@@ -1,0 +1,32 @@
+    .title	hello
+
+    br	start
+func:
+    mov #1774, sp
+    rts pc
+
+start:
+    emt 14
+    mov	#100, r1
+
+loop:
+    mov r1, @#177716
+    sob r1, loop
+    trap 36
+
+    mov	#4, r1
+m1:
+    dec r1
+    bne m1
+
+    jsr pc, @#120000
+
+    jsr pc, sbr
+
+    jsr pc, func
+    rti
+
+sbr:
+    rts pc
+
+    .end

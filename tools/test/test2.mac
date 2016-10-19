@@ -1,0 +1,21 @@
+    .title	hello
+
+    .psect	hello, abs
+
+    .=1000
+
+    mov		#1000, sp
+
+    mov		#10, r0
+    mov		#2000, r1
+loop:
+    movb	r0, (r1)+
+    dec		r0
+    bne		loop
+
+    nop
+    nop
+    nop
+    halt
+
+    .end

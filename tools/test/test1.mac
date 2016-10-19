@@ -1,0 +1,24 @@
+    .title	hello
+
+    .psect	hello, abs
+
+    .=1000
+
+    mov		#1000, sp
+    mov		#3, r0
+
+    jsr		pc, @#func
+    nop
+    nop
+    halt
+
+func:
+    mov		#2, r1
+loop:
+    dec		r0
+    bne		loop
+
+    rts pc
+
+
+    .end
