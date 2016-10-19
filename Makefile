@@ -5,7 +5,7 @@ CFLAGS = -O3 -Wall
 OBJS = core/core.o core/disas.o
 
 emu11: $(OBJS) emu11.o
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ -lncurses
 
 dis11: $(OBJS) dis11.o
 	$(CC) -o $@ $^

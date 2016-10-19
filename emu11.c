@@ -7,17 +7,33 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ncurses.h>
 
 #include "core/core.h"
 #include "core/disas.h"
 
-void dump_regs(regs *r)
+enum {
+	WIN_DIS = 0,
+	WIN_REGS,
+	WIN_DUMP,
+	WIN_CONS
+};
+
+struct _windows {
+	int in_use;
+	int scroll;
+	int startx, starty, width, height;
+	WINDOW *win;
+} windows[4];
+
+static void dump_regs(regs *r, WINDOW *win)
 {
 #define F(f) ((p & SET_BIT(f))?1:0)
 	word p = r->psw;
-    printf("R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PC=%06o PSW=%06o ",
+    mvwprintw(win, 0, 0, "P=%d T=%d N=%d Z=%d V=%d C=%d\n", F(BIT_P), F(BIT_T), F(BIT_N), F(BIT_Z), F(BIT_V), F(BIT_C));
+    mvwprintw(win, 2, 0, "R0=%06o\nR1=%06o\nR2=%06o\nR3=%06o\nR4=%06o\nR5=%06o\nSP=%06o\nPC=%06o\nPS=%06o\n",
 	    r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6], r->r[7], r->psw);
-    printf("P=%d T=%d N=%d Z=%d V=%d C=%d", F(BIT_P), F(BIT_T), F(BIT_N), F(BIT_Z), F(BIT_V), F(BIT_C));
 #undef F
 }
 
@@ -29,7 +45,7 @@ void dump_mem(regs *r, word start, word length, byte mode) {
 
 	while (i < length) {
 		if (i % 8 == 0) {
-			printf("%06o: ", start);
+			wprintw(windows[WIN_DUMP].win, "%06o: ", start);
 		}
 		if (mode) {
 			byte bl = r->mem[start++];
@@ -37,14 +53,15 @@ void dump_mem(regs *r, word start, word length, byte mode) {
 			buf[(i++) % 8] = (bl >= 32)?bl:'.';
 			buf[i % 8] = (bh >= 32)?bh:'.';
 			word w = (bh << 8) | bl;
-			printf("%06o ", w);
+			wprintw(windows[WIN_DUMP].win, "%06o ", w);
 		} else {
 			byte b = r->mem[start++];
 			buf[i % 8] = (b >= 32)?b:'.';
-			printf("%03o ", b);
+			wprintw(windows[WIN_DUMP].win, "%03o ", b);
 		}
 		if (i % 8 == 7) {
-			printf("%s\n", buf);
+			wprintw(windows[WIN_DUMP].win, "%s\n", buf);
+			wrefresh(windows[WIN_DUMP].win);
 			buf[8] = 0;
 		}
 		i++;
@@ -52,7 +69,48 @@ void dump_mem(regs *r, word start, word length, byte mode) {
 	buf[i % 8] = 0;
 
 	if (i % 8 != 0) {
-		printf("%s\n", buf);
+		wprintw(windows[WIN_DUMP].win, "%s\n", buf);
+		wrefresh(windows[WIN_DUMP].win);
+	}
+}
+
+static void calc_windows()
+{
+	windows[WIN_DIS].startx = 0;
+	windows[WIN_DIS].starty = 0;
+	windows[WIN_DIS].width = COLS / 2 - 2;
+	windows[WIN_DIS].height = (LINES / 6) * 4 - 1;
+	windows[WIN_DIS].in_use = 1;
+	windows[WIN_DIS].scroll = 1;
+
+	windows[WIN_REGS].startx = COLS / 2 + 2;
+	windows[WIN_REGS].starty = 0;
+	windows[WIN_REGS].width = COLS / 2 - 2;
+	windows[WIN_REGS].height = (LINES / 6) * 4 - 1;
+	windows[WIN_REGS].in_use = 1;
+
+	windows[WIN_DUMP].startx = 0;
+	windows[WIN_DUMP].starty = (LINES / 6) * 4;
+	windows[WIN_DUMP].width = COLS;
+	windows[WIN_DUMP].height = (LINES / 6) * 2;
+	windows[WIN_DUMP].in_use = 1;
+	windows[WIN_DUMP].scroll = 1;
+}
+
+static void update_windows()
+{
+	int i;
+	for (i = 0; i < sizeof(windows) / sizeof(struct _windows); i++) {
+		if (!windows[i].in_use) {
+			continue;
+		}
+		if (windows[i].win) {
+			delwin(windows[i].win);
+		}
+		windows[i].win = newwin(windows[i].height, windows[i].width, windows[i].starty, windows[i].startx);
+		//box(windows[i].win, 0, 0);
+		scrollok(windows[i].win, TRUE);
+		wrefresh(windows[i].win);
 	}
 }
 
@@ -62,6 +120,19 @@ int main(int argc, char *argv[])
 	regs r;
 	word addr;
 	word length;
+	int ch;
+
+	memset(&windows, 0, sizeof(windows));
+
+	initscr();
+	cbreak();
+	curs_set(FALSE);
+	noecho();
+	keypad(stdscr, TRUE);
+	refresh();
+
+	calc_windows();
+	update_windows();
 
 	r.mem = malloc(65536);
 
@@ -71,40 +142,68 @@ int main(int argc, char *argv[])
 		sscanf(argv[2], "%o", &tmp);
 		addr = tmp & 0177776;
 		length = fread(&r.mem[addr], 1, 65536 - addr, inf);
-		fprintf(stderr, "Loaded file %s to %06o length %06o\n", argv[1], addr, length);
+		wprintw(windows[WIN_DUMP].win, "Loaded file %s to %06o length %06o\n", argv[1], addr, length);
+		wrefresh(windows[WIN_DUMP].win);
 		fclose(inf);
 	} else {
-		fprintf(stderr, "Can not open file %s\n", argv[1]);
+		wprintw(windows[WIN_DUMP].win, "Can not open file %s\n", argv[1]);
+		wrefresh(windows[WIN_DUMP].win);
+
+		getch();
+		endwin();
+
 		return 1;
 	}
 
 	r.SEL1 = addr & 0177400;
 
-	fprintf(stderr, "Reset address set to %06o\n", r.SEL1);
+	wprintw(windows[WIN_DUMP].win, "Reset address set to %06o\n", r.SEL1);
+	wrefresh(windows[WIN_DUMP].win);
 
 	core_reset(&r);
 
 	while (1) {
 		addr = r.r[7];
-		printf("\n%06o %06o ", addr, (r.mem[addr] | (r.mem[addr + 1] << 8)));
-		printf("%s\n", disas(&r, &addr, out));
-		dump_regs(&r);
-		int key;
-		do {
-			key = getchar();
-			printf("--> %d\n", key);
-			if (key == 'm' || key == 'M') {
-				int start = 0;
-				int len = 0;
-				printf("Mem dump start address: ");
-				scanf("%o", &start);
-				printf("Mem dump length: ");
-				scanf("%o", &len);
-				dump_mem(&r, start, len, (key == 'M')?1:0);
-			}
-		} while (key != 10);
-		core_step(&r);
+		wprintw(windows[WIN_DIS].win, "%06o %06o ", addr, (r.mem[addr] | (r.mem[addr + 1] << 8)));
+		wprintw(windows[WIN_DIS].win, "%s\n", disas(&r, &addr, out));
+		wrefresh(windows[WIN_DIS].win);
+		dump_regs(&r, windows[WIN_REGS].win);
+		wrefresh(windows[WIN_REGS].win);
+		ch = getch();
+
+		if (ch == KEY_F(10)) {
+			break;
+		}
+
+		if (ch == KEY_F(1)) {
+			char buf[7];
+			int start = 0;
+			int len = 0;
+			curs_set(TRUE);
+			echo();
+			wprintw(windows[WIN_DUMP].win, "Mem dump start address: ");
+			wrefresh(windows[WIN_DUMP].win);
+			wgetnstr(windows[WIN_DUMP].win, buf, 6);
+			sscanf(buf, "%o", &start);
+			wprintw(windows[WIN_DUMP].win, "Mem dump length: ");
+			wrefresh(windows[WIN_DUMP].win);
+			wgetnstr(windows[WIN_DUMP].win, buf, 6);
+			sscanf(buf, "%o", &len);
+			curs_set(FALSE);
+			noecho();
+
+			dump_mem(&r, start, len, 1);
+
+//			printf("--> %d\n", key);
+//			if (key == 'm' || key == 'M') {
+//				dump_mem(&r, start, len, (key == 'M')?1:0);
+//			}
+		} else {
+			core_step(&r);
+		}
 	}
+
+	endwin();
 
 	return 0;
 }
