@@ -1,0 +1,36 @@
+    .title	hello
+
+    mov		#177777, r0
+    movb	#033, r0
+
+    mov		#1000, sp
+    sec
+    jsr		pc, func
+    mov		r0, r1
+    sev
+    sez
+    sen
+    ccc
+l1:
+    scc
+    clc
+    clv
+    clz
+    cln
+
+
+    mov		#123456, r0
+    mov		#123456, r1
+    mov		#123456, r2
+    mov		#177777, r3
+l2:
+    mov		#177777, r4
+    mov		#0, r5
+    mov		#123456, sp
+    mov		#123456, pc
+
+func:
+    mov		#666, r0
+    rts pc
+
+    .end
