@@ -29,9 +29,9 @@ struct _windows {
 
 static void dump_regs(regs *r, WINDOW *win)
 {
-#define F(f) ((p & SET_BIT(f))?1:0)
+#define F(f,s) ((p & SET_BIT(f))?s:'-')
 	word p = r->psw;
-    mvwprintw(win, 0, 0, "P=%d T=%d N=%d Z=%d V=%d C=%d\n", F(BIT_P), F(BIT_T), F(BIT_N), F(BIT_Z), F(BIT_V), F(BIT_C));
+    mvwprintw(win, 0, 0, "%c - - %c %c %c %c %c\n", F(BIT_P, 'P'), F(BIT_T, 'T'), F(BIT_N, 'N'), F(BIT_Z, 'Z'), F(BIT_V, 'V'), F(BIT_C, 'C'));
     mvwprintw(win, 2, 0, "R0=%06o\nR1=%06o\nR2=%06o\nR3=%06o\nR4=%06o\nR5=%06o\nSP=%06o\nPC=%06o\nPS=%06o\n",
 	    r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6], r->r[7], r->psw);
 #undef F
