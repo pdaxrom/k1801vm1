@@ -12,7 +12,8 @@ enum {
 	NONE = 0,
 	SOP,		/* single operand */
 	DOP,		/* double operand */
-	RSD,		/* register source or destination */
+	RD,			/* register destination */
+	RS,			/* register source */
 	BRN,		/* branch */
 	SRG,		/* single register */
 	ROF,		/* register offset */
@@ -72,8 +73,13 @@ static const struct _OPCODE {
 	{ "ADD",	0060000, DOP, 0 },
 	{ "SUB",	0160000, DOP, 0 },
 
-	{ "JSR",	0004000, RSD, 0 },
-	{ "XOR",	0074000, RSD, 0 },
+	{ "MUL",	0070000, RS, 0 },
+	{ "DIV",	0071000, RS, 0 },
+	{ "ASH",	0072000, RS, 0 },
+	{ "ASHC",	0073000, RS, 0 },
+
+	{ "JSR",	0004000, RD, 0 },
+	{ "XOR",	0074000, RD, 0 },
 
 	{ "RTS",    0000200, SRG, 0 },
 
@@ -217,8 +223,17 @@ char *disas(regs *r, word *addr, char *out)
 			break;
 		}
 
-		if ((OPS[i].type == RSD) && (OPS[i].code == (instr & 0177000))) {
-			sprintf(out, "%s\t%s,%s", OPS[i].name, REG[(instr >> 6) & 07],
+		if ((OPS[i].type == RS) && (OPS[i].code == (instr & 0177000))) {
+			sprintf(out, "%s\t%s,%s", OPS[i].name,
+					decode_operand(r, addr, instr & 077, tmpbuf),
+					REG[(instr >> 6) & 07]
+					);
+			break;
+		}
+
+		if ((OPS[i].type == RD) && (OPS[i].code == (instr & 0177000))) {
+			sprintf(out, "%s\t%s,%s", OPS[i].name,
+					REG[(instr >> 6) & 07],
 					decode_operand(r, addr, instr & 077, tmpbuf));
 			break;
 		}
