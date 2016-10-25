@@ -25,6 +25,13 @@
 #define sword signed short
 #endif
 
+enum {
+	BK0010 = 0,
+	MK85,
+	MK90,
+	DCJ11,
+};
+
 #define SET_BIT(a) (1 << a)
 
 #define BIT_H 8
@@ -54,9 +61,13 @@ union u_long {
 };
 
 typedef struct _regs {
+	byte	model;
+
     word	psw, r[8];
 
-    word	SEL1;
+    word	cps, cpc;	/* 0177676 0177674 */
+
+    word	SEL1;		/* 0177716         */
 
     word	fTrap;
 
