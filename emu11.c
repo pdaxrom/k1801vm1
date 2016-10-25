@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
 	calc_windows();
 	update_windows();
 
+	r.model = MK85;
 	r.mem = malloc(65536);
 
 	FILE *inf = fopen(argv[1], "rb");
