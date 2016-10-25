@@ -261,7 +261,7 @@ int core_step(regs *r)
 				store_word(r, 0177676, r->psw);
 				store_word(r, 0177674, r->r[7]);
 				store_word(r, 0177716, load_word(r, 0177716) | 010);
-				vec |= (r->SEL1 & 0177400);
+				vec = (r->SEL1 & 0177400);
 				r->r[7] = load_word(r, vec + 2) & 0177776;
 				r->psw  = load_word(r, vec + 4);
 			}
