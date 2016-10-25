@@ -222,7 +222,7 @@ int core_step(regs *r)
 		case 000000: /* HALT */ {
 #warning HALT
 			word vec;
-			if (r->model == MK85) {
+			if (r->model == MK85 || r->model == MK90) {
 				r->cps = r->psw;
 				r->cpc = r->r[7];
 				vec = 0170;
@@ -322,7 +322,7 @@ int core_step(regs *r)
 
     }
 
-    if (r->model == MK85) {
+    if (r->model == MK85 || r->model == MK90) {
     	switch(op) {
     	case 0000012: /* GO */
     		r->r[7] = r->cpc;
