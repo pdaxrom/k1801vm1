@@ -43,6 +43,16 @@
 #define FLAG_V SET_BIT(BIT_V)
 #define FLAG_C SET_BIT(BIT_C)
 
+union u_word {
+	unsigned short	u;
+	signed short	s;
+};
+
+union u_long {
+	unsigned long	u;
+	signed long		s;
+};
+
 typedef struct _regs {
     word	psw, r[8];
 
