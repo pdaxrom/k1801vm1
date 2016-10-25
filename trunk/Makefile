@@ -1,11 +1,11 @@
 all: emu11 dis11
 
-CFLAGS = -O3 -Wall
+CFLAGS = -O2 -Wall -g
 
 OBJS = core/core.o core/disas.o
 
 emu11: $(OBJS) emu11.o
-	$(CC) -o $@ $^ -lncurses
+	$(CC) -g -o $@ $^ -lncurses
 
 dis11: $(OBJS) dis11.o
 	$(CC) -o $@ $^
