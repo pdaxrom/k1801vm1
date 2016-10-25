@@ -219,10 +219,30 @@ int core_step(regs *r)
     // No operands instructions
     //
     switch(op) {
-		case 000000: /* HALT */
+		case 000000: /* HALT */ {
 #warning HALT
-			r->r[7] = (r->SEL1 & 0177400) + 4;
+			word vec;
+			if (r->model == MK85) {
+				r->cps = r->psw;
+				r->cpc = r->r[7];
+				vec = 0170;
+				if (flag_is_set(FLAG_H)) {
+					vec |= (r->SEL1 & 0177400);
+				}
+				r->r[7] = load_word(r, vec    ) & 0177776;
+				r->psw  = load_word(r, vec + 2) | FLAG_H;
+			} else {
+				pushw(r->psw);
+				pushw(r->r[7]);
+				vec = 4;
+				if (flag_is_set(FLAG_H)) {
+					vec |= (r->SEL1 & 0177400);
+				}
+				r->r[7] = load_word(r, vec    ) & 0177776;
+				r->psw  = load_word(r, vec + 2) | FLAG_H;
+			}
 			return 0;
+		}
 
 		case 000001: /* WAIT */
 			r->fWait = 1;
@@ -300,6 +320,50 @@ int core_step(regs *r)
 			set_flag(FLAG_C | FLAG_V | FLAG_Z | FLAG_N);
 			return 0;
 
+    }
+
+    if (r->model == MK85) {
+    	switch(op) {
+    	case 0000012: /* GO */
+    		r->r[7] = r->cpc;
+    		r->psw = r->cps;
+    		return 0;
+
+    	case 0000016: /* STEP */
+    		r->r[7] = r->cpc;
+    		r->psw = r->cps;
+    		return 0;
+
+    	case 0000020: /* RSEL */
+    		r->r[0] = r->SEL1;
+    		return 0;
+
+    	case 0000021: /* MFUS */
+    		r->r[0] = load_word(r, r->r[5]);
+    		r->r[5] += 2;
+    		return 0;
+
+    	case 0000022: /* RCPC */
+    		r->r[0] = r->cpc;
+    		return 0;
+
+    	case 0000024: /* RCPS */
+    		r->r[0] = r->cps;
+    		return 0;
+
+    	case 0000031: /* MTUS */
+    		r->r[5] -= 2;
+    		store_word(r, r->r[5], r->r[0]);
+    		return 0;
+
+    	case 0000032: /* WCPC */
+    		r->cpc = r->r[0];
+    		return 0;
+
+    	case 0000034: /* WCPS */
+    		r->cps = r->r[0];
+    		return 0;
+    	}
     }
 
 #define BR_OFFSET()			\

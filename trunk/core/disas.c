@@ -47,6 +47,18 @@ static const struct _OPCODE {
 	{ "SEN",	0000270, NONE, 0 },
 	{ "SCC",	0000277, NONE, 0 },
 
+	/* КА1013ВМ1 */
+	{ "GO",		0000012, NONE, 0 },
+	{ "STEP",	0000016, NONE, 0 },
+	{ "RSEL",	0000020, NONE, 0 },
+	{ "MFUS",	0000021, NONE, 0 },
+	{ "RCPC",	0000022, NONE, 0 },
+	{ "RCPS",	0000024, NONE, 0 },
+	{ "MTUS",	0000031, NONE, 0 },
+	{ "WCPC",	0000032, NONE, 0 },
+	{ "WCPS",	0000034, NONE, 0 },
+	/* */
+
 	{ "JMP",	0000100, SOP, 0 },
 	{ "CLR",	0005000, SOP, 1 },
 	{ "COM",	0005100, SOP, 1 },
