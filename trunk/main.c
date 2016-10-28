@@ -11,13 +11,15 @@
 #include "core/core.h"
 #include "core/disas.h"
 
+#include "core/hardware.h"
+
 void dump_regs(regs *r)
 {
 #define F(f,s) ((p & SET_BIT(f))?s:'-')
 	word p = r->psw;
-    printf("R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PC=%06o PSW=%06o ",
-	    r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6], r->r[7], r->psw);
     printf("%c %c - - %c %c %c %c %c\n", F(BIT_H, 'H'), F(BIT_P, 'P'), F(BIT_T, 'T'), F(BIT_N, 'N'), F(BIT_Z, 'Z'), F(BIT_V, 'V'), F(BIT_C, 'C'));
+    printf("R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PC=%06o PSW=%06o\n",
+	    r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6], r->r[7], r->psw);
 #undef F
 }
 
@@ -63,6 +65,7 @@ int main(int argc, char *argv[])
 	word addr;
 	word length;
 
+	r.model = MK90;
 	r.mem = malloc(65536);
 
 	FILE *inf = fopen(argv[1], "rb");
@@ -84,12 +87,17 @@ int main(int argc, char *argv[])
 
 	core_reset(&r);
 
-	while (1) {
+	start_hardware(&r, 800, 600);
+
+	int f_exit = 0;
+
+	while (!f_exit) {
 		addr = r.r[7];
 		printf("\n%06o %06o ", addr, (r.mem[addr] | (r.mem[addr + 1] << 8)));
 		printf("%s\n", disas(&r, &addr, out));
 		dump_regs(&r);
 		int key;
+#if 0
 		do {
 			key = getchar();
 			printf("--> %d\n", key);
@@ -101,10 +109,15 @@ int main(int argc, char *argv[])
 				printf("Mem dump length: ");
 				scanf("%o", &len);
 				dump_mem(&r, start, len, (key == 'M')?1:0);
+			} else if (key == '0') {
+				f_exit = 1;
 			}
 		} while (key != 10);
+#endif
 		core_step(&r);
 	}
+
+	stop_hardware(&r);
 
 	return 0;
 }
