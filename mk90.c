@@ -108,6 +108,8 @@ static Io_Map *get_device(word addr)
 	static Io_Map io_map[] = {
 			{ "KA1835VG3", 0xe800, 0x8, 0x7, ka1835vg3_read_byte, ka1835vg3_write_byte, NULL, NULL },
 			{ "KA1835VG4", 0xe810, 0x8, 0x7, ka1835vg4_read_byte, ka1835vg4_write_byte, ka1835vg4_read_word, ka1835vg4_write_word },
+			{ "KA1835VG5", 0xe81a, 0x4, 0x3, NULL, NULL, NULL, NULL },
+			{ "KA512VI1",  0xea00, 0x80,0x7f,NULL, NULL, NULL, NULL },
 	};
 
 	int i;
