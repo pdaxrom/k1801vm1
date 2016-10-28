@@ -72,12 +72,21 @@ typedef struct _regs {
 
     word	fWait;
 
-    byte	*mem;
+    byte (* load_byte)	(struct _regs *r, word offset);
+    void (* store_byte)	(struct _regs *r, word offset, byte value);
+    word (* load_word)	(struct _regs *r, word offset);
+    void (* store_word)	(struct _regs *r, word offset, word value);
+
+    int  (* init)		(struct _regs *r);
+    void (* reset)		(struct _regs *r);
+    void (* fini)		(struct _regs *r);
+
+    byte *(* ramptr)	(struct _regs *r, word offset);
 } regs;
 
+void core_init(regs *r);
 void core_reset(regs *r);
-
-int core_step(regs *r);
-
+int  core_step (regs *r);
+void core_fini (regs *r);
 
 #endif

@@ -131,7 +131,7 @@ static char *decode_operand(regs *r, word *addr, byte operand, char *out)
 	word data = 0;
 
 	if (mode == 6 || mode == 7 || operand == 027 || operand == 037) {
-		data = r->mem[*addr] | (r->mem[*addr + 1] << 8);
+		data = r->load_word(r, *addr);
 		*addr += 2;
 	}
 
@@ -188,7 +188,7 @@ char *disas(regs *r, word *addr, char *out)
 {
 	char tmpbuf[256];
 	char tmpbuf2[256];
-	word instr = (r->mem[*addr + 1] << 8) | r->mem[*addr];
+	word instr = r->load_word(r, *addr);
 
 	*addr += 2;
 

@@ -62,46 +62,30 @@
 	r->r[6] += 2;			\
 }
 
+void core_init(regs *r)
+{
+	r->init(r);
+}
+
 void core_reset(regs *r)
 {
     r->r[7] = r->SEL1 & 0177400;
     r->psw = 0340;
     r->fWait = 0;
     r->fTrap = 0;
+
+    r->reset(r);
 }
 
-static INLINE byte load_byte(regs *r, word offset)
+void core_fini(regs *r)
 {
-	byte value;
-	if (hardware_load_byte(r, offset, &value)) {
-		return value;
-	}
-    return r->mem[offset];
+	r->fini(r);
 }
 
-static INLINE void store_byte(regs *r, word offset, byte value) {
-	if (hardware_store_byte(r, offset, value)) {
-		return;
-	}
-	r->mem[offset] = value;
-}
-
-static INLINE word load_word(regs *r, word offset)
-{
-	word value;
-	if (hardware_load_word(r, offset, &value)) {
-		return value;
-	}
-    return load_byte(r, offset) | (load_byte(r, offset + 1) << 8);
-}
-
-static INLINE void store_word(regs *r, word offset, word value) {
-	if (hardware_store_word(r, offset, value)) {
-		return;
-	}
-	store_byte(r, offset,     value & 0377);
-	store_byte(r, offset + 1, value >> 8);
-}
+#define load_byte(a, b) r->load_byte(a, b)
+#define store_byte(a, b, c) r->store_byte(a, b, c)
+#define load_word(a, b) r->load_word(a, b)
+#define store_word(a, b, c) r->store_word(a, b, c)
 
 static INLINE byte get_data_byte(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {

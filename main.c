@@ -13,6 +13,8 @@
 
 #include "core/hardware.h"
 
+void mk90_connect(regs *r);
+
 void dump_regs(regs *r)
 {
 #define F(f,s) ((p & SET_BIT(f))?s:'-')
@@ -34,14 +36,14 @@ void dump_mem(regs *r, word start, word length, byte mode) {
 			printf("%06o: ", start);
 		}
 		if (mode) {
-			byte bl = r->mem[start++];
-			byte bh = r->mem[start++];
+			byte bl = r->load_byte(r, start++);
+			byte bh = r->load_byte(r, start++);
 			buf[(i++) % 8] = (bl >= 32)?bl:'.';
 			buf[i % 8] = (bh >= 32)?bh:'.';
 			word w = (bh << 8) | bl;
 			printf("%06o ", w);
 		} else {
-			byte b = r->mem[start++];
+			byte b = r->load_byte(r, start++);
 			buf[i % 8] = (b >= 32)?b:'.';
 			printf("%03o ", b);
 		}
@@ -66,14 +68,23 @@ int main(int argc, char *argv[])
 	word length;
 
 	r.model = K1806VM2;
-	r.mem = malloc(65536);
+
+	r.r[6] = 0;
+
+	hwstub_connect(&r);
+
+	mk90_connect(&r);
+
+	core_init(&r);
+
+	byte *mem = r.ramptr(&r, 0);
 
 	FILE *inf = fopen(argv[1], "rb");
 	if (inf) {
 		unsigned int tmp;
 		sscanf(argv[2], "%o", &tmp);
 		addr = tmp & 0177776;
-		length = fread(&r.mem[addr], 1, 65536 - addr, inf);
+		length = fread(&mem[addr], 1, 65536 - addr, inf);
 		fprintf(stderr, "Loaded file %s to %06o length %06o\n", argv[1], addr, length);
 		fclose(inf);
 	} else {
@@ -87,13 +98,11 @@ int main(int argc, char *argv[])
 
 	core_reset(&r);
 
-	start_hardware(&r, 800, 600);
-
 	int f_exit = 0;
 
 	while (!f_exit) {
 		addr = r.r[7];
-		printf("\n%06o %06o ", addr, (r.mem[addr] | (r.mem[addr + 1] << 8)));
+		printf("\n%06o %06o ", addr, r.load_word(&r, addr));
 		printf("%s\n", disas(&r, &addr, out));
 		dump_regs(&r);
 		int key;
@@ -117,7 +126,7 @@ int main(int argc, char *argv[])
 		core_step(&r);
 	}
 
-	stop_hardware(&r);
+	core_fini(&r);
 
 	return 0;
 }

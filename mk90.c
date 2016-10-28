@@ -38,6 +38,7 @@ static float scale_y = 1;
 
 static int exit_request = 0;
 
+static byte *mem = NULL;
 static byte ka1835vg1_reg[8];
 
 static byte ka1835vg1_read_byte(byte addr)
@@ -50,50 +51,42 @@ static void ka1835vg1_write_byte(byte addr, byte value)
 	ka1835vg1_reg[addr] = value;
 }
 
-int hardware_load_byte(regs *r, word offset, byte *value)
+static byte hardware_load_byte(regs *r, word offset)
 {
 	if (offset >= 0xe800 && offset <= 0xe807) {
-		*value = ka1835vg1_read_byte(offset & 0x7);
-		SDL_Log("Read from KA1835VG1 [%04X] -> %02X\n", offset, *value);
-		return 1;
+		byte value = ka1835vg1_read_byte(offset & 0x7);
+		SDL_Log("Read from KA1835VG1 [%04X] -> %02X\n", offset, value);
+		return value;
 	}
 
-	return 0;
+    return mem[offset];
 }
 
-int hardware_store_byte(regs *r, word offset, byte value)
+static void hardware_store_byte(regs *r, word offset, byte value)
 {
 	if (offset >= 0xe800 && offset <= 0xe807) {
 		SDL_Log("Write to KA1835VG1 [%04X] <- %02X\n", offset, value);
 		ka1835vg1_write_byte(offset & 0x7, value);
-		return 1;
+		return;
 	}
 
-	return 0;
+	mem[offset] = value;
 }
 
-int hardware_load_word(regs *r, word offset, word *value)
+static word hardware_load_word(regs *r, word offset)
 {
-	byte l, h;
-	int ret = hardware_load_byte(r, offset, &l);
-	ret |= hardware_load_byte(r, offset + 1, &h);
-	*value = (h << 8) | l;
-
-	return ret;
+    return r->load_byte(r, offset) | (r->load_byte(r, offset + 1) << 8);
 }
 
-int hardware_store_word(regs *r, word offset, word value)
+static void hardware_store_word(regs *r, word offset, word value)
 {
-	//SDL_Log("Write to HW addr %04X <- %04X\n", offset, value);
-	int ret = hardware_store_byte(r, offset, value & 0xff);
-	ret |= hardware_store_byte(r, offset + 1, value >> 8);
-
-	return ret;
+	r->store_byte(r, offset,     value & 0377);
+	r->store_byte(r, offset + 1, value >> 8);
 }
 
 static void draw_screen(regs *r, unsigned short *framebuffer, int width, int height)
 {
-	word *mem = (word *)&r->mem[(ka1835vg1_read_byte(1) << 8) | ka1835vg1_read_byte(0)];
+	word *vram = (word *)&mem[(ka1835vg1_read_byte(1) << 8) | ka1835vg1_read_byte(0)];
 
 //	SDL_Log("Video mem = %04X\n", (ka1835vg1_read_byte(1) << 8) | ka1835vg1_read_byte(0));
 	int page = 0;
@@ -104,7 +97,7 @@ static void draw_screen(regs *r, unsigned short *framebuffer, int width, int hei
 	for (page = 0; page < 2; page++) {
 		for (i = 0; i < FB_WIDTH * FB_HEIGHT / 16; i++) {
 			int bit_count;
-			word tmp = mem[i];
+			word tmp = vram[i];
 			for (bit_count = 0; bit_count < 8; bit_count++) {
 				if (tmp & bit) {
 					framebuffer[j++] = 0xffff;
@@ -271,12 +264,19 @@ static int SDLCALL HandleVideo(void *args)
     return 0;
 }
 
-int start_hardware(regs *r, int width, int height)
+static int hardware_init(regs *r)
 {
+	int width = 640;
+	int height = 400;
+
     static Video_Args video_args = {
     	.w = 0,
     	.h = 0,
     };
+
+	if (!mem) {
+		mem = malloc(65536);
+	}
 
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
@@ -297,7 +297,12 @@ int start_hardware(regs *r, int width, int height)
     return 0;
 }
 
-void stop_hardware(regs *r)
+static void hardware_reset(regs *r)
+{
+
+}
+
+static void hardware_fini(regs *r)
 {
 	exit_request = 1;
 
@@ -305,4 +310,26 @@ void stop_hardware(regs *r)
     //SDL_WaitThread(inputThread, NULL);
 
     SDL_Quit();
+
+    if (mem) {
+		free(mem);
+		mem = NULL;
+	}
+}
+
+static byte *hardware_ramptr(regs *r, word offset)
+{
+	return &mem[offset];
+}
+
+void mk90_connect(regs *r)
+{
+	r->load_byte	= hardware_load_byte;
+	r->store_byte	= hardware_store_byte;
+	r->load_word	= hardware_load_word;
+	r->store_word	= hardware_store_word;
+	r->init			= hardware_init;
+	r->reset		= hardware_reset;
+	r->fini			= hardware_fini;
+	r->ramptr		= hardware_ramptr;
 }

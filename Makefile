@@ -9,12 +9,12 @@ CFLAGS += -DUSE_GLES2
 VIDEOLIB = -lGLESv2 -lEGL
 endif
 
-OBJS = core/core.o core/disas.o
+OBJS = core/core.o core/disas.o core/hardware.o
 
-emu11: $(OBJS) emu11.o core/hardware.o
+emu11: $(OBJS) emu11.o
 	$(CC) -g -o $@ $^ -lncurses
 
-dis11: core/disas.o dis11.o
+dis11: core/disas.o core/hardware.o dis11.o
 	$(CC) -o $@ $^
 
 mk90: $(OBJS) mk90.o shader.o main.o

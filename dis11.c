@@ -11,6 +11,8 @@
 #include "core/core.h"
 #include "core/disas.h"
 
+#include "core/hardware.h"
+
 int main(int argc, char *argv[])
 {
 	char out[1024];
@@ -18,14 +20,20 @@ int main(int argc, char *argv[])
 	word addr;
 	word length;
 
-	r.mem = malloc(65536);
+	r.model = K1806VM2;
+
+	hwstub_connect(&r);
+
+	r.init(&r);
+
+	byte *mem = r.ramptr(&r, 0);
 
 	FILE *inf = fopen(argv[1], "rb");
 	if (inf) {
 		unsigned int tmp;
 		sscanf(argv[2], "%o", &tmp);
 		addr = tmp & 0177776;
-		length = fread(&r.mem[addr], 1, 65536 - addr, inf);
+		length = fread(&mem[addr], 1, 65536 - addr, inf);
 		fprintf(stderr, "Loaded file %s to %06o length %06o\n", argv[1], addr, length);
 		fclose(inf);
 	} else {
@@ -34,10 +42,13 @@ int main(int argc, char *argv[])
 	}
 
 	word end_addr = (addr + length + 1) & 0177776;
+
 	while (addr < end_addr) {
-		printf("%06o %06o ", addr, (r.mem[addr] | (r.mem[addr + 1] << 8)));
+		printf("%06o %06o ", addr, r.load_word(&r, addr));
 		printf("%s\n", disas(&r, &addr, out));
 	}
+
+	r.fini(&r);
 
 	return 0;
 }
