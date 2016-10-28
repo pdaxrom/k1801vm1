@@ -125,9 +125,11 @@ static byte hardware_load_byte(regs *r, word offset)
 {
 	Io_Map *dev = get_device(offset);
 	if (dev) {
-		byte value = dev->read_byte(offset & dev->mask);
-		SDL_Log("%s: Read byte from [%04X] -> %02X\n", dev->name, offset, value);
-		return value;
+		if (dev->read_byte) {
+			byte value = dev->read_byte(offset & dev->mask);
+			SDL_Log("%s: Read byte from [%04X] -> %02X\n", dev->name, offset, value);
+			return value;
+		}
 	}
 
     return mem[offset];
@@ -137,9 +139,11 @@ static void hardware_store_byte(regs *r, word offset, byte value)
 {
 	Io_Map *dev = get_device(offset);
 	if (dev) {
-		SDL_Log("%s: Write byte to [%04X] <- %02X\n", dev->name, offset, value);
-		dev->write_byte(offset & dev->mask, value);
-		return;
+		if (dev->write_byte) {
+			SDL_Log("%s: Write byte to [%04X] <- %02X\n", dev->name, offset, value);
+			dev->write_byte(offset & dev->mask, value);
+			return;
+		}
 	}
 
 	mem[offset] = value;
