@@ -47,8 +47,8 @@ static const struct _OPCODE {
 	{ "SEN",	0000270, NONE, 0 },
 	{ "SCC",	0000277, NONE, 0 },
 
-	/* КА1013ВМ1 */
-	{ "GO",		0000012, NONE, 0 },
+	/* К1806ВМ2 */
+	{ "START",		0000012, NONE, 0 },
 	{ "STEP",	0000016, NONE, 0 },
 	{ "RSEL",	0000020, NONE, 0 },
 	{ "MFUS",	0000021, NONE, 0 },

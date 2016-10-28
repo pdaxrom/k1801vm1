@@ -26,9 +26,8 @@
 #endif
 
 enum {
-	BK0010 = 0,
-	MK85,
-	MK90,
+	K1801VM1 = 0,
+	K1806VM2,
 	DCJ11,
 };
 
