@@ -237,7 +237,7 @@ int core_step(regs *r)
 		case 000000: /* HALT */ {
 #warning HALT
 			word vec;
-			if (r->model == MK85 || r->model == MK90) {
+			if (r->model == K1806VM2) {
 				r->cps = r->psw;
 				r->cpc = r->r[7];
 				vec = 0170;
@@ -361,9 +361,9 @@ int core_step(regs *r)
 
     }
 
-    if (r->model == MK85 || r->model == MK90) {
+    if (r->model == K1806VM2) {
     	switch(op) {
-    	case 0000012: /* GO */
+    	case 0000012: /* START */
     		r->r[7] = r->cpc;
     		r->psw = r->cps;
     		return 0;
@@ -982,7 +982,6 @@ int core_step(regs *r)
 			if ((shift & 077) != 0) {
 				if (shift & 040) {
 					word count = 0100 - (shift & 077);
-					word sign = tmp & SIGN;
 					while (count--) {
 						set_flag_if(tmp & 1, FLAG_C);
 						tmp >>= 1;
@@ -1015,7 +1014,6 @@ int core_step(regs *r)
 			if ((shift & 077) != 0) {
 				if (shift & 040) {
 					word count = 0100 - (shift & 077);
-					unsigned long sign = tmp & 0x80000000;
 					while(count--) {
 						set_flag_if(tmp & 1, FLAG_C);
 						tmp >>=1;
