@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "core.h"
+#include "hardware.h"
 
 #define TYPE_WORD	0
 #define TYPE_BYTE	1
@@ -71,19 +72,33 @@ void core_reset(regs *r)
 
 static INLINE byte load_byte(regs *r, word offset)
 {
+	byte value;
+	if (hardware_load_byte(r, offset, &value)) {
+		return value;
+	}
     return r->mem[offset];
 }
 
 static INLINE void store_byte(regs *r, word offset, byte value) {
+	if (hardware_store_byte(r, offset, value)) {
+		return;
+	}
 	r->mem[offset] = value;
 }
 
 static INLINE word load_word(regs *r, word offset)
 {
+	word value;
+	if (hardware_load_word(r, offset, &value)) {
+		return value;
+	}
     return load_byte(r, offset) | (load_byte(r, offset + 1) << 8);
 }
 
 static INLINE void store_word(regs *r, word offset, word value) {
+	if (hardware_store_word(r, offset, value)) {
+		return;
+	}
 	store_byte(r, offset,     value & 0377);
 	store_byte(r, offset + 1, value >> 8);
 }
@@ -971,7 +986,6 @@ int core_step(regs *r)
 					while (count--) {
 						set_flag_if(tmp & 1, FLAG_C);
 						tmp >>= 1;
-						tmp |= sign;
 					}
 				} else {
 					word count = shift & 037;
@@ -985,7 +999,6 @@ int core_step(regs *r)
 			} else {
 				clear_flag(FLAG_V);
 			}
-
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,   FLAG_Z);
 
@@ -1006,7 +1019,6 @@ int core_step(regs *r)
 					while(count--) {
 						set_flag_if(tmp & 1, FLAG_C);
 						tmp >>=1;
-						tmp |= sign;
 					}
 				} else {
 					word count = shift & 037;
