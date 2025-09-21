@@ -103,6 +103,14 @@ static INLINE void put_data_byte(regs *r, byte type, word offset, byte value) {
 	}
 }
 
+static INLINE void put_data_byte_movb(regs *r, byte type, word offset, byte value) {
+	if (type == TYPE_REG) {
+		r->r[offset] = (value & SIGN_B) ? (0177400 | value) : (value & 0377);
+	} else {
+		store_byte(r, offset, value);
+	}
+}
+
 static INLINE word get_data_word(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {
 		return r->r[offset];
@@ -559,6 +567,7 @@ int core_step(regs *r)
 
 #define PUT_WORD(a) put_data_word(r, dst_type, dst_offset, a);
 #define PUT_BYTE(a) put_data_byte(r, dst_type, dst_offset, a);
+#define PUT_BYTE_MOVB(a) put_data_byte_movb(r, dst_type, dst_offset, a);
 
     switch ((op & 0177700) >> 6) {
 		case 00001: /* JMP */
@@ -1060,7 +1069,7 @@ int core_step(regs *r)
 			DECODE_SRCB();
 			GET_SBYTE(tmp);
 			DECODE_DSTB();
-			PUT_BYTE(tmp);
+			PUT_BYTE_MOVB(tmp);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
