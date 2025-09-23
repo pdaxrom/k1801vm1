@@ -481,14 +481,14 @@ int core_step(regs *r)
 			return 0;
 
 		case 0003000: /* BGT */
-			if (((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) == 0) && flag_is_clear(FLAG_Z)) {
+			if (((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) | flag_is_set(FLAG_Z)) == 0) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
 			return 0;
 
 		case 0003400: /* BLE */
-			if (((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) == 1) && flag_is_set(FLAG_Z)) {
+			if (((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) | flag_is_set(FLAG_Z)) == 1) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
@@ -708,7 +708,7 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			set_flag_if(tmp & 1,      FLAG_C);
-			tmp = (tmp & SIGN) | (tmp >> 1);
+			tmp = (tmp & SIGN_B) | (tmp >> 1);
 			PUT_BYTE(tmp);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
@@ -716,7 +716,7 @@ int core_step(regs *r)
 			return 0;
 		}
 
-		case 00063: /* ASR */ {
+		case 00063: /* ASL */ {
 			DECODE_DST();
 			GET_WORD(tmp);
 			set_flag_if(tmp & SIGN,   FLAG_C);
@@ -727,7 +727,7 @@ int core_step(regs *r)
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
 			return 0;
 		}
-		case 01063: /* ASRB */ {
+		case 01063: /* ASLB */ {
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			set_flag_if(tmp & SIGN_B, FLAG_C);
@@ -920,13 +920,14 @@ int core_step(regs *r)
 		case 0070: /* MUL */ {
 			union u_word data1;
 			union u_word data2;
-			union u_long tmp;
+			union u_dword tmp;
 			RA_REG(reg);
 			data1.u = r->r[reg];
 			DECODE_DST();
 			data2.u = get_data_word(r, dst_type, dst_offset);
 
-			tmp.s = ((long) data1.s) * ((long) data2.s);
+			tmp.s = ((sdword) data1.s) * ((sdword) data2.s);
+
 			r->r[reg] = tmp.u >> 16;
 			r->r[reg | 1] = tmp.u & 0177777;
 
@@ -940,27 +941,34 @@ int core_step(regs *r)
 		case 0071: /* DIV */ {
 			union u_word data1;
 			union u_word data2;
-			union u_long tmp;
+			union u_dword tmp;
 			RA_REG(reg);
 			data1.u = (r->r[reg] << 16) | r->r[reg | 1];
 			DECODE_DST();
 			data2.u = get_data_word(r, dst_type, dst_offset);
 			if (data2.u == 0) {
-				clear_flag(FLAG_C);
-				clear_flag(FLAG_V);
+				set_flag(FLAG_C);
+				set_flag(FLAG_V);
+				clear_flag(FLAG_Z);
+				clear_flag(FLAG_N);
 				return 0;
 			}
 			clear_flag(FLAG_C);
 
 			tmp.s = data1.s / data2.s;
-			r->r[reg] = tmp.u & 0177777;
 
 			set_flag_if(tmp.u == 0, FLAG_Z);
 			set_flag_if(tmp.s < 0, FLAG_N);
-			set_flag_if((tmp.s < -0100000) || (tmp.s >= 077777), FLAG_V);
+			if ((tmp.s < -0100000) || (tmp.s >= 077777)) {
+				clear_flag(FLAG_C);
+				set_flag(FLAG_V);
+				clear_flag(FLAG_Z);
+				clear_flag(FLAG_N);
+				return 0;
+			}
 
-			tmp.s = data1.s % data2.s;
-			r->r[reg | 1] = tmp.u & 0177777;
+			r->r[reg | 1] = (data1.s % data2.s) & 0177777;
+			r->r[reg] = tmp.u & 0177777;
 
 			return 0;
 		}
@@ -999,8 +1007,8 @@ int core_step(regs *r)
 
 		case 0073: /* ASHC */ {
 			RA_REG(reg);
-			unsigned long tmp = (r->r[reg] << 16) | r->r[reg | 1];
-			unsigned long old = tmp;
+			dword tmp = (r->r[reg] << 16) | r->r[reg | 1];
+			dword old = tmp;
 			DECODE_DST();
 			GET_WORD(shift);
 
@@ -1082,7 +1090,7 @@ int core_step(regs *r)
 			DECODE_DST();
 			GET_WORD(tmp1);
 			word tmp2 = ~tmp1;
-			unsigned long tmp3 = ((unsigned long) tmp) + ((unsigned long) tmp2) + 1;
+			dword tmp3 = ((dword) tmp) + ((dword) tmp2) + 1;
 			tmp2 = tmp3 & 0177777;
 			set_flag_if(tmp2 & SIGN,  FLAG_N);
 			set_flag_if(tmp2 == 0,    FLAG_Z);
@@ -1096,7 +1104,7 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp1);
 			byte tmp2 = ~tmp1;
-			unsigned long tmp3 = ((unsigned long) tmp) + ((unsigned long) tmp2) + 1;
+			dword tmp3 = ((dword) tmp) + ((dword) tmp2) + 1;
 			tmp2 = tmp3 & 0377;
 			set_flag_if(tmp2 & SIGN_B,  FLAG_N);
 			set_flag_if(tmp2 == 0,      FLAG_Z);
@@ -1110,7 +1118,7 @@ int core_step(regs *r)
 			GET_SWORD(tmp);
 			DECODE_DST();
 			GET_WORD(tmp1);
-			unsigned long tmp3 = ((unsigned long) tmp) + ((unsigned long) tmp1);
+			dword tmp3 = ((dword) tmp) + ((dword) tmp1);
 			word tmp2 = tmp3 & 0177777;
 			PUT_WORD(tmp2);
 			set_flag_if(tmp2 & SIGN,  FLAG_N);
@@ -1126,7 +1134,7 @@ int core_step(regs *r)
 			DECODE_DST();
 			GET_WORD(tmp1);
 			word tmp2 = ~tmp;
-			unsigned long tmp3 = ((unsigned long) tmp1) + ((unsigned long) tmp2) + 1;
+			dword tmp3 = ((dword) tmp1) + ((dword) tmp2) + 1;
 			tmp2 = tmp3 & 0177777;
 			PUT_WORD(tmp2);
 			set_flag_if(tmp2 & SIGN,  FLAG_N);

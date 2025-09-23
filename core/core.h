@@ -8,21 +8,30 @@
 #ifndef CORE_H_
 #define CORE_H_
 
+#include <stdint.h>
+
 #ifndef INLINE
 #define INLINE inline
 #endif
 
 #ifndef byte
-#define byte unsigned char
+#define byte uint8_t
 #endif
 #ifndef word
-#define word unsigned short
+#define word uint16_t
 #endif
+#ifndef dword
+#define dword uint32_t
+#endif
+
 #ifndef sbyte
-#define sbyte signed char
+#define sbyte int8_t
 #endif
 #ifndef sword
-#define sword signed short
+#define sword int16_t
+#endif
+#ifndef sdword
+#define sdword int32_t
 #endif
 
 enum {
@@ -50,13 +59,13 @@ enum {
 #define FLAG_C SET_BIT(BIT_C)
 
 union u_word {
-	unsigned short	u;
-	signed short	s;
+	word	u;
+	sword	s;
 };
 
-union u_long {
-	unsigned long	u;
-	signed long		s;
+union u_dword {
+	dword	u;
+	sdword	s;
 };
 
 typedef struct _regs {
