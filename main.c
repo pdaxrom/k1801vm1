@@ -7,11 +7,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
+#include <SDL.h>
 
 #include "core/core.h"
 #include "core/disas.h"
 
 #include "core/hardware.h"
+
+#define FB_WIDTH	120
+#define FB_HEIGHT	64
+
+static int is_running;
 
 void mk90_connect(regs *r);
 
@@ -60,6 +68,71 @@ void dump_mem(regs *r, word start, word length, byte mode) {
 	}
 }
 
+static int SDLCALL cpu_thread(void *args)
+{
+    char out[1024];
+    regs *r = (regs *) args;
+
+	while (is_running) {
+		word addr = r->r[7];
+//		dump_regs(r);
+//		printf("\n%06o %06o ", addr, r->load_word(r, addr));
+//		printf("%s\n", disas(r, &addr, out));
+		int key;
+#if 0
+		do {
+			key = getchar();
+			printf("--> %d\n", key);
+			if (key == 'm' || key == 'M') {
+				int start = 0;
+				int len = 0;
+				printf("Mem dump start address: ");
+				scanf("%o", &start);
+				printf("Mem dump length: ");
+				scanf("%o", &len);
+				dump_mem(&r, start, len, (key == 'M')?1:0);
+			} else if (key == '0') {
+				is_running = 0;
+			}
+		} while (key != 10);
+#endif
+if (r->load_word(r, addr) != 0) {
+		core_step(r);
+}
+		
+		usleep(100);
+	}
+}
+
+static void draw_screen(regs *r, unsigned int *framebuffer, int width, int height)
+{
+
+//	word *vram = (word *)r->ramptr(r, (r->load_byte(r, 0xe800) << 8) | r->load_byte(r, 0xe801));
+	word *vram = (word *)r->ramptr(r, r->load_word(r, 0xe800));
+
+//	SDL_Log("Video mem = %04X\n", (ka1835vg1_read_byte(1) << 8) | ka1835vg1_read_byte(0));
+	int page = 0;
+	int i = 0;
+	int j = 0;
+	int bit = 0x80;
+
+	for (page = 0; page < 2; page++) {
+		for (i = 0; i < FB_WIDTH * FB_HEIGHT / 16; i++) {
+			int bit_count;
+			word tmp = vram[i];
+			for (bit_count = 0; bit_count < 8; bit_count++) {
+				if (tmp & bit) {
+					framebuffer[j++] = 0xffffffff;
+				} else {
+					framebuffer[j++] = 0;
+				}
+				tmp <<= 1;
+			}
+		}
+		bit = 0x8000;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	char out[1024];
@@ -98,33 +171,85 @@ int main(int argc, char *argv[])
 
 	core_reset(&r);
 
-	int f_exit = 0;
+//fixme: hack
+r.r[7] = addr;
+//r.r[6] = 0x0200;
+//r.r[7] = 0xf630;
 
-	while (!f_exit) {
-		addr = r.r[7];
-		printf("\n%06o %06o ", addr, r.load_word(&r, addr));
-		printf("%s\n", disas(&r, &addr, out));
-		dump_regs(&r);
-		int key;
-#if 0
-		do {
-			key = getchar();
-			printf("--> %d\n", key);
-			if (key == 'm' || key == 'M') {
-				int start = 0;
-				int len = 0;
-				printf("Mem dump start address: ");
-				scanf("%o", &start);
-				printf("Mem dump length: ");
-				scanf("%o", &len);
-				dump_mem(&r, start, len, (key == 'M')?1:0);
-			} else if (key == '0') {
-				f_exit = 1;
-			}
-		} while (key != 10);
-#endif
-		core_step(&r);
-	}
+        if (SDL_Init(SDL_INIT_EVERYTHING) < 0) { /* Initialize SDL's Video subsystem */
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Init fail : %s\n", SDL_GetError());
+            return 1;
+        }
+
+    SDL_Window *window = SDL_CreateWindow("SDL2 Framebuffer Emulation",
+                                          SDL_WINDOWPOS_CENTERED,
+                                          SDL_WINDOWPOS_CENTERED,
+                                          FB_WIDTH * 2, FB_HEIGHT * 2,   // scaled 2x
+                                          SDL_WINDOW_SHOWN);
+    if (!window) {
+        printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1,
+                                                SDL_RENDERER_ACCELERATED |
+                                                SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer) {
+        printf("SDL_CreateRenderer Error: %s\n", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Our framebuffer texture (ARGB8888 format)
+    SDL_Texture *framebuffer = SDL_CreateTexture(renderer,
+                                                 SDL_PIXELFORMAT_ARGB8888,
+                                                 SDL_TEXTUREACCESS_STREAMING,
+                                                 FB_WIDTH, FB_HEIGHT);
+    if (!framebuffer) {
+        printf("SDL_CreateTexture Error: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+
+
+    is_running = 1;
+
+        SDL_Thread *cpu = SDL_CreateThread(cpu_thread, "CPU thread", &r);
+
+    SDL_Event event;
+
+    while (is_running) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                is_running = 0;
+            }
+        }
+
+        // Lock framebuffer to access pixels directly
+        void *pixels;
+        int pitch;
+        if (SDL_LockTexture(framebuffer, NULL, &pixels, &pitch) == 0) {
+            // pitch = number of bytes per row
+            draw_screen(&r, pixels, FB_WIDTH, FB_HEIGHT);
+
+            SDL_UnlockTexture(framebuffer);
+        }
+
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, framebuffer, NULL, NULL);
+        SDL_RenderPresent(renderer);
+    }
+
+    SDL_DestroyTexture(framebuffer);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
 
 	core_fini(&r);
 
