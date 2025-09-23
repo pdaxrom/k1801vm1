@@ -1,0 +1,194 @@
+; Simple graphics routines for the Elektronika MK-90
+
+	.title graph
+
+	scr=2000
+
+	nop			;obligatory!
+	mov	#scr, sp
+	mov	#scr, @#164000
+	mov	#104306, @#164002
+	jsr	pc,cls
+; draw a circle
+	mov	#60,r0
+	mov	#40,r1
+	mov	#36,r4
+	jsr	pc,circle
+; draw a line
+	mov	#5,r0
+	mov	#2,r1
+	mov	#145,r2
+	mov	#75,r3
+	jsr	pc,line
+finish:	jmp	finish
+
+; clear the display RAM
+cls:	mov	#scr,r0
+	mov	#740,r1
+cls1:	clr	(r0)+
+	sob	r1,cls1
+	rts	pc
+
+; expects the pixel's X coordinate in R0, Y coordinate in R1
+; returns the offset in the screen buffer in R1 and the bit mask in R2
+pixel:	mov	#100000,r2
+	bit	#40,r1
+	bne	pixel1
+	swab	r2
+pixel1:	mov	r0,-(sp)
+	bic	#177770,r0
+	neg	r0
+	ash	r0,r2
+	mov	(sp)+,r0
+	asr	r0
+	asr	r0
+	bic	#1,r0
+	bic	#177740,r1
+	mul	#36,r1
+	add	r0,r1
+	rts	pc
+
+; plot a pixel on the X coordinate in R0, Y coordinate in R1
+plot:	mov	r0,-(sp)
+	mov	r1,-(sp)
+	mov	r2,-(sp)
+	jsr	pc,pixel
+	bis	r2,scr(r1)
+	mov	(sp)+,r2
+	mov	(sp)+,r1
+	mov	(sp)+,r0	
+	rts	pc
+
+; draw a circle using the midpoint algorithm
+; r0 = X coordinate of the centre
+; r1 = Y coordinate of the centre
+; r4 = radius
+circle:	mov	r4,r2		;x = radius
+	neg	r4		;error = -radius
+	clr	r3		;y = 0
+circl1:	cmp	r2,r3		;while (x >= y)
+	bcs	circl2
+	jsr	pc,plot8
+	add	r3,r4		;error += y
+	inc	r3		;++y
+	add	r3,r4		;error += y
+ 	bmi	circl1		;if (error >= 0)
+	dec	r2		;--x
+	sub	r2,r4		;error -= x
+	sub	r2,r4		;error -= x
+	br	circl1
+circl2:	rts	pc
+ 
+plot8:	jsr	pc,swap23	;swap x <-> y
+	jsr	pc,plot4
+	jsr	pc,swap23	;swap x <-> y
+	cmp	r2,r3		;if (x != y)
+	beq	plotr
+plot4:
+; setPixel(cx + x, cy + y)
+	add	r2,r0
+	add	r3,r1
+	jsr	pc,plot
+	sub	r3,r1
+	sub	r2,r0
+; if (x != 0) setPixel(cx - x, cy + y)
+	tst	r2
+	beq	plot4a
+	sub	r2,r0
+	add	r3,r1
+	jsr	pc,plot
+	add	r2,r0
+	sub	r3,r1
+; if (y != 0) setPixel(cx + x, cy - y)
+plot4a:	tst	r3
+	beq	plotr
+	add	r2,r0
+	sub	r3,r1
+	jsr	pc,plot
+	sub	r2,r0
+	add	r3,r1
+; if (x != 0 && y != 0) setPixel(cx - x, cy - y)
+	tst	r2
+	beq	plotr
+	sub	r2,r0
+	sub	r3,r1
+	jsr	pc,plot
+	add	r2,r0
+	add	r3,r1
+plotr:	rts	pc
+
+; draw a line using the Bresenham's algorithm
+; R0 = X0 then later X
+; R1 = Y0 then later Y
+; R2 = X1
+; R3 = Y1
+line:
+; steep := abs(y1 - y0) > abs(x1 - x0)
+	mov	r3,r4
+	sub	r1,r4
+	bcc	line1
+	neg	r4
+line1:	mov	r2,r5
+	sub	r0,r5
+	bcc	line2
+	neg	r5
+line2:	sub	r4,r5		;R5=steep
+	bpl	line3
+; if steep then swap(x0, y0): swap(x1, y1)
+	jsr	pc,swap01
+	jsr	pc,swap23
+; if x0 > x1 then swap(x0, x1): swap(y0, y1)
+line3:	cmp	r2,r0
+	bpl	line4
+	mov	r0,r4
+	mov	r2,r0
+	mov	r4,r2
+	mov	r1,r4
+	mov	r3,r1
+	mov	r4,r3
+line4:	mov	r2,-(sp)	;X1
+; deltax := x1 - x0
+	sub	r0,r2		;R2=deltax
+; deltay := abs(y1 - y0)
+; if y0 < y1 then ystep := 1 else ystep := -1
+	mov	#1,-(sp)	;ystep
+	sub	r1,r3		;R3=deltay
+	bpl	line5
+	neg	(sp)
+	neg	r3
+; error := deltax / 2
+line5:	mov	r2,r4
+	asr	r4		;R4=error
+; data on the stack: 0(SP) = ystep, 2(SP) = X1
+; R0 = X = X0, R1 = Y = Y0, R2 = deltax, R3 = deltay, R4 = error, R5 = steep
+; for x from x0 to x1
+line6:
+; if steep then plot(y,x) else plot(x,y)
+	jsr	pc,swap1
+	jsr	pc,plot
+	jsr	pc,swap1
+; error := error - deltay
+	sub	r3,r4
+; if error < 0 then y := y + ystep : error := error + deltax
+	bpl	line7
+	add	(sp),r1
+	add	r2,r4
+line7:	inc	r0		;X
+	cmp	2(sp),r0
+	bcc	line6		;loop to line6 if X1 >= X
+	add	#4,sp
+	rts	pc
+
+swap1:	tst	r5		;steep
+	bpl	swap2
+swap01:	mov	r0,-(sp)
+	mov	r1,r0
+	mov	(sp)+,r1
+swap2:	rts	pc
+
+swap23:	mov	r2,-(sp)
+	mov	r3,r2
+	mov	(sp)+,r3
+	rts	pc
+
+	.end

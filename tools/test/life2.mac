@@ -1,0 +1,223 @@
+; Conway's Game of Life
+
+;	.psect	hello, abs
+
+;	.=	0
+
+	nop
+	mov	#stack, sp
+start:	mov	#scr, @#164000
+	mov	#104306, @#164002
+; initialise the variable 'seed'
+	mov	#100,@#165024	;RTC register A,
+				;DV=010 (OSC1=32768Hz), RS=0000 (no SQW)
+	mov	@#165000,r0	;RTC, seconds
+	movb	r0,seed
+	mov	@#165004,r0	;RTC, minutes
+	movb	r0,seed+1
+; clear the display RAM
+	mov	#scr,r0
+	mov	#740,r1
+cls:	clr	(r0)+
+	sob	r1,cls
+;
+main1:	clr	gener
+	jsr	pc,deal
+main2:	jsr	pc,show
+	inc	gener
+	mov	gener,r3
+	mov	#scr+24,r0
+	jsr	pc,number
+	jsr	pc,next
+	br	main2
+
+; copy the contents of the cell array to the screen
+show:	mov	#pf+10,r0
+	mov	#pf+410,r1
+	mov	#scr,r2
+	mov	#40,-(sp)	;counter of rows
+show1:	mov	#4,r5		;counter of words in a row
+show2:	mov	(r0)+,r3
+	mov	(r1)+,r4
+	swab	r3
+	swab	r4
+	movb	r3,(r2)+
+	movb	r4,(r2)+
+	swab	r3
+	swab	r4
+	movb	r3,(r2)+
+	movb	r4,(r2)+
+	sob	r5,show2
+	add	#16,r2
+	dec	(sp)
+	bne	show1
+	mov	(sp)+,r0
+	rts	pc
+
+; calculate the next generation
+next:	mov	#76,r5		;counter of columns
+next1:	mov	#100,r4		;counter of rows
+	mov	#pf+10,r0
+	clr	r3		;number of cells in the upper row
+next2:	mov	r3,r1
+	mov	16(r0),r2
+	bic	#177770,r2	;bit pattern of cells in the lower row
+	movb	t1(r2),r3	;number of cells in the lower row
+	add	r3,r1		;add the number of cells in the lower row
+	mov	6(r0),r2
+	bic	#177770,r2	;bit pattern of cells in the middle row
+	movb	t1(r2),r3	;number of cells in the middle row
+	add	r3,r1		;add the number of cells in the middle row
+; lit the child cell if:
+; the central cell lives and the number of neighbours including self is 3 or 4,
+; or the central cell is empty and the number of neigbours is equal 3
+	sub	#3,r1
+	beq	next3
+	clc
+	dec	r1		;number of neighbours = 4 ?
+	bne	next4
+	bit	#2,r2		;does the central cell live?
+	beq	next4
+next3:	sec			;lit the child cell
+next4:	ror	(r0)+
+	ror	(r0)+
+	ror	(r0)+
+	ror	(r0)+
+	sob	r4,next2
+	sob	r5,next1
+; add the left margin
+	mov	#100,r4		;counter of rows
+	mov	#pf+10,r0
+next5:	clc
+	ror	(r0)+
+	ror	(r0)+
+	ror	(r0)+
+	ror	(r0)+
+	sob	r4,next5
+	rts	pc
+
+; initialise the cell array with random pattern
+deal:	mov	#pf,r4
+	mov	#4,r5
+deal1:	clr	(r4)+
+	sob	r5,deal1
+	mov	#400,r5
+deal2:	jsr	pc,randw
+	mov	r5,r0
+	bic	#177774,r0	;left margin
+	bne	deal3
+	clc
+	ror	r3
+	br	deal4
+deal3:	dec	r0		;right margin
+	bne	deal4
+	bic	#1,r3
+deal4:	mov	r3,(r4)+
+	sob	r5,deal2
+	mov	#4,r5
+deal5:	clr	(r4)+
+	sob	r5,deal5
+	rts	pc
+
+; display the character R1 at the screen address R0,
+; advance the pointer R0 to the next column
+putc:	mov	r2,-(sp)
+; R1 <- 6 * R1
+	asl	r1		;* 2
+	mov	r1,-(sp)
+	asl	r1		;* 4
+	add	(sp)+,r1	;* 6
+	add	#chars,r1
+	mov	#6,r2
+putc1:	
+	movb	(r1)+,(r0)
+	add	#36,r0
+	sob	r2,putc1
+	sub	#262,r0		;6 * 36 - 2 = B2
+	mov	(sp)+,r2
+	rts	pc
+
+print1:	jsr	pc, putc
+; print a string pointed to by R2 at the screen address R0,
+; advance the pointer R0 to the next column,
+; the string should be terminated by a negative byte
+print:	movb	(r2)+, r1
+	bpl	print1
+	rts	pc
+
+; print R3 decimal at the screen address R0
+number:	mov	sp,r1
+	mov	#5012,-(sp)	;spaces
+	mov	(sp),-(sp)
+	mov	(sp),-(sp)
+	movb	#200,-(r1)
+numb1:	clr	r2
+	div	#12,r2
+	movb	r3,-(r1)
+	mov	r2,r3
+	bne	numb1
+	mov	sp,r2
+	jsr	pc,print
+	add	#6,sp
+	rts	pc
+
+; R3 <- pseudo-random number in range 0..255 on the most significant byte
+; code copied from the Elektronika MK-85 ROM
+random:	mov	#21,r0
+	mov	seed,r1
+	clr	r2
+	mov	#31105,r3
+rando1:	ror	r2
+	ror	r3
+	bcc	rando2
+	add	r1,r2
+rando2:	sob	r0,rando1
+	add	#15415,r3
+	bic	#100000,r3
+	mov	r3,seed
+	rol	r3
+	bic	#377,r3
+	rts	pc
+
+; R3 <- random word
+randw:	jsr	pc,random
+	mov	r3,-(sp)
+	jsr	pc,random
+	swab	r3
+	bis	(sp)+,r3
+	rts	pc
+
+; number of set bits
+t1:	.byte	0,1,1,2,1,2,2,3
+
+; characters, width = 8 pixels, height = 6 pixels
+chars:	.byte	074, 106, 112, 122, 142, 074 ;digit '0'
+	.byte	030, 050, 010, 010, 010, 076 ;digit '1'
+	.byte	074, 102, 002, 074, 100, 176 ;digit '2'
+	.byte	074, 102, 014, 002, 102, 074 ;digit '3'
+	.byte	010, 030, 050, 110, 176, 010 ;digit '4'
+	.byte	176, 100, 174, 002, 102, 074 ;digit '5'
+	.byte	074, 100, 174, 102, 102, 074 ;digit '6'
+	.byte	176, 002, 004, 010, 020, 020 ;digit '7'
+	.byte	074, 102, 074, 102, 102, 074 ;digit '8'
+	.byte	074, 102, 102, 076, 002, 074 ;digit '9'
+	.byte	000, 000, 000, 000, 000, 000 ;space
+
+	.even
+
+gener:	.blkw	1	;counter of generations
+seed:	.blkw	1	;used to generate pseudo-random numbers
+
+; cell array: 66 rows (the upper and lower are empty), 64 columns (4 words)
+pf:	.blkw	102*4
+
+	.even
+scr:
+	.blkb	740
+
+	.even
+
+	.blkw	1000
+stack:
+
+	.end
