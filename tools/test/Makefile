@@ -1,7 +1,7 @@
 MACRO11 = ../macro11
 DUMPOBJ = ../dumpobj
 
-all: hello.bin test.bin test1.bin test2.bin test3.bin test4.bin test5.bin
+all: hello.bin test.bin test1.bin test2.bin test3.bin test4.bin test5.bin life2.bin graph.bin cmdtest.bin test_suite.bin
 
 .SUFFIXES: .mac .obj .bin
 

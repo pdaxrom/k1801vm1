@@ -75,9 +75,9 @@ static int SDLCALL cpu_thread(void *args)
 
 	while (is_running) {
 		word addr = r->r[7];
-//		dump_regs(r);
-//		printf("\n%06o %06o ", addr, r->load_word(r, addr));
-//		printf("%s\n", disas(r, &addr, out));
+		dump_regs(r);
+		printf("\n%06o %06o ", addr, r->load_word(r, addr));
+		printf("%s\n", disas(r, &addr, out));
 		int key;
 #if 0
 		do {
@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
 
 //fixme: hack
 r.r[7] = addr;
-//r.r[6] = 0x0200;
-//r.r[7] = 0xf630;
+r.r[6] = 0x0200;
+r.r[7] = 0xf630;
 
         if (SDL_Init(SDL_INIT_EVERYTHING) < 0) { /* Initialize SDL's Video subsystem */
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Init fail : %s\n", SDL_GetError());
