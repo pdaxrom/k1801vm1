@@ -1,0 +1,313 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <SDL.h>
+
+#include "core/core.h"
+#include "core/disas.h"
+#include "bk_hw.h"
+
+#define FPS 60
+#define CYCLES_PER_FRAME 40000
+
+#define MONITOR_BASE 0100000
+#define BASIC_BASE 0120000
+
+static void usage(const char *prog)
+{
+    fprintf(stderr,
+            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace]\n"
+            "Defaults to ROM/MONIT10.ROM and ROM/BASIC10.ROM\n",
+            prog);
+}
+
+static int load_rom_file(const char *path, byte **out_data, word *out_size)
+{
+    FILE *fp = fopen(path, "rb");
+    if (!fp) {
+        return -1;
+    }
+    fseek(fp, 0, SEEK_END);
+    long sz = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (sz <= 0 || sz > 65536) {
+        fclose(fp);
+        return -1;
+    }
+    byte *buf = (byte *)malloc((size_t)sz);
+    if (!buf) {
+        fclose(fp);
+        return -1;
+    }
+    if (fread(buf, 1, (size_t)sz, fp) != (size_t)sz) {
+        fclose(fp);
+        free(buf);
+        return -1;
+    }
+    fclose(fp);
+    *out_data = buf;
+    *out_size = (word)sz;
+    return 0;
+}
+
+static word peek_rom_word(const byte *rom, word size, word offset)
+{
+    if (!rom || offset + 1 >= size) {
+        return 0;
+    }
+    return (word)(rom[offset] | (rom[offset + 1] << 8));
+}
+
+static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
+{
+    byte *vram = bk_hw_vram_ptr();
+    if (!vram) {
+        return;
+    }
+    word vram_size = bk_hw_vram_size();
+    word shift = bk_hw_shift_reg();
+
+    static uint32_t *pixels;
+    static size_t pixels_size;
+    const size_t needed = (size_t)BK_SCREEN_WIDTH * BK_SCREEN_HEIGHT;
+
+    if (pixels_size != needed) {
+        free(pixels);
+        pixels = (uint32_t *)calloc(needed, sizeof(uint32_t));
+        pixels_size = needed;
+    }
+
+    word line_bytes = (word)(BK_SCREEN_WIDTH / 8);
+    word base_offset = (word)((shift & 0377) * 0100);
+    for (int y = 0; y < BK_SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < BK_SCREEN_WIDTH; x++) {
+            word line_offset = (word)(y * line_bytes);
+            word byte_index = (word)(base_offset + line_offset + (x >> 3));
+            if (vram_size) {
+                byte_index %= vram_size;
+            }
+            byte mask = (byte)(0200 >> (x & 7));
+            byte bit = 0;
+            bit = vram[byte_index] & mask;
+            pixels[y * BK_SCREEN_WIDTH + x] = bit ? 0xFFFFFFFFu : 0x00000000u;
+        }
+    }
+
+    SDL_UpdateTexture(tex, NULL, pixels, BK_SCREEN_WIDTH * sizeof(uint32_t));
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, tex, NULL, NULL);
+    SDL_RenderPresent(renderer);
+}
+
+int main(int argc, char **argv)
+{
+    const char *rom_dir = "ROM";
+    const char *monitor_path_arg = NULL;
+    const char *basic_path_arg = NULL;
+    word start_addr = 0;
+    int have_start = 0;
+    int trace = 0;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--rom-dir") == 0 && i + 1 < argc) {
+            rom_dir = argv[++i];
+        } else if (strcmp(argv[i], "--monitor") == 0 && i + 1 < argc) {
+            monitor_path_arg = argv[++i];
+        } else if (strcmp(argv[i], "--basic") == 0 && i + 1 < argc) {
+            basic_path_arg = argv[++i];
+        } else if (strcmp(argv[i], "--trace") == 0) {
+            trace = 1;
+        } else if (strcmp(argv[i], "--start") == 0 && i + 1 < argc) {
+            unsigned int tmp = 0;
+            sscanf(argv[++i], "%o", &tmp);
+            start_addr = (word)tmp;
+            have_start = 1;
+        } else {
+            usage(argv[0]);
+            return 1;
+        }
+    }
+
+    char monitor_path_buf[512];
+    char basic_path_buf[512];
+    const char *rom_dirs[] = { rom_dir, "../ROM", "./rom", "../rom" };
+    const char *monitor_path = monitor_path_arg;
+    const char *basic_path = basic_path_arg;
+
+    if (!monitor_path || !basic_path) {
+        for (size_t i = 0; i < sizeof(rom_dirs) / sizeof(rom_dirs[0]); i++) {
+            if (!monitor_path) {
+                snprintf(monitor_path_buf, sizeof(monitor_path_buf), "%s/MONIT10.ROM", rom_dirs[i]);
+                FILE *f = fopen(monitor_path_buf, "rb");
+                if (f) {
+                    fclose(f);
+                    monitor_path = monitor_path_buf;
+                }
+            }
+            if (!basic_path) {
+                snprintf(basic_path_buf, sizeof(basic_path_buf), "%s/BASIC10.ROM", rom_dirs[i]);
+                FILE *f = fopen(basic_path_buf, "rb");
+                if (f) {
+                    fclose(f);
+                    basic_path = basic_path_buf;
+                }
+            }
+            if (monitor_path && basic_path) {
+                break;
+            }
+        }
+    }
+
+    if (!monitor_path || !basic_path) {
+        fprintf(stderr, "ROM files not found. Use --monitor/--basic or --rom-dir.\n");
+        return 1;
+    }
+
+    byte *monitor_rom = NULL;
+    word monitor_size = 0;
+    if (load_rom_file(monitor_path, &monitor_rom, &monitor_size) != 0) {
+        fprintf(stderr, "Failed to load MONIT10.ROM from %s\n", monitor_path);
+        return 1;
+    }
+
+    byte *basic_rom = NULL;
+    word basic_size = 0;
+    if (load_rom_file(basic_path, &basic_rom, &basic_size) != 0) {
+        fprintf(stderr, "Failed to load BASIC10.ROM from %s\n", basic_path);
+        free(monitor_rom);
+        return 1;
+    }
+
+    fprintf(stderr, "MONIT10.ROM: %s size=%06o first=%06o\n",
+            monitor_path, monitor_size, peek_rom_word(monitor_rom, monitor_size, 0));
+    fprintf(stderr, "BASIC10.ROM: %s size=%06o first=%06o\n",
+            basic_path, basic_size, peek_rom_word(basic_rom, basic_size, 0));
+
+    regs r;
+    memset(&r, 0, sizeof(r));
+    r.model = K1801VM1;
+
+    bk_hw_connect(&r);
+    if (r.init(&r) != 0) {
+        fprintf(stderr, "Hardware init failed\n");
+        free(monitor_rom);
+        free(basic_rom);
+        return 1;
+    }
+
+    bk_hw_set_rom_segment(monitor_rom, MONITOR_BASE, monitor_size);
+    bk_hw_set_rom_segment(basic_rom, BASIC_BASE, basic_size);
+    r.SEL1 = MONITOR_BASE;
+    core_reset(&r);
+
+    if (have_start) {
+        r.r[7] = start_addr;
+    } else {
+        r.r[7] = MONITOR_BASE;
+    }
+
+    r.r[6] = 01000;
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
+        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+        free(monitor_rom);
+        free(basic_rom);
+        return 1;
+    }
+
+    SDL_Window *win = SDL_CreateWindow(
+        "BK0010-01 (core)",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        BK_SCREEN_WIDTH * 2,
+        BK_SCREEN_HEIGHT * 2,
+        SDL_WINDOW_SHOWN);
+    if (!win) {
+        fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
+        SDL_Quit();
+        free(monitor_rom);
+        free(basic_rom);
+        return 1;
+    }
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        free(monitor_rom);
+        free(basic_rom);
+        return 1;
+    }
+
+    SDL_Texture *tex = SDL_CreateTexture(renderer,
+                                         SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_STREAMING,
+                                         BK_SCREEN_WIDTH,
+                                         BK_SCREEN_HEIGHT);
+    if (!tex) {
+        fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(win);
+        SDL_Quit();
+        free(monitor_rom);
+        free(basic_rom);
+        return 1;
+    }
+
+    int running = 1;
+    Uint32 frame_delay = 1000 / FPS;
+
+    char disas_buf[256];
+    while (running) {
+        Uint32 frame_start = SDL_GetTicks();
+
+        SDL_Event ev;
+        while (SDL_PollEvent(&ev)) {
+            if (ev.type == SDL_QUIT) {
+                running = 0;
+            } else if (ev.type == SDL_KEYDOWN) {
+                SDL_Keycode key = ev.key.keysym.sym;
+                if (key == SDLK_ESCAPE) {
+                    running = 0;
+                } else if (key >= 32 && key < 127) {
+                    bk_hw_handle_key((int)key);
+                } else if (key == SDLK_RETURN) {
+                    bk_hw_handle_key('\n');
+                } else if (key == SDLK_BACKSPACE) {
+                    bk_hw_handle_key('\b');
+                }
+            }
+        }
+
+        for (int i = 0; i < CYCLES_PER_FRAME; i++) {
+            if (trace) {
+                word pc = r.r[7];
+                word addr = pc;
+                disas(&r, &addr, disas_buf);
+                printf("%06o %06o %s\n", pc, r.load_word(&r, pc), disas_buf);
+            }
+            if (core_step(&r) != 0) {
+                break;
+            }
+        }
+
+        draw_screen(renderer, tex);
+
+        Uint32 frame_time = SDL_GetTicks() - frame_start;
+        if (frame_time < frame_delay) {
+            SDL_Delay(frame_delay - frame_time);
+        }
+    }
+
+    SDL_DestroyTexture(tex);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(win);
+    SDL_Quit();
+
+    core_fini(&r);
+    free(monitor_rom);
+    free(basic_rom);
+    return 0;
+}
