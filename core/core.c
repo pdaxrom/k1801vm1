@@ -208,8 +208,8 @@ int core_step(regs *r)
     	if (!r->fTrap) {
     		pushw(r->psw);
     		pushw(r->r[7]);
-    		r->r[7] = load_word(r, 14);
-    		r->psw  = load_word(r, 16);
+    		r->r[7] = load_word(r, 014);
+    		r->psw  = load_word(r, 016);
     	}
     }
 
@@ -287,15 +287,15 @@ int core_step(regs *r)
 		case 000003: /* BPT */
 			pushw(r->psw);
 			pushw(r->r[7]);
-			r->r[7] = load_word(r, 14);
-			r->psw  = load_word(r, 16);
+			r->r[7] = load_word(r, 014);
+			r->psw  = load_word(r, 016);
 			return 0;
 
 		case 000004: /* IOT */
 			pushw(r->psw);
 			pushw(r->r[7]);
-			r->r[7] = load_word(r, 20);
-			r->psw  = load_word(r, 22);
+			r->r[7] = load_word(r, 020);
+			r->psw  = load_word(r, 022);
 			return 0;
 
 		case 000005: /* RESET */
@@ -509,18 +509,19 @@ int core_step(regs *r)
 			return 0;
 
 		case 0104000:
+		case 0104400:
 			if (op & 0400) {
 				// TRAP
 				pushw(r->psw);
 				pushw(r->r[7]);
-				r->r[7] = load_word(r, 34);
-				r->psw  = load_word(r, 36);
+				r->r[7] = load_word(r, 034);
+				r->psw  = load_word(r, 036);
 			} else {
 				// EMT
 				pushw(r->psw);
 				pushw(r->r[7]);
-				r->r[7] = load_word(r, 30);
-				r->psw  = load_word(r, 32);
+				r->r[7] = load_word(r, 030);
+				r->psw  = load_word(r, 032);
 			}
 			return 0;
     }

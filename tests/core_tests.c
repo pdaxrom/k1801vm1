@@ -94,6 +94,36 @@ static INLINE word op_sob(byte reg, byte offset)
     return 0077000 | ((reg & 07) << 6) | (offset & 077);
 }
 
+static INLINE word op_emt(byte code)
+{
+    return 0104000 | (code & 0377);
+}
+
+static INLINE word op_trap(byte code)
+{
+    return 0104400 | (code & 0377);
+}
+
+static INLINE word op_bpt(void)
+{
+    return 0000003;
+}
+
+static INLINE word op_iot(void)
+{
+    return 0000004;
+}
+
+static INLINE word op_rtt(void)
+{
+    return 0000006;
+}
+
+static INLINE word op_rti(void)
+{
+    return 0000002;
+}
+
 static INLINE void store_word(cpu_fixture *fx, word addr, word value)
 {
     fx->r.store_word(&fx->r, addr, value);
@@ -330,6 +360,387 @@ cleanup:
     return rc;
 }
 
+static int test_emt_pushes_and_vectors(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_emt(0),
+    };
+
+    current_test = "emt_vector";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 030, handler);
+    store_word(&fx, 032, new_psw);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 030), handler, "Vector fetch sanity");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 032), new_psw, "Vector PSW sanity");
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "EMT should succeed");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load EMT vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load EMT vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_trap_pushes_and_vectors(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 03000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_trap(0),
+    };
+
+    current_test = "trap_vector";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 034, handler);
+    store_word(&fx, 036, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "TRAP should succeed");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load TRAP vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load TRAP vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_bpt_vectors(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 04000;
+    const word new_psw = 000200;
+    const word program[] = {
+        op_bpt(),
+    };
+
+    current_test = "bpt_vector";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT should succeed");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load BPT vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load BPT vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_iot_vectors(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 05000;
+    const word new_psw = 000220;
+    const word program[] = {
+        op_iot(),
+    };
+
+    current_test = "iot_vector";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 020, handler);
+    store_word(&fx, 022, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IOT should succeed");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load IOT vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IOT vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_trace_vector(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 06000;
+    const word new_psw = 000240;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "trace_vector";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    store_word(&fx, handler, op_nop());
+    store_word(&fx, handler + 2, op_nop());
+    store_word(&fx, handler + 2, op_nop());
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler), op_nop(), "Handler NOP sanity");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP sanity");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 016), new_psw, "Vector PSW sanity");
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Trace should succeed");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP after trace");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), FLAG_T | 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_rtt_restores_and_sets_ftrap(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rtt(),
+    };
+
+    current_test = "rtt_restore";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, 000111);
+    fx.r.psw = 000003;
+    fx.r.fTrap = 0;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTT should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, 000111, "PSW should restore from stack");
+    ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
+    ASSERT_EQ(fx.r.fTrap, 1, "RTT should set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_rtt_skips_trace_once(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 07000;
+    const word new_psw = FLAG_T | 000003;
+    const word program[] = {
+        op_rtt(),
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "rtt_trace_skip";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    store_word(&fx, handler, op_nop());
+    store_word(&fx, handler + 2, op_nop());
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, TEST_BASE + 2);
+    store_word(&fx, 01202, FLAG_T | 000003);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTT should succeed");
+    ASSERT_EQ(fx.r.fTrap, 1, "RTT should set fTrap");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "NOP should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "PC should advance without trace trap");
+    ASSERT_EQ(fx.r.fTrap, 0, "fTrap should clear after next step");
+    ASSERT_EQ(fx.r.psw, FLAG_T | 000003, "PSW should preserve T bit");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Next instruction should execute under trace");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "Trace should vector on following step");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01200), TEST_BASE + 4, "Trace stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01202), FLAG_T | 000003, "Trace stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_trace_rearms_after_handler(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 07000;
+    const word new_psw = 000240;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "trace_rearm";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    store_word(&fx, handler, op_nop());
+    store_word(&fx, handler + 2, op_nop());
+
+    fx.r.r[6] = 01200;
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Trace should vector on first step");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
+    ASSERT_EQ(fx.r.fTrap, 0, "fTrap should remain clear");
+
+    fx.r.psw |= FLAG_T;
+    fx.r.r[7] = TEST_BASE;
+    ASSERT_EQ(core_step(&fx.r), 0, "Trace should rearm on next step");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should return to handler after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01170), TEST_BASE, "Second trace stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01172), (word)(new_psw | FLAG_T), "Second trace stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_trace_rearms_with_t_in_vector(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 07200;
+    const word new_psw = (word)(FLAG_T | 000003);
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "trace_rearm_vector_t";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    store_word(&fx, handler, op_nop());
+    store_word(&fx, handler + 2, op_nop());
+
+    fx.r.r[6] = 01200;
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Trace should vector on first step");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
+
+    fx.r.r[7] = TEST_BASE;
+    ASSERT_EQ(core_step(&fx.r), 0, "Trace should rearm with T in vector");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should return to handler after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01170), TEST_BASE, "Second trace stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01172), new_psw, "Second trace stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_trace_stops_when_t_cleared(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 07400;
+    const word new_psw = 000003;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "trace_stop_clear_t";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    store_word(&fx, handler, op_nop());
+    store_word(&fx, handler + 2, op_nop());
+
+    fx.r.r[6] = 01200;
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Trace should vector on first step");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
+
+    fx.r.r[7] = TEST_BASE;
+    ASSERT_EQ(core_step(&fx.r), 0, "Program NOP should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01174), TEST_BASE, "Trace stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01176), FLAG_T | 000003, "Trace stack PSW incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP after trace");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_rti_restores_state(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rti(),
+    };
+
+    current_test = "rti_restore";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, 000111);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, 000111, "PSW should restore from stack");
+    ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
+    ASSERT_EQ(fx.r.fTrap, 0, "RTI should not set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -341,6 +752,17 @@ int main(void)
     failed += test_branch_on_equal_skips_instruction();
     failed += test_jsr_and_rts_restore_context();
     failed += test_sob_loops_expected_count();
+    failed += test_emt_pushes_and_vectors();
+    failed += test_trap_pushes_and_vectors();
+    failed += test_bpt_vectors();
+    failed += test_iot_vectors();
+    failed += test_trace_vector();
+    failed += test_rtt_restores_and_sets_ftrap();
+    failed += test_rtt_skips_trace_once();
+    failed += test_trace_rearms_after_handler();
+    failed += test_trace_rearms_with_t_in_vector();
+    failed += test_trace_stops_when_t_cleared();
+    failed += test_rti_restores_state();
 
     if (failed) {
         fprintf(stderr, "%d test(s) failed\n", failed);
