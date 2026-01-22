@@ -87,7 +87,7 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
             if (vram_size) {
                 byte_index %= vram_size;
             }
-            byte mask = (byte)(0200 >> (x & 7));
+            byte mask = (byte)(1 << (x & 7));
             byte bit = 0;
             bit = vram[byte_index] & mask;
             pixels[y * BK_SCREEN_WIDTH + x] = bit ? 0xFFFFFFFFu : 0x00000000u;
