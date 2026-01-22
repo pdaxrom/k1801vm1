@@ -79,7 +79,8 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
     }
 
     word line_bytes = (word)(BK_SCREEN_WIDTH / 8);
-    word base_offset = (word)((shift & 0377) * 0100);
+    word scroll = (word)(shift & 0377);
+    word base_offset = (word)(((scroll - 0330) & 0377) * 0100);
     for (int y = 0; y < BK_SCREEN_HEIGHT; y++) {
         for (int x = 0; x < BK_SCREEN_WIDTH; x++) {
             word line_offset = (word)(y * line_bytes);
