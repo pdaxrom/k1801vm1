@@ -232,8 +232,8 @@ int main(int argc, char **argv)
         }
     }
 
-    if (!monitor_path || !basic_path) {
-        fprintf(stderr, "ROM files not found. Use --monitor/--basic or --rom-dir.\n");
+    if (!monitor_path) {
+        fprintf(stderr, "MONIT10.ROM not found. Use --monitor or --rom-dir.\n");
         return 1;
     }
 
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
 
     byte *basic_rom = NULL;
     word basic_size = 0;
-    if (load_rom_file(basic_path, &basic_rom, &basic_size) != 0) {
+    if (basic_path && load_rom_file(basic_path, &basic_rom, &basic_size) != 0) {
         fprintf(stderr, "Failed to load BASIC10.ROM from %s\n", basic_path);
         free(monitor_rom);
         return 1;
@@ -254,8 +254,12 @@ int main(int argc, char **argv)
 
     fprintf(stderr, "MONIT10.ROM: %s size=%06o first=%06o\n",
             monitor_path, monitor_size, peek_rom_word(monitor_rom, monitor_size, 0));
-    fprintf(stderr, "BASIC10.ROM: %s size=%06o first=%06o\n",
-            basic_path, basic_size, peek_rom_word(basic_rom, basic_size, 0));
+    if (basic_rom) {
+        fprintf(stderr, "BASIC10.ROM: %s size=%06o first=%06o\n",
+                basic_path, basic_size, peek_rom_word(basic_rom, basic_size, 0));
+    } else {
+        fprintf(stderr, "BASIC10.ROM: not loaded\n");
+    }
 
     regs r;
     memset(&r, 0, sizeof(r));
@@ -270,7 +274,9 @@ int main(int argc, char **argv)
     }
 
     bk_hw_set_rom_segment(monitor_rom, MONITOR_BASE, monitor_size);
-    bk_hw_set_rom_segment(basic_rom, BASIC_BASE, basic_size);
+    if (basic_rom) {
+        bk_hw_set_rom_segment(basic_rom, BASIC_BASE, basic_size);
+    }
     r.SEL1 = MONITOR_BASE;
     core_reset(&r);
 

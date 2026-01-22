@@ -19,6 +19,9 @@
 #define BK_EXT_PORT   0177714
 #define BK_SYS_CTRL   0177716
 #define BK_KBD_VECTOR 000060
+#define BK_ROM_LO     0100000
+#define BK_ROM_HI     0177777
+#define BK_BUS_VECTOR 000004
 
 #define CSR_READY 0200
 
@@ -34,6 +37,7 @@ static word sys_ctrl = 0100000;
 static byte sys_port_out = 0;
 static byte sys_port_in = 0170;
 static byte kbd_irq_pending = 0;
+static byte bus_error_pending = 0;
 
 static int bk_poll_irq(regs *r, word *vector);
 
@@ -80,11 +84,20 @@ static INLINE uint32_t rom_offset(const rom_segment *seg, word addr)
     return addr32 + 0x10000 - base;
 }
 
+static INLINE int is_rom_addr(word addr)
+{
+    return addr >= BK_ROM_LO && addr <= BK_ROM_HI;
+}
+
 static byte mem_read(word addr)
 {
     const rom_segment *seg = rom_for_addr(addr);
     if (seg) {
         return seg->data[rom_offset(seg, addr)];
+    }
+    if (is_rom_addr(addr)) {
+        bus_error_pending = 1;
+        return 0;
     }
     return mem[addr];
 }
@@ -92,6 +105,10 @@ static byte mem_read(word addr)
 static void mem_write(word addr, byte value)
 {
     if (rom_for_addr(addr)) {
+        return;
+    }
+    if (is_rom_addr(addr)) {
+        bus_error_pending = 1;
         return;
     }
     mem[addr] = value;
@@ -235,6 +252,7 @@ static void bk_reset(regs *r)
     sys_port_out = 0;
     sys_port_in = 0170;
     kbd_irq_pending = 0;
+    bus_error_pending = 0;
 }
 
 static void bk_fini(regs *r)
@@ -288,6 +306,7 @@ void bk_hw_reset_state(void)
     sys_port_out = 0;
     sys_port_in = 0170;
     kbd_irq_pending = 0;
+    bus_error_pending = 0;
 }
 
 void bk_hw_handle_key(int code)
@@ -315,7 +334,20 @@ byte *bk_hw_vram_ptr(void)
 
 static int bk_poll_irq(regs *r, word *vector)
 {
-    (void)r;
+    if (is_rom_addr(r->r[7]) && !rom_for_addr(r->r[7])) {
+        bus_error_pending = 0;
+        if (vector) {
+            *vector = BK_BUS_VECTOR;
+        }
+        return 1;
+    }
+    if (bus_error_pending) {
+        bus_error_pending = 0;
+        if (vector) {
+            *vector = BK_BUS_VECTOR;
+        }
+        return 1;
+    }
     if (kbd_irq_pending && (kbd_status & CSR_READY) && ((kbd_status & 0100) == 0)) {
         kbd_irq_pending = 0;
         if (vector) {
