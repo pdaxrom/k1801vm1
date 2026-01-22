@@ -199,9 +199,17 @@ int core_step(regs *r)
     byte src_type;
     word dst_offset;
     byte dst_type;
+    word irq_vector;
 
     if (r->fWait) {
     	return 0;
+    }
+
+    if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
+    	pushw(r->psw);
+    	pushw(r->r[7]);
+    	r->r[7] = load_word(r, irq_vector);
+    	r->psw  = load_word(r, (word)(irq_vector + 2));
     }
 
     if (flag_is_set(FLAG_T)) {

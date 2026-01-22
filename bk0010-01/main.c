@@ -17,7 +17,7 @@
 static void usage(const char *prog)
 {
     fprintf(stderr,
-            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace]\n"
+            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace] [--show-shift]\n"
             "Defaults to ROM/MONIT10.ROM and ROM/BASIC10.ROM\n",
             prog);
 }
@@ -81,6 +81,9 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
     word line_bytes = (word)(BK_SCREEN_WIDTH / 8);
     word scroll = (word)(shift & 0377);
     word base_offset = (word)(((scroll - 0330) & 0377) * 0100);
+    if (vram_size) {
+        base_offset %= vram_size;
+    }
     for (int y = 0; y < BK_SCREEN_HEIGHT; y++) {
         for (int x = 0; x < BK_SCREEN_WIDTH; x++) {
             word line_offset = (word)(y * line_bytes);
@@ -89,8 +92,7 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
                 byte_index %= vram_size;
             }
             byte mask = (byte)(1 << (x & 7));
-            byte bit = 0;
-            bit = vram[byte_index] & mask;
+            byte bit = vram[byte_index] & mask;
             pixels[y * BK_SCREEN_WIDTH + x] = bit ? 0xFFFFFFFFu : 0x00000000u;
         }
     }
@@ -101,6 +103,73 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
     SDL_RenderPresent(renderer);
 }
 
+static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
+{
+    if (mod & KMOD_CTRL) {
+        switch (key) {
+        case SDLK_g: return 0007; /* BEL */
+        case SDLK_m: return 0015; /* set tab stop */
+        case SDLK_p: return 0020; /* repeat */
+        case SDLK_r: return 0022; /* cursor home */
+        case SDLK_t: return 0024; /* clear screen */
+        case SDLK_u: return 0025; /* line delete */
+        default: break;
+        }
+    }
+
+    switch (key) {
+    case SDLK_ESCAPE: return 0003; /* cancel line */
+    case SDLK_BACKSPACE: return 0010; /* cursor left */
+    case SDLK_RETURN: return 0012; /* VK */
+    case SDLK_KP_ENTER: return 0012;
+    case SDLK_TAB: return 0211;
+    case SDLK_LEFT: return 0010;
+    case SDLK_RIGHT: return 0037;
+    case SDLK_UP: return 0040;
+    case SDLK_DOWN: return 0041;
+    case SDLK_HOME: return 0022;
+    case SDLK_F1: return 0016; /* RUS */
+    case SDLK_F2: return 0017; /* LAT */
+    case SDLK_F5: return 0014; /* reset screen */
+    default: break;
+    }
+
+    if (key >= SDLK_0 && key <= SDLK_9) {
+        static const char shifted[] = ")!@#$%^&*(";
+        char c = (char)('0' + (key - SDLK_0));
+        if (mod & KMOD_SHIFT) {
+            c = shifted[key - SDLK_0];
+        }
+        return (byte)c;
+    }
+
+    if (key >= SDLK_a && key <= SDLK_z) {
+        char c = (char)('a' + (key - SDLK_a));
+        if (mod & KMOD_SHIFT) {
+            c = (char)('A' + (key - SDLK_a));
+        }
+        return (byte)c;
+    }
+
+    switch (key) {
+    case SDLK_SPACE: return ' ';
+    case SDLK_MINUS: return (mod & KMOD_SHIFT) ? '_' : '-';
+    case SDLK_EQUALS: return (mod & KMOD_SHIFT) ? '+' : '=';
+    case SDLK_LEFTBRACKET: return (mod & KMOD_SHIFT) ? '{' : '[';
+    case SDLK_RIGHTBRACKET: return (mod & KMOD_SHIFT) ? '}' : ']';
+    case SDLK_SEMICOLON: return (mod & KMOD_SHIFT) ? ':' : ';';
+    case SDLK_QUOTE: return (mod & KMOD_SHIFT) ? '\"' : '\'';
+    case SDLK_COMMA: return (mod & KMOD_SHIFT) ? '<' : ',';
+    case SDLK_PERIOD: return (mod & KMOD_SHIFT) ? '>' : '.';
+    case SDLK_SLASH: return (mod & KMOD_SHIFT) ? '?' : '/';
+    case SDLK_BACKSLASH: return (mod & KMOD_SHIFT) ? '|' : '\\';
+    case SDLK_BACKQUOTE: return (mod & KMOD_SHIFT) ? '~' : '`';
+    default: break;
+    }
+
+    return -1;
+}
+
 int main(int argc, char **argv)
 {
     const char *rom_dir = "ROM";
@@ -109,6 +178,7 @@ int main(int argc, char **argv)
     word start_addr = 0;
     int have_start = 0;
     int trace = 0;
+    int show_shift = 0;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--rom-dir") == 0 && i + 1 < argc) {
@@ -119,6 +189,8 @@ int main(int argc, char **argv)
             basic_path_arg = argv[++i];
         } else if (strcmp(argv[i], "--trace") == 0) {
             trace = 1;
+        } else if (strcmp(argv[i], "--show-shift") == 0) {
+            show_shift = 1;
         } else if (strcmp(argv[i], "--start") == 0 && i + 1 < argc) {
             unsigned int tmp = 0;
             sscanf(argv[++i], "%o", &tmp);
@@ -261,8 +333,16 @@ int main(int argc, char **argv)
     Uint32 frame_delay = 1000 / FPS;
 
     char disas_buf[256];
+    word last_shift = 0xFFFF;
     while (running) {
         Uint32 frame_start = SDL_GetTicks();
+        if (show_shift) {
+            word shift = bk_hw_shift_reg();
+            if (shift != last_shift) {
+                fprintf(stderr, "SHIFT=%06o (%04X)\n", shift, shift);
+                last_shift = shift;
+            }
+        }
 
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
@@ -272,12 +352,11 @@ int main(int argc, char **argv)
                 SDL_Keycode key = ev.key.keysym.sym;
                 if (key == SDLK_ESCAPE) {
                     running = 0;
-                } else if (key >= 32 && key < 127) {
-                    bk_hw_handle_key((int)key);
-                } else if (key == SDLK_RETURN) {
-                    bk_hw_handle_key('\n');
-                } else if (key == SDLK_BACKSPACE) {
-                    bk_hw_handle_key('\b');
+                } else {
+                    int code = bk_translate_key(key, ev.key.keysym.mod);
+                    if (code >= 0) {
+                        bk_hw_handle_key(code);
+                    }
                 }
             }
         }

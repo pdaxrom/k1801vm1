@@ -90,6 +90,8 @@ typedef struct _regs {
     void (* reset)		(struct _regs *r);
     void (* fini)		(struct _regs *r);
 
+    int  (* poll_irq)	(struct _regs *r, word *vector);
+
     byte *(* ramptr)	(struct _regs *r, word offset);
 } regs;
 

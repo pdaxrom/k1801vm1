@@ -71,5 +71,6 @@ void hwstub_connect(regs *r)
 	r->init			= hardware_init;
 	r->reset		= hardware_reset;
 	r->fini			= hardware_fini;
+	r->poll_irq		= NULL;
 	r->ramptr		= hardware_ramptr;
 }

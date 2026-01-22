@@ -124,6 +124,21 @@ static INLINE word op_rti(void)
     return 0000002;
 }
 
+static int test_irq_pending;
+
+static int test_poll_irq(regs *r, word *vector)
+{
+    (void)r;
+    if (test_irq_pending) {
+        test_irq_pending = 0;
+        if (vector) {
+            *vector = 000060;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 static INLINE void store_word(cpu_fixture *fx, word addr, word value)
 {
     fx->r.store_word(&fx->r, addr, value);
@@ -741,6 +756,77 @@ cleanup:
     return rc;
 }
 
+static int test_keyboard_irq_vector(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "kbd_irq_vector";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.poll_irq = test_poll_irq;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should succeed");
+    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should execute handler instruction");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    return rc;
+}
+
+static int test_irq_mask_blocks_interrupt(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "irq_mask_block";
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    fx.r.poll_irq = NULL;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "NOP should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without IRQ");
+    ASSERT_EQ(fx.r.psw, 000003, "PSW should remain unchanged");
+    ASSERT_EQ(fx.r.r[6], 01000, "SP should remain unchanged");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    return rc;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -763,6 +849,8 @@ int main(void)
     failed += test_trace_rearms_with_t_in_vector();
     failed += test_trace_stops_when_t_cleared();
     failed += test_rti_restores_state();
+    failed += test_keyboard_irq_vector();
+    failed += test_irq_mask_blocks_interrupt();
 
     if (failed) {
         fprintf(stderr, "%d test(s) failed\n", failed);

@@ -6,7 +6,9 @@ SDL_LIBS := $(shell sdl2-config --libs)
 
 CORE_DIR := ../core
 
-OBJS := main.o bk_hw.o $(CORE_DIR)/core.o $(CORE_DIR)/disas.o
+CORE_OBJS := core_core.o core_disas.o
+
+OBJS := main.o bk_hw.o $(CORE_OBJS)
 
 all: bk0010-01
 
@@ -19,10 +21,10 @@ main.o: main.c bk_hw.h $(CORE_DIR)/core.h
 bk_hw.o: bk_hw.c bk_hw.h $(CORE_DIR)/core.h
 	$(CC) $(CFLAGS) -I.. -c -o $@ $<
 
-$(CORE_DIR)/core.o: $(CORE_DIR)/core.c $(CORE_DIR)/core.h
+core_core.o: $(CORE_DIR)/core.c $(CORE_DIR)/core.h
 	$(CC) $(CFLAGS) -I.. -c -o $@ $<
 
-$(CORE_DIR)/disas.o: $(CORE_DIR)/disas.c $(CORE_DIR)/disas.h $(CORE_DIR)/core.h
+core_disas.o: $(CORE_DIR)/disas.c $(CORE_DIR)/disas.h $(CORE_DIR)/core.h
 	$(CC) $(CFLAGS) -I.. -c -o $@ $<
 
 clean:

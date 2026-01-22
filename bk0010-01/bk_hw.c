@@ -18,6 +18,7 @@
 #define BK_SHIFT_REG  0177664
 #define BK_EXT_PORT   0177714
 #define BK_SYS_CTRL   0177716
+#define BK_KBD_VECTOR 000060
 
 #define CSR_READY 0200
 
@@ -32,6 +33,9 @@ static word ext_port = 0177777;
 static word sys_ctrl = 0100000;
 static byte sys_port_out = 0;
 static byte sys_port_in = 0170;
+static byte kbd_irq_pending = 0;
+
+static int bk_poll_irq(regs *r, word *vector);
 
 typedef struct {
     const byte *data;
@@ -111,11 +115,12 @@ static byte bk_load_byte(regs *r, word offset)
     case BK_KBD_DATA:
         kbd_status &= (byte)~CSR_READY;
         sys_port_in |= 040;
+        kbd_irq_pending = 0;
         return kbd_data;
     case BK_SHIFT_REG:
         return (byte)(shift_reg & 0377);
     case (BK_SHIFT_REG + 1):
-        return (byte)(shift_reg >> 8);
+        return (byte)(shift_reg >> 8) & 02;
     case BK_EXT_PORT:
         return (byte)(ext_port & 0377);
     case (BK_EXT_PORT + 1):
@@ -168,7 +173,7 @@ static void bk_store_byte(regs *r, word offset, byte value)
         shift_reg = (word)((shift_reg & 0177400) | value);
         break;
     case (BK_SHIFT_REG + 1):
-        shift_reg = (word)((shift_reg & 0377) | ((word)value << 8));
+        shift_reg = (word)((shift_reg & 0377) | (((word)value << 8) & 01000));
         break;
     case BK_EXT_PORT:
         ext_port = (word)((ext_port & 0177400) | value);
@@ -229,6 +234,7 @@ static void bk_reset(regs *r)
     sys_ctrl = 0100000;
     sys_port_out = 0;
     sys_port_in = 0170;
+    kbd_irq_pending = 0;
 }
 
 static void bk_fini(regs *r)
@@ -248,14 +254,15 @@ static byte *bk_ramptr(regs *r, word offset)
 
 void bk_hw_connect(regs *r)
 {
-    r->load_byte = bk_load_byte;
-    r->store_byte = bk_store_byte;
-    r->load_word = bk_load_word;
-    r->store_word = bk_store_word;
-    r->init = bk_init;
-    r->reset = bk_reset;
-    r->fini = bk_fini;
-    r->ramptr = bk_ramptr;
+	r->load_byte = bk_load_byte;
+	r->store_byte = bk_store_byte;
+	r->load_word = bk_load_word;
+	r->store_word = bk_store_word;
+	r->init = bk_init;
+	r->reset = bk_reset;
+	r->fini = bk_fini;
+	r->poll_irq = bk_poll_irq;
+	r->ramptr = bk_ramptr;
 }
 
 void bk_hw_set_rom_segment(const byte *rom, word base, word size)
@@ -280,18 +287,22 @@ void bk_hw_reset_state(void)
     sys_ctrl = 0100000;
     sys_port_out = 0;
     sys_port_in = 0170;
+    kbd_irq_pending = 0;
 }
 
-void bk_hw_handle_key(int ch)
+void bk_hw_handle_key(int code)
 {
-    if (ch < 0) {
+    if (code < 0) {
         return;
     }
-    rbuf = (byte)ch;
+    rbuf = (byte)code;
     rcsr |= CSR_READY;
-    kbd_data = (byte)ch;
+    kbd_data = (byte)code;
     kbd_status |= CSR_READY;
     sys_port_in &= (byte)~040;
+    if ((kbd_status & 0100) == 0) {
+        kbd_irq_pending = 1;
+    }
 }
 
 byte *bk_hw_vram_ptr(void)
@@ -302,20 +313,33 @@ byte *bk_hw_vram_ptr(void)
     return &mem[bk_hw_vram_base()];
 }
 
+static int bk_poll_irq(regs *r, word *vector)
+{
+    (void)r;
+    if (kbd_irq_pending && (kbd_status & CSR_READY) && ((kbd_status & 0100) == 0)) {
+        kbd_irq_pending = 0;
+        if (vector) {
+            *vector = BK_KBD_VECTOR;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 word bk_hw_vram_base(void)
 {
-    if ((shift_reg & 01000) == 0) {
-        return BK_VRAM_BASE_RP;
+    if (shift_reg & 01000) {
+        return BK_VRAM_BASE;
     }
-    return BK_VRAM_BASE;
+    return BK_VRAM_BASE_RP;
 }
 
 word bk_hw_vram_size(void)
 {
-    if ((shift_reg & 01000) == 0) {
-        return BK_VRAM_SIZE_RP;
+    if (shift_reg & 01000) {
+        return BK_VRAM_SIZE;
     }
-    return BK_VRAM_SIZE;
+    return BK_VRAM_SIZE_RP;
 }
 
 word bk_hw_shift_reg(void)

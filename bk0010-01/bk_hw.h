@@ -13,7 +13,7 @@
 void bk_hw_connect(regs *r);
 void bk_hw_set_rom_segment(const byte *rom, word base, word size);
 void bk_hw_reset_state(void);
-void bk_hw_handle_key(int ch);
+void bk_hw_handle_key(int code);
 byte *bk_hw_vram_ptr(void);
 word bk_hw_vram_base(void);
 word bk_hw_vram_size(void);
