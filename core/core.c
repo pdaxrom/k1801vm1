@@ -85,8 +85,29 @@ void core_fini(regs *r)
 
 #define load_byte(a, b) r->load_byte(a, b)
 #define store_byte(a, b, c) r->store_byte(a, b, c)
-#define load_word(a, b) r->load_word(a, b)
-#define store_word(a, b, c) r->store_word(a, b, c)
+
+static INLINE void bus_error_trap(regs *r);
+
+static INLINE word core_load_word(regs *r, word offset)
+{
+	if ((r->model == DCJ11) && (offset & 1)) {
+		bus_error_trap(r);
+		return 0;
+	}
+	return r->load_word(r, offset);
+}
+
+static INLINE void core_store_word(regs *r, word offset, word value)
+{
+	if ((r->model == DCJ11) && (offset & 1)) {
+		bus_error_trap(r);
+		return;
+	}
+	r->store_word(r, offset, value);
+}
+
+#define load_word(a, b) core_load_word(a, b)
+#define store_word(a, b, c) core_store_word(a, b, c)
 
 static INLINE void illegal_trap(regs *r)
 {
@@ -95,6 +116,22 @@ static INLINE void illegal_trap(regs *r)
 	r->r[7] = load_word(r, 010);
 	r->psw  = load_word(r, 012);
 }
+
+#undef load_word
+#undef store_word
+
+static INLINE void bus_error_trap(regs *r)
+{
+	r->r[6] -= 2;
+	r->store_word(r, r->r[6], r->psw);
+	r->r[6] -= 2;
+	r->store_word(r, r->r[6], r->r[7]);
+	r->r[7] = r->load_word(r, 000004);
+	r->psw  = r->load_word(r, 000006);
+}
+
+#define load_word(a, b) core_load_word(a, b)
+#define store_word(a, b, c) core_store_word(a, b, c)
 
 static INLINE byte get_data_byte(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {

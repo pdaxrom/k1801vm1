@@ -894,6 +894,37 @@ cleanup:
     return rc;
 }
 
+static int run_illegal_op_test_model(word op, const char *name, byte model)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 05000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op,
+    };
+
+    current_test = name;
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 010, handler);
+    store_word(&fx, 012, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Illegal instruction should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load illegal vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load illegal vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_vm1_illegal_instructions_trap(void)
 {
     int rc = 0;
@@ -903,6 +934,81 @@ static int test_vm1_illegal_instructions_trap(void)
     rc += run_illegal_op_test(op_ash(0, operand(0, 1)), "illegal_ash_vm1");
     rc += run_illegal_op_test(op_ashc(0, operand(0, 1)), "illegal_ashc_vm1");
 
+    return rc;
+}
+
+static int test_dcj11_special_ops_illegal_on_other_models(void)
+{
+    int rc = 0;
+    const byte models[] = { K1801VM1, K1801VM1G, K1806VM2 };
+    const char *names[] = { "K1801VM1", "K1801VM1G", "K1806VM2" };
+    char namebuf[64];
+
+    for (size_t i = 0; i < sizeof(models) / sizeof(models[0]); i++) {
+        snprintf(namebuf, sizeof(namebuf), "mfpt_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_mfpt(), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "mfpd_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_mfpd(operand(0, 0)), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "mfpi_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_mfpi(operand(0, 0)), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "mtpi_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_mtpi(operand(0, 0)), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "mtpd_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_mtpd(operand(0, 0)), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "tstset_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_tstset(operand(0, 1)), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "wrtlck_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_wrtlck(operand(0, 1)), namebuf, models[i]);
+    }
+
+    return rc;
+}
+
+static int test_dcj11_tstset_wrtlck_mode0_illegal(void)
+{
+    int rc = 0;
+
+    rc += run_illegal_op_test_model(op_tstset(operand(0, 0)), "tstset_mode0_dcj11", DCJ11);
+    rc += run_illegal_op_test_model(op_wrtlck(operand(0, 0)), "wrtlck_mode0_dcj11", DCJ11);
+
+    return rc;
+}
+
+static int test_dcj11_alignment_trap(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 06000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_mov(operand(1, 1), operand(0, 0)),
+    };
+
+    current_test = "dcj11_alignment_trap";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[1] = 000001;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Odd word access should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760, "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
     return rc;
 }
 
@@ -2309,9 +2415,13 @@ static int test_dcj11_special_ops(void)
     current_test = "dcj11_special_ops";
     fixture_setup_model(&fx, DCJ11);
 
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
     write_op(&fx, op_mfpt());
     ASSERT_EQ(core_step(&fx.r), 0, "MFPT should execute");
     ASSERT_EQ(fx.r.r[0], 5, "MFPT should set R0 to 5");
+    ASSERT_EQ(fx.r.psw & (FLAG_N | FLAG_Z | FLAG_V | FLAG_C),
+              (FLAG_N | FLAG_Z | FLAG_V | FLAG_C),
+              "MFPT should not change CC");
 
     store_word(&fx, src_addr, 01234);
     write_op(&fx, op_mfpd(operand(1, 1)));
@@ -2320,6 +2430,9 @@ static int test_dcj11_special_ops(void)
     ASSERT_EQ(core_step(&fx.r), 0, "MFPD should execute");
     ASSERT_EQ(fx.r.r[6], 00776, "MFPD should push word");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 01234, "MFPD stack value");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "MFPD should clear N");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "MFPD should clear Z");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "MFPD should clear V");
 
     store_word(&fx, src_addr, 04567);
     write_op(&fx, op_mfpi(operand(1, 1)));
@@ -2328,6 +2441,9 @@ static int test_dcj11_special_ops(void)
     ASSERT_EQ(core_step(&fx.r), 0, "MFPI should execute");
     ASSERT_EQ(fx.r.r[6], 00776, "MFPI should push word");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 04567, "MFPI stack value");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "MFPI should clear N");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "MFPI should clear Z");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "MFPI should clear V");
 
     store_word(&fx, TEST_STACK, 01234);
     write_op(&fx, op_mtpi(operand(1, 2)));
@@ -2336,6 +2452,9 @@ static int test_dcj11_special_ops(void)
     ASSERT_EQ(core_step(&fx.r), 0, "MTPI should execute");
     ASSERT_EQ(fx.r.r[6], TEST_STACK + 2, "MTPI should pop word");
     ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 01234, "MTPI should store word");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "MTPI should clear N");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "MTPI should clear Z");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "MTPI should clear V");
 
     store_word(&fx, TEST_STACK, 04567);
     write_op(&fx, op_mtpd(operand(1, 2)));
@@ -2344,6 +2463,9 @@ static int test_dcj11_special_ops(void)
     ASSERT_EQ(core_step(&fx.r), 0, "MTPD should execute");
     ASSERT_EQ(fx.r.r[6], TEST_STACK + 2, "MTPD should pop word");
     ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 04567, "MTPD should store word");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "MTPD should clear N");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "MTPD should clear Z");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "MTPD should clear V");
 
     store_word(&fx, dst_addr, 000000);
     write_op(&fx, op_tstset(operand(1, 2)));
@@ -2352,12 +2474,38 @@ static int test_dcj11_special_ops(void)
     ASSERT_EQ(fx.r.r[0], 0, "TSTSET should load R0");
     ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 000001, "TSTSET should set low bit");
     ASSERT_EQ(is_flag_set(&fx.r, FLAG_C), 0, "TSTSET should clear C when bit0 was 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "TSTSET should clear N when R0 >= 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 1, "TSTSET should set Z when R0 == 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "TSTSET should clear V");
+
+    store_word(&fx, dst_addr, 000001);
+    write_op(&fx, op_tstset(operand(1, 2)));
+    fx.r.r[2] = dst_addr;
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTSET should execute");
+    ASSERT_EQ(fx.r.r[0], 1, "TSTSET should load R0");
+    ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 000001, "TSTSET should keep bit0 set");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_C), 1, "TSTSET should set C when bit0 was 1");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "TSTSET should clear N when R0 >= 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "TSTSET should clear Z when R0 != 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "TSTSET should clear V");
 
     fx.r.r[0] = 01234;
     write_op(&fx, op_wrtlck(operand(1, 2)));
     fx.r.r[2] = dst_addr;
     ASSERT_EQ(core_step(&fx.r), 0, "WRTLCK should execute");
     ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 01234, "WRTLCK should store R0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 0, "WRTLCK should clear N when R0 >= 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "WRTLCK should clear Z when R0 != 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "WRTLCK should clear V");
+
+    fx.r.r[0] = 0100000;
+    write_op(&fx, op_wrtlck(operand(1, 2)));
+    fx.r.r[2] = dst_addr;
+    ASSERT_EQ(core_step(&fx.r), 0, "WRTLCK should execute");
+    ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 0100000, "WRTLCK should store negative R0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_N), 1, "WRTLCK should set N when R0 < 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_Z), 0, "WRTLCK should clear Z when R0 != 0");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_V), 0, "WRTLCK should clear V");
 
 cleanup:
     fixture_teardown(&fx);
@@ -2766,6 +2914,9 @@ int main(void)
     failed += test_emt_pushes_and_vectors();
     failed += test_trap_pushes_and_vectors();
     failed += test_vm1_illegal_instructions_trap();
+    failed += test_dcj11_special_ops_illegal_on_other_models();
+    failed += test_dcj11_tstset_wrtlck_mode0_illegal();
+    failed += test_dcj11_alignment_trap();
     failed += test_extended_ops_supported();
     failed += test_condition_codes();
     failed += test_wait_and_reset();
