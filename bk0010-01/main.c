@@ -7,6 +7,7 @@
 #include "core/core.h"
 #include "core/disas.h"
 #include "bk_hw.h"
+#include "bk_tape.h"
 
 #define FPS 60
 #define CYCLES_PER_FRAME 40000
@@ -17,7 +18,8 @@
 static void usage(const char *prog)
 {
     fprintf(stderr,
-            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace] [--show-shift] [--show-cpu]\n"
+            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--tape-in <file>] [--tape-raw] [--tape-name <name>] [--tape-out <file>] [--tape-out-bin <file>] [--tape-out-roundtrip <file>] "
+            "[--start <octal>] [--trace] [--show-shift] [--show-cpu]\n"
             "Defaults to ROM/MONIT10.ROM and ROM/BASIC10.ROM\n",
             prog);
 }
@@ -48,6 +50,49 @@ static int load_rom_file(const char *path, byte **out_data, word *out_size)
     fclose(fp);
     *out_data = buf;
     *out_size = (word)sz;
+    return 0;
+}
+
+static int load_tape_file(const char *path, byte **out_data, size_t *out_size)
+{
+    FILE *fp = fopen(path, "rb");
+    if (!fp) {
+        return -1;
+    }
+    fseek(fp, 0, SEEK_END);
+    long sz = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    if (sz <= 0 || sz > (1024 * 1024)) {
+        fclose(fp);
+        return -1;
+    }
+    byte *buf = (byte *)malloc((size_t)sz);
+    if (!buf) {
+        fclose(fp);
+        return -1;
+    }
+    if (fread(buf, 1, (size_t)sz, fp) != (size_t)sz) {
+        fclose(fp);
+        free(buf);
+        return -1;
+    }
+    fclose(fp);
+    *out_data = buf;
+    *out_size = (size_t)sz;
+    return 0;
+}
+
+static int save_tape_file(const char *path, const byte *data, size_t size)
+{
+    FILE *fp = fopen(path, "wb");
+    if (!fp) {
+        return -1;
+    }
+    if (size > 0 && fwrite(data, 1, size, fp) != size) {
+        fclose(fp);
+        return -1;
+    }
+    fclose(fp);
     return 0;
 }
 
@@ -175,6 +220,13 @@ int main(int argc, char **argv)
     const char *rom_dir = "ROM";
     const char *monitor_path_arg = NULL;
     const char *basic_path_arg = NULL;
+    const char *tape_in_path = NULL;
+    const char *tape_out_path = NULL;
+    const char *tape_out_bin_path = NULL;
+    const char *tape_out_roundtrip_path = NULL;
+    const char *tape_name = NULL;
+    char tape_name_buf[32];
+    int tape_raw = 0;
     word start_addr = 0;
     int have_start = 0;
     int trace = 0;
@@ -188,6 +240,21 @@ int main(int argc, char **argv)
             monitor_path_arg = argv[++i];
         } else if (strcmp(argv[i], "--basic") == 0 && i + 1 < argc) {
             basic_path_arg = argv[++i];
+        } else if (strcmp(argv[i], "--tape-in") == 0 && i + 1 < argc) {
+            tape_in_path = argv[++i];
+        } else if (strcmp(argv[i], "--tape-raw") == 0) {
+            tape_raw = 1;
+        } else if (strcmp(argv[i], "--tape-name") == 0 && i + 1 < argc) {
+            tape_name = argv[++i];
+            if (strcmp(tape_name, "-") == 0) {
+                tape_name = "";
+            }
+        } else if (strcmp(argv[i], "--tape-out") == 0 && i + 1 < argc) {
+            tape_out_path = argv[++i];
+        } else if (strcmp(argv[i], "--tape-out-bin") == 0 && i + 1 < argc) {
+            tape_out_bin_path = argv[++i];
+        } else if (strcmp(argv[i], "--tape-out-roundtrip") == 0 && i + 1 < argc) {
+            tape_out_roundtrip_path = argv[++i];
         } else if (strcmp(argv[i], "--trace") == 0) {
             trace = 1;
         } else if (strcmp(argv[i], "--show-shift") == 0) {
@@ -282,6 +349,69 @@ int main(int argc, char **argv)
     }
     r.SEL1 = MONITOR_BASE;
     core_reset(&r);
+
+    bk_hw_set_tick_hz(FPS * CYCLES_PER_FRAME);
+
+    if (tape_in_path && !tape_raw && !tape_name) {
+        const char *base = strrchr(tape_in_path, '/');
+        base = base ? base + 1 : tape_in_path;
+        const char *dot = strrchr(base, '.');
+        size_t nlen = dot ? (size_t)(dot - base) : strlen(base);
+        if (nlen > 16) {
+            nlen = 16;
+        }
+        if (nlen > 0) {
+            memcpy(tape_name_buf, base, nlen);
+            tape_name_buf[nlen] = '\0';
+            tape_name = tape_name_buf;
+        }
+    }
+
+    if (tape_in_path) {
+        byte *tape_data = NULL;
+        size_t tape_size = 0;
+        if (load_tape_file(tape_in_path, &tape_data, &tape_size) != 0) {
+            fprintf(stderr, "Failed to load tape from %s\n", tape_in_path);
+        } else if (tape_raw) {
+            if (bk_hw_tape_set_input_raw(tape_data, tape_size) != 0) {
+                fprintf(stderr, "Failed to set raw tape input\n");
+            }
+        } else if (tape_name) {
+            byte *raw_data = NULL;
+            size_t raw_size = 0;
+            if (bk_tape_encode_bin_to_raw(tape_data, tape_size, tape_name,
+                                          &raw_data, &raw_size) == 0) {
+                char raw_path[1024];
+                snprintf(raw_path, sizeof(raw_path), "%s.raw", tape_in_path);
+                if (save_tape_file(raw_path, raw_data, raw_size) != 0) {
+                    fprintf(stderr, "Failed to write tape raw to %s\n", raw_path);
+                } else {
+                    fprintf(stderr, "Wrote tape raw: %s size=%zu\n", raw_path, raw_size);
+                }
+                free(raw_data);
+            } else {
+                fprintf(stderr, "Failed to encode tape raw from %s\n", tape_in_path);
+            }
+            if (bk_hw_tape_set_input_named(tape_data, tape_size, tape_name) != 0) {
+                fprintf(stderr, "Failed to set tape input\n");
+            } else {
+                fprintf(stderr, "TAPE IN: %s size=%zu name=%s\n",
+                        tape_in_path, tape_size, tape_name);
+                bk_hw_tape_rewind();
+            }
+        } else if (bk_hw_tape_set_input(tape_data, tape_size) != 0) {
+            fprintf(stderr, "Failed to set tape input\n");
+        } else {
+            fprintf(stderr, "TAPE IN: %s size=%zu\n", tape_in_path, tape_size);
+            bk_hw_tape_rewind();
+        }
+        free(tape_data);
+    }
+
+    if (tape_out_path) {
+        bk_hw_tape_set_output_enabled(1);
+        fprintf(stderr, "TAPE OUT: %s\n", tape_out_path);
+    }
 
     if (have_start) {
         r.r[7] = start_addr;
@@ -410,6 +540,52 @@ int main(int argc, char **argv)
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(win);
     SDL_Quit();
+
+    if (tape_out_path) {
+        size_t out_size = 0;
+        const byte *out_data = bk_hw_tape_output_data(&out_size);
+        if (out_size == 0) {
+            fprintf(stderr, "TAPE OUT: decoded size is 0\n");
+        }
+        if (save_tape_file(tape_out_path, out_data, out_size) != 0) {
+            fprintf(stderr, "Failed to write tape to %s\n", tape_out_path);
+        } else {
+            fprintf(stderr, "Wrote tape: %s size=%zu\n", tape_out_path, out_size);
+        }
+            if (tape_out_bin_path && out_data && out_size > 0) {
+                byte *bin_data = NULL;
+                size_t bin_size = 0;
+                char name_buf[32];
+                byte name_raw[16];
+                if (bk_tape_decode_raw_to_bin(out_data, out_size, &bin_data, &bin_size,
+                                              name_buf, sizeof(name_buf),
+                                              name_raw, sizeof(name_raw)) != 0) {
+                    fprintf(stderr, "Failed to decode raw tape\n");
+                } else if (save_tape_file(tape_out_bin_path, bin_data, bin_size) != 0) {
+                    fprintf(stderr, "Failed to write decoded tape to %s\n", tape_out_bin_path);
+                } else {
+                    fprintf(stderr, "Wrote tape bin: %s size=%zu name=%s\n",
+                            tape_out_bin_path, bin_size, name_buf);
+                }
+                if (tape_out_roundtrip_path && bin_data && bin_size > 0) {
+                    byte *round_raw = NULL;
+                    size_t round_raw_size = 0;
+                    if (bk_tape_encode_bin_to_raw_named(bin_data, bin_size,
+                                                        name_raw, sizeof(name_raw),
+                                                        &round_raw, &round_raw_size) != 0) {
+                        fprintf(stderr, "Failed to encode roundtrip tape\n");
+                    } else if (save_tape_file(tape_out_roundtrip_path, round_raw, round_raw_size) != 0) {
+                        fprintf(stderr, "Failed to write roundtrip tape to %s\n",
+                                tape_out_roundtrip_path);
+                } else {
+                    fprintf(stderr, "Wrote tape roundtrip: %s size=%zu\n",
+                            tape_out_roundtrip_path, round_raw_size);
+                }
+                free(round_raw);
+            }
+            free(bin_data);
+        }
+    }
 
     core_fini(&r);
     free(monitor_rom);

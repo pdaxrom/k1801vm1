@@ -1,7 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "bk_hw.h"
+#include "bk_tape.h"
 
 #define MEM_SIZE 65536
 
@@ -30,6 +32,12 @@
 #define TIMER_CSR_DIV4    0100
 #define TIMER_CSR_ZERO    0200
 #define TIMER_CSR_PAUSE   0001
+#define SYS_PORT_TAPE_BIT 0040
+#define SYS_PORT_TAPE_BIT2 0100
+#define SYS_PORT_KEY_BIT  0100
+#define SYS_PORT_MOTOR_BIT 0200
+#define SYS_PORT_OUT_MASK 0360
+#define SYS_PORT_IN_MASK  0370
 
 static byte *mem;
 
@@ -43,10 +51,13 @@ static word timer_prescaler = 0;
 static byte rap_present = 1;
 static word ext_port = 0177777;
 static word sys_ctrl = 0100000;
-static byte sys_port_out = 0;
-static byte sys_port_in = 0170;
+static byte sys_port_out = 0220;
+static byte sys_port_in = 0370;
 static byte kbd_irq_pending = 0;
 static byte bus_error_pending = 0;
+static int motor_state = 1;
+static int tape_debug = 0;
+static byte tape_in_bit = 1;
 
 static int bk_poll_irq(regs *r, word *vector);
 
@@ -125,6 +136,11 @@ static void timer_apply_csr(byte new_low)
     }
 }
 
+static INLINE int tape_motor_on(void)
+{
+    return (sys_port_out & SYS_PORT_MOTOR_BIT) == 0;
+}
+
 static byte mem_read(word addr)
 {
     const rom_segment *seg = rom_for_addr(addr);
@@ -160,7 +176,7 @@ static byte bk_load_byte(regs *r, word offset)
         return 0;
     case BK_KBD_DATA:
         kbd_status &= (byte)~CSR_READY;
-        sys_port_in |= 040;
+        sys_port_in |= SYS_PORT_KEY_BIT;
         kbd_irq_pending = 0;
         return kbd_data;
     case (BK_KBD_DATA + 1):
@@ -206,7 +222,7 @@ static byte bk_load_byte(regs *r, word offset)
     case (BK_EXT_PORT + 1):
         return (byte)(ext_port >> 8);
     case BK_SYS_CTRL: {
-        word value = (word)(sys_port_in & 0170);
+        word value = (word)(sys_port_in & SYS_PORT_IN_MASK);
         return (byte)(value & 0377);
     }
     case (BK_SYS_CTRL + 1): {
@@ -280,7 +296,20 @@ static void bk_store_byte(regs *r, word offset, byte value)
         ext_port = (word)((ext_port & 0377) | ((word)value << 8));
         break;
     case BK_SYS_CTRL:
-        sys_port_out = (byte)(value & 0170);
+        sys_port_out = (byte)(value & SYS_PORT_OUT_MASK);
+        if (tape_motor_on() != motor_state) {
+            motor_state = tape_motor_on();
+            fprintf(stderr, "TAPE MOTOR %s\n", motor_state ? "ON" : "OFF");
+        }
+        if (tape_debug) {
+            fprintf(stderr, "SYS_CTRL=%03o tape5=%d tape6=%d motor=%d\n",
+                    value & 0377,
+                    (value & SYS_PORT_TAPE_BIT) ? 1 : 0,
+                    (value & SYS_PORT_TAPE_BIT2) ? 1 : 0,
+                    (value & SYS_PORT_MOTOR_BIT) ? 1 : 0);
+        }
+        bk_tape_write(tape_motor_on(),
+                      (value & SYS_PORT_TAPE_BIT2) ? 1 : 0);
         break;
     case (BK_SYS_CTRL + 1):
         break;
@@ -317,6 +346,8 @@ static int bk_init(regs *r)
         }
     }
     memset(mem, 0, MEM_SIZE);
+    tape_debug = getenv("BK_TAPE_DEBUG") ? 1 : 0;
+    bk_tape_init();
     return 0;
 }
 
@@ -333,10 +364,12 @@ static void bk_reset(regs *r)
     rap_present = 1;
     ext_port = 0177777;
     sys_ctrl = 0100000;
-    sys_port_out = 0;
-    sys_port_in = 0170;
+    sys_port_out = 0220;
+    sys_port_in = 0370;
     kbd_irq_pending = 0;
     bus_error_pending = 0;
+    motor_state = 1;
+    bk_tape_reset();
 }
 
 static void bk_fini(regs *r)
@@ -346,6 +379,8 @@ static void bk_fini(regs *r)
         free(mem);
         mem = NULL;
     }
+    bk_tape_set_input(NULL, 0);
+    bk_tape_output_clear();
 }
 
 static byte *bk_ramptr(regs *r, word offset)
@@ -390,10 +425,47 @@ void bk_hw_reset_state(void)
     rap_present = 1;
     ext_port = 0177777;
     sys_ctrl = 0100000;
-    sys_port_out = 0;
-    sys_port_in = 0170;
+    sys_port_out = 0220;
+    sys_port_in = 0370;
     kbd_irq_pending = 0;
     bus_error_pending = 0;
+    motor_state = 1;
+    bk_tape_reset();
+}
+
+int bk_hw_tape_set_input(const byte *data, size_t size)
+{
+    return bk_tape_set_input_bin(data, size, NULL);
+}
+
+int bk_hw_tape_set_input_named(const byte *data, size_t size, const char *name)
+{
+    return bk_tape_set_input_bin(data, size, name);
+}
+
+int bk_hw_tape_set_input_raw(const byte *data, size_t size)
+{
+    return bk_tape_set_input(data, size);
+}
+
+void bk_hw_tape_set_output_enabled(int enable)
+{
+    bk_tape_set_output_enabled(enable);
+}
+
+const byte *bk_hw_tape_output_data(size_t *size)
+{
+    return bk_tape_output_data(size);
+}
+
+void bk_hw_tape_output_clear(void)
+{
+    bk_tape_output_clear();
+}
+
+void bk_hw_tape_rewind(void)
+{
+    bk_tape_rewind();
 }
 
 void bk_hw_handle_key(int code)
@@ -403,14 +475,27 @@ void bk_hw_handle_key(int code)
     }
     kbd_data = (byte)code;
     kbd_status |= CSR_READY;
-    sys_port_in &= (byte)~040;
+    sys_port_in &= (byte)~SYS_PORT_KEY_BIT;
     if ((kbd_status & 0100) == 0) {
         kbd_irq_pending = 1;
     }
 }
 
+void bk_hw_set_tick_hz(unsigned int hz)
+{
+    bk_tape_set_tick_hz(hz);
+}
+
 void bk_hw_tick(void)
 {
+    bk_tape_tick();
+    tape_in_bit = (byte)bk_tape_read();
+    if (tape_in_bit) {
+        sys_port_in |= SYS_PORT_TAPE_BIT;
+    } else {
+        sys_port_in &= (byte)~SYS_PORT_TAPE_BIT;
+    }
+
     if ((timer_csr_low & TIMER_CSR_START) == 0) {
         return;
     }
