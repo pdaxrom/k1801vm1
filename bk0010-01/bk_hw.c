@@ -9,6 +9,9 @@
 #define BK_KBD_STATUS 0177660
 #define BK_KBD_DATA   0177662
 #define BK_SHIFT_REG  0177664
+#define BK_VM1_RR     0177700
+#define BK_VM1_RAP    0177702
+#define BK_VM1_ROSH   0177704
 #define BK_TIMER_SV   0177706
 #define BK_TIMER_CNT  0177710
 #define BK_TIMER_CSR  0177712
@@ -37,6 +40,7 @@ static word timer_sv = 011000;
 static word timer_count = 0177777;
 static byte timer_csr_low = 0;
 static word timer_prescaler = 0;
+static byte rap_present = 1;
 static word ext_port = 0177777;
 static word sys_ctrl = 0100000;
 static byte sys_port_out = 0;
@@ -165,6 +169,26 @@ static byte bk_load_byte(regs *r, word offset)
         return (byte)(shift_reg & 0377);
     case (BK_SHIFT_REG + 1):
         return (byte)(shift_reg >> 8) & 02;
+    case BK_VM1_RR:
+        return 0377;
+    case (BK_VM1_RR + 1):
+        return 0177;
+    case BK_VM1_RAP:
+        if (!rap_present) {
+            bus_error_pending = 1;
+            return 0;
+        }
+        return 0377;
+    case (BK_VM1_RAP + 1):
+        if (!rap_present) {
+            bus_error_pending = 1;
+            return 0;
+        }
+        return 0177;
+    case BK_VM1_ROSH:
+        return 0340;
+    case (BK_VM1_ROSH + 1):
+        return 0177;
     case BK_TIMER_SV:
         return (byte)(timer_sv & 0377);
     case (BK_TIMER_SV + 1):
@@ -218,6 +242,16 @@ static void bk_store_byte(regs *r, word offset, byte value)
         break;
     case (BK_SHIFT_REG + 1):
         shift_reg = (word)((shift_reg & 0377) | (((word)value << 8) & 01000));
+        break;
+    case BK_VM1_RR:
+    case (BK_VM1_RR + 1):
+        break;
+    case BK_VM1_RAP:
+    case (BK_VM1_RAP + 1):
+        rap_present = 0;
+        break;
+    case BK_VM1_ROSH:
+    case (BK_VM1_ROSH + 1):
         break;
     case BK_TIMER_SV:
         timer_sv = (word)((timer_sv & 0177400) | value);
@@ -296,6 +330,7 @@ static void bk_reset(regs *r)
     timer_count = 0177777;
     timer_csr_low = 0;
     timer_prescaler = 0;
+    rap_present = 1;
     ext_port = 0177777;
     sys_ctrl = 0100000;
     sys_port_out = 0;
@@ -352,6 +387,7 @@ void bk_hw_reset_state(void)
     timer_count = 0177777;
     timer_csr_low = 0;
     timer_prescaler = 0;
+    rap_present = 1;
     ext_port = 0177777;
     sys_ctrl = 0100000;
     sys_port_out = 0;
