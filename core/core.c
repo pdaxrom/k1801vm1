@@ -325,6 +325,14 @@ int core_step(regs *r)
 			r->fTrap = 1;
 			return 0;
 
+		case 000007: /* MFPT */
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			r->r[0] = 5;
+			return 0;
+
 		case 000240: /* NOP */
 			return 0;
 
@@ -589,6 +597,10 @@ int core_step(regs *r)
 
     switch ((op & 0177700) >> 6) {
 		case 00001: /* JMP */
+			if ((op & 070) == 0) {
+				illegal_trap(r);
+				return 0;
+			}
 			DECODE_DST();
 			r->r[7] = dst_offset;
 			return 0;
@@ -857,7 +869,7 @@ int core_step(regs *r)
 				tmp = tmp - 1;
 			}
 			PUT_WORD(tmp);
-			set_flag_if(!tmp_c,       FLAG_C);
+			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			return 0;
@@ -871,7 +883,7 @@ int core_step(regs *r)
 				tmp = tmp - 1;
 			}
 			PUT_BYTE(tmp);
-			set_flag_if(!tmp_c,       FLAG_C);
+			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			return 0;
@@ -917,6 +929,99 @@ int core_step(regs *r)
 			DECODE_DST();
 			r->psw = (get_data_word(r, dst_type, dst_offset) & 0007) | (r->psw & 0177770);
 			return 0;
+
+		case 00072: /* TSTSET */ {
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			if ((op & 070) == 0) {
+				illegal_trap(r);
+				return 0;
+			}
+			DECODE_DST();
+			GET_WORD(tmp);
+			r->r[0] = tmp;
+			PUT_WORD(tmp | 1);
+			set_flag_if(r->r[0] & SIGN, FLAG_N);
+			set_flag_if(r->r[0] == 0,  FLAG_Z);
+			clear_flag(FLAG_V);
+			set_flag_if(tmp & 1,       FLAG_C);
+			return 0;
+		}
+
+		case 00073: /* WRTLCK */ {
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			if ((op & 070) == 0) {
+				illegal_trap(r);
+				return 0;
+			}
+			DECODE_DST();
+			word tmp = r->r[0];
+			PUT_WORD(tmp);
+			set_flag_if(tmp & SIGN, FLAG_N);
+			set_flag_if(tmp == 0,  FLAG_Z);
+			clear_flag(FLAG_V);
+			return 0;
+		}
+
+		case 00065: /* MFPD */ {
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			DECODE_DST();
+			GET_WORD(tmp);
+			pushw(tmp);
+			set_flag_if(tmp & SIGN, FLAG_N);
+			set_flag_if(tmp == 0,  FLAG_Z);
+			clear_flag(FLAG_V);
+			return 0;
+		}
+		case 01065: /* MFPI */ {
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			DECODE_DST();
+			GET_WORD(tmp);
+			pushw(tmp);
+			set_flag_if(tmp & SIGN, FLAG_N);
+			set_flag_if(tmp == 0,  FLAG_Z);
+			clear_flag(FLAG_V);
+			return 0;
+		}
+		case 00066: /* MTPI */ {
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			DECODE_DST();
+			word tmp;
+			pullw(tmp);
+			PUT_WORD(tmp);
+			set_flag_if(tmp & SIGN, FLAG_N);
+			set_flag_if(tmp == 0,  FLAG_Z);
+			clear_flag(FLAG_V);
+			return 0;
+		}
+		case 01066: /* MTPD */ {
+			if (r->model != DCJ11) {
+				illegal_trap(r);
+				return 0;
+			}
+			DECODE_DST();
+			word tmp;
+			pullw(tmp);
+			PUT_WORD(tmp);
+			set_flag_if(tmp & SIGN, FLAG_N);
+			set_flag_if(tmp == 0,  FLAG_Z);
+			clear_flag(FLAG_V);
+			return 0;
+		}
     }
 
     //
@@ -1015,7 +1120,11 @@ int core_step(regs *r)
 					word count = 0100 - (shift & 077);
 					while (count--) {
 						set_flag_if(tmp & 1, FLAG_C);
-						tmp >>= 1;
+						if (tmp & SIGN) {
+							tmp = (tmp >> 1) | SIGN;
+						} else {
+							tmp >>= 1;
+						}
 					}
 				} else {
 					word count = shift & 037;
@@ -1051,7 +1160,11 @@ int core_step(regs *r)
 					word count = 0100 - (shift & 077);
 					while(count--) {
 						set_flag_if(tmp & 1, FLAG_C);
-						tmp >>=1;
+						if (tmp & 0x80000000) {
+							tmp = (tmp >> 1) | 0x80000000;
+						} else {
+							tmp >>= 1;
+						}
 					}
 				} else {
 					word count = shift & 037;

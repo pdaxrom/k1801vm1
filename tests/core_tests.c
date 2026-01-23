@@ -14,10 +14,10 @@ typedef struct {
 
 static const char *current_test;
 
-static void fixture_setup(cpu_fixture *fx)
+static void fixture_setup_model(cpu_fixture *fx, byte model)
 {
     memset(fx, 0, sizeof(*fx));
-    fx->r.model = K1801VM1;
+    fx->r.model = model;
     hwstub_connect(&fx->r);
     core_init(&fx->r);
     fx->mem = fx->r.ramptr(&fx->r, 0);
@@ -27,6 +27,11 @@ static void fixture_setup(cpu_fixture *fx)
     fx->r.r[7] = TEST_BASE;
     fx->r.r[6] = TEST_STACK;
     fx->r.psw = 0;
+}
+
+static void fixture_setup(cpu_fixture *fx)
+{
+    fixture_setup_model(fx, K1801VM1);
 }
 
 static void fixture_teardown(cpu_fixture *fx)
@@ -49,6 +54,46 @@ static INLINE word op_movb(word src, word dst)
     return 0110000 | ((src & 077) << 6) | (dst & 077);
 }
 
+static INLINE word op_cmp(word src, word dst)
+{
+    return 0020000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_cmpb(word src, word dst)
+{
+    return 0120000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_bit(word src, word dst)
+{
+    return 0030000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_bitb(word src, word dst)
+{
+    return 0130000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_bic(word src, word dst)
+{
+    return 0040000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_bicb(word src, word dst)
+{
+    return 0140000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_bis(word src, word dst)
+{
+    return 0050000 | ((src & 077) << 6) | (dst & 077);
+}
+
+static INLINE word op_bisb(word src, word dst)
+{
+    return 0150000 | ((src & 077) << 6) | (dst & 077);
+}
+
 static INLINE word op_add(word src, word dst)
 {
     return 0060000 | ((src & 077) << 6) | (dst & 077);
@@ -59,14 +104,34 @@ static INLINE word op_sub(word src, word dst)
     return 0160000 | ((src & 077) << 6) | (dst & 077);
 }
 
+static INLINE word op_xor(byte reg, word dst)
+{
+    return 0074000 | ((reg & 07) << 6) | (dst & 077);
+}
+
 static INLINE word op_jsr(byte reg, word dst)
 {
     return 0004000 | ((reg & 07) << 6) | (dst & 077);
 }
 
-static INLINE word op_beq(byte offset)
+static INLINE word op_mul(byte reg, word dst)
 {
-    return 0001400 | (offset & 0377);
+    return 0070000 | ((reg & 07) << 6) | (dst & 077);
+}
+
+static INLINE word op_div(byte reg, word dst)
+{
+    return 0071000 | ((reg & 07) << 6) | (dst & 077);
+}
+
+static INLINE word op_ash(byte reg, word dst)
+{
+    return 0072000 | ((reg & 07) << 6) | (dst & 077);
+}
+
+static INLINE word op_ashc(byte reg, word dst)
+{
+    return 0073000 | ((reg & 07) << 6) | (dst & 077);
 }
 
 static INLINE word op_clr(word dst)
@@ -74,14 +139,309 @@ static INLINE word op_clr(word dst)
     return 0005000 | (dst & 077);
 }
 
+static INLINE word op_clrb(word dst)
+{
+    return 0105000 | (dst & 077);
+}
+
+static INLINE word op_com(word dst)
+{
+    return 0005100 | (dst & 077);
+}
+
+static INLINE word op_comb(word dst)
+{
+    return 0105100 | (dst & 077);
+}
+
 static INLINE word op_inc(word dst)
 {
     return 0005200 | (dst & 077);
 }
 
+static INLINE word op_incb(word dst)
+{
+    return 0105200 | (dst & 077);
+}
+
+static INLINE word op_dec(word dst)
+{
+    return 0005300 | (dst & 077);
+}
+
+static INLINE word op_decb(word dst)
+{
+    return 0105300 | (dst & 077);
+}
+
+static INLINE word op_neg(word dst)
+{
+    return 0005400 | (dst & 077);
+}
+
+static INLINE word op_negb(word dst)
+{
+    return 0105400 | (dst & 077);
+}
+
+static INLINE word op_tst(word dst)
+{
+    return 0005700 | (dst & 077);
+}
+
+static INLINE word op_tstb(word dst)
+{
+    return 0105700 | (dst & 077);
+}
+
+static INLINE word op_asr(word dst)
+{
+    return 0006200 | (dst & 077);
+}
+
+static INLINE word op_asrb(word dst)
+{
+    return 0106200 | (dst & 077);
+}
+
+static INLINE word op_asl(word dst)
+{
+    return 0006300 | (dst & 077);
+}
+
+static INLINE word op_aslb(word dst)
+{
+    return 0106300 | (dst & 077);
+}
+
+static INLINE word op_ror(word dst)
+{
+    return 0006000 | (dst & 077);
+}
+
+static INLINE word op_rorb(word dst)
+{
+    return 0106000 | (dst & 077);
+}
+
+static INLINE word op_rol(word dst)
+{
+    return 0006100 | (dst & 077);
+}
+
+static INLINE word op_rolb(word dst)
+{
+    return 0106100 | (dst & 077);
+}
+
+static INLINE word op_adc(word dst)
+{
+    return 0005500 | (dst & 077);
+}
+
+static INLINE word op_adcb(word dst)
+{
+    return 0105500 | (dst & 077);
+}
+
+static INLINE word op_sbc(word dst)
+{
+    return 0005600 | (dst & 077);
+}
+
+static INLINE word op_sbcb(word dst)
+{
+    return 0105600 | (dst & 077);
+}
+
+static INLINE word op_swab(word dst)
+{
+    return 0000300 | (dst & 077);
+}
+
+static INLINE word op_sxt(word dst)
+{
+    return 0006700 | (dst & 077);
+}
+
+static INLINE word op_mfps(word dst)
+{
+    return 0106700 | (dst & 077);
+}
+
+static INLINE word op_mtps(word dst)
+{
+    return 0106400 | (dst & 077);
+}
+
+static INLINE word op_jmp(word dst)
+{
+    return 0000100 | (dst & 077);
+}
+
 static INLINE word op_nop(void)
 {
     return 000240;
+}
+
+static INLINE word op_halt(void)
+{
+    return 000000;
+}
+
+static INLINE word op_wait(void)
+{
+    return 000001;
+}
+
+static INLINE word op_rti(void)
+{
+    return 0000002;
+}
+
+static INLINE word op_bpt(void)
+{
+    return 0000003;
+}
+
+static INLINE word op_iot(void)
+{
+    return 0000004;
+}
+
+static INLINE word op_reset(void)
+{
+    return 0000005;
+}
+
+static INLINE word op_rtt(void)
+{
+    return 0000006;
+}
+
+static INLINE word op_clc(void)
+{
+    return 000241;
+}
+
+static INLINE word op_clv(void)
+{
+    return 000242;
+}
+
+static INLINE word op_clz(void)
+{
+    return 000244;
+}
+
+static INLINE word op_cln(void)
+{
+    return 000250;
+}
+
+static INLINE word op_ccc(void)
+{
+    return 000257;
+}
+
+static INLINE word op_sec(void)
+{
+    return 000261;
+}
+
+static INLINE word op_sev(void)
+{
+    return 000262;
+}
+
+static INLINE word op_sez(void)
+{
+    return 000264;
+}
+
+static INLINE word op_sen(void)
+{
+    return 000270;
+}
+
+static INLINE word op_scc(void)
+{
+    return 000277;
+}
+
+static INLINE word op_br(byte offset)
+{
+    return 0000400 | (offset & 0377);
+}
+
+static INLINE word op_bne(byte offset)
+{
+    return 0001000 | (offset & 0377);
+}
+
+static INLINE word op_beq(byte offset)
+{
+    return 0001400 | (offset & 0377);
+}
+
+static INLINE word op_bpl(byte offset)
+{
+    return 0100000 | (offset & 0377);
+}
+
+static INLINE word op_bmi(byte offset)
+{
+    return 0100400 | (offset & 0377);
+}
+
+static INLINE word op_bvc(byte offset)
+{
+    return 0102000 | (offset & 0377);
+}
+
+static INLINE word op_bvs(byte offset)
+{
+    return 0102400 | (offset & 0377);
+}
+
+static INLINE word op_bcc(byte offset)
+{
+    return 0103000 | (offset & 0377);
+}
+
+static INLINE word op_bcs(byte offset)
+{
+    return 0103400 | (offset & 0377);
+}
+
+static INLINE word op_bge(byte offset)
+{
+    return 0002000 | (offset & 0377);
+}
+
+static INLINE word op_blt(byte offset)
+{
+    return 0002400 | (offset & 0377);
+}
+
+static INLINE word op_bgt(byte offset)
+{
+    return 0003000 | (offset & 0377);
+}
+
+static INLINE word op_ble(byte offset)
+{
+    return 0003400 | (offset & 0377);
+}
+
+static INLINE word op_bhi(byte offset)
+{
+    return 0101000 | (offset & 0377);
+}
+
+static INLINE word op_blos(byte offset)
+{
+    return 0101400 | (offset & 0377);
 }
 
 static INLINE word op_rts(byte reg)
@@ -104,24 +464,39 @@ static INLINE word op_trap(byte code)
     return 0104400 | (code & 0377);
 }
 
-static INLINE word op_bpt(void)
+static INLINE word op_mfpt(void)
 {
-    return 0000003;
+    return 0000007;
 }
 
-static INLINE word op_iot(void)
+static INLINE word op_mfpd(word src)
 {
-    return 0000004;
+    return 0006500 | (src & 077);
 }
 
-static INLINE word op_rtt(void)
+static INLINE word op_mfpi(word src)
 {
-    return 0000006;
+    return 0106500 | (src & 077);
 }
 
-static INLINE word op_rti(void)
+static INLINE word op_mtpi(word dst)
 {
-    return 0000002;
+    return 0006600 | (dst & 077);
+}
+
+static INLINE word op_mtpd(word dst)
+{
+    return 0106600 | (dst & 077);
+}
+
+static INLINE word op_tstset(word dst)
+{
+    return 0007200 | (dst & 077);
+}
+
+static INLINE word op_wrtlck(word dst)
+{
+    return 0007300 | (dst & 077);
 }
 
 static int test_irq_pending;
@@ -157,6 +532,33 @@ static INLINE int is_flag_set(const regs *r, word flag)
     return (r->psw & flag) == flag;
 }
 
+typedef struct {
+    byte model;
+    const char *name;
+} model_case;
+
+static const model_case model_cases[] = {
+    { K1801VM1,  "K1801VM1" },
+    { K1801VM1G, "K1801VM1G" },
+    { K1806VM2,  "K1806VM2" },
+    { DCJ11,     "DCJ11" },
+};
+
+static INLINE void set_test_name(char *buf, size_t len, const char *base, const char *model)
+{
+    snprintf(buf, len, "%s_%s", base, model);
+    current_test = buf;
+}
+
+static int run_for_models(int (*fn)(byte model, const char *name))
+{
+    int rc = 0;
+    for (size_t i = 0; i < sizeof(model_cases) / sizeof(model_cases[0]); i++) {
+        rc += fn(model_cases[i].model, model_cases[i].name);
+    }
+    return rc;
+}
+
 #define ASSERT_EQ(actual, expected, msg)                         \
     do {                                                         \
         if ((actual) != (expected)) {                            \
@@ -176,6 +578,28 @@ static INLINE int is_flag_set(const regs *r, word flag)
             goto cleanup;                                        \
         }                                                        \
     } while (0)
+
+#define expect_flags(r, n, z, v, c)                              \
+    do {                                                         \
+        if ((n) >= 0) {                                          \
+            ASSERT_EQ(is_flag_set((r), FLAG_N), (n), "N flag mismatch"); \
+        }                                                        \
+        if ((z) >= 0) {                                          \
+            ASSERT_EQ(is_flag_set((r), FLAG_Z), (z), "Z flag mismatch"); \
+        }                                                        \
+        if ((v) >= 0) {                                          \
+            ASSERT_EQ(is_flag_set((r), FLAG_V), (v), "V flag mismatch"); \
+        }                                                        \
+        if ((c) >= 0) {                                          \
+            ASSERT_EQ(is_flag_set((r), FLAG_C), (c), "C flag mismatch"); \
+        }                                                        \
+    } while (0)
+
+static INLINE void write_op(cpu_fixture *fx, word op)
+{
+    store_word(fx, TEST_BASE, op);
+    fx->r.r[7] = TEST_BASE;
+}
 
 static int test_mov_updates_flags(void)
 {
@@ -433,6 +857,1507 @@ static int test_trap_pushes_and_vectors(void)
     ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int run_illegal_op_test(word op, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 05000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op,
+    };
+
+    current_test = name;
+    fixture_setup(&fx);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 010, handler);
+    store_word(&fx, 012, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Illegal instruction should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load illegal vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load illegal vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1_illegal_instructions_trap(void)
+{
+    int rc = 0;
+
+    rc += run_illegal_op_test(op_mul(0, operand(0, 1)), "illegal_mul_vm1");
+    rc += run_illegal_op_test(op_div(0, operand(0, 1)), "illegal_div_vm1");
+    rc += run_illegal_op_test(op_ash(0, operand(0, 1)), "illegal_ash_vm1");
+    rc += run_illegal_op_test(op_ashc(0, operand(0, 1)), "illegal_ashc_vm1");
+
+    return rc;
+}
+
+static int test_extended_ops_supported_models(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    word program[2];
+    int active = 0;
+    char namebuf[64];
+
+    set_test_name(namebuf, sizeof(namebuf), "mul_supported", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 2;
+    fx.r.r[1] = 3;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute on VM1G");
+    ASSERT_EQ(fx.r.r[0], 0, "MUL high word");
+    ASSERT_EQ(fx.r.r[1], 6, "MUL low word");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after MUL");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "mul_negative", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0177777;
+    fx.r.r[1] = 2;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL negative should execute");
+    ASSERT_EQ(fx.r.r[0], 0177777, "MUL negative high word");
+    ASSERT_EQ(fx.r.r[1], 0177776, "MUL negative low word");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after MUL negative");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_supported", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 6;
+    fx.r.r[2] = 3;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV should execute on VM1G");
+    ASSERT_EQ(fx.r.r[0], 2, "DIV quotient");
+    ASSERT_EQ(fx.r.r[1], 0, "DIV remainder");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_remainder", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 7;
+    fx.r.r[2] = 3;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV remainder should execute");
+    ASSERT_EQ(fx.r.r[0], 2, "DIV remainder quotient");
+    ASSERT_EQ(fx.r.r[1], 1, "DIV remainder remainder");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV remainder");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_by_zero", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 6;
+    fx.r.r[2] = 0;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV by zero should execute");
+    expect_flags(&fx.r, 0, 0, 1, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV by zero");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_overflow", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 077777;
+    fx.r.r[2] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV overflow should execute");
+    expect_flags(&fx.r, 0, 0, 1, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV overflow");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_supported", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 1;
+    fx.r.r[1] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH should execute on VM1G");
+    ASSERT_EQ(fx.r.r[0], 2, "ASH result");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_zero", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 01234;
+    fx.r.r[1] = 0;
+    fx.r.psw = FLAG_V;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH zero should execute");
+    ASSERT_EQ(fx.r.r[0], 01234, "ASH zero should not change value");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH zero");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_large", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 1;
+    fx.r.r[1] = 0000041;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH large should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "ASH large should shift right");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH large");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_v_flag", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0040000;
+    fx.r.r[1] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH should execute");
+    ASSERT_EQ(fx.r.r[0], 0100000, "ASH should shift into sign");
+    expect_flags(&fx.r, 1, 0, 1, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_right", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0002;
+    fx.r.r[1] = 0100077;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH right should execute");
+    ASSERT_EQ(fx.r.r[0], 1, "ASH right result");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH right");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_right_carry", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0003;
+    fx.r.r[1] = 0100076;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH right should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "ASH right carry result");
+    expect_flags(&fx.r, 0, 1, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH right carry");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_supported", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 1;
+    fx.r.r[2] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC should execute on VM1G");
+    ASSERT_EQ(fx.r.r[0], 0, "ASHC high word");
+    ASSERT_EQ(fx.r.r[1], 2, "ASHC low word");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_zero", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 01234;
+    fx.r.r[1] = 05670;
+    fx.r.r[2] = 0;
+    fx.r.psw = FLAG_V;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC zero should execute");
+    ASSERT_EQ(fx.r.r[0], 01234, "ASHC zero high");
+    ASSERT_EQ(fx.r.r[1], 05670, "ASHC zero low");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC zero");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_large", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 1;
+    fx.r.r[2] = 0000041;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC large should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "ASHC large high");
+    ASSERT_EQ(fx.r.r[1], 0, "ASHC large low");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC large");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_v_flag", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0040000;
+    fx.r.r[1] = 0;
+    fx.r.r[2] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC should execute");
+    ASSERT_EQ(fx.r.r[0], 0100000, "ASHC should shift into sign");
+    ASSERT_EQ(fx.r.r[1], 0, "ASHC low word");
+    expect_flags(&fx.r, 1, 0, 1, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_right", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 2;
+    fx.r.r[2] = 0100077;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC right should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "ASHC right high word");
+    ASSERT_EQ(fx.r.r[1], 1, "ASHC right low word");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC right");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_right_carry", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 0003;
+    fx.r.r[2] = 0100076;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC right should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "ASHC right carry high");
+    ASSERT_EQ(fx.r.r[1], 0, "ASHC right carry low");
+    expect_flags(&fx.r, 0, 1, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC right carry");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "mul_overflow", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 077777;
+    fx.r.r[1] = 2;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL overflow should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "MUL overflow high word");
+    ASSERT_EQ(fx.r.r[1], 0177776, "MUL overflow low word");
+    expect_flags(&fx.r, 0, 0, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after MUL overflow");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_negative", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0177777;
+    fx.r.r[1] = 0177776;
+    fx.r.r[2] = 2;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV negative should execute");
+    ASSERT_EQ(fx.r.r[0], 0177777, "DIV negative quotient");
+    ASSERT_EQ(fx.r.r[1], 0, "DIV negative remainder");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV negative");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_negative_divisor", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 7;
+    fx.r.r[2] = 0177777;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV negative divisor should execute");
+    ASSERT_EQ(fx.r.r[0], 0177771, "DIV negative divisor quotient");
+    ASSERT_EQ(fx.r.r[1], 0, "DIV negative divisor remainder");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV negative divisor");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "mul_max_positive", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 077777;
+    fx.r.r[1] = 077777;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL max should execute");
+    ASSERT_EQ(fx.r.r[0], 037777, "MUL max high word");
+    ASSERT_EQ(fx.r.r[1], 0000001, "MUL max low word");
+    expect_flags(&fx.r, 0, 0, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after MUL max");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_neg_right", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0177777;
+    fx.r.r[1] = 0100077;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH negative right should execute");
+    ASSERT_EQ(fx.r.r[0], 0177777, "ASH negative right result");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH negative right");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_neg_right", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0177777;
+    fx.r.r[1] = 0177777;
+    fx.r.r[2] = 0100077;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC negative right should execute");
+    ASSERT_EQ(fx.r.r[0], 0177777, "ASHC negative right high");
+    ASSERT_EQ(fx.r.r[1], 0177777, "ASHC negative right low");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC negative right");
+    fixture_teardown(&fx);
+    active = 0;
+
+cleanup:
+    if (active) {
+        fixture_teardown(&fx);
+    }
+    return rc;
+}
+
+static int test_extended_ops_supported(void)
+{
+    int rc = 0;
+
+    rc += test_extended_ops_supported_models(K1801VM1G, "K1801VM1G");
+    rc += test_extended_ops_supported_models(K1806VM2, "K1806VM2");
+    rc += test_extended_ops_supported_models(DCJ11, "DCJ11");
+
+    return rc;
+}
+
+static int test_condition_codes_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "nop", name);
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+    fx.r.r[0] = 01234;
+    write_op(&fx, op_nop());
+    ASSERT_EQ(core_step(&fx.r), 0, "NOP should execute");
+    ASSERT_EQ(fx.r.r[0], 01234, "NOP should not change registers");
+    ASSERT_EQ(fx.r.psw, (FLAG_N | FLAG_Z | FLAG_V | FLAG_C), "NOP should not change PSW");
+
+    set_test_name(namebuf, sizeof(namebuf), "clc", name);
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+    write_op(&fx, op_clc());
+    ASSERT_EQ(core_step(&fx.r), 0, "CLC should execute");
+    expect_flags(&fx.r, 1, 1, 1, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "clv", name);
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+    write_op(&fx, op_clv());
+    ASSERT_EQ(core_step(&fx.r), 0, "CLV should execute");
+    expect_flags(&fx.r, 1, 1, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "clz", name);
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+    write_op(&fx, op_clz());
+    ASSERT_EQ(core_step(&fx.r), 0, "CLZ should execute");
+    expect_flags(&fx.r, 1, 0, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "cln", name);
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+    write_op(&fx, op_cln());
+    ASSERT_EQ(core_step(&fx.r), 0, "CLN should execute");
+    expect_flags(&fx.r, 0, 1, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "ccc", name);
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+    write_op(&fx, op_ccc());
+    ASSERT_EQ(core_step(&fx.r), 0, "CCC should execute");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "sec", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_sec());
+    ASSERT_EQ(core_step(&fx.r), 0, "SEC should execute");
+    expect_flags(&fx.r, 0, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "sev", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_sev());
+    ASSERT_EQ(core_step(&fx.r), 0, "SEV should execute");
+    expect_flags(&fx.r, 0, 0, 1, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "sez", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_sez());
+    ASSERT_EQ(core_step(&fx.r), 0, "SEZ should execute");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "sen", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_sen());
+    ASSERT_EQ(core_step(&fx.r), 0, "SEN should execute");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "scc", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_scc());
+    ASSERT_EQ(core_step(&fx.r), 0, "SCC should execute");
+    expect_flags(&fx.r, 1, 1, 1, 1);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_condition_codes(void)
+{
+    return run_for_models(test_condition_codes_model);
+}
+
+static int test_wait_and_reset_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "wait", name);
+    write_op(&fx, op_wait());
+    ASSERT_EQ(core_step(&fx.r), 0, "WAIT should execute");
+    ASSERT_EQ(fx.r.fWait, 1, "WAIT should set fWait");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after WAIT");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "WAIT should stop execution");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should stay while waiting");
+
+    fx.r.fWait = 0;
+    set_test_name(namebuf, sizeof(namebuf), "reset", name);
+    write_op(&fx, op_reset());
+    fx.r.psw = 000003;
+    fx.r.r[0] = 0777;
+    ASSERT_EQ(core_step(&fx.r), 0, "RESET should execute");
+    ASSERT_EQ(fx.r.psw, 000003, "RESET should not change PSW");
+    ASSERT_EQ(fx.r.r[0], 0777, "RESET should not change registers");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after RESET");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_wait_and_reset(void)
+{
+    return run_for_models(test_wait_and_reset_model);
+}
+
+static int test_halt_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    word handler = 01234;
+    word new_psw = 00440;
+
+    fixture_setup_model(&fx, model);
+    set_test_name(namebuf, sizeof(namebuf), "halt", name);
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.SEL1 = 0400;
+    store_word(&fx, 0177716, 0200);
+    store_word(&fx, 0170, handler);
+    store_word(&fx, 0172, new_psw);
+    store_word(&fx, 0402, handler);
+    store_word(&fx, 0404, new_psw);
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, 000000);
+
+    write_op(&fx, op_halt());
+    ASSERT_EQ(core_step(&fx.r), 0, "HALT should execute");
+
+    if (model == K1806VM2) {
+        ASSERT_EQ(fx.r.cpc, TEST_BASE + 2, "HALT should save CPC");
+        ASSERT_EQ(fx.r.cps, 000003, "HALT should save CPS");
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT should load vector");
+        ASSERT_EQ(fx.r.psw, (new_psw | FLAG_H), "HALT should set H in PSW");
+    } else if (model == DCJ11) {
+        ASSERT_EQ(fx.r.r[6], 00774, "HALT should push two words");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "HALT stack PC");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "HALT stack PSW");
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT should load vector");
+        ASSERT_EQ(fx.r.psw, 0340, "HALT should set PSW to 0340");
+    } else {
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177674), TEST_BASE + 2, "HALT should store PC");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177676), 000003, "HALT should store PSW");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0210, "HALT should set SEL1 bit 010");
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT should load vector");
+        ASSERT_EQ(fx.r.psw, new_psw, "HALT should load PSW");
+    }
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_halt(void)
+{
+    return run_for_models(test_halt_model);
+}
+
+static int test_branches_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    {
+        word psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+        set_test_name(namebuf, sizeof(namebuf), "br_forward", name);
+        fx.r.psw = psw;
+        write_op(&fx, op_br(0001));
+        ASSERT_EQ(core_step(&fx.r), 0, "BR should execute");
+        ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BR should branch forward");
+        ASSERT_EQ(fx.r.psw, psw, "BR should not change PSW");
+    }
+
+    {
+        set_test_name(namebuf, sizeof(namebuf), "br_backward", name);
+        fx.r.psw = 0;
+        write_op(&fx, op_br(0377));
+        ASSERT_EQ(core_step(&fx.r), 0, "BR should execute");
+        ASSERT_EQ(fx.r.r[7], TEST_BASE, "BR should branch backward");
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "bne_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bne(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BNE should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BNE should branch when Z=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bne_not", name);
+    fx.r.psw = FLAG_Z;
+    write_op(&fx, op_bne(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BNE should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BNE should not branch when Z=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "beq_taken", name);
+    fx.r.psw = FLAG_Z;
+    write_op(&fx, op_beq(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BEQ should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BEQ should branch when Z=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "beq_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_beq(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BEQ should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BEQ should not branch when Z=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bpl_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bpl(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BPL should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BPL should branch when N=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bpl_not", name);
+    fx.r.psw = FLAG_N;
+    write_op(&fx, op_bpl(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BPL should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BPL should not branch when N=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "bmi_taken", name);
+    fx.r.psw = FLAG_N;
+    write_op(&fx, op_bmi(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BMI should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BMI should branch when N=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "bmi_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bmi(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BMI should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BMI should not branch when N=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bvc_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bvc(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BVC should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BVC should branch when V=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bvc_not", name);
+    fx.r.psw = FLAG_V;
+    write_op(&fx, op_bvc(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BVC should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BVC should not branch when V=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "bvs_taken", name);
+    fx.r.psw = FLAG_V;
+    write_op(&fx, op_bvs(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BVS should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BVS should branch when V=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "bvs_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bvs(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BVS should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BVS should not branch when V=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bcc_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bcc(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BCC should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BCC should branch when C=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bcc_not", name);
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_bcc(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BCC should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BCC should not branch when C=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "bcs_taken", name);
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_bcs(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BCS should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BCS should branch when C=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "bcs_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bcs(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BCS should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BCS should not branch when C=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bge_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bge(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BGE should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BGE should branch when N=V");
+
+    set_test_name(namebuf, sizeof(namebuf), "bge_not", name);
+    fx.r.psw = FLAG_N;
+    write_op(&fx, op_bge(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BGE should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BGE should not branch when N!=V");
+
+    set_test_name(namebuf, sizeof(namebuf), "blt_taken", name);
+    fx.r.psw = FLAG_N;
+    write_op(&fx, op_blt(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BLT should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BLT should branch when N!=V");
+
+    set_test_name(namebuf, sizeof(namebuf), "blt_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_blt(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BLT should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BLT should not branch when N=V");
+
+    set_test_name(namebuf, sizeof(namebuf), "bgt_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bgt(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BGT should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BGT should branch when !Z && N=V");
+
+    set_test_name(namebuf, sizeof(namebuf), "bgt_not", name);
+    fx.r.psw = FLAG_Z;
+    write_op(&fx, op_bgt(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BGT should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BGT should not branch when Z=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "ble_taken", name);
+    fx.r.psw = FLAG_Z;
+    write_op(&fx, op_ble(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BLE should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BLE should branch when Z=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "ble_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_ble(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BLE should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BLE should not branch when Z=0 and N=V");
+
+    set_test_name(namebuf, sizeof(namebuf), "bhi_taken", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_bhi(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BHI should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BHI should branch when C=0 && Z=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "bhi_not", name);
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_bhi(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BHI should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BHI should not branch when C=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "blos_taken", name);
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_blos(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BLOS should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "BLOS should branch when C=1");
+
+    set_test_name(namebuf, sizeof(namebuf), "blos_not", name);
+    fx.r.psw = 0;
+    write_op(&fx, op_blos(0001));
+    ASSERT_EQ(core_step(&fx.r), 0, "BLOS should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "BLOS should not branch when C=0 && Z=0");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_branches(void)
+{
+    return run_for_models(test_branches_model);
+}
+
+static int test_jmp_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    word target = 01234;
+
+    fixture_setup_model(&fx, model);
+    set_test_name(namebuf, sizeof(namebuf), "jmp", name);
+
+    fx.r.r[1] = target;
+    write_op(&fx, op_jmp(operand(1, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "JMP should execute");
+    ASSERT_EQ(fx.r.r[7], target, "JMP should load target address");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_jmp(void)
+{
+    return run_for_models(test_jmp_model);
+}
+
+static int test_addressing_modes_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_rn", name);
+    fx.r.r[1] = 01234;
+    write_op(&fx, op_mov(operand(0, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV R1,R0");
+    ASSERT_EQ(fx.r.r[0], 01234, "Rn mode should read register");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_indirect", name);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02000, 04567);
+    write_op(&fx, op_mov(operand(1, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV (R1),R0");
+    ASSERT_EQ(fx.r.r[0], 04567, "(Rn) should read memory");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_autoinc", name);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02000, 01111);
+    write_op(&fx, op_mov(operand(2, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV (R1)+,R0");
+    ASSERT_EQ(fx.r.r[0], 01111, "(Rn)+ should read memory");
+    ASSERT_EQ(fx.r.r[1], 02002, "(Rn)+ should increment by 2");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_autoinc_def", name);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02000, 03000);
+    store_word(&fx, 03000, 02222);
+    write_op(&fx, op_mov(operand(3, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @(R1)+,R0");
+    ASSERT_EQ(fx.r.r[0], 02222, "@(Rn)+ should read indirect");
+    ASSERT_EQ(fx.r.r[1], 02002, "@(Rn)+ should increment by 2");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_autodec", name);
+    fx.r.r[1] = 02002;
+    store_word(&fx, 02000, 03333);
+    write_op(&fx, op_mov(operand(4, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV -(R1),R0");
+    ASSERT_EQ(fx.r.r[0], 03333, "-(Rn) should read memory");
+    ASSERT_EQ(fx.r.r[1], 02000, "-(Rn) should decrement by 2");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_autodec_def", name);
+    fx.r.r[1] = 02002;
+    store_word(&fx, 02000, 03000);
+    store_word(&fx, 03000, 04444);
+    write_op(&fx, op_mov(operand(5, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @-(R1),R0");
+    ASSERT_EQ(fx.r.r[0], 04444, "@-(Rn) should read indirect");
+    ASSERT_EQ(fx.r.r[1], 02000, "@-(Rn) should decrement by 2");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_index", name);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02004, 05555);
+    store_word(&fx, TEST_BASE + 2, 0004);
+    write_op(&fx, op_mov(operand(6, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV X(R1),R0");
+    ASSERT_EQ(fx.r.r[0], 05555, "X(Rn) should read with displacement");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_index_def", name);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02004, 03000);
+    store_word(&fx, 03000, 06666);
+    store_word(&fx, TEST_BASE + 2, 0004);
+    write_op(&fx, op_mov(operand(7, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @X(R1),R0");
+    ASSERT_EQ(fx.r.r[0], 06666, "@X(Rn) should read indirect");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_byte_autoinc", name);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02000, 01234);
+    write_op(&fx, op_movb(operand(2, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB (R1)+,R0");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0234, "MOVB should read byte");
+    ASSERT_EQ(fx.r.r[1], 02001, "Byte (Rn)+ should increment by 1");
+
+    set_test_name(namebuf, sizeof(namebuf), "addr_byte_sp_inc", name);
+    fx.r.r[6] = 03000;
+    store_word(&fx, 03000, 077);
+    write_op(&fx, op_movb(operand(2, 6), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB (SP)+,R0");
+    ASSERT_EQ(fx.r.r[6], 03002, "Byte (SP)+ should increment by 2");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_addressing_modes(void)
+{
+    return run_for_models(test_addressing_modes_model);
+}
+
+static int test_single_operand_word_ops_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "clr", name);
+    fx.r.r[0] = 01234;
+    fx.r.psw = FLAG_N | FLAG_V | FLAG_C;
+    write_op(&fx, op_clr(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "CLR");
+    ASSERT_EQ(fx.r.r[0], 0, "CLR should clear register");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "com", name);
+    fx.r.r[0] = 0;
+    write_op(&fx, op_com(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "COM");
+    ASSERT_EQ(fx.r.r[0], 0177777, "COM should invert");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "inc", name);
+    fx.r.r[0] = 077777;
+    write_op(&fx, op_inc(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "INC");
+    ASSERT_EQ(fx.r.r[0], 0100000, "INC should increment");
+    expect_flags(&fx.r, 1, 0, 1, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "dec", name);
+    fx.r.r[0] = 0100000;
+    write_op(&fx, op_dec(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "DEC");
+    ASSERT_EQ(fx.r.r[0], 077777, "DEC should decrement");
+    expect_flags(&fx.r, 0, 0, 1, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "neg", name);
+    fx.r.r[0] = 1;
+    write_op(&fx, op_neg(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "NEG");
+    ASSERT_EQ(fx.r.r[0], 0177777, "NEG should negate");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "tst", name);
+    fx.r.r[0] = 0;
+    fx.r.psw = FLAG_C | FLAG_V;
+    write_op(&fx, op_tst(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "TST");
+    ASSERT_EQ(fx.r.r[0], 0, "TST should not modify");
+    expect_flags(&fx.r, 0, 1, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "asr", name);
+    fx.r.r[0] = 1;
+    fx.r.psw = 0;
+    write_op(&fx, op_asr(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ASR");
+    ASSERT_EQ(fx.r.r[0], 0, "ASR should shift");
+    expect_flags(&fx.r, 0, 1, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "asl", name);
+    fx.r.r[0] = 0100000;
+    fx.r.psw = 0;
+    write_op(&fx, op_asl(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ASL");
+    ASSERT_EQ(fx.r.r[0], 0, "ASL should shift");
+    expect_flags(&fx.r, 0, 1, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "ror", name);
+    fx.r.r[0] = 1;
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_ror(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ROR");
+    ASSERT_EQ(fx.r.r[0], 0100000, "ROR should rotate");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "rol", name);
+    fx.r.r[0] = 0100000;
+    fx.r.psw = 1;
+    write_op(&fx, op_rol(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ROL");
+    ASSERT_EQ(fx.r.r[0], 1, "ROL should rotate");
+    expect_flags(&fx.r, 0, 0, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "adc", name);
+    fx.r.r[0] = 0177777;
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_adc(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ADC");
+    ASSERT_EQ(fx.r.r[0], 0, "ADC should add carry");
+    expect_flags(&fx.r, 0, 1, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "sbc", name);
+    fx.r.r[0] = 0;
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_sbc(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SBC");
+    ASSERT_EQ(fx.r.r[0], 0177777, "SBC should subtract carry");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_single_operand_word_ops(void)
+{
+    return run_for_models(test_single_operand_word_ops_model);
+}
+
+static int test_single_operand_byte_ops_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "clrb", name);
+    fx.r.r[0] = 0123400;
+    fx.r.psw = FLAG_N | FLAG_V | FLAG_C;
+    write_op(&fx, op_clrb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "CLRB");
+    ASSERT_EQ(fx.r.r[0], 0123400, "CLRB should clear low byte");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "comb", name);
+    fx.r.r[0] = 0123400;
+    write_op(&fx, op_comb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "COMB");
+    ASSERT_EQ(fx.r.r[0], 0123777, "COMB should invert low byte");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "incb", name);
+    fx.r.r[0] = 0123777;
+    write_op(&fx, op_incb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "INCB");
+    ASSERT_EQ(fx.r.r[0], 0123400, "INCB should increment low byte");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "decb", name);
+    fx.r.r[0] = 0124200;
+    write_op(&fx, op_decb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "DECB");
+    ASSERT_EQ(fx.r.r[0], 0124177, "DECB should decrement low byte");
+    expect_flags(&fx.r, 0, 0, 1, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "negb", name);
+    fx.r.r[0] = 0000001;
+    write_op(&fx, op_negb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "NEGB");
+    ASSERT_EQ(fx.r.r[0], 0000377, "NEGB should negate low byte");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "tstb", name);
+    fx.r.r[0] = 0000000;
+    fx.r.psw = FLAG_C | FLAG_V;
+    write_op(&fx, op_tstb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB");
+    ASSERT_EQ(fx.r.r[0], 0000000, "TSTB should not modify");
+    expect_flags(&fx.r, 0, 1, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "asrb", name);
+    fx.r.r[0] = 0000001;
+    fx.r.psw = 0;
+    write_op(&fx, op_asrb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ASRB");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0, "ASRB should shift");
+    expect_flags(&fx.r, 0, 1, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "aslb", name);
+    fx.r.r[0] = 0000200;
+    fx.r.psw = 0;
+    write_op(&fx, op_aslb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ASLB");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0, "ASLB should shift");
+    expect_flags(&fx.r, 0, 0, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "rorb", name);
+    fx.r.r[0] = 0000001;
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_rorb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "RORB");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0200, "RORB should rotate");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "rolb", name);
+    fx.r.r[0] = 0000200;
+    fx.r.psw = 1;
+    write_op(&fx, op_rolb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ROLB");
+    ASSERT_EQ(fx.r.r[0] & 0377, 1, "ROLB should rotate");
+    expect_flags(&fx.r, 0, 0, 1, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "adcb", name);
+    fx.r.r[0] = 0000377;
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_adcb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ADCB");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0, "ADCB should add carry");
+    expect_flags(&fx.r, 0, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "sbcb", name);
+    fx.r.r[0] = 0000000;
+    fx.r.psw = FLAG_C;
+    write_op(&fx, op_sbcb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SBCB");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0377, "SBCB should subtract carry");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_single_operand_byte_ops(void)
+{
+    return run_for_models(test_single_operand_byte_ops_model);
+}
+
+static int test_misc_ops_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "swab", name);
+    fx.r.r[0] = 0123405;
+    write_op(&fx, op_swab(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SWAB");
+    ASSERT_EQ(fx.r.r[0], 02647, "SWAB should swap bytes");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "sxt_set", name);
+    fx.r.psw = FLAG_N;
+    fx.r.r[0] = 0;
+    write_op(&fx, op_sxt(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SXT");
+    ASSERT_EQ(fx.r.r[0], 0177777, "SXT should sign extend");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "sxt_clear", name);
+    fx.r.psw = 0;
+    fx.r.r[0] = 0177777;
+    write_op(&fx, op_sxt(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SXT");
+    ASSERT_EQ(fx.r.r[0], 0, "SXT should clear");
+    expect_flags(&fx.r, 0, 1, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "mfps", name);
+    fx.r.psw = 000345;
+    write_op(&fx, op_mfps(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0345, "MFPS should move PSW");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "mtps", name);
+    fx.r.psw = 012340;
+    fx.r.r[0] = 000007;
+    write_op(&fx, op_mtps(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
+    ASSERT_EQ(fx.r.psw & 0007, 0007, "MTPS should update low bits");
+    ASSERT_EQ(fx.r.psw & 0177770, 012340, "MTPS should keep high bits");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_misc_ops(void)
+{
+    return run_for_models(test_misc_ops_model);
+}
+
+static int test_double_operand_word_ops_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "mov", name);
+    fx.r.r[1] = 0100000;
+    write_op(&fx, op_mov(operand(0, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV");
+    ASSERT_EQ(fx.r.r[0], 0100000, "MOV should copy");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "cmp", name);
+    fx.r.r[0] = 3;
+    fx.r.r[1] = 5;
+    write_op(&fx, op_cmp(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "CMP");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "bit", name);
+    fx.r.psw = FLAG_C;
+    fx.r.r[0] = 0040;
+    fx.r.r[1] = 0060;
+    write_op(&fx, op_bit(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "BIT");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "bic", name);
+    fx.r.r[0] = 0007;
+    fx.r.r[1] = 0005;
+    write_op(&fx, op_bic(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "BIC");
+    ASSERT_EQ(fx.r.r[1], 0000, "BIC should clear bits");
+    expect_flags(&fx.r, 0, 1, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "bis", name);
+    fx.r.r[0] = 0007;
+    fx.r.r[1] = 0010;
+    write_op(&fx, op_bis(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "BIS");
+    ASSERT_EQ(fx.r.r[1], 0017, "BIS should set bits");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "xor", name);
+    fx.r.r[0] = 0003;
+    fx.r.r[1] = 0005;
+    write_op(&fx, op_xor(0, operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "XOR");
+    ASSERT_EQ(fx.r.r[1], 0006, "XOR should apply reg");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "add", name);
+    fx.r.r[0] = 1;
+    fx.r.r[1] = 2;
+    write_op(&fx, op_add(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "ADD");
+    ASSERT_EQ(fx.r.r[1], 3, "ADD should add");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "sub", name);
+    fx.r.r[0] = 2;
+    fx.r.r[1] = 1;
+    write_op(&fx, op_sub(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SUB");
+    ASSERT_EQ(fx.r.r[1], 0177777, "SUB should subtract");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_double_operand_word_ops(void)
+{
+    return run_for_models(test_double_operand_word_ops_model);
+}
+
+static int test_double_operand_byte_ops_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    fixture_setup_model(&fx, model);
+
+    set_test_name(namebuf, sizeof(namebuf), "movb", name);
+    fx.r.r[1] = 0000200;
+    write_op(&fx, op_movb(operand(0, 1), operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB");
+    ASSERT_EQ(fx.r.r[0], 0177600, "MOVB should sign extend");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "cmpb", name);
+    fx.r.r[0] = 0000001;
+    fx.r.r[1] = 0000002;
+    write_op(&fx, op_cmpb(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "CMPB");
+    expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "bitb", name);
+    fx.r.psw = FLAG_C;
+    fx.r.r[0] = 0000001;
+    fx.r.r[1] = 0000003;
+    write_op(&fx, op_bitb(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "BITB");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "bicb", name);
+    fx.r.r[0] = 0000001;
+    fx.r.r[1] = 0123403;
+    write_op(&fx, op_bicb(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "BICB");
+    ASSERT_EQ(fx.r.r[1], 0123402, "BICB should clear low bits");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "bisb", name);
+    fx.r.r[0] = 0000001;
+    fx.r.r[1] = 0123402;
+    write_op(&fx, op_bisb(operand(0, 0), operand(0, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "BISB");
+    ASSERT_EQ(fx.r.r[1], 0123403, "BISB should set low bits");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_double_operand_byte_ops(void)
+{
+    return run_for_models(test_double_operand_byte_ops_model);
+}
+
+static int test_vm2_privileged_ops(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+
+    current_test = "vm2_privileged";
+    fixture_setup_model(&fx, K1806VM2);
+
+    fx.r.cpc = 01234;
+    fx.r.cps = 00440;
+    write_op(&fx, 0000012);
+    ASSERT_EQ(core_step(&fx.r), 0, "START");
+    ASSERT_EQ(fx.r.r[7], 01234, "START should load CPC");
+    ASSERT_EQ(fx.r.psw, 00440, "START should load CPS");
+
+    fx.r.cpc = 02000;
+    fx.r.cps = 000200;
+    write_op(&fx, 0000016);
+    ASSERT_EQ(core_step(&fx.r), 0, "STEP");
+    ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
+    ASSERT_EQ(fx.r.psw, 000200, "STEP should load CPS");
+
+    fx.r.SEL1 = 0777;
+    write_op(&fx, 0000020);
+    ASSERT_EQ(core_step(&fx.r), 0, "RSEL");
+    ASSERT_EQ(fx.r.r[0], 0777, "RSEL should read SEL1");
+
+    fx.r.r[5] = 03000;
+    store_word(&fx, 03000, 01234);
+    write_op(&fx, 0000021);
+    ASSERT_EQ(core_step(&fx.r), 0, "MFUS");
+    ASSERT_EQ(fx.r.r[0], 01234, "MFUS should load via R5");
+    ASSERT_EQ(fx.r.r[5], 03002, "MFUS should increment R5");
+
+    fx.r.cpc = 05555;
+    write_op(&fx, 0000022);
+    ASSERT_EQ(core_step(&fx.r), 0, "RCPC");
+    ASSERT_EQ(fx.r.r[0], 05555, "RCPC should read CPC");
+
+    fx.r.cps = 00666;
+    write_op(&fx, 0000024);
+    ASSERT_EQ(core_step(&fx.r), 0, "RCPS");
+    ASSERT_EQ(fx.r.r[0], 00666, "RCPS should read CPS");
+
+    fx.r.r[5] = 04002;
+    fx.r.r[0] = 07777;
+    write_op(&fx, 0000031);
+    ASSERT_EQ(core_step(&fx.r), 0, "MTUS");
+    ASSERT_EQ(fx.r.r[5], 04000, "MTUS should decrement R5");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 04000), 07777, "MTUS should store via R5");
+
+    fx.r.r[0] = 01111;
+    write_op(&fx, 0000032);
+    ASSERT_EQ(core_step(&fx.r), 0, "WCPC");
+    ASSERT_EQ(fx.r.cpc, 01111, "WCPC should write CPC");
+
+    fx.r.r[0] = 02222;
+    write_op(&fx, 0000034);
+    ASSERT_EQ(core_step(&fx.r), 0, "WCPS");
+    ASSERT_EQ(fx.r.cps, 02222, "WCPS should write CPS");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_special_ops(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word src_addr = 02000;
+    const word dst_addr = 02100;
+
+    current_test = "dcj11_special_ops";
+    fixture_setup_model(&fx, DCJ11);
+
+    write_op(&fx, op_mfpt());
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPT should execute");
+    ASSERT_EQ(fx.r.r[0], 5, "MFPT should set R0 to 5");
+
+    store_word(&fx, src_addr, 01234);
+    write_op(&fx, op_mfpd(operand(1, 1)));
+    fx.r.r[1] = src_addr;
+    fx.r.r[6] = 01000;
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPD should execute");
+    ASSERT_EQ(fx.r.r[6], 00776, "MFPD should push word");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 01234, "MFPD stack value");
+
+    store_word(&fx, src_addr, 04567);
+    write_op(&fx, op_mfpi(operand(1, 1)));
+    fx.r.r[1] = src_addr;
+    fx.r.r[6] = 01000;
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPI should execute");
+    ASSERT_EQ(fx.r.r[6], 00776, "MFPI should push word");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 04567, "MFPI stack value");
+
+    store_word(&fx, TEST_STACK, 01234);
+    write_op(&fx, op_mtpi(operand(1, 2)));
+    fx.r.r[2] = dst_addr;
+    fx.r.r[6] = TEST_STACK;
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPI should execute");
+    ASSERT_EQ(fx.r.r[6], TEST_STACK + 2, "MTPI should pop word");
+    ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 01234, "MTPI should store word");
+
+    store_word(&fx, TEST_STACK, 04567);
+    write_op(&fx, op_mtpd(operand(1, 2)));
+    fx.r.r[2] = dst_addr;
+    fx.r.r[6] = TEST_STACK;
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPD should execute");
+    ASSERT_EQ(fx.r.r[6], TEST_STACK + 2, "MTPD should pop word");
+    ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 04567, "MTPD should store word");
+
+    store_word(&fx, dst_addr, 000000);
+    write_op(&fx, op_tstset(operand(1, 2)));
+    fx.r.r[2] = dst_addr;
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTSET should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "TSTSET should load R0");
+    ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 000001, "TSTSET should set low bit");
+    ASSERT_EQ(is_flag_set(&fx.r, FLAG_C), 0, "TSTSET should clear C when bit0 was 0");
+
+    fx.r.r[0] = 01234;
+    write_op(&fx, op_wrtlck(operand(1, 2)));
+    fx.r.r[2] = dst_addr;
+    ASSERT_EQ(core_step(&fx.r), 0, "WRTLCK should execute");
+    ASSERT_EQ(fx.r.load_word(&fx.r, dst_addr), 01234, "WRTLCK should store R0");
 
 cleanup:
     fixture_teardown(&fx);
@@ -840,6 +2765,21 @@ int main(void)
     failed += test_sob_loops_expected_count();
     failed += test_emt_pushes_and_vectors();
     failed += test_trap_pushes_and_vectors();
+    failed += test_vm1_illegal_instructions_trap();
+    failed += test_extended_ops_supported();
+    failed += test_condition_codes();
+    failed += test_wait_and_reset();
+    failed += test_halt();
+    failed += test_branches();
+    failed += test_jmp();
+    failed += test_addressing_modes();
+    failed += test_single_operand_word_ops();
+    failed += test_single_operand_byte_ops();
+    failed += test_misc_ops();
+    failed += test_double_operand_word_ops();
+    failed += test_double_operand_byte_ops();
+    failed += test_vm2_privileged_ops();
+    failed += test_dcj11_special_ops();
     failed += test_bpt_vectors();
     failed += test_iot_vectors();
     failed += test_trace_vector();
