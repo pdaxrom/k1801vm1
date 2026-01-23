@@ -383,6 +383,7 @@ int main(int argc, char **argv)
             if (core_step(&r) != 0) {
                 break;
             }
+            bk_hw_tick();
             instr_count++;
         }
 
