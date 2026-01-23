@@ -13,7 +13,7 @@ Build
 Run
 ---
 
-- `./bk0010-01 [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace] [--show-shift]`
+- `./bk0010-01 [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace] [--show-shift] [--show-cpu]`
 
 Notes
 -----

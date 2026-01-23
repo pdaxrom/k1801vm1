@@ -17,7 +17,7 @@
 static void usage(const char *prog)
 {
     fprintf(stderr,
-            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace] [--show-shift]\n"
+            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--start <octal>] [--trace] [--show-shift] [--show-cpu]\n"
             "Defaults to ROM/MONIT10.ROM and ROM/BASIC10.ROM\n",
             prog);
 }
@@ -179,6 +179,7 @@ int main(int argc, char **argv)
     int have_start = 0;
     int trace = 0;
     int show_shift = 0;
+    int show_cpu = 0;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--rom-dir") == 0 && i + 1 < argc) {
@@ -191,6 +192,8 @@ int main(int argc, char **argv)
             trace = 1;
         } else if (strcmp(argv[i], "--show-shift") == 0) {
             show_shift = 1;
+        } else if (strcmp(argv[i], "--show-cpu") == 0) {
+            show_cpu = 1;
         } else if (strcmp(argv[i], "--start") == 0 && i + 1 < argc) {
             unsigned int tmp = 0;
             sscanf(argv[++i], "%o", &tmp);
@@ -340,6 +343,9 @@ int main(int argc, char **argv)
 
     char disas_buf[256];
     word last_shift = 0xFFFF;
+    Uint64 perf_freq = SDL_GetPerformanceFrequency();
+    Uint64 perf_last = SDL_GetPerformanceCounter();
+    unsigned long long instr_count = 0;
     while (running) {
         Uint32 frame_start = SDL_GetTicks();
         if (show_shift) {
@@ -377,9 +383,21 @@ int main(int argc, char **argv)
             if (core_step(&r) != 0) {
                 break;
             }
+            instr_count++;
         }
 
         draw_screen(renderer, tex);
+
+        if (show_cpu) {
+            Uint64 now = SDL_GetPerformanceCounter();
+            double elapsed = (double)(now - perf_last) / (double)perf_freq;
+            if (elapsed >= 1.0) {
+                double ips = instr_count / elapsed;
+                fprintf(stderr, "CPU: %.2f KIPS (%.2f MHz)\n", ips / 1000.0, ips / 1.0e6);
+                instr_count = 0;
+                perf_last = now;
+            }
+        }
 
         Uint32 frame_time = SDL_GetTicks() - frame_start;
         if (frame_time < frame_delay) {
