@@ -37,6 +37,7 @@
 enum {
 	K1801VM1 = 0,
 	K1801VM1G,
+	K1801VM2,
 	K1806VM2,
 	DCJ11,
 };
@@ -82,6 +83,7 @@ typedef struct _regs {
 
     word	fWait;
     word    fAbort;
+    word    fHaltSignal;
 
     byte (* load_byte)	(struct _regs *r, word offset);
     void (* store_byte)	(struct _regs *r, word offset, byte value);

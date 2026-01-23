@@ -52,6 +52,8 @@
     }						\
 }
 
+#define is_vm2(r) ((r)->model == K1801VM2 || (r)->model == K1806VM2)
+
 #define pushw(v) {			\
 	r->r[6] -= 2;			\
 	store_word(r, r->r[6], v); \
@@ -75,6 +77,7 @@ void core_reset(regs *r)
     r->fWait = 0;
     r->fTrap = 0;
     r->fAbort = 0;
+    r->fHaltSignal = 0;
 
     r->reset(r);
 }
@@ -134,6 +137,37 @@ static INLINE void bus_error_trap(regs *r)
 
 #define load_word(a, b) core_load_word(a, b)
 #define store_word(a, b, c) core_store_word(a, b, c)
+
+static INLINE void handle_halt(regs *r)
+{
+	word vec;
+	if (is_vm2(r)) {
+		r->cps = r->psw;
+		r->cpc = r->r[7];
+		vec = 0170;
+		if (flag_is_set(FLAG_H)) {
+			vec |= (r->SEL1 & 0177400);
+		}
+		r->r[7] = load_word(r, vec    ) & 0177776;
+		r->psw  = load_word(r, vec + 2) | FLAG_H;
+	} else if (r->model == DCJ11) {
+		pushw(r->psw);
+		pushw(r->r[7]);
+		vec = 4;
+		if (flag_is_set(FLAG_H)) {
+			vec |= (r->SEL1 & 0177400);
+		}
+		r->r[7] = load_word(r, vec    ) & 0177776;
+		r->psw  = 0340;
+	} else {
+		store_word(r, 0177676, r->psw);
+		store_word(r, 0177674, r->r[7]);
+		store_word(r, 0177716, load_word(r, 0177716) | 010);
+		vec = (r->SEL1 & 0177400);
+		r->r[7] = load_word(r, vec + 2) & 0177776;
+		r->psw  = load_word(r, vec + 4);
+	}
+}
 
 static INLINE byte get_data_byte(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {
@@ -272,6 +306,13 @@ int core_step(regs *r)
     	return 0;
     }
 
+    if (r->fHaltSignal) {
+    	r->fHaltSignal = 0;
+    	r->fWait = 0;
+    	handle_halt(r);
+    	return 0;
+    }
+
     if (r->fWait) {
     	return 0;
     }
@@ -311,50 +352,7 @@ int core_step(regs *r)
     switch(op) {
 		case 000000: /* HALT */ {
 #warning HALT
-			word vec;
-			if (r->model == K1806VM2) {
-				r->cps = r->psw;
-				r->cpc = r->r[7];
-				vec = 0170;
-				if (flag_is_set(FLAG_H)) {
-					vec |= (r->SEL1 & 0177400);
-				}
-				r->r[7] = load_word(r, vec    ) & 0177776;
-				r->psw  = load_word(r, vec + 2) | FLAG_H;
-			} else if (r->model == DCJ11) {
-				pushw(r->psw);
-				pushw(r->r[7]);
-				vec = 4;
-				if (flag_is_set(FLAG_H)) {
-					vec |= (r->SEL1 & 0177400);
-				}
-				r->r[7] = load_word(r, vec    ) & 0177776;
-				r->psw  = 0340;
-			} else {
-				/*
-				 * http://bk0010.org/forum/?id=2224&old
-				 * Он в пультовый режим выходить хочет - это микропрограмма такая:
-				 * BIS #10,@#177716 - для отключения пользовательского ПЗУ и подключения
-				 * ПЗУ с отладчиком, которого в БК нет.
-				 * MFPS @#177676
-				 * MOV PC,@#177674
-				 * MOV @#(SEL1[разряды 8-15]+C) , PC
-				 * MTPS @#(SEL1[разряды 8-15]+C+2)
-				 * - и далее отработка программы отладчика из ПЗУ.
-				 * Где C=2, если это кнопка Стоп или команда HALT, C=6 - если указатель
-				 * стека смотрит на несуществующую область памяти, когда процессор при
-				 * обработке прерывания пытается сохранить свое состояние, и C=12, если
-				 * это зависание при передаче вектора прерывания. Но в БК нет регистров
-				 * копии RS и PC, потому он отрабатывает 4й вектор по ошибке шины в
-				 * нормальном состоянии.
-				 */
-				store_word(r, 0177676, r->psw);
-				store_word(r, 0177674, r->r[7]);
-				store_word(r, 0177716, load_word(r, 0177716) | 010);
-				vec = (r->SEL1 & 0177400);
-				r->r[7] = load_word(r, vec + 2) & 0177776;
-				r->psw  = load_word(r, vec + 4);
-			}
+			handle_halt(r);
 			return 0;
 		}
 
@@ -444,7 +442,7 @@ int core_step(regs *r)
 
     }
 
-    if (r->model == K1806VM2) {
+    if (is_vm2(r)) {
     	switch(op) {
     	case 0000012: /* START */
     		r->r[7] = r->cpc;

@@ -532,6 +532,11 @@ static INLINE int is_flag_set(const regs *r, word flag)
     return (r->psw & flag) == flag;
 }
 
+static INLINE int is_vm2_model(byte model)
+{
+    return model == K1801VM2 || model == K1806VM2;
+}
+
 typedef struct {
     byte model;
     const char *name;
@@ -540,6 +545,7 @@ typedef struct {
 static const model_case model_cases[] = {
     { K1801VM1,  "K1801VM1" },
     { K1801VM1G, "K1801VM1G" },
+    { K1801VM2,  "K1801VM2" },
     { K1806VM2,  "K1806VM2" },
     { DCJ11,     "DCJ11" },
 };
@@ -940,8 +946,8 @@ static int test_vm1_illegal_instructions_trap(void)
 static int test_dcj11_special_ops_illegal_on_other_models(void)
 {
     int rc = 0;
-    const byte models[] = { K1801VM1, K1801VM1G, K1806VM2 };
-    const char *names[] = { "K1801VM1", "K1801VM1G", "K1806VM2" };
+    const byte models[] = { K1801VM1, K1801VM1G, K1801VM2, K1806VM2 };
+    const char *names[] = { "K1801VM1", "K1801VM1G", "K1801VM2", "K1806VM2" };
     char namebuf[64];
 
     for (size_t i = 0; i < sizeof(models) / sizeof(models[0]); i++) {
@@ -1479,6 +1485,7 @@ static int test_extended_ops_supported(void)
     int rc = 0;
 
     rc += test_extended_ops_supported_models(K1801VM1G, "K1801VM1G");
+    rc += test_extended_ops_supported_models(K1801VM2, "K1801VM2");
     rc += test_extended_ops_supported_models(K1806VM2, "K1806VM2");
     rc += test_extended_ops_supported_models(DCJ11, "DCJ11");
 
@@ -1633,7 +1640,7 @@ static int test_halt_model(byte model, const char *name)
     write_op(&fx, op_halt());
     ASSERT_EQ(core_step(&fx.r), 0, "HALT should execute");
 
-    if (model == K1806VM2) {
+    if (is_vm2_model(model)) {
         ASSERT_EQ(fx.r.cpc, TEST_BASE + 2, "HALT should save CPC");
         ASSERT_EQ(fx.r.cps, 000003, "HALT should save CPS");
         ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT should load vector");
@@ -1660,6 +1667,60 @@ cleanup:
 static int test_halt(void)
 {
     return run_for_models(test_halt_model);
+}
+
+static int test_external_halt_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    word handler = 01234;
+    word new_psw = 00440;
+
+    fixture_setup_model(&fx, model);
+    set_test_name(namebuf, sizeof(namebuf), "halt_signal", name);
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.SEL1 = 0400;
+    store_word(&fx, 0177716, 0200);
+    store_word(&fx, 0170, handler);
+    store_word(&fx, 0172, new_psw);
+    store_word(&fx, 0402, handler);
+    store_word(&fx, 0404, new_psw);
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, 000000);
+
+    fx.r.fHaltSignal = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "HALT signal should execute");
+
+    if (is_vm2_model(model)) {
+        ASSERT_EQ(fx.r.cpc, TEST_BASE, "HALT signal should save CPC");
+        ASSERT_EQ(fx.r.cps, 000003, "HALT signal should save CPS");
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT signal should load vector");
+        ASSERT_EQ(fx.r.psw, (new_psw | FLAG_H), "HALT signal should set H in PSW");
+    } else if (model == DCJ11) {
+        ASSERT_EQ(fx.r.r[6], 00774, "HALT signal should push two words");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE, "HALT signal stack PC");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "HALT signal stack PSW");
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT signal should load vector");
+        ASSERT_EQ(fx.r.psw, 0340, "HALT signal should set PSW to 0340");
+    } else {
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177674), TEST_BASE, "HALT signal should store PC");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177676), 000003, "HALT signal should store PSW");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0210, "HALT signal should set SEL1 bit 010");
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT signal should load vector");
+        ASSERT_EQ(fx.r.psw, new_psw, "HALT signal should load PSW");
+    }
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_external_halt(void)
+{
+    return run_for_models(test_external_halt_model);
 }
 
 static int test_branches_model(byte model, const char *name)
@@ -2400,13 +2461,14 @@ static int test_double_operand_byte_ops(void)
     return run_for_models(test_double_operand_byte_ops_model);
 }
 
-static int test_vm2_privileged_ops(void)
+static int test_vm2_privileged_ops_model(byte model, const char *name)
 {
     cpu_fixture fx;
     int rc = 0;
+    char namebuf[64];
 
-    current_test = "vm2_privileged";
-    fixture_setup_model(&fx, K1806VM2);
+    set_test_name(namebuf, sizeof(namebuf), "vm2_privileged", name);
+    fixture_setup_model(&fx, model);
 
     fx.r.cpc = 01234;
     fx.r.cps = 00440;
@@ -2463,6 +2525,16 @@ static int test_vm2_privileged_ops(void)
 
 cleanup:
     fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_privileged_ops(void)
+{
+    int rc = 0;
+
+    rc += test_vm2_privileged_ops_model(K1801VM2, "K1801VM2");
+    rc += test_vm2_privileged_ops_model(K1806VM2, "K1806VM2");
+
     return rc;
 }
 
@@ -2984,6 +3056,7 @@ int main(void)
     failed += test_condition_codes();
     failed += test_wait_and_reset();
     failed += test_halt();
+    failed += test_external_halt();
     failed += test_branches();
     failed += test_jmp();
     failed += test_addressing_modes();
