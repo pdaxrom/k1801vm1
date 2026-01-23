@@ -62,6 +62,7 @@
 	r->r[6] += 2;			\
 }
 
+
 void core_init(regs *r)
 {
 	r->init(r);
@@ -86,6 +87,14 @@ void core_fini(regs *r)
 #define store_byte(a, b, c) r->store_byte(a, b, c)
 #define load_word(a, b) r->load_word(a, b)
 #define store_word(a, b, c) r->store_word(a, b, c)
+
+static INLINE void illegal_trap(regs *r)
+{
+	pushw(r->psw);
+	pushw(r->r[7]);
+	r->r[7] = load_word(r, 010);
+	r->psw  = load_word(r, 012);
+}
 
 static INLINE byte get_data_byte(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {
@@ -927,6 +936,10 @@ int core_step(regs *r)
 		}
 
 		case 0070: /* MUL */ {
+			if (r->model == K1801VM1) {
+				illegal_trap(r);
+				return 0;
+			}
 			union u_word data1;
 			union u_word data2;
 			union u_dword tmp;
@@ -948,6 +961,10 @@ int core_step(regs *r)
 		}
 
 		case 0071: /* DIV */ {
+			if (r->model == K1801VM1) {
+				illegal_trap(r);
+				return 0;
+			}
 			union u_word data1;
 			union u_word data2;
 			union u_dword tmp;
@@ -983,6 +1000,10 @@ int core_step(regs *r)
 		}
 
 		case 0072: /* ASH */ {
+			if (r->model == K1801VM1) {
+				illegal_trap(r);
+				return 0;
+			}
 			RA_REG(reg);
 			word tmp = r->r[reg];
 			word old = tmp;
@@ -1015,6 +1036,10 @@ int core_step(regs *r)
 		}
 
 		case 0073: /* ASHC */ {
+			if (r->model == K1801VM1) {
+				illegal_trap(r);
+				return 0;
+			}
 			RA_REG(reg);
 			dword tmp = (r->r[reg] << 16) | r->r[reg | 1];
 			dword old = tmp;
@@ -1227,5 +1252,6 @@ int core_step(regs *r)
 		}
     }
 
-    return -1;
+	illegal_trap(r);
+	return 0;
 }
