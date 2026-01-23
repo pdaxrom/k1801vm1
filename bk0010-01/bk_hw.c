@@ -6,12 +6,6 @@
 
 #define MEM_SIZE 65536
 
-/* PDP-11 compatible console addresses (octal) */
-#define BK_RCSR 0177560
-#define BK_RBUF 0177562
-#define BK_TCSR 0177564
-#define BK_TBUF 0177566
-
 /* BK-0010-01 system I/O (octal) */
 #define BK_KBD_STATUS 0177660
 #define BK_KBD_DATA   0177662
@@ -118,22 +112,17 @@ static byte bk_load_byte(regs *r, word offset)
 {
     (void)r;
     switch (offset) {
-    case BK_RCSR:
-        return rcsr;
-    case BK_RBUF:
-        rcsr &= (byte)~CSR_READY;
-        return rbuf;
-    case BK_TCSR:
-        return CSR_READY;
-    case BK_TBUF:
-        return 0;
     case BK_KBD_STATUS:
         return (byte)((kbd_status & CSR_READY) | (kbd_status & 0100));
+    case (BK_KBD_STATUS + 1):
+        return 0;
     case BK_KBD_DATA:
         kbd_status &= (byte)~CSR_READY;
         sys_port_in |= 040;
         kbd_irq_pending = 0;
         return kbd_data;
+    case (BK_KBD_DATA + 1):
+        return 0;
     case BK_SHIFT_REG:
         return (byte)(shift_reg & 0377);
     case (BK_SHIFT_REG + 1):
@@ -143,19 +132,16 @@ static byte bk_load_byte(regs *r, word offset)
     case (BK_EXT_PORT + 1):
         return (byte)(ext_port >> 8);
     case BK_SYS_CTRL: {
-        word value = sys_ctrl;
-        value &= 0177400;
-        value |= (word)(sys_port_in & 0170);
+        word value = (word)(sys_port_in & 0170);
         return (byte)(value & 0377);
     }
     case (BK_SYS_CTRL + 1): {
         word value = sys_ctrl;
-        value &= 0177400;
-        value |= (word)(sys_port_in & 0170);
         return (byte)(value >> 8);
     }
     default:
         if (offset >= 0177600) {
+            bus_error_pending = 1;
             return 0;
         }
         return mem_read(offset);
@@ -166,25 +152,16 @@ static void bk_store_byte(regs *r, word offset, byte value)
 {
     (void)r;
     switch (offset) {
-    case BK_RCSR:
-        rcsr = value;
-        break;
-    case BK_RBUF:
-        rbuf = value;
-        rcsr |= CSR_READY;
-        break;
-    case BK_TCSR:
-        break;
-    case BK_TBUF:
-        putchar(value);
-        fflush(stdout);
-        break;
     case BK_KBD_STATUS:
         kbd_status = (byte)((kbd_status & CSR_READY) | (value & 0100));
+        break;
+    case (BK_KBD_STATUS + 1):
         break;
     case BK_KBD_DATA:
         kbd_data = value;
         kbd_status |= CSR_READY;
+        break;
+    case (BK_KBD_DATA + 1):
         break;
     case BK_SHIFT_REG:
         shift_reg = (word)((shift_reg & 0177400) | value);
@@ -202,10 +179,10 @@ static void bk_store_byte(regs *r, word offset, byte value)
         sys_port_out = (byte)(value & 0170);
         break;
     case (BK_SYS_CTRL + 1):
-        sys_port_out = (byte)(value & 0170);
         break;
     default:
         if (offset >= 0177600) {
+            bus_error_pending = 1;
             break;
         }
         mem_write(offset, value);

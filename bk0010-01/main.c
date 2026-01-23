@@ -363,7 +363,7 @@ int main(int argc, char **argv)
             } else if (ev.type == SDL_KEYDOWN) {
                 SDL_Keycode key = ev.key.keysym.sym;
                 if (key == SDLK_ESCAPE) {
-                    running = 0;
+                    r.fHaltSignal = 1;
                 } else {
                     int code = bk_translate_key(key, ev.key.keysym.mod);
                     if (code >= 0) {
