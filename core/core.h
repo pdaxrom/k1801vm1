@@ -81,6 +81,7 @@ typedef struct _regs {
     word	fTrap;
 
     word	fWait;
+    word    fAbort;
 
     byte (* load_byte)	(struct _regs *r, word offset);
     void (* store_byte)	(struct _regs *r, word offset, byte value);

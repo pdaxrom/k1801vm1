@@ -74,6 +74,7 @@ void core_reset(regs *r)
     r->psw = 0340;
     r->fWait = 0;
     r->fTrap = 0;
+    r->fAbort = 0;
 
     r->reset(r);
 }
@@ -128,6 +129,7 @@ static INLINE void bus_error_trap(regs *r)
 	r->store_word(r, r->r[6], r->r[7]);
 	r->r[7] = r->load_word(r, 000004);
 	r->psw  = r->load_word(r, 000006);
+	r->fAbort = 1;
 }
 
 #define load_word(a, b) core_load_word(a, b)
@@ -179,6 +181,9 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type, word *offset)
     byte mode = (data & 0070) >> 3;
     byte step;
 
+    if (r->fAbort) {
+    	return TYPE_ERROR;
+    }
 
     if (data_type == TYPE_WORD) {
     	step = 2;
@@ -211,6 +216,9 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type, word *offset)
     	return TYPE_MEM;
     case 3: /* @(Rn)+ */
     	*offset = load_word(r, r->r[reg]);
+    	if (r->fAbort) {
+    		return TYPE_ERROR;
+    	}
     	r->r[reg] += step;
     	return TYPE_MEM;
     case 4: /* -(Rn) */
@@ -220,17 +228,29 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type, word *offset)
     case 5: /* @-(Rn) */
     	r->r[reg] -= step;
     	*offset = load_word(r, r->r[reg]);
+    	if (r->fAbort) {
+    		return TYPE_ERROR;
+    	}
     	return TYPE_MEM;
     case 6: /* X(Rn) */ {
     	word tmp = load_word(r, r->r[7]);
+    	if (r->fAbort) {
+    		return TYPE_ERROR;
+    	}
     	r->r[7] += 2;
     	*offset = r->r[reg] + tmp;
     	}
     	return TYPE_MEM;
     case 7: /* @X(Rn) */ {
     	word tmp = load_word(r, r->r[7]);
+    	if (r->fAbort) {
+    		return TYPE_ERROR;
+    	}
     	r->r[7] += 2;
     	*offset = load_word(r, r->r[reg] + tmp);
+    	if (r->fAbort) {
+    		return TYPE_ERROR;
+    	}
     	}
     	return TYPE_MEM;
     }
@@ -246,6 +266,11 @@ int core_step(regs *r)
     word dst_offset;
     byte dst_type;
     word irq_vector;
+
+    if (r->fAbort) {
+    	r->fAbort = 0;
+    	return 0;
+    }
 
     if (r->fWait) {
     	return 0;
@@ -274,6 +299,10 @@ int core_step(regs *r)
     // load instruction
 
     word op = load_word(r, r->r[7]);
+    if (r->fAbort) {
+    	r->fAbort = 0;
+    	return 0;
+    }
     r->r[7] += 2;
 
     //
@@ -622,15 +651,15 @@ int core_step(regs *r)
     // single operand instructions
     //
 
-#define DECODE_DST()  dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
-#define DECODE_DSTB() dst_type = decode_data(r, op & 00077, TYPE_BYTE, &dst_offset);
+#define DECODE_DST()  do { dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset); if (dst_type == TYPE_ERROR) return 0; } while (0)
+#define DECODE_DSTB() do { dst_type = decode_data(r, op & 00077, TYPE_BYTE, &dst_offset); if (dst_type == TYPE_ERROR) return 0; } while (0)
 
-#define GET_WORD(a) word a = get_data_word(r, dst_type, dst_offset);
-#define GET_BYTE(a) word a = get_data_byte(r, dst_type, dst_offset);
+#define GET_WORD(a) word a = get_data_word(r, dst_type, dst_offset); if (r->fAbort) return 0;
+#define GET_BYTE(a) word a = get_data_byte(r, dst_type, dst_offset); if (r->fAbort) return 0;
 
-#define PUT_WORD(a) put_data_word(r, dst_type, dst_offset, a);
-#define PUT_BYTE(a) put_data_byte(r, dst_type, dst_offset, a);
-#define PUT_BYTE_MOVB(a) put_data_byte_movb(r, dst_type, dst_offset, a);
+#define PUT_WORD(a) put_data_word(r, dst_type, dst_offset, a); if (r->fAbort) return 0;
+#define PUT_BYTE(a) put_data_byte(r, dst_type, dst_offset, a); if (r->fAbort) return 0;
+#define PUT_BYTE_MOVB(a) put_data_byte_movb(r, dst_type, dst_offset, a); if (r->fAbort) return 0;
 
     switch ((op & 0177700) >> 6) {
 		case 00001: /* JMP */
@@ -1240,11 +1269,11 @@ int core_step(regs *r)
     // Double operand instructions
     //
 
-#define DECODE_SRC()  src_type = decode_data(r, (op >> 6) & 077, TYPE_WORD, &src_offset);
-#define DECODE_SRCB() src_type = decode_data(r, (op >> 6) & 077, TYPE_BYTE, &src_offset);
+#define DECODE_SRC()  do { src_type = decode_data(r, (op >> 6) & 077, TYPE_WORD, &src_offset); if (src_type == TYPE_ERROR) return 0; } while (0)
+#define DECODE_SRCB() do { src_type = decode_data(r, (op >> 6) & 077, TYPE_BYTE, &src_offset); if (src_type == TYPE_ERROR) return 0; } while (0)
 
-#define GET_SWORD(a) word a = get_data_word(r, src_type, src_offset);
-#define GET_SBYTE(a) word a = get_data_byte(r, src_type, src_offset);
+#define GET_SWORD(a) word a = get_data_word(r, src_type, src_offset); if (r->fAbort) return 0;
+#define GET_SBYTE(a) word a = get_data_byte(r, src_type, src_offset); if (r->fAbort) return 0;
 
     switch((op & 0170000) >> 12) {
 		case 001: /* MOV */	{

@@ -1012,6 +1012,67 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_alignment_trap_store(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 06000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_mov(operand(0, 0), operand(1, 1)),
+    };
+
+    current_test = "dcj11_alignment_trap_store";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[0] = 01234;
+    fx.r.r[1] = 000001;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Odd word store should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760, "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_alignment_trap_fetch(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 06000;
+    const word new_psw = 000340;
+
+    current_test = "dcj11_alignment_trap_fetch";
+    fixture_setup_model(&fx, DCJ11);
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[7] = TEST_BASE + 1;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Odd instruction fetch should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760, "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 1, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_extended_ops_supported_models(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -2917,6 +2978,8 @@ int main(void)
     failed += test_dcj11_special_ops_illegal_on_other_models();
     failed += test_dcj11_tstset_wrtlck_mode0_illegal();
     failed += test_dcj11_alignment_trap();
+    failed += test_dcj11_alignment_trap_store();
+    failed += test_dcj11_alignment_trap_fetch();
     failed += test_extended_ops_supported();
     failed += test_condition_codes();
     failed += test_wait_and_reset();
