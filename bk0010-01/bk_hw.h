@@ -18,6 +18,7 @@ void bk_hw_reset_state(void);
 void bk_hw_handle_key(int code);
 void bk_hw_set_tick_hz(unsigned int hz);
 void bk_hw_tick(void);
+void bk_hw_tick_n(unsigned int ticks);
 int bk_hw_tape_set_input(const byte *data, size_t size);
 int bk_hw_tape_set_input_named(const byte *data, size_t size, const char *name);
 int bk_hw_tape_set_input_raw(const byte *data, size_t size);

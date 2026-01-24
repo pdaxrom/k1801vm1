@@ -515,6 +515,13 @@ void bk_hw_tick(void)
     }
 }
 
+void bk_hw_tick_n(unsigned int ticks)
+{
+    while (ticks--) {
+        bk_hw_tick();
+    }
+}
+
 byte *bk_hw_vram_ptr(void)
 {
     if (!mem) {

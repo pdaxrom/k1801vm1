@@ -8,6 +8,7 @@
 #define TAPE_SYNCH_DEFAULT 25
 
 static unsigned tape_synch = TAPE_SYNCH_DEFAULT;
+static int tape_synch_forced = 0;
 
 static byte tape_read_val = 1;
 static byte tape_write_val = 0;
@@ -378,6 +379,7 @@ void bk_tape_init(void)
 		long v = strtol(synch_env, NULL, 0);
 		if (v > 0 && v <= 100000) {
 			tape_synch = (unsigned)v;
+			tape_synch_forced = 1;
 		}
 	}
 }
@@ -395,7 +397,17 @@ void bk_tape_reset(void)
 
 void bk_tape_set_tick_hz(unsigned int hz)
 {
-	(void)hz;
+	if (tape_synch_forced) {
+		return;
+	}
+	if (hz == 0) {
+		return;
+	}
+	unsigned sync = hz / 3000u;
+	if (sync == 0) {
+		sync = 1;
+	}
+	tape_synch = sync;
 }
 
 void bk_tape_tick(void)

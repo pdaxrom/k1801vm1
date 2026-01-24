@@ -74,6 +74,7 @@ void core_reset(regs *r)
 {
     r->r[7] = r->SEL1 & 0177400;
     r->psw = 0340;
+    r->ir = 0;
     r->fWait = 0;
     r->fTrap = 0;
     r->fAbort = 0;
@@ -344,6 +345,7 @@ int core_step(regs *r)
     	r->fAbort = 0;
     	return 0;
     }
+    r->ir = op;
     r->r[7] += 2;
 
     //

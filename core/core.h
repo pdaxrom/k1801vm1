@@ -74,6 +74,7 @@ typedef struct _regs {
 	byte	model;
 
     word	psw, r[8];
+    word    ir;
 
     word	cps, cpc;	/* 0177676 0177674 */
 
