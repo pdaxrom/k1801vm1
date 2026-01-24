@@ -2313,7 +2313,48 @@ static int test_misc_ops_model(byte model, const char *name)
     write_op(&fx, op_mtps(operand(0, 0)));
     ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
     ASSERT_EQ(fx.r.psw & 0007, 0007, "MTPS should update low bits");
-    ASSERT_EQ(fx.r.psw & 0177770, 012340, "MTPS should keep high bits");
+    ASSERT_EQ(fx.r.psw & (FLAG_T | FLAG_H), 012340 & (FLAG_T | FLAG_H),
+              "MTPS should keep T/H");
+
+    set_test_name(namebuf, sizeof(namebuf), "mtps_set_p", name);
+    fx.r.psw = 012340;
+    fx.r.r[0] = 0200;
+    write_op(&fx, op_mtps(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
+    ASSERT_EQ(fx.r.psw & FLAG_P, FLAG_P, "MTPS should set P");
+
+    set_test_name(namebuf, sizeof(namebuf), "mtps_clear_p", name);
+    fx.r.psw = 012340 | FLAG_P;
+    fx.r.r[0] = 0000;
+    write_op(&fx, op_mtps(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
+    ASSERT_EQ(fx.r.psw & FLAG_P, 0, "MTPS should clear P");
+
+    set_test_name(namebuf, sizeof(namebuf), "mtps_imm_set_p", name);
+    fx.r.psw = 012340;
+    store_word(&fx, TEST_BASE, op_mtps(operand(2, 7)));
+    store_word(&fx, TEST_BASE + 2, 0200);
+    fx.r.r[7] = TEST_BASE;
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
+    ASSERT_EQ(fx.r.psw & FLAG_P, FLAG_P, "MTPS immediate should set P");
+
+    set_test_name(namebuf, sizeof(namebuf), "mtps_imm_clear_p", name);
+    fx.r.psw = 012340 | FLAG_P;
+    store_word(&fx, TEST_BASE, op_mtps(operand(2, 7)));
+    store_word(&fx, TEST_BASE + 2, 0000);
+    fx.r.r[7] = TEST_BASE;
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
+    ASSERT_EQ(fx.r.psw & FLAG_P, 0, "MTPS immediate should clear P");
+
+    set_test_name(namebuf, sizeof(namebuf), "mtps_imm_keep_th", name);
+    fx.r.psw = FLAG_T | FLAG_H | FLAG_P;
+    store_word(&fx, TEST_BASE, op_mtps(operand(2, 7)));
+    store_word(&fx, TEST_BASE + 2, 0000);
+    fx.r.r[7] = TEST_BASE;
+    fx.r.fTrap = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS");
+    ASSERT_EQ(fx.r.psw & (FLAG_T | FLAG_H), FLAG_T | FLAG_H,
+              "MTPS immediate should keep T/H");
 
 cleanup:
     fixture_teardown(&fx);
@@ -2733,11 +2774,11 @@ static int test_trace_vector(void)
     fx.r.psw = FLAG_T | 000003;
 
     ASSERT_EQ(core_step(&fx.r), 0, "Trace should succeed");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter trace handler");
     ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
-    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler), op_nop(), "Handler NOP after trace");
     ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), FLAG_T | 000003, "Stack PSW incorrect");
 
 cleanup:
@@ -2809,9 +2850,9 @@ static int test_rtt_skips_trace_once(void)
     ASSERT_EQ(fx.r.psw, FLAG_T | 000003, "PSW should preserve T bit");
 
     ASSERT_EQ(core_step(&fx.r), 0, "Next instruction should execute under trace");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "Trace should vector on following step");
+    ASSERT_EQ(fx.r.r[7], handler, "Trace should vector on following step");
     ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 01200), TEST_BASE + 4, "Trace stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01200), TEST_BASE + 6, "Trace stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 01202), FLAG_T | 000003, "Trace stack PSW incorrect");
 
 cleanup:
@@ -2842,15 +2883,15 @@ static int test_trace_rearms_after_handler(void)
     fx.r.psw = FLAG_T | 000003;
 
     ASSERT_EQ(core_step(&fx.r), 0, "Trace should vector on first step");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter trace handler");
     ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
     ASSERT_EQ(fx.r.fTrap, 0, "fTrap should remain clear");
 
     fx.r.psw |= FLAG_T;
     fx.r.r[7] = TEST_BASE;
     ASSERT_EQ(core_step(&fx.r), 0, "Trace should rearm on next step");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should return to handler after trace");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 01170), TEST_BASE, "Second trace stack PC incorrect");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should return to handler after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01170), TEST_BASE + 2, "Second trace stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 01172), (word)(new_psw | FLAG_T), "Second trace stack PSW incorrect");
 
 cleanup:
@@ -2881,14 +2922,14 @@ static int test_trace_rearms_with_t_in_vector(void)
     fx.r.psw = FLAG_T | 000003;
 
     ASSERT_EQ(core_step(&fx.r), 0, "Trace should vector on first step");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter trace handler");
     ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
 
     fx.r.r[7] = TEST_BASE;
     ASSERT_EQ(core_step(&fx.r), 0, "Trace should rearm with T in vector");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should return to handler after trace");
-    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP after trace");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 01170), TEST_BASE, "Second trace stack PC incorrect");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should return to handler after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler), op_nop(), "Handler NOP after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01170), TEST_BASE + 2, "Second trace stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 01172), new_psw, "Second trace stack PSW incorrect");
 
 cleanup:
@@ -2919,15 +2960,15 @@ static int test_trace_stops_when_t_cleared(void)
     fx.r.psw = FLAG_T | 000003;
 
     ASSERT_EQ(core_step(&fx.r), 0, "Trace should vector on first step");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should advance after handler");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter trace handler");
     ASSERT_EQ(fx.r.psw, new_psw, "PSW should load trace vector");
 
     fx.r.r[7] = TEST_BASE;
     ASSERT_EQ(core_step(&fx.r), 0, "Program NOP should execute");
     ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without trace");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 01174), TEST_BASE, "Trace stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01174), TEST_BASE + 2, "Trace stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 01176), FLAG_T | 000003, "Trace stack PSW incorrect");
-    ASSERT_EQ(fx.r.load_word(&fx.r, handler + 2), op_nop(), "Handler+2 NOP after trace");
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler), op_nop(), "Handler NOP after trace");
 
 cleanup:
     fixture_teardown(&fx);
@@ -2986,10 +3027,10 @@ static int test_keyboard_irq_vector(void)
     test_irq_pending = 1;
 
     ASSERT_EQ(core_step(&fx.r), 0, "IRQ should succeed");
-    ASSERT_EQ(fx.r.r[7], handler + 2, "PC should execute handler instruction");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter handler");
     ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
     ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
 
 cleanup:

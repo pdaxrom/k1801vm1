@@ -301,6 +301,10 @@ int core_step(regs *r)
     word dst_offset;
     byte dst_type;
     word irq_vector;
+    word psw_before = r->psw;
+    int do_trace = 0;
+    int skip_trace = r->fTrap ? 1 : 0;
+    r->fTrap = 0;
 
     if (r->fAbort) {
     	r->fAbort = 0;
@@ -318,32 +322,15 @@ int core_step(regs *r)
     	return 0;
     }
 
-    if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
-    	pushw(r->psw);
-    	pushw(r->r[7]);
-    	r->r[7] = load_word(r, irq_vector);
-    	r->psw  = load_word(r, (word)(irq_vector + 2));
-    }
+    /* IRQs are checked after instruction execution (real PDP-11 behavior). */
 
-    if (flag_is_set(FLAG_T)) {
-    	if (!r->fTrap) {
-    		pushw(r->psw);
-    		pushw(r->r[7]);
-    		r->r[7] = load_word(r, 014);
-    		r->psw  = load_word(r, 016);
-    	}
-    }
-
-    if (r->fTrap) {
-    	r->fTrap = 0;
-    }
 
     // load instruction
 
     word op = load_word(r, r->r[7]);
     if (r->fAbort) {
     	r->fAbort = 0;
-    	return 0;
+        return 0;
     }
     r->ir = op;
     r->r[7] += 2;
@@ -355,92 +342,93 @@ int core_step(regs *r)
 		case 000000: /* HALT */ {
 #warning HALT
 			handle_halt(r);
-			return 0;
+        goto step_end;
 		}
 
 		case 000001: /* WAIT */
 			r->fWait = 1;
-			return 0;
+        goto step_end;
 
 		case 000002: /* RTI */
 			pullw(r->r[7]);
 			pullw(r->psw);
-			return 0;
+        goto step_end;
 
 		case 000003: /* BPT */
 			pushw(r->psw);
 			pushw(r->r[7]);
 			r->r[7] = load_word(r, 014);
 			r->psw  = load_word(r, 016);
-			return 0;
+        goto step_end;
 
 		case 000004: /* IOT */
 			pushw(r->psw);
 			pushw(r->r[7]);
 			r->r[7] = load_word(r, 020);
 			r->psw  = load_word(r, 022);
-			return 0;
+        goto step_end;
 
 		case 000005: /* RESET */
 #warning RESET
-			return 0;
+        goto step_end;
 
 		case 000006: /* RTT */
 			pullw(r->r[7]);
 			pullw(r->psw);
 			r->fTrap = 1;
-			return 0;
+			skip_trace = 1;
+        goto step_end;
 
 		case 000007: /* MFPT */
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			r->r[0] = 5;
-			return 0;
+        goto step_end;
 
 		case 000240: /* NOP */
-			return 0;
+        goto step_end;
 
 		case 000241: /* CLC */
 			clear_flag(FLAG_C);
-			return 0;
+        goto step_end;
 
 		case 000242: /* CLV */
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 
 		case 000244: /* CLZ */
 			clear_flag(FLAG_Z);
-			return 0;
+        goto step_end;
 
 		case 000250: /* CLN */
 			clear_flag(FLAG_N);
-			return 0;
+        goto step_end;
 
 		case 000257: /* CCC */
 			clear_flag(FLAG_C | FLAG_V | FLAG_Z | FLAG_N);
-			return 0;
+        goto step_end;
 
 		case 000261: /* SEC */
 			set_flag(FLAG_C);
-			return 0;
+        goto step_end;
 
 		case 000262: /* SEV */
 			set_flag(FLAG_V);
-			return 0;
+        goto step_end;
 
 		case 000264: /* SEZ */
 			set_flag(FLAG_Z);
-			return 0;
+        goto step_end;
 
 		case 000270: /* SEN */
 			set_flag(FLAG_N);
-			return 0;
+        goto step_end;
 
 		case 000277: /* SCC */
 			set_flag(FLAG_C | FLAG_V | FLAG_Z | FLAG_N);
-			return 0;
+        goto step_end;
 
     }
 
@@ -449,42 +437,42 @@ int core_step(regs *r)
     	case 0000012: /* START */
     		r->r[7] = r->cpc;
     		r->psw = r->cps;
-    		return 0;
+        goto step_end;
 
     	case 0000016: /* STEP */
     		r->r[7] = r->cpc;
     		r->psw = r->cps;
-    		return 0;
+        goto step_end;
 
     	case 0000020: /* RSEL */
     		r->r[0] = r->SEL1;
-    		return 0;
+        goto step_end;
 
     	case 0000021: /* MFUS */
     		r->r[0] = load_word(r, r->r[5]);
     		r->r[5] += 2;
-    		return 0;
+        goto step_end;
 
     	case 0000022: /* RCPC */
     		r->r[0] = r->cpc;
-    		return 0;
+        goto step_end;
 
     	case 0000024: /* RCPS */
     		r->r[0] = r->cps;
-    		return 0;
+        goto step_end;
 
     	case 0000031: /* MTUS */
     		r->r[5] -= 2;
     		store_word(r, r->r[5], r->r[0]);
-    		return 0;
+        goto step_end;
 
     	case 0000032: /* WCPC */
     		r->cpc = r->r[0];
-    		return 0;
+        goto step_end;
 
     	case 0000034: /* WCPS */
     		r->cps = r->r[0];
-    		return 0;
+        goto step_end;
     	}
     }
 
@@ -498,7 +486,7 @@ int core_step(regs *r)
 		case 0000400: /* BR */ {
 			BR_OFFSET();
 			r->r[7] += (offset * 2);
-			return 0;
+        goto step_end;
 		}
 
 		case 0001000: /* BNE */
@@ -506,98 +494,98 @@ int core_step(regs *r)
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0001400: /* BEQ */
 			if (flag_is_set(FLAG_Z)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0100000: /* BPL */
 			if (flag_is_clear(FLAG_N)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0100400: /* BMI */
 			if (flag_is_set(FLAG_N)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0102000: /* BVC */
 			if (flag_is_clear(FLAG_V)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0102400: /* BVS */
 			if (flag_is_set(FLAG_V)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0103000: /* BCC or BHIS */
 			if (flag_is_clear(FLAG_C)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0103400: /* BCS or BLO */
 			if (flag_is_set(FLAG_C)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0002000: /* BGE */
 			if ((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) == 0) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0002400: /* BLT */
 			if ((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) == 1) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0003000: /* BGT */
 			if (((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) | flag_is_set(FLAG_Z)) == 0) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0003400: /* BLE */
 			if (((flag_is_set(FLAG_N) ^ flag_is_set(FLAG_V)) | flag_is_set(FLAG_Z)) == 1) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0101000: /* BHI */
 			if (flag_is_clear(FLAG_C | FLAG_Z)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0101400: /* BLOS */
 			if (!flag_is_clear(FLAG_C | FLAG_Z)) {
 				BR_OFFSET();
 				r->r[7] += (offset * 2);
 			}
-			return 0;
+        goto step_end;
 
 		case 0104000:
 		case 0104400:
@@ -614,7 +602,7 @@ int core_step(regs *r)
 				r->r[7] = load_word(r, 030);
 				r->psw  = load_word(r, 032);
 			}
-			return 0;
+        goto step_end;
     }
 
     // RTS
@@ -622,7 +610,7 @@ int core_step(regs *r)
     	byte reg = op & 07;
     	r->r[7] = r->r[reg];
     	pullw(r->r[reg]);
-    	return 0;
+        goto step_end;
     }
 
     // MARKNN instruction
@@ -632,7 +620,7 @@ int core_step(regs *r)
     	r->r[6] += (nn << 1);
     	r->r[7] = r->r[5];
     	pullw(r->r[5]);
-    	return 0;
+        goto step_end;
     }
 
     // SOB instruction
@@ -644,7 +632,7 @@ int core_step(regs *r)
     	if (r->r[reg]) {
     		r->r[7] -= (nn << 1);
     	}
-    	return 0;
+        goto step_end;
     }
 
     //
@@ -665,24 +653,24 @@ int core_step(regs *r)
 		case 00001: /* JMP */
 			if ((op & 070) == 0) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			r->r[7] = dst_offset;
-			return 0;
+        goto step_end;
 
 		case 00050: /* CLR */
 			DECODE_DST();
 			put_data_word(r, dst_type, dst_offset, 0);
 			clear_flag(FLAG_N | FLAG_V | FLAG_C);
 			set_flag(FLAG_Z);
-			return 0;
+        goto step_end;
 		case 01050: /* CLRB */
 			DECODE_DSTB();
 			put_data_byte(r, dst_type, dst_offset, 0);
 			clear_flag(FLAG_N | FLAG_V | FLAG_C);
 			set_flag(FLAG_Z);
-			return 0;
+        goto step_end;
 
 		case 00051: /* COM */ {
 			DECODE_DST();
@@ -693,7 +681,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			clear_flag(FLAG_V);
 			set_flag(FLAG_C);
-			return 0;
+        goto step_end;
 		}
 		case 01051: /* COMB */ {
 			DECODE_DSTB();
@@ -704,7 +692,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			clear_flag(FLAG_V);
 			set_flag(FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 00052: /* INC */ {
@@ -715,7 +703,7 @@ int core_step(regs *r)
 			PUT_WORD(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN,   FLAG_N);
-			return 0;
+        goto step_end;
 		}
 		case 01052: /* INCB */ {
 			DECODE_DSTB();
@@ -725,7 +713,7 @@ int core_step(regs *r)
 			PUT_BYTE(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
-			return 0;
+        goto step_end;
 		}
 
 		case 00053: /* DEC */ {
@@ -736,7 +724,7 @@ int core_step(regs *r)
 			PUT_WORD(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN,   FLAG_N);
-			return 0;
+        goto step_end;
 		}
 		case 01053: /* DECB */ {
 			DECODE_DSTB();
@@ -746,7 +734,7 @@ int core_step(regs *r)
 			PUT_BYTE(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
-			return 0;
+        goto step_end;
 		}
 
 		case 00054: /* NEG */ {
@@ -758,7 +746,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == MNI,   FLAG_V);
 			set_flag_if(tmp != 0,     FLAG_C);
-			return 0;
+        goto step_end;
 		}
 		case 01054: /* NEGB */ {
 			DECODE_DSTB();
@@ -769,7 +757,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == MNI_B, FLAG_V);
 			set_flag_if(tmp != 0,     FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 00057: /* TST */ {
@@ -778,7 +766,7 @@ int core_step(regs *r)
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			clear_flag(FLAG_V | FLAG_C);
-			return 0;
+        goto step_end;
 		}
 		case 01057: /* TSTB */ {
 			DECODE_DSTB();
@@ -786,7 +774,7 @@ int core_step(regs *r)
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			clear_flag(FLAG_V | FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 00062: /* ASR */ {
@@ -798,7 +786,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 01062: /* ASRB */ {
 			DECODE_DSTB();
@@ -809,7 +797,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 00063: /* ASL */ {
@@ -821,7 +809,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 01063: /* ASLB */ {
 			DECODE_DSTB();
@@ -832,7 +820,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 00060: /* ROR */ {
@@ -848,7 +836,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 01060: /* RORB */ {
 			DECODE_DSTB();
@@ -863,7 +851,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 00061: /* ROL */ {
@@ -879,7 +867,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 01061: /* ROLB */ {
 			DECODE_DSTB();
@@ -894,7 +882,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 00055: /* ADC */ {
@@ -909,7 +897,7 @@ int core_step(regs *r)
 			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
-			return 0;
+        goto step_end;
 		}
 		case 01055: /* ADCB */ {
 			DECODE_DSTB();
@@ -923,7 +911,7 @@ int core_step(regs *r)
 			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
-			return 0;
+        goto step_end;
 		}
 
 		case 00056: /* SBC */ {
@@ -938,7 +926,7 @@ int core_step(regs *r)
 			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
-			return 0;
+        goto step_end;
 		}
 		case 01056: /* SBCB */ {
 			DECODE_DSTB();
@@ -952,7 +940,7 @@ int core_step(regs *r)
 			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
-			return 0;
+        goto step_end;
 		}
 
 		case 00003: /* SWAB */ {
@@ -965,7 +953,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B,     FLAG_N);
 			set_flag_if(tmp == 0,         FLAG_Z);
 			}
-			return 0;
+        goto step_end;
 
 		case 00067: /* SXT */
 			DECODE_DST();
@@ -977,7 +965,7 @@ int core_step(regs *r)
 				set_flag(FLAG_Z);
 			}
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 
 		case 01067: /* MFPS */ {
 #warning MFPS
@@ -988,22 +976,22 @@ int core_step(regs *r)
 			set_flag_if((tmp & 0377) == 0, FLAG_Z);
 			clear_flag(FLAG_V);
 			}
-			return 0;
+        goto step_end;
 
 		case 01064: /* MTPS */
-#warning MTPS
-			DECODE_DST();
-			r->psw = (get_data_word(r, dst_type, dst_offset) & 0007) | (r->psw & 0177770);
-			return 0;
+			DECODE_DSTB();
+			GET_BYTE(tmp);
+			r->psw = (r->psw & (FLAG_T | FLAG_H)) | (tmp & 0xEF);
+        goto step_end;
 
 		case 00072: /* TSTSET */ {
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			if ((op & 070) == 0) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			GET_WORD(tmp);
@@ -1013,17 +1001,17 @@ int core_step(regs *r)
 			set_flag_if(r->r[0] == 0,  FLAG_Z);
 			clear_flag(FLAG_V);
 			set_flag_if(tmp & 1,       FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 00073: /* WRTLCK */ {
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			if ((op & 070) == 0) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			word tmp = r->r[0];
@@ -1031,13 +1019,13 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,  FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 00065: /* MFPD */ {
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			GET_WORD(tmp);
@@ -1045,12 +1033,12 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,  FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 01065: /* MFPI */ {
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			GET_WORD(tmp);
@@ -1058,12 +1046,12 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,  FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 00066: /* MTPI */ {
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			word tmp;
@@ -1072,12 +1060,12 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,  FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 01066: /* MTPD */ {
 			if (r->model != DCJ11) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			DECODE_DST();
 			word tmp;
@@ -1086,7 +1074,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,  FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
     }
 
@@ -1103,13 +1091,13 @@ int core_step(regs *r)
 			pushw(r->r[reg]);
 			r->r[reg] = r->r[7];
 			r->r[7] = dst_offset;
-			return 0;
+        goto step_end;
 		}
 
 		case 0070: /* MUL */ {
 			if (r->model == K1801VM1) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			union u_word data1;
 			union u_word data2;
@@ -1128,13 +1116,13 @@ int core_step(regs *r)
 			set_flag_if(tmp.u & 0x80000000, FLAG_N);
 			set_flag_if((tmp.s < -0100000) || (tmp.s >= 077777), FLAG_C);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 0071: /* DIV */ {
 			if (r->model == K1801VM1) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			union u_word data1;
 			union u_word data2;
@@ -1148,7 +1136,7 @@ int core_step(regs *r)
 				set_flag(FLAG_V);
 				clear_flag(FLAG_Z);
 				clear_flag(FLAG_N);
-				return 0;
+        goto step_end;
 			}
 			clear_flag(FLAG_C);
 
@@ -1161,19 +1149,19 @@ int core_step(regs *r)
 				set_flag(FLAG_V);
 				clear_flag(FLAG_Z);
 				clear_flag(FLAG_N);
-				return 0;
+        goto step_end;
 			}
 
 			r->r[reg | 1] = (data1.s % data2.s) & 0177777;
 			r->r[reg] = tmp.u & 0177777;
 
-			return 0;
+        goto step_end;
 		}
 
 		case 0072: /* ASH */ {
 			if (r->model == K1801VM1) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			RA_REG(reg);
 			word tmp = r->r[reg];
@@ -1207,13 +1195,13 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN, FLAG_N);
 			set_flag_if(tmp == 0,   FLAG_Z);
 
-			return 0;
+        goto step_end;
 		}
 
 		case 0073: /* ASHC */ {
 			if (r->model == K1801VM1) {
 				illegal_trap(r);
-				return 0;
+        goto step_end;
 			}
 			RA_REG(reg);
 			dword tmp = (r->r[reg] << 16) | r->r[reg | 1];
@@ -1249,7 +1237,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & 0x80000000, FLAG_N);
 			set_flag_if(tmp == 0, FLAG_Z);
 
-			return 0;
+        goto step_end;
 		}
 
 		case 0074: /* XOR */ {
@@ -1261,7 +1249,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
     }
 
@@ -1284,7 +1272,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN,   FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 011: /* MOVB */ {
 			DECODE_SRCB();
@@ -1294,7 +1282,7 @@ int core_step(regs *r)
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 002: /* CMP */ {
@@ -1309,7 +1297,7 @@ int core_step(regs *r)
 			set_flag_if(tmp2 == 0,    FLAG_Z);
 			set_flag_if(((tmp & SIGN) != (tmp1 & SIGN)) && ((tmp1 & SIGN) == (tmp2 & SIGN)), FLAG_V);
 			set_flag_if(!(tmp3 & CARRY), FLAG_C);
-			return 0;
+        goto step_end;
 		}
 		case 012: /* CMPB */ {
 			DECODE_SRCB();
@@ -1323,7 +1311,7 @@ int core_step(regs *r)
 			set_flag_if(tmp2 == 0,      FLAG_Z);
 			set_flag_if(((tmp & SIGN_B) != (tmp1 & SIGN_B)) && ((tmp1 & SIGN_B) == (tmp2 & SIGN_B)), FLAG_V);
 			set_flag_if(!(tmp3 & CARRY_B), FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 006: /* ADD */ {
@@ -1338,7 +1326,7 @@ int core_step(regs *r)
 			set_flag_if(tmp2 == 0,    FLAG_Z);
 			set_flag_if(((tmp & SIGN) == (tmp1 & SIGN)) && ((tmp & SIGN) != (tmp2 & SIGN)), FLAG_V);
 			set_flag_if(tmp3 & CARRY, FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 016: /* SUB */ {
@@ -1354,7 +1342,7 @@ int core_step(regs *r)
 			set_flag_if(tmp2 == 0,    FLAG_Z);
 			set_flag_if(((tmp & SIGN) != (tmp1 & SIGN)) && ((tmp & SIGN) == (tmp2 & SIGN)), FLAG_V);
 			set_flag_if(!(tmp3 & CARRY), FLAG_C);
-			return 0;
+        goto step_end;
 		}
 
 		case 003: /* BIT */ {
@@ -1366,7 +1354,7 @@ int core_step(regs *r)
 			set_flag_if(tmp2 & SIGN,   FLAG_N);
 			set_flag_if(tmp2 == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 013: /* BITB */ {
 			DECODE_SRCB();
@@ -1377,7 +1365,7 @@ int core_step(regs *r)
 			set_flag_if(tmp2 & SIGN_B, FLAG_N);
 			set_flag_if(tmp2 == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 004: /* BIC */ {
@@ -1390,7 +1378,7 @@ int core_step(regs *r)
 			set_flag_if(tmp1 & SIGN,   FLAG_N);
 			set_flag_if(tmp1 == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 014: /* BICB */ {
 			DECODE_SRCB();
@@ -1402,7 +1390,7 @@ int core_step(regs *r)
 			set_flag_if(tmp1 & SIGN_B, FLAG_N);
 			set_flag_if(tmp1 == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 
 		case 005: /* BIS */ {
@@ -1415,7 +1403,7 @@ int core_step(regs *r)
 			set_flag_if(tmp1 & SIGN,   FLAG_N);
 			set_flag_if(tmp1 == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
 		case 015: /* BISB */ {
 			DECODE_SRCB();
@@ -1427,10 +1415,27 @@ int core_step(regs *r)
 			set_flag_if(tmp1 & SIGN_B, FLAG_N);
 			set_flag_if(tmp1 == 0,     FLAG_Z);
 			clear_flag(FLAG_V);
-			return 0;
+        goto step_end;
 		}
     }
 
 	illegal_trap(r);
-	return 0;
+        goto step_end;
+step_end:
+    if (!skip_trace && (psw_before & FLAG_T)) {
+        do_trace = 1;
+    }
+    if (do_trace) {
+        pushw(r->psw);
+        pushw(r->r[7]);
+        r->r[7] = load_word(r, 014);
+        r->psw  = load_word(r, 016);
+    }
+    if (!do_trace && r->poll_irq && !flag_is_set(FLAG_P) && r->poll_irq(r, &irq_vector)) {
+        pushw(r->psw);
+        pushw(r->r[7]);
+        r->r[7] = load_word(r, irq_vector);
+        r->psw  = load_word(r, (word)(irq_vector + 2));
+    }
+    return 0;
 }
