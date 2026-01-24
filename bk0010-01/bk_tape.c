@@ -9,6 +9,7 @@
 
 static unsigned tape_synch = TAPE_SYNCH_DEFAULT;
 static int tape_synch_forced = 0;
+static int tape_name_pad_space = 0;
 
 static byte tape_read_val = 1;
 static byte tape_write_val = 0;
@@ -384,6 +385,11 @@ void bk_tape_init(void)
 	}
 }
 
+void bk_tape_set_name_pad(int use_space)
+{
+	tape_name_pad_space = use_space ? 1 : 0;
+}
+
 void bk_tape_reset(void)
 {
 	tape_ticks = 0;
@@ -523,7 +529,9 @@ static int tape_encode_bin_to_raw_internal(const byte *data, size_t size,
 		size_t nlen = name_raw_size > 16 ? 16 : name_raw_size;
 		memcpy(header, name_raw, nlen);
 	} else if (name) {
-		memset(header, ' ', sizeof(header));
+		if (tape_name_pad_space) {
+			memset(header, ' ', sizeof(header));
+		}
 		size_t nlen = strlen(name);
 		if (nlen > 16) {
 			nlen = 16;

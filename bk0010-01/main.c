@@ -21,7 +21,7 @@
 static void usage(const char *prog)
 {
     fprintf(stderr,
-            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--tape-in <file>] [--tape-raw] [--tape-name <name>] [--tape-out <file>] [--tape-out-bin <file>] "
+            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--tape-in <file>] [--tape-raw] [--tape-name <name>] [--tape-name-pad <zero|space>] [--tape-name-zero] [--tape-name-space] [--tape-out <file>] [--tape-out-bin <file>] "
             "[--cpu-3mhz] [--cpu-4mhz] [--cpu-max] [--start <octal>] [--trace] [--show-shift] [--show-cpu]\n"
             "Defaults to ROM/MONIT10.ROM and ROM/BASIC10.ROM\n",
             prog);
@@ -218,14 +218,16 @@ static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
     return -1;
 }
 
-static void update_window_title(SDL_Window *win, unsigned int cpu_hz, int cpu_max)
+static void update_window_title(SDL_Window *win, unsigned int cpu_hz, int cpu_max, int name_pad_space)
 {
     char title[128];
     if (cpu_max) {
-        snprintf(title, sizeof(title), "BK0010-01 (CPU: MAX)");
+        snprintf(title, sizeof(title), "BK0010-01 (CPU: MAX, NAME: %s)",
+                 name_pad_space ? "SPACE" : "ZERO");
     } else {
         double mhz = cpu_hz / 1000000.0;
-        snprintf(title, sizeof(title), "BK0010-01 (CPU: %.1f MHz)", mhz);
+        snprintf(title, sizeof(title), "BK0010-01 (CPU: %.1f MHz, NAME: %s)",
+                 mhz, name_pad_space ? "SPACE" : "ZERO");
     }
     SDL_SetWindowTitle(win, title);
 }
@@ -284,6 +286,7 @@ int main(int argc, char **argv)
     unsigned int cpu_hz = CPU_HZ_3MHZ;
     int cpu_max = 0;
     int cpu_mode = 0;
+    int name_pad_space = 0;
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--rom-dir") == 0 && i + 1 < argc) {
@@ -322,6 +325,20 @@ int main(int argc, char **argv)
         } else if (strcmp(argv[i], "--cpu-max") == 0) {
             cpu_max = 1;
             cpu_mode = 2;
+        } else if (strcmp(argv[i], "--tape-name-pad") == 0 && i + 1 < argc) {
+            const char *pad = argv[++i];
+            if (strcmp(pad, "space") == 0) {
+                name_pad_space = 1;
+            } else if (strcmp(pad, "zero") == 0) {
+                name_pad_space = 0;
+            } else {
+                fprintf(stderr, "Unknown pad mode: %s\n", pad);
+                return 1;
+            }
+        } else if (strcmp(argv[i], "--tape-name-space") == 0) {
+            name_pad_space = 1;
+        } else if (strcmp(argv[i], "--tape-name-zero") == 0) {
+            name_pad_space = 0;
         } else if (strcmp(argv[i], "--start") == 0 && i + 1 < argc) {
             unsigned int tmp = 0;
             sscanf(argv[++i], "%o", &tmp);
@@ -397,6 +414,7 @@ int main(int argc, char **argv)
     r.model = K1801VM1;
 
     bk_hw_connect(&r);
+    bk_tape_set_name_pad(name_pad_space);
     if (r.init(&r) != 0) {
         fprintf(stderr, "Hardware init failed\n");
         free(monitor_rom);
@@ -541,7 +559,7 @@ int main(int argc, char **argv)
     uint64_t instr_count = 0;
     uint64_t cycle_count = 0;
     uint64_t cycles_per_frame = cpu_hz / FPS;
-    update_window_title(win, cpu_hz, cpu_max);
+    update_window_title(win, cpu_hz, cpu_max, name_pad_space);
     while (running) {
         Uint32 frame_start = SDL_GetTicks();
         if (show_shift) {
@@ -560,6 +578,10 @@ int main(int argc, char **argv)
                 SDL_Keycode key = ev.key.keysym.sym;
                 if (key == SDLK_ESCAPE) {
                     r.fHaltSignal = 1;
+                } else if (key == SDLK_F9) {
+                    name_pad_space = !name_pad_space;
+                    bk_tape_set_name_pad(name_pad_space);
+                    update_window_title(win, cpu_hz, cpu_max, name_pad_space);
                 } else if (key == SDLK_F10) {
                     cpu_mode = (cpu_mode + 1) % 3;
                     if (cpu_mode == 0) {
@@ -573,7 +595,7 @@ int main(int argc, char **argv)
                     }
                     cycles_per_frame = cpu_hz / FPS;
                     bk_hw_set_tick_hz(cpu_hz);
-                    update_window_title(win, cpu_hz, cpu_max);
+                    update_window_title(win, cpu_hz, cpu_max, name_pad_space);
                 } else {
                     int code = bk_translate_key(key, ev.key.keysym.mod);
                     if (code >= 0) {

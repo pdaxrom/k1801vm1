@@ -11,6 +11,7 @@ void bk_tape_set_tick_hz(unsigned int hz);
 void bk_tape_tick(void);
 void bk_tape_write(int motor_on, int val);
 int bk_tape_read(void);
+void bk_tape_set_name_pad(int use_space);
 
 int bk_tape_set_input(const byte *data, size_t size);
 int bk_tape_set_input_bin(const byte *data, size_t size, const char *name);
