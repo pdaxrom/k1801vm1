@@ -18,7 +18,7 @@
 static void usage(const char *prog)
 {
     fprintf(stderr,
-            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--tape-in <file>] [--tape-raw] [--tape-name <name>] [--tape-out <file>] [--tape-out-bin <file>] [--tape-out-roundtrip <file>] "
+            "Usage: %s [--rom-dir <path>] [--monitor <file>] [--basic <file>] [--tape-in <file>] [--tape-raw] [--tape-name <name>] [--tape-out <file>] [--tape-out-bin <file>] "
             "[--start <octal>] [--trace] [--show-shift] [--show-cpu]\n"
             "Defaults to ROM/MONIT10.ROM and ROM/BASIC10.ROM\n",
             prog);
@@ -223,7 +223,6 @@ int main(int argc, char **argv)
     const char *tape_in_path = NULL;
     const char *tape_out_path = NULL;
     const char *tape_out_bin_path = NULL;
-    const char *tape_out_roundtrip_path = NULL;
     const char *tape_name = NULL;
     char tape_name_buf[32];
     int tape_raw = 0;
@@ -253,8 +252,6 @@ int main(int argc, char **argv)
             tape_out_path = argv[++i];
         } else if (strcmp(argv[i], "--tape-out-bin") == 0 && i + 1 < argc) {
             tape_out_bin_path = argv[++i];
-        } else if (strcmp(argv[i], "--tape-out-roundtrip") == 0 && i + 1 < argc) {
-            tape_out_roundtrip_path = argv[++i];
         } else if (strcmp(argv[i], "--trace") == 0) {
             trace = 1;
         } else if (strcmp(argv[i], "--show-shift") == 0) {
@@ -377,21 +374,6 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Failed to set raw tape input\n");
             }
         } else if (tape_name) {
-            byte *raw_data = NULL;
-            size_t raw_size = 0;
-            if (bk_tape_encode_bin_to_raw(tape_data, tape_size, tape_name,
-                                          &raw_data, &raw_size) == 0) {
-                char raw_path[1024];
-                snprintf(raw_path, sizeof(raw_path), "%s.raw", tape_in_path);
-                if (save_tape_file(raw_path, raw_data, raw_size) != 0) {
-                    fprintf(stderr, "Failed to write tape raw to %s\n", raw_path);
-                } else {
-                    fprintf(stderr, "Wrote tape raw: %s size=%zu\n", raw_path, raw_size);
-                }
-                free(raw_data);
-            } else {
-                fprintf(stderr, "Failed to encode tape raw from %s\n", tape_in_path);
-            }
             if (bk_hw_tape_set_input_named(tape_data, tape_size, tape_name) != 0) {
                 fprintf(stderr, "Failed to set tape input\n");
             } else {
@@ -567,25 +549,9 @@ int main(int argc, char **argv)
                     fprintf(stderr, "Wrote tape bin: %s size=%zu name=%s\n",
                             tape_out_bin_path, bin_size, name_buf);
                 }
-                if (tape_out_roundtrip_path && bin_data && bin_size > 0) {
-                    byte *round_raw = NULL;
-                    size_t round_raw_size = 0;
-                    if (bk_tape_encode_bin_to_raw_named(bin_data, bin_size,
-                                                        name_raw, sizeof(name_raw),
-                                                        &round_raw, &round_raw_size) != 0) {
-                        fprintf(stderr, "Failed to encode roundtrip tape\n");
-                    } else if (save_tape_file(tape_out_roundtrip_path, round_raw, round_raw_size) != 0) {
-                        fprintf(stderr, "Failed to write roundtrip tape to %s\n",
-                                tape_out_roundtrip_path);
-                } else {
-                    fprintf(stderr, "Wrote tape roundtrip: %s size=%zu\n",
-                            tape_out_roundtrip_path, round_raw_size);
-                }
-                free(round_raw);
+                free(bin_data);
             }
-            free(bin_data);
         }
-    }
 
     core_fini(&r);
     free(monitor_rom);

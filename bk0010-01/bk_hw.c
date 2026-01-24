@@ -55,8 +55,6 @@ static byte sys_port_out = 0220;
 static byte sys_port_in = 0370;
 static byte kbd_irq_pending = 0;
 static byte bus_error_pending = 0;
-static int motor_state = 1;
-static int tape_debug = 0;
 static byte tape_in_bit = 1;
 
 static int bk_poll_irq(regs *r, word *vector);
@@ -297,17 +295,6 @@ static void bk_store_byte(regs *r, word offset, byte value)
         break;
     case BK_SYS_CTRL:
         sys_port_out = (byte)(value & SYS_PORT_OUT_MASK);
-        if (tape_motor_on() != motor_state) {
-            motor_state = tape_motor_on();
-            fprintf(stderr, "TAPE MOTOR %s\n", motor_state ? "ON" : "OFF");
-        }
-        if (tape_debug) {
-            fprintf(stderr, "SYS_CTRL=%03o tape5=%d tape6=%d motor=%d\n",
-                    value & 0377,
-                    (value & SYS_PORT_TAPE_BIT) ? 1 : 0,
-                    (value & SYS_PORT_TAPE_BIT2) ? 1 : 0,
-                    (value & SYS_PORT_MOTOR_BIT) ? 1 : 0);
-        }
         bk_tape_write(tape_motor_on(),
                       (value & SYS_PORT_TAPE_BIT2) ? 1 : 0);
         break;
@@ -346,7 +333,6 @@ static int bk_init(regs *r)
         }
     }
     memset(mem, 0, MEM_SIZE);
-    tape_debug = getenv("BK_TAPE_DEBUG") ? 1 : 0;
     bk_tape_init();
     return 0;
 }
@@ -368,7 +354,6 @@ static void bk_reset(regs *r)
     sys_port_in = 0370;
     kbd_irq_pending = 0;
     bus_error_pending = 0;
-    motor_state = 1;
     bk_tape_reset();
 }
 
@@ -429,7 +414,6 @@ void bk_hw_reset_state(void)
     sys_port_in = 0370;
     kbd_irq_pending = 0;
     bus_error_pending = 0;
-    motor_state = 1;
     bk_tape_reset();
 }
 

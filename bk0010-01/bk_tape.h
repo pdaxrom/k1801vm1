@@ -16,9 +16,6 @@ int bk_tape_set_input(const byte *data, size_t size);
 int bk_tape_set_input_bin(const byte *data, size_t size, const char *name);
 int bk_tape_encode_bin_to_raw(const byte *data, size_t size, const char *name,
                               byte **out_raw, size_t *out_size);
-int bk_tape_encode_bin_to_raw_named(const byte *data, size_t size,
-                                    const byte *name_raw, size_t name_raw_size,
-                                    byte **out_raw, size_t *out_size);
 void bk_tape_set_output_enabled(int enable);
 const byte *bk_tape_output_data(size_t *size);
 void bk_tape_output_clear(void);

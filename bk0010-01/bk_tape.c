@@ -12,8 +12,6 @@ static unsigned tape_synch = TAPE_SYNCH_DEFAULT;
 static byte tape_read_val = 1;
 static byte tape_write_val = 0;
 static int tape_status = 1; /* 0 = moving, 1 = stopped */
-static int tape_debug = 0;
-
 static uint64_t tape_ticks = 0;
 static uint64_t tape_read_ticks = 0;
 static uint64_t tape_write_ticks = 0;
@@ -313,27 +311,14 @@ int bk_tape_decode_raw_to_bin(const byte *raw, size_t raw_size,
     int polarity = 0;
     int threshold = 0;
     if (tape_find_header(&r, &polarity, &threshold) != 0) {
-        if (tape_debug) {
-            fprintf(stderr, "TAPE decode: find_header failed\n");
-        }
         return -1;
-    }
-    if (tape_debug) {
-        fprintf(stderr, "TAPE decode: polarity=%d threshold=%d pos=%zu\n",
-                polarity, threshold, r.pos);
     }
     byte header[024];
     if (tape_read_array_raw(&r, polarity, threshold, header, sizeof(header)) != 0) {
-        if (tape_debug) {
-            fprintf(stderr, "TAPE decode: read header failed at pos=%zu\n", r.pos);
-        }
         return -1;
     }
     word addr = (word)(header[1] << 8 | header[0]);
     word len = (word)(header[3] << 8 | header[2]);
-    if (tape_debug) {
-        fprintf(stderr, "TAPE decode: addr=%06o len=%06o pos=%zu\n", addr, len, r.pos);
-    }
     if (name_out && name_size) {
         size_t n = (name_size - 1 < 16) ? name_size - 1 : 16;
         memcpy(name_out, &header[4], n);
@@ -362,9 +347,6 @@ int bk_tape_decode_raw_to_bin(const byte *raw, size_t raw_size,
 	buf[2] = (byte)(len & 0xff);
 	buf[3] = (byte)(len >> 8);
     if (tape_read_array_raw(&r, polarity, threshold, buf + 4, len) != 0) {
-        if (tape_debug) {
-            fprintf(stderr, "TAPE decode: read data failed at pos=%zu\n", r.pos);
-        }
         free(buf);
         return -1;
     }
@@ -380,14 +362,7 @@ int bk_tape_decode_raw_to_bin(const byte *raw, size_t raw_size,
         }
     }
     word sum = tape_checksum(buf + 4, len);
-    if (tape_debug) {
-        fprintf(stderr, "TAPE decode: checksum=%06o len=%06o\n", sum, len);
-    }
     if (checksum != sum) {
-        if (tape_debug) {
-            fprintf(stderr, "TAPE decode: checksum mismatch read=%06o calc=%06o\n",
-                    checksum, sum);
-        }
         free(buf);
         return -1;
     }
@@ -398,7 +373,6 @@ int bk_tape_decode_raw_to_bin(const byte *raw, size_t raw_size,
 
 void bk_tape_init(void)
 {
-	tape_debug = getenv("BK_TAPE_DEBUG") ? 1 : 0;
 	const char *synch_env = getenv("BK_TAPE_SYNCH");
 	if (synch_env && *synch_env) {
 		long v = strtol(synch_env, NULL, 0);
@@ -607,14 +581,6 @@ int bk_tape_encode_bin_to_raw(const byte *data, size_t size, const char *name,
                               byte **out_raw, size_t *out_size)
 {
 	return tape_encode_bin_to_raw_internal(data, size, NULL, 0, name, out_raw, out_size);
-}
-
-int bk_tape_encode_bin_to_raw_named(const byte *data, size_t size,
-                                    const byte *name_raw, size_t name_raw_size,
-                                    byte **out_raw, size_t *out_size)
-{
-	return tape_encode_bin_to_raw_internal(data, size, name_raw, name_raw_size,
-	                                       NULL, out_raw, out_size);
 }
 
 int bk_tape_set_input_bin(const byte *data, size_t size, const char *name)
