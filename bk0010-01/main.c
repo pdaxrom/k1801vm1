@@ -20,24 +20,7 @@
     typedef unsigned long long Uint64;
     typedef unsigned char Uint8;
     typedef int SDL_AudioDeviceID;
-    static Uint32 SDL_GetTicks(void) { struct timeval tv; gettimeofday(&tv, NULL); return (Uint32)(tv.tv_sec * 1000 + tv.tv_usec / 1000); }
-    static void SDL_Delay(Uint32 ms) { usleep((useconds_t)ms * 1000); }
-    static Uint64 SDL_GetPerformanceFrequency(void) { return 1000000ULL; }
     static Uint64 SDL_GetPerformanceCounter(void) { struct timeval tv; gettimeofday(&tv, NULL); return (Uint64)tv.tv_sec * 1000000ULL + tv.tv_usec; }
-    static const char *SDL_GetError(void) { return "SDL not available"; }
-    static void SDL_Quit(void) {}
-    static void SDL_PauseAudioDevice(int, int) {}
-    static void SDL_CloseAudioDevice(int) {}
-    static void SDL_DestroyTexture(SDL_Texture *) {}
-    static void SDL_DestroyRenderer(SDL_Renderer *) {}
-    static void SDL_DestroyWindow(SDL_Window *) {}
-    static void SDL_SetWindowTitle(SDL_Window *, const char *) {}
-    static void SDL_LockAudioDevice(int) {}
-    static void SDL_UnlockAudioDevice(int) {}
-    static void SDL_RenderClear(SDL_Renderer *) {}
-    static void SDL_RenderCopy(SDL_Renderer *, void *, void *, void *) {}
-    static void SDL_RenderPresent(SDL_Renderer *) {}
-    static void SDL_UpdateTexture(SDL_Texture *, void *, const void *, int) {}
     /* Minimal SDL_AudioSpec definition */
     typedef struct {
         int freq;
@@ -197,9 +180,6 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
     SDL_RenderCopy(renderer, tex, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
-#else
-/* No‑op stub for X11 backend – drawing is performed by x11_gui_draw(). */
-static void draw_screen(void *unused1, void *unused2) { (void)unused1; (void)unused2; }
 #endif
 
 /* Key translation – only needed when SDL backend is compiled. */
@@ -291,10 +271,6 @@ static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
 
     return code;
 }
-#else
-/* Stub for X11 backend – key handling performed in x11_gui.c */
-static int bk_translate_key(int key, int mod) { (void)key; (void)mod; return 0; }
-#endif
 
 static void update_window_title(SDL_Window *win, unsigned int cpu_hz, int cpu_max, int name_pad_space)
 {
@@ -344,6 +320,7 @@ static void audio_callback(void *userdata, Uint8 *stream, int len)
         }
     }
 }
+#endif
 
 int main(int argc, char **argv)
 {
@@ -631,7 +608,6 @@ int main(int argc, char **argv)
 #else
     /* No audio support in X11 mode */
     int audio_dev = 0;
-    beeper_state beep_state = { 0, 0, 0, 0 };
 #endif
 
     int running = 1;
@@ -660,9 +636,9 @@ int main(int argc, char **argv)
     update_window_title(win, cpu_hz, cpu_max, name_pad_space);
 #endif
     while (running) {
-        Uint32 frame_start = 0;
         /* Timing start */
 #ifdef USE_SDL
+        Uint32 frame_start = 0;
         frame_start = SDL_GetTicks();
 #endif
         if (show_shift) {
@@ -756,12 +732,14 @@ int main(int argc, char **argv)
                 cycles = 1;
             }
             if (audio_dev != 0 && bk_hw_beeper_pulse()) {
+#ifdef USE_SDL
                 Uint32 now = SDL_GetTicks();
                 SDL_LockAudioDevice(audio_dev);
                 if ((Uint32)(now + 30) > beep_state.beep_until_ms) {
                     beep_state.beep_until_ms = now + 30;
                 }
                 SDL_UnlockAudioDevice(audio_dev);
+#endif
             }
             bk_hw_tick_n(cycles);
             instr_count++;

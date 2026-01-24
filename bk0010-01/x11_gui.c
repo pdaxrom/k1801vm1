@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+#include <X11/Xutil.h>
 
 #include "bk_hw.h"
 #include "x11_gui.h"
