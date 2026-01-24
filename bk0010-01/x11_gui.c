@@ -30,47 +30,87 @@ static int scale_factor = 1;
  */
 static int translate_key(KeySym ks, unsigned int state)
 {
+    int code = 0;
+
+    /* Ctrl‑modified shortcuts. */
     if (state & ControlMask) {
         switch (ks) {
-            case XK_g: return 0007; /* BEL */
-            case XK_m: return 0015; /* set tab stop */
-            case XK_p: return 0020; /* repeat */
-            case XK_r: return 0022; /* cursor home */
-            case XK_t: return 0024; /* clear screen */
-            case XK_u: return 0025; /* line delete */
+            case XK_g: code = 0007; break;   /* BEL */
+            case XK_m: code = 0015; break;   /* set tab stop */
+            case XK_p: code = 0020; break;   /* repeat */
+            case XK_r: code = 0022; break;   /* cursor home */
+            case XK_t: code = 0024; break;   /* clear screen */
+            case XK_u: code = 0025; break;   /* line delete */
+            case XK_F11: return 0402; break; /* Ctrl+F11 → BK_KEY_PADD */
+            case XK_F12: return 0401; break; /* Ctrl+F12 → BK_KEY_FREQ */
+            default: break;
+        }
+        if (code) return code;
+    }
+
+    /* Regular keys. */
+    switch (ks) {
+        case XK_Escape:   return 0400; break;   /* ESC → BK_KEY_STOP */
+        case XK_BackSpace:code = 030; break;
+        case XK_Return:   code = 012; break;
+        case XK_Tab:      code = 011; break;
+        case XK_Left:     code = 010; break;
+        case XK_Right:    code = 031; break;
+        case XK_Up:       code = 032; break;
+        case XK_Down:     code = 033; break;
+        case XK_Home:     code = 023; break;
+        case XK_F1:  code = 0201; break; /* povt */
+        case XK_F2:  code = 003;  break; /* kt */
+        case XK_F3:  code = 0213; break; /* -|--> */
+        case XK_F4:  code = 026;  break; /* |<--- */
+        case XK_F5:  code = 027;  break; /* |---> */
+        case XK_F6:  code = 0202; break; /* ind su */
+        case XK_F7:  code = 0204; break; /* blk red */
+        case XK_F8:  code = 0200; break; /* shag */
+        case XK_F9:  code = 014;  break; /* sbr */
+        case XK_F10: code = 0016; break; /* RUS */
+        case XK_F11: code = 0017; break; /* LAT */
+        default: break;
+    }
+
+    /* Numeric keys. */
+    if (!code && ks >= XK_0 && ks <= XK_9) {
+        static const char shifted[] = ")!@#$%^&*(";
+        char c = (char)('0' + (ks - XK_0));
+        if (state & ShiftMask) c = shifted[ks - XK_0];
+        code = (int)c;
+    }
+    /* Alphabetic keys. */
+    if (!code && ks >= XK_a && ks <= XK_z) {
+        char c = (char)('a' + (ks - XK_a));
+        if (state & ShiftMask) c = (char)('A' + (ks - XK_a));
+        code = (int)c;
+    }
+
+    if (!code) {
+        switch(ks) {
+            case XK_space: code = ' '; break;
+            case XK_minus: code = (state & ShiftMask) ? '_' : '-'; break;
+            case XK_equal: code = (state & ShiftMask) ? '+' : '='; break;
+            case XK_bracketleft: code = (state & ShiftMask) ? '{' : '['; break;
+            case XK_bracketright: code = (state & ShiftMask) ? '}' : ']'; break;
+            case XK_semicolon: code = (state & ShiftMask) ? ':' : ';'; break;
+            case XK_apostrophe: code = (state & ShiftMask) ? '\"' : '\''; break;
+            case XK_comma: code = (state & ShiftMask) ? '<' : ','; break;
+            case XK_period: code = (state & ShiftMask) ? '>' : '.'; break;
+            case XK_slash: code = (state & ShiftMask) ? '?' : '/'; break;
+            case XK_backslash: code = (state & ShiftMask) ? '|' : '\\'; break;
+            case XK_grave: code = (state & ShiftMask) ? '~' : '`'; break;
             default: break;
         }
     }
 
-    switch (ks) {
-        case XK_Escape: return 0003;
-        case XK_BackSpace: return 0010;
-        case XK_Return: return 0012;
-        case XK_Tab: return 0211;
-        case XK_Left: return 0010;
-        case XK_Right: return 0037;
-        case XK_Up: return 0040;
-        case XK_Down: return 0041;
-        case XK_Home: return 0022;
-        case XK_F1: return 0016; /* RUS */
-        case XK_F2: return 0017; /* LAT */
-        case XK_F5: return 0014; /* reset screen */
-        default: break;
+    /* If Alt (left or right) is held, add 0200 to the result. */
+    if (code && (state & Mod1Mask)) {
+        code |= 0200;
     }
 
-    if (ks >= XK_0 && ks <= XK_9) {
-        static const char shifted[] = ")!@#$%^&*(";
-        char c = (char)('0' + (ks - XK_0));
-        if (state & ShiftMask) c = shifted[ks - XK_0];
-        return (int)c;
-    }
-    if (ks >= XK_a && ks <= XK_z) {
-        char c = (char)('a' + (ks - XK_a));
-        if (state & ShiftMask) c = (char)('A' + (ks - XK_a));
-        return (int)c;
-    }
-    if (ks == XK_space) return ' ';
-    return 0;
+    return code;
 }
 
 int x11_gui_init(void)
@@ -175,25 +215,20 @@ void x11_gui_draw(void)
 
 int x11_gui_handle_events(void)
 {
-    while (XPending(display)) {
+    if (XPending(display)) {
         XEvent ev;
         XNextEvent(display, &ev);
         if (ev.type == ClientMessage) {
             // Window manager close request.
-            return 1;
+            return -1;
         }
         if (ev.type == DestroyNotify) {
-            return 1;
+            return -2;
         }
         if (ev.type == KeyPress) {
             KeySym ks = XLookupKeysym(&ev.xkey, 0);
             int code = translate_key(ks, ev.xkey.state);
-            if (code) {
-                // Forward the key code to the emulator using the same API as
-                // the SDL backend – the core provides `bk_hw_handle_key` for
-                // this purpose.
-                bk_hw_handle_key(code);
-            }
+            return code;
         }
     }
     return 0;

@@ -217,8 +217,8 @@ static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
             case SDLK_r: code = 0022; break; /* cursor home */
             case SDLK_t: code = 0024; break; /* clear screen */
             case SDLK_u: code = 0025; break; /* line delete */
-            case SDLK_F11: return BK_KEY_PADD; break;
-            case SDLK_F12: return BK_KEY_FREQ; break;
+            case SDLK_F11: return BK_KEY_PADD; break; /* Ctrl+F11 */
+            case SDLK_F12: return BK_KEY_FREQ; break; /* Ctrl+F12 */
             default: break;
         }
     }
@@ -226,9 +226,9 @@ static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
     /* Regular keys – only processed if no Ctrl shortcut matched. */
     if (code == -1) {
         switch (key) {
-            case SDLK_ESCAPE:   return BK_KEY_STOP;  break; /* cancel line */
-            case SDLK_BACKSPACE:code = 030;  break; /* cursor left */
-            case SDLK_RETURN:   code = 012;  break; /* VK */
+            case SDLK_ESCAPE:   return BK_KEY_STOP; break; /* STOP */
+            case SDLK_BACKSPACE:code = 030;  break;
+            case SDLK_RETURN:   code = 012;  break;
             case SDLK_TAB:      code = 011;  break;
             case SDLK_LEFT:     code = 010;  break;
             case SDLK_RIGHT:    code = 031;  break;
@@ -708,7 +708,33 @@ int main(int argc, char **argv)
             }
         }
 #else
-        if (x11_gui_handle_events()) {
+        int code;
+        while ((code = x11_gui_handle_events()) > 0) {
+            if (code == BK_KEY_STOP) {
+                r.fHaltSignal = 1;
+            } else if (code == BK_KEY_PADD) {
+                name_pad_space = !name_pad_space;
+                bk_tape_set_name_pad(name_pad_space);
+                //update_window_title(win, cpu_hz, cpu_max, name_pad_space);
+            } else if (code == BK_KEY_FREQ) {
+                cpu_mode = (cpu_mode + 1) % 3;
+                if (cpu_mode == 0) {
+                    cpu_hz = CPU_HZ_3MHZ;
+                    cpu_max = 0;
+                } else if (cpu_mode == 1) {
+                    cpu_hz = CPU_HZ_4MHZ;
+                    cpu_max = 0;
+                } else {
+                    cpu_max = 1;
+                }
+                cycles_per_frame = cpu_hz / FPS;
+                bk_hw_set_tick_hz(cpu_hz);
+                //update_window_title(win, cpu_hz, cpu_max, name_pad_space);
+            } else if (code >= 0) {
+                bk_hw_handle_key(code);
+            }
+        }
+        if (code < 0) {
             running = 0;
         }
 #endif
