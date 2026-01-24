@@ -56,6 +56,8 @@ static byte sys_port_in = 0370;
 static byte kbd_irq_pending = 0;
 static byte bus_error_pending = 0;
 static byte tape_in_bit = 1;
+static int beeper_on = 0;
+static int beeper_pulse = 0;
 
 static int bk_poll_irq(regs *r, word *vector);
 
@@ -295,6 +297,10 @@ static void bk_store_byte(regs *r, word offset, byte value)
         break;
     case BK_SYS_CTRL:
         sys_port_out = (byte)(value & SYS_PORT_OUT_MASK);
+        beeper_on = (value & SYS_PORT_TAPE_BIT2) ? 1 : 0;
+        if (beeper_on) {
+            beeper_pulse++;
+        }
         bk_tape_write(tape_motor_on(),
                       (value & SYS_PORT_TAPE_BIT2) ? 1 : 0);
         break;
@@ -354,6 +360,8 @@ static void bk_reset(regs *r)
     sys_port_in = 0370;
     kbd_irq_pending = 0;
     bus_error_pending = 0;
+    beeper_on = 0;
+    beeper_pulse = 0;
     bk_tape_reset();
 }
 
@@ -520,6 +528,18 @@ void bk_hw_tick_n(unsigned int ticks)
     while (ticks--) {
         bk_hw_tick();
     }
+}
+
+int bk_hw_beeper_on(void)
+{
+    return beeper_on;
+}
+
+int bk_hw_beeper_pulse(void)
+{
+    int v = beeper_pulse;
+    beeper_pulse = 0;
+    return v;
 }
 
 byte *bk_hw_vram_ptr(void)

@@ -230,6 +230,41 @@ static void update_window_title(SDL_Window *win, unsigned int cpu_hz, int cpu_ma
     SDL_SetWindowTitle(win, title);
 }
 
+typedef struct {
+    int sample_rate;
+    int freq;
+    int phase;
+    Uint32 beep_until_ms;
+} beeper_state;
+
+static void audio_callback(void *userdata, Uint8 *stream, int len)
+{
+    beeper_state *st = (beeper_state *)userdata;
+    int16_t *out = (int16_t *)stream;
+    int samples = len / (int)sizeof(int16_t);
+    Uint32 now = SDL_GetTicks();
+    int on = 0;
+    if (st->beep_until_ms != 0) {
+        on = ((int32_t)(now - st->beep_until_ms) < 0);
+    }
+    int step = st->sample_rate / st->freq;
+    if (step <= 0) {
+        step = 1;
+    }
+    for (int i = 0; i < samples; i++) {
+        if (on) {
+            int v = (st->phase < step / 2) ? 8000 : -8000;
+            out[i] = (int16_t)v;
+            st->phase++;
+            if (st->phase >= step) {
+                st->phase = 0;
+            }
+        } else {
+            out[i] = 0;
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
     const char *rom_dir = "ROM";
@@ -432,7 +467,7 @@ int main(int argc, char **argv)
 
     r.r[6] = 01000;
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         free(monitor_rom);
         free(basic_rom);
@@ -477,6 +512,23 @@ int main(int argc, char **argv)
         free(monitor_rom);
         free(basic_rom);
         return 1;
+    }
+
+    SDL_AudioDeviceID audio_dev = 0;
+    beeper_state beep_state = { 44100, 1000, 0, 0 };
+    SDL_AudioSpec want;
+    SDL_AudioSpec have;
+    SDL_zero(want);
+    want.freq = beep_state.sample_rate;
+    want.format = AUDIO_S16SYS;
+    want.channels = 1;
+    want.samples = 512;
+    want.callback = audio_callback;
+    want.userdata = &beep_state;
+    audio_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+    if (audio_dev != 0) {
+        beep_state.sample_rate = have.freq;
+        SDL_PauseAudioDevice(audio_dev, 0);
     }
 
     int running = 1;
@@ -547,6 +599,14 @@ int main(int argc, char **argv)
             if (cycles == 0) {
                 cycles = 1;
             }
+            if (audio_dev != 0 && bk_hw_beeper_pulse()) {
+                Uint32 now = SDL_GetTicks();
+                SDL_LockAudioDevice(audio_dev);
+                if ((Uint32)(now + 30) > beep_state.beep_until_ms) {
+                    beep_state.beep_until_ms = now + 30;
+                }
+                SDL_UnlockAudioDevice(audio_dev);
+            }
             bk_hw_tick_n(cycles);
             instr_count++;
             cycle_count += cycles;
@@ -577,6 +637,9 @@ int main(int argc, char **argv)
     SDL_DestroyTexture(tex);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(win);
+    if (audio_dev != 0) {
+        SDL_CloseAudioDevice(audio_dev);
+    }
     SDL_Quit();
 
     if (tape_out_path) {
