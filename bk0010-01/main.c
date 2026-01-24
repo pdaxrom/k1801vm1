@@ -2,8 +2,58 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <SDL.h>
+/* Required for stub implementations */
+#include <sys/time.h>
+#include <unistd.h>
 
+/* GUI backend selection */
+#ifdef USE_SDL
+    /* Full SDL2 support */
+    #include <SDL.h>
+#else
+    /* Minimal SDL‑like stubs required for the X11 backend. Only the symbols
+       used in the source are defined. */
+    typedef void *SDL_Window;
+    typedef void *SDL_Renderer;
+    typedef void *SDL_Texture;
+    typedef unsigned int Uint32;
+    typedef unsigned long long Uint64;
+    typedef unsigned char Uint8;
+    typedef int SDL_AudioDeviceID;
+    static Uint32 SDL_GetTicks(void) { struct timeval tv; gettimeofday(&tv, NULL); return (Uint32)(tv.tv_sec * 1000 + tv.tv_usec / 1000); }
+    static void SDL_Delay(Uint32 ms) { usleep((useconds_t)ms * 1000); }
+    static Uint64 SDL_GetPerformanceFrequency(void) { return 1000000ULL; }
+    static Uint64 SDL_GetPerformanceCounter(void) { struct timeval tv; gettimeofday(&tv, NULL); return (Uint64)tv.tv_sec * 1000000ULL + tv.tv_usec; }
+    static const char *SDL_GetError(void) { return "SDL not available"; }
+    static void SDL_Quit(void) {}
+    static void SDL_PauseAudioDevice(int, int) {}
+    static void SDL_CloseAudioDevice(int) {}
+    static void SDL_DestroyTexture(SDL_Texture *) {}
+    static void SDL_DestroyRenderer(SDL_Renderer *) {}
+    static void SDL_DestroyWindow(SDL_Window *) {}
+    static void SDL_SetWindowTitle(SDL_Window *, const char *) {}
+    static void SDL_LockAudioDevice(int) {}
+    static void SDL_UnlockAudioDevice(int) {}
+    static void SDL_RenderClear(SDL_Renderer *) {}
+    static void SDL_RenderCopy(SDL_Renderer *, void *, void *, void *) {}
+    static void SDL_RenderPresent(SDL_Renderer *) {}
+    static void SDL_UpdateTexture(SDL_Texture *, void *, const void *, int) {}
+    /* Minimal SDL_AudioSpec definition */
+    typedef struct {
+        int freq;
+        unsigned int format;
+        unsigned char channels;
+        unsigned short samples;
+        void (*callback)(void *, Uint8 *, int);
+        void *userdata;
+    } SDL_AudioSpec;
+    #define AUDIO_S16SYS 0x8010
+    #define SDL_zero(x) memset(&(x), 0, sizeof(x))
+    /* X11 specific GUI */
+    #include "x11_gui.h"
+#endif
+
+/* Core emulation headers */
 #include "core/core.h"
 #include "core/disas.h"
 #include "bk_hw.h"
@@ -107,116 +157,138 @@ static word peek_rom_word(const byte *rom, word size, word offset)
     return (word)(rom[offset] | (rom[offset + 1] << 8));
 }
 
+/* Rendering helper – SDL implementation only. */
+#ifdef USE_SDL
 static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
 {
     byte *vram = bk_hw_vram_ptr();
-    if (!vram) {
-        return;
-    }
+    if (!vram) return;
     word vram_size = bk_hw_vram_size();
     word shift = bk_hw_shift_reg();
 
     static uint32_t *pixels;
     static size_t pixels_size;
     const size_t needed = (size_t)BK_SCREEN_WIDTH * BK_SCREEN_HEIGHT;
-
     if (pixels_size != needed) {
         free(pixels);
         pixels = (uint32_t *)calloc(needed, sizeof(uint32_t));
         pixels_size = needed;
     }
-
     word line_bytes = (word)(BK_SCREEN_WIDTH / 8);
     word scroll = (word)(shift & 0377);
     word base_offset = (word)(((scroll - 0330) & 0377) * 0100);
-    if (vram_size) {
-        base_offset %= vram_size;
-    }
-    for (int y = 0; y < BK_SCREEN_HEIGHT; y++) {
-        for (int x = 0; x < BK_SCREEN_WIDTH; x++) {
+    if (vram_size) base_offset %= vram_size;
+    for (int y = 0; y < BK_SCREEN_HEIGHT; ++y) {
+        for (int x = 0; x < BK_SCREEN_WIDTH; ++x) {
             word line_offset = (word)(y * line_bytes);
             word byte_index = (word)(base_offset + line_offset + (x >> 3));
-            if (vram_size) {
-                byte_index %= vram_size;
-            }
+            if (vram_size) byte_index %= vram_size;
             byte mask = (byte)(1 << (x & 7));
             byte bit = vram[byte_index] & mask;
             pixels[y * BK_SCREEN_WIDTH + x] = bit ? 0xFFFFFFFFu : 0x00000000u;
         }
     }
-
     SDL_UpdateTexture(tex, NULL, pixels, BK_SCREEN_WIDTH * sizeof(uint32_t));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, tex, NULL, NULL);
     SDL_RenderPresent(renderer);
 }
+#else
+/* No‑op stub for X11 backend – drawing is performed by x11_gui_draw(). */
+static void draw_screen(void *unused1, void *unused2) { (void)unused1; (void)unused2; }
+#endif
 
+/* Key translation – only needed when SDL backend is compiled. */
+#ifdef USE_SDL
 static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
 {
+    int code = -1;
+
+    /* Ctrl‑modified shortcuts. */
     if (mod & KMOD_CTRL) {
         switch (key) {
-        case SDLK_g: return 0007; /* BEL */
-        case SDLK_m: return 0015; /* set tab stop */
-        case SDLK_p: return 0020; /* repeat */
-        case SDLK_r: return 0022; /* cursor home */
-        case SDLK_t: return 0024; /* clear screen */
-        case SDLK_u: return 0025; /* line delete */
-        default: break;
+            case SDLK_g: code = 0007; break; /* BEL */
+            case SDLK_m: code = 0015; break; /* set tab stop */
+            case SDLK_p: code = 0020; break; /* repeat */
+            case SDLK_r: code = 0022; break; /* cursor home */
+            case SDLK_t: code = 0024; break; /* clear screen */
+            case SDLK_u: code = 0025; break; /* line delete */
+            default: break;
         }
     }
 
-    switch (key) {
-    case SDLK_ESCAPE: return 0003; /* cancel line */
-    case SDLK_BACKSPACE: return 0010; /* cursor left */
-    case SDLK_RETURN: return 0012; /* VK */
-    case SDLK_KP_ENTER: return 0012;
-    case SDLK_TAB: return 0211;
-    case SDLK_LEFT: return 0010;
-    case SDLK_RIGHT: return 0037;
-    case SDLK_UP: return 0040;
-    case SDLK_DOWN: return 0041;
-    case SDLK_HOME: return 0022;
-    case SDLK_F1: return 0016; /* RUS */
-    case SDLK_F2: return 0017; /* LAT */
-    case SDLK_F5: return 0014; /* reset screen */
-    default: break;
+    /* Regular keys – only processed if no Ctrl shortcut matched. */
+    if (code == -1) {
+        switch (key) {
+            case SDLK_ESCAPE:   code = 003;  break; /* cancel line */
+            case SDLK_BACKSPACE:code = 030;  break; /* cursor left */
+            case SDLK_RETURN:   code = 012;  break; /* VK */
+            case SDLK_TAB:      code = 011;  break;
+            case SDLK_LEFT:     code = 010;  break;
+            case SDLK_RIGHT:    code = 031;  break;
+            case SDLK_UP:       code = 032;  break;
+            case SDLK_DOWN:     code = 033;  break;
+            case SDLK_HOME:     code = 023;  break;
+            case SDLK_F1:  code = 0201; break; /* povt */
+            case SDLK_F2:  code = 003;  break; /* kt */
+            case SDLK_F3:  code = 0213; break; /* -|--> */
+            case SDLK_F4:  code = 026;  break; /* |<--- */
+            case SDLK_F5:  code = 027;  break; /* |---> */
+            case SDLK_F6:  code = 0202; break; /* ind su */
+            case SDLK_F7:  code = 0204; break; /* blk red */
+            case SDLK_F8:  code = 0200; break; /* shag */
+            case SDLK_F9:  code = 014;  break; /* sbr */
+            case SDLK_F10: code = 0016; break; /* RUS */
+            case SDLK_F11: code = 0017; break; /* LAT */
+            default: break;
+        }
     }
 
-    if (key >= SDLK_0 && key <= SDLK_9) {
+    /* Numeric keys. */
+    if (code == -1 && key >= SDLK_0 && key <= SDLK_9) {
         static const char shifted[] = ")!@#$%^&*(";
         char c = (char)('0' + (key - SDLK_0));
-        if (mod & KMOD_SHIFT) {
-            c = shifted[key - SDLK_0];
-        }
-        return (byte)c;
+        if (mod & KMOD_SHIFT) c = shifted[key - SDLK_0];
+        code = (int)c;
     }
 
-    if (key >= SDLK_a && key <= SDLK_z) {
+    /* Alphabetic keys. */
+    if (code == -1 && key >= SDLK_a && key <= SDLK_z) {
         char c = (char)('a' + (key - SDLK_a));
-        if (mod & KMOD_SHIFT) {
-            c = (char)('A' + (key - SDLK_a));
+        if (mod & KMOD_SHIFT) c = (char)('A' + (key - SDLK_a));
+        code = (int)c;
+    }
+
+    /* Punctuation and other symbols. */
+    if (code == -1) {
+        switch (key) {
+            case SDLK_SPACE: code = ' '; break;
+            case SDLK_MINUS: code = (mod & KMOD_SHIFT) ? '_' : '-'; break;
+            case SDLK_EQUALS: code = (mod & KMOD_SHIFT) ? '+' : '='; break;
+            case SDLK_LEFTBRACKET: code = (mod & KMOD_SHIFT) ? '{' : '['; break;
+            case SDLK_RIGHTBRACKET: code = (mod & KMOD_SHIFT) ? '}' : ']'; break;
+            case SDLK_SEMICOLON: code = (mod & KMOD_SHIFT) ? ':' : ';'; break;
+            case SDLK_QUOTE: code = (mod & KMOD_SHIFT) ? '\"' : '\''; break;
+            case SDLK_COMMA: code = (mod & KMOD_SHIFT) ? '<' : ','; break;
+            case SDLK_PERIOD: code = (mod & KMOD_SHIFT) ? '>' : '.'; break;
+            case SDLK_SLASH: code = (mod & KMOD_SHIFT) ? '?' : '/'; break;
+            case SDLK_BACKSLASH: code = (mod & KMOD_SHIFT) ? '|' : '\\'; break;
+            case SDLK_BACKQUOTE: code = (mod & KMOD_SHIFT) ? '~' : '`'; break;
+            default: break;
         }
-        return (byte)c;
     }
 
-    switch (key) {
-    case SDLK_SPACE: return ' ';
-    case SDLK_MINUS: return (mod & KMOD_SHIFT) ? '_' : '-';
-    case SDLK_EQUALS: return (mod & KMOD_SHIFT) ? '+' : '=';
-    case SDLK_LEFTBRACKET: return (mod & KMOD_SHIFT) ? '{' : '[';
-    case SDLK_RIGHTBRACKET: return (mod & KMOD_SHIFT) ? '}' : ']';
-    case SDLK_SEMICOLON: return (mod & KMOD_SHIFT) ? ':' : ';';
-    case SDLK_QUOTE: return (mod & KMOD_SHIFT) ? '\"' : '\'';
-    case SDLK_COMMA: return (mod & KMOD_SHIFT) ? '<' : ',';
-    case SDLK_PERIOD: return (mod & KMOD_SHIFT) ? '>' : '.';
-    case SDLK_SLASH: return (mod & KMOD_SHIFT) ? '?' : '/';
-    case SDLK_BACKSLASH: return (mod & KMOD_SHIFT) ? '|' : '\\';
-    case SDLK_BACKQUOTE: return (mod & KMOD_SHIFT) ? '~' : '`';
-    default: break;
+    /* If Alt (left or right) is held, add 0200 to the result. */
+    if (code != -1 && (mod & KMOD_ALT)) {
+        code |= 0200;
     }
 
-    return -1;
+    return code;
 }
+#else
+/* Stub for X11 backend – key handling performed in x11_gui.c */
+static int bk_translate_key(int key, int mod) { (void)key; (void)mod; return 0; }
+#endif
 
 static void update_window_title(SDL_Window *win, unsigned int cpu_hz, int cpu_max, int name_pad_space)
 {
@@ -485,13 +557,13 @@ int main(int argc, char **argv)
 
     r.r[6] = 01000;
 
+    /* Initialise the chosen GUI backend */
+    int gui_init_ok = 0;
+#ifdef USE_SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
-        free(monitor_rom);
-        free(basic_rom);
-        return 1;
+        goto gui_fail;
     }
-
     SDL_Window *win = SDL_CreateWindow(
         "BK0010-01",
         SDL_WINDOWPOS_CENTERED,
@@ -501,22 +573,13 @@ int main(int argc, char **argv)
         SDL_WINDOW_SHOWN);
     if (!win) {
         fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
-        SDL_Quit();
-        free(monitor_rom);
-        free(basic_rom);
-        return 1;
+        goto gui_fail;
     }
-
     SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
         fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
-        SDL_DestroyWindow(win);
-        SDL_Quit();
-        free(monitor_rom);
-        free(basic_rom);
-        return 1;
+        goto gui_fail;
     }
-
     SDL_Texture *tex = SDL_CreateTexture(renderer,
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_STREAMING,
@@ -524,14 +587,25 @@ int main(int argc, char **argv)
                                          BK_SCREEN_HEIGHT);
     if (!tex) {
         fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(win);
-        SDL_Quit();
+        goto gui_fail;
+    }
+    gui_init_ok = 1;
+#else /* USE_X11 */
+    if (x11_gui_init() != 0) {
+        fprintf(stderr, "X11 GUI init failed\n");
+        goto gui_fail;
+    }
+    gui_init_ok = 1;
+#endif
+    if (!gui_init_ok) {
+    gui_fail:
         free(monitor_rom);
         free(basic_rom);
         return 1;
     }
 
+    /* Audio initialisation – only when SDL is available */
+#ifdef USE_SDL
     SDL_AudioDeviceID audio_dev = 0;
     beeper_state beep_state = { 44100, 1000, 0, 0 };
     SDL_AudioSpec want;
@@ -548,20 +622,43 @@ int main(int argc, char **argv)
         beep_state.sample_rate = have.freq;
         SDL_PauseAudioDevice(audio_dev, 0);
     }
+#else
+    /* No audio support in X11 mode */
+    int audio_dev = 0;
+    beeper_state beep_state = { 0, 0, 0, 0 };
+#endif
 
     int running = 1;
     Uint32 frame_delay = 1000 / FPS;
 
     char disas_buf[256];
     word last_shift = 0xFFFF;
-    Uint64 perf_freq = SDL_GetPerformanceFrequency();
-    Uint64 perf_last = SDL_GetPerformanceCounter();
+    /* Timing helpers – use SDL when available, otherwise fall back to
+       gettimeofday. */
+    Uint64 perf_freq = 0;
+    Uint64 perf_last = 0;
+#ifdef USE_SDL
+    perf_freq = SDL_GetPerformanceFrequency();
+    perf_last = SDL_GetPerformanceCounter();
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    perf_last = (Uint64)tv.tv_sec * 1000000ULL + tv.tv_usec;
+    perf_freq = 1000000ULL; /* microseconds */
+#endif
     uint64_t instr_count = 0;
     uint64_t cycle_count = 0;
     uint64_t cycles_per_frame = cpu_hz / FPS;
+    /* Set window title – only relevant for SDL backend */
+#ifdef USE_SDL
     update_window_title(win, cpu_hz, cpu_max, name_pad_space);
+#endif
     while (running) {
-        Uint32 frame_start = SDL_GetTicks();
+        Uint32 frame_start = 0;
+        /* Timing start */
+#ifdef USE_SDL
+        frame_start = SDL_GetTicks();
+#endif
         if (show_shift) {
             word shift = bk_hw_shift_reg();
             if (shift != last_shift) {
@@ -570,6 +667,8 @@ int main(int argc, char **argv)
             }
         }
 
+        /* Input handling */
+#ifdef USE_SDL
         SDL_Event ev;
         while (SDL_PollEvent(&ev)) {
             if (ev.type == SDL_QUIT) {
@@ -578,11 +677,11 @@ int main(int argc, char **argv)
                 SDL_Keycode key = ev.key.keysym.sym;
                 if (key == SDLK_ESCAPE) {
                     r.fHaltSignal = 1;
-                } else if (key == SDLK_F9) {
+                } else if (key == SDLK_F23) {
                     name_pad_space = !name_pad_space;
                     bk_tape_set_name_pad(name_pad_space);
                     update_window_title(win, cpu_hz, cpu_max, name_pad_space);
-                } else if (key == SDLK_F10) {
+                } else if (key == SDLK_F24) {
                     cpu_mode = (cpu_mode + 1) % 3;
                     if (cpu_mode == 0) {
                         cpu_hz = CPU_HZ_3MHZ;
@@ -603,7 +702,12 @@ int main(int argc, char **argv)
                     }
                 }
             }
-        }
+    }
+#else
+    if (x11_gui_handle_events()) {
+        running = 0;
+    }
+#endif
 
         uint64_t frame_cycles = 0;
         uint64_t frame_budget = cpu_max ? MAX_CYCLES_PER_FRAME : cycles_per_frame;
@@ -635,7 +739,12 @@ int main(int argc, char **argv)
             frame_cycles += cycles;
         }
 
+        /* Render */
+#ifdef USE_SDL
         draw_screen(renderer, tex);
+#else
+        x11_gui_draw();
+#endif
 
         if (show_cpu) {
             Uint64 now = SDL_GetPerformanceCounter();
@@ -650,12 +759,22 @@ int main(int argc, char **argv)
             }
         }
 
-        Uint32 frame_time = SDL_GetTicks() - frame_start;
+        /* Frame pacing */
+        Uint32 frame_time = 0;
+#ifdef USE_SDL
+        frame_time = SDL_GetTicks() - frame_start;
         if (!cpu_max && frame_time < frame_delay) {
             SDL_Delay(frame_delay - frame_time);
         }
+#else
+        if (!cpu_max && frame_time < frame_delay) {
+            usleep((frame_delay - frame_time) * 1000);
+        }
+#endif
     }
 
+    /* Cleanup */
+#ifdef USE_SDL
     SDL_DestroyTexture(tex);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(win);
@@ -663,6 +782,10 @@ int main(int argc, char **argv)
         SDL_CloseAudioDevice(audio_dev);
     }
     SDL_Quit();
+#else
+    x11_gui_cleanup();
+    /* No audio or SDL cleanup needed */
+#endif
 
     if (tape_out_path) {
         size_t out_size = 0;

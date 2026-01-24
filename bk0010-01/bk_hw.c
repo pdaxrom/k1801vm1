@@ -19,10 +19,11 @@
 #define BK_TIMER_CSR  0177712
 #define BK_EXT_PORT   0177714
 #define BK_SYS_CTRL   0177716
-#define BK_KBD_VECTOR 000060
+#define BK_KBD_VECTOR 0000060
+#define BK_KBD_VECTOR2 0000274    /* AR2 (ALT) vector for console */
 #define BK_ROM_LO     0100000
 #define BK_ROM_HI     0177777
-#define BK_BUS_VECTOR 000004
+#define BK_BUS_VECTOR 0000004
 
 #define CSR_READY 0200
 #define TIMER_CSR_MONITOR 0004
@@ -178,7 +179,7 @@ static byte bk_load_byte(regs *r, word offset)
         kbd_status &= (byte)~CSR_READY;
         sys_port_in |= SYS_PORT_KEY_BIT;
         kbd_irq_pending = 0;
-        return kbd_data;
+        return kbd_data & 0177;
     case (BK_KBD_DATA + 1):
         return 0;
     case BK_SHIFT_REG:
@@ -569,7 +570,7 @@ static int bk_poll_irq(regs *r, word *vector)
     if (kbd_irq_pending && (kbd_status & CSR_READY) && ((kbd_status & 0100) == 0)) {
         kbd_irq_pending = 0;
         if (vector) {
-            *vector = BK_KBD_VECTOR;
+            *vector = (kbd_data & 0200) ? BK_KBD_VECTOR2 : BK_KBD_VECTOR;
         }
         return 1;
     }
