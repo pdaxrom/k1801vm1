@@ -67,11 +67,17 @@ cd terak
 make                # builds ./build/bin/terak
 ```
 
-### Load a binary and set the PC
+### Load a binary and set the PC (optional load address)
 
 ```bash
+# Load at the default address 000000
 ./build/bin/terak --load hello.bin --pc 000200
+
+# Load at a custom address (octal) 001000
+./build/bin/terak --load hello.bin --addr 001000 --pc 001200
 ```
+
+`--load` specifies the binary file. `--addr` (octal) sets the load address – if omitted the binary is placed at `000000`. `--pc` (octal) sets the initial program counter after loading.
 
 ### RK05 boot (stub)
 
