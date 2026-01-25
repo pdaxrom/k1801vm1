@@ -13,4 +13,7 @@ int machine_run(regs *r, int max_steps, int trace);
 /* Load a binary file into RAM at the given octal address. */
 int machine_load_bin(const char *path, uint16_t load_addr);
 
+/* Stop the machine and perform clean‑up via the API. */
+void machine_stop(regs *r);
+
 #endif /* MACHINE_H_ */

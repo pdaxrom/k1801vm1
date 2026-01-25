@@ -85,7 +85,9 @@ void core_reset(regs *r)
 
 void core_fini(regs *r)
 {
-	r->fini(r);
+	if (r->fini) {
+		r->fini(r);
+	}
 }
 
 #define load_byte(a, b) r->load_byte(a, b)

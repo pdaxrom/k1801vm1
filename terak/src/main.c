@@ -52,5 +52,7 @@ int main(int argc, char **argv) {
     }
 
     machine_run(&r, max_steps, trace);
+    /* Clean up via the machine API */
+    machine_stop(&r);
     return 0;
 }

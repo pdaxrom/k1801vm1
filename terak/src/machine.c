@@ -34,3 +34,7 @@ int machine_run(regs *r, int max_steps, int trace) {
     return steps;
 }
 
+/* Stop the machine – invoke the registered fini callback and core cleanup. */
+void machine_stop(regs *r) {
+    core_fini(r);
+}
