@@ -28,4 +28,9 @@ static byte *hardware_ramptr(regs *r, word offset);
 
 void hwstub_connect(regs *r);
 
+int hwstub_vm1_load_byte(regs *r, word offset, byte *value_out);
+int hwstub_vm1_store_byte(regs *r, word offset, byte value);
+int hwstub_vm1_load_word(regs *r, word offset, word *value_out);
+int hwstub_vm1_store_word(regs *r, word offset, word value);
+
 #endif /* MK90_H_ */

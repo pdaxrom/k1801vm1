@@ -786,11 +786,11 @@ int core_step(regs *r)
 			}
         goto step_end;
 
+		/* EMT */
 		case 0104000:
+		/* TRAP */
 		case 0104400: {
-			word code = op & 0377;
 			word vec = (op & 0400) ? 000034 : 000030;
-			vec = (word)(vec + (code << 2));
 			pushw(r->psw);
 			pushw(r->r[7]);
 			r->r[7] = load_word(r, vec);

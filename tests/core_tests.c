@@ -932,7 +932,7 @@ cleanup:
     return rc;
 }
 
-static int test_vm1_trap_vectors_with_code(void)
+static int test_vm1_trap_vectors_ignore_code(void)
 {
     cpu_fixture fx;
     int rc = 0;
@@ -942,12 +942,12 @@ static int test_vm1_trap_vectors_with_code(void)
     const word new_psw_trap = 000140;
     const byte emt_code = 000012;
     const byte trap_code = 000003;
-    const word emt_vec = 000030 + (emt_code << 2);
-    const word trap_vec = 000034 + (trap_code << 2);
+    const word emt_vec = 000030;
+    const word trap_vec = 000034;
     const word emt_program[] = { op_emt(emt_code) };
     const word trap_program[] = { op_trap(trap_code) };
 
-    current_test = "vm1_emt_vector_code";
+    current_test = "vm1_emt_vector_ignore_code";
     fixture_setup_model(&fx, K1801VM1);
     load_program(&fx, TEST_BASE, emt_program, sizeof(emt_program) / sizeof(emt_program[0]));
     store_word(&fx, emt_vec, handler_emt);
@@ -962,7 +962,7 @@ static int test_vm1_trap_vectors_with_code(void)
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "EMT stack PSW incorrect");
     fixture_teardown(&fx);
 
-    current_test = "vm1_trap_vector_code";
+    current_test = "vm1_trap_vector_ignore_code";
     fixture_setup_model(&fx, K1801VM1);
     load_program(&fx, TEST_BASE, trap_program, sizeof(trap_program) / sizeof(trap_program[0]));
     store_word(&fx, trap_vec, handler_trap);
@@ -978,6 +978,56 @@ static int test_vm1_trap_vectors_with_code(void)
     fixture_teardown(&fx);
 
 cleanup:
+    return rc;
+}
+
+static int test_emt_trap_ignore_code_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler_emt = 02400;
+    const word handler_trap = 02600;
+    const word new_psw_emt = 000120;
+    const word new_psw_trap = 000140;
+    const byte emt_code = 000012;
+    const byte trap_code = 000003;
+    const word emt_vec = 000030;
+    const word trap_vec = 000034;
+    const word emt_program[] = { op_emt(emt_code) };
+    const word trap_program[] = { op_trap(trap_code) };
+
+    set_test_name(namebuf, sizeof(namebuf), "emt_ignore_code", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, emt_program, sizeof(emt_program) / sizeof(emt_program[0]));
+    store_word(&fx, emt_vec, handler_emt);
+    store_word(&fx, emt_vec + 2, new_psw_emt);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "EMT should vector to 000030");
+    ASSERT_EQ(fx.r.r[7], handler_emt, "EMT PC should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw_emt, "EMT PSW should load vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "EMT SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "EMT stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "EMT stack PSW incorrect");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "trap_ignore_code", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, trap_program, sizeof(trap_program) / sizeof(trap_program[0]));
+    store_word(&fx, trap_vec, handler_trap);
+    store_word(&fx, trap_vec + 2, new_psw_trap);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "TRAP should vector to 000034");
+    ASSERT_EQ(fx.r.r[7], handler_trap, "TRAP PC should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw_trap, "TRAP PSW should load vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "TRAP SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "TRAP stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "TRAP stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
     return rc;
 }
 
@@ -4305,6 +4355,65 @@ cleanup:
     return rc;
 }
 
+static int test_vm1_rr_rap_rosh_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_rr_rap_rosh", name);
+    fixture_setup_model(&fx, model);
+
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177700), 017777, "RR word readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177702), 017777, "RAP word readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177704), 0177340, "ROSH word readback");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177700), 0377, "RR low byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177701), 0177, "RR high byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177702), 0377, "RAP low byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177703), 0177, "RAP high byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177704), 0340, "ROSH low byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177705), 0177, "ROSH high byte");
+
+    fx.r.store_word(&fx.r, 0177702, 000000);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177702), 000000, "RAP clears on word write");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177702), 000000, "RAP low byte clears");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177703), 000000, "RAP high byte clears");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1_rr_rap_rosh_non_vm1_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    if (is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_rr_rap_rosh_non", name);
+    fixture_setup_model(&fx, model);
+
+    store_word(&fx, 0177700, 012345);
+    store_word(&fx, 0177702, 023456);
+    store_word(&fx, 0177704, 034567);
+
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177700), 012345, "RR should be normal RAM");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177702), 023456, "RAP should be normal RAM");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177704), 034567, "ROSH should be normal RAM");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_vm1g_timer_irq(void)
 {
     cpu_fixture fx;
@@ -5150,7 +5259,10 @@ int main(void)
     failed += test_sob_loops_expected_count();
     failed += test_emt_pushes_and_vectors();
     failed += test_trap_pushes_and_vectors();
-    failed += test_vm1_trap_vectors_with_code();
+    failed += test_vm1_trap_vectors_ignore_code();
+    failed += test_emt_trap_ignore_code_model(K1801VM2, "K1801VM2");
+    failed += test_emt_trap_ignore_code_model(K1806VM2, "K1806VM2");
+    failed += test_emt_trap_ignore_code_model(DCJ11, "DCJ11");
     failed += test_vm1_illegal_instructions_trap();
     failed += test_dcj11_special_ops_illegal_on_other_models();
     failed += test_dcj11_tstset_wrtlck_mode0_illegal();
@@ -5232,6 +5344,11 @@ int main(void)
     failed += test_vm2_irq_highest_priority_model(K1806VM2, "K1806VM2");
     failed += test_vm1_timer_registers_model(K1801VM1, "K1801VM1");
     failed += test_vm1_timer_registers_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm1_rr_rap_rosh_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_rr_rap_rosh_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm1_rr_rap_rosh_non_vm1_model(K1801VM2, "K1801VM2");
+    failed += test_vm1_rr_rap_rosh_non_vm1_model(K1806VM2, "K1806VM2");
+    failed += test_vm1_rr_rap_rosh_non_vm1_model(DCJ11, "DCJ11");
     failed += test_vm1g_timer_irq();
     failed += test_vm1g_eis_diagnostics();
     failed += test_vm1g_eis_not_illegal();

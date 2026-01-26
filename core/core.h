@@ -84,6 +84,7 @@ typedef struct _regs {
     word    TVE_COUNT;  /* 0177710 */
     word    TVE_CSR;    /* 0177712 */
     byte    TVE_PENDING;
+    byte    VM1_RAP_PRESENT;
 
     word	fTrap;
 

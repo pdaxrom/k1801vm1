@@ -21,7 +21,7 @@ endif
 CORE_DIR := ../core
 # Core emulation source files
 # Core object files are located in the parent core directory.
-CORE_OBJS := $(CORE_DIR)/core.o $(CORE_DIR)/disas.o
+CORE_OBJS := $(CORE_DIR)/core.o $(CORE_DIR)/disas.o $(CORE_DIR)/hardware.o
 # Object files for the emulator. X11 GUI objects are added only when the X11
 # backend is selected.
 OBJS := main.o bk_hw.o bk_tape.o bk_timing.o $(CORE_OBJS) $(X11_OBJS)

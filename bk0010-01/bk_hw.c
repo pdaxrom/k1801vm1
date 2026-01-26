@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "bk_hw.h"
+#include "core/hardware.h"
 #include "bk_tape.h"
 
 #define MEM_SIZE 65536
@@ -11,12 +12,6 @@
 #define BK_KBD_STATUS 0177660
 #define BK_KBD_DATA   0177662
 #define BK_SHIFT_REG  0177664
-#define BK_VM1_RR     0177700
-#define BK_VM1_RAP    0177702
-#define BK_VM1_ROSH   0177704
-#define BK_TIMER_SV   0177706
-#define BK_TIMER_CNT  0177710
-#define BK_TIMER_CSR  0177712
 #define BK_EXT_PORT   0177714
 #define BK_SYS_CTRL   0177716
 #define BK_KBD_VECTOR 0000060
@@ -26,13 +21,6 @@
 #define BK_BUS_VECTOR 0000004
 
 #define CSR_READY 0200
-#define TIMER_CSR_MONITOR 0004
-#define TIMER_CSR_SINGLE  0010
-#define TIMER_CSR_START   0020
-#define TIMER_CSR_DIV16   0040
-#define TIMER_CSR_DIV4    0100
-#define TIMER_CSR_ZERO    0200
-#define TIMER_CSR_PAUSE   0001
 #define SYS_PORT_TAPE_BIT 0040
 #define SYS_PORT_TAPE_BIT2 0100
 #define SYS_PORT_KEY_BIT  0100
@@ -45,11 +33,6 @@ static byte *mem;
 static byte kbd_status = CSR_READY;
 static byte kbd_data = 0;
 static word shift_reg = 01330;
-static word timer_sv = 011000;
-static word timer_count = 0177777;
-static byte timer_csr_low = 0;
-static word timer_prescaler = 0;
-static byte rap_present = 1;
 static word ext_port = 0177777;
 static word sys_ctrl = 0100000;
 static byte sys_port_out = 0220;
@@ -110,33 +93,6 @@ static INLINE int is_rom_addr(word addr)
     return addr >= BK_ROM_LO && addr <= BK_ROM_HI;
 }
 
-static INLINE word timer_csr_read(void)
-{
-    return (word)(0177400 | timer_csr_low);
-}
-
-static INLINE void timer_reload(void)
-{
-    timer_count = timer_sv;
-    timer_prescaler = 0;
-}
-
-static void timer_apply_csr(byte new_low)
-{
-    byte old_low = timer_csr_low;
-    timer_csr_low = new_low;
-
-    if ((timer_csr_low & TIMER_CSR_START) == 0) {
-        timer_reload();
-    } else if ((old_low & TIMER_CSR_START) == 0) {
-        timer_reload();
-    }
-
-    if (timer_csr_low & TIMER_CSR_PAUSE) {
-        timer_reload();
-    }
-}
-
 static INLINE int tape_motor_on(void)
 {
     return (sys_port_out & SYS_PORT_MOTOR_BIT) == 0;
@@ -169,7 +125,10 @@ static void mem_write(word addr, byte value)
 
 static byte bk_load_byte(regs *r, word offset)
 {
-    (void)r;
+    byte value;
+    if (hwstub_vm1_load_byte(r, offset, &value)) {
+        return value;
+    }
     switch (offset) {
     case BK_KBD_STATUS:
         return (byte)((kbd_status & CSR_READY) | (kbd_status & 0100));
@@ -186,38 +145,6 @@ static byte bk_load_byte(regs *r, word offset)
         return (byte)(shift_reg & 0377);
     case (BK_SHIFT_REG + 1):
         return (byte)(shift_reg >> 8) & 02;
-    case BK_VM1_RR:
-        return 0377;
-    case (BK_VM1_RR + 1):
-        return 0177;
-    case BK_VM1_RAP:
-        if (!rap_present) {
-            bus_error_pending = 1;
-            return 0;
-        }
-        return 0377;
-    case (BK_VM1_RAP + 1):
-        if (!rap_present) {
-            bus_error_pending = 1;
-            return 0;
-        }
-        return 0177;
-    case BK_VM1_ROSH:
-        return 0340;
-    case (BK_VM1_ROSH + 1):
-        return 0177;
-    case BK_TIMER_SV:
-        return (byte)(timer_sv & 0377);
-    case (BK_TIMER_SV + 1):
-        return (byte)(timer_sv >> 8);
-    case BK_TIMER_CNT:
-        return (byte)(timer_count & 0377);
-    case (BK_TIMER_CNT + 1):
-        return (byte)(timer_count >> 8);
-    case BK_TIMER_CSR:
-        return (byte)(timer_csr_read() & 0377);
-    case (BK_TIMER_CSR + 1):
-        return 0377;
     case BK_EXT_PORT:
         return (byte)(ext_port & 0377);
     case (BK_EXT_PORT + 1):
@@ -241,7 +168,9 @@ static byte bk_load_byte(regs *r, word offset)
 
 static void bk_store_byte(regs *r, word offset, byte value)
 {
-    (void)r;
+    if (hwstub_vm1_store_byte(r, offset, value)) {
+        return;
+    }
     switch (offset) {
     case BK_KBD_STATUS:
         kbd_status = (byte)((kbd_status & CSR_READY) | (value & 0100));
@@ -259,36 +188,6 @@ static void bk_store_byte(regs *r, word offset, byte value)
         break;
     case (BK_SHIFT_REG + 1):
         shift_reg = (word)((shift_reg & 0377) | (((word)value << 8) & 01000));
-        break;
-    case BK_VM1_RR:
-    case (BK_VM1_RR + 1):
-        break;
-    case BK_VM1_RAP:
-    case (BK_VM1_RAP + 1):
-        rap_present = 0;
-        break;
-    case BK_VM1_ROSH:
-    case (BK_VM1_ROSH + 1):
-        break;
-    case BK_TIMER_SV:
-        timer_sv = (word)((timer_sv & 0177400) | value);
-        if ((timer_csr_low & TIMER_CSR_START) == 0 || (timer_csr_low & TIMER_CSR_PAUSE)) {
-            timer_reload();
-        }
-        break;
-    case (BK_TIMER_SV + 1):
-        timer_sv = (word)((timer_sv & 0377) | ((word)value << 8));
-        if ((timer_csr_low & TIMER_CSR_START) == 0 || (timer_csr_low & TIMER_CSR_PAUSE)) {
-            timer_reload();
-        }
-        break;
-    case BK_TIMER_CNT:
-    case (BK_TIMER_CNT + 1):
-        break;
-    case BK_TIMER_CSR:
-        timer_apply_csr(value);
-        break;
-    case (BK_TIMER_CSR + 1):
         break;
     case BK_EXT_PORT:
         ext_port = (word)((ext_port & 0177400) | value);
@@ -319,13 +218,22 @@ static void bk_store_byte(regs *r, word offset, byte value)
 
 static word bk_load_word(regs *r, word offset)
 {
-    byte lo = bk_load_byte(r, offset);
-    byte hi = bk_load_byte(r, (word)(offset + 1));
-    return (word)(lo | (hi << 8));
+    word value;
+    if (hwstub_vm1_load_word(r, offset, &value)) {
+        return value;
+    }
+    {
+        byte lo = bk_load_byte(r, offset);
+        byte hi = bk_load_byte(r, (word)(offset + 1));
+        return (word)(lo | (hi << 8));
+    }
 }
 
 static void bk_store_word(regs *r, word offset, word value)
 {
+    if (hwstub_vm1_store_word(r, offset, value)) {
+        return;
+    }
     bk_store_byte(r, offset, (byte)(value & 0377));
     bk_store_byte(r, (word)(offset + 1), (byte)(value >> 8));
 }
@@ -346,15 +254,9 @@ static int bk_init(regs *r)
 
 static void bk_reset(regs *r)
 {
-    (void)r;
     kbd_status = CSR_READY;
     kbd_data = 0;
     shift_reg = 01330;
-    timer_sv = 011000;
-    timer_count = 0177777;
-    timer_csr_low = 0;
-    timer_prescaler = 0;
-    rap_present = 1;
     ext_port = 0177777;
     sys_ctrl = 0100000;
     sys_port_out = 0220;
@@ -363,6 +265,7 @@ static void bk_reset(regs *r)
     bus_error_pending = 0;
     beeper_on = 0;
     beeper_pulse = 0;
+    r->VM1_RAP_PRESENT = 1;
     bk_tape_reset();
 }
 
@@ -412,11 +315,6 @@ void bk_hw_reset_state(void)
     kbd_status = CSR_READY;
     kbd_data = 0;
     shift_reg = 01330;
-    timer_sv = 011000;
-    timer_count = 0177777;
-    timer_csr_low = 0;
-    timer_prescaler = 0;
-    rap_present = 1;
     ext_port = 0177777;
     sys_ctrl = 0100000;
     sys_port_out = 0220;
@@ -487,40 +385,6 @@ void bk_hw_tick(void)
         sys_port_in |= SYS_PORT_TAPE_BIT;
     } else {
         sys_port_in &= (byte)~SYS_PORT_TAPE_BIT;
-    }
-
-    if ((timer_csr_low & TIMER_CSR_START) == 0) {
-        return;
-    }
-    if (timer_csr_low & TIMER_CSR_PAUSE) {
-        return;
-    }
-
-    word divisor = 1;
-    if (timer_csr_low & TIMER_CSR_DIV4) {
-        divisor *= 4;
-    }
-    if (timer_csr_low & TIMER_CSR_DIV16) {
-        divisor *= 16;
-    }
-
-    timer_prescaler++;
-    if (timer_prescaler < divisor) {
-        return;
-    }
-    timer_prescaler = 0;
-
-    word prev = timer_count;
-    timer_count--;
-    if (prev == 0) {
-        if (timer_csr_low & TIMER_CSR_MONITOR) {
-            timer_csr_low |= TIMER_CSR_ZERO;
-        }
-        if ((timer_csr_low & TIMER_CSR_SINGLE) && ((timer_csr_low & 0002) == 0)) {
-            timer_csr_low &= (byte)~TIMER_CSR_START;
-        } else if ((timer_csr_low & 0002) == 0) {
-            timer_reload();
-        }
     }
 }
 
