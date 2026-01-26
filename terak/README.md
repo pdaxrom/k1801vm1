@@ -14,9 +14,9 @@ RT‑11 RK05 image while keeping the code base tiny and portable.
 * **DL11 console** – memory‑mapped UART at the standard octal addresses
   `177560` RCSR, `177562` RBUF, `177564` XCSR, `177566` XBUF.  Input is polled from the
   host terminal in raw, non‑blocking mode; output is printed to stdout.
-* **RK11 stub** – CSR registers are present (`177400`‑`177412`).  The stub does not
-  perform real disk I/O yet but provides the necessary registers for a host‑side
-  bootstrap.
+* **RK11 minimal** - CSR registers are present (`0177400`-`0177416`) and a minimal
+  READ + GO (`000005`) transfer path copies data from an RK05 image into RAM with
+  RDY (`0000200`) asserted on completion.
 * **Adapter layer** – `adapter_core.c/h` wires the core callbacks (`load_byte`,
   `store_word`, …) to the bus implementation.
 * **Machine layer** – `machine.c/h` creates the CPU, loads binaries, runs the
@@ -79,25 +79,49 @@ make                # builds ./build/bin/terak
 
 `--load` specifies the binary file. `--addr` (octal) sets the load address – if omitted the binary is placed at `000000`. `--pc` (octal) sets the initial program counter after loading.
 
-### RK05 boot (stub)
+### RK05 boot (minimal RK11)
 
 ```bash
 ./build/bin/terak --rk05 rt11_rk05.dsk --boot rk
 ```
 
-The current RK11 implementation does not transfer data; a host‑side bootstrap can
-copy the first blocks into RAM before starting execution.
+The RK11 path now supports a minimal READ + GO command for RT-11 bootstraps; the
+optional `--boot rk` flag still performs a host-side copy of the first blocks for
+simple testing.
 
 ## TODO – what remains
 
-* **Full RK11 implementation** – handle the GO flag, READ/WRITE commands, translate
-  the disk address (`RKDA`) to a linear block number, and move data between the
-  RK05 image file and RAM.
+* **Full RK11 implementation** - handle seek timing, error conditions, and real
+  RK05 geometry (the current mapping is simplified and linear).
 * **Bootstrap loader** – a small PDP‑11 program that reads the boot blocks via RK11
   and jumps to the RT‑11 monitor.
 * **Interrupt support** – expose `poll_irq` and device interrupt lines so the core
   can service them.
 * **More tests** – add smoke tests for the RK11 driver and for a real RT‑11 image.
+
+## RK11 CSR behavior (octal)
+
+This RK11 implementation is minimal and intended only to support RT-11 bootstrap and monitor load.
+
+* CSR base addresses:
+  * `0177400` RKDS
+  * `0177402` RKER
+  * `0177404` RKCS
+  * `0177406` RKWC (negative word count)
+  * `0177410` RKBA (bus address)
+  * `0177412` RKDA (disk address)
+  * `0177416` RKDB (stubbed)
+* RKCS behavior:
+  * GO = `0000001`
+  * RDY/DONE = `0000200` (byte reads see this in bit 7)
+  * READ + GO = `000005` (function code `000004` + GO)
+* RKDA mapping (RK05 geometry):
+  * sector = `RKDA & 0000017`
+  * surface = `(RKDA & 0000020) >> 4`
+  * cylinder = `(RKDA & 0017740) >> 5`
+  * LBA = `((cylinder * 2 + surface) * 0014) + sector`
+  * byte offset = `LBA * 01000` (01000 bytes per sector)
+  * RKDA increments by one sector per 0400 words transferred
 
 ## Memory map (octal)
 

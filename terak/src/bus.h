@@ -12,6 +12,7 @@ uint16_t bus_read_word(paddr_t addr);
 void     bus_write_word(paddr_t addr, uint16_t val);
 uint8_t  bus_read_byte(paddr_t addr);
 void     bus_write_byte(paddr_t addr, uint8_t val);
+int      bus_is_nxm(paddr_t addr);
 
 /* Initialise RAM (called by machine init). */
 void bus_init(void);
@@ -20,4 +21,3 @@ void bus_init(void);
 extern uint8_t ram[0177776 + 2]; /* full 64 KB */
 
 #endif /* BUS_H_ */
-

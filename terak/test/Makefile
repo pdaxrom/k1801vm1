@@ -5,7 +5,7 @@
 MACRO11 = ../../tools/macro11
 DUMPOBJ = ../../tools/dumpobj
 
-all: hello.bin
+all: hello.bin rk11_read.bin rk11_boot.bin
 
 .SUFFIXES: .mac .obj .bin
 

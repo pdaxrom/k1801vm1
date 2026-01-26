@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 /* CSR bits – only the bits required for polling are defined */
-#define DL11_CSR_DONE   0x80  /* Receive character available */
-#define DL11_CSR_READY  0x80  /* Transmitter ready */
+#define DL11_CSR_DONE   0200  /* Receive character available */
+#define DL11_CSR_READY  0200  /* Transmitter ready */
 
 /* Initialise the device (clear registers). */
 void dl11_reset(void);

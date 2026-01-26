@@ -8,7 +8,7 @@
 void machine_init(regs *r);
 
 /* Run the emulator.  Returns when max_steps reaches 0 or a halt occurs. */
-int machine_run(regs *r, int max_steps, int trace);
+int machine_run(regs *r, int max_steps, int trace, int trace_emt, int trace_regs, int trace_irq);
 
 /* Load a binary file into RAM at the given octal address. */
 int machine_load_bin(const char *path, uint16_t load_addr);
