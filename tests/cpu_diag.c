@@ -1,8 +1,66 @@
 /* CPU diagnostic harness skeleton (no semantic checks yet). */
 #include "cpu_diag.h"
 #include <string.h>
+#include <ctype.h>
+#include <stdio.h>
 
 #include "core/hardware.h"
+
+static int cpu_diag_str_eq(const char *a, const char *b)
+{
+    if (!a || !b) {
+        return 0;
+    }
+    while (*a && *b) {
+        char ca = (char)tolower((unsigned char)*a);
+        char cb = (char)tolower((unsigned char)*b);
+        if (ca != cb) {
+            return 0;
+        }
+        a++;
+        b++;
+    }
+    return *a == '\0' && *b == '\0';
+}
+
+int cpu_diag_parse_model(const char *name, byte *model_out)
+{
+    if (!model_out) {
+        return 0;
+    }
+    if (cpu_diag_str_eq(name, "dcj11")) {
+        *model_out = DCJ11;
+        return 1;
+    }
+    if (cpu_diag_str_eq(name, "vm1")) {
+        *model_out = K1801VM1;
+        return 1;
+    }
+    if (cpu_diag_str_eq(name, "vm1g")) {
+        *model_out = K1801VM1G;
+        return 1;
+    }
+    if (cpu_diag_str_eq(name, "vm2")) {
+        *model_out = K1801VM2;
+        return 1;
+    }
+    return 0;
+}
+
+const char *cpu_diag_model_name(byte model)
+{
+    switch (model) {
+    case DCJ11:
+        return "dcj11";
+    case K1801VM2:
+        return "vm2";
+    case K1801VM1G:
+        return "vm1g";
+    case K1801VM1:
+    default:
+        return "vm1";
+    }
+}
 
 void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model)
 {

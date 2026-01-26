@@ -53,6 +53,10 @@
 }
 
 #define is_vm2(r) ((r)->model == K1801VM2 || (r)->model == K1806VM2)
+static INLINE int dcj11_kernel_psw(word psw)
+{
+	return ((psw >> 14) & 03) == 0;
+}
 
 #define pushw(v) {			\
 	r->r[6] -= 2;			\
@@ -66,9 +70,34 @@
 
 static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
 {
-	word vec = irq_vector & 0777;
+	word vec = (r->model == K1801VM1 || r->model == K1801VM1G)
+		? irq_vector
+		: (irq_vector & 0777);
 	int pri = (irq_vector >> 9) & 07;
 	int psw_pri = (r->psw >> 5) & 07;
+	if (r->model == K1801VM1 || r->model == K1801VM1G) {
+		const word psw10 = 01000;
+		const word psw11 = 02000;
+		if (r->psw & psw10) {
+			return 0;
+		}
+		if ((vec == 0160002) && (r->psw & psw11)) {
+			return 0;
+		}
+		if ((vec != 0160002) && flag_is_set(FLAG_P)) {
+			return 0;
+		}
+		*vec_out = vec & 0177776;
+		return 1;
+	}
+	if (is_vm2(r)) {
+		vec = irq_vector;
+		if (r->psw & FLAG_P) {
+			return 0;
+		}
+		*vec_out = vec & 0177776;
+		return 1;
+	}
 	if (pri && psw_pri >= pri) {
 		return 0;
 	}
@@ -79,6 +108,9 @@ static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
 
 void core_init(regs *r)
 {
+	if (r->model == K1806VM2) {
+		r->model = K1801VM2;
+	}
 	r->init(r);
 }
 
@@ -91,6 +123,8 @@ void core_reset(regs *r)
     r->fTrap = 0;
     r->fAbort = 0;
     r->fHaltSignal = 0;
+    r->fStepDeferHalt = 0;
+    r->fFisError = 0;
 
     r->reset(r);
 }
@@ -156,15 +190,19 @@ static INLINE void bus_error_trap(regs *r)
 static INLINE void handle_halt(regs *r)
 {
 	word vec;
-	if (is_vm2(r)) {
+	if (r->model == K1801VM1 || r->model == K1801VM1G) {
+		store_word(r, 0177676, r->psw);
+		store_word(r, 0177674, r->r[7]);
+		store_word(r, 0177716, load_word(r, 0177716) | 010);
+		vec = 0160002;
+		r->r[7] = load_word(r, vec);
+		r->psw  = load_word(r, (word)(vec + 2));
+	} else if (is_vm2(r)) {
 		r->cps = r->psw;
 		r->cpc = r->r[7];
-		vec = 0170;
-		if (flag_is_set(FLAG_H)) {
-			vec |= (r->SEL0 & 0177400);
-		}
+		vec = (word)((r->SEL0 & 0177400) | 0170);
 		r->r[7] = load_word(r, vec    ) & 0177776;
-		r->psw  = load_word(r, vec + 2) | FLAG_H;
+		r->psw  = load_word(r, vec + 2);
 	} else if (r->model == DCJ11) {
 		pushw(r->psw);
 		pushw(r->r[7]);
@@ -182,6 +220,28 @@ static INLINE void handle_halt(regs *r)
 		r->r[7] = load_word(r, vec + 2) & 0177776;
 		r->psw  = load_word(r, vec + 4);
 	}
+}
+
+static INLINE void handle_fis(regs *r)
+{
+	word vec;
+	if (r->SEL0 & 0200) {
+		illegal_trap(r);
+		return;
+	}
+	r->cps = r->psw;
+	r->cpc = r->r[7];
+	vec = (word)((r->SEL0 & 0177400) | 010);
+	r->r[7] = load_word(r, vec    ) & 0177776;
+	r->psw  = load_word(r, vec + 2);
+}
+
+static INLINE void handle_fis_error(regs *r)
+{
+	pushw(r->psw);
+	pushw(r->r[7]);
+	r->r[7] = load_word(r, 0244);
+	r->psw  = load_word(r, 0246);
 }
 
 static INLINE byte get_data_byte(regs *r, byte type, word offset) {
@@ -317,6 +377,8 @@ int core_step(regs *r)
     word irq_vector;
     word psw_before = r->psw;
     int do_trace = 0;
+    int defer_halt = 0;
+    int skip_irq = 0;
     int skip_trace = r->fTrap ? 1 : 0;
     r->fTrap = 0;
 
@@ -326,17 +388,25 @@ int core_step(regs *r)
     }
 
     if (r->fHaltSignal) {
-    	r->fHaltSignal = 0;
-    	r->fWait = 0;
-    	handle_halt(r);
-    	return 0;
+        if (is_vm2(r) && r->fStepDeferHalt) {
+            r->fStepDeferHalt = 0;
+            defer_halt = 1;
+        } else {
+            r->fHaltSignal = 0;
+            if (is_vm2(r) && flag_is_set(FLAG_H)) {
+                r->fWait = 0;
+                return 0;
+            }
+            r->fWait = 0;
+            handle_halt(r);
+            return 0;
+        }
     }
 
     if (r->fWait) {
         if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
             word vec;
             if (irq_accept(r, irq_vector, &vec)) {
-                vec = (word)((irq_vector & 0777) & 017776);
                 r->fWait = 0;
                 pushw(r->psw);
                 pushw(r->r[7]);
@@ -353,31 +423,58 @@ int core_step(regs *r)
 
     // load instruction
 
-    word op = load_word(r, r->r[7]);
-    if (r->fAbort) {
-    	r->fAbort = 0;
+	word op = load_word(r, r->r[7]);
+	if (r->fAbort) {
+		r->fAbort = 0;
         return 0;
     }
     r->ir = op;
     r->r[7] += 2;
+    if (is_vm2(r) && ((op & 0177700) == 0075000)) {
+        if (r->fFisError) {
+            r->fFisError = 0;
+            handle_fis_error(r);
+        } else {
+            handle_fis(r);
+        }
+        goto step_end;
+    }
 
     //
     // No operands instructions
     //
     switch(op) {
 		case 000000: /* HALT */ {
-#warning HALT
+			if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
+				pushw(r->psw);
+				pushw(r->r[7]);
+				r->r[7] = load_word(r, 000004);
+				r->psw  = load_word(r, 000006);
+				goto step_end;
+			}
 			handle_halt(r);
         goto step_end;
 		}
 
 		case 000001: /* WAIT */
 			r->fWait = 1;
+			if (r->model == K1801VM1 || r->model == K1801VM1G || is_vm2(r) || r->model == DCJ11) {
+				skip_trace = 1;
+			}
         goto step_end;
 
 		case 000002: /* RTI */
 			pullw(r->r[7]);
 			pullw(r->psw);
+			if (is_vm2(r)) {
+				if (r->r[7] < 0160000) {
+					r->psw = (word)((r->psw & ~FLAG_H) | (psw_before & FLAG_H));
+				}
+			}
+			if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
+				word mask = 0170000 | 000340;
+				r->psw = (word)((r->psw & ~mask) | (psw_before & mask));
+			}
         goto step_end;
 
 		case 000003: /* BPT */
@@ -395,12 +492,28 @@ int core_step(regs *r)
         goto step_end;
 
 		case 000005: /* RESET */
-#warning RESET
+			if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
+				goto step_end;
+			}
+			r->fWait = 0;
+			r->fHaltSignal = 0;
+			if (r->reset) {
+				r->reset(r);
+			}
         goto step_end;
 
 		case 000006: /* RTT */
 			pullw(r->r[7]);
 			pullw(r->psw);
+			if (is_vm2(r)) {
+				if (r->r[7] < 0160000) {
+					r->psw = (word)((r->psw & ~FLAG_H) | (psw_before & FLAG_H));
+				}
+			}
+			if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
+				word mask = 0170000 | 000340;
+				r->psw = (word)((r->psw & ~mask) | (psw_before & mask));
+			}
 			r->fTrap = 1;
 			skip_trace = 1;
         goto step_end;
@@ -461,42 +574,102 @@ int core_step(regs *r)
     if (is_vm2(r)) {
     	switch(op) {
     	case 0000012: /* START */
+            if (!flag_is_set(FLAG_H) || !flag_is_set(FLAG_P)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->r[7] = r->cpc;
     		r->psw = r->cps;
+            if (r->poll_irq) {
+                word vec;
+                word irq_vector;
+                if (r->poll_irq(r, &irq_vector)) {
+                    if (irq_accept(r, irq_vector, &vec)) {
+                        pushw(r->psw);
+                        pushw(r->r[7]);
+                        r->r[7] = load_word(r, vec);
+                        r->psw  = load_word(r, (word)(vec + 2));
+                    }
+                }
+            }
         goto step_end;
 
     	case 0000016: /* STEP */
+            if (!flag_is_set(FLAG_H) || !flag_is_set(FLAG_P)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->r[7] = r->cpc;
     		r->psw = r->cps;
+            skip_irq = 1;
+            r->fStepDeferHalt = 1;
         goto step_end;
 
     	case 0000020: /* RSEL */
+            if (!flag_is_set(FLAG_H)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->r[0] = r->SEL0;
         goto step_end;
 
     	case 0000021: /* MFUS */
+            if (!flag_is_set(FLAG_H)) {
+                illegal_trap(r);
+        goto step_end;
+            }
+            {
+                word psw_saved = r->psw;
+                r->psw = (word)(r->psw & ~FLAG_H);
     		r->r[0] = load_word(r, r->r[5]);
     		r->r[5] += 2;
+                r->psw = psw_saved;
+            }
         goto step_end;
 
     	case 0000022: /* RCPC */
+            if (!flag_is_set(FLAG_H) || !flag_is_set(FLAG_P)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->r[0] = r->cpc;
         goto step_end;
 
     	case 0000024: /* RCPS */
+            if (!flag_is_set(FLAG_H) || !flag_is_set(FLAG_P)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->r[0] = r->cps;
         goto step_end;
 
     	case 0000031: /* MTUS */
+            if (!flag_is_set(FLAG_H)) {
+                illegal_trap(r);
+        goto step_end;
+            }
+            {
+                word psw_saved = r->psw;
+                r->psw = (word)(r->psw & ~FLAG_H);
     		r->r[5] -= 2;
     		store_word(r, r->r[5], r->r[0]);
+                r->psw = psw_saved;
+            }
         goto step_end;
 
     	case 0000032: /* WCPC */
+            if (!flag_is_set(FLAG_H) || !flag_is_set(FLAG_P)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->cpc = r->r[0];
         goto step_end;
 
     	case 0000034: /* WCPS */
+            if (!flag_is_set(FLAG_H) || !flag_is_set(FLAG_P)) {
+                illegal_trap(r);
+        goto step_end;
+            }
     		r->cps = r->r[0];
         goto step_end;
     	}
@@ -614,20 +787,15 @@ int core_step(regs *r)
         goto step_end;
 
 		case 0104000:
-		case 0104400:
-			if (op & 0400) {
-				// TRAP
-				pushw(r->psw);
-				pushw(r->r[7]);
-				r->r[7] = load_word(r, 034);
-				r->psw  = load_word(r, 036);
-			} else {
-				// EMT
-				pushw(r->psw);
-				pushw(r->r[7]);
-				r->r[7] = load_word(r, 030);
-				r->psw  = load_word(r, 032);
-			}
+		case 0104400: {
+			word code = op & 0377;
+			word vec = (op & 0400) ? 000034 : 000030;
+			vec = (word)(vec + (code << 2));
+			pushw(r->psw);
+			pushw(r->r[7]);
+			r->r[7] = load_word(r, vec);
+			r->psw  = load_word(r, (word)(vec + 2));
+		}
         goto step_end;
     }
 
@@ -944,8 +1112,9 @@ int core_step(regs *r)
 			DECODE_DST();
 			GET_WORD(tmp);
 			set_flag_if(tmp == MNI,   FLAG_V);
-			byte tmp_c = (tmp == 0) && flag_is_set(FLAG_C);
-			if (flag_is_set(FLAG_C)) {
+			byte flag_c = flag_is_set(FLAG_C);
+			byte tmp_c = flag_c && (tmp == 0);
+			if (flag_c) {
 				tmp = tmp - 1;
 			}
 			PUT_WORD(tmp);
@@ -958,8 +1127,9 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			set_flag_if(tmp == MNI_B, FLAG_V);
-			byte tmp_c = (tmp == 0) && flag_is_set(FLAG_C);
-			if (flag_is_set(FLAG_C)) {
+			byte flag_c = flag_is_set(FLAG_C);
+			byte tmp_c = flag_c && (tmp == 0);
+			if (flag_c) {
 				tmp = tmp - 1;
 			}
 			PUT_BYTE(tmp);
@@ -994,7 +1164,6 @@ int core_step(regs *r)
         goto step_end;
 
 		case 01067: /* MFPS */ {
-#warning MFPS
 			DECODE_DST();
 			word tmp = r->psw;
 			PUT_WORD(tmp);
@@ -1007,7 +1176,13 @@ int core_step(regs *r)
 		case 01064: /* MTPS */
 			DECODE_DSTB();
 			GET_BYTE(tmp);
-			r->psw = (r->psw & (FLAG_T | FLAG_H)) | (tmp & 0xEF);
+			{
+				word low = tmp & 0357;
+				if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
+					low = (word)((low & 000037) | (r->psw & 000340));
+				}
+				r->psw = (word)((r->psw & 0177000) | (r->psw & (FLAG_T | FLAG_H)) | low);
+			}
         goto step_end;
 
 		case 00072: /* TSTSET */ {
@@ -1448,8 +1623,42 @@ int core_step(regs *r)
 	illegal_trap(r);
         goto step_end;
 step_end:
+    if ((r->model == K1801VM1 || r->model == K1801VM1G) && (r->TVE_CSR & 000020)) {
+        if (r->TVE_COUNT != 0) {
+            r->TVE_COUNT--;
+        }
+        if (r->TVE_COUNT == 0) {
+            if (r->TVE_CSR & 000004) {
+                if (r->TVE_PENDING) {
+                    r->TVE_CSR |= 000200;
+                } else {
+                    r->TVE_PENDING = 1;
+                }
+            }
+            if (!(r->TVE_CSR & 000002)) {
+                if (r->TVE_CSR & 000010) {
+                    r->TVE_CSR &= ~000020;
+                }
+                if (r->TVE_LIMIT == 0) {
+                    r->TVE_COUNT = 0177777;
+                } else {
+                    r->TVE_COUNT = r->TVE_LIMIT;
+                }
+            }
+        }
+    }
     if (!skip_trace && (psw_before & FLAG_T)) {
         do_trace = 1;
+    }
+    if (defer_halt && r->fHaltSignal) {
+        r->fHaltSignal = 0;
+        if (is_vm2(r) && flag_is_set(FLAG_H)) {
+            r->fWait = 0;
+            return 0;
+        }
+        r->fWait = 0;
+        handle_halt(r);
+        return 0;
     }
     if (do_trace) {
         pushw(r->psw);
@@ -1457,15 +1666,34 @@ step_end:
         r->r[7] = load_word(r, 014);
         r->psw  = load_word(r, 016);
     }
-    if (!do_trace && r->poll_irq && r->poll_irq(r, &irq_vector)) {
-        word vec;
-        if (irq_accept(r, irq_vector, &vec)) {
-            vec = (word)((irq_vector & 0777) & 017776);
-            pushw(r->psw);
-            pushw(r->r[7]);
-            r->r[7] = load_word(r, vec);
-            r->psw  = load_word(r, (word)(vec + 2));
+    if (!do_trace) {
+        if (r->model == K1801VM1G && r->TVE_PENDING && (r->TVE_CSR & 000004)) {
+            if ((r->psw & 01000) == 0 && (r->psw & FLAG_P) == 0) {
+                r->TVE_PENDING = 0;
+                pushw(r->psw);
+                pushw(r->r[7]);
+                r->r[7] = load_word(r, 000270);
+                r->psw  = load_word(r, 000272);
+                return 0;
+            }
         }
+        if (!skip_irq) {
+            if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
+                word vec;
+                if (irq_accept(r, irq_vector, &vec)) {
+                    pushw(r->psw);
+                    pushw(r->r[7]);
+                    r->r[7] = load_word(r, vec);
+                    r->psw  = load_word(r, (word)(vec + 2));
+                }
+            }
+        }
+    }
+    if (is_vm2(r)) {
+    	if ((r->psw & (FLAG_P | FLAG_H)) != (FLAG_P | FLAG_H)) {
+    		r->cps = r->psw;
+    		r->cpc = r->r[7];
+    	}
     }
     return 0;
 }

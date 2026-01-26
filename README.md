@@ -152,7 +152,7 @@ SEL‑related entities implemented in `core/`:
 ### 8.2 Semantics
 Implemented behavior:
 - Reset PC uses SEL0 high byte: PC ← (SEL0 & 0177400), PSW ← 000340
-- RSEL reads SEL0 into R0 (for VM2/DCJ11)
+- RSEL reads SEL0 into R0 (VM2 only)
 - SEL1/SEL2 are memory‑mapped external registers; byte and word access supported
 - SEL1/SEL2 are handled by the hardware stub (`core/hardware.c`)
 
@@ -169,7 +169,7 @@ References:
 ## 9. Differences vs K1801VM1 (Summary)
 
 Key differences (within this project’s scope):
-- DCJ11 supports VM2 privileged instructions (GO/STEP/RSEL/RCPC/RCPS/WCPC/WCPS)
+- DCJ11 treats VM2 privileged instructions (GO/STEP/RSEL/RCPC/RCPS/WCPC/WCPS) as illegal
 - DCJ11 interrupt priority masking behavior follows J‑11 rules
 
 Impact:
@@ -193,7 +193,155 @@ References: `doc/KM1801VM2.pdf`.
 
 ---
 
-## 11. Diagnostic Tests
+## 11. K1801VM1 Compliance (CPU Core)
+
+This section summarizes VM1 behavior implemented in `core/` and verified
+by tests. All values are OCTAL.
+
+References:
+- `doc/Однокристальный-микропроцессор-К1801ВМ1.pdf`
+- `doc/1801vm1.txt`
+
+### 11.1 VM1 Trap/Exception Entry
+Entry stack frame (top → bottom):
+- PC
+- PSW
+
+Status: **PASS**
+
+### 11.2 VM1 RTI Semantics
+RTI restores:
+1) PC
+2) PSW
+
+Status: **PASS**
+
+### 11.3 VM1 HALT Semantics (Pult Exception)
+HALT generates a “pult” exception:
+- PSW saved at 0177676
+- PC saved at 0177674
+- bit 010 set in 0177716
+- PC loaded from 0160002, PSW loaded from 0160004
+
+Status: **PASS / FIXED**
+
+### 11.4 VM1 WAIT Semantics
+- WAIT sets fWait and stops instruction fetch.
+- T‑bit does not force an immediate trace exit while waiting.
+
+Status: **PASS / FIXED**
+
+### 11.5 VM1 Interrupt Masking
+- PSW7 (I) masks IRQ2/IRQ3/VIRQ.
+- PSW10 masks IRQ1/IRQ2/IRQ3/VIRQ.
+- PSW11 masks IRQ1.
+
+Status: **PASS / FIXED**
+
+### 11.6 VM1 Multiple Interrupt Selection
+- When multiple IRQs are pending, IRQ1 has highest priority over TVE, IRQ2, IRQ3, VIRQ.
+- VM1 accepts full vectors (no 9‑bit priority encoding on the bus).
+
+Status: **PASS / FIXED**
+
+### 11.7 VM1 Timer Registers (VE1)
+- TVE_LIMIT at 0177706 (R/W)
+- TVE_COUNT at 0177710 (RO)
+- TVE_CSR at 0177712 (R/W, high byte reads as 0377)
+- Writes to TVE_CSR copy TVE_LIMIT → TVE_COUNT
+
+Status: **PASS / LIMITED**
+
+### 11.8 VM1G Notes
+- VM1G adds a working EIS block and VE1 timer IRQ support.
+
+Status: **PASS / LIMITED**
+
+---
+
+## 12. K1801VM1G Compliance (CPU Core)
+
+This section summarizes VM1G‑specific behavior implemented in `core/` and verified
+by tests. All values are OCTAL.
+
+References:
+- `doc/Однокристальный-микропроцессор-К1801ВМ1.pdf`
+- `doc/1801vm1.txt`
+
+### 12.1 VM1G EIS Instructions
+EIS instructions are enabled on VM1G:
+- MUL
+- DIV
+- ASH
+- ASHC
+
+Status: **PASS / FIXED**
+
+### 12.2 VM1G Timer Interrupt
+- VM1G generates timer IRQ at vector 000270 when RUN+MON are set.
+- Interrupt masked by PSW7/PSW10.
+
+Status: **PASS / LIMITED**
+
+---
+
+## 13. K1801VM2 Compliance (CPU Core)
+
+This section summarizes VM2 behavior implemented in `core/` and verified
+by tests. All values are OCTAL.
+
+References:
+- `doc/KM1801VM2.pdf`
+
+### 13.1 VM2 Mode and Copy Registers
+- CPC/CPSW track PC/PSW unless both P and H/U bits are set.
+- When P=1 and H/U=1, CPC/CPSW are locked for debugger/FIS use.
+
+Status: **PASS / FIXED**
+
+### 13.2 VM2 HALT Instruction / HALT Signal
+- HALT vectors via SEL170 (SEL0 high byte + 0170).
+- External HALT is masked when H/U=1.
+- After STEP, HALT is deferred until one instruction executes.
+
+Status: **PASS / FIXED**
+
+### 13.3 VM2 HALT‑Mode Instructions
+- START/STEP, RCPC/RCPS, WCPC/WCPS require H=1 and P=1.
+- RSEL/MFUS/MTUS require H=1.
+
+Status: **PASS / FIXED**
+
+### 13.4 START vs STEP Semantics
+- START loads PC/CPSW from CPC/CPSW and immediately checks interrupts.
+- STEP loads PC/CPSW from CPC/CPSW and does **not** start interrupt processing.
+
+Status: **PASS / FIXED**
+
+### 13.5 FIS Trap Handling (VM2)
+- FIS opcodes 075000–075037 trap to SEL010 (SEL0 high byte + 0010).
+- If SEL0 bit 7 is set, FIS traps as illegal (vector 000010).
+- FIS error trap uses vector 000244 (triggered by `fFisError` flag).
+
+Status: **PASS / LIMITED**
+
+### 13.6 VM2 RTI H/U Semantics
+- H/U is restored only when new PC ≥ 160000; otherwise H/U preserved.
+
+Status: **PASS / FIXED**
+
+---
+
+## 14. K1806VM2 Alias
+
+K1806VM2 is treated as an alias of K1801VM2 in this core. All VM2 tests are
+run for both model IDs.
+
+Status: **PASS**
+
+---
+
+## 15. Diagnostic Tests
 
 Implemented tests (see `tests/core_tests.c`):
 - trap/interrupt stack frame order
@@ -210,7 +358,7 @@ make test
 
 ---
 
-## 12. Known Limitations
+## 16. Known Limitations
 
 - No MMU or separate user/kernel spaces.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
@@ -218,7 +366,7 @@ make test
 
 ---
 
-## 13. Conclusion
+## 17. Conclusion
 
 Overall DCJ11 compliance status: **MOSTLY COMPLIANT** for CPU‑level semantics.
 Core behavior matches documented trap/interrupt rules and tested instruction

@@ -40,6 +40,8 @@ static void fixture_teardown(cpu_fixture *fx)
     core_fini(&fx->r);
 }
 
+static INLINE int is_vm1_model(byte model);
+
 static INLINE word operand(byte mode, byte reg)
 {
     return (((word) mode) << 3) | (reg & 07);
@@ -500,12 +502,21 @@ static INLINE word op_wrtlck(word dst)
     return 0007300 | (dst & 077);
 }
 
+static INLINE word op_fis(word sub)
+{
+    return 0075000 | (sub & 077);
+}
+
 static int test_irq_pending;
 static int test_irq_priority;
 static word test_last_vector;
 static int test_irq_called;
 static int test_irq_pending_pri[8];
 static word test_irq_vector_pri[8];
+static word test_irq_vector;
+
+static INLINE int is_vm2_model(byte model);
+static INLINE int is_vm1_model(byte model);
 
 static int test_poll_irq(regs *r, word *vector)
 {
@@ -522,6 +533,20 @@ static int test_poll_irq(regs *r, word *vector)
     return 0;
 }
 
+static int test_poll_irq_vector(regs *r, word *vector)
+{
+    (void)r;
+    if (!test_irq_pending) {
+        return 0;
+    }
+    test_irq_pending = 0;
+    if (vector) {
+        *vector = test_irq_vector;
+        test_last_vector = *vector;
+    }
+    return 1;
+}
+
 static int test_poll_irq_highest(regs *r, word *vector)
 {
     int best = -1;
@@ -534,11 +559,16 @@ static int test_poll_irq_highest(regs *r, word *vector)
     if (best >= 0) {
         test_irq_pending_pri[best] = 0;
         if (vector) {
-            *vector = (word)((test_irq_vector_pri[best] & 0777) | ((best & 07) << 9));
+            if (is_vm1_model(r->model) || is_vm2_model(r->model)) {
+                *vector = (word)(test_irq_vector_pri[best] & 0177776);
+            } else {
+                *vector = (word)((test_irq_vector_pri[best] & 0777) | ((best & 07) << 9));
+            }
+            test_last_vector = *vector;
         }
+        test_irq_called = 1;
         return 1;
     }
-    (void)r;
     return 0;
 }
 
@@ -563,6 +593,11 @@ static INLINE int is_flag_set(const regs *r, word flag)
 static INLINE int is_vm2_model(byte model)
 {
     return model == K1801VM2 || model == K1806VM2;
+}
+
+static INLINE int is_vm1_model(byte model)
+{
+    return model == K1801VM1 || model == K1801VM1G;
 }
 
 typedef struct {
@@ -838,7 +873,7 @@ static int test_emt_pushes_and_vectors(void)
     cpu_fixture fx;
     int rc = 0;
     const word handler = 02000;
-    const word new_psw = 000340;
+    const word new_psw = 000000;
     const word program[] = {
         op_emt(0),
     };
@@ -871,7 +906,7 @@ static int test_trap_pushes_and_vectors(void)
     cpu_fixture fx;
     int rc = 0;
     const word handler = 03000;
-    const word new_psw = 000340;
+    const word new_psw = 000000;
     const word program[] = {
         op_trap(0),
     };
@@ -897,12 +932,61 @@ cleanup:
     return rc;
 }
 
+static int test_vm1_trap_vectors_with_code(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler_emt = 02400;
+    const word handler_trap = 02600;
+    const word new_psw_emt = 000120;
+    const word new_psw_trap = 000140;
+    const byte emt_code = 000012;
+    const byte trap_code = 000003;
+    const word emt_vec = 000030 + (emt_code << 2);
+    const word trap_vec = 000034 + (trap_code << 2);
+    const word emt_program[] = { op_emt(emt_code) };
+    const word trap_program[] = { op_trap(trap_code) };
+
+    current_test = "vm1_emt_vector_code";
+    fixture_setup_model(&fx, K1801VM1);
+    load_program(&fx, TEST_BASE, emt_program, sizeof(emt_program) / sizeof(emt_program[0]));
+    store_word(&fx, emt_vec, handler_emt);
+    store_word(&fx, emt_vec + 2, new_psw_emt);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "EMT should vector with code");
+    ASSERT_EQ(fx.r.r[7], handler_emt, "EMT PC should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw_emt, "EMT PSW should load vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "EMT SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "EMT stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "EMT stack PSW incorrect");
+    fixture_teardown(&fx);
+
+    current_test = "vm1_trap_vector_code";
+    fixture_setup_model(&fx, K1801VM1);
+    load_program(&fx, TEST_BASE, trap_program, sizeof(trap_program) / sizeof(trap_program[0]));
+    store_word(&fx, trap_vec, handler_trap);
+    store_word(&fx, trap_vec + 2, new_psw_trap);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "TRAP should vector with code");
+    ASSERT_EQ(fx.r.r[7], handler_trap, "TRAP PC should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw_trap, "TRAP PSW should load vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "TRAP SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "TRAP stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "TRAP stack PSW incorrect");
+    fixture_teardown(&fx);
+
+cleanup:
+    return rc;
+}
+
 static int run_illegal_op_test(word op, const char *name)
 {
     cpu_fixture fx;
     int rc = 0;
     const word handler = 05000;
-    const word new_psw = 000340;
+    const word new_psw = 000000;
     const word program[] = {
         op,
     };
@@ -1520,6 +1604,41 @@ static int test_extended_ops_supported(void)
     return rc;
 }
 
+static int test_vm1_eis_illegal(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word ops[] = {
+        op_mul(0, operand(0, 1)),
+        op_div(0, operand(0, 1)),
+        op_ash(0, operand(0, 1)),
+        op_ashc(0, operand(0, 1)),
+    };
+    const char *names[] = { "MUL", "DIV", "ASH", "ASHC" };
+
+    for (size_t i = 0; i < sizeof(ops) / sizeof(ops[0]); i++) {
+        current_test = names[i];
+        fixture_setup_model(&fx, K1801VM1);
+        write_op(&fx, ops[i]);
+        store_word(&fx, 000010, handler);
+        store_word(&fx, 000012, new_psw);
+        fx.r.r[6] = 01000;
+        fx.r.psw = 000003;
+        ASSERT_EQ(core_step(&fx.r), 0, "EIS should trap on VM1");
+        ASSERT_EQ(fx.r.r[7], handler, "Illegal instruction vector");
+        ASSERT_EQ(fx.r.psw, new_psw, "Illegal instruction PSW");
+        ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+        fixture_teardown(&fx);
+    }
+
+cleanup:
+    return rc;
+}
+
 static int test_condition_codes_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -1687,6 +1806,44 @@ cleanup:
     return rc;
 }
 
+static int test_vm1_wait_ignores_trace_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_wait(),
+    };
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_wait_ignore_t", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, new_psw);
+    fx.r.r[6] = 01000;
+    store_word(&fx, 00774, 012345);
+    store_word(&fx, 00776, 065432);
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "WAIT should execute");
+    ASSERT_EQ(fx.r.fWait, 1, "WAIT should set fWait");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "WAIT should not trace when T is set");
+    ASSERT_EQ(fx.r.psw, (FLAG_T | 000003), "WAIT should not change PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), 012345, "WAIT should not push PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 065432, "WAIT should not push PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_halt_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -1704,19 +1861,30 @@ static int test_halt_model(byte model, const char *name)
     store_word(&fx, 0177716, 0200);
     store_word(&fx, 0170, handler);
     store_word(&fx, 0172, new_psw);
-    store_word(&fx, 0402, handler);
-    store_word(&fx, 0404, new_psw);
+    store_word(&fx, 0570, handler);
+    store_word(&fx, 0572, new_psw);
+    if (is_vm2_model(model)) {
+        store_word(&fx, 0572, (word)(FLAG_P | FLAG_H));
+    }
     store_word(&fx, 000004, handler);
     store_word(&fx, 000006, 000000);
+    store_word(&fx, 0160002, handler);
+    store_word(&fx, 0160004, new_psw);
 
     write_op(&fx, op_halt());
     ASSERT_EQ(core_step(&fx.r), 0, "HALT should execute");
 
     if (is_vm2_model(model)) {
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT should load vector");
+        ASSERT_EQ(fx.r.psw, (word)(FLAG_P | FLAG_H), "HALT should load PSW");
         ASSERT_EQ(fx.r.cpc, TEST_BASE + 2, "HALT should save CPC");
         ASSERT_EQ(fx.r.cps, 000003, "HALT should save CPS");
-        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT should load vector");
-        ASSERT_EQ(fx.r.psw, (new_psw | FLAG_H), "HALT should set H in PSW");
+    } else if (is_vm1_model(model)) {
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177674), TEST_BASE + 2, "HALT should store PC");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177676), 000003, "HALT should store PSW");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0210, "HALT should set SEL1 bit 010");
+        ASSERT_EQ(fx.r.r[7], handler, "HALT should load vector");
+        ASSERT_EQ(fx.r.psw, new_psw, "HALT should load PSW");
     } else if (model == DCJ11) {
         ASSERT_EQ(fx.r.r[6], 00774, "HALT should push two words");
         ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "HALT stack PC");
@@ -1758,19 +1926,30 @@ static int test_external_halt_model(byte model, const char *name)
     store_word(&fx, 0177716, 0200);
     store_word(&fx, 0170, handler);
     store_word(&fx, 0172, new_psw);
-    store_word(&fx, 0402, handler);
-    store_word(&fx, 0404, new_psw);
+    store_word(&fx, 0570, handler);
+    store_word(&fx, 0572, new_psw);
+    if (is_vm2_model(model)) {
+        store_word(&fx, 0572, (word)(FLAG_P | FLAG_H));
+    }
     store_word(&fx, 000004, handler);
     store_word(&fx, 000006, 000000);
+    store_word(&fx, 0160002, handler);
+    store_word(&fx, 0160004, new_psw);
 
     fx.r.fHaltSignal = 1;
     ASSERT_EQ(core_step(&fx.r), 0, "HALT signal should execute");
 
     if (is_vm2_model(model)) {
+        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT signal should load vector");
+        ASSERT_EQ(fx.r.psw, (word)(FLAG_P | FLAG_H), "HALT signal should load PSW");
         ASSERT_EQ(fx.r.cpc, TEST_BASE, "HALT signal should save CPC");
         ASSERT_EQ(fx.r.cps, 000003, "HALT signal should save CPS");
-        ASSERT_EQ(fx.r.r[7], handler & 0177776, "HALT signal should load vector");
-        ASSERT_EQ(fx.r.psw, (new_psw | FLAG_H), "HALT signal should set H in PSW");
+    } else if (is_vm1_model(model)) {
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177674), TEST_BASE, "HALT signal should store PC");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177676), 000003, "HALT signal should store PSW");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0210, "HALT signal should set SEL1 bit 010");
+        ASSERT_EQ(fx.r.r[7], handler, "HALT signal should load vector");
+        ASSERT_EQ(fx.r.psw, new_psw, "HALT signal should load PSW");
     } else if (model == DCJ11) {
         ASSERT_EQ(fx.r.r[6], 00774, "HALT signal should push two words");
         ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE, "HALT signal stack PC");
@@ -1790,9 +1969,88 @@ cleanup:
     return rc;
 }
 
+static int test_vm2_external_halt_masked(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "vm2_halt_mask";
+    fixture_setup_model(&fx, K1801VM2);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = FLAG_H;
+    fx.r.fHaltSignal = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "HALT signal should be masked by H");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE, "PC should remain unchanged");
+    ASSERT_EQ(fx.r.psw, FLAG_H, "PSW should remain unchanged");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_external_halt(void)
 {
     return run_for_models(test_external_halt_model);
+}
+
+static int test_dcj11_halt_user_traps(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02600;
+    const word new_psw = 000200;
+    const word program[] = {
+        op_halt(),
+    };
+
+    current_test = "dcj11_halt_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 0140000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "HALT should trap in user mode");
+    ASSERT_EQ(fx.r.r[7], handler, "HALT should vector through 000004");
+    ASSERT_EQ(fx.r.psw, new_psw, "HALT should load PSW from vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "HALT should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "HALT stack PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 0140000, "HALT stack PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_reset_user_is_nop(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_reset(),
+    };
+
+    current_test = "dcj11_reset_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[0] = 01234;
+    fx.r.psw = 0140000;
+    ASSERT_EQ(core_step(&fx.r), 0, "RESET should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "RESET should act as NOP in user mode");
+    ASSERT_EQ(fx.r.r[0], 01234, "RESET should not modify registers");
+    ASSERT_EQ(fx.r.psw, 0140000, "RESET should not modify PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
 }
 
 static int test_branches_model(byte model, const char *name)
@@ -2584,53 +2842,64 @@ static int test_vm2_privileged_ops_model(byte model, const char *name)
     fixture_setup_model(&fx, model);
 
     fx.r.cpc = 01234;
-    fx.r.cps = 00440;
+    fx.r.cps = 00440 | FLAG_H;
+    fx.r.psw = FLAG_P | FLAG_H;
     write_op(&fx, 0000012);
     ASSERT_EQ(core_step(&fx.r), 0, "START");
     ASSERT_EQ(fx.r.r[7], 01234, "START should load CPC");
-    ASSERT_EQ(fx.r.psw, 00440, "START should load CPS");
+    ASSERT_EQ(fx.r.psw, (word)(00440 | FLAG_H), "START should load CPS");
 
     fx.r.cpc = 02000;
-    fx.r.cps = 000200;
+    fx.r.cps = 000200 | FLAG_H;
+    fx.r.psw = FLAG_P | FLAG_H;
     write_op(&fx, 0000016);
     ASSERT_EQ(core_step(&fx.r), 0, "STEP");
     ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
-    ASSERT_EQ(fx.r.psw, 000200, "STEP should load CPS");
+    ASSERT_EQ(fx.r.psw, (word)(000200 | FLAG_H), "STEP should load CPS");
 
     fx.r.SEL0 = 0777;
+    fx.r.psw = FLAG_H;
     write_op(&fx, 0000020);
     ASSERT_EQ(core_step(&fx.r), 0, "RSEL");
     ASSERT_EQ(fx.r.r[0], 0777, "RSEL should read SEL0");
 
     fx.r.r[5] = 03000;
     store_word(&fx, 03000, 01234);
+    fx.r.psw = FLAG_H;
     write_op(&fx, 0000021);
     ASSERT_EQ(core_step(&fx.r), 0, "MFUS");
     ASSERT_EQ(fx.r.r[0], 01234, "MFUS should load via R5");
     ASSERT_EQ(fx.r.r[5], 03002, "MFUS should increment R5");
+    ASSERT_EQ(fx.r.psw, FLAG_H, "MFUS should preserve PSW");
 
     fx.r.cpc = 05555;
+    fx.r.psw = FLAG_P | FLAG_H;
     write_op(&fx, 0000022);
     ASSERT_EQ(core_step(&fx.r), 0, "RCPC");
     ASSERT_EQ(fx.r.r[0], 05555, "RCPC should read CPC");
 
     fx.r.cps = 00666;
+    fx.r.psw = FLAG_P | FLAG_H;
     write_op(&fx, 0000024);
     ASSERT_EQ(core_step(&fx.r), 0, "RCPS");
     ASSERT_EQ(fx.r.r[0], 00666, "RCPS should read CPS");
 
     fx.r.r[5] = 04002;
     fx.r.r[0] = 07777;
+    fx.r.psw = FLAG_H;
     write_op(&fx, 0000031);
     ASSERT_EQ(core_step(&fx.r), 0, "MTUS");
     ASSERT_EQ(fx.r.r[5], 04000, "MTUS should decrement R5");
     ASSERT_EQ(fx.r.load_word(&fx.r, 04000), 07777, "MTUS should store via R5");
+    ASSERT_EQ(fx.r.psw, FLAG_H, "MTUS should preserve PSW");
 
+    fx.r.psw = FLAG_P | FLAG_H;
     fx.r.r[0] = 01111;
     write_op(&fx, 0000032);
     ASSERT_EQ(core_step(&fx.r), 0, "WCPC");
     ASSERT_EQ(fx.r.cpc, 01111, "WCPC should write CPC");
 
+    fx.r.psw = FLAG_P | FLAG_H;
     fx.r.r[0] = 02222;
     write_op(&fx, 0000034);
     ASSERT_EQ(core_step(&fx.r), 0, "WCPS");
@@ -2648,6 +2917,420 @@ static int test_vm2_privileged_ops(void)
     rc += test_vm2_privileged_ops_model(K1801VM2, "K1801VM2");
     rc += test_vm2_privileged_ops_model(K1806VM2, "K1806VM2");
 
+    return rc;
+}
+
+static int test_vm2_halt_ops_illegal_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02600;
+    const word new_psw = 000340;
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_halt_ops_illegal", name);
+    fixture_setup_model(&fx, model);
+
+    store_word(&fx, 000010, handler);
+    store_word(&fx, 000012, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    write_op(&fx, 0000020); /* RSEL */
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RSEL in USER should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load illegal vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load illegal vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000000, "Stack PSW incorrect");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_halt_ops_pmask", name);
+    fixture_setup_model(&fx, model);
+    store_word(&fx, 000010, handler);
+    store_word(&fx, 000012, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_H;
+    write_op(&fx, 0000012); /* START */
+    ASSERT_EQ(core_step(&fx.r), 0, "START without P should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load illegal vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load illegal vector");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_start_irq_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000200;
+    const word program[] = {
+        0000012, /* START */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_start_irq", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.cpc = 02000;
+    fx.r.cps = 000000;
+    fx.r.psw = FLAG_P | FLAG_H;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "START should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "START should enter IRQ before first instruction");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), 02000, "Stack PC should be CPC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000000, "Stack PSW should be CPSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_vm2_step_no_irq_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000200;
+    const word program[] = {
+        0000016, /* STEP */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_step_no_irq", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.cpc = 02000;
+    fx.r.cps = 000000;
+    fx.r.psw = FLAG_P | FLAG_H;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "STEP should execute");
+    ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
+    ASSERT_EQ(fx.r.psw, 000000, "STEP should load CPSW");
+    ASSERT_EQ(test_irq_pending, 1, "STEP should not consume IRQ");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_vm2_step_halt_signal_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000200;
+    const word vec = 0570;
+    const word program[] = {
+        0000016, /* STEP */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_step_halt", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.SEL0 = 0400;
+    store_word(&fx, vec, handler);
+    store_word(&fx, vec + 2, new_psw);
+    store_word(&fx, 02000, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.cpc = 02000;
+    fx.r.cps = 000000;
+    fx.r.psw = FLAG_P | FLAG_H;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "STEP should execute");
+    ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
+    ASSERT_EQ(fx.r.psw, 000000, "STEP should load CPSW");
+
+    fx.r.fHaltSignal = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "Instruction after STEP should execute");
+    ASSERT_EQ(fx.r.cpc, 02002, "HALT should capture CPC after first instruction");
+    ASSERT_EQ(fx.r.cps, 000000, "HALT should capture CPSW after first instruction");
+    ASSERT_EQ(fx.r.r[7], handler, "HALT signal should vector after first instruction");
+    ASSERT_EQ(fx.r.psw, new_psw, "HALT signal should load PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_step_halt_masked_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        0000016, /* STEP */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_step_halt_masked", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 02000, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.cpc = 02000;
+    fx.r.cps = FLAG_H;
+    fx.r.psw = FLAG_P | FLAG_H;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "STEP should execute");
+    ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
+    ASSERT_EQ(fx.r.psw, FLAG_H, "STEP should load CPSW");
+
+    fx.r.fHaltSignal = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "Instruction after STEP should execute");
+    ASSERT_EQ(fx.r.r[7], 02002, "HALT should be masked when H=1");
+    ASSERT_EQ(fx.r.fHaltSignal, 0, "HALT signal should be consumed");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_step_halt_unmasked_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000200;
+    const word vec = 0570;
+    const word program[] = {
+        0000016, /* STEP */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_step_halt_unmasked", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.SEL0 = 0400;
+    store_word(&fx, vec, handler);
+    store_word(&fx, vec + 2, new_psw);
+    store_word(&fx, 02000, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.cpc = 02000;
+    fx.r.cps = FLAG_P;
+    fx.r.psw = FLAG_P | FLAG_H;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "STEP should execute");
+    ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
+    ASSERT_EQ(fx.r.psw, FLAG_P, "STEP should load CPSW");
+
+    fx.r.fHaltSignal = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "Instruction after STEP should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "HALT should vector when H=0");
+    ASSERT_EQ(fx.r.psw, new_psw, "HALT should load PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_step_halt_unmasked_p0_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000200;
+    const word vec = 0570;
+    const word program[] = {
+        0000016, /* STEP */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_step_halt_unmasked_p0", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.SEL0 = 0400;
+    store_word(&fx, vec, handler);
+    store_word(&fx, vec + 2, new_psw);
+    store_word(&fx, 02000, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.cpc = 02000;
+    fx.r.cps = 000000;
+    fx.r.psw = FLAG_P | FLAG_H;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "STEP should execute");
+    ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
+    ASSERT_EQ(fx.r.psw, 000000, "STEP should load CPSW");
+
+    fx.r.fHaltSignal = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "Instruction after STEP should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "HALT should vector when H=0,P=0");
+    ASSERT_EQ(fx.r.psw, new_psw, "HALT should load PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_fis_trap_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = FLAG_P | FLAG_H;
+    const word vec = 0410;
+    const word program[] = {
+        op_fis(0),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_fis_trap", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.SEL0 = 0400;
+    store_word(&fx, vec, handler);
+    store_word(&fx, vec + 2, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_H;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FIS should trap to SEL010");
+    ASSERT_EQ(fx.r.r[7], handler, "FIS should vector to SEL010");
+    ASSERT_EQ(fx.r.psw, new_psw, "FIS should load PSW from vector");
+    ASSERT_EQ(fx.r.cpc, TEST_BASE + 2, "FIS should save CPC");
+    ASSERT_EQ(fx.r.cps, FLAG_H, "FIS should save CPSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_fis_missing_traps_illegal_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_fis(0),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_fis_missing", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000010, handler);
+    store_word(&fx, 000012, new_psw);
+    fx.r.SEL0 = 0200;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FIS missing should trap illegal");
+    ASSERT_EQ(fx.r.r[7], handler, "Illegal vector should load");
+    ASSERT_EQ(fx.r.psw, new_psw, "Illegal PSW should load");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_fis_error_trap_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000200;
+    const word program[] = {
+        op_fis(0),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_fis_error", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 0244, handler);
+    store_word(&fx, 0246, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.fFisError = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FIS error should trap to 0244");
+    ASSERT_EQ(fx.r.r[7], handler, "FIS error should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "FIS error should load PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC after FIS error");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000000, "Stack PSW after FIS error");
+
+cleanup:
+    fixture_teardown(&fx);
     return rc;
 }
 
@@ -3079,6 +3762,40 @@ cleanup:
     return rc;
 }
 
+static int test_vm1_rti_restores_flags_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_rti(),
+    };
+    const word stack_psw = (FLAG_H | FLAG_P | FLAG_T | FLAG_N | FLAG_Z | FLAG_C);
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_rti_flags", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, stack_psw);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, stack_psw, "PSW should restore from stack");
+    ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
+    ASSERT_EQ(fx.r.fTrap, 0, "RTI should not set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_dcj11_rti_restores_state(void)
 {
     cpu_fixture fx;
@@ -3101,6 +3818,128 @@ static int test_dcj11_rti_restores_state(void)
     ASSERT_EQ(fx.r.psw, 000111, "PSW should restore from stack");
     ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
     ASSERT_EQ(fx.r.fTrap, 0, "RTI should not set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_rti_restores_state_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_rti(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_rti_restore", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, 000111);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, 000111, "PSW should restore from stack");
+    ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
+    ASSERT_EQ(fx.r.fTrap, 0, "RTI should not set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_rti_hu_restore_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_rti(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_rti_hu_keep", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 0100000);
+    store_word(&fx, 01202, 000000);
+    fx.r.psw = FLAG_H;
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should execute");
+    ASSERT_EQ((fx.r.psw & FLAG_H), FLAG_H, "RTI should keep H when PC < 160000");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_rti_hu_load", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 0160000);
+    store_word(&fx, 01202, FLAG_H);
+    fx.r.psw = 000000;
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should execute");
+    ASSERT_EQ((fx.r.psw & FLAG_H), FLAG_H, "RTI should load H when PC >= 160000");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_rti_user_restricts_psw(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rti(),
+    };
+    const word psw_before = 0140240;
+    const word psw_stack = 000000;
+
+    current_test = "dcj11_rti_user_psw";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, psw_stack);
+    fx.r.psw = psw_before;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, psw_before, "RTI should preserve mode/priority bits");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_mtps_user_restricts_psw(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mtps(operand(0, 0)),
+    };
+
+    current_test = "dcj11_mtps_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[0] = 000340;
+    fx.r.psw = 0140000 | 000200;
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS should execute");
+    ASSERT_EQ((fx.r.psw & 000340), 000200, "MTPS should not change PSW priority");
 
 cleanup:
     fixture_teardown(&fx);
@@ -3238,7 +4077,7 @@ static int test_dcj11_irq_highest_priority(void)
     cpu_fixture fx;
     int rc = 0;
     const word handler_lo = 02000;
-    const word handler_hi = 03000;
+    const word handler_hi = 04000;
     const word new_psw = 000340;
     const word program[] = {
         op_nop(),
@@ -3253,7 +4092,8 @@ static int test_dcj11_irq_highest_priority(void)
     store_word(&fx, 000070, handler_hi);
     store_word(&fx, 000072, new_psw);
     store_word(&fx, handler_lo, op_nop());
-    store_word(&fx, handler_hi, op_nop());
+    store_word(&fx, handler_hi, op_rti());
+    ASSERT_EQ(fx.r.load_word(&fx.r, handler_hi), op_rti(), "IRQ handler should start with RTI");
 
     memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
     memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
@@ -3274,6 +4114,304 @@ cleanup:
     fixture_teardown(&fx);
     memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
     memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    return rc;
+}
+
+static int test_dcj11_irq_vector_mask(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler_masked = 02000;
+    const word handler_full = 03000;
+    const word new_psw_masked = 000340;
+    const word new_psw_full = 000200;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_vector_mask";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000300, handler_masked);
+    store_word(&fx, 000302, new_psw_masked);
+    store_word(&fx, 004300, handler_full);
+    store_word(&fx, 004302, new_psw_full);
+    store_word(&fx, handler_masked, op_nop());
+    store_word(&fx, handler_full, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 004300;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should execute");
+    ASSERT_EQ(fx.r.r[7], handler_masked, "IRQ should mask vector to 8-bit");
+    ASSERT_EQ(fx.r.psw, new_psw_masked, "PSW should load masked vector");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_vm1_irq_masking_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02200;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_irq_mask_psw7", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 000100, handler);
+    store_word(&fx, 000102, new_psw);
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_P;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000100;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ2 should be masked by PSW7");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without IRQ");
+    ASSERT_EQ(fx.r.r[6], 01000, "SP should remain unchanged");
+
+    fx.r.psw = 000000;
+    test_irq_vector = 000100;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ2 should be accepted when PSW7=0");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_irq_mask_psw10", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 01000;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "VIRQ should be masked by PSW10");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without IRQ");
+    ASSERT_EQ(fx.r.r[6], 01000, "SP should remain unchanged");
+
+    fx.r.psw = 000000;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "VIRQ should be accepted when PSW10=0");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    test_last_vector = 0;
+    return rc;
+}
+
+static int test_vm1_irq_priority_selection_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler_1 = 02100;
+    const word handler_2 = 02200;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_irq_priority_irq1", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 0160002, handler_1);
+    store_word(&fx, 0160004, new_psw);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0160002), handler_1, "VM1 IRQ1 vector readback");
+    store_word(&fx, 000100, handler_2);
+    store_word(&fx, 000102, new_psw);
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.poll_irq = test_poll_irq_highest;
+    memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+    memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    test_irq_pending_pri[3] = 1;
+    test_irq_vector_pri[3] = 000100;
+    test_irq_pending_pri[6] = 1;
+    test_irq_vector_pri[6] = 0160002;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted");
+    ASSERT_EQ(fx.r.r[7], handler_1, "IRQ1 should win over IRQ2");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    fixture_teardown(&fx);
+
+cleanup:
+    memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+    memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    return rc;
+}
+
+static int test_vm1_timer_registers_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word limit = 012345;
+    const word csr_value = 000024;
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_timer_regs", name);
+    fixture_setup_model(&fx, model);
+
+    store_word(&fx, 0177706, limit);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177706), limit, "TVE_LIMIT read/write");
+
+    store_word(&fx, 0177712, csr_value);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177710), limit, "TVE_COUNT loads from LIMIT");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177712), (word)(0177400 | csr_value), "TVE_CSR readback");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177713), 0377, "TVE_CSR high byte is 0377");
+
+    store_word(&fx, 0177710, 000000);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177710), limit, "TVE_COUNT is read-only");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1g_timer_irq(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "vm1g_timer_irq";
+    fixture_setup_model(&fx, K1801VM1G);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000270, handler);
+    store_word(&fx, 000272, new_psw);
+    store_word(&fx, 0177706, 000001);
+    store_word(&fx, 0177712, 000024); /* RUN|MON */
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Timer should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "Timer IRQ should vector to 000270");
+    ASSERT_EQ(fx.r.psw, new_psw, "Timer IRQ should load PSW");
+    ASSERT_EQ(fx.r.r[6], 00774, "Timer IRQ should push two words");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1g_eis_diagnostics(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    word program[1];
+
+    current_test = "vm1g_eis_diag";
+    fixture_setup_model(&fx, K1801VM1G);
+
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 2;
+    fx.r.r[1] = 3;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "MUL high word");
+    ASSERT_EQ(fx.r.r[1], 6, "MUL low word");
+
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 6;
+    fx.r.r[2] = 3;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV should execute");
+    ASSERT_EQ(fx.r.r[0], 2, "DIV quotient");
+    ASSERT_EQ(fx.r.r[1], 0, "DIV remainder");
+
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 1;
+    fx.r.r[1] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH should execute");
+    ASSERT_EQ(fx.r.r[0], 2, "ASH result");
+
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0;
+    fx.r.r[1] = 1;
+    fx.r.r[2] = 1;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "ASHC high word");
+    ASSERT_EQ(fx.r.r[1], 2, "ASHC low word");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1g_eis_not_illegal(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 05000;
+    const word new_psw = 000340;
+    word program[1];
+
+    current_test = "vm1g_eis_not_illegal";
+    fixture_setup_model(&fx, K1801VM1G);
+
+    store_word(&fx, 000010, handler);
+    store_word(&fx, 000012, new_psw);
+
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 2;
+    fx.r.r[1] = 3;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute on VM1G");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "MUL should advance PC");
+
+cleanup:
+    fixture_teardown(&fx);
     return rc;
 }
 
@@ -3325,6 +4463,493 @@ static int test_dcj11_sel1_sel2_regs(void)
     fx.r.store_byte(&fx.r, 0177715, 00007);
     ASSERT_EQ(fx.r.SEL1, 051476, "SEL1 byte write");
     ASSERT_EQ(fx.r.SEL2, 003512, "SEL2 byte write");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1_tstb_flags_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_tstb_zero", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[0] = 0000000;
+    fx.r.psw = FLAG_C | FLAG_V;
+    write_op(&fx, op_tstb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB");
+    ASSERT_EQ(fx.r.r[0], 0000000, "TSTB should not modify");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_tstb_neg", name);
+    fx.r.r[0] = 0000200;
+    fx.r.psw = FLAG_C | FLAG_V;
+    write_op(&fx, op_tstb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB");
+    ASSERT_EQ(fx.r.r[0], 0000200, "TSTB should not modify");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm1_bpl_after_tstb_model(byte model, const char *name)
+{
+    cpu_fixture fx_pos;
+    cpu_fixture fx_neg;
+    int pos_init = 0;
+    int neg_init = 0;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_tstb(operand(0, 0)),      /* 0 */
+        op_bpl(0003),                /* 2: branch offset is in words */
+        op_mov(operand(2, 7), operand(0, 1)), /* 4 */
+        000001,                      /* 6 */
+        op_br(0002),                 /* 10 */
+        op_mov(operand(2, 7), operand(0, 1)), /* 12 */
+        000002,                      /* 14 */
+        op_nop(),                    /* 16 */
+    };
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_bpl_pos", name);
+    fixture_setup_model(&fx_pos, model);
+    pos_init = 1;
+    load_program(&fx_pos, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx_pos.r.r[0] = 0000001;
+    ASSERT_EQ(core_step(&fx_pos.r), 0, "TSTB");
+    ASSERT_EQ(core_step(&fx_pos.r), 0, "BPL");
+    ASSERT_EQ(fx_pos.r.r[7], TEST_BASE + 0012, "BPL should branch to MOV #2");
+    ASSERT_EQ(core_step(&fx_pos.r), 0, "MOV #2");
+    ASSERT_EQ(fx_pos.r.r[1], 000002, "BPL should branch when N=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_bpl_neg", name);
+    fixture_setup_model(&fx_neg, model);
+    neg_init = 1;
+    load_program(&fx_neg, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx_neg.r.r[0] = 0000200;
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "TSTB");
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "BPL");
+    ASSERT_EQ(fx_neg.r.r[7], TEST_BASE + 0004, "BPL should fall through to MOV #1");
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "MOV #1");
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "BR");
+    ASSERT_EQ(fx_neg.r.r[1], 000001, "BPL should not branch when N=1");
+
+cleanup:
+    if (pos_init) {
+        fixture_teardown(&fx_pos);
+    }
+    if (neg_init) {
+        fixture_teardown(&fx_neg);
+    }
+    return rc;
+}
+
+static int test_vm2_tstb_flags_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_tstb_zero", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[0] = 0000000;
+    fx.r.psw = FLAG_C | FLAG_V;
+    write_op(&fx, op_tstb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB");
+    ASSERT_EQ(fx.r.r[0], 0000000, "TSTB should not modify");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_tstb_neg", name);
+    fx.r.r[0] = 0000200;
+    fx.r.psw = FLAG_C | FLAG_V;
+    write_op(&fx, op_tstb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB");
+    ASSERT_EQ(fx.r.r[0], 0000200, "TSTB should not modify");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_bpl_after_tstb_model(byte model, const char *name)
+{
+    cpu_fixture fx_pos;
+    cpu_fixture fx_neg;
+    int pos_init = 0;
+    int neg_init = 0;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_tstb(operand(0, 0)),      /* 0 */
+        op_bpl(0003),                /* 2: branch offset is in words */
+        op_mov(operand(2, 7), operand(0, 1)), /* 4 */
+        000001,                      /* 6 */
+        op_br(0002),                 /* 10 */
+        op_mov(operand(2, 7), operand(0, 1)), /* 12 */
+        000002,                      /* 14 */
+        op_nop(),                    /* 16 */
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_bpl_pos", name);
+    fixture_setup_model(&fx_pos, model);
+    pos_init = 1;
+    load_program(&fx_pos, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx_pos.r.r[0] = 0000001;
+    ASSERT_EQ(core_step(&fx_pos.r), 0, "TSTB");
+    ASSERT_EQ(core_step(&fx_pos.r), 0, "BPL");
+    ASSERT_EQ(fx_pos.r.r[7], TEST_BASE + 0012, "BPL should branch to MOV #2");
+    ASSERT_EQ(core_step(&fx_pos.r), 0, "MOV #2");
+    ASSERT_EQ(fx_pos.r.r[1], 000002, "BPL should branch when N=0");
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_bpl_neg", name);
+    fixture_setup_model(&fx_neg, model);
+    neg_init = 1;
+    load_program(&fx_neg, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx_neg.r.r[0] = 0000200;
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "TSTB");
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "BPL");
+    ASSERT_EQ(fx_neg.r.r[7], TEST_BASE + 0004, "BPL should fall through to MOV #1");
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "MOV #1");
+    ASSERT_EQ(core_step(&fx_neg.r), 0, "BR");
+    ASSERT_EQ(fx_neg.r.r[1], 000001, "BPL should not branch when N=1");
+
+cleanup:
+    if (pos_init) {
+        fixture_teardown(&fx_pos);
+    }
+    if (neg_init) {
+        fixture_teardown(&fx_neg);
+    }
+    return rc;
+}
+
+static int test_vm2_trap_stack_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 06000;
+    const word new_psw = 000340;
+    word program[1];
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_bpt_stack", name);
+    fixture_setup_model(&fx, model);
+    program[0] = op_bpt();
+    load_program(&fx, TEST_BASE, program, 1);
+    store_word(&fx, 000014, handler);
+    store_word(&fx, 000016, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "BPT should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "BPT should load PSW");
+    ASSERT_EQ(fx.r.r[6], 00774, "BPT should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "BPT stack PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "BPT stack PSW");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_iot_stack", name);
+    fixture_setup_model(&fx, model);
+    program[0] = op_iot();
+    load_program(&fx, TEST_BASE, program, 1);
+    store_word(&fx, 000020, handler);
+    store_word(&fx, 000022, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "IOT should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "IOT should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "IOT should load PSW");
+    ASSERT_EQ(fx.r.r[6], 00774, "IOT should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "IOT stack PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "IOT stack PSW");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_emt_stack", name);
+    fixture_setup_model(&fx, model);
+    program[0] = op_emt(0);
+    load_program(&fx, TEST_BASE, program, 1);
+    store_word(&fx, 000030, handler);
+    store_word(&fx, 000032, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "EMT should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "EMT should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "EMT should load PSW");
+    ASSERT_EQ(fx.r.r[6], 00774, "EMT should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "EMT stack PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "EMT stack PSW");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_trap_stack", name);
+    fixture_setup_model(&fx, model);
+    program[0] = op_trap(0);
+    load_program(&fx, TEST_BASE, program, 1);
+    store_word(&fx, 000034, handler);
+    store_word(&fx, 000036, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "TRAP should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "TRAP should load vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "TRAP should load PSW");
+    ASSERT_EQ(fx.r.r[6], 00774, "TRAP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "TRAP stack PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "TRAP stack PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_wait_ignores_trace_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_wait(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_wait_ignore_t", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000014, handler);
+    store_word(&fx, 000016, new_psw);
+    fx.r.r[6] = 01000;
+    store_word(&fx, 00774, 012345);
+    store_word(&fx, 00776, 065432);
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "WAIT should execute");
+    ASSERT_EQ(fx.r.fWait, 1, "WAIT should set fWait");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "WAIT should not trace when T is set");
+    ASSERT_EQ(fx.r.psw, (FLAG_T | 000003), "WAIT should not change PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), 012345, "WAIT should not push PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 065432, "WAIT should not push PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_cpc_cpsw_update_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_nop(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_cpc_lock", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.cpc = 01234;
+    fx.r.cps = 05670;
+    fx.r.psw = FLAG_P | FLAG_H;
+    ASSERT_EQ(core_step(&fx.r), 0, "NOP should execute");
+    ASSERT_EQ(fx.r.cpc, 01234, "CPC should remain locked");
+    ASSERT_EQ(fx.r.cps, 05670, "CPSW should remain locked");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_cpc_update", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.cpc = 01234;
+    fx.r.cps = 05670;
+    fx.r.psw = FLAG_H;
+    ASSERT_EQ(core_step(&fx.r), 0, "NOP should execute");
+    ASSERT_EQ(fx.r.cpc, TEST_BASE + 2, "CPC should follow PC");
+    ASSERT_EQ(fx.r.cps, fx.r.psw, "CPSW should follow PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_irq_masking_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_irq_pmask", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_P;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be masked by P");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without IRQ");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_irq_pri_ignore", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 001060, handler);
+    store_word(&fx, 001062, new_psw);
+    store_word(&fx, handler, op_nop());
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000140; /* priority bits set, P clear */
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 001060;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should ignore priority bits on VM2");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_irq_full_vector", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 0161234, handler);
+    store_word(&fx, 0161236, new_psw);
+    store_word(&fx, 0001234, 012345);
+    store_word(&fx, 0001236, 000200);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 0161234;
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should accept full vector");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should use full vector address");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load from full vector");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_vm2_irq_highest_priority_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler_lo = 02000;
+    const word handler_hi = 04000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_irq_highest", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler_lo);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, 003000, handler_hi);
+    store_word(&fx, 003002, new_psw);
+    store_word(&fx, handler_lo, op_nop());
+    store_word(&fx, handler_hi, op_nop());
+    ASSERT_EQ(fx.r.load_word(&fx.r, 003000), handler_hi, "Vector should point to handler");
+
+    memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+    memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    test_irq_pending_pri[3] = 1;
+    test_irq_vector_pri[3] = 000060;
+    test_irq_pending_pri[6] = 1;
+    test_irq_vector_pri[6] = 003000;
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.poll_irq = test_poll_irq_highest;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted");
+    ASSERT_EQ(fx.r.r[7], handler_hi, "Highest priority IRQ should be selected");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+
+cleanup:
+    fixture_teardown(&fx);
+    memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+    memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    return rc;
+}
+
+static int test_dcj11_wait_ignores_trace(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_wait(),
+    };
+
+    current_test = "dcj11_wait_ignore_t";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000014, handler);
+    store_word(&fx, 000016, new_psw);
+    fx.r.r[6] = 01000;
+    store_word(&fx, 00774, 012345);
+    store_word(&fx, 00776, 065432);
+    fx.r.psw = FLAG_T | 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "WAIT should execute");
+    ASSERT_EQ(fx.r.fWait, 1, "WAIT should set fWait");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "WAIT should not trace when T is set");
+    ASSERT_EQ(fx.r.psw, (FLAG_T | 000003), "WAIT should not change PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), 012345, "WAIT should not push PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 065432, "WAIT should not push PSW");
 
 cleanup:
     fixture_teardown(&fx);
@@ -3525,6 +5150,7 @@ int main(void)
     failed += test_sob_loops_expected_count();
     failed += test_emt_pushes_and_vectors();
     failed += test_trap_pushes_and_vectors();
+    failed += test_vm1_trap_vectors_with_code();
     failed += test_vm1_illegal_instructions_trap();
     failed += test_dcj11_special_ops_illegal_on_other_models();
     failed += test_dcj11_tstset_wrtlck_mode0_illegal();
@@ -3532,11 +5158,17 @@ int main(void)
     failed += test_dcj11_alignment_trap_store();
     failed += test_dcj11_alignment_trap_fetch();
     failed += test_extended_ops_supported();
+    failed += test_vm1_eis_illegal();
     failed += test_condition_codes();
     failed += test_wait_and_reset();
     failed += test_dcj11_wait_resume_on_irq();
+    failed += test_vm1_wait_ignores_trace_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_wait_ignores_trace_model(K1801VM1G, "K1801VM1G");
     failed += test_halt();
     failed += test_external_halt();
+    failed += test_vm2_external_halt_masked();
+    failed += test_dcj11_halt_user_traps();
+    failed += test_dcj11_reset_user_is_nop();
     failed += test_branches();
     failed += test_jmp();
     failed += test_addressing_modes();
@@ -3546,6 +5178,26 @@ int main(void)
     failed += test_double_operand_word_ops();
     failed += test_double_operand_byte_ops();
     failed += test_vm2_privileged_ops();
+    failed += test_vm2_halt_ops_illegal_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_halt_ops_illegal_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_start_irq_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_start_irq_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_step_no_irq_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_step_no_irq_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_step_halt_signal_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_step_halt_signal_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_step_halt_masked_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_step_halt_masked_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_step_halt_unmasked_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_step_halt_unmasked_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_step_halt_unmasked_p0_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_step_halt_unmasked_p0_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_fis_trap_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_fis_trap_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_fis_missing_traps_illegal_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_fis_missing_traps_illegal_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_fis_error_trap_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_fis_error_trap_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_special_ops();
     failed += test_bpt_vectors();
     failed += test_iot_vectors();
@@ -3557,12 +5209,49 @@ int main(void)
     failed += test_trace_stops_when_t_cleared();
     failed += test_rti_restores_state();
     failed += test_dcj11_rti_restores_state();
+    failed += test_dcj11_rti_user_restricts_psw();
+    failed += test_dcj11_mtps_user_restricts_psw();
+    failed += test_vm2_rti_restores_state_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_rti_restores_state_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_rti_hu_restore_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_rti_hu_restore_model(K1806VM2, "K1806VM2");
+    failed += test_vm1_rti_restores_flags_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_rti_restores_flags_model(K1801VM1G, "K1801VM1G");
     failed += test_keyboard_irq_vector();
     failed += test_irq_mask_blocks_interrupt();
     failed += test_dcj11_irq_priority_mask();
     failed += test_dcj11_irq_highest_priority();
+    failed += test_dcj11_irq_vector_mask();
+    failed += test_vm1_irq_masking_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_irq_masking_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm1_irq_priority_selection_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_irq_priority_selection_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm2_irq_masking_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_irq_masking_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_irq_highest_priority_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_irq_highest_priority_model(K1806VM2, "K1806VM2");
+    failed += test_vm1_timer_registers_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_timer_registers_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm1g_timer_irq();
+    failed += test_vm1g_eis_diagnostics();
+    failed += test_vm1g_eis_not_illegal();
     failed += test_dcj11_sel0_reset();
     failed += test_dcj11_sel1_sel2_regs();
+    failed += test_vm1_tstb_flags_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_tstb_flags_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm1_bpl_after_tstb_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_bpl_after_tstb_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm2_tstb_flags_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_tstb_flags_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_bpl_after_tstb_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_bpl_after_tstb_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_trap_stack_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_trap_stack_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_wait_ignores_trace_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_wait_ignores_trace_model(K1806VM2, "K1806VM2");
+    failed += test_dcj11_wait_ignores_trace();
+    failed += test_vm2_cpc_cpsw_update_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_cpc_cpsw_update_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_tstb_flags();
     failed += test_dcj11_bpl_after_tstb();
     failed += test_dcj11_bpl_after_tstb_neg();

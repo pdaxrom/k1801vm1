@@ -17,6 +17,9 @@ typedef struct {
 void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model);
 void cpu_diag_fixture_fini(cpu_diag_fixture *fx);
 
+int cpu_diag_parse_model(const char *name, byte *model_out);
+const char *cpu_diag_model_name(byte model);
+
 cpu_diag_result cpu_diag_run_all(cpu_diag_fixture *fx);
 void cpu_diag_trace_octal(cpu_diag_fixture *fx, const char *label);
 
