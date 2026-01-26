@@ -80,12 +80,18 @@ typedef struct _regs {
 
     word	SEL0;		/* unaddressed SEL register */
     word	SEL1, SEL2;	/* 0177716 0177714 external registers */
+    word    TVE_LIMIT;  /* 0177706 */
+    word    TVE_COUNT;  /* 0177710 */
+    word    TVE_CSR;    /* 0177712 */
+    byte    TVE_PENDING;
 
     word	fTrap;
 
     word	fWait;
     word    fAbort;
     word    fHaltSignal;
+    word    fStepDeferHalt;
+    word    fFisError;
 
     byte (* load_byte)	(struct _regs *r, word offset);
     void (* store_byte)	(struct _regs *r, word offset, byte value);
