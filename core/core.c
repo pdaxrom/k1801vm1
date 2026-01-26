@@ -64,6 +64,18 @@
 	r->r[6] += 2;			\
 }
 
+static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
+{
+	word vec = irq_vector & 0777;
+	int pri = (irq_vector >> 9) & 07;
+	int psw_pri = (r->psw >> 5) & 07;
+	if (pri && psw_pri >= pri) {
+		return 0;
+	}
+	*vec_out = vec & 017776;
+	return 1;
+}
+
 
 void core_init(regs *r)
 {
@@ -72,7 +84,7 @@ void core_init(regs *r)
 
 void core_reset(regs *r)
 {
-    r->r[7] = r->SEL1 & 0177400;
+    r->r[7] = r->SEL0 & 0177400;
     r->psw = 0340;
     r->ir = 0;
     r->fWait = 0;
@@ -149,7 +161,7 @@ static INLINE void handle_halt(regs *r)
 		r->cpc = r->r[7];
 		vec = 0170;
 		if (flag_is_set(FLAG_H)) {
-			vec |= (r->SEL1 & 0177400);
+			vec |= (r->SEL0 & 0177400);
 		}
 		r->r[7] = load_word(r, vec    ) & 0177776;
 		r->psw  = load_word(r, vec + 2) | FLAG_H;
@@ -158,7 +170,7 @@ static INLINE void handle_halt(regs *r)
 		pushw(r->r[7]);
 		vec = 4;
 		if (flag_is_set(FLAG_H)) {
-			vec |= (r->SEL1 & 0177400);
+			vec |= (r->SEL0 & 0177400);
 		}
 		r->r[7] = load_word(r, vec    ) & 0177776;
 		r->psw  = 0340;
@@ -166,7 +178,7 @@ static INLINE void handle_halt(regs *r)
 		store_word(r, 0177676, r->psw);
 		store_word(r, 0177674, r->r[7]);
 		store_word(r, 0177716, load_word(r, 0177716) | 010);
-		vec = (r->SEL1 & 0177400);
+		vec = (r->SEL0 & 0177400);
 		r->r[7] = load_word(r, vec + 2) & 0177776;
 		r->psw  = load_word(r, vec + 4);
 	}
@@ -321,6 +333,18 @@ int core_step(regs *r)
     }
 
     if (r->fWait) {
+        if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
+            word vec;
+            if (irq_accept(r, irq_vector, &vec)) {
+                vec = (word)((irq_vector & 0777) & 017776);
+                r->fWait = 0;
+                pushw(r->psw);
+                pushw(r->r[7]);
+                r->r[7] = load_word(r, vec);
+                r->psw  = load_word(r, (word)(vec + 2));
+            }
+            return 0;
+        }
     	return 0;
     }
 
@@ -447,7 +471,7 @@ int core_step(regs *r)
         goto step_end;
 
     	case 0000020: /* RSEL */
-    		r->r[0] = r->SEL1;
+    		r->r[0] = r->SEL0;
         goto step_end;
 
     	case 0000021: /* MFUS */
@@ -1433,11 +1457,15 @@ step_end:
         r->r[7] = load_word(r, 014);
         r->psw  = load_word(r, 016);
     }
-    if (!do_trace && r->poll_irq && !flag_is_set(FLAG_P) && r->poll_irq(r, &irq_vector)) {
-        pushw(r->psw);
-        pushw(r->r[7]);
-        r->r[7] = load_word(r, irq_vector);
-        r->psw  = load_word(r, (word)(irq_vector + 2));
+    if (!do_trace && r->poll_irq && r->poll_irq(r, &irq_vector)) {
+        word vec;
+        if (irq_accept(r, irq_vector, &vec)) {
+            vec = (word)((irq_vector & 0777) & 017776);
+            pushw(r->psw);
+            pushw(r->r[7]);
+            r->r[7] = load_word(r, vec);
+            r->psw  = load_word(r, (word)(vec + 2));
+        }
     }
     return 0;
 }

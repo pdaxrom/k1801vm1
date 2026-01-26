@@ -9,7 +9,9 @@ TESTS = tests/core_tests
 emu11: $(OBJS) emu11.o
 	$(CC) -g -o $@ $^ -lncurses
 
-core/core.o core/disas.o core/hardware.o: core/core.h
+core/core.o: core/core.c core/core.h
+core/disas.o: core/disas.c core/core.h
+core/hardware.o: core/hardware.c core/hardware.h
 
 dis11: core/disas.o core/hardware.o dis11.o
 	$(CC) -o $@ $^

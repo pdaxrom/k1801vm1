@@ -165,9 +165,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	r.SEL1 = addr & 0177400;
+	r.SEL0 = addr & 0177400;
 
-	fprintf(stderr, "Reset address set to %06o\n", r.SEL1);
+	fprintf(stderr, "Reset address set to %06o\n", r.SEL0);
 
 	core_reset(&r);
 

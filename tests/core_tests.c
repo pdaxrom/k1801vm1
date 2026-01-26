@@ -22,6 +22,7 @@ static void fixture_setup_model(cpu_fixture *fx, byte model)
     core_init(&fx->r);
     fx->mem = fx->r.ramptr(&fx->r, 0);
     memset(fx->mem, 0, 1 << 16);
+    fx->r.SEL0 = 0;
     fx->r.SEL1 = 0;
     core_reset(&fx->r);
     fx->r.r[7] = TEST_BASE;
@@ -500,6 +501,11 @@ static INLINE word op_wrtlck(word dst)
 }
 
 static int test_irq_pending;
+static int test_irq_priority;
+static word test_last_vector;
+static int test_irq_called;
+static int test_irq_pending_pri[8];
+static word test_irq_vector_pri[8];
 
 static int test_poll_irq(regs *r, word *vector)
 {
@@ -507,10 +513,32 @@ static int test_poll_irq(regs *r, word *vector)
     if (test_irq_pending) {
         test_irq_pending = 0;
         if (vector) {
-            *vector = 000060;
+            *vector = (word)(000060 | ((test_irq_priority & 07) << 9));
+            test_last_vector = *vector;
+        }
+        test_irq_called = 1;
+        return 1;
+    }
+    return 0;
+}
+
+static int test_poll_irq_highest(regs *r, word *vector)
+{
+    int best = -1;
+    for (int pri = 7; pri >= 0; pri--) {
+        if (test_irq_pending_pri[pri]) {
+            best = pri;
+            break;
+        }
+    }
+    if (best >= 0) {
+        test_irq_pending_pri[best] = 0;
+        if (vector) {
+            *vector = (word)((test_irq_vector_pri[best] & 0777) | ((best & 07) << 9));
         }
         return 1;
     }
+    (void)r;
     return 0;
 }
 
@@ -1615,6 +1643,50 @@ static int test_wait_and_reset(void)
     return run_for_models(test_wait_and_reset_model);
 }
 
+static int test_dcj11_wait_resume_on_irq(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_wait(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_wait_irq";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000060), handler, "IRQ vector sanity");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000062), new_psw, "IRQ PSW sanity");
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.poll_irq = test_poll_irq;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "WAIT should execute");
+    ASSERT_EQ(fx.r.fWait, 1, "WAIT should set fWait");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after WAIT");
+
+    test_irq_pending = 1;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should resume WAIT");
+    ASSERT_EQ(fx.r.fWait, 0, "IRQ should clear fWait");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_priority = 0;
+    return rc;
+}
+
 static int test_halt_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -1628,7 +1700,7 @@ static int test_halt_model(byte model, const char *name)
 
     fx.r.r[6] = 01000;
     fx.r.psw = 000003;
-    fx.r.SEL1 = 0400;
+    fx.r.SEL0 = 0400;
     store_word(&fx, 0177716, 0200);
     store_word(&fx, 0170, handler);
     store_word(&fx, 0172, new_psw);
@@ -1682,7 +1754,7 @@ static int test_external_halt_model(byte model, const char *name)
 
     fx.r.r[6] = 01000;
     fx.r.psw = 000003;
-    fx.r.SEL1 = 0400;
+    fx.r.SEL0 = 0400;
     store_word(&fx, 0177716, 0200);
     store_word(&fx, 0170, handler);
     store_word(&fx, 0172, new_psw);
@@ -2525,10 +2597,10 @@ static int test_vm2_privileged_ops_model(byte model, const char *name)
     ASSERT_EQ(fx.r.r[7], 02000, "STEP should load CPC");
     ASSERT_EQ(fx.r.psw, 000200, "STEP should load CPS");
 
-    fx.r.SEL1 = 0777;
+    fx.r.SEL0 = 0777;
     write_op(&fx, 0000020);
     ASSERT_EQ(core_step(&fx.r), 0, "RSEL");
-    ASSERT_EQ(fx.r.r[0], 0777, "RSEL should read SEL1");
+    ASSERT_EQ(fx.r.r[0], 0777, "RSEL should read SEL0");
 
     fx.r.r[5] = 03000;
     store_word(&fx, 03000, 01234);
@@ -2756,6 +2828,7 @@ static int test_trace_vector(void)
     const word new_psw = 000240;
     const word program[] = {
         op_nop(),
+        op_nop(),
     };
 
     current_test = "trace_vector";
@@ -2868,6 +2941,7 @@ static int test_trace_rearms_after_handler(void)
     const word new_psw = 000240;
     const word program[] = {
         op_nop(),
+        op_nop(),
     };
 
     current_test = "trace_rearm";
@@ -2907,6 +2981,7 @@ static int test_trace_rearms_with_t_in_vector(void)
     const word new_psw = (word)(FLAG_T | 000003);
     const word program[] = {
         op_nop(),
+        op_nop(),
     };
 
     current_test = "trace_rearm_vector_t";
@@ -2944,6 +3019,7 @@ static int test_trace_stops_when_t_cleared(void)
     const word handler = 07400;
     const word new_psw = 000003;
     const word program[] = {
+        op_nop(),
         op_nop(),
     };
 
@@ -3003,6 +3079,34 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_rti_restores_state(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rti(),
+    };
+
+    current_test = "dcj11_rti_restore";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, 000111);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, 000111, "PSW should restore from stack");
+    ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
+    ASSERT_EQ(fx.r.fTrap, 0, "RTI should not set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_keyboard_irq_vector(void)
 {
     cpu_fixture fx;
@@ -3010,6 +3114,7 @@ static int test_keyboard_irq_vector(void)
     const word handler = 02000;
     const word new_psw = 000340;
     const word program[] = {
+        op_nop(),
         op_nop(),
     };
 
@@ -3036,6 +3141,7 @@ static int test_keyboard_irq_vector(void)
 cleanup:
     fixture_teardown(&fx);
     test_irq_pending = 0;
+    test_irq_priority = 0;
     return rc;
 }
 
@@ -3046,6 +3152,7 @@ static int test_irq_mask_blocks_interrupt(void)
     const word handler = 02400;
     const word new_psw = 000340;
     const word program[] = {
+        op_nop(),
         op_nop(),
     };
 
@@ -3071,9 +3178,340 @@ static int test_irq_mask_blocks_interrupt(void)
 cleanup:
     fixture_teardown(&fx);
     test_irq_pending = 0;
+    test_irq_priority = 0;
     return rc;
 }
 
+static int test_dcj11_irq_priority_mask(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_pri_mask";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000200; /* priority 4 */
+    fx.r.poll_irq = test_poll_irq;
+
+    test_irq_priority = 4;
+    test_irq_pending = 1;
+    test_irq_called = 0;
+    test_last_vector = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ at same priority should be masked");
+    ASSERT_EQ(test_irq_called, 1, "IRQ poll should run");
+    ASSERT_EQ(test_last_vector, (word)(000060 | ((test_irq_priority & 07) << 9)), "IRQ poll should provide vector");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance without IRQ");
+
+    test_irq_priority = 5;
+    test_irq_pending = 1;
+    test_irq_called = 0;
+    test_last_vector = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ at higher priority should be accepted");
+    ASSERT_EQ(test_irq_called, 1, "IRQ poll should run");
+    ASSERT_EQ(test_last_vector, (word)(000060 | ((test_irq_priority & 07) << 9)), "IRQ poll should provide vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000060), handler, "IRQ vector should remain intact");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_priority = 0;
+    return rc;
+}
+
+static int test_dcj11_irq_highest_priority(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler_lo = 02000;
+    const word handler_hi = 03000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_highest";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler_lo);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, 000070, handler_hi);
+    store_word(&fx, 000072, new_psw);
+    store_word(&fx, handler_lo, op_nop());
+    store_word(&fx, handler_hi, op_nop());
+
+    memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+    memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    test_irq_pending_pri[3] = 1;
+    test_irq_vector_pri[3] = 000060;
+    test_irq_pending_pri[6] = 1;
+    test_irq_vector_pri[6] = 000070;
+
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.poll_irq = test_poll_irq_highest;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted");
+    ASSERT_EQ(fx.r.r[7], handler_hi, "Highest priority IRQ should be selected");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IRQ vector");
+
+cleanup:
+    fixture_teardown(&fx);
+    memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+    memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+    return rc;
+}
+
+static int test_dcj11_sel0_reset(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+
+    current_test = "dcj11_sel0_reset";
+    fixture_setup_model(&fx, DCJ11);
+
+    fx.r.SEL0 = 012340;
+    fx.r.SEL1 = 077700;
+    core_reset(&fx.r);
+
+    ASSERT_EQ(fx.r.r[7], 012000, "Reset PC should use SEL0 high byte");
+    ASSERT_EQ(fx.r.psw, 000340, "Reset PSW should be 0340");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_sel1_sel2_regs(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+
+    current_test = "dcj11_sel_regs";
+    fixture_setup_model(&fx, DCJ11);
+
+    fx.r.SEL1 = 012345;
+    fx.r.SEL2 = 054321;
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 012345, "SEL1 word read");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177714), 054321, "SEL2 word read");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177716), 00345, "SEL1 low byte read");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177717), 00024, "SEL1 high byte read");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177714), 00321, "SEL2 low byte read");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177715), 00130, "SEL2 high byte read");
+
+    store_word(&fx, 0177716, 065432);
+    store_word(&fx, 0177714, 010765);
+    ASSERT_EQ(fx.r.SEL1, 065432, "SEL1 word write");
+    ASSERT_EQ(fx.r.SEL2, 010765, "SEL2 word write");
+
+    fx.r.store_byte(&fx.r, 0177716, 00076);
+    fx.r.store_byte(&fx.r, 0177717, 00123);
+    fx.r.store_byte(&fx.r, 0177714, 00112);
+    fx.r.store_byte(&fx.r, 0177715, 00007);
+    ASSERT_EQ(fx.r.SEL1, 051476, "SEL1 byte write");
+    ASSERT_EQ(fx.r.SEL2, 003512, "SEL2 byte write");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_tstb_flags(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word addr = 01200;
+    const word program[] = {
+        op_tstb(operand(1, 0)),
+        op_tstb(operand(1, 0)),
+    };
+
+    current_test = "dcj11_tstb_flags";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.r[0] = addr;
+
+    fx.r.store_byte(&fx.r, addr, 0200);
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB should execute");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+
+    fx.r.store_byte(&fx.r, addr, 0000);
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB should execute");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_bpl_after_tstb(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word addr = 01200;
+    const word program[] = {
+        op_tstb(operand(1, 0)),      /* 0 */
+        op_bpl(0002),                /* 2: branch offset is in words, skips MOV #imm (2 words) */
+        op_mov(operand(2, 7), operand(0, 1)), /* 4 */
+        000001,                      /* 6 */
+        op_mov(operand(2, 7), operand(0, 1)), /* 10 */
+        000002,                      /* 12 */
+    };
+
+    current_test = "dcj11_bpl_after_tstb_pos";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.r[0] = addr;
+    fx.r.store_byte(&fx.r, addr, 000001);
+
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB should execute");
+    ASSERT_EQ(core_step(&fx.r), 0, "BPL should execute");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #2 should execute");
+    ASSERT_EQ(fx.r.r[1], 000002, "BPL should skip MOV #1");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_bpl_after_tstb_neg(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word addr = 01200;
+    const word program[] = {
+        op_tstb(operand(1, 0)),      /* 0 */
+        op_bpl(0002),                /* 2: branch offset is in words, skips MOV #imm (2 words) */
+        op_mov(operand(2, 7), operand(0, 1)), /* 4 */
+        000001,                      /* 6 */
+        op_mov(operand(2, 7), operand(0, 1)), /* 10 */
+        000002,                      /* 12 */
+    };
+
+    current_test = "dcj11_bpl_after_tstb_neg";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.r[0] = addr;
+    fx.r.store_byte(&fx.r, addr, 0200);
+
+    ASSERT_EQ(core_step(&fx.r), 0, "TSTB should execute");
+    ASSERT_EQ(core_step(&fx.r), 0, "BPL should execute");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #1 should execute");
+    ASSERT_EQ(fx.r.r[1], 000001, "BPL should not branch on N=1");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_bpt_stack_order(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word new_psw = 000340;
+    const word program[] = {
+        000003, /* BPT */
+    };
+
+    current_test = "dcj11_bpt_stack";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000014, handler);
+    store_word(&fx, 000016, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT should succeed");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load BPT vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load BPT vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_iot_stack_order(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        000004, /* IOT */
+    };
+
+    current_test = "dcj11_iot_stack";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000020, handler);
+    store_word(&fx, 000022, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IOT should succeed");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load IOT vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load IOT vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_bus_error_stack_order(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02600;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_mov(operand(1, 0), operand(0, 1)), /* MOV (R0), R1 */
+    };
+
+    current_test = "dcj11_bus_error_stack";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[0] = 000001; /* odd address triggers bus error on word fetch */
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Bus error should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760, "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.r[6], 00774, "SP should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
 int main(void)
 {
     int failed = 0;
@@ -3096,6 +3534,7 @@ int main(void)
     failed += test_extended_ops_supported();
     failed += test_condition_codes();
     failed += test_wait_and_reset();
+    failed += test_dcj11_wait_resume_on_irq();
     failed += test_halt();
     failed += test_external_halt();
     failed += test_branches();
@@ -3117,8 +3556,19 @@ int main(void)
     failed += test_trace_rearms_with_t_in_vector();
     failed += test_trace_stops_when_t_cleared();
     failed += test_rti_restores_state();
+    failed += test_dcj11_rti_restores_state();
     failed += test_keyboard_irq_vector();
     failed += test_irq_mask_blocks_interrupt();
+    failed += test_dcj11_irq_priority_mask();
+    failed += test_dcj11_irq_highest_priority();
+    failed += test_dcj11_sel0_reset();
+    failed += test_dcj11_sel1_sel2_regs();
+    failed += test_dcj11_tstb_flags();
+    failed += test_dcj11_bpl_after_tstb();
+    failed += test_dcj11_bpl_after_tstb_neg();
+    failed += test_dcj11_bpt_stack_order();
+    failed += test_dcj11_iot_stack_order();
+    failed += test_dcj11_bus_error_stack_order();
 
     if (failed) {
         fprintf(stderr, "%d test(s) failed\n", failed);

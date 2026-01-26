@@ -78,7 +78,8 @@ typedef struct _regs {
 
     word	cps, cpc;	/* 0177676 0177674 */
 
-    word	SEL1, SEL2;	/* 0177716 0177714 */
+    word	SEL0;		/* unaddressed SEL register */
+    word	SEL1, SEL2;	/* 0177716 0177714 external registers */
 
     word	fTrap;
 

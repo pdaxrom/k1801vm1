@@ -1,0 +1,23 @@
+/* CPU diagnostic harness skeleton (no behavior yet). */
+#ifndef CPU_DIAG_H_
+#define CPU_DIAG_H_
+
+#include "core/core.h"
+
+typedef struct {
+    regs r;
+    byte *mem;
+} cpu_diag_fixture;
+
+typedef struct {
+    const char *name;
+    int passed;
+} cpu_diag_result;
+
+void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model);
+void cpu_diag_fixture_fini(cpu_diag_fixture *fx);
+
+cpu_diag_result cpu_diag_run_all(cpu_diag_fixture *fx);
+void cpu_diag_trace_octal(cpu_diag_fixture *fx, const char *label);
+
+#endif /* CPU_DIAG_H_ */

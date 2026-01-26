@@ -16,21 +16,63 @@ static byte *mem = NULL;
 
 static byte hardware_load_byte(regs *r, word offset)
 {
+    if (offset == 0177716) {
+        return r->SEL1 & 0377;
+    }
+    if (offset == 0177717) {
+        return (r->SEL1 >> 8) & 0377;
+    }
+    if (offset == 0177714) {
+        return r->SEL2 & 0377;
+    }
+    if (offset == 0177715) {
+        return (r->SEL2 >> 8) & 0377;
+    }
     return mem[offset];
 }
 
 static void hardware_store_byte(regs *r, word offset, byte value)
 {
+    if (offset == 0177716) {
+        r->SEL1 = (word)((r->SEL1 & 0177400) | (value & 0377));
+        return;
+    }
+    if (offset == 0177717) {
+        r->SEL1 = (word)(((value & 0377) << 8) | (r->SEL1 & 0377));
+        return;
+    }
+    if (offset == 0177714) {
+        r->SEL2 = (word)((r->SEL2 & 0177400) | (value & 0377));
+        return;
+    }
+    if (offset == 0177715) {
+        r->SEL2 = (word)(((value & 0377) << 8) | (r->SEL2 & 0377));
+        return;
+    }
 	mem[offset] = value;
 }
 
 static word hardware_load_word(regs *r, word offset)
 {
+    if (offset == 0177716) {
+        return r->SEL1;
+    }
+    if (offset == 0177714) {
+        return r->SEL2;
+    }
     return r->load_byte(r, offset) | (r->load_byte(r, offset + 1) << 8);
 }
 
 static void hardware_store_word(regs *r, word offset, word value)
 {
+    if (offset == 0177716) {
+        r->SEL1 = value;
+        return;
+    }
+    if (offset == 0177714) {
+        r->SEL2 = value;
+        return;
+    }
 	r->store_byte(r, offset,     value & 0377);
 	r->store_byte(r, offset + 1, value >> 8);
 }
