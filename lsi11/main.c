@@ -21,11 +21,18 @@ static void usage(const char *argv0) {
           "  -traceirq       Trace delivered IRQ vectors\n"
           "  -tracenxm       Trace NXM traps\n",
           argv0);
+  fprintf(stderr,
+          "  -load <file>    Load binary file into RAM\n"
+          "  -addr <oct>     Load address (octal) for -load (default 0)\n"
+          "  -pc <oct>       Set initial PC (R7) to octal address\n");
 }
 
 int main(int argc, char **argv) {
   const char *rk_path = NULL;
+  const char *load_path = NULL;
   int do_bootcopy = 0;
+  long load_addr = 0;
+  long start_pc = -1;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
@@ -36,6 +43,12 @@ int main(int argc, char **argv) {
       lsi11_set_trace_irq(1);
     } else if (!strcmp(argv[i], "-tracenxm")) {
       lsi11_set_trace_nxm(1);
+    } else if (!strcmp(argv[i], "-load") && i + 1 < argc) {
+      load_path = argv[++i];
+    } else if (!strcmp(argv[i], "-addr") && i + 1 < argc) {
+      load_addr = strtol(argv[++i], NULL, 8);
+    } else if (!strcmp(argv[i], "-pc") && i + 1 < argc) {
+      start_pc = strtol(argv[++i], NULL, 8);
     } else {
       usage(argv[0]);
       return 2;
@@ -75,6 +88,46 @@ int main(int argc, char **argv) {
     }
     /* start execution at 000000 (common simple bootstrap scenario) */
     r.r[7] = 000000;
+  }
+
+  if (load_path) {
+    FILE *fload = fopen(load_path, "rb");
+    if (!fload) {
+      fprintf(stderr, "Cannot open file: %s\n", load_path);
+      r.fini(&r);
+      return 1;
+    }
+
+    if (fseek(fload, 0, SEEK_END) != 0) {
+      fprintf(stderr, "Seek failed: %s\n", load_path);
+      fclose(fload);
+      r.fini(&r);
+      return 1;
+    }
+    long fsize = ftell(fload);
+    fseek(fload, 0, SEEK_SET);
+
+    if (load_addr < 0 || load_addr + fsize > 0200000) {
+      fprintf(stderr, "Load address/size out of RAM bounds (max 0200000)\n");
+      fclose(fload);
+      r.fini(&r);
+      return 1;
+    }
+
+    if (fread(&ram[load_addr], 1, fsize, fload) != (size_t)fsize) {
+      fprintf(stderr, "Read failed: %s\n", load_path);
+      fclose(fload);
+      r.fini(&r);
+      return 1;
+    }
+    fclose(fload);
+    fprintf(stderr, "Loaded %ld bytes from %s to octal %lo\n", fsize, load_path,
+            load_addr);
+  }
+
+  if (start_pc >= 0) {
+    r.r[7] = (uint16_t)start_pc;
+    fprintf(stderr, "Set PC to octal %lo\n", start_pc);
   }
 
   /* -------- main emulation loop --------
