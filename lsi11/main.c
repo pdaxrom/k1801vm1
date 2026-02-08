@@ -11,12 +11,42 @@
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
 #include "../core/disas.h"
 
+static int parse_cpu_model(const char *name, byte *model) {
+  if (!name || !model)
+    return -1;
+
+  if (!strcmp(name, "dcj11") || !strcmp(name, "11/03")) {
+    *model = DCJ11;
+    return 0;
+  }
+  if (!strcmp(name, "k1801vm1") || !strcmp(name, "vm1")) {
+    *model = K1801VM1;
+    return 0;
+  }
+  if (!strcmp(name, "k1801vm1g") || !strcmp(name, "vm1g")) {
+    *model = K1801VM1G;
+    return 0;
+  }
+  if (!strcmp(name, "k1801vm2") || !strcmp(name, "vm2")) {
+    *model = K1801VM2;
+    return 0;
+  }
+  if (!strcmp(name, "k1806vm2")) {
+    *model = K1806VM2;
+    return 0;
+  }
+
+  return -1;
+}
+
 static void usage(const char *argv0) {
   fprintf(stderr,
           "Usage:\n"
-          "  %s -rk <rk05.img> [-bootcopy|-bootrt11]\n"
+          "  %s -rk <rk05.img> [-bootcopy|-bootrt11] [-cpu <model>]\n"
           "\n"
           "Options:\n"
+          "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
+          "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
           "  -rk <path>      Attach RK05 image\n"
           "  -bootcopy       Copy first 010000 bytes from RK image into RAM at "
           "000000\n"
@@ -42,6 +72,7 @@ int main(int argc, char **argv) {
   long load_addr = 0;
   long start_pc = -1;
   long sr_value = -1;
+  byte cpu_model = DCJ11;
   int trace = 0;
   int trace_regs = 0;
 
@@ -69,6 +100,12 @@ int main(int argc, char **argv) {
       start_pc = strtol(argv[++i], NULL, 8);
     } else if (!strcmp(argv[i], "-sr") && i + 1 < argc) {
       sr_value = strtol(argv[++i], NULL, 8);
+    } else if (!strcmp(argv[i], "-cpu") && i + 1 < argc) {
+      if (parse_cpu_model(argv[++i], &cpu_model) != 0) {
+        fprintf(stderr, "Unknown CPU model: %s\n", argv[i]);
+        usage(argv[0]);
+        return 2;
+      }
     } else {
       usage(argv[0]);
       return 2;
@@ -77,7 +114,7 @@ int main(int argc, char **argv) {
 
   regs r;
   memset(&r, 0, sizeof(r));
-  r.model = DCJ11;
+  r.model = cpu_model;
 
   lsi11_hw_connect(&r);
 

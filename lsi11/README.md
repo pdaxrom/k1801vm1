@@ -35,6 +35,24 @@ All addresses, vectors, and priorities are **octal**.
 * `make` builds the emulator binary `lsi11`.
 * `make test` builds and runs the semantic tests (checks bus mapping and IRQ rules).
 
+## CPU Model Selection
+By default `lsi11` starts with `dcj11` core mode.
+
+You can select CPU model explicitly:
+```
+./lsi11 -cpu dcj11
+./lsi11 -cpu 11/03
+./lsi11 -cpu k1801vm1
+./lsi11 -cpu k1801vm1g
+./lsi11 -cpu k1801vm2
+./lsi11 -cpu k1806vm2
+```
+
+Short aliases are also accepted:
+- `vm1` for `k1801vm1`
+- `vm1g` for `k1801vm1g`
+- `vm2` for `k1801vm2`
+
 ## Booting RT-11 (RT11SJ)
 The RT-11 image `disks/rt11v400.dsk` can be booted via the built-in loader:
 ```
