@@ -180,7 +180,7 @@ void lsi11_hw_connect(regs *r) {
 }
 
 void lsi11_poll_devices(void) {
-  dl11_poll_input();
+  dl11_poll();
   kw11_poll();
   rk11_poll();
   lp11_poll();

@@ -13,13 +13,8 @@
 #include "../dev_rk11.h"
 #include "../dev_sr.h"
 
-/* We don’t need a real core regs; irq_poll only uses it for DCJ11 encoding.
-   Provide a tiny stub that matches your encode_vec() needs.
-   TODO: adjust this to your real regs struct or replace encode_vec() to not
-   require regs. */
-struct _regs {
-  int dummy;
-};
+/* test helper from dev_dl11.c (built with LSI11_TESTS) */
+void dl11_test_inject_rx(uint8_t ch);
 
 static int g_fail = 0;
 static void check(int cond, const char *msg) {
@@ -27,6 +22,14 @@ static void check(int cond, const char *msg) {
     fprintf(stderr, "FAIL: %s\n", msg);
     g_fail = 1;
   }
+}
+
+static void reset_devices(void) {
+  dl11_reset();
+  kw11_reset();
+  rk11_reset();
+  lp11_reset();
+  sr_reset();
 }
 
 /* Helper: poll and return 1 if IRQ delivered */
@@ -56,32 +59,42 @@ static void wr8(uint16_t a, uint8_t v) { bus_write8(a, v); }
 static void test_dl11_tx(regs *r) {
   uint16_t vec = 0;
 
+  reset_devices();
+
   /* enable TX interrupts: write IE bit (0100) into TCSR */
   wr8(DL11_TCSR, 000100);
 
   /* clear DONE by writing TBUF (software clears DONE) */
   wr8(DL11_TBUF, 'A');
 
-  /* TX device model sets DONE=1 after write; if IE=1, should assert IRQ once */
+  /* Allow TX to complete */
+  dl11_poll();
+
+  /* TX device model sets DONE=1 after completion; if IE=1, should assert IRQ */
   check(poll_irq(r, &vec) == 1, "DL11 TX: first IRQ delivered");
   check(vec == 000064,
         "DL11 TX: vector is 000064 (octal)"); /* unless DCJ11 encoding changes
                                                  it */
 
-  /* ACK already happened inside irq_poll (grant-time ack). Next poll must NOT
-   * re-IRQ while DONE==1 */
+  /* While DONE==1 and IE==1, IRQ is level and should repeat */
   vec = 0;
-  check(poll_irq(r, &vec) == 0, "DL11 TX: no repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 1, "DL11 TX: repeat IRQ while DONE==1");
 
   /* Now clear DONE again by writing TBUF -> should allow a NEW IRQ */
   wr8(DL11_TBUF, 'B');
+  dl11_poll();
   vec = 0;
   check(poll_irq(r, &vec) == 1,
         "DL11 TX: new IRQ after software clears DONE and event happens");
+
+  /* cleanup */
+  wr8(DL11_TCSR, 000000);
 }
 
 static void test_dl11_rx(regs *r) {
   uint16_t vec = 0;
+
+  reset_devices();
 
   /* enable RX interrupts: write IE bit (0100) into RCSR */
   wr8(DL11_RCSR, 000100);
@@ -92,9 +105,9 @@ static void test_dl11_rx(regs *r) {
   check(poll_irq(r, &vec) == 1, "DL11 RX: first IRQ delivered");
   check((vec & 0000777) == 000060, "DL11 RX: vector 000060");
 
-  /* No repeat while DONE==1 (even after ACK) */
+  /* While DONE==1 and IE==1, IRQ is level and should repeat */
   vec = 0;
-  check(poll_irq(r, &vec) == 0, "DL11 RX: no repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 1, "DL11 RX: repeat IRQ while DONE==1");
 
   /* Software clears DONE: reading RBUF */
   (void)rd8(DL11_RBUF);
@@ -107,10 +120,16 @@ static void test_dl11_rx(regs *r) {
   dl11_test_inject_rx('S');
   vec = 0;
   check(poll_irq(r, &vec) == 1, "DL11 RX: new IRQ after next event");
+
+  /* cleanup */
+  (void)rd8(DL11_RBUF);
+  wr8(DL11_RCSR, 000000);
 }
 
 static void test_kw11(regs *r) {
   uint16_t vec = 0;
+
+  reset_devices();
 
   /* enable IE */
   wr8(KW11_CSR, 000100);
@@ -130,8 +149,9 @@ static void test_kw11(regs *r) {
   /* vector check (if no DCJ11 encoding): */
   check((vec & 0000777) == 000100, "KW11: vector low bits 000100");
 
-  /* While DONE==1, kw11_poll should NOT generate another IRQ */
+  /* While DONE==1 and IE==1, IRQ is level and should repeat */
   vec = 0;
+  got = 0;
   for (int i = 0; i < 2000; i++) {
     kw11_poll();
     if (poll_irq(r, &vec)) {
@@ -139,9 +159,8 @@ static void test_kw11(regs *r) {
       break;
     }
     usleep(100);
-    got = 0;
   }
-  check(!got, "KW11: no repeat IRQ while DONE==1");
+  check(got, "KW11: repeat IRQ while DONE==1");
 
   /* Software clears DONE: write CSR low byte */
   wr8(KW11_CSR, 000100);
@@ -163,6 +182,8 @@ static void test_kw11(regs *r) {
 static void test_lp11(regs *r) {
   uint16_t vec = 0;
 
+  reset_devices();
+
   /* enable IE */
   wr8(LP11_CSR, 000100);
 
@@ -174,7 +195,7 @@ static void test_lp11(regs *r) {
   check((vec & 0000777) == 000200, "LP11: vector 000200");
 
   vec = 0;
-  check(poll_irq(r, &vec) == 0, "LP11: no repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 1, "LP11: repeat IRQ while DONE==1");
 
   /* write DBR again => clears DONE and generates new DONE event => new IRQ */
   wr8(LP11_DBR, 'Y');
@@ -184,6 +205,8 @@ static void test_lp11(regs *r) {
 
 static void test_rk11(regs *r) {
   uint16_t vec = 0;
+
+  reset_devices();
 
   /* enable IE */
   wr8(RKCS, 000100);
@@ -200,9 +223,9 @@ static void test_rk11(regs *r) {
   check(poll_irq(r, &vec) == 1, "RK11: IRQ delivered on completion");
   check((vec & 0000777) == 000220, "RK11: vector 000220");
 
-  /* No repeat while DONE==1 */
+  /* Repeat while DONE==1 */
   vec = 0;
-  check(poll_irq(r, &vec) == 0, "RK11: no repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 1, "RK11: repeat IRQ while DONE==1");
 
   /* Start next GO command (software clears DONE) => allow a new completion IRQ
    */
@@ -239,13 +262,6 @@ int main(void) {
     fprintf(stderr, "FAIL: sr_init\n");
     return 1;
   }
-
-  /* reset devices */
-  dl11_reset();
-  kw11_reset();
-  rk11_reset();
-  lp11_reset();
-  sr_reset();
 
   test_dl11_tx(&r);
   test_dl11_rx(&r);

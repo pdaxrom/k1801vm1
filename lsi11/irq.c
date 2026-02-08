@@ -1,4 +1,5 @@
 #include "irq.h"
+#include "../core/core.h"
 
 #define MAX_IRQ 32
 
@@ -8,13 +9,9 @@ static int g_n = 0;
 /* NOTE: You must match core’s DCJ11 encoding convention here. */
 static uint16_t encode_vec(regs *r, uint16_t v, uint8_t pri)
 {
-    /* If your core uses v|((pri&7)<<9) for DCJ11, do it here for all devices. */
-    extern int regs_model_is_dcj11(const regs *r); /* or use r->model if available */
-    (void)r;
-
-    /* Template: replace with actual model check used in your project. */
-    /* Default: no encoding */
-    (void)pri;
+    if (r && r->model == DCJ11) {
+        return (uint16_t)(v | ((pri & 07) << 9));
+    }
     return v;
 }
 

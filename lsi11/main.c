@@ -8,6 +8,7 @@
 
 /* core headers (read-only) */
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
+#include "../core/disas.h"
 
 static void usage(const char *argv0) {
   fprintf(stderr,
@@ -18,6 +19,8 @@ static void usage(const char *argv0) {
           "  -rk <path>      Attach RK05 image\n"
           "  -bootcopy       Copy first 010000 bytes from RK image into RAM at "
           "000000\n"
+          "  -trace          Trace each instruction\n"
+          "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
           "  -tracenxm       Trace NXM traps\n",
           argv0);
@@ -33,6 +36,8 @@ int main(int argc, char **argv) {
   int do_bootcopy = 0;
   long load_addr = 0;
   long start_pc = -1;
+  int trace = 0;
+  int trace_regs = 0;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
@@ -43,6 +48,11 @@ int main(int argc, char **argv) {
       lsi11_set_trace_irq(1);
     } else if (!strcmp(argv[i], "-tracenxm")) {
       lsi11_set_trace_nxm(1);
+    } else if (!strcmp(argv[i], "-trace")) {
+      trace = 1;
+    } else if (!strcmp(argv[i], "-trace-regs")) {
+      trace = 1;
+      trace_regs = 1;
     } else if (!strcmp(argv[i], "-load") && i + 1 < argc) {
       load_path = argv[++i];
     } else if (!strcmp(argv[i], "-addr") && i + 1 < argc) {
@@ -57,6 +67,7 @@ int main(int argc, char **argv) {
 
   regs r;
   memset(&r, 0, sizeof(r));
+  r.model = DCJ11;
 
   lsi11_hw_connect(&r);
 
@@ -135,6 +146,19 @@ int main(int argc, char **argv) {
   for (;;) {
     /* Run a chunk of CPU steps, poll devices between chunks */
     for (int k = 0; k < 1000; k++) {
+      if (trace) {
+        char buf[128];
+        word pc = r.r[7];
+        word tmp = pc;
+        disas(&r, &tmp, buf);
+        fprintf(stderr, "%06o %s\n", pc, buf);
+        if (trace_regs) {
+          fprintf(stderr,
+                  "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
+                  r.r[0], r.r[1], r.r[2], r.r[3], r.r[4], r.r[5], r.r[6],
+                  r.psw);
+        }
+      }
       /* TODO: replace with your core single-instruction executor */
       core_step(&r); /* must exist in your core */
       if (r.fAbort)
@@ -146,7 +170,7 @@ int main(int argc, char **argv) {
     if (r.fAbort) {
       /* core set fAbort on traps/halt; decide how to handle */
       /* For now: break */
-      break;
+//      break;
     }
   }
 

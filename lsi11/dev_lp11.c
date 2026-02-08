@@ -57,8 +57,8 @@ static void lp11_write8(uint16_t a, uint8_t v)
     }
 }
 
-int lp11_irq_pending(void) { return lp_l.irq_req ? 1 : 0; }
-void lp11_irq_ack(void) { irq_latch_ack(&lp_l); }
+int lp11_irq_pending(void) { return (lp_l.ie && lp_l.done) ? 1 : 0; }
+void lp11_irq_ack(void) { }
 
 int lp11_init(void)
 {

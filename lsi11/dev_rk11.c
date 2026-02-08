@@ -22,6 +22,7 @@
 #define RKCS_GO   0000001
 #define RKCS_FUNC_MASK 0000016
 #define RKCS_READ 0000004
+#define RKCS_WRITE 0000002
 #define RKCS_IE   0000100
 
 /* We expose DONE/RDY through a DONE bit in low byte for polling.
@@ -147,8 +148,8 @@ static void rk_write8(uint16_t a, uint8_t b)
     }
 }
 
-int rk11_irq_pending(void) { return rk_l.irq_req ? 1 : 0; }
-void rk11_irq_ack(void) { irq_latch_ack(&rk_l); }
+int rk11_irq_pending(void) { return (rk_l.ie && rk_l.done) ? 1 : 0; }
+void rk11_irq_ack(void) { }
 
 int rk11_init(void)
 {
@@ -188,8 +189,9 @@ void rk11_poll(void)
     /* execute command only while GO is set */
     if (!(rkcs & RKCS_GO)) return;
 
-    /* Only READ supported in minimal model */
-    if ((rkcs & RKCS_FUNC_MASK) != RKCS_READ) {
+    /* Support READ/WRITE only */
+    uint16_t func = (uint16_t)(rkcs & RKCS_FUNC_MASK);
+    if (func != RKCS_READ && func != RKCS_WRITE) {
         /* complete with error or just DONE */
         rker = 000001;
         rkcs &= (uint16_t)~RKCS_GO;
@@ -227,11 +229,18 @@ void rk11_poll(void)
 
         if (fseek(fp, (long)off, SEEK_SET) != 0) { rker = 000001; break; }
 
-        uint8_t lo, hi;
-        if (fread(&lo, 1, 1, fp) != 1) { rker = 000001; break; }
-        if (fread(&hi, 1, 1, fp) != 1) { rker = 000001; break; }
-
-        bus_write16((paddr_t)mem, (uint16_t)(lo | ((uint16_t)hi << 8)));
+        if (func == RKCS_READ) {
+            uint8_t lo, hi;
+            if (fread(&lo, 1, 1, fp) != 1) { rker = 000001; break; }
+            if (fread(&hi, 1, 1, fp) != 1) { rker = 000001; break; }
+            bus_write16((paddr_t)mem, (uint16_t)(lo | ((uint16_t)hi << 8)));
+        } else {
+            uint16_t w = bus_read16((paddr_t)mem);
+            uint8_t lo = (uint8_t)(w & 000377);
+            uint8_t hi = (uint8_t)((w >> 8) & 000377);
+            if (fwrite(&lo, 1, 1, fp) != 1) { rker = 000001; break; }
+            if (fwrite(&hi, 1, 1, fp) != 1) { rker = 000001; break; }
+        }
 
         mem += 2;
         rkba = (uint16_t)(rkba + 2);

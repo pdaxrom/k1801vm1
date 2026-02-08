@@ -52,8 +52,8 @@ static void kw11_write8(uint16_t a, uint8_t v)
 }
 
 /* --- IRQ source --- */
-int kw11_irq_pending(void) { return kw_l.irq_req ? 1 : 0; }
-void kw11_irq_ack(void) { irq_latch_ack(&kw_l); }
+int kw11_irq_pending(void) { return (kw_l.ie && kw_l.done) ? 1 : 0; }
+void kw11_irq_ack(void) { }
 
 int kw11_init(void)
 {
