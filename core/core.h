@@ -14,6 +14,10 @@
 #define INLINE inline
 #endif
 
+#ifndef ENABLE_MMU
+#define ENABLE_MMU 0
+#endif
+
 #ifndef byte
 #define byte uint8_t
 #endif
@@ -93,6 +97,22 @@ typedef struct _regs {
     word    fHaltSignal;
     word    fStepDeferHalt;
     word    fFisError;
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    /*
+     * DCJ11 MMU state (PDP-11 MMR/PAR/PDR model).
+     * Indexed as [mode][space][segment]:
+     *   mode: 0=kernel, 1=supervisor, 3=user (2 reserved)
+     *   space: 0=I-space, 1=D-space
+     *   segment: 0..7
+     */
+    word    mmu_ssr0;
+    word    mmu_ssr1;
+    word    mmu_ssr2;
+    word    mmu_ssr3;
+    word    mmu_par[4][2][8];
+    word    mmu_pdr[4][2][8];
+#endif
 
     byte (* load_byte)	(struct _regs *r, word offset);
     void (* store_byte)	(struct _regs *r, word offset, byte value);

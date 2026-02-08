@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "core.h"
 #include "hardware.h"
 
@@ -15,6 +16,7 @@
 #define TYPE_REG	0
 #define TYPE_MEM	1
 #define TYPE_ERROR	2
+#define TYPE_IFETCH	3
 
 #define	MPI	0077777		/* most positive integer */
 #define MNI	0100000		/* most negative integer */
@@ -125,6 +127,14 @@ void core_reset(regs *r)
     r->fHaltSignal = 0;
     r->fStepDeferHalt = 0;
     r->fFisError = 0;
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    r->mmu_ssr0 = 0;
+    r->mmu_ssr1 = 0;
+    r->mmu_ssr2 = 0;
+    r->mmu_ssr3 = 0;
+    memset(r->mmu_par, 0, sizeof(r->mmu_par));
+    memset(r->mmu_pdr, 0, sizeof(r->mmu_pdr));
+#endif
 
     r->reset(r);
 }
@@ -136,56 +146,613 @@ void core_fini(regs *r)
 	}
 }
 
-#define load_byte(a, b) r->load_byte(a, b)
-#define store_byte(a, b, c) r->store_byte(a, b, c)
+#define raw_load_byte(a, b)  (((a)->load_byte)((a), (b)))
+#define raw_store_byte(a, b, c) (((a)->store_byte)((a), (b), (c)))
+#define raw_load_word(a, b)  (((a)->load_word)((a), (b)))
+#define raw_store_word(a, b, c) (((a)->store_word)((a), (b), (c)))
+
+enum {
+	MMU_FAULT_NONE = 0,
+	MMU_FAULT_NONRES = 1,
+	MMU_FAULT_LENGTH = 2,
+	MMU_FAULT_PROTECT = 3,
+};
+
+/* MMR/SSR and PAR/PDR map (octal) */
+#define MMU_SSR0 0177572
+#define MMU_SSR1 0177574
+#define MMU_SSR2 0177576
+#define MMU_SSR3 0177516
+
+#define MMU_SUP_I_PDR_BASE 0172200
+#define MMU_SUP_D_PDR_BASE 0172220
+#define MMU_SUP_I_PAR_BASE 0172240
+#define MMU_SUP_D_PAR_BASE 0172260
+
+#define MMU_KER_I_PDR_BASE 0172300
+#define MMU_KER_D_PDR_BASE 0172320
+#define MMU_KER_I_PAR_BASE 0172340
+#define MMU_KER_D_PAR_BASE 0172360
+
+#define MMU_USR_I_PDR_BASE 0177600
+#define MMU_USR_D_PDR_BASE 0177620
+#define MMU_USR_I_PAR_BASE 0177640
+#define MMU_USR_D_PAR_BASE 0177660
+
+#define MMU_SSR0_ENABLE    0000001
+#define MMU_SSR0_SEG_SHIFT 1
+#define MMU_SSR0_MODE_SHIFT 5
+#define MMU_SSR0_FAULT     0100000
+#define MMU_SSR0_NONRES    0004000
+#define MMU_SSR0_LENGTH    0002000
+#define MMU_SSR0_PROTECT   0001000
+
+#define MMU_SSR3_KD        0000001
+#define MMU_SSR3_SD        0000002
+#define MMU_SSR3_UD        0000004
+
+#define MMU_TRAP_VECTOR    0000250
 
 static INLINE void bus_error_trap(regs *r);
+static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault, int mode, int seg);
 
-static INLINE word core_load_word(regs *r, word offset)
+static INLINE int mmu_decode_parpdr(word addr, int *mode, int *space, int *is_par, int *seg)
 {
+	word a = (word)(addr & 0177776);
+
+#define MMU_DEC(base, m, s, p)                                     \
+	do {                                                        \
+		if (a >= (base) && a <= (word)((base) + 016) &&    \
+		    (((a) - (base)) & 1) == 0) {                    \
+			if (mode) *mode = (m);                      \
+			if (space) *space = (s);                    \
+			if (is_par) *is_par = (p);                  \
+			if (seg) *seg = (int)(((a) - (base)) >> 1);\
+			return 1;                                   \
+		}                                                   \
+	} while (0)
+
+	MMU_DEC(MMU_SUP_I_PDR_BASE, 1, 0, 0);
+	MMU_DEC(MMU_SUP_D_PDR_BASE, 1, 1, 0);
+	MMU_DEC(MMU_SUP_I_PAR_BASE, 1, 0, 1);
+	MMU_DEC(MMU_SUP_D_PAR_BASE, 1, 1, 1);
+
+	MMU_DEC(MMU_KER_I_PDR_BASE, 0, 0, 0);
+	MMU_DEC(MMU_KER_D_PDR_BASE, 0, 1, 0);
+	MMU_DEC(MMU_KER_I_PAR_BASE, 0, 0, 1);
+	MMU_DEC(MMU_KER_D_PAR_BASE, 0, 1, 1);
+
+	MMU_DEC(MMU_USR_I_PDR_BASE, 3, 0, 0);
+	MMU_DEC(MMU_USR_D_PDR_BASE, 3, 1, 0);
+	MMU_DEC(MMU_USR_I_PAR_BASE, 3, 0, 1);
+	MMU_DEC(MMU_USR_D_PAR_BASE, 3, 1, 1);
+
+#undef MMU_DEC
+	return 0;
+}
+
+static INLINE int mmu_is_reg_address(word addr)
+{
+	int mode, space, is_par, seg;
+	word a = (word)(addr & 0177776);
+
+	if (a == MMU_SSR0 || a == MMU_SSR1 || a == MMU_SSR2 || a == MMU_SSR3) {
+		return 1;
+	}
+	return mmu_decode_parpdr(a, &mode, &space, &is_par, &seg);
+}
+
+static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
+{
+	int mode, space, is_par, seg;
+	word a = (word)(addr & 0177776);
+
+	if (r->model != DCJ11) {
+		return 0;
+	}
+
+	if (a == MMU_SSR0) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		*value_out = r->mmu_ssr0;
+#else
+		*value_out = 0;
+#endif
+		return 1;
+	}
+	if (a == MMU_SSR1) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		*value_out = r->mmu_ssr1;
+#else
+		*value_out = 0;
+#endif
+		return 1;
+	}
+	if (a == MMU_SSR2) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		*value_out = r->mmu_ssr2;
+#else
+		*value_out = 0;
+#endif
+		return 1;
+	}
+	if (a == MMU_SSR3) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		*value_out = r->mmu_ssr3;
+#else
+		*value_out = 0;
+#endif
+		return 1;
+	}
+	if (mmu_decode_parpdr(a, &mode, &space, &is_par, &seg)) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		*value_out = is_par ? r->mmu_par[mode][space][seg] : r->mmu_pdr[mode][space][seg];
+#else
+		*value_out = 0;
+#endif
+		return 1;
+	}
+
+	return 0;
+}
+
+static INLINE int mmu_io_write_word(regs *r, word addr, word value)
+{
+	int mode, space, is_par, seg;
+	word a = (word)(addr & 0177776);
+
+	if (r->model != DCJ11) {
+		return 0;
+	}
+
+	if (a == MMU_SSR0) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		r->mmu_ssr0 = value;
+#else
+		(void)value;
+#endif
+		return 1;
+	}
+	if (a == MMU_SSR1) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		r->mmu_ssr1 = value;
+#else
+		(void)value;
+#endif
+		return 1;
+	}
+	if (a == MMU_SSR2) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		r->mmu_ssr2 = value;
+#else
+		(void)value;
+#endif
+		return 1;
+	}
+	if (a == MMU_SSR3) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		r->mmu_ssr3 = value;
+#else
+		(void)value;
+#endif
+		return 1;
+	}
+	if (mmu_decode_parpdr(a, &mode, &space, &is_par, &seg)) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		if (is_par) {
+			r->mmu_par[mode][space][seg] = value;
+		} else {
+			r->mmu_pdr[mode][space][seg] = value;
+		}
+#else
+		(void)value;
+#endif
+		return 1;
+	}
+
+	return 0;
+}
+
+static INLINE int mmu_io_read_byte(regs *r, word addr, byte *value_out)
+{
+	word w;
+	word wa = (word)(addr & 0177776);
+	if (!mmu_io_read_word(r, wa, &w)) {
+		return 0;
+	}
+	*value_out = (addr & 1) ? (byte)((w >> 8) & 0377) : (byte)(w & 0377);
+	return 1;
+}
+
+static INLINE int mmu_io_write_byte(regs *r, word addr, byte value)
+{
+	word w;
+	word wa = (word)(addr & 0177776);
+
+	if (!mmu_is_reg_address(wa) || r->model != DCJ11) {
+		return 0;
+	}
+
+	if (!mmu_io_read_word(r, wa, &w)) {
+		w = 0;
+	}
+	if (addr & 1) {
+		w = (word)((w & 0377) | ((word)value << 8));
+	} else {
+		w = (word)((w & 0177400) | value);
+	}
+	return mmu_io_write_word(r, wa, w);
+}
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+static INLINE int mmu_split_enabled(const regs *r, int mode)
+{
+	switch (mode) {
+	case 0: return (r->mmu_ssr3 & MMU_SSR3_KD) ? 1 : 0;
+	case 1: return (r->mmu_ssr3 & MMU_SSR3_SD) ? 1 : 0;
+	case 3: return (r->mmu_ssr3 & MMU_SSR3_UD) ? 1 : 0;
+	default:
+		return 0;
+	}
+}
+
+static INLINE int mmu_mode_from_psw(word psw)
+{
+	int mode = (psw >> 14) & 03;
+	/* Reserved mode 2 is treated as kernel in this core. */
+	return (mode == 2) ? 0 : mode;
+}
+
+static INLINE int mmu_fault_write_allowed(word pdr)
+{
+	int acf = pdr & 07;
+	return (acf == 2 || acf == 3 || acf == 6 || acf == 7);
+}
+
+static INLINE word mmu_fault_to_ssr0_bits(int fault)
+{
+	switch (fault) {
+	case MMU_FAULT_NONRES: return MMU_SSR0_NONRES;
+	case MMU_FAULT_LENGTH: return MMU_SSR0_LENGTH;
+	case MMU_FAULT_PROTECT: return MMU_SSR0_PROTECT;
+	default: return 0;
+	}
+}
+#endif
+
+static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch, int force_kernel_d,
+				  dword *pa_out, int *fault_code_out, int *mode_out, int *seg_out)
+{
+	if (pa_out) {
+		*pa_out = va;
+	}
+	if (fault_code_out) {
+		*fault_code_out = MMU_FAULT_NONE;
+	}
+	if (mode_out) {
+		*mode_out = 0;
+	}
+	if (seg_out) {
+		*seg_out = (va >> 13) & 07;
+	}
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+	if (r->model != DCJ11) {
+		return 0;
+	}
+	if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+		return 0;
+	}
+
+	/* Keep I/O page always reachable in this 16-bit core model. */
+	if (va >= 0160000) {
+		if (pa_out) {
+			*pa_out = va;
+		}
+		return 0;
+	}
+
+	{
+		int mode = force_kernel_d ? 0 : mmu_mode_from_psw(r->psw);
+		int space = force_kernel_d ? 1 : (is_ifetch ? 0 : (mmu_split_enabled(r, mode) ? 1 : 0));
+		int seg = (va >> 13) & 07;
+		int block = (va >> 6) & 0177;
+		word pdr = r->mmu_pdr[mode][space][seg];
+		word par = r->mmu_par[mode][space][seg];
+		int acf = pdr & 07;
+		int ed = (pdr >> 3) & 01;
+		int len = (pdr >> 8) & 0177;
+
+		if (mode_out) {
+			*mode_out = mode;
+		}
+		if (seg_out) {
+			*seg_out = seg;
+		}
+
+		if (acf == 0) {
+			if (fault_code_out) {
+				*fault_code_out = MMU_FAULT_NONRES;
+			}
+			return -1;
+		}
+
+		if ((!ed && block > len) || (ed && block < len)) {
+			if (fault_code_out) {
+				*fault_code_out = MMU_FAULT_LENGTH;
+			}
+			return -1;
+		}
+
+		if (is_write && !mmu_fault_write_allowed(pdr)) {
+			if (fault_code_out) {
+				*fault_code_out = MMU_FAULT_PROTECT;
+			}
+			return -1;
+		}
+
+		if (is_write) {
+			/* Mark segment written (heuristic W-bit model). */
+			r->mmu_pdr[mode][space][seg] |= 0000100;
+		}
+
+		if (pa_out) {
+			dword pa_block = (dword)((par + block) & 0777777);
+			*pa_out = (pa_block << 6) | (va & 077);
+		}
+	}
+#else
+	(void)r;
+	(void)is_write;
+	(void)is_ifetch;
+	(void)force_kernel_d;
+	(void)fault_code_out;
+	(void)mode_out;
+	(void)seg_out;
+#endif
+
+	return 0;
+}
+
+/*
+ * Required centralized translation API.
+ * is_ifetch: 1=instruction fetch (I-space), 0=data access (I/D per SSR3)
+ */
+static INLINE int translate_va(regs *r, word va, int is_write, int is_ifetch,
+			       dword *pa_out, int *fault_code_out)
+{
+	return translate_va_ex(r, va, is_write, is_ifetch, 0, pa_out, fault_code_out, NULL, NULL);
+}
+
+static INLINE void mmu_record_fault(regs *r, word va, word pc, int fault, int mode, int seg)
+{
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+	if (r->model != DCJ11) {
+		return;
+	}
+	/* First-fault latch semantics. */
+	if (r->mmu_ssr0 & MMU_SSR0_FAULT) {
+		return;
+	}
+	r->mmu_ssr0 = (word)((r->mmu_ssr0 & MMU_SSR0_ENABLE) |
+			     MMU_SSR0_FAULT |
+			     (((word)seg & 07) << MMU_SSR0_SEG_SHIFT) |
+			     (((word)mode & 03) << MMU_SSR0_MODE_SHIFT) |
+			     mmu_fault_to_ssr0_bits(fault));
+	r->mmu_ssr2 = pc;
+	r->mmu_ssr1 = va;
+#else
+	(void)r;
+	(void)va;
+	(void)pc;
+	(void)fault;
+	(void)mode;
+	(void)seg;
+#endif
+}
+
+static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch, int force_kernel_d)
+{
+	byte value;
+	dword pa = 0;
+	int fault = MMU_FAULT_NONE;
+	int mode = 0;
+	int seg = 0;
+	int rc;
+
+	if (mmu_io_read_byte(r, offset, &value)) {
+		return value;
+	}
+
+	if (force_kernel_d) {
+		rc = translate_va_ex(r, offset, 0, is_ifetch, 1, &pa, &fault, &mode, &seg);
+	} else {
+		rc = translate_va(r, offset, 0, is_ifetch, &pa, &fault);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+			mode = mmu_mode_from_psw(r->psw);
+			seg = (offset >> 13) & 07;
+		}
+#endif
+	}
+	if (rc < 0) {
+		mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+		return 0;
+	}
+
+	return raw_load_byte(r, (word)pa);
+}
+
+static INLINE void core_store_byte_ex(regs *r, word offset, byte value, int force_kernel_d)
+{
+	dword pa = 0;
+	int fault = MMU_FAULT_NONE;
+	int mode = 0;
+	int seg = 0;
+	int rc;
+
+	if (mmu_io_write_byte(r, offset, value)) {
+		return;
+	}
+
+	if (force_kernel_d) {
+		rc = translate_va_ex(r, offset, 1, 0, 1, &pa, &fault, &mode, &seg);
+	} else {
+		rc = translate_va(r, offset, 1, 0, &pa, &fault);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+			mode = mmu_mode_from_psw(r->psw);
+			seg = (offset >> 13) & 07;
+		}
+#endif
+	}
+	if (rc < 0) {
+		mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+		return;
+	}
+
+	raw_store_byte(r, (word)pa, value);
+}
+
+static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch, int force_kernel_d)
+{
+	word value;
+	dword pa = 0;
+	int fault = MMU_FAULT_NONE;
+	int mode = 0;
+	int seg = 0;
+	int rc;
+
 	if ((r->model == DCJ11) && (offset & 1)) {
 		bus_error_trap(r);
 		return 0;
 	}
-	return r->load_word(r, offset);
+
+	if (mmu_io_read_word(r, offset, &value)) {
+		return value;
+	}
+
+	if (force_kernel_d) {
+		rc = translate_va_ex(r, offset, 0, is_ifetch, 1, &pa, &fault, &mode, &seg);
+	} else {
+		rc = translate_va(r, offset, 0, is_ifetch, &pa, &fault);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+			mode = mmu_mode_from_psw(r->psw);
+			seg = (offset >> 13) & 07;
+		}
+#endif
+	}
+	if (rc < 0) {
+		mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+		return 0;
+	}
+
+	return raw_load_word(r, (word)pa);
 }
 
-static INLINE void core_store_word(regs *r, word offset, word value)
+static INLINE void core_store_word_ex(regs *r, word offset, word value, int force_kernel_d)
 {
+	dword pa = 0;
+	int fault = MMU_FAULT_NONE;
+	int mode = 0;
+	int seg = 0;
+	int rc;
+
 	if ((r->model == DCJ11) && (offset & 1)) {
 		bus_error_trap(r);
 		return;
 	}
-	r->store_word(r, offset, value);
+
+	if (mmu_io_write_word(r, offset, value)) {
+		return;
+	}
+
+	if (force_kernel_d) {
+		rc = translate_va_ex(r, offset, 1, 0, 1, &pa, &fault, &mode, &seg);
+	} else {
+		rc = translate_va(r, offset, 1, 0, &pa, &fault);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+		if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+			mode = mmu_mode_from_psw(r->psw);
+			seg = (offset >> 13) & 07;
+		}
+#endif
+	}
+	if (rc < 0) {
+		mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+		return;
+	}
+
+	raw_store_word(r, (word)pa, value);
 }
 
-#define load_word(a, b) core_load_word(a, b)
-#define store_word(a, b, c) core_store_word(a, b, c)
+static INLINE byte core_load_byte(regs *r, word offset)
+{
+	return core_load_byte_ex(r, offset, 0, 0);
+}
+
+static INLINE void core_store_byte(regs *r, word offset, byte value)
+{
+	core_store_byte_ex(r, offset, value, 0);
+}
+
+static INLINE word core_load_word(regs *r, word offset)
+{
+	return core_load_word_ex(r, offset, 0, 0);
+}
+
+static INLINE word core_load_word_ifetch(regs *r, word offset)
+{
+	return core_load_word_ex(r, offset, 1, 0);
+}
+
+static INLINE word core_load_word_vector(regs *r, word offset)
+{
+	return core_load_word_ex(r, offset, 0, 1);
+}
+
+static INLINE void core_store_word(regs *r, word offset, word value)
+{
+	core_store_word_ex(r, offset, value, 0);
+}
+
+#define load_byte(a, b) core_load_byte((a), (b))
+#define store_byte(a, b, c) core_store_byte((a), (b), (c))
+#define load_word(a, b) core_load_word((a), (b))
+#define load_word_ifetch(a, b) core_load_word_ifetch((a), (b))
+#define load_word_vector(a, b) core_load_word_vector((a), (b))
+#define store_word(a, b, c) core_store_word((a), (b), (c))
 
 static INLINE void illegal_trap(regs *r)
 {
 	pushw(r->psw);
 	pushw(r->r[7]);
-	r->r[7] = load_word(r, 010);
-	r->psw  = load_word(r, 012);
+	r->r[7] = load_word_vector(r, 010);
+	r->psw  = load_word_vector(r, 012);
 }
-
-#undef load_word
-#undef store_word
 
 static INLINE void bus_error_trap(regs *r)
 {
 	r->r[6] -= 2;
-	r->store_word(r, r->r[6], r->psw);
+	raw_store_word(r, r->r[6], r->psw);
 	r->r[6] -= 2;
-	r->store_word(r, r->r[6], r->r[7]);
-	r->r[7] = r->load_word(r, 000004);
-	r->psw  = r->load_word(r, 000006);
+	raw_store_word(r, r->r[6], r->r[7]);
+	r->r[7] = load_word_vector(r, 000004);
+	r->psw  = load_word_vector(r, 000006);
 	r->fAbort = 1;
 }
 
-#define load_word(a, b) core_load_word(a, b)
-#define store_word(a, b, c) core_store_word(a, b, c)
+static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault, int mode, int seg)
+{
+	mmu_record_fault(r, va, pc, fault, mode, seg);
+	r->r[6] -= 2;
+	raw_store_word(r, r->r[6], r->psw);
+	r->r[6] -= 2;
+	raw_store_word(r, r->r[6], pc);
+	r->r[7] = load_word_vector(r, MMU_TRAP_VECTOR);
+	r->psw  = load_word_vector(r, (word)(MMU_TRAP_VECTOR + 2));
+	r->fAbort = 1;
+}
 
 static INLINE void handle_halt(regs *r)
 {
@@ -195,14 +762,14 @@ static INLINE void handle_halt(regs *r)
 		store_word(r, 0177674, r->r[7]);
 		store_word(r, 0177716, load_word(r, 0177716) | 010);
 		vec = 0160002;
-		r->r[7] = load_word(r, vec);
-		r->psw  = load_word(r, (word)(vec + 2));
+		r->r[7] = load_word_vector(r, vec);
+		r->psw  = load_word_vector(r, (word)(vec + 2));
 	} else if (is_vm2(r)) {
 		r->cps = r->psw;
 		r->cpc = r->r[7];
 		vec = (word)((r->SEL0 & 0177400) | 0170);
-		r->r[7] = load_word(r, vec    ) & 0177776;
-		r->psw  = load_word(r, vec + 2);
+		r->r[7] = load_word_vector(r, vec    ) & 0177776;
+		r->psw  = load_word_vector(r, vec + 2);
 	} else if (r->model == DCJ11) {
 		pushw(r->psw);
 		pushw(r->r[7]);
@@ -210,15 +777,15 @@ static INLINE void handle_halt(regs *r)
 		if (flag_is_set(FLAG_H)) {
 			vec |= (r->SEL0 & 0177400);
 		}
-		r->r[7] = load_word(r, vec    ) & 0177776;
+		r->r[7] = load_word_vector(r, vec    ) & 0177776;
 		r->psw  = 0340;
 	} else {
 		store_word(r, 0177676, r->psw);
 		store_word(r, 0177674, r->r[7]);
 		store_word(r, 0177716, load_word(r, 0177716) | 010);
 		vec = (r->SEL0 & 0177400);
-		r->r[7] = load_word(r, vec + 2) & 0177776;
-		r->psw  = load_word(r, vec + 4);
+		r->r[7] = load_word_vector(r, vec + 2) & 0177776;
+		r->psw  = load_word_vector(r, vec + 4);
 	}
 }
 
@@ -232,21 +799,23 @@ static INLINE void handle_fis(regs *r)
 	r->cps = r->psw;
 	r->cpc = r->r[7];
 	vec = (word)((r->SEL0 & 0177400) | 010);
-	r->r[7] = load_word(r, vec    ) & 0177776;
-	r->psw  = load_word(r, vec + 2);
+	r->r[7] = load_word_vector(r, vec    ) & 0177776;
+	r->psw  = load_word_vector(r, vec + 2);
 }
 
 static INLINE void handle_fis_error(regs *r)
 {
 	pushw(r->psw);
 	pushw(r->r[7]);
-	r->r[7] = load_word(r, 0244);
-	r->psw  = load_word(r, 0246);
+	r->r[7] = load_word_vector(r, 0244);
+	r->psw  = load_word_vector(r, 0246);
 }
 
 static INLINE byte get_data_byte(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {
 		return r->r[offset] & 0377;
+	} else if (type == TYPE_IFETCH) {
+		return core_load_byte_ex(r, offset, 1, 0);
 	} else {
 		return load_byte(r, offset);
 	}
@@ -271,6 +840,8 @@ static INLINE void put_data_byte_movb(regs *r, byte type, word offset, byte valu
 static INLINE word get_data_word(regs *r, byte type, word offset) {
 	if (type == TYPE_REG) {
 		return r->r[offset];
+	} else if (type == TYPE_IFETCH) {
+		return load_word_ifetch(r, offset);
 	} else {
 		return load_word(r, offset);
 	}
@@ -322,9 +893,16 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type, word *offset)
     case 2: /* (Rn)+ */
     	*offset = r->r[reg];
     	r->r[reg] += step;
+    	if (reg == 7) {
+    		return TYPE_IFETCH;
+    	}
     	return TYPE_MEM;
     case 3: /* @(Rn)+ */
-    	*offset = load_word(r, r->r[reg]);
+    	if (reg == 7) {
+    		*offset = load_word_ifetch(r, r->r[reg]);
+    	} else {
+    		*offset = load_word(r, r->r[reg]);
+    	}
     	if (r->fAbort) {
     		return TYPE_ERROR;
     	}
@@ -342,7 +920,7 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type, word *offset)
     	}
     	return TYPE_MEM;
     case 6: /* X(Rn) */ {
-    	word tmp = load_word(r, r->r[7]);
+    	word tmp = load_word_ifetch(r, r->r[7]);
     	if (r->fAbort) {
     		return TYPE_ERROR;
     	}
@@ -351,7 +929,7 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type, word *offset)
     	}
     	return TYPE_MEM;
     case 7: /* @X(Rn) */ {
-    	word tmp = load_word(r, r->r[7]);
+    	word tmp = load_word_ifetch(r, r->r[7]);
     	if (r->fAbort) {
     		return TYPE_ERROR;
     	}
@@ -410,8 +988,8 @@ int core_step(regs *r)
                 r->fWait = 0;
                 pushw(r->psw);
                 pushw(r->r[7]);
-                r->r[7] = load_word(r, vec);
-                r->psw  = load_word(r, (word)(vec + 2));
+                r->r[7] = load_word_vector(r, vec);
+                r->psw  = load_word_vector(r, (word)(vec + 2));
             }
             return 0;
         }
@@ -423,7 +1001,7 @@ int core_step(regs *r)
 
     // load instruction
 
-	word op = load_word(r, r->r[7]);
+	word op = load_word_ifetch(r, r->r[7]);
 	if (r->fAbort) {
 		r->fAbort = 0;
         return 0;
@@ -448,8 +1026,8 @@ int core_step(regs *r)
 			if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
 				pushw(r->psw);
 				pushw(r->r[7]);
-				r->r[7] = load_word(r, 000004);
-				r->psw  = load_word(r, 000006);
+				r->r[7] = load_word_vector(r, 000004);
+				r->psw  = load_word_vector(r, 000006);
 				goto step_end;
 			}
 			handle_halt(r);
@@ -480,15 +1058,15 @@ int core_step(regs *r)
 		case 000003: /* BPT */
 			pushw(r->psw);
 			pushw(r->r[7]);
-			r->r[7] = load_word(r, 014);
-			r->psw  = load_word(r, 016);
+			r->r[7] = load_word_vector(r, 014);
+			r->psw  = load_word_vector(r, 016);
         goto step_end;
 
 		case 000004: /* IOT */
 			pushw(r->psw);
 			pushw(r->r[7]);
-			r->r[7] = load_word(r, 020);
-			r->psw  = load_word(r, 022);
+			r->r[7] = load_word_vector(r, 020);
+			r->psw  = load_word_vector(r, 022);
         goto step_end;
 
 		case 000005: /* RESET */
@@ -587,8 +1165,8 @@ int core_step(regs *r)
                     if (irq_accept(r, irq_vector, &vec)) {
                         pushw(r->psw);
                         pushw(r->r[7]);
-                        r->r[7] = load_word(r, vec);
-                        r->psw  = load_word(r, (word)(vec + 2));
+                        r->r[7] = load_word_vector(r, vec);
+                        r->psw  = load_word_vector(r, (word)(vec + 2));
                     }
                 }
             }
@@ -793,8 +1371,8 @@ int core_step(regs *r)
 			word vec = (op & 0400) ? 000034 : 000030;
 			pushw(r->psw);
 			pushw(r->r[7]);
-			r->r[7] = load_word(r, vec);
-			r->psw  = load_word(r, (word)(vec + 2));
+			r->r[7] = load_word_vector(r, vec);
+			r->psw  = load_word_vector(r, (word)(vec + 2));
 		}
         goto step_end;
     }
@@ -1664,8 +2242,8 @@ step_end:
     if (do_trace) {
         pushw(r->psw);
         pushw(r->r[7]);
-        r->r[7] = load_word(r, 014);
-        r->psw  = load_word(r, 016);
+        r->r[7] = load_word_vector(r, 014);
+        r->psw  = load_word_vector(r, 016);
     }
     if (!do_trace) {
         if (r->model == K1801VM1G && r->TVE_PENDING && (r->TVE_CSR & 000004)) {
@@ -1673,8 +2251,8 @@ step_end:
                 r->TVE_PENDING = 0;
                 pushw(r->psw);
                 pushw(r->r[7]);
-                r->r[7] = load_word(r, 000270);
-                r->psw  = load_word(r, 000272);
+                r->r[7] = load_word_vector(r, 000270);
+                r->psw  = load_word_vector(r, 000272);
                 return 0;
             }
         }
@@ -1684,8 +2262,8 @@ step_end:
                 if (irq_accept(r, irq_vector, &vec)) {
                     pushw(r->psw);
                     pushw(r->r[7]);
-                    r->r[7] = load_word(r, vec);
-                    r->psw  = load_word(r, (word)(vec + 2));
+                    r->r[7] = load_word_vector(r, vec);
+                    r->psw  = load_word_vector(r, (word)(vec + 2));
                 }
             }
         }
