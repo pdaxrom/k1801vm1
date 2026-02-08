@@ -880,7 +880,7 @@ int core_step(regs *r)
 		case 01051: /* COMB */ {
 			DECODE_DSTB();
 			GET_BYTE(tmp);
-			tmp = ~tmp;
+			tmp = (~tmp) & 0377;
 			PUT_BYTE(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
@@ -903,7 +903,7 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			set_flag_if(tmp == MPI_B, FLAG_V);
-			tmp++;
+			tmp = (tmp + 1) & 0377;
 			PUT_BYTE(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
@@ -924,7 +924,7 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			set_flag_if(tmp == MNI_B, FLAG_V);
-			tmp--;
+			tmp = (tmp - 1) & 0377;
 			PUT_BYTE(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
@@ -945,7 +945,7 @@ int core_step(regs *r)
 		case 01054: /* NEGB */ {
 			DECODE_DSTB();
 			GET_BYTE(tmp);
-			tmp = (NEG_1_B - tmp) + 1;
+			tmp = ((NEG_1_B - tmp) + 1) & 0377;
 			PUT_BYTE(tmp);
 			set_flag_if(tmp == 0,     FLAG_Z);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
@@ -1009,7 +1009,7 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			set_flag_if(tmp & SIGN_B, FLAG_C);
-			tmp = tmp << 1;
+			tmp = (tmp << 1) & 0377;
 			PUT_BYTE(tmp);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
 			set_flag_if(tmp == 0,     FLAG_Z);
@@ -1067,10 +1067,11 @@ int core_step(regs *r)
 			DECODE_DSTB();
 			GET_BYTE(tmp);
 			byte tmp_c = tmp & SIGN_B;
-			tmp = tmp << 1;
+			tmp = (tmp << 1) & 0377;
 			if (flag_is_set(FLAG_C)) {
 				tmp |= 1;
 			}
+			tmp &= 0377;
 			PUT_BYTE(tmp);
 			set_flag_if(tmp_c,        FLAG_C);
 			set_flag_if(tmp & SIGN_B, FLAG_N);
@@ -1099,7 +1100,7 @@ int core_step(regs *r)
 			set_flag_if((tmp == MPI_B) && flag_is_set(FLAG_C), FLAG_V);
 			byte tmp_c = (tmp == NEG_1_B) && flag_is_set(FLAG_C);
 			if (flag_is_set(FLAG_C)) {
-				tmp = tmp + 1;
+				tmp = (tmp + 1) & 0377;
 			}
 			PUT_BYTE(tmp);
 			set_flag_if(tmp_c,        FLAG_C);
@@ -1130,7 +1131,7 @@ int core_step(regs *r)
 			byte flag_c = flag_is_set(FLAG_C);
 			byte tmp_c = flag_c && (tmp == 0);
 			if (flag_c) {
-				tmp = tmp - 1;
+				tmp = (tmp - 1) & 0377;
 			}
 			PUT_BYTE(tmp);
 			set_flag_if(tmp_c,        FLAG_C);

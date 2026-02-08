@@ -2567,7 +2567,7 @@ static int test_single_operand_byte_ops_model(byte model, const char *name)
     write_op(&fx, op_incb(operand(0, 0)));
     ASSERT_EQ(core_step(&fx.r), 0, "INCB");
     ASSERT_EQ(fx.r.r[0], 0123400, "INCB should increment low byte");
-    expect_flags(&fx.r, 0, 0, 0, -1);
+    expect_flags(&fx.r, 0, 1, 0, -1);
 
     set_test_name(namebuf, sizeof(namebuf), "decb", name);
     fx.r.r[0] = 0124200;
@@ -2605,7 +2605,7 @@ static int test_single_operand_byte_ops_model(byte model, const char *name)
     write_op(&fx, op_aslb(operand(0, 0)));
     ASSERT_EQ(core_step(&fx.r), 0, "ASLB");
     ASSERT_EQ(fx.r.r[0] & 0377, 0, "ASLB should shift");
-    expect_flags(&fx.r, 0, 0, 1, 1);
+    expect_flags(&fx.r, 0, 1, 1, 1);
 
     set_test_name(namebuf, sizeof(namebuf), "rorb", name);
     fx.r.r[0] = 0000001;
@@ -2629,7 +2629,7 @@ static int test_single_operand_byte_ops_model(byte model, const char *name)
     write_op(&fx, op_adcb(operand(0, 0)));
     ASSERT_EQ(core_step(&fx.r), 0, "ADCB");
     ASSERT_EQ(fx.r.r[0] & 0377, 0, "ADCB should add carry");
-    expect_flags(&fx.r, 0, 0, 0, 1);
+    expect_flags(&fx.r, 0, 1, 0, 1);
 
     set_test_name(namebuf, sizeof(namebuf), "sbcb", name);
     fx.r.r[0] = 0000000;
