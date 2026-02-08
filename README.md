@@ -55,7 +55,9 @@ N/Z/V/C, T, and priority bits: **PASS / FIXED**
 - Priority masking verified by DCJ11 IRQ tests.
 
 Mode bits: **LIMITED**
-- No user/kernel memory spaces or MMU; PSW mode bits do not affect memory access.
+- With `ENABLE_MMU=0` (default), memory is identity-mapped and mode bits do not
+  affect address translation.
+- With `ENABLE_MMU=1`, mode bits select Kernel/Supervisor/User PAR/PDR sets.
 
 References: J‑11 Programmer’s Reference (PSW and trap/interrupt behavior).
 
@@ -183,11 +185,12 @@ References: `doc/1801vm.txt`, `doc/KM1801VM2.pdf`.
 ## 10. Differences vs K1801VM2 (Summary)
 
 Key differences (within scope):
-- No MMU or separate user/kernel memory space in this core
+- MMU is compile-time optional (`ENABLE_MMU`, default off)
 - HALT/SEL vectoring follows implemented DCJ11 rules (SEL0)
 
 Impact:
-- Supervisor/user address space distinctions are not enforced.
+- With default build (`ENABLE_MMU=0`), supervisor/user memory distinctions are not enforced.
+- With MMU build (`ENABLE_MMU=1`), K/S/U relocation/protection and split I/D are enforced.
 
 References: `doc/KM1801VM2.pdf`.
 
@@ -356,11 +359,20 @@ Run:
 make test
 ```
 
+MMU test matrix:
+```
+make test-matrix
+```
+
 ---
 
 ## 16. Known Limitations
 
-- No MMU or separate user/kernel spaces.
+- Physical memory backing in the default hardware stub is 16-bit (64KB). MMU PAR/PDR
+  translation is implemented, but 22-bit physical extensions are stored-only in control
+  registers and are not backed by a >64KB RAM model in this core test harness.
+- `SSR1` is implemented as a simplified fault context latch (fault VA), not a complete
+  per-microstep register modification log.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
 - Device interrupt arbitration is outside the core (handled by machine layer).
 
@@ -370,7 +382,48 @@ make test
 
 Overall DCJ11 compliance status: **MOSTLY COMPLIANT** for CPU‑level semantics.
 Core behavior matches documented trap/interrupt rules and tested instruction
-semantics, with explicit limitations around MMU and device‑level bus signaling.
+semantics, includes optional MMU support behind `ENABLE_MMU`, with explicit
+limitations around 22-bit physical memory modeling and device‑level bus signaling.
+
+---
+
+## 18. DCJ11 MMU (ENABLE_MMU)
+
+Build-time switch:
+- `ENABLE_MMU=0` (default): MMU translation disabled, no MMU faults.
+- `ENABLE_MMU=1`: MMU logic compiled in; runtime enable via `SSR0` bit 0.
+
+Implemented register map (OCTAL):
+- `SSR0..SSR3`: `177572`, `177574`, `177576`, `177516`
+- Supervisor PAR/PDR: `172200..172276`
+- Kernel PAR/PDR: `172300..172376`
+- User PAR/PDR: `177600..177676`
+
+Supported MMU behavior (`ENABLE_MMU=1`):
+- K/S/U mode selection from PSW.
+- 8 segments per space, PAR/PDR relocation.
+- Split I/D per mode via `SSR3` bits `KD/SD/UD`.
+- Instruction fetch in I-space, data in D-space when split enabled.
+- Trap/interrupt vector fetch forced through Kernel D-space.
+- Fault classes: non-resident, length, write-protect; trap vector `000250`.
+- `SSR0` fault latch + runtime enable bit, `SSR2` fault PC, `SSR1` simplified VA latch.
+
+`ENABLE_MMU=0` policy:
+- MMU registers are present for DCJ11 accesses, read as `0`, writes ignored.
+
+MMU compliance table:
+
+| Feature | Implemented | Notes |
+|--------|-------------|-------|
+| Compile-time MMU switch (`ENABLE_MMU`) | YES | Default off |
+| Runtime MMU enable (`SSR0` bit 0) | YES | Translation active only when set |
+| K/S/U PAR/PDR translation | YES | Mode 2 treated as kernel |
+| Split I/D (`SSR3 KD/SD/UD`) | YES | Per mode |
+| MMU fault trap (`000250`) | YES | Instruction aborted |
+| Vector fetch via Kernel D-space | YES | Applied to traps/IRQs |
+| `SSR0/SSR2` fault state | YES | First-fault latch behavior |
+| `SSR1` restart log | PARTIAL | Stores fault VA only |
+| 22-bit physical memory backing | NO | Control bits stored; core RAM is 64KB |
 
 ---
 
