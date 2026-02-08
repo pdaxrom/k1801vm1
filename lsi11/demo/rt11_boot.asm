@@ -66,6 +66,6 @@ print_done:
         rts     pc
 
 msg_banner:
-        DB      "RT11 BOOT\r\n", 0
+        DB      "RK11 BOOT\r\n", 0
 msg_fail:
         DB      "RK11 BOOT FAIL\r\n", 0
