@@ -55,7 +55,8 @@ static void usage(const char *argv0) {
           "  -trace          Trace each instruction\n"
           "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
-          "  -tracenxm       Trace NXM traps\n",
+          "  -tracenxm       Trace NXM traps\n"
+          "  -exit-on-abort  Exit emulator on HALT/abort\n",
           argv0);
   fprintf(stderr,
           "  -load <file>    Load binary file into RAM\n"
@@ -75,6 +76,7 @@ int main(int argc, char **argv) {
   byte cpu_model = DCJ11;
   int trace = 0;
   int trace_regs = 0;
+  int exit_on_abort = 0;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
@@ -92,6 +94,8 @@ int main(int argc, char **argv) {
     } else if (!strcmp(argv[i], "-trace-regs")) {
       trace = 1;
       trace_regs = 1;
+    } else if (!strcmp(argv[i], "-exit-on-abort")) {
+      exit_on_abort = 1;
     } else if (!strcmp(argv[i], "-load") && i + 1 < argc) {
       load_path = argv[++i];
     } else if (!strcmp(argv[i], "-addr") && i + 1 < argc) {
@@ -258,9 +262,11 @@ int main(int argc, char **argv) {
     lsi11_poll_devices();
 
     if (r.fAbort) {
-      /* core set fAbort on traps/halt; decide how to handle */
-      /* For now: break */
-//      break;
+      if (exit_on_abort) {
+        break;
+      }
+      /* RT-11 and some monitor code may use HALT/abort vector path. */
+      r.fAbort = 0;
     }
   }
 
