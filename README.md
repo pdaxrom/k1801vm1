@@ -363,14 +363,17 @@ MMU test matrix:
 ```
 make test-matrix
 ```
+Includes MMU-on tests for register decode, faults, split I/D and 22-bit physical
+memory fetch/store paths.
 
 ---
 
 ## 16. Known Limitations
 
-- Physical memory backing in the default hardware stub is 16-bit (64KB). MMU PAR/PDR
-  translation is implemented, but 22-bit physical extensions are stored-only in control
-  registers and are not backed by a >64KB RAM model in this core test harness.
+- With `ENABLE_MMU=1`, core hardware stub provides 22-bit physical backing
+  memory (4MB) so MMU translation above `0177777` is testable in unit tests.
+- With `ENABLE_MMU=0`, hardware stub uses legacy 64KB memory backing.
+- Machine-specific frontends may still provide their own bus/memory limits.
 - `SSR1` is implemented as a simplified fault context latch (fault VA), not a complete
   per-microstep register modification log.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
@@ -423,7 +426,7 @@ MMU compliance table:
 | Vector fetch via Kernel D-space | YES | Applied to traps/IRQs |
 | `SSR0/SSR2` fault state | YES | First-fault latch behavior |
 | `SSR1` restart log | PARTIAL | Stores fault VA only |
-| 22-bit physical memory backing | NO | Control bits stored; core RAM is 64KB |
+| 22-bit physical memory backing | YES | Core hwstub provides 4MB physical RAM |
 
 ---
 

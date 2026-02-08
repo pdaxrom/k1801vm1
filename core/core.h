@@ -119,6 +119,15 @@ typedef struct _regs {
     word (* load_word)	(struct _regs *r, word offset);
     void (* store_word)	(struct _regs *r, word offset, word value);
 
+    /*
+     * Optional physical-address callbacks (22-bit capable).
+     * When NULL, core falls back to 16-bit callbacks.
+     */
+    byte (* load_byte_pa)	(struct _regs *r, dword offset);
+    void (* store_byte_pa)	(struct _regs *r, dword offset, byte value);
+    word (* load_word_pa)	(struct _regs *r, dword offset);
+    void (* store_word_pa)	(struct _regs *r, dword offset, word value);
+
     int  (* init)		(struct _regs *r);
     void (* reset)		(struct _regs *r);
     void (* fini)		(struct _regs *r);

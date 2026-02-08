@@ -71,6 +71,23 @@ static INLINE word mmu_phys_read_word(const mmu_fixture *fx, word pa)
     return (word)(fx->mem[pa] | ((word)fx->mem[(word)(pa + 1)] << 8));
 }
 
+static INLINE void mmu_phys22_write_word(mmu_fixture *fx, dword pa, word value)
+{
+    if (fx->r.store_word_pa) {
+        fx->r.store_word_pa(&fx->r, pa, value);
+        return;
+    }
+    mmu_phys_write_word(fx, (word)pa, value);
+}
+
+static INLINE word mmu_phys22_read_word(const mmu_fixture *fx, dword pa)
+{
+    if (fx->r.load_word_pa) {
+        return fx->r.load_word_pa((regs *)&fx->r, pa);
+    }
+    return mmu_phys_read_word(fx, (word)pa);
+}
+
 static INLINE word mmu_operand(byte mode, byte reg)
 {
     return (((word)mode) << 3) | (reg & 07);

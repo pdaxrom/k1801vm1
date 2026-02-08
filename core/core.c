@@ -151,6 +151,58 @@ void core_fini(regs *r)
 #define raw_load_word(a, b)  (((a)->load_word)((a), (b)))
 #define raw_store_word(a, b, c) (((a)->store_word)((a), (b), (c)))
 
+static INLINE byte raw_load_byte_phys(regs *r, dword pa)
+{
+	/*
+	 * Keep legacy 16-bit path for low addresses so existing
+	 * memory-mapped register decode remains intact.
+	 */
+	if (pa <= 0177777) {
+		return raw_load_byte(r, (word)pa);
+	}
+	if (r->load_byte_pa) {
+		return r->load_byte_pa(r, pa);
+	}
+	return raw_load_byte(r, (word)pa);
+}
+
+static INLINE void raw_store_byte_phys(regs *r, dword pa, byte value)
+{
+	if (pa <= 0177777) {
+		raw_store_byte(r, (word)pa, value);
+		return;
+	}
+	if (r->store_byte_pa) {
+		r->store_byte_pa(r, pa, value);
+		return;
+	}
+	raw_store_byte(r, (word)pa, value);
+}
+
+static INLINE word raw_load_word_phys(regs *r, dword pa)
+{
+	if (pa <= 0177777) {
+		return raw_load_word(r, (word)pa);
+	}
+	if (r->load_word_pa) {
+		return r->load_word_pa(r, pa);
+	}
+	return raw_load_word(r, (word)pa);
+}
+
+static INLINE void raw_store_word_phys(regs *r, dword pa, word value)
+{
+	if (pa <= 0177777) {
+		raw_store_word(r, (word)pa, value);
+		return;
+	}
+	if (r->store_word_pa) {
+		r->store_word_pa(r, pa, value);
+		return;
+	}
+	raw_store_word(r, (word)pa, value);
+}
+
 enum {
 	MMU_FAULT_NONE = 0,
 	MMU_FAULT_NONRES = 1,
@@ -579,7 +631,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch, int fo
 		return 0;
 	}
 
-	return raw_load_byte(r, (word)pa);
+	return raw_load_byte_phys(r, pa);
 }
 
 static INLINE void core_store_byte_ex(regs *r, word offset, byte value, int force_kernel_d)
@@ -610,7 +662,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value, int forc
 		return;
 	}
 
-	raw_store_byte(r, (word)pa, value);
+	raw_store_byte_phys(r, pa, value);
 }
 
 static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch, int force_kernel_d)
@@ -647,7 +699,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch, int fo
 		return 0;
 	}
 
-	return raw_load_word(r, (word)pa);
+	return raw_load_word_phys(r, pa);
 }
 
 static INLINE void core_store_word_ex(regs *r, word offset, word value, int force_kernel_d)
@@ -683,7 +735,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value, int forc
 		return;
 	}
 
-	raw_store_word(r, (word)pa, value);
+	raw_store_word_phys(r, pa, value);
 }
 
 static INLINE byte core_load_byte(regs *r, word offset)
