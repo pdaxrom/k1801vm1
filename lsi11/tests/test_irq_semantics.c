@@ -237,8 +237,14 @@ static void test_rk11(regs *r) {
 
 int main(void) {
   regs r;
+  char err[128];
   memset(&r, 0, sizeof(r));
 
+  bus_reset_config();
+  if (bus_configure(BUS_MACHINE_LSI11_1104, 0, err, sizeof(err)) != 0) {
+    fprintf(stderr, "FAIL: bus_configure: %s\n", err);
+    return 1;
+  }
   bus_init();
 
   /* init devices (register IO + irq sources) */

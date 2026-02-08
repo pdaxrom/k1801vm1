@@ -40,9 +40,18 @@ static int parse_cpu_model(const char *name, byte *model) {
 }
 
 static void usage(const char *argv0) {
+#if defined(LSI11_TARGET_1134)
+  const char *target = "pdp1134";
+#else
+  const char *target = "lsi11";
+#endif
+
   fprintf(stderr,
           "Usage:\n"
           "  %s -rk <rk05.img> [-bootcopy|-bootrt11] [-cpu <model>]\n"
+          "\n"
+          "Target profile:\n"
+          "  %s\n"
           "\n"
           "Options:\n"
           "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
@@ -56,13 +65,22 @@ static void usage(const char *argv0) {
           "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
           "  -tracenxm       Trace NXM traps\n"
-          "  -exit-on-abort  Exit emulator on HALT/abort\n",
-          argv0);
+          "  -exit-on-abort  Exit emulator on HALT/abort\n"
+          "  -check-config   Validate machine config and exit\n",
+          argv0, target);
   fprintf(stderr,
           "  -load <file>    Load binary file into RAM\n"
           "  -addr <oct>     Load address (octal) for -load (default 0)\n"
           "  -pc <oct>       Set initial PC (R7) to octal address\n"
-          "  -sr <oct>       Set SR switch register (0177570) value\n");
+          "  -sr <oct>       Set SR switch register (0177570) value\n"
+#if defined(LSI11_TARGET_1134)
+          "  -ram <kb>       RAM size in KB (default 4096, must be multiple of 8)\n"
+          "  -dl11-alias     Enable DL11 alias 0176500..0176507\n"
+          "  -no-dl11-alias  Disable DL11 alias 0176500..0176507 (default)\n");
+#else
+          "  -dl11-alias     Keep DL11 alias enabled (default)\n"
+          "  -no-dl11-alias  Disable DL11 alias (non-standard for this target)\n");
+#endif
 }
 
 int main(int argc, char **argv) {
@@ -73,10 +91,20 @@ int main(int argc, char **argv) {
   long load_addr = 0;
   long start_pc = -1;
   long sr_value = -1;
+  long ram_kb_arg = -1;
+  int force_dl11_alias = -1;
   byte cpu_model = DCJ11;
   int trace = 0;
   int trace_regs = 0;
   int exit_on_abort = 0;
+  int check_config_only = 0;
+  char cfg_err[160] = {0};
+
+#if defined(LSI11_TARGET_1134)
+  const lsi11_machine_t machine_kind = LSI11_MACHINE_1134;
+#else
+  const lsi11_machine_t machine_kind = LSI11_MACHINE_1104;
+#endif
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
@@ -96,6 +124,8 @@ int main(int argc, char **argv) {
       trace_regs = 1;
     } else if (!strcmp(argv[i], "-exit-on-abort")) {
       exit_on_abort = 1;
+    } else if (!strcmp(argv[i], "-check-config")) {
+      check_config_only = 1;
     } else if (!strcmp(argv[i], "-load") && i + 1 < argc) {
       load_path = argv[++i];
     } else if (!strcmp(argv[i], "-addr") && i + 1 < argc) {
@@ -104,6 +134,12 @@ int main(int argc, char **argv) {
       start_pc = strtol(argv[++i], NULL, 8);
     } else if (!strcmp(argv[i], "-sr") && i + 1 < argc) {
       sr_value = strtol(argv[++i], NULL, 8);
+    } else if (!strcmp(argv[i], "-ram") && i + 1 < argc) {
+      ram_kb_arg = strtol(argv[++i], NULL, 10);
+    } else if (!strcmp(argv[i], "-dl11-alias")) {
+      force_dl11_alias = 1;
+    } else if (!strcmp(argv[i], "-no-dl11-alias")) {
+      force_dl11_alias = 0;
     } else if (!strcmp(argv[i], "-cpu") && i + 1 < argc) {
       if (parse_cpu_model(argv[++i], &cpu_model) != 0) {
         fprintf(stderr, "Unknown CPU model: %s\n", argv[i]);
@@ -114,6 +150,35 @@ int main(int argc, char **argv) {
       usage(argv[0]);
       return 2;
     }
+  }
+
+#if !defined(LSI11_TARGET_1134)
+  if (ram_kb_arg >= 0) {
+    fprintf(stderr,
+            "This lsi11 target is fixed 56KB RAM; -ram is not supported.\n");
+    return 2;
+  }
+#endif
+
+  if (ram_kb_arg < 0) {
+    ram_kb_arg = 0;
+  }
+
+  if (lsi11_machine_configure(machine_kind, (uint32_t)ram_kb_arg, cfg_err,
+                              sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Machine configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (force_dl11_alias >= 0) {
+    lsi11_set_dl11_alias(force_dl11_alias);
+  }
+
+  if (check_config_only) {
+    const char *m = (lsi11_machine_current() == LSI11_MACHINE_1134) ? "pdp1134"
+                                                                     : "lsi11";
+    fprintf(stderr, "CONFIG machine=%s ram_kb=%u dl11_alias=%d\n", m,
+            lsi11_machine_ram_kb(), lsi11_dl11_alias());
+    return 0;
   }
 
   regs r;
@@ -147,7 +212,13 @@ int main(int argc, char **argv) {
     /* Copy first 010000 bytes (4 KB) into RAM[000000..007777] by default.
        Adjust if your bootstrap needs a different size. */
     const size_t n = 010000;
-    if (rk11_boot_copy(&ram[0], n) != 0) {
+    uint8_t *ram0 = bus_ram_ptr(0);
+    if (!ram0 || !bus_range_is_ram(0, n)) {
+      fprintf(stderr, "bootcopy destination is outside RAM\n");
+      r.fini(&r);
+      return 1;
+    }
+    if (rk11_boot_copy(ram0, n) != 0) {
       fprintf(stderr, "rk11_boot_copy failed (need -rk <image>)\n");
       r.fini(&r);
       return 1;
@@ -191,7 +262,15 @@ int main(int argc, char **argv) {
       r.fini(&r);
       return 1;
     }
-    memcpy(&ram[0], buf, n);
+    {
+      uint8_t *ram0 = bus_ram_ptr(0);
+      if (!ram0 || !bus_range_is_ram(0, n)) {
+        fprintf(stderr, "bootrt11 destination is outside RAM\n");
+        r.fini(&r);
+        return 1;
+      }
+      memcpy(ram0, buf, n);
+    }
     r.r[7] = 000000;
   }
 
@@ -212,18 +291,28 @@ int main(int argc, char **argv) {
     long fsize = ftell(fload);
     fseek(fload, 0, SEEK_SET);
 
-    if (load_addr < 0 || load_addr + fsize > 0200000) {
-      fprintf(stderr, "Load address/size out of RAM bounds (max 0200000)\n");
+    if (load_addr < 0 || fsize < 0 ||
+        !bus_range_is_ram((paddr_t)load_addr, (size_t)fsize)) {
+      fprintf(stderr, "Load address/size out of RAM bounds\n");
       fclose(fload);
       r.fini(&r);
       return 1;
     }
 
-    if (fread(&ram[load_addr], 1, fsize, fload) != (size_t)fsize) {
-      fprintf(stderr, "Read failed: %s\n", load_path);
-      fclose(fload);
-      r.fini(&r);
-      return 1;
+    {
+      uint8_t *dst = bus_ram_ptr((paddr_t)load_addr);
+      if (!dst) {
+        fprintf(stderr, "Load destination is outside RAM\n");
+        fclose(fload);
+        r.fini(&r);
+        return 1;
+      }
+      if (fread(dst, 1, fsize, fload) != (size_t)fsize) {
+        fprintf(stderr, "Read failed: %s\n", load_path);
+        fclose(fload);
+        r.fini(&r);
+        return 1;
+      }
     }
     fclose(fload);
     fprintf(stderr, "Loaded %ld bytes from %s to octal %lo\n", fsize, load_path,

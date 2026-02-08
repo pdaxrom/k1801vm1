@@ -13,6 +13,7 @@
 #include "util_term.h"
 
 #include <stdio.h>
+#include <string.h>
 
 /* ---- core integration ----
    You must include the correct core header(s) here.
@@ -31,12 +32,52 @@ typedef uint8_t byte;
 
 static int trace_irq_flag = 0;
 static int trace_nxm_flag = 0;
+static lsi11_machine_t machine_profile = LSI11_MACHINE_1104;
+static uint32_t machine_ram_kb = 56;
+static int dl11_alias_on = 1;
+
+int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
+                            size_t err_len) {
+  int rc;
+
+  if (machine == LSI11_MACHINE_1104) {
+    rc = bus_configure(BUS_MACHINE_LSI11_1104, 0, err, err_len);
+    if (rc != 0)
+      return rc;
+    machine_profile = LSI11_MACHINE_1104;
+    machine_ram_kb = bus_ram_kb();
+    dl11_alias_on = 1;
+    return 0;
+  }
+
+  if (machine == LSI11_MACHINE_1134) {
+    rc = bus_configure(BUS_MACHINE_PDP1134, ram_kb, err, err_len);
+    if (rc != 0)
+      return rc;
+    machine_profile = LSI11_MACHINE_1134;
+    machine_ram_kb = bus_ram_kb();
+    dl11_alias_on = 0;
+    return 0;
+  }
+
+  if (err && err_len)
+    snprintf(err, err_len, "Unknown machine profile");
+  return -1;
+}
+
+void lsi11_set_dl11_alias(int on) { dl11_alias_on = on ? 1 : 0; }
+
+int lsi11_dl11_alias(void) { return dl11_alias_on; }
+
+lsi11_machine_t lsi11_machine_current(void) { return machine_profile; }
+
+uint32_t lsi11_machine_ram_kb(void) { return machine_ram_kb; }
 
 /* ---------- NXM trap ----------
    This matches your previous approach: push PSW and PC, then vector through
    000004/000006. If your core already provides a bus error trap helper, use
    that instead. */
-static void nxm_trap(regs *r, word addr) {
+static void nxm_trap(regs *r, paddr_t addr) {
   (void)addr;
 
   /* Optional trace */
@@ -46,7 +87,8 @@ static void nxm_trap(regs *r, word addr) {
     char buf[128];
     word tmp = disas_pc;
     disas(r, &tmp, buf);
-    fprintf(stderr, "NXM at %06o PC=%06o IR=%06o %s\n", addr, disas_pc, r->ir,
+    fprintf(stderr, "NXM at %06o PC=%06o IR=%06o %s\n", (unsigned)addr,
+            disas_pc, r->ir,
             buf);
     fprintf(stderr,
             "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
@@ -75,7 +117,7 @@ static byte core_load_byte(regs *r, word addr) {
     return (byte)((addr & 1) ? ((r->psw >> 8) & 000377) : (r->psw & 000377));
   }
   if (bus_is_nxm((paddr_t)addr)) {
-    nxm_trap(r, addr);
+    nxm_trap(r, (paddr_t)addr);
     return 0;
   }
   return bus_read8((paddr_t)addr);
@@ -92,7 +134,7 @@ static void core_store_byte(regs *r, word addr, byte v) {
     return;
   }
   if (bus_is_nxm((paddr_t)addr)) {
-    nxm_trap(r, addr);
+    nxm_trap(r, (paddr_t)addr);
     return;
   }
   bus_write8((paddr_t)addr, v);
@@ -101,7 +143,7 @@ static void core_store_byte(regs *r, word addr, byte v) {
 static word core_load_word(regs *r, word addr) {
   if (addr == 0177776) return r->psw;
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
-    nxm_trap(r, addr);
+    nxm_trap(r, (paddr_t)addr);
     return 0;
   }
   return (word)bus_read16((paddr_t)addr);
@@ -113,7 +155,39 @@ static void core_store_word(regs *r, word addr, word v) {
     return;
   }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
-    nxm_trap(r, addr);
+    nxm_trap(r, (paddr_t)addr);
+    return;
+  }
+  bus_write16((paddr_t)addr, (uint16_t)v);
+}
+
+static byte core_load_byte_pa(regs *r, dword addr) {
+  if (bus_is_nxm((paddr_t)addr)) {
+    nxm_trap(r, (paddr_t)addr);
+    return 0;
+  }
+  return bus_read8((paddr_t)addr);
+}
+
+static void core_store_byte_pa(regs *r, dword addr, byte v) {
+  if (bus_is_nxm((paddr_t)addr)) {
+    nxm_trap(r, (paddr_t)addr);
+    return;
+  }
+  bus_write8((paddr_t)addr, v);
+}
+
+static word core_load_word_pa(regs *r, dword addr) {
+  if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
+    nxm_trap(r, (paddr_t)addr);
+    return 0;
+  }
+  return (word)bus_read16((paddr_t)addr);
+}
+
+static void core_store_word_pa(regs *r, dword addr, word v) {
+  if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
+    nxm_trap(r, (paddr_t)addr);
     return;
   }
   bus_write16((paddr_t)addr, (uint16_t)v);
@@ -124,6 +198,7 @@ static int impl_init(regs *r) {
   (void)r;
   /* init bus RAM; devices register their I/O in *_init() */
   bus_init();
+  dl11_set_alias(dl11_alias_on);
 
   /* init host terminal */
   util_term_init_raw();
@@ -180,7 +255,7 @@ static int core_poll_irq(regs *r, word *vec) {
    Only RAM 000000..0157777 is “real”, but backing array is 64K. */
 static uint8_t *core_ramptr(regs *r, word offset) {
   (void)r;
-  return &ram[offset];
+  return bus_ram_ptr((paddr_t)offset);
 }
 
 void lsi11_hw_connect(regs *r) {
@@ -188,6 +263,10 @@ void lsi11_hw_connect(regs *r) {
   r->store_byte = core_store_byte;
   r->load_word = core_load_word;
   r->store_word = core_store_word;
+  r->load_byte_pa = core_load_byte_pa;
+  r->store_byte_pa = core_store_byte_pa;
+  r->load_word_pa = core_load_word_pa;
+  r->store_word_pa = core_store_word_pa;
 
   r->init = impl_init;
   r->reset = impl_reset;

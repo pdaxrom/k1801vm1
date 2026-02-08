@@ -1,15 +1,19 @@
-# lsi11/Makefile — PDP-11/03-like emulator (plain make, with tests)
+# lsi11/Makefile — split machine targets:
+#   lsi11   : PDP-11/04-like, no MMU, fixed 56KB RAM + DL11 alias
+#   pdp1134 : PDP-11/34-like, MMU enabled, default 4096KB RAM
 
 CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra
 CPPFLAGS ?= -I. -I../core
 
-BIN := lsi11
+BUILD_DIR := .build
 
-#
-# ---------- Common (device/bus/irq) ----------
-# These are used by both the main binary and the tests.
-#
+BIN_LSI11 := lsi11
+BIN_PDP1134 := pdp1134
+
+CFG_LSI11 := -DENABLE_MMU=0 -DMMU_STUB_REGS_WHEN_DISABLED=0 -DLSI11_TARGET_1104=1
+CFG_PDP1134 := -DENABLE_MMU=1 -DLSI11_TARGET_1134=1
+
 COMMON_SRCS := \
   bus.c \
   devio.c \
@@ -21,72 +25,88 @@ COMMON_SRCS := \
   dev_lp11.c \
   dev_sr.c
 
-COMMON_OBJS := $(COMMON_SRCS:.c=.o)
-
-#
-# ---------- Main program ----------
-# Depends on core/, adapter_core, and main
-#
 MAIN_SRCS := \
   main.c \
   adapter_core.c
 
-MAIN_OBJS := $(MAIN_SRCS:.c=.o)
+COMMON_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/lsi11/,$(COMMON_SRCS:.c=.o))
+MAIN_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/lsi11/,$(MAIN_SRCS:.c=.o))
+CORE_OBJS_LSI11 := $(BUILD_DIR)/lsi11/core_core.o $(BUILD_DIR)/lsi11/core_hardware.o $(BUILD_DIR)/lsi11/core_disas.o
 
-#
-# ---------- Tests ----------
-#
+COMMON_OBJS_PDP1134 := $(addprefix $(BUILD_DIR)/pdp1134/,$(COMMON_SRCS:.c=.o))
+MAIN_OBJS_PDP1134 := $(addprefix $(BUILD_DIR)/pdp1134/,$(MAIN_SRCS:.c=.o))
+CORE_OBJS_PDP1134 := $(BUILD_DIR)/pdp1134/core_core.o $(BUILD_DIR)/pdp1134/core_hardware.o $(BUILD_DIR)/pdp1134/core_disas.o
+
 TEST_CFLAGS := $(CFLAGS) -DLSI11_TESTS=1
+TEST_COMMON_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/test-lsi11/,$(COMMON_SRCS:.c=.o))
 
-TESTS := \
+TESTS_LSI11 := \
   tests/test_bus_map \
   tests/test_irq_semantics
 
-#
-# ---------- Targets ----------
-#
-all: $(BIN)
+ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
 
-CORE_OBJS := ../core/core.o ../core/hardware.o ../core/disas.o
+all: $(BIN_LSI11) $(BIN_PDP1134)
 
-$(BIN): $(MAIN_OBJS) $(COMMON_OBJS) $(CORE_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(MAIN_OBJS) $(COMMON_OBJS) $(CORE_OBJS)
+$(BIN_LSI11): $(MAIN_OBJS_LSI11) $(COMMON_OBJS_LSI11) $(CORE_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
 
-#
-# ---------- Compile rules ----------
-#
-%.o: %.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+$(BIN_PDP1134): $(MAIN_OBJS_PDP1134) $(COMMON_OBJS_PDP1134) $(CORE_OBJS_PDP1134)
+	$(CC) $(CFLAGS) -o $@ $^
 
-tests/%.o: tests/%.c
-	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) -c -o $@ $<
+$(BUILD_DIR)/lsi11/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_LSI11) -c -o $@ $<
 
-#
-# ---------- Link tests ----------
-# NOTE: tests do NOT link adapter_core.o or main.o
-#
-TEST_COMMON_OBJS := $(addprefix tests/, $(COMMON_OBJS))
+$(BUILD_DIR)/pdp1134/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1134) -c -o $@ $<
 
-tests/%.o: %.c
-	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) -c -o $@ $<
+$(BUILD_DIR)/lsi11/core_%.o: ../core/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_LSI11) -c -o $@ $<
 
-tests/test_bus_map: tests/test_bus_map.o $(TEST_COMMON_OBJS)
-	$(CC) $(CFLAGS) -o $@ tests/test_bus_map.o $(TEST_COMMON_OBJS)
+$(BUILD_DIR)/pdp1134/core_%.o: ../core/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1134) -c -o $@ $<
 
-tests/test_irq_semantics: tests/test_irq_semantics.o $(TEST_COMMON_OBJS)
-	$(CC) $(CFLAGS) -o $@ tests/test_irq_semantics.o $(TEST_COMMON_OBJS)
+$(BUILD_DIR)/test-lsi11/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_LSI11) -c -o $@ $<
 
-test: $(TESTS)
+$(BUILD_DIR)/test-lsi11/tests/%.o: tests/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_LSI11) -c -o $@ $<
+
+tests/test_bus_map: $(BUILD_DIR)/test-lsi11/tests/test_bus_map.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
+tests/test_irq_semantics: $(BUILD_DIR)/test-lsi11/tests/test_irq_semantics.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
+test: test-lsi11
+
+test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	@echo "Running bus map test..."
 	./tests/test_bus_map
 	@echo "Running IRQ semantics test..."
 	./tests/test_irq_semantics
+	@echo "Running lsi11 profile config test..."
+	./tests/test_lsi11_config.sh ./$(BIN_LSI11)
+	@echo "LSI11 TESTS PASSED"
+
+test-pdp1134: $(BIN_PDP1134)
+	@echo "Running pdp1134 RAM/config tests..."
+	./tests/test_pdp1134_ram.sh ./$(BIN_PDP1134)
+	@echo "Running core MMU suite (ENABLE_MMU=1)..."
+	$(MAKE) -C .. clean
+	$(MAKE) -C .. CFLAGS="$(ROOT_MMU_CFLAGS)" test-mmu-on
+	@echo "PDP1134 TESTS PASSED"
+
+test-matrix: test-lsi11 test-pdp1134
 	@echo "ALL TESTS PASSED"
 
-#
-# ---------- Cleanup ----------
-#
 clean:
-	rm -f $(BIN) *.o tests/*.o $(TESTS)
+	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1134) $(TESTS_LSI11)
 
-.PHONY: all test clean
+.PHONY: all test test-lsi11 test-pdp1134 test-matrix clean

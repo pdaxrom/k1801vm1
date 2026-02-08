@@ -10,6 +10,10 @@
 #include "core.h"
 #include "hardware.h"
 
+#ifndef MMU_STUB_REGS_WHEN_DISABLED
+#define MMU_STUB_REGS_WHEN_DISABLED 1
+#endif
+
 #define TYPE_WORD	0
 #define TYPE_BYTE	1
 
@@ -288,6 +292,12 @@ static INLINE int mmu_is_reg_address(word addr)
 	int mode, space, is_par, seg;
 	word a = (word)(addr & 0177776);
 
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+#if !(MMU_STUB_REGS_WHEN_DISABLED)
+	return 0;
+#endif
+#endif
+
 	if (a == MMU_SSR0 || a == MMU_SSR1 || a == MMU_SSR2 || a == MMU_SSR3) {
 		return 1;
 	}
@@ -298,6 +308,15 @@ static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
 {
 	int mode, space, is_par, seg;
 	word a = (word)(addr & 0177776);
+
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+#if !(MMU_STUB_REGS_WHEN_DISABLED)
+	(void)r;
+	(void)addr;
+	(void)value_out;
+	return 0;
+#endif
+#endif
 
 	if (r->model != DCJ11) {
 		return 0;
@@ -351,6 +370,15 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
 {
 	int mode, space, is_par, seg;
 	word a = (word)(addr & 0177776);
+
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+#if !(MMU_STUB_REGS_WHEN_DISABLED)
+	(void)r;
+	(void)addr;
+	(void)value;
+	return 0;
+#endif
+#endif
 
 	if (r->model != DCJ11) {
 		return 0;

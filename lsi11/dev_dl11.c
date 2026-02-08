@@ -24,6 +24,7 @@ static irq_latch_t tx_l;
 static uint8_t rx_buf = 0;
 static uint64_t tx_ready_ns = 0;
 static int tx_busy = 0;
+static int dl11_alias_enabled = 1;
 
 static uint64_t now_ns(void)
 {
@@ -107,8 +108,14 @@ static void dl11_write8(uint16_t a, uint8_t v)
         util_term_putc((char)v);
 
         /* transmitter becomes ready later -> DONE=1 */
+#if (DL11_TX_CHAR_NS == 0ull)
+        irq_latch_event_set_done(&tx_l);
+        tx_busy = 0;
+        tx_ready_ns = 0;
+#else
         tx_busy = 1;
         tx_ready_ns = now_ns() + DL11_TX_CHAR_NS;
+#endif
         return;
     default:
         return;
@@ -124,12 +131,12 @@ void dl11_tx_irq_ack(void) { irq_latch_ack(&tx_l); }
 
 int dl11_init(void)
 {
-    /* Register BOTH ranges to same callbacks (aliasing) */
+    /* Register primary range and optional alias. */
     static const io_range_t primary = { 0177560, 0177567, dl11_read8, dl11_write8, "DL11(primary)" };
     static const io_range_t alias   = { 0176500, 0176507, dl11_read8, dl11_write8, "DL11(alias)" };
 
     if (devio_register(&primary) != 0) return -1;
-    if (devio_register(&alias) != 0) return -1;
+    if (dl11_alias_enabled && devio_register(&alias) != 0) return -1;
 
     static const irq_source_t rxsrc = { "DL11 RX", 000060, 4, dl11_rx_irq_pending, dl11_rx_irq_ack };
     static const irq_source_t txsrc = { "DL11 TX", 000064, 4, dl11_tx_irq_pending, dl11_tx_irq_ack };
@@ -153,6 +160,11 @@ void dl11_reset(void)
     irq_latch_event_set_done(&tx_l);
     tx_busy = 0;
     tx_ready_ns = 0;
+}
+
+void dl11_set_alias(int on)
+{
+    dl11_alias_enabled = on ? 1 : 0;
 }
 
 void dl11_poll(void)
