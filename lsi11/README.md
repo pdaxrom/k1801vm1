@@ -69,6 +69,11 @@ Switch register can be set explicitly:
 ```
 (`SR` is `0177570`, default `000000`).
 
+Alternative RK11 demo bootstrap loader from `demo/rk11_boot.bin`:
+```
+./lsi11 -rk disks/rtv40rk.dsk -load demo/rk11_boot.bin -addr 02000 -pc 02000
+```
+
 Useful debug options:
 - `-trace` instruction trace
 - `-trace-regs` trace with registers
