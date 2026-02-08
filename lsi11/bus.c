@@ -14,6 +14,7 @@ int bus_is_nxm(paddr_t addr) {
     return 0; /* RAM */
 
   if (a >= IO_PAGE_START && a <= IO_PAGE_END) {
+    /* IO page: only decoded device registers are valid */
     return devio_has(a) ? 0 : 1;
   }
 

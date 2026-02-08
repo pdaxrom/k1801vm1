@@ -5,6 +5,7 @@
 #include "adapter_core.h"
 #include "bus.h"
 #include "dev_rk11.h"
+#include "dev_sr.h"
 
 /* core headers (read-only) */
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
@@ -13,12 +14,14 @@
 static void usage(const char *argv0) {
   fprintf(stderr,
           "Usage:\n"
-          "  %s -rk <rk05.img> [-bootcopy]\n"
+          "  %s -rk <rk05.img> [-bootcopy|-bootrt11]\n"
           "\n"
           "Options:\n"
           "  -rk <path>      Attach RK05 image\n"
           "  -bootcopy       Copy first 010000 bytes from RK image into RAM at "
           "000000\n"
+          "  -bootrt11       Copy first 01000 bytes (or 2nd block if empty) "
+          "into RAM at 000000 and jump to 000000\n"
           "  -trace          Trace each instruction\n"
           "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
@@ -27,15 +30,18 @@ static void usage(const char *argv0) {
   fprintf(stderr,
           "  -load <file>    Load binary file into RAM\n"
           "  -addr <oct>     Load address (octal) for -load (default 0)\n"
-          "  -pc <oct>       Set initial PC (R7) to octal address\n");
+          "  -pc <oct>       Set initial PC (R7) to octal address\n"
+          "  -sr <oct>       Set SR switch register (0177570) value\n");
 }
 
 int main(int argc, char **argv) {
   const char *rk_path = NULL;
   const char *load_path = NULL;
   int do_bootcopy = 0;
+  int do_bootrt11 = 0;
   long load_addr = 0;
   long start_pc = -1;
+  long sr_value = -1;
   int trace = 0;
   int trace_regs = 0;
 
@@ -44,6 +50,8 @@ int main(int argc, char **argv) {
       rk_path = argv[++i];
     } else if (!strcmp(argv[i], "-bootcopy")) {
       do_bootcopy = 1;
+    } else if (!strcmp(argv[i], "-bootrt11")) {
+      do_bootrt11 = 1;
     } else if (!strcmp(argv[i], "-traceirq")) {
       lsi11_set_trace_irq(1);
     } else if (!strcmp(argv[i], "-tracenxm")) {
@@ -59,6 +67,8 @@ int main(int argc, char **argv) {
       load_addr = strtol(argv[++i], NULL, 8);
     } else if (!strcmp(argv[i], "-pc") && i + 1 < argc) {
       start_pc = strtol(argv[++i], NULL, 8);
+    } else if (!strcmp(argv[i], "-sr") && i + 1 < argc) {
+      sr_value = strtol(argv[++i], NULL, 8);
     } else {
       usage(argv[0]);
       return 2;
@@ -86,7 +96,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  r.reset(&r);
+  core_reset(&r);
+
+  if (sr_value >= 0) {
+    sr_set((uint16_t)sr_value);
+  }
 
   if (do_bootcopy) {
     /* Copy first 010000 bytes (4 KB) into RAM[000000..007777] by default.
@@ -98,6 +112,45 @@ int main(int argc, char **argv) {
       return 1;
     }
     /* start execution at 000000 (common simple bootstrap scenario) */
+    r.r[7] = 000000;
+  }
+
+  if (do_bootrt11) {
+    if (!rk_path) {
+      fprintf(stderr, "-bootrt11 requires -rk <image>\n");
+      r.fini(&r);
+      return 1;
+    }
+    FILE *f = fopen(rk_path, "rb");
+    if (!f) {
+      fprintf(stderr, "Cannot open RK image: %s\n", rk_path);
+      r.fini(&r);
+      return 1;
+    }
+    const size_t n = 01000;
+    uint8_t buf[01000];
+    size_t got = fread(buf, 1, n, f);
+    int all_zero = 1;
+    if (got == n) {
+      for (size_t i = 0; i < n; i++) {
+        if (buf[i]) { all_zero = 0; break; }
+      }
+    }
+    if (got != n || all_zero) {
+      if (fseek(f, (long)n, SEEK_SET) == 0) {
+        got = fread(buf, 1, n, f);
+        if (got == n) {
+          all_zero = 0;
+        }
+      }
+    }
+    fclose(f);
+    if (got != n || all_zero) {
+      fprintf(stderr, "RT11 boot block not found in image\n");
+      r.fini(&r);
+      return 1;
+    }
+    memcpy(&ram[0], buf, n);
     r.r[7] = 000000;
   }
 

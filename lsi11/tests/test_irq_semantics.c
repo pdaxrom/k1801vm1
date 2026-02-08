@@ -76,9 +76,9 @@ static void test_dl11_tx(regs *r) {
         "DL11 TX: vector is 000064 (octal)"); /* unless DCJ11 encoding changes
                                                  it */
 
-  /* While DONE==1 and IE==1, IRQ is level and should repeat */
+  /* DONE stays set, but IRQ is latched; no repeat until DONE is cleared */
   vec = 0;
-  check(poll_irq(r, &vec) == 1, "DL11 TX: repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 0, "DL11 TX: no repeat IRQ while DONE==1");
 
   /* Now clear DONE again by writing TBUF -> should allow a NEW IRQ */
   wr8(DL11_TBUF, 'B');
@@ -105,9 +105,9 @@ static void test_dl11_rx(regs *r) {
   check(poll_irq(r, &vec) == 1, "DL11 RX: first IRQ delivered");
   check((vec & 0000777) == 000060, "DL11 RX: vector 000060");
 
-  /* While DONE==1 and IE==1, IRQ is level and should repeat */
+  /* DONE stays set, but IRQ is latched; no repeat until DONE is cleared */
   vec = 0;
-  check(poll_irq(r, &vec) == 1, "DL11 RX: repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 0, "DL11 RX: no repeat IRQ while DONE==1");
 
   /* Software clears DONE: reading RBUF */
   (void)rd8(DL11_RBUF);
@@ -149,7 +149,7 @@ static void test_kw11(regs *r) {
   /* vector check (if no DCJ11 encoding): */
   check((vec & 0000777) == 000100, "KW11: vector low bits 000100");
 
-  /* While DONE==1 and IE==1, IRQ is level and should repeat */
+  /* KW11-L keeps ticking: after acknowledge, next ticks should interrupt again. */
   vec = 0;
   got = 0;
   for (int i = 0; i < 2000; i++) {
@@ -160,9 +160,9 @@ static void test_kw11(regs *r) {
     }
     usleep(100);
   }
-  check(got, "KW11: repeat IRQ while DONE==1");
+  check(got, "KW11: repeat IRQ on subsequent tick");
 
-  /* Software clears DONE: write CSR low byte */
+  /* Software write to CSR should still keep clock/IE operational. */
   wr8(KW11_CSR, 000100);
 
   /* After DONE cleared, next tick should generate another IRQ */
@@ -195,7 +195,7 @@ static void test_lp11(regs *r) {
   check((vec & 0000777) == 000200, "LP11: vector 000200");
 
   vec = 0;
-  check(poll_irq(r, &vec) == 1, "LP11: repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 0, "LP11: no repeat IRQ while DONE==1");
 
   /* write DBR again => clears DONE and generates new DONE event => new IRQ */
   wr8(LP11_DBR, 'Y');
@@ -223,9 +223,9 @@ static void test_rk11(regs *r) {
   check(poll_irq(r, &vec) == 1, "RK11: IRQ delivered on completion");
   check((vec & 0000777) == 000220, "RK11: vector 000220");
 
-  /* Repeat while DONE==1 */
+  /* DONE remains set; IRQ is latched and should not repeat */
   vec = 0;
-  check(poll_irq(r, &vec) == 1, "RK11: repeat IRQ while DONE==1");
+  check(poll_irq(r, &vec) == 0, "RK11: no repeat IRQ while DONE==1");
 
   /* Start next GO command (software clears DONE) => allow a new completion IRQ
    */

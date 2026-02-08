@@ -52,8 +52,15 @@ static void kw11_write8(uint16_t a, uint8_t v)
 }
 
 /* --- IRQ source --- */
-int kw11_irq_pending(void) { return (kw_l.ie && kw_l.done) ? 1 : 0; }
-void kw11_irq_ack(void) { }
+int kw11_irq_pending(void) { return kw_l.irq_req ? 1 : 0; }
+void kw11_irq_ack(void)
+{
+    /* KW11-L style: interrupt acknowledge drops the monitor request,
+       letting the next tick generate a fresh DONE/IRQ cycle. */
+    kw_l.irq_req = 0;
+    kw_l.done = 0;
+    kw_l.irq_armed = 1;
+}
 
 int kw11_init(void)
 {

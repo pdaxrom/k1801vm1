@@ -32,12 +32,9 @@ static uint64_t now_ns(void)
     return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
 }
 
-/* Approx 9600 bps -> ~1.04ms per char including start/stop; use 1ms */
-#ifdef LSI11_TESTS
+/* Do not bind TX completion to host wall-clock by default.
+   In unthrottled CPU mode, real-time delays can starve guest polling loops. */
 #define DL11_TX_CHAR_NS 0ull
-#else
-#define DL11_TX_CHAR_NS 1000000ull
-#endif
 
 static uint16_t norm(uint16_t a)
 {
@@ -60,7 +57,7 @@ static uint8_t dl11_read8(uint16_t a)
     case DL11_RBUF: {
         /* “Software clears DONE”: reading RBUF clears RX DONE */
         uint8_t ch = rx_buf;
-        rx_l.done = 0;
+        irq_latch_sw_clear_done(&rx_l);
         return ch;
     }
     case DL11_TCSR: {
@@ -81,15 +78,30 @@ static void dl11_write8(uint16_t a, uint8_t v)
     a = norm(a);
     switch (a) {
     case DL11_RCSR:
-        /* allow writing IE only */
-        rx_l.ie = (v & CSR_IE) ? 1 : 0;
+        /* allow writing IE only; if DONE is already set, enabling IE raises IRQ */
+        if (v & CSR_IE) {
+            if (!rx_l.ie && rx_l.done) {
+                rx_l.irq_req = 1;
+            }
+            rx_l.ie = 1;
+        } else {
+            rx_l.ie = 0;
+        }
         return;
     case DL11_TCSR:
-        tx_l.ie = (v & CSR_IE) ? 1 : 0;
+        /* if transmitter is already DONE, enabling IE should request IRQ */
+        if (v & CSR_IE) {
+            if (!tx_l.ie && tx_l.done) {
+                tx_l.irq_req = 1;
+            }
+            tx_l.ie = 1;
+        } else {
+            tx_l.ie = 0;
+        }
         return;
     case DL11_TBUF:
         /* “Software clears DONE”: writing TBUF clears TX DONE */
-        tx_l.done = 0;
+        irq_latch_sw_clear_done(&tx_l);
 
         /* output low byte */
         util_term_putc((char)v);
@@ -104,11 +116,11 @@ static void dl11_write8(uint16_t a, uint8_t v)
 }
 
 /* --- IRQ sources --- */
-int dl11_rx_irq_pending(void) { return (rx_l.ie && rx_l.done) ? 1 : 0; }
-void dl11_rx_irq_ack(void) { }
+int dl11_rx_irq_pending(void) { return rx_l.irq_req ? 1 : 0; }
+void dl11_rx_irq_ack(void) { irq_latch_ack(&rx_l); }
 
-int dl11_tx_irq_pending(void) { return (tx_l.ie && tx_l.done) ? 1 : 0; }
-void dl11_tx_irq_ack(void) { }
+int dl11_tx_irq_pending(void) { return tx_l.irq_req ? 1 : 0; }
+void dl11_tx_irq_ack(void) { irq_latch_ack(&tx_l); }
 
 int dl11_init(void)
 {
@@ -138,7 +150,7 @@ void dl11_reset(void)
     rx_buf = 0;
 
     /* TX starts ready: DONE=1 */
-    tx_l.done = 1;
+    irq_latch_event_set_done(&tx_l);
     tx_busy = 0;
     tx_ready_ns = 0;
 }
@@ -149,7 +161,7 @@ void dl11_poll(void)
         uint64_t t = now_ns();
         if (t >= tx_ready_ns) {
             tx_busy = 0;
-            tx_l.done = 1;
+            irq_latch_event_set_done(&tx_l);
         }
     }
 
@@ -161,7 +173,7 @@ void dl11_poll(void)
     if (c < 0) return;
 
     rx_buf = (uint8_t)c;
-    rx_l.done = 1;
+    irq_latch_event_set_done(&rx_l);
 }
 
 #ifdef LSI11_TESTS
@@ -171,6 +183,6 @@ void dl11_test_inject_rx(uint8_t ch)
     if (rx_l.done) return;
 
     rx_buf = ch;
-    rx_l.done = 1;
+    irq_latch_event_set_done(&rx_l);
 }
 #endif

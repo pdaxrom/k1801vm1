@@ -41,8 +41,15 @@ int irq_poll(regs *r, uint16_t *vec_out)
 
     uint16_t v = g_irq[best].vector;
     uint8_t pri = g_irq[best].priority;
-    *vec_out = encode_vec(r, v, pri);
+    if (r && r->model == DCJ11) {
+        int psw_pri = (r->psw >> 5) & 07;
+        if (pri && psw_pri >= pri) {
+            /* masked: leave request pending */
+            return 0;
+        }
+    }
 
-    g_irq[best].ack(); /* grant-time ack */
+    *vec_out = encode_vec(r, v, pri);
+    g_irq[best].ack(); /* grant-time ack (only if acceptable) */
     return 1;
 }

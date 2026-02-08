@@ -5,6 +5,7 @@
 #include "bus.h"
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 /* RK11 CSR base range (octal) */
 #define RK_BASE 0177400
@@ -42,6 +43,8 @@ static uint16_t rkds, rker, rkcs, rkwc, rkba, rkda, rkdb;
 static irq_latch_t rk_l;     /* DONE/IE + irq latch */
 static FILE *fp = NULL;
 static int sector_one_based = 0;
+static int rk_debug = 0;
+static int rk_debug_active = 0;
 
 static uint16_t get_sector(uint16_t v) { return (uint16_t)(v & RKDA_SECTOR_MASK); }
 static uint16_t get_surf(uint16_t v)   { return (uint16_t)((v & RKDA_SURF_MASK) >> 4); }
@@ -148,11 +151,12 @@ static void rk_write8(uint16_t a, uint8_t b)
     }
 }
 
-int rk11_irq_pending(void) { return (rk_l.ie && rk_l.done) ? 1 : 0; }
-void rk11_irq_ack(void) { }
+int rk11_irq_pending(void) { return rk_l.irq_req ? 1 : 0; }
+void rk11_irq_ack(void) { irq_latch_ack(&rk_l); }
 
 int rk11_init(void)
 {
+    rk_debug = (getenv("RK11_DEBUG") != NULL);
     static const io_range_t r = { 0177400, 0177417, rk_read8, rk_write8, "RK11" };
     if (devio_register(&r) != 0) return -1;
 
@@ -188,6 +192,12 @@ void rk11_poll(void)
 {
     /* execute command only while GO is set */
     if (!(rkcs & RKCS_GO)) return;
+    if (rk_debug && !rk_debug_active) {
+        rk_debug_active = 1;
+        fprintf(stderr,
+                "RK11 GO rkcs=%06o rkwc=%06o rkba=%06o rkda=%06o\n",
+                rkcs, rkwc, rkba, rkda);
+    }
 
     /* Support READ/WRITE only */
     uint16_t func = (uint16_t)(rkcs & RKCS_FUNC_MASK);
@@ -197,6 +207,11 @@ void rk11_poll(void)
         rkcs &= (uint16_t)~RKCS_GO;
         irq_latch_event_set_done(&rk_l);
         sync_rkcs_bits();
+        if (rk_debug) {
+            fprintf(stderr, "RK11 DONE (bad func) rkcs=%06o rker=%06o\n", rkcs,
+                    rker);
+            rk_debug_active = 0;
+        }
         return;
     }
 
@@ -205,6 +220,11 @@ void rk11_poll(void)
         rkcs &= (uint16_t)~RKCS_GO;
         irq_latch_event_set_done(&rk_l);
         sync_rkcs_bits();
+        if (rk_debug) {
+            fprintf(stderr, "RK11 DONE (no media) rkcs=%06o rker=%06o\n", rkcs,
+                    rker);
+            rk_debug_active = 0;
+        }
         return;
     }
 
@@ -214,6 +234,11 @@ void rk11_poll(void)
         rkcs &= (uint16_t)~RKCS_GO;
         irq_latch_event_set_done(&rk_l);
         sync_rkcs_bits();
+        if (rk_debug) {
+            fprintf(stderr, "RK11 DONE (wc<=0) rkcs=%06o rkwc=%06o\n", rkcs,
+                    rkwc);
+            rk_debug_active = 0;
+        }
         return;
     }
 
@@ -260,6 +285,11 @@ void rk11_poll(void)
     rkcs &= (uint16_t)~RKCS_GO;
     irq_latch_event_set_done(&rk_l);
     sync_rkcs_bits();
+    if (rk_debug) {
+        fprintf(stderr, "RK11 DONE rkcs=%06o rkwc=%06o rkba=%06o rkda=%06o rker=%06o\n",
+                rkcs, rkwc, rkba, rkda, rker);
+        rk_debug_active = 0;
+    }
 }
 
 int rk11_open_image(const char *path)

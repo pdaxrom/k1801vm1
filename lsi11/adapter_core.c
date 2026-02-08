@@ -54,11 +54,13 @@ static void nxm_trap(regs *r, word addr) {
             r->psw);
   }
 
-  /* push PSW then PC (same as your earlier trap) */
+  /* Match core bus-error semantics: push current PC. */
+  word fault_pc = r->r[7];
+  /* push PSW then PC */
   r->r[6] -= 0000002;
   r->store_word(r, r->r[6], r->psw);
   r->r[6] -= 0000002;
-  r->store_word(r, r->r[6], r->r[7]);
+  r->store_word(r, r->r[6], fault_pc);
 
   r->r[7] = r->load_word(r, 0000004);
   r->psw = r->load_word(r, 0000006);
@@ -69,6 +71,9 @@ static void nxm_trap(regs *r, word addr) {
 /* ---------- bus callbacks for core ---------- */
 
 static byte core_load_byte(regs *r, word addr) {
+  if ((addr & 0177776) == 0177776) {
+    return (byte)((addr & 1) ? ((r->psw >> 8) & 000377) : (r->psw & 000377));
+  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, addr);
     return 0;
@@ -77,6 +82,15 @@ static byte core_load_byte(regs *r, word addr) {
 }
 
 static void core_store_byte(regs *r, word addr, byte v) {
+  if ((addr & 0177776) == 0177776) {
+    word psw = r->psw;
+    if (addr & 1)
+      psw = (word)((psw & 000377) | ((word)v << 8));
+    else
+      psw = (word)((psw & 0177400) | v);
+    r->psw = psw;
+    return;
+  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, addr);
     return;
@@ -85,6 +99,7 @@ static void core_store_byte(regs *r, word addr, byte v) {
 }
 
 static word core_load_word(regs *r, word addr) {
+  if (addr == 0177776) return r->psw;
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, addr);
     return 0;
@@ -93,6 +108,10 @@ static word core_load_word(regs *r, word addr) {
 }
 
 static void core_store_word(regs *r, word addr, word v) {
+  if (addr == 0177776) {
+    r->psw = v;
+    return;
+  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, addr);
     return;
@@ -126,7 +145,6 @@ static int impl_init(regs *r) {
 
 static void impl_reset(regs *r) {
   (void)r;
-  bus_init();
   dl11_reset();
   kw11_reset();
   rk11_reset();
