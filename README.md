@@ -177,6 +177,7 @@ SEL‑related entities implemented in `core/`:
 - SEL0 — unaddressed SEL register (CPU‑internal)
 - SEL1 — external register at 0177716
 - SEL2 — external register at 0177714
+- DCJ11 CPU register at `0177750` (core-owned register, reset `0`)
 
 ### 8.2 Semantics
 Implemented behavior:

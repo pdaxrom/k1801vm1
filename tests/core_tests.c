@@ -4693,6 +4693,90 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_reg177750_core_owned(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(3, 7), operand(0, 0)),
+        0177750,
+        op_mov(operand(2, 7), operand(3, 7)),
+        065432,
+        0177750,
+        op_mov(operand(3, 7), operand(0, 1)),
+        0177750,
+        op_movb(operand(2, 7), operand(3, 7)),
+        000345,
+        0177750,
+        op_movb(operand(2, 7), operand(3, 7)),
+        000024,
+        0177751,
+        op_mov(operand(3, 7), operand(0, 2)),
+        0177750,
+    };
+
+    current_test = "dcj11_reg177750_core_owned";
+    fixture_setup_model(&fx, DCJ11);
+
+    /* Ensure this register is CPU-owned, not regular RAM-backed storage. */
+    fx.mem[0177750] = 000001;
+    fx.mem[0177751] = 000002;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R0");
+    ASSERT_EQ(fx.r.r[0], 000000, "0177750 reset value");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #065432,@#177750");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R1");
+    ASSERT_EQ(fx.r.r[1], 065432, "0177750 word write/read");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB #345,@#177750");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB #24,@#177751");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R2");
+    ASSERT_EQ(fx.r.r[2], 012345, "0177750 byte write/read");
+
+    ASSERT_EQ(fx.mem[0177750], 000001, "0177750 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177751], 000002, "0177750 should not modify RAM high byte");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_non_dcj11_reg177750_is_ram(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(3, 7), operand(0, 0)),
+        0177750,
+        op_mov(operand(2, 7), operand(3, 7)),
+        012345,
+        0177750,
+        op_mov(operand(3, 7), operand(0, 1)),
+        0177750,
+    };
+
+    current_test = "non_dcj11_reg177750_is_ram";
+    fixture_setup_model(&fx, K1801VM2);
+
+    fx.mem[0177750] = 000011;
+    fx.mem[0177751] = 000022;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R0");
+    ASSERT_EQ(fx.r.r[0], 011011, "0177750 should be RAM on VM2");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #012345,@#177750");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R1");
+    ASSERT_EQ(fx.r.r[1], 012345, "VM2 RAM word readback");
+    ASSERT_EQ(fx.mem[0177750], 000345, "VM2 RAM low byte");
+    ASSERT_EQ(fx.mem[0177751], 000024, "VM2 RAM high byte");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_vm1_tstb_flags_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -5472,6 +5556,8 @@ int main(void)
     failed += test_vm1g_eis_not_illegal();
     failed += test_dcj11_sel0_reset();
     failed += test_dcj11_sel1_sel2_regs();
+    failed += test_dcj11_reg177750_core_owned();
+    failed += test_non_dcj11_reg177750_is_ram();
     failed += test_vm1_tstb_flags_model(K1801VM1, "K1801VM1");
     failed += test_vm1_tstb_flags_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_bpl_after_tstb_model(K1801VM1, "K1801VM1");

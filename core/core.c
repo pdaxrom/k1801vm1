@@ -66,6 +66,26 @@ static INLINE int dcj11_kernel_psw(word psw)
 	return ((psw >> 14) & 03) == 0;
 }
 
+static INLINE int dcj11_has_reg_177750(regs *r, word offset)
+{
+	return (r->model == DCJ11) && ((offset & 0177776) == 0177750);
+}
+
+static INLINE byte dcj11_reg_177750_load_byte(regs *r, word offset)
+{
+	return (byte)((offset & 1) ? ((r->J11_REG177750 >> 8) & 0377)
+	                          : (r->J11_REG177750 & 0377));
+}
+
+static INLINE void dcj11_reg_177750_store_byte(regs *r, word offset, byte value)
+{
+	if (offset & 1) {
+		r->J11_REG177750 = (word)((r->J11_REG177750 & 000377) | (((word)value & 0377) << 8));
+	} else {
+		r->J11_REG177750 = (word)((r->J11_REG177750 & 0177400) | ((word)value & 0377));
+	}
+}
+
 static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
 {
 	if (is_vm2(r)) {
@@ -137,6 +157,7 @@ void core_reset(regs *r)
     r->r[7] = r->SEL0 & 0177400;
     r->psw = 0340;
     r->ir = 0;
+    r->J11_REG177750 = 0;
     r->fWait = 0;
     r->fTrap = 0;
     r->fAbort = 0;
@@ -671,6 +692,10 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch, int fo
 	int seg = 0;
 	int rc;
 
+	if (dcj11_has_reg_177750(r, offset)) {
+		return dcj11_reg_177750_load_byte(r, offset);
+	}
+
 	if (mmu_io_read_byte(r, offset, &value)) {
 		return value;
 	}
@@ -701,6 +726,11 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value, int forc
 	int mode = 0;
 	int seg = 0;
 	int rc;
+
+	if (dcj11_has_reg_177750(r, offset)) {
+		dcj11_reg_177750_store_byte(r, offset, value);
+		return;
+	}
 
 	if (mmu_io_write_byte(r, offset, value)) {
 		return;
@@ -739,6 +769,10 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch, int fo
 		return 0;
 	}
 
+	if (dcj11_has_reg_177750(r, offset)) {
+		return r->J11_REG177750;
+	}
+
 	if (mmu_io_read_word(r, offset, &value)) {
 		return value;
 	}
@@ -772,6 +806,11 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value, int forc
 
 	if ((r->model == DCJ11) && (offset & 1)) {
 		bus_error_trap(r);
+		return;
+	}
+
+	if (dcj11_has_reg_177750(r, offset)) {
+		r->J11_REG177750 = value;
 		return;
 	}
 

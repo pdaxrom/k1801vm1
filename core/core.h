@@ -84,6 +84,7 @@ typedef struct _regs {
 
     word	SEL0;		/* unaddressed SEL register */
     word	SEL1, SEL2;	/* 0177716 0177714 external registers */
+    word    J11_REG177750; /* DCJ11 CPU register at 0177750 */
     word    TVE_LIMIT;  /* 0177706 */
     word    TVE_COUNT;  /* 0177710 */
     word    TVE_CSR;    /* 0177712 */
