@@ -53,6 +53,8 @@ R0–R7: **PASS**
 N/Z/V/C, T, and priority bits: **PASS / FIXED**
 - N/Z/V/C and T verified by tests (TSTB, trace, RTT/RTI).
 - Priority masking verified by DCJ11 IRQ tests.
+- Memory-mapped PSW register access at `0177776` is handled in `core/`
+  (CPU-level), not in machine device layers.
 
 Mode bits: **LIMITED**
 - With `ENABLE_MMU=0` (default), memory is identity-mapped and mode bits do not

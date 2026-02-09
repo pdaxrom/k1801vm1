@@ -71,6 +71,11 @@ static INLINE int dcj11_has_reg_177750(regs *r, word offset)
 	return (r->model == DCJ11) && ((offset & 0177776) == 0177750);
 }
 
+static INLINE int cpu_has_reg_177776(word offset)
+{
+	return ((offset & 0177776) == 0177776);
+}
+
 static INLINE byte dcj11_reg_177750_load_byte(regs *r, word offset)
 {
 	return (byte)((offset & 1) ? ((r->J11_REG177750 >> 8) & 0377)
@@ -83,6 +88,20 @@ static INLINE void dcj11_reg_177750_store_byte(regs *r, word offset, byte value)
 		r->J11_REG177750 = (word)((r->J11_REG177750 & 000377) | (((word)value & 0377) << 8));
 	} else {
 		r->J11_REG177750 = (word)((r->J11_REG177750 & 0177400) | ((word)value & 0377));
+	}
+}
+
+static INLINE byte cpu_reg_177776_load_byte(regs *r, word offset)
+{
+	return (byte)((offset & 1) ? ((r->psw >> 8) & 0377) : (r->psw & 0377));
+}
+
+static INLINE void cpu_reg_177776_store_byte(regs *r, word offset, byte value)
+{
+	if (offset & 1) {
+		r->psw = (word)((r->psw & 000377) | (((word)value & 0377) << 8));
+	} else {
+		r->psw = (word)((r->psw & 0177400) | ((word)value & 0377));
 	}
 }
 
@@ -695,6 +714,9 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch, int fo
 	if (dcj11_has_reg_177750(r, offset)) {
 		return dcj11_reg_177750_load_byte(r, offset);
 	}
+	if (cpu_has_reg_177776(offset)) {
+		return cpu_reg_177776_load_byte(r, offset);
+	}
 
 	if (mmu_io_read_byte(r, offset, &value)) {
 		return value;
@@ -729,6 +751,10 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value, int forc
 
 	if (dcj11_has_reg_177750(r, offset)) {
 		dcj11_reg_177750_store_byte(r, offset, value);
+		return;
+	}
+	if (cpu_has_reg_177776(offset)) {
+		cpu_reg_177776_store_byte(r, offset, value);
 		return;
 	}
 
@@ -772,6 +798,9 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch, int fo
 	if (dcj11_has_reg_177750(r, offset)) {
 		return r->J11_REG177750;
 	}
+	if (offset == 0177776) {
+		return r->psw;
+	}
 
 	if (mmu_io_read_word(r, offset, &value)) {
 		return value;
@@ -811,6 +840,10 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value, int forc
 
 	if (dcj11_has_reg_177750(r, offset)) {
 		r->J11_REG177750 = value;
+		return;
+	}
+	if (offset == 0177776) {
+		r->psw = value;
 		return;
 	}
 
