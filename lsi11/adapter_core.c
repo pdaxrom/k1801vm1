@@ -114,9 +114,6 @@ static void nxm_trap(regs *r, paddr_t addr) {
 /* ---------- bus callbacks for core ---------- */
 
 static byte core_load_byte(regs *r, word addr) {
-  if ((addr & 0177776) == 0177776) {
-    return (byte)((addr & 1) ? ((r->psw >> 8) & 000377) : (r->psw & 000377));
-  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -125,15 +122,6 @@ static byte core_load_byte(regs *r, word addr) {
 }
 
 static void core_store_byte(regs *r, word addr, byte v) {
-  if ((addr & 0177776) == 0177776) {
-    word psw = r->psw;
-    if (addr & 1)
-      psw = (word)((psw & 000377) | ((word)v << 8));
-    else
-      psw = (word)((psw & 0177400) | v);
-    r->psw = psw;
-    return;
-  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -142,7 +130,6 @@ static void core_store_byte(regs *r, word addr, byte v) {
 }
 
 static word core_load_word(regs *r, word addr) {
-  if (addr == 0177776) return r->psw;
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -151,10 +138,6 @@ static word core_load_word(regs *r, word addr) {
 }
 
 static void core_store_word(regs *r, word addr, word v) {
-  if (addr == 0177776) {
-    r->psw = v;
-    return;
-  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return;
