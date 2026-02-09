@@ -139,11 +139,12 @@ Status: **FIXED**
 
 Status: **PASS**
 
-### 7.3 DCJ11-Specific Base Instructions
+### 7.3 Privileged Base Instructions (DCJ11/VM2)
 `SPL n` (`0000230..0000237`):
 - kernel mode: sets `PS<7:5>` to `n`
 - supervisor/user mode: treated as NOP
-- non-DCJ11 models: illegal-instruction trap
+- supported on DCJ11/VM2/K1806VM2
+- VM1/VM1G: illegal-instruction trap
 
 `MFPS dst`:
 - transfers low byte of `PSW` as byte operation (`MOVB`-style destination semantics)
@@ -158,6 +159,10 @@ Status: **PASS**
 `TSTSET dst`, `WRTLCK dst`:
 - implemented for DCJ11 only
 - non-DCJ11 models trap as illegal instruction
+
+`MFPD dst`, `MFPI dst`, `MTPI dst`, `MTPD dst`:
+- implemented on DCJ11 and VM2/K1806VM2
+- VM1/VM1G trap as illegal instruction
 
 Status: **FIXED / PASS**
 
@@ -375,7 +380,8 @@ Implemented tests (see `tests/core_tests.c`):
 - IRQ priority masking and highest‑priority selection
 - TSTB flags and BPL branching
 - DCJ11 SEL0/SEL1/SEL2 semantics
-- DCJ11 `SPL` kernel/user semantics and illegal trap on other models
+- `SPL` kernel/user semantics on DCJ11/VM2 and illegal trap on VM1/VM1G
+- `MFPD/MFPI/MTPI/MTPD` availability on DCJ11/VM2 vs VM1/VM1G
 - `MFPS` byte semantics (register sign-extension, memory byte-store/autoincrement)
 
 Run:

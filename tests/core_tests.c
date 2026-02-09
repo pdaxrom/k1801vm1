@@ -1121,17 +1121,19 @@ static int test_dcj11_special_ops_illegal_on_other_models(void)
         snprintf(namebuf, sizeof(namebuf), "mfpt_illegal_%s", names[i]);
         rc += run_illegal_op_test_model(op_mfpt(), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mfpd_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mfpd(operand(0, 0)), namebuf, models[i]);
+        if (models[i] == K1801VM1 || models[i] == K1801VM1G) {
+            snprintf(namebuf, sizeof(namebuf), "mfpd_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mfpd(operand(0, 0)), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mfpi_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mfpi(operand(0, 0)), namebuf, models[i]);
+            snprintf(namebuf, sizeof(namebuf), "mfpi_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mfpi(operand(0, 0)), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mtpi_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mtpi(operand(0, 0)), namebuf, models[i]);
+            snprintf(namebuf, sizeof(namebuf), "mtpi_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mtpi(operand(0, 0)), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mtpd_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mtpd(operand(0, 0)), namebuf, models[i]);
+            snprintf(namebuf, sizeof(namebuf), "mtpd_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mtpd(operand(0, 0)), namebuf, models[i]);
+        }
 
         snprintf(namebuf, sizeof(namebuf), "tstset_illegal_%s", names[i]);
         rc += run_illegal_op_test_model(op_tstset(operand(0, 1)), namebuf, models[i]);
@@ -4082,7 +4084,7 @@ static int test_spl_illegal_on_other_models_model(byte model, const char *name)
     const word new_psw = 000340;
     char namebuf[64];
 
-    if (model == DCJ11) {
+    if (model == DCJ11 || model == K1801VM2 || model == K1806VM2) {
         return 0;
     }
 
