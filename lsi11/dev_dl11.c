@@ -3,6 +3,8 @@
 #include "irq.h"
 #include "irq_latch.h"
 #include "util_term.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 /* CSR addresses (octal) */
@@ -25,6 +27,7 @@ static uint8_t rx_buf = 0;
 static uint64_t tx_ready_ns = 0;
 static int tx_busy = 0;
 static int dl11_alias_enabled = 1;
+static int dl11_debug_tx = 0;
 
 static uint64_t now_ns(void)
 {
@@ -104,6 +107,11 @@ static void dl11_write8(uint16_t a, uint8_t v)
         /* “Software clears DONE”: writing TBUF clears TX DONE */
         irq_latch_sw_clear_done(&tx_l);
 
+        if (dl11_debug_tx) {
+            fprintf(stderr, "DL11 TX %03o '%c'\n", v & 000377,
+                    (v >= 32 && v < 127) ? (char)v : '.');
+        }
+
         /* output low byte */
         util_term_putc((char)v);
 
@@ -131,6 +139,7 @@ void dl11_tx_irq_ack(void) { irq_latch_ack(&tx_l); }
 
 int dl11_init(void)
 {
+    dl11_debug_tx = (getenv("DL11_DEBUG_TX") != NULL);
     /* Register primary range and optional alias. */
     static const io_range_t primary = { 0177560, 0177567, dl11_read8, dl11_write8, "DL11(primary)" };
     static const io_range_t alias   = { 0176500, 0176507, dl11_read8, dl11_write8, "DL11(alias)" };

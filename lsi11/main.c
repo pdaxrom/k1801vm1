@@ -4,6 +4,7 @@
 
 #include "adapter_core.h"
 #include "bus.h"
+#include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
 
@@ -15,6 +16,10 @@ static int parse_cpu_model(const char *name, byte *model) {
   if (!name || !model)
     return -1;
 
+  if (!strcmp(name, "11/34")) {
+    *model = K1801VM2;
+    return 0;
+  }
   if (!strcmp(name, "dcj11") || !strcmp(name, "11/03")) {
     *model = DCJ11;
     return 0;
@@ -39,6 +44,23 @@ static int parse_cpu_model(const char *name, byte *model) {
   return -1;
 }
 
+static const char *cpu_model_name(byte model) {
+  switch (model) {
+  case K1801VM1:
+    return "k1801vm1";
+  case K1801VM1G:
+    return "k1801vm1g";
+  case K1801VM2:
+    return "k1801vm2";
+  case K1806VM2:
+    return "k1806vm2";
+  case DCJ11:
+    return "dcj11";
+  default:
+    return "unknown";
+  }
+}
+
 static void usage(const char *argv0) {
 #if defined(LSI11_TARGET_1134)
   const char *target = "pdp1134";
@@ -48,19 +70,26 @@ static void usage(const char *argv0) {
 
   fprintf(stderr,
           "Usage:\n"
-          "  %s -rk <rk05.img> [-bootcopy|-bootrt11] [-cpu <model>]\n"
+          "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] "
+          "[-bootcopy|-bootrt11] [-cpu <model>]\n"
           "\n"
           "Target profile:\n"
           "  %s\n"
           "\n"
           "Options:\n"
+#if defined(LSI11_TARGET_1134)
+          "  -cpu <model>    CPU model: dcj11 (default), 11/03, 11/34, "
+          "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
+#else
           "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
           "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
+#endif
           "  -rk <path>      Attach RK05 image\n"
-          "  -bootcopy       Copy first 010000 bytes from RK image into RAM at "
+          "  -rh <path>      Attach RH11 (RK06/RK07) image (pdp1134 only)\n"
+          "  -bootcopy       Copy first 010000 bytes from RK/RH image into RAM at "
           "000000\n"
           "  -bootrt11       Copy first 01000 bytes (or 2nd block if empty) "
-          "into RAM at 000000 and jump to 000000\n"
+          "from RK/RH image into RAM at 000000 and jump to 000000\n"
           "  -trace          Trace each instruction\n"
           "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
@@ -74,7 +103,8 @@ static void usage(const char *argv0) {
           "  -pc <oct>       Set initial PC (R7) to octal address\n"
           "  -sr <oct>       Set SR switch register (0177570) value\n"
 #if defined(LSI11_TARGET_1134)
-          "  -ram <kb>       RAM size in KB (default 4096, must be multiple of 8)\n"
+          "  -ram <kb>       RAM size in KB (default 4096, must be multiple of 4)\n"
+          "  --mem-kb <kb>   Same as -ram (pdp1134 only)\n"
           "  -dl11-alias     Enable DL11 alias 0176500..0176507\n"
           "  -no-dl11-alias  Disable DL11 alias 0176500..0176507 (default)\n");
 #else
@@ -85,6 +115,7 @@ static void usage(const char *argv0) {
 
 int main(int argc, char **argv) {
   const char *rk_path = NULL;
+  const char *rh_path = NULL;
   const char *load_path = NULL;
   int do_bootcopy = 0;
   int do_bootrt11 = 0;
@@ -93,7 +124,11 @@ int main(int argc, char **argv) {
   long sr_value = -1;
   long ram_kb_arg = -1;
   int force_dl11_alias = -1;
+#if defined(LSI11_TARGET_1134)
   byte cpu_model = DCJ11;
+#else
+  byte cpu_model = DCJ11;
+#endif
   int trace = 0;
   int trace_regs = 0;
   int exit_on_abort = 0;
@@ -109,6 +144,8 @@ int main(int argc, char **argv) {
   for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
       rk_path = argv[++i];
+    } else if (!strcmp(argv[i], "-rh") && i + 1 < argc) {
+      rh_path = argv[++i];
     } else if (!strcmp(argv[i], "-bootcopy")) {
       do_bootcopy = 1;
     } else if (!strcmp(argv[i], "-bootrt11")) {
@@ -136,6 +173,8 @@ int main(int argc, char **argv) {
       sr_value = strtol(argv[++i], NULL, 8);
     } else if (!strcmp(argv[i], "-ram") && i + 1 < argc) {
       ram_kb_arg = strtol(argv[++i], NULL, 10);
+    } else if (!strcmp(argv[i], "--mem-kb") && i + 1 < argc) {
+      ram_kb_arg = strtol(argv[++i], NULL, 10);
     } else if (!strcmp(argv[i], "-dl11-alias")) {
       force_dl11_alias = 1;
     } else if (!strcmp(argv[i], "-no-dl11-alias")) {
@@ -158,6 +197,11 @@ int main(int argc, char **argv) {
             "This lsi11 target is fixed 56KB RAM; -ram is not supported.\n");
     return 2;
   }
+  if (rh_path) {
+    fprintf(stderr,
+            "This lsi11 target does not provide RH11; -rh is not supported.\n");
+    return 2;
+  }
 #endif
 
   if (ram_kb_arg < 0) {
@@ -176,8 +220,11 @@ int main(int argc, char **argv) {
   if (check_config_only) {
     const char *m = (lsi11_machine_current() == LSI11_MACHINE_1134) ? "pdp1134"
                                                                      : "lsi11";
-    fprintf(stderr, "CONFIG machine=%s ram_kb=%u dl11_alias=%d\n", m,
-            lsi11_machine_ram_kb(), lsi11_dl11_alias());
+    int rh11_on = (lsi11_machine_current() == LSI11_MACHINE_1134) ? 1 : 0;
+    fprintf(stderr,
+            "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d\n", m,
+            cpu_model_name(cpu_model), lsi11_machine_ram_kb(), lsi11_dl11_alias(),
+            rh11_on);
     return 0;
   }
 
@@ -201,6 +248,14 @@ int main(int argc, char **argv) {
       return 1;
     }
   }
+  if (rh_path) {
+    if (rh11_open_image(rh_path) != 0) {
+      fprintf(stderr, "rh11_open_image failed: %s\n", rh_path);
+      rk11_close_image();
+      r.fini(&r);
+      return 1;
+    }
+  }
 
   core_reset(&r);
 
@@ -212,14 +267,24 @@ int main(int argc, char **argv) {
     /* Copy first 010000 bytes (4 KB) into RAM[000000..007777] by default.
        Adjust if your bootstrap needs a different size. */
     const size_t n = 010000;
+    int rc = -1;
     uint8_t *ram0 = bus_ram_ptr(0);
     if (!ram0 || !bus_range_is_ram(0, n)) {
       fprintf(stderr, "bootcopy destination is outside RAM\n");
       r.fini(&r);
       return 1;
     }
-    if (rk11_boot_copy(ram0, n) != 0) {
-      fprintf(stderr, "rk11_boot_copy failed (need -rk <image>)\n");
+    if (rk_path) {
+      rc = rk11_boot_copy(ram0, n);
+    } else if (rh_path) {
+      rc = rh11_boot_copy(ram0, n);
+    } else {
+      fprintf(stderr, "-bootcopy requires -rk <image> or -rh <image>\n");
+      r.fini(&r);
+      return 1;
+    }
+    if (rc != 0) {
+      fprintf(stderr, "bootcopy failed (check -rk/-rh image)\n");
       r.fini(&r);
       return 1;
     }
@@ -228,14 +293,15 @@ int main(int argc, char **argv) {
   }
 
   if (do_bootrt11) {
-    if (!rk_path) {
-      fprintf(stderr, "-bootrt11 requires -rk <image>\n");
+    const char *boot_path = rk_path ? rk_path : rh_path;
+    if (!boot_path) {
+      fprintf(stderr, "-bootrt11 requires -rk <image> or -rh <image>\n");
       r.fini(&r);
       return 1;
     }
-    FILE *f = fopen(rk_path, "rb");
+    FILE *f = fopen(boot_path, "rb");
     if (!f) {
-      fprintf(stderr, "Cannot open RK image: %s\n", rk_path);
+      fprintf(stderr, "Cannot open boot image: %s\n", boot_path);
       r.fini(&r);
       return 1;
     }
@@ -327,8 +393,9 @@ int main(int argc, char **argv) {
   /* -------- main emulation loop --------
      Replace cpu_step(&r) with your core's actual stepping API. */
   for (;;) {
-    /* Run a chunk of CPU steps, poll devices between chunks */
-    for (int k = 0; k < 1000; k++) {
+    /* Keep device service latency low so boot ROM wait loops do not stall. */
+    int step_chunk = trace ? 1 : 64;
+    for (int k = 0; k < step_chunk; k++) {
       if (trace) {
         char buf[128];
         word pc = r.r[7];
@@ -360,6 +427,7 @@ int main(int argc, char **argv) {
   }
 
   r.fini(&r);
+  rh11_close_image();
   rk11_close_image();
   return 0;
 }

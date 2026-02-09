@@ -15,6 +15,11 @@ grep -q "machine=pdp1134" "$TMP1" || {
   exit 1
 }
 
+grep -q "cpu=dcj11" "$TMP1" || {
+  echo "FAIL: expected default cpu=dcj11" >&2
+  exit 1
+}
+
 grep -q "ram_kb=4096" "$TMP1" || {
   echo "FAIL: expected default ram_kb=4096" >&2
   exit 1
@@ -25,17 +30,22 @@ grep -q "dl11_alias=0" "$TMP1" || {
   exit 1
 }
 
-if "$BIN" -ram 4100 -check-config >/dev/null 2>"$TMP2"; then
-  echo "FAIL: expected -ram 4100 to be rejected" >&2
-  exit 1
-fi
-
-grep -q "multiple of 8 KB" "$TMP2" || {
-  echo "FAIL: missing multiple-of-8KB validation message" >&2
+grep -q "rh11=1" "$TMP1" || {
+  echo "FAIL: expected rh11=1 on pdp1134" >&2
   exit 1
 }
 
-"$BIN" -ram 4104 -check-config >/dev/null 2>"$TMP3"
+if "$BIN" --mem-kb 4101 -check-config >/dev/null 2>"$TMP2"; then
+  echo "FAIL: expected --mem-kb 4101 to be rejected" >&2
+  exit 1
+fi
+
+grep -q "multiple of 4 KB" "$TMP2" || {
+  echo "FAIL: missing multiple-of-4KB validation message" >&2
+  exit 1
+}
+
+"$BIN" --mem-kb 4104 -check-config >/dev/null 2>"$TMP3"
 
 grep -q "ram_kb=4104" "$TMP3" || {
   echo "FAIL: expected ram_kb=4104" >&2

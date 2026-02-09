@@ -13,11 +13,7 @@ typedef uint32_t paddr_t;
 
 #define BUS_PAGE_SIZE 4096u
 #define BUS_PAGE_SIZE_KB (BUS_PAGE_SIZE / 1024u)
-/*
- * PDP-11/34 profile keeps RAM sized to full 8KB virtual segments, while host
- * allocations still use 4KB pages.
- */
-#define BUS_SEGMENT_SIZE_KB 8u
+#define BUS_RAM_GRANULARITY_KB BUS_PAGE_SIZE_KB
 
 typedef enum {
   BUS_MACHINE_LSI11_1104 = 0,
@@ -28,7 +24,7 @@ typedef enum {
  * Configure bus/memory model.
  * - BUS_MACHINE_LSI11_1104: fixed 56KB RAM model (ram_kb argument ignored)
  * - BUS_MACHINE_PDP1134: default 4096KB when ram_kb==0, otherwise ram_kb must
- *   be a multiple of BUS_SEGMENT_SIZE_KB.
+ *   be a multiple of BUS_RAM_GRANULARITY_KB.
  */
 int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
                   size_t err_len);

@@ -24,8 +24,13 @@ grep -q "dl11_alias=1" "$TMP1" || {
   exit 1
 }
 
-if "$BIN" -ram 60 -check-config >/dev/null 2>"$TMP2"; then
-  echo "FAIL: -ram must be rejected for lsi11 target" >&2
+grep -q "rh11=0" "$TMP1" || {
+  echo "FAIL: expected rh11=0 on lsi11 profile" >&2
+  exit 1
+}
+
+if "$BIN" --mem-kb 60 -check-config >/dev/null 2>"$TMP2"; then
+  echo "FAIL: --mem-kb must be rejected for lsi11 target" >&2
   exit 1
 fi
 

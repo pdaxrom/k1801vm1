@@ -21,6 +21,7 @@ COMMON_SRCS := \
   util_term.c \
   dev_dl11.c \
   dev_kw11.c \
+  dev_rh11.c \
   dev_rk11.c \
   dev_lp11.c \
   dev_sr.c
@@ -39,10 +40,15 @@ CORE_OBJS_PDP1134 := $(BUILD_DIR)/pdp1134/core_core.o $(BUILD_DIR)/pdp1134/core_
 
 TEST_CFLAGS := $(CFLAGS) -DLSI11_TESTS=1
 TEST_COMMON_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/test-lsi11/,$(COMMON_SRCS:.c=.o))
+TEST_COMMON_OBJS_PDP1134 := $(addprefix $(BUILD_DIR)/test-pdp1134/,$(COMMON_SRCS:.c=.o))
 
 TESTS_LSI11 := \
   tests/test_bus_map \
-  tests/test_irq_semantics
+  tests/test_irq_semantics \
+  tests/test_rh11_lsi11_absent
+
+TESTS_PDP1134 := \
+  tests/test_rh11_pdp1134
 
 ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
 
@@ -78,10 +84,24 @@ $(BUILD_DIR)/test-lsi11/tests/%.o: tests/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_LSI11) -c -o $@ $<
 
+$(BUILD_DIR)/test-pdp1134/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_PDP1134) -c -o $@ $<
+
+$(BUILD_DIR)/test-pdp1134/tests/%.o: tests/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_PDP1134) -c -o $@ $<
+
 tests/test_bus_map: $(BUILD_DIR)/test-lsi11/tests/test_bus_map.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
 tests/test_irq_semantics: $(BUILD_DIR)/test-lsi11/tests/test_irq_semantics.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
+tests/test_rh11_lsi11_absent: $(BUILD_DIR)/test-lsi11/tests/test_rh11_lsi11_absent.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
+tests/test_rh11_pdp1134: $(BUILD_DIR)/test-pdp1134/tests/test_rh11_pdp1134.o $(TEST_COMMON_OBJS_PDP1134)
 	$(CC) $(CFLAGS) -o $@ $^
 
 test: test-lsi11
@@ -91,11 +111,15 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	./tests/test_bus_map
 	@echo "Running IRQ semantics test..."
 	./tests/test_irq_semantics
+	@echo "Running RH11 absence test (lsi11 profile)..."
+	./tests/test_rh11_lsi11_absent
 	@echo "Running lsi11 profile config test..."
 	./tests/test_lsi11_config.sh ./$(BIN_LSI11)
 	@echo "LSI11 TESTS PASSED"
 
-test-pdp1134: $(BIN_PDP1134)
+test-pdp1134: $(BIN_PDP1134) $(TESTS_PDP1134)
+	@echo "Running RH11 pdp1134 tests..."
+	./tests/test_rh11_pdp1134
 	@echo "Running pdp1134 RAM/config tests..."
 	./tests/test_pdp1134_ram.sh ./$(BIN_PDP1134)
 	@echo "Running core MMU suite (ENABLE_MMU=1)..."
@@ -107,6 +131,6 @@ test-matrix: test-lsi11 test-pdp1134
 	@echo "ALL TESTS PASSED"
 
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1134) $(TESTS_LSI11)
+	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1134) $(TESTS_LSI11) $(TESTS_PDP1134)
 
 .PHONY: all test test-lsi11 test-pdp1134 test-matrix clean
