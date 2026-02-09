@@ -139,6 +139,28 @@ Status: **FIXED**
 
 Status: **PASS**
 
+### 7.3 DCJ11-Specific Base Instructions
+`SPL n` (`0000230..0000237`):
+- kernel mode: sets `PS<7:5>` to `n`
+- supervisor/user mode: treated as NOP
+- non-DCJ11 models: illegal-instruction trap
+
+`MFPS dst`:
+- transfers low byte of `PSW` as byte operation (`MOVB`-style destination semantics)
+- register destination gets sign-extended byte
+- memory destination performs byte store and byte autoincrement rules
+- condition codes: `N/Z` from transferred byte, `V=0`, `C` unchanged
+
+`MTPS src`:
+- updates low PSW byte mask as implemented in core
+- on DCJ11 in supervisor/user mode, `PS<7:5>` is preserved
+
+`TSTSET dst`, `WRTLCK dst`:
+- implemented for DCJ11 only
+- non-DCJ11 models trap as illegal instruction
+
+Status: **FIXED / PASS**
+
 References: J‑11 Programmer’s Reference (instruction set).
 
 ---
@@ -353,6 +375,8 @@ Implemented tests (see `tests/core_tests.c`):
 - IRQ priority masking and highest‑priority selection
 - TSTB flags and BPL branching
 - DCJ11 SEL0/SEL1/SEL2 semantics
+- DCJ11 `SPL` kernel/user semantics and illegal trap on other models
+- `MFPS` byte semantics (register sign-extension, memory byte-store/autoincrement)
 
 Run:
 ```

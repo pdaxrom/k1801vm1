@@ -317,6 +317,11 @@ static INLINE word op_reset(void)
     return 0000005;
 }
 
+static INLINE word op_spl(byte level)
+{
+    return 0000230 | (level & 07);
+}
+
 static INLINE word op_rtt(void)
 {
     return 0000006;
@@ -2680,11 +2685,31 @@ static int test_misc_ops_model(byte model, const char *name)
     ASSERT_EQ(fx.r.r[0], 0, "SXT should clear");
     expect_flags(&fx.r, 0, 1, 0, -1);
 
-    set_test_name(namebuf, sizeof(namebuf), "mfps", name);
+    set_test_name(namebuf, sizeof(namebuf), "mfps_reg", name);
     fx.r.psw = 000345;
     write_op(&fx, op_mfps(operand(0, 0)));
     ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
-    ASSERT_EQ(fx.r.r[0] & 0377, 0345, "MFPS should move PSW");
+    ASSERT_EQ(fx.r.r[0], 0177745, "MFPS should sign-extend into register");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "mfps_mem_byte", name);
+    store_word(&fx, 02200, 012345);
+    fx.r.psw = 000141;
+    fx.r.r[1] = 02200;
+    write_op(&fx, op_mfps(operand(1, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 02200), 0141, "MFPS should store low PSW byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 02201), 024, "MFPS should keep high byte");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "mfps_autoinc_byte", name);
+    store_word(&fx, 02220, 0);
+    fx.r.psw = 000201;
+    fx.r.r[2] = 02220;
+    write_op(&fx, op_mfps(operand(2, 2)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
+    ASSERT_EQ(fx.r.r[2], 02221, "MFPS autoincrement must step by byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 02220), 0201, "MFPS autoincrement value mismatch");
     expect_flags(&fx.r, 1, 0, 0, -1);
 
     set_test_name(namebuf, sizeof(namebuf), "mtps", name);
@@ -3994,6 +4019,94 @@ static int test_dcj11_mtps_user_restricts_psw(void)
 cleanup:
     fixture_teardown(&fx);
     return rc;
+}
+
+static int test_dcj11_spl_kernel_sets_priority(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_spl(5),
+        op_spl(2),
+    };
+    const word cc_before = FLAG_N | FLAG_C;
+
+    current_test = "dcj11_spl_kernel";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = cc_before;
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL 5 should execute");
+    ASSERT_EQ(fx.r.psw & 000340, 000240, "SPL should set kernel priority");
+    ASSERT_EQ(fx.r.psw & 000017, cc_before, "SPL should preserve condition codes");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL 2 should execute");
+    ASSERT_EQ(fx.r.psw & 000340, 000100, "SPL should update kernel priority");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_spl_user_is_nop(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_spl(7),
+    };
+    const word psw_before = 0140205;
+
+    current_test = "dcj11_spl_user_nop";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = psw_before;
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL in user mode should execute as NOP");
+    ASSERT_EQ(fx.r.psw, psw_before, "SPL in user mode should not modify PSW");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "SPL in user mode should advance PC");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_spl_illegal_on_other_models_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_spl(7),
+    };
+    const word handler = 07000;
+    const word new_psw = 000340;
+    char namebuf[64];
+
+    if (model == DCJ11) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "spl_illegal", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 010, handler);
+    store_word(&fx, 012, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL should trap on non-DCJ11 models");
+    ASSERT_EQ(fx.r.r[7], handler, "SPL should load illegal vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "SPL should load illegal vector PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_spl_illegal_on_other_models(void)
+{
+    return run_for_models(test_spl_illegal_on_other_models_model);
 }
 
 static int test_keyboard_irq_vector(void)
@@ -5323,6 +5436,9 @@ int main(void)
     failed += test_dcj11_rti_restores_state();
     failed += test_dcj11_rti_user_restricts_psw();
     failed += test_dcj11_mtps_user_restricts_psw();
+    failed += test_dcj11_spl_kernel_sets_priority();
+    failed += test_dcj11_spl_user_is_nop();
+    failed += test_spl_illegal_on_other_models();
     failed += test_vm2_rti_restores_state_model(K1801VM2, "K1801VM2");
     failed += test_vm2_rti_restores_state_model(K1806VM2, "K1806VM2");
     failed += test_vm2_rti_hu_restore_model(K1801VM2, "K1801VM2");

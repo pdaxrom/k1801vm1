@@ -19,7 +19,8 @@ enum {
 	ROF,		/* register offset */
 	EMT,		/* EMT and TRAP */
 	FLG,		/* flags */
-	NN			/* numeric */
+	NN,			/* numeric */
+	SPLN		/* SPL n */
 };
 
 static const struct _OPCODE {
@@ -35,6 +36,7 @@ static const struct _OPCODE {
 	{ "IOT",	0000004, NONE, 0 },
 	{ "RESET",	0000005, NONE, 0 },
 	{ "RTT",	0000006, NONE, 0 },
+	{ "MFPT",	0000007, NONE, 0 },
 	{ "NOP",	0000240, NONE, 0 },
 	{ "CLC",	0000241, NONE, 0 },
 	{ "CLV",	0000242, NONE, 0 },
@@ -76,6 +78,12 @@ static const struct _OPCODE {
 	{ "SXT",	0006700, SOP, 0 },
 	{ "MTPS",	0106400, SOP, 0 },
 	{ "MFPS",	0106700, SOP, 0 },
+	{ "MFPD",	0006500, SOP, 0 },
+	{ "MFPI",	0106500, SOP, 0 },
+	{ "MTPI",	0006600, SOP, 0 },
+	{ "MTPD",	0106600, SOP, 0 },
+	{ "TSTSET",	0007200, SOP, 0 },
+	{ "WRTLCK",	0007300, SOP, 0 },
 
 	{ "MOV",	0010000, DOP, 1 },
 	{ "CMP",	0020000, DOP, 1 },
@@ -98,6 +106,7 @@ static const struct _OPCODE {
 	{ "SOB",	0077000, ROF, 0 },
 
 	{ "MARK",	0006400, NN,  0 },
+	{ "SPL",	0000230, SPLN, 0 },
 
 	{ "EMT",	0104000, EMT, 0 },
 	{ "TRAP",	0104400, EMT, 0 },
@@ -268,6 +277,11 @@ char *disas(regs *r, word *addr, char *out)
 
 		if ((OPS[i].type == EMT) && (OPS[i].code == (instr & 0177400))) {
 			sprintf(out, "%s\t%o", OPS[i].name, instr & 0377);
+			break;
+		}
+
+		if ((OPS[i].type == SPLN) && (OPS[i].code == (instr & 0177770))) {
+			sprintf(out, "%s\t%o", OPS[i].name, instr & 07);
 			break;
 		}
 

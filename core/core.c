@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "core.h"
 #include "hardware.h"
@@ -218,7 +219,12 @@ enum {
 #define MMU_SSR0 0177572
 #define MMU_SSR1 0177574
 #define MMU_SSR2 0177576
-#define MMU_SSR3 0177516
+/*
+ * MMR3/SSR3 is 0172516 on classic 11/34-style systems.
+ * Keep 0177516 as a compatibility alias for existing DCJ11-oriented code.
+ */
+#define MMU_SSR3      0172516
+#define MMU_SSR3_ALT  0177516
 
 #define MMU_SUP_I_PDR_BASE 0172200
 #define MMU_SUP_D_PDR_BASE 0172220
@@ -251,6 +257,7 @@ enum {
 
 static INLINE void bus_error_trap(regs *r);
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault, int mode, int seg);
+static int core_trace_mmu_boot = -1;
 
 static INLINE int mmu_decode_parpdr(word addr, int *mode, int *space, int *is_par, int *seg)
 {
@@ -298,7 +305,8 @@ static INLINE int mmu_is_reg_address(word addr)
 #endif
 #endif
 
-	if (a == MMU_SSR0 || a == MMU_SSR1 || a == MMU_SSR2 || a == MMU_SSR3) {
+	if (a == MMU_SSR0 || a == MMU_SSR1 || a == MMU_SSR2 ||
+	    a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 		return 1;
 	}
 	return mmu_decode_parpdr(a, &mode, &space, &is_par, &seg);
@@ -346,7 +354,7 @@ static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
 #endif
 		return 1;
 	}
-	if (a == MMU_SSR3) {
+	if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 		*value_out = r->mmu_ssr3;
 #else
@@ -387,6 +395,9 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
 	if (a == MMU_SSR0) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 		r->mmu_ssr0 = value;
+		if (core_trace_mmu_boot > 0) {
+			fprintf(stderr, "MMU SSR0 <= %06o\n", value);
+		}
 #else
 		(void)value;
 #endif
@@ -408,9 +419,12 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
 #endif
 		return 1;
 	}
-	if (a == MMU_SSR3) {
+	if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 		r->mmu_ssr3 = value;
+		if (core_trace_mmu_boot > 0) {
+			fprintf(stderr, "MMU SSR3 <= %06o (addr=%06o)\n", value, a);
+		}
 #else
 		(void)value;
 #endif
@@ -523,10 +537,17 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
 		return 0;
 	}
 
-	/* Keep I/O page always reachable in this 16-bit core model. */
+	/*
+	 * Top virtual 8KB is fixed I/O page under relocation.
+	 * It is mapped to physical I/O page (18-bit or 22-bit view).
+	 */
 	if (va >= 0160000) {
 		if (pa_out) {
-			*pa_out = va;
+			if (r->mmu_ssr3 & 0000020) {
+				*pa_out = (dword)(017760000 | (va & 017777));
+			} else {
+				*pa_out = (dword)(00760000 | (va & 017777));
+			}
 		}
 		return 0;
 	}
@@ -813,6 +834,16 @@ static INLINE void illegal_trap(regs *r)
 
 static INLINE void bus_error_trap(regs *r)
 {
+	static int trace_init = 0;
+	static int trace_on = 0;
+	if (!trace_init) {
+		trace_on = (getenv("CORE_TRACE_BUSERR") != NULL) ? 1 : 0;
+		trace_init = 1;
+	}
+	if (trace_on) {
+		fprintf(stderr, "BUSERR pc=%06o fault=%06o sp=%06o ps=%06o ir=%06o\n",
+			r->r[7], r->r[7], r->r[6], r->psw, r->ir);
+	}
 	r->r[6] -= 2;
 	raw_store_word(r, r->r[6], r->psw);
 	r->r[6] -= 2;
@@ -1040,6 +1071,10 @@ int core_step(regs *r)
     int skip_trace = r->fTrap ? 1 : 0;
     r->fTrap = 0;
 
+    if (core_trace_mmu_boot < 0) {
+        core_trace_mmu_boot = (getenv("CORE_TRACE_MMU_BOOT") != NULL) ? 1 : 0;
+    }
+
     if (r->fAbort) {
     	r->fAbort = 0;
     	return 0;
@@ -1086,6 +1121,30 @@ int core_step(regs *r)
 		r->fAbort = 0;
         return 0;
     }
+
+    if (core_trace_mmu_boot > 0 && r->r[7] == 005202) {
+        dword pa_r = 0, pa_w = 0;
+        int f_r = 0, f_w = 0;
+        int m_r = 0, m_w = 0;
+        int s_r = 0, s_w = 0;
+        int rc_r = translate_va_ex(r, 0140000, 0, 0, 0, &pa_r, &f_r, &m_r, &s_r);
+        int rc_w = translate_va_ex(r, 0140000, 1, 0, 0, &pa_w, &f_w, &m_w, &s_w);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+        fprintf(stderr,
+                "MMU BOOT PC=%06o SSR0=%06o SSR3=%06o KIPDR6=%06o KDPDR6=%06o KIPAR6=%06o KDPAR6=%06o rcR=%d paR=%08o fR=%d mR=%d sR=%d rcW=%d paW=%08o fW=%d mW=%d sW=%d\n",
+                r->r[7], r->mmu_ssr0, r->mmu_ssr3,
+                r->mmu_pdr[0][0][6], r->mmu_pdr[0][1][6],
+                r->mmu_par[0][0][6], r->mmu_par[0][1][6],
+                rc_r, (unsigned)pa_r, f_r, m_r, s_r,
+                rc_w, (unsigned)pa_w, f_w, m_w, s_w);
+#else
+        fprintf(stderr,
+                "MMU BOOT PC=%06o rcR=%d paR=%08o fR=%d mR=%d sR=%d rcW=%d paW=%08o fW=%d mW=%d sW=%d\n",
+                r->r[7], rc_r, (unsigned)pa_r, f_r, m_r, s_r,
+                rc_w, (unsigned)pa_w, f_w, m_w, s_w);
+#endif
+    }
+
     r->ir = op;
     r->r[7] += 2;
     if (is_vm2(r) && ((op & 0177700) == 0075000)) {
@@ -1228,6 +1287,17 @@ int core_step(regs *r)
         goto step_end;
 
     }
+
+	if ((op & 0177770) == 0000230) { /* SPL */
+		if (r->model != DCJ11) {
+			illegal_trap(r);
+        goto step_end;
+		}
+		if (dcj11_kernel_psw(psw_before)) {
+			r->psw = (word)((r->psw & ~000340) | ((op & 07) << 5));
+		}
+        goto step_end;
+	}
 
     if (is_vm2(r)) {
     	switch(op) {
@@ -1823,11 +1893,11 @@ int core_step(regs *r)
         goto step_end;
 
 		case 01067: /* MFPS */ {
-			DECODE_DST();
-			word tmp = r->psw;
-			PUT_WORD(tmp);
-			set_flag_if(tmp & SIGN_B,      FLAG_N);
-			set_flag_if((tmp & 0377) == 0, FLAG_Z);
+			DECODE_DSTB();
+			word tmp = r->psw & 0377;
+			PUT_BYTE_MOVB(tmp);
+			set_flag_if(tmp & SIGN_B,  FLAG_N);
+			set_flag_if(tmp == 0,      FLAG_Z);
 			clear_flag(FLAG_V);
 			}
         goto step_end;
