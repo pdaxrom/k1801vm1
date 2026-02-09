@@ -36,13 +36,6 @@ static int trace_nxm_flag = 0;
 static lsi11_machine_t machine_profile = LSI11_MACHINE_1104;
 static uint32_t machine_ram_kb = 56;
 static int dl11_alias_on = 1;
-static word dcj11_cpu_reg_177750 = 0;
-
-static int dcj11_has_cpu_reg_177750(const regs *r, word addr) {
-  if (!r || r->model != DCJ11)
-    return 0;
-  return ((addr & 0177776) == 0177750) ? 1 : 0;
-}
 
 int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
                             size_t err_len) {
@@ -121,10 +114,6 @@ static void nxm_trap(regs *r, paddr_t addr) {
 /* ---------- bus callbacks for core ---------- */
 
 static byte core_load_byte(regs *r, word addr) {
-  if (dcj11_has_cpu_reg_177750(r, addr)) {
-    return (byte)((addr & 1) ? ((dcj11_cpu_reg_177750 >> 8) & 000377)
-                             : (dcj11_cpu_reg_177750 & 000377));
-  }
   if ((addr & 0177776) == 0177776) {
     return (byte)((addr & 1) ? ((r->psw >> 8) & 000377) : (r->psw & 000377));
   }
@@ -136,15 +125,6 @@ static byte core_load_byte(regs *r, word addr) {
 }
 
 static void core_store_byte(regs *r, word addr, byte v) {
-  if (dcj11_has_cpu_reg_177750(r, addr)) {
-    word reg = dcj11_cpu_reg_177750;
-    if (addr & 1)
-      reg = (word)((reg & 000377) | ((word)v << 8));
-    else
-      reg = (word)((reg & 0177400) | v);
-    dcj11_cpu_reg_177750 = reg;
-    return;
-  }
   if ((addr & 0177776) == 0177776) {
     word psw = r->psw;
     if (addr & 1)
@@ -162,8 +142,6 @@ static void core_store_byte(regs *r, word addr, byte v) {
 }
 
 static word core_load_word(regs *r, word addr) {
-  if (dcj11_has_cpu_reg_177750(r, addr))
-    return dcj11_cpu_reg_177750;
   if (addr == 0177776) return r->psw;
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
@@ -173,10 +151,6 @@ static word core_load_word(regs *r, word addr) {
 }
 
 static void core_store_word(regs *r, word addr, word v) {
-  if (dcj11_has_cpu_reg_177750(r, addr)) {
-    dcj11_cpu_reg_177750 = v;
-    return;
-  }
   if (addr == 0177776) {
     r->psw = v;
     return;
@@ -189,11 +163,6 @@ static void core_store_word(regs *r, word addr, word v) {
 }
 
 static byte core_load_byte_pa(regs *r, dword addr) {
-  if (dcj11_has_cpu_reg_177750(r, (word)addr)) {
-    word a = (word)addr;
-    return (byte)((a & 1) ? ((dcj11_cpu_reg_177750 >> 8) & 000377)
-                          : (dcj11_cpu_reg_177750 & 000377));
-  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -202,16 +171,6 @@ static byte core_load_byte_pa(regs *r, dword addr) {
 }
 
 static void core_store_byte_pa(regs *r, dword addr, byte v) {
-  if (dcj11_has_cpu_reg_177750(r, (word)addr)) {
-    word a = (word)addr;
-    word reg = dcj11_cpu_reg_177750;
-    if (a & 1)
-      reg = (word)((reg & 000377) | ((word)v << 8));
-    else
-      reg = (word)((reg & 0177400) | v);
-    dcj11_cpu_reg_177750 = reg;
-    return;
-  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -220,8 +179,6 @@ static void core_store_byte_pa(regs *r, dword addr, byte v) {
 }
 
 static word core_load_word_pa(regs *r, dword addr) {
-  if (dcj11_has_cpu_reg_177750(r, (word)addr))
-    return dcj11_cpu_reg_177750;
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -230,10 +187,6 @@ static word core_load_word_pa(regs *r, dword addr) {
 }
 
 static void core_store_word_pa(regs *r, dword addr, word v) {
-  if (dcj11_has_cpu_reg_177750(r, (word)addr)) {
-    dcj11_cpu_reg_177750 = v;
-    return;
-  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -272,7 +225,6 @@ static int impl_init(regs *r) {
 
 static void impl_reset(regs *r) {
   (void)r;
-  dcj11_cpu_reg_177750 = 0;
   dl11_reset();
   kw11_reset();
   rk11_reset();

@@ -36,6 +36,7 @@ This subproject now provides two separate executables:
 - MMU registers and translation are available in CPU core.
 - Default CPU model is `dcj11`.
 - Optional override: `-cpu dcj11|11/03|11/34|k1801vm1|k1801vm1g|k1801vm2|k1806vm2`.
+- DCJ11 CPU register `0177750` is implemented in `core/` (CPU-level), not in machine device map.
 
 ### RAM size model
 - Default RAM size: **4096 KB**.
