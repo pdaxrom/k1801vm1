@@ -59,9 +59,10 @@ This subproject now provides two separate executables:
 - If needed for compatibility, alias can be explicitly enabled:
   - `-dl11-alias`
 - Bus decode model:
-  - low 16-bit I/O page `160000..177777` is reserved for devices/NXM (not RAM)
-  - higher 18-bit/22-bit I/O windows are decoded to the same 16-bit device page
-  - RAM is available below `160000` and above the low I/O page up to configured size
+  - low 16-bit page `160000..177777`: registered device CSRs are decoded there
+  - undecoded addresses in `160000..177777` fall through to RAM if they are within configured RAM size (not forced to NXM)
+  - higher 18-bit/22-bit I/O windows are decoded to the same 16-bit device page for registered devices
+  - for non-device addresses outside RAM range, bus returns NXM as usual
 
 ### RH11 in pdp1134 profile
 - RH11 (Massbus adapter) is available only in `pdp1134`.
