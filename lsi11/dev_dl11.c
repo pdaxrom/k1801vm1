@@ -19,6 +19,9 @@
 /* Bits (byte): DONE=0200, IE=0100 */
 #define CSR_DONE 000200
 #define CSR_IE   000100
+#define CSR_MAINT 000004
+#define CSR_BREAK 000001
+#define RCSR_RE   000001
 
 static irq_latch_t rx_l;
 static irq_latch_t tx_l;
@@ -28,6 +31,8 @@ static uint64_t tx_ready_ns = 0;
 static int tx_busy = 0;
 static int dl11_alias_enabled = 1;
 static int dl11_debug_tx = 0;
+static int dl11_8bit_mode = 0; /* default 7-bit TTY behavior */
+static uint8_t tcsr_misc = 0;  /* MAINT (bit2) + BREAK (bit0) */
 
 static uint64_t now_ns(void)
 {
@@ -45,6 +50,11 @@ static uint16_t norm(uint16_t a)
     if ((a & 0177770) == DL11_BASE_ALIAS)
         return (uint16_t)(DL11_BASE_PRIMARY | (a & 0000007));
     return a;
+}
+
+static inline uint8_t dl11_mask_char(uint8_t v)
+{
+    return dl11_8bit_mode ? v : (uint8_t)(v & 0177);
 }
 
 /* --- I/O callbacks --- */
@@ -68,6 +78,7 @@ static uint8_t dl11_read8(uint16_t a)
         uint8_t v = 0;
         if (tx_l.done) v |= CSR_DONE;
         if (tx_l.ie)   v |= CSR_IE;
+        v |= (uint8_t)(tcsr_misc & (CSR_MAINT | CSR_BREAK));
         return v;
     }
     case DL11_TBUF:
@@ -82,7 +93,7 @@ static void dl11_write8(uint16_t a, uint8_t v)
     a = norm(a);
     switch (a) {
     case DL11_RCSR:
-        /* allow writing IE only; if DONE is already set, enabling IE raises IRQ */
+        /* IE controls RX IRQ generation; RE (bit 0) clears DONE when asserted. */
         if (v & CSR_IE) {
             if (!rx_l.ie && rx_l.done) {
                 rx_l.irq_req = 1;
@@ -91,9 +102,18 @@ static void dl11_write8(uint16_t a, uint8_t v)
         } else {
             rx_l.ie = 0;
         }
+        if (v & RCSR_RE) {
+            irq_latch_sw_clear_done(&rx_l);
+        }
+        return;
+    case DL11_RBUF:
+        /* RBUF addressed for read or write clears Receiver Done. */
+        irq_latch_sw_clear_done(&rx_l);
         return;
     case DL11_TCSR:
-        /* if transmitter is already DONE, enabling IE should request IRQ */
+        tcsr_misc = (uint8_t)(v & (CSR_MAINT | CSR_BREAK));
+
+        /* If transmitter is already ready, enabling IE should request IRQ. */
         if (v & CSR_IE) {
             if (!tx_l.ie && tx_l.done) {
                 tx_l.irq_req = 1;
@@ -113,7 +133,13 @@ static void dl11_write8(uint16_t a, uint8_t v)
         }
 
         /* output low byte */
-        util_term_putc((char)v);
+        util_term_putc((char)dl11_mask_char(v));
+
+        if ((tcsr_misc & CSR_MAINT) && !rx_l.done) {
+            /* Maintenance loopback: transmitter feeds receiver input. */
+            rx_buf = dl11_mask_char(v);
+            irq_latch_event_set_done(&rx_l);
+        }
 
         /* transmitter becomes ready later -> DONE=1 */
 #if (DL11_TX_CHAR_NS == 0ull)
@@ -169,6 +195,7 @@ void dl11_reset(void)
     irq_latch_event_set_done(&tx_l);
     tx_busy = 0;
     tx_ready_ns = 0;
+    tcsr_misc = 0;
 }
 
 void dl11_set_alias(int on)
@@ -193,8 +220,13 @@ void dl11_poll(void)
     c = util_term_getc_nonblock();
     if (c < 0) return;
 
-    rx_buf = (uint8_t)c;
+    rx_buf = dl11_mask_char((uint8_t)c);
     irq_latch_event_set_done(&rx_l);
+}
+
+void dl11_set_8bit(int on)
+{
+    dl11_8bit_mode = on ? 1 : 0;
 }
 
 #ifdef LSI11_TESTS

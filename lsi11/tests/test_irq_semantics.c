@@ -121,6 +121,11 @@ static void test_dl11_rx(regs *r) {
   vec = 0;
   check(poll_irq(r, &vec) == 1, "DL11 RX: new IRQ after next event");
 
+  /* Addressing RBUF by write also clears DONE. */
+  wr8(DL11_RBUF, 0);
+  vec = 0;
+  check(poll_irq(r, &vec) == 0, "DL11 RX: RBUF write clears DONE without IRQ");
+
   /* cleanup */
   (void)rd8(DL11_RBUF);
   wr8(DL11_RCSR, 000000);
@@ -131,8 +136,19 @@ static void test_kw11(regs *r) {
 
   reset_devices();
 
-  /* enable IE */
+  /* Enable IE while monitor already set -> immediate IRQ request. */
   wr8(KW11_CSR, 000100);
+  check(poll_irq(r, &vec) == 1, "KW11: immediate IRQ when IE set with MON=1");
+  check((vec & 0000777) == 000100, "KW11: vector low bits 000100");
+
+  /* read/clear: monitor clears on CSR read */
+  check((rd8(KW11_CSR) & 000300) == 000300, "KW11: read returns MON=1, IE=1 before clear");
+  check((rd8(KW11_CSR) & 000200) == 0, "KW11: second read sees MON cleared");
+
+  /* With MON=0, re-writing IE should not immediately re-IRQ. */
+  wr8(KW11_CSR, 000100);
+  vec = 0;
+  check(poll_irq(r, &vec) == 0, "KW11: no immediate IRQ when MON=0");
 
   /* Wait/poll until an IRQ arrives (kw11_poll uses host time).
      Give it some tries; each loop calls kw11_poll then polls IRQ. */
@@ -146,10 +162,8 @@ static void test_kw11(regs *r) {
     usleep(100);
   }
   check(got, "KW11: got an IRQ at 50 Hz");
-  /* vector check (if no DCJ11 encoding): */
-  check((vec & 0000777) == 000100, "KW11: vector low bits 000100");
 
-  /* KW11-L keeps ticking: after acknowledge, next ticks should interrupt again. */
+  /* KW11 keeps ticking: after acknowledge, next tick interrupts again. */
   vec = 0;
   got = 0;
   for (int i = 0; i < 2000; i++) {
@@ -162,10 +176,10 @@ static void test_kw11(regs *r) {
   }
   check(got, "KW11: repeat IRQ on subsequent tick");
 
-  /* Software write to CSR should still keep clock/IE operational. */
+  /* Writing CSR keeps IE and does not clear monitor in this model. */
   wr8(KW11_CSR, 000100);
 
-  /* After DONE cleared, next tick should generate another IRQ */
+  /* Next tick should still generate another IRQ. */
   vec = 0;
   got = 0;
   for (int i = 0; i < 5000; i++) {
@@ -176,7 +190,7 @@ static void test_kw11(regs *r) {
     }
     usleep(100);
   }
-  check(got, "KW11: new IRQ after clearing DONE");
+  check(got, "KW11: new IRQ on subsequent tick with IE=1");
 }
 
 static void test_lp11(regs *r) {

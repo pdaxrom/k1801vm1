@@ -2,7 +2,6 @@
 #include "dev_kw11.h"
 #include "devio.h"
 #include "irq.h"
-#include "irq_latch.h"
 #include <stdint.h>
 #include <time.h>
 
@@ -13,7 +12,9 @@
 #define CSR_DONE 000200
 #define CSR_IE   000100
 
-static irq_latch_t kw_l;
+static uint8_t kw_done = 0;
+static uint8_t kw_ie = 0;
+static uint8_t kw_irq_req = 0;
 static uint64_t last_tick_ns = 0;
 static int clock_init = 0;
 
@@ -29,8 +30,11 @@ static uint8_t kw11_read8(uint16_t a)
 {
     if (a == KW11_CSR) {
         uint8_t v = 0;
-        if (kw_l.done) v |= CSR_DONE;
-        if (kw_l.ie)   v |= CSR_IE;
+        if (kw_done) v |= CSR_DONE;
+        if (kw_ie)   v |= CSR_IE;
+        /* LKS monitor is read/clear. */
+        kw_done = 0;
+        kw_irq_req = 0;
         return v;
     }
     if (a == (uint16_t)(KW11_CSR + 1)) return 0;
@@ -40,9 +44,14 @@ static uint8_t kw11_read8(uint16_t a)
 static void kw11_write8(uint16_t a, uint8_t v)
 {
     if (a == KW11_CSR) {
-        /* Software clears DONE: any write to CSR low byte */
-        irq_latch_sw_clear_done(&kw_l);
-        irq_latch_set_ie(&kw_l, (v & CSR_IE) ? 1 : 0);
+        kw_ie = (v & CSR_IE) ? 1 : 0;
+        /*
+         * If IE is set while monitor is already set, request interrupt
+         * immediately.
+         */
+        if (kw_ie && kw_done) {
+            kw_irq_req = 1;
+        }
         return;
     }
     if (a == (uint16_t)(KW11_CSR + 1)) {
@@ -52,14 +61,10 @@ static void kw11_write8(uint16_t a, uint8_t v)
 }
 
 /* --- IRQ source --- */
-int kw11_irq_pending(void) { return kw_l.irq_req ? 1 : 0; }
+int kw11_irq_pending(void) { return kw_irq_req ? 1 : 0; }
 void kw11_irq_ack(void)
 {
-    /* KW11-L style: interrupt acknowledge drops the monitor request,
-       letting the next tick generate a fresh DONE/IRQ cycle. */
-    kw_l.irq_req = 0;
-    kw_l.done = 0;
-    kw_l.irq_armed = 1;
+    kw_irq_req = 0;
 }
 
 int kw11_init(void)
@@ -76,12 +81,14 @@ int kw11_init(void)
 
 void kw11_reset(void)
 {
-    irq_latch_reset(&kw_l);
+    kw_done = 1; /* Set by INIT */
+    kw_ie = 0;   /* Cleared by INIT */
+    kw_irq_req = 0;
     clock_init = 0;
     last_tick_ns = 0;
 }
 
-/* 50 Hz ticks; STRICT: tick only if DONE==0 */
+/* 50 Hz ticks; monitor set on each tick. */
 void kw11_poll(void)
 {
     const uint64_t period_ns = 20000000ull; /* 20ms */
@@ -101,8 +108,8 @@ void kw11_poll(void)
     uint64_t ticks = elapsed / period_ns;
     last_tick_ns += ticks * period_ns;
 
-    /* STRICT policy */
-    if (!kw_l.done) {
-        irq_latch_event_set_done(&kw_l);
+    kw_done = 1;
+    if (kw_ie) {
+        kw_irq_req = 1;
     }
 }
