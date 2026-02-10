@@ -25,6 +25,9 @@ void lsi11_set_dl11_alias(int on);
 int lsi11_dl11_alias(void);
 lsi11_machine_t lsi11_machine_current(void);
 uint32_t lsi11_machine_ram_kb(void);
+int lsi11_set_device_enabled(const char *name, int on, char *err,
+                             size_t err_len);
+int lsi11_device_enabled(const char *name);
 
 /* Connect machine callbacks to core regs struct. */
 void lsi11_hw_connect(regs *r);

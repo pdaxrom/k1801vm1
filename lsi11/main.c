@@ -5,6 +5,7 @@
 #include "adapter_core.h"
 #include "bus.h"
 #include "dev_dl11.h"
+#include "dev_rl11.h"
 #include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
@@ -62,6 +63,54 @@ static const char *cpu_model_name(byte model) {
   }
 }
 
+/*
+ * RL11 bootstrap (M9312-style), adapted from Pico_1140 rl11.h.
+ * Loaded at 02000 and entered at 02002.
+ */
+#define RL_BOOT_ADDR  002000
+#define RL_BOOT_ENTRY (RL_BOOT_ADDR + 000002)
+static const uint16_t rl_bootstrap[] = {
+    0042114,                         /* "LD" signature */
+    0012706, RL_BOOT_ADDR,           /* MOV #boot_start, SP */
+    0012700, 0000000,                /* MOV #unit, R0 (unit 0) */
+    0010003,                         /* MOV R0, R3 */
+    0000303,                         /* SWAB R3 */
+    0012701, 0174400,                /* MOV #RLCS, R1 */
+    0012761, 0000013, 0000004,       /* MOV #13, 4(R1) ; clear errors */
+    0052703, 0000004,                /* BIS #4, R3     ; unit + gstat */
+    0010311,                         /* MOV R3, (R1) */
+    0105711,                         /* TSTB (R1) */
+    0100376,                         /* BPL .-2 */
+    0105003,                         /* CLRB R3 */
+    0052703, 0000010,                /* BIS #10, R3    ; unit + rdhdr */
+    0010311,                         /* MOV R3, (R1) */
+    0105711,                         /* TSTB (R1) */
+    0100376,                         /* BPL .-2 */
+    0016102, 0000006,                /* MOV 6(R1), R2  ; header word1 */
+    0042702, 0000077,                /* BIC #77, R2    ; clear sector */
+    0005202,                         /* INC R2         ; seek marker */
+    0010261, 0000004,                /* MOV R2, 4(R1)  ; seek params */
+    0105003,                         /* CLRB R3 */
+    0052703, 0000006,                /* BIS #6, R3     ; unit + seek */
+    0010311,                         /* MOV R3, (R1) */
+    0105711,                         /* TSTB (R1) */
+    0100376,                         /* BPL .-2 */
+    0005061, 0000002,                /* CLR 2(R1)      ; BA=0 */
+    0005061, 0000004,                /* CLR 4(R1)      ; DA=0 */
+    0012761, 0177000, 0000006,       /* MOV #-512.,6(R1) */
+    0105003,                         /* CLRB R3 */
+    0052703, 0000014,                /* BIS #14, R3    ; unit + read */
+    0010311,                         /* MOV R3, (R1) */
+    0105711,                         /* TSTB (R1) */
+    0100376,                         /* BPL .-2 */
+    0042711, 0000377,                /* BIC #377, (R1) */
+    0005002,                         /* CLR R2 */
+    0005003,                         /* CLR R3 */
+    0012704, RL_BOOT_ADDR + 000020,  /* MOV #boot+20, R4 */
+    0005005,                         /* CLR R5 */
+    0005007                          /* CLR PC */
+};
+
 static void usage(const char *argv0) {
 #if defined(LSI11_TARGET_1134)
   const char *target = "pdp1134";
@@ -71,7 +120,7 @@ static void usage(const char *argv0) {
 
   fprintf(stderr,
           "Usage:\n"
-          "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] "
+          "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-rl <rl.img>] "
           "[-bootcopy|-bootrt11] [-cpu <model>]\n"
           "\n"
           "Target profile:\n"
@@ -87,10 +136,20 @@ static void usage(const char *argv0) {
 #endif
           "  -rk <path>      Attach RK05 image\n"
           "  -rh <path>      Attach RH11 (RK06/RK07) image (pdp1134 only)\n"
-          "  -bootcopy       Copy first 010000 bytes from RK/RH image into RAM at "
+          "  -rl <path>      Attach RL image (auto detect RL01/RL02)\n"
+          "  -rl01 <path>    Attach image as RL01\n"
+          "  -rl02 <path>    Attach image as RL02\n"
+          "  -disable-dl     Disable DL11\n"
+          "  -disable-kw     Disable KW11\n"
+          "  -disable-lp     Disable LP11\n"
+          "  -disable-rk     Disable RK11\n"
+          "  -disable-rh     Disable RH11\n"
+          "  -disable-rl     Disable RL11\n"
+          "  -disable-sr     Disable SR\n"
+          "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
           "000000\n"
-          "  -bootrt11       Copy first 01000 bytes (or 2nd block if empty) "
-          "from RK/RH image into RAM at 000000 and jump to 000000\n"
+          "  -bootrt11       RK/RH: copy first 01000 bytes (or 2nd block if "
+          "empty); RL: run RL bootstrap\n"
           "  -trace          Trace each instruction\n"
           "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
@@ -119,6 +178,8 @@ static void usage(const char *argv0) {
 int main(int argc, char **argv) {
   const char *rk_path = NULL;
   const char *rh_path = NULL;
+  const char *rl_path = NULL;
+  int rl_type = RL11_TYPE_AUTO;
   const char *load_path = NULL;
   int do_bootcopy = 0;
   int do_bootrt11 = 0;
@@ -127,6 +188,13 @@ int main(int argc, char **argv) {
   long sr_value = -1;
   long ram_kb_arg = -1;
   int force_dl11_alias = -1;
+  int disable_dl = 0;
+  int disable_kw = 0;
+  int disable_lp = 0;
+  int disable_rk = 0;
+  int disable_rh = 0;
+  int disable_rl = 0;
+  int disable_sr = 0;
 #if defined(LSI11_TARGET_1134)
   byte cpu_model = DCJ11;
 #else
@@ -150,6 +218,29 @@ int main(int argc, char **argv) {
       rk_path = argv[++i];
     } else if (!strcmp(argv[i], "-rh") && i + 1 < argc) {
       rh_path = argv[++i];
+    } else if (!strcmp(argv[i], "-rl") && i + 1 < argc) {
+      rl_path = argv[++i];
+      rl_type = RL11_TYPE_AUTO;
+    } else if (!strcmp(argv[i], "-rl01") && i + 1 < argc) {
+      rl_path = argv[++i];
+      rl_type = RL11_TYPE_RL01;
+    } else if (!strcmp(argv[i], "-rl02") && i + 1 < argc) {
+      rl_path = argv[++i];
+      rl_type = RL11_TYPE_RL02;
+    } else if (!strcmp(argv[i], "-disable-dl")) {
+      disable_dl = 1;
+    } else if (!strcmp(argv[i], "-disable-kw")) {
+      disable_kw = 1;
+    } else if (!strcmp(argv[i], "-disable-lp")) {
+      disable_lp = 1;
+    } else if (!strcmp(argv[i], "-disable-rk")) {
+      disable_rk = 1;
+    } else if (!strcmp(argv[i], "-disable-rh")) {
+      disable_rh = 1;
+    } else if (!strcmp(argv[i], "-disable-rl")) {
+      disable_rl = 1;
+    } else if (!strcmp(argv[i], "-disable-sr")) {
+      disable_sr = 1;
     } else if (!strcmp(argv[i], "-bootcopy")) {
       do_bootcopy = 1;
     } else if (!strcmp(argv[i], "-bootrt11")) {
@@ -225,14 +316,68 @@ int main(int argc, char **argv) {
     lsi11_set_dl11_alias(force_dl11_alias);
   }
 
+  if (disable_dl &&
+      lsi11_set_device_enabled("dl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (disable_kw &&
+      lsi11_set_device_enabled("kw11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (disable_lp &&
+      lsi11_set_device_enabled("lp11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (disable_rk &&
+      lsi11_set_device_enabled("rk11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (disable_rh &&
+      lsi11_set_device_enabled("rh11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (disable_rl &&
+      lsi11_set_device_enabled("rl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+  if (disable_sr &&
+      lsi11_set_device_enabled("sr", 0, cfg_err, sizeof(cfg_err)) != 0) {
+    fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+    return 2;
+  }
+
+  if (rk_path && !lsi11_device_enabled("rk11")) {
+    fprintf(stderr, "-rk is not allowed with -disable-rk\n");
+    return 2;
+  }
+  if (rh_path && !lsi11_device_enabled("rh11")) {
+    fprintf(stderr, "-rh is not allowed with -disable-rh\n");
+    return 2;
+  }
+  if (rl_path && !lsi11_device_enabled("rl11")) {
+    fprintf(stderr, "-rl/-rl01/-rl02 is not allowed with -disable-rl\n");
+    return 2;
+  }
+
   if (check_config_only) {
     const char *m = (lsi11_machine_current() == LSI11_MACHINE_1134) ? "pdp1134"
                                                                      : "lsi11";
     int rh11_on = (lsi11_machine_current() == LSI11_MACHINE_1134) ? 1 : 0;
     fprintf(stderr,
-            "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d\n", m,
-            cpu_model_name(cpu_model), lsi11_machine_ram_kb(), lsi11_dl11_alias(),
-            rh11_on);
+            "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
+            "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "
+            "dev_sr=%d\n",
+            m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
+            lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
+            lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
+            lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
+            lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"));
     return 0;
   }
 
@@ -265,6 +410,15 @@ int main(int argc, char **argv) {
       return 1;
     }
   }
+  if (rl_path) {
+    if (rl11_open_image_typed(rl_path, rl_type) != 0) {
+      fprintf(stderr, "rl11_open_image failed: %s\n", rl_path);
+      rh11_close_image();
+      rk11_close_image();
+      r.fini(&r);
+      return 1;
+    }
+  }
 
   core_reset(&r);
 
@@ -287,8 +441,11 @@ int main(int argc, char **argv) {
       rc = rk11_boot_copy(ram0, n);
     } else if (rh_path) {
       rc = rh11_boot_copy(ram0, n);
+    } else if (rl_path) {
+      rc = rl11_boot_copy(ram0, n);
     } else {
-      fprintf(stderr, "-bootcopy requires -rk <image> or -rh <image>\n");
+      fprintf(stderr,
+              "-bootcopy requires -rk <image>, -rh <image>, or -rl <image>\n");
       r.fini(&r);
       return 1;
     }
@@ -302,9 +459,26 @@ int main(int argc, char **argv) {
   }
 
   if (do_bootrt11) {
-    const char *boot_path = rk_path ? rk_path : rh_path;
+    if (rl_path) {
+      uint8_t *ram0 = bus_ram_ptr(RL_BOOT_ADDR);
+      size_t n = sizeof(rl_bootstrap);
+      if (!ram0 || !bus_range_is_ram(RL_BOOT_ADDR, n)) {
+        fprintf(stderr, "bootrt11 destination is outside RAM\n");
+        r.fini(&r);
+        return 1;
+      }
+      for (size_t i = 0; i < (sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0]));
+           i++) {
+        uint16_t w = rl_bootstrap[i];
+        ram0[i * 2 + 0] = (uint8_t)(w & 000377);
+        ram0[i * 2 + 1] = (uint8_t)((w >> 8) & 000377);
+      }
+      r.r[7] = RL_BOOT_ENTRY;
+    } else {
+    const char *boot_path = rk_path ? rk_path : (rh_path ? rh_path : rl_path);
     if (!boot_path) {
-      fprintf(stderr, "-bootrt11 requires -rk <image> or -rh <image>\n");
+      fprintf(stderr,
+              "-bootrt11 requires -rk <image>, -rh <image>, or -rl <image>\n");
       r.fini(&r);
       return 1;
     }
@@ -347,6 +521,7 @@ int main(int argc, char **argv) {
       memcpy(ram0, buf, n);
     }
     r.r[7] = 000000;
+    }
   }
 
   if (load_path) {
@@ -436,6 +611,7 @@ int main(int argc, char **argv) {
   }
 
   r.fini(&r);
+  rl11_close_image();
   rh11_close_image();
   rk11_close_image();
   return 0;

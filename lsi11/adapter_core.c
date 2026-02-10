@@ -7,6 +7,7 @@
 #include "dev_dl11.h"
 #include "dev_kw11.h"
 #include "dev_lp11.h"
+#include "dev_rl11.h"
 #include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
@@ -36,6 +37,29 @@ static int trace_nxm_flag = 0;
 static lsi11_machine_t machine_profile = LSI11_MACHINE_1104;
 static uint32_t machine_ram_kb = 56;
 static int dl11_alias_on = 1;
+static int term_raw_active = 0;
+
+typedef struct {
+  int dl11;
+  int kw11;
+  int lp11;
+  int rl11;
+  int rk11;
+  int rh11;
+  int sr;
+} lsi11_device_mask_t;
+
+static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 0, 1};
+
+static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine) {
+  device_mask.dl11 = 1;
+  device_mask.kw11 = 1;
+  device_mask.lp11 = 1;
+  device_mask.rl11 = 1;
+  device_mask.rk11 = 1;
+  device_mask.sr = 1;
+  device_mask.rh11 = (machine == LSI11_MACHINE_1134) ? 1 : 0;
+}
 
 int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
                             size_t err_len) {
@@ -48,6 +72,7 @@ int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
     machine_profile = LSI11_MACHINE_1104;
     machine_ram_kb = bus_ram_kb();
     dl11_alias_on = 1;
+    lsi11_reset_device_mask_for_profile(machine_profile);
     return 0;
   }
 
@@ -58,6 +83,7 @@ int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
     machine_profile = LSI11_MACHINE_1134;
     machine_ram_kb = bus_ram_kb();
     dl11_alias_on = 0;
+    lsi11_reset_device_mask_for_profile(machine_profile);
     return 0;
   }
 
@@ -73,6 +99,75 @@ int lsi11_dl11_alias(void) { return dl11_alias_on; }
 lsi11_machine_t lsi11_machine_current(void) { return machine_profile; }
 
 uint32_t lsi11_machine_ram_kb(void) { return machine_ram_kb; }
+
+int lsi11_set_device_enabled(const char *name, int on, char *err,
+                             size_t err_len) {
+  int v = on ? 1 : 0;
+  if (!name) {
+    if (err && err_len)
+      snprintf(err, err_len, "Device name is required");
+    return -1;
+  }
+
+  if (!strcmp(name, "dl11")) {
+    device_mask.dl11 = v;
+    return 0;
+  }
+  if (!strcmp(name, "kw11")) {
+    device_mask.kw11 = v;
+    return 0;
+  }
+  if (!strcmp(name, "lp11")) {
+    device_mask.lp11 = v;
+    return 0;
+  }
+  if (!strcmp(name, "rl11")) {
+    device_mask.rl11 = v;
+    return 0;
+  }
+  if (!strcmp(name, "rk11")) {
+    device_mask.rk11 = v;
+    return 0;
+  }
+  if (!strcmp(name, "rh11")) {
+    if (machine_profile != LSI11_MACHINE_1134 && v) {
+      if (err && err_len)
+        snprintf(err, err_len, "RH11 is not available on lsi11 profile");
+      return -1;
+    }
+    device_mask.rh11 = (machine_profile == LSI11_MACHINE_1134) ? v : 0;
+    return 0;
+  }
+  if (!strcmp(name, "sr")) {
+    device_mask.sr = v;
+    return 0;
+  }
+
+  if (err && err_len)
+    snprintf(err, err_len, "Unknown device: %s", name);
+  return -1;
+}
+
+int lsi11_device_enabled(const char *name) {
+  if (!name) {
+    return 0;
+  }
+  if (!strcmp(name, "dl11"))
+    return device_mask.dl11;
+  if (!strcmp(name, "kw11"))
+    return device_mask.kw11;
+  if (!strcmp(name, "lp11"))
+    return device_mask.lp11;
+  if (!strcmp(name, "rl11"))
+    return device_mask.rl11;
+  if (!strcmp(name, "rk11"))
+    return device_mask.rk11;
+  if (!strcmp(name, "rh11"))
+    return device_mask.rh11;
+  if (!strcmp(name, "sr"))
+    return device_mask.sr;
+  return 0;
+}
 
 /* ---------- NXM trap ----------
    This matches your previous approach: push PSW and PC, then vector through
@@ -185,22 +280,28 @@ static int impl_init(regs *r) {
   dl11_set_alias(dl11_alias_on);
 
   /* init host terminal */
-  util_term_init_raw();
+  term_raw_active = 0;
+  if (device_mask.dl11) {
+    util_term_init_raw();
+    term_raw_active = 1;
+  }
 
   /* init device frameworks (devio/irq are implicit singletons) */
-  if (dl11_init() != 0)
+  if (device_mask.dl11 && dl11_init() != 0)
     return -1;
-  if (kw11_init() != 0)
+  if (device_mask.kw11 && kw11_init() != 0)
     return -1;
-  if (rk11_init() != 0)
+  if (device_mask.rl11 && rl11_init() != 0)
     return -1;
-  if (machine_profile == LSI11_MACHINE_1134) {
+  if (device_mask.rk11 && rk11_init() != 0)
+    return -1;
+  if (device_mask.rh11 && machine_profile == LSI11_MACHINE_1134) {
     if (rh11_init() != 0)
       return -1;
   }
-  if (lp11_init() != 0)
+  if (device_mask.lp11 && lp11_init() != 0)
     return -1;
-  if (sr_init() != 0)
+  if (device_mask.sr && sr_init() != 0)
     return -1;
 
   return 0;
@@ -208,19 +309,29 @@ static int impl_init(regs *r) {
 
 static void impl_reset(regs *r) {
   (void)r;
-  dl11_reset();
-  kw11_reset();
-  rk11_reset();
-  if (machine_profile == LSI11_MACHINE_1134) {
+  if (device_mask.dl11)
+    dl11_reset();
+  if (device_mask.kw11)
+    kw11_reset();
+  if (device_mask.rl11)
+    rl11_reset();
+  if (device_mask.rk11)
+    rk11_reset();
+  if (device_mask.rh11 && machine_profile == LSI11_MACHINE_1134) {
     rh11_reset();
   }
-  lp11_reset();
-  sr_reset();
+  if (device_mask.lp11)
+    lp11_reset();
+  if (device_mask.sr)
+    sr_reset();
 }
 
 static void impl_fini(regs *r) {
   (void)r;
-  util_term_restore();
+  if (term_raw_active) {
+    util_term_restore();
+    term_raw_active = 0;
+  }
 }
 
 /* IRQ poll callback: delegates to irq_poll() */
@@ -268,13 +379,19 @@ void lsi11_hw_connect(regs *r) {
 }
 
 void lsi11_poll_devices(void) {
-  dl11_poll();
-  kw11_poll();
-  rk11_poll();
-  if (machine_profile == LSI11_MACHINE_1134) {
+  if (device_mask.dl11)
+    dl11_poll();
+  if (device_mask.kw11)
+    kw11_poll();
+  if (device_mask.rl11)
+    rl11_poll();
+  if (device_mask.rk11)
+    rk11_poll();
+  if (device_mask.rh11 && machine_profile == LSI11_MACHINE_1134) {
     rh11_poll();
   }
-  lp11_poll();
+  if (device_mask.lp11)
+    lp11_poll();
 }
 
 void lsi11_set_trace_irq(int on) { trace_irq_flag = on ? 1 : 0; }
