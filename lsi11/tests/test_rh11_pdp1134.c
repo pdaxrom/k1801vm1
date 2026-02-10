@@ -16,6 +16,7 @@
 #define RHWC  0177442
 #define RHBA  0177444
 #define RHDA  0177446
+#define RHCS2 0177450
 #define RHER  0177454
 #define RHDB  0177462
 
@@ -25,9 +26,12 @@
 #define RHCS1_FUNC_MASK 0000076
 #define RHCS1_IE        0000100
 #define RHCS1_DONEB     0000200
+#define RHCS1_BAEXT     0001400
 
-#define RH11_FUNC_READ  0000070
+#define RH11_FUNC_READ  0000020
 #define RHER_NXM        0000002
+#define RHCS2_NEM       0004000
+#define RHCS2_NED       0010000
 
 static int g_fail = 0;
 
@@ -77,6 +81,17 @@ static void start_rh_read(uint16_t wc, uint16_t ba, uint16_t da, int ie) {
   bus_write8(RHCS1, cs1);
 }
 
+static void start_rh_read_ext(uint16_t wc, uint16_t ba, uint16_t da,
+                              uint16_t cs1_ext, int ie) {
+  uint16_t cs1 = (uint16_t)(RH11_FUNC_READ | RHCS1_GO | cs1_ext);
+  if (ie)
+    cs1 |= RHCS1_IE;
+  bus_write16(RHWC, wc);
+  bus_write16(RHBA, ba);
+  bus_write16(RHDA, da);
+  bus_write16(RHCS1, cs1);
+}
+
 int main(void) {
   char err[128];
   char img[] = "/tmp/rh11-img-XXXXXX";
@@ -102,8 +117,9 @@ int main(void) {
   rk11_reset();
 
   /* 1) decode and register accessibility on pdp1134 */
-  check(bus_is_nxm(0170000) == 1, "pdp1134 low 16-bit I/O page must not be RAM");
-  check(bus_is_nxm(0200000) == 0, "pdp1134 RAM must exist above low 16-bit I/O page");
+  check(bus_is_nxm(0170000) == 0,
+        "pdp1134 low 16-bit region is RAM (18/22-bit memory model)");
+  check(bus_is_nxm(0200000) == 0, "pdp1134 RAM must exist at 0200000");
   bus_write16(0200000, 045612);
   check(bus_read16(0200000) == 045612, "pdp1134 RAM readback at 0200000");
   check(bus_is_nxm(RHCS1) == 0, "RH11 base must decode on pdp1134");
@@ -131,7 +147,7 @@ int main(void) {
   rh11_poll();
   check(bus_read16(000200) == 012345, "RH11 READ transfers first word");
   check(poll_irq_vec(&r, &vec) == 1, "RH11 first IRQ delivered");
-  check((vec & 0000777) == 000254, "RH11 vector is 000254");
+  check((vec & 0000777) == 000210, "RH11 vector is 000210");
   vec = 0;
   check(poll_irq_vec(&r, &vec) == 0, "RH11 no repeat IRQ while DONE==1");
   start_rh_read(0177777, 000202, 000000, 1);
@@ -144,7 +160,7 @@ int main(void) {
   start_rh_read(0177777, 000204, 000000, 1);
   rh11_poll();
   check(poll_irq_vec(&r, &vec) == 1, "RH11 IRQ delivered in coexistence");
-  check((vec & 0000777) == 000254, "RH11 coexistence vector");
+  check((vec & 0000777) == 000210, "RH11 coexistence vector");
 
   rk11_close_image(); /* force no-media completion path */
   bus_write8(RKCS, 000105); /* IE + READ + GO */
@@ -163,15 +179,41 @@ int main(void) {
   }
   bus_init();
   rh11_reset();
-  start_rh_read(0177777, 0177777, 000000, 1);
+  start_rh_read(0177776, 0177776, 000000, 1);
   rh11_poll();
-  check((bus_read16(RHER) & RHER_NXM) != 0, "RH11 sets NXM error");
+  check(((bus_read16(RHCS2) & RHCS2_NEM) != 0) ||
+            ((bus_read16(RHER) & RHER_NXM) != 0),
+        "RH11 sets NEM/NXM error");
   check((bus_read16(RHCS1) & RHCS1_GO) == 0, "RH11 clears GO on completion");
   check((bus_read16(RHCS1) & RHCS1_DONEB) != 0, "RH11 sets DONE on completion");
   vec = 0;
   check(poll_irq_vec(&r, &vec) == 1, "RH11 IRQ delivered for NXM completion");
   vec = 0;
   check(poll_irq_vec(&r, &vec) == 0, "RH11 no repeat after NXM completion");
+
+  /* 6) Non-zero unit select should report nonexistent drive. */
+  rh11_reset();
+  bus_write16(RHCS2, 000001);
+  start_rh_read(0177777, 000200, 000000, 0);
+  rh11_poll();
+  check((bus_read16(RHCS2) & RHCS2_NED) != 0,
+        "RH11 sets NED for non-existent unit");
+
+  /* 7) BA16/BA17 extension should participate in DMA addressing. */
+  if (bus_configure(BUS_MACHINE_PDP1134, 4096, err, sizeof(err)) != 0) {
+    fprintf(stderr, "FAIL: bus_configure(4096KB): %s\n", err);
+    rh11_close_image();
+    unlink(img);
+    return 1;
+  }
+  bus_init();
+  rh11_reset();
+  start_rh_read_ext(0177776, 0177776, 000000, RHCS1_BAEXT, 0);
+  rh11_poll();
+  check(bus_read16(0777776) == 012345,
+        "RH11 read uses BA16/BA17 extension (first word)");
+  check(bus_read16(0000000) == 006543,
+        "RH11 BA extension increments on RKBA overflow");
 
   rh11_close_image();
   unlink(img);

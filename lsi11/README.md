@@ -69,7 +69,7 @@ This subproject now provides two separate executables:
   - `0177440 RHCS1`, `0177442 RHWC`, `0177444 RHBA`, `0177446 RHDA`
   - `0177450 RHCS2`, `0177452 RHDS`, `0177454 RHER`, `0177456 RHAS`
   - `0177460 RHLA`, `0177462 RHDB`
-- IRQ: vector `000254`, priority `5`.
+- IRQ: vector `000210`, priority `5` (RK611 default from EK-RK067-UG-001).
 - IRQ semantics follow project latch rules:
   - edge-triggered and latched, no repeat while `DONE=1`
   - ACK clears only `irq_req`
@@ -77,9 +77,10 @@ This subproject now provides two separate executables:
   - IE toggles do not generate an IRQ by themselves
 - Supported commands (phase 1):
   - `READ`, `WRITE`, `SEEK` (single unit, unit 0)
-- DMA model (phase 1 limitations):
-  - `RHBA` uses low 16-bit physical bus address only
-  - no Unibus map / no 18/22-bit RH DMA extension
+- DMA model:
+  - `RHBA` uses low 16-bit physical bus address
+  - `RHCS1` bits `BA16/BA17` extend DMA to 18-bit physical address space
+  - no Unibus map (22-bit map is not implemented)
   - DMA uses bus physical accesses only, MMU translation is not used
   - NXM during DMA sets error and still completes command with `DONE`
 - Disk mapping (phase 1):
@@ -107,7 +108,7 @@ This subproject now provides two separate executables:
 | DL11 (console TX) | `0177564–0177567` (+ optional alias `0176504–0176507`) | `000064` | `4` | TCSR bit 7 | TCSR bit 6 | Write TBUF (`...66`) | TX IRQ does not repeat until TX DONE cleared |
 | KW11-L (line clock) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | Read CSR low byte (`0177546`) | 50 Hz; monitor set by INIT and by each tick; ACK clears IRQ request only |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
-| RH11 (Massbus) | `0177440–0177462` | `000254` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK, 16-bit RHBA DMA |
+| RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |
 | LP11 (printer) | `0177514–0177517` | `000200` | `4` | CSR bit 7 | CSR bit 6 | Write DBR (`0177516`) | Output to host stdout |
 | SR (switch reg) | `0177570–0177571` | — | — | — | — | — | Read-only 16-bit value, default `000000` |
 
