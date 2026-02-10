@@ -45,6 +45,7 @@ TEST_COMMON_OBJS_PDP1134 := $(addprefix $(BUILD_DIR)/test-pdp1134/,$(COMMON_SRCS
 TESTS_LSI11 := \
   tests/test_bus_map \
   tests/test_irq_semantics \
+  tests/test_rk11_regs \
   tests/test_rh11_lsi11_absent
 
 TESTS_PDP1134 := \
@@ -98,6 +99,9 @@ tests/test_bus_map: $(BUILD_DIR)/test-lsi11/tests/test_bus_map.o $(TEST_COMMON_O
 tests/test_irq_semantics: $(BUILD_DIR)/test-lsi11/tests/test_irq_semantics.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_rk11_regs: $(BUILD_DIR)/test-lsi11/tests/test_rk11_regs.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
 tests/test_rh11_lsi11_absent: $(BUILD_DIR)/test-lsi11/tests/test_rh11_lsi11_absent.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -111,6 +115,8 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	./tests/test_bus_map
 	@echo "Running IRQ semantics test..."
 	./tests/test_irq_semantics
+	@echo "Running RK11 register/transfer test..."
+	./tests/test_rk11_regs
 	@echo "Running RH11 absence test (lsi11 profile)..."
 	./tests/test_rh11_lsi11_absent
 	@echo "Running lsi11 profile config test..."
