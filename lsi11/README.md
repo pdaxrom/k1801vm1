@@ -28,6 +28,8 @@ This subproject now provides two separate executables:
 ### Boot/usage
 - RT-11 boot with RK11 loader:
   - `./lsi11 -rk disks/rt11v400.dsk -bootrt11`
+- RL image attach (auto RL01/RL02 detect):
+  - `./lsi11 -rl disks/rl02.dsk`
 
 ## 2) `pdp1134` target (PDP-11/34-like, MMU enabled)
 
@@ -52,7 +54,7 @@ This subproject now provides two separate executables:
   - Example: `4104 KB` valid
 
 ### I/O compatibility
-- RK11, RH11, DL11, KW11, LP11, SR are supported.
+- RL11, RK11, RH11, DL11, KW11, LP11, SR are supported.
 - DL11 alias is **not forced** by default on this target.
 - DL11 terminal character width defaults to **7-bit** (UNIX V5 compatible).
   - Use `-tty8b` for 8-bit console behavior.
@@ -60,7 +62,7 @@ This subproject now provides two separate executables:
   - `-dl11-alias`
 - Bus decode model:
   - low 16-bit page `160000..177777`: registered device CSRs are decoded there
-  - undecoded addresses in `160000..177777` fall through to RAM if they are within configured RAM size (not forced to NXM)
+  - undecoded addresses in `160000..177777` are NXM (reserved I/O page, not RAM)
   - higher 18-bit/22-bit I/O windows are decoded to the same 16-bit device page for registered devices
   - for non-device addresses outside RAM range, bus returns NXM as usual
 
@@ -98,6 +100,8 @@ This subproject now provides two separate executables:
   - `./pdp1134 -rk disks/rt11v400.dsk -bootrt11`
 - RH11 image attach:
   - `./pdp1134 -rh disks/rk07.img`
+- RL image attach:
+  - `./pdp1134 -rl disks/rl02.dsk`
 - UNIX V5 boot:
   - `./pdp1134 -rk disks/unix_v5_rk.dsk -bootrt11`
 
@@ -108,6 +112,7 @@ This subproject now provides two separate executables:
 | DL11 (console RX) | `0177560–0177563` (+ optional alias `0176500–0176503`) | `000060` | `4` | RCSR bit 7 | RCSR bit 6 | Read RBUF (`...62`) | RX IRQ does not repeat until RX DONE cleared |
 | DL11 (console TX) | `0177564–0177567` (+ optional alias `0176504–0176507`) | `000064` | `4` | TCSR bit 7 | TCSR bit 6 | Write TBUF (`...66`) | TX IRQ does not repeat until TX DONE cleared |
 | KW11-L (line clock) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | Read CSR low byte (`0177546`) | 50 Hz; monitor set by INIT and by each tick; ACK clears IRQ request only |
+| RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
 | RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |
 | LP11 (printer) | `0177514–0177517` | `000200` | `4` | CSR bit 7 | CSR bit 6 | Write DBR (`0177516`) | Output to host stdout |
@@ -135,3 +140,16 @@ This subproject now provides two separate executables:
 - `-traceirq` IRQ delivery trace
 - `-tracenxm` bus/NXM trap trace
 - `-exit-on-abort` terminate emulator loop when core sets HALT/abort
+
+## Device disable options
+- `-disable-dl` disable DL11
+- `-disable-kw` disable KW11
+- `-disable-lp` disable LP11
+- `-disable-rk` disable RK11
+- `-disable-rh` disable RH11
+- `-disable-rl` disable RL11
+- `-disable-sr` disable SR register
+
+Notes:
+- If a device is disabled, attaching media for it (for example `-disable-rl` with `-rl`) is rejected.
+- `-check-config` prints final per-device enable state (`dev_*` fields).
