@@ -4,6 +4,7 @@
 
 #include "adapter_core.h"
 #include "bus.h"
+#include "dev_dl11.h"
 #include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
@@ -94,6 +95,8 @@ static void usage(const char *argv0) {
           "  -trace-regs     With -trace, also dump registers\n"
           "  -traceirq       Trace delivered IRQ vectors\n"
           "  -tracenxm       Trace NXM traps\n"
+          "  -tty7b          DL11 console 7-bit mode (default)\n"
+          "  -tty8b          DL11 console 8-bit mode\n"
           "  -exit-on-abort  Exit emulator on HALT/abort\n"
           "  -check-config   Validate machine config and exit\n",
           argv0, target);
@@ -131,6 +134,7 @@ int main(int argc, char **argv) {
 #endif
   int trace = 0;
   int trace_regs = 0;
+  int dl11_8bit = 0;
   int exit_on_abort = 0;
   int check_config_only = 0;
   char cfg_err[160] = {0};
@@ -159,6 +163,10 @@ int main(int argc, char **argv) {
     } else if (!strcmp(argv[i], "-trace-regs")) {
       trace = 1;
       trace_regs = 1;
+    } else if (!strcmp(argv[i], "-tty7b")) {
+      dl11_8bit = 0;
+    } else if (!strcmp(argv[i], "-tty8b")) {
+      dl11_8bit = 1;
     } else if (!strcmp(argv[i], "-exit-on-abort")) {
       exit_on_abort = 1;
     } else if (!strcmp(argv[i], "-check-config")) {
@@ -232,6 +240,7 @@ int main(int argc, char **argv) {
   memset(&r, 0, sizeof(r));
   r.model = cpu_model;
 
+  dl11_set_8bit(dl11_8bit);
   lsi11_hw_connect(&r);
 
   /* core init will init devices etc. */
