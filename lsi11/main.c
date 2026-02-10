@@ -14,10 +14,18 @@
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
 #include "../core/disas.h"
 
+#if defined(LSI11_TARGET_1184) || defined(LSI11_TARGET_1134)
+#define LSI11_TARGET_PDP1184 1
+#endif
+
 static int parse_cpu_model(const char *name, byte *model) {
   if (!name || !model)
     return -1;
 
+  if (!strcmp(name, "11/84")) {
+    *model = DCJ11;
+    return 0;
+  }
   if (!strcmp(name, "11/34")) {
     *model = K1801VM2;
     return 0;
@@ -112,8 +120,8 @@ static const uint16_t rl_bootstrap[] = {
 };
 
 static void usage(const char *argv0) {
-#if defined(LSI11_TARGET_1134)
-  const char *target = "pdp1134";
+#if defined(LSI11_TARGET_PDP1184)
+  const char *target = "pdp1184";
 #else
   const char *target = "lsi11";
 #endif
@@ -127,15 +135,15 @@ static void usage(const char *argv0) {
           "  %s\n"
           "\n"
           "Options:\n"
-#if defined(LSI11_TARGET_1134)
-          "  -cpu <model>    CPU model: dcj11 (default), 11/03, 11/34, "
+#if defined(LSI11_TARGET_PDP1184)
+          "  -cpu <model>    CPU model: dcj11 (default), 11/03, 11/84, 11/34, "
           "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
 #else
           "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
           "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
 #endif
           "  -rk <path>      Attach RK05 image\n"
-          "  -rh <path>      Attach RH11 (RK06/RK07) image (pdp1134 only)\n"
+          "  -rh <path>      Attach RH11 (RK06/RK07) image (pdp1184 only)\n"
           "  -rl <path>      Attach RL image (auto detect RL01/RL02)\n"
           "  -rl01 <path>    Attach image as RL01\n"
           "  -rl02 <path>    Attach image as RL02\n"
@@ -164,9 +172,9 @@ static void usage(const char *argv0) {
           "  -addr <oct>     Load address (octal) for -load (default 0)\n"
           "  -pc <oct>       Set initial PC (R7) to octal address\n"
           "  -sr <oct>       Set SR switch register (0177570) value\n"
-#if defined(LSI11_TARGET_1134)
+#if defined(LSI11_TARGET_PDP1184)
           "  -ram <kb>       RAM size in KB (default 4096, must be multiple of 4)\n"
-          "  --mem-kb <kb>   Same as -ram (pdp1134 only)\n"
+          "  --mem-kb <kb>   Same as -ram (pdp1184 only)\n"
           "  -dl11-alias     Enable DL11 alias 0176500..0176507\n"
           "  -no-dl11-alias  Disable DL11 alias 0176500..0176507 (default)\n");
 #else
@@ -195,7 +203,7 @@ int main(int argc, char **argv) {
   int disable_rh = 0;
   int disable_rl = 0;
   int disable_sr = 0;
-#if defined(LSI11_TARGET_1134)
+#if defined(LSI11_TARGET_PDP1184)
   byte cpu_model = DCJ11;
 #else
   byte cpu_model = DCJ11;
@@ -207,8 +215,8 @@ int main(int argc, char **argv) {
   int check_config_only = 0;
   char cfg_err[160] = {0};
 
-#if defined(LSI11_TARGET_1134)
-  const lsi11_machine_t machine_kind = LSI11_MACHINE_1134;
+#if defined(LSI11_TARGET_PDP1184)
+  const lsi11_machine_t machine_kind = LSI11_MACHINE_1184;
 #else
   const lsi11_machine_t machine_kind = LSI11_MACHINE_1104;
 #endif
@@ -290,7 +298,7 @@ int main(int argc, char **argv) {
     }
   }
 
-#if !defined(LSI11_TARGET_1134)
+#if !defined(LSI11_TARGET_PDP1184)
   if (ram_kb_arg >= 0) {
     fprintf(stderr,
             "This lsi11 target is fixed 56KB RAM; -ram is not supported.\n");
@@ -366,9 +374,9 @@ int main(int argc, char **argv) {
   }
 
   if (check_config_only) {
-    const char *m = (lsi11_machine_current() == LSI11_MACHINE_1134) ? "pdp1134"
+    const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184"
                                                                      : "lsi11";
-    int rh11_on = (lsi11_machine_current() == LSI11_MACHINE_1134) ? 1 : 0;
+    int rh11_on = (lsi11_machine_current() == LSI11_MACHINE_1184) ? 1 : 0;
     fprintf(stderr,
             "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
             "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "

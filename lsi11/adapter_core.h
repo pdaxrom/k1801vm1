@@ -9,13 +9,14 @@
 
 typedef enum {
   LSI11_MACHINE_1104 = 0,
-  LSI11_MACHINE_1134 = 1,
+  LSI11_MACHINE_1184 = 1,
+  LSI11_MACHINE_1134 = LSI11_MACHINE_1184,
 } lsi11_machine_t;
 
 /*
  * Configure machine profile before lsi11_hw_connect()/r.init().
  * For 11/04-like profile, RAM is fixed to 56KB (ram_kb ignored).
- * For 11/34-like profile, default is 4096KB when ram_kb==0 and ram_kb must be
+ * For 11/84-like profile, default is 4096KB when ram_kb==0 and ram_kb must be
  * a multiple of 4KB.
  */
 int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,

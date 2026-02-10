@@ -164,8 +164,8 @@ int main(void) {
   check(irq_poll(&r, &vec) == 0, "RK11 IRQ does not repeat while DONE=1");
 
   /* MEX bits are writable and increment on RKBA overflow. */
-  if (bus_configure(BUS_MACHINE_PDP1134, 4096, err, sizeof(err)) != 0) {
-    fprintf(stderr, "FAIL: bus_configure pdp1134: %s\n", err);
+  if (bus_configure(BUS_MACHINE_PDP1184, 4096, err, sizeof(err)) != 0) {
+    fprintf(stderr, "FAIL: bus_configure pdp1184: %s\n", err);
     rk11_close_image();
     unlink(img);
     return 1;

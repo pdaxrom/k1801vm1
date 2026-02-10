@@ -3,15 +3,15 @@ set -eu
 
 BIN="$1"
 
-TMP1="$(mktemp /tmp/pdp1134cfg.XXXXXX)"
-TMP2="$(mktemp /tmp/pdp1134cfg.XXXXXX)"
-TMP3="$(mktemp /tmp/pdp1134cfg.XXXXXX)"
+TMP1="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
+TMP2="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
+TMP3="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
 trap 'rm -f "$TMP1" "$TMP2" "$TMP3"' EXIT INT TERM
 
 "$BIN" -check-config >/dev/null 2>"$TMP1"
 
-grep -q "machine=pdp1134" "$TMP1" || {
-  echo "FAIL: expected machine=pdp1134" >&2
+grep -q "machine=pdp1184" "$TMP1" || {
+  echo "FAIL: expected machine=pdp1184" >&2
   exit 1
 }
 
@@ -31,7 +31,7 @@ grep -q "dl11_alias=0" "$TMP1" || {
 }
 
 grep -q "rh11=1" "$TMP1" || {
-  echo "FAIL: expected rh11=1 on pdp1134" >&2
+  echo "FAIL: expected rh11=1 on pdp1184" >&2
   exit 1
 }
 
@@ -52,4 +52,4 @@ grep -q "ram_kb=4104" "$TMP3" || {
   exit 1
 }
 
-echo "PASS: test_pdp1134_ram"
+echo "PASS: test_pdp1184_ram"

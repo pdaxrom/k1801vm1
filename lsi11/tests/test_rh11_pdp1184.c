@@ -103,7 +103,7 @@ int main(void) {
   r.psw = 0;
 
   bus_reset_config();
-  if (bus_configure(BUS_MACHINE_PDP1134, 4096, err, sizeof(err)) != 0) {
+  if (bus_configure(BUS_MACHINE_PDP1184, 4096, err, sizeof(err)) != 0) {
     fprintf(stderr, "FAIL: bus_configure: %s\n", err);
     return 1;
   }
@@ -116,14 +116,14 @@ int main(void) {
   rh11_reset();
   rk11_reset();
 
-  /* 1) decode and register accessibility on pdp1134 */
+  /* 1) decode and register accessibility on pdp1184 */
   check(bus_is_nxm(0170000) == 1,
-        "pdp1134 low 16-bit I/O page hole is NXM when undecoded");
-  check(bus_is_nxm(0200000) == 0, "pdp1134 RAM must exist at 0200000");
+        "pdp1184 low 16-bit I/O page hole is NXM when undecoded");
+  check(bus_is_nxm(0200000) == 0, "pdp1184 RAM must exist at 0200000");
   bus_write16(0200000, 045612);
-  check(bus_read16(0200000) == 045612, "pdp1134 RAM readback at 0200000");
-  check(bus_is_nxm(RHCS1) == 0, "RH11 base must decode on pdp1134");
-  check(bus_is_nxm(RHDB) == 0, "RH11 last register must decode on pdp1134");
+  check(bus_read16(0200000) == 045612, "pdp1184 RAM readback at 0200000");
+  check(bus_is_nxm(RHCS1) == 0, "RH11 base must decode on pdp1184");
+  check(bus_is_nxm(RHDB) == 0, "RH11 last register must decode on pdp1184");
   bus_write16(RHWC, 012345);
   bus_write16(RHBA, 000120);
   bus_write16(RHDA, 000777);
@@ -171,7 +171,7 @@ int main(void) {
 
   /* 5) DMA NXM must set error and complete cleanly */
   /* Reconfigure to small RAM so a 16-bit BA overflow can hit true NXM. */
-  if (bus_configure(BUS_MACHINE_PDP1134, 64, err, sizeof(err)) != 0) {
+  if (bus_configure(BUS_MACHINE_PDP1184, 64, err, sizeof(err)) != 0) {
     fprintf(stderr, "FAIL: bus_configure(64KB): %s\n", err);
     rh11_close_image();
     unlink(img);
@@ -200,7 +200,7 @@ int main(void) {
         "RH11 sets NED for non-existent unit");
 
   /* 7) BA16/BA17 extension should participate in DMA addressing. */
-  if (bus_configure(BUS_MACHINE_PDP1134, 4096, err, sizeof(err)) != 0) {
+  if (bus_configure(BUS_MACHINE_PDP1184, 4096, err, sizeof(err)) != 0) {
     fprintf(stderr, "FAIL: bus_configure(4096KB): %s\n", err);
     rh11_close_image();
     unlink(img);
@@ -219,7 +219,7 @@ int main(void) {
   unlink(img);
 
   if (!g_fail) {
-    printf("PASS: test_rh11_pdp1134\n");
+    printf("PASS: test_rh11_pdp1184\n");
     return 0;
   }
   return 1;

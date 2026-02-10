@@ -5,7 +5,7 @@ All addresses, vectors, and priorities are **octal**.
 This subproject now provides two separate executables:
 
 1. `lsi11` (PDP-11/04-like profile)
-2. `pdp1134` (PDP-11/34-like profile)
+2. `pdp1184` (PDP-11/84-like profile, DCJ-11)
 
 ## 1) `lsi11` target (PDP-11/04-like, NO MMU)
 
@@ -31,13 +31,13 @@ This subproject now provides two separate executables:
 - RL image attach (auto RL01/RL02 detect):
   - `./lsi11 -rl disks/rl02.dsk`
 
-## 2) `pdp1134` target (PDP-11/34-like, MMU enabled)
+## 2) `pdp1184` target (PDP-11/84-like, MMU enabled)
 
 ### Identity and MMU policy
 - Built with `ENABLE_MMU=1`.
 - MMU registers and translation are available in CPU core.
 - Default CPU model is `dcj11`.
-- Optional override: `-cpu dcj11|11/03|11/34|k1801vm1|k1801vm1g|k1801vm2|k1806vm2`.
+- Optional override: `-cpu dcj11|11/03|11/84|11/34|k1801vm1|k1801vm1g|k1801vm2|k1806vm2`.
 - CPU-visible processor registers are implemented in `core/` (CPU-level), not in machine device map:
   - `0177750` (DCJ11 register)
   - `0177776` (PSW)
@@ -66,8 +66,8 @@ This subproject now provides two separate executables:
   - higher 18-bit/22-bit I/O windows are decoded to the same 16-bit device page for registered devices
   - for non-device addresses outside RAM range, bus returns NXM as usual
 
-### RH11 in pdp1134 profile
-- RH11 (Massbus adapter) is available only in `pdp1134`.
+### RH11 in pdp1184 profile
+- RH11 (Massbus adapter) is available only in `pdp1184`.
 - CSR map (octal), 16-bit I/O page view, base `0177440`:
   - `0177440 RHCS1`, `0177442 RHWC`, `0177444 RHBA`, `0177446 RHDA`
   - `0177450 RHCS2`, `0177452 RHDS`, `0177454 RHER`, `0177456 RHAS`
@@ -93,17 +93,17 @@ This subproject now provides two separate executables:
 
 ### Examples
 - Default config check:
-  - `./pdp1134 -check-config`
+  - `./pdp1184 -check-config`
 - Explicit RAM size:
-  - `./pdp1134 --mem-kb 4104 -check-config`
+  - `./pdp1184 --mem-kb 4104 -check-config`
 - RT-11 boot:
-  - `./pdp1134 -rk disks/rt11v400.dsk -bootrt11`
+  - `./pdp1184 -rk disks/rt11v400.dsk -bootrt11`
 - RH11 image attach:
-  - `./pdp1134 -rh disks/rk07.img`
+  - `./pdp1184 -rh disks/rk07.img`
 - RL image attach:
-  - `./pdp1134 -rl disks/rl02.dsk`
+  - `./pdp1184 -rl disks/rl02.dsk`
 - UNIX V5 boot:
-  - `./pdp1134 -rk disks/unix_v5_rk.dsk -bootrt11`
+  - `./pdp1184 -rk disks/unix_v5_rk.dsk -bootrt11`
 
 ## Device CSR / IRQ table
 
@@ -123,16 +123,23 @@ This subproject now provides two separate executables:
   - `make -C lsi11`
 - Build only 11/04-like profile:
   - `make -C lsi11 lsi11`
-- Build only 11/34-like profile:
+- Build only 11/84-like profile:
+  - `make -C lsi11 pdp1184`
+- Backward-compatible alias:
   - `make -C lsi11 pdp1134`
 
 ## Tests
 - 11/04-like tests (MMU disabled + DL11 alias checks):
   - `make -C lsi11 test-lsi11`
-- 11/34-like tests (RAM sizing + core MMU suite):
+- 11/84-like tests (RAM sizing + core MMU suite):
+  - `make -C lsi11 test-pdp1184`
+- Backward-compatible alias:
   - `make -C lsi11 test-pdp1134`
 - Full matrix:
   - `make -C lsi11 test-matrix`
+
+Compatibility note:
+- Binary `pdp1134` is kept as an alias of `pdp1184` for existing scripts.
 
 ## Common debug options
 - `-trace` instruction trace

@@ -17,13 +17,14 @@ typedef uint32_t paddr_t;
 
 typedef enum {
   BUS_MACHINE_LSI11_1104 = 0,
-  BUS_MACHINE_PDP1134 = 1,
+  BUS_MACHINE_PDP1184 = 1,
+  BUS_MACHINE_PDP1134 = BUS_MACHINE_PDP1184,
 } bus_machine_t;
 
 /*
  * Configure bus/memory model.
  * - BUS_MACHINE_LSI11_1104: fixed 56KB RAM model (ram_kb argument ignored)
- * - BUS_MACHINE_PDP1134: default 4096KB when ram_kb==0, otherwise ram_kb must
+ * - BUS_MACHINE_PDP1184: default 4096KB when ram_kb==0, otherwise ram_kb must
  *   be a multiple of BUS_RAM_GRANULARITY_KB.
  */
 int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,

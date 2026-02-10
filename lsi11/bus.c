@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define LSI11_FIXED_RAM_KB 56u
-#define PDP1134_DEFAULT_RAM_KB 4096u
+#define PDP1184_DEFAULT_RAM_KB 4096u
 #define PDP11_18BIT_IO_PAGE_START 0760000
 #define PDP11_18BIT_IO_PAGE_END   0777777
 #define PDP11_22BIT_IO_PAGE_START 017760000
@@ -46,9 +46,9 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
     g_cfg.ram_kb = LSI11_FIXED_RAM_KB;
     return 0;
 
-  case BUS_MACHINE_PDP1134:
+  case BUS_MACHINE_PDP1184:
     if (ram_kb == 0)
-      ram_kb = PDP1134_DEFAULT_RAM_KB;
+      ram_kb = PDP1184_DEFAULT_RAM_KB;
 
     if ((ram_kb % BUS_RAM_GRANULARITY_KB) != 0) {
       set_err(err, err_len,
@@ -57,7 +57,7 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
       return -1;
     }
 
-    g_cfg.machine = BUS_MACHINE_PDP1134;
+    g_cfg.machine = BUS_MACHINE_PDP1184;
     g_cfg.ram_kb = ram_kb;
     return 0;
 
@@ -151,7 +151,7 @@ int bus_addr_is_ram(paddr_t addr) {
     return (a <= RAM_END) ? 1 : 0;
   }
 
-  /* On PDP-11/34-like configuration, low 16-bit I/O page is never RAM. */
+  /* On PDP-11/84-like configuration, low 16-bit I/O page is never RAM. */
   if (addr >= IO_PAGE_START && addr <= IO_PAGE_END)
     return 0;
 
