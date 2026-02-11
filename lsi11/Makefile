@@ -128,7 +128,7 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	./tests/test_rl11
 	@echo "Running RK11 register/transfer test..."
 	./tests/test_rk11_regs
-	@echo "Running RH11 absence test (lsi11 profile)..."
+	@echo "Running RH11 decode test (lsi11 profile)..."
 	./tests/test_rh11_lsi11_absent
 	@echo "Running lsi11 profile config test..."
 	./tests/test_lsi11_config.sh ./$(BIN_LSI11)

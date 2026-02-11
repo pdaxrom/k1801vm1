@@ -51,16 +51,17 @@ typedef struct {
   int sr;
 } lsi11_device_mask_t;
 
-static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 0, 1};
+static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1};
 
 static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine) {
+  (void)machine;
   device_mask.dl11 = 1;
   device_mask.kw11 = 1;
   device_mask.lp11 = 1;
   device_mask.rl11 = 1;
   device_mask.rk11 = 1;
   device_mask.sr = 1;
-  device_mask.rh11 = (machine == LSI11_MACHINE_1184) ? 1 : 0;
+  device_mask.rh11 = 1;
 }
 
 int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
@@ -132,12 +133,7 @@ int lsi11_set_device_enabled(const char *name, int on, char *err,
     return 0;
   }
   if (!strcmp(name, "rh11")) {
-    if (machine_profile != LSI11_MACHINE_1184 && v) {
-      if (err && err_len)
-        snprintf(err, err_len, "RH11 is not available on lsi11 profile");
-      return -1;
-    }
-    device_mask.rh11 = (machine_profile == LSI11_MACHINE_1184) ? v : 0;
+    device_mask.rh11 = v;
     return 0;
   }
   if (!strcmp(name, "sr")) {
@@ -365,7 +361,7 @@ static int impl_init(regs *r) {
     return -1;
   if (device_mask.rk11 && rk11_init() != 0)
     return -1;
-  if (device_mask.rh11 && machine_profile == LSI11_MACHINE_1184) {
+  if (device_mask.rh11) {
     if (rh11_init() != 0)
       return -1;
   }
@@ -398,7 +394,7 @@ static void impl_reset(regs *r) {
     rl11_reset();
   if (device_mask.rk11)
     rk11_reset();
-  if (device_mask.rh11 && machine_profile == LSI11_MACHINE_1184) {
+  if (device_mask.rh11) {
     rh11_reset();
   }
   if (device_mask.lp11)
@@ -468,7 +464,7 @@ void lsi11_poll_devices(void) {
     rl11_poll();
   if (device_mask.rk11)
     rk11_poll();
-  if (device_mask.rh11 && machine_profile == LSI11_MACHINE_1184) {
+  if (device_mask.rh11) {
     rh11_poll();
   }
   if (device_mask.lp11)

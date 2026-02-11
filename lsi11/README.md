@@ -13,7 +13,7 @@ This subproject now provides two separate executables:
 - Built with `ENABLE_MMU=0` (MMU not compiled in).
 - This target is intentionally fixed-function and does not require MMU runtime setup.
 - Built with `MMU_STUB_REGS_WHEN_DISABLED=0` so MMU CSR stubs do not overlap LP11 CSR addresses.
-- RH11 is not registered in this profile (addresses `0177440..0177462` remain absent/NXM).
+- RH11 is available in this profile at `0177440..0177462`.
 
 ### Memory map (fixed)
 | Range (octal) | Size | Meaning |
@@ -28,6 +28,8 @@ This subproject now provides two separate executables:
 ### Boot/usage
 - RT-11 boot with RK11 loader:
   - `./lsi11 -rk disks/rt11v400.dsk -bootrt11`
+- RH11 image attach:
+  - `./lsi11 -rh disks/rk07.img`
 - RL image attach (auto RL01/RL02 detect):
   - `./lsi11 -rl disks/rl02.dsk`
 
@@ -68,8 +70,8 @@ This subproject now provides two separate executables:
   - higher 18-bit/22-bit I/O windows are decoded to the same 16-bit device page for registered devices
   - for non-device addresses outside RAM range, bus returns NXM as usual
 
-### RH11 in pdp1184 profile
-- RH11 (Massbus adapter) is available only in `pdp1184`.
+### RH11 controller
+- RH11 (Massbus adapter) is available in both `lsi11` and `pdp1184`.
 - CSR map (octal), 16-bit I/O page view, base `0177440`:
   - `0177440 RHCS1`, `0177442 RHWC`, `0177444 RHBA`, `0177446 RHDA`
   - `0177450 RHCS2`, `0177452 RHDS`, `0177454 RHER`, `0177456 RHAS`

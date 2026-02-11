@@ -117,7 +117,7 @@ static void usage(const char *argv0) {
           "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
 #endif
           "  -rk <path>      Attach RK05 image\n"
-          "  -rh <path>      Attach RH11 (RK06/RK07) image (pdp1184 only)\n"
+          "  -rh <path>      Attach RH11 (RK06/RK07) image\n"
           "  -rl <path>      Attach RL image (auto detect RL01/RL02)\n"
           "  -rl01 <path>    Attach image as RL01\n"
           "  -rl02 <path>    Attach image as RL02\n"
@@ -278,11 +278,6 @@ int main(int argc, char **argv) {
             "This lsi11 target is fixed 56KB RAM; -ram is not supported.\n");
     return 2;
   }
-  if (rh_path) {
-    fprintf(stderr,
-            "This lsi11 target does not provide RH11; -rh is not supported.\n");
-    return 2;
-  }
 #endif
 
   if (ram_kb_arg < 0) {
@@ -350,7 +345,7 @@ int main(int argc, char **argv) {
   if (check_config_only) {
     const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184"
                                                                      : "lsi11";
-    int rh11_on = (lsi11_machine_current() == LSI11_MACHINE_1184) ? 1 : 0;
+    int rh11_on = lsi11_device_enabled("rh11");
     fprintf(stderr,
             "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
             "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "

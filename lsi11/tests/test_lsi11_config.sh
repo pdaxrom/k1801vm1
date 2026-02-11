@@ -24,8 +24,8 @@ grep -q "dl11_alias=1" "$TMP1" || {
   exit 1
 }
 
-grep -q "rh11=0" "$TMP1" || {
-  echo "FAIL: expected rh11=0 on lsi11 profile" >&2
+grep -q "rh11=1" "$TMP1" || {
+  echo "FAIL: expected rh11=1 on lsi11 profile" >&2
   exit 1
 }
 
