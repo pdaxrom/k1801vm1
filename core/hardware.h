@@ -11,6 +11,7 @@
 #ifndef MK90_H_
 #define MK90_H_
 #include "core.h"
+#include <stddef.h>
 
 #if 0
 
@@ -27,6 +28,9 @@ static byte *hardware_ramptr(regs *r, word offset);
 #endif
 
 void hwstub_connect(regs *r);
+size_t hwstub_required_memory_size(void);
+int hwstub_set_memory(byte *memory, size_t size);
+void hwstub_clear_memory_binding(void);
 
 int hwstub_vm1_load_byte(regs *r, word offset, byte *value_out);
 int hwstub_vm1_store_byte(regs *r, word offset, byte value);

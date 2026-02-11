@@ -2,11 +2,14 @@
 #ifndef CPU_DIAG_H_
 #define CPU_DIAG_H_
 
+#include <stddef.h>
 #include "core/core.h"
 
 typedef struct {
     regs r;
     byte *mem;
+    byte *mem_owner;
+    size_t mem_size;
 } cpu_diag_fixture;
 
 typedef struct {

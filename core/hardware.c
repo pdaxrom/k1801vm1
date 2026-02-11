@@ -14,12 +14,36 @@
 #include "hardware.h"
 
 static byte *mem = NULL;
+static size_t mem_size = 0;
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 #define PHYS_MEM_SIZE (1u << 22)
 #else
 #define PHYS_MEM_SIZE (1u << 16)
 #endif
+
+size_t hwstub_required_memory_size(void)
+{
+	return PHYS_MEM_SIZE;
+}
+
+int hwstub_set_memory(byte *memory, size_t size)
+{
+	if (!memory || size < PHYS_MEM_SIZE) {
+		mem = NULL;
+		mem_size = 0;
+		return -1;
+	}
+	mem = memory;
+	mem_size = size;
+	return 0;
+}
+
+void hwstub_clear_memory_binding(void)
+{
+	mem = NULL;
+	mem_size = 0;
+}
 
 static int vm1_load_byte(regs *r, word offset, byte *value_out)
 {
@@ -182,9 +206,9 @@ int hwstub_vm1_store_word(regs *r, word offset, word value)
 
 static byte hardware_load_byte(regs *r, word offset)
 {
-    byte value;
-    if (vm1_load_byte(r, offset, &value)) {
-        return value;
+	byte value;
+	if (vm1_load_byte(r, offset, &value)) {
+		return value;
     }
     if (r->model == K1801VM1 || r->model == K1801VM1G) {
         (void)value;
@@ -198,9 +222,12 @@ static byte hardware_load_byte(regs *r, word offset)
     if (offset == 0177714) {
         return r->SEL2 & 0377;
     }
-    if (offset == 0177715) {
-        return (r->SEL2 >> 8) & 0377;
-    }
+	if (offset == 0177715) {
+		return (r->SEL2 >> 8) & 0377;
+	}
+	if (!mem) {
+		return 0;
+	}
     return mem[offset];
 }
 
@@ -224,10 +251,13 @@ static void hardware_store_byte(regs *r, word offset, byte value)
         r->SEL2 = (word)((r->SEL2 & 0177400) | (value & 0377));
         return;
     }
-    if (offset == 0177715) {
+	if (offset == 0177715) {
         r->SEL2 = (word)(((value & 0377) << 8) | (r->SEL2 & 0377));
         return;
     }
+	if (!mem) {
+		return;
+	}
 	mem[offset] = value;
 }
 
@@ -271,13 +301,11 @@ static void hardware_store_word(regs *r, word offset, word value)
 
 static int hardware_init(regs *r)
 {
-	if (!mem) {
-		mem = malloc(PHYS_MEM_SIZE);
-		if (!mem) {
-			return -1;
-		}
-		memset(mem, 0, PHYS_MEM_SIZE);
+	(void)r;
+	if (!mem || mem_size < PHYS_MEM_SIZE) {
+		return -1;
 	}
+	memset(mem, 0, PHYS_MEM_SIZE);
 
 	return 0;
 }
@@ -295,14 +323,17 @@ static void hardware_reset(regs *r)
 
 static void hardware_fini(regs *r)
 {
-	if (mem) {
-		free(mem);
-		mem = NULL;
-	}
+	(void)r;
+	mem = NULL;
+	mem_size = 0;
 }
 
 static byte *hardware_ramptr(regs *r, word offset)
 {
+	(void)r;
+	if (!mem) {
+		return NULL;
+	}
 	return &mem[offset];
 }
 
@@ -310,18 +341,27 @@ static byte *hardware_ramptr(regs *r, word offset)
 static byte hardware_load_byte_pa(regs *r, dword offset)
 {
 	(void)r;
+	if (!mem) {
+		return 0;
+	}
 	return mem[offset & (PHYS_MEM_SIZE - 1)];
 }
 
 static void hardware_store_byte_pa(regs *r, dword offset, byte value)
 {
 	(void)r;
+	if (!mem) {
+		return;
+	}
 	mem[offset & (PHYS_MEM_SIZE - 1)] = value;
 }
 
 static word hardware_load_word_pa(regs *r, dword offset)
 {
 	(void)r;
+	if (!mem) {
+		return 0;
+	}
 	byte lo = mem[offset & (PHYS_MEM_SIZE - 1)];
 	byte hi = mem[(offset + 1) & (PHYS_MEM_SIZE - 1)];
 	return (word)(lo | ((word)hi << 8));
@@ -330,6 +370,9 @@ static word hardware_load_word_pa(regs *r, dword offset)
 static void hardware_store_word_pa(regs *r, dword offset, word value)
 {
 	(void)r;
+	if (!mem) {
+		return;
+	}
 	mem[offset & (PHYS_MEM_SIZE - 1)] = (byte)(value & 0377);
 	mem[(offset + 1) & (PHYS_MEM_SIZE - 1)] = (byte)((value >> 8) & 0377);
 }

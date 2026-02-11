@@ -2,6 +2,7 @@
 #define MMU_TEST_COMMON_H
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "core/core.h"
@@ -13,6 +14,8 @@
 typedef struct {
     regs r;
     byte *mem;
+    byte *mem_owner;
+    size_t mem_size;
 } mmu_fixture;
 
 static const char *mmu_current_test;
@@ -20,11 +23,24 @@ static const char *mmu_current_test;
 static INLINE void mmu_fixture_setup(mmu_fixture *fx)
 {
     memset(fx, 0, sizeof(*fx));
+    fx->mem_size = hwstub_required_memory_size();
+    fx->mem_owner = (byte *)calloc(1, fx->mem_size);
+    if (!fx->mem_owner) {
+        fprintf(stderr, "FAIL: %s: hwstub memory allocation (%zu bytes)\n",
+                mmu_current_test ? mmu_current_test : "mmu_fixture_setup", fx->mem_size);
+        abort();
+    }
+    if (hwstub_set_memory(fx->mem_owner, fx->mem_size) != 0) {
+        fprintf(stderr, "FAIL: %s: hwstub_set_memory\n",
+                mmu_current_test ? mmu_current_test : "mmu_fixture_setup");
+        free(fx->mem_owner);
+        abort();
+    }
     fx->r.model = DCJ11;
     hwstub_connect(&fx->r);
     core_init(&fx->r);
     fx->mem = fx->r.ramptr(&fx->r, 0);
-    memset(fx->mem, 0, 1 << 16);
+    memset(fx->mem, 0, fx->mem_size);
     fx->r.SEL0 = 0;
     fx->r.SEL1 = 0;
     fx->r.SEL2 = 0;
@@ -37,6 +53,9 @@ static INLINE void mmu_fixture_setup(mmu_fixture *fx)
 static INLINE void mmu_fixture_teardown(mmu_fixture *fx)
 {
     core_fini(&fx->r);
+    hwstub_clear_memory_binding();
+    free(fx->mem_owner);
+    fx->mem_owner = NULL;
 }
 
 static INLINE void mmu_set_test(const char *name)

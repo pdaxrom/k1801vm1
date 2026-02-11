@@ -19,9 +19,20 @@ int main(int argc, char *argv[])
 	regs r;
 	word addr;
 	word length;
+	byte *stub_mem;
 
 	r.model = K1806VM2;
 
+	stub_mem = calloc(1, hwstub_required_memory_size());
+	if (!stub_mem) {
+		fprintf(stderr, "Failed to allocate hwstub memory\n");
+		return 1;
+	}
+	if (hwstub_set_memory(stub_mem, hwstub_required_memory_size()) != 0) {
+		fprintf(stderr, "Failed to bind hwstub memory\n");
+		free(stub_mem);
+		return 1;
+	}
 	hwstub_connect(&r);
 
 	r.init(&r);
@@ -38,6 +49,9 @@ int main(int argc, char *argv[])
 		fclose(inf);
 	} else {
 		fprintf(stderr, "Can not open file %s\n", argv[1]);
+		r.fini(&r);
+		hwstub_clear_memory_binding();
+		free(stub_mem);
 		return 1;
 	}
 
@@ -49,6 +63,8 @@ int main(int argc, char *argv[])
 	}
 
 	r.fini(&r);
+	hwstub_clear_memory_binding();
+	free(stub_mem);
 
 	return 0;
 }
