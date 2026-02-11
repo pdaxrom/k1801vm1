@@ -41,6 +41,8 @@ This subproject now provides two separate executables:
 - CPU-visible processor registers are implemented in `core/` (CPU-level), not in machine device map:
   - `0177750` (DCJ11 register)
   - `0177776` (PSW)
+- In `pdp1184` profile, `0177750` reset value is initialized to `001045` to match
+  RT-11/SIMH PDP-11/84 CPU identification path.
 
 ### RAM size model
 - Default RAM size: **4096 KB**.
@@ -111,7 +113,7 @@ This subproject now provides two separate executables:
 |---|---|---:|---:|---|---|---|---|
 | DL11 (console RX) | `0177560–0177563` (+ optional alias `0176500–0176503`) | `000060` | `4` | RCSR bit 7 | RCSR bit 6 | Read RBUF (`...62`) | RX IRQ does not repeat until RX DONE cleared |
 | DL11 (console TX) | `0177564–0177567` (+ optional alias `0176504–0176507`) | `000064` | `4` | TCSR bit 7 | TCSR bit 6 | Write TBUF (`...66`) | TX IRQ does not repeat until TX DONE cleared |
-| KW11-L (line clock) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | Read CSR low byte (`0177546`) | 50 Hz; monitor set by INIT and by each tick; ACK clears IRQ request only |
+| KW11-L / KW11-P | `0177546–0177547` (L), `0172540–0172545` (P) | `000100` | `6` | L: CSR bit 7 (monitor), P: CSR bit 7 (DONE) | L: CSR bit 6, P: CSR bit 6 | L: read CSR low byte (`0177546`), P: write CSR with DONE=0 | L: fixed 50 Hz line clock; P: programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
 | RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |

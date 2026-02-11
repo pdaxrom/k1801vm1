@@ -151,8 +151,8 @@ int bus_addr_is_ram(paddr_t addr) {
     return (a <= RAM_END) ? 1 : 0;
   }
 
-  /* On PDP-11/84-like configuration, low 16-bit I/O page is never RAM. */
-  if (addr >= IO_PAGE_START && addr <= IO_PAGE_END)
+  /* On PDP-11/84-like configuration, I/O page aliases are never RAM. */
+  if (addr >= PDP11_22BIT_IO_PAGE_START && addr <= PDP11_22BIT_IO_PAGE_END)
     return 0;
 
   return (addr < g_ram_bytes) ? 1 : 0;

@@ -72,51 +72,25 @@ static const char *cpu_model_name(byte model) {
 }
 
 /*
- * RL11 bootstrap (M9312-style), adapted from Pico_1140 rl11.h.
- * Loaded at 02000 and entered at 02002.
+ * RL11 ROM bootstrap (DEC/SIMH compatible sequence).
+ * Reads one 256-word block from RL unit 0 into 000000 and jumps to 000000.
+ * Loaded/executed from 02000 to avoid clobbering low memory before transfer.
  */
 #define RL_BOOT_ADDR  002000
-#define RL_BOOT_ENTRY (RL_BOOT_ADDR + 000002)
+#define RL_BOOT_ENTRY RL_BOOT_ADDR
 static const uint16_t rl_bootstrap[] = {
-    0042114,                         /* "LD" signature */
-    0012706, RL_BOOT_ADDR,           /* MOV #boot_start, SP */
-    0012700, 0000000,                /* MOV #unit, R0 (unit 0) */
-    0010003,                         /* MOV R0, R3 */
-    0000303,                         /* SWAB R3 */
-    0012701, 0174400,                /* MOV #RLCS, R1 */
-    0012761, 0000013, 0000004,       /* MOV #13, 4(R1) ; clear errors */
-    0052703, 0000004,                /* BIS #4, R3     ; unit + gstat */
-    0010311,                         /* MOV R3, (R1) */
-    0105711,                         /* TSTB (R1) */
-    0100376,                         /* BPL .-2 */
-    0105003,                         /* CLRB R3 */
-    0052703, 0000010,                /* BIS #10, R3    ; unit + rdhdr */
-    0010311,                         /* MOV R3, (R1) */
-    0105711,                         /* TSTB (R1) */
-    0100376,                         /* BPL .-2 */
-    0016102, 0000006,                /* MOV 6(R1), R2  ; header word1 */
-    0042702, 0000077,                /* BIC #77, R2    ; clear sector */
-    0005202,                         /* INC R2         ; seek marker */
-    0010261, 0000004,                /* MOV R2, 4(R1)  ; seek params */
-    0105003,                         /* CLRB R3 */
-    0052703, 0000006,                /* BIS #6, R3     ; unit + seek */
-    0010311,                         /* MOV R3, (R1) */
-    0105711,                         /* TSTB (R1) */
-    0100376,                         /* BPL .-2 */
-    0005061, 0000002,                /* CLR 2(R1)      ; BA=0 */
-    0005061, 0000004,                /* CLR 4(R1)      ; DA=0 */
-    0012761, 0177000, 0000006,       /* MOV #-512.,6(R1) */
-    0105003,                         /* CLRB R3 */
-    0052703, 0000014,                /* BIS #14, R3    ; unit + read */
-    0010311,                         /* MOV R3, (R1) */
-    0105711,                         /* TSTB (R1) */
-    0100376,                         /* BPL .-2 */
-    0042711, 0000377,                /* BIC #377, (R1) */
-    0005002,                         /* CLR R2 */
-    0005003,                         /* CLR R3 */
-    0012704, RL_BOOT_ADDR + 000020,  /* MOV #boot+20, R4 */
-    0005005,                         /* CLR R5 */
-    0005007                          /* CLR PC */
+    0012701, 0174400,         /* MOV  #RLCS,R1 */
+    0012761, 0000013, 0000004,/* MOV  #13,4(R1)      ; clear error */
+    0012711, 0000004,         /* MOV  #4,(R1)         ; GET STATUS */
+    0105711,                  /* WAIT1: TSTB (R1) */
+    0100376,                  /*        BPL  WAIT1 */
+    0005061, 0000002,         /* CLR  2(R1)           ; BA = 0 */
+    0005061, 0000004,         /* CLR  4(R1)           ; DA = 0 */
+    0012761, 0177400, 0000006,/* MOV  #-256,6(R1)     ; WC = -256 words */
+    0012711, 0000014,         /* MOV  #14,(R1)        ; READ + GO */
+    0105711,                  /* WAIT2: TSTB (R1) */
+    0100376,                  /*        BPL  WAIT2 */
+    0005007                   /* CLR  PC */
 };
 
 static void usage(const char *argv0) {

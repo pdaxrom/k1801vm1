@@ -45,6 +45,14 @@ static int poll_irq(regs *r, uint16_t *vec) { return irq_poll((void *)r, vec); }
 
 /* KW11 */
 #define KW11_CSR 0177546
+#define KW11P_CSR 0172540
+#define KW11P_CSB 0172542
+#define KW11P_CTR 0172544
+#define KW11P_RUN 000001
+#define KW11P_REPEAT 000010
+#define KW11P_FIX 000040
+#define KW11P_IE 000100
+#define KW11P_DONE 000200
 
 /* LP11 */
 #define LP11_CSR 0177514
@@ -55,6 +63,8 @@ static int poll_irq(regs *r, uint16_t *vec) { return irq_poll((void *)r, vec); }
 
 static uint8_t rd8(uint16_t a) { return bus_read8(a); }
 static void wr8(uint16_t a, uint8_t v) { bus_write8(a, v); }
+static uint16_t rd16(uint16_t a) { return bus_read16(a); }
+static void wr16(uint16_t a, uint16_t v) { bus_write16(a, v); }
 
 static void test_dl11_tx(regs *r) {
   uint16_t vec = 0;
@@ -193,6 +203,55 @@ static void test_kw11(regs *r) {
   check(got, "KW11: new IRQ on subsequent tick with IE=1");
 }
 
+static void test_kw11p(regs *r) {
+  uint16_t vec = 0;
+
+  reset_devices();
+
+  wr16(KW11P_CSB, 012345);
+  check(rd16(KW11P_CSB) == 012345, "KW11-P: CSB read/write");
+  wr16(KW11P_CTR, 076543);
+  check(rd16(KW11P_CTR) == 076543, "KW11-P: CTR read/write");
+
+  /* Single mode, down count, start + IE. */
+  wr16(KW11P_CSB, 000001);
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_RUN));
+
+  /* One pulse: 1 -> 0, no terminal event yet. */
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_RUN | KW11P_FIX));
+  check(poll_irq(r, &vec) == 0, "KW11-P: no IRQ before terminal count");
+
+  /* Second pulse: 0 -> underflow, DONE+IRQ in single mode. */
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_RUN | KW11P_FIX));
+  check(poll_irq(r, &vec) == 1, "KW11-P: IRQ on single-mode terminal count");
+  check((vec & 0000777) == 000100, "KW11-P: vector 000100");
+  vec = 0;
+  check(poll_irq(r, &vec) == 0, "KW11-P: no repeat IRQ while DONE==1");
+
+  /* Repeat mode + ERR on second terminal while previous DONE still set. */
+  wr16(KW11P_CSB, 000000);
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_REPEAT | KW11P_RUN));
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_REPEAT | KW11P_RUN | KW11P_FIX));
+  check(poll_irq(r, &vec) == 1, "KW11-P: repeat mode first terminal IRQ");
+
+  /* Keep DONE set (write with DONE=1), then force another terminal -> ERR. */
+  wr8(KW11P_CSR,
+      (uint8_t)(KW11P_IE | KW11P_REPEAT | KW11P_RUN | KW11P_DONE | KW11P_FIX));
+  check((rd8((uint16_t)(KW11P_CSR + 1)) & 000001) != 0,
+        "KW11-P: ERR set on unserviced repeat terminal");
+  vec = 0;
+  check(poll_irq(r, &vec) == 0, "KW11-P: no repeat IRQ while DONE==1");
+
+  /* Clear ERR and DONE, then next terminal should IRQ again. */
+  wr8((uint16_t)(KW11P_CSR + 1), 000000);
+  check((rd8((uint16_t)(KW11P_CSR + 1)) & 000001) == 0,
+        "KW11-P: ERR clear via CSR high write");
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_REPEAT | KW11P_RUN));
+  wr8(KW11P_CSR, (uint8_t)(KW11P_IE | KW11P_REPEAT | KW11P_RUN | KW11P_FIX));
+  check(poll_irq(r, &vec) == 1,
+        "KW11-P: IRQ returns after software clears DONE");
+}
+
 static void test_lp11(regs *r) {
   uint16_t vec = 0;
 
@@ -286,6 +345,7 @@ int main(void) {
   test_dl11_tx(&r);
   test_dl11_rx(&r);
   test_kw11(&r);
+  test_kw11p(&r);
   test_lp11(&r);
   test_rk11(&r);
 

@@ -32,6 +32,8 @@ typedef uint16_t word;
 typedef uint8_t byte;
 #endif
 
+#define J11_CPU_ID_1184 001045
+
 static int trace_irq_flag = 0;
 static int trace_nxm_flag = 0;
 static lsi11_machine_t machine_profile = LSI11_MACHINE_1104;
@@ -175,6 +177,20 @@ int lsi11_device_enabled(const char *name) {
    that instead. */
 static void nxm_trap(regs *r, paddr_t addr) {
   (void)addr;
+  if (r->model == DCJ11) {
+    int io_timeout = 0;
+    if (addr <= 0177777) {
+      io_timeout = (addr >= 0160000) ? 1 : 0;
+    } else {
+      io_timeout = (addr >= 017760000 && addr <= 017777777) ? 1 : 0;
+    }
+    if (io_timeout) {
+      r->J11_REG177752_177766[6] |= 0000020; /* CPUE_TMO */
+    } else {
+      r->J11_REG177752_177766[6] |= 0000040; /* CPUE_NXM */
+    }
+    r->J11_REG177752_177766[6] &= 0000374;
+  }
 
   /* Optional trace */
   if (trace_nxm_flag) {
@@ -206,9 +222,38 @@ static void nxm_trap(regs *r, paddr_t addr) {
   r->fAbort = 1;
 }
 
+static int j11_probe_shadow_hit(regs *r, paddr_t addr) {
+  if (machine_profile != LSI11_MACHINE_1184)
+    return 0;
+  if (r->model != DCJ11)
+    return 0;
+  /* Minimal probe aliases for 11/84-like RT-11 detection paths. */
+  if (addr >= 017772000 && addr <= 017772001) {
+    return 1;
+  }
+  return 0;
+}
+
+static byte j11_probe_shadow_read_byte(paddr_t addr) {
+  if (addr == 017772000) {
+    return 000001;
+  }
+  return 000000;
+}
+
+static word j11_probe_shadow_read_word(paddr_t addr) {
+  if (addr == 017772000) {
+    return 000001;
+  }
+  return 000000;
+}
+
 /* ---------- bus callbacks for core ---------- */
 
 static byte core_load_byte(regs *r, word addr) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+    return j11_probe_shadow_read_byte((paddr_t)addr);
+  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -217,6 +262,9 @@ static byte core_load_byte(regs *r, word addr) {
 }
 
 static void core_store_byte(regs *r, word addr, byte v) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+    return;
+  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -225,6 +273,10 @@ static void core_store_byte(regs *r, word addr, byte v) {
 }
 
 static word core_load_word(regs *r, word addr) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
+      j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+    return j11_probe_shadow_read_word((paddr_t)addr);
+  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -233,6 +285,10 @@ static word core_load_word(regs *r, word addr) {
 }
 
 static void core_store_word(regs *r, word addr, word v) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
+      j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+    return;
+  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -241,6 +297,9 @@ static void core_store_word(regs *r, word addr, word v) {
 }
 
 static byte core_load_byte_pa(regs *r, dword addr) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+    return j11_probe_shadow_read_byte((paddr_t)addr);
+  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -249,6 +308,9 @@ static byte core_load_byte_pa(regs *r, dword addr) {
 }
 
 static void core_store_byte_pa(regs *r, dword addr, byte v) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+    return;
+  }
   if (bus_is_nxm((paddr_t)addr)) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -257,6 +319,10 @@ static void core_store_byte_pa(regs *r, dword addr, byte v) {
 }
 
 static word core_load_word_pa(regs *r, dword addr) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
+      j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+    return j11_probe_shadow_read_word((paddr_t)addr);
+  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return 0;
@@ -265,6 +331,10 @@ static word core_load_word_pa(regs *r, dword addr) {
 }
 
 static void core_store_word_pa(regs *r, dword addr, word v) {
+  if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
+      j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+    return;
+  }
   if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
     nxm_trap(r, (paddr_t)addr);
     return;
@@ -309,6 +379,17 @@ static int impl_init(regs *r) {
 
 static void impl_reset(regs *r) {
   (void)r;
+  if (r->model == DCJ11) {
+    if (machine_profile == LSI11_MACHINE_1184) {
+      /* Match PDP-11/84 identification path expected by RT-11 monitor. */
+      r->J11_REG177750 = J11_CPU_ID_1184;
+      /* 11/8x systems expose non-zero Hit/Miss register value. */
+      r->J11_REG177752_177766[0] = 000010;
+    } else {
+      r->J11_REG177750 = 0;
+      r->J11_REG177752_177766[0] = 0;
+    }
+  }
   if (device_mask.dl11)
     dl11_reset();
   if (device_mask.kw11)

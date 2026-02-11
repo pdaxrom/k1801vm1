@@ -117,8 +117,8 @@ int main(void) {
   rk11_reset();
 
   /* 1) decode and register accessibility on pdp1184 */
-  check(bus_is_nxm(0170000) == 1,
-        "pdp1184 low 16-bit I/O page hole is NXM when undecoded");
+  check(bus_is_nxm(0170000) == 0,
+        "pdp1184 physical RAM must exist below 64KB holeless region");
   check(bus_is_nxm(0200000) == 0, "pdp1184 RAM must exist at 0200000");
   bus_write16(0200000, 045612);
   check(bus_read16(0200000) == 045612, "pdp1184 RAM readback at 0200000");
