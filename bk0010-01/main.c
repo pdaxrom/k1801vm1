@@ -465,15 +465,31 @@ int main(int argc, char **argv)
     }
 
     regs r;
+    byte *bk_mem = NULL;
     memset(&r, 0, sizeof(r));
     r.model = K1801VM1;
 
+    bk_mem = (byte *)calloc(1, bk_hw_required_memory_size());
+    if (!bk_mem) {
+        fprintf(stderr, "Failed to allocate BK memory\n");
+        free(monitor_rom);
+        free(basic_rom);
+        return 1;
+    }
+    if (bk_hw_set_memory(bk_mem, bk_hw_required_memory_size()) != 0) {
+        fprintf(stderr, "Failed to bind BK memory\n");
+        free(monitor_rom);
+        free(basic_rom);
+        free(bk_mem);
+        return 1;
+    }
     bk_hw_connect(&r);
     bk_tape_set_name_pad(name_pad_space);
     if (r.init(&r) != 0) {
         fprintf(stderr, "Hardware init failed\n");
         free(monitor_rom);
         free(basic_rom);
+        free(bk_mem);
         return 1;
     }
 
@@ -582,8 +598,10 @@ int main(int argc, char **argv)
 #endif
     if (!gui_init_ok) {
     gui_fail:
+        core_fini(&r);
         free(monitor_rom);
         free(basic_rom);
+        free(bk_mem);
         return 1;
     }
 
@@ -828,5 +846,6 @@ int main(int argc, char **argv)
     core_fini(&r);
     free(monitor_rom);
     free(basic_rom);
+    free(bk_mem);
     return 0;
 }

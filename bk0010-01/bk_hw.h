@@ -13,6 +13,8 @@
 #define BK_SCREEN_HEIGHT 256
 
 void bk_hw_connect(regs *r);
+size_t bk_hw_required_memory_size(void);
+int bk_hw_set_memory(byte *memory, size_t size);
 void bk_hw_set_rom_segment(const byte *rom, word base, word size);
 void bk_hw_reset_state(void);
 void bk_hw_handle_key(int code);

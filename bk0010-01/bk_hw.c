@@ -29,6 +29,7 @@
 #define SYS_PORT_IN_MASK  0370
 
 static byte *mem;
+static size_t mem_size;
 
 static byte kbd_status = CSR_READY;
 static byte kbd_data = 0;
@@ -241,11 +242,8 @@ static void bk_store_word(regs *r, word offset, word value)
 static int bk_init(regs *r)
 {
     (void)r;
-    if (!mem) {
-        mem = (byte *)malloc(MEM_SIZE);
-        if (!mem) {
-            return -1;
-        }
+    if (!mem || mem_size < MEM_SIZE) {
+        return -1;
     }
     memset(mem, 0, MEM_SIZE);
     bk_tape_init();
@@ -272,10 +270,8 @@ static void bk_reset(regs *r)
 static void bk_fini(regs *r)
 {
     (void)r;
-    if (mem) {
-        free(mem);
-        mem = NULL;
-    }
+    mem = NULL;
+    mem_size = 0;
     bk_tape_set_input(NULL, 0);
     bk_tape_output_clear();
 }
@@ -297,6 +293,23 @@ void bk_hw_connect(regs *r)
 	r->fini = bk_fini;
 	r->poll_irq = bk_poll_irq;
 	r->ramptr = bk_ramptr;
+}
+
+size_t bk_hw_required_memory_size(void)
+{
+    return MEM_SIZE;
+}
+
+int bk_hw_set_memory(byte *memory, size_t size)
+{
+    if (!memory || size < MEM_SIZE) {
+        mem = NULL;
+        mem_size = 0;
+        return -1;
+    }
+    mem = memory;
+    mem_size = size;
+    return 0;
 }
 
 void bk_hw_set_rom_segment(const byte *rom, word base, word size)
