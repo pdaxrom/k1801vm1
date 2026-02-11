@@ -440,7 +440,7 @@ Supported MMU behavior (`ENABLE_MMU=1`):
 - 8 segments per space, PAR/PDR relocation.
 - Split I/D per mode via `SSR3` bits `KD/SD/UD`.
 - Instruction fetch in I-space, data in D-space when split enabled.
-- Trap/interrupt vector fetch forced through Kernel D-space.
+- Trap/interrupt vector fetch through Kernel D-space (when split I/D enabled) or I-space.
 - Fault classes: non-resident, length, write-protect; trap vector `000250`.
 - `SSR0` fault latch + runtime enable bit, `SSR2` fault PC, `SSR1` simplified VA latch.
 
@@ -456,7 +456,7 @@ MMU compliance table:
 | K/S/U PAR/PDR translation | YES | Mode 2 treated as kernel |
 | Split I/D (`SSR3 KD/SD/UD`) | YES | Per mode |
 | MMU fault trap (`000250`) | YES | Instruction aborted |
-| Vector fetch via Kernel D-space | YES | Applied to traps/IRQs |
+| Vector fetch via Kernel D-space | YES | D-space when KD split enabled, else I-space |
 | `SSR0/SSR2` fault state | YES | First-fault latch behavior |
 | `SSR1` restart log | PARTIAL | Stores fault VA only |
 | 22-bit physical memory backing | YES | Core hwstub provides 4MB physical RAM |

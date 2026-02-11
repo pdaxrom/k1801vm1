@@ -8,14 +8,17 @@
 
 #define MMU_TRAP_VECTOR 0000250
 #define MMU_SSR0_ENABLE 0000001
-#define MMU_SSR0_FAULT  0100000
+#define MMU_SSR0_FAULT 0100000
 #define MMU_SSR0_NONRES 0004000
 #define MMU_SSR0_LENGTH 0002000
-#define MMU_SSR0_PROT   0001000
+#define MMU_SSR0_PROT 0001000
 
 static INLINE void setup_mmu_fault_vector(mmu_fixture *fx)
 {
     fx->r.mmu_ssr0 = MMU_SSR0_ENABLE;
+
+    /* Enable kernel split I/D so vector fetch uses D-space. */
+    fx->r.mmu_ssr3 = 0000001; /* KD */
 
     fx->r.mmu_par[0][1][0] = 0000;
     fx->r.mmu_pdr[0][1][0] = 0177006;
@@ -46,9 +49,10 @@ static int test_fault_nonresident_ifetch(void)
 
     MMU_ASSERT_EQ(fx.r.mmu_ssr2, 000000, "SSR2 records fault PC");
     MMU_ASSERT_EQ(fx.r.mmu_ssr1, 000000, "SSR1 records fault VA");
-    MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_NONRES)) ==
-                    (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_NONRES),
-                    "SSR0 must contain nonresident fault");
+    MMU_ASSERT_TRUE(
+        (fx.r.mmu_ssr0 & (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_NONRES)) ==
+        (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_NONRES),
+        "SSR0 must contain nonresident fault");
 
     mmu_fixture_teardown(&fx);
     return 0;
@@ -62,23 +66,31 @@ static int test_fault_length_on_data_write(void)
     mmu_fixture_setup(&fx);
     setup_mmu_fault_vector(&fx);
 
+    /* I-space seg 0: permissive (instruction fetch). */
     fx.r.mmu_par[0][0][0] = 0000;
-    fx.r.mmu_pdr[0][0][0] = 0000006;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    /* D-space seg 1: length=0 triggers length fault on data write to block > 0.
+     * Remap seg 1 D-space PAR to physical 0 so VA 020200 -> phys 000200. */
+    fx.r.mmu_par[0][1][1] = 0000;
+    fx.r.mmu_pdr[0][1][1] = 0000006;
     fx.r.r[7] = 000000;
 
+    /* MOV #1, @#020200 — data write targets segment 1 via D-space */
     mmu_phys_write_word(&fx, 000000,
                         mmu_op_mov(mmu_operand(2, 7), mmu_operand(3, 7)));
     mmu_phys_write_word(&fx, 000002, 000001);
-    mmu_phys_write_word(&fx, 000004, 000200);
+    mmu_phys_write_word(&fx, 000004, 020200);
     mmu_phys_write_word(&fx, 000200, 012345);
 
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU length trap");
 
     MMU_ASSERT_EQ(fx.r.r[7], 000400, "PC must load MMU trap handler");
-    MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_LENGTH)) ==
-                    (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_LENGTH),
-                    "SSR0 must contain length fault");
-    MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 012345, "faulting write must not commit");
+    MMU_ASSERT_TRUE(
+        (fx.r.mmu_ssr0 & (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_LENGTH)) ==
+        (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_LENGTH),
+        "SSR0 must contain length fault");
+    MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 012345,
+                  "faulting write must not commit");
 
     mmu_fixture_teardown(&fx);
     return 0;
@@ -92,23 +104,31 @@ static int test_fault_protect_on_data_write(void)
     mmu_fixture_setup(&fx);
     setup_mmu_fault_vector(&fx);
 
+    /* I-space seg 0: permissive (instruction fetch). */
     fx.r.mmu_par[0][0][0] = 0000;
-    fx.r.mmu_pdr[0][0][0] = 0177001;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    /* D-space seg 1: read-only (ACF=1) triggers protect fault on data write.
+     * Remap seg 1 D-space PAR to physical 0 so VA 020200 -> phys 000200. */
+    fx.r.mmu_par[0][1][1] = 0000;
+    fx.r.mmu_pdr[0][1][1] = 0177001;
     fx.r.r[7] = 000000;
 
+    /* MOV #1, @#020200 — data write targets segment 1 via D-space */
     mmu_phys_write_word(&fx, 000000,
                         mmu_op_mov(mmu_operand(2, 7), mmu_operand(3, 7)));
     mmu_phys_write_word(&fx, 000002, 000001);
-    mmu_phys_write_word(&fx, 000004, 000200);
+    mmu_phys_write_word(&fx, 000004, 020200);
     mmu_phys_write_word(&fx, 000200, 076543);
 
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU protection trap");
 
     MMU_ASSERT_EQ(fx.r.r[7], 000400, "PC must load MMU trap handler");
-    MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_PROT)) ==
-                    (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_PROT),
-                    "SSR0 must contain protection fault");
-    MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 076543, "protected write must not commit");
+    MMU_ASSERT_TRUE(
+        (fx.r.mmu_ssr0 & (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_PROT)) ==
+        (MMU_SSR0_ENABLE | MMU_SSR0_FAULT | MMU_SSR0_PROT),
+        "SSR0 must contain protection fault");
+    MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 076543,
+                  "protected write must not commit");
 
     mmu_fixture_teardown(&fx);
     return 0;
