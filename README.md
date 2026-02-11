@@ -463,6 +463,128 @@ MMU compliance table:
 
 ---
 
+## 19. Debugging Playbook (including SIMH)
+
+This section collects practical debugging methods used in this repository.
+
+### 19.1 Fast local checks
+
+Core-only:
+```sh
+make test
+make test-mmu-on
+```
+
+LSI11 machine profiles:
+```sh
+make -C lsi11 test
+make -C lsi11 test-pdp1184
+```
+
+### 19.2 Emulator trace options
+
+For `lsi11/lsi11` and `lsi11/pdp1184`:
+- `-trace` instruction trace with disassembly
+- `-trace-regs` register dump per instruction
+- `-traceirq` interrupt delivery trace
+- `-tracenxm` NXM/bus trap trace
+- `-check-config` final machine/device config print
+
+Example:
+```sh
+./lsi11/pdp1184 -rk lsi11/disks/SYS.DSK -bootrt11 -trace -traceirq -tracenxm > /tmp/pdp1184.trace
+```
+
+### 19.3 LLDB debugging examples
+
+```sh
+lldb -- ./lsi11/pdp1184 -rk lsi11/disks/SYS.DSK -bootrt11
+```
+
+Useful LLDB commands:
+```text
+(lldb) b core_step
+(lldb) b nxm_trap
+(lldb) run
+(lldb) bt
+(lldb) frame variable *r
+(lldb) register read
+```
+
+For test binaries:
+```sh
+lldb -- tests/core_tests
+lldb -- tests/test_mmu_basic
+```
+
+### 19.4 SIMH reference runs (cross-check)
+
+Use SIMH as reference behavior when validating boot loaders, CPU ID paths,
+interrupt flow, and controller polling loops.
+
+PDP-11/04 + RK (RT-11 style):
+```text
+set cpu 11/04
+set cpu 64k
+set cpu idle
+set console 7b
+set tti 7b
+set tto 7b
+set rk0 enabled
+attach rk0 lsi11/disks/SYS.DSK
+boot rk0
+```
+
+PDP-11/04 + RL:
+```text
+set cpu 11/04
+set cpu idle
+set rl enabled
+attach rl0 lsi11/disks/newsys.rl02
+boot rl0
+```
+
+PDP-11/84 + RL:
+```text
+set cpu 11/84
+set rl enabled
+attach rl0 lsi11/disks/newsys.rl02
+boot rl0
+```
+
+PDP-11/34 + HK/RK07 image:
+```text
+set cpu 11/34
+set cpu 4M
+set TTI 8B
+set TTO 8B
+set hk0 rk07
+attach hk0 lsi11/disks/rt11v503.dsk
+boot hk0
+```
+
+### 19.5 SIMH interactive debug commands
+
+After boot:
+```text
+break 000604
+go
+step
+step 20
+examine 177450
+examine 177440
+```
+
+### 19.6 Side-by-side comparison workflow
+
+1. Run emulator with `-trace` and save log.
+2. Run same image/config in SIMH.
+3. Compare traces around first divergence (PC, PSW, CSR values, IRQ vectors).
+4. If divergence starts after I/O access, add `-traceirq`/`-tracenxm`.
+5. If divergence starts in CPU flow, reproduce with `tests/core_*` or MMU tests.
+
+---
+
 ## Appendix A: Checklist Mapping
 
 This report corresponds to:
