@@ -50,11 +50,15 @@ tests/test_mmu_22bit.o: tests/test_mmu_22bit.c tests/mmu_test_common.h core/core
 tests/cpu_diag: tests/cpu_diag_main.o tests/cpu_diag.o core/core.o core/hardware.o
 	$(CC) -g -o $@ $^
 
-test: $(TESTS) $(MMU_TESTS_OFF)
+test:
+	$(MAKE) clean
+	$(MAKE) CFLAGS='$(BASE_CFLAGS) -DENABLE_MMU=0' $(TESTS) $(MMU_TESTS_OFF)
 	./tests/core_tests
 	./tests/test_mmu_disable_build
 
-test-mmu-on: $(TESTS) $(MMU_TESTS_ON)
+test-mmu-on:
+	$(MAKE) clean
+	$(MAKE) CFLAGS='$(BASE_CFLAGS) -DENABLE_MMU=1' $(TESTS) $(MMU_TESTS_ON)
 	./tests/core_tests
 	./tests/test_mmu_basic
 	./tests/test_mmu_faults
@@ -62,10 +66,8 @@ test-mmu-on: $(TESTS) $(MMU_TESTS_ON)
 	./tests/test_mmu_22bit
 
 test-matrix:
-	$(MAKE) clean
 	$(MAKE) test
-	$(MAKE) clean
-	$(MAKE) CFLAGS='$(BASE_CFLAGS) -DENABLE_MMU=1' test-mmu-on
+	$(MAKE) test-mmu-on
 
 diag: $(DIAG)
 	./tests/cpu_diag --all

@@ -66,9 +66,80 @@ static INLINE int dcj11_kernel_psw(word psw)
 	return ((psw >> 14) & 03) == 0;
 }
 
-static INLINE int dcj11_has_reg_177750(regs *r, word offset)
+enum {
+	DCJ11_REG_NONE = 0,
+	DCJ11_REG_MEMERR_177744,
+	DCJ11_REG_CCR_177746,
+	DCJ11_REG_MAINT_177750,
+	DCJ11_REG_HITMISS_177752,
+	DCJ11_REG_CPUERR_177766
+};
+
+static INLINE int dcj11_reg_select(word offset)
 {
-	return (r->model == DCJ11) && ((offset & 0177776) == 0177750);
+	switch (offset & 0177776) {
+	case 0177744:
+		return DCJ11_REG_MEMERR_177744;
+	case 0177746:
+		return DCJ11_REG_CCR_177746;
+	case 0177750:
+		return DCJ11_REG_MAINT_177750;
+	case 0177752:
+		return DCJ11_REG_HITMISS_177752;
+	case 0177766:
+		return DCJ11_REG_CPUERR_177766;
+	default:
+		return DCJ11_REG_NONE;
+	}
+}
+
+static INLINE int dcj11_has_reg_block_177744(regs *r, word offset)
+{
+	return (r->model == DCJ11) && (dcj11_reg_select(offset) != DCJ11_REG_NONE);
+}
+
+static INLINE word dcj11_reg_block_load_word(regs *r, word offset)
+{
+	switch (dcj11_reg_select(offset)) {
+	case DCJ11_REG_MEMERR_177744:
+		return r->J11_REG177744;
+	case DCJ11_REG_CCR_177746:
+		return r->J11_REG177746;
+	case DCJ11_REG_MAINT_177750:
+		return r->J11_REG177750;
+	case DCJ11_REG_HITMISS_177752:
+		return r->J11_REG177752_177766[0];
+	case DCJ11_REG_CPUERR_177766:
+		return (word)(r->J11_REG177752_177766[6] & 0000374);
+	default:
+		return 0;
+	}
+}
+
+static INLINE void dcj11_reg_block_store_word(regs *r, word offset, word value)
+{
+	switch (dcj11_reg_select(offset)) {
+	case DCJ11_REG_MEMERR_177744:
+		/* Memory system error register: cleared by any write. */
+		r->J11_REG177744 = 0;
+		return;
+	case DCJ11_REG_CCR_177746:
+		r->J11_REG177746 = value;
+		return;
+	case DCJ11_REG_MAINT_177750:
+		/* Maintenance register is read-only in normal mode. */
+		return;
+	case DCJ11_REG_HITMISS_177752:
+		/* Hit/miss register clears on write. */
+		r->J11_REG177752_177766[0] = 0;
+		return;
+	case DCJ11_REG_CPUERR_177766:
+		/* CPU error register clears on write. */
+		r->J11_REG177752_177766[6] = 0;
+		return;
+	default:
+		return;
+	}
 }
 
 static INLINE int cpu_has_reg_177776(word offset)
@@ -78,17 +149,29 @@ static INLINE int cpu_has_reg_177776(word offset)
 
 static INLINE byte dcj11_reg_177750_load_byte(regs *r, word offset)
 {
-	return (byte)((offset & 1) ? ((r->J11_REG177750 >> 8) & 0377)
-	                          : (r->J11_REG177750 & 0377));
+	word value = dcj11_reg_block_load_word(r, offset);
+	return (byte)((offset & 1) ? ((value >> 8) & 0377)
+	                          : (value & 0377));
 }
 
 static INLINE void dcj11_reg_177750_store_byte(regs *r, word offset, byte value)
 {
-	if (offset & 1) {
-		r->J11_REG177750 = (word)((r->J11_REG177750 & 000377) | (((word)value & 0377) << 8));
-	} else {
-		r->J11_REG177750 = (word)((r->J11_REG177750 & 0177400) | ((word)value & 0377));
+	int reg = dcj11_reg_select(offset);
+	if (reg == DCJ11_REG_MEMERR_177744 ||
+	    reg == DCJ11_REG_HITMISS_177752 ||
+	    reg == DCJ11_REG_CPUERR_177766 ||
+	    reg == DCJ11_REG_MAINT_177750) {
+		dcj11_reg_block_store_word(r, offset, 0);
+		return;
 	}
+
+	word regv = dcj11_reg_block_load_word(r, offset);
+	if (offset & 1) {
+		regv = (word)((regv & 000377) | (((word)value & 0377) << 8));
+	} else {
+		regv = (word)((regv & 0177400) | ((word)value & 0377));
+	}
+	dcj11_reg_block_store_word(r, offset, regv);
 }
 
 static INLINE byte cpu_reg_177776_load_byte(regs *r, word offset)
@@ -176,7 +259,10 @@ void core_reset(regs *r)
     r->r[7] = r->SEL0 & 0177400;
     r->psw = 0340;
     r->ir = 0;
+    r->J11_REG177744 = 0;
+    r->J11_REG177746 = 0;
     r->J11_REG177750 = 0;
+    memset(r->J11_REG177752_177766, 0, sizeof(r->J11_REG177752_177766));
     r->fWait = 0;
     r->fTrap = 0;
     r->fAbort = 0;
@@ -584,22 +670,19 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
 	if (r->model != DCJ11) {
 		return 0;
 	}
-	if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
-		return 0;
-	}
 
 	/*
-	 * Top virtual 8KB is fixed I/O page under relocation.
-	 * It is mapped to physical I/O page (18-bit or 22-bit view).
+	 * Top virtual 8KB is the I/O page on DCJ11 regardless of MMU enable.
+	 * Under MMU it is still fixed to physical I/O page (18-bit or 22-bit view).
 	 */
 	if (va >= 0160000) {
 		if (pa_out) {
-			if (r->mmu_ssr3 & 0000020) {
-				*pa_out = (dword)(017760000 | (va & 017777));
-			} else {
-				*pa_out = (dword)(00760000 | (va & 017777));
-			}
+			*pa_out = (dword)(017760000 | (va & 017777));
 		}
+		return 0;
+	}
+
+	if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
 		return 0;
 	}
 
@@ -711,7 +794,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch, int fo
 	int seg = 0;
 	int rc;
 
-	if (dcj11_has_reg_177750(r, offset)) {
+	if (dcj11_has_reg_block_177744(r, offset)) {
 		return dcj11_reg_177750_load_byte(r, offset);
 	}
 	if (cpu_has_reg_177776(offset)) {
@@ -749,7 +832,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value, int forc
 	int seg = 0;
 	int rc;
 
-	if (dcj11_has_reg_177750(r, offset)) {
+	if (dcj11_has_reg_block_177744(r, offset)) {
 		dcj11_reg_177750_store_byte(r, offset, value);
 		return;
 	}
@@ -795,8 +878,8 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch, int fo
 		return 0;
 	}
 
-	if (dcj11_has_reg_177750(r, offset)) {
-		return r->J11_REG177750;
+	if (dcj11_has_reg_block_177744(r, offset)) {
+		return dcj11_reg_block_load_word(r, offset);
 	}
 	if (offset == 0177776) {
 		return r->psw;
@@ -838,8 +921,8 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value, int forc
 		return;
 	}
 
-	if (dcj11_has_reg_177750(r, offset)) {
-		r->J11_REG177750 = value;
+	if (dcj11_has_reg_block_177744(r, offset)) {
+		dcj11_reg_block_store_word(r, offset, value);
 		return;
 	}
 	if (offset == 0177776) {
