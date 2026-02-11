@@ -17,8 +17,12 @@ static uint16_t encode_vec(regs *r, uint16_t v, uint8_t pri)
 
 int irq_register(const irq_source_t *s)
 {
-    if (!s || !s->pending || !s->ack) return -1;
-    if (g_n >= MAX_IRQ) return -1;
+    if (!s || !s->pending || !s->ack) {
+        return -1;
+    }
+    if (g_n >= MAX_IRQ) {
+        return -1;
+    }
     g_irq[g_n++] = *s;
     return 0;
 }
@@ -29,7 +33,9 @@ int irq_poll(regs *r, uint16_t *vec_out)
     uint8_t best_pri = 0;
 
     for (int i = 0; i < g_n; i++) {
-        if (!g_irq[i].pending()) continue;
+        if (!g_irq[i].pending()) {
+            continue;
+        }
 
         if (best < 0 || g_irq[i].priority > best_pri) {
             best = i;
@@ -37,7 +43,9 @@ int irq_poll(regs *r, uint16_t *vec_out)
         }
     }
 
-    if (best < 0) return 0;
+    if (best < 0) {
+        return 0;
+    }
 
     uint16_t v = g_irq[best].vector;
     uint8_t pri = g_irq[best].priority;

@@ -92,14 +92,16 @@ static void kwp_step_one(void)
 
     if (kwp_csr & KW11P_UP) {
         kwp_ctr = (uint16_t)(kwp_ctr + 1);
-        if (kwp_ctr == 0)
+        if (kwp_ctr == 0) {
             kwp_terminal_event();
+        }
         return;
     }
 
     kwp_ctr = (uint16_t)(kwp_ctr - 1);
-    if (prev == 0)
+    if (prev == 0) {
         kwp_terminal_event();
+    }
 }
 
 static void kwp_advance_pulses(uint64_t pulses)
@@ -133,12 +135,14 @@ static void kwp_write_csr_low(uint8_t v)
     kwp_csr = (uint16_t)((kwp_csr & (uint16_t)~control_mask) | (v & control_mask));
 
     /* DONE is software-clearable (write 0). */
-    if ((v & KW11P_DONE) == 0)
+    if ((v & KW11P_DONE) == 0) {
         kwp_sw_clear_done();
+    }
 
     /* IE disable suppresses request immediately. */
-    if ((kwp_csr & KW11P_IE) == 0)
+    if ((kwp_csr & KW11P_IE) == 0) {
         kwp_irq_req = 0;
+    }
 
     /* RUN rising edge loads counter from buffer. */
     if ((old & KW11P_RUN) == 0 && (kwp_csr & KW11P_RUN)) {
@@ -157,8 +161,9 @@ static void kwp_write_csr_low(uint8_t v)
 static void kwp_write_csr_high(uint8_t v)
 {
     /* ERR is software-clearable via high-byte bit0 write=0. */
-    if ((v & 000001) == 0)
+    if ((v & 000001) == 0) {
         kwp_sw_clear_err();
+    }
 }
 
 /* --- I/O callbacks --- */
@@ -166,28 +171,39 @@ static uint8_t kw11_read8(uint16_t a)
 {
     if (a == KW11L_CSR) {
         uint8_t v = 0;
-        if (kwl_done) v |= KW11L_DONE;
-        if (kwl_ie)   v |= KW11L_IE;
+        if (kwl_done) {
+            v |= KW11L_DONE;
+        }
+        if (kwl_ie) {
+            v |= KW11L_IE;
+        }
         /* LKS monitor is read/clear. */
         kwl_done = 0;
         kwl_irq_req = 0;
         return v;
     }
-    if (a == (uint16_t)(KW11L_CSR + 1))
+    if (a == (uint16_t)(KW11L_CSR + 1)) {
         return 0;
+    }
 
-    if (a == KW11P_CSR)
+    if (a == KW11P_CSR) {
         return (uint8_t)(kwp_csr & 000377);
-    if (a == (uint16_t)(KW11P_CSR + 1))
+    }
+    if (a == (uint16_t)(KW11P_CSR + 1)) {
         return (uint8_t)((kwp_csr >> 8) & 000001);
-    if (a == KW11P_CSB)
+    }
+    if (a == KW11P_CSB) {
         return (uint8_t)(kwp_csb & 000377);
-    if (a == (uint16_t)(KW11P_CSB + 1))
+    }
+    if (a == (uint16_t)(KW11P_CSB + 1)) {
         return (uint8_t)((kwp_csb >> 8) & 000377);
-    if (a == KW11P_CTR)
+    }
+    if (a == KW11P_CTR) {
         return (uint8_t)(kwp_ctr & 000377);
-    if (a == (uint16_t)(KW11P_CTR + 1))
+    }
+    if (a == (uint16_t)(KW11P_CTR + 1)) {
         return (uint8_t)((kwp_ctr >> 8) & 000377);
+    }
 
     return 0;
 }
@@ -239,8 +255,9 @@ static void kw11_write8(uint16_t a, uint8_t v)
 /* --- IRQ source --- */
 int kw11_irq_pending(void)
 {
-    if (kwp_irq_req)
+    if (kwp_irq_req) {
         return 1;
+    }
     return kwl_irq_req ? 1 : 0;
 }
 
@@ -257,14 +274,17 @@ int kw11_init(void)
 {
     static const io_range_t l = { 0177546, 0177547, kw11_read8, kw11_write8, "KW11-L" };
     static const io_range_t p = { 0172540, 0172545, kw11_read8, kw11_write8, "KW11-P" };
-    if (devio_register(&l) != 0)
+    if (devio_register(&l) != 0) {
         return -1;
-    if (devio_register(&p) != 0)
+    }
+    if (devio_register(&p) != 0) {
         return -1;
+    }
 
     static const irq_source_t s = { "KW11", 000100, 6, kw11_irq_pending, kw11_irq_ack };
-    if (irq_register(&s) != 0)
+    if (irq_register(&s) != 0) {
         return -1;
+    }
 
     kw11_reset();
     return 0;
@@ -306,14 +326,16 @@ void kw11_poll(void)
             uint64_t ticks = elapsed / kwl_period_ns;
             kwl_last_tick_ns += ticks * kwl_period_ns;
             kwl_done = 1;
-            if (kwl_ie)
+            if (kwl_ie) {
                 kwl_irq_req = 1;
+            }
         }
     }
 
     /* --- KW11-P --- */
-    if ((kwp_csr & KW11P_RUN) == 0)
+    if ((kwp_csr & KW11P_RUN) == 0) {
         return;
+    }
 
     if (!kwp_clock_init) {
         kwp_clock_init = 1;
@@ -326,12 +348,14 @@ void kw11_poll(void)
     }
 
     uint64_t period_ns = kwp_period_ns();
-    if (period_ns == 0)
+    if (period_ns == 0) {
         return;
+    }
 
     uint64_t elapsed = t - kwp_last_tick_ns;
-    if (elapsed < period_ns)
+    if (elapsed < period_ns) {
         return;
+    }
 
     uint64_t pulses = elapsed / period_ns;
     kwp_last_tick_ns += pulses * period_ns;

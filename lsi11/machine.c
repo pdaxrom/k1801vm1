@@ -9,11 +9,21 @@ int lsi11_machine_init(void)
 {
     util_term_init_raw();
 
-    if (dl11_init() != 0) return -1;
-    if (kw11_init() != 0) return -1;
-    if (rk11_init() != 0) return -1;
-    if (lp11_init() != 0) return -1;
-    if (sr_init()  != 0) return -1;
+    if (dl11_init() != 0) {
+        return -1;
+    }
+    if (kw11_init() != 0) {
+        return -1;
+    }
+    if (rk11_init() != 0) {
+        return -1;
+    }
+    if (lp11_init() != 0) {
+        return -1;
+    }
+    if (sr_init()  != 0) {
+        return -1;
+    }
 
     return 0;
 }

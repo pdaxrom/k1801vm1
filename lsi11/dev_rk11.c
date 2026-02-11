@@ -99,642 +99,685 @@ static int sector_one_based = 0;
 static int rk_debug = 0;
 static int rk_debug_active = 0;
 
-static uint16_t rk_get_drive(uint16_t da) {
-  return (uint16_t)((da & RKDA_DRIVE_MASK) >> 13);
+static uint16_t rk_get_drive(uint16_t da)
+{
+    return (uint16_t)((da & RKDA_DRIVE_MASK) >> 13);
 }
 
-static uint16_t rk_get_sector(uint16_t da) {
-  return (uint16_t)(da & RKDA_SECTOR_MASK);
+static uint16_t rk_get_sector(uint16_t da)
+{
+    return (uint16_t)(da & RKDA_SECTOR_MASK);
 }
 
-static uint16_t rk_get_surf(uint16_t da) {
-  return (uint16_t)((da & RKDA_SURF_MASK) >> 4);
+static uint16_t rk_get_surf(uint16_t da)
+{
+    return (uint16_t)((da & RKDA_SURF_MASK) >> 4);
 }
 
-static uint16_t rk_get_cyl(uint16_t da) {
-  return (uint16_t)((da & RKDA_CYL_MASK) >> 5);
+static uint16_t rk_get_cyl(uint16_t da)
+{
+    return (uint16_t)((da & RKDA_CYL_MASK) >> 5);
 }
 
 static uint16_t rk_set_da(uint16_t drive, uint16_t cyl, uint16_t surf,
-                          uint16_t sec) {
-  return (uint16_t)(((drive & 07) << 13) | ((cyl & 0377) << 5) |
-                    ((surf & 01) << 4) | (sec & 017));
+                          uint16_t sec)
+{
+    return (uint16_t)(((drive & 07) << 13) | ((cyl & 0377) << 5) |
+                      ((surf & 01) << 4) | (sec & 017));
 }
 
-static int rk_da_to_lba(uint16_t da, uint32_t *lba_out) {
-  uint32_t cyl = rk_get_cyl(da);
-  uint32_t surf = rk_get_surf(da);
-  uint32_t sec = rk_get_sector(da);
+static int rk_da_to_lba(uint16_t da, uint32_t *lba_out)
+{
+    uint32_t cyl = rk_get_cyl(da);
+    uint32_t surf = rk_get_surf(da);
+    uint32_t sec = rk_get_sector(da);
 
-  if (sector_one_based) {
-    if (sec == 0) {
-      sec = RK_SECTORS_PER_TRACK;
+    if (sector_one_based) {
+        if (sec == 0) {
+            sec = RK_SECTORS_PER_TRACK;
+        }
+        sec -= 1;
     }
-    sec -= 1;
-  }
 
-  if (sec >= RK_SECTORS_PER_TRACK) {
-    return -1;
-  }
-  if (surf > RK_MAX_SURF) {
-    return -1;
-  }
-  if (cyl > RK_MAX_CYL) {
-    return -1;
-  }
-
-  *lba_out = ((cyl * 2u + surf) * (uint32_t)RK_SECTORS_PER_TRACK) + sec;
-  return 0;
-}
-
-static int rk_next_sector(uint16_t *da) {
-  uint16_t drive = rk_get_drive(*da);
-  uint16_t cyl = rk_get_cyl(*da);
-  uint16_t surf = rk_get_surf(*da);
-  uint16_t sec = rk_get_sector(*da);
-
-  sec++;
-  if (sec >= RK_SECTORS_PER_TRACK) {
-    sec = 0;
-    surf++;
-    if (surf > RK_MAX_SURF) {
-      surf = 0;
-      cyl++;
-      if (cyl > RK_MAX_CYL) {
+    if (sec >= RK_SECTORS_PER_TRACK) {
         return -1;
-      }
     }
-  }
+    if (surf > RK_MAX_SURF) {
+        return -1;
+    }
+    if (cyl > RK_MAX_CYL) {
+        return -1;
+    }
 
-  *da = rk_set_da(drive, cyl, surf, sec);
-  return 0;
+    *lba_out = ((cyl * 2u + surf) * (uint32_t)RK_SECTORS_PER_TRACK) + sec;
+    return 0;
 }
 
-static void rk_clear_soft_errors(void) {
-  rker &= (uint16_t)~RKER_SOFT_MASK;
+static int rk_next_sector(uint16_t *da)
+{
+    uint16_t drive = rk_get_drive(*da);
+    uint16_t cyl = rk_get_cyl(*da);
+    uint16_t surf = rk_get_surf(*da);
+    uint16_t sec = rk_get_sector(*da);
+
+    sec++;
+    if (sec >= RK_SECTORS_PER_TRACK) {
+        sec = 0;
+        surf++;
+        if (surf > RK_MAX_SURF) {
+            surf = 0;
+            cyl++;
+            if (cyl > RK_MAX_CYL) {
+                return -1;
+            }
+        }
+    }
+
+    *da = rk_set_da(drive, cyl, surf, sec);
+    return 0;
 }
 
-static void rk_clear_hard_errors(void) {
-  rker &= (uint16_t)~RKER_HARD_MASK;
+static void rk_clear_soft_errors(void)
+{
+    rker &= (uint16_t)~RKER_SOFT_MASK;
 }
 
-static int rk_has_hard_error(void) { return (rker & RKER_HARD_MASK) ? 1 : 0; }
-
-static void rk_sync_rkcs(void) {
-  uint16_t ro = 0;
-
-  if (rk_l.done) {
-    ro |= RKCS_RDY;
-  }
-  if (rkcs & RKCS_SCP) {
-    ro |= RKCS_SCP;
-  }
-  if (rk_has_hard_error()) {
-    ro |= RKCS_HE;
-  }
-  if (rker != 0) {
-    ro |= RKCS_ERR;
-  }
-
-  rkcs &= (uint16_t)~(RKCS_RDY | RKCS_SCP | RKCS_HE | RKCS_ERR);
-  rkcs |= ro;
-
-  rkcs &= (uint16_t)~RKCS_MEX_MASK;
-  rkcs |= (uint16_t)((rkmex & 03) << 4);
-
-  if (rk_l.ie) {
-    rkcs |= RKCS_IDE;
-  } else {
-    rkcs &= (uint16_t)~RKCS_IDE;
-  }
+static void rk_clear_hard_errors(void)
+{
+    rker &= (uint16_t)~RKER_HARD_MASK;
 }
 
-static void rk_sync_rkds(void) {
-  uint16_t drive = rk_get_drive(rkda);
-  uint16_t sec = rk_get_sector(rkda);
-  uint16_t v = 0;
-
-  v |= (uint16_t)(sec & RKDS_SECTOR_MASK);
-  v |= RKDS_SC_SA;
-  v |= RKDS_SOK;
-  v |= RKDS_RK05;
-  v |= (uint16_t)((drive & 07) << 13);
-
-  if (fp) {
-    v |= RKDS_DRY;
-  }
-  if (rk_l.done) {
-    v |= RKDS_RWS_RDY;
-  }
-  if (img_read_only || rk_write_lock) {
-    v |= RKDS_WPS;
-  }
-
-  rkds = v;
+static int rk_has_hard_error(void)
+{
+    return (rker & RKER_HARD_MASK) ? 1 : 0;
 }
 
-static void rk_sync_status(void) {
-  rk_sync_rkcs();
-  rk_sync_rkds();
+static void rk_sync_rkcs(void)
+{
+    uint16_t ro = 0;
+
+    if (rk_l.done) {
+        ro |= RKCS_RDY;
+    }
+    if (rkcs & RKCS_SCP) {
+        ro |= RKCS_SCP;
+    }
+    if (rk_has_hard_error()) {
+        ro |= RKCS_HE;
+    }
+    if (rker != 0) {
+        ro |= RKCS_ERR;
+    }
+
+    rkcs &= (uint16_t)~(RKCS_RDY | RKCS_SCP | RKCS_HE | RKCS_ERR);
+    rkcs |= ro;
+
+    rkcs &= (uint16_t)~RKCS_MEX_MASK;
+    rkcs |= (uint16_t)((rkmex & 03) << 4);
+
+    if (rk_l.ie) {
+        rkcs |= RKCS_IDE;
+    } else {
+        rkcs &= (uint16_t)~RKCS_IDE;
+    }
 }
 
-static void rk_set_error(uint16_t bit) {
-  rker |= bit;
-  rk_sync_status();
+static void rk_sync_rkds(void)
+{
+    uint16_t drive = rk_get_drive(rkda);
+    uint16_t sec = rk_get_sector(rkda);
+    uint16_t v = 0;
+
+    v |= (uint16_t)(sec & RKDS_SECTOR_MASK);
+    v |= RKDS_SC_SA;
+    v |= RKDS_SOK;
+    v |= RKDS_RK05;
+    v |= (uint16_t)((drive & 07) << 13);
+
+    if (fp) {
+        v |= RKDS_DRY;
+    }
+    if (rk_l.done) {
+        v |= RKDS_RWS_RDY;
+    }
+    if (img_read_only || rk_write_lock) {
+        v |= RKDS_WPS;
+    }
+
+    rkds = v;
 }
 
-static paddr_t rk_pa(uint8_t mex, uint16_t ba) {
-  return (paddr_t)(((uint32_t)(mex & 03) << 16) | ba);
+static void rk_sync_status(void)
+{
+    rk_sync_rkcs();
+    rk_sync_rkds();
 }
 
-static void rk_ba_inc(uint16_t *ba, uint8_t *mex) {
-  uint16_t prev = *ba;
-
-  *ba = (uint16_t)(*ba + 2);
-  if (*ba < prev) {
-    *mex = (uint8_t)((*mex + 1) & 03);
-  }
+static void rk_set_error(uint16_t bit)
+{
+    rker |= bit;
+    rk_sync_status();
 }
 
-static int rk_dma_read_word(paddr_t pa, uint16_t *w) {
-  if (!bus_range_is_ram(pa, 2)) {
-    return -1;
-  }
-  if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
-    return -1;
-  }
-  *w = bus_read16(pa);
-  return 0;
+static paddr_t rk_pa(uint8_t mex, uint16_t ba)
+{
+    return (paddr_t)(((uint32_t)(mex & 03) << 16) | ba);
 }
 
-static int rk_dma_write_word(paddr_t pa, uint16_t w) {
-  if (!bus_range_is_ram(pa, 2)) {
-    return -1;
-  }
-  if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
-    return -1;
-  }
-  bus_write16(pa, w);
-  return 0;
+static void rk_ba_inc(uint16_t *ba, uint8_t *mex)
+{
+    uint16_t prev = *ba;
+
+    *ba = (uint16_t)(*ba + 2);
+    if (*ba < prev) {
+        *mex = (uint8_t)((*mex + 1) & 03);
+    }
 }
 
-static void rk_finish_command(void) {
-  rkcs &= (uint16_t)~RKCS_GO;
-  irq_latch_event_set_done(&rk_l);
-  rk_sync_status();
-  if (rk_debug && rk_debug_active) {
-    fprintf(stderr,
-            "RK11 DONE rkcs=%06o rkwc=%06o rkba=%06o mex=%o rkda=%06o rker=%06o\n",
-            rkcs, rkwc, rkba, rkmex, rkda, rker);
-    rk_debug_active = 0;
-  }
+static int rk_dma_read_word(paddr_t pa, uint16_t *w)
+{
+    if (!bus_range_is_ram(pa, 2)) {
+        return -1;
+    }
+    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+        return -1;
+    }
+    *w = bus_read16(pa);
+    return 0;
 }
 
-static void rk_do_control_reset(void) {
-  rk_clear_hard_errors();
-  rk_clear_soft_errors();
-  rk_write_lock = 0;
-  rkwc = 0;
-  rkba = 0;
-  rkda = 0;
-  rkdb = 0;
-  rkmex = 0;
-
-  rkcs &= (uint16_t)(RKCS_IDE | RKCS_SSE | RKCS_EXB | RKCS_FMT | RKCS_IBA);
-  rkcs &= (uint16_t)~RKCS_SCP;
-
-  rk_finish_command();
+static int rk_dma_write_word(paddr_t pa, uint16_t w)
+{
+    if (!bus_range_is_ram(pa, 2)) {
+        return -1;
+    }
+    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+        return -1;
+    }
+    bus_write16(pa, w);
+    return 0;
 }
 
-static int rk_validate_da_for_xfer(uint16_t da) {
-  uint16_t drive = rk_get_drive(da);
-  uint16_t cyl = rk_get_cyl(da);
-  uint16_t sec = rk_get_sector(da);
+static void rk_finish_command(void)
+{
+    rkcs &= (uint16_t)~RKCS_GO;
+    irq_latch_event_set_done(&rk_l);
+    rk_sync_status();
+    if (rk_debug && rk_debug_active) {
+        fprintf(stderr,
+                "RK11 DONE rkcs=%06o rkwc=%06o rkba=%06o mex=%o rkda=%06o rker=%06o\n",
+                rkcs, rkwc, rkba, rkmex, rkda, rker);
+        rk_debug_active = 0;
+    }
+}
 
-  if (drive != 0) {
-    rk_set_error(RKER_NXD);
-    return -1;
-  }
-  if (cyl > RK_MAX_CYL) {
-    rk_set_error(RKER_NXC);
-    return -1;
-  }
-  if (sec >= RK_SECTORS_PER_TRACK) {
-    rk_set_error(RKER_NXS);
-    return -1;
-  }
-  if (rk_get_surf(da) > RK_MAX_SURF) {
-    rk_set_error(RKER_SKE);
-    return -1;
-  }
-  return 0;
+static void rk_do_control_reset(void)
+{
+    rk_clear_hard_errors();
+    rk_clear_soft_errors();
+    rk_write_lock = 0;
+    rkwc = 0;
+    rkba = 0;
+    rkda = 0;
+    rkdb = 0;
+    rkmex = 0;
+
+    rkcs &= (uint16_t)(RKCS_IDE | RKCS_SSE | RKCS_EXB | RKCS_FMT | RKCS_IBA);
+    rkcs &= (uint16_t)~RKCS_SCP;
+
+    rk_finish_command();
+}
+
+static int rk_validate_da_for_xfer(uint16_t da)
+{
+    uint16_t drive = rk_get_drive(da);
+    uint16_t cyl = rk_get_cyl(da);
+    uint16_t sec = rk_get_sector(da);
+
+    if (drive != 0) {
+        rk_set_error(RKER_NXD);
+        return -1;
+    }
+    if (cyl > RK_MAX_CYL) {
+        rk_set_error(RKER_NXC);
+        return -1;
+    }
+    if (sec >= RK_SECTORS_PER_TRACK) {
+        rk_set_error(RKER_NXS);
+        return -1;
+    }
+    if (rk_get_surf(da) > RK_MAX_SURF) {
+        rk_set_error(RKER_SKE);
+        return -1;
+    }
+    return 0;
 }
 
 enum rk_xfer_mode {
-  RK_XFER_READ = 0,
-  RK_XFER_WRITE = 1,
-  RK_XFER_WCHK = 2,
-  RK_XFER_RCHK = 3
+    RK_XFER_READ = 0,
+    RK_XFER_WRITE = 1,
+    RK_XFER_WCHK = 2,
+    RK_XFER_RCHK = 3
 };
 
-static void rk_transfer(enum rk_xfer_mode mode) {
-  uint16_t cur_wc = rkwc;
-  uint16_t cur_ba = rkba;
-  uint16_t cur_da = rkda;
-  uint8_t cur_mex = rkmex;
-  int w_in_sector = 0;
+static void rk_transfer(enum rk_xfer_mode mode)
+{
+    uint16_t cur_wc = rkwc;
+    uint16_t cur_ba = rkba;
+    uint16_t cur_da = rkda;
+    uint8_t cur_mex = rkmex;
+    int w_in_sector = 0;
 
-  if (rk_validate_da_for_xfer(cur_da) != 0) {
-    rk_finish_command();
-    return;
-  }
-
-  if (!fp) {
-    rk_set_error(RKER_DRE);
-    rk_finish_command();
-    return;
-  }
-
-  if ((mode == RK_XFER_WRITE || mode == RK_XFER_WCHK) &&
-      (img_read_only || rk_write_lock)) {
-    rk_set_error(RKER_WLK);
-    rk_finish_command();
-    return;
-  }
-
-  while (cur_wc != 0) {
-    uint32_t lba = 0;
-    uint32_t off = 0;
-    uint16_t w = 0;
-    uint8_t lo, hi;
-    paddr_t pa = rk_pa(cur_mex, cur_ba);
-
-    if (rk_da_to_lba(cur_da, &lba) != 0) {
-      rk_set_error(RKER_NXS);
-      break;
-    }
-    off = lba * 01000u + (uint32_t)w_in_sector * 2u;
-    if (fseek(fp, (long)off, SEEK_SET) != 0) {
-      rk_set_error(RKER_DLT);
-      break;
+    if (rk_validate_da_for_xfer(cur_da) != 0) {
+        rk_finish_command();
+        return;
     }
 
-    if (mode == RK_XFER_READ || mode == RK_XFER_RCHK || mode == RK_XFER_WCHK) {
-      if (fread(&lo, 1, 1, fp) != 1 || fread(&hi, 1, 1, fp) != 1) {
-        rk_set_error(RKER_DLT);
-        break;
-      }
-      w = (uint16_t)(lo | ((uint16_t)hi << 8));
+    if (!fp) {
+        rk_set_error(RKER_DRE);
+        rk_finish_command();
+        return;
     }
 
-    if (mode == RK_XFER_READ) {
-      if (rk_dma_write_word(pa, w) != 0) {
-        rk_set_error(RKER_NXM);
-        break;
-      }
-    } else if (mode == RK_XFER_WRITE) {
-      if (rk_dma_read_word(pa, &w) != 0) {
-        rk_set_error(RKER_NXM);
-        break;
-      }
-      lo = (uint8_t)(w & 000377);
-      hi = (uint8_t)((w >> 8) & 000377);
-      if (fwrite(&lo, 1, 1, fp) != 1 || fwrite(&hi, 1, 1, fp) != 1) {
-        rk_set_error(RKER_DLT);
-        break;
-      }
-    } else if (mode == RK_XFER_WCHK) {
-      uint16_t mw = 0;
-      if (rk_dma_read_word(pa, &mw) != 0) {
-        rk_set_error(RKER_NXM);
-        break;
-      }
-      if (mw != w) {
-        rk_set_error(RKER_WCE);
-      }
+    if ((mode == RK_XFER_WRITE || mode == RK_XFER_WCHK) &&
+            (img_read_only || rk_write_lock)) {
+        rk_set_error(RKER_WLK);
+        rk_finish_command();
+        return;
     }
 
-    if (!(rkcs & RKCS_IBA)) {
-      rk_ba_inc(&cur_ba, &cur_mex);
-    }
-    cur_wc = (uint16_t)(cur_wc + 1);
+    while (cur_wc != 0) {
+        uint32_t lba = 0;
+        uint32_t off = 0;
+        uint16_t w = 0;
+        uint8_t lo, hi;
+        paddr_t pa = rk_pa(cur_mex, cur_ba);
 
-    w_in_sector++;
-    if (w_in_sector >= RK_WORDS_PER_SECTOR) {
-      w_in_sector = 0;
-      if (rk_next_sector(&cur_da) != 0) {
-        if (cur_wc != 0) {
-          rk_set_error(RKER_OVR);
+        if (rk_da_to_lba(cur_da, &lba) != 0) {
+            rk_set_error(RKER_NXS);
+            break;
         }
+        off = lba * 01000u + (uint32_t)w_in_sector * 2u;
+        if (fseek(fp, (long)off, SEEK_SET) != 0) {
+            rk_set_error(RKER_DLT);
+            break;
+        }
+
+        if (mode == RK_XFER_READ || mode == RK_XFER_RCHK || mode == RK_XFER_WCHK) {
+            if (fread(&lo, 1, 1, fp) != 1 || fread(&hi, 1, 1, fp) != 1) {
+                rk_set_error(RKER_DLT);
+                break;
+            }
+            w = (uint16_t)(lo | ((uint16_t)hi << 8));
+        }
+
+        if (mode == RK_XFER_READ) {
+            if (rk_dma_write_word(pa, w) != 0) {
+                rk_set_error(RKER_NXM);
+                break;
+            }
+        } else if (mode == RK_XFER_WRITE) {
+            if (rk_dma_read_word(pa, &w) != 0) {
+                rk_set_error(RKER_NXM);
+                break;
+            }
+            lo = (uint8_t)(w & 000377);
+            hi = (uint8_t)((w >> 8) & 000377);
+            if (fwrite(&lo, 1, 1, fp) != 1 || fwrite(&hi, 1, 1, fp) != 1) {
+                rk_set_error(RKER_DLT);
+                break;
+            }
+        } else if (mode == RK_XFER_WCHK) {
+            uint16_t mw = 0;
+            if (rk_dma_read_word(pa, &mw) != 0) {
+                rk_set_error(RKER_NXM);
+                break;
+            }
+            if (mw != w) {
+                rk_set_error(RKER_WCE);
+            }
+        }
+
+        if (!(rkcs & RKCS_IBA)) {
+            rk_ba_inc(&cur_ba, &cur_mex);
+        }
+        cur_wc = (uint16_t)(cur_wc + 1);
+
+        w_in_sector++;
+        if (w_in_sector >= RK_WORDS_PER_SECTOR) {
+            w_in_sector = 0;
+            if (rk_next_sector(&cur_da) != 0) {
+                if (cur_wc != 0) {
+                    rk_set_error(RKER_OVR);
+                }
+                break;
+            }
+        }
+    }
+
+    rkwc = cur_wc;
+    rkba = cur_ba;
+    rkmex = (uint8_t)(cur_mex & 03);
+    rkda = cur_da;
+    rk_sync_status();
+
+    if (mode == RK_XFER_WRITE) {
+        fflush(fp);
+    }
+
+    rk_finish_command();
+}
+
+static void rk_exec_command(void)
+{
+    uint16_t fn = rkcs & RKCS_FUNC_MASK;
+
+    if (!(rkcs & RKCS_GO)) {
+        return;
+    }
+
+    if (rk_debug && !rk_debug_active) {
+        rk_debug_active = 1;
+        fprintf(stderr,
+                "RK11 GO fn=%02o rkcs=%06o rkwc=%06o rkba=%06o mex=%o rkda=%06o\n",
+                fn >> 1, rkcs, rkwc, rkba, rkmex, rkda);
+    }
+
+    switch (fn) {
+    case RKCS_FN_CTLRESET:
+        rk_do_control_reset();
+        return;
+
+    case RKCS_FN_SEEK:
+        if (rk_validate_da_for_xfer(rkda) != 0) {
+            rk_finish_command();
+            return;
+        }
+        rkcs |= RKCS_SCP;
+        rk_finish_command();
+        return;
+
+    case RKCS_FN_DRESET:
+        if (rk_get_drive(rkda) != 0) {
+            rk_set_error(RKER_NXD);
+            rk_finish_command();
+            return;
+        }
+        rkda = rk_set_da(0, 0, 0, 0);
+        rkcs |= RKCS_SCP;
+        rk_finish_command();
+        return;
+
+    case RKCS_FN_WLOCK:
+        if (rk_get_drive(rkda) != 0) {
+            rk_set_error(RKER_NXD);
+            rk_finish_command();
+            return;
+        }
+        rk_write_lock = 1;
+        rk_finish_command();
+        return;
+
+    case RKCS_FN_READ:
+        rk_transfer(RK_XFER_READ);
+        return;
+
+    case RKCS_FN_WRITE:
+        rk_transfer(RK_XFER_WRITE);
+        return;
+
+    case RKCS_FN_WCHK:
+        if (rkcs & RKCS_FMT) {
+            rk_set_error(RKER_PGE);
+            rk_finish_command();
+            return;
+        }
+        rk_transfer(RK_XFER_WCHK);
+        return;
+
+    case RKCS_FN_RCHK:
+        if (rkcs & RKCS_FMT) {
+            rk_set_error(RKER_PGE);
+            rk_finish_command();
+            return;
+        }
+        rk_transfer(RK_XFER_RCHK);
+        return;
+
+    default:
+        rk_set_error(RKER_PGE);
+        rk_finish_command();
+        return;
+    }
+}
+
+static uint8_t rk_read8(uint16_t addr)
+{
+    uint16_t base = (uint16_t)(addr & 0177776);
+    uint16_t v = 0;
+
+    rk_sync_status();
+
+    switch (base) {
+    case RKDS:
+        v = rkds;
         break;
-      }
+    case RKER:
+        v = rker;
+        break;
+    case RKCS:
+        v = rkcs;
+        break;
+    case RKWC:
+        v = rkwc;
+        break;
+    case RKBA:
+        v = rkba;
+        break;
+    case RKDA:
+        v = rkda;
+        break;
+    case RKDB:
+        v = rkdb;
+        break;
+    default:
+        return 0;
     }
-  }
 
-  rkwc = cur_wc;
-  rkba = cur_ba;
-  rkmex = (uint8_t)(cur_mex & 03);
-  rkda = cur_da;
-  rk_sync_status();
-
-  if (mode == RK_XFER_WRITE) {
-    fflush(fp);
-  }
-
-  rk_finish_command();
+    if (addr & 1) {
+        return (uint8_t)((v >> 8) & 000377);
+    }
+    return (uint8_t)(v & 000377);
 }
 
-static void rk_exec_command(void) {
-  uint16_t fn = rkcs & RKCS_FUNC_MASK;
+static void rk_write8(uint16_t addr, uint8_t b)
+{
+    uint16_t base = (uint16_t)(addr & 0177776);
+    uint16_t old;
+    uint16_t v;
 
-  if (!(rkcs & RKCS_GO)) {
-    return;
-  }
+    rk_sync_status();
 
-  if (rk_debug && !rk_debug_active) {
-    rk_debug_active = 1;
-    fprintf(stderr,
-            "RK11 GO fn=%02o rkcs=%06o rkwc=%06o rkba=%06o mex=%o rkda=%06o\n",
-            fn >> 1, rkcs, rkwc, rkba, rkmex, rkda);
-  }
+    switch (base) {
+    case RKDS:
+    case RKER:
+        /* read-only */
+        return;
 
-  switch (fn) {
-  case RKCS_FN_CTLRESET:
-    rk_do_control_reset();
-    return;
+    case RKWC:
+        old = rkwc;
+        if (addr & 1) {
+            rkwc = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
+        } else {
+            rkwc = (uint16_t)((old & 0177400) | b);
+        }
+        return;
 
-  case RKCS_FN_SEEK:
-    if (rk_validate_da_for_xfer(rkda) != 0) {
-      rk_finish_command();
-      return;
+    case RKBA:
+        old = rkba;
+        if (addr & 1) {
+            rkba = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
+        } else {
+            rkba = (uint16_t)((old & 0177400) | b);
+        }
+        return;
+
+    case RKDA:
+        if (!rk_l.done) {
+            return;
+        }
+        old = rkda;
+        if (addr & 1) {
+            rkda = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
+        } else {
+            rkda = (uint16_t)((old & 0177400) | b);
+        }
+        rk_sync_status();
+        return;
+
+    case RKDB:
+        old = rkdb;
+        if (addr & 1) {
+            rkdb = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
+        } else {
+            rkdb = (uint16_t)((old & 0177400) | b);
+        }
+        return;
+
+    case RKCS:
+        old = rkcs;
+        if (addr & 1) {
+            v = (uint16_t)(old & (uint16_t)~(RKCS_SSE | RKCS_EXB | RKCS_FMT | RKCS_IBA));
+            v |= (uint16_t)(((uint16_t)b << 8) & (RKCS_SSE | RKCS_EXB | RKCS_FMT | RKCS_IBA));
+            rkcs = v;
+            rk_sync_status();
+            return;
+        }
+
+        /* low byte: FUN/MEX/IDE writable; GO starts a command */
+        rkcs &= (uint16_t)~(RKCS_FUNC_MASK | RKCS_MEX_MASK | RKCS_IDE);
+        rkcs |= (uint16_t)(b & (RKCS_FUNC_MASK | RKCS_MEX_MASK | RKCS_IDE));
+        rkmex = (uint8_t)((rkcs & RKCS_MEX_MASK) >> 4);
+        irq_latch_set_ie(&rk_l, (rkcs & RKCS_IDE) ? 1 : 0);
+
+        if (b & RKCS_GO) {
+            if (rk_l.done) {
+                rkcs |= RKCS_GO;
+                rkcs &= (uint16_t)~RKCS_SCP;
+                rk_clear_soft_errors();
+                irq_latch_sw_clear_done(&rk_l);
+            }
+        } else {
+            rkcs &= (uint16_t)~RKCS_GO;
+        }
+        rk_sync_status();
+        return;
+
+    default:
+        return;
     }
-    rkcs |= RKCS_SCP;
-    rk_finish_command();
-    return;
-
-  case RKCS_FN_DRESET:
-    if (rk_get_drive(rkda) != 0) {
-      rk_set_error(RKER_NXD);
-      rk_finish_command();
-      return;
-    }
-    rkda = rk_set_da(0, 0, 0, 0);
-    rkcs |= RKCS_SCP;
-    rk_finish_command();
-    return;
-
-  case RKCS_FN_WLOCK:
-    if (rk_get_drive(rkda) != 0) {
-      rk_set_error(RKER_NXD);
-      rk_finish_command();
-      return;
-    }
-    rk_write_lock = 1;
-    rk_finish_command();
-    return;
-
-  case RKCS_FN_READ:
-    rk_transfer(RK_XFER_READ);
-    return;
-
-  case RKCS_FN_WRITE:
-    rk_transfer(RK_XFER_WRITE);
-    return;
-
-  case RKCS_FN_WCHK:
-    if (rkcs & RKCS_FMT) {
-      rk_set_error(RKER_PGE);
-      rk_finish_command();
-      return;
-    }
-    rk_transfer(RK_XFER_WCHK);
-    return;
-
-  case RKCS_FN_RCHK:
-    if (rkcs & RKCS_FMT) {
-      rk_set_error(RKER_PGE);
-      rk_finish_command();
-      return;
-    }
-    rk_transfer(RK_XFER_RCHK);
-    return;
-
-  default:
-    rk_set_error(RKER_PGE);
-    rk_finish_command();
-    return;
-  }
 }
 
-static uint8_t rk_read8(uint16_t addr) {
-  uint16_t base = (uint16_t)(addr & 0177776);
-  uint16_t v = 0;
+int rk11_irq_pending(void)
+{
+    return rk_l.irq_req ? 1 : 0;
+}
 
-  rk_sync_status();
+void rk11_irq_ack(void)
+{
+    irq_latch_ack(&rk_l);
+}
 
-  switch (base) {
-  case RKDS:
-    v = rkds;
-    break;
-  case RKER:
-    v = rker;
-    break;
-  case RKCS:
-    v = rkcs;
-    break;
-  case RKWC:
-    v = rkwc;
-    break;
-  case RKBA:
-    v = rkba;
-    break;
-  case RKDA:
-    v = rkda;
-    break;
-  case RKDB:
-    v = rkdb;
-    break;
-  default:
+int rk11_init(void)
+{
+    static const io_range_t r = {RK_BASE, RKDB, rk_read8, rk_write8, "RK11"};
+    static const irq_source_t s = {"RK11", 000220, 5, rk11_irq_pending,
+                                   rk11_irq_ack
+                                  };
+
+    rk_debug = (getenv("RK11_DEBUG") != NULL);
+
+    if (devio_register(&r) != 0) {
+        return -1;
+    }
+    if (irq_register(&s) != 0) {
+        return -1;
+    }
+
+    rk11_reset();
     return 0;
-  }
-
-  if (addr & 1) {
-    return (uint8_t)((v >> 8) & 000377);
-  }
-  return (uint8_t)(v & 000377);
 }
 
-static void rk_write8(uint16_t addr, uint8_t b) {
-  uint16_t base = (uint16_t)(addr & 0177776);
-  uint16_t old;
-  uint16_t v;
+void rk11_reset(void)
+{
+    rkds = 0;
+    rker = 0;
+    rkcs = 0;
+    rkwc = 0;
+    rkba = 0;
+    rkda = 0;
+    rkdb = 0;
+    rkmex = 0;
+    rk_write_lock = 0;
+    rk_debug_active = 0;
 
-  rk_sync_status();
-
-  switch (base) {
-  case RKDS:
-  case RKER:
-    /* read-only */
-    return;
-
-  case RKWC:
-    old = rkwc;
-    if (addr & 1) {
-      rkwc = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
-    } else {
-      rkwc = (uint16_t)((old & 0177400) | b);
-    }
-    return;
-
-  case RKBA:
-    old = rkba;
-    if (addr & 1) {
-      rkba = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
-    } else {
-      rkba = (uint16_t)((old & 0177400) | b);
-    }
-    return;
-
-  case RKDA:
-    if (!rk_l.done) {
-      return;
-    }
-    old = rkda;
-    if (addr & 1) {
-      rkda = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
-    } else {
-      rkda = (uint16_t)((old & 0177400) | b);
-    }
+    irq_latch_reset(&rk_l);
+    irq_latch_event_set_done(&rk_l);
     rk_sync_status();
-    return;
-
-  case RKDB:
-    old = rkdb;
-    if (addr & 1) {
-      rkdb = (uint16_t)((old & 000377) | ((uint16_t)b << 8));
-    } else {
-      rkdb = (uint16_t)((old & 0177400) | b);
-    }
-    return;
-
-  case RKCS:
-    old = rkcs;
-    if (addr & 1) {
-      v = (uint16_t)(old & (uint16_t)~(RKCS_SSE | RKCS_EXB | RKCS_FMT | RKCS_IBA));
-      v |= (uint16_t)(((uint16_t)b << 8) & (RKCS_SSE | RKCS_EXB | RKCS_FMT | RKCS_IBA));
-      rkcs = v;
-      rk_sync_status();
-      return;
-    }
-
-    /* low byte: FUN/MEX/IDE writable; GO starts a command */
-    rkcs &= (uint16_t)~(RKCS_FUNC_MASK | RKCS_MEX_MASK | RKCS_IDE);
-    rkcs |= (uint16_t)(b & (RKCS_FUNC_MASK | RKCS_MEX_MASK | RKCS_IDE));
-    rkmex = (uint8_t)((rkcs & RKCS_MEX_MASK) >> 4);
-    irq_latch_set_ie(&rk_l, (rkcs & RKCS_IDE) ? 1 : 0);
-
-    if (b & RKCS_GO) {
-      if (rk_l.done) {
-        rkcs |= RKCS_GO;
-        rkcs &= (uint16_t)~RKCS_SCP;
-        rk_clear_soft_errors();
-        irq_latch_sw_clear_done(&rk_l);
-      }
-    } else {
-      rkcs &= (uint16_t)~RKCS_GO;
-    }
-    rk_sync_status();
-    return;
-
-  default:
-    return;
-  }
 }
 
-int rk11_irq_pending(void) { return rk_l.irq_req ? 1 : 0; }
-
-void rk11_irq_ack(void) { irq_latch_ack(&rk_l); }
-
-int rk11_init(void) {
-  static const io_range_t r = {RK_BASE, RKDB, rk_read8, rk_write8, "RK11"};
-  static const irq_source_t s = {"RK11", 000220, 5, rk11_irq_pending,
-                                  rk11_irq_ack};
-
-  rk_debug = (getenv("RK11_DEBUG") != NULL);
-
-  if (devio_register(&r) != 0) {
-    return -1;
-  }
-  if (irq_register(&s) != 0) {
-    return -1;
-  }
-
-  rk11_reset();
-  return 0;
+void rk11_poll(void)
+{
+    rk_exec_command();
 }
 
-void rk11_reset(void) {
-  rkds = 0;
-  rker = 0;
-  rkcs = 0;
-  rkwc = 0;
-  rkba = 0;
-  rkda = 0;
-  rkdb = 0;
-  rkmex = 0;
-  rk_write_lock = 0;
-  rk_debug_active = 0;
+int rk11_open_image(const char *path)
+{
+    FILE *f = NULL;
 
-  irq_latch_reset(&rk_l);
-  irq_latch_event_set_done(&rk_l);
-  rk_sync_status();
-}
+    if (fp) {
+        fclose(fp);
+        fp = NULL;
+    }
 
-void rk11_poll(void) { rk_exec_command(); }
-
-int rk11_open_image(const char *path) {
-  FILE *f = NULL;
-
-  if (fp) {
-    fclose(fp);
-    fp = NULL;
-  }
-
-  img_read_only = 0;
-  f = fopen(path, "r+b");
-  if (!f) {
-    f = fopen(path, "rb");
+    img_read_only = 0;
+    f = fopen(path, "r+b");
     if (!f) {
-      rk_sync_status();
-      return -1;
+        f = fopen(path, "rb");
+        if (!f) {
+            rk_sync_status();
+            return -1;
+        }
+        img_read_only = 1;
     }
-    img_read_only = 1;
-  }
 
-  fp = f;
-  rk_sync_status();
-  return 0;
+    fp = f;
+    rk_sync_status();
+    return 0;
 }
 
-void rk11_close_image(void) {
-  if (fp) {
-    fclose(fp);
-    fp = NULL;
-  }
-  img_read_only = 0;
-  rk_sync_status();
+void rk11_close_image(void)
+{
+    if (fp) {
+        fclose(fp);
+        fp = NULL;
+    }
+    img_read_only = 0;
+    rk_sync_status();
 }
 
-void rk11_set_sector_base(int one_based) {
-  sector_one_based = one_based ? 1 : 0;
+void rk11_set_sector_base(int one_based)
+{
+    sector_one_based = one_based ? 1 : 0;
 }
 
-int rk11_boot_copy(void *dest, size_t len) {
-  if (!fp) {
-    return -1;
-  }
-  if (fseek(fp, 0, SEEK_SET) != 0) {
-    return -1;
-  }
-  return (fread(dest, 1, len, fp) == len) ? 0 : -1;
+int rk11_boot_copy(void *dest, size_t len)
+{
+    if (!fp) {
+        return -1;
+    }
+    if (fseek(fp, 0, SEEK_SET) != 0) {
+        return -1;
+    }
+    return (fread(dest, 1, len, fp) == len) ? 0 : -1;
 }

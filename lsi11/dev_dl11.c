@@ -47,8 +47,9 @@ static uint64_t now_ns(void)
 
 static uint16_t norm(uint16_t a)
 {
-    if ((a & 0177770) == DL11_BASE_ALIAS)
+    if ((a & 0177770) == DL11_BASE_ALIAS) {
         return (uint16_t)(DL11_BASE_PRIMARY | (a & 0000007));
+    }
     return a;
 }
 
@@ -64,8 +65,12 @@ static uint8_t dl11_read8(uint16_t a)
     switch (a) {
     case DL11_RCSR: {
         uint8_t v = 0;
-        if (rx_l.done) v |= CSR_DONE;
-        if (rx_l.ie)   v |= CSR_IE;
+        if (rx_l.done) {
+            v |= CSR_DONE;
+        }
+        if (rx_l.ie) {
+            v |= CSR_IE;
+        }
         return v;
     }
     case DL11_RBUF: {
@@ -76,8 +81,12 @@ static uint8_t dl11_read8(uint16_t a)
     }
     case DL11_TCSR: {
         uint8_t v = 0;
-        if (tx_l.done) v |= CSR_DONE;
-        if (tx_l.ie)   v |= CSR_IE;
+        if (tx_l.done) {
+            v |= CSR_DONE;
+        }
+        if (tx_l.ie) {
+            v |= CSR_IE;
+        }
         v |= (uint8_t)(tcsr_misc & (CSR_MAINT | CSR_BREAK));
         return v;
     }
@@ -157,11 +166,23 @@ static void dl11_write8(uint16_t a, uint8_t v)
 }
 
 /* --- IRQ sources --- */
-int dl11_rx_irq_pending(void) { return rx_l.irq_req ? 1 : 0; }
-void dl11_rx_irq_ack(void) { irq_latch_ack(&rx_l); }
+int dl11_rx_irq_pending(void)
+{
+    return rx_l.irq_req ? 1 : 0;
+}
+void dl11_rx_irq_ack(void)
+{
+    irq_latch_ack(&rx_l);
+}
 
-int dl11_tx_irq_pending(void) { return tx_l.irq_req ? 1 : 0; }
-void dl11_tx_irq_ack(void) { irq_latch_ack(&tx_l); }
+int dl11_tx_irq_pending(void)
+{
+    return tx_l.irq_req ? 1 : 0;
+}
+void dl11_tx_irq_ack(void)
+{
+    irq_latch_ack(&tx_l);
+}
 
 int dl11_init(void)
 {
@@ -170,14 +191,22 @@ int dl11_init(void)
     static const io_range_t primary = { 0177560, 0177567, dl11_read8, dl11_write8, "DL11(primary)" };
     static const io_range_t alias   = { 0176500, 0176507, dl11_read8, dl11_write8, "DL11(alias)" };
 
-    if (devio_register(&primary) != 0) return -1;
-    if (dl11_alias_enabled && devio_register(&alias) != 0) return -1;
+    if (devio_register(&primary) != 0) {
+        return -1;
+    }
+    if (dl11_alias_enabled && devio_register(&alias) != 0) {
+        return -1;
+    }
 
     static const irq_source_t rxsrc = { "DL11 RX", 000060, 4, dl11_rx_irq_pending, dl11_rx_irq_ack };
     static const irq_source_t txsrc = { "DL11 TX", 000064, 4, dl11_tx_irq_pending, dl11_tx_irq_ack };
 
-    if (irq_register(&rxsrc) != 0) return -1;
-    if (irq_register(&txsrc) != 0) return -1;
+    if (irq_register(&rxsrc) != 0) {
+        return -1;
+    }
+    if (irq_register(&txsrc) != 0) {
+        return -1;
+    }
 
     dl11_reset();
     return 0;
@@ -215,10 +244,14 @@ void dl11_poll(void)
 
     int c;
     /* host input -> if RX DONE already set, drop or buffer? minimal: drop */
-    if (rx_l.done) return;
+    if (rx_l.done) {
+        return;
+    }
 
     c = util_term_getc_nonblock();
-    if (c < 0) return;
+    if (c < 0) {
+        return;
+    }
 
     rx_buf = dl11_mask_char((uint8_t)c);
     irq_latch_event_set_done(&rx_l);
@@ -233,7 +266,9 @@ void dl11_set_8bit(int on)
 void dl11_test_inject_rx(uint8_t ch)
 {
     /* Do not overwrite if RX still holds unread data (DONE==1) */
-    if (rx_l.done) return;
+    if (rx_l.done) {
+        return;
+    }
 
     rx_buf = ch;
     irq_latch_event_set_done(&rx_l);

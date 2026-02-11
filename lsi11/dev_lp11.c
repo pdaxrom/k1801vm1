@@ -18,14 +18,24 @@ static uint8_t lp11_read8(uint16_t a)
 {
     if (a == LP11_CSR) {
         uint8_t v = 0;
-        if (lp_l.done) v |= CSR_DONE;
-        if (lp_l.ie)   v |= CSR_IE;
+        if (lp_l.done) {
+            v |= CSR_DONE;
+        }
+        if (lp_l.ie) {
+            v |= CSR_IE;
+        }
         return v;
     }
-    if (a == (uint16_t)(LP11_CSR + 1)) return 0;
+    if (a == (uint16_t)(LP11_CSR + 1)) {
+        return 0;
+    }
 
-    if (a == LP11_DBR) return 0;
-    if (a == (uint16_t)(LP11_DBR + 1)) return 0;
+    if (a == LP11_DBR) {
+        return 0;
+    }
+    if (a == (uint16_t)(LP11_DBR + 1)) {
+        return 0;
+    }
 
     return 0;
 }
@@ -37,7 +47,9 @@ static void lp11_write8(uint16_t a, uint8_t v)
         irq_latch_set_ie(&lp_l, (v & CSR_IE) ? 1 : 0);
         return;
     }
-    if (a == (uint16_t)(LP11_CSR + 1)) return; /* ignore */
+    if (a == (uint16_t)(LP11_CSR + 1)) {
+        return;    /* ignore */
+    }
 
     if (a == LP11_DBR) {
         /* Software clears DONE: writing DBR */
@@ -57,16 +69,26 @@ static void lp11_write8(uint16_t a, uint8_t v)
     }
 }
 
-int lp11_irq_pending(void) { return lp_l.irq_req ? 1 : 0; }
-void lp11_irq_ack(void) { irq_latch_ack(&lp_l); }
+int lp11_irq_pending(void)
+{
+    return lp_l.irq_req ? 1 : 0;
+}
+void lp11_irq_ack(void)
+{
+    irq_latch_ack(&lp_l);
+}
 
 int lp11_init(void)
 {
     static const io_range_t r = { 0177514, 0177517, lp11_read8, lp11_write8, "LP11" };
-    if (devio_register(&r) != 0) return -1;
+    if (devio_register(&r) != 0) {
+        return -1;
+    }
 
     static const irq_source_t s = { "LP11", 000200, 4, lp11_irq_pending, lp11_irq_ack };
-    if (irq_register(&s) != 0) return -1;
+    if (irq_register(&s) != 0) {
+        return -1;
+    }
 
     lp11_reset();
     return 0;

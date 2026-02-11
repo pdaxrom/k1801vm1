@@ -5,11 +5,11 @@
 #include "../core/core.h"
 
 typedef struct {
-  const char *name;
-  uint16_t vector;  /* e.g. 000060 */
-  uint8_t priority; /* 0..7 */
-  int (*pending)(void);
-  void (*ack)(void);
+    const char *name;
+    uint16_t vector;  /* e.g. 000060 */
+    uint8_t priority; /* 0..7 */
+    int (*pending)(void);
+    void (*ack)(void);
 } irq_source_t;
 
 int irq_register(const irq_source_t *s);

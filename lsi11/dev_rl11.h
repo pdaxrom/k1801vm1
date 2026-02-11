@@ -4,9 +4,9 @@
 #include <stddef.h>
 
 enum {
-  RL11_TYPE_AUTO = 0,
-  RL11_TYPE_RL01 = 1,
-  RL11_TYPE_RL02 = 2,
+    RL11_TYPE_AUTO = 0,
+    RL11_TYPE_RL01 = 1,
+    RL11_TYPE_RL02 = 2,
 };
 
 int rl11_init(void);

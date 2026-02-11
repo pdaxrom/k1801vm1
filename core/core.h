@@ -39,11 +39,11 @@
 #endif
 
 enum {
-	K1801VM1 = 0,
-	K1801VM1G,
-	K1801VM2,
-	K1806VM2,
-	DCJ11,
+    K1801VM1 = 0,
+    K1801VM1G,
+    K1801VM2,
+    K1806VM2,
+    DCJ11,
 };
 
 #define SET_BIT(a) (1 << a)
@@ -65,17 +65,17 @@ enum {
 #define FLAG_C SET_BIT(BIT_C)
 
 union u_word {
-	word	u;
-	sword	s;
+    word	u;
+    sword	s;
 };
 
 union u_dword {
-	dword	u;
-	sdword	s;
+    dword	u;
+    sdword	s;
 };
 
 typedef struct _regs {
-	byte	model;
+    byte	model;
 
     word	psw, r[8];
     word    ir;

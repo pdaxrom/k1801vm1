@@ -8,32 +8,37 @@
 
 /* GUI backend selection */
 #ifdef USE_SDL
-    /* Full SDL2 support */
-    #include <SDL.h>
+/* Full SDL2 support */
+#include <SDL.h>
 #else
-    /* Minimal SDL‑like stubs required for the X11 backend. Only the symbols
-       used in the source are defined. */
-    typedef void *SDL_Window;
-    typedef void *SDL_Renderer;
-    typedef void *SDL_Texture;
-    typedef unsigned int Uint32;
-    typedef unsigned long long Uint64;
-    typedef unsigned char Uint8;
-    typedef int SDL_AudioDeviceID;
-    static Uint64 SDL_GetPerformanceCounter(void) { struct timeval tv; gettimeofday(&tv, NULL); return (Uint64)tv.tv_sec * 1000000ULL + tv.tv_usec; }
-    /* Minimal SDL_AudioSpec definition */
-    typedef struct {
-        int freq;
-        unsigned int format;
-        unsigned char channels;
-        unsigned short samples;
-        void (*callback)(void *, Uint8 *, int);
-        void *userdata;
-    } SDL_AudioSpec;
-    #define AUDIO_S16SYS 0x8010
-    #define SDL_zero(x) memset(&(x), 0, sizeof(x))
-    /* X11 specific GUI */
-    #include "x11_gui.h"
+/* Minimal SDL‑like stubs required for the X11 backend. Only the symbols
+   used in the source are defined. */
+typedef void *SDL_Window;
+typedef void *SDL_Renderer;
+typedef void *SDL_Texture;
+typedef unsigned int Uint32;
+typedef unsigned long long Uint64;
+typedef unsigned char Uint8;
+typedef int SDL_AudioDeviceID;
+static Uint64 SDL_GetPerformanceCounter(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (Uint64)tv.tv_sec * 1000000ULL + tv.tv_usec;
+}
+/* Minimal SDL_AudioSpec definition */
+typedef struct {
+    int freq;
+    unsigned int format;
+    unsigned char channels;
+    unsigned short samples;
+    void (*callback)(void *, Uint8 *, int);
+    void *userdata;
+} SDL_AudioSpec;
+#define AUDIO_S16SYS 0x8010
+#define SDL_zero(x) memset(&(x), 0, sizeof(x))
+/* X11 specific GUI */
+#include "x11_gui.h"
 #endif
 
 /* Core emulation headers */
@@ -149,7 +154,9 @@ static word peek_rom_word(const byte *rom, word size, word offset)
 static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
 {
     byte *vram = bk_hw_vram_ptr();
-    if (!vram) return;
+    if (!vram) {
+        return;
+    }
     word vram_size = bk_hw_vram_size();
     word shift = bk_hw_shift_reg();
 
@@ -164,12 +171,16 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
     word line_bytes = (word)(BK_SCREEN_WIDTH / 8);
     word scroll = (word)(shift & 0377);
     word base_offset = (word)(((scroll - 0330) & 0377) * 0100);
-    if (vram_size) base_offset %= vram_size;
+    if (vram_size) {
+        base_offset %= vram_size;
+    }
     for (int y = 0; y < BK_SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < BK_SCREEN_WIDTH; ++x) {
             word line_offset = (word)(y * line_bytes);
             word byte_index = (word)(base_offset + line_offset + (x >> 3));
-            if (vram_size) byte_index %= vram_size;
+            if (vram_size) {
+                byte_index %= vram_size;
+            }
             byte mask = (byte)(1 << (x & 7));
             byte bit = vram[byte_index] & mask;
             pixels[y * BK_SCREEN_WIDTH + x] = bit ? 0xFFFFFFFFu : 0x00000000u;
@@ -191,42 +202,100 @@ static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
     /* Ctrl‑modified shortcuts. */
     if (mod & KMOD_CTRL) {
         switch (key) {
-            case SDLK_g: code = 0007; break; /* BEL */
-            case SDLK_m: code = 0015; break; /* set tab stop */
-            case SDLK_p: code = 0020; break; /* repeat */
-            case SDLK_r: code = 0022; break; /* cursor home */
-            case SDLK_t: code = 0024; break; /* clear screen */
-            case SDLK_u: code = 0025; break; /* line delete */
-            case SDLK_F11: return BK_KEY_PADD; break; /* Ctrl+F11 */
-            case SDLK_F12: return BK_KEY_FREQ; break; /* Ctrl+F12 */
-            default: break;
+        case SDLK_g:
+            code = 0007;
+            break; /* BEL */
+        case SDLK_m:
+            code = 0015;
+            break; /* set tab stop */
+        case SDLK_p:
+            code = 0020;
+            break; /* repeat */
+        case SDLK_r:
+            code = 0022;
+            break; /* cursor home */
+        case SDLK_t:
+            code = 0024;
+            break; /* clear screen */
+        case SDLK_u:
+            code = 0025;
+            break; /* line delete */
+        case SDLK_F11:
+            return BK_KEY_PADD;
+            break; /* Ctrl+F11 */
+        case SDLK_F12:
+            return BK_KEY_FREQ;
+            break; /* Ctrl+F12 */
+        default:
+            break;
         }
     }
 
     /* Regular keys – only processed if no Ctrl shortcut matched. */
     if (code == -1) {
         switch (key) {
-            case SDLK_ESCAPE:   return BK_KEY_STOP; break; /* STOP */
-            case SDLK_BACKSPACE:code = 030;  break;
-            case SDLK_RETURN:   code = 012;  break;
-            case SDLK_TAB:      code = 011;  break;
-            case SDLK_LEFT:     code = 010;  break;
-            case SDLK_RIGHT:    code = 031;  break;
-            case SDLK_UP:       code = 032;  break;
-            case SDLK_DOWN:     code = 033;  break;
-            case SDLK_HOME:     code = 023;  break;
-            case SDLK_F1:  code = 0201; break; /* povt */
-            case SDLK_F2:  code = 003;  break; /* kt */
-            case SDLK_F3:  code = 0213; break; /* -|--> */
-            case SDLK_F4:  code = 026;  break; /* |<--- */
-            case SDLK_F5:  code = 027;  break; /* |---> */
-            case SDLK_F6:  code = 0202; break; /* ind su */
-            case SDLK_F7:  code = 0204; break; /* blk red */
-            case SDLK_F8:  code = 0200; break; /* shag */
-            case SDLK_F9:  code = 014;  break; /* sbr */
-            case SDLK_F10: code = 0016; break; /* RUS */
-            case SDLK_F11: code = 0017; break; /* LAT */
-            default: break;
+        case SDLK_ESCAPE:
+            return BK_KEY_STOP;
+            break; /* STOP */
+        case SDLK_BACKSPACE:
+            code = 030;
+            break;
+        case SDLK_RETURN:
+            code = 012;
+            break;
+        case SDLK_TAB:
+            code = 011;
+            break;
+        case SDLK_LEFT:
+            code = 010;
+            break;
+        case SDLK_RIGHT:
+            code = 031;
+            break;
+        case SDLK_UP:
+            code = 032;
+            break;
+        case SDLK_DOWN:
+            code = 033;
+            break;
+        case SDLK_HOME:
+            code = 023;
+            break;
+        case SDLK_F1:
+            code = 0201;
+            break; /* povt */
+        case SDLK_F2:
+            code = 003;
+            break; /* kt */
+        case SDLK_F3:
+            code = 0213;
+            break; /* -|--> */
+        case SDLK_F4:
+            code = 026;
+            break; /* |<--- */
+        case SDLK_F5:
+            code = 027;
+            break; /* |---> */
+        case SDLK_F6:
+            code = 0202;
+            break; /* ind su */
+        case SDLK_F7:
+            code = 0204;
+            break; /* blk red */
+        case SDLK_F8:
+            code = 0200;
+            break; /* shag */
+        case SDLK_F9:
+            code = 014;
+            break; /* sbr */
+        case SDLK_F10:
+            code = 0016;
+            break; /* RUS */
+        case SDLK_F11:
+            code = 0017;
+            break; /* LAT */
+        default:
+            break;
         }
     }
 
@@ -234,33 +303,62 @@ static int bk_translate_key(SDL_Keycode key, SDL_Keymod mod)
     if (code == -1 && key >= SDLK_0 && key <= SDLK_9) {
         static const char shifted[] = ")!@#$%^&*(";
         char c = (char)('0' + (key - SDLK_0));
-        if (mod & KMOD_SHIFT) c = shifted[key - SDLK_0];
+        if (mod & KMOD_SHIFT) {
+            c = shifted[key - SDLK_0];
+        }
         code = (int)c;
     }
 
     /* Alphabetic keys. */
     if (code == -1 && key >= SDLK_a && key <= SDLK_z) {
         char c = (char)('a' + (key - SDLK_a));
-        if (mod & KMOD_SHIFT) c = (char)('A' + (key - SDLK_a));
+        if (mod & KMOD_SHIFT) {
+            c = (char)('A' + (key - SDLK_a));
+        }
         code = (int)c;
     }
 
     /* Punctuation and other symbols. */
     if (code == -1) {
         switch (key) {
-            case SDLK_SPACE: code = ' '; break;
-            case SDLK_MINUS: code = (mod & KMOD_SHIFT) ? '_' : '-'; break;
-            case SDLK_EQUALS: code = (mod & KMOD_SHIFT) ? '+' : '='; break;
-            case SDLK_LEFTBRACKET: code = (mod & KMOD_SHIFT) ? '{' : '['; break;
-            case SDLK_RIGHTBRACKET: code = (mod & KMOD_SHIFT) ? '}' : ']'; break;
-            case SDLK_SEMICOLON: code = (mod & KMOD_SHIFT) ? ':' : ';'; break;
-            case SDLK_QUOTE: code = (mod & KMOD_SHIFT) ? '\"' : '\''; break;
-            case SDLK_COMMA: code = (mod & KMOD_SHIFT) ? '<' : ','; break;
-            case SDLK_PERIOD: code = (mod & KMOD_SHIFT) ? '>' : '.'; break;
-            case SDLK_SLASH: code = (mod & KMOD_SHIFT) ? '?' : '/'; break;
-            case SDLK_BACKSLASH: code = (mod & KMOD_SHIFT) ? '|' : '\\'; break;
-            case SDLK_BACKQUOTE: code = (mod & KMOD_SHIFT) ? '~' : '`'; break;
-            default: break;
+        case SDLK_SPACE:
+            code = ' ';
+            break;
+        case SDLK_MINUS:
+            code = (mod & KMOD_SHIFT) ? '_' : '-';
+            break;
+        case SDLK_EQUALS:
+            code = (mod & KMOD_SHIFT) ? '+' : '=';
+            break;
+        case SDLK_LEFTBRACKET:
+            code = (mod & KMOD_SHIFT) ? '{' : '[';
+            break;
+        case SDLK_RIGHTBRACKET:
+            code = (mod & KMOD_SHIFT) ? '}' : ']';
+            break;
+        case SDLK_SEMICOLON:
+            code = (mod & KMOD_SHIFT) ? ':' : ';';
+            break;
+        case SDLK_QUOTE:
+            code = (mod & KMOD_SHIFT) ? '\"' : '\'';
+            break;
+        case SDLK_COMMA:
+            code = (mod & KMOD_SHIFT) ? '<' : ',';
+            break;
+        case SDLK_PERIOD:
+            code = (mod & KMOD_SHIFT) ? '>' : '.';
+            break;
+        case SDLK_SLASH:
+            code = (mod & KMOD_SHIFT) ? '?' : '/';
+            break;
+        case SDLK_BACKSLASH:
+            code = (mod & KMOD_SHIFT) ? '|' : '\\';
+            break;
+        case SDLK_BACKQUOTE:
+            code = (mod & KMOD_SHIFT) ? '~' : '`';
+            break;
+        default:
+            break;
         }
     }
 
@@ -564,12 +662,12 @@ int main(int argc, char **argv)
         goto gui_fail;
     }
     SDL_Window *win = SDL_CreateWindow(
-        "BK0010-01",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        BK_SCREEN_WIDTH * 2,
-        BK_SCREEN_HEIGHT * 2,
-        SDL_WINDOW_SHOWN);
+                          "BK0010-01",
+                          SDL_WINDOWPOS_CENTERED,
+                          SDL_WINDOWPOS_CENTERED,
+                          BK_SCREEN_WIDTH * 2,
+                          BK_SCREEN_HEIGHT * 2,
+                          SDL_WINDOW_SHOWN);
     if (!win) {
         fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
         goto gui_fail;
@@ -597,7 +695,7 @@ int main(int argc, char **argv)
     gui_init_ok = 1;
 #endif
     if (!gui_init_ok) {
-    gui_fail:
+gui_fail:
         core_fini(&r);
         free(monitor_rom);
         free(basic_rom);
@@ -824,24 +922,24 @@ int main(int argc, char **argv)
         } else {
             fprintf(stderr, "Wrote tape: %s size=%zu\n", tape_out_path, out_size);
         }
-            if (tape_out_bin_path && out_data && out_size > 0) {
-                byte *bin_data = NULL;
-                size_t bin_size = 0;
-                char name_buf[32];
-                byte name_raw[16];
-                if (bk_tape_decode_raw_to_bin(out_data, out_size, &bin_data, &bin_size,
-                                              name_buf, sizeof(name_buf),
-                                              name_raw, sizeof(name_raw)) != 0) {
-                    fprintf(stderr, "Failed to decode raw tape\n");
-                } else if (save_tape_file(tape_out_bin_path, bin_data, bin_size) != 0) {
-                    fprintf(stderr, "Failed to write decoded tape to %s\n", tape_out_bin_path);
-                } else {
-                    fprintf(stderr, "Wrote tape bin: %s size=%zu name=%s\n",
-                            tape_out_bin_path, bin_size, name_buf);
-                }
-                free(bin_data);
+        if (tape_out_bin_path && out_data && out_size > 0) {
+            byte *bin_data = NULL;
+            size_t bin_size = 0;
+            char name_buf[32];
+            byte name_raw[16];
+            if (bk_tape_decode_raw_to_bin(out_data, out_size, &bin_data, &bin_size,
+                                          name_buf, sizeof(name_buf),
+                                          name_raw, sizeof(name_raw)) != 0) {
+                fprintf(stderr, "Failed to decode raw tape\n");
+            } else if (save_tape_file(tape_out_bin_path, bin_data, bin_size) != 0) {
+                fprintf(stderr, "Failed to write decoded tape to %s\n", tape_out_bin_path);
+            } else {
+                fprintf(stderr, "Wrote tape bin: %s size=%zu name=%s\n",
+                        tape_out_bin_path, bin_size, name_buf);
             }
+            free(bin_data);
         }
+    }
 
     core_fini(&r);
     free(monitor_rom);

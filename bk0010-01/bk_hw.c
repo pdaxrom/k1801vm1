@@ -284,15 +284,15 @@ static byte *bk_ramptr(regs *r, word offset)
 
 void bk_hw_connect(regs *r)
 {
-	r->load_byte = bk_load_byte;
-	r->store_byte = bk_store_byte;
-	r->load_word = bk_load_word;
-	r->store_word = bk_store_word;
-	r->init = bk_init;
-	r->reset = bk_reset;
-	r->fini = bk_fini;
-	r->poll_irq = bk_poll_irq;
-	r->ramptr = bk_ramptr;
+    r->load_byte = bk_load_byte;
+    r->store_byte = bk_store_byte;
+    r->load_word = bk_load_word;
+    r->store_word = bk_store_word;
+    r->init = bk_init;
+    r->reset = bk_reset;
+    r->fini = bk_fini;
+    r->poll_irq = bk_poll_irq;
+    r->ramptr = bk_ramptr;
 }
 
 size_t bk_hw_required_memory_size(void)
