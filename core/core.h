@@ -79,6 +79,9 @@ typedef struct _regs {
 
     word	psw, r[8];
     word    ir;
+    /* Banked stack pointers for DCJ11 protection modes: K/S/U. */
+    word    sp_mode[4];
+    byte    sp_mode_init;
 
     word	cps, cpc;	/* 0177676 0177674 */
 
@@ -145,5 +148,10 @@ void core_init(regs *r);
 void core_reset(regs *r);
 int  core_step (regs *r);
 void core_fini (regs *r);
+
+/* D12 diagnostics hooks (no-op unless built with CORE_VEC_TRACE). */
+void core_d12_note_event(const char *line);
+void core_d12_dump_context(void);
+unsigned core_d12_irq_depth(void);
 
 #endif

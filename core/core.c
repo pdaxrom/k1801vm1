@@ -65,9 +65,40 @@
 
 #define is_vm2(r) ((r)->model == K1801VM2 || (r)->model == K1806VM2)
 #define has_prev_space_ops(r) (is_vm2(r) || (r)->model == DCJ11)
+#define PSW_CM_MASK 0140000
+#define PSW_PM_MASK 0030000
+
+static INLINE int psw_mode_normalize(int mode)
+{
+    mode &= 03;
+    return (mode == 02) ? 0 : mode;
+}
+
 static INLINE int dcj11_kernel_psw(word psw)
 {
-    return ((psw >> 14) & 03) == 0;
+    return psw_mode_normalize((psw >> 14) & 03) == 0;
+}
+
+static INLINE int dcj11_psw_cur_mode(word psw)
+{
+    return psw_mode_normalize((psw >> 14) & 03);
+}
+
+static INLINE int dcj11_psw_prev_mode(word psw)
+{
+    return psw_mode_normalize((psw >> 12) & 03);
+}
+
+static INLINE word dcj11_psw_set_cur_mode(word psw, int mode)
+{
+    int m = psw_mode_normalize(mode);
+    return (word)((psw & ~PSW_CM_MASK) | ((word)(m & 03) << 14));
+}
+
+static INLINE word dcj11_psw_set_prev_mode(word psw, int mode)
+{
+    int m = psw_mode_normalize(mode);
+    return (word)((psw & ~PSW_PM_MASK) | ((word)(m & 03) << 12));
 }
 
 enum {
@@ -201,6 +232,62 @@ static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
     return vec_psw;
 }
 
+static INLINE void dcj11_sp_mode_init(regs *r)
+{
+    int mode;
+
+    if (r->model != DCJ11) {
+        return;
+    }
+    if (r->sp_mode_init) {
+        return;
+    }
+    for (mode = 0; mode < 4; mode++) {
+        r->sp_mode[mode] = r->r[6];
+    }
+    r->sp_mode_init = 1;
+}
+
+static INLINE void dcj11_switch_stack_mode(regs *r, word old_psw, word new_psw)
+{
+    int old_mode;
+    int new_mode;
+
+    if (r->model != DCJ11) {
+        return;
+    }
+    old_mode = dcj11_psw_cur_mode(old_psw);
+    new_mode = dcj11_psw_cur_mode(new_psw);
+    if (old_mode == new_mode) {
+        return;
+    }
+    dcj11_sp_mode_init(r);
+    r->sp_mode[old_mode] = r->r[6];
+    r->r[6] = r->sp_mode[new_mode];
+}
+
+static INLINE word dcj11_read_mode_reg(regs *r, int mode, word reg)
+{
+    if (reg != 6 || r->model != DCJ11) {
+        return r->r[reg & 07];
+    }
+    dcj11_sp_mode_init(r);
+    return r->sp_mode[psw_mode_normalize(mode)];
+}
+
+static INLINE void dcj11_write_mode_reg(regs *r, int mode, word reg, word value)
+{
+    if (reg != 6 || r->model != DCJ11) {
+        r->r[reg & 07] = value;
+        return;
+    }
+    dcj11_sp_mode_init(r);
+    r->sp_mode[psw_mode_normalize(mode)] = value;
+    if (dcj11_psw_cur_mode(r->psw) == psw_mode_normalize(mode)) {
+        r->r[6] = value;
+    }
+}
+
 #define pushw(v)                                                               \
   {                                                                            \
     r->r[6] -= 2;                                                              \
@@ -266,6 +353,8 @@ void core_reset(regs *r)
     r->J11_REG177744 = 0;
     r->J11_REG177746 = 0;
     r->J11_REG177750 = 0;
+    memset(r->sp_mode, 0, sizeof(r->sp_mode));
+    r->sp_mode_init = 0;
     memset(r->J11_REG177752_177766, 0, sizeof(r->J11_REG177752_177766));
     r->fWait = 0;
     r->fTrap = 0;
