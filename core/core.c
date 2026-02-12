@@ -1928,19 +1928,50 @@ int core_step(regs *r)
         }
         goto step_end;
 
-    case 000002: /* RTI */
-        pullw(r->r[7]);
-        pullw(r->psw);
+    case 000002: { /* RTI */
+        word popped_pc;
+        word popped_psw;
+#if CORE_RTI_TRACE
+        word sp_pc = r->r[6];
+        word sp_psw;
+        word pre_pc = r->r[7];
+        word pre_psw = r->psw;
+        word pre_sp = r->r[6];
+#endif
+        pullw(popped_pc);
+#if CORE_RTI_TRACE
+        sp_psw = r->r[6];
+#endif
+        pullw(popped_psw);
+        RTI_TRACE(
+            "CORE RTI PRE PC=%06o PS=%06o SP=%06o KSP=%06o SSP=%06o USP=%06o\n",
+            pre_pc, pre_psw, pre_sp, r->sp_mode[0], r->sp_mode[1], r->sp_mode[3]);
+        RTI_TRACE("CORE RTI POP PC@%06o=%06o PS@%06o=%06o\n", sp_pc, popped_pc,
+                  sp_psw, popped_psw);
+        r->r[7] = popped_pc;
         if (is_vm2(r)) {
             if (r->r[7] < 0160000) {
-                r->psw = (word)((r->psw & ~FLAG_H) | (psw_before & FLAG_H));
+                popped_psw = (word)((popped_psw & ~FLAG_H) | (psw_before & FLAG_H));
             }
         }
         if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
             word mask = 0170000 | 000340;
-            r->psw = (word)((r->psw & ~mask) | (psw_before & mask));
+            popped_psw = (word)((popped_psw & ~mask) | (psw_before & mask));
         }
-        goto step_end;
+        if (r->model == DCJ11) {
+            dcj11_switch_stack_mode(r, psw_before, popped_psw);
+        }
+        r->psw = popped_psw;
+#if CORE_VEC_TRACE
+        if (g_d12.depth > 0) {
+            g_d12.depth--;
+        }
+#endif
+        RTI_TRACE(
+            "CORE RTI POST PC=%06o PS=%06o SP=%06o KSP=%06o SSP=%06o USP=%06o\n",
+            r->r[7], r->psw, r->r[6], r->sp_mode[0], r->sp_mode[1], r->sp_mode[3]);
+    }
+    goto step_end;
 
     case 000003: { /* BPT */
         word old_psw = r->psw;
@@ -1965,21 +1996,34 @@ int core_step(regs *r)
         }
         goto step_end;
 
-    case 000006: /* RTT */
-        pullw(r->r[7]);
-        pullw(r->psw);
+    case 000006: { /* RTT */
+        word popped_pc;
+        word popped_psw;
+        pullw(popped_pc);
+        pullw(popped_psw);
+        r->r[7] = popped_pc;
         if (is_vm2(r)) {
             if (r->r[7] < 0160000) {
-                r->psw = (word)((r->psw & ~FLAG_H) | (psw_before & FLAG_H));
+                popped_psw = (word)((popped_psw & ~FLAG_H) | (psw_before & FLAG_H));
             }
         }
         if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
             word mask = 0170000 | 000340;
-            r->psw = (word)((r->psw & ~mask) | (psw_before & mask));
+            popped_psw = (word)((popped_psw & ~mask) | (psw_before & mask));
         }
+        if (r->model == DCJ11) {
+            dcj11_switch_stack_mode(r, psw_before, popped_psw);
+        }
+        r->psw = popped_psw;
+#if CORE_VEC_TRACE
+        if (g_d12.depth > 0) {
+            g_d12.depth--;
+        }
+#endif
         r->fTrap = 1;
         skip_trace = 1;
-        goto step_end;
+    }
+    goto step_end;
 
     case 000007: /* MFPT */
         if (r->model != DCJ11) {
@@ -2724,28 +2768,98 @@ int core_step(regs *r)
     }
 
     case 00065: { /* MFPD */
+        word mfp_tmp = 0;
         if (!has_prev_space_ops(r)) {
             illegal_trap(r);
             goto step_end;
         }
-        DECODE_DST();
-        GET_WORD(tmp);
-        pushw(tmp);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        if (r->model != DCJ11) {
+            DECODE_DST();
+            mfp_tmp = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                goto step_end;
+            }
+        } else {
+            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int cur_mode = dcj11_psw_cur_mode(psw_before);
+            word saved_sp = r->r[6];
+            int swapped_sp = 0;
+
+            if (prev_mode != cur_mode) {
+                dcj11_sp_mode_init(r);
+                r->r[6] = r->sp_mode[prev_mode];
+                swapped_sp = 1;
+            }
+            dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
+            if (swapped_sp) {
+                r->sp_mode[prev_mode] = r->r[6];
+                r->r[6] = saved_sp;
+            }
+            if (dst_type == TYPE_ERROR) {
+                goto step_end;
+            }
+            if (dst_type == TYPE_REG) {
+                mfp_tmp = dcj11_read_mode_reg(r, prev_mode, dst_offset);
+            } else if (dst_type == TYPE_IFETCH) {
+                mfp_tmp = load_word_ifetch(r, dst_offset);
+            } else {
+                mfp_tmp = core_load_word_mode_space(r, dst_offset, prev_mode, 1);
+            }
+            if (r->fAbort) {
+                goto step_end;
+            }
+        }
+        pushw(mfp_tmp);
+        set_flag_if(mfp_tmp & SIGN, FLAG_N);
+        set_flag_if(mfp_tmp == 0, FLAG_Z);
         clear_flag(FLAG_V);
         goto step_end;
     }
     case 01065: { /* MFPI */
+        word mfp_tmp = 0;
         if (!has_prev_space_ops(r)) {
             illegal_trap(r);
             goto step_end;
         }
-        DECODE_DST();
-        GET_WORD(tmp);
-        pushw(tmp);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        if (r->model != DCJ11) {
+            DECODE_DST();
+            mfp_tmp = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                goto step_end;
+            }
+        } else {
+            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int cur_mode = dcj11_psw_cur_mode(psw_before);
+            word saved_sp = r->r[6];
+            int swapped_sp = 0;
+
+            if (prev_mode != cur_mode) {
+                dcj11_sp_mode_init(r);
+                r->r[6] = r->sp_mode[prev_mode];
+                swapped_sp = 1;
+            }
+            dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
+            if (swapped_sp) {
+                r->sp_mode[prev_mode] = r->r[6];
+                r->r[6] = saved_sp;
+            }
+            if (dst_type == TYPE_ERROR) {
+                goto step_end;
+            }
+            if (dst_type == TYPE_REG) {
+                mfp_tmp = dcj11_read_mode_reg(r, prev_mode, dst_offset);
+            } else if (dst_type == TYPE_IFETCH) {
+                mfp_tmp = load_word_ifetch(r, dst_offset);
+            } else {
+                mfp_tmp = core_load_word_mode_space(r, dst_offset, prev_mode, 0);
+            }
+            if (r->fAbort) {
+                goto step_end;
+            }
+        }
+        pushw(mfp_tmp);
+        set_flag_if(mfp_tmp & SIGN, FLAG_N);
+        set_flag_if(mfp_tmp == 0, FLAG_Z);
         clear_flag(FLAG_V);
         goto step_end;
     }
@@ -2754,10 +2868,45 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
-        DECODE_DST();
+        if (r->model != DCJ11) {
+            DECODE_DST();
+        } else {
+            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int cur_mode = dcj11_psw_cur_mode(psw_before);
+            word saved_sp = r->r[6];
+            int swapped_sp = 0;
+
+            if (prev_mode != cur_mode) {
+                dcj11_sp_mode_init(r);
+                r->r[6] = r->sp_mode[prev_mode];
+                swapped_sp = 1;
+            }
+            dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
+            if (swapped_sp) {
+                r->sp_mode[prev_mode] = r->r[6];
+                r->r[6] = saved_sp;
+            }
+            if (dst_type == TYPE_ERROR) {
+                goto step_end;
+            }
+        }
         word tmp;
         pullw(tmp);
-        PUT_WORD(tmp);
+        if (r->fAbort) {
+            goto step_end;
+        }
+        if (r->model != DCJ11) {
+            PUT_WORD(tmp);
+        } else {
+            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            if (dst_type == TYPE_REG) {
+                dcj11_write_mode_reg(r, prev_mode, dst_offset, tmp);
+            } else if (dst_type == TYPE_IFETCH) {
+                store_word(r, dst_offset, tmp);
+            } else {
+                core_store_word_mode_space(r, dst_offset, tmp, prev_mode, 0);
+            }
+        }
         set_flag_if(tmp & SIGN, FLAG_N);
         set_flag_if(tmp == 0, FLAG_Z);
         clear_flag(FLAG_V);
@@ -2768,10 +2917,45 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
-        DECODE_DST();
+        if (r->model != DCJ11) {
+            DECODE_DST();
+        } else {
+            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int cur_mode = dcj11_psw_cur_mode(psw_before);
+            word saved_sp = r->r[6];
+            int swapped_sp = 0;
+
+            if (prev_mode != cur_mode) {
+                dcj11_sp_mode_init(r);
+                r->r[6] = r->sp_mode[prev_mode];
+                swapped_sp = 1;
+            }
+            dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
+            if (swapped_sp) {
+                r->sp_mode[prev_mode] = r->r[6];
+                r->r[6] = saved_sp;
+            }
+            if (dst_type == TYPE_ERROR) {
+                goto step_end;
+            }
+        }
         word tmp;
         pullw(tmp);
-        PUT_WORD(tmp);
+        if (r->fAbort) {
+            goto step_end;
+        }
+        if (r->model != DCJ11) {
+            PUT_WORD(tmp);
+        } else {
+            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            if (dst_type == TYPE_REG) {
+                dcj11_write_mode_reg(r, prev_mode, dst_offset, tmp);
+            } else if (dst_type == TYPE_IFETCH) {
+                store_word(r, dst_offset, tmp);
+            } else {
+                core_store_word_mode_space(r, dst_offset, tmp, prev_mode, 1);
+            }
+        }
         set_flag_if(tmp & SIGN, FLAG_N);
         set_flag_if(tmp == 0, FLAG_Z);
         clear_flag(FLAG_V);
