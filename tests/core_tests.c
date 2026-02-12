@@ -7,6 +7,8 @@
 
 #define TEST_BASE 01000
 #define TEST_STACK 0400
+#define DCJ11_CM(mode) ((word)(((mode) & 03) << 14))
+#define DCJ11_PM(mode) ((word)(((mode) & 03) << 12))
 
 typedef struct {
     regs r;
@@ -2077,7 +2079,7 @@ static int test_dcj11_halt_user_traps(void)
     cpu_fixture fx;
     int rc = 0;
     const word handler = 02600;
-    const word new_psw = 000200;
+    const word new_psw = DCJ11_CM(0) | DCJ11_PM(3) | 000200;
     const word program[] = {
         op_halt(),
     };
@@ -4018,6 +4020,272 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_mode_stack_banking(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rti(),
+        000003, /* BPT */
+        op_rti(),
+        000003, /* BPT */
+        op_nop(),
+    };
+    const word psw_kernel = DCJ11_CM(0) | 000003;
+    const word psw_super = DCJ11_CM(1) | 000003;
+    const word psw_user = DCJ11_CM(3) | 000003;
+    const word ksp0 = 010000;
+    const word ssp0 = 012000;
+    const word usp0 = 014000;
+
+    current_test = "dcj11_mode_stack_banking";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = ksp0;
+    fx.r.sp_mode[1] = ssp0;
+    fx.r.sp_mode[3] = usp0;
+    fx.r.r[6] = ksp0;
+    fx.r.psw = psw_kernel;
+
+    store_word(&fx, ksp0, TEST_BASE + 2);
+    store_word(&fx, ksp0 + 2, psw_user);
+    store_word(&fx, 000014, TEST_BASE + 4);
+    store_word(&fx, 000016, 000340);
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI K->U should succeed");
+    ASSERT_EQ(fx.r.psw, psw_user, "RTI should switch to user mode");
+    ASSERT_EQ(fx.r.r[6], usp0, "R6 should load user stack bank");
+    ASSERT_EQ(fx.r.sp_mode[0], ksp0 + 4, "Kernel stack bank should be advanced");
+
+    fx.r.r[6] = usp0 + 010;
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT U->K should succeed");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "BPT should enter kernel mode");
+    ASSERT_EQ(fx.r.r[6], ksp0, "BPT should switch to kernel stack");
+    ASSERT_EQ(fx.r.sp_mode[3], usp0 + 010, "User stack bank should retain updates");
+
+    store_word(&fx, ksp0, TEST_BASE + 6);
+    store_word(&fx, ksp0 + 2, psw_super);
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI K->S should succeed");
+    ASSERT_EQ(fx.r.psw, psw_super, "RTI should switch to supervisor mode");
+    ASSERT_EQ(fx.r.r[6], ssp0, "R6 should load supervisor stack bank");
+
+    fx.r.r[6] = ssp0 + 010;
+    store_word(&fx, 000014, TEST_BASE + 10);
+    store_word(&fx, 000016, 000340);
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT S->K should succeed");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "BPT should enter kernel mode");
+    ASSERT_EQ(fx.r.r[6], ksp0, "Kernel stack should be selected again");
+    ASSERT_EQ(fx.r.sp_mode[1], ssp0 + 010, "Supervisor stack bank should retain updates");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_irq_entry_frame_user(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word vector_psw = 000340;
+    const word user_psw = DCJ11_CM(3) | 000003;
+    const word kernel_sp = 01000;
+    const word user_sp = 01200;
+    const word expected_psw = DCJ11_CM(0) | DCJ11_PM(3) | 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_entry_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, vector_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = user_sp;
+    fx.r.psw = user_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter IRQ handler");
+    ASSERT_EQ(fx.r.psw, expected_psw, "PSW should set CM=K and PM=U");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "Current mode should be kernel");
+    ASSERT_EQ((fx.r.psw >> 12) & 03, 3, "Previous mode should be user");
+    ASSERT_EQ(fx.r.r[6], (word)(kernel_sp - 4), "IRQ should push frame on kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 4)), TEST_BASE + 2,
+              "Kernel stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 2)), user_psw,
+              "Kernel stack PSW incorrect");
+    ASSERT_EQ(fx.r.sp_mode[3], user_sp, "User stack bank should stay unchanged");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_dcj11_rti_restore_user_mode_stack(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02200;
+    const word vector_psw = 000340;
+    const word user_psw = DCJ11_CM(3) | 000003;
+    const word kernel_sp = 01000;
+    const word user_sp = 01200;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_rti_restore_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, vector_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = user_sp;
+    fx.r.psw = user_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ entry should succeed");
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return from handler");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "RTI should restore user PC");
+    ASSERT_EQ(fx.r.psw, user_psw, "RTI should restore user PSW");
+    ASSERT_EQ(fx.r.r[6], user_sp, "RTI should restore user stack");
+    ASSERT_EQ(fx.r.sp_mode[0], kernel_sp, "Kernel stack bank should preserve return SP");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_dcj11_irq_rti_supervisor_mode(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word vector_psw = 000340;
+    const word super_psw = DCJ11_CM(1) | 000003;
+    const word kernel_sp = 01000;
+    const word super_sp = 01200;
+    const word expected_psw = DCJ11_CM(0) | DCJ11_PM(1) | 000340;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_rti_supervisor";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, vector_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = super_sp;
+    fx.r.sp_mode[3] = 01400;
+    fx.r.r[6] = super_sp;
+    fx.r.psw = super_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted from supervisor mode");
+    ASSERT_EQ(fx.r.psw, expected_psw, "IRQ PSW should set PM=supervisor");
+    ASSERT_EQ(fx.r.r[6], (word)(kernel_sp - 4), "IRQ frame should use kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 4)), TEST_BASE + 2,
+              "Kernel stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 2)), super_psw,
+              "Kernel stack PSW incorrect");
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return to supervisor context");
+    ASSERT_EQ(fx.r.psw, super_psw, "RTI should restore supervisor PSW");
+    ASSERT_EQ(fx.r.r[6], super_sp, "RTI should restore supervisor stack");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_dcj11_irq_rti_mode_stack_switch(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word kernel_psw = DCJ11_CM(0) | DCJ11_PM(3) | 000340;
+    const word user_psw = 0140003;
+    const word kernel_sp = 01000;
+    const word user_sp = 01200;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_rti_mode_stack";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, kernel_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = user_sp;
+    fx.r.psw = user_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted after NOP");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter IRQ handler");
+    ASSERT_EQ(fx.r.psw, kernel_psw, "PSW should load kernel IRQ vector");
+    ASSERT_EQ(fx.r.r[6], (word)(kernel_sp - 4), "IRQ should push frame on kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 4)), TEST_BASE + 2,
+              "Kernel stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 2)), user_psw,
+              "Kernel stack PSW incorrect");
+    ASSERT_EQ(fx.r.sp_mode[3], user_sp, "User stack bank should be preserved");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return to user context");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "RTI should restore user PC");
+    ASSERT_EQ(fx.r.psw, user_psw, "RTI should restore user PSW");
+    ASSERT_EQ(fx.r.r[6], user_sp, "RTI should switch back to user stack");
+    ASSERT_EQ(fx.r.sp_mode[0], kernel_sp, "Kernel stack bank should preserve post-RTI SP");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
 static int test_dcj11_mtps_user_restricts_psw(void)
 {
     cpu_fixture fx;
@@ -5652,6 +5920,11 @@ int main(void)
     failed += test_rti_restores_state();
     failed += test_dcj11_rti_restores_state();
     failed += test_dcj11_rti_user_restricts_psw();
+    failed += test_dcj11_mode_stack_banking();
+    failed += test_dcj11_irq_entry_frame_user();
+    failed += test_dcj11_rti_restore_user_mode_stack();
+    failed += test_dcj11_irq_rti_supervisor_mode();
+    failed += test_dcj11_irq_rti_mode_stack_switch();
     failed += test_dcj11_mtps_user_restricts_psw();
     failed += test_dcj11_spl_kernel_sets_priority();
     failed += test_dcj11_spl_user_is_nop();

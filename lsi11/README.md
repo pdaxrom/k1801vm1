@@ -164,3 +164,17 @@ Compatibility note:
 Notes:
 - If a device is disabled, attaching media for it (for example `-disable-rl` with `-rl`) is rejected.
 - `-check-config` prints final per-device enable state (`dev_*` fields).
+
+## DCJ11 K/S/U Compliance (In Progress)
+
+Checklist:
+- [ ] PSW `CM/PM` handling for DCJ11 (`CM=<15:14>`, `PM=<13:12>`).
+- [ ] Separate stack banks `KSP/SSP/USP` and active `R6` switch by `CM`.
+- [ ] IRQ/trap entry frame correctness (`OLDPS`, `OLDPC`) on handler stack.
+- [ ] `RTI/RTT` restore correctness (PC/PSW order + stack-bank handoff).
+- [ ] Vector fetch path is physical (MMU bypass).
+- [ ] `MFPI/MFPD/MTPI/MTPD` use previous mode (`PM`) with proper I/D space.
+
+### Verification Results
+
+- Pending in C5 (commands and expected outputs).
