@@ -53,9 +53,13 @@ R0–R7: **PASS**
 N/Z/V/C, T, and priority bits: **PASS / FIXED**
 - N/Z/V/C and T verified by tests (TSTB, trace, RTT/RTI).
 - Priority masking verified by DCJ11 IRQ tests.
+- Memory-mapped PSW register access at `0177776` is handled in `core/`
+  (CPU-level), not in machine device layers.
 
 Mode bits: **LIMITED**
-- No user/kernel memory spaces or MMU; PSW mode bits do not affect memory access.
+- With `ENABLE_MMU=0` (default), memory is identity-mapped and mode bits do not
+  affect address translation.
+- With `ENABLE_MMU=1`, mode bits select Kernel/Supervisor/User PAR/PDR sets.
 
 References: J‑11 Programmer’s Reference (PSW and trap/interrupt behavior).
 
@@ -137,6 +141,33 @@ Status: **FIXED**
 
 Status: **PASS**
 
+### 7.3 Privileged Base Instructions (DCJ11/VM2)
+`SPL n` (`0000230..0000237`):
+- kernel mode: sets `PS<7:5>` to `n`
+- supervisor/user mode: treated as NOP
+- supported on DCJ11/VM2/K1806VM2
+- VM1/VM1G: illegal-instruction trap
+
+`MFPS dst`:
+- transfers low byte of `PSW` as byte operation (`MOVB`-style destination semantics)
+- register destination gets sign-extended byte
+- memory destination performs byte store and byte autoincrement rules
+- condition codes: `N/Z` from transferred byte, `V=0`, `C` unchanged
+
+`MTPS src`:
+- updates low PSW byte mask as implemented in core
+- on DCJ11 in supervisor/user mode, `PS<7:5>` is preserved
+
+`TSTSET dst`, `WRTLCK dst`:
+- implemented for DCJ11 only
+- non-DCJ11 models trap as illegal instruction
+
+`MFPD dst`, `MFPI dst`, `MTPI dst`, `MTPD dst`:
+- implemented on DCJ11 and VM2/K1806VM2
+- VM1/VM1G trap as illegal instruction
+
+Status: **FIXED / PASS**
+
 References: J‑11 Programmer’s Reference (instruction set).
 
 ---
@@ -148,6 +179,7 @@ SEL‑related entities implemented in `core/`:
 - SEL0 — unaddressed SEL register (CPU‑internal)
 - SEL1 — external register at 0177716
 - SEL2 — external register at 0177714
+- DCJ11 CPU register at `0177750` (core-owned register, reset `0`)
 
 ### 8.2 Semantics
 Implemented behavior:
@@ -183,11 +215,12 @@ References: `doc/1801vm.txt`, `doc/KM1801VM2.pdf`.
 ## 10. Differences vs K1801VM2 (Summary)
 
 Key differences (within scope):
-- No MMU or separate user/kernel memory space in this core
+- MMU is compile-time optional (`ENABLE_MMU`, default off)
 - HALT/SEL vectoring follows implemented DCJ11 rules (SEL0)
 
 Impact:
-- Supervisor/user address space distinctions are not enforced.
+- With default build (`ENABLE_MMU=0`), supervisor/user memory distinctions are not enforced.
+- With MMU build (`ENABLE_MMU=1`), K/S/U relocation/protection and split I/D are enforced.
 
 References: `doc/KM1801VM2.pdf`.
 
@@ -350,17 +383,32 @@ Implemented tests (see `tests/core_tests.c`):
 - IRQ priority masking and highest‑priority selection
 - TSTB flags and BPL branching
 - DCJ11 SEL0/SEL1/SEL2 semantics
+- `SPL` kernel/user semantics on DCJ11/VM2 and illegal trap on VM1/VM1G
+- `MFPD/MFPI/MTPI/MTPD` availability on DCJ11/VM2 vs VM1/VM1G
+- `MFPS` byte semantics (register sign-extension, memory byte-store/autoincrement)
 
 Run:
 ```
 make test
 ```
 
+MMU test matrix:
+```
+make test-matrix
+```
+Includes MMU-on tests for register decode, faults, split I/D and 22-bit physical
+memory fetch/store paths.
+
 ---
 
 ## 16. Known Limitations
 
-- No MMU or separate user/kernel spaces.
+- With `ENABLE_MMU=1`, core hardware stub provides 22-bit physical backing
+  memory (4MB) so MMU translation above `0177777` is testable in unit tests.
+- With `ENABLE_MMU=0`, hardware stub uses legacy 64KB memory backing.
+- Machine-specific frontends may still provide their own bus/memory limits.
+- `SSR1` is implemented as a simplified fault context latch (fault VA), not a complete
+  per-microstep register modification log.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
 - Device interrupt arbitration is outside the core (handled by machine layer).
 
@@ -370,7 +418,170 @@ make test
 
 Overall DCJ11 compliance status: **MOSTLY COMPLIANT** for CPU‑level semantics.
 Core behavior matches documented trap/interrupt rules and tested instruction
-semantics, with explicit limitations around MMU and device‑level bus signaling.
+semantics, includes optional MMU support behind `ENABLE_MMU`, with explicit
+limitations around 22-bit physical memory modeling and device‑level bus signaling.
+
+---
+
+## 18. DCJ11 MMU (ENABLE_MMU)
+
+Build-time switch:
+- `ENABLE_MMU=0` (default): MMU translation disabled, no MMU faults.
+- `ENABLE_MMU=1`: MMU logic compiled in; runtime enable via `SSR0` bit 0.
+
+Implemented register map (OCTAL):
+- `SSR0..SSR3`: `177572`, `177574`, `177576`, `177516`
+- Supervisor PAR/PDR: `172200..172276`
+- Kernel PAR/PDR: `172300..172376`
+- User PAR/PDR: `177600..177676`
+
+Supported MMU behavior (`ENABLE_MMU=1`):
+- K/S/U mode selection from PSW.
+- 8 segments per space, PAR/PDR relocation.
+- Split I/D per mode via `SSR3` bits `KD/SD/UD`.
+- Instruction fetch in I-space, data in D-space when split enabled.
+- Trap/interrupt vector fetch through Kernel D-space (when split I/D enabled) or I-space.
+- Fault classes: non-resident, length, write-protect; trap vector `000250`.
+- `SSR0` fault latch + runtime enable bit, `SSR2` fault PC, `SSR1` simplified VA latch.
+
+`ENABLE_MMU=0` policy:
+- MMU registers are present for DCJ11 accesses, read as `0`, writes ignored.
+
+MMU compliance table:
+
+| Feature | Implemented | Notes |
+|--------|-------------|-------|
+| Compile-time MMU switch (`ENABLE_MMU`) | YES | Default off |
+| Runtime MMU enable (`SSR0` bit 0) | YES | Translation active only when set |
+| K/S/U PAR/PDR translation | YES | Mode 2 treated as kernel |
+| Split I/D (`SSR3 KD/SD/UD`) | YES | Per mode |
+| MMU fault trap (`000250`) | YES | Instruction aborted |
+| Vector fetch via Kernel D-space | YES | D-space when KD split enabled, else I-space |
+| `SSR0/SSR2` fault state | YES | First-fault latch behavior |
+| `SSR1` restart log | PARTIAL | Stores fault VA only |
+| 22-bit physical memory backing | YES | Core hwstub provides 4MB physical RAM |
+
+---
+
+## 19. Debugging Playbook (including SIMH)
+
+This section collects practical debugging methods used in this repository.
+
+### 19.1 Fast local checks
+
+Core-only:
+```sh
+make test
+make test-mmu-on
+```
+
+LSI11 machine profiles:
+```sh
+make -C lsi11 test
+make -C lsi11 test-pdp1184
+```
+
+### 19.2 Emulator trace options
+
+For `lsi11/lsi11` and `lsi11/pdp1184`:
+- `-trace` instruction trace with disassembly
+- `-trace-regs` register dump per instruction
+- `-traceirq` interrupt delivery trace
+- `-tracenxm` NXM/bus trap trace
+- `-check-config` final machine/device config print
+
+Example:
+```sh
+./lsi11/pdp1184 -rk lsi11/disks/SYS.DSK -bootrt11 -trace -traceirq -tracenxm > /tmp/pdp1184.trace
+```
+
+### 19.3 LLDB debugging examples
+
+```sh
+lldb -- ./lsi11/pdp1184 -rk lsi11/disks/SYS.DSK -bootrt11
+```
+
+Useful LLDB commands:
+```text
+(lldb) b core_step
+(lldb) b nxm_trap
+(lldb) run
+(lldb) bt
+(lldb) frame variable *r
+(lldb) register read
+```
+
+For test binaries:
+```sh
+lldb -- tests/core_tests
+lldb -- tests/test_mmu_basic
+```
+
+### 19.4 SIMH reference runs (cross-check)
+
+Use SIMH as reference behavior when validating boot loaders, CPU ID paths,
+interrupt flow, and controller polling loops.
+
+PDP-11/04 + RK (RT-11 style):
+```text
+set cpu 11/04
+set cpu 64k
+set cpu idle
+set console 7b
+set tti 7b
+set tto 7b
+set rk0 enabled
+attach rk0 lsi11/disks/SYS.DSK
+boot rk0
+```
+
+PDP-11/04 + RL:
+```text
+set cpu 11/04
+set cpu idle
+set rl enabled
+attach rl0 lsi11/disks/newsys.rl02
+boot rl0
+```
+
+PDP-11/84 + RL:
+```text
+set cpu 11/84
+set rl enabled
+attach rl0 lsi11/disks/newsys.rl02
+boot rl0
+```
+
+PDP-11/34 + HK/RK07 image:
+```text
+set cpu 11/34
+set cpu 4M
+set TTI 8B
+set TTO 8B
+set hk0 rk07
+attach hk0 lsi11/disks/rt11v503.dsk
+boot hk0
+```
+
+### 19.5 SIMH interactive debug commands
+
+After boot:
+```text
+break 000604
+go
+step
+step 20
+examine 177450
+examine 177440
+```
+
+### 19.6 Side-by-side comparison workflow
+
+1. Run emulator with `-trace` and save log.
+2. Run same image/config in SIMH.
+3. Compare traces around first divergence (PC, PSW, CSR values, IRQ vectors).
+4. If divergence starts after I/O access, add `-traceirq`/`-tracenxm`.
+5. If divergence starts in CPU flow, reproduce with `tests/core_*` or MMU tests.
 
 ---
 

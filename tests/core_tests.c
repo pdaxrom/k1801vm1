@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "core/core.h"
@@ -6,10 +7,14 @@
 
 #define TEST_BASE 01000
 #define TEST_STACK 0400
+#define DCJ11_CM(mode) ((word)(((mode) & 03) << 14))
+#define DCJ11_PM(mode) ((word)(((mode) & 03) << 12))
 
 typedef struct {
     regs r;
     byte *mem;
+    byte *mem_owner;
+    size_t mem_size;
 } cpu_fixture;
 
 static const char *current_test;
@@ -17,11 +22,22 @@ static const char *current_test;
 static void fixture_setup_model(cpu_fixture *fx, byte model)
 {
     memset(fx, 0, sizeof(*fx));
+    fx->mem_size = hwstub_required_memory_size();
+    fx->mem_owner = (byte *)calloc(1, fx->mem_size);
+    if (!fx->mem_owner) {
+        fprintf(stderr, "FAIL: hwstub memory allocation (%zu bytes)\n", fx->mem_size);
+        exit(1);
+    }
+    if (hwstub_set_memory(fx->mem_owner, fx->mem_size) != 0) {
+        fprintf(stderr, "FAIL: hwstub_set_memory\n");
+        free(fx->mem_owner);
+        exit(1);
+    }
     fx->r.model = model;
     hwstub_connect(&fx->r);
     core_init(&fx->r);
     fx->mem = fx->r.ramptr(&fx->r, 0);
-    memset(fx->mem, 0, 1 << 16);
+    memset(fx->mem, 0, fx->mem_size);
     fx->r.SEL0 = 0;
     fx->r.SEL1 = 0;
     core_reset(&fx->r);
@@ -38,6 +54,9 @@ static void fixture_setup(cpu_fixture *fx)
 static void fixture_teardown(cpu_fixture *fx)
 {
     core_fini(&fx->r);
+    hwstub_clear_memory_binding();
+    free(fx->mem_owner);
+    fx->mem_owner = NULL;
 }
 
 static INLINE int is_vm1_model(byte model);
@@ -315,6 +334,11 @@ static INLINE word op_iot(void)
 static INLINE word op_reset(void)
 {
     return 0000005;
+}
+
+static INLINE word op_spl(byte level)
+{
+    return 0000230 | (level & 07);
 }
 
 static INLINE word op_rtt(void)
@@ -1116,17 +1140,19 @@ static int test_dcj11_special_ops_illegal_on_other_models(void)
         snprintf(namebuf, sizeof(namebuf), "mfpt_illegal_%s", names[i]);
         rc += run_illegal_op_test_model(op_mfpt(), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mfpd_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mfpd(operand(0, 0)), namebuf, models[i]);
+        if (models[i] == K1801VM1 || models[i] == K1801VM1G) {
+            snprintf(namebuf, sizeof(namebuf), "mfpd_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mfpd(operand(0, 0)), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mfpi_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mfpi(operand(0, 0)), namebuf, models[i]);
+            snprintf(namebuf, sizeof(namebuf), "mfpi_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mfpi(operand(0, 0)), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mtpi_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mtpi(operand(0, 0)), namebuf, models[i]);
+            snprintf(namebuf, sizeof(namebuf), "mtpi_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mtpi(operand(0, 0)), namebuf, models[i]);
 
-        snprintf(namebuf, sizeof(namebuf), "mtpd_illegal_%s", names[i]);
-        rc += run_illegal_op_test_model(op_mtpd(operand(0, 0)), namebuf, models[i]);
+            snprintf(namebuf, sizeof(namebuf), "mtpd_illegal_%s", names[i]);
+            rc += run_illegal_op_test_model(op_mtpd(operand(0, 0)), namebuf, models[i]);
+        }
 
         snprintf(namebuf, sizeof(namebuf), "tstset_illegal_%s", names[i]);
         rc += run_illegal_op_test_model(op_tstset(operand(0, 1)), namebuf, models[i]);
@@ -2053,7 +2079,7 @@ static int test_dcj11_halt_user_traps(void)
     cpu_fixture fx;
     int rc = 0;
     const word handler = 02600;
-    const word new_psw = 000200;
+    const word new_psw = DCJ11_CM(0) | DCJ11_PM(3) | 000200;
     const word program[] = {
         op_halt(),
     };
@@ -2680,11 +2706,31 @@ static int test_misc_ops_model(byte model, const char *name)
     ASSERT_EQ(fx.r.r[0], 0, "SXT should clear");
     expect_flags(&fx.r, 0, 1, 0, -1);
 
-    set_test_name(namebuf, sizeof(namebuf), "mfps", name);
+    set_test_name(namebuf, sizeof(namebuf), "mfps_reg", name);
     fx.r.psw = 000345;
     write_op(&fx, op_mfps(operand(0, 0)));
     ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
-    ASSERT_EQ(fx.r.r[0] & 0377, 0345, "MFPS should move PSW");
+    ASSERT_EQ(fx.r.r[0], 0177745, "MFPS should sign-extend into register");
+    expect_flags(&fx.r, 1, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "mfps_mem_byte", name);
+    store_word(&fx, 02200, 012345);
+    fx.r.psw = 000141;
+    fx.r.r[1] = 02200;
+    write_op(&fx, op_mfps(operand(1, 1)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 02200), 0141, "MFPS should store low PSW byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 02201), 024, "MFPS should keep high byte");
+    expect_flags(&fx.r, 0, 0, 0, -1);
+
+    set_test_name(namebuf, sizeof(namebuf), "mfps_autoinc_byte", name);
+    store_word(&fx, 02220, 0);
+    fx.r.psw = 000201;
+    fx.r.r[2] = 02220;
+    write_op(&fx, op_mfps(operand(2, 2)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPS");
+    ASSERT_EQ(fx.r.r[2], 02221, "MFPS autoincrement must step by byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 02220), 0201, "MFPS autoincrement value mismatch");
     expect_flags(&fx.r, 1, 0, 0, -1);
 
     set_test_name(namebuf, sizeof(namebuf), "mtps", name);
@@ -3974,6 +4020,272 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_mode_stack_banking(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rti(),
+        000003, /* BPT */
+        op_rti(),
+        000003, /* BPT */
+        op_nop(),
+    };
+    const word psw_kernel = DCJ11_CM(0) | 000003;
+    const word psw_super = DCJ11_CM(1) | 000003;
+    const word psw_user = DCJ11_CM(3) | 000003;
+    const word ksp0 = 010000;
+    const word ssp0 = 012000;
+    const word usp0 = 014000;
+
+    current_test = "dcj11_mode_stack_banking";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = ksp0;
+    fx.r.sp_mode[1] = ssp0;
+    fx.r.sp_mode[3] = usp0;
+    fx.r.r[6] = ksp0;
+    fx.r.psw = psw_kernel;
+
+    store_word(&fx, ksp0, TEST_BASE + 2);
+    store_word(&fx, ksp0 + 2, psw_user);
+    store_word(&fx, 000014, TEST_BASE + 4);
+    store_word(&fx, 000016, 000340);
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI K->U should succeed");
+    ASSERT_EQ(fx.r.psw, psw_user, "RTI should switch to user mode");
+    ASSERT_EQ(fx.r.r[6], usp0, "R6 should load user stack bank");
+    ASSERT_EQ(fx.r.sp_mode[0], ksp0 + 4, "Kernel stack bank should be advanced");
+
+    fx.r.r[6] = usp0 + 010;
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT U->K should succeed");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "BPT should enter kernel mode");
+    ASSERT_EQ(fx.r.r[6], ksp0, "BPT should switch to kernel stack");
+    ASSERT_EQ(fx.r.sp_mode[3], usp0 + 010, "User stack bank should retain updates");
+
+    store_word(&fx, ksp0, TEST_BASE + 6);
+    store_word(&fx, ksp0 + 2, psw_super);
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI K->S should succeed");
+    ASSERT_EQ(fx.r.psw, psw_super, "RTI should switch to supervisor mode");
+    ASSERT_EQ(fx.r.r[6], ssp0, "R6 should load supervisor stack bank");
+
+    fx.r.r[6] = ssp0 + 010;
+    store_word(&fx, 000014, TEST_BASE + 10);
+    store_word(&fx, 000016, 000340);
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT S->K should succeed");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "BPT should enter kernel mode");
+    ASSERT_EQ(fx.r.r[6], ksp0, "Kernel stack should be selected again");
+    ASSERT_EQ(fx.r.sp_mode[1], ssp0 + 010, "Supervisor stack bank should retain updates");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_irq_entry_frame_user(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word vector_psw = 000340;
+    const word user_psw = DCJ11_CM(3) | 000003;
+    const word kernel_sp = 01000;
+    const word user_sp = 01200;
+    const word expected_psw = DCJ11_CM(0) | DCJ11_PM(3) | 000340;
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_entry_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, vector_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = user_sp;
+    fx.r.psw = user_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter IRQ handler");
+    ASSERT_EQ(fx.r.psw, expected_psw, "PSW should set CM=K and PM=U");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "Current mode should be kernel");
+    ASSERT_EQ((fx.r.psw >> 12) & 03, 3, "Previous mode should be user");
+    ASSERT_EQ(fx.r.r[6], (word)(kernel_sp - 4), "IRQ should push frame on kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 4)), TEST_BASE + 2,
+              "Kernel stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 2)), user_psw,
+              "Kernel stack PSW incorrect");
+    ASSERT_EQ(fx.r.sp_mode[3], user_sp, "User stack bank should stay unchanged");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_dcj11_rti_restore_user_mode_stack(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02200;
+    const word vector_psw = 000340;
+    const word user_psw = DCJ11_CM(3) | 000003;
+    const word kernel_sp = 01000;
+    const word user_sp = 01200;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_rti_restore_user";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, vector_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = user_sp;
+    fx.r.psw = user_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ entry should succeed");
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return from handler");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "RTI should restore user PC");
+    ASSERT_EQ(fx.r.psw, user_psw, "RTI should restore user PSW");
+    ASSERT_EQ(fx.r.r[6], user_sp, "RTI should restore user stack");
+    ASSERT_EQ(fx.r.sp_mode[0], kernel_sp, "Kernel stack bank should preserve return SP");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_dcj11_irq_rti_supervisor_mode(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word vector_psw = 000340;
+    const word super_psw = DCJ11_CM(1) | 000003;
+    const word kernel_sp = 01000;
+    const word super_sp = 01200;
+    const word expected_psw = DCJ11_CM(0) | DCJ11_PM(1) | 000340;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_rti_supervisor";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, vector_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = super_sp;
+    fx.r.sp_mode[3] = 01400;
+    fx.r.r[6] = super_sp;
+    fx.r.psw = super_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted from supervisor mode");
+    ASSERT_EQ(fx.r.psw, expected_psw, "IRQ PSW should set PM=supervisor");
+    ASSERT_EQ(fx.r.r[6], (word)(kernel_sp - 4), "IRQ frame should use kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 4)), TEST_BASE + 2,
+              "Kernel stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 2)), super_psw,
+              "Kernel stack PSW incorrect");
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return to supervisor context");
+    ASSERT_EQ(fx.r.psw, super_psw, "RTI should restore supervisor PSW");
+    ASSERT_EQ(fx.r.r[6], super_sp, "RTI should restore supervisor stack");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
+static int test_dcj11_irq_rti_mode_stack_switch(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02000;
+    const word kernel_psw = DCJ11_CM(0) | DCJ11_PM(3) | 000340;
+    const word user_psw = 0140003;
+    const word kernel_sp = 01000;
+    const word user_sp = 01200;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_rti_mode_stack";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, kernel_psw);
+    store_word(&fx, handler, op_rti());
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = user_sp;
+    fx.r.psw = user_psw;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted after NOP");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should enter IRQ handler");
+    ASSERT_EQ(fx.r.psw, kernel_psw, "PSW should load kernel IRQ vector");
+    ASSERT_EQ(fx.r.r[6], (word)(kernel_sp - 4), "IRQ should push frame on kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 4)), TEST_BASE + 2,
+              "Kernel stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, (word)(kernel_sp - 2)), user_psw,
+              "Kernel stack PSW incorrect");
+    ASSERT_EQ(fx.r.sp_mode[3], user_sp, "User stack bank should be preserved");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return to user context");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "RTI should restore user PC");
+    ASSERT_EQ(fx.r.psw, user_psw, "RTI should restore user PSW");
+    ASSERT_EQ(fx.r.r[6], user_sp, "RTI should switch back to user stack");
+    ASSERT_EQ(fx.r.sp_mode[0], kernel_sp, "Kernel stack bank should preserve post-RTI SP");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
 static int test_dcj11_mtps_user_restricts_psw(void)
 {
     cpu_fixture fx;
@@ -3994,6 +4306,94 @@ static int test_dcj11_mtps_user_restricts_psw(void)
 cleanup:
     fixture_teardown(&fx);
     return rc;
+}
+
+static int test_dcj11_spl_kernel_sets_priority(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_spl(5),
+        op_spl(2),
+    };
+    const word cc_before = FLAG_N | FLAG_C;
+
+    current_test = "dcj11_spl_kernel";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = cc_before;
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL 5 should execute");
+    ASSERT_EQ(fx.r.psw & 000340, 000240, "SPL should set kernel priority");
+    ASSERT_EQ(fx.r.psw & 000017, cc_before, "SPL should preserve condition codes");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL 2 should execute");
+    ASSERT_EQ(fx.r.psw & 000340, 000100, "SPL should update kernel priority");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_spl_user_is_nop(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_spl(7),
+    };
+    const word psw_before = 0140205;
+
+    current_test = "dcj11_spl_user_nop";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = psw_before;
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL in user mode should execute as NOP");
+    ASSERT_EQ(fx.r.psw, psw_before, "SPL in user mode should not modify PSW");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "SPL in user mode should advance PC");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_spl_illegal_on_other_models_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_spl(7),
+    };
+    const word handler = 07000;
+    const word new_psw = 000340;
+    char namebuf[64];
+
+    if (model == DCJ11 || model == K1801VM2 || model == K1806VM2) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "spl_illegal", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 010, handler);
+    store_word(&fx, 012, new_psw);
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "SPL should trap on non-DCJ11 models");
+    ASSERT_EQ(fx.r.r[7], handler, "SPL should load illegal vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "SPL should load illegal vector PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_spl_illegal_on_other_models(void)
+{
+    return run_for_models(test_spl_illegal_on_other_models_model);
 }
 
 static int test_keyboard_irq_vector(void)
@@ -4572,6 +4972,204 @@ static int test_dcj11_sel1_sel2_regs(void)
     fx.r.store_byte(&fx.r, 0177715, 00007);
     ASSERT_EQ(fx.r.SEL1, 051476, "SEL1 byte write");
     ASSERT_EQ(fx.r.SEL2, 003512, "SEL2 byte write");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_reg177750_core_owned(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(3, 7), operand(0, 0)),
+        0177750,
+        op_mov(operand(2, 7), operand(3, 7)),
+        065432,
+        0177750,
+        op_mov(operand(3, 7), operand(0, 1)),
+        0177750,
+        op_movb(operand(2, 7), operand(3, 7)),
+        000345,
+        0177750,
+        op_movb(operand(2, 7), operand(3, 7)),
+        000024,
+        0177751,
+        op_mov(operand(3, 7), operand(0, 2)),
+        0177750,
+    };
+
+    current_test = "dcj11_reg177750_core_owned";
+    fixture_setup_model(&fx, DCJ11);
+
+    /* Ensure this register is CPU-owned, not regular RAM-backed storage. */
+    fx.mem[0177750] = 000001;
+    fx.mem[0177751] = 000002;
+    fx.r.J11_REG177750 = 001045;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R0");
+    ASSERT_EQ(fx.r.r[0], 001045, "0177750 reset value");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #065432,@#177750");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R1");
+    ASSERT_EQ(fx.r.r[1], 001045, "0177750 is read-only");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB #345,@#177750");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB #24,@#177751");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R2");
+    ASSERT_EQ(fx.r.r[2], 001045, "0177750 byte writes ignored");
+
+    ASSERT_EQ(fx.mem[0177750], 000001, "0177750 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177751], 000002, "0177750 should not modify RAM high byte");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_regblock_177744_177746_core_owned(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(3, 7), operand(0, 0)),
+        0177744,
+        op_mov(operand(2, 7), operand(3, 7)),
+        012345,
+        0177744,
+        op_mov(operand(3, 7), operand(0, 1)),
+        0177744,
+        op_mov(operand(3, 7), operand(0, 2)),
+        0177746,
+        op_mov(operand(2, 7), operand(3, 7)),
+        076543,
+        0177746,
+        op_mov(operand(3, 7), operand(0, 3)),
+        0177746,
+    };
+
+    current_test = "dcj11_regblock_177744_177746_core_owned";
+    fixture_setup_model(&fx, DCJ11);
+
+    fx.mem[0177744] = 000011;
+    fx.mem[0177745] = 000022;
+    fx.mem[0177746] = 000033;
+    fx.mem[0177747] = 000044;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177744,R0");
+    ASSERT_EQ(fx.r.r[0], 000000, "0177744 reset value");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #012345,@#177744");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177744,R1");
+    ASSERT_EQ(fx.r.r[1], 000000, "0177744 write clears MEMERR");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177746,R2");
+    ASSERT_EQ(fx.r.r[2], 000000, "0177746 reset value");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #076543,@#177746");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177746,R3");
+    ASSERT_EQ(fx.r.r[3], 076543, "0177746 word write/read");
+
+    ASSERT_EQ(fx.mem[0177744], 000011, "0177744 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177745], 000022, "0177744 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177746], 000033, "0177746 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177747], 000044, "0177746 should not modify RAM high byte");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_regblock_177752_177766_core_owned(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(3, 7), operand(0, 0)),
+        0177752,
+        op_mov(operand(2, 7), operand(3, 7)),
+        012345,
+        0177752,
+        op_mov(operand(3, 7), operand(0, 1)),
+        0177752,
+        op_movb(operand(2, 7), operand(3, 7)),
+        000067,
+        0177753,
+        op_mov(operand(3, 7), operand(0, 2)),
+        0177752,
+        op_mov(operand(2, 7), operand(3, 7)),
+        054321,
+        0177766,
+        op_mov(operand(3, 7), operand(0, 3)),
+        0177766,
+    };
+
+    current_test = "dcj11_regblock_177752_177766_core_owned";
+    fixture_setup_model(&fx, DCJ11);
+
+    /* Ensure these CPU-owned words are not backed by RAM bytes. */
+    fx.mem[0177752] = 000011;
+    fx.mem[0177753] = 000022;
+    fx.mem[0177766] = 000033;
+    fx.mem[0177767] = 000044;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177752,R0");
+    ASSERT_EQ(fx.r.r[0], 000000, "0177752 reset value");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #012345,@#177752");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177752,R1");
+    ASSERT_EQ(fx.r.r[1], 000000, "0177752 write clears HITMISS");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOVB #067,@#177753");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177752,R2");
+    ASSERT_EQ(fx.r.r[2], 000000, "0177752 byte write clears HITMISS");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #054321,@#1777766");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#1777766,R3");
+    ASSERT_EQ(fx.r.r[3], 000000, "0177766 write clears CPUERR");
+
+    ASSERT_EQ(fx.mem[0177752], 000011, "0177752 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177753], 000022, "0177752 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177766], 000033, "0177766 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177767], 000044, "0177766 should not modify RAM high byte");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_non_dcj11_reg177750_is_ram(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(3, 7), operand(0, 0)),
+        0177750,
+        op_mov(operand(2, 7), operand(3, 7)),
+        012345,
+        0177750,
+        op_mov(operand(3, 7), operand(0, 1)),
+        0177750,
+    };
+
+    current_test = "non_dcj11_reg177750_is_ram";
+    fixture_setup_model(&fx, K1801VM2);
+
+    fx.mem[0177750] = 000011;
+    fx.mem[0177751] = 000022;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R0");
+    ASSERT_EQ(fx.r.r[0], 011011, "0177750 should be RAM on VM2");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #012345,@#177750");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R1");
+    ASSERT_EQ(fx.r.r[1], 012345, "VM2 RAM word readback");
+    ASSERT_EQ(fx.mem[0177750], 000345, "VM2 RAM low byte");
+    ASSERT_EQ(fx.mem[0177751], 000024, "VM2 RAM high byte");
 
 cleanup:
     fixture_teardown(&fx);
@@ -5322,7 +5920,15 @@ int main(void)
     failed += test_rti_restores_state();
     failed += test_dcj11_rti_restores_state();
     failed += test_dcj11_rti_user_restricts_psw();
+    failed += test_dcj11_mode_stack_banking();
+    failed += test_dcj11_irq_entry_frame_user();
+    failed += test_dcj11_rti_restore_user_mode_stack();
+    failed += test_dcj11_irq_rti_supervisor_mode();
+    failed += test_dcj11_irq_rti_mode_stack_switch();
     failed += test_dcj11_mtps_user_restricts_psw();
+    failed += test_dcj11_spl_kernel_sets_priority();
+    failed += test_dcj11_spl_user_is_nop();
+    failed += test_spl_illegal_on_other_models();
     failed += test_vm2_rti_restores_state_model(K1801VM2, "K1801VM2");
     failed += test_vm2_rti_restores_state_model(K1806VM2, "K1806VM2");
     failed += test_vm2_rti_hu_restore_model(K1801VM2, "K1801VM2");
@@ -5354,6 +5960,10 @@ int main(void)
     failed += test_vm1g_eis_not_illegal();
     failed += test_dcj11_sel0_reset();
     failed += test_dcj11_sel1_sel2_regs();
+    failed += test_dcj11_regblock_177744_177746_core_owned();
+    failed += test_dcj11_reg177750_core_owned();
+    failed += test_dcj11_regblock_177752_177766_core_owned();
+    failed += test_non_dcj11_reg177750_is_ram();
     failed += test_vm1_tstb_flags_model(K1801VM1, "K1801VM1");
     failed += test_vm1_tstb_flags_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_bpl_after_tstb_model(K1801VM1, "K1801VM1");

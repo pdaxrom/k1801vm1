@@ -21,7 +21,9 @@ static inline void irq_latch_reset(irq_latch_t *l)
 /* Device event => sets DONE once. No repeat while DONE==1. */
 static inline void irq_latch_event_set_done(irq_latch_t *l)
 {
-    if (l->done) return;
+    if (l->done) {
+        return;
+    }
     l->done = 1;
     if (l->ie && l->irq_armed) {
         l->irq_req = 1;

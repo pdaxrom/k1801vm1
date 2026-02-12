@@ -10,7 +10,9 @@ static int raw_on = 0;
 
 void util_term_init_raw(void)
 {
-    if (raw_on) return;
+    if (raw_on) {
+        return;
+    }
     raw_on = 1;
 
     tcgetattr(STDIN_FILENO, &oldt);
@@ -26,7 +28,9 @@ void util_term_init_raw(void)
 
 void util_term_restore(void)
 {
-    if (!raw_on) return;
+    if (!raw_on) {
+        return;
+    }
     raw_on = 0;
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 }
@@ -35,7 +39,9 @@ int util_term_getc_nonblock(void)
 {
     unsigned char c;
     ssize_t n = read(STDIN_FILENO, &c, 1);
-    if (n == 1) return (int)c;
+    if (n == 1) {
+        return (int)c;
+    }
     return -1;
 }
 

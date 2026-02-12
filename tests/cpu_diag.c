@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "core/hardware.h"
 
@@ -64,12 +65,27 @@ const char *cpu_diag_model_name(byte model)
 
 void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model)
 {
+    size_t mem_size;
+    byte *mem_owner;
     memset(fx, 0, sizeof(*fx));
+    mem_size = hwstub_required_memory_size();
+    mem_owner = (byte *)calloc(1, mem_size);
+    if (!mem_owner) {
+        fprintf(stderr, "cpu_diag: hwstub memory allocation failed (%zu bytes)\n", mem_size);
+        abort();
+    }
+    if (hwstub_set_memory(mem_owner, mem_size) != 0) {
+        fprintf(stderr, "cpu_diag: hwstub_set_memory failed\n");
+        free(mem_owner);
+        abort();
+    }
     fx->r.model = model;
     hwstub_connect(&fx->r);
     core_init(&fx->r);
     fx->mem = fx->r.ramptr(&fx->r, 0);
-    memset(fx->mem, 0, 1 << 16);
+    fx->mem_owner = mem_owner;
+    fx->mem_size = mem_size;
+    memset(fx->mem, 0, mem_size);
     fx->r.SEL0 = 0;
     fx->r.SEL1 = 0;
     core_reset(&fx->r);
@@ -78,6 +94,9 @@ void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model)
 void cpu_diag_fixture_fini(cpu_diag_fixture *fx)
 {
     core_fini(&fx->r);
+    hwstub_clear_memory_binding();
+    free(fx->mem_owner);
+    fx->mem_owner = NULL;
 }
 
 cpu_diag_result cpu_diag_run_all(cpu_diag_fixture *fx)

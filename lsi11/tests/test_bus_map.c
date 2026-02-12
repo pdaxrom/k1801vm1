@@ -4,6 +4,7 @@
 #include "../bus.h"
 #include "../devio.h"
 #include "../dev_sr.h"
+#include "../dev_dl11.h"
 
 /* Simple assert helpers */
 static int g_fail = 0;
@@ -17,11 +18,21 @@ static void check(int cond, const char *msg)
 
 int main(void)
 {
+    char err[128];
+    bus_reset_config();
+    if (bus_configure(BUS_MACHINE_LSI11_1104, 0, err, sizeof(err)) != 0) {
+        fprintf(stderr, "FAIL: bus_configure: %s\n", err);
+        return 1;
+    }
     bus_init();
 
-    /* Register at least SR so IO page has at least one decoded address */
+    /* Register at least SR and DL11 so IO page has decoded addresses */
     if (sr_init() != 0) {
         fprintf(stderr, "FAIL: sr_init\n");
+        return 1;
+    }
+    if (dl11_init() != 0) {
+        fprintf(stderr, "FAIL: dl11_init\n");
         return 1;
     }
 
@@ -45,6 +56,9 @@ int main(void)
     /* SR is decoded */
     check(bus_is_nxm(0177570) == 0, "SR low byte should be decoded");
     check(bus_is_nxm(0177571) == 0, "SR high byte should be decoded");
+    check(bus_is_nxm(0177560) == 0, "DL11 primary should be decoded");
+    check(bus_is_nxm(0176500) == 0, "DL11 alias low should be decoded");
+    check(bus_is_nxm(0176507) == 0, "DL11 alias high should be decoded");
 
     /* Word access: addr and addr+1 must both be valid.
        Example: last RAM byte is 0157777, so word at 0157777 crosses into IO page => should NXM. */

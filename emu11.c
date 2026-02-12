@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
 	word addr;
 	word length;
 	int ch;
+	byte *stub_mem;
 
 	memset(&windows, 0, sizeof(windows));
 
@@ -140,6 +141,18 @@ int main(int argc, char *argv[])
 
 	r.r[6] = 0;
 
+	stub_mem = calloc(1, hwstub_required_memory_size());
+	if (!stub_mem) {
+		endwin();
+		fprintf(stderr, "Failed to allocate hwstub memory\n");
+		return 1;
+	}
+	if (hwstub_set_memory(stub_mem, hwstub_required_memory_size()) != 0) {
+		endwin();
+		fprintf(stderr, "Failed to bind hwstub memory\n");
+		free(stub_mem);
+		return 1;
+	}
 	hwstub_connect(&r);
 
 	core_init(&r);
@@ -160,6 +173,9 @@ int main(int argc, char *argv[])
 		wrefresh(windows[WIN_DUMP].win);
 
 		getch();
+		core_fini(&r);
+		hwstub_clear_memory_binding();
+		free(stub_mem);
 		endwin();
 
 		return 1;
@@ -214,6 +230,8 @@ int main(int argc, char *argv[])
 	}
 
 	core_fini(&r);
+	hwstub_clear_memory_binding();
+	free(stub_mem);
 
 	endwin();
 
