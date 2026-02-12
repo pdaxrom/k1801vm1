@@ -40,11 +40,11 @@ static int test_split_id_data_uses_d_space(void)
     return 0;
 }
 
-static int test_vector_fetch_uses_kernel_d_space(void)
+static int test_vector_fetch_uses_physical_space(void)
 {
     mmu_fixture fx;
 
-    mmu_set_test("vector_fetch_uses_kernel_d");
+    mmu_set_test("vector_fetch_uses_physical");
     mmu_fixture_setup(&fx);
 
     fx.r.mmu_ssr0 = 000001;
@@ -61,16 +61,18 @@ static int test_vector_fetch_uses_kernel_d_space(void)
 
     mmu_phys_write_word(&fx, 014000, mmu_op_bpt());
 
-    mmu_phys_write_word(&fx, 010014, 002222);
-    mmu_phys_write_word(&fx, 010016, 000340);
+    mmu_phys_write_word(&fx, 000014, 002222);
+    mmu_phys_write_word(&fx, 000016, 000340);
 
-    mmu_phys_write_word(&fx, 014014, 003333);
+    mmu_phys_write_word(&fx, 010014, 003333);
+    mmu_phys_write_word(&fx, 010016, 000000);
+    mmu_phys_write_word(&fx, 014014, 004444);
     mmu_phys_write_word(&fx, 014016, 000000);
 
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "BPT trap in user mode");
 
-    MMU_ASSERT_EQ(fx.r.r[7], 002222, "vector fetch must use kernel D PAR/PDR");
-    MMU_ASSERT_EQ(fx.r.psw, 000340, "PSW loaded from kernel D vector");
+    MMU_ASSERT_EQ(fx.r.r[7], 002222, "vector fetch must use physical vector table");
+    MMU_ASSERT_EQ(fx.r.psw, 030340, "PSW loaded from physical vector with PM=old mode");
 
     mmu_fixture_teardown(&fx);
     return 0;
@@ -81,7 +83,7 @@ int main(void)
     int failed = 0;
 
     failed += test_split_id_data_uses_d_space();
-    failed += test_vector_fetch_uses_kernel_d_space();
+    failed += test_vector_fetch_uses_physical_space();
 
     if (failed) {
         return 1;

@@ -7,12 +7,37 @@
 
 #include "core.h"
 #include "hardware.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifndef MMU_STUB_REGS_WHEN_DISABLED
 #define MMU_STUB_REGS_WHEN_DISABLED 1
+#endif
+
+#ifndef CORE_RTI_TRACE
+#define CORE_RTI_TRACE 0
+#endif
+
+#ifndef CORE_VEC_TRACE
+#define CORE_VEC_TRACE 0
+#endif
+
+#if CORE_RTI_TRACE
+#define RTI_TRACE(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define RTI_TRACE(...)                                                         \
+    do {                                                                       \
+    } while (0)
+#endif
+
+#if CORE_VEC_TRACE
+#define VEC_TRACE(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define VEC_TRACE(...)                                                         \
+    do {                                                                       \
+    } while (0)
 #endif
 
 #define TYPE_WORD 0
@@ -99,6 +124,134 @@ static INLINE word dcj11_psw_set_prev_mode(word psw, int mode)
 {
     int m = psw_mode_normalize(mode);
     return (word)((psw & ~PSW_PM_MASK) | ((word)(m & 03) << 12));
+}
+
+#if CORE_VEC_TRACE
+#define D12_RING_SLOTS 0000040u
+#define D12_RING_LINE_MAX 0000400u
+
+typedef struct {
+    char lines[D12_RING_SLOTS][D12_RING_LINE_MAX];
+    uint32_t next;
+    uint32_t count;
+    uint32_t next_id;
+    unsigned depth;
+    int env_init;
+    int stop_on_badps;
+    int stop_on_rawps0;
+} d12_trace_state_t;
+
+static d12_trace_state_t g_d12 = {0};
+
+static int d12_env_flag(const char *name)
+{
+    const char *v = getenv(name);
+
+    if (!v || !*v) {
+        return 0;
+    }
+    if (!strcmp(v, "0")) {
+        return 0;
+    }
+    return 1;
+}
+
+static void d12_init_env(void)
+{
+    if (g_d12.env_init) {
+        return;
+    }
+    g_d12.stop_on_badps = d12_env_flag("CORE_STOP_ON_BADPS");
+    g_d12.stop_on_rawps0 = d12_env_flag("CORE_STOP_ON_RAWPS0");
+    g_d12.env_init = 1;
+}
+
+static void d12_ring_add(const char *line)
+{
+    size_t n;
+
+    if (!line || !*line) {
+        return;
+    }
+    d12_init_env();
+    n = strlen(line);
+    if (n >= D12_RING_LINE_MAX) {
+        n = D12_RING_LINE_MAX - 1;
+    }
+    memcpy(g_d12.lines[g_d12.next], line, n);
+    g_d12.lines[g_d12.next][n] = '\0';
+    g_d12.next = (g_d12.next + 1) % D12_RING_SLOTS;
+    if (g_d12.count < D12_RING_SLOTS) {
+        g_d12.count++;
+    }
+}
+
+static void d12_ring_addf(const char *fmt, ...)
+{
+    char line[D12_RING_LINE_MAX];
+    va_list ap;
+
+    va_start(ap, fmt);
+    vsnprintf(line, sizeof(line), fmt, ap);
+    va_end(ap);
+    d12_ring_add(line);
+}
+
+static void d12_dump_last_vec_lines(unsigned count)
+{
+    unsigned shown = 0;
+    unsigned idx;
+    unsigned scanned;
+
+    if (g_d12.count == 0 || count == 0) {
+        return;
+    }
+
+    fprintf(stderr, "---- D12 LAST VEC ----\n");
+    idx = (g_d12.next + D12_RING_SLOTS - 1) % D12_RING_SLOTS;
+    for (scanned = 0; scanned < g_d12.count && shown < count; scanned++) {
+        const char *line = g_d12.lines[idx];
+        if (!strncmp(line, "VEC ", 4)) {
+            fprintf(stderr, "%s\n", line);
+            shown++;
+        }
+        idx = (idx + D12_RING_SLOTS - 1) % D12_RING_SLOTS;
+    }
+}
+#endif
+
+void core_d12_note_event(const char *line)
+{
+#if CORE_VEC_TRACE
+    d12_ring_add(line);
+#else
+    (void)line;
+#endif
+}
+
+void core_d12_dump_context(void)
+{
+#if CORE_VEC_TRACE
+    unsigned total = g_d12.count;
+    unsigned start =
+        (g_d12.count < D12_RING_SLOTS) ? 0 : (g_d12.next % D12_RING_SLOTS);
+
+    d12_init_env();
+    fprintf(stderr, "---- D12 CONTEXT DUMP ----\n");
+    for (unsigned i = 0; i < total; i++) {
+        unsigned idx = (start + i) % D12_RING_SLOTS;
+        fprintf(stderr, "%s\n", g_d12.lines[idx]);
+    }
+#endif
+}
+
+unsigned core_d12_irq_depth(void)
+{
+#if CORE_VEC_TRACE
+    return g_d12.depth;
+#else
+    return 0;
+#endif
 }
 
 enum {
@@ -228,6 +381,12 @@ static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
         word old_mode = (old_psw >> 14) & 03;
         /* Trap always enters kernel mode; previous mode keeps old current mode. */
         vec_psw = (word)((vec_psw & ~0170000) | (old_mode << 12));
+        return vec_psw;
+    }
+    if (r->model == DCJ11) {
+        int old_cm = dcj11_psw_cur_mode(old_psw);
+        vec_psw = dcj11_psw_set_cur_mode(vec_psw, 0);
+        vec_psw = dcj11_psw_set_prev_mode(vec_psw, old_cm);
     }
     return vec_psw;
 }
@@ -261,6 +420,22 @@ static INLINE void dcj11_switch_stack_mode(regs *r, word old_psw, word new_psw)
     if (old_mode == new_mode) {
         return;
     }
+#if CORE_VEC_TRACE
+    int old_pm = dcj11_psw_prev_mode(old_psw);
+    int new_pm = dcj11_psw_prev_mode(new_psw);
+    d12_ring_addf(
+        "MODE SWITCH PC=%06o PS=%06o oldCM=%o oldPM=%o newCM=%o newPM=%o SP=%06o",
+        r->r[7], old_psw, old_mode & 03, old_pm & 03, new_mode & 03,
+        new_pm & 03, r->r[6]);
+    d12_ring_addf("SP BANKS K=%06o S=%06o U=%06o", r->sp_mode[0], r->sp_mode[1],
+                  r->sp_mode[3]);
+    VEC_TRACE(
+        "MODE SWITCH PC=%06o PS=%06o oldCM=%o oldPM=%o newCM=%o newPM=%o SP=%06o\n",
+        r->r[7], old_psw, old_mode & 03, old_pm & 03, new_mode & 03,
+        new_pm & 03, r->r[6]);
+    VEC_TRACE("SP BANKS K=%06o S=%06o U=%06o\n", r->sp_mode[0], r->sp_mode[1],
+              r->sp_mode[3]);
+#endif
     dcj11_sp_mode_init(r);
     r->sp_mode[old_mode] = r->r[6];
     r->r[6] = r->sp_mode[new_mode];
@@ -347,14 +522,21 @@ void core_init(regs *r)
 
 void core_reset(regs *r)
 {
+    int mode;
+
+#if CORE_VEC_TRACE
+    memset(&g_d12, 0, sizeof(g_d12));
+#endif
     r->r[7] = r->SEL0 & 0177400;
     r->psw = 0340;
+    for (mode = 0; mode < 4; mode++) {
+        r->sp_mode[mode] = 0;
+    }
+    r->sp_mode_init = 0;
     r->ir = 0;
     r->J11_REG177744 = 0;
     r->J11_REG177746 = 0;
     r->J11_REG177750 = 0;
-    memset(r->sp_mode, 0, sizeof(r->sp_mode));
-    r->sp_mode_init = 0;
     memset(r->J11_REG177752_177766, 0, sizeof(r->J11_REG177752_177766));
     r->fWait = 0;
     r->fTrap = 0;
@@ -870,6 +1052,103 @@ static INLINE int translate_va(regs *r, word va, int is_write, int is_ifetch,
                            NULL, NULL);
 }
 
+static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
+                                          int mode_in, int space_in,
+                                          dword *pa_out, int *fault_code_out,
+                                          int *seg_out)
+{
+    if (pa_out) {
+        *pa_out = va;
+    }
+    if (fault_code_out) {
+        *fault_code_out = MMU_FAULT_NONE;
+    }
+    if (seg_out) {
+        *seg_out = (va >> 13) & 07;
+    }
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model != DCJ11) {
+        return 0;
+    }
+
+    if (va >= 0160000) {
+        if (pa_out) {
+            *pa_out = (dword)(017760000 | (va & 017777));
+        }
+        return 0;
+    }
+
+    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+        return 0;
+    }
+
+    {
+        int mode = psw_mode_normalize(mode_in);
+        int space = space_in ? 1 : 0;
+        int seg = (va >> 13) & 07;
+        int block = (va >> 6) & 0177;
+        word pdr;
+        word par;
+        int acf;
+        int ed;
+        int len;
+
+        if (space && !mmu_split_enabled(r, mode)) {
+            space = 0;
+        }
+        if (seg_out) {
+            *seg_out = seg;
+        }
+
+        pdr = r->mmu_pdr[mode][space][seg];
+        par = r->mmu_par[mode][space][seg];
+        acf = pdr & 07;
+        ed = (pdr >> 3) & 01;
+        len = (pdr >> 8) & 0177;
+
+        if (acf == 0) {
+            if (fault_code_out) {
+                *fault_code_out = MMU_FAULT_NONRES;
+            }
+            return -1;
+        }
+
+        if ((!ed && block > len) || (ed && block < len)) {
+            if (fault_code_out) {
+                *fault_code_out = MMU_FAULT_LENGTH;
+            }
+            return -1;
+        }
+
+        if (is_write && !mmu_fault_write_allowed(pdr)) {
+            if (fault_code_out) {
+                *fault_code_out = MMU_FAULT_PROTECT;
+            }
+            return -1;
+        }
+
+        if (is_write) {
+            r->mmu_pdr[mode][space][seg] |= 0000100;
+        }
+
+        if (pa_out) {
+            dword pa_block = (dword)((par + block) & 0777777);
+            *pa_out = (pa_block << 6) | (va & 077);
+        }
+    }
+#else
+    (void)r;
+    (void)is_write;
+    (void)mode_in;
+    (void)space_in;
+    (void)fault_code_out;
+    (void)seg_out;
+#endif
+
+    return 0;
+}
+
 static INLINE void mmu_record_fault(regs *r, word va, word pc, int fault,
                                     int mode, int seg)
 {
@@ -1069,6 +1348,73 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     raw_store_word_phys(r, pa, value);
 }
 
+static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
+                                             int data_space)
+{
+    dword pa = 0;
+    int fault = MMU_FAULT_NONE;
+    int seg = 0;
+    int rc;
+    word value;
+
+    if ((r->model == DCJ11) && (offset & 1)) {
+        bus_error_trap(r);
+        return 0;
+    }
+
+    if (dcj11_has_reg_block_177744(r, offset)) {
+        return dcj11_reg_block_load_word(r, offset);
+    }
+    if (offset == 0177776) {
+        return r->psw;
+    }
+    if (mmu_io_read_word(r, offset, &value)) {
+        return value;
+    }
+
+    rc = translate_va_mode_space(r, offset, 0, mode, data_space, &pa, &fault,
+                                 &seg);
+    if (rc < 0) {
+        mmu_fault_trap(r, offset, r->r[7], fault, psw_mode_normalize(mode), seg);
+        return 0;
+    }
+    return raw_load_word_phys(r, pa);
+}
+
+static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
+                                              int mode, int data_space)
+{
+    dword pa = 0;
+    int fault = MMU_FAULT_NONE;
+    int seg = 0;
+    int rc;
+
+    if ((r->model == DCJ11) && (offset & 1)) {
+        bus_error_trap(r);
+        return;
+    }
+
+    if (dcj11_has_reg_block_177744(r, offset)) {
+        dcj11_reg_block_store_word(r, offset, value);
+        return;
+    }
+    if (offset == 0177776) {
+        r->psw = value;
+        return;
+    }
+    if (mmu_io_write_word(r, offset, value)) {
+        return;
+    }
+
+    rc = translate_va_mode_space(r, offset, 1, mode, data_space, &pa, &fault,
+                                 &seg);
+    if (rc < 0) {
+        mmu_fault_trap(r, offset, r->r[7], fault, psw_mode_normalize(mode), seg);
+        return;
+    }
+    raw_store_word_phys(r, pa, value);
+}
+
 static INLINE byte core_load_byte(regs *r, word offset)
 {
     return core_load_byte_ex(r, offset, 0, 0);
@@ -1091,7 +1437,8 @@ static INLINE word core_load_word_ifetch(regs *r, word offset)
 
 static INLINE word core_load_word_vector(regs *r, word offset)
 {
-    return core_load_word_ex(r, offset, 0, 1);
+    word a = (word)(offset & 0177776);
+    return raw_load_word_phys(r, a);
 }
 
 static INLINE void core_store_word(regs *r, word offset, word value)
@@ -1106,13 +1453,134 @@ static INLINE void core_store_word(regs *r, word offset, word value)
 #define load_word_vector(a, b) core_load_word_vector((a), (b))
 #define store_word(a, b, c) core_store_word((a), (b), (c))
 
+static INLINE void core_take_vector(regs *r, word vec, word old_pc, word old_psw,
+                                    const char *kind)
+{
+    word new_pc = 0;
+    word fetched_psw = 0;
+    word new_psw = 0;
+#if CORE_VEC_TRACE
+    uint32_t id = ++g_d12.next_id;
+    word ps_addr;
+    word pc_addr;
+    word vec_base = (word)((vec & 0000777) & 0177776);
+    word raw_pc = raw_load_word_phys(r, vec_base);
+    word raw_ps = raw_load_word_phys(r, (word)(vec_base + 2));
+    int mmu_en = 0;
+    char path_space = 'I';
+    const char *k = (kind && *kind) ? kind : "VEC";
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mmu_en = 1;
+        path_space = mmu_split_enabled(r, 0) ? 'D' : 'I';
+    }
+#endif
+
+    d12_init_env();
+
+    d12_ring_addf("VEC TAKE id=%06o kind=%s vec=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o",
+                  (unsigned)id, k, vec, old_pc, old_psw, r->r[6],
+                  (old_psw >> 14) & 03, (old_psw >> 5) & 07);
+    VEC_TRACE(
+        "VEC TAKE id=%06o kind=%s vec=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o\n",
+        (unsigned)id, k, vec, old_pc, old_psw, r->r[6], (old_psw >> 14) & 03,
+        (old_psw >> 5) & 07);
+    d12_ring_addf(
+        "VEC RAW id=%06o vec=%06o base=%06o [base]=%06o [base+2]=%06o",
+        (unsigned)id, vec, vec_base, raw_pc, raw_ps);
+    VEC_TRACE("VEC RAW id=%06o vec=%06o base=%06o [base]=%06o [base+2]=%06o\n",
+              (unsigned)id, vec, vec_base, raw_pc, raw_ps);
+    d12_ring_addf("VEC PHYS id=%06o phys=1 mmu=%o mode=%o space=P", (unsigned)id,
+                  mmu_en ? 1 : 0, (old_psw >> 14) & 03);
+    VEC_TRACE("VEC PHYS id=%06o phys=1 mmu=%o mode=%o space=P\n", (unsigned)id,
+              mmu_en ? 1 : 0, (old_psw >> 14) & 03);
+    d12_ring_addf("VEC PHYS id=%06o phys=0 mmu=%o mode=%o space=%c", (unsigned)id,
+                  mmu_en ? 1 : 0, (old_psw >> 14) & 03, path_space);
+    VEC_TRACE("VEC PHYS id=%06o phys=0 mmu=%o mode=%o space=%c\n", (unsigned)id,
+              mmu_en ? 1 : 0, (old_psw >> 14) & 03, path_space);
+    if (raw_ps == 0) {
+        d12_ring_addf("VEC ALERT id=%06o RAWPS=000000 vec=%06o base=%06o",
+                      (unsigned)id, vec, vec_base);
+        VEC_TRACE("VEC ALERT id=%06o RAWPS=000000 vec=%06o base=%06o\n",
+                  (unsigned)id, vec, vec_base);
+        core_d12_dump_context();
+        if (g_d12.stop_on_rawps0) {
+            exit(0);
+        }
+    }
+#endif
+#if !CORE_VEC_TRACE
+    (void)kind;
+#endif
+    fetched_psw = load_word_vector(r, (word)(vec + 2));
+    new_psw = trap_psw(r, old_psw, fetched_psw);
+
+    if (r->model == DCJ11) {
+        dcj11_switch_stack_mode(r, old_psw, new_psw);
+    }
+#if CORE_VEC_TRACE
+    ps_addr = (word)(r->r[6] - 2);
+    r->r[6] = ps_addr;
+    store_word(r, r->r[6], old_psw);
+    d12_ring_addf("VEC PUSH id=%06o addr=%06o <= %06o (OLDPS)", (unsigned)id,
+                  ps_addr, old_psw);
+    VEC_TRACE("VEC PUSH id=%06o addr=%06o <= %06o (OLDPS)\n", (unsigned)id,
+              ps_addr, old_psw);
+    if (old_psw == 0) {
+        d12_ring_addf("VEC ALERT id=%06o PUSHED OLDPS=000000 addr=%06o prePS=%06o PC=%06o",
+                      (unsigned)id, ps_addr, old_psw, old_pc);
+        VEC_TRACE(
+            "VEC ALERT id=%06o PUSHED OLDPS=000000 addr=%06o prePS=%06o PC=%06o\n",
+            (unsigned)id, ps_addr, old_psw, old_pc);
+        d12_dump_last_vec_lines(0000012);
+        core_d12_dump_context();
+        if (g_d12.stop_on_badps) {
+            exit(0);
+        }
+    }
+    pc_addr = (word)(r->r[6] - 2);
+    r->r[6] = pc_addr;
+    store_word(r, r->r[6], old_pc);
+    d12_ring_addf("VEC PUSH id=%06o addr=%06o <= %06o (OLDPC)", (unsigned)id,
+                  pc_addr, old_pc);
+    VEC_TRACE("VEC PUSH id=%06o addr=%06o <= %06o (OLDPC)\n", (unsigned)id,
+              pc_addr, old_pc);
+#else
+    pushw(old_psw);
+    pushw(old_pc);
+#endif
+    new_pc = load_word_vector(r, vec);
+#if CORE_VEC_TRACE
+    d12_ring_addf("VEC FETCH id=%06o newPC=%06o newPS=%06o", (unsigned)id, new_pc,
+                  new_psw);
+    VEC_TRACE("VEC FETCH id=%06o newPC=%06o newPS=%06o\n", (unsigned)id, new_pc,
+              new_psw);
+    d12_ring_addf("VEC NEW id=%06o newPC=%06o newPS=%06o (rawPS=%06o masked=%06o)",
+                  (unsigned)id, new_pc, new_psw, raw_ps, new_psw);
+    VEC_TRACE(
+        "VEC NEW id=%06o newPC=%06o newPS=%06o (rawPS=%06o masked=%06o)\n",
+        (unsigned)id, new_pc, new_psw, raw_ps, new_psw);
+#endif
+    r->r[7] = new_pc;
+    r->psw = new_psw;
+#if CORE_VEC_TRACE
+    if (g_d12.depth < 0177777u) {
+        g_d12.depth++;
+    }
+    d12_ring_addf("VEC POST id=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o depth=%o",
+                  (unsigned)id, r->r[7], r->psw, r->r[6], (r->psw >> 14) & 03,
+                  (r->psw >> 5) & 07, g_d12.depth);
+    VEC_TRACE(
+        "VEC POST id=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o depth=%o\n",
+        (unsigned)id, r->r[7], r->psw, r->r[6], (r->psw >> 14) & 03,
+        (r->psw >> 5) & 07, g_d12.depth);
+#endif
+}
+
 static INLINE void illegal_trap(regs *r)
 {
     word old_psw = r->psw;
-    pushw(r->psw);
-    pushw(r->r[7]);
-    r->r[7] = load_word_vector(r, 010);
-    r->psw = trap_psw(r, old_psw, load_word_vector(r, 012));
+    core_take_vector(r, 010, r->r[7], old_psw, "ILL");
 }
 
 static INLINE void bus_error_trap(regs *r)
@@ -1128,12 +1596,7 @@ static INLINE void bus_error_trap(regs *r)
         fprintf(stderr, "BUSERR pc=%06o fault=%06o sp=%06o ps=%06o ir=%06o\n",
                 r->r[7], r->r[7], r->r[6], r->psw, r->ir);
     }
-    r->r[6] -= 2;
-    raw_store_word(r, r->r[6], r->psw);
-    r->r[6] -= 2;
-    raw_store_word(r, r->r[6], r->r[7]);
-    r->r[7] = load_word_vector(r, 000004);
-    r->psw = trap_psw(r, old_psw, load_word_vector(r, 000006));
+    core_take_vector(r, 000004, r->r[7], old_psw, "BUSERR");
     r->fAbort = 1;
 }
 
@@ -1142,13 +1605,7 @@ static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
 {
     word old_psw = r->psw;
     mmu_record_fault(r, va, pc, fault, mode, seg);
-    r->r[6] -= 2;
-    raw_store_word(r, r->r[6], r->psw);
-    r->r[6] -= 2;
-    raw_store_word(r, r->r[6], pc);
-    r->r[7] = load_word_vector(r, MMU_TRAP_VECTOR);
-    r->psw =
-        trap_psw(r, old_psw, load_word_vector(r, (word)(MMU_TRAP_VECTOR + 2)));
+    core_take_vector(r, MMU_TRAP_VECTOR, pc, old_psw, "MMU");
     r->fAbort = 1;
 }
 
@@ -1396,10 +1853,7 @@ int core_step(regs *r)
             if (irq_accept(r, irq_vector, &vec)) {
                 word old_psw = r->psw;
                 r->fWait = 0;
-                pushw(r->psw);
-                pushw(r->r[7]);
-                r->r[7] = load_word_vector(r, vec);
-                r->psw = trap_psw(r, old_psw, load_word_vector(r, (word)(vec + 2)));
+                core_take_vector(r, vec, r->r[7], old_psw, "IRQ");
             }
             return 0;
         }
@@ -1459,10 +1913,7 @@ int core_step(regs *r)
     case 000000: { /* HALT */
         if ((r->model == DCJ11 || is_vm2(r)) && !dcj11_kernel_psw(psw_before)) {
             word old_psw = r->psw;
-            pushw(r->psw);
-            pushw(r->r[7]);
-            r->r[7] = load_word_vector(r, 000004);
-            r->psw = trap_psw(r, old_psw, load_word_vector(r, 000006));
+            core_take_vector(r, 000004, r->r[7], old_psw, "HALT");
             goto step_end;
         }
         handle_halt(r);
@@ -1493,19 +1944,13 @@ int core_step(regs *r)
 
     case 000003: { /* BPT */
         word old_psw = r->psw;
-        pushw(r->psw);
-        pushw(r->r[7]);
-        r->r[7] = load_word_vector(r, 014);
-        r->psw = trap_psw(r, old_psw, load_word_vector(r, 016));
+        core_take_vector(r, 014, r->r[7], old_psw, "BPT");
     }
     goto step_end;
 
     case 000004: { /* IOT */
         word old_psw = r->psw;
-        pushw(r->psw);
-        pushw(r->r[7]);
-        r->r[7] = load_word_vector(r, 020);
-        r->psw = trap_psw(r, old_psw, load_word_vector(r, 022));
+        core_take_vector(r, 020, r->r[7], old_psw, "IOT");
     }
     goto step_end;
 
@@ -1822,10 +2267,8 @@ int core_step(regs *r)
     case 0104400: {
         word old_psw = r->psw;
         word vec = (op & 0400) ? 000034 : 000030;
-        pushw(r->psw);
-        pushw(r->r[7]);
-        r->r[7] = load_word_vector(r, vec);
-        r->psw = trap_psw(r, old_psw, load_word_vector(r, (word)(vec + 2)));
+        core_take_vector(r, vec, r->r[7], old_psw,
+                         (op & 0400) ? "TRAP" : "EMT");
     }
     goto step_end;
     }
@@ -2744,20 +3187,14 @@ step_end:
     }
     if (do_trace) {
         word old_psw = r->psw;
-        pushw(r->psw);
-        pushw(r->r[7]);
-        r->r[7] = load_word_vector(r, 014);
-        r->psw = trap_psw(r, old_psw, load_word_vector(r, 016));
+        core_take_vector(r, 014, r->r[7], old_psw, "TRACE");
     }
     if (!do_trace) {
         if (r->model == K1801VM1G && r->TVE_PENDING && (r->TVE_CSR & 000004)) {
             if ((r->psw & 01000) == 0 && (r->psw & FLAG_P) == 0) {
                 word old_psw = r->psw;
                 r->TVE_PENDING = 0;
-                pushw(r->psw);
-                pushw(r->r[7]);
-                r->r[7] = load_word_vector(r, 000270);
-                r->psw = trap_psw(r, old_psw, load_word_vector(r, 000272));
+                core_take_vector(r, 000270, r->r[7], old_psw, "TVE");
                 return 0;
             }
         }
@@ -2766,10 +3203,7 @@ step_end:
                 word vec;
                 if (irq_accept(r, irq_vector, &vec)) {
                     word old_psw = r->psw;
-                    pushw(r->psw);
-                    pushw(r->r[7]);
-                    r->r[7] = load_word_vector(r, vec);
-                    r->psw = trap_psw(r, old_psw, load_word_vector(r, (word)(vec + 2)));
+                    core_take_vector(r, vec, r->r[7], old_psw, "IRQ");
                 }
             }
         }
