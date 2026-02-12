@@ -150,7 +150,240 @@ Compatibility note:
 - `-trace-regs` trace with registers
 - `-traceirq` IRQ delivery trace
 - `-tracenxm` bus/NXM trap trace
+- `-diag` enable lsi11 diagnostics (same as `LSI11_DIAG=1`)
 - `-exit-on-abort` terminate emulator loop when core sets HALT/abort
+
+## Diagnostics for RT-11 XM hang
+- Diagnostics are **off by default**.
+- Enable with environment:
+  - `LSI11_DIAG=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+- Or with CLI flag:
+  - `./pdp1184 -diag -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+
+### D1: RK11 DMA range + command summary
+- On each command start:
+  - `RK11 start: PC=%06o RKCS=%06o RKWC=%06o RKBA=%06o RKDA=%06o`
+- On each command completion:
+  - `RK11 done : PC=%06o RKCS=%06o RKWC=%06o RKBA=%06o RKDA=%06o words=%06o BA=[%06o..%06o] err=%06o irq=%o ferr=%06o`
+  - `ferr` is first RK error bit seen during this command (`000000` if none).
+- Interpretation:
+  - If BA range goes above `0400000` with `-ram 128`, RK11 DMA addressing is wrong.
+  - If BA range stays low/sane but boot hangs, look at MMU/IRQ diagnostics.
+
+### D2: MMU enable snapshot (one-shot)
+- First `SSR0` MMU-enable transition `0->1` prints:
+  - `MMU enable: PC=%06o PS=%06o SSR0=%06o SSR1=%06o SSR2=%06o`
+  - `MMU K I%o: PAR=%06o PDR=%06o` (segments `0..7`)
+  - `MMU K D%o: PAR=%06o PDR=%06o` when separate I/D is enabled for kernel.
+- Interpretation:
+  - MMU enable immediately followed by stall usually points to mapping/fault setup.
+
+### D3: WAIT/PC stall detector with IRQ visibility
+- On stall:
+  - `STALL: reason=<WAIT|PC-LOOP> PC=%06o PS=%06o IR=%06o ...`
+  - `IRQS: DLrx=%o DLtx=%o KW=%o RK=%o`
+  - `IRQNEXT: vec=%06o pri=%o masked=%o` (when pending)
+- Interpretation:
+  - `reason=WAIT` and all IRQ pending bits `0`: missing IRQ generation.
+  - `reason=WAIT` with IRQ pending but no progress: IRQ accept/priority path issue.
+  - Continuous `DLtx=1` with repeated `vec=000064`: DL11 TX latch regression.
+
+## RT-11 XM hang diagnostics (D4/D5/D6)
+- Same enable switch:
+  - `LSI11_DIAG=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+  - `./pdp1184 -diag -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+- Reports are rate-limited (periodic summary, no per-instruction spam).
+
+### D4: PC hotspot sampler
+- Periodic output:
+  - `PC HOTSPOTS (last %06o samples):`
+  - `PC=%06o cnt=%06o PS=%06o mode=%o pri=%o`
+  - `NOW: PC=%06o PS=%06o IR=%06o`
+- Context dump around hottest PC:
+  - `PC CONTEXT center=%06o`
+  - `  %06o: %06o <disassembly>`
+- Interpretation:
+  - One dominant PC: tight polling loop.
+  - Two alternating dominant PCs: handler/return loop.
+
+### D5: vector histogram (interrupt focus)
+- Periodic output:
+  - `VEC HIST: KW11(000100)=%06o`
+  - `VEC TOP:`
+  - `VEC=%06o cnt=%06o` (top non-KW11 vectors)
+  - `TRAP HIST: ABORT=%06o MMUFAULT=%06o`
+- Per-event (rate-limited) abort line:
+  - `ABORT: PC=%06o PS=%06o IR=%06o SSR0=%06o SSR1=%06o SSR2=%06o`
+- Interpretation:
+  - High non-KW11 vector counts indicate abnormal interrupt activity.
+  - Rising `ABORT`/`MMUFAULT` indicates trap/fault churn after banner.
+
+### D6: MMU SSR change/fault logging
+- Any `SSR0` transition:
+  - `SSR0: PC=%06o PS=%06o %06o -> %06o (SSR1=%06o SSR2=%06o)`
+- `SSR3` transition (separate I/D control visibility):
+  - `SSR3: PC=%06o PS=%06o %06o -> %06o`
+- Kernel map updates (rate-limited):
+  - `PAR: mode=K I seg=%o %06o -> %06o`
+  - `PDR: mode=K I seg=%o %06o -> %06o`
+  - `PAR: mode=K D seg=%o %06o -> %06o`
+  - `PDR: mode=K D seg=%o %06o -> %06o`
+- MMU fault event:
+  - `MMU FAULT: PC=%06o PS=%06o SSR0=%06o SSR1=%06o SSR2=%06o VA=%06o`
+- Interpretation:
+  - Repeated SSR0 fault-bit transitions with similar `SSR1/SSR2` usually indicate MMU fault loop.
+  - `SSR3` enabling split I/D after banner can explain XM-only hangs.
+  - Frequent PAR/PDR churn after banner suggests active remapping path; no churn suggests stable map and points to non-MMU logic.
+
+### RAM flag watchpoints (XM non-progress loops)
+- Enabled by the same diagnostics switch:
+  - `LSI11_DIAG=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+  - `./pdp1184 -diag -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+- Watched physical RAM addresses (octal):
+  - `125726`
+  - `125730`
+  - `147246`
+- Write watchpoint (CPU and DMA writes through bus path):
+  - `WPW <B|W> addr=%06o <= %06o PC=%06o PS=%06o mode=%o pri=%o`
+- Read watchpoint (filtered to known hot loop PC windows):
+  - `WPR <B|W> addr=%06o -> %06o PC=%06o PS=%06o mode=%o`
+- Periodic snapshot:
+  - `FLAGSNAP PC=%06o PS=%06o 125726=%06o 125730=%06o 147246=%06o`
+- Interpretation:
+  - No `WPW` after banner and static `FLAGSNAP`: producer path for flags is not running or writes elsewhere.
+  - `WPW` present but `FLAGSNAP` unchanged at consumer time: address-space/banking mismatch candidate.
+  - `WPR` repeatedly reading stale values in hot loop with no intervening `WPW`: confirms non-progress wait condition.
+
+### D8: VA->PA trace and mirror experiment
+- VA->PA trace is enabled with diagnostics:
+  - `LSI11_DIAG=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+- Optional verbose trace:
+  - `LSI11_DIAG_VERBOSE=1` (removes default `XLT` line cap)
+- Optional mirror experiment (explicit behavior change):
+  - `LSI11_MIRROR_FLAGS=1`
+  - On each word write to `PA=147246`, emulator also writes same word to `PA=125730`.
+- `XLT` line format:
+  - `XLT <R|W><B|W> PC=%06o PS=%06o mode=%o [space=I|D] VA=%06o -> PA=%06o val=%06o`
+- Periodic correlation summary:
+  - `XLT SUM: VA125726->PA %06o cnt=%06o | VA125730->PA %06o cnt=%06o | PA147246 writes=%06o reads=%06o`
+  - If multiple PAs are seen for one VA, summary appends `(+N others)`.
+- Mirror log line:
+  - `MIRROR: PA147246->PA125730 val=%06o PC=%06o`
+- Interpretation:
+  - If `VA125730` maps to `PA147246` but consumer still reads `0`: likely read/write space or bank selection mismatch.
+  - If `VA125730` maps to `PA125730` while producer writes `PA147246`: producer/consumer use different physical locations.
+  - If `LSI11_MIRROR_FLAGS=1` makes XM reach `.`: mapping mismatch is confirmed.
+
+### D9: microtrace + SIMH oracle comparison
+- Enable microtrace in our emulator:
+  - `LSI11_MICROTRACE=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+- PC windows (octal):
+  - `W1: 134442..134474`
+  - `W2: 147234..147264`
+- Per-instruction line:
+  - `MT I SEQ=%06o PC=%06o IR=%06o PS=%06o mode=%o pri=%o R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o`
+- Per-memory-access line (for active window instruction `SEQ`):
+  - `MT M SEQ=%06o <R|W><B|W> VA=%06o -> PA=%06o val=%06o`
+- Automatic stop:
+  - Max `003720` instructions per window (2000 decimal), then prints:
+    - `MT SUMMARY`
+    - last `000024` `MT I` lines for each window
+    - VA/PA read/write counts for `125726`, `125730`, `147246`
+
+- SIMH oracle run:
+  - `tools/run_simh_xm_trace.sh /tmp/xm_simh_mt.log`
+  - Uses `tools/simh_xm_trace.ini` with:
+    - `SET CPU 11/84`
+    - `SET CLK 50HZ`
+    - breakpoints at `134442` and `147234`
+    - `SHOW CPU HISTORY`
+
+- End-to-end compare:
+  - `tools/run_xm_microtrace.sh /tmp/xm_our_mt.log`
+  - `tools/run_simh_xm_trace.sh /tmp/xm_simh_mt.log`
+  - `python3 tools/d9_compare.py --our-log /tmp/xm_our_mt.log --simh-log /tmp/xm_simh_mt.log --max-steps 2000`
+- Compare output:
+  - `W1 FIRST MISMATCH ...` / `W2 FIRST MISMATCH ...`
+  - `FIRST DIVERGENCE WINDOW=... STEP=... REASON=...`
+
+### D10: IRQ/RTI context trace (pre/post) + vector fetch tagging
+- Enable:
+  - `LSI11_IRQTRACE=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+- Optional stop on known divergence signature:
+  - `LSI11_STOP_ON_DIVERGE=1`
+- Can run together with D9:
+  - `LSI11_MICROTRACE=1 LSI11_IRQTRACE=1 ...`
+
+- IRQ offer (poll path):
+  - `IRQ OFFER id=%06o PC=%06o PS=%06o SP=%06o vec=%06o pri=%o src=%s`
+- Vector table reads for offered IRQ id:
+  - `IRQ VECFETCH id=%06o addr=%06o -> %06o (vec=%06o src=%s)`
+  - `addr=vec` is fetched handler PC, `addr=vec+2` is fetched PSW.
+- IRQ accept (instruction-boundary correlation):
+  - `IRQ ACCEPT id=%06o prePC=%06o prePS=%06o preSP=%06o -> PC=%06o PS=%06o SP=%06o vec=%06o src=%s`
+- RTI pre/post:
+  - `RTI PRE depth=%o id=%06o PC=%06o PS=%06o SP=%06o`
+  - `RTI POST depth=%o id=%06o PC=%06o PS=%06o SP=%06o`
+- Window correlation markers:
+  - `WIN W1 ENTER PC=%06o PS=%06o SP=%06o depth=%o lastid=%06o`
+  - `WIN W2 ENTER PC=%06o PS=%06o SP=%06o depth=%o lastid=%06o`
+
+- Rate limit:
+  - max `011610` lines (`5000` decimal), then:
+    - `IRQTRACE AUTO-OFF (limit)`
+- Optional divergence stop:
+  - if `LSI11_STOP_ON_DIVERGE=1` and signature matches:
+    - `DIVERGE SIGNATURE HIT PC=%06o PS=%06o SP=%06o`
+
+- Interpretation:
+  - If `IRQ VECFETCH` values already differ from reference: vector table content/read path issue.
+  - If `IRQ VECFETCH` matches but `IRQ ACCEPT` post state is wrong: interrupt entry/stacking/PSW transfer issue.
+  - If `IRQ ACCEPT` is correct and mismatch appears on `RTI POST`: RTI restore path (PC/PSW/SP) is likely wrong.
+
+## DCJ11 K/S/U Compliance (Verified)
+
+Checklist:
+- `CM/PM` handling is correct on IRQ/trap entry (`CM=0`, `PM=old CM`).
+- `KSP/SSP/USP` banking is active and `R6` follows current `CM`.
+- IRQ/trap frame push order is correct (`OLDPS`, then `OLDPC` on the active handler stack).
+- `RTI/RTT` restores `PC/PSW` and returns to the proper stack bank.
+- Vector fetch uses physical vector table access (MMU bypass).
+- `MFPI/MFPD/MTPI/MTPD` uses previous mode (`PM`) with proper I/D handling.
+
+Core tests added:
+- `tests/core_tests.c`: `test_dcj11_mode_stack_banking`
+- `tests/core_tests.c`: `test_dcj11_irq_entry_frame_user`
+- `tests/core_tests.c`: `test_dcj11_rti_restore_user_mode_stack`
+- `tests/core_tests.c`: `test_dcj11_irq_rti_supervisor_mode`
+- `tests/test_mmu_splitid.c`: vector fetch expects physical fetch
+
+Verification commands and expected output:
+
+1. XM boot:
+   - command:
+     - `./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+   - expected:
+     - `RT-11XM (S) V05.03`
+     - `?KMON-F-File not found DK:STARTX.COM`
+     - `.`
+
+2. D9 compare:
+   - command:
+     - `python3 tools/d9_compare.py --our-log /tmp/xm_our_mt.log --simh-log /tmp/xm_simh_mt.log`
+   - expected:
+     - `W1: no mismatch`
+     - `W2: no mismatch`
+     - `FIRST DIVERGENCE: none detected in compared range`
+
+3. D10 trace:
+   - command:
+     - `LSI11_IRQTRACE=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
+   - expected:
+     - no `DIVERGE SIGNATURE HIT`
+     - trace may end with `IRQTRACE AUTO-OFF (limit)`
+
+Note:
+- `DK:STARTX.COM` missing is an RT-11 disk content issue, not an emulator failure.
 
 ## Device disable options
 - `-disable-dl` disable DL11
@@ -164,17 +397,3 @@ Compatibility note:
 Notes:
 - If a device is disabled, attaching media for it (for example `-disable-rl` with `-rl`) is rejected.
 - `-check-config` prints final per-device enable state (`dev_*` fields).
-
-## DCJ11 K/S/U Compliance (In Progress)
-
-Checklist:
-- [ ] PSW `CM/PM` handling for DCJ11 (`CM=<15:14>`, `PM=<13:12>`).
-- [ ] Separate stack banks `KSP/SSP/USP` and active `R6` switch by `CM`.
-- [ ] IRQ/trap entry frame correctness (`OLDPS`, `OLDPC`) on handler stack.
-- [ ] `RTI/RTT` restore correctness (PC/PSW order + stack-bank handoff).
-- [ ] Vector fetch path is physical (MMU bypass).
-- [ ] `MFPI/MFPD/MTPI/MTPD` use previous mode (`PM`) with proper I/D space.
-
-### Verification Results
-
-- Pending in C5 (commands and expected outputs).
