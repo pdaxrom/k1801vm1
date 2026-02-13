@@ -1850,7 +1850,9 @@ int core_step(regs *r)
     }
 
     if (r->fWait) {
-        if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
+        /* VM2 masks EVNT/VIRQ when PSW.P is set; do not consume pending IRQs. */
+        if ((!is_vm2(r) || !(r->psw & FLAG_P)) &&
+                r->poll_irq && r->poll_irq(r, &irq_vector)) {
             word vec;
             if (irq_accept(r, irq_vector, &vec)) {
                 word old_psw = r->psw;
@@ -2099,7 +2101,7 @@ int core_step(regs *r)
             }
             r->r[7] = r->cpc;
             r->psw = r->cps;
-            if (r->poll_irq) {
+            if (!(r->psw & FLAG_P) && r->poll_irq) {
                 word vec;
                 word irq_vector;
                 if (r->poll_irq(r, &irq_vector)) {
@@ -3383,7 +3385,8 @@ step_end:
             }
         }
         if (!skip_irq) {
-            if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
+            if ((!is_vm2(r) || !(r->psw & FLAG_P)) &&
+                    r->poll_irq && r->poll_irq(r, &irq_vector)) {
                 word vec;
                 if (irq_accept(r, irq_vector, &vec)) {
                     word old_psw = r->psw;

@@ -5673,6 +5673,50 @@ cleanup:
     return rc;
 }
 
+static int test_vm2_irq_mask_holds_pending_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_nop(),
+        op_nop(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_irq_mask_hold", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 000060, handler);
+    store_word(&fx, 000062, new_psw);
+    store_word(&fx, handler, op_nop());
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_P;
+    fx.r.poll_irq = test_poll_irq_vector;
+    test_irq_vector = 000060;
+    test_irq_pending = 1;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Masked IRQ step should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "Masked IRQ should not vector");
+    ASSERT_EQ(test_irq_pending, 1, "Masked VM2 IRQ must remain pending");
+
+    fx.r.psw = 000000;
+    ASSERT_EQ(core_step(&fx.r), 0, "Unmasked IRQ step should execute");
+    ASSERT_EQ(fx.r.r[7], handler, "Pending VM2 IRQ should vector after unmask");
+    ASSERT_EQ(fx.r.psw, new_psw, "Vector PSW should load on accepted IRQ");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_pending = 0;
+    test_irq_vector = 0;
+    return rc;
+}
+
 static int test_vm2_irq_highest_priority_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -6039,6 +6083,8 @@ int main(void)
     failed += test_vm1_irq_priority_selection_model(K1801VM1G, "K1801VM1G");
     failed += test_vm2_irq_masking_model(K1801VM2, "K1801VM2");
     failed += test_vm2_irq_masking_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_irq_mask_holds_pending_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_irq_mask_holds_pending_model(K1806VM2, "K1806VM2");
     failed += test_vm2_irq_highest_priority_model(K1801VM2, "K1801VM2");
     failed += test_vm2_irq_highest_priority_model(K1806VM2, "K1806VM2");
     failed += test_vm1_timer_registers_model(K1801VM1, "K1801VM1");

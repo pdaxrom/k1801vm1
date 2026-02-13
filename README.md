@@ -380,6 +380,13 @@ Status: **PASS / FIXED**
 
 Status: **PASS / FIXED**
 
+### 13.9 VM2 IRQ Masking with `P` Bit
+- `PSW.P=1` masks VM2 external interrupts `EVNT` and `VIRQ`.
+- Masked VM2 IRQ requests must remain pending and be accepted only after `P` is cleared.
+- Core VM2 IRQ polling path now avoids consuming/acknowledging IRQ while `P=1`.
+
+Status: **PASS / FIXED**
+
 ---
 
 ## 14. K1806VM2 Alias
@@ -398,6 +405,7 @@ Implemented tests (see `tests/core_tests.c`):
 - RTI restore order
 - WAIT + interrupt resume
 - IRQ priority masking and highest‑priority selection
+- VM2 masked IRQ retention until unmask (`vm2_irq_mask_hold`)
 - TSTB flags and BPL branching
 - DCJ11 SEL0/SEL1/SEL2 semantics
 - `SPL` kernel/user semantics on DCJ11/VM2 and illegal trap on VM1/VM1G
