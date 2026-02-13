@@ -378,10 +378,12 @@ static INLINE void cpu_reg_177776_store_byte(regs *r, word offset, byte value)
 static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
 {
     if (is_vm2(r)) {
-        word old_mode = (old_psw >> 14) & 03;
-        /* Trap always enters kernel mode; previous mode keeps old current mode. */
-        vec_psw = (word)((vec_psw & ~0170000) | (old_mode << 12));
-        return vec_psw;
+        if (old_psw & FLAG_H) {
+            /* HALT entry: vector may load PSW[8:0] (0000777). */
+            return (word)((old_psw & ~0000777) | (vec_psw & 0000777));
+        }
+        /* USER entry: load PSW[7:0] and force H/U (0000400) to 0. */
+        return (word)((old_psw & ~0000777) | (vec_psw & 0000377));
     }
     if (r->model == DCJ11) {
         int old_cm = dcj11_psw_cur_mode(old_psw);
@@ -2102,10 +2104,8 @@ int core_step(regs *r)
                 word irq_vector;
                 if (r->poll_irq(r, &irq_vector)) {
                     if (irq_accept(r, irq_vector, &vec)) {
-                        pushw(r->psw);
-                        pushw(r->r[7]);
-                        r->r[7] = load_word_vector(r, vec);
-                        r->psw = load_word_vector(r, (word)(vec + 2));
+                        word old_psw = r->psw;
+                        core_take_vector(r, vec, r->r[7], old_psw, "IRQ");
                     }
                 }
             }
