@@ -15,6 +15,11 @@ typedef uint32_t paddr_t;
 #define BUS_PAGE_SIZE_KB (BUS_PAGE_SIZE / 1024u)
 #define BUS_RAM_GRANULARITY_KB BUS_PAGE_SIZE_KB
 
+/* VM2 USER/HALT RAM bank defaults (0200000 = 64KB). */
+#define BUS_VM2_DEFAULT_USER_RAM_BYTES 0200000u
+#define BUS_VM2_DEFAULT_HALT_RAM_BYTES 0000000u
+#define BUS_VM2_BANK_MAX_BYTES 0200000u
+
 typedef enum {
     BUS_MACHINE_LSI11_1104 = 0,
     BUS_MACHINE_PDP1184 = 1,
@@ -32,6 +37,12 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
 
 void bus_init(void);
 void bus_reset_config(void);
+void bus_vm2_reset_config(void);
+
+int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes, char *err,
+                      size_t err_len);
+uint32_t bus_vm2_user_ram_bytes(void);
+uint32_t bus_vm2_halt_ram_bytes(void);
 
 int bus_is_nxm(paddr_t addr);
 int bus_addr_is_ram(paddr_t addr);
@@ -42,6 +53,13 @@ uint16_t bus_read16(paddr_t addr);
 
 void bus_write8(paddr_t addr, uint8_t v);
 void bus_write16(paddr_t addr, uint16_t v);
+
+/* VM2 CPU-side accessors: bank RAM for 000000..157777, never bank 160000..177777. */
+int bus_vm2_cpu_is_nxm(uint16_t addr, int halt_mode);
+uint8_t bus_vm2_cpu_read8(uint16_t addr, int halt_mode);
+void bus_vm2_cpu_write8(uint16_t addr, int halt_mode, uint8_t v);
+uint16_t bus_vm2_cpu_read16(uint16_t addr, int halt_mode);
+void bus_vm2_cpu_write16(uint16_t addr, int halt_mode, uint16_t v);
 
 uint8_t *bus_ram_ptr(paddr_t addr);
 uint32_t bus_ram_kb(void);

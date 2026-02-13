@@ -53,6 +53,16 @@ typedef struct {
 
 static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1};
 
+static int vm2_model(const regs *r)
+{
+    return (r->model == K1801VM2 || r->model == K1806VM2) ? 1 : 0;
+}
+
+static int vm2_halt_mode(const regs *r)
+{
+    return (vm2_model(r) && (r->psw & FLAG_H)) ? 1 : 0;
+}
+
 static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
 {
     (void)machine;
@@ -285,6 +295,14 @@ static byte core_load_byte(regs *r, word addr)
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return j11_probe_shadow_read_byte((paddr_t)addr);
     }
+    if (vm2_model(r)) {
+        int halt_mode = vm2_halt_mode(r);
+        if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
+            nxm_trap(r, (paddr_t)addr);
+            return 0;
+        }
+        return bus_vm2_cpu_read8((uint16_t)addr, halt_mode);
+    }
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
         return 0;
@@ -295,6 +313,15 @@ static byte core_load_byte(regs *r, word addr)
 static void core_store_byte(regs *r, word addr, byte v)
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+        return;
+    }
+    if (vm2_model(r)) {
+        int halt_mode = vm2_halt_mode(r);
+        if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
+            nxm_trap(r, (paddr_t)addr);
+            return;
+        }
+        bus_vm2_cpu_write8((uint16_t)addr, halt_mode, (uint8_t)v);
         return;
     }
     if (bus_is_nxm((paddr_t)addr)) {
@@ -310,6 +337,16 @@ static word core_load_word(regs *r, word addr)
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
         return j11_probe_shadow_read_word((paddr_t)addr);
     }
+    if (vm2_model(r)) {
+        int halt_mode = vm2_halt_mode(r);
+        uint16_t a1 = (uint16_t)(addr + 1);
+        if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode) ||
+                bus_vm2_cpu_is_nxm(a1, halt_mode)) {
+            nxm_trap(r, (paddr_t)addr);
+            return 0;
+        }
+        return (word)bus_vm2_cpu_read16((uint16_t)addr, halt_mode);
+    }
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
         return 0;
@@ -321,6 +358,17 @@ static void core_store_word(regs *r, word addr, word v)
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+        return;
+    }
+    if (vm2_model(r)) {
+        int halt_mode = vm2_halt_mode(r);
+        uint16_t a1 = (uint16_t)(addr + 1);
+        if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode) ||
+                bus_vm2_cpu_is_nxm(a1, halt_mode)) {
+            nxm_trap(r, (paddr_t)addr);
+            return;
+        }
+        bus_vm2_cpu_write16((uint16_t)addr, halt_mode, (uint16_t)v);
         return;
     }
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {

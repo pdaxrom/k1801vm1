@@ -18,9 +18,18 @@ typedef struct {
     uint32_t ram_kb;
 } bus_cfg_t;
 
+typedef struct {
+    uint32_t user_ram_bytes;
+    uint32_t halt_ram_bytes;
+} vm2_ram_cfg_t;
+
 static bus_cfg_t g_cfg = {BUS_MACHINE_LSI11_1104, LSI11_FIXED_RAM_KB};
 static uint8_t *g_ram = NULL;
 static size_t g_ram_bytes = 0;
+static vm2_ram_cfg_t g_vm2_cfg = {BUS_VM2_DEFAULT_USER_RAM_BYTES,
+                                  BUS_VM2_DEFAULT_HALT_RAM_BYTES};
+static uint8_t *g_vm2_halt_ram = NULL;
+static size_t g_vm2_halt_ram_bytes = 0;
 
 static void set_err(char *err, size_t err_len, const char *fmt, ...)
 {
@@ -39,6 +48,13 @@ void bus_reset_config(void)
 {
     g_cfg.machine = BUS_MACHINE_LSI11_1104;
     g_cfg.ram_kb = LSI11_FIXED_RAM_KB;
+    bus_vm2_reset_config();
+}
+
+void bus_vm2_reset_config(void)
+{
+    g_vm2_cfg.user_ram_bytes = BUS_VM2_DEFAULT_USER_RAM_BYTES;
+    g_vm2_cfg.halt_ram_bytes = BUS_VM2_DEFAULT_HALT_RAM_BYTES;
 }
 
 int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
@@ -87,9 +103,44 @@ size_t bus_ram_bytes(void)
     return g_ram_bytes;
 }
 
+int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes, char *err,
+                      size_t err_len)
+{
+    if (user_ram_bytes == 0) {
+        user_ram_bytes = BUS_VM2_DEFAULT_USER_RAM_BYTES;
+    }
+    if (user_ram_bytes > BUS_VM2_BANK_MAX_BYTES) {
+        set_err(err, err_len,
+                "VM2 USER RAM size %07o exceeds 0200000 bytes",
+                (unsigned)user_ram_bytes);
+        return -1;
+    }
+    if (halt_ram_bytes > BUS_VM2_BANK_MAX_BYTES) {
+        set_err(err, err_len,
+                "VM2 HALT RAM size %07o exceeds 0200000 bytes",
+                (unsigned)halt_ram_bytes);
+        return -1;
+    }
+
+    g_vm2_cfg.user_ram_bytes = user_ram_bytes;
+    g_vm2_cfg.halt_ram_bytes = halt_ram_bytes;
+    return 0;
+}
+
+uint32_t bus_vm2_user_ram_bytes(void)
+{
+    return g_vm2_cfg.user_ram_bytes;
+}
+
+uint32_t bus_vm2_halt_ram_bytes(void)
+{
+    return g_vm2_cfg.halt_ram_bytes;
+}
+
 void bus_init(void)
 {
     size_t need_bytes = (size_t)g_cfg.ram_kb * 1024u;
+    size_t halt_need = (size_t)g_vm2_cfg.halt_ram_bytes;
 
     if (g_ram && g_ram_bytes != need_bytes) {
         free(g_ram);
@@ -107,6 +158,33 @@ void bus_init(void)
     }
 
     memset(g_ram, 0, g_ram_bytes);
+
+    if (g_vm2_halt_ram && g_vm2_halt_ram_bytes != halt_need) {
+        free(g_vm2_halt_ram);
+        g_vm2_halt_ram = NULL;
+        g_vm2_halt_ram_bytes = 0;
+    }
+
+    if (halt_need == 0) {
+        if (g_vm2_halt_ram) {
+            free(g_vm2_halt_ram);
+            g_vm2_halt_ram = NULL;
+            g_vm2_halt_ram_bytes = 0;
+        }
+        return;
+    }
+
+    if (!g_vm2_halt_ram) {
+        if (posix_memalign((void **)&g_vm2_halt_ram, BUS_PAGE_SIZE, halt_need) != 0) {
+            fprintf(stderr,
+                    "bus_init: VM2 HALT RAM allocation failed (%zu bytes)\n",
+                    halt_need);
+            abort();
+        }
+        g_vm2_halt_ram_bytes = halt_need;
+    }
+
+    memset(g_vm2_halt_ram, 0, g_vm2_halt_ram_bytes);
 }
 
 static int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
@@ -249,6 +327,87 @@ void bus_write16(paddr_t addr, uint16_t v)
 {
     bus_write8(addr, (uint8_t)(v & 000377));
     bus_write8(addr + 1, (uint8_t)((v >> 8) & 000377));
+}
+
+static int vm2_bankable_ram_addr(uint16_t addr)
+{
+    /* CPU-side banking applies only to RAM window 000000..157777. */
+    return (addr < IO_PAGE_START) ? 1 : 0;
+}
+
+static int vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
+{
+    uint16_t io_addr = 0;
+
+    if (io_decode_addr((paddr_t)addr, &io_addr)) {
+        return 0;
+    }
+    if (!bus_addr_is_ram((paddr_t)addr)) {
+        return 1;
+    }
+    if (!vm2_bankable_ram_addr(addr)) {
+        return 0;
+    }
+    if (halt_mode) {
+        if (g_vm2_cfg.halt_ram_bytes == 0) {
+            return 1;
+        }
+        return ((uint32_t)addr >= g_vm2_cfg.halt_ram_bytes) ? 1 : 0;
+    }
+    return ((uint32_t)addr >= g_vm2_cfg.user_ram_bytes) ? 1 : 0;
+}
+
+int bus_vm2_cpu_is_nxm(uint16_t addr, int halt_mode)
+{
+    return vm2_cpu_is_nxm_byte(addr, halt_mode ? 1 : 0);
+}
+
+uint8_t bus_vm2_cpu_read8(uint16_t addr, int halt_mode)
+{
+    uint16_t io_addr = 0;
+
+    if (io_decode_addr((paddr_t)addr, &io_addr)) {
+        return devio_read8(io_addr);
+    }
+    if (vm2_cpu_is_nxm_byte(addr, halt_mode ? 1 : 0)) {
+        return 0;
+    }
+    if (halt_mode && vm2_bankable_ram_addr(addr) && g_vm2_halt_ram) {
+        return g_vm2_halt_ram[addr];
+    }
+    return g_ram[addr];
+}
+
+void bus_vm2_cpu_write8(uint16_t addr, int halt_mode, uint8_t v)
+{
+    uint16_t io_addr = 0;
+
+    if (io_decode_addr((paddr_t)addr, &io_addr)) {
+        devio_write8(io_addr, v);
+        return;
+    }
+    if (vm2_cpu_is_nxm_byte(addr, halt_mode ? 1 : 0)) {
+        return;
+    }
+    if (halt_mode && vm2_bankable_ram_addr(addr) && g_vm2_halt_ram) {
+        g_vm2_halt_ram[addr] = v;
+        return;
+    }
+    g_ram[addr] = v;
+}
+
+uint16_t bus_vm2_cpu_read16(uint16_t addr, int halt_mode)
+{
+    uint8_t lo = bus_vm2_cpu_read8(addr, halt_mode);
+    uint8_t hi = bus_vm2_cpu_read8((uint16_t)(addr + 1), halt_mode);
+    return (uint16_t)(lo | ((uint16_t)hi << 8));
+}
+
+void bus_vm2_cpu_write16(uint16_t addr, int halt_mode, uint16_t v)
+{
+    bus_vm2_cpu_write8(addr, halt_mode, (uint8_t)(v & 000377));
+    bus_vm2_cpu_write8((uint16_t)(addr + 1), halt_mode,
+                       (uint8_t)((v >> 8) & 000377));
 }
 
 uint8_t *bus_ram_ptr(paddr_t addr)
