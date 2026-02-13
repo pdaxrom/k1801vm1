@@ -5352,6 +5352,99 @@ cleanup:
     return rc;
 }
 
+static int test_vm2_mtps_preserves_hu_t_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word old_psw = 0000420;
+    const word src = 0000347;
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_mtps_hu_t", name);
+    fixture_setup_model(&fx, model);
+    fx.r.psw = old_psw;
+    fx.r.r[0] = src;
+    fx.r.fTrap = 1; /* suppress trace side-effect when T=1 */
+    write_op(&fx, op_mtps(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPS should execute");
+    ASSERT_EQ(fx.r.psw & 0000400, old_psw & 0000400, "MTPS must preserve H/U");
+    ASSERT_EQ(fx.r.psw & 0000020, old_psw & 0000020, "MTPS must preserve T");
+    ASSERT_EQ(fx.r.psw & 0000340, src & 0000340, "MTPS must load bits 7:5");
+    ASSERT_EQ(fx.r.psw & 0000017, src & 0000017, "MTPS must load bits 3:0");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_user_vector_forces_hu_zero_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02000;
+    const word vec_psw = 0000437;
+    const word program[] = {
+        op_bpt(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_vec_user_hu0", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 000014, handler);
+    store_word(&fx, 000016, vec_psw);
+    fx.r.psw = 0000000; /* USER: H/U=0 */
+    fx.r.r[6] = TEST_STACK;
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT should execute");
+    ASSERT_EQ(fx.r.psw & 0000400, 0000000, "USER vector must force H/U=0");
+    ASSERT_EQ(fx.r.psw & 0000377, vec_psw & 0000377,
+              "USER vector must load PSW bits 7:0");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm2_halt_vector_allows_hu_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02200;
+    const word vec_psw = 0000437;
+    const word program[] = {
+        op_bpt(),
+    };
+
+    if (!is_vm2_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm2_vec_halt_hu", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 000014, handler);
+    store_word(&fx, 000016, vec_psw);
+    fx.r.psw = 0000400; /* HALT: H/U=1 */
+    fx.r.r[6] = TEST_STACK;
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT should execute");
+    ASSERT_EQ(fx.r.psw & 0000400, 0000400, "HALT vector may keep H/U=1");
+    ASSERT_EQ(fx.r.psw & 0000377, vec_psw & 0000377,
+              "HALT vector must load PSW bits 7:0");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_vm2_trap_stack_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -5972,6 +6065,12 @@ int main(void)
     failed += test_vm2_tstb_flags_model(K1806VM2, "K1806VM2");
     failed += test_vm2_bpl_after_tstb_model(K1801VM2, "K1801VM2");
     failed += test_vm2_bpl_after_tstb_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_mtps_preserves_hu_t_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_mtps_preserves_hu_t_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_user_vector_forces_hu_zero_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_user_vector_forces_hu_zero_model(K1806VM2, "K1806VM2");
+    failed += test_vm2_halt_vector_allows_hu_model(K1801VM2, "K1801VM2");
+    failed += test_vm2_halt_vector_allows_hu_model(K1806VM2, "K1806VM2");
     failed += test_vm2_trap_stack_model(K1801VM2, "K1801VM2");
     failed += test_vm2_trap_stack_model(K1806VM2, "K1806VM2");
     failed += test_vm2_wait_ignores_trace_model(K1801VM2, "K1801VM2");

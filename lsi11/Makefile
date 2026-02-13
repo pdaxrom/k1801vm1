@@ -46,6 +46,7 @@ TEST_COMMON_OBJS_PDP1184 := $(addprefix $(BUILD_DIR)/test-pdp1184/,$(COMMON_SRCS
 
 TESTS_LSI11 := \
   tests/test_bus_map \
+  tests/test_vm2_banking \
   tests/test_irq_semantics \
   tests/test_rl11 \
   tests/test_rk11_regs \
@@ -102,6 +103,9 @@ $(BUILD_DIR)/test-pdp1184/tests/%.o: tests/%.c
 tests/test_bus_map: $(BUILD_DIR)/test-lsi11/tests/test_bus_map.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_vm2_banking: $(BUILD_DIR)/test-lsi11/tests/test_vm2_banking.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
 tests/test_irq_semantics: $(BUILD_DIR)/test-lsi11/tests/test_irq_semantics.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -122,6 +126,8 @@ test: test-lsi11
 test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	@echo "Running bus map test..."
 	./tests/test_bus_map
+	@echo "Running VM2 banking test..."
+	./tests/test_vm2_banking
 	@echo "Running IRQ semantics test..."
 	./tests/test_irq_semantics
 	@echo "Running RL11 register/transfer test..."
