@@ -21,6 +21,14 @@ This subproject now provides two separate executables:
 | `000000–157777` | 56 KB | RAM |
 | `160000–177777` | 8 KB | I/O page (device CSRs only) |
 
+### VM2 USER/HALT RAM banking
+- For CPU model `k1801vm2`/`k1806vm2`, CPU RAM accesses in `000000..157777`
+  use VM2 USER/HALT bank policy in machine layer.
+- Default USER bank size: `0200000` bytes (64KB).
+- Default HALT bank size: `0000000` bytes (HALT RAM absent, HALT RAM access -> NXM).
+- Optional HALT bank size: `0200000` bytes (distinct HALT RAM bank).
+- I/O page `160000..177777` is never banked and keeps existing decode/NXM behavior.
+
 ### DL11 alias requirement
 - DL11 alias mapping is enabled and preserved:
   - `0176500–0176507` aliases `0177560–0177567`

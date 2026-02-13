@@ -327,6 +327,9 @@ References:
 - `doc/KM1801VM2.pdf`
 
 ### 13.1 VM2 Mode and Copy Registers
+- VM2 mode is selected only by H/U bit `0000400`:
+  - `H/U=0` USER
+  - `H/U=1` HALT
 - CPC/CPSW track PC/PSW unless both P and H/U bits are set.
 - When P=1 and H/U=1, CPC/CPSW are locked for debugger/FIS use.
 
@@ -360,6 +363,20 @@ Status: **PASS / LIMITED**
 
 ### 13.6 VM2 RTI H/U Semantics
 - H/U is restored only when new PC ≥ 160000; otherwise H/U preserved.
+
+Status: **PASS / FIXED**
+
+### 13.7 VM2 MTPS Masking
+- `MTPS` updates only `PSW[7:5]` and `PSW[3:0]` (`0000340 | 0000017`).
+- `PSW` bit `0000020` (T) is preserved.
+- `PSW` bit `0000400` (H/U) is preserved.
+
+Status: **PASS / FIXED**
+
+### 13.8 VM2 Trap/IRQ Vector PSW Load
+- From USER (`H/U=0`): vector load uses `PSW[7:0]` and forces `H/U=0`.
+- From HALT (`H/U=1`): vector load uses `PSW[8:0]`, so vector may set/clear `H/U`.
+- VM2 vector entry path does not use DCJ11 CM/PM stack-mode logic.
 
 Status: **PASS / FIXED**
 
