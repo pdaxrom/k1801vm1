@@ -408,6 +408,12 @@ int main(int argc, char **argv)
         sr_set((uint16_t)sr_value);
     }
 
+    // FIXME: No-address register for initial configuration
+    if (r.model == K1801VM2 || r.model == K1806VM2) {
+        r.SEL0 = 0;
+        r.SEL0 = 0200; // Disable FIS trap by default
+    }
+
     if (do_bootcopy) {
         /* Copy first 010000 bytes (4 KB) into RAM[000000..007777] by default.
            Adjust if your bootstrap needs a different size. */
