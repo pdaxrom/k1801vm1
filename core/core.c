@@ -2082,7 +2082,7 @@ int core_step(regs *r)
     }
 
     if ((op & 0177770) == 0000230) { /* SPL */
-        if (r->model != DCJ11 && !is_vm2(r)) {
+        if (r->model != DCJ11) {
             illegal_trap(r);
             goto step_end;
         }
