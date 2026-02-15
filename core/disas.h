@@ -5,9 +5,9 @@
  *      Author: Alexander Chukov <sash@pdaXrom.org>
  */
 
-#ifndef DISAS_H_
-#define DISAS_H_
+#ifndef _CORE_DISAS_H_
+#define _CORE_DISAS_H_
 
 char *disas(regs *r, word *addr, char *out);
 
-#endif /* DISAS_H_ */
+#endif

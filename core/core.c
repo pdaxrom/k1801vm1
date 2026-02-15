@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #ifndef MMU_STUB_REGS_WHEN_DISABLED
 #define MMU_STUB_REGS_WHEN_DISABLED 1
@@ -254,80 +255,132 @@ unsigned core_d12_irq_depth(void)
 #endif
 }
 
-enum {
-    DCJ11_REG_NONE = 0,
-    DCJ11_REG_MEMERR_177744,
-    DCJ11_REG_CCR_177746,
-    DCJ11_REG_MAINT_177750,
-    DCJ11_REG_HITMISS_177752,
-    DCJ11_REG_CPUERR_177766
-};
+static INLINE bool vm1_reg_block_load_word(regs *r, word offset, word *value_out)
+{
+    switch (offset) {
+    case 0177700:
+        *value_out = 017777;
+        return true;
+    case 0177702:
+        *value_out = r->VM1_RAP_PRESENT ? 017777 : 0;
+        return true;
+    case 0177704:
+        *value_out = 0177340;
+        return true;
+    case 0177706:
+        *value_out = r->TVE_LIMIT;
+        return true;
+    case 0177710:
+        *value_out = r->TVE_COUNT;
+        return true;
+    case 0177712:
+        *value_out = r->TVE_CSR;
+        return true;
+    default:
+        return false;
+    }
+}
 
-static INLINE int dcj11_reg_select(word offset)
+static INLINE bool vm1_reg_block_store_word(regs *r, word offset, word value)
+{
+    switch (offset) {
+    case 0177700:
+        return true;
+    case 0177702:
+        r->VM1_RAP_PRESENT = 0;
+        return true;
+    case 0177704:
+        return true;
+    case 0177706:
+        r->TVE_LIMIT = value;
+        return true;
+    case 0177710:
+        return true;
+    case 0177712:
+        r->TVE_CSR = (word)(0177400 | (value & 0177));
+        r->TVE_COUNT = r->TVE_LIMIT;
+        return true;
+    default:
+        return false;
+    }
+}
+
+static INLINE bool vm1_reg_block_load_byte(regs *r, word offset, byte *val8)
+{
+    word value;
+    if (!vm1_reg_block_load_word(r, offset, &value)) {
+        return false;
+    }
+    *val8 = (byte)((offset & 1) ? ((value >> 8) & 0377) : (value & 0377));
+    return true;
+}
+
+static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
+{
+    word regv;
+    if (!vm1_reg_block_load_word(r, offset, &regv)) {
+        return false;
+    }
+    if (offset & 1) {
+        regv = (word)((regv & 000377) | (((word)value & 0377) << 8));
+    } else {
+        regv = (word)((regv & 0177400) | ((word)value & 0377));
+    }
+    return vm1_reg_block_store_word(r, offset, regv);
+}
+
+#define DCJ11_REG_MEMERR 0177744
+#define DCJ11_REG_CCR 0177746
+#define DCJ11_REG_MAINT 0177750
+#define DCJ11_REG_HITMISS 0177752
+#define DCJ11_REG_CPUERR 0177766
+
+static INLINE bool dcj11_reg_block_load_word(regs *r, word offset, word *value)
 {
     switch (offset & 0177776) {
-    case 0177744:
-        return DCJ11_REG_MEMERR_177744;
-    case 0177746:
-        return DCJ11_REG_CCR_177746;
-    case 0177750:
-        return DCJ11_REG_MAINT_177750;
-    case 0177752:
-        return DCJ11_REG_HITMISS_177752;
-    case 0177766:
-        return DCJ11_REG_CPUERR_177766;
+    case DCJ11_REG_MEMERR:
+        *value = r->J11_REG177744;
+        return true;
+    case DCJ11_REG_CCR:
+        *value = r->J11_REG177746;
+        return true;
+    case DCJ11_REG_MAINT:
+        *value = r->J11_REG177750;
+        return true;
+    case DCJ11_REG_HITMISS:
+        *value = r->J11_REG177752_177766[0];
+        return true;
+    case DCJ11_REG_CPUERR:
+        *value = (word)(r->J11_REG177752_177766[6] & 0000374);
+        return true;
     default:
-        return DCJ11_REG_NONE;
+        return false;
     }
 }
 
-static INLINE int dcj11_has_reg_block_177744(regs *r, word offset)
+static INLINE bool dcj11_reg_block_store_word(regs *r, word offset, word value)
 {
-    return (r->model == DCJ11) && (dcj11_reg_select(offset) != DCJ11_REG_NONE);
-}
-
-static INLINE word dcj11_reg_block_load_word(regs *r, word offset)
-{
-    switch (dcj11_reg_select(offset)) {
-    case DCJ11_REG_MEMERR_177744:
-        return r->J11_REG177744;
-    case DCJ11_REG_CCR_177746:
-        return r->J11_REG177746;
-    case DCJ11_REG_MAINT_177750:
-        return r->J11_REG177750;
-    case DCJ11_REG_HITMISS_177752:
-        return r->J11_REG177752_177766[0];
-    case DCJ11_REG_CPUERR_177766:
-        return (word)(r->J11_REG177752_177766[6] & 0000374);
-    default:
-        return 0;
-    }
-}
-
-static INLINE void dcj11_reg_block_store_word(regs *r, word offset,
-        word value)
-{
-    switch (dcj11_reg_select(offset)) {
-    case DCJ11_REG_MEMERR_177744:
+    switch (offset & 0177776) {
+    case DCJ11_REG_MEMERR:
         /* Memory system error register: cleared by any write. */
         r->J11_REG177744 = 0;
-        return;
-    case DCJ11_REG_CCR_177746:
+        return true;
+    case DCJ11_REG_CCR:
         r->J11_REG177746 = value;
-        return;
-    case DCJ11_REG_MAINT_177750:
+        return true;
+    case DCJ11_REG_MAINT:
         /* Maintenance register is read-only in normal mode. */
-        return;
-    case DCJ11_REG_HITMISS_177752:
+        return true;
+    case DCJ11_REG_HITMISS:
         /* Hit/miss register clears on write. */
         r->J11_REG177752_177766[0] = 0;
-        return;
-    case DCJ11_REG_CPUERR_177766:
+        return true;
+    case DCJ11_REG_CPUERR:
         /* CPU error register clears on write. */
         r->J11_REG177752_177766[6] = 0;
-        return;
+        return true;
     default:
-        return;
+        return false;
     }
 }
 
@@ -336,29 +389,34 @@ static INLINE int cpu_has_reg_177776(word offset)
     return ((offset & 0177776) == 0177776);
 }
 
-static INLINE byte dcj11_reg_177750_load_byte(regs *r, word offset)
+static INLINE bool dcj11_reg_block_load_byte(regs *r, word offset, byte *val8)
 {
-    word value = dcj11_reg_block_load_word(r, offset);
-    return (byte)((offset & 1) ? ((value >> 8) & 0377) : (value & 0377));
+    word value;
+    if (!dcj11_reg_block_load_word(r, offset, &value)) {
+        return false;
+    }
+    *val8 = (byte)((offset & 1) ? ((value >> 8) & 0377) : (value & 0377));
+    return true;
 }
 
-static INLINE void dcj11_reg_177750_store_byte(regs *r, word offset,
+static INLINE bool dcj11_reg_block_store_byte(regs *r, word offset,
         byte value)
 {
-    int reg = dcj11_reg_select(offset);
-    if (reg == DCJ11_REG_MEMERR_177744 || reg == DCJ11_REG_HITMISS_177752 ||
-            reg == DCJ11_REG_CPUERR_177766 || reg == DCJ11_REG_MAINT_177750) {
-        dcj11_reg_block_store_word(r, offset, 0);
-        return;
+    if (offset == DCJ11_REG_MEMERR || offset == DCJ11_REG_HITMISS ||
+        offset == DCJ11_REG_CPUERR || offset == DCJ11_REG_MAINT) {
+        return dcj11_reg_block_store_word(r, offset, 0);
     }
 
-    word regv = dcj11_reg_block_load_word(r, offset);
+    word regv;
+    if (!dcj11_reg_block_load_word(r, offset, &regv)) {
+        return false;
+    }
     if (offset & 1) {
         regv = (word)((regv & 000377) | (((word)value & 0377) << 8));
     } else {
         regv = (word)((regv & 0177400) | ((word)value & 0377));
     }
-    dcj11_reg_block_store_word(r, offset, regv);
+    return dcj11_reg_block_store_word(r, offset, regv);
 }
 
 static INLINE byte cpu_reg_177776_load_byte(regs *r, word offset)
@@ -512,57 +570,6 @@ static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
     }
     *vec_out = vec & 017776;
     return 1;
-}
-
-void core_init(regs *r)
-{
-    if (r->model == K1806VM2) {
-        r->model = K1801VM2;
-    }
-    r->init(r);
-}
-
-void core_reset(regs *r)
-{
-    int mode;
-
-#if CORE_VEC_TRACE
-    memset(&g_d12, 0, sizeof(g_d12));
-#endif
-    r->r[7] = r->SEL0 & 0177400;
-    r->psw = 0340;
-    for (mode = 0; mode < 4; mode++) {
-        r->sp_mode[mode] = 0;
-    }
-    r->sp_mode_init = 0;
-    r->ir = 0;
-    r->J11_REG177744 = 0;
-    r->J11_REG177746 = 0;
-    r->J11_REG177750 = 0;
-    memset(r->J11_REG177752_177766, 0, sizeof(r->J11_REG177752_177766));
-    r->fWait = 0;
-    r->fTrap = 0;
-    r->fAbort = 0;
-    r->fHaltSignal = 0;
-    r->fStepDeferHalt = 0;
-    r->fFisError = 0;
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-    r->mmu_ssr0 = 0;
-    r->mmu_ssr1 = 0;
-    r->mmu_ssr2 = 0;
-    r->mmu_ssr3 = 0;
-    memset(r->mmu_par, 0, sizeof(r->mmu_par));
-    memset(r->mmu_pdr, 0, sizeof(r->mmu_pdr));
-#endif
-
-    r->reset(r);
-}
-
-void core_fini(regs *r)
-{
-    if (r->fini) {
-        r->fini(r);
-    }
 }
 
 #define raw_load_byte(a, b) (((a)->load_byte)((a), (b)))
@@ -1188,9 +1195,16 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
     int seg = 0;
     int rc;
 
-    if (dcj11_has_reg_block_177744(r, offset)) {
-        return dcj11_reg_177750_load_byte(r, offset);
+    if (r->model == DCJ11) {
+        if (dcj11_reg_block_load_byte(r, offset, &value)) {
+            return value;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        if (vm1_reg_block_load_byte(r, offset, &value)) {
+            return value;
+        }
     }
+
     if (cpu_has_reg_177776(offset)) {
         return cpu_reg_177776_load_byte(r, offset);
     }
@@ -1227,10 +1241,16 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     int seg = 0;
     int rc;
 
-    if (dcj11_has_reg_block_177744(r, offset)) {
-        dcj11_reg_177750_store_byte(r, offset, value);
-        return;
+    if (r->model == DCJ11) {
+        if (dcj11_reg_block_store_byte(r, offset, value)) {
+            return;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        if (vm1_reg_block_store_byte(r, offset, value)) {
+            return;
+        }
     }
+
     if (cpu_has_reg_177776(offset)) {
         cpu_reg_177776_store_byte(r, offset, value);
         return;
@@ -1269,14 +1289,23 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     int seg = 0;
     int rc;
 
-    if ((r->model == DCJ11) && (offset & 1)) {
-        bus_error_trap(r);
-        return 0;
+    if (r->model == DCJ11) {
+        if (offset & 1) {
+            bus_error_trap(r);
+            return 0;
+        }
+
+        word value;
+        if (dcj11_reg_block_load_word(r, offset, &value)) {
+            return value;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        word value;
+        if (vm1_reg_block_load_word(r, offset, &value)) {
+            return value;
+        }
     }
 
-    if (dcj11_has_reg_block_177744(r, offset)) {
-        return dcj11_reg_block_load_word(r, offset);
-    }
     if (offset == 0177776) {
         return r->psw;
     }
@@ -1313,15 +1342,21 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     int seg = 0;
     int rc;
 
-    if ((r->model == DCJ11) && (offset & 1)) {
-        bus_error_trap(r);
-        return;
+    if (r->model == DCJ11) {
+        if (offset & 1) {
+            bus_error_trap(r);
+            return;
+        }
+
+        if (dcj11_reg_block_store_word(r, offset, value)) {
+            return;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        if (vm1_reg_block_store_word(r, offset, value)) {
+            return;
+        }
     }
 
-    if (dcj11_has_reg_block_177744(r, offset)) {
-        dcj11_reg_block_store_word(r, offset, value);
-        return;
-    }
     if (offset == 0177776) {
         r->psw = value;
         return;
@@ -1359,14 +1394,23 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
     int rc;
     word value;
 
-    if ((r->model == DCJ11) && (offset & 1)) {
-        bus_error_trap(r);
-        return 0;
+    if (r->model == DCJ11) {
+        if (offset & 1) {
+            bus_error_trap(r);
+            return 0;
+        }
+
+        word value;
+        if (dcj11_reg_block_load_word(r, offset, &value)) {
+            return value;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        word value;
+        if (vm1_reg_block_load_word(r, offset, &value)) {
+            return value;
+        }
     }
 
-    if (dcj11_has_reg_block_177744(r, offset)) {
-        return dcj11_reg_block_load_word(r, offset);
-    }
     if (offset == 0177776) {
         return r->psw;
     }
@@ -1391,15 +1435,21 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
     int seg = 0;
     int rc;
 
-    if ((r->model == DCJ11) && (offset & 1)) {
-        bus_error_trap(r);
-        return;
+    if (r->model == DCJ11) {
+        if (offset & 1) {
+            bus_error_trap(r);
+            return;
+        }
+
+        if (dcj11_reg_block_store_word(r, offset, value)) {
+            return;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        if (vm1_reg_block_store_word(r, offset, value)) {
+            return;
+        }
     }
 
-    if (dcj11_has_reg_block_177744(r, offset)) {
-        dcj11_reg_block_store_word(r, offset, value);
-        return;
-    }
     if (offset == 0177776) {
         r->psw = value;
         return;
@@ -1454,6 +1504,66 @@ static INLINE void core_store_word(regs *r, word offset, word value)
 #define load_word_ifetch(a, b) core_load_word_ifetch((a), (b))
 #define load_word_vector(a, b) core_load_word_vector((a), (b))
 #define store_word(a, b, c) core_store_word((a), (b), (c))
+
+void core_init(regs *r)
+{
+    if (r->model == K1806VM2) {
+        r->model = K1801VM2;
+    }
+    r->init(r);
+}
+
+void core_reset(regs *r)
+{
+    int mode;
+
+#if CORE_VEC_TRACE
+    memset(&g_d12, 0, sizeof(g_d12));
+#endif
+    r->r[7] = r->SEL0 & 0177400;
+    r->psw = 0340;
+    for (mode = 0; mode < 4; mode++) {
+        r->sp_mode[mode] = 0;
+    }
+    r->sp_mode_init = 0;
+    r->ir = 0;
+    r->J11_REG177744 = 0;
+    r->J11_REG177746 = 0;
+    r->J11_REG177750 = 0;
+    memset(r->J11_REG177752_177766, 0, sizeof(r->J11_REG177752_177766));
+    r->fWait = 0;
+    r->fTrap = 0;
+    r->fAbort = 0;
+    r->fHaltSignal = 0;
+    r->fStepDeferHalt = 0;
+    r->fFisError = 0;
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    r->mmu_ssr0 = 0;
+    r->mmu_ssr1 = 0;
+    r->mmu_ssr2 = 0;
+    r->mmu_ssr3 = 0;
+    memset(r->mmu_par, 0, sizeof(r->mmu_par));
+    memset(r->mmu_pdr, 0, sizeof(r->mmu_pdr));
+#endif
+
+    r->reset(r);
+
+    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        r->TVE_CSR = 0177400;
+        r->TVE_LIMIT = 0;
+        r->TVE_COUNT = 0;
+        r->TVE_PENDING = 0;
+        r->VM1_RAP_PRESENT = 1;
+        r->r[7] = load_word(r, 0177716) & 0177400;
+    }
+}
+
+void core_fini(regs *r)
+{
+    if (r->fini) {
+        r->fini(r);
+    }
+}
 
 static INLINE void core_take_vector(regs *r, word vec, word old_pc, word old_psw,
                                     const char *kind)
@@ -1618,7 +1728,7 @@ static INLINE void handle_halt(regs *r)
         store_word(r, 0177676, r->psw);
         store_word(r, 0177674, r->r[7]);
         store_word(r, 0177716, load_word(r, 0177716) | 010);
-        vec = 0160002;
+        vec = (load_word(r, 0177716) & 0177400) | 002;
         r->r[7] = load_word_vector(r, vec);
         r->psw = load_word_vector(r, (word)(vec + 2));
     } else if (is_vm2(r)) {
@@ -1640,7 +1750,7 @@ static INLINE void handle_halt(regs *r)
         store_word(r, 0177676, r->psw);
         store_word(r, 0177674, r->r[7]);
         store_word(r, 0177716, load_word(r, 0177716) | 010);
-        vec = (r->SEL0 & 0177400);
+        vec = load_word(r, 0177716) & 0177400;
         r->r[7] = load_word_vector(r, vec + 2) & 0177776;
         r->psw = load_word_vector(r, vec + 4);
     }

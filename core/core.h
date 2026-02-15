@@ -5,8 +5,8 @@
  *      Author: Alexander Chukov <sash@pdaXrom.org>
  */
 
-#ifndef CORE_H_
-#define CORE_H_
+#ifndef _CORE_CORE_H_
+#define _CORE_CORE_H_
 
 #include <stdint.h>
 
