@@ -3,7 +3,7 @@
 #   pdp1184 : PDP-11/84-like, MMU enabled, default 4096KB RAM
 
 CC ?= cc
-CFLAGS ?= -O2 -Wall -Wextra
+CFLAGS ?= -O2 -Wall -Wpedantic -Wextra
 CPPFLAGS ?= -I. -I../core
 
 BUILD_DIR := .build
@@ -26,7 +26,9 @@ COMMON_SRCS := \
   dev_rh11.c \
   dev_rk11.c \
   dev_lp11.c \
-  dev_sr.c
+  dev_sr.c \
+  dev_vm1sel.c \
+  dev_vm1sav.c
 
 MAIN_SRCS := \
   main.c \
@@ -34,11 +36,13 @@ MAIN_SRCS := \
 
 COMMON_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/lsi11/,$(COMMON_SRCS:.c=.o))
 MAIN_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/lsi11/,$(MAIN_SRCS:.c=.o))
-CORE_OBJS_LSI11 := $(BUILD_DIR)/lsi11/core_core.o $(BUILD_DIR)/lsi11/core_hardware.o $(BUILD_DIR)/lsi11/core_disas.o
+CORE_OBJS_LSI11 := $(BUILD_DIR)/lsi11/core_core.o \
+$(BUILD_DIR)/lsi11/core_disas.o
 
 COMMON_OBJS_PDP1184 := $(addprefix $(BUILD_DIR)/pdp1184/,$(COMMON_SRCS:.c=.o))
 MAIN_OBJS_PDP1184 := $(addprefix $(BUILD_DIR)/pdp1184/,$(MAIN_SRCS:.c=.o))
-CORE_OBJS_PDP1184 := $(BUILD_DIR)/pdp1184/core_core.o $(BUILD_DIR)/pdp1184/core_hardware.o $(BUILD_DIR)/pdp1184/core_disas.o
+CORE_OBJS_PDP1184 := $(BUILD_DIR)/pdp1184/core_core.o \
+$(BUILD_DIR)/pdp1184/core_disas.o
 
 TEST_CFLAGS := $(CFLAGS) -DLSI11_TESTS=1
 TEST_COMMON_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/test-lsi11/,$(COMMON_SRCS:.c=.o))

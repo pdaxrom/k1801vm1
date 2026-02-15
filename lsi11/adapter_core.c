@@ -11,6 +11,8 @@
 #include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
+#include "dev_vm1sel.h"
+#include "dev_vm1sav.h"
 
 #include "util_term.h"
 
@@ -49,9 +51,11 @@ typedef struct {
     int rk11;
     int rh11;
     int sr;
+    int vm1sel;
+    int vm1sav;
 } lsi11_device_mask_t;
 
-static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1};
+static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 0};
 
 static int vm2_model(const regs *r)
 {
@@ -73,6 +77,8 @@ static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
     device_mask.rk11 = 1;
     device_mask.sr = 1;
     device_mask.rh11 = 1;
+    device_mask.vm1sel = 1;
+    device_mask.vm1sav = 1;
 }
 
 int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
@@ -169,6 +175,14 @@ int lsi11_set_device_enabled(const char *name, int on, char *err,
         device_mask.sr = v;
         return 0;
     }
+    if (!strcmp(name, "vm1sel")) {
+        device_mask.vm1sel = v;
+        return 0;
+    }
+    if (!strcmp(name, "vm1sav")) {
+        device_mask.vm1sav = v;
+        return 0;
+    }
 
     if (err && err_len) {
         snprintf(err, err_len, "Unknown device: %s", name);
@@ -201,6 +215,12 @@ int lsi11_device_enabled(const char *name)
     }
     if (!strcmp(name, "sr")) {
         return device_mask.sr;
+    }
+    if (!strcmp(name, "vm1sel")) {
+        return device_mask.vm1sel;
+    }
+    if (!strcmp(name, "vm1sav")) {
+        return device_mask.vm1sav;
     }
     return 0;
 }
@@ -456,15 +476,19 @@ static int impl_init(regs *r)
     if (device_mask.rk11 && rk11_init() != 0) {
         return -1;
     }
-    if (device_mask.rh11) {
-        if (rh11_init() != 0) {
-            return -1;
-        }
+    if (device_mask.rh11 && rh11_init() != 0) {
+        return -1;
     }
     if (device_mask.lp11 && lp11_init() != 0) {
         return -1;
     }
     if (device_mask.sr && sr_init() != 0) {
+        return -1;
+    }
+    if (device_mask.vm1sel && vm1sel_init() != 0) {
+        return -1;
+    }
+    if (device_mask.vm1sav && vm1sav_init() != 0) {
         return -1;
     }
 
@@ -505,6 +529,12 @@ static void impl_reset(regs *r)
     }
     if (device_mask.sr) {
         sr_reset();
+    }
+    if (device_mask.vm1sel) {
+        vm1sel_reset();
+    }
+    if (device_mask.vm1sav) {
+        vm1sav_reset();
     }
 }
 

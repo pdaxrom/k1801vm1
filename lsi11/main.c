@@ -9,6 +9,8 @@
 #include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
+#include "dev_vm1sel.h"
+#include "dev_vm1sav.h"
 
 /* core headers (read-only) */
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
@@ -182,6 +184,8 @@ int main(int argc, char **argv)
     int disable_rh = 0;
     int disable_rl = 0;
     int disable_sr = 0;
+    int disable_vm1sel = 1;
+    int disable_vm1sav = 1;
 #if defined(LSI11_TARGET_PDP1184)
     byte cpu_model = DCJ11;
 #else
@@ -298,6 +302,11 @@ int main(int argc, char **argv)
         lsi11_set_dl11_alias(force_dl11_alias);
     }
 
+    if (cpu_model == K1801VM1 || cpu_model == K1801VM1G) {
+        disable_vm1sel = 0;
+        disable_vm1sav = 0;
+    }
+
     if (disable_dl &&
             lsi11_set_device_enabled("dl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
@@ -333,6 +342,16 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
+    if (disable_vm1sel &&
+            lsi11_set_device_enabled("vm1sel", 0, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
+    if (disable_vm1sav &&
+            lsi11_set_device_enabled("vm1sav", 0, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
 
     if (rk_path && !lsi11_device_enabled("rk11")) {
         fprintf(stderr, "-rk is not allowed with -disable-rk\n");
@@ -354,12 +373,13 @@ int main(int argc, char **argv)
         fprintf(stderr,
                 "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
                 "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "
-                "dev_sr=%d\n",
+                "dev_sr=%d dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
                 lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
                 lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
-                lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"));
+                lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"),
+                lsi11_device_enabled("vm1sel"), lsi11_device_enabled("vm1sav"));
         return 0;
     }
 

@@ -3,6 +3,8 @@
 #include "dev_rk11.h"
 #include "dev_lp11.h"
 #include "dev_sr.h"
+#include "dev_vm1sel.h"
+#include "dev_vm1sav.h"
 #include "util_term.h"
 
 int lsi11_machine_init(void)
@@ -24,6 +26,12 @@ int lsi11_machine_init(void)
     if (sr_init()  != 0) {
         return -1;
     }
+    if (vm1sel_init()  != 0) {
+        return -1;
+    }
+    if (vm1sav_init()  != 0) {
+        return -1;
+    }
 
     return 0;
 }
@@ -35,6 +43,8 @@ void lsi11_machine_reset(void)
     rk11_reset();
     lp11_reset();
     sr_reset();
+    vm1sel_reset();
+    vm1sav_reset();
 }
 
 void lsi11_machine_poll(void)
