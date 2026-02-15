@@ -85,8 +85,7 @@ typedef struct _regs {
 
     word	cps, cpc;	/* 0177676 0177674 */
 
-    word	SEL0;		/* unaddressed SEL register */
-    word	SEL1, SEL2;	/* 0177716 0177714 external registers */
+    word    SEL0; /* unaddressed SEL register */
     word    J11_REG177744; /* DCJ11 CPU register at 0177744 */
     word    J11_REG177746; /* DCJ11 CPU register at 0177746 */
     word    J11_REG177750; /* DCJ11 CPU register at 0177750 */
@@ -148,10 +147,5 @@ void core_init(regs *r);
 void core_reset(regs *r);
 int  core_step (regs *r);
 void core_fini (regs *r);
-
-/* D12 diagnostics hooks (no-op unless built with CORE_VEC_TRACE). */
-void core_d12_note_event(const char *line);
-void core_d12_dump_context(void);
-unsigned core_d12_irq_depth(void);
 
 #endif

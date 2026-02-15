@@ -201,7 +201,7 @@ char *disas(regs *r, word *addr, char *out)
 
     *addr += 2;
 
-    sprintf(out, "UNKNOWN");
+    sprintf(out, "UNKNOWN [0%0o]", instr);
 
     int i;
 

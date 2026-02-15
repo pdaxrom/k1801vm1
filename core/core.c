@@ -17,30 +17,6 @@
 #define MMU_STUB_REGS_WHEN_DISABLED 1
 #endif
 
-#ifndef CORE_RTI_TRACE
-#define CORE_RTI_TRACE 0
-#endif
-
-#ifndef CORE_VEC_TRACE
-#define CORE_VEC_TRACE 0
-#endif
-
-#if CORE_RTI_TRACE
-#define RTI_TRACE(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define RTI_TRACE(...)                                                         \
-    do {                                                                       \
-    } while (0)
-#endif
-
-#if CORE_VEC_TRACE
-#define VEC_TRACE(...) fprintf(stderr, __VA_ARGS__)
-#else
-#define VEC_TRACE(...)                                                         \
-    do {                                                                       \
-    } while (0)
-#endif
-
 #define TYPE_WORD 0
 #define TYPE_BYTE 1
 
@@ -125,134 +101,6 @@ static INLINE word dcj11_psw_set_prev_mode(word psw, int mode)
 {
     int m = psw_mode_normalize(mode);
     return (word)((psw & ~PSW_PM_MASK) | ((word)(m & 03) << 12));
-}
-
-#if CORE_VEC_TRACE
-#define D12_RING_SLOTS 0000040u
-#define D12_RING_LINE_MAX 0000400u
-
-typedef struct {
-    char lines[D12_RING_SLOTS][D12_RING_LINE_MAX];
-    uint32_t next;
-    uint32_t count;
-    uint32_t next_id;
-    unsigned depth;
-    int env_init;
-    int stop_on_badps;
-    int stop_on_rawps0;
-} d12_trace_state_t;
-
-static d12_trace_state_t g_d12 = {0};
-
-static int d12_env_flag(const char *name)
-{
-    const char *v = getenv(name);
-
-    if (!v || !*v) {
-        return 0;
-    }
-    if (!strcmp(v, "0")) {
-        return 0;
-    }
-    return 1;
-}
-
-static void d12_init_env(void)
-{
-    if (g_d12.env_init) {
-        return;
-    }
-    g_d12.stop_on_badps = d12_env_flag("CORE_STOP_ON_BADPS");
-    g_d12.stop_on_rawps0 = d12_env_flag("CORE_STOP_ON_RAWPS0");
-    g_d12.env_init = 1;
-}
-
-static void d12_ring_add(const char *line)
-{
-    size_t n;
-
-    if (!line || !*line) {
-        return;
-    }
-    d12_init_env();
-    n = strlen(line);
-    if (n >= D12_RING_LINE_MAX) {
-        n = D12_RING_LINE_MAX - 1;
-    }
-    memcpy(g_d12.lines[g_d12.next], line, n);
-    g_d12.lines[g_d12.next][n] = '\0';
-    g_d12.next = (g_d12.next + 1) % D12_RING_SLOTS;
-    if (g_d12.count < D12_RING_SLOTS) {
-        g_d12.count++;
-    }
-}
-
-static void d12_ring_addf(const char *fmt, ...)
-{
-    char line[D12_RING_LINE_MAX];
-    va_list ap;
-
-    va_start(ap, fmt);
-    vsnprintf(line, sizeof(line), fmt, ap);
-    va_end(ap);
-    d12_ring_add(line);
-}
-
-static void d12_dump_last_vec_lines(unsigned count)
-{
-    unsigned shown = 0;
-    unsigned idx;
-    unsigned scanned;
-
-    if (g_d12.count == 0 || count == 0) {
-        return;
-    }
-
-    fprintf(stderr, "---- D12 LAST VEC ----\n");
-    idx = (g_d12.next + D12_RING_SLOTS - 1) % D12_RING_SLOTS;
-    for (scanned = 0; scanned < g_d12.count && shown < count; scanned++) {
-        const char *line = g_d12.lines[idx];
-        if (!strncmp(line, "VEC ", 4)) {
-            fprintf(stderr, "%s\n", line);
-            shown++;
-        }
-        idx = (idx + D12_RING_SLOTS - 1) % D12_RING_SLOTS;
-    }
-}
-#endif
-
-void core_d12_note_event(const char *line)
-{
-#if CORE_VEC_TRACE
-    d12_ring_add(line);
-#else
-    (void)line;
-#endif
-}
-
-void core_d12_dump_context(void)
-{
-#if CORE_VEC_TRACE
-    unsigned total = g_d12.count;
-    unsigned start =
-        (g_d12.count < D12_RING_SLOTS) ? 0 : (g_d12.next % D12_RING_SLOTS);
-
-    d12_init_env();
-    fprintf(stderr, "---- D12 CONTEXT DUMP ----\n");
-    for (unsigned i = 0; i < total; i++) {
-        unsigned idx = (start + i) % D12_RING_SLOTS;
-        fprintf(stderr, "%s\n", g_d12.lines[idx]);
-    }
-#endif
-}
-
-unsigned core_d12_irq_depth(void)
-{
-#if CORE_VEC_TRACE
-    return g_d12.depth;
-#else
-    return 0;
-#endif
 }
 
 static INLINE bool vm1_reg_block_load_word(regs *r, word offset, word *value_out)
@@ -442,8 +290,7 @@ static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
         }
         /* USER entry: load PSW[7:0] and force H/U (0000400) to 0. */
         return (word)((old_psw & ~0000777) | (vec_psw & 0000377));
-    }
-    if (r->model == DCJ11) {
+    } else if (r->model == DCJ11) {
         int old_cm = dcj11_psw_cur_mode(old_psw);
         vec_psw = dcj11_psw_set_cur_mode(vec_psw, 0);
         vec_psw = dcj11_psw_set_prev_mode(vec_psw, old_cm);
@@ -480,22 +327,7 @@ static INLINE void dcj11_switch_stack_mode(regs *r, word old_psw, word new_psw)
     if (old_mode == new_mode) {
         return;
     }
-#if CORE_VEC_TRACE
-    int old_pm = dcj11_psw_prev_mode(old_psw);
-    int new_pm = dcj11_psw_prev_mode(new_psw);
-    d12_ring_addf(
-        "MODE SWITCH PC=%06o PS=%06o oldCM=%o oldPM=%o newCM=%o newPM=%o SP=%06o",
-        r->r[7], old_psw, old_mode & 03, old_pm & 03, new_mode & 03,
-        new_pm & 03, r->r[6]);
-    d12_ring_addf("SP BANKS K=%06o S=%06o U=%06o", r->sp_mode[0], r->sp_mode[1],
-                  r->sp_mode[3]);
-    VEC_TRACE(
-        "MODE SWITCH PC=%06o PS=%06o oldCM=%o oldPM=%o newCM=%o newPM=%o SP=%06o\n",
-        r->r[7], old_psw, old_mode & 03, old_pm & 03, new_mode & 03,
-        new_pm & 03, r->r[6]);
-    VEC_TRACE("SP BANKS K=%06o S=%06o U=%06o\n", r->sp_mode[0], r->sp_mode[1],
-              r->sp_mode[3]);
-#endif
+
     dcj11_sp_mode_init(r);
     r->sp_mode[old_mode] = r->r[6];
     r->r[6] = r->sp_mode[new_mode];
@@ -556,8 +388,7 @@ static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
         }
         *vec_out = vec & 0177776;
         return 1;
-    }
-    if (is_vm2(r)) {
+    } else if (is_vm2(r)) {
         vec = irq_vector;
         if (r->psw & FLAG_P) {
             return 0;
@@ -679,8 +510,6 @@ enum {
 static INLINE void bus_error_trap(regs *r);
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
                                   int mode, int seg);
-static int core_trace_mmu_boot = -1;
-
 static INLINE int mmu_decode_parpdr(word addr, int *mode, int *space,
                                     int *is_par, int *seg)
 {
@@ -823,9 +652,6 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     if (a == MMU_SSR0) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         r->mmu_ssr0 = value;
-        if (core_trace_mmu_boot > 0) {
-            fprintf(stderr, "MMU SSR0 <= %06o\n", value);
-        }
 #else
         (void)value;
 #endif
@@ -850,9 +676,6 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         r->mmu_ssr3 = value;
-        if (core_trace_mmu_boot > 0) {
-            fprintf(stderr, "MMU SSR3 <= %06o (addr=%06o)\n", value, a);
-        }
 #else
         (void)value;
 #endif
@@ -1517,9 +1340,6 @@ void core_reset(regs *r)
 {
     int mode;
 
-#if CORE_VEC_TRACE
-    memset(&g_d12, 0, sizeof(g_d12));
-#endif
     r->r[7] = r->SEL0 & 0177400;
     r->psw = 0340;
     for (mode = 0; mode < 4; mode++) {
@@ -1571,122 +1391,19 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc, word old_psw
     word new_pc = 0;
     word fetched_psw = 0;
     word new_psw = 0;
-#if CORE_VEC_TRACE
-    uint32_t id = ++g_d12.next_id;
-    word ps_addr;
-    word pc_addr;
-    word vec_base = (word)((vec & 0000777) & 0177776);
-    word raw_pc = raw_load_word_phys(r, vec_base);
-    word raw_ps = raw_load_word_phys(r, (word)(vec_base + 2));
-    int mmu_en = 0;
-    char path_space = 'I';
-    const char *k = (kind && *kind) ? kind : "VEC";
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
-        mmu_en = 1;
-        path_space = mmu_split_enabled(r, 0) ? 'D' : 'I';
-    }
-#endif
-
-    d12_init_env();
-
-    d12_ring_addf("VEC TAKE id=%06o kind=%s vec=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o",
-                  (unsigned)id, k, vec, old_pc, old_psw, r->r[6],
-                  (old_psw >> 14) & 03, (old_psw >> 5) & 07);
-    VEC_TRACE(
-        "VEC TAKE id=%06o kind=%s vec=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o\n",
-        (unsigned)id, k, vec, old_pc, old_psw, r->r[6], (old_psw >> 14) & 03,
-        (old_psw >> 5) & 07);
-    d12_ring_addf(
-        "VEC RAW id=%06o vec=%06o base=%06o [base]=%06o [base+2]=%06o",
-        (unsigned)id, vec, vec_base, raw_pc, raw_ps);
-    VEC_TRACE("VEC RAW id=%06o vec=%06o base=%06o [base]=%06o [base+2]=%06o\n",
-              (unsigned)id, vec, vec_base, raw_pc, raw_ps);
-    d12_ring_addf("VEC PHYS id=%06o phys=1 mmu=%o mode=%o space=P", (unsigned)id,
-                  mmu_en ? 1 : 0, (old_psw >> 14) & 03);
-    VEC_TRACE("VEC PHYS id=%06o phys=1 mmu=%o mode=%o space=P\n", (unsigned)id,
-              mmu_en ? 1 : 0, (old_psw >> 14) & 03);
-    d12_ring_addf("VEC PHYS id=%06o phys=0 mmu=%o mode=%o space=%c", (unsigned)id,
-                  mmu_en ? 1 : 0, (old_psw >> 14) & 03, path_space);
-    VEC_TRACE("VEC PHYS id=%06o phys=0 mmu=%o mode=%o space=%c\n", (unsigned)id,
-              mmu_en ? 1 : 0, (old_psw >> 14) & 03, path_space);
-    if (raw_ps == 0) {
-        d12_ring_addf("VEC ALERT id=%06o RAWPS=000000 vec=%06o base=%06o",
-                      (unsigned)id, vec, vec_base);
-        VEC_TRACE("VEC ALERT id=%06o RAWPS=000000 vec=%06o base=%06o\n",
-                  (unsigned)id, vec, vec_base);
-        core_d12_dump_context();
-        if (g_d12.stop_on_rawps0) {
-            exit(0);
-        }
-    }
-#endif
-#if !CORE_VEC_TRACE
     (void)kind;
-#endif
+
     fetched_psw = load_word_vector(r, (word)(vec + 2));
     new_psw = trap_psw(r, old_psw, fetched_psw);
 
     if (r->model == DCJ11) {
         dcj11_switch_stack_mode(r, old_psw, new_psw);
     }
-#if CORE_VEC_TRACE
-    ps_addr = (word)(r->r[6] - 2);
-    r->r[6] = ps_addr;
-    store_word(r, r->r[6], old_psw);
-    d12_ring_addf("VEC PUSH id=%06o addr=%06o <= %06o (OLDPS)", (unsigned)id,
-                  ps_addr, old_psw);
-    VEC_TRACE("VEC PUSH id=%06o addr=%06o <= %06o (OLDPS)\n", (unsigned)id,
-              ps_addr, old_psw);
-    if (old_psw == 0) {
-        d12_ring_addf("VEC ALERT id=%06o PUSHED OLDPS=000000 addr=%06o prePS=%06o PC=%06o",
-                      (unsigned)id, ps_addr, old_psw, old_pc);
-        VEC_TRACE(
-            "VEC ALERT id=%06o PUSHED OLDPS=000000 addr=%06o prePS=%06o PC=%06o\n",
-            (unsigned)id, ps_addr, old_psw, old_pc);
-        d12_dump_last_vec_lines(0000012);
-        core_d12_dump_context();
-        if (g_d12.stop_on_badps) {
-            exit(0);
-        }
-    }
-    pc_addr = (word)(r->r[6] - 2);
-    r->r[6] = pc_addr;
-    store_word(r, r->r[6], old_pc);
-    d12_ring_addf("VEC PUSH id=%06o addr=%06o <= %06o (OLDPC)", (unsigned)id,
-                  pc_addr, old_pc);
-    VEC_TRACE("VEC PUSH id=%06o addr=%06o <= %06o (OLDPC)\n", (unsigned)id,
-              pc_addr, old_pc);
-#else
     pushw(old_psw);
     pushw(old_pc);
-#endif
     new_pc = load_word_vector(r, vec);
-#if CORE_VEC_TRACE
-    d12_ring_addf("VEC FETCH id=%06o newPC=%06o newPS=%06o", (unsigned)id, new_pc,
-                  new_psw);
-    VEC_TRACE("VEC FETCH id=%06o newPC=%06o newPS=%06o\n", (unsigned)id, new_pc,
-              new_psw);
-    d12_ring_addf("VEC NEW id=%06o newPC=%06o newPS=%06o (rawPS=%06o masked=%06o)",
-                  (unsigned)id, new_pc, new_psw, raw_ps, new_psw);
-    VEC_TRACE(
-        "VEC NEW id=%06o newPC=%06o newPS=%06o (rawPS=%06o masked=%06o)\n",
-        (unsigned)id, new_pc, new_psw, raw_ps, new_psw);
-#endif
     r->r[7] = new_pc;
     r->psw = new_psw;
-#if CORE_VEC_TRACE
-    if (g_d12.depth < 0177777u) {
-        g_d12.depth++;
-    }
-    d12_ring_addf("VEC POST id=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o depth=%o",
-                  (unsigned)id, r->r[7], r->psw, r->r[6], (r->psw >> 14) & 03,
-                  (r->psw >> 5) & 07, g_d12.depth);
-    VEC_TRACE(
-        "VEC POST id=%06o PC=%06o PS=%06o SP=%06o mode=%o pri=%o depth=%o\n",
-        (unsigned)id, r->r[7], r->psw, r->r[6], (r->psw >> 14) & 03,
-        (r->psw >> 5) & 07, g_d12.depth);
-#endif
 }
 
 static INLINE void illegal_trap(regs *r)
@@ -1934,10 +1651,6 @@ int core_step(regs *r)
     int skip_trace = r->fTrap ? 1 : 0;
     r->fTrap = 0;
 
-    if (core_trace_mmu_boot < 0) {
-        core_trace_mmu_boot = (getenv("CORE_TRACE_MMU_BOOT") != NULL) ? 1 : 0;
-    }
-
     if (r->fAbort) {
         r->fAbort = 0;
         return 0;
@@ -1984,30 +1697,6 @@ int core_step(regs *r)
         return 0;
     }
 
-    if (core_trace_mmu_boot > 0 && r->r[7] == 005202) {
-        dword pa_r = 0, pa_w = 0;
-        int f_r = 0, f_w = 0;
-        int m_r = 0, m_w = 0;
-        int s_r = 0, s_w = 0;
-        int rc_r = translate_va_ex(r, 0140000, 0, 0, 0, &pa_r, &f_r, &m_r, &s_r);
-        int rc_w = translate_va_ex(r, 0140000, 1, 0, 0, &pa_w, &f_w, &m_w, &s_w);
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-        fprintf(stderr,
-                "MMU BOOT PC=%06o SSR0=%06o SSR3=%06o KIPDR6=%06o KDPDR6=%06o "
-                "KIPAR6=%06o KDPAR6=%06o rcR=%d paR=%08o fR=%d mR=%d sR=%d rcW=%d "
-                "paW=%08o fW=%d mW=%d sW=%d\n",
-                r->r[7], r->mmu_ssr0, r->mmu_ssr3, r->mmu_pdr[0][0][6],
-                r->mmu_pdr[0][1][6], r->mmu_par[0][0][6], r->mmu_par[0][1][6], rc_r,
-                (unsigned)pa_r, f_r, m_r, s_r, rc_w, (unsigned)pa_w, f_w, m_w, s_w);
-#else
-        fprintf(stderr,
-                "MMU BOOT PC=%06o rcR=%d paR=%08o fR=%d mR=%d sR=%d rcW=%d "
-                "paW=%08o fW=%d mW=%d sW=%d\n",
-                r->r[7], rc_r, (unsigned)pa_r, f_r, m_r, s_r, rc_w, (unsigned)pa_w,
-                f_w, m_w, s_w);
-#endif
-    }
-
     r->ir = op;
     r->r[7] += 2;
     if (is_vm2(r) && ((op & 0177700) == 0075000)) {
@@ -2045,23 +1734,8 @@ int core_step(regs *r)
     case 000002: { /* RTI */
         word popped_pc;
         word popped_psw;
-#if CORE_RTI_TRACE
-        word sp_pc = r->r[6];
-        word sp_psw;
-        word pre_pc = r->r[7];
-        word pre_psw = r->psw;
-        word pre_sp = r->r[6];
-#endif
         pullw(popped_pc);
-#if CORE_RTI_TRACE
-        sp_psw = r->r[6];
-#endif
         pullw(popped_psw);
-        RTI_TRACE(
-            "CORE RTI PRE PC=%06o PS=%06o SP=%06o KSP=%06o SSP=%06o USP=%06o\n",
-            pre_pc, pre_psw, pre_sp, r->sp_mode[0], r->sp_mode[1], r->sp_mode[3]);
-        RTI_TRACE("CORE RTI POP PC@%06o=%06o PS@%06o=%06o\n", sp_pc, popped_pc,
-                  sp_psw, popped_psw);
         r->r[7] = popped_pc;
         if (is_vm2(r)) {
             if (r->r[7] < 0160000) {
@@ -2076,14 +1750,6 @@ int core_step(regs *r)
             dcj11_switch_stack_mode(r, psw_before, popped_psw);
         }
         r->psw = popped_psw;
-#if CORE_VEC_TRACE
-        if (g_d12.depth > 0) {
-            g_d12.depth--;
-        }
-#endif
-        RTI_TRACE(
-            "CORE RTI POST PC=%06o PS=%06o SP=%06o KSP=%06o SSP=%06o USP=%06o\n",
-            r->r[7], r->psw, r->r[6], r->sp_mode[0], r->sp_mode[1], r->sp_mode[3]);
     }
     goto step_end;
 
@@ -2120,20 +1786,14 @@ int core_step(regs *r)
             if (r->r[7] < 0160000) {
                 popped_psw = (word)((popped_psw & ~FLAG_H) | (psw_before & FLAG_H));
             }
-        }
-        if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
-            word mask = 0170000 | 000340;
-            popped_psw = (word)((popped_psw & ~mask) | (psw_before & mask));
-        }
-        if (r->model == DCJ11) {
+        } else if (r->model == DCJ11) {
+            if (!dcj11_kernel_psw(psw_before)) {
+                word mask = 0170000 | 000340;
+                popped_psw = (word)((popped_psw & ~mask) | (psw_before & mask));
+            }
             dcj11_switch_stack_mode(r, psw_before, popped_psw);
         }
         r->psw = popped_psw;
-#if CORE_VEC_TRACE
-        if (g_d12.depth > 0) {
-            g_d12.depth--;
-        }
-#endif
         r->fTrap = 1;
         skip_trace = 1;
     }
