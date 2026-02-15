@@ -126,10 +126,6 @@ static void mem_write(word addr, byte value)
 
 static byte bk_load_byte(regs *r, word offset)
 {
-    byte value;
-    if (hwstub_vm1_load_byte(r, offset, &value)) {
-        return value;
-    }
     switch (offset) {
     case BK_KBD_STATUS:
         return (byte)((kbd_status & CSR_READY) | (kbd_status & 0100));
@@ -169,9 +165,6 @@ static byte bk_load_byte(regs *r, word offset)
 
 static void bk_store_byte(regs *r, word offset, byte value)
 {
-    if (hwstub_vm1_store_byte(r, offset, value)) {
-        return;
-    }
     switch (offset) {
     case BK_KBD_STATUS:
         kbd_status = (byte)((kbd_status & CSR_READY) | (value & 0100));
@@ -219,22 +212,13 @@ static void bk_store_byte(regs *r, word offset, byte value)
 
 static word bk_load_word(regs *r, word offset)
 {
-    word value;
-    if (hwstub_vm1_load_word(r, offset, &value)) {
-        return value;
-    }
-    {
-        byte lo = bk_load_byte(r, offset);
-        byte hi = bk_load_byte(r, (word)(offset + 1));
-        return (word)(lo | (hi << 8));
-    }
+    byte lo = bk_load_byte(r, offset);
+    byte hi = bk_load_byte(r, (word)(offset + 1));
+    return (word)(lo | (hi << 8));
 }
 
 static void bk_store_word(regs *r, word offset, word value)
 {
-    if (hwstub_vm1_store_word(r, offset, value)) {
-        return;
-    }
     bk_store_byte(r, offset, (byte)(value & 0377));
     bk_store_byte(r, (word)(offset + 1), (byte)(value >> 8));
 }
@@ -263,7 +247,7 @@ static void bk_reset(regs *r)
     bus_error_pending = 0;
     beeper_on = 0;
     beeper_pulse = 0;
-    r->VM1_RAP_PRESENT = 1;
+//    sys_ctrl = 0160000;
     bk_tape_reset();
 }
 

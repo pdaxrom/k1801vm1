@@ -1,5 +1,5 @@
 CC ?= cc
-CFLAGS ?= -Wall -g
+CFLAGS ?= -Wall -Wpedantic -g
 
 # Choose GUI backend at build time (default SDL2)
 GUI ?= sdl

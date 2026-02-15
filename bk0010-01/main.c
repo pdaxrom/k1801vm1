@@ -595,7 +595,7 @@ int main(int argc, char **argv)
     if (basic_rom) {
         bk_hw_set_rom_segment(basic_rom, BASIC_BASE, basic_size);
     }
-    r.SEL1 = MONITOR_BASE;
+
     core_reset(&r);
 
     bk_hw_set_tick_hz(cpu_hz);
@@ -649,10 +649,10 @@ int main(int argc, char **argv)
     if (have_start) {
         r.r[7] = start_addr;
     } else {
-        r.r[7] = MONITOR_BASE;
+//        r.r[7] = MONITOR_BASE;
     }
 
-    r.r[6] = 01000;
+//    r.r[6] = 01000;
 
     /* Initialise the chosen GUI backend */
     int gui_init_ok = 0;
