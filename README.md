@@ -265,9 +265,10 @@ Status: **PASS / FIXED**
 Status: **PASS / FIXED**
 
 ### 11.5 VM1 Interrupt Masking
-- PSW7 (I) masks IRQ2/IRQ3/VIRQ.
-- PSW10 masks IRQ1/IRQ2/IRQ3/VIRQ.
-- PSW11 masks IRQ1.
+- PSW7 (bit 7, P) masks IRQ2/IRQ3/VIRQ.
+- PSW10 (bit 10) masks IRQ1/IRQ2/IRQ3/VIRQ.
+- PSW11 (bit 11) masks IRQ1.
+- **Fixed IRQ reliability**: interrupts are now acknowledged (`ACK`) only when the CPU core is ready to accept them, preventing lost interrupts during high-priority tasks.
 
 Status: **PASS / FIXED**
 
@@ -313,6 +314,7 @@ Status: **PASS / FIXED**
 ### 12.2 VM1G Timer Interrupt
 - VM1G generates timer IRQ at vector 000270 when RUN+MON are set.
 - Interrupt masked by PSW7/PSW10.
+- Reliability fix for lost interrupts applies to timer IRQ as well.
 
 Status: **PASS / LIMITED**
 
@@ -381,9 +383,15 @@ Status: **PASS / FIXED**
 Status: **PASS / FIXED**
 
 ### 13.9 VM2 IRQ Masking with `P` Bit
-- `PSW.P=1` masks VM2 external interrupts `EVNT` and `VIRQ`.
-- Masked VM2 IRQ requests must remain pending and be accepted only after `P` is cleared.
-- Core VM2 IRQ polling path now avoids consuming/acknowledging IRQ while `P=1`.
+- `PSW.P=1` (bit 7) masks VM2 external interrupts `EVNT` and `VIRQ`.
+- Interrupts are only acknowledged (`ACK`) when they can be accepted by the CPU.
+
+Status: **PASS / FIXED**
+
+### 13.10 VM2 Address Space Banking
+- VM2 supports two independent 64KB banks: USER and HALT.
+- Bank selection is controlled by `PSW.H/U` (bit 8).
+- Implementation uses 17-bit physical addresses in core hardware stub (`addr | 0200000` for HALT mode).
 
 Status: **PASS / FIXED**
 
@@ -430,7 +438,8 @@ memory fetch/store paths.
 
 - With `ENABLE_MMU=1`, core hardware stub provides 22-bit physical backing
   memory (4MB) so MMU translation above `0177777` is testable in unit tests.
-- With `ENABLE_MMU=0`, hardware stub uses legacy 64KB memory backing.
+- With `ENABLE_MMU=0`, hardware stub uses legacy 64KB memory backing by default,
+  expanded to 128KB when VM2 model is active to support USER/HALT banking.
 - Machine-specific frontends may still provide their own bus/memory limits.
 - `SSR1` is implemented as a simplified fault context latch (fault VA), not a complete
   per-microstep register modification log.
@@ -513,6 +522,7 @@ For `lsi11/lsi11` and `lsi11/pdp1184`:
 - `-trace-regs` register dump per instruction
 - `-traceirq` interrupt delivery trace
 - `-tracenxm` NXM/bus trap trace
+- `-steps N` execute exactly N instructions and exit
 - `-check-config` final machine/device config print
 
 Example:
