@@ -372,6 +372,7 @@ static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
     word vec = (r->model == K1801VM1 || r->model == K1801VM1G)
                ? irq_vector
                : (irq_vector & 0777);
+
     int pri = (irq_vector >> 9) & 07;
     int psw_pri = (r->psw >> 5) & 07;
     if (r->model == K1801VM1 || r->model == K1801VM1G) {
@@ -1673,9 +1674,7 @@ int core_step(regs *r)
     }
 
     if (r->fWait) {
-        /* VM2 masks EVNT/VIRQ when PSW.P is set; do not consume pending IRQs. */
-        if ((!is_vm2(r) || !(r->psw & FLAG_P)) &&
-                r->poll_irq && r->poll_irq(r, &irq_vector)) {
+        if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
             word vec;
             if (irq_accept(r, irq_vector, &vec)) {
                 word old_psw = r->psw;
@@ -1871,7 +1870,7 @@ int core_step(regs *r)
             }
             r->r[7] = r->cpc;
             r->psw = r->cps;
-            if (!(r->psw & FLAG_P) && r->poll_irq) {
+            if (r->poll_irq) {
                 word vec;
                 word irq_vector;
                 if (r->poll_irq(r, &irq_vector)) {
@@ -3155,8 +3154,7 @@ step_end:
             }
         }
         if (!skip_irq) {
-            if ((!is_vm2(r) || !(r->psw & FLAG_P)) &&
-                    r->poll_irq && r->poll_irq(r, &irq_vector)) {
+            if (r->poll_irq && r->poll_irq(r, &irq_vector)) {
                 word vec;
                 if (irq_accept(r, irq_vector, &vec)) {
                     word old_psw = r->psw;
