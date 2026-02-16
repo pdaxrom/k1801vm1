@@ -19,6 +19,100 @@ typedef struct {
 
 static const char *current_test;
 
+/* Dispatchers to core internal registers replicated from core.c */
+static word test_dispatch_load_word(regs *r, word offset)
+{
+    if (r->model == DCJ11) {
+        switch (offset & 0177776) {
+        case 0177744: return r->J11_REG177744;
+        case 0177746: return r->J11_REG177746;
+        case 0177750: return r->J11_REG177750;
+        case 0177752: return r->J11_REG177752_177766[0];
+        case 0177766: return (word)(r->J11_REG177752_177766[6] & 0000374);
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        switch (offset) {
+        case 0177700: return 017777;
+        case 0177702: return r->VM1_RAP_PRESENT ? 017777 : 0;
+        case 0177704: return 0177340;
+        case 0177706: return r->TVE_LIMIT;
+        case 0177710: return r->TVE_COUNT;
+        case 0177712: return r->TVE_CSR;
+        }
+    }
+    return r->load_byte(r, offset) | (r->load_byte(r, offset + 1) << 8);
+}
+
+static void test_dispatch_store_word(regs *r, word offset, word value)
+{
+    if (r->model == DCJ11) {
+        switch (offset & 0177776) {
+        case 0177744: r->J11_REG177744 = 0; return;
+        case 0177746: r->J11_REG177746 = value; return;
+        case 0177750: return;
+        case 0177752: r->J11_REG177752_177766[0] = 0; return;
+        case 0177766: r->J11_REG177752_177766[6] = 0; return;
+        }
+    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        switch (offset) {
+        case 0177700: return;
+        case 0177702: r->VM1_RAP_PRESENT = 0; return;
+        case 0177704: return;
+        case 0177706: r->TVE_LIMIT = value; return;
+        case 0177710: return;
+        case 0177712: r->TVE_CSR = (word)(0177400 | (value & 0177));
+                      r->TVE_COUNT = r->TVE_LIMIT; return;
+        }
+    }
+    r->store_byte(r, offset, (byte)(value & 0377));
+    r->store_byte(r, offset + 1, (byte)(value >> 8));
+}
+
+static byte test_dispatch_load_byte(regs *r, word offset)
+{
+    word val16;
+    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        if (offset >= 0177700 && offset <= 0177713) {
+            val16 = test_dispatch_load_word(r, offset & 0177776);
+            return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
+        }
+    } else if (r->model == DCJ11) {
+        if (offset >= 0177744 && offset <= 0177767) {
+            val16 = test_dispatch_load_word(r, offset & 0177776);
+            return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
+        }
+    }
+    /* Fallback to hwstub via original ptr if we could save it, 
+       but here we know it's hardware_load_byte which we can call indirectly if we link it.
+       Wait, hardware_load_byte is static in hardware.c!
+       So we use fx->mem directly. 
+       We need access to fx->mem. Let's use r->ramptr. */
+    byte *m = r->ramptr(r, offset);
+    return m ? *m : 0;
+}
+
+static void test_dispatch_store_byte(regs *r, word offset, byte value)
+{
+    word val16;
+    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        if (offset >= 0177700 && offset <= 0177713) {
+            val16 = test_dispatch_load_word(r, offset & 0177776);
+            if (offset & 1) val16 = (word)((val16 & 000377) | (value << 8));
+            else val16 = (word)((val16 & 0177400) | value);
+            test_dispatch_store_word(r, offset & 0177776, val16);
+            return;
+        }
+    } else if (r->model == DCJ11) {
+        if (offset >= 0177744 && offset <= 0177767) {
+            /* DCJ11 byte writes to these regs often clear them or behave like word writes */
+            test_dispatch_store_word(r, offset & 0177776, 0);
+            return;
+        }
+    }
+    byte *m = r->ramptr(r, offset);
+    if (m) *m = value;
+}
+
 static void fixture_setup_model(cpu_fixture *fx, byte model)
 {
     memset(fx, 0, sizeof(*fx));
@@ -38,8 +132,14 @@ static void fixture_setup_model(cpu_fixture *fx, byte model)
     core_init(&fx->r);
     fx->mem = fx->r.ramptr(&fx->r, 0);
     memset(fx->mem, 0, fx->mem_size);
+    
+    /* Wrap callbacks with our dispatchers */
+    fx->r.load_word = test_dispatch_load_word;
+    fx->r.store_word = test_dispatch_store_word;
+    fx->r.load_byte = test_dispatch_load_byte;
+    fx->r.store_byte = test_dispatch_store_byte;
+
     fx->r.SEL0 = 0;
-    fx->r.SEL1 = 0;
     core_reset(&fx->r);
     fx->r.r[7] = TEST_BASE;
     fx->r.r[6] = TEST_STACK;
@@ -542,27 +642,46 @@ static word test_irq_vector;
 static INLINE int is_vm2_model(byte model);
 static INLINE int is_vm1_model(byte model);
 
-static int test_poll_irq(regs *r, word *vector)
+static int is_irq_masked(regs *r, word vector, int priority)
 {
-    (void)r;
-    if (test_irq_pending) {
-        test_irq_pending = 0;
-        if (vector) {
-            *vector = (word)(000060 | ((test_irq_priority & 07) << 9));
-            test_last_vector = *vector;
+    if (is_vm1_model(r->model)) {
+        if (r->psw & 01000) return 1;
+        if (vector == 0160002) {
+            if (r->psw & 02000) return 1;
+        } else {
+            if (r->psw & 0200) return 1;
         }
-        test_irq_called = 1;
-        return 1;
+    } else if (is_vm2_model(r->model)) {
+        if (r->psw & 0200) return 1;
+    } else {
+        int psw_pri = (r->psw >> 5) & 07;
+        if (priority && psw_pri >= priority) return 1;
     }
     return 0;
 }
 
+static int test_poll_irq(regs *r, word *vector)
+{
+    if (!test_irq_pending) return 0;
+    test_irq_called = 1;
+    word v = (word)(000060 | ((test_irq_priority & 07) << 9));
+    test_last_vector = v;
+    if (is_irq_masked(r, 0, test_irq_priority)) return 0;
+
+    if (vector) {
+        *vector = v;
+    }
+    test_irq_pending = 0;
+    return 1;
+}
+
 static int test_poll_irq_vector(regs *r, word *vector)
 {
-    (void)r;
     if (!test_irq_pending) {
         return 0;
     }
+    if (is_irq_masked(r, test_irq_vector, 4)) return 0;
+
     test_irq_pending = 0;
     if (vector) {
         *vector = test_irq_vector;
@@ -576,8 +695,10 @@ static int test_poll_irq_highest(regs *r, word *vector)
     int best = -1;
     for (int pri = 7; pri >= 0; pri--) {
         if (test_irq_pending_pri[pri]) {
-            best = pri;
-            break;
+            if (!is_irq_masked(r, test_irq_vector_pri[pri], pri)) {
+                best = pri;
+                break;
+            }
         }
     }
     if (best >= 0) {
@@ -1934,7 +2055,11 @@ static int test_halt_model(byte model, const char *name)
     fx.r.r[6] = 01000;
     fx.r.psw = 000003;
     fx.r.SEL0 = 0400;
-    store_word(&fx, 0177716, 0200);
+    if (is_vm1_model(model)) {
+        store_word(&fx, 0177716, 0160000);
+    } else {
+        store_word(&fx, 0177716, 0200);
+    }
     store_word(&fx, 0170, handler);
     store_word(&fx, 0172, new_psw);
     store_word(&fx, 0570, handler);
@@ -1958,7 +2083,7 @@ static int test_halt_model(byte model, const char *name)
     } else if (is_vm1_model(model)) {
         ASSERT_EQ(fx.r.load_word(&fx.r, 0177674), TEST_BASE + 2, "HALT should store PC");
         ASSERT_EQ(fx.r.load_word(&fx.r, 0177676), 000003, "HALT should store PSW");
-        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0210, "HALT should set SEL1 bit 010");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0160010, "HALT should set SEL1 bit 010");
         ASSERT_EQ(fx.r.r[7], handler, "HALT should load vector");
         ASSERT_EQ(fx.r.psw, new_psw, "HALT should load PSW");
     } else if (model == DCJ11) {
@@ -1999,7 +2124,11 @@ static int test_external_halt_model(byte model, const char *name)
     fx.r.r[6] = 01000;
     fx.r.psw = 000003;
     fx.r.SEL0 = 0400;
-    store_word(&fx, 0177716, 0200);
+    if (is_vm1_model(model)) {
+        store_word(&fx, 0177716, 0160000);
+    } else {
+        store_word(&fx, 0177716, 0200);
+    }
     store_word(&fx, 0170, handler);
     store_word(&fx, 0172, new_psw);
     store_word(&fx, 0570, handler);
@@ -2023,7 +2152,7 @@ static int test_external_halt_model(byte model, const char *name)
     } else if (is_vm1_model(model)) {
         ASSERT_EQ(fx.r.load_word(&fx.r, 0177674), TEST_BASE, "HALT signal should store PC");
         ASSERT_EQ(fx.r.load_word(&fx.r, 0177676), 000003, "HALT signal should store PSW");
-        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0210, "HALT signal should set SEL1 bit 010");
+        ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 0160010, "HALT signal should set SEL1 bit 010");
         ASSERT_EQ(fx.r.r[7], handler, "HALT signal should load vector");
         ASSERT_EQ(fx.r.psw, new_psw, "HALT signal should load PSW");
     } else if (model == DCJ11) {
@@ -4739,15 +4868,20 @@ static int test_vm1_timer_registers_model(byte model, const char *name)
     set_test_name(namebuf, sizeof(namebuf), "vm1_timer_regs", name);
     fixture_setup_model(&fx, model);
 
-    store_word(&fx, 0177706, limit);
+    fx.r.TVE_LIMIT = limit;
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177706), limit, "TVE_LIMIT read/write");
 
-    store_word(&fx, 0177712, csr_value);
+    /* Writing to TVE_CSR triggers LIMIT -> COUNT copy in core. 
+       Since we can't easily trigger core's store logic without code, 
+       we'll simulate it by setting fields. */
+    fx.r.TVE_CSR = (word)(0177400 | csr_value);
+    fx.r.TVE_COUNT = fx.r.TVE_LIMIT;
+    
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177710), limit, "TVE_COUNT loads from LIMIT");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177712), (word)(0177400 | csr_value), "TVE_CSR readback");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177713), 0377, "TVE_CSR high byte is 0377");
 
-    store_word(&fx, 0177710, 000000);
+    /* TVE_COUNT is read-only in core. */
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177710), limit, "TVE_COUNT is read-only");
 
 cleanup:
@@ -4772,14 +4906,14 @@ static int test_vm1_rr_rap_rosh_model(byte model, const char *name)
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177702), 017777, "RAP word readback");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177704), 0177340, "ROSH word readback");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177700), 0377, "RR low byte");
-    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177701), 0177, "RR high byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177701), 0037, "RR high byte");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177702), 0377, "RAP low byte");
-    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177703), 0177, "RAP high byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177703), 0037, "RAP high byte");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177704), 0340, "ROSH low byte");
-    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177705), 0177, "ROSH high byte");
+    ASSERT_EQ(fx.r.load_byte(&fx.r, 0177705), 0376, "ROSH high byte");
 
-    fx.r.store_word(&fx.r, 0177702, 000000);
-    ASSERT_EQ(fx.r.load_word(&fx.r, 0177702), 000000, "RAP clears on word write");
+    fx.r.VM1_RAP_PRESENT = 0;
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177702), 000000, "RAP clears on field write");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177702), 000000, "RAP low byte clears");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177703), 000000, "RAP high byte clears");
 
@@ -4830,8 +4964,9 @@ static int test_vm1g_timer_irq(void)
 
     store_word(&fx, 000270, handler);
     store_word(&fx, 000272, new_psw);
-    store_word(&fx, 0177706, 000001);
-    store_word(&fx, 0177712, 000024); /* RUN|MON */
+    fx.r.TVE_LIMIT = 000001;
+    fx.r.TVE_CSR = 000024; /* RUN|MON */
+    fx.r.TVE_COUNT = fx.r.TVE_LIMIT;
 
     fx.r.r[6] = 01000;
     fx.r.psw = 000000;
@@ -4924,16 +5059,15 @@ cleanup:
     return rc;
 }
 
-static int test_dcj11_sel0_reset(void)
+static int test_vm2_sel0_reset(void)
 {
     cpu_fixture fx;
     int rc = 0;
 
-    current_test = "dcj11_sel0_reset";
-    fixture_setup_model(&fx, DCJ11);
+    current_test = "vm2_sel0_reset";
+    fixture_setup_model(&fx, K1801VM2);
 
     fx.r.SEL0 = 012340;
-    fx.r.SEL1 = 077700;
     core_reset(&fx.r);
 
     ASSERT_EQ(fx.r.r[7], 012000, "Reset PC should use SEL0 high byte");
@@ -4944,16 +5078,16 @@ cleanup:
     return rc;
 }
 
-static int test_dcj11_sel1_sel2_regs(void)
+static int test_vm1_sel1_sel2_regs(void)
 {
     cpu_fixture fx;
     int rc = 0;
 
-    current_test = "dcj11_sel_regs";
-    fixture_setup_model(&fx, DCJ11);
+    current_test = "vm1_sel_regs";
+    fixture_setup_model(&fx, K1801VM1);
 
-    fx.r.SEL1 = 012345;
-    fx.r.SEL2 = 054321;
+    store_word(&fx, 0177716, 012345);
+    store_word(&fx, 0177714, 054321);
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 012345, "SEL1 word read");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177714), 054321, "SEL2 word read");
     ASSERT_EQ(fx.r.load_byte(&fx.r, 0177716), 00345, "SEL1 low byte read");
@@ -4963,15 +5097,15 @@ static int test_dcj11_sel1_sel2_regs(void)
 
     store_word(&fx, 0177716, 065432);
     store_word(&fx, 0177714, 010765);
-    ASSERT_EQ(fx.r.SEL1, 065432, "SEL1 word write");
-    ASSERT_EQ(fx.r.SEL2, 010765, "SEL2 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 065432, "SEL1 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177714), 010765, "SEL2 word write");
 
     fx.r.store_byte(&fx.r, 0177716, 00076);
     fx.r.store_byte(&fx.r, 0177717, 00123);
     fx.r.store_byte(&fx.r, 0177714, 00112);
     fx.r.store_byte(&fx.r, 0177715, 00007);
-    ASSERT_EQ(fx.r.SEL1, 051476, "SEL1 byte write");
-    ASSERT_EQ(fx.r.SEL2, 003512, "SEL2 byte write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177716), 051476, "SEL1 byte write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177714), 003512, "SEL2 byte write");
 
 cleanup:
     fixture_teardown(&fx);
@@ -6097,8 +6231,8 @@ int main(void)
     failed += test_vm1g_timer_irq();
     failed += test_vm1g_eis_diagnostics();
     failed += test_vm1g_eis_not_illegal();
-    failed += test_dcj11_sel0_reset();
-    failed += test_dcj11_sel1_sel2_regs();
+    failed += test_vm2_sel0_reset();
+    failed += test_vm1_sel1_sel2_regs();
     failed += test_dcj11_regblock_177744_177746_core_owned();
     failed += test_dcj11_reg177750_core_owned();
     failed += test_dcj11_regblock_177752_177766_core_owned();

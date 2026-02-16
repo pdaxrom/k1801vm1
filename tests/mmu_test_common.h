@@ -42,8 +42,6 @@ static INLINE void mmu_fixture_setup(mmu_fixture *fx)
     fx->mem = fx->r.ramptr(&fx->r, 0);
     memset(fx->mem, 0, fx->mem_size);
     fx->r.SEL0 = 0;
-    fx->r.SEL1 = 0;
-    fx->r.SEL2 = 0;
     core_reset(&fx->r);
     fx->r.r[7] = MMU_TEST_BASE;
     fx->r.r[6] = MMU_TEST_STACK;
