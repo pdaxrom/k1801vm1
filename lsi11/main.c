@@ -145,6 +145,7 @@ static void usage(const char *argv0)
             "  -tty7b          DL11 console 7-bit mode (default)\n"
             "  -tty8b          DL11 console 8-bit mode\n"
             "  -exit-on-abort  Exit emulator on HALT/abort\n"
+            "  -steps N        Emulate N steps then exit\n"
             "  -check-config   Validate machine config and exit\n",
             argv0, target);
     fprintf(stderr,
@@ -193,6 +194,7 @@ int main(int argc, char **argv)
 #endif
     int trace = 0;
     int trace_regs = 0;
+    long max_steps = -1;
     int dl11_8bit = 0;
     int exit_on_abort = 0;
     int check_config_only = 0;
@@ -253,6 +255,8 @@ int main(int argc, char **argv)
             exit_on_abort = 1;
         } else if (!strcmp(argv[i], "-check-config")) {
             check_config_only = 1;
+        } else if (!strcmp(argv[i], "-steps") && i + 1 < argc) {
+            max_steps = strtol(argv[++i], NULL, 10);
         } else if (!strcmp(argv[i], "-load") && i + 1 < argc) {
             load_path = argv[++i];
         } else if (!strcmp(argv[i], "-addr") && i + 1 < argc) {
@@ -588,8 +592,14 @@ int main(int argc, char **argv)
     /* -------- main emulation loop --------
        Replace cpu_step(&r) with your core's actual stepping API. */
     for (;;) {
+        if (max_steps == 0) {
+            break;
+        }
         /* Keep device service latency low so boot ROM wait loops do not stall. */
         int step_chunk = trace ? 1 : 64;
+        if (max_steps > 0 && step_chunk > max_steps) {
+            step_chunk = (int)max_steps;
+        }
         for (int k = 0; k < step_chunk; k++) {
             if (trace) {
                 char buf[128];
@@ -606,7 +616,13 @@ int main(int argc, char **argv)
             }
             /* TODO: replace with your core single-instruction executor */
             core_step(&r); /* must exist in your core */
+            if (max_steps > 0) {
+                max_steps--;
+            }
             if (r.fAbort) {
+                break;
+            }
+            if (max_steps == 0) {
                 break;
             }
         }
