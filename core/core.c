@@ -1341,8 +1341,6 @@ void core_reset(regs *r)
 {
     int mode;
 
-    r->r[7] = r->SEL0 & 0177400;
-    r->psw = 0340;
     for (mode = 0; mode < 4; mode++) {
         r->sp_mode[mode] = 0;
     }
@@ -1376,7 +1374,12 @@ void core_reset(regs *r)
         r->TVE_PENDING = 0;
         r->VM1_RAP_PRESENT = 1;
         r->r[7] = load_word(r, 0177716) & 0177400;
+    } else if (is_vm2(r)) {
+        r->r[7] = r->SEL0 & 0177400;
+    } else {
+        r->r[7] = 0;
     }
+    r->psw = 0340;
 }
 
 void core_fini(regs *r)
@@ -1460,7 +1463,8 @@ static INLINE void handle_halt(regs *r)
         pushw(r->r[7]);
         vec = 4;
         if (flag_is_set(FLAG_H)) {
-            vec |= (r->SEL0 & 0177400);
+            //vec |= (r->SEL0 & 0177400);
+            // In kernel mode must start mini ODT console
         }
         r->r[7] = load_word_vector(r, vec) & 0177776;
         r->psw = 0340;
@@ -1894,7 +1898,7 @@ int core_step(regs *r)
             goto step_end;
 
         case 0000020: /* RSEL */
-            if (!flag_is_set(FLAG_H)) {
+            if (!is_vm2(r) || !flag_is_set(FLAG_H)) {
                 illegal_trap(r);
                 goto step_end;
             }
