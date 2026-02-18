@@ -62,6 +62,11 @@ static int vm2_model(const regs *r)
     return (r->model == K1801VM2 || r->model == K1806VM2) ? 1 : 0;
 }
 
+static int vm1_model(const regs *r)
+{
+    return (r->model == K1801VM1 || r->model == K1801VM1G) ? 1 : 0;
+}
+
 static int vm2_halt_mode(const regs *r)
 {
     return (vm2_model(r) && (r->psw & FLAG_H)) ? 1 : 0;
@@ -77,8 +82,9 @@ static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
     device_mask.rk11 = 1;
     device_mask.sr = 1;
     device_mask.rh11 = 1;
-    device_mask.vm1sel = 1;
-    device_mask.vm1sav = 1;
+    /* VM1 extension devices are CPU-specific and must be enabled explicitly. */
+    device_mask.vm1sel = 0;
+    device_mask.vm1sav = 0;
 }
 
 int lsi11_machine_configure(lsi11_machine_t machine, uint32_t ram_kb, char *err,
@@ -451,10 +457,20 @@ static void core_store_word_pa(regs *r, dword addr, word v)
 /* core expects init/reset/fini */
 static int impl_init(regs *r)
 {
-    (void)r;
+    int need_vm1_ext = vm1_model(r);
+
     /* init bus RAM; devices register their I/O in *_init() */
     bus_init();
     dl11_set_alias(dl11_alias_on);
+
+    /* Enforce VM1-only extension peripheral visibility by CPU model. */
+    if (need_vm1_ext) {
+        device_mask.vm1sel = 1;
+        device_mask.vm1sav = 1;
+    } else {
+        device_mask.vm1sel = 0;
+        device_mask.vm1sav = 0;
+    }
 
     /* init host terminal */
     term_raw_active = 0;

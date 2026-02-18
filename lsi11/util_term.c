@@ -1,9 +1,42 @@
-#define _POSIX_C_SOURCE 200809L
 #include "util_term.h"
-#include <unistd.h>
-#include <termios.h>
+
+#if defined(PICO_ON_DEVICE)
+
+#include "pico/stdlib.h"
+
+#include <stdio.h>
+
+void util_term_init_raw(void)
+{
+}
+
+void util_term_restore(void)
+{
+}
+
+int util_term_getc_nonblock(void)
+{
+    int c = getchar_timeout_us(0);
+    if (c == PICO_ERROR_TIMEOUT) {
+        return -1;
+    }
+    return c & 0xff;
+}
+
+void util_term_putc(char c)
+{
+    putchar((unsigned char)c);
+    fflush(stdout);
+}
+
+#else
+
+#define _POSIX_C_SOURCE 200809L
+
 #include <fcntl.h>
 #include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
 
 static struct termios oldt;
 static int raw_on = 0;
@@ -50,3 +83,5 @@ void util_term_putc(char c)
     fputc((unsigned char)c, stdout);
     fflush(stdout);
 }
+
+#endif

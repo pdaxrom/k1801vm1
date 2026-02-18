@@ -10,6 +10,7 @@ void rh11_poll(void);
 
 int rh11_open_image(const char *path);
 void rh11_close_image(void);
+void rh11_set_debug(int on);
 int rh11_boot_copy(void *dest, size_t len);
 
 int rh11_irq_pending(void);

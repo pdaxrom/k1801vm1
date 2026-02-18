@@ -4,6 +4,7 @@
 #include "devio.h"
 #include "irq.h"
 #include "irq_latch.h"
+#include "emu_file.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -93,7 +94,7 @@ static uint8_t rkmex; /* 2-bit extension from RKCS bits 4..5 */
 static uint8_t rk_write_lock;
 
 static irq_latch_t rk_l;
-static FILE *fp = NULL;
+static emu_file_t *fp = NULL;
 static int img_read_only = 0;
 static int sector_one_based = 0;
 static int rk_debug = 0;
@@ -397,14 +398,16 @@ static void rk_transfer(enum rk_xfer_mode mode)
             rk_set_error(RKER_NXS);
             break;
         }
-        off = lba * 01000u + (uint32_t)w_in_sector * 2u;
-        if (fseek(fp, (long)off, SEEK_SET) != 0) {
-            rk_set_error(RKER_DLT);
-            break;
+        if (w_in_sector == 0) {
+            off = lba * 01000u;
+            if (emu_fseek(fp, (long)off, EMU_SEEK_SET) != 0) {
+                rk_set_error(RKER_DLT);
+                break;
+            }
         }
 
         if (mode == RK_XFER_READ || mode == RK_XFER_RCHK || mode == RK_XFER_WCHK) {
-            if (fread(&lo, 1, 1, fp) != 1 || fread(&hi, 1, 1, fp) != 1) {
+            if (emu_fread(&lo, 1, 1, fp) != 1 || emu_fread(&hi, 1, 1, fp) != 1) {
                 rk_set_error(RKER_DLT);
                 break;
             }
@@ -423,7 +426,7 @@ static void rk_transfer(enum rk_xfer_mode mode)
             }
             lo = (uint8_t)(w & 000377);
             hi = (uint8_t)((w >> 8) & 000377);
-            if (fwrite(&lo, 1, 1, fp) != 1 || fwrite(&hi, 1, 1, fp) != 1) {
+            if (emu_fwrite(&lo, 1, 1, fp) != 1 || emu_fwrite(&hi, 1, 1, fp) != 1) {
                 rk_set_error(RKER_DLT);
                 break;
             }
@@ -462,7 +465,7 @@ static void rk_transfer(enum rk_xfer_mode mode)
     rk_sync_status();
 
     if (mode == RK_XFER_WRITE) {
-        fflush(fp);
+        emu_fflush(fp);
     }
 
     rk_finish_command();
@@ -733,17 +736,17 @@ void rk11_poll(void)
 
 int rk11_open_image(const char *path)
 {
-    FILE *f = NULL;
+    emu_file_t *f = NULL;
 
     if (fp) {
-        fclose(fp);
+        emu_fclose(fp);
         fp = NULL;
     }
 
     img_read_only = 0;
-    f = fopen(path, "r+b");
+    f = emu_fopen(path, "r+b");
     if (!f) {
-        f = fopen(path, "rb");
+        f = emu_fopen(path, "rb");
         if (!f) {
             rk_sync_status();
             return -1;
@@ -759,7 +762,7 @@ int rk11_open_image(const char *path)
 void rk11_close_image(void)
 {
     if (fp) {
-        fclose(fp);
+        emu_fclose(fp);
         fp = NULL;
     }
     img_read_only = 0;
@@ -771,13 +774,18 @@ void rk11_set_sector_base(int one_based)
     sector_one_based = one_based ? 1 : 0;
 }
 
+void rk11_set_debug(int on)
+{
+    rk_debug = on ? 1 : 0;
+}
+
 int rk11_boot_copy(void *dest, size_t len)
 {
     if (!fp) {
         return -1;
     }
-    if (fseek(fp, 0, SEEK_SET) != 0) {
+    if (emu_fseek(fp, 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (fread(dest, 1, len, fp) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, fp) == len) ? 0 : -1;
 }

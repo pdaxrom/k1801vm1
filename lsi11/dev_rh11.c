@@ -4,10 +4,12 @@
 #include "devio.h"
 #include "irq.h"
 #include "irq_latch.h"
+#include "emu_file.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* RK611-compatible controller at RH11 slot in 16-bit I/O page view (octal). */
 #define RH11_BASE 0177440
@@ -95,7 +97,7 @@
 
 static uint16_t rhcs1, rhwc, rhba, rhda, rhcs2, rhds, rher, rhas, rhdc, rhdb;
 static irq_latch_t rh_l;
-static FILE *rh_fp = NULL;
+static emu_file_t *rh_fp = NULL;
 static int rh_debug = 0;
 static int rh_debug_active = 0;
 static int rh_sec_one_based = 0;
@@ -298,6 +300,38 @@ enum rh_xfer_mode {
     RH_XFER_WCHECK = 2
 };
 
+static int rh_read_sector(uint32_t lba, uint8_t *buf)
+{
+    uint32_t off = lba * RH11_SECTOR_BYTES;
+    size_t got;
+
+    if (emu_fseek(rh_fp, (long)off, EMU_SEEK_SET) != 0) {
+        return -1;
+    }
+
+    got = emu_fread(buf, 1, RH11_SECTOR_BYTES, rh_fp);
+    if (got == RH11_SECTOR_BYTES) {
+        return 0;
+    }
+    if (got < RH11_SECTOR_BYTES && emu_feof(rh_fp)) {
+        memset(buf + got, 0, RH11_SECTOR_BYTES - got);
+        emu_clearerr(rh_fp);
+        return 0;
+    }
+    return -1;
+}
+
+static int rh_write_sector(uint32_t lba, const uint8_t *buf)
+{
+    uint32_t off = lba * RH11_SECTOR_BYTES;
+    if (emu_fseek(rh_fp, (long)off, EMU_SEEK_SET) != 0) {
+        return -1;
+    }
+    return (emu_fwrite(buf, 1, RH11_SECTOR_BYTES, rh_fp) == RH11_SECTOR_BYTES)
+           ? 0
+           : -1;
+}
+
 static void rh_transfer(enum rh_xfer_mode mode)
 {
     int16_t wc = (int16_t)rhwc;
@@ -309,6 +343,11 @@ static void rh_transfer(enum rh_xfer_mode mode)
     uint8_t cur_ext = rh_cs1_ba_ext_get();
     int w_in_sec = 0;
     int bai = (rhcs2 & RHCS2_BAI) ? 1 : 0;
+    uint8_t secbuf[RH11_SECTOR_BYTES];
+    uint32_t sec_lba = 0;
+    int sec_valid = 0;
+    int sec_dirty = 0;
+    int had_error = 0;
 
     if ((rhcs2 & RHCS2_DS_MASK) != 0) {
         rh_set_cs2_error(RHCS2_NED);
@@ -329,56 +368,67 @@ static void rh_transfer(enum rh_xfer_mode mode)
 
     for (int i = 0; i < words; i++) {
         uint32_t lba = 0;
-        uint32_t off = 0;
         uint16_t w = 0;
-        uint8_t lo = 0;
-        uint8_t hi = 0;
+        unsigned sec_off = 0;
 
         if (rh_lba(cur_dc, cur_da, &lba) != 0) {
             rh_set_rher_error(RHER_IDAE);
-            break;
-        }
-        off = lba * RH11_SECTOR_BYTES + (uint32_t)w_in_sec * 2u;
-        if (fseek(rh_fp, (long)off, SEEK_SET) != 0) {
-            rh_set_cs2_error(RHCS2_DLT);
+            had_error = 1;
             break;
         }
 
-        if (mode == RH_XFER_READ || mode == RH_XFER_WCHECK) {
-            if (fread(&lo, 1, 1, rh_fp) != 1 || fread(&hi, 1, 1, rh_fp) != 1) {
+        if (!sec_valid || sec_lba != lba) {
+            if (sec_dirty) {
+                if (rh_write_sector(sec_lba, secbuf) != 0) {
+                    rh_set_cs2_error(RHCS2_DLT);
+                    had_error = 1;
+                    break;
+                }
+                sec_dirty = 0;
+            }
+            if (rh_read_sector(lba, secbuf) != 0) {
                 rh_set_cs2_error(RHCS2_DLT);
+                had_error = 1;
                 break;
             }
-            w = (uint16_t)(lo | ((uint16_t)hi << 8));
+            sec_lba = lba;
+            sec_valid = 1;
+        }
+
+        sec_off = (unsigned)w_in_sec * 2u;
+        if (mode == RH_XFER_READ || mode == RH_XFER_WCHECK) {
+            w = (uint16_t)(secbuf[sec_off] |
+                           ((uint16_t)secbuf[sec_off + 1] << 8));
         }
 
         if (mode == RH_XFER_READ) {
             if (rh_dma_write_word(cur_ba, cur_ext, w) != 0) {
                 rh_set_cs2_error(RHCS2_NEM);
                 rher |= RHER_LEGACY_NXM;
+                had_error = 1;
                 break;
             }
         } else if (mode == RH_XFER_WRITE) {
             if (rh_dma_read_word(cur_ba, cur_ext, &w) != 0) {
                 rh_set_cs2_error(RHCS2_NEM);
                 rher |= RHER_LEGACY_NXM;
+                had_error = 1;
                 break;
             }
-            lo = (uint8_t)(w & 000377);
-            hi = (uint8_t)((w >> 8) & 000377);
-            if (fwrite(&lo, 1, 1, rh_fp) != 1 || fwrite(&hi, 1, 1, rh_fp) != 1) {
-                rh_set_cs2_error(RHCS2_DLT);
-                break;
-            }
+            secbuf[sec_off] = (uint8_t)(w & 000377);
+            secbuf[sec_off + 1] = (uint8_t)((w >> 8) & 000377);
+            sec_dirty = 1;
         } else { /* RH_XFER_WCHECK */
             uint16_t memw = 0;
             if (rh_dma_read_word(cur_ba, cur_ext, &memw) != 0) {
                 rh_set_cs2_error(RHCS2_NEM);
                 rher |= RHER_LEGACY_NXM;
+                had_error = 1;
                 break;
             }
             if (memw != w) {
                 rh_set_cs2_error(RHCS2_WCE);
+                had_error = 1;
                 break;
             }
         }
@@ -390,13 +440,29 @@ static void rh_transfer(enum rh_xfer_mode mode)
 
         w_in_sec++;
         if (w_in_sec >= RH11_WORDS_PER_SECTOR) {
+            if (sec_dirty) {
+                if (rh_write_sector(sec_lba, secbuf) != 0) {
+                    rh_set_cs2_error(RHCS2_DLT);
+                    had_error = 1;
+                    break;
+                }
+                sec_dirty = 0;
+            }
+            sec_valid = 0;
             w_in_sec = 0;
             rh_advance_sector(&cur_dc, &cur_da);
         }
     }
 
+    if (sec_dirty) {
+        if (rh_write_sector(sec_lba, secbuf) != 0) {
+            rh_set_cs2_error(RHCS2_DLT);
+            had_error = 1;
+        }
+    }
+
     if (mode == RH_XFER_WRITE) {
-        fflush(rh_fp);
+        emu_fflush(rh_fp);
     }
 
     rhwc = cur_wc;
@@ -404,6 +470,7 @@ static void rh_transfer(enum rh_xfer_mode mode)
     rhdc = cur_dc;
     rhda = cur_da;
     rh_cs1_ba_ext_set(cur_ext);
+    (void)had_error;
     rh_finish_command();
 }
 
@@ -668,9 +735,9 @@ void rh11_poll(void)
 int rh11_open_image(const char *path)
 {
     if (rh_fp) {
-        fclose(rh_fp);
+        emu_fclose(rh_fp);
     }
-    rh_fp = fopen(path, "r+b");
+    rh_fp = emu_fopen(path, "r+b");
     if (!rh_fp) {
         return -1;
     }
@@ -680,9 +747,14 @@ int rh11_open_image(const char *path)
 void rh11_close_image(void)
 {
     if (rh_fp) {
-        fclose(rh_fp);
+        emu_fclose(rh_fp);
         rh_fp = NULL;
     }
+}
+
+void rh11_set_debug(int on)
+{
+    rh_debug = on ? 1 : 0;
 }
 
 int rh11_boot_copy(void *dest, size_t len)
@@ -690,8 +762,8 @@ int rh11_boot_copy(void *dest, size_t len)
     if (!rh_fp) {
         return -1;
     }
-    if (fseek(rh_fp, 0, SEEK_SET) != 0) {
+    if (emu_fseek(rh_fp, 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (fread(dest, 1, len, rh_fp) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, rh_fp) == len) ? 0 : -1;
 }

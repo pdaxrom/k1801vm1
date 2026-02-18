@@ -4,10 +4,12 @@
 #include "devio.h"
 #include "irq.h"
 #include "irq_latch.h"
+#include "emu_file.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* RL11 registers (octal) */
 #define RL11_BASE 0174400
@@ -84,7 +86,7 @@
 #define RL_MAX_DRIVES 4
 
 typedef struct {
-    FILE *fp;
+    emu_file_t *fp;
     int type;
     int read_only;
     uint16_t cyl;
@@ -252,6 +254,37 @@ static uint16_t rl_calc_crc16(int wc, const uint16_t *data)
         }
     }
     return (uint16_t)crc;
+}
+
+static int rl_read_sector(rl_drive_t *d, uint32_t lba, uint8_t *buf)
+{
+    uint32_t off = lba * RL_BYTES_PER_SECTOR;
+    size_t got;
+
+    if (emu_fseek(d->fp, (long)off, EMU_SEEK_SET) != 0) {
+        return -1;
+    }
+    got = emu_fread(buf, 1, RL_BYTES_PER_SECTOR, d->fp);
+    if (got == RL_BYTES_PER_SECTOR) {
+        return 0;
+    }
+    if (got < RL_BYTES_PER_SECTOR && emu_feof(d->fp)) {
+        memset(buf + got, 0, RL_BYTES_PER_SECTOR - got);
+        emu_clearerr(d->fp);
+        return 0;
+    }
+    return -1;
+}
+
+static int rl_write_sector(rl_drive_t *d, uint32_t lba, const uint8_t *buf)
+{
+    uint32_t off = lba * RL_BYTES_PER_SECTOR;
+    if (emu_fseek(d->fp, (long)off, EMU_SEEK_SET) != 0) {
+        return -1;
+    }
+    return (emu_fwrite(buf, 1, RL_BYTES_PER_SECTOR, d->fp) == RL_BYTES_PER_SECTOR)
+           ? 0
+           : -1;
 }
 
 static int rl_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
@@ -467,6 +500,11 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
     uint16_t maxwc = 0;
     int w_in_sector = 0;
     int had_error = 0;
+    uint8_t secbuf[RL_BYTES_PER_SECTOR];
+    uint32_t sec_lba = 0;
+    int sec_valid = 0;
+    int sec_dirty = 0;
+    int sec_word = 0;
 
     if (!d || !d->fp) {
         rl_set_error(RLCS_E_HNF, 0);
@@ -519,9 +557,8 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
 
     while (wc_xfer != 0) {
         uint32_t lba = 0;
-        uint32_t off = 0;
         uint16_t w = 0;
-        uint8_t lo, hi;
+        unsigned sec_off = 0;
 
         if (rl_da_to_lba(d, cur_da, &lba) != 0) {
             rl_set_error(RLCS_E_HNF, 0);
@@ -529,36 +566,29 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
             break;
         }
 
-        off = lba * RL_BYTES_PER_SECTOR + (uint32_t)w_in_sector * 2u;
-        if (fseek(d->fp, (long)off, SEEK_SET) != 0) {
-            rl_set_error(RLCS_E_DLT, 0);
-            had_error = 1;
-            break;
+        if (!sec_valid || sec_lba != lba) {
+            if (sec_dirty) {
+                if (rl_write_sector(d, sec_lba, secbuf) != 0) {
+                    rl_set_error(RLCS_E_DLT, 0);
+                    had_error = 1;
+                    break;
+                }
+                sec_dirty = 0;
+            }
+            if (rl_read_sector(d, lba, secbuf) != 0) {
+                rl_set_error(RLCS_E_DLT, 0);
+                had_error = 1;
+                break;
+            }
+            sec_lba = lba;
+            sec_valid = 1;
+            sec_word = 0;
         }
 
+        sec_off = (unsigned)sec_word * 2u;
         if (mode == RL_XFER_READ || mode == RL_XFER_WCHK) {
-            if (fread(&lo, 1, 1, d->fp) != 1) {
-                if (feof(d->fp)) {
-                    /* Short image tail is treated as zero-filled media. */
-                    clearerr(d->fp);
-                    lo = 0;
-                    hi = 0;
-                } else {
-                    rl_set_error(RLCS_E_DLT, 0);
-                    had_error = 1;
-                    break;
-                }
-            } else if (fread(&hi, 1, 1, d->fp) != 1) {
-                if (feof(d->fp)) {
-                    clearerr(d->fp);
-                    hi = 0;
-                } else {
-                    rl_set_error(RLCS_E_DLT, 0);
-                    had_error = 1;
-                    break;
-                }
-            }
-            w = (uint16_t)(lo | ((uint16_t)hi << 8));
+            w = (uint16_t)(secbuf[sec_off] |
+                           ((uint16_t)secbuf[sec_off + 1] << 8));
         }
 
         if (mode == RL_XFER_READ) {
@@ -573,13 +603,9 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
                 had_error = 1;
                 break;
             }
-            lo = (uint8_t)(w & 000377);
-            hi = (uint8_t)((w >> 8) & 000377);
-            if (fwrite(&lo, 1, 1, d->fp) != 1 || fwrite(&hi, 1, 1, d->fp) != 1) {
-                rl_set_error(RLCS_E_DLT, 0);
-                had_error = 1;
-                break;
-            }
+            secbuf[sec_off] = (uint8_t)(w & 000377);
+            secbuf[sec_off + 1] = (uint8_t)((w >> 8) & 000377);
+            sec_dirty = 1;
         } else { /* RL_XFER_WCHK */
             uint16_t mw = 0;
             if (rl_dma_read_word(cur_ba, cur_ext, &mw) != 0) {
@@ -598,12 +624,23 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
         wc_done++;
         rl_ba_inc(&cur_ba, &cur_ext);
 
+        sec_word++;
         w_in_sector++;
         if (w_in_sector >= RL_WORDS_PER_SECTOR) {
             uint16_t sec = (uint16_t)(cur_da & RLDA_SA_MASK);
             uint16_t head = (cur_da & RLDA_HS) ? 1 : 0;
             uint16_t cyl = (uint16_t)((cur_da & RLDA_CA_MASK) >> RLDA_CA_SHIFT);
 
+            if (sec_dirty) {
+                if (rl_write_sector(d, sec_lba, secbuf) != 0) {
+                    rl_set_error(RLCS_E_DLT, 0);
+                    had_error = 1;
+                    break;
+                }
+                sec_dirty = 0;
+            }
+            sec_valid = 0;
+            sec_word = 0;
             w_in_sector = 0;
             sec++;
             cur_da = (uint16_t)((cyl << RLDA_CA_SHIFT) | (head ? RLDA_HS : 0) |
@@ -616,29 +653,33 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
      * the remainder of the current sector with zeros before command completion.
      */
     if (!had_error && mode == RL_XFER_WRITE && w_in_sector > 0) {
-        uint32_t lba = 0;
-        uint32_t off = 0;
-        if (rl_da_to_lba(d, cur_da, &lba) != 0) {
-            rl_set_error(RLCS_E_HNF, 0);
-            had_error = 1;
-        } else {
-            off = lba * RL_BYTES_PER_SECTOR + (uint32_t)w_in_sector * 2u;
-            if (fseek(d->fp, (long)off, SEEK_SET) != 0) {
+        if (!sec_valid) {
+            uint32_t lba = 0;
+            if (rl_da_to_lba(d, cur_da, &lba) != 0 || rl_read_sector(d, lba, secbuf) != 0) {
                 rl_set_error(RLCS_E_DLT, 0);
                 had_error = 1;
             } else {
-                uint8_t zlo = 0;
-                uint8_t zhi = 0;
-                while (w_in_sector < RL_WORDS_PER_SECTOR) {
-                    if (fwrite(&zlo, 1, 1, d->fp) != 1 ||
-                            fwrite(&zhi, 1, 1, d->fp) != 1) {
-                        rl_set_error(RLCS_E_DLT, 0);
-                        had_error = 1;
-                        break;
-                    }
-                    w_in_sector++;
-                }
+                sec_lba = lba;
+                sec_valid = 1;
+                sec_word = w_in_sector;
             }
+        }
+        while (!had_error && w_in_sector < RL_WORDS_PER_SECTOR) {
+            unsigned off = (unsigned)sec_word * 2u;
+            secbuf[off] = 0;
+            secbuf[off + 1] = 0;
+            sec_word++;
+            w_in_sector++;
+        }
+        if (!had_error) {
+            sec_dirty = 1;
+        }
+    }
+
+    if (sec_dirty) {
+        if (rl_write_sector(d, sec_lba, secbuf) != 0) {
+            rl_set_error(RLCS_E_DLT, 0);
+            had_error = 1;
         }
     }
 
@@ -685,7 +726,7 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
     }
 
     if (mode == RL_XFER_WRITE) {
-        fflush(d->fp);
+        emu_fflush(d->fp);
     }
 
     rl_finish_command();
@@ -902,20 +943,20 @@ void rl11_poll(void)
 
 int rl11_open_image_typed(const char *path, int type)
 {
-    FILE *f = NULL;
+    emu_file_t *f = NULL;
     int read_only = 0;
     long sz = 0;
     int dtype = type;
     rl_drive_t *d = &rl_drv[0];
 
     if (d->fp) {
-        fclose(d->fp);
+        emu_fclose(d->fp);
         d->fp = NULL;
     }
 
-    f = fopen(path, "r+b");
+    f = emu_fopen(path, "r+b");
     if (!f) {
-        f = fopen(path, "rb");
+        f = emu_fopen(path, "rb");
         if (!f) {
             rl_sync_cs();
             return -1;
@@ -923,9 +964,9 @@ int rl11_open_image_typed(const char *path, int type)
         read_only = 1;
     }
 
-    if (fseek(f, 0, SEEK_END) == 0) {
-        sz = ftell(f);
-        fseek(f, 0, SEEK_SET);
+    if (emu_fseek(f, 0, EMU_SEEK_END) == 0) {
+        sz = emu_ftell(f);
+        emu_fseek(f, 0, EMU_SEEK_SET);
     }
 
     if (dtype == RL11_TYPE_AUTO) {
@@ -937,7 +978,7 @@ int rl11_open_image_typed(const char *path, int type)
     }
 
     if (dtype != RL11_TYPE_RL01 && dtype != RL11_TYPE_RL02) {
-        fclose(f);
+        emu_fclose(f);
         return -1;
     }
 
@@ -963,7 +1004,7 @@ void rl11_close_image(void)
 {
     rl_drive_t *d = &rl_drv[0];
     if (d->fp) {
-        fclose(d->fp);
+        emu_fclose(d->fp);
         d->fp = NULL;
     }
     d->type = RL11_TYPE_AUTO;
@@ -975,14 +1016,19 @@ void rl11_close_image(void)
     rl_sync_cs();
 }
 
+void rl11_set_debug(int on)
+{
+    rl_debug = on ? 1 : 0;
+}
+
 int rl11_boot_copy(void *dest, size_t len)
 {
     rl_drive_t *d = &rl_drv[0];
     if (!d->fp) {
         return -1;
     }
-    if (fseek(d->fp, 0, SEEK_SET) != 0) {
+    if (emu_fseek(d->fp, 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (fread(dest, 1, len, d->fp) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, d->fp) == len) ? 0 : -1;
 }

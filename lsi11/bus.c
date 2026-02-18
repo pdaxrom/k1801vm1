@@ -31,6 +31,19 @@ static vm2_ram_cfg_t g_vm2_cfg = {BUS_VM2_DEFAULT_USER_RAM_BYTES,
 static uint8_t *g_vm2_halt_ram = NULL;
 static size_t g_vm2_halt_ram_bytes = 0;
 
+static void *bus_alloc(size_t size)
+{
+#if defined(PICO_ON_DEVICE)
+    return malloc(size);
+#else
+    void *p = NULL;
+    if (posix_memalign(&p, BUS_PAGE_SIZE, size) != 0) {
+        return NULL;
+    }
+    return p;
+#endif
+}
+
 static void set_err(char *err, size_t err_len, const char *fmt, ...)
 {
     va_list ap;
@@ -149,7 +162,8 @@ void bus_init(void)
     }
 
     if (!g_ram) {
-        if (posix_memalign((void **)&g_ram, BUS_PAGE_SIZE, need_bytes) != 0) {
+        g_ram = (uint8_t *)bus_alloc(need_bytes);
+        if (!g_ram) {
             fprintf(stderr, "bus_init: memory allocation failed (%zu bytes)\n",
                     need_bytes);
             abort();
@@ -175,7 +189,8 @@ void bus_init(void)
     }
 
     if (!g_vm2_halt_ram) {
-        if (posix_memalign((void **)&g_vm2_halt_ram, BUS_PAGE_SIZE, halt_need) != 0) {
+        g_vm2_halt_ram = (uint8_t *)bus_alloc(halt_need);
+        if (!g_vm2_halt_ram) {
             fprintf(stderr,
                     "bus_init: VM2 HALT RAM allocation failed (%zu bytes)\n",
                     halt_need);
@@ -195,20 +210,12 @@ static int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
         return 0;
     }
 
-    if (g_cfg.machine == BUS_MACHINE_LSI11_1104) {
-        if (addr < IO_PAGE_START || addr > IO_PAGE_END) {
-            return 0;
-        }
-        a16 = (uint16_t)addr;
-        if (!devio_has(a16)) {
-            return 0;
-        }
-        *io_addr_out = a16;
-        return 1;
-    }
-
     if (addr <= 0177777) {
         a16 = (uint16_t)addr;
+        if (g_cfg.machine == BUS_MACHINE_LSI11_1104 &&
+                (a16 < IO_PAGE_START || a16 > IO_PAGE_END)) {
+            return 0;
+        }
         if (devio_has(a16)) {
             *io_addr_out = a16;
             return 1;

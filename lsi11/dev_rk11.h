@@ -10,6 +10,7 @@ void rk11_poll(void);
 
 int  rk11_open_image(const char *path);
 void rk11_close_image(void);
+void rk11_set_debug(int on);
 
 /* optional: one-based sector mapping */
 void rk11_set_sector_base(int one_based);

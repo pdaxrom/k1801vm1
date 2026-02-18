@@ -185,8 +185,6 @@ int main(int argc, char **argv)
     int disable_rh = 0;
     int disable_rl = 0;
     int disable_sr = 0;
-    int disable_vm1sel = 1;
-    int disable_vm1sav = 1;
 #if defined(LSI11_TARGET_PDP1184)
     byte cpu_model = DCJ11;
 #else
@@ -307,8 +305,19 @@ int main(int argc, char **argv)
     }
 
     if (cpu_model == K1801VM1 || cpu_model == K1801VM1G) {
-        disable_vm1sel = 0;
-        disable_vm1sav = 0;
+        if (lsi11_set_device_enabled("vm1sel", 1, cfg_err, sizeof(cfg_err)) != 0 ||
+                lsi11_set_device_enabled("vm1sav", 1, cfg_err,
+                                         sizeof(cfg_err)) != 0) {
+            fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+            return 2;
+        }
+    } else {
+        if (lsi11_set_device_enabled("vm1sel", 0, cfg_err, sizeof(cfg_err)) != 0 ||
+                lsi11_set_device_enabled("vm1sav", 0, cfg_err,
+                                         sizeof(cfg_err)) != 0) {
+            fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+            return 2;
+        }
     }
 
     if (disable_dl &&
@@ -346,17 +355,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_vm1sel &&
-            lsi11_set_device_enabled("vm1sel", 0, cfg_err, sizeof(cfg_err)) != 0) {
-        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
-        return 2;
-    }
-    if (disable_vm1sav &&
-            lsi11_set_device_enabled("vm1sav", 0, cfg_err, sizeof(cfg_err)) != 0) {
-        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
-        return 2;
-    }
-
     if (rk_path && !lsi11_device_enabled("rk11")) {
         fprintf(stderr, "-rk is not allowed with -disable-rk\n");
         return 2;

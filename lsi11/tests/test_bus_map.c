@@ -60,6 +60,14 @@ int main(void)
     check(bus_is_nxm(0176500) == 0, "DL11 alias low should be decoded");
     check(bus_is_nxm(0176507) == 0, "DL11 alias high should be decoded");
 
+    /* 22-bit I/O aliases must decode to the same device registers.
+       This path is required by DCJ11 when MMU support is enabled. */
+    check(bus_is_nxm(017777570) == 0, "SR 22-bit alias low should be decoded");
+    check(bus_is_nxm(017777571) == 0, "SR 22-bit alias high should be decoded");
+    check(bus_is_nxm(017777560) == 0, "DL11 22-bit alias should be decoded");
+    check(bus_is_nxm(017777776) == 1,
+          "Undecoded 22-bit I/O alias should be NXM");
+
     /* Word access: addr and addr+1 must both be valid.
        Example: last RAM byte is 0157777, so word at 0157777 crosses into IO page => should NXM. */
     check(bus_is_nxm(0157777) == 0, "Byte at 0157777 ok");

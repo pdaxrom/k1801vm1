@@ -5,7 +5,11 @@
 #include "util_term.h"
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(PICO_ON_DEVICE)
+#include "pico/time.h"
+#else
 #include <time.h>
+#endif
 
 /* CSR addresses (octal) */
 #define DL11_BASE_PRIMARY 0177560
@@ -36,9 +40,13 @@ static uint8_t tcsr_misc = 0;  /* MAINT (bit2) + BREAK (bit0) */
 
 static uint64_t now_ns(void)
 {
+#if defined(PICO_ON_DEVICE)
+    return (uint64_t)time_us_64() * 1000ull;
+#else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+#endif
 }
 
 /* Do not bind TX completion to host wall-clock by default.

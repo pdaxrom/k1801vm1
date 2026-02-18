@@ -16,6 +16,7 @@ void rl11_poll(void);
 int rl11_open_image(const char *path);
 int rl11_open_image_typed(const char *path, int type);
 void rl11_close_image(void);
+void rl11_set_debug(int on);
 int rl11_boot_copy(void *dest, size_t len);
 
 int rl11_irq_pending(void);

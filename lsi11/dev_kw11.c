@@ -1,9 +1,15 @@
+#if !defined(PICO_ON_DEVICE)
 #define _POSIX_C_SOURCE 200809L
+#endif
 #include "dev_kw11.h"
 #include "devio.h"
 #include "irq.h"
 #include <stdint.h>
+#if defined(PICO_ON_DEVICE)
+#include "pico/time.h"
+#else
 #include <time.h>
+#endif
 
 /* KW11-L address (octal) */
 #define KW11L_CSR 0177546
@@ -49,9 +55,13 @@ static int kwp_clock_init = 0;
 
 static uint64_t now_ns(void)
 {
+#if defined(PICO_ON_DEVICE)
+    return (uint64_t)time_us_64() * 1000ull;
+#else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+#endif
 }
 
 static void kwp_sw_clear_done(void)

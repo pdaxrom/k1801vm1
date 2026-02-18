@@ -19,6 +19,7 @@ COMMON_SRCS := \
   bus.c \
   devio.c \
   irq.c \
+  emu_file.c \
   util_term.c \
   dev_dl11.c \
   dev_kw11.c \
