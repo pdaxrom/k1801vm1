@@ -559,10 +559,10 @@ int main(void)
 
     printf("\nPico LSI11 emulator\n");
     prompt_and_set_clock();
-#if defined(PICO_FIXED_MACHINE_1184)
+#if defined(LSI11_TARGET_1184)
     mode_choice = 2;
     printf("Fixed mode: pdp11/84\n");
-#elif defined(PICO_FIXED_MACHINE_1104)
+#elif defined(LSI11_TARGET_1104)
     mode_choice = 1;
     printf("Fixed mode: lsi11\n");
 #else
@@ -619,14 +619,6 @@ int main(void)
                                  image_count) - 1;
     image_type = prompt_image_type();
     trace_boot = prompt_trace_mode();
-    if (lsi11_set_device_enabled("rk11", image_type == IMAGE_TYPE_RK, cfg_err,
-                                 sizeof(cfg_err)) != 0 ||
-            lsi11_set_device_enabled("rh11", image_type == IMAGE_TYPE_RH, cfg_err,
-                                     sizeof(cfg_err)) != 0 ||
-            lsi11_set_device_enabled("rl11", image_type == IMAGE_TYPE_RL, cfg_err,
-                                     sizeof(cfg_err)) != 0) {
-        fatal_halt(cfg_err);
-    }
 
     printf("Mode: %s\n", mode_name);
     printf("CPU: %s\n", cpu_model_name(cpu_model));
@@ -645,9 +637,9 @@ int main(void)
     lsi11_set_trace_irq(trace_boot ? 1 : 0);
     lsi11_set_trace_nxm(trace_boot ? 1 : 0);
     if (trace_boot) {
-        rk11_set_debug(1);
-        rh11_set_debug(1);
-        rl11_set_debug(1);
+//        rk11_set_debug(1);
+//        rh11_set_debug(1);
+//        rl11_set_debug(1);
     }
 
     if (image_type == IMAGE_TYPE_RK &&
@@ -708,40 +700,45 @@ int main(void)
         r.r[7] = 000000;
     }
 
+    // FIXME: No-address register for initial configuration
+    if (r.model == K1801VM2 || r.model == K1806VM2) {
+        r.SEL0 = 0;
+        r.SEL0 = 0200; // Disable FIS trap by default
+    }
+
+    {
+        const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184)
+                        ? "pdp1184"
+                        : "lsi11";
+        int rh11_on = lsi11_device_enabled("rh11");
+        printf(
+            "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
+            "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "
+            "dev_sr=%d dev_vm1sel=%d dev_vm1sav=%d\n",
+            m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
+            lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
+            lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
+            lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
+            lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"),
+            lsi11_device_enabled("vm1sel"), lsi11_device_enabled("vm1sav"));
+    }
+
     printf("Starting emulator...\n");
 
     for (;;) {
-        for (int i = 0; i < 64; i++) {
+        int step_chunk = trace_boot ? 1 : 64;
+        for (int i = 0; i < step_chunk; i++) {
             if (trace_boot && steps < 2000) {
                 char dbuf[128];
                 word pc = r.r[7];
                 word tmp = pc;
                 disas(&r, &tmp, dbuf);
-                printf("T %07lu PC=%06o %s\n", steps, pc, dbuf);
+                printf("%06o %s\n", pc, dbuf);
             }
             core_step(&r);
             steps++;
             if (r.fAbort) {
                 break;
-            }
-            if (trace_boot && (steps % 4096ul) == 0ul) {
-                printf("T step=%lu PC=%06o PS=%06o", steps, r.r[7], r.psw);
-                if (image_type == IMAGE_TYPE_RK) {
-                    printf(" RKCS=%06o RKER=%06o RKWC=%06o RKBA=%06o RKDA=%06o",
-                           bus_read16(0177404), bus_read16(0177402),
-                           bus_read16(0177406), bus_read16(0177410),
-                           bus_read16(0177412));
-                } else if (image_type == IMAGE_TYPE_RH) {
-                    printf(" RHCS1=%06o RHER=%06o RHWC=%06o RHBA=%06o RHDA=%06o",
-                           bus_read16(0177440), bus_read16(0177454),
-                           bus_read16(0177442), bus_read16(0177444),
-                           bus_read16(0177446));
-                } else {
-                    printf(" RLCS=%06o RLBA=%06o RLDA=%06o RLMP=%06o",
-                           bus_read16(0174400), bus_read16(0174402),
-                           bus_read16(0174404), bus_read16(0174406));
-                }
-                printf("\n");
             }
         }
 

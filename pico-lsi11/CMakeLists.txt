@@ -41,7 +41,7 @@ set(PICO_LSI11_COMMON_SOURCES
     ../lsi11/dev_vm1sav.c
 )
 
-function(add_pico_emu_target target_name mmu_value fixed_machine_define)
+function(add_pico_emu_target target_name mmu_value machine_define)
   add_executable(${target_name}
       ${PICO_LSI11_COMMON_SOURCES}
   )
@@ -54,8 +54,13 @@ function(add_pico_emu_target target_name mmu_value fixed_machine_define)
 
   target_compile_definitions(${target_name} PRIVATE
       ENABLE_MMU=${mmu_value}
-      ${fixed_machine_define}=1
+      ${machine_define}=1
   )
+  if("${mmu_value}" STREQUAL "0")
+    target_compile_definitions(${target_name} PRIVATE
+        MMU_STUB_REGS_WHEN_DISABLED=0
+    )
+  endif()
 
   target_link_libraries(${target_name} PRIVATE
       pico_stdlib
@@ -71,5 +76,5 @@ function(add_pico_emu_target target_name mmu_value fixed_machine_define)
   pico_add_extra_outputs(${target_name})
 endfunction()
 
-add_pico_emu_target(pico_lsi11 0 PICO_FIXED_MACHINE_1104)
-add_pico_emu_target(pico_pdp1184 1 PICO_FIXED_MACHINE_1184)
+add_pico_emu_target(pico_lsi11 0 LSI11_TARGET_1104)
+add_pico_emu_target(pico_pdp1184 1 LSI11_TARGET_1184)
