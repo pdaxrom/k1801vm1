@@ -13,6 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef PICO_ON_DEVICE
+#include "pico/stdlib.h"
+#endif
+
 #ifndef MMU_STUB_REGS_WHEN_DISABLED
 #define MMU_STUB_REGS_WHEN_DISABLED 1
 #endif
@@ -537,6 +541,12 @@ enum {
 
 #define MMU_TRAP_VECTOR 0000250
 
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg);
+static void INLINE mmu_tlb_flush_all(regs *r);
+static INLINE int mmu_split_enabled(const regs *r, int mode);
+#endif
+
 static INLINE void bus_error_trap(regs *r);
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
                                   int mode, int seg);
@@ -765,9 +775,7 @@ static INLINE int mmu_io_write_byte(regs *r, word addr, byte value)
 }
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-static INLINE int mmu_split_enabled(const regs *r, int mode);
-
-void mmu_tlb_update(regs *r, int mode, int space, int seg)
+static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
 {
     word pdr = r->mmu_pdr[mode][space][seg];
     word par = r->mmu_par[mode][space][seg];
@@ -810,7 +818,7 @@ void mmu_tlb_update(regs *r, int mode, int space, int seg)
     }
 }
 
-void mmu_tlb_flush_all(regs *r)
+static void INLINE mmu_tlb_flush_all(regs *r)
 {
     int mode, space, seg;
     for (mode = 0; mode < 4; mode++) {
@@ -1851,7 +1859,11 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type,
     return TYPE_ERROR;
 }
 
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(core_step)(regs *r)
+#else
 int core_step(regs *r)
+#endif
 {
     word src_offset;
     byte src_type;

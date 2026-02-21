@@ -37,7 +37,11 @@ int devio_register(const io_range_t *r)
     return 0;
 }
 
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(devio_has)(uint16_t addr)
+#else
 int devio_has(uint16_t addr)
+#endif
 {
     int i;
     for (i = 0; i < g_count; i++) {
@@ -48,7 +52,11 @@ int devio_has(uint16_t addr)
     return 0;
 }
 
+#ifdef PICO_ON_DEVICE
+uint8_t __not_in_flash_func(devio_read8)(uint16_t addr)
+#else
 uint8_t devio_read8(uint16_t addr)
+#endif
 {
     int i;
     uint32_t irqstate = io_lock_acquire();
@@ -63,7 +71,11 @@ uint8_t devio_read8(uint16_t addr)
     return 0;
 }
 
+#ifdef PICO_ON_DEVICE
+void __not_in_flash_func(devio_write8)(uint16_t addr, uint8_t v)
+#else
 void devio_write8(uint16_t addr, uint8_t v)
+#endif
 {
     int i;
     uint32_t irqstate = io_lock_acquire();

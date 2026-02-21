@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef PICO_ON_DEVICE
+#include "pico/stdlib.h"
+#endif
+
 typedef uint8_t (*io_read8_fn)(uint16_t addr);
 typedef void    (*io_write8_fn)(uint16_t addr, uint8_t val);
 

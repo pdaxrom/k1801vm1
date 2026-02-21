@@ -548,7 +548,7 @@ static int load_boot_block(const char *image_path, int trace_boot)
 }
 
 /* ---- Core 1: CPU emulation loop ---- */
-static void core1_entry(void)
+static void __not_in_flash_func(core1_entry)(void)
 {
     regs *r = (regs *)(uintptr_t)multicore_fifo_pop_blocking();
     int trace_boot = (int)multicore_fifo_pop_blocking();

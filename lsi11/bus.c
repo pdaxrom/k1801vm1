@@ -32,7 +32,7 @@ static vm2_ram_cfg_t g_vm2_cfg = {BUS_VM2_DEFAULT_USER_RAM_BYTES,
 static uint8_t *g_vm2_halt_ram = NULL;
 static size_t g_vm2_halt_ram_bytes = 0;
 
-static void *bus_alloc(size_t size)
+static inline void *bus_alloc(size_t size)
 {
 #if defined(PICO_ON_DEVICE)
     return malloc(size);
@@ -200,7 +200,7 @@ void bus_init(void)
     memset(g_vm2_halt_ram, 0, g_vm2_halt_ram_bytes);
 }
 
-static int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
+static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
 {
     uint16_t a16;
 
@@ -239,13 +239,17 @@ static int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
     return 0;
 }
 
-static int io_is_decoded(paddr_t addr)
+static inline int io_is_decoded(paddr_t addr)
 {
     uint16_t io_addr = 0;
     return io_decode_addr(addr, &io_addr);
 }
 
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(bus_addr_is_ram)(paddr_t addr)
+#else
 int bus_addr_is_ram(paddr_t addr)
+#endif
 {
     if (io_is_decoded(addr)) {
         return 0;
@@ -264,7 +268,11 @@ int bus_addr_is_ram(paddr_t addr)
     return (addr < g_ram_bytes) ? 1 : 0;
 }
 
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(bus_range_is_ram)(paddr_t addr, size_t len)
+#else
 int bus_range_is_ram(paddr_t addr, size_t len)
+#endif
 {
     if (len == 0) {
         return 1;
@@ -278,7 +286,11 @@ int bus_range_is_ram(paddr_t addr, size_t len)
     return 1;
 }
 
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(bus_is_nxm)(paddr_t addr)
+#else
 int bus_is_nxm(paddr_t addr)
+#endif
 {
     if (io_is_decoded(addr)) {
         return 0;
@@ -291,7 +303,11 @@ int bus_is_nxm(paddr_t addr)
     return 1;
 }
 
+#ifdef PICO_ON_DEVICE
+uint8_t __not_in_flash_func(bus_read8)(paddr_t addr)
+#else
 uint8_t bus_read8(paddr_t addr)
+#endif
 {
     uint16_t io_addr = 0;
 
@@ -306,7 +322,11 @@ uint8_t bus_read8(paddr_t addr)
     return 0;
 }
 
+#ifdef PICO_ON_DEVICE
+void __not_in_flash_func(bus_write8)(paddr_t addr, uint8_t v)
+#else
 void bus_write8(paddr_t addr, uint8_t v)
+#endif
 {
     uint16_t io_addr = 0;
 
@@ -321,7 +341,11 @@ void bus_write8(paddr_t addr, uint8_t v)
     }
 }
 
+#ifdef PICO_ON_DEVICE
+uint16_t __not_in_flash_func(bus_read16)(paddr_t addr)
+#else
 uint16_t bus_read16(paddr_t addr)
+#endif
 {
     uint16_t io_addr = 0;
 
@@ -338,7 +362,11 @@ uint16_t bus_read16(paddr_t addr)
     return 0;
 }
 
+#ifdef PICO_ON_DEVICE
+void __not_in_flash_func(bus_write16)(paddr_t addr, uint16_t v)
+#else
 void bus_write16(paddr_t addr, uint16_t v)
+#endif
 {
     uint16_t io_addr = 0;
 
@@ -355,13 +383,13 @@ void bus_write16(paddr_t addr, uint16_t v)
     }
 }
 
-static int vm2_bankable_ram_addr(uint16_t addr)
+static int inline vm2_bankable_ram_addr(uint16_t addr)
 {
     /* CPU-side banking applies only to RAM window 000000..157777. */
     return (addr < IO_PAGE_START) ? 1 : 0;
 }
 
-static int vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
+static int inline vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
 {
     uint16_t io_addr = 0;
 
@@ -383,12 +411,20 @@ static int vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
     return ((uint32_t)addr >= g_vm2_cfg.user_ram_bytes) ? 1 : 0;
 }
 
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(bus_vm2_cpu_is_nxm)(uint16_t addr, int halt_mode)
+#else
 int bus_vm2_cpu_is_nxm(uint16_t addr, int halt_mode)
+#endif
 {
     return vm2_cpu_is_nxm_byte(addr, halt_mode ? 1 : 0);
 }
 
+#ifdef PICO_ON_DEVICE
+uint8_t __not_in_flash_func(bus_vm2_cpu_read8)(uint16_t addr, int halt_mode)
+#else
 uint8_t bus_vm2_cpu_read8(uint16_t addr, int halt_mode)
+#endif
 {
     uint16_t io_addr = 0;
 
@@ -404,7 +440,11 @@ uint8_t bus_vm2_cpu_read8(uint16_t addr, int halt_mode)
     return g_ram[addr];
 }
 
+#ifdef PICO_ON_DEVICE
+void __not_in_flash_func(bus_vm2_cpu_write8)(uint16_t addr, int halt_mode, uint8_t v)
+#else
 void bus_vm2_cpu_write8(uint16_t addr, int halt_mode, uint8_t v)
+#endif
 {
     uint16_t io_addr = 0;
 
@@ -422,14 +462,22 @@ void bus_vm2_cpu_write8(uint16_t addr, int halt_mode, uint8_t v)
     g_ram[addr] = v;
 }
 
+#ifdef PICO_ON_DEVICE
+uint16_t __not_in_flash_func(bus_vm2_cpu_read16)(uint16_t addr, int halt_mode)
+#else
 uint16_t bus_vm2_cpu_read16(uint16_t addr, int halt_mode)
+#endif
 {
     uint8_t lo = bus_vm2_cpu_read8(addr, halt_mode);
     uint8_t hi = bus_vm2_cpu_read8((uint16_t)(addr + 1), halt_mode);
     return (uint16_t)(lo | ((uint16_t)hi << 8));
 }
 
+#ifdef PICO_ON_DEVICE
+void __not_in_flash_func(bus_vm2_cpu_write16)(uint16_t addr, int halt_mode, uint16_t v)
+#else
 void bus_vm2_cpu_write16(uint16_t addr, int halt_mode, uint16_t v)
+#endif
 {
     bus_vm2_cpu_write8(addr, halt_mode, (uint8_t)(v & 000377));
     bus_vm2_cpu_write8((uint16_t)(addr + 1), halt_mode,

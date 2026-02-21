@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef PICO_ON_DEVICE
+#include "pico/stdlib.h"
+#endif
+
 typedef uint32_t paddr_t;
 
 /* PDP-11 fixed I/O page map (OCTAL) */

@@ -163,9 +163,4 @@ void core_reset(regs *r);
 int core_step(regs *r);
 void core_fini(regs *r);
 
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-void mmu_tlb_flush_all(regs *r);
-void mmu_tlb_update(regs *r, int mode, int space, int seg);
-#endif
-
 #endif

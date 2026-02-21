@@ -58,17 +58,17 @@ typedef struct {
 
 static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 0};
 
-static int vm2_model(const regs *r)
+static inline int vm2_model(const regs *r)
 {
     return (r->model == K1801VM2 || r->model == K1806VM2) ? 1 : 0;
 }
 
-static int vm1_model(const regs *r)
+static inline int vm1_model(const regs *r)
 {
     return (r->model == K1801VM1 || r->model == K1801VM1G) ? 1 : 0;
 }
 
-static int vm2_halt_mode(const regs *r)
+static inline int vm2_halt_mode(const regs *r)
 {
     return (vm2_model(r) && (r->psw & FLAG_H)) ? 1 : 0;
 }
@@ -236,7 +236,7 @@ int lsi11_device_enabled(const char *name)
    This matches your previous approach: push PSW and PC, then vector through
    000004/000006. If your core already provides a bus error trap helper, use
    that instead. */
-static void nxm_trap(regs *r, paddr_t addr)
+static inline void nxm_trap(regs *r, paddr_t addr)
 {
     (void)addr;
     if (r->model == DCJ11) {
@@ -283,7 +283,7 @@ static void nxm_trap(regs *r, paddr_t addr)
     r->fAbort = 1;
 }
 
-static int j11_probe_shadow_hit(regs *r, paddr_t addr)
+static inline int j11_probe_shadow_hit(regs *r, paddr_t addr)
 {
     if (machine_profile != LSI11_MACHINE_1184) {
         return 0;
@@ -298,7 +298,7 @@ static int j11_probe_shadow_hit(regs *r, paddr_t addr)
     return 0;
 }
 
-static byte j11_probe_shadow_read_byte(paddr_t addr)
+static inline byte j11_probe_shadow_read_byte(paddr_t addr)
 {
     if (addr == 017772000) {
         return 000001;
@@ -306,7 +306,7 @@ static byte j11_probe_shadow_read_byte(paddr_t addr)
     return 000000;
 }
 
-static word j11_probe_shadow_read_word(paddr_t addr)
+static inline word j11_probe_shadow_read_word(paddr_t addr)
 {
     if (addr == 017772000) {
         return 000001;
@@ -316,7 +316,11 @@ static word j11_probe_shadow_read_word(paddr_t addr)
 
 /* ---------- bus callbacks for core ---------- */
 
+#ifdef PICO_ON_DEVICE
+static byte __not_in_flash_func(core_load_byte)(regs *r, word addr)
+#else
 static byte core_load_byte(regs *r, word addr)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return j11_probe_shadow_read_byte((paddr_t)addr);
@@ -336,7 +340,11 @@ static byte core_load_byte(regs *r, word addr)
     return bus_read8((paddr_t)addr);
 }
 
+#ifdef PICO_ON_DEVICE
+static void __not_in_flash_func(core_store_byte)(regs *r, word addr, byte v)
+#else
 static void core_store_byte(regs *r, word addr, byte v)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return;
@@ -357,7 +365,11 @@ static void core_store_byte(regs *r, word addr, byte v)
     bus_write8((paddr_t)addr, v);
 }
 
+#ifdef PICO_ON_DEVICE
+static word __not_in_flash_func(core_load_word)(regs *r, word addr)
+#else
 static word core_load_word(regs *r, word addr)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
@@ -380,7 +392,11 @@ static word core_load_word(regs *r, word addr)
     return (word)bus_read16((paddr_t)addr);
 }
 
+#ifdef PICO_ON_DEVICE
+static void __not_in_flash_func(core_store_word)(regs *r, word addr, word v)
+#else
 static void core_store_word(regs *r, word addr, word v)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
@@ -404,7 +420,11 @@ static void core_store_word(regs *r, word addr, word v)
     bus_write16((paddr_t)addr, (uint16_t)v);
 }
 
+#ifdef PICO_ON_DEVICE
+static byte __not_in_flash_func(core_load_byte_pa)(regs *r, dword addr)
+#else
 static byte core_load_byte_pa(regs *r, dword addr)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return j11_probe_shadow_read_byte((paddr_t)addr);
@@ -416,7 +436,11 @@ static byte core_load_byte_pa(regs *r, dword addr)
     return bus_read8((paddr_t)addr);
 }
 
+#ifdef PICO_ON_DEVICE
+static void __not_in_flash_func(core_store_byte_pa)(regs *r, dword addr, byte v)
+#else
 static void core_store_byte_pa(regs *r, dword addr, byte v)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return;
@@ -428,7 +452,11 @@ static void core_store_byte_pa(regs *r, dword addr, byte v)
     bus_write8((paddr_t)addr, v);
 }
 
+#ifdef PICO_ON_DEVICE
+static word __not_in_flash_func(core_load_word_pa)(regs *r, dword addr)
+#else
 static word core_load_word_pa(regs *r, dword addr)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
@@ -441,7 +469,11 @@ static word core_load_word_pa(regs *r, dword addr)
     return (word)bus_read16((paddr_t)addr);
 }
 
+#ifdef PICO_ON_DEVICE
+static void __not_in_flash_func(core_store_word_pa)(regs *r, dword addr, word v)
+#else
 static void core_store_word_pa(regs *r, dword addr, word v)
+#endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
@@ -564,7 +596,11 @@ static void impl_fini(regs *r)
 }
 
 /* IRQ poll callback: delegates to irq_poll() */
+#ifdef PICO_ON_DEVICE
+int __not_in_flash_func(core_poll_irq)(regs *r, word *vec)
+#else
 static int core_poll_irq(regs *r, word *vec)
+#endif
 {
     uint16_t v = 0;
     uint32_t irqstate = io_lock_acquire();
