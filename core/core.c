@@ -1050,7 +1050,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM access bypasses entire callback chain. */
-    if (r->ram_fast && offset < 0160000) {
+    if (r->ram_fast && offset < r->ram_fast_size) {
         return r->ram_fast[offset];
     }
 #endif
@@ -1103,7 +1103,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM access bypasses entire callback chain. */
-    if (r->ram_fast && offset < 0160000) {
+    if (r->ram_fast && offset < r->ram_fast_size) {
         r->ram_fast[offset] = value;
         return;
     }
@@ -1159,7 +1159,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM word access bypasses entire callback chain. */
-    if (r->ram_fast && offset < 0157777) {
+    if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
         return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
     }
 #endif
@@ -1219,7 +1219,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM word access bypasses entire callback chain. */
-    if (r->ram_fast && offset < 0157777) {
+    if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
         r->ram_fast[offset] = (uint8_t)(value & 000377);
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
         return;
