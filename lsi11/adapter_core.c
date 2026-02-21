@@ -7,13 +7,14 @@
 #include "dev_dl11.h"
 #include "dev_kw11.h"
 #include "dev_lp11.h"
-#include "dev_rl11.h"
 #include "dev_rh11.h"
 #include "dev_rk11.h"
+#include "dev_rl11.h"
 #include "dev_sr.h"
-#include "dev_vm1sel.h"
 #include "dev_vm1sav.h"
+#include "dev_vm1sel.h"
 
+#include "io_lock.h"
 #include "util_term.h"
 
 #include <stdio.h>
@@ -261,8 +262,7 @@ static void nxm_trap(regs *r, paddr_t addr)
         word tmp = disas_pc;
         disas(r, &tmp, buf);
         fprintf(stderr, "NXM at %06o PC=%06o IR=%06o %s\n", (unsigned)addr,
-                disas_pc, r->ir,
-                buf);
+                disas_pc, r->ir, buf);
         fprintf(stderr,
                 "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
                 r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6],
@@ -567,9 +567,12 @@ static void impl_fini(regs *r)
 static int core_poll_irq(regs *r, word *vec)
 {
     uint16_t v = 0;
+    uint32_t irqstate = io_lock_acquire();
     if (!irq_poll(r, &v)) {
+        io_lock_release(irqstate);
         return 0;
     }
+    io_lock_release(irqstate);
 
     *vec = (word)v;
 
@@ -613,12 +616,23 @@ void lsi11_hw_connect(regs *r)
 
 void lsi11_poll_devices(void)
 {
+    /* Fast devices: poll under spinlock (no SD I/O) */
+    uint32_t irqstate = io_lock_acquire();
     if (device_mask.dl11) {
         dl11_poll();
     }
     if (device_mask.kw11) {
         kw11_poll();
     }
+    if (device_mask.lp11) {
+        lp11_poll();
+    }
+    io_lock_release(irqstate);
+
+    /* Disk controllers: poll outside spinlock.
+       These execute disk commands that perform slow SD card SPI I/O.
+       Holding the spinlock during SD I/O would block Core 1 CPU from
+       accessing any device register, causing a hang. */
     if (device_mask.rl11) {
         rl11_poll();
     }
@@ -627,9 +641,6 @@ void lsi11_poll_devices(void)
     }
     if (device_mask.rh11) {
         rh11_poll();
-    }
-    if (device_mask.lp11) {
-        lp11_poll();
     }
 }
 
