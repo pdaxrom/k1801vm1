@@ -692,6 +692,7 @@ int main(void)
         fatal_halt("failed to open selected RL image");
     }
 
+    r.ram_fast_size = (uint32_t)bus_ram_bytes();
     core_reset(&r);
     sr_set(0);
 

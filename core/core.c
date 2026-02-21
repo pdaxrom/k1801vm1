@@ -8,10 +8,10 @@
 #include "core.h"
 #include "hardware.h"
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 #ifndef MMU_STUB_REGS_WHEN_DISABLED
 #define MMU_STUB_REGS_WHEN_DISABLED 1
@@ -65,6 +65,30 @@
     }                                                                          \
   }
 
+/*
+ * Batch PSW flag helpers: compute multiple flags in one PSW write.
+ * Avoids 3-4 separate read-modify-write cycles per instruction.
+ */
+#define PSW_SET_NZV_WORD(result)                                               \
+  do {                                                                         \
+    word _f = 0;                                                               \
+    if ((result) & SIGN)                                                       \
+      _f |= FLAG_N;                                                            \
+    if ((word)(result) == 0)                                                   \
+      _f |= FLAG_Z;                                                            \
+    r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                      \
+  } while (0)
+
+#define PSW_SET_NZV_BYTE(result)                                               \
+  do {                                                                         \
+    word _f = 0;                                                               \
+    if ((result) & SIGN_B)                                                     \
+      _f |= FLAG_N;                                                            \
+    if (((result) & 0377) == 0)                                                \
+      _f |= FLAG_Z;                                                            \
+    r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                      \
+  } while (0)
+
 #define is_vm2(r) ((r)->model == K1801VM2 || (r)->model == K1806VM2)
 #define has_prev_space_ops(r) (is_vm2(r) || (r)->model == DCJ11)
 #define PSW_CM_MASK 0140000
@@ -103,7 +127,8 @@ static INLINE word dcj11_psw_set_prev_mode(word psw, int mode)
     return (word)((psw & ~PSW_PM_MASK) | ((word)(m & 03) << 12));
 }
 
-static INLINE bool vm1_reg_block_load_word(regs *r, word offset, word *value_out)
+static INLINE bool vm1_reg_block_load_word(regs *r, word offset,
+        word *value_out)
 {
     switch (offset) {
     case 0177700:
@@ -183,7 +208,8 @@ static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
 #define DCJ11_REG_HITMISS 0177752
 #define DCJ11_REG_CPUERR 0177766
 
-static INLINE bool dcj11_reg_block_load_word(regs *r, word offset, word *value)
+static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
+        word *value)
 {
     switch (offset & 0177776) {
     case DCJ11_REG_MEMERR:
@@ -206,7 +232,8 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset, word *value)
     }
 }
 
-static INLINE bool dcj11_reg_block_store_word(regs *r, word offset, word value)
+static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
+        word value)
 {
     switch (offset & 0177776) {
     case DCJ11_REG_MEMERR:
@@ -251,7 +278,7 @@ static INLINE bool dcj11_reg_block_store_byte(regs *r, word offset,
         byte value)
 {
     if (offset == DCJ11_REG_MEMERR || offset == DCJ11_REG_HITMISS ||
-        offset == DCJ11_REG_CPUERR || offset == DCJ11_REG_MAINT) {
+            offset == DCJ11_REG_CPUERR || offset == DCJ11_REG_MAINT) {
         return dcj11_reg_block_store_word(r, offset, 0);
     }
 
@@ -314,7 +341,8 @@ static INLINE void dcj11_sp_mode_init(regs *r)
     r->sp_mode_init = 1;
 }
 
-static INLINE void dcj11_switch_stack_mode(regs *r, word old_psw, word new_psw)
+static INLINE void dcj11_switch_stack_mode(regs *r, word old_psw,
+        word new_psw)
 {
     int old_mode;
     int new_mode;
@@ -342,7 +370,8 @@ static INLINE word dcj11_read_mode_reg(regs *r, int mode, word reg)
     return r->sp_mode[psw_mode_normalize(mode)];
 }
 
-static INLINE void dcj11_write_mode_reg(regs *r, int mode, word reg, word value)
+static INLINE void dcj11_write_mode_reg(regs *r, int mode, word reg,
+                                        word value)
 {
     if (reg != 6 || r->model != DCJ11) {
         r->r[reg & 07] = value;
@@ -886,9 +915,9 @@ static INLINE int translate_va(regs *r, word va, int is_write, int is_ifetch,
 }
 
 static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
-                                          int mode_in, int space_in,
-                                          dword *pa_out, int *fault_code_out,
-                                          int *seg_out)
+        int mode_in, int space_in,
+        dword *pa_out, int *fault_code_out,
+        int *seg_out)
 {
     if (pa_out) {
         *pa_out = va;
@@ -1019,6 +1048,13 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
     int seg = 0;
     int rc;
 
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+    /* Fast path: RAM access bypasses entire callback chain. */
+    if (r->ram_fast && offset < 0160000) {
+        return r->ram_fast[offset];
+    }
+#endif
+
     if (r->model == DCJ11) {
         if (dcj11_reg_block_load_byte(r, offset, &value)) {
             return value;
@@ -1064,6 +1100,14 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     int mode = 0;
     int seg = 0;
     int rc;
+
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+    /* Fast path: RAM access bypasses entire callback chain. */
+    if (r->ram_fast && offset < 0160000) {
+        r->ram_fast[offset] = value;
+        return;
+    }
+#endif
 
     if (r->model == DCJ11) {
         if (dcj11_reg_block_store_byte(r, offset, value)) {
@@ -1112,6 +1156,13 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     int mode = 0;
     int seg = 0;
     int rc;
+
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+    /* Fast path: RAM word access bypasses entire callback chain. */
+    if (r->ram_fast && offset < 0157777) {
+        return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
+    }
+#endif
 
     if (r->model == DCJ11) {
         if (offset & 1) {
@@ -1166,6 +1217,15 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     int seg = 0;
     int rc;
 
+#if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
+    /* Fast path: RAM word access bypasses entire callback chain. */
+    if (r->ram_fast && offset < 0157777) {
+        r->ram_fast[offset] = (uint8_t)(value & 000377);
+        r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
+        return;
+    }
+#endif
+
     if (r->model == DCJ11) {
         if (offset & 1) {
             bus_error_trap(r);
@@ -1210,7 +1270,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
 }
 
 static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
-                                             int data_space)
+        int data_space)
 {
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
@@ -1252,7 +1312,7 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
 }
 
 static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
-                                              int mode, int data_space)
+        int mode, int data_space)
 {
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
@@ -1380,6 +1440,14 @@ void core_reset(regs *r)
         r->r[7] = 0;
     }
     r->psw = 0340;
+
+    /* Cache direct RAM pointer for fast-path access in core_step. */
+    if (r->ramptr) {
+        r->ram_fast = r->ramptr(r, 0);
+        /* ram_fast_size set externally or defaults to bus_ram_bytes() */
+    } else {
+        r->ram_fast = NULL;
+    }
 }
 
 void core_fini(regs *r)
@@ -1389,8 +1457,8 @@ void core_fini(regs *r)
     }
 }
 
-static INLINE void core_take_vector(regs *r, word vec, word old_pc, word old_psw,
-                                    const char *kind)
+static INLINE void core_take_vector(regs *r, word vec, word old_pc,
+                                    word old_psw, const char *kind)
 {
     word new_pc = 0;
     word fetched_psw = 0;
@@ -1463,8 +1531,8 @@ static INLINE void handle_halt(regs *r)
         pushw(r->r[7]);
         vec = 4;
         if (flag_is_set(FLAG_H)) {
-            //vec |= (r->SEL0 & 0177400);
-            // In kernel mode must start mini ODT console
+            // vec |= (r->SEL0 & 0177400);
+            //  In kernel mode must start mini ODT console
         }
         r->r[7] = load_word_vector(r, vec) & 0177776;
         r->psw = 0340;
@@ -2086,8 +2154,7 @@ int core_step(regs *r)
     case 0104400: {
         word old_psw = r->psw;
         word vec = (op & 0400) ? 000034 : 000030;
-        core_take_vector(r, vec, r->r[7], old_psw,
-                         (op & 0400) ? "TRAP" : "EMT");
+        core_take_vector(r, vec, r->r[7], old_psw, (op & 0400) ? "TRAP" : "EMT");
     }
     goto step_end;
     }
@@ -2945,9 +3012,7 @@ int core_step(regs *r)
         GET_SWORD(tmp);
         DECODE_DST();
         PUT_WORD(tmp);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_WORD(tmp);
         goto step_end;
     }
     case 011: { /* MOVB */
@@ -2955,9 +3020,7 @@ int core_step(regs *r)
         GET_SBYTE(tmp);
         DECODE_DSTB();
         PUT_BYTE_MOVB(tmp);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_BYTE(tmp);
         goto step_end;
     }
 
@@ -3035,9 +3098,7 @@ int core_step(regs *r)
         DECODE_DST();
         GET_WORD(tmp1);
         word tmp2 = tmp & tmp1;
-        set_flag_if(tmp2 & SIGN, FLAG_N);
-        set_flag_if(tmp2 == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_WORD(tmp2);
         goto step_end;
     }
     case 013: { /* BITB */
@@ -3046,9 +3107,7 @@ int core_step(regs *r)
         DECODE_DSTB();
         GET_BYTE(tmp1);
         byte tmp2 = tmp & tmp1;
-        set_flag_if(tmp2 & SIGN_B, FLAG_N);
-        set_flag_if(tmp2 == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_BYTE(tmp2);
         goto step_end;
     }
 
@@ -3059,9 +3118,7 @@ int core_step(regs *r)
         GET_WORD(tmp1);
         tmp1 = (~tmp) & tmp1;
         PUT_WORD(tmp1);
-        set_flag_if(tmp1 & SIGN, FLAG_N);
-        set_flag_if(tmp1 == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_WORD(tmp1);
         goto step_end;
     }
     case 014: { /* BICB */
@@ -3071,9 +3128,7 @@ int core_step(regs *r)
         GET_BYTE(tmp1);
         tmp1 = (~tmp) & tmp1;
         PUT_BYTE(tmp1);
-        set_flag_if(tmp1 & SIGN_B, FLAG_N);
-        set_flag_if(tmp1 == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_BYTE(tmp1);
         goto step_end;
     }
 
@@ -3084,9 +3139,7 @@ int core_step(regs *r)
         GET_WORD(tmp1);
         tmp1 = tmp | tmp1;
         PUT_WORD(tmp1);
-        set_flag_if(tmp1 & SIGN, FLAG_N);
-        set_flag_if(tmp1 == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_WORD(tmp1);
         goto step_end;
     }
     case 015: { /* BISB */
@@ -3096,9 +3149,7 @@ int core_step(regs *r)
         GET_BYTE(tmp1);
         tmp1 = tmp | tmp1;
         PUT_BYTE(tmp1);
-        set_flag_if(tmp1 & SIGN_B, FLAG_N);
-        set_flag_if(tmp1 == 0, FLAG_Z);
-        clear_flag(FLAG_V);
+        PSW_SET_NZV_BYTE(tmp1);
         goto step_end;
     }
     }

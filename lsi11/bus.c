@@ -9,9 +9,9 @@
 #define LSI11_FIXED_RAM_KB 56u
 #define PDP1184_DEFAULT_RAM_KB 4096u
 #define PDP11_18BIT_IO_PAGE_START 0760000
-#define PDP11_18BIT_IO_PAGE_END   0777777
+#define PDP11_18BIT_IO_PAGE_END 0777777
 #define PDP11_22BIT_IO_PAGE_START 017760000
-#define PDP11_22BIT_IO_PAGE_END   017777777
+#define PDP11_22BIT_IO_PAGE_END 017777777
 
 typedef struct {
     bus_machine_t machine;
@@ -87,8 +87,8 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
 
         if ((ram_kb % BUS_RAM_GRANULARITY_KB) != 0) {
             set_err(err, err_len,
-                    "RAM size %u KB is invalid: must be multiple of %u KB",
-                    ram_kb, BUS_RAM_GRANULARITY_KB);
+                    "RAM size %u KB is invalid: must be multiple of %u KB", ram_kb,
+                    BUS_RAM_GRANULARITY_KB);
             return -1;
         }
 
@@ -117,21 +117,19 @@ size_t bus_ram_bytes(void)
     return g_ram_bytes;
 }
 
-int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes, char *err,
-                      size_t err_len)
+int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes,
+                      char *err, size_t err_len)
 {
     if (user_ram_bytes == 0) {
         user_ram_bytes = BUS_VM2_DEFAULT_USER_RAM_BYTES;
     }
     if (user_ram_bytes > BUS_VM2_BANK_MAX_BYTES) {
-        set_err(err, err_len,
-                "VM2 USER RAM size %07o exceeds 0200000 bytes",
+        set_err(err, err_len, "VM2 USER RAM size %07o exceeds 0200000 bytes",
                 (unsigned)user_ram_bytes);
         return -1;
     }
     if (halt_ram_bytes > BUS_VM2_BANK_MAX_BYTES) {
-        set_err(err, err_len,
-                "VM2 HALT RAM size %07o exceeds 0200000 bytes",
+        set_err(err, err_len, "VM2 HALT RAM size %07o exceeds 0200000 bytes",
                 (unsigned)halt_ram_bytes);
         return -1;
     }
@@ -192,8 +190,7 @@ void bus_init(void)
     if (!g_vm2_halt_ram) {
         g_vm2_halt_ram = (uint8_t *)bus_alloc(halt_need);
         if (!g_vm2_halt_ram) {
-            fprintf(stderr,
-                    "bus_init: VM2 HALT RAM allocation failed (%zu bytes)\n",
+            fprintf(stderr, "bus_init: VM2 HALT RAM allocation failed (%zu bytes)\n",
                     halt_need);
             abort();
         }
@@ -326,15 +323,36 @@ void bus_write8(paddr_t addr, uint8_t v)
 
 uint16_t bus_read16(paddr_t addr)
 {
-    uint8_t lo = bus_read8(addr);
-    uint8_t hi = bus_read8(addr + 1);
-    return (uint16_t)(lo | ((uint16_t)hi << 8));
+    uint16_t io_addr = 0;
+
+    if (io_decode_addr(addr, &io_addr)) {
+        uint8_t lo = devio_read8(io_addr);
+        uint8_t hi = devio_read8((uint16_t)(io_addr + 1));
+        return (uint16_t)(lo | ((uint16_t)hi << 8));
+    }
+
+    if (bus_addr_is_ram(addr)) {
+        return (uint16_t)(g_ram[addr] | ((uint16_t)g_ram[addr + 1] << 8));
+    }
+
+    return 0;
 }
 
 void bus_write16(paddr_t addr, uint16_t v)
 {
-    bus_write8(addr, (uint8_t)(v & 000377));
-    bus_write8(addr + 1, (uint8_t)((v >> 8) & 000377));
+    uint16_t io_addr = 0;
+
+    if (io_decode_addr(addr, &io_addr)) {
+        devio_write8(io_addr, (uint8_t)(v & 000377));
+        devio_write8((uint16_t)(io_addr + 1), (uint8_t)((v >> 8) & 000377));
+        return;
+    }
+
+    if (bus_addr_is_ram(addr)) {
+        g_ram[addr] = (uint8_t)(v & 000377);
+        g_ram[addr + 1] = (uint8_t)((v >> 8) & 000377);
+        return;
+    }
 }
 
 static int vm2_bankable_ram_addr(uint16_t addr)

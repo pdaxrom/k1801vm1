@@ -65,44 +65,44 @@ enum {
 #define FLAG_C SET_BIT(BIT_C)
 
 union u_word {
-    word	u;
-    sword	s;
+    word u;
+    sword s;
 };
 
 union u_dword {
-    dword	u;
-    sdword	s;
+    dword u;
+    sdword s;
 };
 
 typedef struct _regs {
-    byte	model;
+    byte model;
 
-    word	psw, r[8];
-    word    ir;
+    word psw, r[8];
+    word ir;
     /* Banked stack pointers for DCJ11 protection modes: K/S/U. */
-    word    sp_mode[4];
-    byte    sp_mode_init;
+    word sp_mode[4];
+    byte sp_mode_init;
 
-    word	cps, cpc;	/* 0177676 0177674 */
+    word cps, cpc; /* 0177676 0177674 */
 
-    word    SEL0; /* unaddressed SEL register */
-    word    J11_REG177744; /* DCJ11 CPU register at 0177744 */
-    word    J11_REG177746; /* DCJ11 CPU register at 0177746 */
-    word    J11_REG177750; /* DCJ11 CPU register at 0177750 */
-    word    J11_REG177752_177766[7]; /* DCJ11 CPU registers at 0177752..0177766 */
-    word    TVE_LIMIT;  /* 0177706 */
-    word    TVE_COUNT;  /* 0177710 */
-    word    TVE_CSR;    /* 0177712 */
-    byte    TVE_PENDING;
-    byte    VM1_RAP_PRESENT;
+    word SEL0;                    /* unaddressed SEL register */
+    word J11_REG177744;           /* DCJ11 CPU register at 0177744 */
+    word J11_REG177746;           /* DCJ11 CPU register at 0177746 */
+    word J11_REG177750;           /* DCJ11 CPU register at 0177750 */
+    word J11_REG177752_177766[7]; /* DCJ11 CPU registers at 0177752..0177766 */
+    word TVE_LIMIT;               /* 0177706 */
+    word TVE_COUNT;               /* 0177710 */
+    word TVE_CSR;                 /* 0177712 */
+    byte TVE_PENDING;
+    byte VM1_RAP_PRESENT;
 
-    word	fTrap;
+    word fTrap;
 
-    word	fWait;
-    word    fAbort;
-    word    fHaltSignal;
-    word    fStepDeferHalt;
-    word    fFisError;
+    word fWait;
+    word fAbort;
+    word fHaltSignal;
+    word fStepDeferHalt;
+    word fFisError;
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     /*
@@ -112,40 +112,48 @@ typedef struct _regs {
      *   space: 0=I-space, 1=D-space
      *   segment: 0..7
      */
-    word    mmu_ssr0;
-    word    mmu_ssr1;
-    word    mmu_ssr2;
-    word    mmu_ssr3;
-    word    mmu_par[4][2][8];
-    word    mmu_pdr[4][2][8];
+    word mmu_ssr0;
+    word mmu_ssr1;
+    word mmu_ssr2;
+    word mmu_ssr3;
+    word mmu_par[4][2][8];
+    word mmu_pdr[4][2][8];
 #endif
 
-    byte (* load_byte)	(struct _regs *r, word offset);
-    void (* store_byte)	(struct _regs *r, word offset, byte value);
-    word (* load_word)	(struct _regs *r, word offset);
-    void (* store_word)	(struct _regs *r, word offset, word value);
+    byte (*load_byte)(struct _regs *r, word offset);
+    void (*store_byte)(struct _regs *r, word offset, byte value);
+    word (*load_word)(struct _regs *r, word offset);
+    void (*store_word)(struct _regs *r, word offset, word value);
 
     /*
      * Optional physical-address callbacks (22-bit capable).
      * When NULL, core falls back to 16-bit callbacks.
      */
-    byte (* load_byte_pa)	(struct _regs *r, dword offset);
-    void (* store_byte_pa)	(struct _regs *r, dword offset, byte value);
-    word (* load_word_pa)	(struct _regs *r, dword offset);
-    void (* store_word_pa)	(struct _regs *r, dword offset, word value);
+    byte (*load_byte_pa)(struct _regs *r, dword offset);
+    void (*store_byte_pa)(struct _regs *r, dword offset, byte value);
+    word (*load_word_pa)(struct _regs *r, dword offset);
+    void (*store_word_pa)(struct _regs *r, dword offset, word value);
 
-    int  (* init)		(struct _regs *r);
-    void (* reset)		(struct _regs *r);
-    void (* fini)		(struct _regs *r);
+    int (*init)(struct _regs *r);
+    void (*reset)(struct _regs *r);
+    void (*fini)(struct _regs *r);
 
-    int  (* poll_irq)	(struct _regs *r, word *vector);
+    int (*poll_irq)(struct _regs *r, word *vector);
 
-    byte *(* ramptr)	(struct _regs *r, word offset);
+    byte *(*ramptr)(struct _regs *r, word offset);
+
+    /*
+     * Cached direct pointer to base of RAM, set once at init.
+     * Used by core_step fast-path to bypass callback chain for RAM accesses.
+     * NULL if not available. Size in bytes stored alongside.
+     */
+    uint8_t *ram_fast;
+    uint32_t ram_fast_size;
 } regs;
 
 void core_init(regs *r);
 void core_reset(regs *r);
-int  core_step (regs *r);
-void core_fini (regs *r);
+int core_step(regs *r);
+void core_fini(regs *r);
 
 #endif
