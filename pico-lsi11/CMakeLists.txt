@@ -64,6 +64,8 @@ function(add_pico_emu_target target_name mmu_value machine_define)
 
   target_link_libraries(${target_name} PRIVATE
       pico_stdlib
+      pico_multicore
+      hardware_sync
       FatFs_SPI
   )
 

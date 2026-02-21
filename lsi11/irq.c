@@ -57,14 +57,22 @@ int irq_poll(regs *r, uint16_t *vec_out)
                 return 0;
             }
         } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
-            if (r->psw & 01000) return 0;
+            if (r->psw & 01000) {
+                return 0;
+            }
             if (v == 0160002) {
-                if (r->psw & 02000) return 0;
+                if (r->psw & 02000) {
+                    return 0;
+                }
             } else {
-                if (r->psw & 0200) return 0;
+                if (r->psw & 0200) {
+                    return 0;
+                }
             }
         } else if (r->model == K1801VM2 || r->model == K1806VM2) {
-            if (r->psw & 0200) return 0;
+            if (r->psw & 0200) {
+                return 0;
+            }
         }
     }
 

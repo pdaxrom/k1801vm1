@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pico/stdlib.h"
 #include "hardware/clocks.h"
+#include "hardware/sync.h"
 #include "hardware/vreg.h"
+#include "pico/multicore.h"
+#include "pico/stdlib.h"
 
 #include "f_util.h"
 #include "ff.h"
@@ -30,6 +32,10 @@
 #define RT11_BOOT_BLOCK_BYTES 01000
 #define RL_BOOT_ADDR 002000
 #define RL_BOOT_ENTRY RL_BOOT_ADDR
+
+/* I/O spinlock shared with devio.c and adapter_core.c via io_lock.h */
+spin_lock_t *g_io_spinlock = NULL;
+#define IO_SPINLOCK_NUM 0
 
 typedef struct {
     char name[MAX_IMAGE_NAME];
@@ -240,8 +246,7 @@ static int str_contains_casefold(const char *s, const char *needle)
 
     for (size_t i = 0; i <= (ns - nn); i++) {
         size_t j = 0;
-        while (j < nn &&
-                tolower((unsigned char)s[i + j]) ==
+        while (j < nn && tolower((unsigned char)s[i + j]) ==
                 tolower((unsigned char)needle[j])) {
             j++;
         }
@@ -254,9 +259,9 @@ static int str_contains_casefold(const char *s, const char *needle)
 
 static int has_image_extension(const char *name)
 {
-    static const char *exts[] = {
-        "dsk", "img", "ima", "iso", "rk05", "rk06", "rk07", "rl01", "rl02"
-    };
+    static const char *exts[] = {"dsk",  "img",  "ima",  "iso", "rk05",
+                                 "rk06", "rk07", "rl01", "rl02"
+                                };
     const char *dot = strrchr(name, '.');
     size_t i;
 
@@ -293,7 +298,8 @@ static int image_matches_type(const char *name, image_type_t type)
     if (str_contains_casefold(name, "rl")) {
         is_rl = 1;
     }
-    if (str_contains_casefold(name, "rk06") || str_contains_casefold(name, "rk07") ||
+    if (str_contains_casefold(name, "rk06") ||
+            str_contains_casefold(name, "rk07") ||
             str_contains_casefold(name, "rh")) {
         is_rh = 1;
     }
@@ -399,7 +405,8 @@ static int mount_sd_card(void)
     return -1;
 }
 
-static int list_images(image_entry_t *images, int max_images, image_type_t type)
+static int list_images(image_entry_t *images, int max_images,
+                       image_type_t type)
 {
     DIR dir;
     FILINFO fno;
@@ -540,6 +547,35 @@ static int load_boot_block(const char *image_path, int trace_boot)
     return 0;
 }
 
+/* ---- Core 1: CPU emulation loop ---- */
+static void core1_entry(void)
+{
+    regs *r = (regs *)(uintptr_t)multicore_fifo_pop_blocking();
+    int trace_boot = (int)multicore_fifo_pop_blocking();
+    unsigned long steps = 0;
+
+    for (;;) {
+        int step_chunk = trace_boot ? 1 : 64;
+        for (int i = 0; i < step_chunk; i++) {
+            if (trace_boot && steps < 2000) {
+                char dbuf[128];
+                word pc = r->r[7];
+                word tmp = pc;
+                disas(r, &tmp, dbuf);
+                printf("%06o %s\n", pc, dbuf);
+            }
+            core_step(r);
+            steps++;
+            if (r->fAbort) {
+                break;
+            }
+        }
+        if (r->fAbort) {
+            r->fAbort = 0;
+        }
+    }
+}
+
 int main(void)
 {
     regs r;
@@ -552,7 +588,6 @@ int main(void)
     int image_count;
     int image_choice;
     const char *mode_name;
-    unsigned long steps = 0;
 
     stdio_init_all();
     sleep_ms(2000);
@@ -589,21 +624,20 @@ int main(void)
     cpu_model = prompt_cpu_model(mode_choice);
     if (cpu_model == K1801VM1 || cpu_model == K1801VM1G) {
         if (lsi11_set_device_enabled("vm1sel", 1, cfg_err, sizeof(cfg_err)) != 0 ||
-                lsi11_set_device_enabled("vm1sav", 1, cfg_err,
-                                         sizeof(cfg_err)) != 0) {
+                lsi11_set_device_enabled("vm1sav", 1, cfg_err, sizeof(cfg_err)) != 0) {
             fatal_halt(cfg_err);
         }
     } else {
         if (lsi11_set_device_enabled("vm1sel", 0, cfg_err, sizeof(cfg_err)) != 0 ||
-                lsi11_set_device_enabled("vm1sav", 0, cfg_err,
-                                         sizeof(cfg_err)) != 0) {
+                lsi11_set_device_enabled("vm1sav", 0, cfg_err, sizeof(cfg_err)) != 0) {
             fatal_halt(cfg_err);
         }
     }
 
     while (mount_sd_card() != 0) {
         char line[8];
-        printf("SD is not initialized. Check power/wiring and press Enter to retry...\n");
+        printf("SD is not initialized. Check power/wiring and press Enter to "
+               "retry...\n");
         read_line(line, sizeof(line));
     }
 
@@ -615,8 +649,8 @@ int main(void)
         fatal_halt("no disk images found on SD");
     }
 
-    image_choice = prompt_number("Enter disk number to boot: ", 1,
-                                 image_count) - 1;
+    image_choice =
+        prompt_number("Enter disk number to boot: ", 1, image_count) - 1;
     image_type = prompt_image_type();
     trace_boot = prompt_trace_mode();
 
@@ -637,9 +671,9 @@ int main(void)
     lsi11_set_trace_irq(trace_boot ? 1 : 0);
     lsi11_set_trace_nxm(trace_boot ? 1 : 0);
     if (trace_boot) {
-//        rk11_set_debug(1);
-//        rh11_set_debug(1);
-//        rl11_set_debug(1);
+        //        rk11_set_debug(1);
+        //        rh11_set_debug(1);
+        //        rl11_set_debug(1);
     }
 
     if (image_type == IMAGE_TYPE_RK &&
@@ -707,45 +741,35 @@ int main(void)
     }
 
     {
-        const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184)
-                        ? "pdp1184"
-                        : "lsi11";
+        const char *m =
+            (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184" : "lsi11";
         int rh11_on = lsi11_device_enabled("rh11");
-        printf(
-            "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
-            "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "
-            "dev_sr=%d dev_vm1sel=%d dev_vm1sav=%d\n",
-            m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
-            lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
-            lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
-            lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
-            lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"),
-            lsi11_device_enabled("vm1sel"), lsi11_device_enabled("vm1sav"));
+        printf("CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
+               "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "
+               "dev_sr=%d dev_vm1sel=%d dev_vm1sav=%d\n",
+               m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
+               lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
+               lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
+               lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
+               lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"),
+               lsi11_device_enabled("vm1sel"), lsi11_device_enabled("vm1sav"));
     }
 
     printf("Starting emulator...\n");
 
+    /* Initialize the I/O spinlock before launching core 1 */
+    g_io_spinlock = spin_lock_init(IO_SPINLOCK_NUM);
+
+    /* Launch CPU emulation on core 1 */
+    multicore_launch_core1(core1_entry);
+
+    /* Pass regs pointer and trace flag to core 1 via FIFO */
+    multicore_fifo_push_blocking((uint32_t)(uintptr_t)&r);
+    multicore_fifo_push_blocking((uint32_t)trace_boot);
+
+    /* Core 0: peripheral polling loop */
     for (;;) {
-        int step_chunk = trace_boot ? 1 : 64;
-        for (int i = 0; i < step_chunk; i++) {
-            if (trace_boot && steps < 2000) {
-                char dbuf[128];
-                word pc = r.r[7];
-                word tmp = pc;
-                disas(&r, &tmp, dbuf);
-                printf("%06o %s\n", pc, dbuf);
-            }
-            core_step(&r);
-            steps++;
-            if (r.fAbort) {
-                break;
-            }
-        }
-
         lsi11_poll_devices();
-
-        if (r.fAbort) {
-            r.fAbort = 0;
-        }
+        sleep_us(100);
     }
 }

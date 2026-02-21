@@ -27,7 +27,8 @@ static bus_cfg_t g_cfg = {BUS_MACHINE_LSI11_1104, LSI11_FIXED_RAM_KB};
 static uint8_t *g_ram = NULL;
 static size_t g_ram_bytes = 0;
 static vm2_ram_cfg_t g_vm2_cfg = {BUS_VM2_DEFAULT_USER_RAM_BYTES,
-                                  BUS_VM2_DEFAULT_HALT_RAM_BYTES};
+                                  BUS_VM2_DEFAULT_HALT_RAM_BYTES
+                                 };
 static uint8_t *g_vm2_halt_ram = NULL;
 static size_t g_vm2_halt_ram_bytes = 0;
 
