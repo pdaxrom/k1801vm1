@@ -26,6 +26,8 @@
 #include "core.h"
 #include "disas.h"
 
+#include "term_display.h"
+
 #define MAX_IMAGES 64
 #define MAX_IMAGE_NAME 128
 #define MAX_IMAGE_PATH 256
@@ -652,6 +654,14 @@ int main(void)
     image_choice =
         prompt_number("Enter disk number to boot: ", 1, image_count) - 1;
     image_type = prompt_image_type();
+
+    printf("Duplicate output to ST7565 display:\n");
+    printf("0. no\n");
+    printf("1. yes\n");
+    if (prompt_number("Option [0/1]: ", 0, 1)) {
+        term_display_init();
+    }
+
     trace_boot = prompt_trace_mode();
 
     printf("Mode: %s\n", mode_name);

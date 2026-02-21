@@ -39,6 +39,7 @@ set(PICO_LSI11_COMMON_SOURCES
     ../lsi11/dev_sr.c
     ../lsi11/dev_vm1sel.c
     ../lsi11/dev_vm1sav.c
+    term_display.c
 )
 
 function(add_pico_emu_target target_name mmu_value machine_define)
@@ -66,6 +67,7 @@ function(add_pico_emu_target target_name mmu_value machine_define)
       pico_stdlib
       pico_multicore
       hardware_sync
+      hardware_spi
       FatFs_SPI
   )
 
