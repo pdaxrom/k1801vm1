@@ -118,6 +118,13 @@ typedef struct _regs {
     word mmu_ssr3;
     word mmu_par[4][2][8];
     word mmu_pdr[4][2][8];
+
+    struct {
+        uint8_t *host_read_base;
+        uint8_t *host_write_base;
+        uint16_t valid_min;
+        uint16_t valid_max;
+    } mmu_tlb[4][2][8];
 #endif
 
     byte (*load_byte)(struct _regs *r, word offset);
@@ -155,5 +162,10 @@ void core_init(regs *r);
 void core_reset(regs *r);
 int core_step(regs *r);
 void core_fini(regs *r);
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+void mmu_tlb_flush_all(regs *r);
+void mmu_tlb_update(regs *r, int mode, int space, int seg);
+#endif
 
 #endif

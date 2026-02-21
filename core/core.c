@@ -681,7 +681,11 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
 
     if (a == MMU_SSR0) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
+        word old_ssr0 = r->mmu_ssr0;
         r->mmu_ssr0 = value;
+        if ((old_ssr0 ^ value) & MMU_SSR0_ENABLE) {
+            mmu_tlb_flush_all(r);
+        }
 #else
         (void)value;
 #endif
@@ -706,6 +710,7 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         r->mmu_ssr3 = value;
+        mmu_tlb_flush_all(r);
 #else
         (void)value;
 #endif
@@ -718,6 +723,7 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
         } else {
             r->mmu_pdr[mode][space][seg] = value;
         }
+        mmu_tlb_update(r, mode, space, seg);
 #else
         (void)value;
 #endif
@@ -759,6 +765,63 @@ static INLINE int mmu_io_write_byte(regs *r, word addr, byte value)
 }
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
+static INLINE int mmu_split_enabled(const regs *r, int mode);
+
+void mmu_tlb_update(regs *r, int mode, int space, int seg)
+{
+    word pdr = r->mmu_pdr[mode][space][seg];
+    word par = r->mmu_par[mode][space][seg];
+    int acf = pdr & 07;
+    int ed = (pdr >> 3) & 01;
+    int len = (pdr >> 8) & 0177;
+
+    r->mmu_tlb[mode][space][seg].host_read_base = NULL;
+    r->mmu_tlb[mode][space][seg].host_write_base = NULL;
+    r->mmu_tlb[mode][space][seg].valid_min = 0;
+    r->mmu_tlb[mode][space][seg].valid_max = 0;
+
+    if (acf == 0) {
+        return;    /* Non-resident */
+    }
+
+    if (ed) {
+        /* Expand Down: valid from (len*64) to 8191 */
+        r->mmu_tlb[mode][space][seg].valid_min = (uint16_t)(len << 6);
+        r->mmu_tlb[mode][space][seg].valid_max = 0x1FFF;
+    } else {
+        /* Expand Up: valid from 0 to (len*64 + 63) */
+        r->mmu_tlb[mode][space][seg].valid_min = 0;
+        r->mmu_tlb[mode][space][seg].valid_max = (uint16_t)((len << 6) | 0x3F);
+    }
+
+    if (r->ram_fast) {
+        dword pa_base = (dword)par << 6;
+        dword va_base = (dword)seg << 13;
+
+        /* Fast bypass only for space mapped strictly into RAM */
+        if ((pa_base + 0x2000) <= r->ram_fast_size) {
+            uint8_t *base_ptr = r->ram_fast + pa_base - va_base;
+            r->mmu_tlb[mode][space][seg].host_read_base = base_ptr;
+            /* Writes bypassed only if segment already has W bit set */
+            if ((pdr & 0000100) && (acf == 2 || acf == 3 || acf == 6 || acf == 7)) {
+                r->mmu_tlb[mode][space][seg].host_write_base = base_ptr;
+            }
+        }
+    }
+}
+
+void mmu_tlb_flush_all(regs *r)
+{
+    int mode, space, seg;
+    for (mode = 0; mode < 4; mode++) {
+        for (space = 0; space < 2; space++) {
+            for (seg = 0; seg < 8; seg++) {
+                mmu_tlb_update(r, mode, space, seg);
+            }
+        }
+    }
+}
+
 static INLINE int mmu_split_enabled(const regs *r, int mode)
 {
     switch (mode) {
@@ -1053,6 +1116,18 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
     if (r->ram_fast && offset < r->ram_fast_size) {
         return r->ram_fast[offset];
     }
+#else
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mode = mmu_mode_from_psw(r->psw);
+        seg = offset >> 13;
+        uint16_t po = offset & 0x1FFF;
+        int space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
+        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
+                po <= r->mmu_tlb[mode][space][seg].valid_max &&
+                r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+            return r->mmu_tlb[mode][space][seg].host_read_base[offset];
+        }
+    }
 #endif
 
     if (r->model == DCJ11) {
@@ -1106,6 +1181,19 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     if (r->ram_fast && offset < r->ram_fast_size) {
         r->ram_fast[offset] = value;
         return;
+    }
+#else
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mode = mmu_mode_from_psw(r->psw);
+        seg = offset >> 13;
+        uint16_t po = offset & 0x1FFF;
+        int space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
+        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
+                po <= r->mmu_tlb[mode][space][seg].valid_max &&
+                r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+            r->mmu_tlb[mode][space][seg].host_write_base[offset] = value;
+            return;
+        }
     }
 #endif
 
@@ -1161,6 +1249,19 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     /* Fast path: RAM word access bypasses entire callback chain. */
     if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
         return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
+    }
+#else
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mode = mmu_mode_from_psw(r->psw);
+        seg = offset >> 13;
+        uint16_t po = offset & 0x1FFF;
+        int space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
+        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
+                po <= r->mmu_tlb[mode][space][seg].valid_max &&
+                r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + offset;
+            return (word)(p[0] | ((word)p[1] << 8));
+        }
     }
 #endif
 
@@ -1224,6 +1325,21 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
         return;
     }
+#else
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mode = mmu_mode_from_psw(r->psw);
+        seg = offset >> 13;
+        uint16_t po = offset & 0x1FFF;
+        int space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
+        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
+                po <= r->mmu_tlb[mode][space][seg].valid_max &&
+                r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + offset;
+            p[0] = (uint8_t)(value & 000377);
+            p[1] = (uint8_t)((value >> 8) & 000377);
+            return;
+        }
+    }
 #endif
 
     if (r->model == DCJ11) {
@@ -1278,6 +1394,21 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
     int rc;
     word value;
 
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mode = psw_mode_normalize(mode);
+        seg = offset >> 13;
+        uint16_t po = offset & 0x1FFF;
+        int space = (data_space && mmu_split_enabled(r, mode)) ? 1 : 0;
+        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
+                po <= r->mmu_tlb[mode][space][seg].valid_max &&
+                r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + offset;
+            return (word)(p[0] | ((word)p[1] << 8));
+        }
+    }
+#endif
+
     if (r->model == DCJ11) {
         if (offset & 1) {
             bus_error_trap(r);
@@ -1318,6 +1449,23 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
     int fault = MMU_FAULT_NONE;
     int seg = 0;
     int rc;
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        mode = psw_mode_normalize(mode);
+        seg = offset >> 13;
+        uint16_t po = offset & 0x1FFF;
+        int space = (data_space && mmu_split_enabled(r, mode)) ? 1 : 0;
+        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
+                po <= r->mmu_tlb[mode][space][seg].valid_max &&
+                r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + offset;
+            p[0] = (uint8_t)(value & 000377);
+            p[1] = (uint8_t)((value >> 8) & 000377);
+            return;
+        }
+    }
+#endif
 
     if (r->model == DCJ11) {
         if (offset & 1) {
