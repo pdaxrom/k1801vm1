@@ -173,10 +173,13 @@ Status: **FIXED / PASS**
 - Implemented natively using IEEE-754 `float` operations in software.
 - Converts to and from DEC single-precision F-format dynamically.
 - `Rn` and `4(Rn)` point to the floating-point operands on the PDP-11 stack/memory.
-- Generates `fFisError` internal trap on division by zero.
-- Standard FIS condition code semantics (`N` = sign, `Z` = zero, `V` = 0).
+- Generates FIS error trap (vector 000244) and pushes error code in place of PSW on:
+  - Overflow (error code 02)
+  - Underflow (error code 012)
+  - Division by zero (error code 013)
+- Standard FIS condition code semantics (`N` = sign, `Z` = zero, `V` = 0, `C` = 0).
 
-Status: **PASS**
+Status: **PASS / FIXED**
 
 References: J‑11 Programmer’s Reference (instruction set).
 
@@ -369,9 +372,9 @@ Status: **PASS / FIXED**
 ### 13.5 FIS Trap Handling (VM2)
 - FIS opcodes 075000–075037 trap to SEL010 (SEL0 high byte + 0010).
 - If SEL0 bit 7 is set, FIS traps as illegal (vector 000010).
-- FIS error trap uses vector 000244 (triggered by `fFisError` flag).
+- FIS error trap uses vector 000244, pushing the appropriate error code (02, 012, 013) to the stack instead of PSW.
 
-Status: **PASS / LIMITED**
+Status: **PASS / FIXED**
 
 ### 13.6 VM2 RTI H/U Semantics
 - H/U is restored only when new PC ≥ 160000; otherwise H/U preserved.

@@ -10,17 +10,18 @@
 
 enum {
     NONE = 0,
-    SOP,		/* single operand */
-    DOP,		/* double operand */
-    RD,			/* register destination */
-    RS,			/* register source */
-    BRN,		/* branch */
-    SRG,		/* single register */
-    ROF,		/* register offset */
-    EMT,		/* EMT and TRAP */
-    FLG,		/* flags */
-    NN,			/* numeric */
-    SPLN		/* SPL n */
+    SOP,        /* single operand */
+    DOP,        /* double operand */
+    RD,         /* register destination */
+    RS,         /* register source */
+    BRN,        /* branch */
+    SRG,        /* single register */
+    ROF,        /* register offset */
+    EMT,        /* EMT and TRAP */
+    FLG,        /* flags */
+    NN,         /* numeric */
+    SPLN,       /* SPL n */
+    FIS         /* FIS */
 };
 
 static const struct _OPCODE {
@@ -97,6 +98,11 @@ static const struct _OPCODE {
     { "DIV",	0071000, RS, 0 },
     { "ASH",	0072000, RS, 0 },
     { "ASHC",	0073000, RS, 0 },
+
+    { "FADD",	0075000, FIS, 0 },
+    { "FSUB",	0075010, FIS, 0 },
+    { "FMUL",	0075020, FIS, 0 },
+    { "FDIV",	0075030, FIS, 0 },
 
     { "JSR",	0004000, RD, 0 },
     { "XOR",	0074000, RD, 0 },
@@ -203,9 +209,7 @@ char *disas(regs *r, word *addr, char *out)
 
     sprintf(out, "UNKNOWN [0%0o]", instr);
 
-    int i;
-
-    for (i = 0; i < sizeof(OPS) / sizeof(struct _OPCODE); i++) {
+    for (size_t i = 0; i < sizeof(OPS) / sizeof(struct _OPCODE); i++) {
         char *mode = "";
         if ((OPS[i].mode == 1) && (instr & 0100000)) {
             mode = "B";
@@ -248,6 +252,13 @@ char *disas(regs *r, word *addr, char *out)
             sprintf(out, "%s\t%s,%s", OPS[i].name,
                     decode_operand(r, addr, instr & 077, tmpbuf),
                     REG[(instr >> 6) & 07]
+                   );
+            break;
+        }
+
+        if ((OPS[i].type == FIS) && (OPS[i].code == (instr & 0177070))) {
+            sprintf(out, "%s\t%s", OPS[i].name,
+                    REG[instr & 07]
                    );
             break;
         }

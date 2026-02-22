@@ -3609,7 +3609,7 @@ static int test_vm2_fis_error_trap_model(byte model, const char *name)
     ASSERT_EQ(fx.r.r[7], handler, "FIS error should load vector");
     ASSERT_EQ(fx.r.psw, new_psw, "FIS error should load PSW");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC after FIS error");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000000, "Stack error code after FIS error");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000013, "Stack error code after FIS error");
 
 cleanup:
     fixture_teardown(&fx);

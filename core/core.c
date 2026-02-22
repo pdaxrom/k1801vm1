@@ -1551,7 +1551,7 @@ void core_init(regs *r)
     }
     if (r->model == DCJ11) {
         r->has_fis = 1;
-        r->has_fpu = 1;
+        r->has_fpu = 0;
     } else {
         r->has_fis = 0;
         r->has_fpu = 0;
@@ -1736,7 +1736,7 @@ static INLINE float f11_to_float32(uint32_t f11)
     return res.f;
 }
 
-static INLINE uint32_t float32_to_f11(float f)
+static INLINE uint32_t float32_to_f11(float f, int *error)
 {
     union {
         float f;
@@ -1748,13 +1748,25 @@ static INLINE uint32_t float32_to_f11(float f)
     uint32_t exp32 = (val.u >> 23) & 0xFF;
     uint32_t frac = val.u & 0x007FFFFF;
 
+    if (error) {
+        *error = 0;
+    }
+
     if (exp32 == 0) {
         return 0;
     }
 
     int32_t exp11 = (int32_t)exp32 + 2;
     if (exp11 >= 256) {
-        exp11 = 255;
+        if (error) {
+            *error = 02;
+        }
+        return (sign << 31) | (255 << 23) | frac;
+    } else if (exp11 <= 0) {
+        if (error) {
+            *error = 012;
+        }
+        return 0;
     }
 
     return (sign << 31) | ((uint32_t)exp11 << 23) | frac;
@@ -3187,58 +3199,75 @@ int core_step(regs *r)
         if ((op & 0177740) == 0075000) {
             if (r->has_fis) {
                 word reg = op & 7;
-                word mop = (op >> 3) & 3;
-                word addr_a = r->r[reg];
-                word addr_b = (addr_a + 4) & 0177777;
+                if (reg & 1) {
+                    bus_error_trap(r);
+                    goto step_end;
+                }
 
-                word a_w0 = load_word(r, addr_a);
-                word a_w1 = load_word(r, (addr_a + 2) & 0177777);
+                word mop = (op >> 3) & 3;
+                word addr_b = r->r[reg];
+                word addr_a = (addr_b + 4) & 0177777;
+
                 word b_w0 = load_word(r, addr_b);
                 word b_w1 = load_word(r, (addr_b + 2) & 0177777);
-
                 if (r->fAbort) {
                     return 0;
                 }
 
-                uint32_t a_f11 = ((uint32_t)a_w0 << 16) | a_w1;
+                word a_w0 = load_word(r, addr_a);
+                word a_w1 = load_word(r, (addr_a + 2) & 0177777);
+                if (r->fAbort) {
+                    return 0;
+                }
+
                 uint32_t b_f11 = ((uint32_t)b_w0 << 16) | b_w1;
+                uint32_t a_f11 = ((uint32_t)a_w0 << 16) | a_w1;
 
-                float a_f32 = f11_to_float32(a_f11);
                 float b_f32 = f11_to_float32(b_f11);
+                float a_f32 = f11_to_float32(a_f11);
 
-                if (mop == 3 && a_f32 == 0.0f) {
-                    handle_fis_error(r, b_w0);
+                if (mop == 3 && b_f32 == 0.0f) {
+                    handle_fis_error(r, 013);
                     goto step_end;
                 }
 
                 float res_f32 = 0.0f;
                 switch (mop) {
                 case 0:
-                    res_f32 = b_f32 + a_f32;
+                    res_f32 = a_f32 + b_f32;
                     break; // FADD
                 case 1:
-                    res_f32 = b_f32 - a_f32;
+                    res_f32 = a_f32 - b_f32;
                     break; // FSUB
                 case 2:
-                    res_f32 = b_f32 * a_f32;
+                    res_f32 = a_f32 * b_f32;
                     break; // FMUL
                 case 3:
-                    res_f32 = b_f32 / a_f32;
+                    res_f32 = a_f32 / b_f32;
                     break; // FDIV
                 }
 
-                uint32_t res_f11 = float32_to_f11(res_f32);
+                int fis_err = 0;
+                uint32_t res_f11 = float32_to_f11(res_f32, &fis_err);
+
+                if (fis_err) {
+                    handle_fis_error(r, fis_err);
+                    goto step_end;
+                }
+
                 word res_w0 = (res_f11 >> 16) & 0xFFFF;
                 word res_w1 = res_f11 & 0xFFFF;
 
-                store_word(r, addr_b, res_w0);
-                store_word(r, (addr_b + 2) & 0177777, res_w1);
-
+                store_word(r, addr_a, res_w0);
+                if (r->fAbort) {
+                    return 0;
+                }
+                store_word(r, (addr_a + 2) & 0177777, res_w1);
                 if (r->fAbort) {
                     return 0;
                 }
 
-                r->r[reg] = addr_b;
+                r->r[reg] = addr_a;
 
                 if (res_f11 & 0x80000000) {
                     set_flag(FLAG_N);
@@ -3253,6 +3282,7 @@ int core_step(regs *r)
                 }
 
                 clear_flag(FLAG_V);
+                clear_flag(FLAG_C);
             } else {
                 handle_fis(r);
             }
