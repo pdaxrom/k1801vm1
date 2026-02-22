@@ -596,7 +596,10 @@ int main(int argc, char **argv)
         bk_hw_set_rom_segment(basic_rom, BASIC_BASE, basic_size);
     }
 
+    core_init(&r);
+
     r.ram_fast_size = 0100000;
+
     core_reset(&r);
 
     bk_hw_set_tick_hz(cpu_hz);

@@ -1,9 +1,9 @@
 /* CPU diagnostic harness skeleton (no semantic checks yet). */
 #include "cpu_diag.h"
-#include <string.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "core/hardware.h"
 
@@ -71,7 +71,8 @@ void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model)
     mem_size = hwstub_required_memory_size();
     mem_owner = (byte *)calloc(1, mem_size);
     if (!mem_owner) {
-        fprintf(stderr, "cpu_diag: hwstub memory allocation failed (%zu bytes)\n", mem_size);
+        fprintf(stderr, "cpu_diag: hwstub memory allocation failed (%zu bytes)\n",
+                mem_size);
         abort();
     }
     if (hwstub_set_memory(mem_owner, mem_size) != 0) {
@@ -87,7 +88,6 @@ void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model)
     fx->mem_size = mem_size;
     memset(fx->mem, 0, mem_size);
     fx->r.SEL0 = 0;
-    fx->r.SEL1 = 0;
     core_reset(&fx->r);
 }
 
@@ -102,7 +102,7 @@ void cpu_diag_fixture_fini(cpu_diag_fixture *fx)
 cpu_diag_result cpu_diag_run_all(cpu_diag_fixture *fx)
 {
     (void)fx;
-    cpu_diag_result result = { "cpu_diag", 1 };
+    cpu_diag_result result = {"cpu_diag", 1};
     return result;
 }
 
@@ -113,8 +113,8 @@ void cpu_diag_trace_octal(cpu_diag_fixture *fx, const char *label)
     }
     printf("PC=%06o PSW=%06o\n", fx->r.r[7], fx->r.psw);
     printf("R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o R6=%06o R7=%06o\n",
-           fx->r.r[0], fx->r.r[1], fx->r.r[2], fx->r.r[3],
-           fx->r.r[4], fx->r.r[5], fx->r.r[6], fx->r.r[7]);
+           fx->r.r[0], fx->r.r[1], fx->r.r[2], fx->r.r[3], fx->r.r[4], fx->r.r[5],
+           fx->r.r[6], fx->r.r[7]);
     printf("VEC 000000=%06o 000002=%06o 000004=%06o 000006=%06o\n",
            fx->mem[000000] | ((word)fx->mem[000001] << 8),
            fx->mem[000002] | ((word)fx->mem[000003] << 8),

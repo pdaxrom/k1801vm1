@@ -74,6 +74,12 @@ union u_dword {
     sdword s;
 };
 
+/* SIMH PDP-11 FPU definitions used by pdp11_fp.c */
+typedef struct {
+    uint32_t l;
+    uint32_t h;
+} fpac_t;
+
 typedef struct _regs {
     byte model;
 
@@ -102,7 +108,15 @@ typedef struct _regs {
     word fAbort;
     word fHaltSignal;
     word fStepDeferHalt;
-    word fFisError;
+
+    /* FIS */
+    byte has_fis;
+    /* FPU state */
+    byte has_fpu;
+    fpac_t fpu_fr[6];
+    uint32_t fpu_fps;
+    uint32_t fpu_fea;
+    uint32_t fpu_fec;
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     /*

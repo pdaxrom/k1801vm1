@@ -424,6 +424,8 @@ int main(int argc, char **argv)
         }
     }
 
+    core_init(&r);
+
     core_reset(&r);
 
     if (sr_value >= 0) {

@@ -168,6 +168,16 @@ Status: **PASS**
 
 Status: **FIXED / PASS**
 
+### 7.4 FIS Instructions
+`FADD Rn`, `FSUB Rn`, `FMUL Rn`, `FDIV Rn` (`075000..075037`):
+- Implemented natively using IEEE-754 `float` operations in software.
+- Converts to and from DEC single-precision F-format dynamically.
+- `Rn` and `4(Rn)` point to the floating-point operands on the PDP-11 stack/memory.
+- Generates `fFisError` internal trap on division by zero.
+- Standard FIS condition code semantics (`N` = sign, `Z` = zero, `V` = 0).
+
+Status: **PASS**
+
 References: J‑11 Programmer’s Reference (instruction set).
 
 ---

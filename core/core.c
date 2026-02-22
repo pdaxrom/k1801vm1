@@ -6,7 +6,6 @@
  */
 
 #include "core.h"
-#include "hardware.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -789,7 +788,7 @@ static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
     r->mmu_tlb[mode][space][seg].valid_max = 0;
 
     if (acf == 0) {
-        return;    /* Non-resident */
+        return; /* Non-resident */
     }
 
     if (ed) {
@@ -1550,6 +1549,13 @@ void core_init(regs *r)
     if (r->model == K1806VM2) {
         r->model = K1801VM2;
     }
+    if (r->model == DCJ11) {
+        r->has_fis = 1;
+        r->has_fpu = 1;
+    } else {
+        r->has_fis = 0;
+        r->has_fpu = 0;
+    }
     r->init(r);
 }
 
@@ -1571,7 +1577,6 @@ void core_reset(regs *r)
     r->fAbort = 0;
     r->fHaltSignal = 0;
     r->fStepDeferHalt = 0;
-    r->fFisError = 0;
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     r->mmu_ssr0 = 0;
     r->mmu_ssr1 = 0;
@@ -1702,10 +1707,64 @@ static INLINE void handle_halt(regs *r)
     }
 }
 
+static INLINE float f11_to_float32(uint32_t f11)
+{
+    uint32_t sign = (f11 >> 31) & 1;
+    uint32_t exp11 = (f11 >> 23) & 0xFF;
+    uint32_t frac = f11 & 0x007FFFFF;
+
+    if (exp11 == 0) {
+        return sign ? -0.0f : 0.0f;
+    }
+
+    int32_t exp32 = (int32_t)exp11 - 2;
+    uint32_t ieee = 0;
+
+    if (exp32 <= 0) {
+        ieee = (sign << 31);
+    } else if (exp32 >= 255) {
+        ieee = (sign << 31) | (255 << 23);
+    } else {
+        ieee = (sign << 31) | ((uint32_t)exp32 << 23) | frac;
+    }
+
+    union {
+        uint32_t u;
+        float f;
+    } res;
+    res.u = ieee;
+    return res.f;
+}
+
+static INLINE uint32_t float32_to_f11(float f)
+{
+    union {
+        float f;
+        uint32_t u;
+    } val;
+    val.f = f;
+
+    uint32_t sign = (val.u >> 31) & 1;
+    uint32_t exp32 = (val.u >> 23) & 0xFF;
+    uint32_t frac = val.u & 0x007FFFFF;
+
+    if (exp32 == 0) {
+        return 0;
+    }
+
+    int32_t exp11 = (int32_t)exp32 + 2;
+    if (exp11 >= 256) {
+        exp11 = 255;
+    }
+
+    return (sign << 31) | ((uint32_t)exp11 << 23) | frac;
+}
+
 static INLINE void handle_fis(regs *r)
+
 {
     word vec;
-    if (r->SEL0 & 0200) {
+    if (!is_vm2(r) || r->SEL0 & 0200) {
         illegal_trap(r);
         return;
     }
@@ -1716,9 +1775,9 @@ static INLINE void handle_fis(regs *r)
     r->psw = load_word_vector(r, vec + 2);
 }
 
-static INLINE void handle_fis_error(regs *r)
+static INLINE void handle_fis_error(regs *r, word error)
 {
-    pushw(r->psw);
+    pushw(error);
     pushw(r->r[7]);
     r->r[7] = load_word_vector(r, 0244);
     r->psw = load_word_vector(r, 0246);
@@ -1859,6 +1918,8 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type,
     return TYPE_ERROR;
 }
 
+static int fp11(regs *r, word IR);
+
 #ifdef PICO_ON_DEVICE
 int __not_in_flash_func(core_step)(regs *r)
 #else
@@ -1923,15 +1984,6 @@ int core_step(regs *r)
 
     r->ir = op;
     r->r[7] += 2;
-    if (is_vm2(r) && ((op & 0177700) == 0075000)) {
-        if (r->fFisError) {
-            r->fFisError = 0;
-            handle_fis_error(r);
-        } else {
-            handle_fis(r);
-        }
-        goto step_end;
-    }
 
     //
     // No operands instructions
@@ -3131,6 +3183,83 @@ int core_step(regs *r)
         clear_flag(FLAG_V);
         goto step_end;
     }
+    case 0075: {
+        if ((op & 0177740) == 0075000) {
+            if (r->has_fis) {
+                word reg = op & 7;
+                word mop = (op >> 3) & 3;
+                word addr_a = r->r[reg];
+                word addr_b = (addr_a + 4) & 0177777;
+
+                word a_w0 = load_word(r, addr_a);
+                word a_w1 = load_word(r, (addr_a + 2) & 0177777);
+                word b_w0 = load_word(r, addr_b);
+                word b_w1 = load_word(r, (addr_b + 2) & 0177777);
+
+                if (r->fAbort) {
+                    return 0;
+                }
+
+                uint32_t a_f11 = ((uint32_t)a_w0 << 16) | a_w1;
+                uint32_t b_f11 = ((uint32_t)b_w0 << 16) | b_w1;
+
+                float a_f32 = f11_to_float32(a_f11);
+                float b_f32 = f11_to_float32(b_f11);
+
+                if (mop == 3 && a_f32 == 0.0f) {
+                    handle_fis_error(r, b_w0);
+                    goto step_end;
+                }
+
+                float res_f32 = 0.0f;
+                switch (mop) {
+                case 0:
+                    res_f32 = b_f32 + a_f32;
+                    break; // FADD
+                case 1:
+                    res_f32 = b_f32 - a_f32;
+                    break; // FSUB
+                case 2:
+                    res_f32 = b_f32 * a_f32;
+                    break; // FMUL
+                case 3:
+                    res_f32 = b_f32 / a_f32;
+                    break; // FDIV
+                }
+
+                uint32_t res_f11 = float32_to_f11(res_f32);
+                word res_w0 = (res_f11 >> 16) & 0xFFFF;
+                word res_w1 = res_f11 & 0xFFFF;
+
+                store_word(r, addr_b, res_w0);
+                store_word(r, (addr_b + 2) & 0177777, res_w1);
+
+                if (r->fAbort) {
+                    return 0;
+                }
+
+                r->r[reg] = addr_b;
+
+                if (res_f11 & 0x80000000) {
+                    set_flag(FLAG_N);
+                } else {
+                    clear_flag(FLAG_N);
+                }
+
+                if ((res_f11 & 0x7FFFFFFF) == 0) {
+                    set_flag(FLAG_Z);
+                } else {
+                    clear_flag(FLAG_Z);
+                }
+
+                clear_flag(FLAG_V);
+            } else {
+                handle_fis(r);
+            }
+            goto step_end;
+        }
+        break;
+    }
     }
 
     //
@@ -3305,6 +3434,12 @@ int core_step(regs *r)
         PSW_SET_NZV_BYTE(tmp1);
         goto step_end;
     }
+    case 017: {
+        if (r->has_fpu) {
+            fp11(r, op);
+            goto step_end;
+        }
+    }
     }
 
     illegal_trap(r);
@@ -3379,3 +3514,5 @@ step_end:
     }
     return 0;
 }
+
+#include "pdp11_fp.c"
