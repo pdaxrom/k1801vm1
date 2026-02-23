@@ -122,6 +122,8 @@ static void usage(const char *argv0)
             "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
             "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
 #endif
+            "  -force-fis      Enable FIS for unsupported CPUs\n"
+            "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
             "  -rk <path>      Attach RK05 image\n"
             "  -rh <path>      Attach RH11 (RK06/RK07) image\n"
             "  -rl <path>      Attach RL image (auto detect RL01/RL02)\n"
@@ -190,6 +192,8 @@ int main(int argc, char **argv)
 #else
     byte cpu_model = DCJ11;
 #endif
+    int force_fis = 0;
+    int force_fp11 = 0;
     int trace = 0;
     int trace_regs = 0;
     long max_steps = -1;
@@ -277,6 +281,10 @@ int main(int argc, char **argv)
                 usage(argv[0]);
                 return 2;
             }
+        } else if (!strcmp(argv[i], "-force-fis")) {
+            force_fis = 1;
+        } else if (!strcmp(argv[i], "-force-fp11")) {
+            force_fp11 = 1;
         } else {
             usage(argv[0]);
             return 2;
@@ -425,6 +433,13 @@ int main(int argc, char **argv)
     }
 
     core_init(&r);
+
+    if (force_fis) {
+        r.has_fis = 1;
+    }
+    if (force_fp11) {
+        r.has_fpu = 1;
+    }
 
     core_reset(&r);
 
