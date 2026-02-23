@@ -260,9 +260,18 @@ static inline void nxm_trap(regs *r, paddr_t addr)
         word disas_pc = (pc >= 0000002) ? (word)(pc - 0000002) : pc;
         char buf[128];
         word tmp = disas_pc;
-        disas(r, &tmp, buf);
-        fprintf(stderr, "NXM at %06o PC=%06o IR=%06o %s\n", (unsigned)addr,
-                disas_pc, r->ir, buf);
+        char *dis_str = disas(r, &tmp, buf);
+        fprintf(stderr, "NXM at %06o PC=%06o ", (unsigned)addr, disas_pc);
+        int i = 0;
+        for (word a = disas_pc; a < tmp; a += 2) {
+            fprintf(stderr, "%06o ", r->load_word(r, a));
+            i++;
+        }
+        while (i < 3) {
+            fprintf(stderr, "       ");
+            i++;
+        }
+        fprintf(stderr, "%s (IR=%06o)\n", dis_str, r->ir);
         fprintf(stderr,
                 "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
                 r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6],

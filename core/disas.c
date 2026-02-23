@@ -201,111 +201,108 @@ static char *decode_operand(regs *r, word *addr, byte operand, char *out)
 
 char *disas(regs *r, word *addr, char *out)
 {
+    static short lookup[65536];
+    static int initialized = 0;
     char tmpbuf[256];
     char tmpbuf2[256];
     word instr = r->load_word(r, *addr);
 
+    if (!initialized) {
+        for (int i = 0; i < 65536; i++) {
+            word ins = (word)i;
+            lookup[i] = -1;
+            for (size_t j = 0; j < sizeof(OPS) / sizeof(struct _OPCODE); j++) {
+                int match = 0;
+                if (OPS[j].type == NONE) match = (OPS[j].code == ins);
+                else if (OPS[j].type == SOP) match = (OPS[j].mode ? (ins & 0077700) : (ins & 0177700)) == OPS[j].code;
+                else if (OPS[j].type == DOP) match = (OPS[j].mode ? (ins & 0070000) : (ins & 0170000)) == OPS[j].code;
+                else if (OPS[j].type == RS) match = (ins & 0177000) == OPS[j].code;
+                else if (OPS[j].type == FIS) match = (ins & 0177070) == OPS[j].code;
+                else if (OPS[j].type == RD) match = (ins & 0177000) == OPS[j].code;
+                else if (OPS[j].type == SRG) match = (ins & 0177770) == OPS[j].code;
+                else if (OPS[j].type == ROF) match = (ins & 0177000) == OPS[j].code;
+                else if (OPS[j].type == NN) match = (ins & 0177700) == OPS[j].code;
+                else if (OPS[j].type == EMT) match = (ins & 0177400) == OPS[j].code;
+                else if (OPS[j].type == SPLN) match = (ins & 0177770) == OPS[j].code;
+                else if (OPS[j].type == BRN) match = (ins & 0177400) == OPS[j].code;
+
+                if (match) {
+                    lookup[i] = (short)j;
+                    break;
+                }
+            }
+        }
+        initialized = 1;
+    }
+
     *addr += 2;
 
-    sprintf(out, "UNKNOWN [0%0o]", instr);
+    int i = lookup[instr];
+    if (i < 0) {
+        sprintf(out, "UNKNOWN [0%0o]", instr);
+        return out;
+    }
 
-    for (size_t i = 0; i < sizeof(OPS) / sizeof(struct _OPCODE); i++) {
-        char *mode = "";
-        if ((OPS[i].mode == 1) && (instr & 0100000)) {
-            mode = "B";
-        }
+    char *mode = "";
+    if ((OPS[i].mode == 1) && (instr & 0100000)) {
+        mode = "B";
+    }
 
-        if ((OPS[i].type == NONE) && (OPS[i].code == instr)) {
-            sprintf(out, "%s", OPS[i].name);
-            break;
+    switch (OPS[i].type) {
+    case NONE:
+        sprintf(out, "%s", OPS[i].name);
+        break;
+    case SOP:
+        sprintf(out, "%s%s\t%s", OPS[i].name, mode,
+                decode_operand(r, addr, instr & 077, tmpbuf));
+        break;
+    case DOP:
+        decode_operand(r, addr, (instr >> 6) & 077, tmpbuf);
+        decode_operand(r, addr, instr & 077, tmpbuf2);
+        sprintf(out, "%s%s\t%s,%s", OPS[i].name, mode,
+                tmpbuf, tmpbuf2);
+        break;
+    case RS:
+        sprintf(out, "%s\t%s,%s", OPS[i].name,
+                decode_operand(r, addr, instr & 077, tmpbuf),
+                REG[(instr >> 6) & 07]);
+        break;
+    case FIS:
+        sprintf(out, "%s\t%s", OPS[i].name, REG[instr & 07]);
+        break;
+    case RD:
+        sprintf(out, "%s\t%s,%s", OPS[i].name,
+                REG[(instr >> 6) & 07],
+                decode_operand(r, addr, instr & 077, tmpbuf));
+        break;
+    case SRG:
+        sprintf(out, "%s\t%s", OPS[i].name, REG[instr & 07]);
+        break;
+    case ROF: {
+        word tmp = *addr - ((instr & 077) << 1);
+        sprintf(out, "%s\t%s,%o", OPS[i].name, REG[(instr >> 6) & 07], tmp);
+    }
+    break;
+    case NN:
+        sprintf(out, "%s%o", OPS[i].name, instr & 077);
+        break;
+    case EMT:
+        sprintf(out, "%s\t%o", OPS[i].name, instr & 0377);
+        break;
+    case SPLN:
+        sprintf(out, "%s\t%o", OPS[i].name, instr & 07);
+        break;
+    case BRN: {
+        word tmp = instr & 0377;
+        if (tmp & 0200) {
+            tmp += 0177400;
         }
-
-        if ((OPS[i].type == SOP) && (OPS[i].code == (instr & 0077700)) && (OPS[i].mode == 1)) {
-            sprintf(out, "%s%s\t%s", OPS[i].name, mode,
-                    decode_operand(r, addr, instr & 077, tmpbuf));
-            break;
-        }
-
-        if ((OPS[i].type == SOP) && (OPS[i].code == (instr & 0177700)) && (OPS[i].mode == 0)) {
-            sprintf(out, "%s\t%s", OPS[i].name,
-                    decode_operand(r, addr, instr & 077, tmpbuf));
-            break;
-        }
-
-        if ((OPS[i].type == DOP) && (OPS[i].code == (instr & 0070000)) && (OPS[i].mode == 1)) {
-            decode_operand(r, addr, (instr >> 6) & 077, tmpbuf);
-            decode_operand(r, addr, instr & 077, tmpbuf2);
-            sprintf(out, "%s%s\t%s,%s", OPS[i].name, mode,
-                    tmpbuf, tmpbuf2);
-            break;
-        }
-
-        if ((OPS[i].type == DOP) && (OPS[i].code == (instr & 0170000)) && (OPS[i].mode == 0)) {
-            decode_operand(r, addr, (instr >> 6) & 077, tmpbuf);
-            decode_operand(r, addr, instr & 077, tmpbuf2);
-            sprintf(out, "%s\t%s,%s", OPS[i].name,
-                    tmpbuf, tmpbuf2);
-            break;
-        }
-
-        if ((OPS[i].type == RS) && (OPS[i].code == (instr & 0177000))) {
-            sprintf(out, "%s\t%s,%s", OPS[i].name,
-                    decode_operand(r, addr, instr & 077, tmpbuf),
-                    REG[(instr >> 6) & 07]
-                   );
-            break;
-        }
-
-        if ((OPS[i].type == FIS) && (OPS[i].code == (instr & 0177070))) {
-            sprintf(out, "%s\t%s", OPS[i].name,
-                    REG[instr & 07]
-                   );
-            break;
-        }
-
-        if ((OPS[i].type == RD) && (OPS[i].code == (instr & 0177000))) {
-            sprintf(out, "%s\t%s,%s", OPS[i].name,
-                    REG[(instr >> 6) & 07],
-                    decode_operand(r, addr, instr & 077, tmpbuf));
-            break;
-        }
-
-        if ((OPS[i].type == SRG) && (OPS[i].code == (instr & 0177770))) {
-            sprintf(out, "%s\t%s", OPS[i].name, REG[instr & 07]);
-            break;
-        }
-
-        if ((OPS[i].type == ROF) && (OPS[i].code == (instr & 0177000))) {
-            word tmp = *addr - ((instr & 077) << 1);
-            sprintf(out, "%s\t%s,%o", OPS[i].name, REG[(instr >> 6) & 07], tmp);
-            break;
-        }
-
-        if ((OPS[i].type == NN) && (OPS[i].code == (instr & 0177700))) {
-            sprintf(out, "%s%o", OPS[i].name, instr & 077);
-            break;
-        }
-
-        if ((OPS[i].type == EMT) && (OPS[i].code == (instr & 0177400))) {
-            sprintf(out, "%s\t%o", OPS[i].name, instr & 0377);
-            break;
-        }
-
-        if ((OPS[i].type == SPLN) && (OPS[i].code == (instr & 0177770))) {
-            sprintf(out, "%s\t%o", OPS[i].name, instr & 07);
-            break;
-        }
-
-        if ((OPS[i].type == BRN) && (OPS[i].code == (instr & 0177400))) {
-            word tmp = instr & 0377;
-            if (tmp & 0200) {
-                tmp += 0177400;
-            }
-            tmp = tmp * 2 + *addr;
-            sprintf(out, "%s\t%06o", OPS[i].name, tmp);
-            break;
-        }
+        tmp = tmp * 2 + *addr;
+        sprintf(out, "%s\t%06o", OPS[i].name, tmp);
+    }
+    break;
     }
 
     return out;
 }
+

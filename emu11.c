@@ -189,9 +189,20 @@ int main(int argc, char *argv[])
 	core_reset(&r);
 
 	while (1) {
-		addr = r.r[7];
-		wprintw(windows[WIN_DIS].win, "%06o %06o ", addr, r.load_word(&r, addr));
-		wprintw(windows[WIN_DIS].win, "%s\n", disas(&r, &addr, out));
+		word start_addr = r.r[7];
+		word addr = start_addr;
+		char *dis_str = disas(&r, &addr, out);
+		wprintw(windows[WIN_DIS].win, "%06o ", start_addr);
+		int i = 0;
+		for (word a = start_addr; a < addr; a += 2) {
+			wprintw(windows[WIN_DIS].win, "%06o ", r.load_word(&r, a));
+			i++;
+		}
+		while (i < 3) {
+			wprintw(windows[WIN_DIS].win, "       ");
+			i++;
+		}
+		wprintw(windows[WIN_DIS].win, "%s\n", dis_str);
 		wrefresh(windows[WIN_DIS].win);
 		dump_regs(&r, windows[WIN_REGS].win);
 		wrefresh(windows[WIN_REGS].win);

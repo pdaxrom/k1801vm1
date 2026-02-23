@@ -74,10 +74,21 @@ static int SDLCALL cpu_thread(void *args)
     regs *r = (regs *) args;
 
 	while (is_running) {
-		word addr = r->r[7];
+		word start_addr = r->r[7];
+		word addr = start_addr;
 		dump_regs(r);
-		printf("\n%06o %06o ", addr, r->load_word(r, addr));
-		printf("%s\n", disas(r, &addr, out));
+		char *dis_str = disas(r, &addr, out);
+		printf("\n%06o ", start_addr);
+		int i = 0;
+		for (word a = start_addr; a < addr; a += 2) {
+			printf("%06o ", r->load_word(r, a));
+			i++;
+		}
+		while (i < 3) {
+			printf("       ");
+			i++;
+		}
+		printf("%s\n", dis_str);
 		int key;
 #if 0
 		do {

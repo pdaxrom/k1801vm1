@@ -85,9 +85,20 @@ int main(int argc, char *argv[])
 	core_reset(&r);
 
 	while (1) {
-		addr = r.r[7];
-		printf("\n%06o %06o ", addr, (r.mem[addr] | (r.mem[addr + 1] << 8)));
-		printf("%s\n", disas(&r, &addr, out));
+		word start_addr = r.r[7];
+		word addr = start_addr;
+		char *dis_str = disas(&r, &addr, out);
+		printf("\n%06o ", start_addr);
+		int i = 0;
+		for (word a = start_addr; a < addr; a += 2) {
+			printf("%06o ", (r.mem[a] | (r.mem[a + 1] << 8)));
+			i++;
+		}
+		while (i < 3) {
+			printf("       ");
+			i++;
+		}
+		printf("%s\n", dis_str);
 		dump_regs(&r);
 		int key;
 		do {

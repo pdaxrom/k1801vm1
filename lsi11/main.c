@@ -618,10 +618,20 @@ int main(int argc, char **argv)
         for (int k = 0; k < step_chunk; k++) {
             if (trace) {
                 char buf[128];
-                word pc = r.r[7];
-                word tmp = pc;
+                word start_pc = r.r[7];
+                word tmp = start_pc;
                 disas(&r, &tmp, buf);
-                fprintf(stderr, "%06o %s\n", pc, buf);
+                fprintf(stderr, "%06o ", start_pc);
+                int i = 0;
+                for (word a = start_pc; a < tmp; a += 2) {
+                    fprintf(stderr, "%06o ", r.load_word(&r, a));
+                    i++;
+                }
+                while (i < 3) {
+                    fprintf(stderr, "       ");
+                    i++;
+                }
+                fprintf(stderr, "%s\n", buf);
                 if (trace_regs) {
                     fprintf(stderr,
                             "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",

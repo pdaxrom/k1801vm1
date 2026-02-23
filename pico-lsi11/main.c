@@ -561,10 +561,20 @@ static void __not_in_flash_func(core1_entry)(void)
         for (int i = 0; i < step_chunk; i++) {
             if (trace_boot && steps < 2000) {
                 char dbuf[128];
-                word pc = r->r[7];
-                word tmp = pc;
-                disas(r, &tmp, dbuf);
-                printf("%06o %s\n", pc, dbuf);
+                word start_pc = r->r[7];
+                word tmp = start_pc;
+                char *dis_str = disas(r, &tmp, dbuf);
+                printf("%06o ", start_pc);
+                int j = 0;
+                for (word a = start_pc; a < tmp; a += 2) {
+                    printf("%06o ", r->load_word(r, a));
+                    j++;
+                }
+                while (j < 3) {
+                    printf("       ");
+                    j++;
+                }
+                printf("%s\n", dis_str);
             }
             core_step(r);
             steps++;

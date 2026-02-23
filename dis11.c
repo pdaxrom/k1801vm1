@@ -58,8 +58,19 @@ int main(int argc, char *argv[])
 	word end_addr = (addr + length + 1) & 0177776;
 
 	while (addr < end_addr) {
-		printf("%06o %06o ", addr, r.load_word(&r, addr));
-		printf("%s\n", disas(&r, &addr, out));
+		word start_addr = addr;
+		char *dis_str = disas(&r, &addr, out);
+		printf("%06o ", start_addr);
+		int i = 0;
+		for (word a = start_addr; a < addr; a += 2) {
+			printf("%06o ", r.load_word(&r, a));
+			i++;
+		}
+		while (i < 3) {
+			printf("       ");
+			i++;
+		}
+		printf("%s\n", dis_str);
 	}
 
 	r.fini(&r);
