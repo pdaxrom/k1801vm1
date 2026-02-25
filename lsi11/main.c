@@ -20,6 +20,87 @@
 #define LSI11_TARGET_PDP1184 1
 #endif
 
+#define VM2_MIN_HALT_RAM_BYTES 0004000u /* 2 KB */
+#define VM2_BUSERR_VECTOR      0000004u
+#define VM2_HALT_VECTOR        0000170u
+#define VM2_HANDLER_ADDR       0000400u
+#define VM2_VECTOR_PSW         0000400u
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define VM2_TX_IMM(ch) 0112711u, (uint16_t)(uint8_t)(ch)
+
+/*
+ * VM2 HALT-bank runtime stub:
+ *   MOV  #177566, R1         ; DL11 TBUF
+ *   MOVB #'<char>', (R1)     ; emit text
+ *   ...
+ *   BR   .                   ; stop in place
+ */
+static const uint16_t vm2_halt_stub_prog[] = {
+    0012701u, 0177566u, /* MOV #DL11_TBUF, R1 */
+
+    /* "HALT mode - vector 000004\r\n" */
+    VM2_TX_IMM('H'), VM2_TX_IMM('A'), VM2_TX_IMM('L'), VM2_TX_IMM('T'),
+    VM2_TX_IMM(' '), VM2_TX_IMM('m'), VM2_TX_IMM('o'), VM2_TX_IMM('d'),
+    VM2_TX_IMM('e'), VM2_TX_IMM(' '), VM2_TX_IMM('-'), VM2_TX_IMM(' '),
+    VM2_TX_IMM('v'), VM2_TX_IMM('e'), VM2_TX_IMM('c'), VM2_TX_IMM('t'),
+    VM2_TX_IMM('o'), VM2_TX_IMM('r'), VM2_TX_IMM(' '), VM2_TX_IMM('0'),
+    VM2_TX_IMM('0'), VM2_TX_IMM('0'), VM2_TX_IMM('0'), VM2_TX_IMM('0'),
+    VM2_TX_IMM('4'), VM2_TX_IMM('\r'), VM2_TX_IMM('\n'),
+
+    0000777u /* BR . */
+};
+
+static int cpu_is_vm2(byte model)
+{
+    return (model == K1801VM2 || model == K1806VM2) ? 1 : 0;
+}
+
+static int vm2_halt_store_word(uint16_t addr, uint16_t v, char *err, size_t err_len)
+{
+    if (bus_vm2_cpu_is_nxm(addr, 1) ||
+            bus_vm2_cpu_is_nxm((uint16_t)(addr + 1), 1)) {
+        if (err && err_len) {
+            snprintf(err, err_len, "VM2 HALT RAM NXM at %06o", (unsigned)addr);
+        }
+        return -1;
+    }
+    bus_vm2_cpu_write16(addr, 1, v);
+    return 0;
+}
+
+static int vm2_install_halt_stub(char *err, size_t err_len)
+{
+    uint16_t pc = VM2_HANDLER_ADDR;
+    uint16_t stop_pc = VM2_HANDLER_ADDR +
+                       (uint16_t)((ARRAY_SIZE(vm2_halt_stub_prog) - 1u) * 2u);
+
+    if (vm2_halt_store_word(VM2_BUSERR_VECTOR, VM2_HANDLER_ADDR, err, err_len) != 0) {
+        return -1;
+    }
+    if (vm2_halt_store_word((uint16_t)(VM2_BUSERR_VECTOR + 2), VM2_VECTOR_PSW, err,
+                            err_len) != 0) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < ARRAY_SIZE(vm2_halt_stub_prog); i++) {
+        if (vm2_halt_store_word(pc, vm2_halt_stub_prog[i], err, err_len) != 0) {
+            return -1;
+        }
+        pc += 2;
+    }
+
+    if (vm2_halt_store_word(VM2_HALT_VECTOR, stop_pc, err, err_len) != 0) {
+        return -1;
+    }
+    if (vm2_halt_store_word((uint16_t)(VM2_HALT_VECTOR + 2), VM2_VECTOR_PSW, err,
+                            err_len) != 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
 static int parse_cpu_model(const char *name, byte *model)
 {
     if (!name || !model) {
@@ -308,6 +389,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "Machine configuration error: %s\n", cfg_err);
         return 2;
     }
+    if (cpu_is_vm2(cpu_model)) {
+        if (bus_vm2_configure(BUS_VM2_DEFAULT_USER_RAM_BYTES,
+                              VM2_MIN_HALT_RAM_BYTES, cfg_err,
+                              sizeof(cfg_err)) != 0) {
+            fprintf(stderr, "VM2 configuration error: %s\n", cfg_err);
+            return 2;
+        }
+    }
     if (force_dl11_alias >= 0) {
         lsi11_set_dl11_alias(force_dl11_alias);
     }
@@ -451,6 +540,11 @@ int main(int argc, char **argv)
     if (r.model == K1801VM2 || r.model == K1806VM2) {
         r.SEL0 = 0;
         r.SEL0 = 0200; // Disable FIS trap by default
+        if (vm2_install_halt_stub(cfg_err, sizeof(cfg_err)) != 0) {
+            fprintf(stderr, "VM2 HALT stub error: %s\n", cfg_err);
+            r.fini(&r);
+            return 1;
+        }
     }
 
     if (do_bootcopy) {

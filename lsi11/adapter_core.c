@@ -278,6 +278,22 @@ static inline void nxm_trap(regs *r, paddr_t addr)
                 r->psw);
     }
 
+    /*
+     * Minimal VM2/HALT stack safety:
+     * keep trap frame pushes in available HALT RAM window.
+     */
+    if (vm2_halt_mode(r)) {
+        uint32_t halt_bytes = bus_vm2_halt_ram_bytes();
+        word halt_top = (word)(halt_bytes & 0177776);
+        if (halt_top >= 0000004) {
+            if ((r->r[6] < 0000004) || (r->r[6] > halt_top)) {
+                r->r[6] = halt_top;
+            } else if (r->r[6] & 1) {
+                r->r[6] &= 0177776;
+            }
+        }
+    }
+
     /* Match core bus-error semantics: push current PC. */
     word fault_pc = r->r[7];
     /* push PSW then PC */
