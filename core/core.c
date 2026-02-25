@@ -1997,6 +1997,15 @@ int core_step(regs *r)
     r->ir = op;
     r->r[7] += 2;
 
+    if ((op & 0177740) == 000240) { /* Condition Code Operators */
+        if (op & 000020) {
+            set_flag(op & 000017);
+        } else {
+            clear_flag(op & 000017);
+        }
+        goto step_end;
+    }
+
     //
     // No operands instructions
     //
@@ -2095,48 +2104,7 @@ int core_step(regs *r)
         r->r[0] = 5;
         goto step_end;
 
-    case 000240: /* NOP */
-        goto step_end;
 
-    case 000241: /* CLC */
-        clear_flag(FLAG_C);
-        goto step_end;
-
-    case 000242: /* CLV */
-        clear_flag(FLAG_V);
-        goto step_end;
-
-    case 000244: /* CLZ */
-        clear_flag(FLAG_Z);
-        goto step_end;
-
-    case 000250: /* CLN */
-        clear_flag(FLAG_N);
-        goto step_end;
-
-    case 000257: /* CCC */
-        clear_flag(FLAG_C | FLAG_V | FLAG_Z | FLAG_N);
-        goto step_end;
-
-    case 000261: /* SEC */
-        set_flag(FLAG_C);
-        goto step_end;
-
-    case 000262: /* SEV */
-        set_flag(FLAG_V);
-        goto step_end;
-
-    case 000264: /* SEZ */
-        set_flag(FLAG_Z);
-        goto step_end;
-
-    case 000270: /* SEN */
-        set_flag(FLAG_N);
-        goto step_end;
-
-    case 000277: /* SCC */
-        set_flag(FLAG_C | FLAG_V | FLAG_Z | FLAG_N);
-        goto step_end;
     }
 
     if ((op & 0177770) == 0000230) { /* SPL */
