@@ -851,12 +851,7 @@ static void rl_write8(uint16_t addr, uint8_t b)
                         (rlcs & RLCS_FUNC_MASK) >> 1, rl_selected_drive_index(), rlba,
                         rl_ba_ext_get(), rlda, rlmp);
             }
-            /*
-             * Start command immediately (SIMH-like start semantics) so subsequent
-             * software writes to RLCS cannot retarget an already-issued command.
-             */
             rl_sync_cs();
-            rl_exec_command();
             return;
         }
         rl_sync_cs();
