@@ -35,6 +35,7 @@ void util_term_putc(char c)
 
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 

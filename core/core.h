@@ -95,7 +95,7 @@ typedef struct _regs {
     word J11_REG177744;           /* DCJ11 CPU register at 0177744 */
     word J11_REG177746;           /* DCJ11 CPU register at 0177746 */
     word J11_REG177750;           /* DCJ11 CPU register at 0177750 */
-    word J11_REG177752_177766[7]; /* DCJ11 CPU registers at 0177752..0177766 */
+    word J11_REG177752_177766[8]; /* DCJ11 CPU registers at 0177752..0177766 */
     word TVE_LIMIT;               /* 0177706 */
     word TVE_COUNT;               /* 0177710 */
     word TVE_CSR;                 /* 0177712 */

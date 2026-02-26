@@ -228,7 +228,7 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
         *value = r->J11_REG177752_177766[0];
         return true;
     case DCJ11_REG_CPUERR:
-        *value = (word)(r->J11_REG177752_177766[6] & 0000374);
+        *value = (word)(r->J11_REG177752_177766[7] & 0000374);
         return true;
     default:
         return false;
@@ -255,7 +255,7 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
         return true;
     case DCJ11_REG_CPUERR:
         /* CPU error register clears on write. */
-        r->J11_REG177752_177766[6] = 0;
+        r->J11_REG177752_177766[7] = 0;
         return true;
     default:
         return false;

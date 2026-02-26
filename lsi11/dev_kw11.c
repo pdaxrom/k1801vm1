@@ -187,9 +187,6 @@ static uint8_t kw11_read8(uint16_t a)
         if (kwl_ie) {
             v |= KW11L_IE;
         }
-        /* LKS monitor is read/clear. */
-        kwl_done = 0;
-        kwl_irq_req = 0;
         return v;
     }
     if (a == (uint16_t)(KW11L_CSR + 1)) {
@@ -222,6 +219,10 @@ static void kw11_write8(uint16_t a, uint8_t v)
 {
     if (a == KW11L_CSR) {
         kwl_ie = (v & KW11L_IE) ? 1 : 0;
+        if ((v & KW11L_DONE) == 0) {
+            kwl_done = 0;
+            kwl_irq_req = 0;
+        }
         /*
          * If IE is set while monitor is already set, request interrupt
          * immediately.

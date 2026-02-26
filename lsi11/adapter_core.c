@@ -247,11 +247,11 @@ static inline void nxm_trap(regs *r, paddr_t addr)
             io_timeout = (addr >= 017760000 && addr <= 017777777) ? 1 : 0;
         }
         if (io_timeout) {
-            r->J11_REG177752_177766[6] |= 0000020; /* CPUE_TMO */
+            r->J11_REG177752_177766[7] |= 0000020; /* CPUE_TMO */
         } else {
-            r->J11_REG177752_177766[6] |= 0000040; /* CPUE_NXM */
+            r->J11_REG177752_177766[7] |= 0000040; /* CPUE_NXM */
         }
-        r->J11_REG177752_177766[6] &= 0000374;
+        r->J11_REG177752_177766[7] &= 0000374;
     }
 
     /* Optional trace */

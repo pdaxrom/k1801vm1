@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(PICO_ON_DEVICE)
+#include "pico/time.h"
+#else
+#include <time.h>
+#endif
 
 /* RL11 registers (octal) */
 #define RL11_BASE 0174400
@@ -99,9 +104,21 @@ static uint16_t rlcs, rlba, rlda, rlmp;
 static uint8_t rl_err_code;
 static uint8_t rl_drive_error;
 static uint8_t rl_busy;
+static uint64_t rl_ready_ns;
 
 static irq_latch_t rl_l;
 static rl_drive_t rl_drv[RL_MAX_DRIVES];
+
+static uint64_t now_ns(void)
+{
+#if defined(PICO_ON_DEVICE)
+    return (uint64_t)time_us_64() * 1000ull;
+#else
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+#endif
+}
 
 /* Read Header returns three words sequentially via MP reads. */
 static uint16_t rl_rhdr_fifo[3];
@@ -736,6 +753,12 @@ static void rl_exec_command(void)
 {
     uint16_t fn = (uint16_t)(rlcs & RLCS_FUNC_MASK);
 
+    if (rl_debug) {
+        fprintf(stderr, "RL11 EXEC fn=%02o ds=%o ba=%06o ext=%o da=%06o mp=%06o\n",
+                fn >> 1, rl_selected_drive_index(), rlba,
+                rl_ba_ext_get(), rlda, rlmp);
+    }
+
     switch (fn) {
     case RLCS_FN_NOOP:
         rl_exec_noop();
@@ -843,6 +866,7 @@ static void rl_write8(uint16_t addr, uint8_t b)
         if ((b & RLCS_CRDY) == 0 && rl_l.done) {
             irq_latch_sw_clear_done(&rl_l);
             rl_busy = 1;
+            rl_ready_ns = now_ns() + 10000000ull; /* 10ms delay */
             rl_clear_errors();
             rl_rhdr_reset_fifo();
             if (rl_debug) {
@@ -931,6 +955,9 @@ void rl11_reset(void)
 void rl11_poll(void)
 {
     if (!rl_busy) {
+        return;
+    }
+    if (now_ns() < rl_ready_ns) {
         return;
     }
     rl_exec_command();

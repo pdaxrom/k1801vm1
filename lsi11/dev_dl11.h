@@ -8,6 +8,7 @@ void dl11_reset(void);
 void dl11_poll(void); /* host keyboard -> RX + TX timing */
 void dl11_set_alias(int on);
 void dl11_set_8bit(int on);
+void dl11_set_nl_to_cr(int on);
 
 int dl11_rx_irq_pending(void);
 void dl11_rx_irq_ack(void);

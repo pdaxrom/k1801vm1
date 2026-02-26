@@ -36,6 +36,7 @@ static int tx_busy = 0;
 static int dl11_alias_enabled = 1;
 static int dl11_debug_tx = 0;
 static int dl11_8bit_mode = 0; /* default 7-bit TTY behavior */
+static int dl11_nl_to_cr = 0;
 static uint8_t tcsr_misc = 0;  /* MAINT (bit2) + BREAK (bit0) */
 
 static uint64_t now_ns(void)
@@ -152,11 +153,13 @@ static void dl11_write8(uint16_t a, uint8_t v)
         /* output low byte */
         util_term_putc((char)dl11_mask_char(v));
 
+#if 0
         if ((tcsr_misc & CSR_MAINT) && !rx_l.done) {
             /* Maintenance loopback: transmitter feeds receiver input. */
             rx_buf = dl11_mask_char(v);
             irq_latch_event_set_done(&rx_l);
         }
+#endif
 
         /* transmitter becomes ready later -> DONE=1 */
 #if (DL11_TX_CHAR_NS == 0ull)
@@ -257,8 +260,12 @@ void dl11_poll(void)
     }
 
     c = util_term_getc_nonblock();
-    if (c < 0) {
+    if (c <= 0) {
         return;
+    }
+
+    if (dl11_nl_to_cr && c == '\n') {
+        c = '\r';
     }
 
     rx_buf = dl11_mask_char((uint8_t)c);
@@ -268,6 +275,11 @@ void dl11_poll(void)
 void dl11_set_8bit(int on)
 {
     dl11_8bit_mode = on ? 1 : 0;
+}
+
+void dl11_set_nl_to_cr(int on)
+{
+    dl11_nl_to_cr = on ? 1 : 0;
 }
 
 #ifdef LSI11_TESTS

@@ -33,7 +33,7 @@ static word test_dispatch_load_word(regs *r, word offset)
         case 0177752:
             return r->J11_REG177752_177766[0];
         case 0177766:
-            return (word)(r->J11_REG177752_177766[6] & 0000374);
+            return (word)(r->J11_REG177752_177766[7] & 0000374);
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
         switch (offset) {
@@ -70,7 +70,7 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
             r->J11_REG177752_177766[0] = 0;
             return;
         case 0177766:
-            r->J11_REG177752_177766[6] = 0;
+            r->J11_REG177752_177766[7] = 0;
             return;
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
