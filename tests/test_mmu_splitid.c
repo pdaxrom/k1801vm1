@@ -6,7 +6,7 @@
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 
-#define MMU_SSR3_KD 0000001
+#define MMU_SSR3_KD 0000004
 
 static int test_split_id_data_uses_d_space(void)
 {
@@ -40,11 +40,11 @@ static int test_split_id_data_uses_d_space(void)
     return 0;
 }
 
-static int test_vector_fetch_uses_physical_space(void)
+static int test_vector_fetch_uses_kernel_d_space(void)
 {
     mmu_fixture fx;
 
-    mmu_set_test("vector_fetch_uses_physical");
+    mmu_set_test("vector_fetch_uses_kernel_d_space");
     mmu_fixture_setup(&fx);
 
     fx.r.mmu_ssr0 = 000001;
@@ -71,8 +71,8 @@ static int test_vector_fetch_uses_physical_space(void)
 
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "BPT trap in user mode");
 
-    MMU_ASSERT_EQ(fx.r.r[7], 002222, "vector fetch must use physical vector table");
-    MMU_ASSERT_EQ(fx.r.psw, 030340, "PSW loaded from physical vector with PM=old mode");
+    MMU_ASSERT_EQ(fx.r.r[7], 003333, "vector fetch must use kernel D-space mapping");
+    MMU_ASSERT_EQ(fx.r.psw, 030000, "PSW loaded from kernel D-space vector with PM=old mode");
 
     mmu_fixture_teardown(&fx);
     return 0;
@@ -83,7 +83,7 @@ int main(void)
     int failed = 0;
 
     failed += test_split_id_data_uses_d_space();
-    failed += test_vector_fetch_uses_physical_space();
+    failed += test_vector_fetch_uses_kernel_d_space();
 
     if (failed) {
         return 1;

@@ -256,11 +256,39 @@ static inline void nxm_trap(regs *r, paddr_t addr)
 
     /* Optional trace */
     if (trace_nxm_flag) {
-        word pc = r->r[7];
-        word disas_pc = (pc >= 0000002) ? (word)(pc - 0000002) : pc;
+        word disas_pc = r->instr_pc;
         char buf[128];
         word tmp = disas_pc;
-        char *dis_str = disas(r, &tmp, buf);
+        char *dis_str;
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+        /*
+         * disas() uses r->load_word (data-space reads). On J11 with split I/D,
+         * that can decode garbage for the current instruction. Temporarily force
+         * current mode to unified space so disassembly reads I-space words.
+         */
+        word saved_ssr3 = 0;
+        word split_mask = 0;
+        if (r->model == DCJ11 && (r->mmu_ssr0 & 0000001)) {
+            int cm = (r->psw >> 14) & 03;
+            if (cm == 02) {
+                cm = 0;
+            }
+            if (cm == 0) {
+                split_mask = 0000004; /* KDS */
+            } else if (cm == 1) {
+                split_mask = 0000002; /* SDS */
+            } else if (cm == 3) {
+                split_mask = 0000001; /* UDS */
+            }
+        }
+        saved_ssr3 = r->mmu_ssr3;
+        if (split_mask) {
+            r->mmu_ssr3 = (word)(r->mmu_ssr3 & ~split_mask);
+        }
+        dis_str = disas(r, &tmp, buf);
+#else
+        dis_str = disas(r, &tmp, buf);
+#endif
         fprintf(stderr, "NXM at %06o PC=%06o ", (unsigned)addr, disas_pc);
         int i = 0;
         for (word a = disas_pc; a < tmp; a += 2) {
@@ -276,6 +304,11 @@ static inline void nxm_trap(regs *r, paddr_t addr)
                 "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
                 r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6],
                 r->psw);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+        if (split_mask) {
+            r->mmu_ssr3 = saved_ssr3;
+        }
+#endif
     }
 
     /*

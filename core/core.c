@@ -526,17 +526,32 @@ enum {
 #define MMU_USR_I_PAR_BASE 0177640
 #define MMU_USR_D_PAR_BASE 0177660
 
+/* J11 MMR0 (SSR0) subset compatible with SIMH's MM0_J mask. */
 #define MMU_SSR0_ENABLE 0000001
-#define MMU_SSR0_SEG_SHIFT 1
-#define MMU_SSR0_MODE_SHIFT 5
-#define MMU_SSR0_FAULT 0100000
-#define MMU_SSR0_NONRES 0004000
-#define MMU_SSR0_LENGTH 0002000
-#define MMU_SSR0_PROTECT 0001000
+#define MMU_SSR0_PAGE_SHIFT 1
+#define MMU_SSR0_PAGE_MASK 0000176
+#define MMU_SSR0_PROTECT 0020000
+#define MMU_SSR0_LENGTH 0040000
+#define MMU_SSR0_NONRES 0100000
+#define MMU_SSR0_FREEZE 0160000
+#define MMU_SSR0_J_MASK 0160177
+#define MMU_SSR0_J_WR_MASK 0171401
 
-#define MMU_SSR3_KD 0000001
+#define MMU_SSR3_UD 0000001
 #define MMU_SSR3_SD 0000002
-#define MMU_SSR3_UD 0000004
+#define MMU_SSR3_KD 0000004
+#define MMU_SSR3_M22E 0000020
+#define MMU_SSR3_J_MASK 0000077
+
+#define MMU_PAR_J_MASK 0177777
+#define MMU_PDR_J_MASK 0177516
+#define MMU_PDR_W 0000100
+#define MMU_PDR_A 0000200
+
+#define MMU_PA18_MASK 000777777
+#define MMU_PA22_MASK 017777777
+#define MMU_PA18_IOPAGE_BASE 000760000
+#define MMU_PA22_IOPAGE_PREFIX 017000000
 
 #define MMU_TRAP_VECTOR 0000250
 
@@ -548,7 +563,13 @@ static INLINE int mmu_split_enabled(const regs *r, int mode);
 
 static INLINE void bus_error_trap(regs *r);
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
-                                  int mode, int seg);
+                                  int mode, int space, int seg);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+static INLINE dword mmu_phys_finalize(dword pa, word ssr3);
+static INLINE int mmu_acf_read_ok(word pdr);
+static INLINE int mmu_acf_write_ok(word pdr);
+static INLINE int mmu_acf_write_is_protect(word pdr);
+#endif
 static INLINE int mmu_decode_parpdr(word addr, int *mode, int *space,
                                     int *is_par, int *seg)
 {
@@ -651,7 +672,7 @@ static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
     }
     if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        *value_out = r->mmu_ssr3;
+        *value_out = (word)(r->mmu_ssr3 & MMU_SSR3_J_MASK);
 #else
         *value_out = 0;
 #endif
@@ -660,7 +681,8 @@ static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
     if (mmu_decode_parpdr(a, &mode, &space, &is_par, &seg)) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         *value_out =
-            is_par ? r->mmu_par[mode][space][seg] : r->mmu_pdr[mode][space][seg];
+            is_par ? (r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK)
+                   : (r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
 #else
         *value_out = 0;
 #endif
@@ -691,7 +713,9 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     if (a == MMU_SSR0) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         word old_ssr0 = r->mmu_ssr0;
-        r->mmu_ssr0 = value;
+        word data = (word)(value & MMU_SSR0_J_MASK);
+        r->mmu_ssr0 =
+            (word)((r->mmu_ssr0 & ~MMU_SSR0_J_WR_MASK) | (data & MMU_SSR0_J_WR_MASK));
         if ((old_ssr0 ^ value) & MMU_SSR0_ENABLE) {
             mmu_tlb_flush_all(r);
         }
@@ -702,7 +726,7 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (a == MMU_SSR1) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        r->mmu_ssr1 = value;
+        (void)value; /* MMR1 is read-only */
 #else
         (void)value;
 #endif
@@ -710,7 +734,7 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (a == MMU_SSR2) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        r->mmu_ssr2 = value;
+        (void)value; /* MMR2 is read-only */
 #else
         (void)value;
 #endif
@@ -718,7 +742,7 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        r->mmu_ssr3 = value;
+        r->mmu_ssr3 = (word)(value & MMU_SSR3_J_MASK);
         mmu_tlb_flush_all(r);
 #else
         (void)value;
@@ -728,9 +752,13 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     if (mmu_decode_parpdr(a, &mode, &space, &is_par, &seg)) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         if (is_par) {
-            r->mmu_par[mode][space][seg] = value;
+            r->mmu_par[mode][space][seg] = (word)(value & MMU_PAR_J_MASK);
+            /* Any APR write clears status bits in the paired PDR. */
+            r->mmu_pdr[mode][space][seg] &= (word)~(MMU_PDR_A | MMU_PDR_W);
         } else {
-            r->mmu_pdr[mode][space][seg] = value;
+            /* J11 masks unimplemented bits; PDR A/W are read-only and clear. */
+            r->mmu_pdr[mode][space][seg] =
+                (word)((value & MMU_PDR_J_MASK) & ~(MMU_PDR_A | MMU_PDR_W));
         }
         mmu_tlb_update(r, mode, space, seg);
 #else
@@ -776,8 +804,8 @@ static INLINE int mmu_io_write_byte(regs *r, word addr, byte value)
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
 {
-    word pdr = r->mmu_pdr[mode][space][seg];
-    word par = r->mmu_par[mode][space][seg];
+    word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
+    word par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
     int acf = pdr & 07;
     int ed = (pdr >> 3) & 01;
     int len = (pdr >> 8) & 0177;
@@ -850,12 +878,6 @@ static INLINE int mmu_mode_from_psw(word psw)
     return (mode == 2) ? 0 : mode;
 }
 
-static INLINE int mmu_fault_write_allowed(word pdr)
-{
-    int acf = pdr & 07;
-    return (acf == 2 || acf == 3 || acf == 6 || acf == 7);
-}
-
 static INLINE word mmu_fault_to_ssr0_bits(int fault)
 {
     switch (fault) {
@@ -869,12 +891,44 @@ static INLINE word mmu_fault_to_ssr0_bits(int fault)
         return 0;
     }
 }
+
+static INLINE dword mmu_phys_finalize(dword pa, word ssr3)
+{
+    /* J11 can run the MMU in 18-bit or 22-bit mode (MMR3<5>). */
+    if (ssr3 & MMU_SSR3_M22E) {
+        return pa & MMU_PA22_MASK;
+    }
+    pa &= MMU_PA18_MASK;
+    if (pa >= MMU_PA18_IOPAGE_BASE) {
+        pa = MMU_PA22_IOPAGE_PREFIX | pa;
+    }
+    return pa;
+}
+
+static INLINE int mmu_acf_read_ok(word pdr)
+{
+    /* J11 PDR uses a 2-bit access code in bits <2:1> (bit 0 not implemented). */
+    int acf = pdr & 06;
+    return (acf == 02 || acf == 06);
+}
+
+static INLINE int mmu_acf_write_ok(word pdr)
+{
+    int acf = pdr & 06;
+    return (acf == 06);
+}
+
+static INLINE int mmu_acf_write_is_protect(word pdr)
+{
+    int acf = pdr & 06;
+    return (acf == 02);
+}
 #endif
 
 static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
                                   int force_kernel_d, dword *pa_out,
                                   int *fault_code_out, int *mode_out,
-                                  int *seg_out)
+                                  int *space_out, int *seg_out)
 {
     if (pa_out) {
         *pa_out = va;
@@ -884,6 +938,9 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
     }
     if (mode_out) {
         *mode_out = 0;
+    }
+    if (space_out) {
+        *space_out = 0;
     }
     if (seg_out) {
         *seg_out = (va >> 13) & 07;
@@ -916,24 +973,19 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
                     : (is_ifetch ? 0 : (mmu_split_enabled(r, mode) ? 1 : 0));
         int seg = (va >> 13) & 07;
         int block = (va >> 6) & 0177;
-        word pdr = r->mmu_pdr[mode][space][seg];
-        word par = r->mmu_par[mode][space][seg];
-        int acf = pdr & 07;
+        word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
+        word par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
         int ed = (pdr >> 3) & 01;
         int len = (pdr >> 8) & 0177;
 
         if (mode_out) {
             *mode_out = mode;
         }
+        if (space_out) {
+            *space_out = space;
+        }
         if (seg_out) {
             *seg_out = seg;
-        }
-
-        if (acf == 0) {
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_NONRES;
-            }
-            return -1;
         }
 
         if ((!ed && block > len) || (ed && block < len)) {
@@ -943,21 +995,32 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
             return -1;
         }
 
-        if (is_write && !mmu_fault_write_allowed(pdr)) {
+        if (is_write) {
+            if (!mmu_acf_write_ok(pdr)) {
+                if (fault_code_out) {
+                    *fault_code_out =
+                        mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
+                                                     : MMU_FAULT_NONRES;
+                }
+                return -1;
+            }
+        } else if (!mmu_acf_read_ok(pdr)) {
             if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_PROTECT;
+                *fault_code_out = MMU_FAULT_NONRES;
             }
             return -1;
         }
 
         if (is_write) {
-            /* Mark segment written (heuristic W-bit model). */
-            r->mmu_pdr[mode][space][seg] |= 0000100;
+            /* Write implies access; keep PDR<A/W> status bits updated. */
+            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
+        } else {
+            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
         }
 
         if (pa_out) {
-            dword pa_block = (dword)((par + block) & 0777777);
-            *pa_out = (pa_block << 6) | (va & 077);
+            dword pa_block = (dword)((par + block) & MMU_PAR_J_MASK);
+            *pa_out = mmu_phys_finalize((pa_block << 6) | (va & 077), r->mmu_ssr3);
         }
     }
 #else
@@ -967,6 +1030,7 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
     (void)force_kernel_d;
     (void)fault_code_out;
     (void)mode_out;
+    (void)space_out;
     (void)seg_out;
 #endif
 
@@ -978,22 +1042,26 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
  * is_ifetch: 1=instruction fetch (I-space), 0=data access (I/D per SSR3)
  */
 static INLINE int translate_va(regs *r, word va, int is_write, int is_ifetch,
-                               dword *pa_out, int *fault_code_out)
+                               dword *pa_out, int *fault_code_out,
+                               int *mode_out, int *space_out, int *seg_out)
 {
     return translate_va_ex(r, va, is_write, is_ifetch, 0, pa_out, fault_code_out,
-                           NULL, NULL);
+                           mode_out, space_out, seg_out);
 }
 
 static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
         int mode_in, int space_in,
         dword *pa_out, int *fault_code_out,
-        int *seg_out)
+        int *space_out, int *seg_out)
 {
     if (pa_out) {
         *pa_out = va;
     }
     if (fault_code_out) {
         *fault_code_out = MMU_FAULT_NONE;
+    }
+    if (space_out) {
+        *space_out = space_in ? 1 : 0;
     }
     if (seg_out) {
         *seg_out = (va >> 13) & 07;
@@ -1022,29 +1090,23 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
         int block = (va >> 6) & 0177;
         word pdr;
         word par;
-        int acf;
         int ed;
         int len;
 
         if (space && !mmu_split_enabled(r, mode)) {
             space = 0;
         }
+        if (space_out) {
+            *space_out = space;
+        }
         if (seg_out) {
             *seg_out = seg;
         }
 
-        pdr = r->mmu_pdr[mode][space][seg];
-        par = r->mmu_par[mode][space][seg];
-        acf = pdr & 07;
+        pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
+        par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
         ed = (pdr >> 3) & 01;
         len = (pdr >> 8) & 0177;
-
-        if (acf == 0) {
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_NONRES;
-            }
-            return -1;
-        }
 
         if ((!ed && block > len) || (ed && block < len)) {
             if (fault_code_out) {
@@ -1053,20 +1115,31 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
             return -1;
         }
 
-        if (is_write && !mmu_fault_write_allowed(pdr)) {
+        if (is_write) {
+            if (!mmu_acf_write_ok(pdr)) {
+                if (fault_code_out) {
+                    *fault_code_out =
+                        mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
+                                                     : MMU_FAULT_NONRES;
+                }
+                return -1;
+            }
+        } else if (!mmu_acf_read_ok(pdr)) {
             if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_PROTECT;
+                *fault_code_out = MMU_FAULT_NONRES;
             }
             return -1;
         }
 
         if (is_write) {
-            r->mmu_pdr[mode][space][seg] |= 0000100;
+            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
+        } else {
+            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
         }
 
         if (pa_out) {
-            dword pa_block = (dword)((par + block) & 0777777);
-            *pa_out = (pa_block << 6) | (va & 077);
+            dword pa_block = (dword)((par + block) & MMU_PAR_J_MASK);
+            *pa_out = mmu_phys_finalize((pa_block << 6) | (va & 077), r->mmu_ssr3);
         }
     }
 #else
@@ -1075,6 +1148,7 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
     (void)mode_in;
     (void)space_in;
     (void)fault_code_out;
+    (void)space_out;
     (void)seg_out;
 #endif
 
@@ -1082,28 +1156,39 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
 }
 
 static INLINE void mmu_record_fault(regs *r, word va, word pc, int fault,
-                                    int mode, int seg)
+                                    int mode, int space, int seg)
 {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     if (r->model != DCJ11) {
         return;
     }
-    /* First-fault latch semantics. */
-    if (r->mmu_ssr0 & MMU_SSR0_FAULT) {
+    /* First-fault latch semantics (MMR0<15:13> freeze updates). */
+    if (r->mmu_ssr0 & MMU_SSR0_FREEZE) {
         return;
     }
-    r->mmu_ssr0 = (word)((r->mmu_ssr0 & MMU_SSR0_ENABLE) | MMU_SSR0_FAULT |
-                         (((word)seg & 07) << MMU_SSR0_SEG_SHIFT) |
-                         (((word)mode & 03) << MMU_SSR0_MODE_SHIFT) |
-                         mmu_fault_to_ssr0_bits(fault));
-    r->mmu_ssr2 = pc;
-    r->mmu_ssr1 = va;
+    r->mmu_ssr0 = (word)(((r->mmu_ssr0 & MMU_SSR0_ENABLE) |
+                          ((((word)(((mode & 03) << 4) | ((space & 01) << 3) |
+                                     (seg & 07))) << MMU_SSR0_PAGE_SHIFT) &
+                           MMU_SSR0_PAGE_MASK) |
+                          mmu_fault_to_ssr0_bits(fault)) &
+                         MMU_SSR0_J_MASK);
+    if (r->model == DCJ11) {
+        /*
+         * J11 MMR2 latches the faulting instruction PC, not the post-incremented
+         * resume PC used for the trap stack frame.
+         */
+        r->mmu_ssr2 = r->instr_pc;
+    } else {
+        r->mmu_ssr2 = pc;
+    }
+    (void)va; /* MMR1 not yet modeled (read-only); keep its current contents. */
 #else
     (void)r;
     (void)va;
     (void)pc;
     (void)fault;
     (void)mode;
+    (void)space;
     (void)seg;
 #endif
 }
@@ -1115,6 +1200,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
+    int space = 0;
     int seg = 0;
     int rc;
 
@@ -1132,6 +1218,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
             return r->mmu_tlb[mode][space][seg].host_read_base[offset];
         }
     }
@@ -1156,18 +1243,20 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
     }
 
     if (force_kernel_d) {
-        rc = translate_va_ex(r, offset, 0, is_ifetch, 1, &pa, &fault, &mode, &seg);
+        rc = translate_va_ex(r, offset, 0, is_ifetch, 1, &pa, &fault, &mode, &space,
+                             &seg);
     } else {
-        rc = translate_va(r, offset, 0, is_ifetch, &pa, &fault);
+        rc = translate_va(r, offset, 0, is_ifetch, &pa, &fault, &mode, &space, &seg);
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
             mode = mmu_mode_from_psw(r->psw);
+            space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
             seg = (offset >> 13) & 07;
         }
 #endif
     }
     if (rc < 0) {
-        mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+        mmu_fault_trap(r, offset, r->r[7], fault, mode, space, seg);
         return 0;
     }
 
@@ -1180,6 +1269,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
+    int space = 0;
     int seg = 0;
     int rc;
 
@@ -1198,6 +1288,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
             r->mmu_tlb[mode][space][seg].host_write_base[offset] = value;
             return;
         }
@@ -1224,18 +1315,19 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     }
 
     if (force_kernel_d) {
-        rc = translate_va_ex(r, offset, 1, 0, 1, &pa, &fault, &mode, &seg);
+        rc = translate_va_ex(r, offset, 1, 0, 1, &pa, &fault, &mode, &space, &seg);
     } else {
-        rc = translate_va(r, offset, 1, 0, &pa, &fault);
+        rc = translate_va(r, offset, 1, 0, &pa, &fault, &mode, &space, &seg);
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
             mode = mmu_mode_from_psw(r->psw);
+            space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
             seg = (offset >> 13) & 07;
         }
 #endif
     }
     if (rc < 0) {
-        mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+        mmu_fault_trap(r, offset, r->r[7], fault, mode, space, seg);
         return;
     }
 
@@ -1249,6 +1341,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
+    int space = 0;
     int seg = 0;
     int rc;
 
@@ -1266,6 +1359,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + offset;
             return (word)(p[0] | ((word)p[1] << 8));
         }
@@ -1298,22 +1392,24 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     }
 
     if (force_kernel_d) {
-        rc = translate_va_ex(r, offset, 0, is_ifetch, 1, &pa, &fault, &mode, &seg);
+        rc = translate_va_ex(r, offset, 0, is_ifetch, 1, &pa, &fault, &mode, &space,
+                             &seg);
     } else {
-        rc = translate_va(r, offset, 0, is_ifetch, &pa, &fault);
+        rc = translate_va(r, offset, 0, is_ifetch, &pa, &fault, &mode, &space, &seg);
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
             mode = mmu_mode_from_psw(r->psw);
+            space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
             seg = (offset >> 13) & 07;
         }
 #endif
     }
     if (rc < 0) {
-        mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+        mmu_fault_trap(r, offset, r->r[7], fault, mode, space, seg);
         return 0;
     }
-
-    return raw_load_word_phys(r, pa);
+    value = raw_load_word_phys(r, pa);
+    return value;
 }
 
 static INLINE void core_store_word_ex(regs *r, word offset, word value,
@@ -1322,6 +1418,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
+    int space = 0;
     int seg = 0;
     int rc;
 
@@ -1341,6 +1438,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + offset;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
@@ -1374,21 +1472,21 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     }
 
     if (force_kernel_d) {
-        rc = translate_va_ex(r, offset, 1, 0, 1, &pa, &fault, &mode, &seg);
+        rc = translate_va_ex(r, offset, 1, 0, 1, &pa, &fault, &mode, &space, &seg);
     } else {
-        rc = translate_va(r, offset, 1, 0, &pa, &fault);
+        rc = translate_va(r, offset, 1, 0, &pa, &fault, &mode, &space, &seg);
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         if (rc < 0 && r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
             mode = mmu_mode_from_psw(r->psw);
+            space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
             seg = (offset >> 13) & 07;
         }
 #endif
     }
     if (rc < 0) {
-        mmu_fault_trap(r, offset, r->r[7], fault, mode, seg);
+        mmu_fault_trap(r, offset, r->r[7], fault, mode, space, seg);
         return;
     }
-
     raw_store_word_phys(r, pa, value);
 }
 
@@ -1397,6 +1495,7 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
 {
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
+    int space = 0;
     int seg = 0;
     int rc;
     word value;
@@ -1410,6 +1509,7 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + offset;
             return (word)(p[0] | ((word)p[1] << 8));
         }
@@ -1441,9 +1541,10 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
     }
 
     rc = translate_va_mode_space(r, offset, 0, mode, data_space, &pa, &fault,
-                                 &seg);
+                                 &space, &seg);
     if (rc < 0) {
-        mmu_fault_trap(r, offset, r->r[7], fault, psw_mode_normalize(mode), seg);
+        mmu_fault_trap(r, offset, r->r[7], fault, psw_mode_normalize(mode), space,
+                       seg);
         return 0;
     }
     return raw_load_word_phys(r, pa);
@@ -1454,6 +1555,7 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
 {
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
+    int space = 0;
     int seg = 0;
     int rc;
 
@@ -1466,6 +1568,7 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + offset;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
@@ -1498,9 +1601,10 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
     }
 
     rc = translate_va_mode_space(r, offset, 1, mode, data_space, &pa, &fault,
-                                 &seg);
+                                 &space, &seg);
     if (rc < 0) {
-        mmu_fault_trap(r, offset, r->r[7], fault, psw_mode_normalize(mode), seg);
+        mmu_fault_trap(r, offset, r->r[7], fault, psw_mode_normalize(mode), space,
+                       seg);
         return;
     }
     raw_store_word_phys(r, pa, value);
@@ -1529,6 +1633,12 @@ static INLINE word core_load_word_ifetch(regs *r, word offset)
 static INLINE word core_load_word_vector(regs *r, word offset)
 {
     word a = (word)(offset & 0177776);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11) {
+        /* PDP-11 traps fetch vectors via kernel D-space when MMU is present. */
+        return core_load_word_mode_space(r, a, 0, 1);
+    }
+#endif
     return raw_load_word_phys(r, a);
 }
 
@@ -1663,10 +1773,10 @@ static INLINE void bus_error_trap(regs *r)
 }
 
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
-                                  int mode, int seg)
+                                  int mode, int space, int seg)
 {
     word old_psw = r->psw;
-    mmu_record_fault(r, va, pc, fault, mode, seg);
+    mmu_record_fault(r, va, pc, fault, mode, space, seg);
     core_take_vector(r, MMU_TRAP_VECTOR, pc, old_psw, "MMU");
     r->fAbort = 1;
 }
@@ -1987,6 +2097,7 @@ int core_step(regs *r)
     /* IRQs are checked after instruction execution (real PDP-11 behavior). */
 
     // load instruction
+    r->instr_pc = r->r[7];
 
     word op = load_word_ifetch(r, r->r[7]);
     if (r->fAbort) {
@@ -2827,8 +2938,6 @@ int core_step(regs *r)
             }
             if (dst_type == TYPE_REG) {
                 mfp_tmp = dcj11_read_mode_reg(r, prev_mode, dst_offset);
-            } else if (dst_type == TYPE_IFETCH) {
-                mfp_tmp = load_word_ifetch(r, dst_offset);
             } else {
                 mfp_tmp = core_load_word_mode_space(r, dst_offset, prev_mode, 1);
             }
@@ -2875,10 +2984,13 @@ int core_step(regs *r)
             }
             if (dst_type == TYPE_REG) {
                 mfp_tmp = dcj11_read_mode_reg(r, prev_mode, dst_offset);
-            } else if (dst_type == TYPE_IFETCH) {
-                mfp_tmp = load_word_ifetch(r, dst_offset);
             } else {
-                mfp_tmp = core_load_word_mode_space(r, dst_offset, prev_mode, 0);
+                /*
+                 * Match SIMH: MFPI in user->user context uses D-space, otherwise I-space.
+                 * PC-relative/immediate modes must still access the previous space, not current I.
+                 */
+                int prev_is_d = (prev_mode == cur_mode && prev_mode == 3) ? 1 : 0;
+                mfp_tmp = core_load_word_mode_space(r, dst_offset, prev_mode, prev_is_d);
             }
             if (r->fAbort) {
                 goto step_end;
@@ -2928,8 +3040,6 @@ int core_step(regs *r)
             int prev_mode = dcj11_psw_prev_mode(psw_before);
             if (dst_type == TYPE_REG) {
                 dcj11_write_mode_reg(r, prev_mode, dst_offset, tmp);
-            } else if (dst_type == TYPE_IFETCH) {
-                store_word(r, dst_offset, tmp);
             } else {
                 core_store_word_mode_space(r, dst_offset, tmp, prev_mode, 0);
             }
@@ -2977,8 +3087,6 @@ int core_step(regs *r)
             int prev_mode = dcj11_psw_prev_mode(psw_before);
             if (dst_type == TYPE_REG) {
                 dcj11_write_mode_reg(r, prev_mode, dst_offset, tmp);
-            } else if (dst_type == TYPE_IFETCH) {
-                store_word(r, dst_offset, tmp);
             } else {
                 core_store_word_mode_space(r, dst_offset, tmp, prev_mode, 1);
             }
@@ -3000,6 +3108,14 @@ int core_step(regs *r)
     case 0004: { /* JSR */
         RA_REG(reg);
         DECODE_DST();
+        if (dst_type == TYPE_REG) {
+            /*
+             * JSR with register destination is reserved/illegal on J11-class CPUs.
+             * XXDP MMU bootstrap expects the trap here.
+             */
+            illegal_trap(r);
+            goto step_end;
+        }
         pushw(r->r[reg]);
         r->r[reg] = r->r[7];
         r->r[7] = dst_offset;

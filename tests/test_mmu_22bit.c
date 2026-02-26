@@ -39,7 +39,7 @@ static int test_data_store_to_22bit_memory(void)
     mmu_fixture_setup(&fx);
 
     fx.r.mmu_ssr0 = 000001;
-    fx.r.mmu_ssr3 = 0000001; /* KD split I/D */
+    fx.r.mmu_ssr3 = 0000004; /* KD split I/D (J11 MMR3<KDS>) */
 
     fx.r.mmu_par[0][0][0] = 02000;
     fx.r.mmu_pdr[0][0][0] = 0177006;

@@ -85,6 +85,7 @@ typedef struct _regs {
 
     word psw, r[8];
     word ir;
+    word instr_pc;
     /* Banked stack pointers for DCJ11 protection modes: K/S/U. */
     word sp_mode[4];
     byte sp_mode_init;

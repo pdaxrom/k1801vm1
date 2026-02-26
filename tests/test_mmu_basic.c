@@ -36,8 +36,8 @@ static int test_mmu_register_decode(void)
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "step 3");
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "step 4");
 
-    MMU_ASSERT_EQ(fx.r.mmu_ssr3, 012340, "SSR3 write/read");
-    MMU_ASSERT_EQ(fx.r.r[0], 012340, "SSR3 decode via MOV");
+    MMU_ASSERT_EQ(fx.r.mmu_ssr3, 000040, "SSR3 write/read (J11 MM3 mask)");
+    MMU_ASSERT_EQ(fx.r.r[0], 000040, "SSR3 decode via MOV");
     MMU_ASSERT_EQ(fx.r.mmu_par[0][0][0], 012345, "KISA0 write/read");
     MMU_ASSERT_EQ(fx.r.r[1], 012345, "KISA0 decode via MOV");
 
