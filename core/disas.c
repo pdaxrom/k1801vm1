@@ -189,60 +189,49 @@ static char *decode_operand(regs *r, word *addr, byte operand, char *out)
 
 char *disas(regs *r, word *addr, char *out)
 {
-    static short lookup[65536];
-    static int initialized = 0;
     char tmpbuf[256];
     char tmpbuf2[256];
     word instr = r->load_word(r, *addr);
+    int i = -1;
 
-    if (!initialized) {
-        for (int i = 0; i < 65536; i++) {
-            word ins = (word)i;
-            lookup[i] = -1;
-            for (size_t j = 0; j < sizeof(OPS) / sizeof(struct _OPCODE); j++) {
-                int match = 0;
-                if (OPS[j].type == NONE) {
-                    match = (OPS[j].code == ins);
-                } else if (OPS[j].type == SOP)
-                    match =
-                        (OPS[j].mode ? (ins & 0077700) : (ins & 0177700)) == OPS[j].code;
-                else if (OPS[j].type == DOP)
-                    match =
-                        (OPS[j].mode ? (ins & 0070000) : (ins & 0170000)) == OPS[j].code;
-                else if (OPS[j].type == RS) {
-                    match = (ins & 0177000) == OPS[j].code;
-                } else if (OPS[j].type == FIS) {
-                    match = (ins & 0177070) == OPS[j].code;
-                } else if (OPS[j].type == RD) {
-                    match = (ins & 0177000) == OPS[j].code;
-                } else if (OPS[j].type == SRG) {
-                    match = (ins & 0177770) == OPS[j].code;
-                } else if (OPS[j].type == ROF) {
-                    match = (ins & 0177000) == OPS[j].code;
-                } else if (OPS[j].type == NN) {
-                    match = (ins & 0177700) == OPS[j].code;
-                } else if (OPS[j].type == EMT) {
-                    match = (ins & 0177400) == OPS[j].code;
-                } else if (OPS[j].type == SPLN) {
-                    match = (ins & 0177770) == OPS[j].code;
-                } else if (OPS[j].type == BRN) {
-                    match = (ins & 0177400) == OPS[j].code;
-                } else if (OPS[j].type == FLG) {
-                    match = (ins & 0177740) == OPS[j].code;
-                }
-
-                if (match) {
-                    lookup[i] = (short)j;
-                    break;
-                }
-            }
+    for (size_t j = 0; j < sizeof(OPS) / sizeof(struct _OPCODE); j++) {
+        int match = 0;
+        if (OPS[j].type == NONE) {
+            match = (OPS[j].code == instr);
+        } else if (OPS[j].type == SOP) {
+            match = (OPS[j].mode ? (instr & 0077700) : (instr & 0177700)) == OPS[j].code;
+        } else if (OPS[j].type == DOP) {
+            match = (OPS[j].mode ? (instr & 0070000) : (instr & 0170000)) == OPS[j].code;
+        } else if (OPS[j].type == RS) {
+            match = (instr & 0177000) == OPS[j].code;
+        } else if (OPS[j].type == FIS) {
+            match = (instr & 0177070) == OPS[j].code;
+        } else if (OPS[j].type == RD) {
+            match = (instr & 0177000) == OPS[j].code;
+        } else if (OPS[j].type == SRG) {
+            match = (instr & 0177770) == OPS[j].code;
+        } else if (OPS[j].type == ROF) {
+            match = (instr & 0177000) == OPS[j].code;
+        } else if (OPS[j].type == NN) {
+            match = (instr & 0177700) == OPS[j].code;
+        } else if (OPS[j].type == EMT) {
+            match = (instr & 0177400) == OPS[j].code;
+        } else if (OPS[j].type == SPLN) {
+            match = (instr & 0177770) == OPS[j].code;
+        } else if (OPS[j].type == BRN) {
+            match = (instr & 0177400) == OPS[j].code;
+        } else if (OPS[j].type == FLG) {
+            match = (instr & 0177740) == OPS[j].code;
         }
-        initialized = 1;
+
+        if (match) {
+            i = (int)j;
+            break;
+        }
     }
 
     *addr += 2;
 
-    int i = lookup[instr];
     if (i < 0) {
         sprintf(out, "UNKNOWN [0%0o]", instr);
         return out;
