@@ -2356,7 +2356,7 @@ int core_step(regs *r)
 
     if ((op & 0177700) == 0006400) {
         word nn = op & 077;
-        r->r[6] += (nn << 1);
+        r->r[6] = r->r[7] + (nn << 1);
         r->r[7] = r->r[5];
         pullw(r->r[5]);
         goto step_end;
