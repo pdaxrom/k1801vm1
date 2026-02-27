@@ -173,15 +173,15 @@ Table 6 (`Memory Management Expansion and Relocation`) summary:
   - status: aligned with table row (`T250`)
 - `Which SP do MFPI/MFPD/MTPI/MTPD use when PSW<13:12>=10`:
   - table `11/84`: `User`
-  - current `DCJ11` code: previous mode is normalized via helper (`mode 2 -> kernel`), so stack-bank selection is effectively kernel-side for that case
-  - status: mismatch against table expectation
+  - `DCJ11`: `MxPI` path now treats `PM=2` as user for previous-space stack-bank selection (`R6`) and previous-mode operand addressing in these ops.
+  - status: aligned with table expectation (`User`).
 - `PSW<15:12>, multiple SPs, and MxPI ops with/without MMU option`:
   - `DCJ11`: implemented in core path independently of MMU-on translation flow
   - status: aligned for practical behavior
 
 Open follow-up from Table 6:
-- [ ] Decide/implement `DCJ11` behavior for `MFPI/MFPD/MTPI/MTPD` when `PSW<13:12>=10`: keep current mode2->kernel normalization or switch to table-expected user SP behavior.
-- [ ] Add targeted test for `PSW<13:12>=10` stack-bank selection in `MFPI/MFPD/MTPI/MTPD` after policy is fixed.
+- [x] Decide/implement `DCJ11` behavior for `MFPI/MFPD/MTPI/MTPD` when `PSW<13:12>=10`: use table-expected user behavior in `MxPI` path.
+- [x] Add targeted test for `PSW<13:12>=10` stack-bank selection in `MFPI/MFPD/MTPI/MTPD` after policy is fixed.
 
 Table 7 (`MMU Registers`, `PARs`) summary:
 - Scope still used:
@@ -470,9 +470,8 @@ Open follow-up from Table 14:
   - add regression tests and reconcile with old item 28 notes.
 - [x] `VM*` error-using-`SP` behavior (`Table 14`):
   - policy fixed to K1801 docs behavior: keep vector-4 path, add regression tests.
-- [ ] `DCJ11` `MFPI/MFPD/MTPI/MTPD` with `PSW<13:12>=10` (`Table 6`):
-  - choose stack-bank behavior policy,
-  - add targeted test.
+- [x] `DCJ11` `MFPI/MFPD/MTPI/MTPD` with `PSW<13:12>=10` (`Table 6`):
+  - `PM=2` interpreted as user for `MxPI` previous-mode stack-bank selection; targeted regression test added.
 - [ ] `DCJ11` ifetch from MMU internal register block (`Table 7`):
   - finalize policy (non-executable vs permissive),
   - implement and add targeted test.

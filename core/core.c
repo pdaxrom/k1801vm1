@@ -124,9 +124,18 @@ static INLINE int dcj11_psw_cur_mode(word psw)
     return psw_mode_normalize((psw >> 14) & 03);
 }
 
-static INLINE int dcj11_psw_prev_mode(word psw)
+static INLINE int dcj11_psw_prev_mode_mxpi(word psw)
 {
-    return psw_mode_normalize((psw >> 12) & 03);
+    int pm = (psw >> 12) & 03;
+    /*
+     * J-11 MxPI special case: PM=2 selects user stack bank semantics.
+     * Keep global mode normalization unchanged and scope this override to
+     * MFPI/MFPD/MTPI/MTPD only.
+     */
+    if (pm == 02) {
+        return 03;
+    }
+    return psw_mode_normalize(pm);
 }
 
 static INLINE word dcj11_psw_set_cur_mode(word psw, int mode)
@@ -3626,7 +3635,7 @@ int core_step(regs *r)
                 goto step_end;
             }
         } else {
-            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             int cur_mode = dcj11_psw_cur_mode(psw_before);
             word saved_sp = r->r[6];
             int swapped_sp = 0;
@@ -3678,7 +3687,7 @@ int core_step(regs *r)
                 goto step_end;
             }
         } else {
-            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             int cur_mode = dcj11_psw_cur_mode(psw_before);
             word saved_sp = r->r[6];
             int swapped_sp = 0;
@@ -3730,7 +3739,7 @@ int core_step(regs *r)
         if (r->model != DCJ11) {
             DECODE_DST();
         } else {
-            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             int cur_mode = dcj11_psw_cur_mode(psw_before);
             word saved_sp = r->r[6];
             int swapped_sp = 0;
@@ -3758,7 +3767,7 @@ int core_step(regs *r)
         if (r->model != DCJ11) {
             PUT_WORD(tmp);
         } else {
-            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             if (dst_type == TYPE_REG) {
                 dcj11_write_mode_reg(r, prev_mode, dst_offset, tmp);
             } else {
@@ -3778,7 +3787,7 @@ int core_step(regs *r)
         if (r->model != DCJ11) {
             DECODE_DST();
         } else {
-            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             int cur_mode = dcj11_psw_cur_mode(psw_before);
             word saved_sp = r->r[6];
             int swapped_sp = 0;
@@ -3806,7 +3815,7 @@ int core_step(regs *r)
         if (r->model != DCJ11) {
             PUT_WORD(tmp);
         } else {
-            int prev_mode = dcj11_psw_prev_mode(psw_before);
+            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             if (dst_type == TYPE_REG) {
                 dcj11_write_mode_reg(r, prev_mode, dst_offset, tmp);
             } else {

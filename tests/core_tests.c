@@ -4353,6 +4353,67 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_mxpi_prev_mode2_uses_user_sp(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word kernel_sp = 01400;
+    const word user_sp = 01234;
+    const word psw_pm2 = 0020000; /* PM=2, CM=0 */
+
+    current_test = "dcj11_mxpi_pm2_user_sp";
+    fixture_setup_model(&fx, DCJ11);
+
+    fx.r.sp_mode_init = 1;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[1] = 01100;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.r[6] = kernel_sp;
+    fx.r.psw = psw_pm2;
+
+    write_op(&fx, op_mfpi(operand(0, 6))); /* MFPI R6 */
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPI R6 should execute");
+    ASSERT_EQ(fx.r.r[6], kernel_sp - 2, "MFPI should push on current kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, kernel_sp - 2), user_sp,
+              "MFPI PM=2 should read user stack pointer");
+    ASSERT_EQ(fx.r.sp_mode[3], user_sp, "MFPI should not modify user SP bank");
+
+    fx.r.r[6] = kernel_sp;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.psw = psw_pm2;
+    write_op(&fx, op_mfpd(operand(0, 6))); /* MFPD R6 */
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPD R6 should execute");
+    ASSERT_EQ(fx.r.r[6], kernel_sp - 2, "MFPD should push on current kernel stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, kernel_sp - 2), user_sp,
+              "MFPD PM=2 should read user stack pointer");
+    ASSERT_EQ(fx.r.sp_mode[3], user_sp, "MFPD should not modify user SP bank");
+
+    fx.r.r[6] = kernel_sp;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.psw = psw_pm2;
+    store_word(&fx, kernel_sp, 06543);
+    write_op(&fx, op_mtpi(operand(0, 6))); /* MTPI R6 */
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPI R6 should execute");
+    ASSERT_EQ(fx.r.r[6], kernel_sp + 2, "MTPI should pop from current kernel stack");
+    ASSERT_EQ(fx.r.sp_mode[3], 06543, "MTPI PM=2 should write user SP bank");
+
+    fx.r.r[6] = kernel_sp;
+    fx.r.sp_mode[0] = kernel_sp;
+    fx.r.sp_mode[3] = user_sp;
+    fx.r.psw = psw_pm2;
+    store_word(&fx, kernel_sp, 07654);
+    write_op(&fx, op_mtpd(operand(0, 6))); /* MTPD R6 */
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPD R6 should execute");
+    ASSERT_EQ(fx.r.r[6], kernel_sp + 2, "MTPD should pop from current kernel stack");
+    ASSERT_EQ(fx.r.sp_mode[3], 07654, "MTPD PM=2 should write user SP bank");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_dcj11_csm_disabled_illegal(void)
 {
     cpu_fixture fx;
@@ -7662,6 +7723,7 @@ int main(void)
     failed += test_fis_odd_register_allowed_model(DCJ11, "DCJ11");
     failed += test_fp11_divf_divzero_trap();
     failed += test_dcj11_special_ops();
+    failed += test_dcj11_mxpi_prev_mode2_uses_user_sp();
     failed += test_dcj11_csm_disabled_illegal();
     failed += test_dcj11_csm_user_to_supervisor();
     failed += test_dcj11_mmr1_jsr_records_sp_delta();
