@@ -75,7 +75,7 @@ static word test_dispatch_load_word(regs *r, word offset)
         case 0177772:
             return test_dcj11_pirq_visible(r->J11_PIRQ);
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         switch (offset) {
         case 0177700:
             return 017777;
@@ -160,7 +160,7 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
             r->J11_RSVD_177770 = value;
             return;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         switch (offset) {
         case 0177700:
             return;
@@ -187,7 +187,7 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
 static byte test_dispatch_load_byte(regs *r, word offset)
 {
     word val16;
-    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    if (r->model == K1801VM1) {
         if (offset >= 0177700 && offset <= 0177713) {
             val16 = test_dispatch_load_word(r, offset & 0177776);
             return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
@@ -210,7 +210,7 @@ static byte test_dispatch_load_byte(regs *r, word offset)
 static void test_dispatch_store_byte(regs *r, word offset, byte value)
 {
     word val16;
-    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    if (r->model == K1801VM1) {
         if (offset >= 0177700 && offset <= 0177713) {
             val16 = test_dispatch_load_word(r, offset & 0177776);
             if (offset & 1) {
@@ -939,7 +939,7 @@ static INLINE int is_vm2_model(byte model)
 
 static INLINE int is_vm1_model(byte model)
 {
-    return model == K1801VM1 || model == K1801VM1G;
+    return model == K1801VM1;
 }
 
 typedef struct {
@@ -949,7 +949,6 @@ typedef struct {
 
 static const model_case model_cases[] = {
     { K1801VM1,  "K1801VM1" },
-    { K1801VM1G, "K1801VM1G" },
     { K1801VM2,  "K1801VM2" },
     { K1806VM2,  "K1806VM2" },
     { DCJ11,     "DCJ11" },
@@ -1450,15 +1449,15 @@ static int test_vm1_illegal_instructions_trap(void)
 static int test_dcj11_special_ops_illegal_on_other_models(void)
 {
     int rc = 0;
-    const byte models[] = { K1801VM1, K1801VM1G, K1801VM2, K1806VM2 };
-    const char *names[] = { "K1801VM1", "K1801VM1G", "K1801VM2", "K1806VM2" };
+    const byte models[] = { K1801VM1, K1801VM2, K1806VM2 };
+    const char *names[] = { "K1801VM1", "K1801VM2", "K1806VM2" };
     char namebuf[64];
 
     for (size_t i = 0; i < sizeof(models) / sizeof(models[0]); i++) {
         snprintf(namebuf, sizeof(namebuf), "mfpt_illegal_%s", names[i]);
         rc += run_illegal_op_test_model(op_mfpt(), namebuf, models[i]);
 
-        if (models[i] == K1801VM1 || models[i] == K1801VM1G) {
+        if (models[i] == K1801VM1) {
             snprintf(namebuf, sizeof(namebuf), "mfpd_illegal_%s", names[i]);
             rc += run_illegal_op_test_model(op_mfpd(operand(0, 0)), namebuf, models[i]);
 
@@ -1757,7 +1756,7 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     fx.r.r[0] = 2;
     fx.r.r[1] = 3;
     fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute on VM1G");
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute");
     ASSERT_EQ(fx.r.r[0], 0, "MUL high word");
     ASSERT_EQ(fx.r.r[1], 6, "MUL low word");
     expect_flags(&fx.r, 0, 0, 0, 0);
@@ -1806,7 +1805,7 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     fx.r.r[1] = 6;
     fx.r.r[2] = 3;
     fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "DIV should execute on VM1G");
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV should execute");
     ASSERT_EQ(fx.r.r[0], 2, "DIV quotient");
     ASSERT_EQ(fx.r.r[1], 0, "DIV remainder");
     expect_flags(&fx.r, 0, 0, 0, 0);
@@ -1888,7 +1887,7 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     fx.r.r[0] = 1;
     fx.r.r[1] = 1;
     fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "ASH should execute on VM1G");
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH should execute");
     ASSERT_EQ(fx.r.r[0], 2, "ASH result");
     expect_flags(&fx.r, 0, 0, 0, 0);
     ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH");
@@ -1994,7 +1993,7 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     fx.r.r[1] = 1;
     fx.r.r[2] = 1;
     fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "ASHC should execute on VM1G");
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC should execute");
     ASSERT_EQ(fx.r.r[0], 0, "ASHC high word");
     ASSERT_EQ(fx.r.r[1], 2, "ASHC low word");
     expect_flags(&fx.r, 0, 0, 0, 0);
@@ -2213,7 +2212,6 @@ static int test_extended_ops_supported(void)
 {
     int rc = 0;
 
-    rc += test_extended_ops_supported_models(K1801VM1G, "K1801VM1G");
     rc += test_extended_ops_supported_models(K1801VM2, "K1801VM2");
     rc += test_extended_ops_supported_models(K1806VM2, "K1806VM2");
     rc += test_extended_ops_supported_models(DCJ11, "DCJ11");
@@ -6373,117 +6371,6 @@ cleanup:
     return rc;
 }
 
-static int test_vm1g_timer_irq(void)
-{
-    cpu_fixture fx;
-    int rc = 0;
-    const word handler = 02400;
-    const word new_psw = 000340;
-    const word program[] = {
-        op_nop(),
-    };
-
-    current_test = "vm1g_timer_irq";
-    fixture_setup_model(&fx, K1801VM1G);
-    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
-
-    store_word(&fx, 000270, handler);
-    store_word(&fx, 000272, new_psw);
-    fx.r.TVE_LIMIT = 000001;
-    fx.r.TVE_CSR = 000024; /* RUN|MON */
-    fx.r.TVE_COUNT = fx.r.TVE_LIMIT;
-
-    fx.r.r[6] = 01000;
-    fx.r.psw = 000000;
-
-    ASSERT_EQ(core_step(&fx.r), 0, "Timer should execute");
-    ASSERT_EQ(fx.r.r[7], handler, "Timer IRQ should vector to 000270");
-    ASSERT_EQ(fx.r.psw, new_psw, "Timer IRQ should load PSW");
-    ASSERT_EQ(fx.r.r[6], 00774, "Timer IRQ should push two words");
-
-cleanup:
-    fixture_teardown(&fx);
-    return rc;
-}
-
-static int test_vm1g_eis_diagnostics(void)
-{
-    cpu_fixture fx;
-    int rc = 0;
-    word program[1];
-
-    current_test = "vm1g_eis_diag";
-    fixture_setup_model(&fx, K1801VM1G);
-
-    program[0] = op_mul(0, operand(0, 1));
-    load_program(&fx, TEST_BASE, program, 1);
-    fx.r.r[0] = 2;
-    fx.r.r[1] = 3;
-    fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute");
-    ASSERT_EQ(fx.r.r[0], 0, "MUL high word");
-    ASSERT_EQ(fx.r.r[1], 6, "MUL low word");
-
-    program[0] = op_div(0, operand(0, 2));
-    load_program(&fx, TEST_BASE, program, 1);
-    fx.r.r[0] = 0;
-    fx.r.r[1] = 6;
-    fx.r.r[2] = 3;
-    fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "DIV should execute");
-    ASSERT_EQ(fx.r.r[0], 2, "DIV quotient");
-    ASSERT_EQ(fx.r.r[1], 0, "DIV remainder");
-
-    program[0] = op_ash(0, operand(0, 1));
-    load_program(&fx, TEST_BASE, program, 1);
-    fx.r.r[0] = 1;
-    fx.r.r[1] = 1;
-    fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "ASH should execute");
-    ASSERT_EQ(fx.r.r[0], 2, "ASH result");
-
-    program[0] = op_ashc(0, operand(0, 2));
-    load_program(&fx, TEST_BASE, program, 1);
-    fx.r.r[0] = 0;
-    fx.r.r[1] = 1;
-    fx.r.r[2] = 1;
-    fx.r.psw = 0;
-    ASSERT_EQ(core_step(&fx.r), 0, "ASHC should execute");
-    ASSERT_EQ(fx.r.r[0], 0, "ASHC high word");
-    ASSERT_EQ(fx.r.r[1], 2, "ASHC low word");
-
-cleanup:
-    fixture_teardown(&fx);
-    return rc;
-}
-
-static int test_vm1g_eis_not_illegal(void)
-{
-    cpu_fixture fx;
-    int rc = 0;
-    const word handler = 05000;
-    const word new_psw = 000340;
-    word program[1];
-
-    current_test = "vm1g_eis_not_illegal";
-    fixture_setup_model(&fx, K1801VM1G);
-
-    store_word(&fx, 000010, handler);
-    store_word(&fx, 000012, new_psw);
-
-    program[0] = op_mul(0, operand(0, 1));
-    load_program(&fx, TEST_BASE, program, 1);
-    fx.r.r[0] = 2;
-    fx.r.r[1] = 3;
-    fx.r.psw = 000003;
-    ASSERT_EQ(core_step(&fx.r), 0, "MUL should execute on VM1G");
-    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "MUL should advance PC");
-
-cleanup:
-    fixture_teardown(&fx);
-    return rc;
-}
-
 static int test_vm2_sel0_reset(void)
 {
     cpu_fixture fx;
@@ -7837,14 +7724,12 @@ int main(void)
     failed += test_dcj11_alignment_trap_store();
     failed += test_dcj11_alignment_trap_fetch();
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM1, "K1801VM1");
-    failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM1G, "K1801VM1G");
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM2, "K1801VM2");
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_ifetch_bus_error_preserves_pc();
     failed += test_dcj11_ifetch_internal_mmu_reg_traps_addr(0177572, "mmr0");
     failed += test_dcj11_ifetch_internal_mmu_reg_traps_addr(0177660, "usr_d_par0");
     failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM1, "K1801VM1");
-    failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM1G, "K1801VM1G");
     failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM2, "K1801VM2");
     failed += test_vm_sp_bus_error_uses_vector4_model(K1806VM2, "K1806VM2");
     failed += test_extended_ops_supported();
@@ -7853,7 +7738,6 @@ int main(void)
     failed += test_wait_and_reset();
     failed += test_dcj11_wait_resume_on_irq();
     failed += test_vm1_wait_ignores_trace_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_wait_ignores_trace_model(K1801VM1G, "K1801VM1G");
     failed += test_halt();
     failed += test_external_halt();
     failed += test_vm2_external_halt_masked();
@@ -7936,7 +7820,6 @@ int main(void)
     failed += test_vm2_rti_hu_restore_model(K1801VM2, "K1801VM2");
     failed += test_vm2_rti_hu_restore_model(K1806VM2, "K1806VM2");
     failed += test_vm1_rti_restores_flags_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_rti_restores_flags_model(K1801VM1G, "K1801VM1G");
     failed += test_keyboard_irq_vector();
     failed += test_irq_mask_blocks_interrupt();
     failed += test_dcj11_irq_priority_mask();
@@ -7944,9 +7827,7 @@ int main(void)
     failed += test_dcj11_irq_preempt_before_first_isr_instruction();
     failed += test_dcj11_irq_vector_mask();
     failed += test_vm1_irq_masking_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_irq_masking_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_irq_priority_selection_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_irq_priority_selection_model(K1801VM1G, "K1801VM1G");
     failed += test_vm2_irq_masking_model(K1801VM2, "K1801VM2");
     failed += test_vm2_irq_masking_model(K1806VM2, "K1806VM2");
     failed += test_vm2_irq_mask_holds_pending_model(K1801VM2, "K1801VM2");
@@ -7954,17 +7835,11 @@ int main(void)
     failed += test_vm2_irq_highest_priority_model(K1801VM2, "K1801VM2");
     failed += test_vm2_irq_highest_priority_model(K1806VM2, "K1806VM2");
     failed += test_vm1_timer_registers_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_timer_registers_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_rr_rap_rosh_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_rr_rap_rosh_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_ifetch_internal_reg_block_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_ifetch_internal_reg_block_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_rr_rap_rosh_non_vm1_model(K1801VM2, "K1801VM2");
     failed += test_vm1_rr_rap_rosh_non_vm1_model(K1806VM2, "K1806VM2");
     failed += test_vm1_rr_rap_rosh_non_vm1_model(DCJ11, "DCJ11");
-    failed += test_vm1g_timer_irq();
-    failed += test_vm1g_eis_diagnostics();
-    failed += test_vm1g_eis_not_illegal();
     failed += test_vm2_sel0_reset();
     failed += test_vm1_sel1_sel2_regs();
     failed += test_dcj11_regblock_177744_177746_core_owned();
@@ -7973,9 +7848,7 @@ int main(void)
     failed += test_dcj11_regblock_177754_177770_core_owned();
     failed += test_non_dcj11_reg177750_is_ram();
     failed += test_vm1_tstb_flags_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_tstb_flags_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_bpl_after_tstb_model(K1801VM1, "K1801VM1");
-    failed += test_vm1_bpl_after_tstb_model(K1801VM1G, "K1801VM1G");
     failed += test_vm2_tstb_flags_model(K1801VM2, "K1801VM2");
     failed += test_vm2_tstb_flags_model(K1806VM2, "K1806VM2");
     failed += test_vm2_bpl_after_tstb_model(K1801VM2, "K1801VM2");

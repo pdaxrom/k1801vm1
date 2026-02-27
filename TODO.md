@@ -20,39 +20,38 @@
 ## Findings
 
 Table 1 scope used for comparison:
-- `VM1/VM1G/VM2` vs `PDP-11/03` base set
+- `VM1/VM2` vs `PDP-11/03` base set
 - `DCJ11` vs `PDP-11/84`
 
 Table 1 quick matrix (implemented in current code):
-- `BASIC`: VM1/VM1G/VM2/DCJ11 = `Y` (ok)
-- `SOB,SXT`: VM1/VM1G/VM2/DCJ11 = `Y` (ok)
-- `RTT`: VM1/VM1G/VM2/DCJ11 = `Y` (ok)
-- `MARK`: VM1/VM1G/VM2/DCJ11 = `Y` (ok)
-- `XOR`: VM1/VM1G/VM2/DCJ11 = `Y` (ok)
-- `ASH,ASHC,MUL,DIV`: VM1=`N`, VM1G=`Y`, VM2=`Y`, DCJ11=`Y`
+- `BASIC`: VM1/VM2/DCJ11 = `Y` (ok)
+- `SOB,SXT`: VM1/VM2/DCJ11 = `Y` (ok)
+- `RTT`: VM1/VM2/DCJ11 = `Y` (ok)
+- `MARK`: VM1/VM2/DCJ11 = `Y` (ok)
+- `XOR`: VM1/VM2/DCJ11 = `Y` (ok)
+- `ASH,ASHC,MUL,DIV`: VM1=`N`, VM2=`Y`, DCJ11=`Y`
   - For `VM1`: matches 11/03 base (`N` without options)
-  - For `VM1G`: extension beyond strict 11/03 base (intentional for now)
   - For `VM2`: extension beyond strict 11/03 base (allowed by current K1801 policy)
   - For `DCJ11`: `Y` (ok)
-- `46 floating-point instructions (FP11 class)`: VM1/VM1G/VM2 default = `N`, DCJ11 default = `Y`
+- `46 floating-point instructions (FP11 class)`: VM1/VM2 default = `N`, DCJ11 default = `Y`
   - 11/03 base: `N` (ok)
   - 11/84 column: `Y` (ok)
-- `MFPT`: VM1/VM1G=`N`, VM2=`N`, DCJ11=`Y`
+- `MFPT`: VM1=`N`, VM2=`N`, DCJ11=`Y`
   - 11/03: `N` (ok)
   - 11/84: `Y` (ok)
   - VM2 policy: follow K1801VM2 docs (`N`) within 11/03-base compatibility bucket
-- `MTPS`: VM1/VM1G/VM2/DCJ11 = `Y` (ok)
-- `CIS`: VM1/VM1G/VM2/DCJ11 = `N` (ok for our baseline)
-- `MFPI,MFPD,MTPI,MTPD`: VM1/VM1G=`N`, VM2/DCJ11=`Y` (ok)
-- `SPL`: VM1/VM1G/VM2=`N`, DCJ11=`Y` (ok)
-- `CSM`: VM1/VM1G/VM2=`N`, DCJ11=`Y*` (implemented, enabled by `MMR3<3>`)
+- `MTPS`: VM1/VM2/DCJ11 = `Y` (ok)
+- `CIS`: VM1/VM2/DCJ11 = `N` (ok for our baseline)
+- `MFPI,MFPD,MTPI,MTPD`: VM1=`N`, VM2/DCJ11=`Y` (ok)
+- `SPL`: VM1/VM2=`N`, DCJ11=`Y` (ok)
+- `CSM`: VM1/VM2=`N`, DCJ11=`Y*` (implemented, enabled by `MMR3<3>`)
 
 Open mismatches from Table 1:
-- [ ] Decide policy for `VM1G` EIS (`MUL/DIV/ASH/ASHC`) vs strict `11/03` base: keep as extension or gate by compatibility mode.
+- [x] Remove `VM1G` profile support: keep only `VM1` and `VM2` variants in code/tests/CLI.
 
 Table 2 (`Illegal Instruction Actions`, `JMP/JRS`) summary:
 - `JMP %n` (mode 0):
-  - current code: `DCJ11 -> T4`, `VM1/VM1G/VM2 -> T4`
+  - current code: `DCJ11 -> T4`, `VM1/VM2 -> T4`
   - table columns: `11/84 -> T4`, `11/03 -> T10`
   - status: `DCJ11` match, `VM*` intentionally follows K1801 docs (not strict 11/03 table here)
 - `HALT` in non-kernel mode:
@@ -80,7 +79,7 @@ Table 2 (`Illegal Instruction Actions`, `JMP/JRS`) summary:
 
 Table 3 (`MOV/CMP/BIT/BIC/BIS/ADD/SUB`, `SWAB`, `EIS differences`) summary:
 - `Same register source + auto inc/dec(/deferred) destination`:
-  - current code: `DCJ11 -> R+2`, `VM1/VM1G/VM2 -> R`
+  - current code: `DCJ11 -> R+2`, `VM1/VM2 -> R`
   - status: matches selected baseline (`VM* as 11/03`, `DCJ11 as 11/84`)
 - `PC as source + indexed/indexed-deferred destination`:
   - current code: `DCJ11 -> PC+2 semantic row` (effective `OPR+4`), `VM* -> PC semantic row` (effective `OPR+2`)
@@ -89,8 +88,8 @@ Table 3 (`MOV/CMP/BIT/BIC/BIS/ADD/SUB`, `SWAB`, `EIS differences`) summary:
   - current code: `V=0` for all models
   - status: matches table
 - `EIS exists`:
-  - current code: `VM1=N`, `VM1G=Y`, `VM2=Y`, `DCJ11=Y`
-  - status: `VM1` and `DCJ11` align; `VM1G/VM2` are extension behavior beyond strict 11/03 base
+  - current code: `VM1=N`, `VM2=Y`, `DCJ11=Y`
+  - status: `VM1` and `DCJ11` align; `VM2` is extension behavior beyond strict 11/03 base
 - `EIS odd-register CC basis (16 vs 32-bit)`:
   - current implementation behavior is `32-bit` basis for EIS arithmetic paths
   - `DCJ11 (11/84)` expected `32` in table -> aligned
@@ -101,10 +100,10 @@ Open follow-up from Table 3:
 
 Table 4 (`FIS`, `MFPT`, `FPP`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` base
+  - `VM1/VM2` vs `PDP-11/03` base
   - `DCJ11` vs `PDP-11/84`
 - `FIS exists`:
-  - current code defaults: `VM1/VM1G/VM2 = N`, `DCJ11 = N`
+  - current code defaults: `VM1/VM2 = N`, `DCJ11 = N`
   - table baseline: `11/03 = N` (without KEV11), `11/84 = N`
   - status: match for selected baseline
 - `FMUL/FDIV require one word of R6 stack`:
@@ -114,7 +113,7 @@ Table 4 (`FIS`, `MFPT`, `FPP`) summary:
   - current FIS path executes atomically in one step; no explicit mid-instruction interrupt/abort model
   - status: interruptible-FIS semantics are not modeled
 - `MFPT exists` / `MFPT result`:
-  - current code: `VM1/VM1G/VM2 = N`, `DCJ11 = Y`, result `R0=5`
+  - current code: `VM1/VM2 = N`, `DCJ11 = Y`, result `R0=5`
   - status: matches selected baseline (`11/03: N`, `11/84: Y with result 5`)
 - `FPP microcode/hardware`:
   - current code: `DCJ11 has_fpu=1` and FP11 decode is enabled
@@ -127,7 +126,7 @@ Open follow-up from Table 4:
 
 Table 5 (`RESET`, `MTPS/MFPS`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` base
+  - `VM1/VM2` vs `PDP-11/03` base
   - `DCJ11` vs `PDP-11/84`
 - `RESET instruction` timing/power-fail rows:
   - current emulator does not model real-time BUS INIT pulse durations or power-fail timing interactions
@@ -136,7 +135,7 @@ Table 5 (`RESET`, `MTPS/MFPS`) summary:
   - `DCJ11`: user-mode `RESET` is NOP; kernel `RESET` clears `PIRQ`, preserves `CPUERR`, clears `MMR0/MMR3` (with MMU build), preserves `MMR1/MMR2`
   - status: aligned with intended J-11-style functional semantics used in current tests
 - `MTPS/MFPS exists`:
-  - current code: implemented for `VM1/VM1G/VM2/DCJ11`
+  - current code: implemented for `VM1/VM2/DCJ11`
   - status: aligns with selected baseline columns (`11/03 = Y`, `11/84 = Y`)
 - `While in user/supervisor mode, MTPS changes PSW<3:0>`:
   - `DCJ11`: non-kernel `MTPS` updates low condition bits while preserving priority (`<7:5>`)
@@ -150,11 +149,11 @@ Table 5 (`RESET`, `MTPS/MFPS`) summary:
   - status: aligns with selected baseline expectation
 
 Open follow-up from Table 5:
-- [x] Keep current K1801-specific `MTPS/MFPS` behavior for `VM1/VM1G/VM2` (do not enforce strict `11/03` non-kernel `MTPS` restriction).
+- [x] Keep current K1801-specific `MTPS/MFPS` behavior for `VM1/VM2` (do not enforce strict `11/03` non-kernel `MTPS` restriction).
 
 Table 6 (`Memory Management Expansion and Relocation`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Number of physical address bits` / `Maximum physical memory`:
   - `VM*` path is 16-bit/fixed-56KB style machine profile (`lsi11` bus model)
@@ -185,7 +184,7 @@ Open follow-up from Table 6:
 
 Table 7 (`MMU Registers`, `PARs`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `MMR0 <08> maintenance`:
   - `DCJ11` mask matches J-11/SIMH style (`MM0_J=0160177`), bit 8 not implemented
@@ -234,7 +233,7 @@ Open follow-up from Table 7:
 
 Table 8 (`Interrupts`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Number of interrupt (BR) levels`:
   - `DCJ11`: 4-level priority model is implemented
@@ -265,7 +264,7 @@ Open follow-up from Table 8:
 
 Table 9 (`Buses`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Buses available (Q-bus/UNIBUS)`:
   - current emulator uses a unified synthetic bus layer (`lsi11/bus.c`) and does not expose strict electrical Q-bus vs UNIBUS behavior per CPU model.
@@ -299,7 +298,7 @@ Open follow-up from Table 9:
 
 Table 10 (`Processor Status Word`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `PSW bits <15:12> mechanized (current/previous mode)`:
   - `DCJ11`: implemented (`dcj11_psw_*mode`, trap path updates, stack-bank switching) -> aligned with `11/84 = Y`.
@@ -322,7 +321,7 @@ Open follow-up from Table 10:
 
 Table 11 (`Processor Status Word` continuation) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Bits <06:05> mechanized (low-order priority bits)`:
   - `DCJ11`: implemented via `PSW<7:5>` mask logic in IRQ acceptance and `SPL` handling -> aligned with `11/84 = Y`.
@@ -374,7 +373,7 @@ Open follow-up from Table 11:
 
 Table 12 (`General Purpose Registers`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Number of sets of R0-R5`:
   - `DCJ11`: dual bank for `R0..R5` implemented (`rset_bank[2][6]`, switched by `PSW<11>`) -> aligned with `11/84 = 2`.
@@ -393,16 +392,16 @@ Table 12 (`General Purpose Registers`) summary:
   - console ODT-level direct CPU-register addressing is not modeled as a separate path.
   - status: effectively `N`/not implemented for our profiles, `DCJ11` aligned with table `N`.
 - Implementation caveat (important):
-  - for `VM1/VM1G`, addresses `0177700..0177712` are decoded as VM1 internal peripheral/timer registers (`vm1_reg_block_*`), not as architectural `R0..R7`.
-  - policy fixed from K1801 docs (`Однокристальный К1801ВМ1`, `KM1801VM2`): keep ifetch from this internal block permissive for `VM1/VM1G`; add regression tests.
+  - for `VM1`, addresses `0177700..0177712` are decoded as VM1 internal peripheral/timer registers (`vm1_reg_block_*`), not as architectural `R0..R7`.
+  - policy fixed from K1801 docs (`Однокристальный К1801ВМ1`, `KM1801VM2`): keep ifetch from this internal block permissive for `VM1`; add regression tests.
 
 Open follow-up from Table 12:
-- [x] Decide policy for `VM1/VM1G` ifetch from internal register block `0177700..0177712`: keep permissive behavior (K1801 docs-driven), add regression test.
+- [x] Decide policy for `VM1` ifetch from internal register block `0177700..0177712`: keep permissive behavior (K1801 docs-driven), add regression test.
 - [x] Document explicitly that `0177700..0177717` is not mapped to architectural GPRs in current emulator (to avoid confusion with the family table row wording).
 
 Table 13 (`Error Handling`) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Odd address errors detected by CPU`:
   - `DCJ11`: word access odd-address checks are implemented in core word paths (`core_load/store_word*`) with bus-error trap -> aligned with `11/84 = Y`.
@@ -419,7 +418,7 @@ Table 13 (`Error Handling`) summary:
   - policy fixed: interpret this row as *instruction fetch* (`Read I-stream via PC for opcode word`), matching table intent.
   - `VM*` (`11/03` bucket): on instruction-fetch bus error, stacked `PC` is now incremented (`PC+2`) -> aligned with `Y`.
   - `DCJ11` (`11/84` bucket): on instruction-fetch bus error, stacked `PC` remains non-incremented -> aligned with `N`.
-  - targeted regression tests added for `VM1/VM1G/VM2/K1806VM2` and `DCJ11`.
+  - targeted regression tests added for `VM1/VM2/K1806VM2` and `DCJ11`.
 
 Open follow-up from Table 13:
 - [x] Finalize interpretation of row `bus error while reading I-stream using PC` (pure instruction fetch only vs any PC-driven I-stream read including extension words).
@@ -428,7 +427,7 @@ Open follow-up from Table 13:
 
 Table 14 (`Error Handling` continuation) summary:
 - Scope still used:
-  - `VM1/VM1G/VM2` vs `PDP-11/03` baseline
+  - `VM1/VM2` vs `PDP-11/03` baseline
   - `DCJ11` vs `PDP-11/84`
 - `Errors using (SP): odd address / bus error while using (SP)`:
   - `DCJ11`: red-stack fallback path exists (`dcj11_take_red_stack_abort`) with emergency stack at `SP=000004` and vector `000004` -> broadly aligned with `11/84` style `SP<-4, T4`.
@@ -479,7 +478,7 @@ Open follow-up from Table 14:
 ### P1 (next)
 - [x] `MMR3<5>` UB-map semantics (`Table 7`): explicitly documented as unsupported; `SSR3.BME` is retained/readable with no UB-map effect.
 - [x] IRQ preemption before first ISR instruction (`Table 8`): enabled for `DCJ11` (`11/84` profile) with regression test; `VM*` policy kept unchanged.
-- [x] `VM1/VM1G` ifetch from internal reg block `0177700..0177712` (`Table 12`): keep permissive behavior per K1801 docs; covered by regression tests.
+- [x] `VM1` ifetch from internal reg block `0177700..0177712` (`Table 12`): keep permissive behavior per K1801 docs; covered by regression tests.
 - [x] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
 - [ ] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`).
 - [ ] CIS policy (`Tables 8/10`):
@@ -487,7 +486,7 @@ Open follow-up from Table 14:
   - decide PSW bit `<8>` behavior and document.
 - [ ] Error-vector-fetch hang semantics (`Table 14`): decide model vs simplified abort flow.
 - [ ] Front-panel semantics scope (`Table 14`): HALT/INIT/RESTART behavior implement vs document out-of-scope.
-- [ ] `VM1G` EIS policy vs strict `11/03` base (`Table 1`).
+- [x] `VM1G` EIS policy item retired: `VM1G` support removed from project (`Table 1` scope now VM1/VM2/DCJ11).
 - [ ] Add explicit EIS odd-register CC-basis test (`Table 3`).
 
 ### P2 (optional / accuracy extensions)
@@ -500,6 +499,6 @@ Open follow-up from Table 14:
 
 ## Open Questions
 
-- If generic PDP-11 matrix conflicts with K1801 documentation, apply K1801 docs for VM1/VM1G/VM2 first.
-- Keep `VM1/VM1G/VM2` `JMP %n -> T4` as K1801-specific behavior (despite `11/03` table showing `T10`)?
+- If generic PDP-11 matrix conflicts with K1801 documentation, apply K1801 docs for VM1/VM2 first.
+- Keep `VM1/VM2` `JMP %n -> T4` as K1801-specific behavior (despite `11/03` table showing `T10`)?
 - Are `0210..0227` maintenance opcodes required in our scope, or remain intentionally unimplemented as non-basic?

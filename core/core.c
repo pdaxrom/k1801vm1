@@ -650,13 +650,13 @@ static INLINE void dcj11_write_mode_reg(regs *r, int mode, word reg,
 
 static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
 {
-    word vec = (r->model == K1801VM1 || r->model == K1801VM1G)
+    word vec = (r->model == K1801VM1)
                ? irq_vector
                : (irq_vector & 0777);
 
     int pri = (irq_vector >> 9) & 07;
     int psw_pri = (r->psw >> 5) & 07;
-    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    if (r->model == K1801VM1) {
         const word psw10 = 01000;
         const word psw11 = 02000;
         if (r->psw & psw10) {
@@ -1671,7 +1671,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         if (dcj11_reg_block_load_byte(r, offset, &value)) {
             return value;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         if (vm1_reg_block_load_byte(r, offset, &value)) {
             return value;
         }
@@ -1743,7 +1743,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
             mmu_note_internal_reg_write(r, offset, force_kernel_d);
             return;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         if (vm1_reg_block_store_byte(r, offset, value)) {
             return;
         }
@@ -1828,7 +1828,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
             }
             return regv;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         word value;
         if (vm1_reg_block_load_word(r, offset, &value)) {
             return value;
@@ -1924,7 +1924,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
             mmu_note_internal_reg_write(r, offset, force_kernel_d);
             return;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         if (vm1_reg_block_store_word(r, offset, value)) {
             return;
         }
@@ -1997,7 +1997,7 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
         if (dcj11_reg_block_load_word(r, offset, &value)) {
             return value;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         word value;
         if (vm1_reg_block_load_word(r, offset, &value)) {
             return value;
@@ -2059,7 +2059,7 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
             mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
             return;
         }
-    } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    } else if (r->model == K1801VM1) {
         if (vm1_reg_block_store_word(r, offset, value)) {
             return;
         }
@@ -2194,7 +2194,7 @@ void core_reset(regs *r)
 
     r->reset(r);
 
-    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    if (r->model == K1801VM1) {
         r->TVE_CSR = 0177400;
         r->TVE_LIMIT = 0;
         r->TVE_COUNT = 0;
@@ -2406,7 +2406,7 @@ static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
 static INLINE void handle_halt(regs *r)
 {
     word vec;
-    if (r->model == K1801VM1 || r->model == K1801VM1G) {
+    if (r->model == K1801VM1) {
         store_word(r, 0177676, r->psw);
         store_word(r, 0177674, r->r[7]);
         store_word(r, 0177716, load_word(r, 0177716) | 010);
@@ -2791,7 +2791,7 @@ int core_step(regs *r)
 
     case 000001: /* WAIT */
         r->fWait = 1;
-        if (r->model == K1801VM1 || r->model == K1801VM1G || is_vm2(r) ||
+        if (r->model == K1801VM1 || is_vm2(r) ||
                 r->model == DCJ11) {
             skip_trace = 1;
         }
@@ -4533,7 +4533,7 @@ int core_step(regs *r)
     illegal_trap(r);
     goto step_end;
 step_end:
-    if ((r->model == K1801VM1 || r->model == K1801VM1G) &&
+    if ((r->model == K1801VM1) &&
             (r->TVE_CSR & 000020)) {
         if (r->TVE_COUNT != 0) {
             r->TVE_COUNT--;
@@ -4581,14 +4581,6 @@ step_end:
         return 0;
     }
     if (!do_trace) {
-        if (r->model == K1801VM1G && r->TVE_PENDING && (r->TVE_CSR & 000004)) {
-            if ((r->psw & 01000) == 0 && (r->psw & FLAG_P) == 0) {
-                word old_psw = r->psw;
-                r->TVE_PENDING = 0;
-                core_take_vector(r, 000270, r->r[7], old_psw, "TVE");
-                return 0;
-            }
-        }
         if (!skip_irq) {
             if (r->model == DCJ11) {
                 while (core_poll_irq_any(r, &irq_vector)) {

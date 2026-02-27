@@ -65,7 +65,7 @@ int irq_poll(regs *r, uint16_t *vec_out)
                 /* masked: leave request pending */
                 return 0;
             }
-        } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
+        } else if (r->model == K1801VM1) {
             if (r->psw & 01000) {
                 return 0;
             }

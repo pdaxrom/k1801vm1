@@ -146,7 +146,7 @@ Status: **PASS**
 - kernel mode: sets `PS<7:5>` to `n`
 - supervisor/user mode: treated as NOP
 - supported on DCJ11/VM2/K1806VM2
-- VM1/VM1G: illegal-instruction trap
+- VM1: illegal-instruction trap
 
 `MFPS dst`:
 - transfers low byte of `PSW` as byte operation (`MOVB`-style destination semantics)
@@ -164,7 +164,7 @@ Status: **PASS**
 
 `MFPD dst`, `MFPI dst`, `MTPI dst`, `MTPD dst`:
 - implemented on DCJ11 and VM2/K1806VM2
-- VM1/VM1G trap as illegal instruction
+- VM1 trap as illegal instruction
 
 Status: **FIXED / PASS**
 
@@ -300,36 +300,7 @@ Status: **PASS / FIXED**
 Status: **PASS / LIMITED**
 
 ### 11.8 VM1G Notes
-- VM1G adds a working EIS block and VE1 timer IRQ support.
-
-Status: **PASS / LIMITED**
-
----
-
-## 12. K1801VM1G Compliance (CPU Core)
-
-This section summarizes VM1G‑specific behavior implemented in `core/` and verified
-by tests. All values are OCTAL.
-
-References:
-- `doc/Однокристальный-микропроцессор-К1801ВМ1.pdf`
-- `doc/1801vm1.txt`
-
-### 12.1 VM1G EIS Instructions
-EIS instructions are enabled on VM1G:
-- MUL
-- DIV
-- ASH
-- ASHC
-
-Status: **PASS / FIXED**
-
-### 12.2 VM1G Timer Interrupt
-- VM1G generates timer IRQ at vector 000270 when RUN+MON are set.
-- Interrupt masked by PSW7/PSW10.
-- Reliability fix for lost interrupts applies to timer IRQ as well.
-
-Status: **PASS / LIMITED**
+- VM1G profile support has been removed.
 
 ---
 
@@ -429,8 +400,8 @@ Implemented tests (see `tests/core_tests.c`):
 - VM2 masked IRQ retention until unmask (`vm2_irq_mask_hold`)
 - TSTB flags and BPL branching
 - DCJ11 SEL0/SEL1/SEL2 semantics
-- `SPL` kernel/user semantics on DCJ11/VM2 and illegal trap on VM1/VM1G
-- `MFPD/MFPI/MTPI/MTPD` availability on DCJ11/VM2 vs VM1/VM1G
+- `SPL` kernel/user semantics on DCJ11/VM2 and illegal trap on VM1
+- `MFPD/MFPI/MTPI/MTPD` availability on DCJ11/VM2 vs VM1
 - `MFPS` byte semantics (register sign-extension, memory byte-store/autoincrement)
 
 Run:

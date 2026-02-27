@@ -40,7 +40,6 @@
 
 enum {
     K1801VM1 = 0,
-    K1801VM1G,
     K1801VM2,
     K1806VM2,
     DCJ11,

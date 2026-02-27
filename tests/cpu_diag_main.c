@@ -43,7 +43,6 @@ int main(int argc, char **argv)
 
     if (run_all) {
         ok &= run_model(K1801VM1);
-        ok &= run_model(K1801VM1G);
         ok &= run_model(K1801VM2);
         ok &= run_model(DCJ11);
     }

@@ -123,10 +123,6 @@ static int parse_cpu_model(const char *name, byte *model)
         *model = K1801VM1;
         return 0;
     }
-    if (!strcmp(name, "k1801vm1g") || !strcmp(name, "vm1g")) {
-        *model = K1801VM1G;
-        return 0;
-    }
     if (!strcmp(name, "k1801vm2") || !strcmp(name, "vm2")) {
         *model = K1801VM2;
         return 0;
@@ -144,8 +140,6 @@ static const char *cpu_model_name(byte model)
     switch (model) {
     case K1801VM1:
         return "k1801vm1";
-    case K1801VM1G:
-        return "k1801vm1g";
     case K1801VM2:
         return "k1801vm2";
     case K1806VM2:
@@ -198,10 +192,10 @@ static void usage(const char *argv0)
             "Options:\n"
 #if defined(LSI11_TARGET_PDP1184)
             "  -cpu <model>    CPU model: dcj11 (default), 11/03, 11/84, 11/34, "
-            "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
+            "k1801vm1, k1801vm2, k1806vm2\n"
 #else
             "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
-            "k1801vm1, k1801vm1g, k1801vm2, k1806vm2\n"
+            "k1801vm1, k1801vm2, k1806vm2\n"
 #endif
             "  -force-fis      Enable FIS for unsupported CPUs\n"
             "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
@@ -405,7 +399,7 @@ int main(int argc, char **argv)
         lsi11_set_dl11_alias(force_dl11_alias);
     }
 
-    if (cpu_model == K1801VM1 || cpu_model == K1801VM1G) {
+    if (cpu_model == K1801VM1) {
         if (lsi11_set_device_enabled("vm1sel", 1, cfg_err, sizeof(cfg_err)) != 0 ||
                 lsi11_set_device_enabled("vm1sav", 1, cfg_err,
                                          sizeof(cfg_err)) != 0) {

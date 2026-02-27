@@ -65,7 +65,7 @@ static inline int vm2_model(const regs *r)
 
 static inline int vm1_model(const regs *r)
 {
-    return (r->model == K1801VM1 || r->model == K1801VM1G) ? 1 : 0;
+    return (r->model == K1801VM1) ? 1 : 0;
 }
 
 static inline int vm2_halt_mode(const regs *r)

@@ -37,10 +37,6 @@ int cpu_diag_parse_model(const char *name, byte *model_out)
         *model_out = K1801VM1;
         return 1;
     }
-    if (cpu_diag_str_eq(name, "vm1g")) {
-        *model_out = K1801VM1G;
-        return 1;
-    }
     if (cpu_diag_str_eq(name, "vm2")) {
         *model_out = K1801VM2;
         return 1;
@@ -55,8 +51,6 @@ const char *cpu_diag_model_name(byte model)
         return "dcj11";
     case K1801VM2:
         return "vm2";
-    case K1801VM1G:
-        return "vm1g";
     case K1801VM1:
     default:
         return "vm1";

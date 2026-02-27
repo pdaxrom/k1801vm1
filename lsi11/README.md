@@ -47,7 +47,7 @@ This subproject now provides two separate executables:
 - Built with `ENABLE_MMU=1`.
 - MMU registers and translation are available in CPU core.
 - Default CPU model is `dcj11`.
-- Optional override: `-cpu dcj11|11/03|11/84|11/34|k1801vm1|k1801vm1g|k1801vm2|k1806vm2`.
+- Optional override: `-cpu dcj11|11/03|11/84|11/34|k1801vm1|k1801vm2|k1806vm2`.
 - CPU-visible processor registers are implemented in `core/` (CPU-level), not in machine device map:
   - `0177750` (DCJ11 register)
   - `0177776` (PSW)
