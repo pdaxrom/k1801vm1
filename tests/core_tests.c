@@ -4277,6 +4277,57 @@ cleanup:
     return rc;
 }
 
+static int test_fis_fmul_fdiv_no_sp_word_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word base = 01200;
+    const word program[] = {
+        op_fis(020), /* FMUL R0 */
+        op_fis(030), /* FDIV R0 */
+    };
+    const word f11_one_hi = 0x4080;
+    const word f11_two_hi = 0x4100;
+    const word f11_four_hi = 0x4180;
+
+    if (is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "fis_fmul_fdiv_no_sp_word", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.has_fis = 1;
+    fx.r.r[0] = base;
+    fx.r.r[6] = 01000;
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+
+    /*
+     * FIS memory layout used by core:
+     * B at Rn, A at Rn+4, result overwrites A, then Rn += 4.
+     */
+    store_word(&fx, base + 0, f11_one_hi);
+    store_word(&fx, base + 2, 0);
+    store_word(&fx, base + 4, f11_two_hi);
+    store_word(&fx, base + 6, 0);
+    store_word(&fx, base + 8, f11_four_hi);
+    store_word(&fx, base + 10, 0);
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FMUL should execute");
+    ASSERT_EQ(fx.r.r[6], 01000, "FMUL should not consume stack word via R6");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after FMUL");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FDIV should execute");
+    ASSERT_EQ(fx.r.r[6], 01000, "FDIV should not consume stack word via R6");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "PC should advance after FDIV");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_fis_odd_register_allowed_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -7813,6 +7864,9 @@ int main(void)
     failed += test_vm2_fis_missing_traps_illegal_model(K1806VM2, "K1806VM2");
     failed += test_vm2_fis_error_trap_model(K1801VM2, "K1801VM2");
     failed += test_vm2_fis_error_trap_model(K1806VM2, "K1806VM2");
+    failed += test_fis_fmul_fdiv_no_sp_word_model(K1801VM2, "K1801VM2");
+    failed += test_fis_fmul_fdiv_no_sp_word_model(K1806VM2, "K1806VM2");
+    failed += test_fis_fmul_fdiv_no_sp_word_model(DCJ11, "DCJ11");
     failed += test_fis_odd_register_allowed_model(K1801VM2, "K1801VM2");
     failed += test_fis_odd_register_allowed_model(K1806VM2, "K1806VM2");
     failed += test_fis_odd_register_allowed_model(DCJ11, "DCJ11");

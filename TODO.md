@@ -124,6 +124,7 @@ Table 4 (`FIS`, `MFPT`, `FPP`) summary:
 Open follow-up from Table 4:
 - [x] Strict `11/84` policy applied: `DCJ11` default `has_fis=0` (optional enable remains available via CLI `-force-fis`).
 - [ ] If KEV11-style FIS is needed, implement missing semantics (`FMUL/FDIV` one-word `R6` stack usage + interruptible behavior/CC aftermath).
+  - remark: in this step, deep doc cross-check and policy text update are intentionally deferred; only regression coverage for current non-KEV11 stack behavior is added.
 
 Table 5 (`RESET`, `MTPS/MFPS`) summary:
 - Scope still used:
