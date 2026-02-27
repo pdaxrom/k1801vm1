@@ -216,9 +216,9 @@ Table 7 (`MMU Registers`, `PARs`) summary:
   - `DCJ11` uses 16-bit PAR mask (`0177777`)
   - status: aligned (`11/84 = 16`)
 - `Program can execute from PAR`:
-  - current code path allows instruction fetch from MMU register addresses (`mmu_io_read_word` does not block ifetch)
+  - `DCJ11`: instruction fetch from internal MMU register block (`MMR*` / `PAR/PDR`) is trapped as address/bus error (vector `004`, `CPUERR.ADR`), i.e. non-executable.
   - table `11/84` row is `N`
-  - status: mismatch
+  - status: aligned
 - `PAR bit <00>` trap-any-access, bit <07> any-access-flag:
   - no dedicated PAR semantics implemented
   - status: aligned for `11/84 = N`
@@ -228,8 +228,8 @@ Table 7 (`MMU Registers`, `PARs`) summary:
 
 Open follow-up from Table 7:
 - [ ] Implement or explicitly document `MMR3<5>` (UB map enable) as unsupported for `DCJ11` profile.
-- [ ] Decide policy for instruction fetch from MMU register block (`PAR/PDR/MMR*`) on `DCJ11`: enforce non-executable internal-reg behavior (`11/84` table says `N`) or keep current permissive behavior.
-- [ ] If non-executable policy is chosen, add targeted test for ifetch from `0177572..0177660` range (expect vector 4 / bus error path per chosen model policy).
+- [x] Decide policy for instruction fetch from MMU register block (`PAR/PDR/MMR*`) on `DCJ11`: enforce non-executable internal-reg behavior (`11/84` table says `N`).
+- [x] Add targeted test for ifetch from `0177572..0177660` range (vector `004` / `CPUERR.ADR`).
 
 Table 8 (`Interrupts`) summary:
 - Scope still used:
@@ -472,9 +472,8 @@ Open follow-up from Table 14:
   - policy fixed to K1801 docs behavior: keep vector-4 path, add regression tests.
 - [x] `DCJ11` `MFPI/MFPD/MTPI/MTPD` with `PSW<13:12>=10` (`Table 6`):
   - `PM=2` interpreted as user for `MxPI` previous-mode stack-bank selection; targeted regression test added.
-- [ ] `DCJ11` ifetch from MMU internal register block (`Table 7`):
-  - finalize policy (non-executable vs permissive),
-  - implement and add targeted test.
+- [x] `DCJ11` ifetch from MMU internal register block (`Table 7`):
+  - non-executable policy enforced; targeted regression tests added (`0177572`, `0177660`).
 
 ### P1 (next)
 - [ ] `MMR3<5>` UB-map semantics (`Table 7`): implement or document as unsupported.

@@ -1629,6 +1629,40 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_ifetch_internal_mmu_reg_traps_addr(word fetch_addr,
+        const char *tag)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 06000;
+    const word new_psw = 000340;
+
+    set_test_name(namebuf, sizeof(namebuf), "dcj11_ifetch_mmu_reg", tag);
+    current_test = namebuf;
+    fixture_setup_model(&fx, DCJ11);
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[7] = fetch_addr;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.J11_CPUERR = 0;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Internal MMU-reg ifetch should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760,
+              "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), fetch_addr,
+              "DCJ11 internal-reg ifetch should stack non-incremented PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+    ASSERT_EQ(fx.r.J11_CPUERR & 0000100, 0000100, "CPUERR.ADR should be set");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_vm_sp_bus_error_uses_vector4_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -7669,6 +7703,8 @@ int main(void)
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM2, "K1801VM2");
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_ifetch_bus_error_preserves_pc();
+    failed += test_dcj11_ifetch_internal_mmu_reg_traps_addr(0177572, "mmr0");
+    failed += test_dcj11_ifetch_internal_mmu_reg_traps_addr(0177660, "usr_d_par0");
     failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM1, "K1801VM1");
     failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM1G, "K1801VM1G");
     failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM2, "K1801VM2");

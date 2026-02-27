@@ -1840,6 +1840,15 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     }
 
     if (mmu_io_read_word(r, offset, &value)) {
+        if (r->model == DCJ11 && is_ifetch) {
+            /*
+             * J-11 treats instruction fetch from internal MMU register block
+             * as address error (CPUERR.ADR), trapping through vector 4.
+             */
+            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
+            bus_error_trap(r);
+            return 0;
+        }
         return value;
     }
 
