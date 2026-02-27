@@ -13,7 +13,7 @@ DIAG = tests/cpu_diag
 emu11: $(OBJS) emu11.o
 	$(CC) -g -o $@ $^ -lncurses
 
-core/core.o: core/core.c core/core.h
+core/core.o: core/core.c core/core.h core/pdp11_fp.c
 core/disas.o: core/disas.c core/core.h
 core/hardware.o: core/hardware.c core/hardware.h core/core.h
 

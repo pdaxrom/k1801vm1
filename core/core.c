@@ -92,6 +92,17 @@
     r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                      \
   } while (0)
 
+static INLINE dword arith_rshift32(dword value, word count)
+{
+    if (count == 0) {
+        return value;
+    }
+    if (value & 0x80000000u) {
+        return (value >> count) | (~0u << (32 - count));
+    }
+    return value >> count;
+}
+
 #define is_vm2(r) ((r)->model == K1801VM2 || (r)->model == K1806VM2)
 #define has_prev_space_ops(r) (is_vm2(r) || (r)->model == DCJ11)
 #define PSW_CM_MASK 0140000
@@ -3807,22 +3818,21 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
-        union u_word data1;
-        union u_word data2;
-        union u_dword tmp;
+        sdword src;
+        sdword src2;
+        sdword prod;
         RA_REG(reg);
-        data1.u = r->r[reg];
+        src = (sdword)(sword)r->r[reg];
         DECODE_DST();
-        data2.u = get_data_word(r, dst_type, dst_offset);
+        src2 = (sdword)(sword)get_data_word(r, dst_type, dst_offset);
+        prod = src * src2;
 
-        tmp.s = ((sdword)data1.s) * ((sdword)data2.s);
+        r->r[reg] = (word)(((dword)prod >> 16) & 0177777);
+        r->r[reg | 1] = (word)(prod & 0177777);
 
-        r->r[reg] = tmp.u >> 16;
-        r->r[reg | 1] = tmp.u & 0177777;
-
-        set_flag_if(tmp.u == 0, FLAG_Z);
-        set_flag_if(tmp.u & 0x80000000, FLAG_N);
-        set_flag_if((tmp.s < -0100000) || (tmp.s >= 077777), FLAG_C);
+        set_flag_if(prod == 0, FLAG_Z);
+        set_flag_if(prod < 0, FLAG_N);
+        set_flag_if((prod > 077777) || (prod < -0100000), FLAG_C);
         clear_flag(FLAG_V);
         goto step_end;
     }
@@ -3832,36 +3842,51 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
-        union u_word data1;
-        union u_word data2;
-        union u_dword tmp;
+        sdword dividend;
+        sdword divisor;
+        int64_t q64;
+        sdword quotient;
+        sdword remainder;
         RA_REG(reg);
-        data1.u = (r->r[reg] << 16) | r->r[reg | 1];
+        dividend = (sdword)(((dword)r->r[reg] << 16) | r->r[reg | 1]);
         DECODE_DST();
-        data2.u = get_data_word(r, dst_type, dst_offset);
-        if (data2.u == 0) {
+        divisor = (sdword)(sword)get_data_word(r, dst_type, dst_offset);
+
+        if (divisor == 0) {
+            clear_flag(FLAG_N);
+            set_flag(FLAG_Z);
+            set_flag(FLAG_V);
             set_flag(FLAG_C);
-            set_flag(FLAG_V);
-            clear_flag(FLAG_Z);
-            clear_flag(FLAG_N);
             goto step_end;
         }
-        clear_flag(FLAG_C);
 
-        tmp.s = data1.s / data2.s;
-
-        set_flag_if(tmp.u == 0, FLAG_Z);
-        set_flag_if(tmp.s < 0, FLAG_N);
-        if ((tmp.s < -0100000) || (tmp.s >= 077777)) {
+        if (dividend == (sdword)0x80000000u && divisor == -1) {
+            clear_flag(FLAG_N);
+            clear_flag(FLAG_Z);
+            set_flag(FLAG_V);
             clear_flag(FLAG_C);
-            set_flag(FLAG_V);
-            clear_flag(FLAG_Z);
-            clear_flag(FLAG_N);
             goto step_end;
         }
 
-        r->r[reg | 1] = (data1.s % data2.s) & 0177777;
-        r->r[reg] = tmp.u & 0177777;
+        q64 = ((int64_t)dividend) / ((int64_t)divisor);
+        set_flag_if(q64 < 0, FLAG_N);
+        if (q64 > 077777 || q64 < -0100000) {
+            clear_flag(FLAG_Z);
+            set_flag(FLAG_V);
+            clear_flag(FLAG_C);
+            goto step_end;
+        }
+
+        quotient = (sdword)q64;
+        remainder = dividend - (divisor * quotient);
+
+        r->r[reg] = (word)(quotient & 0177777);
+        r->r[reg | 1] = (word)(remainder & 0177777);
+
+        set_flag_if(quotient < 0, FLAG_N);
+        set_flag_if(quotient == 0, FLAG_Z);
+        clear_flag(FLAG_V);
+        clear_flag(FLAG_C);
 
         goto step_end;
     }
@@ -3871,37 +3896,46 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
+        word src16;
+        word count;
+        int sign;
+        dword src;
+        dword dst;
+        dword spill;
         RA_REG(reg);
-        word tmp = r->r[reg];
-        word old = tmp;
+        src16 = r->r[reg];
         DECODE_DST();
         GET_WORD(shift);
+        count = shift & 077;
+        sign = (src16 & SIGN) ? 1 : 0;
+        src = (dword)(sdword)(sword)src16;
 
-        if ((shift & 077) != 0) {
-            if (shift & 040) {
-                word count = 0100 - (shift & 077);
-                while (count--) {
-                    set_flag_if(tmp & 1, FLAG_C);
-                    if (tmp & SIGN) {
-                        tmp = (tmp >> 1) | SIGN;
-                    } else {
-                        tmp >>= 1;
-                    }
-                }
-            } else {
-                word count = shift & 037;
-                while (count--) {
-                    set_flag_if(tmp & SIGN, FLAG_C);
-                    tmp <<= 1;
-                }
-            }
-            set_flag_if((old & SIGN) != (tmp & SIGN), FLAG_V);
-            r->r[reg] = tmp;
-        } else {
+        if (count == 0) {
+            dst = src;
             clear_flag(FLAG_V);
+            clear_flag(FLAG_C);
+        } else if (count <= 15) {
+            dst = src << count;
+            spill = (src >> (16 - count)) & 0177777;
+            set_flag_if(spill != ((dst & SIGN) ? 0177777 : 0), FLAG_V);
+            set_flag_if(spill & 1, FLAG_C);
+        } else if (count <= 31) {
+            dst = 0;
+            set_flag_if(src != 0, FLAG_V);
+            set_flag_if((src << (count - 16)) & 1, FLAG_C);
+        } else if (count == 32) {
+            dst = sign ? 0xFFFFFFFFu : 0;
+            clear_flag(FLAG_V);
+            set_flag_if(sign, FLAG_C);
+        } else {
+            dst = arith_rshift32(src, (word)(64 - count));
+            clear_flag(FLAG_V);
+            set_flag_if((src >> (63 - count)) & 1, FLAG_C);
         }
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+
+        r->r[reg] = (word)(dst & 0177777);
+        set_flag_if(r->r[reg] & SIGN, FLAG_N);
+        set_flag_if(r->r[reg] == 0, FLAG_Z);
 
         goto step_end;
     }
@@ -3911,39 +3945,42 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
+        word count;
+        int sign;
+        dword src;
+        dword dst;
+        dword spill;
         RA_REG(reg);
-        dword tmp = (r->r[reg] << 16) | r->r[reg | 1];
-        dword old = tmp;
+        src = ((dword)r->r[reg] << 16) | r->r[reg | 1];
         DECODE_DST();
         GET_WORD(shift);
+        count = shift & 077;
+        sign = (r->r[reg] & SIGN) ? 1 : 0;
 
-        if ((shift & 077) != 0) {
-            if (shift & 040) {
-                word count = 0100 - (shift & 077);
-                while (count--) {
-                    set_flag_if(tmp & 1, FLAG_C);
-                    if (tmp & 0x80000000) {
-                        tmp = (tmp >> 1) | 0x80000000;
-                    } else {
-                        tmp >>= 1;
-                    }
-                }
-            } else {
-                word count = shift & 037;
-                while (count--) {
-                    set_flag_if(tmp & 0x80000000, FLAG_C);
-                    tmp <<= 1;
-                }
-            }
-            set_flag_if((old & 0x80000000) != (tmp & 0x80000000), FLAG_V);
-            r->r[reg] = tmp >> 16;
-            r->r[reg | 1] = tmp & 0177777;
-        } else {
+        if (count == 0) {
+            dst = src;
             clear_flag(FLAG_V);
+            clear_flag(FLAG_C);
+        } else if (count <= 31) {
+            dst = src << count;
+            spill = (src >> (32 - count)) | (sign ? (~0u << count) : 0);
+            set_flag_if(spill != ((dst & 0x80000000u) ? 0xFFFFFFFFu : 0), FLAG_V);
+            set_flag_if(spill & 1, FLAG_C);
+        } else if (count == 32) {
+            dst = sign ? 0xFFFFFFFFu : 0;
+            clear_flag(FLAG_V);
+            set_flag_if(sign, FLAG_C);
+        } else {
+            dst = arith_rshift32(src, (word)(64 - count));
+            clear_flag(FLAG_V);
+            set_flag_if((src >> (63 - count)) & 1, FLAG_C);
         }
 
-        set_flag_if(tmp & 0x80000000, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        r->r[reg] = (word)((dst >> 16) & 0177777);
+        r->r[reg | 1] = (word)(dst & 0177777);
+
+        set_flag_if(r->r[reg] & SIGN, FLAG_N);
+        set_flag_if((r->r[reg] | r->r[reg | 1]) == 0, FLAG_Z);
 
         goto step_end;
     }
@@ -3963,11 +4000,6 @@ int core_step(regs *r)
         if ((op & 0177740) == 0075000) {
             if (r->has_fis) {
                 word reg = op & 7;
-                if (reg & 1) {
-                    bus_error_trap(r);
-                    goto step_end;
-                }
-
                 word mop = (op >> 3) & 3;
                 word addr_b = r->r[reg];
                 word addr_a = (addr_b + 4) & 0177777;

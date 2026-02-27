@@ -85,6 +85,9 @@ $(BUILD_DIR)/pdp1184/core_%.o: ../core/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1184) -c -o $@ $<
 
+$(BUILD_DIR)/lsi11/core_core.o: ../core/core.c ../core/core.h ../core/pdp11_fp.c
+$(BUILD_DIR)/pdp1184/core_core.o: ../core/core.c ../core/core.h ../core/pdp11_fp.c
+
 $(BUILD_DIR)/test-lsi11/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_LSI11) -c -o $@ $<

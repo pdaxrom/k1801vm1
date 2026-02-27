@@ -299,6 +299,9 @@ static const uint32_t and_mask[33] = {
 };
 static sdword backup_PC;
 static sdword fp_change;
+static t_bool fp_trap_pending;
+static word fp_trap_old_pc;
+static word fp_trap_old_psw;
 
 static t_bool fpnotrap(regs *r, sdword code);
 static sdword GeteaFW(regs *r, sdword spec);
@@ -342,6 +345,9 @@ static int fp11(regs *r, word IR)
 
     backup_PC = r->r[7]; /* save PC for FEA */
     fp_change = 0;       /* assume no reg chg */
+    fp_trap_pending = FALSE;
+    fp_trap_old_pc = r->r[7];
+    fp_trap_old_psw = r->psw;
     ac = (IR >> 6) & 03; /* fac is IR<7:6> */
     dstspec = IR & 077;
     qdouble = FPS & FPS_D;
@@ -671,6 +677,10 @@ static int fp11(regs *r, word IR)
             val = val | (-16);                  /* ensure proper sext */
         }
         R[reg] = (R[reg] + val) & 0177777; /* commit change */
+    }
+    if (fp_trap_pending && !r->fAbort) {
+        core_take_vector(r, TRAP_FPE, fp_trap_old_pc, fp_trap_old_psw, "FPE");
+        fp_trap_pending = FALSE;
     }
     return 0;
 }
@@ -1390,7 +1400,11 @@ static t_bool fpnotrap(regs *r, sdword code)
     FEC = code;
     FEA = (backup_PC - 2) & 0177777;
     if ((FPS & FPS_ID) == 0) {
-        handle_fis_error(r, code);
+        if (!fp_trap_pending) {
+            fp_trap_pending = TRUE;
+            fp_trap_old_pc = r->r[7];
+            fp_trap_old_psw = r->psw;
+        }
     }
     return FALSE;
 }

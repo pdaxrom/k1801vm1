@@ -742,6 +742,11 @@ static INLINE word op_fis(word sub)
     return 0075000 | (sub & 077);
 }
 
+static INLINE word op_fp11(word op11_8, byte ac, word dst)
+{
+    return 0170000 | ((op11_8 & 017) << 8) | ((ac & 03) << 6) | (dst & 077);
+}
+
 static int test_irq_pending;
 static int test_irq_priority;
 static word test_last_vector;
@@ -1542,6 +1547,22 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     fixture_teardown(&fx);
     active = 0;
 
+    set_test_name(namebuf, sizeof(namebuf), "mul_c_boundary", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_mul(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 1;
+    fx.r.r[1] = 077777;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL C boundary should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "MUL C boundary high word");
+    ASSERT_EQ(fx.r.r[1], 077777, "MUL C boundary low word");
+    expect_flags(&fx.r, 0, 0, 0, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after MUL C boundary");
+    fixture_teardown(&fx);
+    active = 0;
+
     set_test_name(namebuf, sizeof(namebuf), "mul_negative", name);
     fixture_setup_model(&fx, model);
     active = 1;
@@ -1602,7 +1623,7 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     fx.r.r[2] = 0;
     fx.r.psw = 0;
     ASSERT_EQ(core_step(&fx.r), 0, "DIV by zero should execute");
-    expect_flags(&fx.r, 0, 0, 1, 1);
+    expect_flags(&fx.r, 0, 1, 1, 1);
     ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV by zero");
     fixture_teardown(&fx);
     active = 0;
@@ -1613,12 +1634,31 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     program[0] = op_div(0, operand(0, 2));
     load_program(&fx, TEST_BASE, program, 1);
     fx.r.r[0] = 0;
-    fx.r.r[1] = 077777;
+    fx.r.r[1] = 0100000;
     fx.r.r[2] = 1;
     fx.r.psw = 0;
     ASSERT_EQ(core_step(&fx.r), 0, "DIV overflow should execute");
+    ASSERT_EQ(fx.r.r[0], 0, "DIV overflow should not update quotient");
+    ASSERT_EQ(fx.r.r[1], 0100000, "DIV overflow should not update remainder");
     expect_flags(&fx.r, 0, 0, 1, 0);
     ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV overflow");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "div_minint_by_neg1", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_div(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0100000;
+    fx.r.r[1] = 0;
+    fx.r.r[2] = 0177777;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "DIV minint/-1 should execute");
+    ASSERT_EQ(fx.r.r[0], 0100000, "DIV minint/-1 should not update quotient");
+    ASSERT_EQ(fx.r.r[1], 0, "DIV minint/-1 should not update remainder");
+    expect_flags(&fx.r, 0, 0, 1, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after DIV minint/-1");
     fixture_teardown(&fx);
     active = 0;
 
@@ -1679,6 +1719,21 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     ASSERT_EQ(fx.r.r[0], 0100000, "ASH should shift into sign");
     expect_flags(&fx.r, 1, 0, 1, 0);
     ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ash_v_nosignchange", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ash(0, operand(0, 1));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0120000;
+    fx.r.r[1] = 2;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASH no-sign-change overflow should execute");
+    ASSERT_EQ(fx.r.r[0], 0100000, "ASH no-sign-change overflow result");
+    expect_flags(&fx.r, 1, 0, 1, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASH no-sign-change overflow");
     fixture_teardown(&fx);
     active = 0;
 
@@ -1777,6 +1832,23 @@ static int test_extended_ops_supported_models(byte model, const char *name)
     ASSERT_EQ(fx.r.r[1], 0, "ASHC low word");
     expect_flags(&fx.r, 1, 0, 1, 0);
     ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC");
+    fixture_teardown(&fx);
+    active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "ashc_v_nosignchange", name);
+    fixture_setup_model(&fx, model);
+    active = 1;
+    program[0] = op_ashc(0, operand(0, 2));
+    load_program(&fx, TEST_BASE, program, 1);
+    fx.r.r[0] = 0120000;
+    fx.r.r[1] = 0;
+    fx.r.r[2] = 2;
+    fx.r.psw = 0;
+    ASSERT_EQ(core_step(&fx.r), 0, "ASHC no-sign-change overflow should execute");
+    ASSERT_EQ(fx.r.r[0], 0100000, "ASHC no-sign-change high word");
+    ASSERT_EQ(fx.r.r[1], 0, "ASHC no-sign-change low word");
+    expect_flags(&fx.r, 1, 0, 1, 0);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after ASHC no-sign-change overflow");
     fixture_teardown(&fx);
     active = 0;
 
@@ -3789,6 +3861,78 @@ static int test_vm2_fis_error_trap_model(byte model, const char *name)
     ASSERT_EQ(fx.r.psw, new_psw, "FIS error should load PSW");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "Stack PC after FIS error");
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000013, "Stack error code after FIS error");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_fis_odd_register_allowed_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word base = 01200;
+    const word program[] = {
+        op_fis(001), /* FADD R1 */
+    };
+
+    if (is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "fis_odd_register", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.has_fis = 1;
+    fx.r.r[1] = base;
+    fx.r.psw = FLAG_N | FLAG_V | FLAG_C;
+    store_word(&fx, base + 0, 0);
+    store_word(&fx, base + 2, 0);
+    store_word(&fx, base + 4, 0);
+    store_word(&fx, base + 6, 0);
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FIS with odd register should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "FIS with odd register should not trap");
+    ASSERT_EQ(fx.r.r[1], base + 4, "FIS should post-increment register by 4");
+    expect_flags(&fx.r, 0, 1, 0, 0);
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_fp11_divf_divzero_trap(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_fp11(011, 0, operand(0, 0)), /* DIVF F0,F0 */
+    };
+
+    current_test = "fp11_divf_divzero_trap";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 0244, handler);
+    store_word(&fx, 0246, new_psw);
+
+    fx.r.has_fpu = 1;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.fpu_fr[0].h = 0;
+    fx.r.fpu_fr[0].l = 0;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FP11 DIVF by zero should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "FP11 DIVF should vector to 0244");
+    ASSERT_EQ(fx.r.psw, new_psw, "FP11 DIVF should load PSW from 0246");
+    ASSERT_EQ(fx.r.r[6], 00774, "FP11 trap should push two words");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "FP11 trap frame PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "FP11 trap frame PSW incorrect");
+    ASSERT_EQ(fx.r.fpu_fec, 000004, "FEC should record divide-by-zero");
 
 cleanup:
     fixture_teardown(&fx);
@@ -7081,6 +7225,10 @@ int main(void)
     failed += test_vm2_fis_missing_traps_illegal_model(K1806VM2, "K1806VM2");
     failed += test_vm2_fis_error_trap_model(K1801VM2, "K1801VM2");
     failed += test_vm2_fis_error_trap_model(K1806VM2, "K1806VM2");
+    failed += test_fis_odd_register_allowed_model(K1801VM2, "K1801VM2");
+    failed += test_fis_odd_register_allowed_model(K1806VM2, "K1806VM2");
+    failed += test_fis_odd_register_allowed_model(DCJ11, "DCJ11");
+    failed += test_fp11_divf_divzero_trap();
     failed += test_dcj11_special_ops();
     failed += test_dcj11_csm_disabled_illegal();
     failed += test_dcj11_csm_user_to_supervisor();
