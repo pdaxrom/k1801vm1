@@ -2169,11 +2169,9 @@ static INLINE void dcj11_reset_instruction_state(regs *r)
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     /*
      * J-11 RESET clears MMR0<15:13,0> and MMR3.
-     * We model this as clearing the MMU control/status registers to reset state.
+     * MMR1/MMR2 are not explicitly reset by RESET.
      */
     r->mmu_ssr0 = 0;
-    r->mmu_ssr1 = 0;
-    r->mmu_ssr2 = 0;
     r->mmu_ssr3 = 0;
     mmu_tlb_flush_all(r);
 #endif

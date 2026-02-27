@@ -2339,7 +2339,7 @@ cleanup:
     return rc;
 }
 
-static int test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr(void)
+static int test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr_mmr1_mmr2(void)
 {
     cpu_fixture fx;
     int rc = 0;
@@ -2367,8 +2367,8 @@ static int test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr(void)
     ASSERT_EQ(fx.r.J11_CPUERR, 0000160, "RESET should not clear CPUERR");
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     ASSERT_EQ(fx.r.mmu_ssr0, 0000000, "RESET should clear MMR0 control/status");
-    ASSERT_EQ(fx.r.mmu_ssr1, 0000000, "RESET should clear MMR1");
-    ASSERT_EQ(fx.r.mmu_ssr2, 0000000, "RESET should clear MMR2");
+    ASSERT_EQ(fx.r.mmu_ssr1, 0007777, "RESET should preserve MMR1");
+    ASSERT_EQ(fx.r.mmu_ssr2, 0001234, "RESET should preserve MMR2");
     ASSERT_EQ(fx.r.mmu_ssr3, 0000000, "RESET should clear MMR3");
 #endif
 
@@ -6558,7 +6558,7 @@ int main(void)
     failed += test_vm2_external_halt_masked();
     failed += test_dcj11_halt_user_traps();
     failed += test_dcj11_reset_user_is_nop();
-    failed += test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr();
+    failed += test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr_mmr1_mmr2();
     failed += test_branches();
     failed += test_jmp();
     failed += test_addressing_modes();
