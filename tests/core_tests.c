@@ -2655,6 +2655,67 @@ static int test_jmp(void)
     return run_for_models(test_jmp_model);
 }
 
+static int test_jmp_jsr_mode0_trap_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 02600;
+    const word new_psw = 000340;
+    const word jmp_trap_vec = 000004;
+    const word jsr_trap_vec = (model == DCJ11) ? 000010 : 000004;
+    const word initial_sp = 01000;
+
+    set_test_name(namebuf, sizeof(namebuf), "jmp_mode0_trap", name);
+    fixture_setup_model(&fx, model);
+
+    store_word(&fx, jmp_trap_vec, handler);
+    store_word(&fx, jmp_trap_vec + 2, new_psw);
+    fx.r.r[6] = initial_sp;
+    fx.r.psw = 000000;
+    write_op(&fx, op_jmp(operand(0, 1))); /* JMP R1 (mode 0) */
+
+    ASSERT_EQ(core_step(&fx.r), 0, "JMP mode0 should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "JMP mode0 should vector to expected trap");
+    ASSERT_EQ(fx.r.psw, new_psw, "JMP mode0 should load trap PSW");
+    ASSERT_EQ(fx.r.r[6], initial_sp - 4, "Trap frame should push PC+PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 4), TEST_BASE + 2,
+              "Trap frame PC should point to next instruction");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 2), 000000,
+              "Trap frame PSW should preserve old PSW");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "jsr_mode0_trap", name);
+    fixture_setup_model(&fx, model);
+
+    store_word(&fx, jsr_trap_vec, handler);
+    store_word(&fx, jsr_trap_vec + 2, new_psw);
+    fx.r.r[2] = 012345;
+    fx.r.r[5] = 065432;
+    fx.r.r[6] = initial_sp;
+    fx.r.psw = 000000;
+    write_op(&fx, op_jsr(5, operand(0, 2))); /* JSR R5,R2 (mode 0) */
+
+    ASSERT_EQ(core_step(&fx.r), 0, "JSR mode0 should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "JSR mode0 should vector to expected trap");
+    ASSERT_EQ(fx.r.psw, new_psw, "JSR mode0 should load trap PSW");
+    ASSERT_EQ(fx.r.r[6], initial_sp - 4, "Trap frame should push PC+PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 4), TEST_BASE + 2,
+              "Trap frame PC should point to next instruction");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 2), 000000,
+              "Trap frame PSW should preserve old PSW");
+    ASSERT_EQ(fx.r.r[5], 065432, "JSR mode0 trap must not modify source register");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_jmp_jsr_mode0_trap(void)
+{
+    return run_for_models(test_jmp_jsr_mode0_trap_model);
+}
+
 static int test_addressing_modes_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -6992,6 +7053,7 @@ int main(void)
     failed += test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr_mmr1_mmr2();
     failed += test_branches();
     failed += test_jmp();
+    failed += test_jmp_jsr_mode0_trap();
     failed += test_addressing_modes();
     failed += test_single_operand_word_ops();
     failed += test_single_operand_byte_ops();

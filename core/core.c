@@ -2322,6 +2322,12 @@ static INLINE void illegal_trap(regs *r)
     core_take_vector(r, 010, r->r[7], old_psw, "ILL");
 }
 
+static INLINE void trap_vector4(regs *r, const char *kind)
+{
+    word old_psw = r->psw;
+    core_take_vector(r, 000004, r->r[7], old_psw, kind);
+}
+
 static INLINE void bus_error_trap(regs *r)
 {
     word old_psw = r->psw;
@@ -3114,7 +3120,7 @@ int core_step(regs *r)
     switch ((op & 0177700) >> 6) {
     case 00001: /* JMP */
         if ((op & 070) == 0) {
-            illegal_trap(r);
+            trap_vector4(r, "ILL");
             goto step_end;
         }
         DECODE_DST();
@@ -3777,11 +3783,11 @@ int core_step(regs *r)
         RA_REG(reg);
         DECODE_DST();
         if (dst_type == TYPE_REG) {
-            /*
-             * JSR with register destination is reserved/illegal on J11-class CPUs.
-             * XXDP MMU bootstrap expects the trap here.
-             */
-            illegal_trap(r);
+            if (r->model == DCJ11) {
+                illegal_trap(r);
+            } else {
+                trap_vector4(r, "ILL");
+            }
             goto step_end;
         }
         r->r[6] -= 2;
