@@ -2208,6 +2208,40 @@ cleanup:
     return rc;
 }
 
+static int test_eis_odd_register_cc_basis_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    word program[1];
+
+    if (model == K1801VM1) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "eis_odd_reg_cc_basis", name);
+    fixture_setup_model(&fx, model);
+    program[0] = op_mul(1, operand(0, 2)); /* MUL R2 with odd Rn=R1 */
+    load_program(&fx, TEST_BASE, program, 1);
+
+    /*
+     * 0400 * 0400 = 000001:000000.
+     * Low word is zero, but full 32-bit product is non-zero.
+     * For 32-bit CC basis Z must be cleared.
+     */
+    fx.r.r[1] = 0400;
+    fx.r.r[2] = 0400;
+    fx.r.psw = FLAG_N | FLAG_Z | FLAG_V | FLAG_C;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MUL odd register should execute");
+    expect_flags(&fx.r, 0, 0, 0, 1);
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after MUL odd register");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_extended_ops_supported(void)
 {
     int rc = 0;
@@ -2215,6 +2249,9 @@ static int test_extended_ops_supported(void)
     rc += test_extended_ops_supported_models(K1801VM2, "K1801VM2");
     rc += test_extended_ops_supported_models(K1806VM2, "K1806VM2");
     rc += test_extended_ops_supported_models(DCJ11, "DCJ11");
+    rc += test_eis_odd_register_cc_basis_model(K1801VM2, "K1801VM2");
+    rc += test_eis_odd_register_cc_basis_model(K1806VM2, "K1806VM2");
+    rc += test_eis_odd_register_cc_basis_model(DCJ11, "DCJ11");
 
     return rc;
 }
