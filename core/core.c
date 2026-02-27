@@ -2720,14 +2720,25 @@ int core_step(regs *r)
     r->instr_pc = r->r[7];
     mmu_mmr1_instruction_start(r);
 
-    word op = load_word_ifetch(r, r->r[7]);
+    word fetch_pc = r->r[7];
+    if (r->model != DCJ11) {
+        /*
+         * VM* compatibility policy (11/03-style row): instruction stream
+         * fetch via PC advances PC even when the fetch aborts.
+         */
+        r->r[7] += 2;
+    }
+
+    word op = load_word_ifetch(r, fetch_pc);
     if (r->fAbort) {
         r->fAbort = 0;
         return 0;
     }
 
     r->ir = op;
-    r->r[7] += 2;
+    if (r->model == DCJ11) {
+        r->r[7] += 2;
+    }
 
     if ((op & 0177740) == 000240) { /* Condition Code Operators */
         if (op & 000020) {

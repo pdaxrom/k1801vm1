@@ -18,6 +18,10 @@ typedef struct {
 } cpu_fixture;
 
 static const char *current_test;
+static int test_buserr_fetch_enable = 0;
+static word test_buserr_fetch_addr = 0;
+static int test_buserr_fetch_guard = 0;
+static void test_dispatch_store_word(regs *r, word offset, word value);
 
 static word test_dcj11_pirq_visible(word pirq)
 {
@@ -88,6 +92,33 @@ static word test_dispatch_load_word(regs *r, word offset)
         }
     }
     return r->load_byte(r, offset) | (r->load_byte(r, offset + 1) << 8);
+}
+
+static void test_inject_buserr_trap(regs *r)
+{
+    word old_psw = r->psw;
+    word fault_pc = r->r[7];
+    word vector_psw = test_dispatch_load_word(r, 000006);
+
+    r->psw = vector_psw;
+    r->r[6] -= 2;
+    test_dispatch_store_word(r, r->r[6], old_psw);
+    r->r[6] -= 2;
+    test_dispatch_store_word(r, r->r[6], fault_pc);
+    r->r[7] = test_dispatch_load_word(r, 000004);
+    r->fAbort = 1;
+}
+
+static word test_dispatch_load_word_fetch_fault(regs *r, word offset)
+{
+    if (test_buserr_fetch_enable && !test_buserr_fetch_guard &&
+            offset == test_buserr_fetch_addr) {
+        test_buserr_fetch_guard = 1;
+        test_inject_buserr_trap(r);
+        test_buserr_fetch_guard = 0;
+        return 0;
+    }
+    return test_dispatch_load_word(r, offset);
 }
 
 static void test_dispatch_store_word(regs *r, word offset, word value)
@@ -1519,6 +1550,81 @@ static int test_dcj11_alignment_trap_fetch(void)
     ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
 
 cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_vm_ifetch_bus_error_increments_pc_model(byte model,
+        const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 06000;
+    const word new_psw = 000340;
+
+    set_test_name(namebuf, sizeof(namebuf), "ifetch_bus_pc_inc", name);
+    fixture_setup_model(&fx, model);
+    current_test = namebuf;
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.load_word = test_dispatch_load_word_fetch_fault;
+    fx.r.ram_fast = NULL;
+    fx.r.r[7] = TEST_BASE;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    test_buserr_fetch_enable = 1;
+    test_buserr_fetch_addr = TEST_BASE;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Instruction fetch bus error should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760,
+              "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2,
+              "VM* bus-error fetch should stack incremented PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    test_buserr_fetch_enable = 0;
+    test_buserr_fetch_addr = 0;
+    test_buserr_fetch_guard = 0;
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_ifetch_bus_error_preserves_pc(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 06000;
+    const word new_psw = 000340;
+
+    current_test = "dcj11_ifetch_bus_pc_preserve";
+    fixture_setup_model(&fx, DCJ11);
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.load_word = test_dispatch_load_word_fetch_fault;
+    fx.r.ram_fast = NULL;
+    fx.r.r[7] = TEST_BASE;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    test_buserr_fetch_enable = 1;
+    test_buserr_fetch_addr = TEST_BASE;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Instruction fetch bus error should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load bus error vector");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760,
+              "PSW should load bus error vector");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE,
+              "DCJ11 bus-error fetch should stack non-incremented PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003, "Stack PSW incorrect");
+
+cleanup:
+    test_buserr_fetch_enable = 0;
+    test_buserr_fetch_addr = 0;
+    test_buserr_fetch_guard = 0;
     fixture_teardown(&fx);
     return rc;
 }
@@ -7453,6 +7559,11 @@ int main(void)
     failed += test_dcj11_alignment_trap();
     failed += test_dcj11_alignment_trap_store();
     failed += test_dcj11_alignment_trap_fetch();
+    failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM1, "K1801VM1");
+    failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM2, "K1801VM2");
+    failed += test_vm_ifetch_bus_error_increments_pc_model(K1806VM2, "K1806VM2");
+    failed += test_dcj11_ifetch_bus_error_preserves_pc();
     failed += test_extended_ops_supported();
     failed += test_vm1_eis_illegal();
     failed += test_condition_codes();
