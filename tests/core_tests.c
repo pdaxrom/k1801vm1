@@ -2339,6 +2339,44 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_reset(),
+    };
+
+    current_test = "dcj11_reset_kernel";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = 0000000;
+    fx.r.J11_PIRQ = 0177000;
+    fx.r.J11_CPUERR = 0000160;
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    fx.r.mmu_ssr0 = 0160176;
+    fx.r.mmu_ssr1 = 0007777;
+    fx.r.mmu_ssr2 = 0001234;
+    fx.r.mmu_ssr3 = 0000027;
+#endif
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RESET should execute in kernel mode");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "PC should advance after RESET");
+    ASSERT_EQ(fx.r.J11_PIRQ, 0000000, "RESET should clear PIRQ");
+    ASSERT_EQ(fx.r.J11_CPUERR, 0000160, "RESET should not clear CPUERR");
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    ASSERT_EQ(fx.r.mmu_ssr0, 0000000, "RESET should clear MMR0 control/status");
+    ASSERT_EQ(fx.r.mmu_ssr1, 0000000, "RESET should clear MMR1");
+    ASSERT_EQ(fx.r.mmu_ssr2, 0000000, "RESET should clear MMR2");
+    ASSERT_EQ(fx.r.mmu_ssr3, 0000000, "RESET should clear MMR3");
+#endif
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_branches_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -6445,6 +6483,46 @@ cleanup:
 #endif
 }
 
+static int test_dcj11_trace_priority_over_yellow_stack(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word trace_handler = 02000;
+    const word stack_handler = 02400;
+    const word vector_psw = 000340;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(4, 6)), /* MOV #1, -(SP) */
+        000001,
+    };
+
+    current_test = "dcj11_trace_priority_over_yellow";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000014, trace_handler);
+    store_word(&fx, 000016, vector_psw);
+    store_word(&fx, 000004, stack_handler);
+    store_word(&fx, 000006, vector_psw);
+
+    fx.r.psw = 000020; /* T-bit set */
+    fx.r.r[6] = 000400;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV should trigger trace then yellow");
+    ASSERT_EQ(fx.r.r[7], stack_handler, "Yellow stack trap should run after trace");
+    ASSERT_EQ(fx.r.psw, vector_psw, "PSW should match stack trap vector");
+    ASSERT_EQ((fx.r.J11_CPUERR & 0000010), 0000010, "CPUERR.YEL should be set");
+    ASSERT_EQ(fx.r.r[6], 000366, "SP should include MOV + trace + stack trap frames");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000366), trace_handler, "Yellow frame PC should be trace handler");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000370), vector_psw, "Yellow frame PSW should be trace PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000372), TEST_BASE + 4, "Trace frame PC should resume after MOV");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000374), 000020, "Trace frame PSW should keep original T-bit");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000376), 000001, "MOV destination write should complete");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -6480,6 +6558,7 @@ int main(void)
     failed += test_vm2_external_halt_masked();
     failed += test_dcj11_halt_user_traps();
     failed += test_dcj11_reset_user_is_nop();
+    failed += test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr();
     failed += test_branches();
     failed += test_jmp();
     failed += test_addressing_modes();
@@ -6600,6 +6679,7 @@ int main(void)
     failed += test_dcj11_yellow_stack_trap_on_bpt_push();
     failed += test_dcj11_stack_limit_boundary_no_trap();
     failed += test_dcj11_red_stack_trap_on_vector_push_abort();
+    failed += test_dcj11_trace_priority_over_yellow_stack();
 
     if (failed) {
         fprintf(stderr, "%d test(s) failed\n", failed);

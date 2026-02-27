@@ -2139,6 +2139,26 @@ static INLINE int dcj11_take_red_stack_abort(regs *r, const char *cause)
     return 1;
 }
 
+static INLINE void dcj11_reset_instruction_state(regs *r)
+{
+    if (r->model != DCJ11) {
+        return;
+    }
+    /* J-11 RESET clears PIRQ; CPUERR is explicitly unaffected. */
+    r->J11_PIRQ = 0;
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    /*
+     * J-11 RESET clears MMR0<15:13,0> and MMR3.
+     * We model this as clearing the MMU control/status registers to reset state.
+     */
+    r->mmu_ssr0 = 0;
+    r->mmu_ssr1 = 0;
+    r->mmu_ssr2 = 0;
+    r->mmu_ssr3 = 0;
+    mmu_tlb_flush_all(r);
+#endif
+}
+
 static INLINE void illegal_trap(regs *r)
 {
     word old_psw = r->psw;
@@ -2584,6 +2604,9 @@ int core_step(regs *r)
     case 000005: /* RESET */
         if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
             goto step_end;
+        }
+        if (r->model == DCJ11) {
+            dcj11_reset_instruction_state(r);
         }
         r->fWait = 0;
         r->fHaltSignal = 0;
@@ -4003,12 +4026,12 @@ step_end:
         handle_halt(r);
         return 0;
     }
-    if (dcj11_service_stack_trap(r)) {
-        return 0;
-    }
     if (do_trace) {
         word old_psw = r->psw;
         core_take_vector(r, 014, r->r[7], old_psw, "TRACE");
+    }
+    if (dcj11_service_stack_trap(r)) {
+        return 0;
     }
     if (!do_trace) {
         if (r->model == K1801VM1G && r->TVE_PENDING && (r->TVE_CSR & 000004)) {
