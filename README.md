@@ -486,6 +486,7 @@ Supported MMU behavior (`ENABLE_MMU=1`):
 - K/S/U mode selection from PSW.
 - 8 segments per space, PAR/PDR relocation.
 - Split I/D per mode via `SSR3` bits `KD/SD/UD`.
+- `SSR3` bit `BME` (`040`) is latched/readable, but Unibus map translation is not implemented.
 - Instruction fetch in I-space, data in D-space when split enabled.
 - Trap/interrupt vector fetch through Kernel D-space (when split I/D enabled) or I-space.
 - Fault classes: non-resident, length, write-protect; trap vector `000250`.
@@ -507,6 +508,7 @@ MMU compliance table:
 | `SSR0/SSR2` fault state | YES | First-fault latch behavior |
 | `SSR1` restart log | PARTIAL | Stores fault VA only |
 | 22-bit physical memory backing | YES | Core hwstub provides 4MB physical RAM |
+| `SSR3.BME` UB-map effect | NO | Bit is stored/readable; no Unibus map translation path |
 
 ---
 

@@ -161,6 +161,32 @@ static int test_mmu_ssr1_read_hides_immediate_entries(void)
     return 0;
 }
 
+static int test_mmu_ssr3_bme_ignored_for_cpu_translation(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("mmu_ssr3_bme_ignored_cpu");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000001;  /* MMU enable */
+    fx.r.mmu_ssr3 = 000040;  /* BME only */
+    fx.r.mmu_par[0][0][0] = 0100;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.r[7] = 000000;
+
+    mmu_phys_write_word(&fx, 010000,
+                        mmu_op_mov(mmu_operand(2, 7), mmu_operand(0, 0)));
+    mmu_phys_write_word(&fx, 010002, 01234);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "mapped fetch with SSR3.BME set");
+    MMU_ASSERT_EQ(fx.r.r[0], 01234, "BME must not alter CPU translation path");
+    MMU_ASSERT_EQ(fx.r.r[7], 000004, "PC should advance normally");
+    MMU_ASSERT_EQ(fx.r.mmu_ssr3 & 000040, 000040, "SSR3.BME should be retained");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -169,6 +195,7 @@ int main(void)
     failed += test_mmu_translation_fetch_and_data();
     failed += test_mmu_ssr2_tracks_fetch_and_freeze();
     failed += test_mmu_ssr1_read_hides_immediate_entries();
+    failed += test_mmu_ssr3_bme_ignored_for_cpu_translation();
 
     if (failed) {
         return 1;

@@ -210,8 +210,9 @@ Table 7 (`MMU Registers`, `PARs`) summary:
   - implemented (`M22E`) and used in physical address finalize logic
   - status: aligned (`11/84 = Y`)
 - `MMR3 bit <05>` (UB map enable):
-  - bit is writable/readable via MMR3 mask, but no actual Unibus map functionality in current emulator (`lsi11/README.md`: no Unibus map)
-  - status: mismatch vs full `11/84` expectation
+  - bit is writable/readable via MMR3 mask and retained in `SSR3`.
+  - current emulator has no Unibus map translation path; `BME` has no effect on CPU translation/DMA routing in current profiles.
+  - status: explicitly documented as unsupported scope (no functional UB-map implementation).
 - `PAR width`:
   - `DCJ11` uses 16-bit PAR mask (`0177777`)
   - status: aligned (`11/84 = 16`)
@@ -227,7 +228,7 @@ Table 7 (`MMU Registers`, `PARs`) summary:
   - status: partial/stub semantics only
 
 Open follow-up from Table 7:
-- [ ] Implement or explicitly document `MMR3<5>` (UB map enable) as unsupported for `DCJ11` profile.
+- [x] Implement or explicitly document `MMR3<5>` (UB map enable) as unsupported for `DCJ11` profile.
 - [x] Decide policy for instruction fetch from MMU register block (`PAR/PDR/MMR*`) on `DCJ11`: enforce non-executable internal-reg behavior (`11/84` table says `N`).
 - [x] Add targeted test for ifetch from `0177572..0177660` range (vector `004` / `CPUERR.ADR`).
 
@@ -476,7 +477,7 @@ Open follow-up from Table 14:
   - non-executable policy enforced; targeted regression tests added (`0177572`, `0177660`).
 
 ### P1 (next)
-- [ ] `MMR3<5>` UB-map semantics (`Table 7`): implement or document as unsupported.
+- [x] `MMR3<5>` UB-map semantics (`Table 7`): explicitly documented as unsupported; `SSR3.BME` is retained/readable with no UB-map effect.
 - [ ] IRQ preemption before first ISR instruction (`Table 8`): decide policy and add test if enabled.
 - [ ] `VM1/VM1G` ifetch from internal reg block `0177700..0177712` (`Table 12`): decide permissive vs block.
 - [ ] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).

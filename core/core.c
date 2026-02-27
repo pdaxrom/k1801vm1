@@ -823,6 +823,7 @@ enum {
 #define MMU_SSR3_KD 0000004
 #define MMU_SSR3_CSM 0000010
 #define MMU_SSR3_M22E 0000020
+#define MMU_SSR3_BME 0000040 /* latched, but UB map translation is not modeled */
 #define MMU_SSR3_J_MASK 0000077
 
 #define MMU_PAR_J_MASK 0177777
@@ -1244,7 +1245,11 @@ static INLINE word mmu_fault_to_ssr0_bits(int fault)
 
 static INLINE dword mmu_phys_finalize(dword pa, word ssr3)
 {
-    /* J11 can run the MMU in 18-bit or 22-bit mode (MMR3<5>). */
+    /*
+     * J11 CPU-side translation uses only 18/22-bit select (M22E).
+     * BME (UB map enable) is currently kept as a readable/writable bit but
+     * does not alter CPU address translation in this emulator.
+     */
     if (ssr3 & MMU_SSR3_M22E) {
         return pa & MMU_PA22_MASK;
     }
