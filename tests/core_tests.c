@@ -1629,6 +1629,50 @@ cleanup:
     return rc;
 }
 
+static int test_vm_sp_bus_error_uses_vector4_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word handler = 06200;
+    const word new_psw = 000340;
+    const word stack_base = 01200;
+    const word program[] = {
+        op_mov(operand(1, 6), operand(0, 0)), /* MOV (SP), R0 */
+    };
+
+    set_test_name(namebuf, sizeof(namebuf), "sp_buserr_vec4", name);
+    fixture_setup_model(&fx, model);
+    current_test = namebuf;
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.load_word = test_dispatch_load_word_fetch_fault;
+    fx.r.ram_fast = NULL;
+    fx.r.r[7] = TEST_BASE;
+    fx.r.r[6] = stack_base;
+    fx.r.psw = 000003;
+    test_buserr_fetch_enable = 1;
+    test_buserr_fetch_addr = stack_base;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "(SP) data bus error should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "VM* should use vector-4 path, not HALT path");
+    ASSERT_EQ(fx.r.psw & 0177760, new_psw & 0177760,
+              "PSW should load bus-error vector");
+    ASSERT_EQ(fx.r.r[6], stack_base - 4, "SP should include trap frame push");
+    ASSERT_EQ(fx.r.load_word(&fx.r, stack_base - 4), TEST_BASE + 2,
+              "Stack PC should point past the faulting instruction");
+    ASSERT_EQ(fx.r.load_word(&fx.r, stack_base - 2), 000003, "Stack PSW incorrect");
+
+cleanup:
+    test_buserr_fetch_enable = 0;
+    test_buserr_fetch_addr = 0;
+    test_buserr_fetch_guard = 0;
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_extended_ops_supported_models(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -7564,6 +7608,10 @@ int main(void)
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1801VM2, "K1801VM2");
     failed += test_vm_ifetch_bus_error_increments_pc_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_ifetch_bus_error_preserves_pc();
+    failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM1, "K1801VM1");
+    failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm_sp_bus_error_uses_vector4_model(K1801VM2, "K1801VM2");
+    failed += test_vm_sp_bus_error_uses_vector4_model(K1806VM2, "K1806VM2");
     failed += test_extended_ops_supported();
     failed += test_vm1_eis_illegal();
     failed += test_condition_codes();

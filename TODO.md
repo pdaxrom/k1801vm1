@@ -431,8 +431,8 @@ Table 14 (`Error Handling` continuation) summary:
   - `DCJ11` vs `PDP-11/84`
 - `Errors using (SP): odd address / bus error while using (SP)`:
   - `DCJ11`: red-stack fallback path exists (`dcj11_take_red_stack_abort`) with emergency stack at `SP=000004` and vector `000004` -> broadly aligned with `11/84` style `SP<-4, T4`.
-  - `VM*`: strict `11/03` table expects `HALT`; current implementation uses regular bus-error trap path (vector 4), not explicit HALT semantic.
-  - status: `DCJ11` mostly aligned, `VM*` mismatch vs strict `11/03` row.
+  - `VM*`: per `KM1801VM2` / `К1801ВМ1` docs, timeout/error processing remains interrupt/vector based (`004`, stack save), with `SP` side effects preserved; no explicit `(SP)->HALT` rule found.
+  - status: keep current vector-4 path for `VM*` as K1801-specific behavior; strict `11/03` `HALT` row is not enforced.
 - `Stack overflow errors / yellow-zone trap implemented`:
   - `DCJ11`: implemented (`dcj11_note_stack_reference`, pending yellow trap serviced after instruction) -> aligned with `11/84 = Y`.
   - `VM*`: not implemented -> aligned with `11/03 = N`.
@@ -452,7 +452,7 @@ Table 14 (`Error Handling` continuation) summary:
   - status: table rows are only partially modeled.
 
 Open follow-up from Table 14:
-- [ ] Decide `VM*` policy for `error using (SP)` row: keep current vector-4 path or implement strict `11/03` `HALT` behavior.
+- [x] Decide `VM*` policy for `error using (SP)` row: keep current vector-4 path (K1801 docs-driven), do not enforce strict `11/03` `HALT`.
 - [ ] Define whether to model explicit “vector-fetch error hangs CPU” state or keep current recoverable abort/trap behavior.
 - [ ] Decide scope for front-panel semantics (`HALT switch`, `INIT halting`, `RESTART`) and either implement or explicitly document as out-of-scope.
 
@@ -468,8 +468,8 @@ Open follow-up from Table 14:
   - finalize row interpretation,
   - implement per-model (`VM*` as `11/03`, `DCJ11` as `11/84`),
   - add regression tests and reconcile with old item 28 notes.
-- [ ] `VM*` error-using-`SP` behavior (`Table 14`):
-  - decide and implement strict `11/03` `HALT` vs current vector-4 path.
+- [x] `VM*` error-using-`SP` behavior (`Table 14`):
+  - policy fixed to K1801 docs behavior: keep vector-4 path, add regression tests.
 - [ ] `DCJ11` `MFPI/MFPD/MTPI/MTPD` with `PSW<13:12>=10` (`Table 6`):
   - choose stack-bank behavior policy,
   - add targeted test.
