@@ -54,8 +54,20 @@ static word test_dispatch_load_word(regs *r, word offset)
             return r->J11_MAINT;
         case 0177752:
             return r->J11_HITMISS;
+        case 0177754:
+            return r->J11_RSVD_177754;
+        case 0177756:
+            return r->J11_RSVD_177756;
+        case 0177760:
+            return r->J11_RSVD_177760;
+        case 0177762:
+            return r->J11_RSVD_177762;
+        case 0177764:
+            return r->J11_RSVD_177764;
         case 0177766:
             return (word)(r->J11_CPUERR & 0000374);
+        case 0177770:
+            return r->J11_RSVD_177770;
         case 0177772:
             return test_dcj11_pirq_visible(r->J11_PIRQ);
         }
@@ -92,11 +104,29 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
             return;
         case 0177752:
             return;
+        case 0177754:
+            r->J11_RSVD_177754 = value;
+            return;
+        case 0177756:
+            r->J11_RSVD_177756 = value;
+            return;
+        case 0177760:
+            r->J11_RSVD_177760 = value;
+            return;
+        case 0177762:
+            r->J11_RSVD_177762 = value;
+            return;
+        case 0177764:
+            r->J11_RSVD_177764 = value;
+            return;
         case 0177772:
             r->J11_PIRQ = value & 0177000;
             return;
         case 0177766:
             r->J11_CPUERR = 0;
+            return;
+        case 0177770:
+            r->J11_RSVD_177770 = value;
             return;
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
@@ -168,7 +198,18 @@ static void test_dispatch_store_byte(regs *r, word offset, byte value)
                 }
                 return;
             }
-            test_dispatch_store_word(r, offset & 0177776, 0);
+            if ((offset & 0177776) == 0177744 || (offset & 0177776) == 0177750 ||
+                    (offset & 0177776) == 0177752 || (offset & 0177776) == 0177766) {
+                test_dispatch_store_word(r, offset & 0177776, 0);
+                return;
+            }
+            val16 = test_dispatch_load_word(r, offset & 0177776);
+            if (offset & 1) {
+                val16 = (word)((val16 & 000377) | ((word)value << 8));
+            } else {
+                val16 = (word)((val16 & 0177400) | (word)value);
+            }
+            test_dispatch_store_word(r, offset & 0177776, val16);
             return;
         }
     }
@@ -449,6 +490,11 @@ static INLINE word op_swab(word dst)
 static INLINE word op_sxt(word dst)
 {
     return 0006700 | (dst & 077);
+}
+
+static INLINE word op_csm(word dst)
+{
+    return 0007000 | (dst & 077);
 }
 
 static INLINE word op_mfps(word dst)
@@ -1361,6 +1407,9 @@ static int test_dcj11_special_ops_illegal_on_other_models(void)
 
         snprintf(namebuf, sizeof(namebuf), "wrtlck_illegal_%s", names[i]);
         rc += run_illegal_op_test_model(op_wrtlck(operand(0, 1)), namebuf, models[i]);
+
+        snprintf(namebuf, sizeof(namebuf), "csm_illegal_%s", names[i]);
+        rc += run_illegal_op_test_model(op_csm(operand(0, 0)), namebuf, models[i]);
     }
 
     return rc;
@@ -3792,6 +3841,314 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_csm_disabled_illegal(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 04000;
+    const word vec_psw = 000340;
+    const word program[] = {
+        op_csm(operand(0, 2)),
+    };
+
+    current_test = "dcj11_csm_disabled_illegal";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000010, handler);
+    store_word(&fx, 000012, vec_psw);
+
+    fx.r.psw = 0140000;
+    fx.r.r[2] = 012345;
+    fx.r.r[6] = 01000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "CSM should trap when MMR3<3> is clear");
+    ASSERT_EQ(fx.r.r[7], handler, "CSM disabled should take illegal instruction vector");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "illegal trap should enter kernel mode");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_csm_user_to_supervisor(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 05000;
+    const word program[] = {
+        op_csm(operand(0, 2)),
+    };
+    const word old_psw = 0140017;
+
+    current_test = "dcj11_csm_user_to_supervisor";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000010, handler);
+    store_word(&fx, 000012, 000000);
+
+    fx.r.mmu_ssr3 = 0000010; /* MMR3<3>: CSM enable */
+    fx.r.psw = old_psw;
+    fx.r.r[2] = 012345;
+    fx.r.r[6] = 01000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "CSM should execute in user mode when enabled");
+    ASSERT_EQ(fx.r.r[7], handler, "CSM should load PC from vector 010");
+    ASSERT_EQ((fx.r.psw >> 14) & 03, 1, "CSM should enter supervisor mode");
+    ASSERT_EQ((fx.r.psw >> 12) & 03, 3, "CSM should record previous mode as user");
+    ASSERT_EQ(fx.r.psw & FLAG_T, 0, "CSM should clear T bit");
+    ASSERT_EQ(fx.r.psw & (FLAG_N | FLAG_Z | FLAG_V | FLAG_C),
+              old_psw & (FLAG_N | FLAG_Z | FLAG_V | FLAG_C),
+              "CSM should preserve condition codes");
+
+    ASSERT_EQ(fx.r.r[6], 00772, "CSM should push 3-word frame on supervisor stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00772), 012345, "CSM frame word 0 should be operand");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2,
+              "CSM frame word 1 should be return PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776),
+              old_psw & ~(FLAG_N | FLAG_Z | FLAG_V | FLAG_C),
+              "CSM frame word 2 should be PSW with CC cleared");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
+static int test_dcj11_mmr1_jsr_records_sp_delta(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word target = 02400;
+    const word program[] = {
+        op_jsr(5, operand(1, 2)), /* JSR R5,(R2) */
+    };
+
+    current_test = "dcj11_mmr1_jsr_sp_delta";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = 000000;
+    fx.r.r[2] = target;
+    fx.r.r[5] = 012345;
+    fx.r.r[6] = 01000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "JSR should execute");
+    ASSERT_EQ(fx.r.r[7], target, "JSR should jump to destination");
+    ASSERT_EQ(fx.r.r[5], TEST_BASE + 2, "JSR should save return PC in source register");
+    ASSERT_EQ(fx.r.r[6], 00776, "JSR should push one word to stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 012345, "JSR should push source register value");
+    ASSERT_EQ(fx.r.mmu_ssr1, 000366, "MMR1 should record SP autodecrement for JSR");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
+static int test_dcj11_mmr1_mfpi_records_sp_delta(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mfpi(operand(0, 1)), /* MFPI R1 */
+    };
+
+    current_test = "dcj11_mmr1_mfpi_sp_delta";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = 000000;
+    fx.r.r[1] = 065432;
+    fx.r.r[6] = 01000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MFPI should execute");
+    ASSERT_EQ(fx.r.r[6], 00776, "MFPI should push one word to stack");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 065432, "MFPI should push source value");
+    ASSERT_EQ(fx.r.mmu_ssr1, 000366, "MMR1 should record SP autodecrement for MFPI");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
+static int test_dcj11_mmr1_mxpi_pop_records_sp_delta(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word stack_addr = 02000;
+    const word program_mtpi[] = {
+        op_mtpi(operand(0, 2)), /* MTPI R2 */
+    };
+    const word program_mtpd[] = {
+        op_mtpd(operand(0, 3)), /* MTPD R3 */
+    };
+
+    current_test = "dcj11_mmr1_mxpi_pop_sp_delta";
+    fixture_setup_model(&fx, DCJ11);
+
+    load_program(&fx, TEST_BASE, program_mtpi, sizeof(program_mtpi) / sizeof(program_mtpi[0]));
+    fx.r.psw = 000000;
+    fx.r.r[2] = 0;
+    fx.r.r[6] = stack_addr;
+    store_word(&fx, stack_addr, 012345);
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPI should execute");
+    ASSERT_EQ(fx.r.r[2], 012345, "MTPI should pop into destination register");
+    ASSERT_EQ(fx.r.r[6], stack_addr + 2, "MTPI should pop one word from stack");
+    ASSERT_EQ(fx.r.mmu_ssr1, 000026, "MMR1 should record SP autoincrement for MTPI");
+
+    load_program(&fx, TEST_BASE, program_mtpd, sizeof(program_mtpd) / sizeof(program_mtpd[0]));
+    fx.r.r[3] = 0;
+    fx.r.r[6] = stack_addr;
+    store_word(&fx, stack_addr, 076543);
+    ASSERT_EQ(core_step(&fx.r), 0, "MTPD should execute");
+    ASSERT_EQ(fx.r.r[3], 076543, "MTPD should pop into destination register");
+    ASSERT_EQ(fx.r.r[6], stack_addr + 2, "MTPD should pop one word from stack");
+    ASSERT_EQ(fx.r.mmu_ssr1, 000026, "MMR1 should record SP autoincrement for MTPD");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
+static int test_dcj11_mmr1_autoinc_deferred_records_before_fault(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 04000;
+    const word vec_psw = 000340;
+    const word program[] = {
+        op_mov(operand(3, 0), operand(0, 1)), /* MOV @(R0)+,R1 */
+    };
+
+    current_test = "dcj11_mmr1_mode3_fault_order";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, vec_psw);
+
+    fx.r.psw = 000003;
+    fx.r.r[0] = 000001; /* odd -> fault on deferred pointer read */
+    fx.r.r[1] = 012345;
+    fx.r.r[6] = 01000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @(R0)+ should fault on odd pointer read");
+    ASSERT_EQ(fx.r.r[7], handler, "Fault should vector to bus error handler");
+    ASSERT_EQ(fx.r.r[0], 000003, "Autoincrement must be visible even when deferred read faults");
+    ASSERT_EQ(fx.r.r[1], 012345, "Destination register should remain unchanged on abort");
+    ASSERT_EQ(fx.r.mmu_ssr1, 000020, "MMR1 should record source autoincrement delta before fault");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
+static int test_dcj11_mmu_illegal_mode2_aborts(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 05200;
+    const word vec_psw = 000340;
+    const word program[] = {
+        op_nop(),
+    };
+    word ssr0_page;
+
+    current_test = "dcj11_mmu_illegal_mode2_aborts";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000250, handler);
+    store_word(&fx, 000252, vec_psw);
+
+    fx.r.psw = 0100000;     /* PSW<15:14> = 2 (illegal MMU mode). */
+    fx.r.r[6] = 01000;
+    fx.r.mmu_ssr0 = 0000001; /* MMU enable */
+    /* Keep kernel seg0 mapped so MMU trap vector fetch can complete. */
+    fx.r.mmu_par[0][0][0] = 0000000;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Illegal mode 2 should abort via MMU trap");
+    ASSERT_EQ(fx.r.r[7], handler, "Illegal mode 2 should vector to MMU trap handler");
+    ASSERT_EQ(fx.r.mmu_ssr2, TEST_BASE, "MMR2 should latch faulting instruction PC");
+    ASSERT_EQ(fx.r.mmu_ssr0 & 0100000, 0100000, "MMR0 should report non-resident abort");
+
+    ssr0_page = (word)((fx.r.mmu_ssr0 >> 1) & 077);
+    ASSERT_EQ((ssr0_page >> 4) & 03, 000002, "MMR0 page field should record mode 2");
+    ASSERT_EQ((ssr0_page >> 3) & 01, 000000, "MMR0 page field should record I-space");
+    ASSERT_EQ(ssr0_page & 07, 000000, "MMR0 page field should record seg0 at TEST_BASE");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
+static int test_dcj11_pdrw_set_on_internal_reg_write(void)
+{
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+    return 0;
+#else
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(3, 7)), /* MOV #1,@#1777572 */
+        000001,
+        0177572,
+    };
+
+    current_test = "dcj11_pdrw_internal_reg_write";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = 000000;
+    fx.r.r[6] = 01000;
+    fx.r.mmu_ssr0 = 0000001; /* MMU enable */
+    fx.r.mmu_ssr3 = 0000004; /* kernel split I/D */
+
+    /* Ensure instruction fetch and data references are resident. */
+    fx.r.mmu_par[0][0][0] = 0000000;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][1][0] = 0000000;
+    fx.r.mmu_pdr[0][1][0] = 0177006;
+    fx.r.mmu_par[0][1][7] = 0000000;
+    fx.r.mmu_pdr[0][1][7] = 0177006;
+
+    ASSERT_EQ(fx.r.mmu_pdr[0][1][7] & 0000100, 0000000, "PDR.W starts clear");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV to internal MMU register should execute");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 6, "MOV #,@# should consume three words");
+    ASSERT_EQ(fx.r.mmu_pdr[0][1][7] & 0000100, 0000100,
+              "Internal register write should set PDR.W");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#endif
+}
+
 static int test_bpt_vectors(void)
 {
     cpu_fixture fx;
@@ -5490,6 +5847,80 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_regblock_177754_177770_core_owned(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+
+    current_test = "dcj11_regblock_177754_177770_core_owned";
+    fixture_setup_model(&fx, DCJ11);
+
+    /* Ensure these CPU-owned words are not backed by RAM bytes. */
+    fx.mem[0177754] = 000011;
+    fx.mem[0177755] = 000022;
+    fx.mem[0177756] = 000033;
+    fx.mem[0177757] = 000044;
+    fx.mem[0177760] = 000055;
+    fx.mem[0177761] = 000066;
+    fx.mem[0177762] = 000077;
+    fx.mem[0177763] = 000101;
+    fx.mem[0177764] = 000111;
+    fx.mem[0177765] = 000122;
+    fx.mem[0177770] = 000133;
+    fx.mem[0177771] = 000144;
+
+    fx.r.J11_RSVD_177754 = 001111;
+    fx.r.J11_RSVD_177756 = 002222;
+    fx.r.J11_RSVD_177760 = 003333;
+    fx.r.J11_RSVD_177762 = 004444;
+    fx.r.J11_RSVD_177764 = 005555;
+    fx.r.J11_RSVD_177770 = 006666;
+
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177754), 001111, "0177754 readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177756), 002222, "0177756 readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177760), 003333, "0177760 readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177762), 004444, "0177762 readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177764), 005555, "0177764 readback");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177770), 006666, "0177770 readback");
+
+    store_word(&fx, 0177754, 012345);
+    store_word(&fx, 0177756, 023456);
+    store_word(&fx, 0177760, 034567);
+    store_word(&fx, 0177762, 045670);
+    store_word(&fx, 0177764, 056701);
+    store_word(&fx, 0177770, 067012);
+
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177754), 012345, "0177754 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177756), 023456, "0177756 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177760), 034567, "0177760 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177762), 045670, "0177762 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177764), 056701, "0177764 word write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177770), 067012, "0177770 word write");
+
+    fx.r.store_byte(&fx.r, 0177760, 000076);
+    fx.r.store_byte(&fx.r, 0177761, 000123);
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177760),
+              (word)((((word)000123) << 8) | (word)000076),
+              "0177760 byte write merge");
+
+    ASSERT_EQ(fx.mem[0177754], 000011, "0177754 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177755], 000022, "0177754 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177756], 000033, "0177756 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177757], 000044, "0177756 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177760], 000055, "0177760 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177761], 000066, "0177760 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177762], 000077, "0177762 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177763], 000101, "0177762 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177764], 000111, "0177764 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177765], 000122, "0177764 should not modify RAM high byte");
+    ASSERT_EQ(fx.mem[0177770], 000133, "0177770 should not modify RAM low byte");
+    ASSERT_EQ(fx.mem[0177771], 000144, "0177770 should not modify RAM high byte");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_non_dcj11_reg177750_is_ram(void)
 {
     cpu_fixture fx;
@@ -6589,6 +7020,14 @@ int main(void)
     failed += test_vm2_fis_error_trap_model(K1801VM2, "K1801VM2");
     failed += test_vm2_fis_error_trap_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_special_ops();
+    failed += test_dcj11_csm_disabled_illegal();
+    failed += test_dcj11_csm_user_to_supervisor();
+    failed += test_dcj11_mmr1_jsr_records_sp_delta();
+    failed += test_dcj11_mmr1_mfpi_records_sp_delta();
+    failed += test_dcj11_mmr1_mxpi_pop_records_sp_delta();
+    failed += test_dcj11_mmr1_autoinc_deferred_records_before_fault();
+    failed += test_dcj11_mmu_illegal_mode2_aborts();
+    failed += test_dcj11_pdrw_set_on_internal_reg_write();
     failed += test_bpt_vectors();
     failed += test_iot_vectors();
     failed += test_trace_vector();
@@ -6647,6 +7086,7 @@ int main(void)
     failed += test_dcj11_regblock_177744_177746_core_owned();
     failed += test_dcj11_reg177750_core_owned();
     failed += test_dcj11_regblock_177752_177766_core_owned();
+    failed += test_dcj11_regblock_177754_177770_core_owned();
     failed += test_non_dcj11_reg177750_is_ram();
     failed += test_vm1_tstb_flags_model(K1801VM1, "K1801VM1");
     failed += test_vm1_tstb_flags_model(K1801VM1G, "K1801VM1G");

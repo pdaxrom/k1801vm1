@@ -12,6 +12,7 @@
 #define MMU_SSR0_LENGTH 0040000
 #define MMU_SSR0_NONRES 0100000
 #define MMU_SSR0_FREEZE 0160000
+#define MMU_PDR_W 0000100
 
 static INLINE void setup_mmu_fault_vector(mmu_fixture *fx)
 {
@@ -89,6 +90,8 @@ static int test_fault_length_on_data_write(void)
     MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & MMU_SSR0_FREEZE) != 0, "MMR0 freeze/fault latched");
     MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & MMU_SSR0_LENGTH) != 0,
                     "MMR0 must contain length fault");
+    MMU_ASSERT_TRUE((fx.r.mmu_pdr[0][1][1] & MMU_PDR_W) != 0,
+                    "faulting write should set PDR.W on J-11");
     MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 012345,
                   "faulting write must not commit");
 
@@ -127,6 +130,8 @@ static int test_fault_protect_on_data_write(void)
     MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & MMU_SSR0_FREEZE) != 0, "MMR0 freeze/fault latched");
     MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & MMU_SSR0_PROT) != 0,
                     "MMR0 must contain protection fault");
+    MMU_ASSERT_TRUE((fx.r.mmu_pdr[0][1][1] & MMU_PDR_W) != 0,
+                    "protected faulting write should set PDR.W on J-11");
     MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 076543,
                   "protected write must not commit");
 

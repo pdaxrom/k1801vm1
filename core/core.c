@@ -214,7 +214,13 @@ static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
 #define DCJ11_REG_CCR 0177746
 #define DCJ11_REG_MAINT 0177750
 #define DCJ11_REG_HITMISS 0177752
+#define DCJ11_REG_RSVD_177754 0177754
+#define DCJ11_REG_RSVD_177756 0177756
+#define DCJ11_REG_RSVD_177760 0177760
+#define DCJ11_REG_RSVD_177762 0177762
+#define DCJ11_REG_RSVD_177764 0177764
 #define DCJ11_REG_CPUERR 0177766
+#define DCJ11_REG_RSVD_177770 0177770
 #define DCJ11_REG_PIRQ 0177772
 
 #define DCJ11_CPUERR_RED 0000004
@@ -309,8 +315,26 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
     case DCJ11_REG_HITMISS:
         *value = r->J11_HITMISS;
         return true;
+    case DCJ11_REG_RSVD_177754:
+        *value = r->J11_RSVD_177754;
+        return true;
+    case DCJ11_REG_RSVD_177756:
+        *value = r->J11_RSVD_177756;
+        return true;
+    case DCJ11_REG_RSVD_177760:
+        *value = r->J11_RSVD_177760;
+        return true;
+    case DCJ11_REG_RSVD_177762:
+        *value = r->J11_RSVD_177762;
+        return true;
+    case DCJ11_REG_RSVD_177764:
+        *value = r->J11_RSVD_177764;
+        return true;
     case DCJ11_REG_CPUERR:
         *value = (word)(r->J11_CPUERR & DCJ11_CPUERR_MASK);
+        return true;
+    case DCJ11_REG_RSVD_177770:
+        *value = r->J11_RSVD_177770;
         return true;
     case DCJ11_REG_PIRQ:
         *value = dcj11_pirq_visible(r->J11_PIRQ);
@@ -337,9 +361,27 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
     case DCJ11_REG_HITMISS:
         /* Hit/miss register is read-only for software. */
         return true;
+    case DCJ11_REG_RSVD_177754:
+        r->J11_RSVD_177754 = value;
+        return true;
+    case DCJ11_REG_RSVD_177756:
+        r->J11_RSVD_177756 = value;
+        return true;
+    case DCJ11_REG_RSVD_177760:
+        r->J11_RSVD_177760 = value;
+        return true;
+    case DCJ11_REG_RSVD_177762:
+        r->J11_RSVD_177762 = value;
+        return true;
+    case DCJ11_REG_RSVD_177764:
+        r->J11_RSVD_177764 = value;
+        return true;
     case DCJ11_REG_CPUERR:
         /* CPU error register clears on write. */
         r->J11_CPUERR = 0;
+        return true;
+    case DCJ11_REG_RSVD_177770:
+        r->J11_RSVD_177770 = value;
         return true;
     case DCJ11_REG_PIRQ:
         r->J11_PIRQ = (word)(value & DCJ11_PIRQ_RW);
@@ -750,6 +792,7 @@ enum {
 #define MMU_SSR3_UD 0000001
 #define MMU_SSR3_SD 0000002
 #define MMU_SSR3_KD 0000004
+#define MMU_SSR3_CSM 0000010
 #define MMU_SSR3_M22E 0000020
 #define MMU_SSR3_J_MASK 0000077
 
@@ -1105,9 +1148,55 @@ static INLINE int mmu_split_enabled(const regs *r, int mode)
 
 static INLINE int mmu_mode_from_psw(word psw)
 {
-    int mode = (psw >> 14) & 03;
-    /* Reserved mode 2 is treated as kernel in this core. */
-    return (mode == 2) ? 0 : mode;
+    return (psw >> 14) & 03;
+}
+
+static INLINE void mmu_note_write_pdrw(regs *r, int mode, int space, int seg)
+{
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model != DCJ11) {
+        return;
+    }
+    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+        return;
+    }
+    mode &= 03;
+    seg &= 07;
+    if (space && !mmu_split_enabled(r, mode)) {
+        space = 0;
+    }
+    r->mmu_pdr[mode][space ? 1 : 0][seg] |= MMU_PDR_W;
+#else
+    (void)r;
+    (void)mode;
+    (void)space;
+    (void)seg;
+#endif
+}
+
+static INLINE void mmu_note_internal_reg_write(regs *r, word va,
+                                               int force_kernel_d)
+{
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    int mode;
+    int space;
+
+    if (r->model != DCJ11) {
+        return;
+    }
+    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+        return;
+    }
+
+    mode = force_kernel_d ? 0 : mmu_mode_from_psw(r->psw);
+    space = force_kernel_d ? (mmu_split_enabled(r, 0) ? 1 : 0)
+                           : (mmu_split_enabled(r, mode) ? 1 : 0);
+    mmu_note_write_pdrw(r, mode, space, (va >> 13) & 07);
+#else
+    (void)r;
+    (void)va;
+    (void)force_kernel_d;
+#endif
 }
 
 static INLINE word mmu_fault_to_ssr0_bits(int fault)
@@ -1154,6 +1243,24 @@ static INLINE int mmu_acf_write_is_protect(word pdr)
 {
     int acf = pdr & 06;
     return (acf == 02);
+}
+#endif
+
+#if !defined(ENABLE_MMU) || !(ENABLE_MMU)
+static INLINE void mmu_note_write_pdrw(regs *r, int mode, int space, int seg)
+{
+    (void)r;
+    (void)mode;
+    (void)space;
+    (void)seg;
+}
+
+static INLINE void mmu_note_internal_reg_write(regs *r, word va,
+                                               int force_kernel_d)
+{
+    (void)r;
+    (void)va;
+    (void)force_kernel_d;
 }
 #endif
 
@@ -1267,7 +1374,25 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
             *seg_out = seg;
         }
 
+        if (mode == 2) {
+            /*
+             * J-11 PSW current mode 2 is illegal for MMU translation paths.
+             * Model this as an immediate non-resident abort rather than
+             * normalizing to kernel mode.
+             */
+            if (is_write) {
+                mmu_note_write_pdrw(r, mode, space, seg);
+            }
+            if (fault_code_out) {
+                *fault_code_out = MMU_FAULT_NONRES;
+            }
+            return -1;
+        }
+
         if ((!ed && block > len) || (ed && block < len)) {
+            if (is_write) {
+                mmu_note_write_pdrw(r, mode, space, seg);
+            }
             if (fault_code_out) {
                 *fault_code_out = MMU_FAULT_LENGTH;
             }
@@ -1276,6 +1401,7 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
 
         if (is_write) {
             if (!mmu_acf_write_ok(pdr)) {
+                mmu_note_write_pdrw(r, mode, space, seg);
                 if (fault_code_out) {
                     *fault_code_out =
                         mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
@@ -1388,6 +1514,9 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
         len = (pdr >> 8) & 0177;
 
         if ((!ed && block > len) || (ed && block < len)) {
+            if (is_write) {
+                mmu_note_write_pdrw(r, mode, space, seg);
+            }
             if (fault_code_out) {
                 *fault_code_out = MMU_FAULT_LENGTH;
             }
@@ -1396,6 +1525,7 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
 
         if (is_write) {
             if (!mmu_acf_write_ok(pdr)) {
+                mmu_note_write_pdrw(r, mode, space, seg);
                 if (fault_code_out) {
                     *fault_code_out =
                         mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
@@ -1576,6 +1706,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
 
     if (r->model == DCJ11) {
         if (dcj11_reg_block_store_byte(r, offset, value)) {
+            mmu_note_internal_reg_write(r, offset, force_kernel_d);
             return;
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
@@ -1586,10 +1717,12 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
 
     if (cpu_has_reg_177776(offset)) {
         cpu_reg_177776_store_byte(r, offset, value);
+        mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
 
     if (mmu_io_write_byte(r, offset, value)) {
+        mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
 
@@ -1745,6 +1878,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         }
 
         if (dcj11_reg_block_store_word(r, offset, value)) {
+            mmu_note_internal_reg_write(r, offset, force_kernel_d);
             return;
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
@@ -1755,10 +1889,12 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
 
     if (offset == 0177776) {
         dcj11_set_psw(r, value);
+        mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
 
     if (mmu_io_write_word(r, offset, value)) {
+        mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
 
@@ -1877,6 +2013,7 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         }
 
         if (dcj11_reg_block_store_word(r, offset, value)) {
+            mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
             return;
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
@@ -1887,9 +2024,11 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
 
     if (offset == 0177776) {
         dcj11_set_psw(r, value);
+        mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
         return;
     }
     if (mmu_io_write_word(r, offset, value)) {
+        mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
         return;
     }
 
@@ -2427,16 +2566,17 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type,
         }
         return TYPE_MEM;
     case 3: /* @(Rn)+ */
+        *offset = r->r[reg];
+        r->r[reg] += step;
+        mmu_mmr1_record_delta(r, reg, step);
         if (reg == 7) {
-            *offset = load_word_ifetch(r, r->r[reg]);
+            *offset = load_word_ifetch(r, *offset);
         } else {
-            *offset = load_word(r, r->r[reg]);
+            *offset = load_word(r, *offset);
         }
         if (r->fAbort) {
             return TYPE_ERROR;
         }
-        r->r[reg] += step;
-        mmu_mmr1_record_delta(r, reg, step);
         return TYPE_MEM;
     case 4: /* -(Rn) */
         r->r[reg] -= step;
@@ -3314,6 +3454,73 @@ int core_step(regs *r)
         }
         goto step_end;
 
+    case 00070: { /* CSM */
+        word old_sp;
+        word new_sp;
+        word old_psw_stack;
+        word new_psw;
+        int old_mode;
+        int csm_enabled = 0;
+
+        if (r->model != DCJ11) {
+            illegal_trap(r);
+            goto step_end;
+        }
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+        csm_enabled = (r->mmu_ssr3 & MMU_SSR3_CSM) ? 1 : 0;
+#endif
+        old_mode = dcj11_psw_cur_mode(psw_before);
+        if (!csm_enabled || old_mode == 0) {
+            illegal_trap(r);
+            goto step_end;
+        }
+
+        DECODE_DST();
+        GET_WORD(csm_arg);
+
+        old_sp = r->r[6];
+        old_psw_stack =
+            (word)(r->psw & ~(FLAG_N | FLAG_Z | FLAG_V | FLAG_C));
+
+        /*
+         * Match SIMH/J-11 CSM frame order on supervisor D-space stack:
+         *   [SP-2] = PSW (CC cleared), [SP-4] = PC, [SP-6] = operand.
+         */
+        core_store_word_mode_space(r, (word)(old_sp - 2), old_psw_stack, 1, 1);
+        if (r->fAbort) {
+            goto step_end;
+        }
+        core_store_word_mode_space(r, (word)(old_sp - 4), r->r[7], 1, 1);
+        if (r->fAbort) {
+            goto step_end;
+        }
+        core_store_word_mode_space(r, (word)(old_sp - 6), csm_arg, 1, 1);
+        if (r->fAbort) {
+            goto step_end;
+        }
+
+        new_sp = (word)(old_sp - 6);
+        dcj11_sp_mode_init(r);
+        r->sp_mode[old_mode] = old_sp;
+        r->sp_mode[1] = new_sp;
+
+        new_psw = r->psw;
+        new_psw = dcj11_psw_set_prev_mode(new_psw, old_mode);
+        new_psw = dcj11_psw_set_cur_mode(new_psw, 1);
+        new_psw = (word)(new_psw & ~FLAG_T);
+        dcj11_set_psw(r, new_psw);
+        if (old_mode == 1) {
+            r->r[6] = new_sp;
+        }
+        r->sp_mode[1] = new_sp;
+
+        r->r[7] = core_load_word_mode_space(r, 000010, 1, 0);
+        if (r->fAbort) {
+            goto step_end;
+        }
+        goto step_end;
+    }
+
     case 00072: { /* TSTSET */
         if (r->model != DCJ11) {
             illegal_trap(r);
@@ -3392,7 +3599,13 @@ int core_step(regs *r)
                 goto step_end;
             }
         }
-        pushw(mfp_tmp);
+        r->r[6] -= 2;
+        mmu_mmr1_record_delta(r, 6, -2);
+        dcj11_note_stack_reference(r, r->r[6]);
+        store_word(r, r->r[6], mfp_tmp);
+        if (r->fAbort) {
+            goto step_end;
+        }
         set_flag_if(mfp_tmp & SIGN, FLAG_N);
         set_flag_if(mfp_tmp == 0, FLAG_Z);
         clear_flag(FLAG_V);
@@ -3443,7 +3656,13 @@ int core_step(regs *r)
                 goto step_end;
             }
         }
-        pushw(mfp_tmp);
+        r->r[6] -= 2;
+        mmu_mmr1_record_delta(r, 6, -2);
+        dcj11_note_stack_reference(r, r->r[6]);
+        store_word(r, r->r[6], mfp_tmp);
+        if (r->fAbort) {
+            goto step_end;
+        }
         set_flag_if(mfp_tmp & SIGN, FLAG_N);
         set_flag_if(mfp_tmp == 0, FLAG_Z);
         clear_flag(FLAG_V);
@@ -3476,11 +3695,12 @@ int core_step(regs *r)
                 goto step_end;
             }
         }
-        word tmp;
-        pullw(tmp);
+        word tmp = load_word(r, r->r[6]);
         if (r->fAbort) {
             goto step_end;
         }
+        r->r[6] += 2;
+        mmu_mmr1_record_delta(r, 6, 2);
         if (r->model != DCJ11) {
             PUT_WORD(tmp);
         } else {
@@ -3523,11 +3743,12 @@ int core_step(regs *r)
                 goto step_end;
             }
         }
-        word tmp;
-        pullw(tmp);
+        word tmp = load_word(r, r->r[6]);
         if (r->fAbort) {
             goto step_end;
         }
+        r->r[6] += 2;
+        mmu_mmr1_record_delta(r, 6, 2);
         if (r->model != DCJ11) {
             PUT_WORD(tmp);
         } else {
@@ -3563,7 +3784,13 @@ int core_step(regs *r)
             illegal_trap(r);
             goto step_end;
         }
-        pushw(r->r[reg]);
+        r->r[6] -= 2;
+        mmu_mmr1_record_delta(r, 6, -2);
+        dcj11_note_stack_reference(r, r->r[6]);
+        store_word(r, r->r[6], r->r[reg]);
+        if (r->fAbort) {
+            goto step_end;
+        }
         r->r[reg] = r->r[7];
         r->r[7] = dst_offset;
         goto step_end;
