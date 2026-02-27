@@ -448,6 +448,15 @@ static INLINE bool dcj11_reg_block_store_byte(regs *r, word offset,
 
 static INLINE void dcj11_set_psw(regs *r, word new_psw);
 
+static INLINE word dcj11_explicit_psw_write(regs *r, word new_psw)
+{
+    if (r->model == DCJ11) {
+        /* 11/84-class behavior: explicit PSW references do not alter T-bit. */
+        new_psw = (word)((new_psw & ~FLAG_T) | (r->psw & FLAG_T));
+    }
+    return new_psw;
+}
+
 static INLINE byte cpu_reg_177776_load_byte(regs *r, word offset)
 {
     return (byte)((offset & 1) ? ((r->psw >> 8) & 0377) : (r->psw & 0377));
@@ -461,7 +470,7 @@ static INLINE void cpu_reg_177776_store_byte(regs *r, word offset, byte value)
     } else {
         new_psw = (word)((r->psw & 0177400) | ((word)value & 0377));
     }
-    dcj11_set_psw(r, new_psw);
+    dcj11_set_psw(r, dcj11_explicit_psw_write(r, new_psw));
 }
 
 static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
@@ -1899,7 +1908,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     }
 
     if (offset == 0177776) {
-        dcj11_set_psw(r, value);
+        dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
         mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
@@ -2034,7 +2043,7 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
     }
 
     if (offset == 0177776) {
-        dcj11_set_psw(r, value);
+        dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
         mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
         return;
     }
@@ -2103,8 +2112,8 @@ void core_init(regs *r)
         r->model = K1801VM2;
     }
     if (r->model == DCJ11) {
-        r->has_fis = 1;
-        r->has_fpu = 0;
+        r->has_fis = 0;
+        r->has_fpu = 1;
     } else {
         r->has_fis = 0;
         r->has_fpu = 0;
@@ -2658,6 +2667,8 @@ int core_step(regs *r)
     word irq_vector;
     word psw_before = r->psw;
     int do_trace = 0;
+    int trace_override = 0;
+    int trace_override_value = 0;
     int defer_halt = 0;
     int skip_irq = 0;
     int skip_trace = r->fTrap ? 1 : 0;
@@ -2685,6 +2696,12 @@ int core_step(regs *r)
     }
 
     if (r->fWait) {
+        if (r->model == DCJ11 && (r->psw & FLAG_T)) {
+            word old_psw = r->psw;
+            r->fWait = 0;
+            core_take_vector(r, 014, r->r[7], old_psw, "TRACE");
+            return 0;
+        }
         if (core_poll_irq_any(r, &irq_vector)) {
             word vec;
             if (irq_accept(r, irq_vector, &vec)) {
@@ -2726,7 +2743,7 @@ int core_step(regs *r)
     //
     switch (op) {
     case 000000: { /* HALT */
-        if ((r->model == DCJ11 || is_vm2(r)) && !dcj11_kernel_psw(psw_before)) {
+        if (r->model == DCJ11 && !dcj11_kernel_psw(psw_before)) {
             if (r->model == DCJ11) {
                 dcj11_set_cpuerr(r, DCJ11_CPUERR_HALT);
             }
@@ -2761,6 +2778,10 @@ int core_step(regs *r)
             popped_psw = dcj11_rti_rtt_protect_psw(psw_before, popped_psw);
         }
         dcj11_set_psw(r, popped_psw);
+        if (r->model == DCJ11) {
+            trace_override = 1;
+            trace_override_value = (r->psw & FLAG_T) ? 1 : 0;
+        }
     }
     goto step_end;
 
@@ -2806,8 +2827,13 @@ int core_step(regs *r)
             }
         }
         dcj11_set_psw(r, popped_psw);
-        r->fTrap = 1;
         skip_trace = 1;
+        if (r->model == DCJ11) {
+            trace_override = 1;
+            trace_override_value = 0;
+        } else {
+            r->fTrap = 1;
+        }
     }
     goto step_end;
 
@@ -3986,10 +4012,12 @@ int core_step(regs *r)
     }
 
     case 0074: { /* XOR */
+        word src_reg;
         RA_REG(reg);
+        src_reg = r->r[reg];
         DECODE_DST();
         GET_WORD(tmp);
-        tmp ^= r->r[reg];
+        tmp ^= (r->model == DCJ11) ? r->r[reg] : src_reg;
         PUT_WORD(tmp);
         set_flag_if(tmp & SIGN, FLAG_N);
         set_flag_if(tmp == 0, FLAG_Z);
@@ -4116,27 +4144,65 @@ int core_step(regs *r)
 
     switch ((op & 0170000) >> 12) {
     case 001: { /* MOV */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
+        word tmp;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+        }
         PUT_WORD(tmp);
         PSW_SET_NZV_WORD(tmp);
         goto step_end;
     }
     case 011: { /* MOVB */
-        DECODE_SRCB();
-        GET_SBYTE(tmp);
-        DECODE_DSTB();
+        word tmp;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DSTB();
+            tmp = r->r[sreg] & 0377;
+        } else {
+            DECODE_SRCB();
+            tmp = get_data_byte(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DSTB();
+        }
         PUT_BYTE_MOVB(tmp);
         PSW_SET_NZV_BYTE(tmp);
         goto step_end;
     }
 
     case 002: { /* CMP */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
-        GET_WORD(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         word tmp2 = ~tmp1;
         dword tmp3 = ((dword)tmp) + ((dword)tmp2) + 1;
         tmp2 = tmp3 & 0177777;
@@ -4149,10 +4215,28 @@ int core_step(regs *r)
         goto step_end;
     }
     case 012: { /* CMPB */
-        DECODE_SRCB();
-        GET_SBYTE(tmp);
-        DECODE_DSTB();
-        GET_BYTE(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg] & 0377;
+        } else {
+            DECODE_SRCB();
+            tmp = get_data_byte(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         byte tmp2 = ~tmp1;
         dword tmp3 = ((dword)tmp) + ((dword)tmp2) + 1;
         tmp2 = tmp3 & 0377;
@@ -4166,10 +4250,28 @@ int core_step(regs *r)
     }
 
     case 006: { /* ADD */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
-        GET_WORD(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         dword tmp3 = ((dword)tmp) + ((dword)tmp1);
         word tmp2 = tmp3 & 0177777;
         PUT_WORD(tmp2);
@@ -4183,10 +4285,28 @@ int core_step(regs *r)
     }
 
     case 016: { /* SUB */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
-        GET_WORD(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         word tmp2 = ~tmp;
         dword tmp3 = ((dword)tmp1) + ((dword)tmp2) + 1;
         tmp2 = tmp3 & 0177777;
@@ -4201,39 +4321,111 @@ int core_step(regs *r)
     }
 
     case 003: { /* BIT */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
-        GET_WORD(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         word tmp2 = tmp & tmp1;
         PSW_SET_NZV_WORD(tmp2);
         goto step_end;
     }
     case 013: { /* BITB */
-        DECODE_SRCB();
-        GET_SBYTE(tmp);
-        DECODE_DSTB();
-        GET_BYTE(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg] & 0377;
+        } else {
+            DECODE_SRCB();
+            tmp = get_data_byte(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         byte tmp2 = tmp & tmp1;
         PSW_SET_NZV_BYTE(tmp2);
         goto step_end;
     }
 
     case 004: { /* BIC */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
-        GET_WORD(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         tmp1 = (~tmp) & tmp1;
         PUT_WORD(tmp1);
         PSW_SET_NZV_WORD(tmp1);
         goto step_end;
     }
     case 014: { /* BICB */
-        DECODE_SRCB();
-        GET_SBYTE(tmp);
-        DECODE_DSTB();
-        GET_BYTE(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg] & 0377;
+        } else {
+            DECODE_SRCB();
+            tmp = get_data_byte(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         tmp1 = (~tmp) & tmp1;
         PUT_BYTE(tmp1);
         PSW_SET_NZV_BYTE(tmp1);
@@ -4241,20 +4433,56 @@ int core_step(regs *r)
     }
 
     case 005: { /* BIS */
-        DECODE_SRC();
-        GET_SWORD(tmp);
-        DECODE_DST();
-        GET_WORD(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg];
+        } else {
+            DECODE_SRC();
+            tmp = get_data_word(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DST();
+            tmp1 = get_data_word(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         tmp1 = tmp | tmp1;
         PUT_WORD(tmp1);
         PSW_SET_NZV_WORD(tmp1);
         goto step_end;
     }
     case 015: { /* BISB */
-        DECODE_SRCB();
-        GET_SBYTE(tmp);
-        DECODE_DSTB();
-        GET_BYTE(tmp1);
+        word tmp;
+        word tmp1;
+        if (r->model == DCJ11 && (((op >> 6) & 070) == 0) && (op & 070)) {
+            word sreg = (op >> 6) & 07;
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            tmp = r->r[sreg] & 0377;
+        } else {
+            DECODE_SRCB();
+            tmp = get_data_byte(r, src_type, src_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+            DECODE_DSTB();
+            tmp1 = get_data_byte(r, dst_type, dst_offset);
+            if (r->fAbort) {
+                return 0;
+            }
+        }
         tmp1 = tmp | tmp1;
         PUT_BYTE(tmp1);
         PSW_SET_NZV_BYTE(tmp1);
@@ -4296,7 +4524,9 @@ step_end:
             }
         }
     }
-    if (!skip_trace && (psw_before & FLAG_T)) {
+    if (trace_override) {
+        do_trace = trace_override_value;
+    } else if (!skip_trace && (psw_before & FLAG_T)) {
         do_trace = 1;
     }
     if (defer_halt && r->fHaltSignal) {

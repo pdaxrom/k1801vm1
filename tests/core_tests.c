@@ -2727,6 +2727,52 @@ static int test_jmp(void)
     return run_for_models(test_jmp_model);
 }
 
+static int test_jmp_jsr_autoinc_mode2_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word initial_sp = 01000;
+    int setup_active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "jmp_autoinc_mode2", name);
+    fixture_setup_model(&fx, model);
+    setup_active = 1;
+    fx.r.r[1] = 02000;
+    write_op(&fx, op_jmp(operand(2, 1))); /* JMP (R1)+ */
+    ASSERT_EQ(core_step(&fx.r), 0, "JMP (R)+ should execute");
+    ASSERT_EQ(fx.r.r[7], 02000, "JMP (R)+ should load PC from original R");
+    ASSERT_EQ(fx.r.r[1], 02002, "JMP (R)+ should autoincrement register by 2");
+    fixture_teardown(&fx);
+    setup_active = 0;
+
+    set_test_name(namebuf, sizeof(namebuf), "jsr_autoinc_mode2", name);
+    fixture_setup_model(&fx, model);
+    setup_active = 1;
+    fx.r.r[2] = 03000;
+    fx.r.r[5] = 012345;
+    fx.r.r[6] = initial_sp;
+    write_op(&fx, op_jsr(5, operand(2, 2))); /* JSR R5,(R2)+ */
+    ASSERT_EQ(core_step(&fx.r), 0, "JSR reg,(R)+ should execute");
+    ASSERT_EQ(fx.r.r[7], 03000, "JSR reg,(R)+ should load PC from original R");
+    ASSERT_EQ(fx.r.r[2], 03002, "JSR reg,(R)+ should autoincrement EA register");
+    ASSERT_EQ(fx.r.r[5], TEST_BASE + 2, "JSR should save return PC into source register");
+    ASSERT_EQ(fx.r.r[6], initial_sp - 2, "JSR should push source register value");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 2), 012345,
+              "JSR should push original source register value");
+
+cleanup:
+    if (setup_active) {
+        fixture_teardown(&fx);
+    }
+    return rc;
+}
+
+static int test_jmp_jsr_autoinc_mode2(void)
+{
+    return run_for_models(test_jmp_jsr_autoinc_mode2_model);
+}
+
 static int test_jmp_jsr_mode0_trap_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -2786,6 +2832,117 @@ cleanup:
 static int test_jmp_jsr_mode0_trap(void)
 {
     return run_for_models(test_jmp_jsr_mode0_trap_model);
+}
+
+static int test_reg_source_order_split_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word initial_sp = 01000;
+
+    set_test_name(namebuf, sizeof(namebuf), "mov_same_reg_autoinc", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[1] = 02000;
+    write_op(&fx, op_mov(operand(0, 1), operand(2, 1))); /* MOV R1,(R1)+ */
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV should execute");
+    ASSERT_EQ(fx.r.r[1], 02002, "Destination autoincrement should apply");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 02000),
+              (model == DCJ11) ? 02002 : 02000,
+              "MOV source register sampling must be model-specific");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "mov_same_reg_autoinc_def", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02000, 03000);
+    write_op(&fx, op_mov(operand(0, 1), operand(3, 1))); /* MOV R1,@(R1)+ */
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV should execute");
+    ASSERT_EQ(fx.r.r[1], 02002, "Destination autoincrement should apply");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 03000),
+              (model == DCJ11) ? 02002 : 02000,
+              "MOV deferred source sampling must be model-specific");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "mov_same_reg_autodec", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[1] = 02000;
+    write_op(&fx, op_mov(operand(0, 1), operand(4, 1))); /* MOV R1,-(R1) */
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV should execute");
+    ASSERT_EQ(fx.r.r[1], 01776, "Destination autodecrement should apply");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01776),
+              (model == DCJ11) ? 01776 : 02000,
+              "MOV autodecrement source sampling must be model-specific");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "mov_same_reg_autodec_def", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 01776, 03000);
+    write_op(&fx, op_mov(operand(0, 1), operand(5, 1))); /* MOV R1,@-(R1) */
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV should execute");
+    ASSERT_EQ(fx.r.r[1], 01776, "Destination autodecrement should apply");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 03000),
+              (model == DCJ11) ? 01776 : 02000,
+              "MOV deferred autodecrement source sampling must be model-specific");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "mov_pc_index_src", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[0] = 03000;
+    write_op(&fx, op_mov(operand(0, 7), operand(6, 0))); /* MOV PC,4(R0) */
+    store_word(&fx, TEST_BASE + 2, 000004);
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV PC,X(R) should execute");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 03004),
+              (model == DCJ11) ? (TEST_BASE + 4) : (TEST_BASE + 2),
+              "MOV PC source value must be model-specific");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "jsr_same_reg_autoinc_src", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[2] = 02000;
+    fx.r.r[6] = initial_sp;
+    store_word(&fx, 02000, 03000);
+    write_op(&fx, op_jsr(2, operand(3, 2))); /* JSR R2,@(R2)+ */
+    ASSERT_EQ(core_step(&fx.r), 0, "JSR should execute");
+    ASSERT_EQ(fx.r.r[7], 03000, "JSR should jump through deferred destination");
+    ASSERT_EQ(fx.r.r[6], initial_sp - 2, "JSR should push one word");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 2), 02002,
+              "JSR source register value should follow destination EA timing");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "xor_same_reg_autoinc_src", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[1] = 02000;
+    store_word(&fx, 02000, 012345);
+    write_op(&fx, op_xor(1, operand(2, 1))); /* XOR R1,(R1)+ */
+    ASSERT_EQ(core_step(&fx.r), 0, "XOR should execute");
+    ASSERT_EQ(fx.r.r[1], 02002, "XOR destination autoincrement should apply");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 02000),
+              (word)(012345 ^ ((model == DCJ11) ? 02002 : 02000)),
+              "XOR source register sampling must be model-specific");
+    fixture_teardown(&fx);
+
+    set_test_name(namebuf, sizeof(namebuf), "jsr_pc_index_src", name);
+    fixture_setup_model(&fx, model);
+    fx.r.r[0] = 03000;
+    fx.r.r[6] = initial_sp;
+    write_op(&fx, op_jsr(7, operand(6, 0))); /* JSR PC,4(R0) */
+    store_word(&fx, TEST_BASE + 2, 000004);
+    ASSERT_EQ(core_step(&fx.r), 0, "JSR PC,X(R) should execute");
+    ASSERT_EQ(fx.r.r[7], 03004, "JSR PC,X(R) should jump to indexed destination");
+    ASSERT_EQ(fx.r.r[6], initial_sp - 2, "JSR should push one word");
+    ASSERT_EQ(fx.r.load_word(&fx.r, initial_sp - 2), TEST_BASE + 4,
+              "JSR PC source value should point past extension word");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_reg_source_order_split(void)
+{
+    return run_for_models(test_reg_source_order_split_model);
 }
 
 static int test_addressing_modes_model(byte model, const char *name)
@@ -4669,6 +4826,115 @@ static int test_rti_restores_state(void)
     ASSERT_EQ(fx.r.psw, 000111, "PSW should restore from stack");
     ASSERT_EQ(fx.r.r[6], 01204, "SP should restore after pulls");
     ASSERT_EQ(fx.r.fTrap, 0, "RTI should not set fTrap");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_rti_traces_immediately_when_t_restored(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 07200;
+    const word vector_psw = 000340;
+    const word program[] = {
+        op_rti(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_rti_trace_immediate";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, vector_psw);
+    store_word(&fx, handler, op_nop());
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, TEST_BASE + 2);
+    store_word(&fx, 01202, FLAG_T | 000003);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should return and immediately take TRACE");
+    ASSERT_EQ(fx.r.r[7], handler, "RTI should vector to trace handler");
+    ASSERT_EQ(fx.r.psw, vector_psw, "TRACE should load vector PSW");
+    ASSERT_EQ(fx.r.r[6], 01200, "SP should pop RTI frame and push TRACE frame");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01200), TEST_BASE + 2, "TRACE frame PC should be return PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01202), FLAG_T | 000003,
+              "TRACE frame PSW should preserve restored T-bit");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_rtt_traces_after_one_instruction(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 07240;
+    const word vector_psw = 000340;
+    const word program[] = {
+        op_rtt(),
+        op_nop(),
+        op_nop(),
+    };
+
+    current_test = "dcj11_rtt_trace_one_inst";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 014, handler);
+    store_word(&fx, 016, vector_psw);
+    store_word(&fx, handler, op_nop());
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, TEST_BASE + 2);
+    store_word(&fx, 01202, FLAG_T | 000003);
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTT should restore PC/PSW");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "RTT should return to next instruction");
+    ASSERT_EQ(fx.r.psw, FLAG_T | 000003, "RTT should restore T-bit");
+    ASSERT_EQ(fx.r.fTrap, 0, "DCJ11 RTT should not use fTrap skip flag");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "One instruction should execute before TRACE");
+    ASSERT_EQ(fx.r.r[7], handler, "TRACE should occur after exactly one instruction");
+    ASSERT_EQ(fx.r.psw, vector_psw, "TRACE should load vector PSW");
+    ASSERT_EQ(fx.r.r[6], 01200, "SP should contain TRACE frame after one instruction");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01200), TEST_BASE + 4, "TRACE frame PC should follow one instruction");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 01202), FLAG_T | 000003,
+              "TRACE frame PSW should keep RTT-restored T-bit");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_explicit_psw_write_preserves_t(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(3, 7)), /* MOV #T,@#177776 */
+        FLAG_T,
+        0177776,
+        op_mov(operand(2, 7), operand(3, 7)), /* MOV #0,@#177776 */
+        0,
+        0177776,
+    };
+
+    current_test = "dcj11_psw_explicit_t_protected";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = 000003;
+    ASSERT_EQ(core_step(&fx.r), 0, "Explicit PSW write should execute");
+    ASSERT_EQ(fx.r.psw & FLAG_T, 0, "Explicit PSW write must not set T on DCJ11");
+
+    fx.r.psw = FLAG_T | 000003;
+    fx.r.fTrap = 1; /* avoid trace side effect while validating explicit write policy */
+    ASSERT_EQ(core_step(&fx.r), 0, "Explicit PSW write should execute");
+    ASSERT_EQ(fx.r.psw & FLAG_T, FLAG_T, "Explicit PSW write must not clear T on DCJ11");
 
 cleanup:
     fixture_teardown(&fx);
@@ -6751,7 +7017,7 @@ cleanup:
     return rc;
 }
 
-static int test_dcj11_wait_ignores_trace(void)
+static int test_dcj11_wait_traces_on_tbit(void)
 {
     cpu_fixture fx;
     int rc = 0;
@@ -6761,7 +7027,7 @@ static int test_dcj11_wait_ignores_trace(void)
         op_wait(),
     };
 
-    current_test = "dcj11_wait_ignore_t";
+    current_test = "dcj11_wait_trace_t";
     fixture_setup_model(&fx, DCJ11);
     load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
 
@@ -6774,10 +7040,15 @@ static int test_dcj11_wait_ignores_trace(void)
 
     ASSERT_EQ(core_step(&fx.r), 0, "WAIT should execute");
     ASSERT_EQ(fx.r.fWait, 1, "WAIT should set fWait");
-    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "WAIT should not trace when T is set");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 2, "WAIT should advance PC");
     ASSERT_EQ(fx.r.psw, (FLAG_T | 000003), "WAIT should not change PSW");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), 012345, "WAIT should not push PC");
-    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 065432, "WAIT should not push PSW");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Pending T-bit should end WAIT with TRACE");
+    ASSERT_EQ(fx.r.fWait, 0, "TRACE should clear WAIT state");
+    ASSERT_EQ(fx.r.r[7], handler, "TRACE should vector from WAIT");
+    ASSERT_EQ(fx.r.psw, new_psw, "TRACE should load vector PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2, "TRACE frame PC should be WAIT next PC");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), FLAG_T | 000003, "TRACE frame PSW should preserve T");
 
 cleanup:
     fixture_teardown(&fx);
@@ -7197,7 +7468,9 @@ int main(void)
     failed += test_dcj11_reset_kernel_clears_pirq_preserves_cpuerr_mmr1_mmr2();
     failed += test_branches();
     failed += test_jmp();
+    failed += test_jmp_jsr_autoinc_mode2();
     failed += test_jmp_jsr_mode0_trap();
+    failed += test_reg_source_order_split();
     failed += test_addressing_modes();
     failed += test_single_operand_word_ops();
     failed += test_single_operand_byte_ops();
@@ -7247,7 +7520,10 @@ int main(void)
     failed += test_trace_rearms_with_t_in_vector();
     failed += test_trace_stops_when_t_cleared();
     failed += test_rti_restores_state();
+    failed += test_dcj11_rti_traces_immediately_when_t_restored();
+    failed += test_dcj11_rtt_traces_after_one_instruction();
     failed += test_dcj11_rti_restores_state();
+    failed += test_dcj11_explicit_psw_write_preserves_t();
     failed += test_dcj11_rti_user_restricts_psw();
     failed += test_dcj11_rti_user_sets_high_psw_bits();
     failed += test_dcj11_mode_stack_banking();
@@ -7316,7 +7592,7 @@ int main(void)
     failed += test_vm2_trap_stack_model(K1806VM2, "K1806VM2");
     failed += test_vm2_wait_ignores_trace_model(K1801VM2, "K1801VM2");
     failed += test_vm2_wait_ignores_trace_model(K1806VM2, "K1806VM2");
-    failed += test_dcj11_wait_ignores_trace();
+    failed += test_dcj11_wait_traces_on_tbit();
     failed += test_vm2_cpc_cpsw_update_model(K1801VM2, "K1801VM2");
     failed += test_vm2_cpc_cpsw_update_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_tstb_flags();
