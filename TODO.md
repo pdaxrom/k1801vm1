@@ -97,6 +97,7 @@ Table 3 (`MOV/CMP/BIT/BIC/BIS/ADD/SUB`, `SWAB`, `EIS differences`) summary:
 
 Open follow-up from Table 3:
 - [ ] Add explicit unit test for EIS odd-register condition-code basis (`32-bit`), at least for `DCJ11` and `VM2`.
+  - comment: leave current `32-bit` CC-basis behavior as-is for now; no core change required.
 
 Table 4 (`FIS`, `MFPT`, `FPP`) summary:
 - Scope still used:
@@ -488,6 +489,7 @@ Open follow-up from Table 14:
 - [ ] Front-panel semantics scope (`Table 14`): HALT/INIT/RESTART behavior implement vs document out-of-scope.
 - [x] `VM1G` EIS policy item retired: `VM1G` support removed from project (`Table 1` scope now VM1/VM2/DCJ11).
 - [ ] Add explicit EIS odd-register CC-basis test (`Table 3`).
+  - comment: keep current EIS odd-register behavior unchanged in this cycle.
 
 ### P2 (optional / accuracy extensions)
 - [ ] KEV11-style FIS semantics (`Table 4`): `FMUL/FDIV` stack usage and interruptibility/CC aftermath.
