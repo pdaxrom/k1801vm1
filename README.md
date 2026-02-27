@@ -435,6 +435,8 @@ memory fetch/store paths.
   per-microstep register modification log.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
 - Device interrupt arbitration is outside the core (handled by machine layer).
+- Vector-fetch/stack-push aborts follow recoverable abort semantics (restoring pre-trap
+  `PC/PS`); a dedicated hardware "hang latch" state is intentionally not modeled.
 
 ---
 

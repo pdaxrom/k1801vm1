@@ -446,15 +446,19 @@ Table 14 (`Error Handling` continuation) summary:
   - `DCJ11`: no separate threshold-based red-zone detector; only red fallback on abort during vector push.
   - status: consistent with `11/84` column (`N` for separate red-zone trap), but behavior is partial/exception-path only.
 - `Vector errors: error while fetching error vector hangs processor`:
-  - current emulator does not model a dedicated hardware “hang” latch/state; vector-fetch faults go through normal abort/trap flow.
-  - status: simplified, not cycle/hardware-accurate to this row.
+  - policy fixed: keep recoverable abort/trap flow (no dedicated hardware “hang” latch/state).
+  - rationale:
+    - J-11 reference states that on abort during vector fetch/stack pushes, `PC/PS` are restored before abort recognition.
+    - K1801 docs model these failures via `SEL174/SEL274` exception vectors, not as an unobservable permanent latch.
+  - status: intentionally simplified hardware model; architectural abort behavior retained.
 - `Halt switch processor / console initialize able to halt / console RESTART able to restart`:
   - core has internal `fHaltSignal` path, but full front-panel switch model (HALT/INIT/RESTART hardware semantics) is not fully emulated in user-facing machine profiles.
   - status: table rows are only partially modeled.
 
 Open follow-up from Table 14:
 - [x] Decide `VM*` policy for `error using (SP)` row: keep current vector-4 path (K1801 docs-driven), do not enforce strict `11/03` `HALT`.
-- [ ] Define whether to model explicit “vector-fetch error hangs CPU” state or keep current recoverable abort/trap behavior.
+- [x] Define whether to model explicit “vector-fetch error hangs CPU” state or keep current recoverable abort/trap behavior.
+  - policy chosen: keep current recoverable abort/trap behavior; no extra CPU hang latch.
 - [ ] Decide scope for front-panel semantics (`HALT switch`, `INIT halting`, `RESTART`) and either implement or explicitly document as out-of-scope.
 
 ## Prioritized Backlog
@@ -483,7 +487,7 @@ Open follow-up from Table 14:
 - [x] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
 - [ ] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`).
 - [x] CIS policy (`Tables 8/10`): keep CIS unsupported; `PSW<8>` is not modeled as CIS-suspend (README updated, `FLAG_H` naming is internal only).
-- [ ] Error-vector-fetch hang semantics (`Table 14`): decide model vs simplified abort flow.
+- [x] Error-vector-fetch hang semantics (`Table 14`): keep simplified recoverable abort flow; no explicit hang latch state.
 - [ ] Front-panel semantics scope (`Table 14`): HALT/INIT/RESTART behavior implement vs document out-of-scope.
 - [x] `VM1G` EIS policy item retired: `VM1G` support removed from project (`Table 1` scope now VM1/VM2/DCJ11).
 - [ ] Add explicit EIS odd-register CC-basis test (`Table 3`).
