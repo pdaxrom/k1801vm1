@@ -7,6 +7,14 @@ This subproject now provides two separate executables:
 1. `lsi11` (PDP-11/04-like profile)
 2. `pdp1184` (PDP-11/84-like profile, DCJ-11)
 
+### Bus model policy (current scope)
+- Unified synthetic bus model is used for both targets; strict electrical `Q-bus` vs
+  `UNIBUS` behavior is not emulated.
+- `pdp1184` adds 18/22-bit I/O-window alias decode to the same 16-bit device page.
+- DATI/DATIP/DATO per-cycle timing/protocol fidelity is out of scope.
+- DL11/KW11 are bus-visible by policy for software compatibility.
+- Bootstrap flow is loader-based (`-bootcopy`, `-bootrt11`), not bus-ROM emulation.
+
 ## 1) `lsi11` target (PDP-11/04-like, NO MMU)
 
 ### Identity and MMU policy

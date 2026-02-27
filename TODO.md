@@ -270,14 +270,14 @@ Table 9 (`Buses`) summary:
 - `Buses available (Q-bus/UNIBUS)`:
   - current emulator uses a unified synthetic bus layer (`lsi11/bus.c`) and does not expose strict electrical Q-bus vs UNIBUS behavior per CPU model.
   - practical profile mapping is machine-level: `lsi11` target is fixed 16-bit I/O-page model, `pdp1184` target adds 18/22-bit I/O alias decode.
-  - status: functional profile split exists, but strict table-level bus identity is only partial.
+  - policy fixed: keep unified synthetic bus model; do not emulate strict electrical `Q-bus` vs `UNIBUS` identity.
 - `Special memory bus` (`PMI` for `11/84`):
   - no explicit PMI/fast-memory side bus model exists.
   - status: not implemented.
 - `Bus cycles utilized` rows (`CLR/SXT`, `MOV`, `EIS` DATI/DATIP/DATO details):
   - bus-cycle micro-sequences are not modeled as explicit DATI/DATIP/DATO transactions.
   - current core models architectural effects and memory/device access results, not per-cycle protocol.
-  - status: cycle-accurate row behavior is out of scope in current implementation.
+  - policy fixed: cycle-accurate DATI/DATIP/DATO behavior remains out of scope.
 - `UNIBUS/Q-bus timeout value`:
   - no microsecond timeout model (`10us`, `15us`, etc.) is implemented; NXM/timeout is handled as immediate access outcome.
   - status: timing-value rows are not implemented.
@@ -286,16 +286,20 @@ Table 9 (`Buses`) summary:
   - status: functional DMA exists, arbitration-timing semantics are simplified.
 - `Console SLU accessible from bus` and `Line clock register accessible from bus`:
   - DL11 (`0177560..0177567`) and KW11 (`0177546..`) are bus-visible in current emulator on both machine profiles.
-  - if `11/84` table interpretation requires these to be not bus-accessible, current implementation diverges.
+  - policy fixed: keep DL11/KW11 bus-visible for software compatibility on all profiles.
 - `Bootstrap ROMs accessible from bus`:
   - no dedicated bus-mapped bootstrap ROM device model; boot paths use helper loaders (`-bootcopy`, `-bootrt11`) and an injected RL bootstrap routine.
-  - status: ROM visibility semantics differ from hardware table.
+  - policy fixed: keep loader-based bootstrap behavior; no bus-visible ROM device.
 
 Open follow-up from Table 9:
-- [ ] Decide whether to keep current unified bus model or introduce explicit per-profile bus identity contract (`Q-bus` vs `UNIBUS`) in docs/code.
-- [ ] Decide policy for `DCJ11/11-84` console/line-clock bus visibility rows (keep DL11/KW11 bus-visible for software compatibility vs enforce table behavior).
-- [ ] If bus-cycle accuracy is required, define minimal DATI/DATIP/DATO tracing/model boundary (at least for `MOV`, `CLR/SXT`, `EIS source fetch`).
-- [ ] Decide whether bootstrap ROM behavior should stay loader-based or be emulated as a bus-visible ROM device.
+- [x] Decide whether to keep current unified bus model or introduce explicit per-profile bus identity contract (`Q-bus` vs `UNIBUS`) in docs/code.
+  - policy chosen: keep unified synthetic bus model with machine-level profile mapping only.
+- [x] Decide policy for `DCJ11/11-84` console/line-clock bus visibility rows (keep DL11/KW11 bus-visible for software compatibility vs enforce table behavior).
+  - policy chosen: keep DL11/KW11 bus-visible.
+- [x] If bus-cycle accuracy is required, define minimal DATI/DATIP/DATO tracing/model boundary (at least for `MOV`, `CLR/SXT`, `EIS source fetch`).
+  - policy chosen: out of scope in current emulator.
+- [x] Decide whether bootstrap ROM behavior should stay loader-based or be emulated as a bus-visible ROM device.
+  - policy chosen: keep loader-based bootstrap path (no ROM device emulation).
 
 Table 10 (`Processor Status Word`) summary:
 - Scope still used:
@@ -496,11 +500,11 @@ Open follow-up from Table 14:
 ### P2 (optional / accuracy extensions)
 - [x] KEV11-style FIS semantics (`Table 4`): FIS support is present in core.
   - comment: keep as implemented for now; verify KEV11-specific `FMUL/FDIV` stack usage and interruptibility/CC details separately.
-- [ ] Bus-model fidelity (`Table 9`):
-  - explicit `Q-bus` vs `UNIBUS` contract,
-  - console/line-clock visibility policy for `11/84`,
-  - define DATI/DATIP/DATO modeling boundary,
-  - bootstrap ROM as bus-visible device vs loader helper.
+- [x] Bus-model fidelity policy (`Table 9`) documented:
+  - keep unified synthetic bus model (no strict electrical `Q-bus`/`UNIBUS` emulation),
+  - keep DL11/KW11 bus-visible for compatibility,
+  - keep DATI/DATIP/DATO cycle-accuracy out of scope,
+  - keep loader-based bootstrap path (no bus-visible ROM device).
 
 ## Open Questions
 

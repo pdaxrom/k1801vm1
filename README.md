@@ -431,10 +431,15 @@ memory fetch/store paths.
 - With `ENABLE_MMU=0`, hardware stub uses legacy 64KB memory backing by default,
   expanded to 128KB when VM2 model is active to support USER/HALT banking.
 - Machine-specific frontends may still provide their own bus/memory limits.
+- Bus model is intentionally unified/synthetic across profiles; strict electrical
+  `Q-bus` vs `UNIBUS` behavior is not emulated.
 - `SSR1` is implemented as a simplified fault context latch (fault VA), not a complete
   per-microstep register modification log.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
+- DATI/DATIP/DATO per-cycle protocol fidelity is out of scope.
 - Device interrupt arbitration is outside the core (handled by machine layer).
+- DL11/KW11 remain bus-visible in machine profiles for software compatibility.
+- Bootstrap behavior is loader-based (`-bootcopy`, `-bootrt11`), not a bus-visible ROM device.
 - Vector-fetch/stack-push aborts follow recoverable abort semantics (restoring pre-trap
   `PC/PS`); a dedicated hardware "hang latch" state is intentionally not modeled.
 
