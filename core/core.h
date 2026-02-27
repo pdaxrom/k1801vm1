@@ -93,10 +93,16 @@ typedef struct _regs {
     word cps, cpc; /* 0177676 0177674 */
 
     word SEL0;                    /* unaddressed SEL register */
-    word J11_REG177744;           /* DCJ11 CPU register at 0177744 */
-    word J11_REG177746;           /* DCJ11 CPU register at 0177746 */
-    word J11_REG177750;           /* DCJ11 CPU register at 0177750 */
-    word J11_REG177752_177766[8]; /* DCJ11 CPU registers at 0177752..0177766 */
+    word J11_MEMERR;              /* 0177744: memory system error register */
+    word J11_CCR;                 /* 0177746: cache control register */
+    word J11_MAINT;               /* 0177750: maintenance register */
+    word J11_HITMISS;             /* 0177752: cache hit/miss register */
+    word J11_RSVD_177754;         /* 0177754: reserved/implementation-defined */
+    word J11_RSVD_177756;         /* 0177756: reserved/implementation-defined */
+    word J11_RSVD_177760;         /* 0177760: reserved/implementation-defined */
+    word J11_RSVD_177762;         /* 0177762: reserved/implementation-defined */
+    word J11_RSVD_177764;         /* 0177764: reserved/implementation-defined */
+    word J11_CPUERR;              /* 0177766: CPU error register */
     word TVE_LIMIT;               /* 0177706 */
     word TVE_COUNT;               /* 0177710 */
     word TVE_CSR;                 /* 0177712 */

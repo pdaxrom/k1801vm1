@@ -247,11 +247,11 @@ static inline void nxm_trap(regs *r, paddr_t addr)
             io_timeout = (addr >= 017760000 && addr <= 017777777) ? 1 : 0;
         }
         if (io_timeout) {
-            r->J11_REG177752_177766[7] |= 0000020; /* CPUE_TMO */
+            r->J11_CPUERR |= 0000020; /* CPUE_TMO */
         } else {
-            r->J11_REG177752_177766[7] |= 0000040; /* CPUE_NXM */
+            r->J11_CPUERR |= 0000040; /* CPUE_NXM */
         }
-        r->J11_REG177752_177766[7] &= 0000374;
+        r->J11_CPUERR &= 0000374;
     }
 
     /* Optional trace */
@@ -607,12 +607,12 @@ static void impl_reset(regs *r)
     if (r->model == DCJ11) {
         if (machine_profile == LSI11_MACHINE_1184) {
             /* Match PDP-11/84 identification path expected by RT-11 monitor. */
-            r->J11_REG177750 = J11_CPU_ID_1184;
+            r->J11_MAINT = J11_CPU_ID_1184;
             /* 11/8x systems expose non-zero Hit/Miss register value. */
-            r->J11_REG177752_177766[0] = 000010;
+            r->J11_HITMISS = 000010;
         } else {
-            r->J11_REG177750 = 0;
-            r->J11_REG177752_177766[0] = 0;
+            r->J11_MAINT = 0;
+            r->J11_HITMISS = 0;
         }
     }
     if (device_mask.dl11) {

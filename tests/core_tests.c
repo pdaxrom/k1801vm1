@@ -25,15 +25,15 @@ static word test_dispatch_load_word(regs *r, word offset)
     if (r->model == DCJ11) {
         switch (offset & 0177776) {
         case 0177744:
-            return r->J11_REG177744;
+            return r->J11_MEMERR;
         case 0177746:
-            return r->J11_REG177746;
+            return r->J11_CCR;
         case 0177750:
-            return r->J11_REG177750;
+            return r->J11_MAINT;
         case 0177752:
-            return r->J11_REG177752_177766[0];
+            return r->J11_HITMISS;
         case 0177766:
-            return (word)(r->J11_REG177752_177766[7] & 0000374);
+            return (word)(r->J11_CPUERR & 0000374);
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
         switch (offset) {
@@ -59,18 +59,18 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
     if (r->model == DCJ11) {
         switch (offset & 0177776) {
         case 0177744:
-            r->J11_REG177744 = 0;
+            r->J11_MEMERR = 0;
             return;
         case 0177746:
-            r->J11_REG177746 = value;
+            r->J11_CCR = value;
             return;
         case 0177750:
             return;
         case 0177752:
-            r->J11_REG177752_177766[0] = 0;
+            r->J11_HITMISS = 0;
             return;
         case 0177766:
-            r->J11_REG177752_177766[7] = 0;
+            r->J11_CPUERR = 0;
             return;
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
@@ -5197,7 +5197,7 @@ static int test_dcj11_reg177750_core_owned(void)
     /* Ensure this register is CPU-owned, not regular RAM-backed storage. */
     fx.mem[0177750] = 000001;
     fx.mem[0177751] = 000002;
-    fx.r.J11_REG177750 = 001045;
+    fx.r.J11_MAINT = 001045;
     load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
 
     ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177750,R0");

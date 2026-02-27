@@ -216,19 +216,19 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
 {
     switch (offset & 0177776) {
     case DCJ11_REG_MEMERR:
-        *value = r->J11_REG177744;
+        *value = r->J11_MEMERR;
         return true;
     case DCJ11_REG_CCR:
-        *value = r->J11_REG177746;
+        *value = r->J11_CCR;
         return true;
     case DCJ11_REG_MAINT:
-        *value = r->J11_REG177750;
+        *value = r->J11_MAINT;
         return true;
     case DCJ11_REG_HITMISS:
-        *value = r->J11_REG177752_177766[0];
+        *value = r->J11_HITMISS;
         return true;
     case DCJ11_REG_CPUERR:
-        *value = (word)(r->J11_REG177752_177766[7] & 0000374);
+        *value = (word)(r->J11_CPUERR & 0000374);
         return true;
     default:
         return false;
@@ -241,21 +241,21 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
     switch (offset & 0177776) {
     case DCJ11_REG_MEMERR:
         /* Memory system error register: cleared by any write. */
-        r->J11_REG177744 = 0;
+        r->J11_MEMERR = 0;
         return true;
     case DCJ11_REG_CCR:
-        r->J11_REG177746 = value;
+        r->J11_CCR = value;
         return true;
     case DCJ11_REG_MAINT:
         /* Maintenance register is read-only in normal mode. */
         return true;
     case DCJ11_REG_HITMISS:
         /* Hit/miss register clears on write. */
-        r->J11_REG177752_177766[0] = 0;
+        r->J11_HITMISS = 0;
         return true;
     case DCJ11_REG_CPUERR:
         /* CPU error register clears on write. */
-        r->J11_REG177752_177766[7] = 0;
+        r->J11_CPUERR = 0;
         return true;
     default:
         return false;
@@ -1678,10 +1678,16 @@ void core_reset(regs *r)
     }
     r->sp_mode_init = 0;
     r->ir = 0;
-    r->J11_REG177744 = 0;
-    r->J11_REG177746 = 0;
-    r->J11_REG177750 = 0;
-    memset(r->J11_REG177752_177766, 0, sizeof(r->J11_REG177752_177766));
+    r->J11_MEMERR = 0;
+    r->J11_CCR = 0;
+    r->J11_MAINT = 0;
+    r->J11_HITMISS = 0;
+    r->J11_RSVD_177754 = 0;
+    r->J11_RSVD_177756 = 0;
+    r->J11_RSVD_177760 = 0;
+    r->J11_RSVD_177762 = 0;
+    r->J11_RSVD_177764 = 0;
+    r->J11_CPUERR = 0;
     r->fWait = 0;
     r->fTrap = 0;
     r->fAbort = 0;
