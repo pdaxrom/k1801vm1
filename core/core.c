@@ -4590,11 +4590,25 @@ step_end:
             }
         }
         if (!skip_irq) {
-            if (core_poll_irq_any(r, &irq_vector)) {
-                word vec;
-                if (irq_accept(r, irq_vector, &vec)) {
+            if (r->model == DCJ11) {
+                while (core_poll_irq_any(r, &irq_vector)) {
+                    word vec;
+                    if (!irq_accept(r, irq_vector, &vec)) {
+                        break;
+                    }
                     word old_psw = r->psw;
                     core_take_vector(r, vec, r->r[7], old_psw, "IRQ");
+                    if (r->fAbort) {
+                        break;
+                    }
+                }
+            } else {
+                if (core_poll_irq_any(r, &irq_vector)) {
+                    word vec;
+                    if (irq_accept(r, irq_vector, &vec)) {
+                        word old_psw = r->psw;
+                        core_take_vector(r, vec, r->r[7], old_psw, "IRQ");
+                    }
                 }
             }
         }

@@ -244,9 +244,9 @@ Table 8 (`Interrupts`) summary:
   - IRQ polling is performed after each instruction, so pending IRQ is accepted in that one-instruction window
   - status: aligned for practical behavior
 - `Can ISR itself be interrupted before executing its first instruction`:
-  - current core checks IRQ only after instruction execution; after vector entry, first handler instruction runs before next IRQ arbitration
-  - table for `11/84` indicates `Y`
-  - status: mismatch
+  - `DCJ11`: `step_end` now re-arbitrates IRQ in a loop; if a higher-priority IRQ is pending after first vector entry, it is taken before executing first low-priority ISR instruction.
+  - `VM*`: unchanged single post-instruction IRQ arbitration (kept as current `11/03`-line policy unless K1801 docs require otherwise).
+  - status: `DCJ11` aligned with `11/84 = Y`; `VM*` unchanged by design.
 - `EIS`/`FPP` interruptibility rows:
   - current implementation executes instruction atomically per `core_step` (no mid-instruction device-interrupt abort)
   - status: aligns with `11/84` rows that expect non-interruptible behavior (`N`)
@@ -259,8 +259,8 @@ Table 8 (`Interrupts`) summary:
   - reset-clearing semantics for CIS are therefore not modeled
 
 Open follow-up from Table 8:
-- [ ] Decide whether to implement pre-first-instruction ISR preemption behavior (`11/84` table `Y`) or keep current post-instruction-only IRQ arbitration model.
-- [ ] If ISR preemption behavior is required, add targeted regression test: higher-priority IRQ pending at vector-entry must preempt before first handler opcode.
+- [x] Decide whether to implement pre-first-instruction ISR preemption behavior (`11/84` table `Y`) or keep current post-instruction-only IRQ arbitration model.
+- [x] If ISR preemption behavior is required, add targeted regression test: higher-priority IRQ pending at vector-entry must preempt before first handler opcode.
 - [ ] Decide policy for `CIS` capability on `DCJ11/11-84` profile: keep unsupported or add optional CIS presence/reset semantics.
 
 Table 9 (`Buses`) summary:
@@ -478,7 +478,7 @@ Open follow-up from Table 14:
 
 ### P1 (next)
 - [x] `MMR3<5>` UB-map semantics (`Table 7`): explicitly documented as unsupported; `SSR3.BME` is retained/readable with no UB-map effect.
-- [ ] IRQ preemption before first ISR instruction (`Table 8`): decide policy and add test if enabled.
+- [x] IRQ preemption before first ISR instruction (`Table 8`): enabled for `DCJ11` (`11/84` profile) with regression test; `VM*` policy kept unchanged.
 - [ ] `VM1/VM1G` ifetch from internal reg block `0177700..0177712` (`Table 12`): decide permissive vs block.
 - [ ] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
 - [ ] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`).

@@ -785,6 +785,10 @@ static int test_irq_called;
 static int test_irq_pending_pri[8];
 static word test_irq_vector_pri[8];
 static word test_irq_vector;
+static int test_irq_seq_len;
+static int test_irq_seq_idx;
+static word test_irq_seq_vector[8];
+static int test_irq_seq_priority[8];
 
 static INLINE int is_vm2_model(byte model);
 static INLINE int is_vm1_model(byte model);
@@ -878,6 +882,36 @@ static int test_poll_irq_highest(regs *r, word *vector)
         return 1;
     }
     return 0;
+}
+
+static int test_poll_irq_sequence(regs *r, word *vector)
+{
+    int idx;
+    int pri;
+    word v;
+
+    if (test_irq_seq_idx >= test_irq_seq_len) {
+        return 0;
+    }
+    idx = test_irq_seq_idx;
+    pri = test_irq_seq_priority[idx];
+    v = test_irq_seq_vector[idx];
+
+    if (is_irq_masked(r, v, pri)) {
+        return 0;
+    }
+
+    if (vector) {
+        if (is_vm1_model(r->model) || is_vm2_model(r->model)) {
+            *vector = (word)(v & 0177776);
+        } else {
+            *vector = (word)((v & 0777) | ((pri & 07) << 9));
+        }
+        test_last_vector = *vector;
+    }
+    test_irq_seq_idx++;
+    test_irq_called = 1;
+    return 1;
 }
 
 static INLINE void store_word(cpu_fixture *fx, word addr, word value)
@@ -5983,6 +6017,63 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_irq_preempt_before_first_isr_instruction(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler_lo = 02000;
+    const word handler_hi = 04000;
+    const word psw_lo = 000140; /* priority 3 */
+    const word psw_hi = 000340; /* priority 7 */
+    const word program[] = {
+        op_nop(),
+    };
+
+    current_test = "dcj11_irq_preempt_entry";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000060, handler_lo);
+    store_word(&fx, 000062, psw_lo);
+    store_word(&fx, 000070, handler_hi);
+    store_word(&fx, 000072, psw_hi);
+    store_word(&fx, handler_lo, op_inc(operand(0, 0)));
+    store_word(&fx, handler_hi, op_nop());
+
+    memset(test_irq_seq_vector, 0, sizeof(test_irq_seq_vector));
+    memset(test_irq_seq_priority, 0, sizeof(test_irq_seq_priority));
+    test_irq_seq_len = 2;
+    test_irq_seq_idx = 0;
+    test_irq_seq_vector[0] = 000060;
+    test_irq_seq_priority[0] = 3;
+    test_irq_seq_vector[1] = 000070;
+    test_irq_seq_priority[1] = 6;
+
+    fx.r.r[0] = 0;
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000000;
+    fx.r.poll_irq = test_poll_irq_sequence;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "IRQ should be accepted");
+    ASSERT_EQ(fx.r.r[7], handler_hi,
+              "Higher-priority IRQ must preempt before low ISR first instruction");
+    ASSERT_EQ(fx.r.psw, psw_hi, "PSW should load high-priority vector PSW");
+    ASSERT_EQ(fx.r.r[0], 0, "Low-priority ISR first opcode must not execute");
+    ASSERT_EQ(fx.r.r[6], 00770, "Two IRQ entries should push two frames");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00770), handler_lo,
+              "Top frame PC should be low-priority handler entry");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00772), psw_lo,
+              "Top frame PSW should be low-priority handler PSW");
+
+cleanup:
+    fixture_teardown(&fx);
+    test_irq_seq_len = 0;
+    test_irq_seq_idx = 0;
+    memset(test_irq_seq_vector, 0, sizeof(test_irq_seq_vector));
+    memset(test_irq_seq_priority, 0, sizeof(test_irq_seq_priority));
+    return rc;
+}
+
 static int test_dcj11_irq_vector_mask(void)
 {
     cpu_fixture fx;
@@ -7803,6 +7894,7 @@ int main(void)
     failed += test_irq_mask_blocks_interrupt();
     failed += test_dcj11_irq_priority_mask();
     failed += test_dcj11_irq_highest_priority();
+    failed += test_dcj11_irq_preempt_before_first_isr_instruction();
     failed += test_dcj11_irq_vector_mask();
     failed += test_vm1_irq_masking_model(K1801VM1, "K1801VM1");
     failed += test_vm1_irq_masking_model(K1801VM1G, "K1801VM1G");
