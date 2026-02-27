@@ -58,6 +58,8 @@ static int test_vector_fetch_uses_kernel_d_space(void)
 
     fx.r.psw = 0140000;
     fx.r.r[7] = 000000;
+    /* Keep kernel stack above fixed J11 yellow-zone threshold (0400). */
+    fx.r.r[6] = 001000;
 
     mmu_phys_write_word(&fx, 014000, mmu_op_bpt());
 

@@ -227,6 +227,7 @@ static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
 
 #define DCJ11_PIRQ_RW 0177000
 #define DCJ11_PIRQ_IMP 0177356
+#define DCJ11_STACK_YEL_LIMIT 0000400
 
 static INLINE void dcj11_set_cpuerr(regs *r, word bits)
 {
@@ -523,6 +524,23 @@ static INLINE void dcj11_set_psw(regs *r, word new_psw)
     r->psw = new_psw;
 }
 
+static INLINE void dcj11_note_stack_reference(regs *r, word addr)
+{
+    if (r->model != DCJ11) {
+        return;
+    }
+    if (r->dcj11_stack_trap_active) {
+        return;
+    }
+    if (!dcj11_kernel_psw(r->psw)) {
+        return;
+    }
+    if (addr < DCJ11_STACK_YEL_LIMIT) {
+        dcj11_set_cpuerr(r, DCJ11_CPUERR_YEL);
+        r->dcj11_yellow_pending = 1;
+    }
+}
+
 static INLINE word dcj11_read_mode_reg(regs *r, int mode, word reg)
 {
     if (reg != 6 || r->model != DCJ11) {
@@ -549,6 +567,7 @@ static INLINE void dcj11_write_mode_reg(regs *r, int mode, word reg,
 #define pushw(v)                                                               \
   {                                                                            \
     r->r[6] -= 2;                                                              \
+    dcj11_note_stack_reference(r, r->r[6]);                                    \
     store_word(r, r->r[6], v);                                                 \
   }
 
@@ -755,6 +774,7 @@ static INLINE int mmu_split_enabled(const regs *r, int mode);
 static INLINE void bus_error_trap(regs *r);
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
                                   int mode, int space, int seg);
+static INLINE int dcj11_take_red_stack_abort(regs *r, const char *cause);
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
 static INLINE dword mmu_phys_finalize(dword pa, word ssr3);
 static INLINE int mmu_acf_read_ok(word pdr);
@@ -1938,6 +1958,11 @@ void core_reset(regs *r)
         }
     }
     r->rset_bank_init = 0;
+    r->dcj11_yellow_pending = 0;
+    r->dcj11_stack_trap_active = 0;
+    r->dcj11_vector_push_active = 0;
+    r->dcj11_vector_old_pc = 0;
+    r->dcj11_vector_old_psw = 0;
     r->ir = 0;
     r->J11_MEMERR = 0;
     r->J11_CCR = 0;
@@ -2006,12 +2031,112 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
     (void)kind;
 
     fetched_psw = load_word_vector(r, (word)(vec + 2));
+    if (r->fAbort) {
+        return;
+    }
+    new_pc = load_word_vector(r, vec);
+    if (r->fAbort) {
+        return;
+    }
+
     new_psw = trap_psw(r, old_psw, fetched_psw);
     dcj11_set_psw(r, new_psw);
+
+    if (r->model == DCJ11) {
+        r->dcj11_vector_old_pc = old_pc;
+        r->dcj11_vector_old_psw = old_psw;
+        r->dcj11_vector_push_active = 1;
+    }
+
     pushw(old_psw);
+    if (r->fAbort) {
+        r->dcj11_vector_push_active = 0;
+        return;
+    }
     pushw(old_pc);
-    new_pc = load_word_vector(r, vec);
+    if (r->fAbort) {
+        r->dcj11_vector_push_active = 0;
+        return;
+    }
+    r->dcj11_vector_push_active = 0;
     r->r[7] = new_pc;
+}
+
+static INLINE int dcj11_service_stack_trap(regs *r)
+{
+    word old_psw;
+
+    if (r->model != DCJ11) {
+        return 0;
+    }
+    if (!r->dcj11_yellow_pending || r->dcj11_stack_trap_active) {
+        return 0;
+    }
+
+    old_psw = r->psw;
+    r->dcj11_yellow_pending = 0;
+    r->dcj11_stack_trap_active = 1;
+    core_take_vector(r, 000004, r->r[7], old_psw, "STK");
+    r->dcj11_stack_trap_active = 0;
+    return 1;
+}
+
+static INLINE int dcj11_take_red_stack_abort(regs *r, const char *cause)
+{
+    word old_psw;
+    word old_pc;
+    word vector_psw;
+    word new_psw;
+    word new_pc;
+    (void)cause;
+
+    if (r->model != DCJ11 || !r->dcj11_vector_push_active) {
+        return 0;
+    }
+
+    old_psw = r->dcj11_vector_old_psw;
+    old_pc = r->dcj11_vector_old_pc;
+    r->dcj11_vector_push_active = 0;
+    r->dcj11_yellow_pending = 0;
+
+    /*
+     * Abort during trap/interrupt stack push: restore pre-trap state and
+     * take red stack trap using emergency kernel stack at locations 2 and 0.
+     */
+    dcj11_set_psw(r, old_psw);
+    r->r[7] = old_pc;
+    dcj11_set_cpuerr(r, DCJ11_CPUERR_RED);
+
+    vector_psw = load_word_vector(r, 000006);
+    if (r->fAbort) {
+        return 1;
+    }
+    new_psw = trap_psw(r, old_psw, vector_psw);
+    dcj11_set_psw(r, new_psw);
+
+    dcj11_sp_mode_init(r);
+    r->sp_mode[0] = 000004;
+    if (dcj11_psw_cur_mode(r->psw) == 0) {
+        r->r[6] = 000004;
+    }
+
+    r->r[6] -= 2;
+    store_word(r, r->r[6], old_psw);
+    if (r->fAbort) {
+        return 1;
+    }
+    r->r[6] -= 2;
+    store_word(r, r->r[6], old_pc);
+    if (r->fAbort) {
+        return 1;
+    }
+
+    new_pc = load_word_vector(r, 000004);
+    if (!r->fAbort) {
+        r->r[7] = new_pc;
+    }
+    r->fAbort = 1;
+    return 1;
 }
 
 static INLINE void illegal_trap(regs *r)
@@ -2025,6 +2150,9 @@ static INLINE void bus_error_trap(regs *r)
     word old_psw = r->psw;
     static int trace_init = 0;
     static int trace_on = 0;
+    if (dcj11_take_red_stack_abort(r, "BUSERR")) {
+        return;
+    }
     if (!trace_init) {
         trace_on = (getenv("CORE_TRACE_BUSERR") != NULL) ? 1 : 0;
         trace_init = 1;
@@ -2041,6 +2169,9 @@ static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
                                   int mode, int space, int seg)
 {
     word old_psw = r->psw;
+    if (dcj11_take_red_stack_abort(r, "MMU")) {
+        return;
+    }
     mmu_record_fault(r, va, pc, fault, mode, space, seg);
     core_take_vector(r, MMU_TRAP_VECTOR, pc, old_psw, "MMU");
     r->fAbort = 1;
@@ -2272,11 +2403,17 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type,
     case 4: /* -(Rn) */
         r->r[reg] -= step;
         mmu_mmr1_record_delta(r, reg, -step);
+        if (reg == 6) {
+            dcj11_note_stack_reference(r, r->r[reg]);
+        }
         *offset = r->r[reg];
         return TYPE_MEM;
     case 5: /* @-(Rn) */
         r->r[reg] -= step;
         mmu_mmr1_record_delta(r, reg, -step);
+        if (reg == 6) {
+            dcj11_note_stack_reference(r, r->r[reg]);
+        }
         *offset = load_word(r, r->r[reg]);
         if (r->fAbort) {
             return TYPE_ERROR;
@@ -3864,6 +4001,9 @@ step_end:
         }
         r->fWait = 0;
         handle_halt(r);
+        return 0;
+    }
+    if (dcj11_service_stack_trap(r)) {
         return 0;
     }
     if (do_trace) {

@@ -6291,6 +6291,160 @@ cleanup:
     fixture_teardown(&fx);
     return rc;
 }
+
+static int test_dcj11_yellow_stack_trap_autodec_sp(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02600;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(4, 6)), /* MOV #1234, -(SP) */
+        01234,
+    };
+
+    current_test = "dcj11_yellow_stack_autodec";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[6] = 000400;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #- (SP) should execute then trap");
+    ASSERT_EQ(fx.r.r[7], handler, "PC should load stack trap vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load stack trap vector");
+    ASSERT_EQ((fx.r.J11_CPUERR & 0000010), 0000010, "CPUERR.YEL should be set");
+    ASSERT_EQ(fx.r.r[6], 000372, "SP should include MOV push and trap frame");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000376), 01234, "MOV destination should be written before trap");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000372), TEST_BASE + 4, "Stack trap frame PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000374), 000001, "Stack trap frame PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_yellow_stack_trap_on_bpt_push(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word bpt_handler = 02000;
+    const word stk_handler = 02400;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_bpt(),
+    };
+
+    current_test = "dcj11_yellow_stack_bpt_push";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000014, bpt_handler);
+    store_word(&fx, 000016, new_psw);
+    store_word(&fx, 000004, stk_handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[6] = 000400;
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "BPT should trigger follow-up yellow stack trap");
+    ASSERT_EQ(fx.r.r[7], stk_handler, "PC should end in stack trap handler");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should match stack trap vector");
+    ASSERT_EQ((fx.r.J11_CPUERR & 0000010), 0000010, "CPUERR.YEL should be set");
+    ASSERT_EQ(fx.r.r[6], 000370, "SP should include BPT and stack-trap frames");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000370), bpt_handler, "Yellow trap frame PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000372), new_psw, "Yellow trap frame PSW incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000374), TEST_BASE + 2, "BPT frame PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000376), 000003, "BPT frame PSW incorrect");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_stack_limit_boundary_no_trap(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02600;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(4, 6)), /* MOV #777, -(SP) */
+        000777,
+    };
+
+    current_test = "dcj11_stack_limit_boundary";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+    fx.r.r[6] = 000402; /* post-decrement address = 0400 (limit boundary) */
+    fx.r.psw = 000003;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #- (SP) at boundary should not trap");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 4, "PC should advance normally");
+    ASSERT_EQ(fx.r.r[6], 000400, "SP should decrement to boundary");
+    ASSERT_EQ((fx.r.J11_CPUERR & 0000010), 0000000, "CPUERR.YEL should remain clear");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000400), 000777, "Destination write should complete");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_red_stack_trap_on_vector_push_abort(void)
+{
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    cpu_fixture fx;
+    int rc = 0;
+    const word bpt_handler = 02000;
+    const word red_handler = 03000;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_bpt(),
+    };
+
+    current_test = "dcj11_red_stack_push_abort";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000014, bpt_handler);
+    store_word(&fx, 000016, new_psw);
+    store_word(&fx, 000004, red_handler);
+    store_word(&fx, 000006, new_psw);
+
+    fx.r.psw = 000003;
+    fx.r.r[6] = 020004;
+
+    /* MMU on + kernel split I/D: vectors in KD seg0, stack push faults in KD seg1. */
+    fx.r.mmu_ssr0 = 0000001;
+    fx.r.mmu_ssr3 = 0000004;
+    fx.r.mmu_par[0][0][0] = 0000000;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][1][0] = 0000000;
+    fx.r.mmu_pdr[0][1][0] = 0177006;
+    fx.r.mmu_par[0][1][1] = 0000000;
+    fx.r.mmu_pdr[0][1][1] = 0000000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "Red stack fallback should complete trap handling");
+    ASSERT_EQ(fx.r.r[7], red_handler, "PC should load red stack vector");
+    ASSERT_EQ(fx.r.psw, new_psw, "PSW should load red stack vector");
+    ASSERT_EQ(fx.r.r[6], 000000, "Emergency stack should end at 0");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000000), TEST_BASE + 2, "Emergency stack PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 000002), 000003, "Emergency stack PSW incorrect");
+    ASSERT_EQ((fx.r.J11_CPUERR & 0000004), 0000004, "CPUERR.RED should be set");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+#else
+    current_test = "dcj11_red_stack_push_abort";
+    return 0;
+#endif
+}
+
 int main(void)
 {
     int failed = 0;
@@ -6442,6 +6596,10 @@ int main(void)
     failed += test_dcj11_bpt_stack_order();
     failed += test_dcj11_iot_stack_order();
     failed += test_dcj11_bus_error_stack_order();
+    failed += test_dcj11_yellow_stack_trap_autodec_sp();
+    failed += test_dcj11_yellow_stack_trap_on_bpt_push();
+    failed += test_dcj11_stack_limit_boundary_no_trap();
+    failed += test_dcj11_red_stack_trap_on_vector_push_abort();
 
     if (failed) {
         fprintf(stderr, "%d test(s) failed\n", failed);

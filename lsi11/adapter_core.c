@@ -317,14 +317,12 @@ int lsi11_device_enabled(const char *name)
    that instead. */
 static inline void nxm_trap(regs *r, paddr_t addr)
 {
-    (void)addr;
     word old_psw = r->psw;
     word fault_pc = r->r[7];
-    word vector_psw = r->load_word(r, 0000006);
+    word vector_psw = 0;
 
     if (r->model == DCJ11) {
         int io_timeout = 0;
-        int old_cm;
         if (addr <= 0177777) {
             io_timeout = (addr >= 0160000) ? 1 : 0;
         } else {
@@ -336,13 +334,6 @@ static inline void nxm_trap(regs *r, paddr_t addr)
             r->J11_CPUERR |= 0000040; /* CPUE_NXM */
         }
         r->J11_CPUERR &= 0000374;
-
-        old_cm = dcj11_cur_mode(old_psw);
-        vector_psw = dcj11_set_cur_mode(vector_psw, 0);
-        vector_psw = dcj11_set_prev_mode(vector_psw, old_cm);
-        dcj11_apply_psw(r, vector_psw);
-    } else {
-        r->psw = vector_psw;
     }
 
     /* Optional trace */
@@ -400,6 +391,47 @@ static inline void nxm_trap(regs *r, paddr_t addr)
             r->mmu_ssr3 = saved_ssr3;
         }
 #endif
+    }
+
+    if (r->model == DCJ11 && r->dcj11_vector_push_active) {
+        word red_old_psw = r->dcj11_vector_old_psw;
+        word red_old_pc = r->dcj11_vector_old_pc;
+        int red_old_cm = dcj11_cur_mode(red_old_psw);
+
+        /* Red-stack fallback for abort during trap/interrupt stack pushes. */
+        r->dcj11_vector_push_active = 0;
+        r->dcj11_yellow_pending = 0;
+        r->J11_CPUERR = (word)((r->J11_CPUERR | 0000004) & 0000374);
+
+        dcj11_apply_psw(r, red_old_psw);
+        r->r[7] = red_old_pc;
+
+        vector_psw = r->load_word(r, 0000006);
+        vector_psw = dcj11_set_cur_mode(vector_psw, 0);
+        vector_psw = dcj11_set_prev_mode(vector_psw, red_old_cm);
+        dcj11_apply_psw(r, vector_psw);
+
+        dcj11_sp_mode_init(r);
+        r->sp_mode[0] = 0000004;
+        r->r[6] = 0000004;
+
+        r->r[6] -= 0000002;
+        r->store_word(r, r->r[6], red_old_psw);
+        r->r[6] -= 0000002;
+        r->store_word(r, r->r[6], red_old_pc);
+        r->r[7] = r->load_word(r, 0000004);
+        r->fAbort = 1;
+        return;
+    }
+
+    vector_psw = r->load_word(r, 0000006);
+    if (r->model == DCJ11) {
+        int old_cm = dcj11_cur_mode(old_psw);
+        vector_psw = dcj11_set_cur_mode(vector_psw, 0);
+        vector_psw = dcj11_set_prev_mode(vector_psw, old_cm);
+        dcj11_apply_psw(r, vector_psw);
+    } else {
+        r->psw = vector_psw;
     }
 
     /*
