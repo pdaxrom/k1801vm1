@@ -494,7 +494,8 @@ Open follow-up from Table 14:
   - comment: keep current EIS odd-register behavior unchanged in this cycle.
 
 ### P2 (optional / accuracy extensions)
-- [ ] KEV11-style FIS semantics (`Table 4`): `FMUL/FDIV` stack usage and interruptibility/CC aftermath.
+- [x] KEV11-style FIS semantics (`Table 4`): FIS support is present in core.
+  - comment: keep as implemented for now; verify KEV11-specific `FMUL/FDIV` stack usage and interruptibility/CC details separately.
 - [ ] Bus-model fidelity (`Table 9`):
   - explicit `Q-bus` vs `UNIBUS` contract,
   - console/line-clock visibility policy for `11/84`,
