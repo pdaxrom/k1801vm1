@@ -839,6 +839,27 @@ static INLINE int mmu_is_reg_address(word addr)
     return mmu_decode_parpdr(a, &mode, &space, &is_par, &seg);
 }
 
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+static INLINE word mmu_ssr1_visible(regs *r)
+{
+    /*
+     * J-11 suppresses #/@# (PC autoincrement, encoded as 027) entries when
+     * MMR1 is read. Keep internal raw tracking and apply cleanup on readback.
+     */
+    word mmr1 = r->mmu_ssr1;
+    if (r->model != DCJ11) {
+        return mmr1;
+    }
+    if ((mmr1 >> 8) == 027) {
+        mmr1 = (word)(mmr1 & 0377);
+    }
+    if ((mmr1 & 0377) == 027) {
+        mmr1 = (word)(mmr1 >> 8);
+    }
+    return mmr1;
+}
+#endif
+
 static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
 {
     int mode, space, is_par, seg;
@@ -867,7 +888,7 @@ static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
     }
     if (a == MMU_SSR1) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        *value_out = r->mmu_ssr1;
+        *value_out = mmu_ssr1_visible(r);
 #else
         *value_out = 0;
 #endif
@@ -1142,12 +1163,14 @@ static INLINE void mmu_mmr1_instruction_start(regs *r)
     if (r->model != DCJ11) {
         return;
     }
-    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
-        return;
-    }
     if (r->mmu_ssr0 & MMU_SSR0_FREEZE) {
         return;
     }
+    /*
+     * J-11 loads MMR2 with instruction VA at the start of each fetch cycle,
+     * independent of relocation enable, unless MMR0<15:13> freeze is active.
+     */
+    r->mmu_ssr2 = r->r[7];
     r->mmu_ssr1 = 0;
 #else
     (void)r;
@@ -1160,9 +1183,6 @@ static INLINE void mmu_mmr1_record_delta(regs *r, int reg, int delta)
     word entry;
 
     if (r->model != DCJ11) {
-        return;
-    }
-    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
         return;
     }
     if (r->mmu_ssr0 & MMU_SSR0_FREEZE) {
