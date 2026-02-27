@@ -6300,6 +6300,53 @@ cleanup:
     return rc;
 }
 
+static int test_vm1_ifetch_internal_reg_block_model(byte model, const char *name)
+{
+    cpu_fixture fx_177706;
+    cpu_fixture fx_177710;
+    int init_177706 = 0;
+    int init_177710 = 0;
+    int rc = 0;
+    char namebuf[64];
+    const word nop = op_nop();
+
+    if (!is_vm1_model(model)) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_ifetch_reg_177706", name);
+    fixture_setup_model(&fx_177706, model);
+    init_177706 = 1;
+    store_word(&fx_177706, 0177706, nop);  /* TVE_LIMIT */
+    fx_177706.r.r[6] = TEST_STACK;
+    fx_177706.r.psw = 000000;
+    fx_177706.r.r[7] = 0177706;
+    ASSERT_EQ(core_step(&fx_177706.r), 0, "ifetch from 0177706 should execute");
+    ASSERT_EQ(fx_177706.r.r[7], 0177710, "PC should advance after ifetch from 0177706");
+    ASSERT_EQ(fx_177706.r.r[6], TEST_STACK, "SP should not change on normal ifetch");
+
+    set_test_name(namebuf, sizeof(namebuf), "vm1_ifetch_reg_177710", name);
+    fixture_setup_model(&fx_177710, model);
+    init_177710 = 1;
+    store_word(&fx_177710, 0177706, nop);  /* TVE_LIMIT */
+    store_word(&fx_177710, 0177712, 0);    /* TVE_CSR write copies LIMIT -> COUNT */
+    fx_177710.r.r[6] = TEST_STACK;
+    fx_177710.r.psw = 000000;
+    fx_177710.r.r[7] = 0177710;
+    ASSERT_EQ(core_step(&fx_177710.r), 0, "ifetch from 0177710 should execute");
+    ASSERT_EQ(fx_177710.r.r[7], 0177712, "PC should advance after ifetch from 0177710");
+    ASSERT_EQ(fx_177710.r.r[6], TEST_STACK, "SP should not change on normal ifetch");
+
+cleanup:
+    if (init_177706) {
+        fixture_teardown(&fx_177706);
+    }
+    if (init_177710) {
+        fixture_teardown(&fx_177710);
+    }
+    return rc;
+}
+
 static int test_vm1_rr_rap_rosh_non_vm1_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -7910,6 +7957,8 @@ int main(void)
     failed += test_vm1_timer_registers_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_rr_rap_rosh_model(K1801VM1, "K1801VM1");
     failed += test_vm1_rr_rap_rosh_model(K1801VM1G, "K1801VM1G");
+    failed += test_vm1_ifetch_internal_reg_block_model(K1801VM1, "K1801VM1");
+    failed += test_vm1_ifetch_internal_reg_block_model(K1801VM1G, "K1801VM1G");
     failed += test_vm1_rr_rap_rosh_non_vm1_model(K1801VM2, "K1801VM2");
     failed += test_vm1_rr_rap_rosh_non_vm1_model(K1806VM2, "K1806VM2");
     failed += test_vm1_rr_rap_rosh_non_vm1_model(DCJ11, "DCJ11");

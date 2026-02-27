@@ -393,12 +393,12 @@ Table 12 (`General Purpose Registers`) summary:
   - console ODT-level direct CPU-register addressing is not modeled as a separate path.
   - status: effectively `N`/not implemented for our profiles, `DCJ11` aligned with table `N`.
 - Implementation caveat (important):
-  - for `VM1/VM1G`, addresses `0177700..0177712` are currently decoded as a VM1 internal register block (`vm1_reg_block_*`), and ifetch from this block is not blocked.
-  - this is not GPR mapping, but it means code fetch from that internal-reg area can occur in current implementation.
+  - for `VM1/VM1G`, addresses `0177700..0177712` are decoded as VM1 internal peripheral/timer registers (`vm1_reg_block_*`), not as architectural `R0..R7`.
+  - policy fixed from K1801 docs (`Однокристальный К1801ВМ1`, `KM1801VM2`): keep ifetch from this internal block permissive for `VM1/VM1G`; add regression tests.
 
 Open follow-up from Table 12:
-- [ ] Decide policy for `VM1/VM1G` ifetch from internal register block `0177700..0177712`: keep permissive behavior or block instruction fetch for stricter `11/03`-style semantics.
-- [ ] Document explicitly that `0177700..0177717` is not mapped to architectural GPRs in current emulator (to avoid confusion with the family table row wording).
+- [x] Decide policy for `VM1/VM1G` ifetch from internal register block `0177700..0177712`: keep permissive behavior (K1801 docs-driven), add regression test.
+- [x] Document explicitly that `0177700..0177717` is not mapped to architectural GPRs in current emulator (to avoid confusion with the family table row wording).
 
 Table 13 (`Error Handling`) summary:
 - Scope still used:
@@ -479,8 +479,8 @@ Open follow-up from Table 14:
 ### P1 (next)
 - [x] `MMR3<5>` UB-map semantics (`Table 7`): explicitly documented as unsupported; `SSR3.BME` is retained/readable with no UB-map effect.
 - [x] IRQ preemption before first ISR instruction (`Table 8`): enabled for `DCJ11` (`11/84` profile) with regression test; `VM*` policy kept unchanged.
-- [ ] `VM1/VM1G` ifetch from internal reg block `0177700..0177712` (`Table 12`): decide permissive vs block.
-- [ ] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
+- [x] `VM1/VM1G` ifetch from internal reg block `0177700..0177712` (`Table 12`): keep permissive behavior per K1801 docs; covered by regression tests.
+- [x] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
 - [ ] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`).
 - [ ] CIS policy (`Tables 8/10`):
   - decide optional CIS capability for `DCJ11`,
