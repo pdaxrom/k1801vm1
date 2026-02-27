@@ -19,6 +19,28 @@ typedef struct {
 
 static const char *current_test;
 
+static word test_dcj11_pirq_visible(word pirq)
+{
+    word req = pirq & 0177000;
+    word pl = 0;
+    if (req & 0100000) {
+        pl = 0000356;
+    } else if (req & 0040000) {
+        pl = 0000314;
+    } else if (req & 0020000) {
+        pl = 0000252;
+    } else if (req & 0010000) {
+        pl = 0000210;
+    } else if (req & 0004000) {
+        pl = 0000146;
+    } else if (req & 0002000) {
+        pl = 0000104;
+    } else if (req & 0001000) {
+        pl = 0000042;
+    }
+    return (word)((req | pl) & 0177356);
+}
+
 /* Dispatchers to core internal registers replicated from core.c */
 static word test_dispatch_load_word(regs *r, word offset)
 {
@@ -34,6 +56,8 @@ static word test_dispatch_load_word(regs *r, word offset)
             return r->J11_HITMISS;
         case 0177766:
             return (word)(r->J11_CPUERR & 0000374);
+        case 0177772:
+            return test_dcj11_pirq_visible(r->J11_PIRQ);
         }
     } else if (r->model == K1801VM1 || r->model == K1801VM1G) {
         switch (offset) {
@@ -67,7 +91,9 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
         case 0177750:
             return;
         case 0177752:
-            r->J11_HITMISS = 0;
+            return;
+        case 0177772:
+            r->J11_PIRQ = value & 0177000;
             return;
         case 0177766:
             r->J11_CPUERR = 0;
@@ -106,7 +132,7 @@ static byte test_dispatch_load_byte(regs *r, word offset)
             return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
         }
     } else if (r->model == DCJ11) {
-        if (offset >= 0177744 && offset <= 0177767) {
+        if (offset >= 0177744 && offset <= 0177773) {
             val16 = test_dispatch_load_word(r, offset & 0177776);
             return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
         }
@@ -135,8 +161,13 @@ static void test_dispatch_store_byte(regs *r, word offset, byte value)
             return;
         }
     } else if (r->model == DCJ11) {
-        if (offset >= 0177744 && offset <= 0177767) {
-            /* DCJ11 byte writes to these regs often clear them or behave like word writes */
+        if (offset >= 0177744 && offset <= 0177773) {
+            if ((offset & 0177776) == 0177772) {
+                if (offset & 1) {
+                    test_dispatch_store_word(r, 0177772, (word)(value << 8));
+                }
+                return;
+            }
             test_dispatch_store_word(r, offset & 0177776, 0);
             return;
         }
@@ -4206,6 +4237,39 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_rti_user_sets_high_psw_bits(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_rti(),
+    };
+    const word psw_before = DCJ11_CM(1) | 000240 | 000001;
+    const word psw_stack = DCJ11_CM(3) | DCJ11_PM(3) | 004000 | 000340 | 000016;
+    const word expected_psw = (word)((psw_stack & ~(0174000 | 000340)) |
+                                     ((psw_stack | psw_before) & 0174000) |
+                                     (psw_before & 000340));
+
+    current_test = "dcj11_rti_user_psw_set_only";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.r[6] = 01200;
+    store_word(&fx, 01200, 01234);
+    store_word(&fx, 01202, psw_stack);
+    fx.r.psw = psw_before;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTI should succeed");
+    ASSERT_EQ(fx.r.r[7], 01234, "PC should restore from stack");
+    ASSERT_EQ(fx.r.psw, expected_psw, "RTI must OR-protect PS<15:11> and keep PS<7:5>");
+    ASSERT_EQ(fx.r.psw & 004000, 004000, "RTI should allow setting PS<11> outside kernel");
+    ASSERT_EQ(fx.r.psw & 000340, psw_before & 000340, "RTI should preserve PS<7:5> outside kernel");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_dcj11_mode_stack_banking(void)
 {
     cpu_fixture fx;
@@ -4263,6 +4327,61 @@ static int test_dcj11_mode_stack_banking(void)
     ASSERT_EQ((fx.r.psw >> 14) & 03, 0, "BPT should enter kernel mode");
     ASSERT_EQ(fx.r.r[6], ksp0, "Kernel stack should be selected again");
     ASSERT_EQ(fx.r.sp_mode[1], ssp0 + 010, "Supervisor stack bank should retain updates");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_register_set_banking(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(0, 0)), /* R0 <- 000111 (set 0) */
+        000111,
+        op_mov(operand(2, 7), operand(0, 1)), /* R1 <- PSW addr */
+        0177776,
+        op_mov(operand(2, 7), operand(1, 1)), /* PS<11>=1 (switch to set 1) */
+        004000,
+        op_mov(operand(2, 7), operand(0, 0)), /* R0 <- 000222 (set 1) */
+        000222,
+        op_mov(operand(2, 7), operand(1, 1)), /* PS<11>=0 (back to set 0) */
+        000000,
+        op_mov(operand(2, 7), operand(1, 1)), /* PS<11>=1 (set 1 again) */
+        004000,
+        op_mov(operand(2, 7), operand(1, 1)), /* PS<11>=0 (set 0 again) */
+        000000,
+    };
+
+    current_test = "dcj11_register_set_banking";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    fx.r.psw = 000000;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #111,R0");
+    ASSERT_EQ(fx.r.r[0], 000111, "R0 in set 0");
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #177776,R1");
+    ASSERT_EQ(fx.r.r[1], 0177776, "R1 in set 0");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #4000,@(R1)");
+    ASSERT_EQ((fx.r.psw & 004000), 004000, "PS<11> should be set");
+    ASSERT_EQ(fx.r.r[0], 000111, "Initial set 1 should mirror set 0");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #222,R0");
+    ASSERT_EQ(fx.r.r[0], 000222, "R0 in set 1");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #0,@(R1)");
+    ASSERT_EQ((fx.r.psw & 004000), 000000, "PS<11> should be clear");
+    ASSERT_EQ(fx.r.r[0], 000111, "R0 restored from set 0");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #4000,@(R1) again");
+    ASSERT_EQ((fx.r.psw & 004000), 004000, "PS<11> should be set again");
+    ASSERT_EQ(fx.r.r[0], 000222, "R0 restored from set 1");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #0,@(R1) again");
+    ASSERT_EQ((fx.r.psw & 004000), 000000, "PS<11> should be clear again");
+    ASSERT_EQ(fx.r.r[0], 000111, "R0 restored from set 0 again");
 
 cleanup:
     fixture_teardown(&fx);
@@ -6248,7 +6367,9 @@ int main(void)
     failed += test_rti_restores_state();
     failed += test_dcj11_rti_restores_state();
     failed += test_dcj11_rti_user_restricts_psw();
+    failed += test_dcj11_rti_user_sets_high_psw_bits();
     failed += test_dcj11_mode_stack_banking();
+    failed += test_dcj11_register_set_banking();
     failed += test_dcj11_irq_entry_frame_user();
     failed += test_dcj11_rti_restore_user_mode_stack();
     failed += test_dcj11_irq_rti_supervisor_mode();

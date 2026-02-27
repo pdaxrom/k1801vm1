@@ -73,6 +73,85 @@ static inline int vm2_halt_mode(const regs *r)
     return (vm2_model(r) && (r->psw & FLAG_H)) ? 1 : 0;
 }
 
+static inline int dcj11_mode_norm(int mode)
+{
+    mode &= 03;
+    return (mode == 02) ? 0 : mode;
+}
+
+static inline int dcj11_cur_mode(word psw)
+{
+    return dcj11_mode_norm((psw >> 14) & 03);
+}
+
+static inline int dcj11_regset(word psw)
+{
+    return (psw >> 11) & 01;
+}
+
+static inline word dcj11_set_cur_mode(word psw, int mode)
+{
+    int m = dcj11_mode_norm(mode);
+    return (word)((psw & ~0140000) | ((word)(m & 03) << 14));
+}
+
+static inline word dcj11_set_prev_mode(word psw, int mode)
+{
+    int m = dcj11_mode_norm(mode);
+    return (word)((psw & ~0030000) | ((word)(m & 03) << 12));
+}
+
+static inline void dcj11_sp_mode_init(regs *r)
+{
+    int mode;
+    if (r->sp_mode_init) {
+        return;
+    }
+    for (mode = 0; mode < 4; mode++) {
+        r->sp_mode[mode] = r->r[6];
+    }
+    r->sp_mode_init = 1;
+}
+
+static inline void dcj11_regset_init(regs *r)
+{
+    int reg;
+    if (r->rset_bank_init) {
+        return;
+    }
+    for (reg = 0; reg < 6; reg++) {
+        r->rset_bank[0][reg] = r->r[reg];
+        r->rset_bank[1][reg] = r->r[reg];
+    }
+    r->rset_bank_init = 1;
+}
+
+static inline void dcj11_apply_psw(regs *r, word new_psw)
+{
+    word old_psw = r->psw;
+    int old_mode = dcj11_cur_mode(old_psw);
+    int new_mode = dcj11_cur_mode(new_psw);
+    int old_set = dcj11_regset(old_psw);
+    int new_set = dcj11_regset(new_psw);
+    int reg;
+
+    if (old_mode != new_mode) {
+        dcj11_sp_mode_init(r);
+        r->sp_mode[old_mode] = r->r[6];
+        r->r[6] = r->sp_mode[new_mode];
+    }
+
+    if (old_set != new_set) {
+        dcj11_regset_init(r);
+        for (reg = 0; reg < 6; reg++) {
+            r->rset_bank[old_set][reg] = r->r[reg];
+            r->r[reg] = r->rset_bank[new_set][reg];
+        }
+    }
+
+    r->psw = new_psw;
+}
+
 static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
 {
     (void)machine;
@@ -239,8 +318,13 @@ int lsi11_device_enabled(const char *name)
 static inline void nxm_trap(regs *r, paddr_t addr)
 {
     (void)addr;
+    word old_psw = r->psw;
+    word fault_pc = r->r[7];
+    word vector_psw = r->load_word(r, 0000006);
+
     if (r->model == DCJ11) {
         int io_timeout = 0;
+        int old_cm;
         if (addr <= 0177777) {
             io_timeout = (addr >= 0160000) ? 1 : 0;
         } else {
@@ -252,6 +336,13 @@ static inline void nxm_trap(regs *r, paddr_t addr)
             r->J11_CPUERR |= 0000040; /* CPUE_NXM */
         }
         r->J11_CPUERR &= 0000374;
+
+        old_cm = dcj11_cur_mode(old_psw);
+        vector_psw = dcj11_set_cur_mode(vector_psw, 0);
+        vector_psw = dcj11_set_prev_mode(vector_psw, old_cm);
+        dcj11_apply_psw(r, vector_psw);
+    } else {
+        r->psw = vector_psw;
     }
 
     /* Optional trace */
@@ -327,16 +418,13 @@ static inline void nxm_trap(regs *r, paddr_t addr)
         }
     }
 
-    /* Match core bus-error semantics: push current PC. */
-    word fault_pc = r->r[7];
-    /* push PSW then PC */
+    /* Match core bus-error semantics: switch to vector PSW first, then push OLDPS/OLDPC. */
     r->r[6] -= 0000002;
-    r->store_word(r, r->r[6], r->psw);
+    r->store_word(r, r->r[6], old_psw);
     r->r[6] -= 0000002;
     r->store_word(r, r->r[6], fault_pc);
 
     r->r[7] = r->load_word(r, 0000004);
-    r->psw = r->load_word(r, 0000006);
 
     r->fAbort = 1;
 }

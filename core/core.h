@@ -86,6 +86,9 @@ typedef struct _regs {
     word psw, r[8];
     word ir;
     word instr_pc;
+    /* DCJ11 dual register set banks for R0..R5 (selected by PSW<11>). */
+    word rset_bank[2][6];
+    byte rset_bank_init;
     /* Banked stack pointers for DCJ11 protection modes: K/S/U. */
     word sp_mode[4];
     byte sp_mode_init;
@@ -103,6 +106,8 @@ typedef struct _regs {
     word J11_RSVD_177762;         /* 0177762: reserved/implementation-defined */
     word J11_RSVD_177764;         /* 0177764: reserved/implementation-defined */
     word J11_CPUERR;              /* 0177766: CPU error register */
+    word J11_RSVD_177770;         /* 0177770: reserved/implementation-defined */
+    word J11_PIRQ;                /* 0177772: program interrupt request register */
     word TVE_LIMIT;               /* 0177706 */
     word TVE_COUNT;               /* 0177710 */
     word TVE_CSR;                 /* 0177712 */
