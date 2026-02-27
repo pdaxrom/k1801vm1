@@ -10,7 +10,6 @@ BUILD_DIR := .build
 
 BIN_LSI11 := lsi11
 BIN_PDP1184 := pdp1184
-BIN_PDP1134_ALIAS := pdp1134
 
 CFG_LSI11 := -DENABLE_MMU=0 -DMMU_STUB_REGS_WHEN_DISABLED=0 -DLSI11_TARGET_1104=1
 CFG_PDP1184 := -DENABLE_MMU=1 -DLSI11_TARGET_1184=1
@@ -62,16 +61,13 @@ TESTS_PDP1184 := \
 
 ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
 
-all: $(BIN_LSI11) $(BIN_PDP1184) $(BIN_PDP1134_ALIAS)
+all: $(BIN_LSI11) $(BIN_PDP1184)
 
 $(BIN_LSI11): $(MAIN_OBJS_LSI11) $(COMMON_OBJS_LSI11) $(CORE_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(BIN_PDP1184): $(MAIN_OBJS_PDP1184) $(COMMON_OBJS_PDP1184) $(CORE_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
-
-$(BIN_PDP1134_ALIAS): $(BIN_PDP1184)
-	cp -f $(BIN_PDP1184) $(BIN_PDP1134_ALIAS)
 
 $(BUILD_DIR)/lsi11/%.o: %.c
 	@mkdir -p $(dir $@)
@@ -155,12 +151,10 @@ test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
 	$(MAKE) -C .. CFLAGS="$(ROOT_MMU_CFLAGS)" test-mmu-on
 	@echo "PDP1184 TESTS PASSED"
 
-test-pdp1134: test-pdp1184
-
 test-matrix: test-lsi11 test-pdp1184
 	@echo "ALL TESTS PASSED"
 
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(BIN_PDP1134_ALIAS) $(TESTS_LSI11) $(TESTS_PDP1184)
+	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(TESTS_LSI11) $(TESTS_PDP1184)
 
-.PHONY: all test test-lsi11 test-pdp1184 test-pdp1134 test-matrix clean
+.PHONY: all test test-lsi11 test-pdp1184 test-matrix clean

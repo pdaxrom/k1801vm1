@@ -137,21 +137,14 @@ This subproject now provides two separate executables:
   - `make -C lsi11 lsi11`
 - Build only 11/84-like profile:
   - `make -C lsi11 pdp1184`
-- Backward-compatible alias:
-  - `make -C lsi11 pdp1134`
 
 ## Tests
 - 11/04-like tests (MMU disabled + DL11 alias checks):
   - `make -C lsi11 test-lsi11`
 - 11/84-like tests (RAM sizing + core MMU suite):
   - `make -C lsi11 test-pdp1184`
-- Backward-compatible alias:
-  - `make -C lsi11 test-pdp1134`
 - Full matrix:
   - `make -C lsi11 test-matrix`
-
-Compatibility note:
-- Binary `pdp1134` is kept as an alias of `pdp1184` for existing scripts.
 
 ## Common debug options
 - `-trace` instruction trace

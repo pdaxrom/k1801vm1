@@ -27,7 +27,6 @@ typedef uint32_t paddr_t;
 typedef enum {
     BUS_MACHINE_LSI11_1104 = 0,
     BUS_MACHINE_PDP1184 = 1,
-    BUS_MACHINE_PDP1134 = BUS_MACHINE_PDP1184,
 } bus_machine_t;
 
 /*

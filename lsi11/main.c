@@ -16,7 +16,7 @@
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
 #include "../core/disas.h"
 
-#if defined(LSI11_TARGET_1184) || defined(LSI11_TARGET_1134)
+#if defined(LSI11_TARGET_1184)
 #define LSI11_TARGET_PDP1184 1
 #endif
 

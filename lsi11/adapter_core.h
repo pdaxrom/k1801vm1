@@ -10,7 +10,6 @@
 typedef enum {
     LSI11_MACHINE_1104 = 0,
     LSI11_MACHINE_1184 = 1,
-    LSI11_MACHINE_1134 = LSI11_MACHINE_1184,
 } lsi11_machine_t;
 
 /*
