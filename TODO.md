@@ -456,14 +456,15 @@ Table 14 (`Error Handling` continuation) summary:
     - K1801 docs model these failures via `SEL174/SEL274` exception vectors, not as an unobservable permanent latch.
   - status: intentionally simplified hardware model; architectural abort behavior retained.
 - `Halt switch processor / console initialize able to halt / console RESTART able to restart`:
-  - core has internal `fHaltSignal` path, but full front-panel switch model (HALT/INIT/RESTART hardware semantics) is not fully emulated in user-facing machine profiles.
-  - status: table rows are only partially modeled.
+  - policy fixed: full hardware front-panel semantics are out of scope in current emulator.
+  - current model keeps internal CPU HALT signal path (`fHaltSignal`) and software boot/reset flows only.
 
 Open follow-up from Table 14:
 - [x] Decide `VM*` policy for `error using (SP)` row: keep current vector-4 path (K1801 docs-driven), do not enforce strict `11/03` `HALT`.
 - [x] Define whether to model explicit “vector-fetch error hangs CPU” state or keep current recoverable abort/trap behavior.
   - policy chosen: keep current recoverable abort/trap behavior; no extra CPU hang latch.
-- [ ] Decide scope for front-panel semantics (`HALT switch`, `INIT halting`, `RESTART`) and either implement or explicitly document as out-of-scope.
+- [x] Decide scope for front-panel semantics (`HALT switch`, `INIT halting`, `RESTART`) and either implement or explicitly document as out-of-scope.
+  - policy chosen: out of scope; keep current internal HALT signal path and software machine controls.
 
 ## Prioritized Backlog
 
@@ -492,7 +493,7 @@ Open follow-up from Table 14:
 - [ ] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`).
 - [x] CIS policy (`Tables 8/10`): keep CIS unsupported; `PSW<8>` is not modeled as CIS-suspend (README updated, `FLAG_H` naming is internal only).
 - [x] Error-vector-fetch hang semantics (`Table 14`): keep simplified recoverable abort flow; no explicit hang latch state.
-- [ ] Front-panel semantics scope (`Table 14`): HALT/INIT/RESTART behavior implement vs document out-of-scope.
+- [x] Front-panel semantics scope (`Table 14`): documented as out-of-scope (no full hardware front-panel model).
 - [x] `VM1G` EIS policy item retired: `VM1G` support removed from project (`Table 1` scope now VM1/VM2/DCJ11).
 - [ ] Add explicit EIS odd-register CC-basis test (`Table 3`).
   - comment: keep current EIS odd-register behavior unchanged in this cycle.

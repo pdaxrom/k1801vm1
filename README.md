@@ -440,6 +440,9 @@ memory fetch/store paths.
 - Device interrupt arbitration is outside the core (handled by machine layer).
 - DL11/KW11 remain bus-visible in machine profiles for software compatibility.
 - Bootstrap behavior is loader-based (`-bootcopy`, `-bootrt11`), not a bus-visible ROM device.
+- Full hardware front-panel semantics (`HALT switch`, console `INIT` halt behavior,
+  console `RESTART` sequencing) are out of scope; only internal HALT signal path and
+  software control flows are modeled.
 - Vector-fetch/stack-push aborts follow recoverable abort semantics (restoring pre-trap
   `PC/PS`); a dedicated hardware "hang latch" state is intentionally not modeled.
 

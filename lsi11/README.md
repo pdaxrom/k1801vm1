@@ -14,6 +14,8 @@ This subproject now provides two separate executables:
 - DATI/DATIP/DATO per-cycle timing/protocol fidelity is out of scope.
 - DL11/KW11 are bus-visible by policy for software compatibility.
 - Bootstrap flow is loader-based (`-bootcopy`, `-bootrt11`), not bus-ROM emulation.
+- Full hardware front-panel semantics (`HALT switch`, `INIT`-driven halt,
+  `RESTART` sequencing) are out of scope for both targets.
 
 ## 1) `lsi11` target (PDP-11/04-like, NO MMU)
 
