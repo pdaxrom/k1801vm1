@@ -61,6 +61,12 @@ Mode bits: **LIMITED**
   affect address translation.
 - With `ENABLE_MMU=1`, mode bits select Kernel/Supervisor/User PAR/PDR sets.
 
+### 3.3 CIS / PSW<8> Policy
+- CIS (Commercial Instruction Set / DIS option) is not implemented in this emulator.
+- For `DCJ11`, `PSW<8>` is not modeled as "CIS instruction suspended".
+- For `VM1/VM2`, `PSW<8>` keeps K1801 meaning (`H/U`, HALT/USER bank/mode), not CIS.
+- Internal `FLAG_H` naming in shared code must not be interpreted as CIS support.
+
 References: J‑11 Programmer’s Reference (PSW and trap/interrupt behavior).
 
 ---

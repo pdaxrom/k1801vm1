@@ -255,13 +255,13 @@ Table 8 (`Interrupts`) summary:
   - status: no additional divergence beyond already tracked FIS policy/semantics
 - `CIS (DIS)` block (`Exists`, `Is cleared by reset`):
   - current emulator has no implemented CIS option path
-  - if interpreted as CIS capability row for `11/84` (`Y`), this is a mismatch
-  - reset-clearing semantics for CIS are therefore not modeled
+  - policy: keep CIS unsupported for all profiles, including `DCJ11/11-84` compatibility scope
+  - reset-clearing semantics for CIS are therefore intentionally not modeled and documented as out-of-scope
 
 Open follow-up from Table 8:
 - [x] Decide whether to implement pre-first-instruction ISR preemption behavior (`11/84` table `Y`) or keep current post-instruction-only IRQ arbitration model.
 - [x] If ISR preemption behavior is required, add targeted regression test: higher-priority IRQ pending at vector-entry must preempt before first handler opcode.
-- [ ] Decide policy for `CIS` capability on `DCJ11/11-84` profile: keep unsupported or add optional CIS presence/reset semantics.
+- [x] Decide policy for `CIS` capability on `DCJ11/11-84` profile: keep unsupported; no optional CIS presence/reset semantics in current scope.
 
 Table 9 (`Buses`) summary:
 - Scope still used:
@@ -308,17 +308,17 @@ Table 10 (`Processor Status Word`) summary:
   - `DCJ11`: implemented (`rset_bank[2][6]`, `dcj11_switch_regset`) -> aligned with `11/84 = Y`.
   - `VM*`: no dual register-set switching by PSW<11> -> baseline-aligned with `11/03 = N`.
 - `PSW bit <08> mechanized (CIS instruction suspended)`:
-  - `DCJ11`: CIS option/bit-8 suspend semantics are not implemented.
+  - `DCJ11`: CIS option/bit-8 suspend semantics are not implemented (by policy).
   - current code still uses bit 8 symbolically as generic `FLAG_H` in shared paths, but not as CIS-suspend state machine.
-  - status: mismatch vs `11/84` table (`Y` expected for CIS-suspend mechanization).
-  - `VM*`: bit 8 exists with K1801 HALT/USER meaning, not CIS meaning (outside strict row semantics).
+  - status: documented out-of-scope divergence vs strict `11/84` CIS row (`Y` in DEC table).
+  - `VM*`: bit 8 is K1801 `H/U` (HALT/USER), not CIS meaning.
 - `PSW bit <07> mechanized (high-order priority bit)`:
   - `DCJ11`: priority mask logic uses `PSW<7:5>` in IRQ accept/poll -> aligned.
   - `VM*`: priority/mask behavior uses K1801-specific PSW bits including bit 7 (`FLAG_P`) -> practical alignment for baseline row `Y`.
 
 Open follow-up from Table 10:
-- [ ] Decide policy for `DCJ11` PSW bit `<8>`: keep current non-CIS usage/stub behavior or implement proper CIS-suspend semantics for `11/84` compatibility.
-- [ ] If CIS bit `<8>` is not implemented, document this explicitly in `README`/compat matrix to avoid ambiguity with shared `FLAG_H` naming.
+- [x] Decide policy for `DCJ11` PSW bit `<8>`: keep current non-CIS usage/stub behavior; CIS-suspend semantics are out of scope.
+- [x] If CIS bit `<8>` is not implemented, document this explicitly in `README`/compat matrix to avoid ambiguity with shared `FLAG_H` naming.
 
 Table 11 (`Processor Status Word` continuation) summary:
 - Scope still used:
@@ -482,9 +482,7 @@ Open follow-up from Table 14:
 - [x] `VM1` ifetch from internal reg block `0177700..0177712` (`Table 12`): keep permissive behavior per K1801 docs; covered by regression tests.
 - [x] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
 - [ ] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`).
-- [ ] CIS policy (`Tables 8/10`):
-  - decide optional CIS capability for `DCJ11`,
-  - decide PSW bit `<8>` behavior and document.
+- [x] CIS policy (`Tables 8/10`): keep CIS unsupported; `PSW<8>` is not modeled as CIS-suspend (README updated, `FLAG_H` naming is internal only).
 - [ ] Error-vector-fetch hang semantics (`Table 14`): decide model vs simplified abort flow.
 - [ ] Front-panel semantics scope (`Table 14`): HALT/INIT/RESTART behavior implement vs document out-of-scope.
 - [x] `VM1G` EIS policy item retired: `VM1G` support removed from project (`Table 1` scope now VM1/VM2/DCJ11).
