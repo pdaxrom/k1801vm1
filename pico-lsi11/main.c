@@ -167,12 +167,8 @@ static const char *cpu_model_name(byte model)
     switch (model) {
     case K1801VM1:
         return "k1801vm1";
-    case K1801VM1G:
-        return "k1801vm1g";
     case K1801VM2:
         return "k1801vm2";
-    case K1806VM2:
-        return "k1806vm2";
     case DCJ11:
         return "dcj11";
     default:
@@ -192,9 +188,7 @@ static byte prompt_cpu_model(int mode_choice)
         printf("1. dcj11 (11/03-compatible)\n");
     }
     printf("2. k1801vm1\n");
-    printf("3. k1801vm1g\n");
-    printf("4. k1801vm2\n");
-    printf("5. k1806vm2\n");
+    printf("3. k1801vm2\n");
 
     choice = prompt_number("CPU number: ", 1, 5);
     switch (choice) {
@@ -203,12 +197,9 @@ static byte prompt_cpu_model(int mode_choice)
     case 2:
         return K1801VM1;
     case 3:
-        return K1801VM1G;
-    case 4:
         return K1801VM2;
-    case 5:
     default:
-        return K1806VM2;
+        return DCJ11;
     }
 }
 
@@ -634,7 +625,7 @@ int main(void)
     }
 
     cpu_model = prompt_cpu_model(mode_choice);
-    if (cpu_model == K1801VM1 || cpu_model == K1801VM1G) {
+    if (cpu_model == K1801VM1) {
         if (lsi11_set_device_enabled("vm1sel", 1, cfg_err, sizeof(cfg_err)) != 0 ||
                 lsi11_set_device_enabled("vm1sav", 1, cfg_err, sizeof(cfg_err)) != 0) {
             fatal_halt(cfg_err);

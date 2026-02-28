@@ -30,7 +30,7 @@ Shared device register and IRQ state is protected by a hardware spinlock (`io_lo
 - On startup, the firmware presents interactive menus for:
   - RP2040 frequency (overclock) selection with voltage profile
   - Machine mode selection (`lsi11` or `pdp11/84`) unless fixed at build time
-  - CPU model selection (`dcj11`, `k1801vm1`, `k1801vm1g`, `k1801vm2`, `k1806vm2`)
+  - CPU model selection (`dcj11`, `k1801vm1`, `k1801vm2`)
   - Numbered disk image list from SD card
   - Image type selection (`RK`, `RH`, `RL`)
   - Boot trace mode (`off` / `on`)
