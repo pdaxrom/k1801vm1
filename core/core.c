@@ -234,14 +234,17 @@ static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
 #define DCJ11_REG_CCR 0177746
 #define DCJ11_REG_MAINT 0177750
 #define DCJ11_REG_HITMISS 0177752
+#ifdef DCJ_REG_RSVD_ENABLED
 #define DCJ11_REG_RSVD_177754 0177754
 #define DCJ11_REG_RSVD_177756 0177756
 #define DCJ11_REG_RSVD_177760 0177760
 #define DCJ11_REG_RSVD_177762 0177762
 #define DCJ11_REG_RSVD_177764 0177764
+#endif
 #define DCJ11_REG_CPUERR 0177766
 #define DCJ11_REG_RSVD_177770 0177770
 #define DCJ11_REG_PIRQ 0177772
+#define DCJ11_REG_PSW 0177776
 
 #define DCJ11_CPUERR_RED 0000004
 #define DCJ11_CPUERR_YEL 0000010
@@ -319,6 +322,9 @@ static INLINE word dcj11_pirq_visible(word pirq)
     return (word)((req | dcj11_pirq_pri_field(level)) & DCJ11_PIRQ_IMP);
 }
 
+static INLINE void dcj11_set_psw(regs *r, word new_psw);
+static INLINE word dcj11_explicit_psw_write(regs *r, word new_psw);
+
 static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
         word *value)
 {
@@ -335,6 +341,7 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
     case DCJ11_REG_HITMISS:
         *value = r->J11_HITMISS;
         return true;
+#ifdef DCJ_REG_RSVD_ENABLED
     case DCJ11_REG_RSVD_177754:
         *value = r->J11_RSVD_177754;
         return true;
@@ -350,6 +357,7 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
     case DCJ11_REG_RSVD_177764:
         *value = r->J11_RSVD_177764;
         return true;
+#endif
     case DCJ11_REG_CPUERR:
         *value = (word)(r->J11_CPUERR & DCJ11_CPUERR_MASK);
         return true;
@@ -358,6 +366,9 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
         return true;
     case DCJ11_REG_PIRQ:
         *value = dcj11_pirq_visible(r->J11_PIRQ);
+        return true;
+    case DCJ11_REG_PSW:
+        *value = r->psw;
         return true;
     default:
         return false;
@@ -381,6 +392,7 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
     case DCJ11_REG_HITMISS:
         /* Hit/miss register is read-only for software. */
         return true;
+#ifdef DCJ_REG_RSVD_ENABLED
     case DCJ11_REG_RSVD_177754:
         r->J11_RSVD_177754 = value;
         return true;
@@ -396,6 +408,7 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
     case DCJ11_REG_RSVD_177764:
         r->J11_RSVD_177764 = value;
         return true;
+#endif
     case DCJ11_REG_CPUERR:
         /* CPU error register clears on write. */
         r->J11_CPUERR = 0;
@@ -406,14 +419,12 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
     case DCJ11_REG_PIRQ:
         r->J11_PIRQ = (word)(value & DCJ11_PIRQ_RW);
         return true;
+    case DCJ11_REG_PSW:
+        dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
+        return true;
     default:
         return false;
     }
-}
-
-static INLINE int cpu_has_reg_177776(word offset)
-{
-    return ((offset & 0177776) == 0177776);
 }
 
 static INLINE bool dcj11_reg_block_load_byte(regs *r, word offset, byte *val8)
@@ -455,8 +466,6 @@ static INLINE bool dcj11_reg_block_store_byte(regs *r, word offset,
     return dcj11_reg_block_store_word(r, offset, regv);
 }
 
-static INLINE void dcj11_set_psw(regs *r, word new_psw);
-
 static INLINE word dcj11_explicit_psw_write(regs *r, word new_psw)
 {
     if (r->model == DCJ11) {
@@ -464,22 +473,6 @@ static INLINE word dcj11_explicit_psw_write(regs *r, word new_psw)
         new_psw = (word)((new_psw & ~FLAG_T) | (r->psw & FLAG_T));
     }
     return new_psw;
-}
-
-static INLINE byte cpu_reg_177776_load_byte(regs *r, word offset)
-{
-    return (byte)((offset & 1) ? ((r->psw >> 8) & 0377) : (r->psw & 0377));
-}
-
-static INLINE void cpu_reg_177776_store_byte(regs *r, word offset, byte value)
-{
-    word new_psw;
-    if (offset & 1) {
-        new_psw = (word)((r->psw & 000377) | (((word)value & 0377) << 8));
-    } else {
-        new_psw = (word)((r->psw & 0177400) | ((word)value & 0377));
-    }
-    dcj11_set_psw(r, dcj11_explicit_psw_write(r, new_psw));
 }
 
 static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
@@ -1677,10 +1670,6 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         }
     }
 
-    if (cpu_has_reg_177776(offset)) {
-        return cpu_reg_177776_load_byte(r, offset);
-    }
-
     if (mmu_io_read_byte(r, offset, &value)) {
         return value;
     }
@@ -1747,12 +1736,6 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
         if (vm1_reg_block_store_byte(r, offset, value)) {
             return;
         }
-    }
-
-    if (cpu_has_reg_177776(offset)) {
-        cpu_reg_177776_store_byte(r, offset, value);
-        mmu_note_internal_reg_write(r, offset, force_kernel_d);
-        return;
     }
 
     if (mmu_io_write_byte(r, offset, value)) {
@@ -1833,15 +1816,6 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         if (vm1_reg_block_load_word(r, offset, &value)) {
             return value;
         }
-    }
-
-    if (offset == 0177776) {
-        if (r->model == DCJ11 && is_ifetch) {
-            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
-            bus_error_trap(r);
-            return 0;
-        }
-        return r->psw;
     }
 
     if (mmu_io_read_word(r, offset, &value)) {
@@ -1930,12 +1904,6 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         }
     }
 
-    if (offset == 0177776) {
-        dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
-        mmu_note_internal_reg_write(r, offset, force_kernel_d);
-        return;
-    }
-
     if (mmu_io_write_word(r, offset, value)) {
         mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
@@ -2004,9 +1972,6 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
         }
     }
 
-    if (offset == 0177776) {
-        return r->psw;
-    }
     if (mmu_io_read_word(r, offset, &value)) {
         return value;
     }
@@ -2065,11 +2030,6 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         }
     }
 
-    if (offset == 0177776) {
-        dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
-        mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
-        return;
-    }
     if (mmu_io_write_word(r, offset, value)) {
         mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
         return;
@@ -2170,11 +2130,13 @@ void core_reset(regs *r)
     r->J11_CCR = 0;
     r->J11_MAINT = 0;
     r->J11_HITMISS = 0;
+#ifdef DCJ_REG_RSVD_ENABLED
     r->J11_RSVD_177754 = 0;
     r->J11_RSVD_177756 = 0;
     r->J11_RSVD_177760 = 0;
     r->J11_RSVD_177762 = 0;
     r->J11_RSVD_177764 = 0;
+#endif
     r->J11_CPUERR = 0;
     r->J11_RSVD_177770 = 0;
     r->J11_PIRQ = 0;

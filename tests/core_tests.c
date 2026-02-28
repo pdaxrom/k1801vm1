@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "core/core.h"
+#include "core/disas.h"
 #include "core/hardware.h"
 
 #define TEST_BASE 01000
@@ -74,6 +75,8 @@ static word test_dispatch_load_word(regs *r, word offset)
             return r->J11_RSVD_177770;
         case 0177772:
             return test_dcj11_pirq_visible(r->J11_PIRQ);
+        case 0177776:
+            return r->psw;
         }
     } else if (r->model == K1801VM1) {
         switch (offset) {
@@ -153,6 +156,9 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
         case 0177772:
             r->J11_PIRQ = value & 0177000;
             return;
+        case 0177776:
+            r->psw = (word)((value & ~FLAG_T) | (r->psw & FLAG_T));
+            return;
         case 0177766:
             r->J11_CPUERR = 0;
             return;
@@ -193,7 +199,7 @@ static byte test_dispatch_load_byte(regs *r, word offset)
             return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
         }
     } else if (r->model == DCJ11) {
-        if (offset >= 0177744 && offset <= 0177773) {
+        if (offset >= 0177744 && offset <= 0177777) {
             val16 = test_dispatch_load_word(r, offset & 0177776);
             return (byte)((offset & 1) ? (val16 >> 8) : (val16 & 0377));
         }
@@ -222,7 +228,7 @@ static void test_dispatch_store_byte(regs *r, word offset, byte value)
             return;
         }
     } else if (r->model == DCJ11) {
-        if (offset >= 0177744 && offset <= 0177773) {
+        if (offset >= 0177744 && offset <= 0177777) {
             if ((offset & 0177776) == 0177772) {
                 if (offset & 1) {
                     test_dispatch_store_word(r, 0177772, (word)(value << 8));
@@ -1009,6 +1015,70 @@ static INLINE void write_op(cpu_fixture *fx, word op)
 {
     store_word(fx, TEST_BASE, op);
     fx->r.r[7] = TEST_BASE;
+}
+
+static int test_disas_combined_flag_ops(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    word addr;
+    char out[64];
+    const word program[] = {
+        0000243, /* CLV|CLC */
+        0000260, /* NOP' */
+        0000265, /* SEZ|SEC */
+        0000257, /* CCC */
+        0000277, /* SCC */
+    };
+
+    current_test = "disas_combined_flag_ops";
+    fixture_setup_model(&fx, K1801VM1);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    addr = TEST_BASE;
+    disas(&fx.r, &addr, out);
+    if (strcmp(out, "CLV|CLC") != 0) {
+        fprintf(stderr, "%s: expected CLV|CLC, got %s\n", current_test, out);
+        rc = 1;
+        goto cleanup;
+    }
+    ASSERT_EQ(addr, TEST_BASE + 2, "disas should advance after CLV|CLC");
+
+    disas(&fx.r, &addr, out);
+    if (strcmp(out, "NOP") != 0) {
+        fprintf(stderr, "%s: expected NOP, got %s\n", current_test, out);
+        rc = 1;
+        goto cleanup;
+    }
+    ASSERT_EQ(addr, TEST_BASE + 4, "disas should advance after NOP'");
+
+    disas(&fx.r, &addr, out);
+    if (strcmp(out, "SEZ|SEC") != 0) {
+        fprintf(stderr, "%s: expected SEZ|SEC, got %s\n", current_test, out);
+        rc = 1;
+        goto cleanup;
+    }
+    ASSERT_EQ(addr, TEST_BASE + 6, "disas should advance after SEZ|SEC");
+
+    disas(&fx.r, &addr, out);
+    if (strcmp(out, "CCC") != 0) {
+        fprintf(stderr, "%s: expected CCC, got %s\n", current_test, out);
+        rc = 1;
+        goto cleanup;
+    }
+    ASSERT_EQ(addr, TEST_BASE + 8, "disas should advance after CCC");
+
+    disas(&fx.r, &addr, out);
+    if (strcmp(out, "SCC") != 0) {
+        fprintf(stderr, "%s: expected SCC, got %s\n", current_test, out);
+        rc = 1;
+        goto cleanup;
+    }
+    ASSERT_EQ(addr, TEST_BASE + 10, "disas should advance after SCC");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
 }
 
 static int test_mov_updates_flags(void)
@@ -5306,6 +5376,37 @@ cleanup:
     return rc;
 }
 
+static int test_vm_psw_addr_is_plain_memory_model(byte model, const char *name)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    char namebuf[64];
+    const word program[] = {
+        op_mov(operand(2, 7), operand(3, 7)), /* MOV #3,@#177776 */
+        000003,
+        0177776,
+    };
+
+    if (model == DCJ11) {
+        return 0;
+    }
+
+    set_test_name(namebuf, sizeof(namebuf), "vm_psw_addr_plain_memory", name);
+    fixture_setup_model(&fx, model);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = FLAG_H | FLAG_C;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "VM* write to 177776 should execute");
+    ASSERT_EQ(fx.r.psw & FLAG_H, FLAG_H, "VM* write to 177776 must not rewrite PSW");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177776), 000003, "VM* write to 177776 should hit memory");
+    ASSERT_EQ(fx.r.r[7], TEST_BASE + 6, "PC should advance past immediate and address");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_vm1_rti_restores_flags_model(byte model, const char *name)
 {
     cpu_fixture fx;
@@ -7792,6 +7893,7 @@ int main(void)
 {
     int failed = 0;
 
+    failed += test_disas_combined_flag_ops();
     failed += test_mov_updates_flags();
     failed += test_movb_sign_extends_register_dest();
     failed += test_add_sets_expected_flags();
@@ -7894,6 +7996,9 @@ int main(void)
     failed += test_dcj11_rtt_traces_after_one_instruction();
     failed += test_dcj11_rti_restores_state();
     failed += test_dcj11_explicit_psw_write_preserves_t();
+    failed += test_vm_psw_addr_is_plain_memory_model(K1801VM1, "K1801VM1");
+    failed += test_vm_psw_addr_is_plain_memory_model(K1801VM2, "K1801VM2");
+    failed += test_vm_psw_addr_is_plain_memory_model(K1806VM2, "K1806VM2");
     failed += test_dcj11_rti_user_restricts_psw();
     failed += test_dcj11_rti_user_sets_high_psw_bits();
     failed += test_dcj11_mode_stack_banking();

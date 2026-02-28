@@ -339,9 +339,9 @@ Table 11 (`Processor Status Word` continuation) summary:
   - condition codes are fully modeled in ALU/instruction paths.
   - status: aligned.
 - `PSW accessible via reads/writes at 177776`:
-  - current code allows direct access for all models (`offset == 0177776` read/write path).
+  - current code exposes direct access only for `DCJ11`, via `DCJ11_REG_PSW` in the J-11 internal register block.
   - `DCJ11/11-84` expects `Y`: aligned.
-  - `VM*` in `11/03` bucket expects `N`: mismatch if strict 11/03 behavior is required.
+  - `VM*` in `11/03` bucket expect `N`: aligned (`177776` is plain memory, not direct `PSW`).
 - `MTPS/MFPS instructions`:
   - implemented for all models.
   - `DCJ11/11-84` and `11/03` baseline both expect `Y`: aligned.
@@ -369,7 +369,8 @@ Table 11 (`Processor Status Word` continuation) summary:
     - status: aligned with `11/84 = Y`.
 
 Open follow-up from Table 11:
-- [x] Decide policy for strict `11/03` compatibility on PSW address `177776` for `VM*`: keep K1801-permissive direct PSW access or block it — temporarily skipped, verify later.
+- [x] Decide policy for strict `11/03` compatibility on PSW address `177776` for `VM*`.
+  - policy chosen: `177776` is J-11-only (`DCJ11_REG_PSW`); `VM*` do not expose direct `PSW` at this address.
 - [x] For `DCJ11`, enforce `11/84` T-bit timing:
   - `RTI`: TRACE with zero intervening instructions.
   - `RTT`: TRACE with one intervening instruction.
@@ -491,7 +492,7 @@ Open follow-up from Table 14:
 - [x] IRQ preemption before first ISR instruction (`Table 8`): enabled for `DCJ11` (`11/84` profile) with regression test; `VM*` policy kept unchanged.
 - [x] `VM1` ifetch from internal reg block `0177700..0177712` (`Table 12`): keep permissive behavior per K1801 docs; covered by regression tests.
 - [x] Document `0177700..0177717` non-GPR mapping clearly (`Table 12`).
-- [x] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`) — temporarily skipped, verify later.
+- [x] Strict `11/03` policy for PSW address `177776` on `VM*` (`Table 11`): `177776` moved into the `DCJ11` internal register block; `VM*` now use plain memory at this address.
 - [x] CIS policy (`Tables 8/10`): keep CIS unsupported; `PSW<8>` is not modeled as CIS-suspend (README updated, `FLAG_H` naming is internal only).
 - [x] Error-vector-fetch hang semantics (`Table 14`): keep simplified recoverable abort flow; no explicit hang latch state.
 - [x] Front-panel semantics scope (`Table 14`): documented as out-of-scope (no full hardware front-panel model).

@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 
+#define DCJ_REG_RSVD_ENABLED
+
 #ifndef INLINE
 #define INLINE inline
 #endif
@@ -107,11 +109,13 @@ typedef struct _regs {
     word J11_CCR;                 /* 0177746: cache control register */
     word J11_MAINT;               /* 0177750: maintenance register */
     word J11_HITMISS;             /* 0177752: cache hit/miss register */
+#ifdef DCJ_REG_RSVD_ENABLED
     word J11_RSVD_177754;         /* 0177754: reserved/implementation-defined */
     word J11_RSVD_177756;         /* 0177756: reserved/implementation-defined */
     word J11_RSVD_177760;         /* 0177760: reserved/implementation-defined */
     word J11_RSVD_177762;         /* 0177762: reserved/implementation-defined */
     word J11_RSVD_177764;         /* 0177764: reserved/implementation-defined */
+#endif
     word J11_CPUERR;              /* 0177766: CPU error register */
     word J11_RSVD_177770;         /* 0177770: reserved/implementation-defined */
     word J11_PIRQ;                /* 0177772: program interrupt request register */
