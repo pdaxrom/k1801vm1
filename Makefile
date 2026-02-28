@@ -23,7 +23,7 @@ dis11: core/disas.o core/hardware.o dis11.o
 mk90: $(OBJS) mk90.o main.o
 	$(CC) -o $@ $^ $(shell sdl2-config --libs) $(VIDEOLIB)
 
-tests/core_tests: tests/core_tests.o core/core.o core/hardware.o
+tests/core_tests: tests/core_tests.o core/core.o core/disas.o core/hardware.o
 	$(CC) -g -o $@ $^
 
 tests/test_mmu_basic: tests/test_mmu_basic.o core/core.o core/hardware.o
