@@ -49,6 +49,9 @@ static word test_dcj11_pirq_visible(word pirq)
 /* Dispatchers to core internal registers replicated from core.c */
 static word test_dispatch_load_word(regs *r, word offset)
 {
+    byte *m0;
+    byte *m1;
+
     if (r->model == DCJ11) {
         switch (offset & 0177776) {
         case 0177744:
@@ -59,6 +62,7 @@ static word test_dispatch_load_word(regs *r, word offset)
             return r->J11_MAINT;
         case 0177752:
             return r->J11_HITMISS;
+#ifdef DCJ_REG_RSVD_ENABLED
         case 0177754:
             return r->J11_RSVD_177754;
         case 0177756:
@@ -69,6 +73,7 @@ static word test_dispatch_load_word(regs *r, word offset)
             return r->J11_RSVD_177762;
         case 0177764:
             return r->J11_RSVD_177764;
+#endif
         case 0177766:
             return (word)(r->J11_CPUERR & 0000374);
         case 0177770:
@@ -94,7 +99,9 @@ static word test_dispatch_load_word(regs *r, word offset)
             return r->TVE_CSR;
         }
     }
-    return r->load_byte(r, offset) | (r->load_byte(r, offset + 1) << 8);
+    m0 = r->ramptr(r, offset);
+    m1 = r->ramptr(r, offset + 1);
+    return (word)((m0 ? *m0 : 0) | ((word)(m1 ? *m1 : 0) << 8));
 }
 
 static void test_inject_buserr_trap(regs *r)
@@ -126,6 +133,9 @@ static word test_dispatch_load_word_fetch_fault(regs *r, word offset)
 
 static void test_dispatch_store_word(regs *r, word offset, word value)
 {
+    byte *m0;
+    byte *m1;
+
     if (r->model == DCJ11) {
         switch (offset & 0177776) {
         case 0177744:
@@ -138,6 +148,7 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
             return;
         case 0177752:
             return;
+#ifdef DCJ_REG_RSVD_ENABLED
         case 0177754:
             r->J11_RSVD_177754 = value;
             return;
@@ -153,6 +164,7 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
         case 0177764:
             r->J11_RSVD_177764 = value;
             return;
+#endif
         case 0177772:
             r->J11_PIRQ = value & 0177000;
             return;
@@ -186,8 +198,14 @@ static void test_dispatch_store_word(regs *r, word offset, word value)
             return;
         }
     }
-    r->store_byte(r, offset, (byte)(value & 0377));
-    r->store_byte(r, offset + 1, (byte)(value >> 8));
+    m0 = r->ramptr(r, offset);
+    m1 = r->ramptr(r, offset + 1);
+    if (m0) {
+        *m0 = (byte)(value & 0377);
+    }
+    if (m1) {
+        *m1 = (byte)(value >> 8);
+    }
 }
 
 static byte test_dispatch_load_byte(regs *r, word offset)
@@ -6799,18 +6817,38 @@ static int test_dcj11_regblock_177754_177770_core_owned(void)
     fx.mem[0177770] = 000133;
     fx.mem[0177771] = 000144;
 
+#ifdef DCJ_REG_RSVD_ENABLED
     fx.r.J11_RSVD_177754 = 001111;
     fx.r.J11_RSVD_177756 = 002222;
     fx.r.J11_RSVD_177760 = 003333;
     fx.r.J11_RSVD_177762 = 004444;
     fx.r.J11_RSVD_177764 = 005555;
+#endif
     fx.r.J11_RSVD_177770 = 006666;
 
+#ifdef DCJ_REG_RSVD_ENABLED
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177754), 001111, "0177754 readback");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177756), 002222, "0177756 readback");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177760), 003333, "0177760 readback");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177762), 004444, "0177762 readback");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177764), 005555, "0177764 readback");
+#else
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177754),
+              (word)((((word)000022) << 8) | (word)000011),
+              "0177754 reads RAM when reserved regs are disabled");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177756),
+              (word)((((word)000044) << 8) | (word)000033),
+              "0177756 reads RAM when reserved regs are disabled");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177760),
+              (word)((((word)000066) << 8) | (word)000055),
+              "0177760 reads RAM when reserved regs are disabled");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177762),
+              (word)((((word)000101) << 8) | (word)000077),
+              "0177762 reads RAM when reserved regs are disabled");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177764),
+              (word)((((word)000122) << 8) | (word)000111),
+              "0177764 reads RAM when reserved regs are disabled");
+#endif
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177770), 006666, "0177770 readback");
 
     store_word(&fx, 0177754, 012345);
@@ -6820,11 +6858,19 @@ static int test_dcj11_regblock_177754_177770_core_owned(void)
     store_word(&fx, 0177764, 056701);
     store_word(&fx, 0177770, 067012);
 
+#ifdef DCJ_REG_RSVD_ENABLED
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177754), 012345, "0177754 word write");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177756), 023456, "0177756 word write");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177760), 034567, "0177760 word write");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177762), 045670, "0177762 word write");
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177764), 056701, "0177764 word write");
+#else
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177754), 012345, "0177754 RAM write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177756), 023456, "0177756 RAM write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177760), 034567, "0177760 RAM write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177762), 045670, "0177762 RAM write");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 0177764), 056701, "0177764 RAM write");
+#endif
     ASSERT_EQ(fx.r.load_word(&fx.r, 0177770), 067012, "0177770 word write");
 
     fx.r.store_byte(&fx.r, 0177760, 000076);
@@ -6833,6 +6879,7 @@ static int test_dcj11_regblock_177754_177770_core_owned(void)
               (word)((((word)000123) << 8) | (word)000076),
               "0177760 byte write merge");
 
+#ifdef DCJ_REG_RSVD_ENABLED
     ASSERT_EQ(fx.mem[0177754], 000011, "0177754 should not modify RAM low byte");
     ASSERT_EQ(fx.mem[0177755], 000022, "0177754 should not modify RAM high byte");
     ASSERT_EQ(fx.mem[0177756], 000033, "0177756 should not modify RAM low byte");
@@ -6843,6 +6890,18 @@ static int test_dcj11_regblock_177754_177770_core_owned(void)
     ASSERT_EQ(fx.mem[0177763], 000101, "0177762 should not modify RAM high byte");
     ASSERT_EQ(fx.mem[0177764], 000111, "0177764 should not modify RAM low byte");
     ASSERT_EQ(fx.mem[0177765], 000122, "0177764 should not modify RAM high byte");
+#else
+    ASSERT_EQ(fx.mem[0177754], 000345, "0177754 low byte should update RAM");
+    ASSERT_EQ(fx.mem[0177755], 000024, "0177754 high byte should update RAM");
+    ASSERT_EQ(fx.mem[0177756], 000056, "0177756 low byte should update RAM");
+    ASSERT_EQ(fx.mem[0177757], 000047, "0177756 high byte should update RAM");
+    ASSERT_EQ(fx.mem[0177760], 000076, "0177760 low byte should update RAM");
+    ASSERT_EQ(fx.mem[0177761], 000123, "0177760 high byte should update RAM");
+    ASSERT_EQ(fx.mem[0177762], 000270, "0177762 low byte should update RAM");
+    ASSERT_EQ(fx.mem[0177763], 000113, "0177762 high byte should update RAM");
+    ASSERT_EQ(fx.mem[0177764], 000301, "0177764 low byte should update RAM");
+    ASSERT_EQ(fx.mem[0177765], 000135, "0177764 high byte should update RAM");
+#endif
     ASSERT_EQ(fx.mem[0177770], 000133, "0177770 should not modify RAM low byte");
     ASSERT_EQ(fx.mem[0177771], 000144, "0177770 should not modify RAM high byte");
 
