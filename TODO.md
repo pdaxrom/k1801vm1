@@ -286,8 +286,9 @@ Table 9 (`Buses`) summary:
   - DMA is polled/service-driven from device polls (`lsi11_poll_devices`), not bus-cycle arbitration during an instruction.
   - status: functional DMA exists, arbitration-timing semantics are simplified.
 - `Console SLU accessible from bus` and `Line clock register accessible from bus`:
-  - DL11 (`0177560..0177567`) and KW11 (`0177546..`) are bus-visible in current emulator on both machine profiles.
-  - policy fixed: keep DL11/KW11 bus-visible for software compatibility on all profiles.
+  - DL11 (`0177560..0177567`) stays bus-visible on both machine profiles.
+  - Default line clock on both machine profiles is an onboard `LTC` with a `KW11-L`-compatible register at `0177546..0177547`.
+  - `KW11-P` at `0172540..0172545` remains available only as an explicit compatibility override.
 - `Bootstrap ROMs accessible from bus`:
   - no dedicated bus-mapped bootstrap ROM device model; boot paths use helper loaders (`-bootcopy`, `-bootrt11`) and an injected RL bootstrap routine.
   - policy fixed: keep loader-based bootstrap behavior; no bus-visible ROM device.
@@ -295,8 +296,8 @@ Table 9 (`Buses`) summary:
 Open follow-up from Table 9:
 - [x] Decide whether to keep current unified bus model or introduce explicit per-profile bus identity contract (`Q-bus` vs `UNIBUS`) in docs/code.
   - policy chosen: keep unified synthetic bus model with machine-level profile mapping only.
-- [x] Decide policy for `DCJ11/11-84` console/line-clock bus visibility rows (keep DL11/KW11 bus-visible for software compatibility vs enforce table behavior).
-  - policy chosen: keep DL11/KW11 bus-visible.
+- [x] Decide policy for console/line-clock bus visibility rows.
+  - policy chosen: keep DL11 bus-visible for compatibility; default both profiles to onboard `LTC` (`KW11-L`-compatible), keep `KW11-P` only as an optional compatibility override.
 - [x] If bus-cycle accuracy is required, define minimal DATI/DATIP/DATO tracing/model boundary (at least for `MOV`, `CLR/SXT`, `EIS source fetch`).
   - policy chosen: out of scope in current emulator.
 - [x] Decide whether bootstrap ROM behavior should stay loader-based or be emulated as a bus-visible ROM device.
@@ -504,7 +505,7 @@ Open follow-up from Table 14:
   - comment: keep as implemented for now; verify KEV11-specific `FMUL/FDIV` stack usage and interruptibility/CC details separately.
 - [x] Bus-model fidelity policy (`Table 9`) documented:
   - keep unified synthetic bus model (no strict electrical `Q-bus`/`UNIBUS` emulation),
-  - keep DL11/KW11 bus-visible for compatibility,
+  - keep DL11 bus-visible for compatibility, default to onboard `LTC` (`KW11-L`-compatible), and keep `KW11-P` only as an optional override,
   - keep DATI/DATIP/DATO cycle-accuracy out of scope,
   - keep loader-based bootstrap path (no bus-visible ROM device).
 

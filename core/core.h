@@ -10,7 +10,8 @@
 
 #include <stdint.h>
 
-#define DCJ_REG_RSVD_ENABLED
+// For DCJ-11 in PDP11/84 this disabled
+//#define DCJ_REG_RSVD_ENABLED
 
 #ifndef INLINE
 #define INLINE inline

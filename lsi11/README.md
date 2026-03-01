@@ -12,7 +12,9 @@ This subproject now provides two separate executables:
   `UNIBUS` behavior is not emulated.
 - `pdp1184` adds 18/22-bit I/O-window alias decode to the same 16-bit device page.
 - DATI/DATIP/DATO per-cycle timing/protocol fidelity is out of scope.
-- DL11/KW11 are bus-visible by policy for software compatibility.
+- DL11 remains bus-visible on both profiles; the default system clock is an
+  onboard `LTC` with a `KW11-L`-compatible interface at `0177546`, while
+  `KW11-P` is available only as an explicit compatibility override.
 - Bootstrap flow is loader-based (`-bootcopy`, `-bootrt11`), not bus-ROM emulation.
 - Full hardware front-panel semantics (`HALT switch`, `INIT`-driven halt,
   `RESTART` sequencing) are out of scope for both targets.
@@ -76,7 +78,7 @@ This subproject now provides two separate executables:
   - Example: `4104 KB` valid
 
 ### I/O compatibility
-- RL11, RK11, RH11, DL11, KW11, LP11, SR are supported.
+- RL11, RK11, RH11, DL11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
 - DL11 alias is **not forced** by default on this target.
 - DL11 terminal character width defaults to **7-bit** (UNIX V5 compatible).
   - Use `-tty8b` for 8-bit console behavior.
@@ -133,7 +135,8 @@ This subproject now provides two separate executables:
 |---|---|---:|---:|---|---|---|---|
 | DL11 (console RX) | `0177560–0177563` (+ optional alias `0176500–0176503`) | `000060` | `4` | RCSR bit 7 | RCSR bit 6 | Read RBUF (`...62`) | RX IRQ does not repeat until RX DONE cleared |
 | DL11 (console TX) | `0177564–0177567` (+ optional alias `0176504–0176507`) | `000064` | `4` | TCSR bit 7 | TCSR bit 6 | Write TBUF (`...66`) | TX IRQ does not repeat until TX DONE cleared |
-| KW11-L / KW11-P | `0177546–0177547` (L), `0172540–0172545` (P) | `000100` | `6` | L: CSR bit 7 (monitor), P: CSR bit 7 (DONE) | L: CSR bit 6, P: CSR bit 6 | L: read CSR low byte (`0177546`), P: write CSR with DONE=0 | L: fixed 50 Hz line clock; P: programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
+| LTC (`KW11-L`-compatible, default on `lsi11` and `pdp1184`) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | read CSR low byte (`0177546`) | Fixed line clock. On `lsi11`, this models CPU-board integrated LTC logic; on `pdp1184`, J-11 onboard LTC |
+| KW11-P (optional override) | `0172540–0172545` | `000100` | `6` | CSR bit 7 (DONE) | CSR bit 6 | write CSR with DONE=0 | Compatibility-only programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
 | RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |
@@ -398,7 +401,11 @@ Note:
 
 ## Device disable options
 - `-disable-dl` disable DL11
-- `-disable-kw` disable KW11
+- `-disable-kw` disable all KW11 variants
+- `-enable-kw11-l` enable KW11-L decode (`0177546..0177547`)
+- `-disable-kw11-l` disable KW11-L decode
+- `-enable-kw11-p` enable KW11-P decode (`0172540..0172545`)
+- `-disable-kw11-p` disable KW11-P decode
 - `-disable-lp` disable LP11
 - `-disable-rk` disable RK11
 - `-disable-rh` disable RH11
@@ -407,4 +414,8 @@ Note:
 
 Notes:
 - If a device is disabled, attaching media for it (for example `-disable-rl` with `-rl`) is rejected.
-- `-check-config` prints final per-device enable state (`dev_*` fields).
+- By default, both `lsi11` and `pdp1184` enable the onboard `LTC`
+  (`KW11-L`-compatible); `KW11-P` is off unless explicitly enabled. The
+  `-enable-kw11-*` / `-disable-kw11-*` options override that default.
+- `-check-config` prints final per-device enable state (`dev_*` fields),
+  including `dev_kw11_l` and `dev_kw11_p`.

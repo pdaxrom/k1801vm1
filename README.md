@@ -438,7 +438,9 @@ memory fetch/store paths.
 - External bus timing and SEL/DIN/DOUT/RPLY signal timing are not modeled.
 - DATI/DATIP/DATO per-cycle protocol fidelity is out of scope.
 - Device interrupt arbitration is outside the core (handled by machine layer).
-- DL11/KW11 remain bus-visible in machine profiles for software compatibility.
+- DL11 remains bus-visible in machine profiles; the default line clock is an
+  onboard `LTC` with a `KW11-L`-compatible interface on both `lsi11` and
+  `pdp1184`, while `KW11-P` remains an explicit compatibility override.
 - Bootstrap behavior is loader-based (`-bootcopy`, `-bootrt11`), not a bus-visible ROM device.
 - Full hardware front-panel semantics (`HALT switch`, console `INIT` halt behavior,
   console `RESTART` sequencing) are out of scope; only internal HALT signal path and

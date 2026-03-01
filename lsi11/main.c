@@ -5,6 +5,7 @@
 #include "adapter_core.h"
 #include "bus.h"
 #include "dev_dl11.h"
+#include "dev_kw11.h"
 #include "dev_rl11.h"
 #include "dev_rh11.h"
 #include "dev_rk11.h"
@@ -206,6 +207,10 @@ static void usage(const char *argv0)
             "  -rl02 <path>    Attach image as RL02\n"
             "  -disable-dl     Disable DL11\n"
             "  -disable-kw     Disable KW11\n"
+            "  -enable-kw11-l  Enable KW11-L decode\n"
+            "  -disable-kw11-l Disable KW11-L decode\n"
+            "  -enable-kw11-p  Enable KW11-P decode\n"
+            "  -disable-kw11-p Disable KW11-P decode\n"
             "  -disable-lp     Disable LP11\n"
             "  -disable-rk     Disable RK11\n"
             "  -disable-rh     Disable RH11\n"
@@ -258,6 +263,8 @@ int main(int argc, char **argv)
     int force_dl11_alias = -1;
     int disable_dl = 0;
     int disable_kw = 0;
+    int kw11_l_override = -1;
+    int kw11_p_override = -1;
     int disable_lp = 0;
     int disable_rk = 0;
     int disable_rh = 0;
@@ -303,6 +310,14 @@ int main(int argc, char **argv)
             disable_dl = 1;
         } else if (!strcmp(argv[i], "-disable-kw")) {
             disable_kw = 1;
+        } else if (!strcmp(argv[i], "-enable-kw11-l")) {
+            kw11_l_override = 1;
+        } else if (!strcmp(argv[i], "-disable-kw11-l")) {
+            kw11_l_override = 0;
+        } else if (!strcmp(argv[i], "-enable-kw11-p")) {
+            kw11_p_override = 1;
+        } else if (!strcmp(argv[i], "-disable-kw11-p")) {
+            kw11_p_override = 0;
         } else if (!strcmp(argv[i], "-disable-lp")) {
             disable_lp = 1;
         } else if (!strcmp(argv[i], "-disable-rk")) {
@@ -399,6 +414,19 @@ int main(int argc, char **argv)
         lsi11_set_dl11_alias(force_dl11_alias);
     }
 
+    {
+        int kw11_l_on = 1;
+        int kw11_p_on = 0;
+
+        if (kw11_l_override >= 0) {
+            kw11_l_on = kw11_l_override;
+        }
+        if (kw11_p_override >= 0) {
+            kw11_p_on = kw11_p_override;
+        }
+        kw11_set_visibility(kw11_l_on, kw11_p_on);
+    }
+
     if (cpu_model == K1801VM1) {
         if (lsi11_set_device_enabled("vm1sel", 1, cfg_err, sizeof(cfg_err)) != 0 ||
                 lsi11_set_device_enabled("vm1sav", 1, cfg_err,
@@ -467,16 +495,21 @@ int main(int argc, char **argv)
         const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184"
                         : "lsi11";
         int rh11_on = lsi11_device_enabled("rh11");
+        int kw11_master = lsi11_device_enabled("kw11");
+        int kw11_l_on = kw11_master ? kw11_l_enabled() : 0;
+        int kw11_p_on = kw11_master ? kw11_p_enabled() : 0;
         fprintf(stderr,
                 "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
-                "dev_dl=%d dev_kw=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d "
-                "dev_sr=%d dev_vm1sel=%d dev_vm1sav=%d\n",
+                "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
+                "dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_sr=%d "
+                "dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
-                lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
-                lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
-                lsi11_device_enabled("rl11"), lsi11_device_enabled("sr"),
-                lsi11_device_enabled("vm1sel"), lsi11_device_enabled("vm1sav"));
+                kw11_master, kw11_l_on, kw11_p_on,
+                lsi11_device_enabled("lp11"), lsi11_device_enabled("rk11"),
+                lsi11_device_enabled("rh11"), lsi11_device_enabled("rl11"),
+                lsi11_device_enabled("sr"), lsi11_device_enabled("vm1sel"),
+                lsi11_device_enabled("vm1sav"));
         return 0;
     }
 

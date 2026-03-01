@@ -8,9 +8,15 @@
 #include <unistd.h>
 
 #include "../bus.h"
+#include "../dev_kw11.h"
 #include "../dev_rh11.h"
 #include "../dev_rk11.h"
 #include "../irq.h"
+
+#define KW11L_CSR 0177546
+#define KW11P_CSR 0172540
+#define KW11P_CSB 0172542
+#define KW11P_CTR 0172544
 
 #define RHCS1 0177440
 #define RHWC  0177442
@@ -120,12 +126,13 @@ int main(void)
     }
     bus_init();
 
-    if (rh11_init() != 0 || rk11_init() != 0) {
+    if (rh11_init() != 0 || rk11_init() != 0 || kw11_init() != 0) {
         fprintf(stderr, "FAIL: device init\n");
         return 1;
     }
     rh11_reset();
     rk11_reset();
+    kw11_reset();
 
     /* 1) decode and register accessibility on pdp1184 */
     check(bus_is_nxm(0170000) == 0,
@@ -141,6 +148,14 @@ int main(void)
     check(bus_read16(RHWC) == 012345, "RHWC readback");
     check(bus_read16(RHBA) == 000120, "RHBA readback");
     check(bus_read16(RHDA) == 000777, "RHDA readback");
+    check(bus_read16(KW11L_CSR) == 000200,
+          "KW11-L/LTC must decode on pdp1184 by default");
+    bus_write16(KW11P_CSB, 012345);
+    bus_write16(KW11P_CTR, 076543);
+    check(bus_read16(KW11P_CSB) == 012345,
+          "KW11-P CSB falls through to RAM when not enabled");
+    check(bus_read16(KW11P_CTR) == 076543,
+          "KW11-P CTR falls through to RAM when not enabled");
 
     if (make_image(img, 0100000) != 0) {
         fprintf(stderr, "FAIL: make image\n");

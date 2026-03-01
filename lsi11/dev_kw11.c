@@ -2,6 +2,7 @@
 #define _POSIX_C_SOURCE 200809L
 #endif
 #include "dev_kw11.h"
+#include "bus.h"
 #include "devio.h"
 #include "irq.h"
 #include <stdint.h>
@@ -52,6 +53,28 @@ static uint8_t kwp_irq_req = 0;
 static uint8_t kwp_irq_armed = 1;
 static uint64_t kwp_last_tick_ns = 0;
 static int kwp_clock_init = 0;
+static int kw11_l_visible = -1;
+static int kw11_p_visible = -1;
+
+static int kw11_default_l_visible(void)
+{
+    return 1;
+}
+
+static int kw11_default_p_visible(void)
+{
+    return 0;
+}
+
+static int kw11_l_visible_effective(void)
+{
+    return (kw11_l_visible >= 0) ? kw11_l_visible : kw11_default_l_visible();
+}
+
+static int kw11_p_visible_effective(void)
+{
+    return (kw11_p_visible >= 0) ? kw11_p_visible : kw11_default_p_visible();
+}
 
 static uint64_t now_ns(void)
 {
@@ -62,6 +85,22 @@ static uint64_t now_ns(void)
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
 #endif
+}
+
+void kw11_set_visibility(int enable_l, int enable_p)
+{
+    kw11_l_visible = enable_l ? 1 : 0;
+    kw11_p_visible = enable_p ? 1 : 0;
+}
+
+int kw11_l_enabled(void)
+{
+    return kw11_l_visible_effective();
+}
+
+int kw11_p_enabled(void)
+{
+    return kw11_p_visible_effective();
 }
 
 static void kwp_sw_clear_done(void)
@@ -285,11 +324,18 @@ int kw11_init(void)
 {
     static const io_range_t l = { 0177546, 0177547, kw11_read8, kw11_write8, "KW11-L" };
     static const io_range_t p = { 0172540, 0172545, kw11_read8, kw11_write8, "KW11-P" };
-    if (devio_register(&l) != 0) {
+    int l_on = kw11_l_visible_effective();
+    int p_on = kw11_p_visible_effective();
+
+    if (l_on && devio_register(&l) != 0) {
         return -1;
     }
-    if (devio_register(&p) != 0) {
+    if (p_on && devio_register(&p) != 0) {
         return -1;
+    }
+    if (!l_on && !p_on) {
+        kw11_reset();
+        return 0;
     }
 
     static const irq_source_t s = { "KW11", 000100, 6, kw11_irq_pending, kw11_irq_ack };
