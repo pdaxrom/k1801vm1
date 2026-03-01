@@ -153,6 +153,39 @@ static const char *cpu_model_name(byte model)
 }
 
 /*
+ * RK11 ROM bootstrap (DEC/SIMH compatible sequence).
+ * Reads one 256-word block from RK unit 0 into 000000 and jumps to 000000.
+ * Loaded/executed from 02000 to avoid clobbering low memory before transfer.
+ */
+#define RK_BOOT_ADDR  002000
+#define RK_BOOT_ENTRY (RK_BOOT_ADDR + 000002)
+static const uint16_t rk_bootstrap[] = {
+    0042113,                  /* "KD" */
+    0012706, RK_BOOT_ADDR,    /* MOV #BOOT_ADDR,SP */
+    0012700, 0000000,         /* MOV #0,R0          ; unit 0 */
+    0010003,                  /* MOV R0,R3 */
+    0000303,                  /* SWAB R3 */
+    0006303,                  /* ASL R3 */
+    0006303,                  /* ASL R3 */
+    0006303,                  /* ASL R3 */
+    0006303,                  /* ASL R3 */
+    0006303,                  /* ASL R3 */
+    0012701, 0177412,         /* MOV #RKDA,R1 */
+    0010311,                  /* MOV R3,(R1)        ; DA */
+    0005041,                  /* CLR -(R1)          ; BA */
+    0012741, 0177000,         /* MOV #-256.*2,-(R1) ; WC */
+    0012741, 0000005,         /* MOV #READ+GO,-(R1) */
+    0005002,                  /* CLR R2 */
+    0005003,                  /* CLR R3 */
+    0012704, RK_BOOT_ADDR + 000020, /* MOV #BOOT_ADDR+20,R4 */
+    0005005,                  /* CLR R5 */
+    0105711,                  /* WAIT: TSTB (R1) */
+    0100376,                  /*       BPL WAIT */
+    0105011,                  /* CLRB (R1) */
+    0005007                   /* CLR PC */
+};
+
+/*
  * RL11 ROM bootstrap (DEC/SIMH compatible sequence).
  * Reads one 256-word block from RL unit 0 into 000000 and jumps to 000000.
  * Loaded/executed from 02000 to avoid clobbering low memory before transfer.
@@ -173,6 +206,113 @@ static const uint16_t rl_bootstrap[] = {
     0100376,                  /*        BPL  WAIT2 */
     0005007                   /* CLR  PC */
 };
+
+/*
+ * RH11/RK611 ROM bootstrap (DEC/SIMH HK-compatible sequence).
+ * Reads one 256-word block from drive 0 into 000000 and jumps to 000000.
+ * Loaded/executed from 02000 to avoid clobbering low memory before transfer.
+ */
+#define RH_BOOT_ADDR  002000
+#define RH_BOOT_ENTRY (RH_BOOT_ADDR + 000002)
+static const uint16_t rh_bootstrap[] = {
+    0042115,                  /* "MD" */
+    0012706, RH_BOOT_ADDR,    /* MOV #BOOT_ADDR,SP */
+    0012700, 0000000,         /* MOV #0,R0          ; unit 0 */
+    0012701, 0177440,         /* MOV #RHCS1,R1 */
+    0012761, 0000040, 0000010,/* MOV #SCLR,10(R1)   ; reset */
+    0010061, 0000010,         /* MOV R0,10(R1)      ; set unit */
+    0016102, 0000012,         /* MOV 12(R1),R2      ; drive type */
+    0100375,                  /* BPL .-4            ; valid? */
+    0042702, 0177377,         /* BIC #177377,R2 */
+    0006302,                  /* ASL R2 */
+    0006302,                  /* ASL R2 */
+    0012703, 0000003,         /* MOV #PACK+GO,R3 */
+    0050203,                  /* BIS R2,R3 */
+    0010311,                  /* MOV R3,(R1) */
+    0105711,                  /* WAIT1: TSTB (R1) */
+    0100376,                  /*        BPL WAIT1 */
+    0012761, 0177000, 0000002,/* MOV #-512.,2(R1)   ; WC */
+    0005061, 0000004,         /* CLR 4(R1)          ; BA */
+    0005061, 0000006,         /* CLR 6(R1)          ; DA */
+    0005061, 0000020,         /* CLR 20(R1)         ; DC */
+    0012703, 0000021,         /* MOV #READ+GO,R3 */
+    0050203,                  /* BIS R2,R3 */
+    0010311,                  /* MOV R3,(R1) */
+    0105711,                  /* WAIT2: TSTB (R1) */
+    0100376,                  /*        BPL WAIT2 */
+    0005002,                  /* CLR R2 */
+    0005003,                  /* CLR R3 */
+    0012704, RH_BOOT_ADDR + 000020, /* MOV #BOOT_ADDR+20,R4 */
+    0005005,                  /* CLR R5 */
+    0005007                   /* CLR PC */
+};
+
+static int install_bootstrap(uint16_t base, const uint16_t *words, size_t word_count)
+{
+    uint8_t *ram = bus_ram_ptr(base);
+    size_t n = word_count * sizeof(uint16_t);
+
+    if (!ram || !bus_range_is_ram(base, n)) {
+        return -1;
+    }
+
+    for (size_t i = 0; i < word_count; i++) {
+        uint16_t w = words[i];
+        ram[i * 2 + 0] = (uint8_t)(w & 000377);
+        ram[i * 2 + 1] = (uint8_t)((w >> 8) & 000377);
+    }
+
+    return 0;
+}
+
+static int preload_rt11_boot_block(const char *path)
+{
+    const size_t n = 01000;
+    uint8_t buf[01000];
+    uint8_t *ram0;
+    FILE *f;
+    size_t got;
+    int all_zero = 1;
+
+    if (!path) {
+        return -1;
+    }
+
+    f = fopen(path, "rb");
+    if (!f) {
+        return -1;
+    }
+
+    got = fread(buf, 1, n, f);
+    if (got == n) {
+        for (size_t i = 0; i < n; i++) {
+            if (buf[i]) {
+                all_zero = 0;
+                break;
+            }
+        }
+    }
+    if (got != n || all_zero) {
+        if (fseek(f, (long)n, SEEK_SET) == 0) {
+            got = fread(buf, 1, n, f);
+            if (got == n) {
+                all_zero = 0;
+            }
+        }
+    }
+    fclose(f);
+
+    if (got != n || all_zero) {
+        return -1;
+    }
+
+    ram0 = bus_ram_ptr(0);
+    if (!ram0 || !bus_range_is_ram(0, n)) {
+        return -1;
+    }
+    memcpy(ram0, buf, n);
+    return 0;
+}
 
 static void usage(const char *argv0)
 {
@@ -218,8 +358,8 @@ static void usage(const char *argv0)
             "  -disable-sr     Disable SR\n"
             "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
             "000000\n"
-            "  -bootrt11       RK/RH: copy first 01000 bytes (or 2nd block if "
-            "empty); RL: run RL bootstrap\n"
+            "  -bootrt11       Run built-in RK/RH/RL bootstrap for the selected "
+            "controller\n"
             "  -trace          Trace each instruction\n"
             "  -trace-regs     With -trace, also dump registers\n"
             "  -traceirq       Trace delivered IRQ vectors\n"
@@ -613,70 +753,47 @@ int main(int argc, char **argv)
 
     if (do_bootrt11) {
         if (rl_path) {
-            uint8_t *ram0 = bus_ram_ptr(RL_BOOT_ADDR);
-            size_t n = sizeof(rl_bootstrap);
-            if (!ram0 || !bus_range_is_ram(RL_BOOT_ADDR, n)) {
+            if (install_bootstrap(RL_BOOT_ADDR, rl_bootstrap,
+                                  sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0])) !=
+                0) {
                 fprintf(stderr, "bootrt11 destination is outside RAM\n");
                 r.fini(&r);
                 return 1;
             }
-            for (size_t i = 0; i < (sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0]));
-                    i++) {
-                uint16_t w = rl_bootstrap[i];
-                ram0[i * 2 + 0] = (uint8_t)(w & 000377);
-                ram0[i * 2 + 1] = (uint8_t)((w >> 8) & 000377);
-            }
             r.r[7] = RL_BOOT_ENTRY;
-        } else {
-            const char *boot_path = rk_path ? rk_path : (rh_path ? rh_path : rl_path);
-            if (!boot_path) {
-                fprintf(stderr,
-                        "-bootrt11 requires -rk <image>, -rh <image>, or -rl <image>\n");
-                r.fini(&r);
-                return 1;
-            }
-            FILE *f = fopen(boot_path, "rb");
-            if (!f) {
-                fprintf(stderr, "Cannot open boot image: %s\n", boot_path);
-                r.fini(&r);
-                return 1;
-            }
-            const size_t n = 01000;
-            uint8_t buf[01000];
-            size_t got = fread(buf, 1, n, f);
-            int all_zero = 1;
-            if (got == n) {
-                for (size_t i = 0; i < n; i++) {
-                    if (buf[i]) {
-                        all_zero = 0;
-                        break;
-                    }
-                }
-            }
-            if (got != n || all_zero) {
-                if (fseek(f, (long)n, SEEK_SET) == 0) {
-                    got = fread(buf, 1, n, f);
-                    if (got == n) {
-                        all_zero = 0;
-                    }
-                }
-            }
-            fclose(f);
-            if (got != n || all_zero) {
+        } else if (rk_path) {
+            if (preload_rt11_boot_block(rk_path) != 0) {
                 fprintf(stderr, "RT11 boot block not found in image\n");
                 r.fini(&r);
                 return 1;
             }
-            {
-                uint8_t *ram0 = bus_ram_ptr(0);
-                if (!ram0 || !bus_range_is_ram(0, n)) {
-                    fprintf(stderr, "bootrt11 destination is outside RAM\n");
-                    r.fini(&r);
-                    return 1;
-                }
-                memcpy(ram0, buf, n);
+            if (install_bootstrap(RK_BOOT_ADDR, rk_bootstrap,
+                                  sizeof(rk_bootstrap) / sizeof(rk_bootstrap[0])) !=
+                0) {
+                fprintf(stderr, "bootrt11 destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
             }
-            r.r[7] = 000000;
+            r.r[7] = RK_BOOT_ENTRY;
+        } else if (rh_path) {
+            if (preload_rt11_boot_block(rh_path) != 0) {
+                fprintf(stderr, "RT11 boot block not found in image\n");
+                r.fini(&r);
+                return 1;
+            }
+            if (install_bootstrap(RH_BOOT_ADDR, rh_bootstrap,
+                                  sizeof(rh_bootstrap) / sizeof(rh_bootstrap[0])) !=
+                0) {
+                fprintf(stderr, "bootrt11 destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            r.r[7] = RH_BOOT_ENTRY;
+        } else {
+            fprintf(stderr,
+                    "-bootrt11 requires -rk <image>, -rh <image>, or -rl <image>\n");
+            r.fini(&r);
+            return 1;
         }
     }
 
