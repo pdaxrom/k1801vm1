@@ -62,8 +62,14 @@ static uint8_t lp11_read8(uint16_t a)
 static void lp11_write8(uint16_t a, uint8_t v)
 {
     if (a == LP11_CSR) {
-        /* allow IE writes; do NOT clear DONE here unless you explicitly want that feature */
-        irq_latch_set_ie(&lp_l, (v & CSR_IE) ? 1 : 0);
+        int old_ie = lp_l.ie;
+        int new_ie = (v & CSR_IE) ? 1 : 0;
+
+        /* LP11 should interrupt immediately when IE is enabled while DONE=1. */
+        irq_latch_set_ie(&lp_l, new_ie);
+        if (!old_ie && new_ie && lp_l.done) {
+            lp_l.irq_req = 1;
+        }
         return;
     }
     if (a == (uint16_t)(LP11_CSR + 1)) {

@@ -229,13 +229,16 @@ static void test_lp11(regs *r)
 
     reset_devices();
 
-    /* enable IE */
+    /* Enable IE while DONE already set -> immediate IRQ request. */
     wr8(LP11_CSR, 000100);
+    check(poll_irq(r, &vec) == 1, "LP11: immediate IRQ when IE set with DONE=1");
+    check((vec & 0000777) == 000200, "LP11: immediate vector 000200");
 
     /* software clears DONE by writing DBR; device then sets DONE=1 again (event)
      */
     wr8(LP11_DBR, 'X');
 
+    vec = 0;
     check(poll_irq(r, &vec) == 1, "LP11: IRQ delivered");
     check((vec & 0000777) == 000200, "LP11: vector 000200");
 
