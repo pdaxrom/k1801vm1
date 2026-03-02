@@ -1829,7 +1829,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         return r->ram_fast[offset];
     }
 #else
-    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE) && !is_ifetch) {
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
@@ -1986,7 +1986,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
     }
 #else
-    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE) && !is_ifetch) {
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
@@ -2450,6 +2450,7 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
     word new_pc = 0;
     word fetched_psw = 0;
     word new_psw = 0;
+    int trace_emit = 0;
     static int trace_init = 0;
     static int trace_on = 0;
 
@@ -2457,9 +2458,16 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
         trace_on = (getenv("CORE_TRACE_TRAPVEC") != NULL) ? 1 : 0;
         trace_init = 1;
     }
-    if (trace_on) {
+    trace_emit = trace_on;
+    if (trace_emit && kind && strcmp(kind, "IRQ") == 0) {
+        trace_emit = 0;
+    }
+    if (trace_emit && kind && strcmp(kind, "TRAP") == 0 && vec == 000034) {
+        trace_emit = 0;
+    }
+    if (trace_emit) {
         fprintf(stderr,
-                "TRAPVEC kind=%s vec=%06o oldpc=%06o oldps=%06o sp=%06o ir=%06o\n",
+                "TRAPVEC kind=%s vec=%06o oldpc=%06o oldps=%06o sp=%06o ir=%06o",
                 kind ? kind : "?", vec, old_pc, old_psw, r->r[6], r->ir);
     }
 
@@ -2470,6 +2478,52 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
     new_pc = load_word_vector(r, vec);
     if (r->fAbort) {
         return;
+    }
+    if (trace_emit) {
+        fprintf(stderr, " newpc=%06o newps=%06o\n", new_pc, fetched_psw);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+        if (r->model == DCJ11 && vec == 000034) {
+            dword pa_pc = 0;
+            dword pa_ps = 0;
+            int fault_pc = MMU_FAULT_NONE;
+            int fault_ps = MMU_FAULT_NONE;
+            int space_pc = 0;
+            int seg_pc = 0;
+            int space_ps = 0;
+            int seg_ps = 0;
+            int kds = mmu_split_enabled(r, 0) ? 1 : 0;
+            int rc_pc = translate_va_mode_space(r, vec, 0, 0, 1, &pa_pc, &fault_pc,
+                                                &space_pc, &seg_pc);
+            int rc_ps = translate_va_mode_space(r, (word)(vec + 2), 0, 0, 1, &pa_ps,
+                                                &fault_ps, &space_ps, &seg_ps);
+            fprintf(stderr,
+                    "TRAPVEC034 mmr0=%06o mmr3=%06o kds=%o "
+                    "par0=%06o pdr0=%06o pcpa=%08o(rc=%d f=%d s=%d g=%d) "
+                    "pspa=%08o(rc=%d f=%d s=%d g=%d)\n",
+                    r->mmu_ssr0, r->mmu_ssr3, kds,
+                    r->mmu_par[0][kds][0], r->mmu_pdr[0][kds][0], pa_pc, rc_pc,
+                    fault_pc, space_pc, seg_pc, pa_ps, rc_ps, fault_ps, space_ps,
+                    seg_ps);
+        }
+        if (r->model == DCJ11 && vec == 000010) {
+            dword pa_oldpc = 0;
+            int fault_oldpc = MMU_FAULT_NONE;
+            int mode_oldpc = 0;
+            int space_oldpc = 0;
+            int seg_oldpc = 0;
+            int rc_oldpc = translate_va(r, old_pc, 0, 1, &pa_oldpc, &fault_oldpc,
+                                        &mode_oldpc, &space_oldpc, &seg_oldpc);
+            word phys_ir = 0;
+            if (rc_oldpc == 0) {
+                phys_ir = raw_load_word_phys(r, pa_oldpc);
+            }
+            fprintf(stderr,
+                    "TRAPVEC010 oldpc-map pa=%08o rc=%d f=%d m=%d s=%d g=%d "
+                    "phys_ir=%06o mmr0=%06o mmr3=%06o\n",
+                    pa_oldpc, rc_oldpc, fault_oldpc, mode_oldpc, space_oldpc,
+                    seg_oldpc, phys_ir, r->mmu_ssr0, r->mmu_ssr3);
+        }
+#endif
     }
 
     new_psw = trap_psw(r, old_psw, fetched_psw);

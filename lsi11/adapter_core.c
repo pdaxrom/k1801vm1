@@ -12,6 +12,7 @@
 #include "dev_rl11.h"
 #include "dev_sr.h"
 #include "tq11.h"
+#include "ubmap.h"
 #include "dev_vm1sav.h"
 #include "dev_vm1sel.h"
 
@@ -486,10 +487,6 @@ static inline int j11_probe_shadow_to_a18(paddr_t addr, paddr_t *a18_out)
         *a18_out = addr;
         return 1;
     }
-    if (addr >= 0160000 && addr <= 0177777) {
-        *a18_out = (0600000 | (addr & 0177777));
-        return 1;
-    }
     return 0;
 }
 
@@ -794,6 +791,9 @@ static int impl_init(regs *r)
     bus_init();
     j11_probe_shadow_reset();
     dl11_set_alias(dl11_alias_on);
+    if (ubmap_init() != 0) {
+        return -1;
+    }
 
     /* Enforce VM1-only extension peripheral visibility by CPU model. */
     if (need_vm1_ext) {
@@ -850,6 +850,7 @@ static void impl_reset(regs *r)
 {
     (void)r;
     j11_probe_shadow_reset();
+    ubmap_reset();
     if (r->model == DCJ11) {
         if (machine_profile == LSI11_MACHINE_1184) {
             /* Match PDP-11/84 identification path expected by RT-11 monitor. */

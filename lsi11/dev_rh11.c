@@ -1,6 +1,7 @@
 #include "dev_rh11.h"
 
 #include "bus.h"
+#include "ubmap.h"
 #include "devio.h"
 #include "irq.h"
 #include "irq_latch.h"
@@ -249,14 +250,18 @@ static void rh_ba_inc(uint16_t *ba, uint8_t *ext)
     }
 }
 
-static paddr_t rh_pa(uint16_t ba, uint8_t ext)
+static paddr_t rh_dma_pa(uint16_t ba, uint8_t ext)
 {
-    return (paddr_t)(((uint32_t)(ext & 03) << 16) | ba);
+    uint32_t uba = (((uint32_t)(ext & 03u)) << 16) | (uint32_t)ba; /* 18-bit */
+    if (bus_machine() == BUS_MACHINE_PDP1184) {
+        return ubmap_map_addr(uba & 000777777u);
+    }
+    return (paddr_t)(uba & 000777777u);
 }
 
 static int rh_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 {
-    paddr_t pa = rh_pa(ba, ext);
+    paddr_t pa = rh_dma_pa(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
@@ -269,7 +274,7 @@ static int rh_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 
 static int rh_dma_write_word(uint16_t ba, uint8_t ext, uint16_t w)
 {
-    paddr_t pa = rh_pa(ba, ext);
+    paddr_t pa = rh_dma_pa(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
@@ -388,6 +393,12 @@ static void rh_transfer(enum rh_xfer_mode mode)
         return;
     }
 
+    if (rh_debug) {
+        fprintf(stderr,
+                "RH11 XFER start wc=%06o words=%d ba=%06o ext=%o dc=%06o da=%06o mode=%d bai=%d\n",
+                rhwc, words, cur_ba, cur_ext, cur_dc, cur_da, mode, bai);
+    }
+
     for (int i = 0; i < words; i++) {
         uint32_t lba = 0;
         uint16_t w = 0;
@@ -492,6 +503,11 @@ static void rh_transfer(enum rh_xfer_mode mode)
     rhdc = cur_dc;
     rhda = cur_da;
     rh_cs1_ba_ext_set(cur_ext);
+    if (rh_debug) {
+        fprintf(stderr,
+                "RH11 XFER end   wc=%06o ba=%06o ext=%o dc=%06o da=%06o err=%d\n",
+                rhwc, rhba, rh_cs1_ba_ext_get(), rhdc, rhda, had_error);
+    }
     (void)had_error;
     rh_finish_command();
 }
@@ -634,7 +650,7 @@ static void rh_write8(uint16_t addr, uint8_t b)
             rhcs2 &= RHCS2_RW_MASK;
             rhcs2 |= RHCS2_IR;
             rhds &= (uint16_t)~RHDS_DRDY;
-            if (rh_debug && (rhcs1 & RHCS1_IE)) {
+            if (rh_debug) {
                 rh_debug_active = 1;
                 fprintf(stderr,
                         "RH11 GO cs1=%06o wc=%06o ba=%06o ext=%o dc=%06o da=%06o cs2=%06o func=%03o\n",

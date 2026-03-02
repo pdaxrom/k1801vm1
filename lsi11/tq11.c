@@ -4,6 +4,7 @@
 #include "devio.h"
 #include "emu_file.h"
 #include "irq.h"
+#include "ubmap.h"
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -331,45 +332,66 @@ static void tq_raise_irq(void)
     tq_log("irq req vec=%06o pri=%o", (unsigned)TQ_VECTOR, (unsigned)TQ_PRIORITY);
 }
 
+static paddr_t tq_dma_map_addr(uint32_t bus_addr)
+{
+    /*
+     * TQ11 is modelled as a UNIBUS DMA device on pdp1184:
+     * DMA address is 18-bit, optionally translated by UBM (MMR3<040>).
+     */
+    if (bus_machine() == BUS_MACHINE_PDP1184) {
+        return ubmap_map_addr(bus_addr & 000777777u);
+    }
+    return (paddr_t)bus_addr;
+}
+
 static int tq_dma_read8_checked(paddr_t addr, uint8_t *v)
 {
+    paddr_t pa = tq_dma_map_addr((uint32_t)addr);
+
     if (!v) {
         return -1;
     }
-    if (!bus_range_is_ram(addr, 1) || bus_is_nxm(addr)) {
+    if (!bus_range_is_ram(pa, 1) || bus_is_nxm(pa)) {
         return -1;
     }
-    *v = bus_read8(addr);
+    *v = bus_read8(pa);
     return 0;
 }
 
 static int tq_dma_write8_checked(paddr_t addr, uint8_t v)
 {
-    if (!bus_range_is_ram(addr, 1) || bus_is_nxm(addr)) {
+    paddr_t pa = tq_dma_map_addr((uint32_t)addr);
+
+    if (!bus_range_is_ram(pa, 1) || bus_is_nxm(pa)) {
         return -1;
     }
-    bus_write8(addr, v);
+    bus_write8(pa, v);
     return 0;
 }
 
 static int tq_dma_read16_checked(paddr_t addr, uint16_t *v)
 {
+    uint8_t lo;
+    uint8_t hi;
+
     if (!v) {
         return -1;
     }
-    if (!bus_range_is_ram(addr, 2) || bus_is_nxm(addr) || bus_is_nxm(addr + 1u)) {
+    if (tq_dma_read8_checked(addr, &lo) != 0 ||
+            tq_dma_read8_checked((paddr_t)(addr + 1u), &hi) != 0) {
         return -1;
     }
-    *v = bus_read16(addr);
+    *v = (uint16_t)((uint16_t)lo | ((uint16_t)hi << 8));
     return 0;
 }
 
 static int tq_dma_write16_checked(paddr_t addr, uint16_t v)
 {
-    if (!bus_range_is_ram(addr, 2) || bus_is_nxm(addr) || bus_is_nxm(addr + 1u)) {
+    if (tq_dma_write8_checked(addr, (uint8_t)(v & 000377u)) != 0 ||
+            tq_dma_write8_checked((paddr_t)(addr + 1u),
+                                  (uint8_t)((v >> 8) & 000377u)) != 0) {
         return -1;
     }
-    bus_write16(addr, v);
     return 0;
 }
 
