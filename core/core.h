@@ -97,6 +97,8 @@ typedef struct _regs {
     /* DCJ11 delayed stack trap state (yellow stack at end of instruction). */
     byte dcj11_yellow_pending;
     byte dcj11_stack_trap_active;
+    /* Set when an instruction explicitly writes PSW via @#177776. */
+    byte dcj11_explicit_psw_write;
     /* Set while trap/interrupt stack frame words are being pushed. */
     byte dcj11_vector_push_active;
     /* Old state to push for an active vector sequence (for red-stack fallback). */

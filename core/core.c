@@ -48,12 +48,20 @@
 
 #define clear_flag(f)                                                          \
   {                                                                            \
-    r->psw &= ~(f);                                                            \
+    word _mask = (word)(f);                                                    \
+    if (r->model == DCJ11 && r->dcj11_explicit_psw_write) {                   \
+      _mask &= (word)~(FLAG_N | FLAG_Z | FLAG_V | FLAG_C);                    \
+    }                                                                          \
+    r->psw &= (word)~_mask;                                                    \
   }
 
 #define set_flag(f)                                                            \
   {                                                                            \
-    r->psw |= (f);                                                             \
+    word _mask = (word)(f);                                                    \
+    if (r->model == DCJ11 && r->dcj11_explicit_psw_write) {                   \
+      _mask &= (word)~(FLAG_N | FLAG_Z | FLAG_V | FLAG_C);                    \
+    }                                                                          \
+    r->psw |= _mask;                                                           \
   }
 
 #define flag_is_set(f) ((r->psw & (f)) == (f))
@@ -74,22 +82,26 @@
  */
 #define PSW_SET_NZV_WORD(result)                                               \
   do {                                                                         \
-    word _f = 0;                                                               \
-    if ((result) & SIGN)                                                       \
-      _f |= FLAG_N;                                                            \
-    if ((word)(result) == 0)                                                   \
-      _f |= FLAG_Z;                                                            \
-    r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                      \
+    if (!(r->model == DCJ11 && r->dcj11_explicit_psw_write)) {                \
+      word _f = 0;                                                             \
+      if ((result) & SIGN)                                                     \
+        _f |= FLAG_N;                                                          \
+      if ((word)(result) == 0)                                                 \
+        _f |= FLAG_Z;                                                          \
+      r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                    \
+    }                                                                          \
   } while (0)
 
 #define PSW_SET_NZV_BYTE(result)                                               \
   do {                                                                         \
-    word _f = 0;                                                               \
-    if ((result) & SIGN_B)                                                     \
-      _f |= FLAG_N;                                                            \
-    if (((result) & 0377) == 0)                                                \
-      _f |= FLAG_Z;                                                            \
-    r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                      \
+    if (!(r->model == DCJ11 && r->dcj11_explicit_psw_write)) {                \
+      word _f = 0;                                                             \
+      if ((result) & SIGN_B)                                                   \
+        _f |= FLAG_N;                                                          \
+      if (((result) & 0377) == 0)                                              \
+        _f |= FLAG_Z;                                                          \
+      r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                    \
+    }                                                                          \
   } while (0)
 
 static INLINE dword arith_rshift32(dword value, word count)
@@ -421,6 +433,7 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
         return true;
     case DCJ11_REG_PSW:
         dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
+        r->dcj11_explicit_psw_write = 1;
         return true;
     default:
         return false;
@@ -637,8 +650,9 @@ static INLINE void dcj11_write_mode_reg(regs *r, int mode, word reg,
 
 #define pullw(v)                                                               \
   {                                                                            \
-    v = load_word(r, r->r[6]);                                                 \
+    word _pull_tmp = load_word(r, r->r[6]);                                    \
     r->r[6] += 2;                                                              \
+    v = _pull_tmp;                                                             \
   }
 
 static INLINE int irq_accept(regs *r, word irq_vector, word *vec_out)
@@ -2365,6 +2379,7 @@ void core_reset(regs *r)
     r->rset_bank_init = 0;
     r->dcj11_yellow_pending = 0;
     r->dcj11_stack_trap_active = 0;
+    r->dcj11_explicit_psw_write = 0;
     r->dcj11_vector_push_active = 0;
     r->dcj11_vector_old_pc = 0;
     r->dcj11_vector_old_psw = 0;
@@ -2935,6 +2950,7 @@ int core_step(regs *r)
     int skip_irq = 0;
     int skip_trace = r->fTrap ? 1 : 0;
     r->fTrap = 0;
+    r->dcj11_explicit_psw_write = 0;
 
     if (r->fAbort) {
         r->fAbort = 0;
@@ -3795,8 +3811,8 @@ int core_step(regs *r)
     case 00056: { /* SBC */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if(tmp == MNI, FLAG_V);
         byte flag_c = flag_is_set(FLAG_C);
+        set_flag_if(flag_c && (tmp == MNI), FLAG_V);
         byte tmp_c = flag_c && (tmp == 0);
         if (flag_c) {
             tmp = tmp - 1;
@@ -3810,8 +3826,8 @@ int core_step(regs *r)
     case 01056: { /* SBCB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if(tmp == MNI_B, FLAG_V);
         byte flag_c = flag_is_set(FLAG_C);
+        set_flag_if(flag_c && (tmp == MNI_B), FLAG_V);
         byte tmp_c = flag_c && (tmp == 0);
         if (flag_c) {
             tmp = (tmp - 1) & 0377;
@@ -4198,8 +4214,12 @@ int core_step(regs *r)
         divisor = (sdword)(sword)get_data_word(r, dst_type, dst_offset);
 
         if (divisor == 0) {
-            clear_flag(FLAG_N);
-            clear_flag(FLAG_Z);
+            /*
+             * Divide by zero does not update registers; keep N/Z consistent
+             * with the unchanged quotient register R.
+             */
+            set_flag_if(((sword)r->r[reg]) < 0, FLAG_N);
+            set_flag_if(r->r[reg] == 0, FLAG_Z);
             set_flag(FLAG_V);
             set_flag(FLAG_C);
             goto step_end;

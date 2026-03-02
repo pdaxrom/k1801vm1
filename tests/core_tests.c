@@ -1266,6 +1266,33 @@ cleanup:
     return rc;
 }
 
+static int test_rts_sp_loads_exact_stack_word(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(0, 6)), /* MOV #02000,SP */
+        002000,
+        op_rts(6),                            /* RTS SP */
+    };
+
+    current_test = "rts_sp_exact_stack_word";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+    store_word(&fx, 002000, 012345);
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #02000,SP should succeed");
+    ASSERT_EQ(fx.r.r[6], 002000, "SP should load immediate");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "RTS SP should succeed");
+    ASSERT_EQ(fx.r.r[7], 002000, "RTS SP should jump to old SP");
+    ASSERT_EQ(fx.r.r[6], 012345, "RTS SP should load exact stack word into SP");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_sob_loops_expected_count(void)
 {
     cpu_fixture fx;
@@ -3483,6 +3510,14 @@ static int test_single_operand_word_ops_model(byte model, const char *name)
     ASSERT_EQ(fx.r.r[0], 0177777, "SBC should subtract carry");
     expect_flags(&fx.r, 1, 0, 0, 1);
 
+    set_test_name(namebuf, sizeof(namebuf), "sbc_v_requires_c", name);
+    fx.r.r[0] = 0100000;
+    fx.r.psw = 0;
+    write_op(&fx, op_sbc(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SBC (C=0)");
+    ASSERT_EQ(fx.r.r[0], 0100000, "SBC with C=0 should keep operand");
+    expect_flags(&fx.r, 1, 0, 0, 0);
+
 cleanup:
     fixture_teardown(&fx);
     return rc;
@@ -3592,6 +3627,14 @@ static int test_single_operand_byte_ops_model(byte model, const char *name)
     ASSERT_EQ(core_step(&fx.r), 0, "SBCB");
     ASSERT_EQ(fx.r.r[0] & 0377, 0377, "SBCB should subtract carry");
     expect_flags(&fx.r, 1, 0, 0, 1);
+
+    set_test_name(namebuf, sizeof(namebuf), "sbcb_v_requires_c", name);
+    fx.r.r[0] = 0000200;
+    fx.r.psw = 0;
+    write_op(&fx, op_sbcb(operand(0, 0)));
+    ASSERT_EQ(core_step(&fx.r), 0, "SBCB (C=0)");
+    ASSERT_EQ(fx.r.r[0] & 0377, 0200, "SBCB with C=0 should keep operand");
+    expect_flags(&fx.r, 1, 0, 0, 0);
 
 cleanup:
     fixture_teardown(&fx);
@@ -5388,6 +5431,35 @@ static int test_dcj11_explicit_psw_write_preserves_t(void)
     fx.r.fTrap = 1; /* avoid trace side effect while validating explicit write policy */
     ASSERT_EQ(core_step(&fx.r), 0, "Explicit PSW write should execute");
     ASSERT_EQ(fx.r.psw & FLAG_T, FLAG_T, "Explicit PSW write must not clear T on DCJ11");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_dcj11_mov_to_psw_keeps_written_cc(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word program[] = {
+        op_mov(operand(2, 7), operand(3, 7)), /* MOV #000377,@#177776 */
+        000377,
+        0177776,
+        op_mov(operand(3, 7), operand(0, 0)), /* MOV @#177776,R0 */
+        0177776,
+    };
+
+    current_test = "dcj11_mov_to_psw_keeps_written_cc";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    fx.r.psw = 000340;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV #000377,@#177776 should execute");
+    ASSERT_EQ(fx.r.psw, 000357, "PSW should keep explicitly written CC bits");
+
+    ASSERT_EQ(core_step(&fx.r), 0, "MOV @#177776,R0 should execute");
+    ASSERT_EQ(fx.r.r[0], 000357, "Readback from @#177776 should match written PSW");
 
 cleanup:
     fixture_teardown(&fx);
@@ -7959,6 +8031,7 @@ int main(void)
     failed += test_subtract_with_borrow();
     failed += test_branch_on_equal_skips_instruction();
     failed += test_jsr_and_rts_restore_context();
+    failed += test_rts_sp_loads_exact_stack_word();
     failed += test_sob_loops_expected_count();
     failed += test_emt_pushes_and_vectors();
     failed += test_trap_pushes_and_vectors();
@@ -8055,6 +8128,7 @@ int main(void)
     failed += test_dcj11_rtt_traces_after_one_instruction();
     failed += test_dcj11_rti_restores_state();
     failed += test_dcj11_explicit_psw_write_preserves_t();
+    failed += test_dcj11_mov_to_psw_keeps_written_cc();
     failed += test_vm_psw_addr_is_plain_memory_model(K1801VM1, "K1801VM1");
     failed += test_vm_psw_addr_is_plain_memory_model(K1801VM2, "K1801VM2");
     failed += test_vm_psw_addr_is_plain_memory_model(K1806VM2, "K1806VM2");
