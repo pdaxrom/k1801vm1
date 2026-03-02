@@ -16,6 +16,7 @@ CFG_PDP1184 := -DENABLE_MMU=1 -DLSI11_TARGET_1184=1
 
 COMMON_SRCS := \
   bus.c \
+  ubmap.c \
   devio.c \
   irq.c \
   emu_file.c \
@@ -59,7 +60,8 @@ TESTS_LSI11 := \
   tests/test_tq11_tap
 
 TESTS_PDP1184 := \
-  tests/test_rh11_pdp1184
+  tests/test_rh11_pdp1184 \
+  tests/test_pdp1184_io_window
 
 ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
 
@@ -130,6 +132,9 @@ tests/test_tq11_tap: $(BUILD_DIR)/test-lsi11/tests/test_tq11_tap.o $(TEST_COMMON
 tests/test_rh11_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh11_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_pdp1184_io_window: $(BUILD_DIR)/test-pdp1184/tests/test_pdp1184_io_window.o $(TEST_COMMON_OBJS_PDP1184)
+	$(CC) $(CFLAGS) -o $@ $^
+
 test: test-lsi11
 
 test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
@@ -154,6 +159,8 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
 	@echo "Running RH11 pdp1184 tests..."
 	./tests/test_rh11_pdp1184
+	@echo "Running pdp1184 I/O window tests..."
+	./tests/test_pdp1184_io_window
 	@echo "Running pdp1184 RAM/config tests..."
 	./tests/test_pdp1184_ram.sh ./$(BIN_PDP1184)
 	@echo "Running core MMU suite (ENABLE_MMU=1)..."

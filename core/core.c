@@ -715,8 +715,97 @@ static INLINE int core_poll_irq_any(regs *r, word *irq_vector)
 #define raw_load_word(a, b) (((a)->load_word)((a), (b)))
 #define raw_store_word(a, b, c) (((a)->store_word)((a), (b), (c)))
 
+static INLINE int mmu_is_reg_address(word addr);
+static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out);
+static INLINE int mmu_io_write_word(regs *r, word addr, word value);
+static INLINE int mmu_io_read_byte(regs *r, word addr, byte *value_out);
+static INLINE int mmu_io_write_byte(regs *r, word addr, byte value);
+
+static INLINE int dcj11_io_alias_offset(dword pa, word *offset_out)
+{
+    if (!offset_out) {
+        return 0;
+    }
+    if (pa < 017760000 || pa > 017777777) {
+        return 0;
+    }
+    *offset_out = (word)(pa & 0177777);
+    return 1;
+}
+
+static INLINE int core_watch_pa_get(dword *pa_out)
+{
+    static int init = 0;
+    static int on = 0;
+    static dword pa = 0;
+
+    if (!init) {
+        const char *env = getenv("CORE_WATCH_PA");
+        if (env && *env) {
+            char *endp = NULL;
+            unsigned long v = strtoul(env, &endp, 8);
+            if (endp != env && *endp == '\0' && v <= 017777777u) {
+                pa = (dword)v;
+                on = 1;
+            }
+        }
+        init = 1;
+    }
+
+    if (!on) {
+        return 0;
+    }
+    if (pa_out) {
+        *pa_out = pa;
+    }
+    return 1;
+}
+
+static INLINE void core_watch_store(const char *kind, regs *r, word va, dword pa,
+                                    word value, int is_word)
+{
+    dword want = 0;
+
+    if (!core_watch_pa_get(&want)) {
+        return;
+    }
+    if (is_word) {
+        if (pa != want && (pa + 1) != want) {
+            return;
+        }
+    } else if (pa != want) {
+        return;
+    }
+
+    fprintf(stderr,
+            "COREWATCH %s pc=%06o va=%06o pa=%08o v=%06o ps=%06o ir=%06o\n",
+            kind, r->r[7], va, (unsigned)pa, value, r->psw, r->ir);
+}
+
+static INLINE int dcj11_phys_internal_reg(word offset)
+{
+    word a = (word)(offset & 0177776);
+
+    if (a >= DCJ11_REG_MEMERR && a <= DCJ11_REG_PSW) {
+        return 1;
+    }
+    return mmu_is_reg_address(a);
+}
+
 static INLINE byte raw_load_byte_phys(regs *r, dword pa)
 {
+    word offset;
+    byte value8;
+
+    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+        if (dcj11_reg_block_load_byte(r, offset, &value8)) {
+            return value8;
+        }
+        if (mmu_io_read_byte(r, offset, &value8)) {
+            return value8;
+        }
+    }
+
     /*
      * Keep legacy 16-bit path for low addresses so existing
      * memory-mapped register decode remains intact.
@@ -732,6 +821,17 @@ static INLINE byte raw_load_byte_phys(regs *r, dword pa)
 
 static INLINE void raw_store_byte_phys(regs *r, dword pa, byte value)
 {
+    word offset;
+
+    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+        if (dcj11_reg_block_store_byte(r, offset, value)) {
+            return;
+        }
+        if (mmu_io_write_byte(r, offset, value)) {
+            return;
+        }
+    }
+
     if (pa <= 0177777) {
         raw_store_byte(r, (word)pa, value);
         return;
@@ -745,6 +845,18 @@ static INLINE void raw_store_byte_phys(regs *r, dword pa, byte value)
 
 static INLINE word raw_load_word_phys(regs *r, dword pa)
 {
+    word offset;
+    word value;
+
+    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+        if (dcj11_reg_block_load_word(r, offset, &value)) {
+            return value;
+        }
+        if (mmu_io_read_word(r, offset, &value)) {
+            return value;
+        }
+    }
+
     if (pa <= 0177777) {
         return raw_load_word(r, (word)pa);
     }
@@ -756,6 +868,17 @@ static INLINE word raw_load_word_phys(regs *r, dword pa)
 
 static INLINE void raw_store_word_phys(regs *r, dword pa, word value)
 {
+    word offset;
+
+    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+        if (dcj11_reg_block_store_word(r, offset, value)) {
+            return;
+        }
+        if (mmu_io_write_word(r, offset, value)) {
+            return;
+        }
+    }
+
     if (pa <= 0177777) {
         raw_store_word(r, (word)pa, value);
         return;
@@ -824,10 +947,8 @@ enum {
 #define MMU_PDR_W 0000100
 #define MMU_PDR_A 0000200
 
-#define MMU_PA18_MASK 000777777
+#define MMU_PA16_MASK 000177777
 #define MMU_PA22_MASK 017777777
-#define MMU_PA18_IOPAGE_BASE 000760000
-#define MMU_PA22_IOPAGE_PREFIX 017000000
 
 #define MMU_TRAP_VECTOR 0000250
 
@@ -994,6 +1115,13 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
 {
     int mode, space, is_par, seg;
     word a = (word)(addr & 0177776);
+    static int trace_init = 0;
+    static int trace_on = 0;
+
+    if (!trace_init) {
+        trace_on = (getenv("CORE_TRACE_MMU_WR") != NULL) ? 1 : 0;
+        trace_init = 1;
+    }
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
 #if !(MMU_STUB_REGS_WHEN_DISABLED)
@@ -1016,6 +1144,10 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
             (word)((r->mmu_ssr0 & ~MMU_SSR0_J_WR_MASK) | (data & MMU_SSR0_J_WR_MASK));
         if ((old_ssr0 ^ value) & MMU_SSR0_ENABLE) {
             mmu_tlb_flush_all(r);
+        }
+        if (trace_on) {
+            fprintf(stderr, "MMUWR pc=%06o reg=%06o old=%06o new=%06o\n", r->r[7], a,
+                    old_ssr0, r->mmu_ssr0);
         }
 #else
         (void)value;
@@ -1040,8 +1172,13 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
+        word old = r->mmu_ssr3;
         r->mmu_ssr3 = (word)(value & MMU_SSR3_J_MASK);
         mmu_tlb_flush_all(r);
+        if (trace_on) {
+            fprintf(stderr, "MMUWR pc=%06o reg=%06o old=%06o new=%06o\n", r->r[7], a,
+                    old, r->mmu_ssr3);
+        }
 #else
         (void)value;
 #endif
@@ -1049,6 +1186,7 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (mmu_decode_parpdr(a, &mode, &space, &is_par, &seg)) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
+        word old = is_par ? r->mmu_par[mode][space][seg] : r->mmu_pdr[mode][space][seg];
         if (is_par) {
             r->mmu_par[mode][space][seg] = (word)(value & MMU_PAR_J_MASK);
             /* Any APR write clears status bits in the paired PDR. */
@@ -1059,6 +1197,12 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
                 (word)((value & MMU_PDR_J_MASK) & ~(MMU_PDR_A | MMU_PDR_W));
         }
         mmu_tlb_update(r, mode, space, seg);
+        if (trace_on) {
+            word now = is_par ? r->mmu_par[mode][space][seg] : r->mmu_pdr[mode][space][seg];
+            fprintf(stderr,
+                    "MMUWR pc=%06o reg=%06o %s m=%d s=%d g=%d old=%06o new=%06o\n",
+                    r->r[7], a, is_par ? "PAR" : "PDR", mode, space, seg, old, now);
+        }
 #else
         (void)value;
 #endif
@@ -1100,6 +1244,11 @@ static INLINE int mmu_io_write_byte(regs *r, word addr, byte value)
 }
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
+static INLINE int mmu_phys_is_iopage(dword pa)
+{
+    return (pa >= 017760000 && pa <= 017777777) ? 1 : 0;
+}
+
 static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
 {
     word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
@@ -1128,12 +1277,20 @@ static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
     }
 
     if (r->ram_fast) {
-        dword pa_base = (dword)par << 6;
-        dword va_base = (dword)seg << 13;
+        dword seg_base = (dword)par << 6;
+        dword pa_base = mmu_phys_finalize(seg_base, r->mmu_ssr3);
+        dword pa_last = mmu_phys_finalize(seg_base + 0017777, r->mmu_ssr3);
 
-        /* Fast bypass only for space mapped strictly into RAM */
-        if ((pa_base + 0x2000) <= r->ram_fast_size) {
-            uint8_t *base_ptr = r->ram_fast + pa_base - va_base;
+        /*
+         * Fast path is valid only for a linear 8KB window mapped into RAM.
+         * Never bypass I/O page (017760000..017777777) through ram_fast.
+         */
+        if (pa_last >= pa_base &&
+                (pa_last - pa_base) == 0017777 &&
+                !mmu_phys_is_iopage(pa_base) &&
+                !mmu_phys_is_iopage(pa_last) &&
+                (pa_base + 0020000) <= r->ram_fast_size) {
+            uint8_t *base_ptr = r->ram_fast + pa_base;
             r->mmu_tlb[mode][space][seg].host_read_base = base_ptr;
             /* Writes bypassed only if segment already has W bit set */
             if ((pdr & 0000100) && (acf == 2 || acf == 3 || acf == 6 || acf == 7)) {
@@ -1239,18 +1396,15 @@ static INLINE word mmu_fault_to_ssr0_bits(int fault)
 static INLINE dword mmu_phys_finalize(dword pa, word ssr3)
 {
     /*
-     * J11 CPU-side translation uses only 18/22-bit select (M22E).
-     * BME (UB map enable) is currently kept as a readable/writable bit but
-     * does not alter CPU address translation in this emulator.
+     * Address modes implemented:
+     * - 16-bit (M22E=0): 000000..0177777, I/O at 0160000..0177777
+     * - 22-bit (M22E=1): 00000000..017777777, I/O at 017760000..017777777
+     * 18-bit mode is intentionally not supported.
      */
     if (ssr3 & MMU_SSR3_M22E) {
         return pa & MMU_PA22_MASK;
     }
-    pa &= MMU_PA18_MASK;
-    if (pa >= MMU_PA18_IOPAGE_BASE) {
-        pa = MMU_PA22_IOPAGE_PREFIX | pa;
-    }
-    return pa;
+    return pa & MMU_PA16_MASK;
 }
 
 static INLINE int mmu_acf_read_ok(word pdr)
@@ -1364,18 +1518,10 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
         return 0;
     }
 
-    /*
-     * Top virtual 8KB is the I/O page on DCJ11 regardless of MMU enable.
-     * Under MMU it is still fixed to physical I/O page (18-bit or 22-bit view).
-     */
-    if (va >= 0160000) {
-        if (pa_out) {
-            *pa_out = (dword)(017760000 | (va & 017777));
-        }
-        return 0;
-    }
-
     if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+        if (pa_out) {
+            *pa_out = (dword)(va & 0177777);
+        }
         return 0;
     }
 
@@ -1504,14 +1650,10 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
         return 0;
     }
 
-    if (va >= 0160000) {
-        if (pa_out) {
-            *pa_out = (dword)(017760000 | (va & 017777));
-        }
-        return 0;
-    }
-
     if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+        if (pa_out) {
+            *pa_out = (dword)(va & 0177777);
+        }
         return 0;
     }
 
@@ -1633,6 +1775,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
                                      int force_kernel_d)
 {
     byte value;
+    int dcj11_decode_va_regs = 1;
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
@@ -1649,18 +1792,24 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
-        uint16_t po = offset & 0x1FFF;
+        uint16_t po = offset & 0017777;
         int space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
             r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-            return r->mmu_tlb[mode][space][seg].host_read_base[offset];
+            return r->mmu_tlb[mode][space][seg].host_read_base[po];
         }
     }
 #endif
 
-    if (r->model == DCJ11) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        dcj11_decode_va_regs = 0;
+    }
+#endif
+
+    if (r->model == DCJ11 && dcj11_decode_va_regs) {
         if (dcj11_reg_block_load_byte(r, offset, &value)) {
             return value;
         }
@@ -1670,7 +1819,8 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         }
     }
 
-    if (mmu_io_read_byte(r, offset, &value)) {
+    if (r->model == DCJ11 && dcj11_decode_va_regs &&
+            mmu_io_read_byte(r, offset, &value)) {
         return value;
     }
 
@@ -1698,6 +1848,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
 static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
                                       int force_kernel_d)
 {
+    int dcj11_decode_va_regs = 1;
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
@@ -1709,25 +1860,37 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     /* Fast path: RAM access bypasses entire callback chain. */
     if (r->ram_fast && offset < r->ram_fast_size) {
         r->ram_fast[offset] = value;
+        core_watch_store("W8", r, offset, (dword)offset, (word)value, 0);
         return;
     }
 #else
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
-        uint16_t po = offset & 0x1FFF;
+        uint16_t po = offset & 0017777;
         int space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-            r->mmu_tlb[mode][space][seg].host_write_base[offset] = value;
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
+            *p = value;
+            if (r->ram_fast && p >= r->ram_fast) {
+                core_watch_store("W8", r, offset, (dword)(p - r->ram_fast),
+                                 (word)value, 0);
+            }
             return;
         }
     }
 #endif
 
-    if (r->model == DCJ11) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        dcj11_decode_va_regs = 0;
+    }
+#endif
+
+    if (r->model == DCJ11 && dcj11_decode_va_regs) {
         if (dcj11_reg_block_store_byte(r, offset, value)) {
             mmu_note_internal_reg_write(r, offset, force_kernel_d);
             return;
@@ -1738,7 +1901,8 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
         }
     }
 
-    if (mmu_io_write_byte(r, offset, value)) {
+    if (r->model == DCJ11 && dcj11_decode_va_regs &&
+            mmu_io_write_byte(r, offset, value)) {
         mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
@@ -1761,12 +1925,14 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     }
 
     raw_store_byte_phys(r, pa, value);
+    core_watch_store("W8", r, offset, pa, (word)value, 0);
 }
 
 static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
                                      int force_kernel_d)
 {
     word value;
+    int dcj11_decode_va_regs = 1;
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
@@ -1783,19 +1949,25 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
-        uint16_t po = offset & 0x1FFF;
+        uint16_t po = offset & 0017777;
         int space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
             r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + offset;
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + po;
             return (word)(p[0] | ((word)p[1] << 8));
         }
     }
 #endif
 
-    if (r->model == DCJ11) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        dcj11_decode_va_regs = 0;
+    }
+#endif
+
+    if (r->model == DCJ11 && dcj11_decode_va_regs) {
         if (offset & 1) {
             dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
             bus_error_trap(r);
@@ -1818,7 +1990,8 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         }
     }
 
-    if (mmu_io_read_word(r, offset, &value)) {
+    if (r->model == DCJ11 && dcj11_decode_va_regs &&
+            mmu_io_read_word(r, offset, &value)) {
         if (r->model == DCJ11 && is_ifetch) {
             /*
              * J-11 treats instruction fetch from internal MMU register block
@@ -1848,6 +2021,15 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         mmu_fault_trap(r, offset, r->r[7], fault, mode, space, seg);
         return 0;
     }
+    if (r->model == DCJ11 && is_ifetch) {
+        word io_offset;
+        if (dcj11_io_alias_offset(pa, &io_offset) &&
+                dcj11_phys_internal_reg(io_offset)) {
+            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
+            bus_error_trap(r);
+            return 0;
+        }
+    }
     value = raw_load_word_phys(r, pa);
     return value;
 }
@@ -1855,6 +2037,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
 static INLINE void core_store_word_ex(regs *r, word offset, word value,
                                       int force_kernel_d)
 {
+    int dcj11_decode_va_regs = 1;
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int mode = 0;
@@ -1867,27 +2050,38 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
         r->ram_fast[offset] = (uint8_t)(value & 000377);
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
+        core_watch_store("W16", r, offset, (dword)offset, value, 1);
         return;
     }
 #else
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
-        uint16_t po = offset & 0x1FFF;
+        uint16_t po = offset & 0017777;
         int space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + offset;
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
+            if (r->ram_fast && p >= r->ram_fast) {
+                core_watch_store("W16", r, offset, (dword)(p - r->ram_fast), value,
+                                 1);
+            }
             return;
         }
     }
 #endif
 
-    if (r->model == DCJ11) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        dcj11_decode_va_regs = 0;
+    }
+#endif
+
+    if (r->model == DCJ11 && dcj11_decode_va_regs) {
         if (offset & 1) {
             dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
             bus_error_trap(r);
@@ -1904,7 +2098,8 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         }
     }
 
-    if (mmu_io_write_word(r, offset, value)) {
+    if (r->model == DCJ11 && dcj11_decode_va_regs &&
+            mmu_io_write_word(r, offset, value)) {
         mmu_note_internal_reg_write(r, offset, force_kernel_d);
         return;
     }
@@ -1926,11 +2121,13 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         return;
     }
     raw_store_word_phys(r, pa, value);
+    core_watch_store("W16", r, offset, pa, value, 1);
 }
 
 static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
         int data_space)
 {
+    int dcj11_decode_va_regs = 1;
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int space = 0;
@@ -1942,19 +2139,25 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = psw_mode_normalize(mode);
         seg = offset >> 13;
-        uint16_t po = offset & 0x1FFF;
+        uint16_t po = offset & 0017777;
         int space = (data_space && mmu_split_enabled(r, mode)) ? 1 : 0;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
             r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + offset;
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + po;
             return (word)(p[0] | ((word)p[1] << 8));
         }
     }
 #endif
 
-    if (r->model == DCJ11) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        dcj11_decode_va_regs = 0;
+    }
+#endif
+
+    if (r->model == DCJ11 && dcj11_decode_va_regs) {
         if (offset & 1) {
             dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
             bus_error_trap(r);
@@ -1972,7 +2175,8 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
         }
     }
 
-    if (mmu_io_read_word(r, offset, &value)) {
+    if (r->model == DCJ11 && dcj11_decode_va_regs &&
+            mmu_io_read_word(r, offset, &value)) {
         return value;
     }
 
@@ -1989,6 +2193,7 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
 static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         int mode, int data_space)
 {
+    int dcj11_decode_va_regs = 1;
     dword pa = 0;
     int fault = MMU_FAULT_NONE;
     int space = 0;
@@ -1999,21 +2204,31 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = psw_mode_normalize(mode);
         seg = offset >> 13;
-        uint16_t po = offset & 0x1FFF;
+        uint16_t po = offset & 0017777;
         int space = (data_space && mmu_split_enabled(r, mode)) ? 1 : 0;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + offset;
+            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
+            if (r->ram_fast && p >= r->ram_fast) {
+                core_watch_store("W16M", r, offset, (dword)(p - r->ram_fast), value,
+                                 1);
+            }
             return;
         }
     }
 #endif
 
-    if (r->model == DCJ11) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
+        dcj11_decode_va_regs = 0;
+    }
+#endif
+
+    if (r->model == DCJ11 && dcj11_decode_va_regs) {
         if (offset & 1) {
             dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
             bus_error_trap(r);
@@ -2030,7 +2245,8 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         }
     }
 
-    if (mmu_io_write_word(r, offset, value)) {
+    if (r->model == DCJ11 && dcj11_decode_va_regs &&
+            mmu_io_write_word(r, offset, value)) {
         mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
         return;
     }
@@ -2043,6 +2259,7 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         return;
     }
     raw_store_word_phys(r, pa, value);
+    core_watch_store("W16M", r, offset, pa, value, 1);
 }
 
 static INLINE byte core_load_byte(regs *r, word offset)
@@ -2192,7 +2409,18 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
     word new_pc = 0;
     word fetched_psw = 0;
     word new_psw = 0;
-    (void)kind;
+    static int trace_init = 0;
+    static int trace_on = 0;
+
+    if (!trace_init) {
+        trace_on = (getenv("CORE_TRACE_TRAPVEC") != NULL) ? 1 : 0;
+        trace_init = 1;
+    }
+    if (trace_on) {
+        fprintf(stderr,
+                "TRAPVEC kind=%s vec=%06o oldpc=%06o oldps=%06o sp=%06o ir=%06o\n",
+                kind ? kind : "?", vec, old_pc, old_psw, r->r[6], r->ir);
+    }
 
     fetched_psw = load_word_vector(r, (word)(vec + 2));
     if (r->fAbort) {
@@ -2723,6 +2951,105 @@ int core_step(regs *r)
     r->ir = op;
     if (r->model == DCJ11) {
         r->r[7] += 2;
+    }
+
+    {
+        static int watch_pc_init = 0;
+        static int watch_pc_on = 0;
+        static word watch_pc = 0;
+        static word watch_hist_pc[64];
+        static word watch_hist_op[64];
+        static word watch_hist_ps[64];
+        static int watch_hist_idx = 0;
+        static int watch_hist_have = 0;
+        int hist_pos = watch_hist_idx;
+        watch_hist_pc[hist_pos] = fetch_pc;
+        watch_hist_op[hist_pos] = op;
+        watch_hist_ps[hist_pos] = r->psw;
+        watch_hist_idx = (watch_hist_idx + 1) & 077;
+        if (watch_hist_have < 64) {
+            watch_hist_have++;
+        }
+        if (!watch_pc_init) {
+            const char *env_pc = getenv("CORE_WATCH_PC");
+            if (env_pc && *env_pc) {
+                char *endp = NULL;
+                long v = strtol(env_pc, &endp, 8);
+                if (endp != env_pc && v >= 0 && v <= 0177777) {
+                    watch_pc = (word)v;
+                    watch_pc_on = 1;
+                }
+            }
+            watch_pc_init = 1;
+        }
+        if (watch_pc_on && fetch_pc == watch_pc) {
+            dword watch_pa = 0;
+            int watch_fault = MMU_FAULT_NONE;
+            int watch_mode = 0;
+            int watch_space = 0;
+            int watch_seg = 0;
+            word watch_par = 0;
+            word watch_pdr = 0;
+            word watch_ssr0 = 0;
+            word watch_ssr3 = 0;
+            word watch_raw = 0;
+            int watch_rc = translate_va_ex(r, fetch_pc, 0, 1, 0, &watch_pa,
+                                           &watch_fault, &watch_mode, &watch_space,
+                                           &watch_seg);
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+            if (r->model == DCJ11 && watch_mode >= 0 && watch_mode < 4 &&
+                    watch_space >= 0 && watch_space < 2 &&
+                    watch_seg >= 0 && watch_seg < 8) {
+                watch_par = r->mmu_par[watch_mode][watch_space][watch_seg];
+                watch_pdr = r->mmu_pdr[watch_mode][watch_space][watch_seg];
+            }
+            watch_ssr0 = r->mmu_ssr0;
+            watch_ssr3 = r->mmu_ssr3;
+#endif
+            if (watch_rc == 0) {
+                watch_raw = raw_load_word_phys(r, watch_pa & ~1u);
+            }
+            fprintf(stderr,
+                    "WATCHPC pc=%06o op=%06o ps=%06o sp=%06o "
+                    "pa=%08o rc=%d f=%d m=%d s=%d g=%d "
+                    "par=%06o pdr=%06o ssr0=%06o ssr3=%06o raw=%06o "
+                    "r0=%06o r1=%06o r2=%06o r3=%06o r4=%06o r5=%06o\n",
+                    fetch_pc, op, r->psw, r->r[6], (unsigned)watch_pa, watch_rc,
+                    watch_fault, watch_mode, watch_space, watch_seg,
+                    watch_par, watch_pdr, watch_ssr0, watch_ssr3, watch_raw,
+                    r->r[0], r->r[1], r->r[2],
+                    r->r[3], r->r[4], r->r[5]);
+            if (getenv("CORE_WATCH_HIST") != NULL) {
+                int i;
+                int start = (watch_hist_have < 64) ? 0 : watch_hist_idx;
+                for (i = 0; i < watch_hist_have; i++) {
+                    int p = (start + i) & 077;
+                    fprintf(stderr, "WATCHHIST pc=%06o op=%06o ps=%06o\n",
+                            watch_hist_pc[p], watch_hist_op[p], watch_hist_ps[p]);
+                }
+            }
+            if (getenv("CORE_WATCH_DUMP") != NULL) {
+                int d;
+                for (d = -6; d <= 10; d += 2) {
+                    word a = (word)(fetch_pc + d);
+                    word w = core_load_word_ex(r, a, 1, 0);
+                    if (r->fAbort) {
+                        r->fAbort = 0;
+                        continue;
+                    }
+                    fprintf(stderr, "WATCHMEM va=%06o w=%06o\n", a, w);
+                }
+                for (d = 0; d <= 12; d += 2) {
+                    word a = (word)(r->r[6] + d);
+                    word w = core_load_word_ex(r, a, 0, 0);
+                    if (r->fAbort) {
+                        r->fAbort = 0;
+                        continue;
+                    }
+                    fprintf(stderr, "WATCHSTK va=%06o w=%06o\n", a, w);
+                }
+            }
+        }
     }
 
     if ((op & 0177740) == 000240) { /* Condition Code Operators */
@@ -3612,20 +3939,7 @@ int core_step(regs *r)
             }
         } else {
             int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
-            int cur_mode = dcj11_psw_cur_mode(psw_before);
-            word saved_sp = r->r[6];
-            int swapped_sp = 0;
-
-            if (prev_mode != cur_mode) {
-                dcj11_sp_mode_init(r);
-                r->r[6] = r->sp_mode[prev_mode];
-                swapped_sp = 1;
-            }
             dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
-            if (swapped_sp) {
-                r->sp_mode[prev_mode] = r->r[6];
-                r->r[6] = saved_sp;
-            }
             if (dst_type == TYPE_ERROR) {
                 goto step_end;
             }
@@ -3665,19 +3979,7 @@ int core_step(regs *r)
         } else {
             int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
             int cur_mode = dcj11_psw_cur_mode(psw_before);
-            word saved_sp = r->r[6];
-            int swapped_sp = 0;
-
-            if (prev_mode != cur_mode) {
-                dcj11_sp_mode_init(r);
-                r->r[6] = r->sp_mode[prev_mode];
-                swapped_sp = 1;
-            }
             dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
-            if (swapped_sp) {
-                r->sp_mode[prev_mode] = r->r[6];
-                r->r[6] = saved_sp;
-            }
             if (dst_type == TYPE_ERROR) {
                 goto step_end;
             }
@@ -3715,21 +4017,7 @@ int core_step(regs *r)
         if (r->model != DCJ11) {
             DECODE_DST();
         } else {
-            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
-            int cur_mode = dcj11_psw_cur_mode(psw_before);
-            word saved_sp = r->r[6];
-            int swapped_sp = 0;
-
-            if (prev_mode != cur_mode) {
-                dcj11_sp_mode_init(r);
-                r->r[6] = r->sp_mode[prev_mode];
-                swapped_sp = 1;
-            }
             dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
-            if (swapped_sp) {
-                r->sp_mode[prev_mode] = r->r[6];
-                r->r[6] = saved_sp;
-            }
             if (dst_type == TYPE_ERROR) {
                 goto step_end;
             }
@@ -3763,21 +4051,7 @@ int core_step(regs *r)
         if (r->model != DCJ11) {
             DECODE_DST();
         } else {
-            int prev_mode = dcj11_psw_prev_mode_mxpi(psw_before);
-            int cur_mode = dcj11_psw_cur_mode(psw_before);
-            word saved_sp = r->r[6];
-            int swapped_sp = 0;
-
-            if (prev_mode != cur_mode) {
-                dcj11_sp_mode_init(r);
-                r->r[6] = r->sp_mode[prev_mode];
-                swapped_sp = 1;
-            }
             dst_type = decode_data(r, op & 00077, TYPE_WORD, &dst_offset);
-            if (swapped_sp) {
-                r->sp_mode[prev_mode] = r->r[6];
-                r->r[6] = saved_sp;
-            }
             if (dst_type == TYPE_ERROR) {
                 goto step_end;
             }
@@ -3876,7 +4150,7 @@ int core_step(regs *r)
 
         if (divisor == 0) {
             clear_flag(FLAG_N);
-            set_flag(FLAG_Z);
+            clear_flag(FLAG_Z);
             set_flag(FLAG_V);
             set_flag(FLAG_C);
             goto step_end;
@@ -3891,8 +4165,8 @@ int core_step(regs *r)
         }
 
         q64 = ((int64_t)dividend) / ((int64_t)divisor);
-        set_flag_if(q64 < 0, FLAG_N);
         if (q64 > 077777 || q64 < -0100000) {
+            clear_flag(FLAG_N);
             clear_flag(FLAG_Z);
             set_flag(FLAG_V);
             clear_flag(FLAG_C);
@@ -3903,7 +4177,9 @@ int core_step(regs *r)
         remainder = dividend - (divisor * quotient);
 
         r->r[reg] = (word)(quotient & 0177777);
-        r->r[reg | 1] = (word)(remainder & 0177777);
+        if ((reg & 1) == 0) {
+            r->r[reg | 1] = (word)(remainder & 0177777);
+        }
 
         set_flag_if(quotient < 0, FLAG_N);
         set_flag_if(quotient == 0, FLAG_Z);

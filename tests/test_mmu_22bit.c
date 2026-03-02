@@ -14,7 +14,7 @@ static int test_ifetch_from_22bit_memory(void)
     mmu_fixture_setup(&fx);
 
     fx.r.mmu_ssr0 = 000001;
-    fx.r.mmu_ssr3 = 000000;
+    fx.r.mmu_ssr3 = 000020;
     fx.r.mmu_par[0][0][0] = 02000;
     fx.r.mmu_pdr[0][0][0] = 0177006;
     fx.r.r[7] = 000000;
@@ -39,7 +39,7 @@ static int test_data_store_to_22bit_memory(void)
     mmu_fixture_setup(&fx);
 
     fx.r.mmu_ssr0 = 000001;
-    fx.r.mmu_ssr3 = 0000004; /* KD split I/D (J11 MMR3<KDS>) */
+    fx.r.mmu_ssr3 = 000024; /* M22E + KD split I/D */
 
     fx.r.mmu_par[0][0][0] = 02000;
     fx.r.mmu_pdr[0][0][0] = 0177006;
@@ -67,12 +67,96 @@ static int test_data_store_to_22bit_memory(void)
     return 0;
 }
 
+static int test_io_window_mmu_disabled_16bit(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("io_window_mmu_disabled_16bit");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000000; /* MMU disabled */
+    fx.r.mmu_ssr3 = 000020; /* M22E must not matter when MMU is disabled */
+
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0000,
+                          mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0002, 0177570);
+
+    mmu_phys22_write_word(&fx, 0177570, 011111);
+    mmu_phys22_write_word(&fx, 017777570, 022222);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU off step");
+    MMU_ASSERT_EQ(fx.r.r[0], 011111, "MMU off: I/O window uses 16-bit address space");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
+static int test_io_window_mmu_enabled_16bit(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("io_window_mmu_enabled_16bit");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000001; /* MMU enable */
+    fx.r.mmu_ssr3 = 000000; /* M22E=0 -> 16-bit address mode */
+    fx.r.mmu_par[0][0][0] = 000000; /* identity for instruction fetch */
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][0][7] = 01600;   /* maps VA 0177570 to PA 0177570 */
+    fx.r.mmu_pdr[0][0][7] = 0177006; /* resident RW expand-up */
+
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0000,
+                          mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0002, 0177570);
+
+    mmu_phys22_write_word(&fx, 0177570, 033333);
+    mmu_phys22_write_word(&fx, 017777570, 044444);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU on M22E=0 step");
+    MMU_ASSERT_EQ(fx.r.r[0], 033333,
+                  "MMU on + M22E=0: I/O window stays in 16-bit space");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
+static int test_io_window_mmu_enabled_22bit(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("io_window_mmu_enabled_22bit");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000001; /* MMU enable */
+    fx.r.mmu_ssr3 = 000020; /* M22E=1 -> 22-bit address mode */
+    fx.r.mmu_par[0][0][0] = 000000; /* identity for instruction fetch */
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][0][7] = 0177600; /* maps VA 0177570 to PA 017777570 */
+    fx.r.mmu_pdr[0][0][7] = 0177006; /* resident RW expand-up */
+
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0000,
+                          mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0002, 0177570);
+
+    mmu_phys22_write_word(&fx, 0177570, 055555);
+    mmu_phys22_write_word(&fx, 017777570, 066666);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU on M22E=1 step");
+    MMU_ASSERT_EQ(fx.r.r[0], 066666, "MMU on + M22E=1: I/O window is 22-bit");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
 int main(void)
 {
     int failed = 0;
 
     failed += test_ifetch_from_22bit_memory();
     failed += test_data_store_to_22bit_memory();
+    failed += test_io_window_mmu_disabled_16bit();
+    failed += test_io_window_mmu_enabled_16bit();
+    failed += test_io_window_mmu_enabled_22bit();
 
     if (failed) {
         return 1;

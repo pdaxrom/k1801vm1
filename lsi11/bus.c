@@ -8,8 +8,6 @@
 
 #define LSI11_FIXED_RAM_KB 56u
 #define PDP1184_DEFAULT_RAM_KB 4096u
-#define PDP11_18BIT_IO_PAGE_START 0760000
-#define PDP11_18BIT_IO_PAGE_END 0777777
 #define PDP11_22BIT_IO_PAGE_START 017760000
 #define PDP11_22BIT_IO_PAGE_END 017777777
 
@@ -31,6 +29,47 @@ static vm2_ram_cfg_t g_vm2_cfg = {BUS_VM2_DEFAULT_USER_RAM_BYTES,
                                  };
 static uint8_t *g_vm2_halt_ram = NULL;
 static size_t g_vm2_halt_ram_bytes = 0;
+static int g_pdp1184_io_16bit = 1;
+static int g_watch_init;
+static int g_watch_on;
+static paddr_t g_watch_pa;
+
+static void bus_watch_init(void)
+{
+    const char *env;
+    char *endp = NULL;
+    unsigned long v;
+
+    if (g_watch_init) {
+        return;
+    }
+    g_watch_init = 1;
+    env = getenv("LSI11_WATCH_PA");
+    if (!env || !*env) {
+        return;
+    }
+    v = strtoul(env, &endp, 8);
+    if (endp == env || *endp != '\0' || v > PDP11_22BIT_IO_PAGE_END) {
+        return;
+    }
+    g_watch_pa = (paddr_t)v;
+    g_watch_on = 1;
+}
+
+static int bus_watch_hit_byte(paddr_t addr)
+{
+    bus_watch_init();
+    return (g_watch_on && addr == g_watch_pa) ? 1 : 0;
+}
+
+static int bus_watch_hit_word(paddr_t addr)
+{
+    bus_watch_init();
+    if (!g_watch_on) {
+        return 0;
+    }
+    return (addr == g_watch_pa || (addr + 1u) == g_watch_pa) ? 1 : 0;
+}
 
 static inline void *bus_alloc(size_t size)
 {
@@ -62,6 +101,7 @@ void bus_reset_config(void)
 {
     g_cfg.machine = BUS_MACHINE_LSI11_1104;
     g_cfg.ram_kb = LSI11_FIXED_RAM_KB;
+    g_pdp1184_io_16bit = 1;
     bus_vm2_reset_config();
 }
 
@@ -78,6 +118,7 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
     case BUS_MACHINE_LSI11_1104:
         g_cfg.machine = BUS_MACHINE_LSI11_1104;
         g_cfg.ram_kb = LSI11_FIXED_RAM_KB;
+        g_pdp1184_io_16bit = 1;
         return 0;
 
     case BUS_MACHINE_PDP1184:
@@ -94,6 +135,7 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
 
         g_cfg.machine = BUS_MACHINE_PDP1184;
         g_cfg.ram_kb = ram_kb;
+        g_pdp1184_io_16bit = 1;
         return 0;
 
     default:
@@ -115,6 +157,16 @@ uint32_t bus_ram_kb(void)
 size_t bus_ram_bytes(void)
 {
     return g_ram_bytes;
+}
+
+void bus_set_pdp1184_io_16bit(int on)
+{
+    g_pdp1184_io_16bit = on ? 1 : 0;
+}
+
+int bus_pdp1184_io_16bit(void)
+{
+    return g_pdp1184_io_16bit;
 }
 
 int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes,
@@ -210,21 +262,19 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
 
     if (addr <= 0177777) {
         a16 = (uint16_t)addr;
-        if (g_cfg.machine == BUS_MACHINE_LSI11_1104 &&
-                (a16 < IO_PAGE_START || a16 > IO_PAGE_END)) {
+        if (a16 < IO_PAGE_START || a16 > IO_PAGE_END) {
             return 0;
         }
-        if (devio_has(a16)) {
-            *io_addr_out = a16;
-            return 1;
-        }
-    }
-
-    if (addr >= PDP11_18BIT_IO_PAGE_START && addr <= PDP11_18BIT_IO_PAGE_END) {
-        a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
-        if (devio_has(a16)) {
-            *io_addr_out = a16;
-            return 1;
+        if (g_cfg.machine == BUS_MACHINE_LSI11_1104) {
+            if (devio_has(a16)) {
+                *io_addr_out = a16;
+                return 1;
+            }
+        } else if (g_cfg.machine == BUS_MACHINE_PDP1184 && g_pdp1184_io_16bit) {
+            if (devio_has(a16)) {
+                *io_addr_out = a16;
+                return 1;
+            }
         }
     }
 
@@ -330,6 +380,11 @@ void bus_write8(paddr_t addr, uint8_t v)
 {
     uint16_t io_addr = 0;
 
+    if (bus_watch_hit_byte(addr)) {
+        fprintf(stderr, "BUSWATCH W8  pa=%08o v=%03o\n", (unsigned)addr,
+                (unsigned)v);
+    }
+
     if (io_decode_addr(addr, &io_addr)) {
         devio_write8(io_addr, v);
         return;
@@ -369,6 +424,11 @@ void bus_write16(paddr_t addr, uint16_t v)
 #endif
 {
     uint16_t io_addr = 0;
+
+    if (bus_watch_hit_word(addr)) {
+        fprintf(stderr, "BUSWATCH W16 pa=%08o v=%06o\n", (unsigned)addr,
+                (unsigned)v);
+    }
 
     if (io_decode_addr(addr, &io_addr)) {
         devio_write8(io_addr, (uint8_t)(v & 000377));
