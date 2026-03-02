@@ -35,14 +35,23 @@ int main(void)
     bus_set_pdp1184_io_16bit(1);
     check(bus_read16(0177570) == 012345,
           "16-bit I/O window must decode SR at 0177570");
+    check(bus_read16(0777570) == 012345,
+          "18-bit I/O alias must decode SR at 0777570");
+    check(!bus_addr_is_ram(0760000),
+          "16-bit mode must reserve full 18-bit I/O alias page as non-RAM");
 
-    /* 22-bit mode: low 0177570 is RAM, high 017777570 is SR. */
+    /* 22-bit mode: low windows (017xxxx and 077xxxx) are RAM, high 017777xxx is I/O. */
     bus_set_pdp1184_io_16bit(0);
     bus_write16(0177570, 065432);
+    bus_write16(0777570, 054321);
     check(bus_read16(0177570) == 065432,
           "22-bit mode must treat low 0177570 as RAM");
+    check(bus_read16(0777570) == 054321,
+          "22-bit mode must treat 18-bit alias 0777570 as RAM");
     check(bus_read16(017777570) == 012345,
           "22-bit I/O window must decode SR at 017777570");
+    check(!bus_addr_is_ram(017777000),
+          "22-bit mode must reserve full high I/O page as non-RAM");
 
     /* Switching back to 16-bit mode restores low-window device decode. */
     bus_set_pdp1184_io_16bit(1);

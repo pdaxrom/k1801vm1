@@ -69,4 +69,13 @@ uint32_t bus_ram_kb(void);
 size_t bus_ram_bytes(void);
 bus_machine_t bus_machine(void);
 
+/*
+ * PDP-11/84 I/O window mode:
+ *  - on=1:  16-bit I/O page at 0160000..0177777
+ *  - on=0: 22-bit I/O page at 017760000..017777777
+ * 18-bit I/O alias 0760000..0777777 is decoded only when on=1.
+ */
+void bus_set_pdp1184_io_16bit(int on);
+int bus_pdp1184_io_16bit(void);
+
 #endif

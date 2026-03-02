@@ -721,16 +721,41 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value);
 static INLINE int mmu_io_read_byte(regs *r, word addr, byte *value_out);
 static INLINE int mmu_io_write_byte(regs *r, word addr, byte value);
 
-static INLINE int dcj11_io_alias_offset(dword pa, word *offset_out)
+static INLINE int dcj11_io_alias_offset(const regs *r, dword pa, word *offset_out)
 {
     if (!offset_out) {
         return 0;
     }
-    if (pa < 017760000 || pa > 017777777) {
+    if (!r || r->model != DCJ11) {
         return 0;
     }
-    *offset_out = (word)(pa & 0177777);
-    return 1;
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    const word mmu_en = 0000001;   /* SSR0<0> */
+    const word mmu_m22e = 0000020; /* SSR3<5> */
+
+    if ((r->mmu_ssr0 & mmu_en) == 0) {
+        return 0;
+    }
+
+    if (r->mmu_ssr3 & mmu_m22e) {
+        /* 22-bit I/O alias: 017760000..017777777 */
+        if (pa < 017760000 || pa > 017777777) {
+            return 0;
+        }
+        *offset_out = (word)(pa & 0177777);
+        return 1;
+    }
+
+    /* 18-bit I/O alias (PDP-11 compatibility window): 0760000..0777777 */
+    if (pa >= 0760000 && pa <= 0777777) {
+        *offset_out = (word)(0160000 | (pa & 017777));
+        return 1;
+    }
+#else
+    (void)pa;
+#endif
+    return 0;
 }
 
 static INLINE int core_watch_pa_get(dword *pa_out)
@@ -797,7 +822,7 @@ static INLINE byte raw_load_byte_phys(regs *r, dword pa)
     word offset;
     byte value8;
 
-    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+    if (r->model == DCJ11 && dcj11_io_alias_offset(r, pa, &offset)) {
         if (dcj11_reg_block_load_byte(r, offset, &value8)) {
             return value8;
         }
@@ -823,7 +848,7 @@ static INLINE void raw_store_byte_phys(regs *r, dword pa, byte value)
 {
     word offset;
 
-    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+    if (r->model == DCJ11 && dcj11_io_alias_offset(r, pa, &offset)) {
         if (dcj11_reg_block_store_byte(r, offset, value)) {
             return;
         }
@@ -848,7 +873,7 @@ static INLINE word raw_load_word_phys(regs *r, dword pa)
     word offset;
     word value;
 
-    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+    if (r->model == DCJ11 && dcj11_io_alias_offset(r, pa, &offset)) {
         if (dcj11_reg_block_load_word(r, offset, &value)) {
             return value;
         }
@@ -870,7 +895,7 @@ static INLINE void raw_store_word_phys(regs *r, dword pa, word value)
 {
     word offset;
 
-    if (r->model == DCJ11 && dcj11_io_alias_offset(pa, &offset)) {
+    if (r->model == DCJ11 && dcj11_io_alias_offset(r, pa, &offset)) {
         if (dcj11_reg_block_store_word(r, offset, value)) {
             return;
         }
@@ -948,6 +973,7 @@ enum {
 #define MMU_PDR_A 0000200
 
 #define MMU_PA16_MASK 000177777
+#define MMU_PA18_MASK 000777777
 #define MMU_PA22_MASK 017777777
 
 #define MMU_TRAP_VECTOR 0000250
@@ -1396,15 +1422,15 @@ static INLINE word mmu_fault_to_ssr0_bits(int fault)
 static INLINE dword mmu_phys_finalize(dword pa, word ssr3)
 {
     /*
-     * Address modes implemented:
-     * - 16-bit (M22E=0): 000000..0177777, I/O at 0160000..0177777
-     * - 22-bit (M22E=1): 00000000..017777777, I/O at 017760000..017777777
-     * 18-bit mode is intentionally not supported.
+     * MMU-on address sizing for DCJ-11:
+     * - M22E=0: 18-bit physical addresses
+     * - M22E=1: 22-bit physical addresses
+     * MMU-off path is handled separately in translate_va_*.
      */
     if (ssr3 & MMU_SSR3_M22E) {
         return pa & MMU_PA22_MASK;
     }
-    return pa & MMU_PA16_MASK;
+    return pa & MMU_PA18_MASK;
 }
 
 static INLINE int mmu_acf_read_ok(word pdr)
@@ -2023,7 +2049,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     }
     if (r->model == DCJ11 && is_ifetch) {
         word io_offset;
-        if (dcj11_io_alias_offset(pa, &io_offset) &&
+        if (dcj11_io_alias_offset(r, pa, &io_offset) &&
                 dcj11_phys_internal_reg(io_offset)) {
             dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
             bus_error_trap(r);
@@ -2585,8 +2611,31 @@ static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
                                   int mode, int space, int seg)
 {
     word old_psw = r->psw;
+    static int trace_init = 0;
+    static int trace_on = 0;
+
+    if (!trace_init) {
+        trace_on = (getenv("CORE_TRACE_MMU_FAULT") != NULL) ? 1 : 0;
+        trace_init = 1;
+    }
+
     if (dcj11_take_red_stack_abort(r, "MMU")) {
         return;
+    }
+    if (trace_on) {
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+        word ssr0 = r->mmu_ssr0;
+        word ssr2 = r->mmu_ssr2;
+        word ssr3 = r->mmu_ssr3;
+#else
+        word ssr0 = 0;
+        word ssr2 = 0;
+        word ssr3 = 0;
+#endif
+        fprintf(stderr,
+                "MMUFAULT pc=%06o va=%06o f=%o m=%o s=%o g=%o ssr0=%06o ssr2=%06o ssr3=%06o ps=%06o\n",
+                pc, va, fault & 07, mode & 03, space & 01, seg & 07,
+                ssr0, ssr2, ssr3, old_psw);
     }
     mmu_record_fault(r, va, pc, fault, mode, space, seg);
     core_take_vector(r, MMU_TRAP_VECTOR, pc, old_psw, "MMU");

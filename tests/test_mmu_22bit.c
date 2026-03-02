@@ -99,7 +99,7 @@ static int test_io_window_mmu_enabled_16bit(void)
     mmu_fixture_setup(&fx);
 
     fx.r.mmu_ssr0 = 000001; /* MMU enable */
-    fx.r.mmu_ssr3 = 000000; /* M22E=0 -> 16-bit address mode */
+    fx.r.mmu_ssr3 = 000000; /* M22E=0 -> 18-bit physical, low I/O decode */
     fx.r.mmu_par[0][0][0] = 000000; /* identity for instruction fetch */
     fx.r.mmu_pdr[0][0][0] = 0177006;
     fx.r.mmu_par[0][0][7] = 01600;   /* maps VA 0177570 to PA 0177570 */
@@ -114,7 +114,7 @@ static int test_io_window_mmu_enabled_16bit(void)
 
     MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU on M22E=0 step");
     MMU_ASSERT_EQ(fx.r.r[0], 033333,
-                  "MMU on + M22E=0: I/O window stays in 16-bit space");
+                  "MMU on + M22E=0: I/O window stays in low space");
 
     mmu_fixture_teardown(&fx);
     return 0;
@@ -148,6 +148,68 @@ static int test_io_window_mmu_enabled_22bit(void)
     return 0;
 }
 
+static int test_io_window_mmu_enabled_18bit_alias(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("io_window_mmu_enabled_18bit_alias");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000001; /* MMU enable */
+    fx.r.mmu_ssr3 = 000000; /* M22E=0 -> 18-bit physical address mode */
+    fx.r.mmu_par[0][0][0] = 000000;  /* identity for instruction fetch */
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][0][7] = 0177600; /* maps VA 0177570 to PA 0777570 */
+    fx.r.mmu_pdr[0][0][7] = 0177006; /* resident RW expand-up */
+
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0000,
+                          mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0002, 0177570);
+
+    mmu_phys22_write_word(&fx, 0177570, 011111);
+    mmu_phys22_write_word(&fx, 0777570, 022222);
+    mmu_phys22_write_word(&fx, 017777570, 033333);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "MMU on 18-bit alias step");
+    MMU_ASSERT_EQ(fx.r.r[0], 022222,
+                  "MMU on + M22E=0: VA segment 7 must map to 18-bit I/O alias");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
+static int test_m22e1_does_not_decode_18bit_io_alias_regs(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("m22e1_does_not_decode_18bit_io_alias_regs");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000001; /* MMU enable */
+    fx.r.mmu_ssr3 = 000020; /* M22E=1 -> 22-bit mode */
+    fx.r.mmu_par[0][0][0] = 000000; /* identity for instruction fetch */
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][0][7] = 07600;  /* maps VA 0177572 to PA 0777572 */
+    fx.r.mmu_pdr[0][0][7] = 0177006;
+
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0000,
+                          mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys22_write_word(&fx, MMU_TEST_BASE + 0002, 0177572);
+
+    /*
+     * In M22E=1 this must be plain RAM read from PA 0777572.
+     * Wrong 18-bit alias decode would route to MMU SSR0 (0177572).
+     */
+    mmu_phys22_write_word(&fx, 0777572, 012345);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "M22E=1 18-bit alias reject step");
+    MMU_ASSERT_EQ(fx.r.r[0], 012345,
+                  "M22E=1 must not decode 18-bit alias window as internal I/O");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -157,6 +219,8 @@ int main(void)
     failed += test_io_window_mmu_disabled_16bit();
     failed += test_io_window_mmu_enabled_16bit();
     failed += test_io_window_mmu_enabled_22bit();
+    failed += test_io_window_mmu_enabled_18bit_alias();
+    failed += test_m22e1_does_not_decode_18bit_io_alias_regs();
 
     if (failed) {
         return 1;

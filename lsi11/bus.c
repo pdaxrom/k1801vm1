@@ -8,6 +8,8 @@
 
 #define LSI11_FIXED_RAM_KB 56u
 #define PDP1184_DEFAULT_RAM_KB 4096u
+#define PDP11_18BIT_IO_PAGE_START 0760000
+#define PDP11_18BIT_IO_PAGE_END 0777777
 #define PDP11_22BIT_IO_PAGE_START 017760000
 #define PDP11_22BIT_IO_PAGE_END 017777777
 
@@ -278,6 +280,16 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
         }
     }
 
+    if (g_cfg.machine == BUS_MACHINE_PDP1184 && g_pdp1184_io_16bit &&
+            addr >= PDP11_18BIT_IO_PAGE_START &&
+            addr <= PDP11_18BIT_IO_PAGE_END) {
+        a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
+        if (devio_has(a16)) {
+            *io_addr_out = a16;
+            return 1;
+        }
+    }
+
     if (addr >= PDP11_22BIT_IO_PAGE_START && addr <= PDP11_22BIT_IO_PAGE_END) {
         a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
         if (devio_has(a16)) {
@@ -310,9 +322,19 @@ int bus_addr_is_ram(paddr_t addr)
         return (a <= RAM_END) ? 1 : 0;
     }
 
-    /* On PDP-11/84-like configuration, I/O page aliases are never RAM. */
-    if (addr >= PDP11_22BIT_IO_PAGE_START && addr <= PDP11_22BIT_IO_PAGE_END) {
-        return 0;
+    /*
+     * PDP-11/84:
+     * - 16-bit/18-bit compatibility mode: reserve full 0760000..0777777.
+     * - 22-bit mode: reserve full 017760000..017777777.
+     */
+    if (g_pdp1184_io_16bit) {
+        if (addr >= PDP11_18BIT_IO_PAGE_START && addr <= PDP11_18BIT_IO_PAGE_END) {
+            return 0;
+        }
+    } else {
+        if (addr >= PDP11_22BIT_IO_PAGE_START && addr <= PDP11_22BIT_IO_PAGE_END) {
+            return 0;
+        }
     }
 
     return (addr < g_ram_bytes) ? 1 : 0;
