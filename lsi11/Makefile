@@ -22,6 +22,7 @@ COMMON_SRCS := \
   util_term.c \
   dev_dl11.c \
   dev_kw11.c \
+  tq11.c \
   dev_rl11.c \
   dev_rh11.c \
   dev_rk11.c \
@@ -54,7 +55,8 @@ TESTS_LSI11 := \
   tests/test_irq_semantics \
   tests/test_rl11 \
   tests/test_rk11_regs \
-  tests/test_rh11_lsi11_absent
+  tests/test_rh11_lsi11_absent \
+  tests/test_tq11_tap
 
 TESTS_PDP1184 := \
   tests/test_rh11_pdp1184
@@ -122,6 +124,9 @@ tests/test_rk11_regs: $(BUILD_DIR)/test-lsi11/tests/test_rk11_regs.o $(TEST_COMM
 tests/test_rh11_lsi11_absent: $(BUILD_DIR)/test-lsi11/tests/test_rh11_lsi11_absent.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_tq11_tap: $(BUILD_DIR)/test-lsi11/tests/test_tq11_tap.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
 tests/test_rh11_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh11_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -140,6 +145,8 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	./tests/test_rk11_regs
 	@echo "Running RH11 decode test (lsi11 profile)..."
 	./tests/test_rh11_lsi11_absent
+	@echo "Running TQ11/TK50 TAP test..."
+	./tests/test_tq11_tap
 	@echo "Running lsi11 profile config test..."
 	./tests/test_lsi11_config.sh ./$(BIN_LSI11)
 	@echo "LSI11 TESTS PASSED"

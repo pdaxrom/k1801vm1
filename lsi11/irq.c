@@ -40,10 +40,25 @@ int irq_poll(regs *r, uint16_t *vec_out)
 {
     int best = -1;
     uint8_t best_pri = 0;
+    int dcj11_psw_pri = 0;
+
+    if (r && r->model == DCJ11) {
+        dcj11_psw_pri = (r->psw >> 5) & 07;
+    }
 
     for (int i = 0; i < g_n; i++) {
         if (!g_irq[i].pending()) {
             continue;
+        }
+
+        /*
+         * Masked BR levels must not block delivery of lower unmasked
+         * requests (important for KW11-L BR6 vs RH11/RK11/RL11 BR5).
+         */
+        if (r && r->model == DCJ11) {
+            if (g_irq[i].priority && dcj11_psw_pri >= g_irq[i].priority) {
+                continue;
+            }
         }
 
         if (best < 0 || g_irq[i].priority > best_pri) {
@@ -59,13 +74,7 @@ int irq_poll(regs *r, uint16_t *vec_out)
     uint16_t v = g_irq[best].vector;
     uint8_t pri = g_irq[best].priority;
     if (r) {
-        if (r->model == DCJ11) {
-            int psw_pri = (r->psw >> 5) & 07;
-            if (pri && psw_pri >= pri) {
-                /* masked: leave request pending */
-                return 0;
-            }
-        } else if (r->model == K1801VM1) {
+        if (r->model == K1801VM1) {
             if (r->psw & 01000) {
                 return 0;
             }

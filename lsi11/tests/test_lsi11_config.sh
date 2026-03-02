@@ -40,10 +40,22 @@ grep -q "rh11=1" "$TMP1" || {
   exit 1
 }
 
+grep -q "dev_tq=0" "$TMP1" || {
+  echo "FAIL: expected dev_tq=0 by default on lsi11 profile" >&2
+  exit 1
+}
+
 "$BIN" -enable-kw11-p -check-config >/dev/null 2>"$TMP3"
 
 grep -q "dev_kw11_p=1" "$TMP3" || {
   echo "FAIL: expected dev_kw11_p=1 with -enable-kw11-p" >&2
+  exit 1
+}
+
+"$BIN" -tq /tmp/test.tap -check-config >/dev/null 2>"$TMP3"
+
+grep -q "dev_tq=1" "$TMP3" || {
+  echo "FAIL: expected dev_tq=1 with -tq" >&2
   exit 1
 }
 

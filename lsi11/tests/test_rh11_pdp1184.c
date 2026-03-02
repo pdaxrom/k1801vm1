@@ -9,6 +9,7 @@
 
 #include "../bus.h"
 #include "../dev_kw11.h"
+#include "../dev_rl11.h"
 #include "../dev_rh11.h"
 #include "../dev_rk11.h"
 #include "../irq.h"
@@ -18,13 +19,24 @@
 #define KW11P_CSB 0172542
 #define KW11P_CTR 0172544
 
+#define RLBAE      0174410
+#define RLBAE_22   017774410
+
 #define RHCS1 0177440
 #define RHWC  0177442
 #define RHBA  0177444
 #define RHDA  0177446
 #define RHCS2 0177450
 #define RHER  0177454
-#define RHDB  0177462
+#define RHSPR 0177462
+#define RHDB  0177464
+#define RHMR3 0177476
+#define RHSPR_22 017777462
+#define RHSPR_22_HI 017777463
+#define RHDB_22 017777464
+#define RHDB_22_HI 017777465
+#define RHMR3_22 017777476
+#define RHMR3_22_HI 017777477
 
 #define RKCS  0177404
 
@@ -126,12 +138,14 @@ int main(void)
     }
     bus_init();
 
-    if (rh11_init() != 0 || rk11_init() != 0 || kw11_init() != 0) {
+    if (rh11_init() != 0 || rk11_init() != 0 || rl11_init() != 0 ||
+            kw11_init() != 0) {
         fprintf(stderr, "FAIL: device init\n");
         return 1;
     }
     rh11_reset();
     rk11_reset();
+    rl11_reset();
     kw11_reset();
 
     /* 1) decode and register accessibility on pdp1184 */
@@ -141,13 +155,31 @@ int main(void)
     bus_write16(0200000, 045612);
     check(bus_read16(0200000) == 045612, "pdp1184 RAM readback at 0200000");
     check(bus_is_nxm(RHCS1) == 0, "RH11 base must decode on pdp1184");
-    check(bus_is_nxm(RHDB) == 0, "RH11 last register must decode on pdp1184");
+    check(bus_is_nxm(RHMR3) == 0, "RH11 last register must decode on pdp1184");
+    check(bus_is_nxm(RHSPR_22) == 0,
+          "RH11 spare register low byte must decode on 22-bit alias");
+    check(bus_is_nxm(RHSPR_22_HI) == 0,
+          "RH11 spare register high byte must decode on 22-bit alias");
+    check(bus_is_nxm(RHMR3_22) == 0,
+          "RH11 last register low byte must decode on 22-bit alias");
+    check(bus_is_nxm(RHMR3_22_HI) == 0,
+          "RH11 last register high byte must decode on 22-bit alias");
+    check(bus_is_nxm(RLBAE_22) == 0, "RL11 RLV12 RLBAE 22-bit alias must decode");
     bus_write16(RHWC, 012345);
     bus_write16(RHBA, 000120);
     bus_write16(RHDA, 000777);
+    bus_write16(RHSPR_22, 0000003);
+    bus_write16(RHDB_22, 006543);
+    bus_write16(RLBAE_22, 0000047);
     check(bus_read16(RHWC) == 012345, "RHWC readback");
     check(bus_read16(RHBA) == 000120, "RHBA readback");
     check(bus_read16(RHDA) == 000777, "RHDA readback");
+    check((bus_read16(RHSPR) & 0000003) == 0000003,
+          "RH11 spare register readback via 22-bit alias");
+    check((bus_read16(RHCS1) & RHCS1_BAEXT) == RHCS1_BAEXT,
+          "RH11 spare register low bits mirror BA16/BA17");
+    check(bus_read16(RHDB) == 006543, "RHDB word readback via 22-bit alias");
+    check((bus_read16(RLBAE) & 0000077) == 0000047, "RLBAE readback via 22-bit alias");
     check(bus_read16(KW11L_CSR) == 000200,
           "KW11-L/LTC must decode on pdp1184 by default");
     bus_write16(KW11P_CSB, 012345);
@@ -156,6 +188,15 @@ int main(void)
           "KW11-P CSB falls through to RAM when not enabled");
     check(bus_read16(KW11P_CTR) == 076543,
           "KW11-P CTR falls through to RAM when not enabled");
+
+    /* HK-compatible rule: IE-only after controller clear must not re-IRQ. */
+    rh11_reset();
+    vec = 0;
+    bus_write8((uint16_t)(RHCS1 + 1), 0000200);
+    check(poll_irq_vec(&r, &vec) == 0, "RH11 CCLR alone does not IRQ");
+    bus_write8(RHCS1, RHCS1_IE);
+    check(poll_irq_vec(&r, &vec) == 0,
+          "RH11 IE-only write after CCLR does not re-IRQ");
 
     if (make_image(img, 0100000) != 0) {
         fprintf(stderr, "FAIL: make image\n");
@@ -196,7 +237,6 @@ int main(void)
     check((vec & 0000777) == 000220, "RK11 coexistence vector");
 
     /* 5) DMA NXM must set error and complete cleanly */
-    /* Reconfigure to small RAM so a 16-bit BA overflow can hit true NXM. */
     if (bus_configure(BUS_MACHINE_PDP1184, 64, err, sizeof(err)) != 0) {
         fprintf(stderr, "FAIL: bus_configure(64KB): %s\n", err);
         rh11_close_image();

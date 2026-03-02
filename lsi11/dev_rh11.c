@@ -24,7 +24,13 @@
 #define RHER  0177454
 #define RHAS  0177456
 #define RHDC  0177460
-#define RHDB  0177462
+#define RHSPR 0177462
+#define RHDB  0177464
+#define RHMR  0177466
+#define RHEC1 0177470
+#define RHEC2 0177472
+#define RHMR2 0177474
+#define RHMR3 0177476
 
 /* CS1 bits */
 #define RHCS1_GO          0000001
@@ -95,7 +101,8 @@
 #define RKDA_HEAD_MASK  0003400
 #define RKDA_HEAD_SHIFT 8
 
-static uint16_t rhcs1, rhwc, rhba, rhda, rhcs2, rhds, rher, rhas, rhdc, rhdb;
+static uint16_t rhcs1, rhwc, rhba, rhda, rhcs2, rhds, rher, rhas, rhdc;
+static uint16_t rhspr, rhdb, rhmr, rhmr2, rhmr3;
 static irq_latch_t rh_l;
 static emu_file_t *rh_fp = NULL;
 static int rh_debug = 0;
@@ -107,10 +114,17 @@ static uint8_t rh_cs1_ba_ext_get(void)
     return (uint8_t)((rhcs1 & RHCS1_BA_EXT_MASK) >> 8);
 }
 
+static void rh_spare_sync_from_cs1(void)
+{
+    rhspr &= (uint16_t)~0000003;
+    rhspr |= (uint16_t)(rh_cs1_ba_ext_get() & 03);
+}
+
 static void rh_cs1_ba_ext_set(uint8_t ext)
 {
     rhcs1 &= (uint16_t)~RHCS1_BA_EXT_MASK;
     rhcs1 |= (uint16_t)(((uint16_t)(ext & 03)) << 8);
+    rh_spare_sync_from_cs1();
 }
 
 static uint16_t rh_da_get_sec(uint16_t da)
@@ -147,8 +161,12 @@ static uint16_t *rh_rw_reg_ptr(uint16_t addr)
         return &rhas;
     case RHDC:
         return &rhdc;
+    case RHSPR:
+        return &rhspr;
     case RHDB:
         return &rhdb;
+    case RHMR:
+        return &rhmr;
     default:
         return NULL;
     }
@@ -269,7 +287,7 @@ static void rh_finish_command(void)
     irq_latch_event_set_done(&rh_l);
     rh_sync_status();
 
-    if (rh_debug && rh_debug_active) {
+    if (rh_debug_active) {
         fprintf(stderr,
                 "RH11 DONE cs1=%06o wc=%06o ba=%06o ext=%o dc=%06o da=%06o cs2=%06o er=%06o\n",
                 rhcs1, rhwc, rhba, rh_cs1_ba_ext_get(), rhdc, rhda, rhcs2, rher);
@@ -283,7 +301,11 @@ static void rh_controller_clear(void)
     rhba = 0;
     rhda = 0;
     rhdc = 0;
+    rhspr = 0;
     rhdb = 0;
+    rhmr = 0;
+    rhmr2 = 0;
+    rhmr3 = 0;
     rher = 0;
     rhcs2 &= RHCS2_DS_MASK;
     rhcs2 |= RHCS2_IR;
@@ -509,8 +531,24 @@ static uint8_t rh_read8(uint16_t addr)
     case RHDC:
         v = rhdc;
         break;
+    case RHSPR:
+        v = rhspr;
+        break;
     case RHDB:
         v = rhdb;
+        break;
+    case RHMR:
+        v = rhmr;
+        break;
+    case RHEC1:
+    case RHEC2:
+        v = 0;
+        break;
+    case RHMR2:
+        v = rhmr2;
+        break;
+    case RHMR3:
+        v = rhmr3;
         break;
     default:
         return 0;
@@ -528,7 +566,8 @@ static void rh_write8(uint16_t addr, uint8_t b)
     uint16_t old;
     uint16_t v;
 
-    if (base == RHDS || base == RHER) {
+    if (base == RHDS || base == RHER || base == RHEC1 || base == RHEC2 ||
+            base == RHMR2 || base == RHMR3) {
         return; /* read-only registers */
     }
 
@@ -562,12 +601,21 @@ static void rh_write8(uint16_t addr, uint8_t b)
         if (addr & 1) {
             /* Controller clear request (bit 15) */
             if (((uint16_t)b << 8) & RHCS1_CERR_CCLR) {
+                if (rh_debug && ((old & RHCS1_IE) || rh_l.ie || rh_l.irq_req)) {
+                    fprintf(stderr,
+                            "RH11 CS1 hi write cclr old=%06o b=%03o done=%o ie=%o irq=%o\n",
+                            old, b, rh_l.done, rh_l.ie, rh_l.irq_req);
+                }
                 rh_controller_clear();
                 return;
             }
             /* BA16/17 writable in this model */
-            rhcs1 &= (uint16_t)~RHCS1_BA_EXT_MASK;
-            rhcs1 |= (uint16_t)(((uint16_t)b << 8) & RHCS1_BA_EXT_MASK);
+            rh_cs1_ba_ext_set((uint8_t)(((uint16_t)b >> 0) & 03));
+            if (rh_debug && ((old & RHCS1_IE) || (rhcs1 & RHCS1_IE) || rh_l.irq_req)) {
+                fprintf(stderr,
+                        "RH11 CS1 hi write old=%06o b=%03o new=%06o done=%o ie=%o irq=%o\n",
+                        old, b, rhcs1, rh_l.done, rh_l.ie, rh_l.irq_req);
+            }
             rh_sync_status();
             return;
         }
@@ -575,7 +623,7 @@ static void rh_write8(uint16_t addr, uint8_t b)
         rhcs1 &= (uint16_t)~(RHCS1_FUNC_MASK | RHCS1_IE);
         rhcs1 |= (uint16_t)(b & (RHCS1_FUNC_MASK | RHCS1_IE));
         irq_latch_set_ie(&rh_l, (rhcs1 & RHCS1_IE) ? 1 : 0);
-        if (!old_ie && rh_l.ie && rh_l.done) {
+        if (!old_ie && rh_l.ie && (b & RHCS1_RDY)) {
             rh_l.irq_req = 1;
         }
 
@@ -586,13 +634,18 @@ static void rh_write8(uint16_t addr, uint8_t b)
             rhcs2 &= RHCS2_RW_MASK;
             rhcs2 |= RHCS2_IR;
             rhds &= (uint16_t)~RHDS_DRDY;
-            if (rh_debug) {
+            if (rh_debug && (rhcs1 & RHCS1_IE)) {
                 rh_debug_active = 1;
                 fprintf(stderr,
                         "RH11 GO cs1=%06o wc=%06o ba=%06o ext=%o dc=%06o da=%06o cs2=%06o func=%03o\n",
                         rhcs1, rhwc, rhba, rh_cs1_ba_ext_get(), rhdc, rhda, rhcs2,
                         rhcs1 & RHCS1_FUNC_MASK);
             }
+        }
+        if (rh_debug && ((b & RHCS1_IE) || rh_l.irq_req)) {
+            fprintf(stderr,
+                    "RH11 CS1 lo write old=%06o b=%03o new=%06o done=%o ie=%o irq=%o\n",
+                    old, b, rhcs1, rh_l.done, rh_l.ie, rh_l.irq_req);
         }
         rh_sync_status();
         return;
@@ -631,8 +684,17 @@ static void rh_write8(uint16_t addr, uint8_t b)
         rhdc = v;
         return;
 
+    case RHSPR:
+        rhspr = v;
+        rh_cs1_ba_ext_set((uint8_t)(rhspr & 03));
+        return;
+
     case RHDB:
         rhdb = v;
+        return;
+
+    case RHMR:
+        rhmr = v;
         return;
 
     default:
@@ -652,7 +714,9 @@ void rh11_irq_ack(void)
 
 int rh11_init(void)
 {
-    static const io_range_t r = {RH11_BASE, RHDB, rh_read8, rh_write8, "RH11"};
+    static const io_range_t r = {RH11_BASE, (uint16_t)(RHMR3 + 1), rh_read8,
+                                 rh_write8, "RH11"
+                                };
     static const irq_source_t s = {"RH11", 000210, 5, rh11_irq_pending,
                                    rh11_irq_ack
                                   };
@@ -681,7 +745,11 @@ void rh11_reset(void)
     rher = 0;
     rhas = 0;
     rhdc = 0;
+    rhspr = 0;
     rhdb = 0;
+    rhmr = 0;
+    rhmr2 = 0;
+    rhmr3 = 0;
 
     irq_latch_reset(&rh_l);
     irq_latch_event_set_done(&rh_l);

@@ -22,6 +22,7 @@
 #define RLBA      0174402
 #define RLDA      0174404
 #define RLMP      0174406
+#define RLBAE     0174410
 
 /* RLCS bits */
 #define RLCS_DRDY      0000001
@@ -52,6 +53,9 @@
 #define RLCS_E_HNF  0005
 #define RLCS_E_NXM  0010
 #define RLCS_E_MPE  0011
+
+/* RLV12 bus address extension register (octal). */
+#define RLBAE_IMP 0000077
 
 /* MP (Get Status) bits */
 #define RLMP_ST_LOCKON 0000005 /* STC:STA = 101 */
@@ -100,7 +104,7 @@ typedef struct {
     uint16_t status_latch;
 } rl_drive_t;
 
-static uint16_t rlcs, rlba, rlda, rlmp;
+static uint16_t rlcs, rlba, rlda, rlmp, rlbae;
 static uint8_t rl_err_code;
 static uint8_t rl_drive_error;
 static uint8_t rl_busy;
@@ -154,13 +158,14 @@ static rl_drive_t *rl_selected_drive(void)
 
 static uint8_t rl_ba_ext_get(void)
 {
-    return (uint8_t)((rlcs & RLCS_BA_MASK) >> 4);
+    return (uint8_t)(rlbae & RLBAE_IMP);
 }
 
 static void rl_ba_ext_set(uint8_t ext)
 {
+    rlbae = (uint16_t)(ext & RLBAE_IMP);
     rlcs &= (uint16_t)~RLCS_BA_MASK;
-    rlcs |= (uint16_t)(((uint16_t)(ext & 03)) << 4);
+    rlcs |= (uint16_t)(((uint16_t)(rlbae & 03)) << 4);
 }
 
 static void rl_clear_errors(void)
@@ -190,7 +195,7 @@ static void rl_sync_cs(void)
     rl_drive_t *d = rl_selected_drive();
     uint16_t drdy = 0;
 
-    rw = (uint16_t)(rlcs & (RLCS_FUNC_MASK | RLCS_BA_MASK | RLCS_DS_MASK));
+    rw = (uint16_t)(rlcs & (RLCS_FUNC_MASK | RLCS_DS_MASK));
     if (rl_l.ie) {
         rw |= RLCS_IE;
     }
@@ -209,6 +214,7 @@ static void rl_sync_cs(void)
         rw |= RLCS_ERR;
     }
     rlcs = rw;
+    rlcs |= (uint16_t)(((uint16_t)(rlbae & 03)) << 4);
 }
 
 static void rl_rhdr_reset_fifo(void)
@@ -239,7 +245,7 @@ static void rl_rhdr_advance_word(void)
 
 static paddr_t rl_pa(uint16_t ba, uint8_t ext)
 {
-    return (paddr_t)(((uint32_t)(ext & 03) << 16) | ba);
+    return (paddr_t)(((uint32_t)(ext & RLBAE_IMP) << 16) | ba);
 }
 
 static void rl_ba_inc(uint16_t *ba, uint8_t *ext)
@@ -247,7 +253,7 @@ static void rl_ba_inc(uint16_t *ba, uint8_t *ext)
     uint16_t prev = *ba;
     *ba = (uint16_t)(*ba + 2);
     if (*ba < prev) {
-        *ext = (uint8_t)((*ext + 1) & 03);
+        *ext = (uint8_t)((*ext + 1) & RLBAE_IMP);
     }
 }
 
@@ -809,6 +815,9 @@ static uint8_t rl_read8(uint16_t addr)
     case RLMP:
         v = rl_rhdr_peek_word();
         break;
+    case RLBAE:
+        v = (uint16_t)(rlbae & RLBAE_IMP);
+        break;
     default:
         return 0;
     }
@@ -840,6 +849,8 @@ static void rl_write8(uint16_t addr, uint8_t b)
         old = rlda;
     } else if (base == RLMP) {
         old = rlmp;
+    } else if (base == RLBAE) {
+        old = rlbae;
     } else {
         return;
     }
@@ -861,6 +872,8 @@ static void rl_write8(uint16_t addr, uint8_t b)
 
         rlcs &= (uint16_t)~(RLCS_FUNC_MASK | RLCS_BA_MASK | RLCS_IE);
         rlcs |= (uint16_t)(b & (RLCS_FUNC_MASK | RLCS_BA_MASK | RLCS_IE));
+        rlbae = (uint16_t)((rlbae & (uint16_t)~0000003u) |
+                           (uint16_t)((b & RLCS_BA_MASK) >> 4));
         irq_latch_set_ie(&rl_l, (rlcs & RLCS_IE) ? 1 : 0);
 
         if ((b & RLCS_CRDY) == 0 && rl_l.done) {
@@ -894,6 +907,11 @@ static void rl_write8(uint16_t addr, uint8_t b)
         rl_rhdr_reset_fifo();
         return;
 
+    case RLBAE:
+        rl_ba_ext_set((uint8_t)v);
+        rl_sync_cs();
+        return;
+
     default:
         return;
     }
@@ -911,7 +929,7 @@ void rl11_irq_ack(void)
 
 int rl11_init(void)
 {
-    static const io_range_t r = {RL11_BASE, (uint16_t)(RLMP + 1), rl_read8,
+    static const io_range_t r = {RL11_BASE, (uint16_t)(RLBAE + 1), rl_read8,
                                  rl_write8, "RL11"
                                 };
     static const irq_source_t s = {"RL11", 000160, 5, rl11_irq_pending,
@@ -943,6 +961,7 @@ void rl11_reset(void)
     rlba = 0;
     rlda = 0;
     rlmp = 0;
+    rlbae = 0;
     rl_busy = 0;
     rl_clear_errors();
     rl_rhdr_reset_fifo();

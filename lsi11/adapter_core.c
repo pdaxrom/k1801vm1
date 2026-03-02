@@ -11,6 +11,7 @@
 #include "dev_rk11.h"
 #include "dev_rl11.h"
 #include "dev_sr.h"
+#include "tq11.h"
 #include "dev_vm1sav.h"
 #include "dev_vm1sel.h"
 
@@ -51,12 +52,14 @@ typedef struct {
     int rl11;
     int rk11;
     int rh11;
+    int tq11;
     int sr;
     int vm1sel;
     int vm1sav;
 } lsi11_device_mask_t;
 
-static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 0};
+static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 0, 1, 0, 0};
+static uint16_t j11_probe_shadow_regs[10];
 
 static inline int vm2_model(const regs *r)
 {
@@ -162,6 +165,7 @@ static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
     device_mask.rk11 = 1;
     device_mask.sr = 1;
     device_mask.rh11 = 1;
+    device_mask.tq11 = 0;
     /* VM1 extension devices are CPU-specific and must be enabled explicitly. */
     device_mask.vm1sel = 0;
     device_mask.vm1sav = 0;
@@ -257,6 +261,10 @@ int lsi11_set_device_enabled(const char *name, int on, char *err,
         device_mask.rh11 = v;
         return 0;
     }
+    if (!strcmp(name, "tq11")) {
+        device_mask.tq11 = v;
+        return 0;
+    }
     if (!strcmp(name, "sr")) {
         device_mask.sr = v;
         return 0;
@@ -298,6 +306,9 @@ int lsi11_device_enabled(const char *name)
     }
     if (!strcmp(name, "rh11")) {
         return device_mask.rh11;
+    }
+    if (!strcmp(name, "tq11")) {
+        return device_mask.tq11;
     }
     if (!strcmp(name, "sr")) {
         return device_mask.sr;
@@ -461,35 +472,141 @@ static inline void nxm_trap(regs *r, paddr_t addr)
     r->fAbort = 1;
 }
 
+static inline int j11_probe_shadow_to_a18(paddr_t addr, paddr_t *a18_out)
+{
+    if (!a18_out) {
+        return 0;
+    }
+
+    if (addr >= 017760000 && addr <= 017777777) {
+        *a18_out = (addr & 0777777);
+        return 1;
+    }
+    if (addr >= 0760000 && addr <= 0777777) {
+        *a18_out = addr;
+        return 1;
+    }
+    if (addr >= 0160000 && addr <= 0177777) {
+        *a18_out = (0600000 | (addr & 0177777));
+        return 1;
+    }
+    return 0;
+}
+
+static inline int j11_probe_shadow_index18(paddr_t a18_even)
+{
+    switch (a18_even & 0777776) {
+    case 0772000:
+        return 0;
+    case 0772474:
+        return 1;
+    case 0776350:
+        return 2;
+    case 0776450:
+        return 3;
+    case 0776750:
+        return 4;
+    case 0777754:
+        return 5;
+    case 0777756:
+        return 6;
+    case 0777760:
+        return 7;
+    case 0777762:
+        return 8;
+    case 0777764:
+        return 9;
+    default:
+        return -1;
+    }
+}
+
+static inline int j11_probe_shadow_lookup(paddr_t addr, int *idx, int *shift)
+{
+    paddr_t a18 = 0;
+    int i;
+
+    if (!j11_probe_shadow_to_a18(addr, &a18)) {
+        return 0;
+    }
+    i = j11_probe_shadow_index18(a18);
+    if (i < 0) {
+        return 0;
+    }
+    if (idx) {
+        *idx = i;
+    }
+    if (shift) {
+        *shift = (a18 & 1) ? 8 : 0;
+    }
+    return 1;
+}
+
+static inline void j11_probe_shadow_reset(void)
+{
+    memset(j11_probe_shadow_regs, 0, sizeof(j11_probe_shadow_regs));
+}
+
 static inline int j11_probe_shadow_hit(regs *r, paddr_t addr)
 {
+    int idx;
+
     if (machine_profile != LSI11_MACHINE_1184) {
         return 0;
     }
     if (r->model != DCJ11) {
         return 0;
     }
-    /* Minimal probe aliases for 11/84-like RT-11 detection paths. */
-    if (addr >= 017772000 && addr <= 017772001) {
-        return 1;
-    }
-    return 0;
+
+    return j11_probe_shadow_lookup(addr, &idx, NULL);
 }
 
 static inline byte j11_probe_shadow_read_byte(paddr_t addr)
 {
-    if (addr == 017772000) {
-        return 000001;
+    int idx = -1;
+    int shift = 0;
+
+    if (j11_probe_shadow_lookup(addr, &idx, &shift)) {
+        return (byte)((j11_probe_shadow_regs[idx] >> shift) & 000377);
     }
     return 000000;
 }
 
 static inline word j11_probe_shadow_read_word(paddr_t addr)
 {
-    if (addr == 017772000) {
-        return 000001;
+    int idx = -1;
+
+    if (j11_probe_shadow_lookup(addr, &idx, NULL)) {
+        return j11_probe_shadow_regs[idx];
     }
     return 000000;
+}
+
+static inline void j11_probe_shadow_write_byte(paddr_t addr, byte v)
+{
+    int idx = -1;
+    int shift = 0;
+    uint16_t mask;
+    uint16_t cur;
+
+    if (!j11_probe_shadow_lookup(addr, &idx, &shift)) {
+        return;
+    }
+
+    mask = (uint16_t)(000377u << shift);
+    cur = j11_probe_shadow_regs[idx];
+    cur = (uint16_t)((cur & ~mask) | (((uint16_t)v << shift) & mask));
+    j11_probe_shadow_regs[idx] = cur;
+}
+
+static inline void j11_probe_shadow_write_word(paddr_t addr, word v)
+{
+    int idx = -1;
+
+    if (!j11_probe_shadow_lookup(addr, &idx, NULL)) {
+        return;
+    }
+    j11_probe_shadow_regs[idx] = (uint16_t)v;
 }
 
 /* ---------- bus callbacks for core ---------- */
@@ -525,6 +642,7 @@ static void core_store_byte(regs *r, word addr, byte v)
 #endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+        j11_probe_shadow_write_byte((paddr_t)addr, v);
         return;
     }
     if (vm2_model(r)) {
@@ -578,6 +696,7 @@ static void core_store_word(regs *r, word addr, word v)
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+        j11_probe_shadow_write_word((paddr_t)addr, v);
         return;
     }
     if (vm2_model(r)) {
@@ -621,6 +740,7 @@ static void core_store_byte_pa(regs *r, dword addr, byte v)
 #endif
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
+        j11_probe_shadow_write_byte((paddr_t)addr, v);
         return;
     }
     if (bus_is_nxm((paddr_t)addr)) {
@@ -655,6 +775,7 @@ static void core_store_word_pa(regs *r, dword addr, word v)
 {
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
+        j11_probe_shadow_write_word((paddr_t)addr, v);
         return;
     }
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
@@ -671,6 +792,7 @@ static int impl_init(regs *r)
 
     /* init bus RAM; devices register their I/O in *_init() */
     bus_init();
+    j11_probe_shadow_reset();
     dl11_set_alias(dl11_alias_on);
 
     /* Enforce VM1-only extension peripheral visibility by CPU model. */
@@ -705,6 +827,9 @@ static int impl_init(regs *r)
     if (device_mask.rh11 && rh11_init() != 0) {
         return -1;
     }
+    if (device_mask.tq11 && tq11_init() != 0) {
+        return -1;
+    }
     if (device_mask.lp11 && lp11_init() != 0) {
         return -1;
     }
@@ -724,6 +849,7 @@ static int impl_init(regs *r)
 static void impl_reset(regs *r)
 {
     (void)r;
+    j11_probe_shadow_reset();
     if (r->model == DCJ11) {
         if (machine_profile == LSI11_MACHINE_1184) {
             /* Match PDP-11/84 identification path expected by RT-11 monitor. */
@@ -749,6 +875,9 @@ static void impl_reset(regs *r)
     }
     if (device_mask.rh11) {
         rh11_reset();
+    }
+    if (device_mask.tq11) {
+        tq11_reset();
     }
     if (device_mask.lp11) {
         lp11_reset();
@@ -855,6 +984,9 @@ void lsi11_poll_devices(void)
     }
     if (device_mask.rh11) {
         rh11_poll();
+    }
+    if (device_mask.tq11) {
+        tq11_poll();
     }
 }
 

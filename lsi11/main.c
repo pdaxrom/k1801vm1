@@ -10,6 +10,7 @@
 #include "dev_rh11.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
+#include "tq11.h"
 #include "dev_vm1sel.h"
 #include "dev_vm1sav.h"
 
@@ -247,6 +248,105 @@ static const uint16_t rh_bootstrap[] = {
     0005007                   /* CLR PC */
 };
 
+/*
+ * TQ11/TMSCP ROM bootstrap (SIMH TQ-compatible sequence).
+ * Initializes the controller, issues ONLINE, REWIND, and READ,
+ * reads one 512-byte block to 000000, and then jumps to 000000.
+ * Loaded/executed from 016000.
+ */
+#define TQ_BOOT_ADDR   016000
+#define TQ_BOOT_ENTRY  (TQ_BOOT_ADDR + 000002)
+#define TQ_BOOT_UNIT   (TQ_BOOT_ADDR + 000010)
+#define TQ_BOOT_CSR    (TQ_BOOT_ADDR + 000014)
+#define TQ_B_CMDINT    (TQ_BOOT_ADDR - 001000)
+#define TQ_B_RSPINT    (TQ_B_CMDINT + 000002)
+#define TQ_B_RING      (TQ_B_RSPINT + 000002)
+#define TQ_B_RSPH      (TQ_B_RING + 000010)
+#define TQ_B_TKRSP     (TQ_B_RSPH + 000004)
+#define TQ_B_CMDH      (TQ_B_TKRSP + 000060)
+#define TQ_B_TKCMD     (TQ_B_CMDH + 000004)
+#define TQ_B_UNIT      (TQ_B_TKCMD + 000004)
+static const uint16_t tq_bootstrap[] = {
+    0046525,                        /* "UM" */
+
+    0012706, TQ_BOOT_ADDR,          /* MOV #016000,SP */
+    0012700, 0000000,               /* MOV #UNIT,R0 */
+    0012701, 0174500,               /* MOV #0174500,R1      ; IP */
+    0005021,                        /* CLR (R1)+            ; init */
+    0012704, 0004000,               /* MOV #004000,R4       ; S1 mask */
+    0005002,                        /* CLR R2 */
+    0005022,                        /* 10$: CLR (R2)+       ; clear up to 016000 */
+    0020237, TQ_BOOT_ADDR - 000002, /*      CMP R2,#015776 */
+    0103774,                        /*      BLO 10$ */
+    0012705, TQ_BOOT_ADDR + 000312, /* MOV #016312,R5       ; cmd table */
+
+    0005711,                        /* 20$: TST (R1)        ; err? */
+    0100001,                        /*      BPL 30$ */
+    0000000,                        /*      HALT */
+    0030411,                        /* 30$: BIT R4,(R1)     ; step set? */
+    0001773,                        /*      BEQ 20$ */
+    0012511,                        /*      MOV (R5)+,(R1)  ; send next */
+    0006304,                        /*      ASL R4          ; next mask */
+    0100370,                        /*      BPL 20$         ; until S4 */
+
+    0012737, 0000400, TQ_B_CMDH + 000002,   /* MOV #000400,CMDH+2 ; VCID=1 */
+    0012737, 0000044, TQ_B_CMDH,            /* MOV #000044,CMDH   ; len */
+    0010037, TQ_B_UNIT,                     /* MOV R0,UNIT */
+    0012737, 0000011, TQ_B_TKCMD + 000010,  /* MOV #000011,TKCMD+10 ; ONL */
+    0012737, 0020000, TQ_B_TKCMD + 000012,  /* MOV #020000,TKCMD+12 ; clr exc */
+    0012702, TQ_B_RING,                     /* MOV #RING,R2 */
+    0012722, TQ_B_TKRSP,                    /* MOV #TKRSP,(R2)+ */
+    0010203,                                /* MOV R2,R3 */
+    0010423,                                /* MOV R4,(R3)+       ; TK own */
+    0012723, TQ_B_TKCMD,                    /* MOV #TKCMD,(R3)+ */
+    0010423,                                /* MOV R4,(R3)+       ; TK own */
+    0005741,                                /* TST -(R1)          ; start poll */
+    0005712,                                /* 40$: TST (R2)      ; wait rsp */
+    0100776,                                /*      BMI 40$ */
+    0105737, TQ_B_TKRSP + 000012,           /* TSTB TKRSP+12      ; stat */
+    0001401,                                /* BEQ 50$ */
+    0000000,                                /* HALT */
+    0012703, TQ_B_TKCMD + 000010,           /* 50$: MOV #TKCMD+10,R3 */
+    0012723, 0000045,                       /* MOV #000045,(R3)+  ; POS */
+    0012723, 0020002,                       /* MOV #020002,(R3)+  ; REW */
+    0012723, 0000001,                       /* MOV #000001,(R3)+  ; rec count */
+    0005023,                                /* CLR (R3)+ */
+    0005023,                                /* CLR (R3)+ */
+    0005023,                                /* CLR (R3)+ */
+    0010412,                                /* MOV R4,(R2)        ; TK own rsp */
+    0010437, TQ_B_RING + 000006,            /* MOV R4,RING+6      ; TK own cmd */
+    0005711,                                /* TST (R1)           ; start poll */
+    0005712,                                /* 60$: TST (R2)      ; wait rsp */
+    0100776,                                /*      BMI 60$ */
+    0105737, TQ_B_TKRSP + 000012,           /* TSTB TKRSP+12      ; stat */
+    0001401,                                /* BEQ 70$ */
+    0000000,                                /* HALT */
+    0012703, TQ_B_TKCMD + 000010,           /* 70$: MOV #TKCMD+10,R3 */
+    0012723, 0000041,                       /* MOV #000041,(R3)+  ; READ */
+    0012723, 0020000,                       /* MOV #020000,(R3)+  ; clr exc */
+    0012723, 0001000,                       /* MOV #001000,(R3)+  ; 512. bytes */
+    0005023,                                /* CLR (R3)+ */
+    0005023,                                /* CLR (R3)+          ; BA low */
+    0010412,                                /* MOV R4,(R2)        ; TK own rsp */
+    0010437, TQ_B_RING + 000006,            /* MOV R4,RING+6      ; TK own cmd */
+    0005711,                                /* TST (R1)           ; start poll */
+    0005712,                                /* 80$: TST (R2)      ; wait rsp */
+    0100776,                                /*      BMI 80$ */
+    0105737, TQ_B_TKRSP + 000012,           /* TSTB TKRSP+12      ; stat */
+    0001401,                                /* BEQ 90$ */
+    0000000,                                /* HALT */
+
+    0005003,                                /* 90$: CLR R3 */
+    0012704, TQ_BOOT_ADDR + 000020,         /* MOV #016020,R4 */
+    0005005,                                /* CLR R5 */
+    0005007,                                /* CLR PC */
+
+    0100000,                                /* cmdtbl: S1 */
+    TQ_B_RING,                              /* ring base */
+    0000000,                                /* ring base high */
+    0000001                                 /* GO */
+};
+
 static int install_bootstrap(uint16_t base, const uint16_t *words, size_t word_count)
 {
     uint8_t *ram = bus_ram_ptr(base);
@@ -325,7 +425,8 @@ static void usage(const char *argv0)
     fprintf(stderr,
             "Usage:\n"
             "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-rl <rl.img>] "
-            "[-bootcopy|-bootrt11] [-cpu <model>]\n"
+            "[-tq <tk50.tap>] "
+            "[-bootcopy|-bootrt11|-boottq] [-cpu <model>]\n"
             "\n"
             "Target profile:\n"
             "  %s\n"
@@ -345,6 +446,7 @@ static void usage(const char *argv0)
             "  -rl <path>      Attach RL image (auto detect RL01/RL02)\n"
             "  -rl01 <path>    Attach image as RL01\n"
             "  -rl02 <path>    Attach image as RL02\n"
+            "  -tq <path>      Attach TK50 TMSCP tape image (.tap) as unit 0\n"
             "  -disable-dl     Disable DL11\n"
             "  -disable-kw     Disable KW11\n"
             "  -enable-kw11-l  Enable KW11-L decode\n"
@@ -355,12 +457,15 @@ static void usage(const char *argv0)
             "  -disable-rk     Disable RK11\n"
             "  -disable-rh     Disable RH11\n"
             "  -disable-rl     Disable RL11\n"
+            "  -disable-tq     Disable TQ11/TMSCP tape controller\n"
             "  -disable-sr     Disable SR\n"
             "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
             "000000\n"
             "  -bootrt11       Run built-in RK/RH/RL bootstrap for the selected "
             "controller\n"
+            "  -boottq         Run built-in TQ/TMSCP bootstrap at 016000 for unit 0\n"
             "  -trace          Trace each instruction\n"
+            "  -trace-after N  Start tracing only after N executed instructions\n"
             "  -trace-regs     With -trace, also dump registers\n"
             "  -traceirq       Trace delivered IRQ vectors\n"
             "  -tracenxm       Trace NXM traps\n"
@@ -392,10 +497,12 @@ int main(int argc, char **argv)
     const char *rk_path = NULL;
     const char *rh_path = NULL;
     const char *rl_path = NULL;
+    const char *tq_path = NULL;
     int rl_type = RL11_TYPE_AUTO;
     const char *load_path = NULL;
     int do_bootcopy = 0;
     int do_bootrt11 = 0;
+    int do_boottq = 0;
     long load_addr = 0;
     long start_pc = -1;
     long sr_value = -1;
@@ -409,6 +516,7 @@ int main(int argc, char **argv)
     int disable_rk = 0;
     int disable_rh = 0;
     int disable_rl = 0;
+    int disable_tq = 0;
     int disable_sr = 0;
 #if defined(LSI11_TARGET_PDP1184)
     byte cpu_model = DCJ11;
@@ -419,11 +527,13 @@ int main(int argc, char **argv)
     int force_fp11 = 0;
     int trace = 0;
     int trace_regs = 0;
+    long trace_after = -1;
     long max_steps = -1;
     int dl11_8bit = 0;
     int do_nl_to_cr = 0;
     int exit_on_abort = 0;
     int check_config_only = 0;
+    int trace_loopvals = 0;
     char cfg_err[160] = {0};
 
 #if defined(LSI11_TARGET_PDP1184)
@@ -446,6 +556,8 @@ int main(int argc, char **argv)
         } else if (!strcmp(argv[i], "-rl02") && i + 1 < argc) {
             rl_path = argv[++i];
             rl_type = RL11_TYPE_RL02;
+        } else if (!strcmp(argv[i], "-tq") && i + 1 < argc) {
+            tq_path = argv[++i];
         } else if (!strcmp(argv[i], "-disable-dl")) {
             disable_dl = 1;
         } else if (!strcmp(argv[i], "-disable-kw")) {
@@ -466,17 +578,24 @@ int main(int argc, char **argv)
             disable_rh = 1;
         } else if (!strcmp(argv[i], "-disable-rl")) {
             disable_rl = 1;
+        } else if (!strcmp(argv[i], "-disable-tq")) {
+            disable_tq = 1;
         } else if (!strcmp(argv[i], "-disable-sr")) {
             disable_sr = 1;
         } else if (!strcmp(argv[i], "-bootcopy")) {
             do_bootcopy = 1;
         } else if (!strcmp(argv[i], "-bootrt11")) {
             do_bootrt11 = 1;
+        } else if (!strcmp(argv[i], "-boottq")) {
+            do_boottq = 1;
         } else if (!strcmp(argv[i], "-traceirq")) {
             lsi11_set_trace_irq(1);
         } else if (!strcmp(argv[i], "-tracenxm")) {
             lsi11_set_trace_nxm(1);
         } else if (!strcmp(argv[i], "-trace")) {
+            trace = 1;
+        } else if (!strcmp(argv[i], "-trace-after") && i + 1 < argc) {
+            trace_after = strtol(argv[++i], NULL, 10);
             trace = 1;
         } else if (!strcmp(argv[i], "-trace-regs")) {
             trace = 1;
@@ -524,6 +643,8 @@ int main(int argc, char **argv)
             return 2;
         }
     }
+
+    trace_loopvals = (getenv("LSI11_TRACE_LOOPVALS") != NULL) ? 1 : 0;
 
 #if !defined(LSI11_TARGET_PDP1184)
     if (ram_kb_arg >= 0) {
@@ -613,6 +734,16 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
+    if (disable_tq &&
+            lsi11_set_device_enabled("tq11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
+    if (tq_path && !disable_tq &&
+            lsi11_set_device_enabled("tq11", 1, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
     if (disable_sr &&
             lsi11_set_device_enabled("sr", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
@@ -630,6 +761,14 @@ int main(int argc, char **argv)
         fprintf(stderr, "-rl/-rl01/-rl02 is not allowed with -disable-rl\n");
         return 2;
     }
+    if (tq_path && !lsi11_device_enabled("tq11")) {
+        fprintf(stderr, "-tq is not allowed with -disable-tq\n");
+        return 2;
+    }
+    if (do_boottq && !tq_path) {
+        fprintf(stderr, "-boottq requires -tq <image>\n");
+        return 2;
+    }
 
     if (check_config_only) {
         const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184"
@@ -641,13 +780,14 @@ int main(int argc, char **argv)
         fprintf(stderr,
                 "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
                 "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
-                "dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_sr=%d "
+                "dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_tq=%d dev_sr=%d "
                 "dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
                 kw11_master, kw11_l_on, kw11_p_on,
                 lsi11_device_enabled("lp11"), lsi11_device_enabled("rk11"),
                 lsi11_device_enabled("rh11"), lsi11_device_enabled("rl11"),
+                lsi11_device_enabled("tq11"),
                 lsi11_device_enabled("sr"), lsi11_device_enabled("vm1sel"),
                 lsi11_device_enabled("vm1sav"));
         return 0;
@@ -661,7 +801,18 @@ int main(int argc, char **argv)
     dl11_set_nl_to_cr(do_nl_to_cr);
     lsi11_hw_connect(&r);
 
-    /* core init will init devices etc. */
+    if (r.model == K1806VM2) {
+        r.model = K1801VM2;
+    }
+    if (r.model == DCJ11) {
+        r.has_fis = 0;
+        r.has_fpu = 1;
+    } else {
+        r.has_fis = 0;
+        r.has_fpu = 0;
+    }
+
+    /* Initialize devices once before attaching media. */
     if (r.init(&r) != 0) {
         fprintf(stderr, "init failed\n");
         return 1;
@@ -692,8 +843,16 @@ int main(int argc, char **argv)
             return 1;
         }
     }
-
-    core_init(&r);
+    if (tq_path) {
+        if (tq11_open_image(tq_path) != 0) {
+            fprintf(stderr, "tq11_open_image failed: %s\n", tq_path);
+            rl11_close_image();
+            rh11_close_image();
+            rk11_close_image();
+            r.fini(&r);
+            return 1;
+        }
+    }
 
     if (force_fis) {
         r.has_fis = 1;
@@ -797,6 +956,18 @@ int main(int argc, char **argv)
         }
     }
 
+    if (do_boottq) {
+        if (install_bootstrap(TQ_BOOT_ADDR, tq_bootstrap,
+                              sizeof(tq_bootstrap) / sizeof(tq_bootstrap[0])) != 0) {
+            fprintf(stderr, "boottq destination is outside RAM\n");
+            r.fini(&r);
+            return 1;
+        }
+        bus_write16(TQ_BOOT_UNIT, 0000000u);
+        bus_write16(TQ_BOOT_CSR, 0174500u);
+        r.r[7] = TQ_BOOT_ENTRY;
+    }
+
     if (load_path) {
         FILE *fload = fopen(load_path, "rb");
         if (!fload) {
@@ -849,6 +1020,7 @@ int main(int argc, char **argv)
 
     /* -------- main emulation loop --------
        Replace cpu_step(&r) with your core's actual stepping API. */
+    long steps_done = 0;
     for (;;) {
         if (max_steps == 0) {
             break;
@@ -859,7 +1031,9 @@ int main(int argc, char **argv)
             step_chunk = (int)max_steps;
         }
         for (int k = 0; k < step_chunk; k++) {
-            if (trace) {
+            int trace_step = trace &&
+                             (trace_after < 0 || steps_done >= trace_after);
+            if (trace_step) {
                 char buf[128];
                 word start_pc = r.r[7];
                 word tmp = start_pc;
@@ -875,6 +1049,22 @@ int main(int argc, char **argv)
                     i++;
                 }
                 fprintf(stderr, "%s\n", buf);
+                if (trace_loopvals && start_pc == 0002032) {
+                    word v177766 = r.load_word(&r, 0177766);
+                    word v177776 = r.load_word(&r, 0177776);
+                    word v60542 = r.load_word(&r, 060542);
+                    word v60560 = r.load_word(&r, 060560);
+                    fprintf(stderr,
+                            "LOOPVALS 177766=%06o 177776=%06o 60542=%06o 60560=%06o\n",
+                            v177766, v177776, v60542, v60560);
+                }
+                if (trace_loopvals && start_pc == 0002214) {
+                    word sp = r.r[6];
+                    word stk_pc = r.load_word(&r, sp);
+                    word stk_ps = r.load_word(&r, (word)(sp + 2));
+                    fprintf(stderr, "LOOPSP  SP=%06o (SP)=%06o (SP+2)=%06o\n",
+                            sp, stk_pc, stk_ps);
+                }
                 if (trace_regs) {
                     fprintf(stderr,
                             "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
@@ -884,6 +1074,7 @@ int main(int argc, char **argv)
             }
             /* TODO: replace with your core single-instruction executor */
             core_step(&r); /* must exist in your core */
+            steps_done++;
             if (max_steps > 0) {
                 max_steps--;
             }
@@ -907,6 +1098,7 @@ int main(int argc, char **argv)
     }
 
     r.fini(&r);
+    tq11_close_image();
     rl11_close_image();
     rh11_close_image();
     rk11_close_image();

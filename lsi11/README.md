@@ -115,6 +115,53 @@ This subproject now provides two separate executables:
   - `RHDA[5:0]` sector, `RHDA[15:6]` linear track
   - `LBA = track * 64 + sector`, sector size `512` bytes (`01000` octal)
 
+### TK50 (TMSCP/TQ) support
+- `TQ11` models a minimal `TMSCP` tape controller for one `TK50`-class unit.
+- Default controller interface (octal):
+  - CSR/port base `0174500`
+  - `IP` at `0174500`
+  - `SA` at `0174502`
+  - vector `000260`
+  - priority `5` (`BR5`)
+- The controller is opt-in:
+  - hidden by default (`dev_tq=0`)
+  - enabled automatically when `-tq <path>` is specified
+  - can be forced off with `-disable-tq`
+- Image backend:
+  - SIMH `.tap` format
+  - variable-length records
+  - tape marks
+  - forward/reverse spacing
+  - rewind
+- Implemented command subset:
+  - `GET UNIT STATUS`
+  - `GET COMMAND STATUS`
+  - `AVAILABLE`
+  - `ONLINE`
+  - `SET UNIT CHARACTERISTICS`
+  - `FLUSH`
+  - `ACCESS`
+  - `COMPARE`
+  - `READ`
+  - `WRITE`
+  - `SPACE`
+  - `REWIND`
+  - `WRITE TAPE MARK`
+- Attention:
+  - when `CF_ATN` is enabled by `SET CONTROLLER CHARACTERISTICS`, the controller
+    can post `UNIT NOW AVAILABLE` attention (`OP_AVA`) for an attached tape
+- Attach example:
+  - `./pdp1184 -tq tapes/tk50.tap`
+  - `./lsi11 -tq tapes/tk50.tap`
+- Boot note:
+  - `-boottq` installs a built-in `TQ/TMSCP` bootstrap at `016000`
+  - example: `./pdp1184 -tq disks/ultrix/ultrix31.tap -boottq -ram 4096`
+  - this follows the `SIMH` `BOOT TQ0` style bootstrap for unit `0`
+  - `-bootrt11` remains disk-only (`RK`/`RH`/`RL`)
+- Tracing:
+  - `LSI11_TRACE_TQ=1 ./pdp1184 -tq tapes/tk50.tap ...`
+  - logs controller init, packet flow, and IRQ delivery in octal
+
 ### Examples
 - Default config check:
   - `./pdp1184 -check-config`
@@ -138,6 +185,7 @@ This subproject now provides two separate executables:
 | LTC (`KW11-L`-compatible, default on `lsi11` and `pdp1184`) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | read CSR low byte (`0177546`) | Fixed line clock. On `lsi11`, this models CPU-board integrated LTC logic; on `pdp1184`, J-11 onboard LTC |
 | KW11-P (optional override) | `0172540–0172545` | `000100` | `6` | CSR bit 7 (DONE) | CSR bit 6 | write CSR with DONE=0 | Compatibility-only programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
+| TQ11 (TK50 / TMSCP) | `0174500–0174503` | `000260` | `5` | port/ring driven | port/ring driven | host clears via descriptor ownership / UQ init flow | Opt-in controller, enabled by `-tq`, one `TK50`-class unit, SIMH `.tap` backend |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
 | RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |
 | LP11 (printer) | `0177514–0177517` | `000200` | `4` | CSR bit 7 | CSR bit 6 | Write DBR (`0177516`) | Output to host stdout |

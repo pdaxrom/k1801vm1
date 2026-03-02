@@ -6,6 +6,9 @@
 #include "devio.h"
 #include "irq.h"
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 #if defined(PICO_ON_DEVICE)
 #include "pico/time.h"
 #else
@@ -55,6 +58,7 @@ static uint64_t kwp_last_tick_ns = 0;
 static int kwp_clock_init = 0;
 static int kw11_l_visible = -1;
 static int kw11_p_visible = -1;
+static int kw11_trace = 0;
 
 static int kw11_default_l_visible(void)
 {
@@ -91,6 +95,18 @@ void kw11_set_visibility(int enable_l, int enable_p)
 {
     kw11_l_visible = enable_l ? 1 : 0;
     kw11_p_visible = enable_p ? 1 : 0;
+}
+
+static void kw11_tracef(const char *fmt, ...)
+{
+    va_list ap;
+    if (!kw11_trace) {
+        return;
+    }
+    va_start(ap, fmt);
+    fputs("KW11 ", stderr);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
 }
 
 int kw11_l_enabled(void)
@@ -269,6 +285,8 @@ static void kw11_write8(uint16_t a, uint8_t v)
         if (kwl_ie && kwl_done) {
             kwl_irq_req = 1;
         }
+        kw11_tracef("L CSR wr=%06o done=%o ie=%o irq=%o\n",
+                    (unsigned)(v & 000377), kwl_done, kwl_ie, kwl_irq_req);
         return;
     }
     if (a == (uint16_t)(KW11L_CSR + 1)) {
@@ -315,9 +333,13 @@ void kw11_irq_ack(void)
 {
     if (kwp_irq_req) {
         kwp_irq_req = 0;
+        kw11_tracef("P irq ack\n");
         return;
     }
     kwl_irq_req = 0;
+    /* KW11-L acknowledge clears monitor (DONE) in interrupt path. */
+    kwl_done = 0;
+    kw11_tracef("L irq ack done=%o ie=%o irq=%o\n", kwl_done, kwl_ie, kwl_irq_req);
 }
 
 int kw11_init(void)
@@ -326,6 +348,8 @@ int kw11_init(void)
     static const io_range_t p = { 0172540, 0172545, kw11_read8, kw11_write8, "KW11-P" };
     int l_on = kw11_l_visible_effective();
     int p_on = kw11_p_visible_effective();
+
+    kw11_trace = (getenv("LSI11_TRACE_KW11") != NULL) ? 1 : 0;
 
     if (l_on && devio_register(&l) != 0) {
         return -1;
@@ -369,7 +393,7 @@ void kw11_reset(void)
 void kw11_poll(void)
 {
     uint64_t t = now_ns();
-    const uint64_t kwl_period_ns = 20000000ull; /* 20 ms -> 50 Hz */
+    const uint64_t kwl_period_ns = 16666667ull; /* ~16.666 ms -> 60 Hz */
 
     /* --- KW11-L --- */
     if (!kwl_clock_init) {
@@ -385,6 +409,10 @@ void kw11_poll(void)
             kwl_done = 1;
             if (kwl_ie) {
                 kwl_irq_req = 1;
+            }
+            if (kw11_trace && kwl_ie) {
+                kw11_tracef("L tick ticks=%06o done=%o ie=%o irq=%o\n",
+                            (unsigned)(ticks & 0177777), kwl_done, kwl_ie, kwl_irq_req);
             }
         }
     }

@@ -10,7 +10,7 @@
 #include "../dev_sr.h"
 
 #define RH11_BASE 0177440
-#define RH11_END  0177462
+#define RH11_END  0177476
 
 static int g_fail = 0;
 

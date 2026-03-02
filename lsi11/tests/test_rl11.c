@@ -15,6 +15,7 @@
 #define RLBA 0174402
 #define RLDA 0174404
 #define RLMP 0174406
+#define RLBAE 0174410
 
 #define RLCS_DRDY      0000001
 #define RLCS_FUNC_MASK 0000016
@@ -93,6 +94,19 @@ static void start_rl_cmd(uint16_t mp, uint16_t ba, uint16_t da, uint8_t cs_low,
     bus_write8(RLCS, cs_low);
 }
 
+static void wait_rl_done(void)
+{
+    int i;
+
+    for (i = 0; i < 50; i++) {
+        rl11_poll();
+        if ((bus_read16(RLCS) & RLCS_CRDY) != 0) {
+            return;
+        }
+        usleep(1000);
+    }
+}
+
 int main(void)
 {
     char err[128];
@@ -140,7 +154,7 @@ int main(void)
 
     /* READ two words from sector 0 into memory. */
     start_rl_cmd(0177776, 000200, 0000000, RLCS_FN_READ | RLCS_IE, 0);
-    rl11_poll();
+    wait_rl_done();
     check(bus_read16(000200) == 012345, "RL11 READ word0");
     check(bus_read16(000202) == 006543, "RL11 READ word1");
     check((bus_read16(RLMP) & 017777) == 000000, "RL11 WC reaches zero");
@@ -153,7 +167,7 @@ int main(void)
     bus_write16(000204, 011111);
     bus_write16(000206, 022222);
     start_rl_cmd(0177776, 000204, 0000001, RLCS_FN_WRITE, 0);
-    rl11_poll();
+    wait_rl_done();
 
     fd = open(rl01_img, O_RDONLY);
     if (fd < 0) {
@@ -177,7 +191,7 @@ int main(void)
 
     /* GET STATUS on RL01: DT bit must be 0. */
     start_rl_cmd(0000000, 000000, 0000003, RLCS_FN_GSTAT, 0);
-    rl11_poll();
+    wait_rl_done();
     mp = bus_read16(RLMP);
     check((mp & RLMP_DT) == 0, "RL11 GET STATUS: RL01 DT bit clear");
 
@@ -198,13 +212,13 @@ int main(void)
 
     /* GET STATUS on RL02: DT bit must be 1. */
     start_rl_cmd(0000000, 000000, 0000003, RLCS_FN_GSTAT, 0);
-    rl11_poll();
+    wait_rl_done();
     mp = bus_read16(RLMP);
     check((mp & RLMP_DT) != 0, "RL11 GET STATUS: RL02 DT bit set");
 
     /* NXM: transfer 2 words from last aligned word of RAM into I/O page. */
     start_rl_cmd(0177776, 0157776, 0000000, RLCS_FN_READ | RLCS_IE, 0);
-    rl11_poll();
+    wait_rl_done();
     cs = bus_read16(RLCS);
     check(((cs & RLCS_E_MASK) >> RLCS_E_SHIFT) == RLCS_E_NXM,
           "RL11 sets NXM error code");
@@ -217,19 +231,30 @@ int main(void)
     /* WRITE CHECK mismatch should set DCRC/WCE error code. */
     bus_write16(000210, 077777);
     start_rl_cmd(0177777, 000210, 0000000, RLCS_FN_WCHK, 0);
-    rl11_poll();
+    wait_rl_done();
     cs = bus_read16(RLCS);
     check(((cs & RLCS_E_MASK) >> RLCS_E_SHIFT) == 0002,
           "RL11 WRITE CHECK sets DCRC/WCE code");
 
     /* RL11 has no implicit track crossing: overflow to sector 050 -> OPI. */
     start_rl_cmd(0177400, 000400, 0000047, RLCS_FN_READ, 0);
-    rl11_poll();
+    wait_rl_done();
     cs = bus_read16(RLCS);
     check(((cs & RLCS_E_MASK) >> RLCS_E_SHIFT) == RLCS_E_OPI,
           "RL11 sector overflow sets OPI");
     check((bus_read16(RLDA) & 0000077) == 0000050,
           "RL11 DA advances to illegal sector 050 on overflow");
+
+    bus_write16(RLBAE, 0000045);
+    check((bus_read16(RLBAE) & 0000077) == 0000045,
+          "RL11 RLBAE stores 6-bit extension");
+    cs = bus_read16(RLCS);
+    check((cs & RLCS_BA_MASK) == 0000020,
+          "RL11 RLCS mirrors low 2 bits of RLBAE");
+
+    bus_write8(RLCS, (uint8_t)((RLCS_CRDY | 0000040) & 0000377));
+    check((bus_read16(RLBAE) & 0000003) == 0000002,
+          "RL11 RLCS BA bits update low 2 bits of RLBAE");
 
     rl11_close_image();
     unlink(rl01_img);
