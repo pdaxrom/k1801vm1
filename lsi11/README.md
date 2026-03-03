@@ -187,6 +187,28 @@ This subproject now provides two separate executables:
 - UNIX V5 boot:
   - `./pdp1184 -rk disks/unix_v5_rk.dsk -bootrt11`
 
+### Demo: interactive boot menu (`demo/boot_menu`)
+- Purpose:
+  - interactive loader helper that detects disk/tape controllers and asks what to boot
+  - supports `RK11`, `RH11/HK`, `RL11`, `TQ11/TMSCP`
+- Build:
+  - `make -C lsi11/demo boot_menu.bin`
+- Load address:
+  - assembled with `org 0100000`
+  - run with `-load demo/boot_menu.bin -addr 0100000 -pc 0100000`
+- Typical run (`pdp1184`, boot from RH unit 0):
+  - `./pdp1184 -rh disks/rt11v5.3/system.dsk -load demo/boot_menu.bin -addr 0100000 -pc 0100000 -ram 128`
+- Typical run (`lsi11`, boot from RH unit 0):
+  - `./lsi11 -rh disks/rt11v503.dsk -load demo/boot_menu.bin -addr 0100000 -pc 0100000`
+- Interaction:
+  - select controller key: `R` (RK), `H` (RH/HK), `L` (RL), `T` (TQ)
+  - select unit number:
+    - `0..7` for `RK/RH/TQ`
+    - `0..3` for `RL`
+- Notes:
+  - menu probes controller CSRs and handles missing devices via bus-error (`000004`) recovery
+  - after selection, it installs/copies built-in bootstrap words and transfers control to selected bootstrap
+
 ## Device CSR / IRQ table
 
 | Device | CSR address range(s) (octal) | Vector (octal) | Priority (octal) | DONE bit | IE bit | Software clears DONE | Notes |
