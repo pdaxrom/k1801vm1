@@ -6,7 +6,7 @@
 
 #include "../bus.h"
 #include "../irq.h"
-#include "../tq11.h"
+#include "../dev_tq11.h"
 
 #define TQ_IP            0174500u
 #define TQ_SA            0174502u

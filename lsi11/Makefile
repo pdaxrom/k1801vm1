@@ -23,7 +23,7 @@ COMMON_SRCS := \
   util_term.c \
   dev_dl11.c \
   dev_kw11.c \
-  tq11.c \
+  dev_tq11.c \
   dev_rl11.c \
   dev_rh11.c \
   dev_rk11.c \

@@ -11,7 +11,7 @@
 #include "dev_rk11.h"
 #include "dev_rl11.h"
 #include "dev_sr.h"
-#include "tq11.h"
+#include "dev_tq11.h"
 #include "ubmap.h"
 #include "dev_vm1sav.h"
 #include "dev_vm1sel.h"

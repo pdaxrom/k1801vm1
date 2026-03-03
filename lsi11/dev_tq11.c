@@ -1,4 +1,4 @@
-#include "tq11.h"
+#include "dev_tq11.h"
 
 #include "bus.h"
 #include "devio.h"
