@@ -324,10 +324,15 @@ int bus_addr_is_ram(paddr_t addr)
 
     /*
      * PDP-11/84:
-     * - 16-bit/18-bit compatibility mode: reserve full 0760000..0777777.
+     * - 16-bit/18-bit compatibility mode:
+     *   reserve low 16-bit I/O page 0160000..0177777 and full 18-bit
+     *   compatibility alias 0760000..0777777.
      * - 22-bit mode: reserve full 017760000..017777777.
      */
     if (g_pdp1184_io_16bit) {
+        if (addr >= IO_PAGE_START && addr <= IO_PAGE_END) {
+            return 0;
+        }
         if (addr >= PDP11_18BIT_IO_PAGE_START && addr <= PDP11_18BIT_IO_PAGE_END) {
             return 0;
         }

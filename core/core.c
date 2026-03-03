@@ -252,9 +252,9 @@ static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
 #define DCJ11_REG_RSVD_177760 0177760
 #define DCJ11_REG_RSVD_177762 0177762
 #define DCJ11_REG_RSVD_177764 0177764
+#define DCJ11_REG_RSVD_177770 0177770
 #endif
 #define DCJ11_REG_CPUERR 0177766
-#define DCJ11_REG_RSVD_177770 0177770
 #define DCJ11_REG_PIRQ 0177772
 #define DCJ11_REG_PSW 0177776
 
@@ -373,9 +373,11 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
     case DCJ11_REG_CPUERR:
         *value = (word)(r->J11_CPUERR & DCJ11_CPUERR_MASK);
         return true;
+#ifdef DCJ_REG_RSVD_ENABLED
     case DCJ11_REG_RSVD_177770:
         *value = r->J11_RSVD_177770;
         return true;
+#endif
     case DCJ11_REG_PIRQ:
         *value = dcj11_pirq_visible(r->J11_PIRQ);
         return true;
@@ -425,9 +427,11 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
         /* CPU error register clears on write. */
         r->J11_CPUERR = 0;
         return true;
+#ifdef DCJ_REG_RSVD_ENABLED
     case DCJ11_REG_RSVD_177770:
         r->J11_RSVD_177770 = value;
         return true;
+#endif
     case DCJ11_REG_PIRQ:
         r->J11_PIRQ = (word)(value & DCJ11_PIRQ_RW);
         return true;
@@ -2396,7 +2400,9 @@ void core_reset(regs *r)
     r->J11_RSVD_177764 = 0;
 #endif
     r->J11_CPUERR = 0;
+#ifdef DCJ_REG_RSVD_ENABLED
     r->J11_RSVD_177770 = 0;
+#endif
     r->J11_PIRQ = 0;
     r->fWait = 0;
     r->fTrap = 0;

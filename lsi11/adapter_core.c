@@ -60,7 +60,10 @@ typedef struct {
 } lsi11_device_mask_t;
 
 static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 0, 1, 0, 0};
+
+#ifdef ENABLE_J11_SHADOW_REGS
 static uint16_t j11_probe_shadow_regs[10];
+#endif
 
 static inline int vm2_model(const regs *r)
 {
@@ -473,6 +476,7 @@ static inline void nxm_trap(regs *r, paddr_t addr)
     r->fAbort = 1;
 }
 
+#ifdef ENABLE_J11_SHADOW_REGS
 static inline int j11_probe_shadow_to_a18(paddr_t addr, paddr_t *a18_out)
 {
     if (!a18_out) {
@@ -605,6 +609,7 @@ static inline void j11_probe_shadow_write_word(paddr_t addr, word v)
     }
     j11_probe_shadow_regs[idx] = (uint16_t)v;
 }
+#endif
 
 /* ---------- bus callbacks for core ---------- */
 
@@ -614,9 +619,11 @@ static byte __not_in_flash_func(core_load_byte)(regs *r, word addr)
 static byte core_load_byte(regs *r, word addr)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return j11_probe_shadow_read_byte((paddr_t)addr);
     }
+#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
@@ -638,10 +645,12 @@ static void __not_in_flash_func(core_store_byte)(regs *r, word addr, byte v)
 static void core_store_byte(regs *r, word addr, byte v)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         j11_probe_shadow_write_byte((paddr_t)addr, v);
         return;
     }
+#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
@@ -664,10 +673,12 @@ static word __not_in_flash_func(core_load_word)(regs *r, word addr)
 static word core_load_word(regs *r, word addr)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
         return j11_probe_shadow_read_word((paddr_t)addr);
     }
+#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         uint16_t a1 = (uint16_t)(addr + 1);
@@ -691,11 +702,13 @@ static void __not_in_flash_func(core_store_word)(regs *r, word addr, word v)
 static void core_store_word(regs *r, word addr, word v)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
         j11_probe_shadow_write_word((paddr_t)addr, v);
         return;
     }
+#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         uint16_t a1 = (uint16_t)(addr + 1);
@@ -720,9 +733,11 @@ static byte __not_in_flash_func(core_load_byte_pa)(regs *r, dword addr)
 static byte core_load_byte_pa(regs *r, dword addr)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         return j11_probe_shadow_read_byte((paddr_t)addr);
     }
+#endif
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
         return 0;
@@ -736,10 +751,12 @@ static void __not_in_flash_func(core_store_byte_pa)(regs *r, dword addr, byte v)
 static void core_store_byte_pa(regs *r, dword addr, byte v)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
         j11_probe_shadow_write_byte((paddr_t)addr, v);
         return;
     }
+#endif
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
         return;
@@ -753,10 +770,12 @@ static word __not_in_flash_func(core_load_word_pa)(regs *r, dword addr)
 static word core_load_word_pa(regs *r, dword addr)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
         return j11_probe_shadow_read_word((paddr_t)addr);
     }
+#endif
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
         return 0;
@@ -770,11 +789,13 @@ static void __not_in_flash_func(core_store_word_pa)(regs *r, dword addr, word v)
 static void core_store_word_pa(regs *r, dword addr, word v)
 #endif
 {
+#ifdef ENABLE_J11_SHADOW_REGS
     if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
             j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
         j11_probe_shadow_write_word((paddr_t)addr, v);
         return;
     }
+#endif
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
         return;
@@ -789,7 +810,9 @@ static int impl_init(regs *r)
 
     /* init bus RAM; devices register their I/O in *_init() */
     bus_init();
+#ifdef ENABLE_J11_SHADOW_REGS
     j11_probe_shadow_reset();
+#endif
     dl11_set_alias(dl11_alias_on);
     if (ubmap_init() != 0) {
         return -1;
@@ -849,7 +872,9 @@ static int impl_init(regs *r)
 static void impl_reset(regs *r)
 {
     (void)r;
+#ifdef ENABLE_J11_SHADOW_REGS
     j11_probe_shadow_reset();
+#endif
     ubmap_reset();
     if (r->model == DCJ11) {
         if (machine_profile == LSI11_MACHINE_1184) {

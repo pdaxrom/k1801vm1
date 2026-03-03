@@ -37,6 +37,10 @@ int main(void)
           "16-bit I/O window must decode SR at 0177570");
     check(bus_read16(0777570) == 012345,
           "18-bit I/O alias must decode SR at 0777570");
+    check(!bus_addr_is_ram(0172540),
+          "16-bit mode must treat undecoded low I/O page addresses as non-RAM");
+    check(bus_is_nxm(0172540),
+          "16-bit mode undecoded low I/O page address must raise NXM");
     check(!bus_addr_is_ram(0760000),
           "16-bit mode must reserve full 18-bit I/O alias page as non-RAM");
 
