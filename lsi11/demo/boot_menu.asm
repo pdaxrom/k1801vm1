@@ -24,23 +24,7 @@ ASC_7     equ 0067
 ASC_CR    equ 0015
 ASC_LF    equ 0012
 
-RK_BOOT_ADDR      equ 002000
-RK_BOOT_ENTRY     equ 002002
-RK_BOOT_UNIT_SLOT equ 002010
-
-RL_BOOT_ADDR        equ 002000
-RL_BOOT_ENTRY       equ 002000
-RL_BOOT_GSTAT_SLOT  equ 002014
-RL_BOOT_READ_SLOT   equ 002036
-
-RH_BOOT_ADDR      equ 002000
-RH_BOOT_ENTRY     equ 002002
-RH_BOOT_UNIT_SLOT equ 002010
-
 TQ_BOOT_ADDR   equ 016000
-TQ_BOOT_ENTRY  equ 016002
-TQ_BOOT_UNIT   equ 016010
-TQ_BOOT_CSR    equ 016014
 TQ_B_CMDINT    equ 015000
 TQ_B_RSPINT    equ 015002
 TQ_B_RING      equ 015004
@@ -50,15 +34,12 @@ TQ_B_CMDH      equ 015100
 TQ_B_TKCMD     equ 015104
 TQ_B_UNIT      equ 015110
 
-RK_BOOT_WORDS  equ 29
-RL_BOOT_WORDS  equ 21
-RH_BOOT_WORDS  equ 46
-TQ_BOOT_WORDS  equ 105
-
 start:
         mtps    #000000
         mov     #stack_top, sp
 
+        mov     @#000004, saved_vec4_pc
+        mov     @#000006, saved_vec4_psw
         mov     #nxm_handler, @#000004
         mov     #000340, @#000006
         clr     probe_resume
@@ -67,6 +48,8 @@ start:
         jsr     pc, print_str
 
         jsr     pc, detect_controllers
+        mov     saved_vec4_pc, @#000004
+        mov     saved_vec4_psw, @#000006
         tstb    present_any
         bne     has_any
 
@@ -214,64 +197,22 @@ halt_internal:
 boot_rk:
         mov     #msg_boot_rk, r1
         jsr     pc, print_str
-        mov     #rk_bootstrap, r0
-        mov     #RK_BOOT_ADDR, r1
-        mov     #RK_BOOT_WORDS, r2
-        jsr     pc, copy_words
-        mov     selected_unit, r0
-        mov     r0, @#RK_BOOT_UNIT_SLOT
-        mov     #RK_BOOT_ENTRY, pc
+        jmp     rk_boot_run
 
 boot_rh:
         mov     #msg_boot_rh, r1
         jsr     pc, print_str
-        mov     #rh_bootstrap, r0
-        mov     #RH_BOOT_ADDR, r1
-        mov     #RH_BOOT_WORDS, r2
-        jsr     pc, copy_words
-        mov     selected_unit, r0
-        mov     r0, @#RH_BOOT_UNIT_SLOT
-        mov     #RH_BOOT_ENTRY, pc
+        jmp     rh_boot_run
 
 boot_rl:
         mov     #msg_boot_rl, r1
         jsr     pc, print_str
-        mov     #rl_bootstrap, r0
-        mov     #RL_BOOT_ADDR, r1
-        mov     #RL_BOOT_WORDS, r2
-        jsr     pc, copy_words
-
-        mov     selected_unit, r0
-        swab    r0
-        mov     r0, r1
-        bis     #0000004, r1
-        mov     r1, @#RL_BOOT_GSTAT_SLOT
-        mov     r0, r1
-        bis     #0000014, r1
-        mov     r1, @#RL_BOOT_READ_SLOT
-        mov     #RL_BOOT_ENTRY, pc
+        jmp     rl_boot_run
 
 boot_tq:
         mov     #msg_boot_tq, r1
         jsr     pc, print_str
-        mov     #tq_bootstrap, r0
-        mov     #TQ_BOOT_ADDR, r1
-        mov     #TQ_BOOT_WORDS, r2
-        jsr     pc, copy_words
-        mov     selected_unit, r0
-        mov     r0, @#TQ_BOOT_UNIT
-        mov     #0174500, r0
-        mov     r0, @#TQ_BOOT_CSR
-        mov     #TQ_BOOT_ENTRY, pc
-
-copy_words:
-        tst     r2
-        beq     copy_done
-copy_loop:
-        mov     (r0)+, (r1)+
-        sob     r2, copy_loop
-copy_done:
-        rts     pc
+        jmp     tq_boot_run
 
 detect_controllers:
         clr     present_any
@@ -395,7 +336,7 @@ msg_line_rl:
 msg_line_tq:
         DB      "  4 - TQ11/TMSCP (tq0..tq7)\r\n", 0
 msg_choose_ctl:
-        DB      "Select controller [R/H/L/T]: ", 0
+        DB      "Select controller [1/2/3/4]: ", 0
 msg_bad_ctl:
         DB      "Invalid controller selection.\r\n", 0
 msg_not_present:
@@ -439,218 +380,203 @@ probe_resume:
         DW      0
 nxm_saved_r0:
         DW      0
+saved_vec4_pc:
+        DW      0
+saved_vec4_psw:
+        DW      0
 probe_nxm:
         DB      0
         even
 
-rk_bootstrap:
-        DW      0042113
-        DW      0012706
-        DW      RK_BOOT_ADDR
-        DW      0012700
-        DW      0000000
-        DW      0010003
-        DW      0000303
-        DW      0006303
-        DW      0006303
-        DW      0006303
-        DW      0006303
-        DW      0006303
-        DW      0012701
-        DW      0177412
-        DW      0010311
-        DW      0005041
-        DW      0012741
-        DW      0177000
-        DW      0012741
-        DW      0000005
-        DW      0005002
-        DW      0005003
-        DW      0012704
-        DW      RK_BOOT_ADDR + 000020
-        DW      0005005
-        DW      0105711
-        DW      0100376
-        DW      0105011
-        DW      0005007
+rk_boot_run:
+        mov     #002000, sp
+        mov     selected_unit, r0
+        mov     r0, r3
+        swab    r3
+        asl     r3
+        asl     r3
+        asl     r3
+        asl     r3
+        asl     r3
+        mov     #0177412, r1
+        mov     r3, (r1)
+        clr     -(r1)
+        mov     #0177000, -(r1)
+        mov     #0000005, -(r1)
+        clr     r2
+        clr     r3
+        mov     #002020, r4
+        clr     r5
+rk_wait:
+        tstb    (r1)
+        bpl     rk_wait
+        clrb    (r1)
+        clr     pc
 
-rl_bootstrap:
-        DW      0012701
-        DW      0174400
-        DW      0012761
-        DW      0000013
-        DW      0000004
-        DW      0012711
-        DW      0000004
-        DW      0105711
-        DW      0100376
-        DW      0005061
-        DW      0000002
-        DW      0005061
-        DW      0000004
-        DW      0012761
-        DW      0177400
-        DW      0000006
-        DW      0012711
-        DW      0000014
-        DW      0105711
-        DW      0100376
-        DW      0005007
+rh_boot_run:
+        mov     #002000, sp
+        mov     selected_unit, r0
+        mov     #0177440, r1
+        mov     #0000040, 10(r1)
+        mov     r0, 10(r1)
+rh_wait_ds:
+        mov     12(r1), r2
+        bpl     rh_wait_ds
+        bic     #0177377, r2
+        asl     r2
+        asl     r2
+        mov     #0000003, r3
+        bis     r2, r3
+        mov     r3, (r1)
+rh_wait1:
+        tstb    (r1)
+        bpl     rh_wait1
+        mov     #0177000, 2(r1)
+        clr     4(r1)
+        clr     6(r1)
+        clr     20(r1)
+        mov     #0000021, r3
+        bis     r2, r3
+        mov     r3, (r1)
+rh_wait2:
+        tstb    (r1)
+        bpl     rh_wait2
+        clr     r2
+        clr     r3
+        mov     #002020, r4
+        clr     r5
+        clr     pc
 
-rh_bootstrap:
-        DW      0042115
-        DW      0012706
-        DW      RH_BOOT_ADDR
-        DW      0012700
-        DW      0000000
-        DW      0012701
-        DW      0177440
-        DW      0012761
-        DW      0000040
-        DW      0000010
-        DW      0010061
-        DW      0000010
-        DW      0016102
-        DW      0000012
-        DW      0100375
-        DW      0042702
-        DW      0177377
-        DW      0006302
-        DW      0006302
-        DW      0012703
-        DW      0000003
-        DW      0050203
-        DW      0010311
-        DW      0105711
-        DW      0100376
-        DW      0012761
-        DW      0177000
-        DW      0000002
-        DW      0005061
-        DW      0000004
-        DW      0005061
-        DW      0000006
-        DW      0005061
-        DW      0000020
-        DW      0012703
-        DW      0000021
-        DW      0050203
-        DW      0010311
-        DW      0105711
-        DW      0100376
-        DW      0005002
-        DW      0005003
-        DW      0012704
-        DW      RH_BOOT_ADDR + 000020
-        DW      0005005
-        DW      0005007
+rl_boot_run:
+        mov     #0174400, r1
+        mov     selected_unit, r0
+        swab    r0
+        mov     r0, r2
+        mov     #0000013, r3
+        bis     r2, r3
+        mov     r3, 4(r1)
+        mov     #0000004, r3
+        bis     r2, r3
+        mov     r3, (r1)
+rl_wait1:
+        tstb    (r1)
+        bpl     rl_wait1
+        clr     2(r1)
+        clr     4(r1)
+        mov     #0177400, 6(r1)
+        mov     #0000014, r3
+        bis     r2, r3
+        mov     r3, (r1)
+rl_wait2:
+        tstb    (r1)
+        bpl     rl_wait2
+        clr     pc
 
-tq_bootstrap:
-        DW      0046525
-        DW      0012706
-        DW      TQ_BOOT_ADDR
-        DW      0012700
-        DW      0000000
-        DW      0012701
-        DW      0174500
-        DW      0005021
-        DW      0012704
-        DW      0004000
-        DW      0005002
-        DW      0005022
-        DW      0020237
-        DW      TQ_BOOT_ADDR - 000002
-        DW      0103774
-        DW      0012705
-        DW      TQ_BOOT_ADDR + 000312
-        DW      0005711
-        DW      0100001
-        DW      0000000
-        DW      0030411
-        DW      0001773
-        DW      0012511
-        DW      0006304
-        DW      0100370
-        DW      0012737
-        DW      0000400
-        DW      TQ_B_CMDH + 000002
-        DW      0012737
-        DW      0000044
-        DW      TQ_B_CMDH
-        DW      0010037
-        DW      TQ_B_UNIT
-        DW      0012737
-        DW      0000011
-        DW      TQ_B_TKCMD + 000010
-        DW      0012737
-        DW      0020000
-        DW      TQ_B_TKCMD + 000012
-        DW      0012702
-        DW      TQ_B_RING
-        DW      0012722
-        DW      TQ_B_TKRSP
-        DW      0010203
-        DW      0010423
-        DW      0012723
-        DW      TQ_B_TKCMD
-        DW      0010423
-        DW      0005741
-        DW      0005712
-        DW      0100776
-        DW      0105737
-        DW      TQ_B_TKRSP + 000012
-        DW      0001401
-        DW      0000000
-        DW      0012703
-        DW      TQ_B_TKCMD + 000010
-        DW      0012723
-        DW      0000045
-        DW      0012723
-        DW      0020002
-        DW      0012723
-        DW      0000001
-        DW      0005023
-        DW      0005023
-        DW      0005023
-        DW      0010412
-        DW      0010437
-        DW      TQ_B_RING + 000006
-        DW      0005711
-        DW      0005712
-        DW      0100776
-        DW      0105737
-        DW      TQ_B_TKRSP + 000012
-        DW      0001401
-        DW      0000000
-        DW      0012703
-        DW      TQ_B_TKCMD + 000010
-        DW      0012723
-        DW      0000041
-        DW      0012723
-        DW      0020000
-        DW      0012723
-        DW      0001000
-        DW      0005023
-        DW      0005023
-        DW      0010412
-        DW      0010437
-        DW      TQ_B_RING + 000006
-        DW      0005711
-        DW      0005712
-        DW      0100776
-        DW      0105737
-        DW      TQ_B_TKRSP + 000012
-        DW      0001401
-        DW      0000000
-        DW      0005003
-        DW      0012704
-        DW      TQ_BOOT_ADDR + 000020
-        DW      0005005
-        DW      0005007
-        DW      0100000
-        DW      TQ_B_RING
-        DW      0000000
-        DW      0000001
+tq_boot_run:
+        mov     #016000, sp
+        mov     selected_unit, r0
+        mov     #0174500, r1
+        clr     (r1)+
+        clr     r2
+tq_clear:
+        clr     (r2)+
+        cmp     r2, #015776
+        blt     tq_clear
+
+tq_step1:
+        tst     (r1)
+        bpl     tq_step1_ok
+        halt
+tq_step1_ok:
+        bit     #0004000, (r1)
+        beq     tq_step1
+        mov     #0100000, (r1)
+
+tq_step2:
+        tst     (r1)
+        bpl     tq_step2_ok
+        halt
+tq_step2_ok:
+        bit     #0010000, (r1)
+        beq     tq_step2
+        mov     #TQ_B_RING, (r1)
+
+tq_step3:
+        tst     (r1)
+        bpl     tq_step3_ok
+        halt
+tq_step3_ok:
+        bit     #0020000, (r1)
+        beq     tq_step3
+        clr     (r1)
+
+tq_step4:
+        tst     (r1)
+        bpl     tq_step4_ok
+        halt
+tq_step4_ok:
+        bit     #0040000, (r1)
+        beq     tq_step4
+        mov     #0000001, (r1)
+
+        mov     #0100000, r4
+
+        mov     #0000400, @#(TQ_B_CMDH + 2)
+        mov     #0000044, @#TQ_B_CMDH
+        mov     r0, @#TQ_B_UNIT
+        mov     #0000011, @#(TQ_B_TKCMD + 10)
+        mov     #0020000, @#(TQ_B_TKCMD + 12)
+        mov     #TQ_B_RING, r2
+        mov     #TQ_B_TKRSP, (r2)+
+        mov     r2, r3
+        mov     r4, (r3)+
+        mov     #TQ_B_TKCMD, (r3)+
+        mov     r4, (r3)+
+        tst     -(r1)
+tq_wait_onl:
+        tst     (r2)
+        bmi     tq_wait_onl
+        tstb    @#(TQ_B_TKRSP + 12)
+        beq     tq_onl_ok
+        halt
+tq_onl_ok:
+        mov     #(TQ_B_TKCMD + 10), r3
+        mov     #0000045, (r3)+
+        mov     #0020002, (r3)+
+        mov     #0000001, (r3)+
+        clr     (r3)+
+        clr     (r3)+
+        clr     (r3)+
+        mov     r4, (r2)
+        mov     r4, @#(TQ_B_RING + 6)
+        tst     (r1)
+tq_wait_rew:
+        tst     (r2)
+        bmi     tq_wait_rew
+        tstb    @#(TQ_B_TKRSP + 12)
+        beq     tq_rew_ok
+        halt
+tq_rew_ok:
+        mov     #(TQ_B_TKCMD + 10), r3
+        mov     #0000041, (r3)+
+        mov     #0020000, (r3)+
+        mov     #0001000, (r3)+
+        clr     (r3)+
+        clr     (r3)+
+        mov     r4, (r2)
+        mov     r4, @#(TQ_B_RING + 6)
+        tst     (r1)
+tq_wait_read:
+        tst     (r2)
+        bmi     tq_wait_read
+        tstb    @#(TQ_B_TKRSP + 12)
+        beq     tq_read_ok
+        halt
+tq_read_ok:
+        clr     r3
+        mov     #016020, r4
+        clr     r5
+        clr     pc
 
 stack_area:
         DS      128
