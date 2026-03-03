@@ -4,11 +4,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define RH11_MAX_DRIVES 8
+
 int rh11_init(void);
 void rh11_reset(void);
 void rh11_poll(void);
 
 int rh11_open_image(const char *path);
+int rh11_open_image_unit(unsigned unit, const char *path);
 void rh11_close_image(void);
 void rh11_set_debug(int on);
 int rh11_boot_copy(void *dest, size_t len);

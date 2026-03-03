@@ -4,11 +4,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define RK11_MAX_DRIVES 8
+
 int  rk11_init(void);
 void rk11_reset(void);
 void rk11_poll(void);
 
 int  rk11_open_image(const char *path);
+int  rk11_open_image_unit(unsigned unit, const char *path);
 void rk11_close_image(void);
 void rk11_set_debug(int on);
 

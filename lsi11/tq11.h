@@ -4,11 +4,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define TQ11_MAX_UNITS 8
+
 int tq11_init(void);
 void tq11_reset(void);
 void tq11_poll(void);
 
 int tq11_open_image(const char *path);
+int tq11_open_image_unit(unsigned unit, const char *path);
 void tq11_close_image(void);
 
 int tq11_attached(void);

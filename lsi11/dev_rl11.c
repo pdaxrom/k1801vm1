@@ -982,13 +982,19 @@ void rl11_poll(void)
     rl_exec_command();
 }
 
-int rl11_open_image_typed(const char *path, int type)
+int rl11_open_image_typed_unit(unsigned unit, const char *path, int type)
 {
     emu_file_t *f = NULL;
     int read_only = 0;
     long sz = 0;
     int dtype = type;
-    rl_drive_t *d = &rl_drv[0];
+    rl_drive_t *d = NULL;
+
+    if (!path || unit >= RL_MAX_DRIVES) {
+        rl_sync_cs();
+        return -1;
+    }
+    d = &rl_drv[unit];
 
     if (d->fp) {
         emu_fclose(d->fp);
@@ -1038,22 +1044,31 @@ int rl11_open_image_typed(const char *path, int type)
 
 int rl11_open_image(const char *path)
 {
-    return rl11_open_image_typed(path, RL11_TYPE_AUTO);
+    return rl11_open_image_typed_unit(0, path, RL11_TYPE_AUTO);
+}
+
+int rl11_open_image_typed(const char *path, int type)
+{
+    return rl11_open_image_typed_unit(0, path, type);
 }
 
 void rl11_close_image(void)
 {
-    rl_drive_t *d = &rl_drv[0];
-    if (d->fp) {
-        emu_fclose(d->fp);
-        d->fp = NULL;
+    size_t i;
+
+    for (i = 0; i < RL_MAX_DRIVES; i++) {
+        rl_drive_t *d = &rl_drv[i];
+        if (d->fp) {
+            emu_fclose(d->fp);
+            d->fp = NULL;
+        }
+        d->type = RL11_TYPE_AUTO;
+        d->read_only = 0;
+        d->cyl = 0;
+        d->head = 0;
+        d->rot_sector = 0;
+        d->status_latch = 0;
     }
-    d->type = RL11_TYPE_AUTO;
-    d->read_only = 0;
-    d->cyl = 0;
-    d->head = 0;
-    d->rot_sector = 0;
-    d->status_latch = 0;
     rl_sync_cs();
 }
 

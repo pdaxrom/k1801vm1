@@ -263,17 +263,52 @@ static uint8_t tq_state;
 static uint8_t tq_irq_req;
 static uint8_t tq_irq_en;
 static uint8_t tq_poll_pending;
-static uint8_t tq_una_pending;
 static uint16_t tq_cflgs;
-static uint8_t tq_online;
-static uint8_t tq_sw_write_protect;
 static uint8_t tq_trace;
 static tq_ring_t tq_cmd_ring;
 static tq_ring_t tq_rsp_ring;
-static emu_file_t *tq_fp;
-static uint8_t tq_read_only;
-static uint32_t tq_tape_pos;
+static uint16_t tq_cmd_unit;
+
+typedef struct {
+    emu_file_t *fp;
+    uint8_t read_only;
+    uint8_t online;
+    uint8_t sw_write_protect;
+    uint8_t una_pending;
+    uint32_t tape_pos;
+} tq_unit_t;
+
+static tq_unit_t tq_units[TQ11_MAX_UNITS];
 static uint8_t tq_xfer_buf[TQ_MAX_RECORD];
+
+static tq_unit_t *tq_unit_ptr(uint16_t unit)
+{
+    if (unit >= TQ11_MAX_UNITS) {
+        return NULL;
+    }
+    return &tq_units[unit];
+}
+
+static uint16_t tq_effective_unit(void)
+{
+    if (tq_cmd_unit < TQ11_MAX_UNITS) {
+        return tq_cmd_unit;
+    }
+    return 0;
+}
+
+static tq_unit_t *tq_cur_unit(void)
+{
+    return tq_unit_ptr(tq_effective_unit());
+}
+
+#define TQ_UNIT    (tq_cur_unit())
+#define tq_fp      (TQ_UNIT->fp)
+#define tq_read_only (TQ_UNIT->read_only)
+#define tq_online  (TQ_UNIT->online)
+#define tq_sw_write_protect (TQ_UNIT->sw_write_protect)
+#define tq_una_pending (TQ_UNIT->una_pending)
+#define tq_tape_pos (TQ_UNIT->tape_pos)
 
 static uint16_t tq_initial_sa(void)
 {
@@ -1114,34 +1149,40 @@ static void tq_rsp_flags_from_status(uint16_t *rsp)
     tq_rsp_or_flags(rsp, tq_response_flags_for_status(rsp[TQ_RSP_STS]));
 }
 
-static void tq_schedule_una(void)
+static void tq_schedule_una(uint16_t unit)
 {
+    tq_unit_t *u = tq_unit_ptr(unit);
+
     if (tq_state != TQ_STATE_UP) {
         return;
     }
-    if (!tq_fp) {
+    if (!u || !u->fp) {
         return;
     }
     if ((tq_cflgs & TQ_CF_ATN) == 0u) {
         return;
     }
 
-    tq_una_pending = 1;
+    u->una_pending = 1;
     tq_poll_pending = 1;
 }
 
-static void tq_prepare_una(uint16_t *rsp)
+static void tq_prepare_una(uint16_t unit, uint16_t *rsp)
 {
+    tq_unit_t *u = tq_unit_ptr(unit);
+
     memset(rsp, 0, TQ_PKT_WORDS * sizeof(uint16_t));
     rsp[TQ_HLNT] = 32u;
     rsp[TQ_HCTC] = TQ_HCTC_SEQ_TMSCP;
     rsp[TQ_RSP_REFL] = 0;
     rsp[TQ_RSP_REFH] = 0;
-    rsp[TQ_RSP_UN] = 0;
+    rsp[TQ_RSP_UN] = unit;
     rsp[TQ_RSP_OPF] = TQ_OP_AVA;
     rsp[TQ_RSP_STS] = 0;
     rsp[8] = 0;
-    rsp[TQ_GUS_UFL] = tq_current_unit_flags();
+    rsp[TQ_GUS_UFL] = u ? ((u->read_only ? TQ_UF_WPH : 0u) |
+                           (u->sw_write_protect ? TQ_UF_WPS : 0u))
+                      : 0u;
     rsp[TQ_GUS_UIDD] =
         (uint16_t)(((uint16_t)TQ_UID_TAPE << 8) | (uint16_t)TQ_UNIT_MODEL);
     tq_put_u32(rsp, TQ_GUS_MEDL, TQ_MEDIA_ID);
@@ -1170,6 +1211,8 @@ static uint16_t tq_status_from_tap_motion(tq_tap_status_t st)
 
 static void tq_cmd_scc(const uint16_t *cmd, uint16_t *rsp)
 {
+    uint16_t unit;
+
     if (cmd[TQ_SCC_MSV] != 0u) {
         tq_prepare_rsp(rsp, cmd, TQ_OP_SCC, 0, (uint16_t)(TQ_ST_CMD | TQ_I_VRSN),
                        TQ_SCC_LNT);
@@ -1184,7 +1227,9 @@ static void tq_cmd_scc(const uint16_t *cmd, uint16_t *rsp)
     rsp[TQ_SCC_CIDD] =
         (uint16_t)(((uint16_t)TQ_CTRL_CLASS << 8) | (uint16_t)TQ_CTRL_MODEL);
     tq_put_u32(rsp, TQ_SCC_MBCL, TQ_MAX_TRANSFER);
-    tq_schedule_una();
+    for (unit = 0; unit < TQ11_MAX_UNITS; unit++) {
+        tq_schedule_una(unit);
+    }
 }
 
 static void tq_cmd_gcs(const uint16_t *cmd, uint16_t *rsp)
@@ -1206,11 +1251,6 @@ static void tq_cmd_suc(const uint16_t *cmd, uint16_t *rsp)
         return;
     }
 
-    if (cmd[TQ_CMD_UN] != 0u) {
-        rsp[TQ_RSP_STS] = TQ_ST_OFL;
-        return;
-    }
-
     tq_sw_write_protect = (cmd[TQ_ONL_UFL] & TQ_UF_WPS) ? 1u : 0u;
     rsp[TQ_RSP_STS] = TQ_ST_SUC;
     tq_fill_online_status(rsp);
@@ -1226,20 +1266,9 @@ static void tq_cmd_flu(const uint16_t *cmd, uint16_t *rsp)
 
 static void tq_cmd_gus(const uint16_t *cmd, uint16_t *rsp)
 {
-    uint16_t unit = cmd[TQ_CMD_UN];
     uint16_t status;
 
-    if ((cmd[TQ_CMD_MOD] & TQ_MD_NXU) != 0u && unit != 0u) {
-        unit = 0u;
-    }
-
     tq_prepare_rsp(rsp, cmd, TQ_OP_GUS, 0, 0, TQ_GUS_LNT);
-    rsp[TQ_RSP_UN] = unit;
-
-    if (unit != 0u) {
-        rsp[TQ_RSP_STS] = TQ_ST_OFL;
-        return;
-    }
 
     if (!tq_fp) {
         status = (uint16_t)(TQ_ST_OFL | TQ_SB_OFL_NV);
@@ -1297,11 +1326,6 @@ static void tq_cmd_onl(const uint16_t *cmd, uint16_t *rsp)
 
     if (!tq_fp) {
         rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_OFL | TQ_SB_OFL_NV);
-        return;
-    }
-
-    if (cmd[TQ_CMD_UN] != 0u) {
-        rsp[TQ_RSP_STS] = TQ_ST_OFL;
         return;
     }
 
@@ -1553,10 +1577,18 @@ static void tq_cmd_pos(const uint16_t *cmd, uint16_t *rsp)
 static void tq_process_command(const uint16_t *cmd, uint16_t *rsp)
 {
     uint16_t op = (uint16_t)(cmd[TQ_CMD_OPC] & 0x00FFu);
+    uint16_t unit = cmd[TQ_CMD_UN];
 
     tq_log("cmd op=%03o mod=%06o ref=%06o%06o unit=%o", (unsigned)op,
            (unsigned)cmd[TQ_CMD_MOD], (unsigned)cmd[TQ_CMD_REFH],
            (unsigned)cmd[TQ_CMD_REFL], (unsigned)cmd[TQ_CMD_UN]);
+
+    if (unit >= TQ11_MAX_UNITS) {
+        tq_prepare_rsp(rsp, cmd, op, 0, TQ_ST_OFL, TQ_RSP_LNT);
+        rsp[TQ_RSP_UN] = unit;
+        return;
+    }
+    tq_cmd_unit = unit;
 
     switch (op) {
     case TQ_OP_GCS:
@@ -1682,8 +1714,16 @@ static int tq_post_attention_una(void)
     uint32_t rsp_slot;
     uint32_t rsp_addr;
     uint16_t rsp[TQ_PKT_WORDS];
+    uint16_t unit;
+    int found = 0;
 
-    if (!tq_una_pending) {
+    for (unit = 0; unit < TQ11_MAX_UNITS; unit++) {
+        if (tq_units[unit].una_pending) {
+            found = 1;
+            break;
+        }
+    }
+    if (!found) {
         return 0;
     }
 
@@ -1697,7 +1737,7 @@ static int tq_post_attention_una(void)
         return -1;
     }
 
-    tq_prepare_una(rsp);
+    tq_prepare_una(unit, rsp);
     if (tq_dma_write_words((paddr_t)(rsp_addr + TQ_HDR_OFF), rsp,
                            ((uint32_t)rsp[TQ_HLNT] + 4u) / 2u) != 0) {
         tq_fail(0000002u);
@@ -1709,8 +1749,8 @@ static int tq_post_attention_una(void)
         return -1;
     }
 
-    tq_una_pending = 0;
-    tq_log("attn op=%03o", (unsigned)TQ_OP_AVA);
+    tq_units[unit].una_pending = 0;
+    tq_log("attn op=%03o unit=%o", (unsigned)TQ_OP_AVA, (unsigned)unit);
     tq_raise_irq();
     return 1;
 }
@@ -1891,19 +1931,25 @@ int tq11_init(void)
 
 void tq11_reset(void)
 {
+    uint16_t unit;
+
     tq_sa = tq_initial_sa();
     tq_sa_latch = 0;
     tq_s1_host = 0;
     tq_comm = 0;
     tq_prgi = 0;
+    tq_cmd_unit = 0;
     tq_state = TQ_STATE_S1;
     tq_irq_req = 0;
     tq_irq_en = 0;
     tq_poll_pending = 0;
-    tq_una_pending = 0;
     tq_cflgs = 0;
-    tq_online = 0;
-    tq_sw_write_protect = 0;
+    for (unit = 0; unit < TQ11_MAX_UNITS; unit++) {
+        tq_units[unit].online = 0;
+        tq_units[unit].sw_write_protect = 0;
+        tq_units[unit].una_pending = 0;
+        tq_units[unit].tape_pos = 0;
+    }
     tq_ring_reset(&tq_cmd_ring);
     tq_ring_reset(&tq_rsp_ring);
     tq_log("reset sa=%06o", (unsigned)tq_sa);
@@ -1920,49 +1966,85 @@ void tq11_poll(void)
     tq_service_poll();
 }
 
+int tq11_open_image_unit(unsigned unit, const char *path)
+{
+    tq_unit_t *u;
+    uint16_t saved_unit;
+
+    if (!path || unit >= TQ11_MAX_UNITS) {
+        return -1;
+    }
+
+    u = &tq_units[unit];
+    if (u->fp) {
+        emu_fclose(u->fp);
+        u->fp = NULL;
+    }
+
+    u->fp = emu_fopen(path, "r+b");
+    u->read_only = 0;
+    if (!u->fp) {
+        u->fp = emu_fopen(path, "rb");
+        u->read_only = 1;
+    }
+    if (!u->fp) {
+        return -1;
+    }
+
+    u->tape_pos = 0;
+    u->online = 0;
+    u->sw_write_protect = 0;
+    u->una_pending = 0;
+    saved_unit = tq_cmd_unit;
+    tq_cmd_unit = (uint16_t)unit;
+    if (tq_tap_seek(0) != 0) {
+        tq_cmd_unit = saved_unit;
+        emu_fclose(u->fp);
+        u->fp = NULL;
+        u->read_only = 0;
+        return -1;
+    }
+    tq_cmd_unit = saved_unit;
+    tq_log("attach unit=%o pos=%07o ro=%u", (unsigned)unit,
+           (unsigned)u->tape_pos, (unsigned)u->read_only);
+    tq_schedule_una((uint16_t)unit);
+    return 0;
+}
+
 int tq11_open_image(const char *path)
 {
-    tq11_close_image();
-
-    tq_fp = emu_fopen(path, "r+b");
-    tq_read_only = 0;
-    if (!tq_fp) {
-        tq_fp = emu_fopen(path, "rb");
-        tq_read_only = 1;
-    }
-    if (!tq_fp) {
-        return -1;
-    }
-
-    tq_tape_pos = 0;
-    tq_online = 0;
-    tq_sw_write_protect = 0;
-    tq_una_pending = 0;
-    if (tq_tap_seek(0) != 0) {
-        tq11_close_image();
-        return -1;
-    }
-    tq_log("attach pos=%07o ro=%u", (unsigned)tq_tape_pos, (unsigned)tq_read_only);
-    tq_schedule_una();
-    return 0;
+    return tq11_open_image_unit(0, path);
 }
 
 void tq11_close_image(void)
 {
-    if (tq_fp) {
-        emu_fclose(tq_fp);
-        tq_fp = NULL;
+    uint16_t unit;
+
+    for (unit = 0; unit < TQ11_MAX_UNITS; unit++) {
+        tq_unit_t *u = &tq_units[unit];
+        if (u->fp) {
+            emu_fclose(u->fp);
+            u->fp = NULL;
+        }
+        u->read_only = 0;
+        u->tape_pos = 0;
+        u->online = 0;
+        u->sw_write_protect = 0;
+        u->una_pending = 0;
     }
-    tq_read_only = 0;
-    tq_tape_pos = 0;
-    tq_online = 0;
-    tq_sw_write_protect = 0;
-    tq_una_pending = 0;
+    tq_poll_pending = 0;
 }
 
 int tq11_attached(void)
 {
-    return tq_fp ? 1 : 0;
+    uint16_t unit;
+
+    for (unit = 0; unit < TQ11_MAX_UNITS; unit++) {
+        if (tq_units[unit].fp) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 #if defined(LSI11_TESTS)

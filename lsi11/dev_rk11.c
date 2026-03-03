@@ -91,14 +91,40 @@
 
 static uint16_t rkds, rker, rkcs, rkwc, rkba, rkda, rkdb;
 static uint8_t rkmex; /* 2-bit extension from RKCS bits 4..5 */
-static uint8_t rk_write_lock;
+static uint8_t rk_write_lock[RK11_MAX_DRIVES];
 
 static irq_latch_t rk_l;
-static emu_file_t *fp = NULL;
-static int img_read_only = 0;
+static emu_file_t *rk_fp[RK11_MAX_DRIVES];
+static uint8_t rk_img_read_only[RK11_MAX_DRIVES];
 static int sector_one_based = 0;
 static int rk_debug = 0;
 static int rk_debug_active = 0;
+
+static int rk_drive_valid(uint16_t drive)
+{
+    return (drive < RK11_MAX_DRIVES) ? 1 : 0;
+}
+
+static emu_file_t *rk_drive_fp(uint16_t drive)
+{
+    if (!rk_drive_valid(drive)) {
+        return NULL;
+    }
+    return rk_fp[drive];
+}
+
+static int rk_drive_read_only(uint16_t drive)
+{
+    if (!rk_drive_valid(drive)) {
+        return 0;
+    }
+    return rk_img_read_only[drive] ? 1 : 0;
+}
+
+static int rk_drive_attached(uint16_t drive)
+{
+    return (rk_drive_fp(drive) != NULL) ? 1 : 0;
+}
 
 static uint16_t rk_get_drive(uint16_t da)
 {
@@ -235,13 +261,13 @@ static void rk_sync_rkds(void)
     v |= RKDS_RK05;
     v |= (uint16_t)((drive & 07) << 13);
 
-    if (fp) {
+    if (rk_drive_attached(drive)) {
         v |= RKDS_DRY;
     }
     if (rk_l.done) {
         v |= RKDS_RWS_RDY;
     }
-    if (img_read_only || rk_write_lock) {
+    if (rk_drive_read_only(drive) || rk_write_lock[drive]) {
         v |= RKDS_WPS;
     }
 
@@ -314,9 +340,13 @@ static void rk_finish_command(void)
 
 static void rk_do_control_reset(void)
 {
+    size_t i;
+
     rk_clear_hard_errors();
     rk_clear_soft_errors();
-    rk_write_lock = 0;
+    for (i = 0; i < RK11_MAX_DRIVES; i++) {
+        rk_write_lock[i] = 0;
+    }
     rkwc = 0;
     rkba = 0;
     rkda = 0;
@@ -335,7 +365,7 @@ static int rk_validate_da_for_xfer(uint16_t da)
     uint16_t cyl = rk_get_cyl(da);
     uint16_t sec = rk_get_sector(da);
 
-    if (drive != 0) {
+    if (!rk_drive_valid(drive) || !rk_drive_attached(drive)) {
         rk_set_error(RKER_NXD);
         return -1;
     }
@@ -366,14 +396,17 @@ static void rk_transfer(enum rk_xfer_mode mode)
     uint16_t cur_wc = rkwc;
     uint16_t cur_ba = rkba;
     uint16_t cur_da = rkda;
+    uint16_t drive = rk_get_drive(cur_da);
     uint8_t cur_mex = rkmex;
     int w_in_sector = 0;
+    emu_file_t *fp = NULL;
 
     if (rk_validate_da_for_xfer(cur_da) != 0) {
         rk_finish_command();
         return;
     }
 
+    fp = rk_drive_fp(drive);
     if (!fp) {
         rk_set_error(RKER_DRE);
         rk_finish_command();
@@ -381,7 +414,7 @@ static void rk_transfer(enum rk_xfer_mode mode)
     }
 
     if ((mode == RK_XFER_WRITE || mode == RK_XFER_WCHK) &&
-            (img_read_only || rk_write_lock)) {
+            (rk_drive_read_only(drive) || rk_write_lock[drive])) {
         rk_set_error(RKER_WLK);
         rk_finish_command();
         return;
@@ -501,23 +534,23 @@ static void rk_exec_command(void)
         return;
 
     case RKCS_FN_DRESET:
-        if (rk_get_drive(rkda) != 0) {
+        if (!rk_drive_valid(rk_get_drive(rkda))) {
             rk_set_error(RKER_NXD);
             rk_finish_command();
             return;
         }
-        rkda = rk_set_da(0, 0, 0, 0);
+        rkda = rk_set_da(rk_get_drive(rkda), 0, 0, 0);
         rkcs |= RKCS_SCP;
         rk_finish_command();
         return;
 
     case RKCS_FN_WLOCK:
-        if (rk_get_drive(rkda) != 0) {
+        if (!rk_drive_valid(rk_get_drive(rkda))) {
             rk_set_error(RKER_NXD);
             rk_finish_command();
             return;
         }
-        rk_write_lock = 1;
+        rk_write_lock[rk_get_drive(rkda)] = 1;
         rk_finish_command();
         return;
 
@@ -713,6 +746,8 @@ int rk11_init(void)
 
 void rk11_reset(void)
 {
+    size_t i;
+
     rkds = 0;
     rker = 0;
     rkcs = 0;
@@ -721,7 +756,9 @@ void rk11_reset(void)
     rkda = 0;
     rkdb = 0;
     rkmex = 0;
-    rk_write_lock = 0;
+    for (i = 0; i < RK11_MAX_DRIVES; i++) {
+        rk_write_lock[i] = 0;
+    }
     rk_debug_active = 0;
 
     irq_latch_reset(&rk_l);
@@ -734,16 +771,22 @@ void rk11_poll(void)
     rk_exec_command();
 }
 
-int rk11_open_image(const char *path)
+int rk11_open_image_unit(unsigned unit, const char *path)
 {
     emu_file_t *f = NULL;
+    uint16_t drive = (uint16_t)unit;
 
-    if (fp) {
-        emu_fclose(fp);
-        fp = NULL;
+    if (!path || !rk_drive_valid(drive)) {
+        rk_sync_status();
+        return -1;
     }
 
-    img_read_only = 0;
+    if (rk_fp[drive]) {
+        emu_fclose(rk_fp[drive]);
+        rk_fp[drive] = NULL;
+    }
+
+    rk_img_read_only[drive] = 0;
     f = emu_fopen(path, "r+b");
     if (!f) {
         f = emu_fopen(path, "rb");
@@ -751,21 +794,31 @@ int rk11_open_image(const char *path)
             rk_sync_status();
             return -1;
         }
-        img_read_only = 1;
+        rk_img_read_only[drive] = 1;
     }
 
-    fp = f;
+    rk_fp[drive] = f;
     rk_sync_status();
     return 0;
 }
 
+int rk11_open_image(const char *path)
+{
+    return rk11_open_image_unit(0, path);
+}
+
 void rk11_close_image(void)
 {
-    if (fp) {
-        emu_fclose(fp);
-        fp = NULL;
+    size_t i;
+
+    for (i = 0; i < RK11_MAX_DRIVES; i++) {
+        if (rk_fp[i]) {
+            emu_fclose(rk_fp[i]);
+            rk_fp[i] = NULL;
+        }
+        rk_img_read_only[i] = 0;
+        rk_write_lock[i] = 0;
     }
-    img_read_only = 0;
     rk_sync_status();
 }
 
@@ -781,11 +834,11 @@ void rk11_set_debug(int on)
 
 int rk11_boot_copy(void *dest, size_t len)
 {
-    if (!fp) {
+    if (!rk_fp[0]) {
         return -1;
     }
-    if (emu_fseek(fp, 0, EMU_SEEK_SET) != 0) {
+    if (emu_fseek(rk_fp[0], 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (emu_fread(dest, 1, len, fp) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, rk_fp[0]) == len) ? 0 : -1;
 }

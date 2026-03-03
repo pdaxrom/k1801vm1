@@ -105,10 +105,28 @@
 static uint16_t rhcs1, rhwc, rhba, rhda, rhcs2, rhds, rher, rhas, rhdc;
 static uint16_t rhspr, rhdb, rhmr, rhmr2, rhmr3;
 static irq_latch_t rh_l;
-static emu_file_t *rh_fp = NULL;
+static emu_file_t *rh_fp[RH11_MAX_DRIVES];
 static int rh_debug = 0;
 static int rh_debug_active = 0;
 static int rh_sec_one_based = 0;
+
+static uint16_t rh_selected_drive(void)
+{
+    return (uint16_t)(rhcs2 & RHCS2_DS_MASK);
+}
+
+static int rh_drive_valid(uint16_t drive)
+{
+    return (drive < RH11_MAX_DRIVES) ? 1 : 0;
+}
+
+static emu_file_t *rh_drive_fp(uint16_t drive)
+{
+    if (!rh_drive_valid(drive)) {
+        return NULL;
+    }
+    return rh_fp[drive];
+}
 
 static uint8_t rh_cs1_ba_ext_get(void)
 {
@@ -215,6 +233,8 @@ static void rh_advance_sector(uint16_t *dc, uint16_t *da)
 
 static void rh_sync_status(void)
 {
+    uint16_t drive = rh_selected_drive();
+
     rhcs1 &= (uint16_t)~(RHCS1_RDY | RHCS1_IE | RHCS1_CERR_CCLR);
     if (rh_l.done) {
         rhcs1 |= RHCS1_RDY;
@@ -224,6 +244,11 @@ static void rh_sync_status(void)
     }
     if (rher || (rhcs2 & RHCS2_ERR_MASK)) {
         rhcs1 |= RHCS1_CERR_CCLR;
+    }
+
+    rhds &= (uint16_t)~RHDS_DRDY;
+    if (rh_drive_fp(drive)) {
+        rhds |= RHDS_DRDY;
     }
 }
 
@@ -327,34 +352,40 @@ enum rh_xfer_mode {
     RH_XFER_WCHECK = 2
 };
 
-static int rh_read_sector(uint32_t lba, uint8_t *buf)
+static int rh_read_sector(emu_file_t *f, uint32_t lba, uint8_t *buf)
 {
     uint32_t off = lba * RH11_SECTOR_BYTES;
     size_t got;
 
-    if (emu_fseek(rh_fp, (long)off, EMU_SEEK_SET) != 0) {
+    if (!f) {
+        return -1;
+    }
+    if (emu_fseek(f, (long)off, EMU_SEEK_SET) != 0) {
         return -1;
     }
 
-    got = emu_fread(buf, 1, RH11_SECTOR_BYTES, rh_fp);
+    got = emu_fread(buf, 1, RH11_SECTOR_BYTES, f);
     if (got == RH11_SECTOR_BYTES) {
         return 0;
     }
-    if (got < RH11_SECTOR_BYTES && emu_feof(rh_fp)) {
+    if (got < RH11_SECTOR_BYTES && emu_feof(f)) {
         memset(buf + got, 0, RH11_SECTOR_BYTES - got);
-        emu_clearerr(rh_fp);
+        emu_clearerr(f);
         return 0;
     }
     return -1;
 }
 
-static int rh_write_sector(uint32_t lba, const uint8_t *buf)
+static int rh_write_sector(emu_file_t *f, uint32_t lba, const uint8_t *buf)
 {
     uint32_t off = lba * RH11_SECTOR_BYTES;
-    if (emu_fseek(rh_fp, (long)off, EMU_SEEK_SET) != 0) {
+    if (!f) {
         return -1;
     }
-    return (emu_fwrite(buf, 1, RH11_SECTOR_BYTES, rh_fp) == RH11_SECTOR_BYTES)
+    if (emu_fseek(f, (long)off, EMU_SEEK_SET) != 0) {
+        return -1;
+    }
+    return (emu_fwrite(buf, 1, RH11_SECTOR_BYTES, f) == RH11_SECTOR_BYTES)
            ? 0
            : -1;
 }
@@ -375,14 +406,17 @@ static void rh_transfer(enum rh_xfer_mode mode)
     int sec_valid = 0;
     int sec_dirty = 0;
     int had_error = 0;
+    uint16_t drive = rh_selected_drive();
+    emu_file_t *fp = NULL;
 
-    if ((rhcs2 & RHCS2_DS_MASK) != 0) {
+    if (!rh_drive_valid(drive)) {
         rh_set_cs2_error(RHCS2_NED);
         rh_finish_command();
         return;
     }
 
-    if (!rh_fp) {
+    fp = rh_drive_fp(drive);
+    if (!fp) {
         rh_set_cs2_error(RHCS2_NED);
         rh_finish_command();
         return;
@@ -412,14 +446,14 @@ static void rh_transfer(enum rh_xfer_mode mode)
 
         if (!sec_valid || sec_lba != lba) {
             if (sec_dirty) {
-                if (rh_write_sector(sec_lba, secbuf) != 0) {
+                if (rh_write_sector(fp, sec_lba, secbuf) != 0) {
                     rh_set_cs2_error(RHCS2_DLT);
                     had_error = 1;
                     break;
                 }
                 sec_dirty = 0;
             }
-            if (rh_read_sector(lba, secbuf) != 0) {
+            if (rh_read_sector(fp, lba, secbuf) != 0) {
                 rh_set_cs2_error(RHCS2_DLT);
                 had_error = 1;
                 break;
@@ -474,7 +508,7 @@ static void rh_transfer(enum rh_xfer_mode mode)
         w_in_sec++;
         if (w_in_sec >= RH11_WORDS_PER_SECTOR) {
             if (sec_dirty) {
-                if (rh_write_sector(sec_lba, secbuf) != 0) {
+                if (rh_write_sector(fp, sec_lba, secbuf) != 0) {
                     rh_set_cs2_error(RHCS2_DLT);
                     had_error = 1;
                     break;
@@ -488,14 +522,14 @@ static void rh_transfer(enum rh_xfer_mode mode)
     }
 
     if (sec_dirty) {
-        if (rh_write_sector(sec_lba, secbuf) != 0) {
+        if (rh_write_sector(fp, sec_lba, secbuf) != 0) {
             rh_set_cs2_error(RHCS2_DLT);
             had_error = 1;
         }
     }
 
     if (mode == RH_XFER_WRITE) {
-        emu_fflush(rh_fp);
+        emu_fflush(fp);
     }
 
     rhwc = cur_wc;
@@ -816,23 +850,38 @@ void rh11_poll(void)
     }
 }
 
-int rh11_open_image(const char *path)
+int rh11_open_image_unit(unsigned unit, const char *path)
 {
-    if (rh_fp) {
-        emu_fclose(rh_fp);
+    uint16_t drive = (uint16_t)unit;
+
+    if (!path || !rh_drive_valid(drive)) {
+        return -1;
     }
-    rh_fp = emu_fopen(path, "r+b");
-    if (!rh_fp) {
+
+    if (rh_fp[drive]) {
+        emu_fclose(rh_fp[drive]);
+    }
+    rh_fp[drive] = emu_fopen(path, "r+b");
+    if (!rh_fp[drive]) {
         return -1;
     }
     return 0;
 }
 
+int rh11_open_image(const char *path)
+{
+    return rh11_open_image_unit(0, path);
+}
+
 void rh11_close_image(void)
 {
-    if (rh_fp) {
-        emu_fclose(rh_fp);
-        rh_fp = NULL;
+    size_t i;
+
+    for (i = 0; i < RH11_MAX_DRIVES; i++) {
+        if (rh_fp[i]) {
+            emu_fclose(rh_fp[i]);
+            rh_fp[i] = NULL;
+        }
     }
 }
 
@@ -843,11 +892,11 @@ void rh11_set_debug(int on)
 
 int rh11_boot_copy(void *dest, size_t len)
 {
-    if (!rh_fp) {
+    if (!rh_fp[0]) {
         return -1;
     }
-    if (emu_fseek(rh_fp, 0, EMU_SEEK_SET) != 0) {
+    if (emu_fseek(rh_fp[0], 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (emu_fread(dest, 1, len, rh_fp) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, rh_fp[0]) == len) ? 0 : -1;
 }

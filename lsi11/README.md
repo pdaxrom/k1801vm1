@@ -52,6 +52,11 @@ This subproject now provides two separate executables:
   - `./lsi11 -rh disks/rk07.img`
 - RL image attach (auto RL01/RL02 detect):
   - `./lsi11 -rl disks/rl02.dsk`
+- Multi-unit attach (repeat option to fill units in order):
+  - `./lsi11 -rk disk0.dsk -rk disk1.dsk` -> `rk0`, `rk1`
+  - `./lsi11 -rh disk0.dsk -rh disk1.dsk` -> `rh0`, `rh1`
+  - `./lsi11 -rl disk0.dsk -rl02 disk1.dsk` -> `rl0`, `rl1`
+  - limits: `rk/rh/tq` up to `8` units, `rl` up to `4` units
 
 ## 2) `pdp1184` target (PDP-11/84-like, MMU enabled)
 
@@ -103,7 +108,7 @@ This subproject now provides two separate executables:
   - new `GO` clears `DONE` (software clear) and re-arms IRQ edge
   - IE toggles do not generate an IRQ by themselves
 - Supported commands (phase 1):
-  - `READ`, `WRITE`, `SEEK` (single unit, unit 0)
+  - `READ`, `WRITE`, `SEEK` (multi-unit; unit selected by `RHCS2<2:0>`)
 - DMA model:
   - `RHBA` uses low 16-bit physical bus address
   - `RHCS1` bits `BA16/BA17` extend DMA to 18-bit physical address space
@@ -116,7 +121,7 @@ This subproject now provides two separate executables:
   - `LBA = track * 64 + sector`, sector size `512` bytes (`01000` octal)
 
 ### TK50 (TMSCP/TQ) support
-- `TQ11` models a minimal `TMSCP` tape controller for one `TK50`-class unit.
+- `TQ11` models a minimal `TMSCP` tape controller for `TK50`-class units (`unit 0..7`).
 - Default controller interface (octal):
   - CSR/port base `0174500`
   - `IP` at `0174500`
@@ -127,6 +132,7 @@ This subproject now provides two separate executables:
   - hidden by default (`dev_tq=0`)
   - enabled automatically when `-tq <path>` is specified
   - can be forced off with `-disable-tq`
+  - repeated `-tq` attaches consecutive units (`tq0`, `tq1`, ...)
 - Image backend:
   - SIMH `.tap` format
   - variable-length records
@@ -153,6 +159,7 @@ This subproject now provides two separate executables:
 - Attach example:
   - `./pdp1184 -tq tapes/tk50.tap`
   - `./lsi11 -tq tapes/tk50.tap`
+  - `./pdp1184 -tq tq0.tap -tq tq1.tap` -> `tq0`, `tq1`
 - Boot note:
   - `-boottq` installs a built-in `TQ/TMSCP` bootstrap at `016000`
   - example: `./pdp1184 -tq disks/ultrix/ultrix31.tap -boottq -ram 4096`
@@ -185,7 +192,7 @@ This subproject now provides two separate executables:
 | LTC (`KW11-L`-compatible, default on `lsi11` and `pdp1184`) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | read CSR low byte (`0177546`) | Fixed line clock. On `lsi11`, this models CPU-board integrated LTC logic; on `pdp1184`, J-11 onboard LTC |
 | KW11-P (optional override) | `0172540–0172545` | `000100` | `6` | CSR bit 7 (DONE) | CSR bit 6 | write CSR with DONE=0 | Compatibility-only programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
-| TQ11 (TK50 / TMSCP) | `0174500–0174503` | `000260` | `5` | port/ring driven | port/ring driven | host clears via descriptor ownership / UQ init flow | Opt-in controller, enabled by `-tq`, one `TK50`-class unit, SIMH `.tap` backend |
+| TQ11 (TK50 / TMSCP) | `0174500–0174503` | `000260` | `5` | port/ring driven | port/ring driven | host clears via descriptor ownership / UQ init flow | Opt-in controller, enabled by `-tq`, supports units `tq0..tq7`, SIMH `.tap` backend |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
 | RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |
 | LP11 (printer) | `0177514–0177517` | `000200` | `4` | CSR bit 7 | CSR bit 6 | Write DBR (`0177516`) | Output to host stdout |

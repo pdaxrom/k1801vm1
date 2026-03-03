@@ -30,6 +30,7 @@
 #define VM2_VECTOR_PSW         0000400u
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define RL11_MAX_DRIVES 4
 #define VM2_TX_IMM(ch) 0112711u, (uint16_t)(uint8_t)(ch)
 
 /*
@@ -503,12 +504,12 @@ static void usage(const char *argv0)
 #endif
             "  -force-fis      Enable FIS for unsupported CPUs\n"
             "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
-            "  -rk <path>      Attach RK05 image\n"
-            "  -rh <path>      Attach RH11 (RK06/RK07) image\n"
-            "  -rl <path>      Attach RL image (auto detect RL01/RL02)\n"
-            "  -rl01 <path>    Attach image as RL01\n"
-            "  -rl02 <path>    Attach image as RL02\n"
-            "  -tq <path>      Attach TK50 TMSCP tape image (.tap) as unit 0\n"
+            "  -rk <path>      Attach RK05 image (repeatable: rk0,rk1,...)\n"
+            "  -rh <path>      Attach RH11 (RK06/RK07) image (repeatable: rh0,rh1,...)\n"
+            "  -rl <path>      Attach RL image (repeatable: rl0,rl1,...; auto RL01/RL02)\n"
+            "  -rl01 <path>    Attach image as RL01 (repeatable)\n"
+            "  -rl02 <path>    Attach image as RL02 (repeatable)\n"
+            "  -tq <path>      Attach TK50 TMSCP tape image (.tap) (repeatable: tq0,tq1,...)\n"
             "  -disable-dl     Disable DL11\n"
             "  -disable-kw     Disable KW11\n"
             "  -enable-kw11-l  Enable KW11-L decode\n"
@@ -556,11 +557,17 @@ static void usage(const char *argv0)
 
 int main(int argc, char **argv)
 {
-    const char *rk_path = NULL;
-    const char *rh_path = NULL;
-    const char *rl_path = NULL;
-    const char *tq_path = NULL;
-    int rl_type = RL11_TYPE_AUTO;
+    const char *rk_path[RK11_MAX_DRIVES] = {0};
+    const char *rh_path[RH11_MAX_DRIVES] = {0};
+    const char *tq_path[TQ11_MAX_UNITS] = {0};
+    struct {
+        const char *path;
+        int type;
+    } rl_path[RL11_MAX_DRIVES];
+    int rk_count = 0;
+    int rh_count = 0;
+    int rl_count = 0;
+    int tq_count = 0;
     const char *load_path = NULL;
     int do_bootcopy = 0;
     int do_bootrt11 = 0;
@@ -611,20 +618,47 @@ int main(int argc, char **argv)
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
-            rk_path = argv[++i];
+            if (rk_count >= RK11_MAX_DRIVES) {
+                fprintf(stderr, "Too many -rk images (max %d)\n", RK11_MAX_DRIVES);
+                return 2;
+            }
+            rk_path[rk_count++] = argv[++i];
         } else if (!strcmp(argv[i], "-rh") && i + 1 < argc) {
-            rh_path = argv[++i];
+            if (rh_count >= RH11_MAX_DRIVES) {
+                fprintf(stderr, "Too many -rh images (max %d)\n", RH11_MAX_DRIVES);
+                return 2;
+            }
+            rh_path[rh_count++] = argv[++i];
         } else if (!strcmp(argv[i], "-rl") && i + 1 < argc) {
-            rl_path = argv[++i];
-            rl_type = RL11_TYPE_AUTO;
+            if (rl_count >= RL11_MAX_DRIVES) {
+                fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
+                return 2;
+            }
+            rl_path[rl_count].path = argv[++i];
+            rl_path[rl_count].type = RL11_TYPE_AUTO;
+            rl_count++;
         } else if (!strcmp(argv[i], "-rl01") && i + 1 < argc) {
-            rl_path = argv[++i];
-            rl_type = RL11_TYPE_RL01;
+            if (rl_count >= RL11_MAX_DRIVES) {
+                fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
+                return 2;
+            }
+            rl_path[rl_count].path = argv[++i];
+            rl_path[rl_count].type = RL11_TYPE_RL01;
+            rl_count++;
         } else if (!strcmp(argv[i], "-rl02") && i + 1 < argc) {
-            rl_path = argv[++i];
-            rl_type = RL11_TYPE_RL02;
+            if (rl_count >= RL11_MAX_DRIVES) {
+                fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
+                return 2;
+            }
+            rl_path[rl_count].path = argv[++i];
+            rl_path[rl_count].type = RL11_TYPE_RL02;
+            rl_count++;
         } else if (!strcmp(argv[i], "-tq") && i + 1 < argc) {
-            tq_path = argv[++i];
+            if (tq_count >= TQ11_MAX_UNITS) {
+                fprintf(stderr, "Too many -tq images (max %d)\n", TQ11_MAX_UNITS);
+                return 2;
+            }
+            tq_path[tq_count++] = argv[++i];
         } else if (!strcmp(argv[i], "-disable-dl")) {
             disable_dl = 1;
         } else if (!strcmp(argv[i], "-disable-kw")) {
@@ -806,7 +840,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (tq_path && !disable_tq &&
+    if (tq_count > 0 && !disable_tq &&
             lsi11_set_device_enabled("tq11", 1, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
@@ -816,23 +850,23 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (rk_path && !lsi11_device_enabled("rk11")) {
+    if (rk_count > 0 && !lsi11_device_enabled("rk11")) {
         fprintf(stderr, "-rk is not allowed with -disable-rk\n");
         return 2;
     }
-    if (rh_path && !lsi11_device_enabled("rh11")) {
+    if (rh_count > 0 && !lsi11_device_enabled("rh11")) {
         fprintf(stderr, "-rh is not allowed with -disable-rh\n");
         return 2;
     }
-    if (rl_path && !lsi11_device_enabled("rl11")) {
+    if (rl_count > 0 && !lsi11_device_enabled("rl11")) {
         fprintf(stderr, "-rl/-rl01/-rl02 is not allowed with -disable-rl\n");
         return 2;
     }
-    if (tq_path && !lsi11_device_enabled("tq11")) {
+    if (tq_count > 0 && !lsi11_device_enabled("tq11")) {
         fprintf(stderr, "-tq is not allowed with -disable-tq\n");
         return 2;
     }
-    if (do_boottq && !tq_path) {
+    if (do_boottq && tq_count == 0) {
         fprintf(stderr, "-boottq requires -tq <image>\n");
         return 2;
     }
@@ -885,34 +919,36 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    /* Attach RK image if provided */
-    if (rk_path) {
-        if (rk11_open_image(rk_path) != 0) {
-            fprintf(stderr, "rk11_open_image failed: %s\n", rk_path);
+    /* Attach images by ascending unit index. */
+    for (int unit = 0; unit < rk_count; unit++) {
+        if (rk11_open_image_unit((unsigned)unit, rk_path[unit]) != 0) {
+            fprintf(stderr, "rk11_open_image failed: rk%o %s\n", unit, rk_path[unit]);
             r.fini(&r);
             return 1;
         }
     }
-    if (rh_path) {
-        if (rh11_open_image(rh_path) != 0) {
-            fprintf(stderr, "rh11_open_image failed: %s\n", rh_path);
+    for (int unit = 0; unit < rh_count; unit++) {
+        if (rh11_open_image_unit((unsigned)unit, rh_path[unit]) != 0) {
+            fprintf(stderr, "rh11_open_image failed: rh%o %s\n", unit, rh_path[unit]);
             rk11_close_image();
             r.fini(&r);
             return 1;
         }
     }
-    if (rl_path) {
-        if (rl11_open_image_typed(rl_path, rl_type) != 0) {
-            fprintf(stderr, "rl11_open_image failed: %s\n", rl_path);
+    for (int unit = 0; unit < rl_count; unit++) {
+        if (rl11_open_image_typed_unit((unsigned)unit, rl_path[unit].path,
+                                       rl_path[unit].type) != 0) {
+            fprintf(stderr, "rl11_open_image failed: rl%o %s\n", unit,
+                    rl_path[unit].path);
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
             return 1;
         }
     }
-    if (tq_path) {
-        if (tq11_open_image(tq_path) != 0) {
-            fprintf(stderr, "tq11_open_image failed: %s\n", tq_path);
+    for (int unit = 0; unit < tq_count; unit++) {
+        if (tq11_open_image_unit((unsigned)unit, tq_path[unit]) != 0) {
+            fprintf(stderr, "tq11_open_image failed: tq%o %s\n", unit, tq_path[unit]);
             rl11_close_image();
             rh11_close_image();
             rk11_close_image();
@@ -958,11 +994,11 @@ int main(int argc, char **argv)
             r.fini(&r);
             return 1;
         }
-        if (rk_path) {
+        if (rk_count > 0) {
             rc = rk11_boot_copy(ram0, n);
-        } else if (rh_path) {
+        } else if (rh_count > 0) {
             rc = rh11_boot_copy(ram0, n);
-        } else if (rl_path) {
+        } else if (rl_count > 0) {
             rc = rl11_boot_copy(ram0, n);
         } else {
             fprintf(stderr,
@@ -980,7 +1016,7 @@ int main(int argc, char **argv)
     }
 
     if (do_bootrt11) {
-        if (rl_path) {
+        if (rl_count > 0) {
             if (install_bootstrap(RL_BOOT_ADDR, rl_bootstrap,
                                   sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0])) !=
                     0) {
@@ -989,8 +1025,8 @@ int main(int argc, char **argv)
                 return 1;
             }
             r.r[7] = RL_BOOT_ENTRY;
-        } else if (rk_path) {
-            if (preload_rt11_boot_block(rk_path) != 0) {
+        } else if (rk_count > 0) {
+            if (preload_rt11_boot_block(rk_path[0]) != 0) {
                 fprintf(stderr, "RT11 boot block not found in image\n");
                 r.fini(&r);
                 return 1;
@@ -1003,8 +1039,8 @@ int main(int argc, char **argv)
                 return 1;
             }
             r.r[7] = RK_BOOT_ENTRY;
-        } else if (rh_path) {
-            if (preload_rt11_boot_block(rh_path) != 0) {
+        } else if (rh_count > 0) {
+            if (preload_rt11_boot_block(rh_path[0]) != 0) {
                 fprintf(stderr, "RT11 boot block not found in image\n");
                 r.fini(&r);
                 return 1;
