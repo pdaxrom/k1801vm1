@@ -604,6 +604,11 @@ int main(int argc, char **argv)
     const lsi11_machine_t machine_kind = LSI11_MACHINE_1104;
 #endif
 
+    if (argc < 2) {
+        usage(argv[0]);
+        return 2;
+    }
+
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
             rk_path = argv[++i];
@@ -978,7 +983,7 @@ int main(int argc, char **argv)
         if (rl_path) {
             if (install_bootstrap(RL_BOOT_ADDR, rl_bootstrap,
                                   sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0])) !=
-                0) {
+                    0) {
                 fprintf(stderr, "bootrt11 destination is outside RAM\n");
                 r.fini(&r);
                 return 1;
@@ -992,7 +997,7 @@ int main(int argc, char **argv)
             }
             if (install_bootstrap(RK_BOOT_ADDR, rk_bootstrap,
                                   sizeof(rk_bootstrap) / sizeof(rk_bootstrap[0])) !=
-                0) {
+                    0) {
                 fprintf(stderr, "bootrt11 destination is outside RAM\n");
                 r.fini(&r);
                 return 1;
@@ -1006,7 +1011,7 @@ int main(int argc, char **argv)
             }
             if (install_bootstrap(RH_BOOT_ADDR, rh_bootstrap,
                                   sizeof(rh_bootstrap) / sizeof(rh_bootstrap[0])) !=
-                0) {
+                    0) {
                 fprintf(stderr, "bootrt11 destination is outside RAM\n");
                 r.fini(&r);
                 return 1;

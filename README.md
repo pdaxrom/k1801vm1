@@ -3,6 +3,10 @@
 This report documents DCJ11 (J‑11) CPU core behavior implemented in `core/`
 and verified by tests in `tests/`. All PDP‑11 values below are in OCTAL.
 
+Documentation split:
+- CPU/core topic index: `core/README.md`
+- Emulator/platform/device topic index: `lsi11/README.md`
+
 ---
 
 ## 1. Scope and Methodology

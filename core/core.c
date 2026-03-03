@@ -1141,7 +1141,7 @@ static INLINE int mmu_io_read_word(regs *r, word addr, word *value_out)
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         *value_out =
             is_par ? (r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK)
-                   : (r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
+            : (r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
 #else
         *value_out = 0;
 #endif
@@ -1395,7 +1395,7 @@ static INLINE void mmu_note_write_pdrw(regs *r, int mode, int space, int seg)
 }
 
 static INLINE void mmu_note_internal_reg_write(regs *r, word va,
-                                               int force_kernel_d)
+        int force_kernel_d)
 {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     int mode;
@@ -1410,7 +1410,7 @@ static INLINE void mmu_note_internal_reg_write(regs *r, word va,
 
     mode = force_kernel_d ? 0 : mmu_mode_from_psw(r->psw);
     space = force_kernel_d ? (mmu_split_enabled(r, 0) ? 1 : 0)
-                           : (mmu_split_enabled(r, mode) ? 1 : 0);
+            : (mmu_split_enabled(r, mode) ? 1 : 0);
     mmu_note_write_pdrw(r, mode, space, (va >> 13) & 07);
 #else
     (void)r;
@@ -1477,7 +1477,7 @@ static INLINE void mmu_note_write_pdrw(regs *r, int mode, int space, int seg)
 }
 
 static INLINE void mmu_note_internal_reg_write(regs *r, word va,
-                                               int force_kernel_d)
+        int force_kernel_d)
 {
     (void)r;
     (void)va;
@@ -1618,7 +1618,7 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
                 if (fault_code_out) {
                     *fault_code_out =
                         mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
-                                                     : MMU_FAULT_NONRES;
+                        : MMU_FAULT_NONRES;
                 }
                 return -1;
             }
@@ -1738,7 +1738,7 @@ static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
                 if (fault_code_out) {
                     *fault_code_out =
                         mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
-                                                     : MMU_FAULT_NONRES;
+                        : MMU_FAULT_NONRES;
                 }
                 return -1;
             }
@@ -1786,7 +1786,7 @@ static INLINE void mmu_record_fault(regs *r, word va, word pc, int fault,
     }
     r->mmu_ssr0 = (word)(((r->mmu_ssr0 & MMU_SSR0_ENABLE) |
                           ((((word)(((mode & 03) << 4) | ((space & 01) << 3) |
-                                     (seg & 07))) << MMU_SSR0_PAGE_SHIFT) &
+                                    (seg & 07))) << MMU_SSR0_PAGE_SHIFT) &
                            MMU_SSR0_PAGE_MASK) |
                           mmu_fault_to_ssr0_bits(fault)) &
                          MMU_SSR0_J_MASK);

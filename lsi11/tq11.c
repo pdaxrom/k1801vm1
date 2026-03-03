@@ -415,7 +415,7 @@ static int tq_dma_write32_checked(paddr_t addr, uint32_t v)
 {
     if (tq_dma_write16_checked(addr, (uint16_t)(v & 0xFFFFu)) != 0 ||
             tq_dma_write16_checked(addr + 2u, (uint16_t)((v >> 16) & 0xFFFFu)) !=
-                0) {
+            0) {
         return -1;
     }
     return 0;
@@ -687,7 +687,7 @@ static uint32_t tq_tap_padded(uint32_t len)
 }
 
 static tq_tap_status_t tq_tap_read_forward(uint8_t *buf, uint32_t max_len,
-                                           uint32_t *rec_len, uint32_t *xfer_len)
+        uint32_t *rec_len, uint32_t *xfer_len)
 {
     uint32_t mark;
     uint32_t data_len;
@@ -890,7 +890,7 @@ static tq_tap_status_t tq_tap_rewind(void)
 }
 
 static tq_tap_status_t tq_tap_space_forward_records(uint32_t count,
-                                                    uint32_t *skipped)
+        uint32_t *skipped)
 {
     uint32_t i;
 
@@ -930,7 +930,7 @@ static tq_tap_status_t tq_tap_space_forward_records(uint32_t count,
 }
 
 static tq_tap_status_t tq_tap_space_forward_marks(uint32_t count,
-                                                  uint32_t *skipped)
+        uint32_t *skipped)
 {
     uint32_t marks = 0;
 
@@ -960,7 +960,7 @@ static tq_tap_status_t tq_tap_space_forward_marks(uint32_t count,
 }
 
 static tq_tap_status_t tq_tap_space_reverse_records(uint32_t count,
-                                                    uint32_t *skipped)
+        uint32_t *skipped)
 {
     uint32_t done = 0;
 
@@ -1000,7 +1000,7 @@ static tq_tap_status_t tq_tap_space_reverse_records(uint32_t count,
 }
 
 static tq_tap_status_t tq_tap_space_reverse_marks(uint32_t count,
-                                                  uint32_t *skipped)
+        uint32_t *skipped)
 {
     uint32_t done = 0;
 
@@ -1160,7 +1160,7 @@ static uint16_t tq_status_from_tap_motion(tq_tap_status_t st)
         return (uint16_t)(TQ_ST_SUC | TQ_SB_SUC_EOT);
     case TQ_TAP_WRP_STATUS:
         return tq_read_only ? (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_HW)
-                            : (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_SW);
+               : (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_SW);
     case TQ_TAP_IOERR:
     case TQ_TAP_INVRL:
     default:
@@ -1449,7 +1449,7 @@ static void tq_cmd_write(const uint16_t *cmd, uint16_t *rsp)
 
     if (tq_sw_write_protect || tq_read_only) {
         rsp[TQ_RSP_STS] = tq_read_only ? (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_HW)
-                                       : (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_SW);
+                          : (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_SW);
         tq_rsp_flags_from_status(rsp);
         return;
     }
@@ -1492,7 +1492,7 @@ static void tq_cmd_wtm(const uint16_t *cmd, uint16_t *rsp)
 
     if (tq_sw_write_protect || tq_read_only) {
         rsp[TQ_RSP_STS] = tq_read_only ? (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_HW)
-                                       : (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_SW);
+                          : (uint16_t)(TQ_ST_WPR | TQ_SB_WPR_SW);
         tq_rsp_flags_from_status(rsp);
         return;
     }
@@ -1656,7 +1656,7 @@ static int tq_process_one(void)
     tq_process_command(cmd, rsp);
     rsp_bytes = (uint32_t)rsp[TQ_HLNT] + 4u;
     if (tq_dma_write_words((paddr_t)(rsp_addr + TQ_HDR_OFF), rsp, rsp_bytes / 2u) !=
-        0) {
+            0) {
         tq_fail(0000002u);
         return -1;
     }
@@ -1873,7 +1873,8 @@ int tq11_init(void)
         TQ_BASE, (uint16_t)(TQ_BASE + 3u), tq11_read8, tq11_write8, "TQ11"
     };
     static const irq_source_t irq = {"TQ11", TQ_VECTOR, TQ_PRIORITY, tq_irq_pending,
-                                     tq_irq_ack};
+                                     tq_irq_ack
+                                    };
 
     tq_trace = (getenv("LSI11_TRACE_TQ") != NULL) ? 1u : 0u;
 

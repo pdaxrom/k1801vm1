@@ -402,50 +402,17 @@ This subproject now provides two separate executables:
   - If `IRQ VECFETCH` matches but `IRQ ACCEPT` post state is wrong: interrupt entry/stacking/PSW transfer issue.
   - If `IRQ ACCEPT` is correct and mismatch appears on `RTI POST`: RTI restore path (PC/PSW/SP) is likely wrong.
 
-## DCJ11 K/S/U Compliance (Verified)
+## CPU/Emulator Documentation Boundary
+- CPU core semantics, MMU behavior, trap/IRQ frame rules and core test matrix are documented in [`core/README.md`](../core/README.md).
+- This document (`lsi11/README.md`) covers machine integration only: buses, devices, CLI, boot flows, and emulator diagnostics.
 
-Checklist:
-- `CM/PM` handling is correct on IRQ/trap entry (`CM=0`, `PM=old CM`).
-- `KSP/SSP/USP` banking is active and `R6` follows current `CM`.
-- IRQ/trap frame push order is correct (`OLDPS`, then `OLDPC` on the active handler stack).
-- `RTI/RTT` restores `PC/PSW` and returns to the proper stack bank.
-- Vector fetch uses physical vector table access (MMU bypass).
-- `MFPI/MFPD/MTPI/MTPD` uses previous mode (`PM`) with proper I/D handling.
-
-Core tests added:
-- `tests/core_tests.c`: `test_dcj11_mode_stack_banking`
-- `tests/core_tests.c`: `test_dcj11_irq_entry_frame_user`
-- `tests/core_tests.c`: `test_dcj11_rti_restore_user_mode_stack`
-- `tests/core_tests.c`: `test_dcj11_irq_rti_supervisor_mode`
-- `tests/test_mmu_splitid.c`: vector fetch expects physical fetch
-
-Verification commands and expected output:
-
-1. XM boot:
-   - command:
-     - `./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
-   - expected:
-     - `RT-11XM (S) V05.03`
-     - `?KMON-F-File not found DK:STARTX.COM`
-     - `.`
-
-2. D9 compare:
-   - command:
-     - `python3 tools/d9_compare.py --our-log /tmp/xm_our_mt.log --simh-log /tmp/xm_simh_mt.log`
-   - expected:
-     - `W1: no mismatch`
-     - `W2: no mismatch`
-     - `FIRST DIVERGENCE: none detected in compared range`
-
-3. D10 trace:
-   - command:
-     - `LSI11_IRQTRACE=1 ./pdp1184 -rk disks/rt11v5.3/SYSXM.DSK -bootrt11 -ram 128`
-   - expected:
-     - no `DIVERGE SIGNATURE HIT`
-     - trace may end with `IRQTRACE AUTO-OFF (limit)`
-
-Note:
-- `DK:STARTX.COM` missing is an RT-11 disk content issue, not an emulator failure.
+## Recent PDP-11/84 Fix (ULTRIX boot path)
+- Fixed a `pdp1184` boot regression where `j11_probe_shadow` incorrectly aliased the low I/O page window `0160000..0177777` into probe-shadow logic.
+- Correct behavior now:
+  - probe-shadow accepts only real high I/O aliases (`0760000..0777777` and `017760000..017777777`)
+  - normal RAM/code addresses (for example physical `00172000`) are no longer intercepted
+- User-visible impact:
+  - ULTRIX-11 boot proceeds to setup (`Load device ...` -> `ULTRIX-11 Kernel V3.1` -> setup prompt) instead of trapping on illegal instruction during early init.
 
 ## Device disable options
 - `-disable-dl` disable DL11
