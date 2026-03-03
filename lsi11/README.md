@@ -15,7 +15,7 @@ This subproject now provides two separate executables:
 - DL11 remains bus-visible on both profiles; the default system clock is an
   onboard `LTC` with a `KW11-L`-compatible interface at `0177546`, while
   `KW11-P` is available only as an explicit compatibility override.
-- Bootstrap flow is loader-based (`-bootcopy`, `-bootrt11`), not bus-ROM emulation.
+- Bootstrap flow is loader-based (`-boot`, `-bootcopy`, `-bootrt11`), not bus-ROM emulation.
 - Full hardware front-panel semantics (`HALT switch`, `INIT`-driven halt,
   `RESTART` sequencing) are out of scope for both targets.
 
@@ -48,6 +48,9 @@ This subproject now provides two separate executables:
 ### Boot/usage
 - RT-11 boot with RK11 loader:
   - `./lsi11 -rk disks/rt11v400.dsk -bootrt11`
+- Explicit unit boot:
+  - `./lsi11 -rk disks/rt11v400.dsk -boot rk0`
+  - `./lsi11 -rk disk0.dsk -rk disk1.dsk -boot rk1`
 - RH11 image attach:
   - `./lsi11 -rh disks/rk07.img`
 - RL image attach (auto RL01/RL02 detect):
@@ -161,6 +164,7 @@ This subproject now provides two separate executables:
   - `./lsi11 -tq tapes/tk50.tap`
   - `./pdp1184 -tq tq0.tap -tq tq1.tap` -> `tq0`, `tq1`
 - Boot note:
+  - `-boot tq0` boots via built-in `TQ/TMSCP` bootstrap from selected `tqN`
   - `-boottq` installs a built-in `TQ/TMSCP` bootstrap at `016000`
   - example: `./pdp1184 -tq disks/ultrix/ultrix31.tap -boottq -ram 4096`
   - this follows the `SIMH` `BOOT TQ0` style bootstrap for unit `0`

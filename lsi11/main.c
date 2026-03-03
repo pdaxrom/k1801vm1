@@ -33,6 +33,14 @@
 #define RL11_MAX_DRIVES 4
 #define VM2_TX_IMM(ch) 0112711u, (uint16_t)(uint8_t)(ch)
 
+enum {
+    BOOT_DEV_NONE = 0,
+    BOOT_DEV_RK,
+    BOOT_DEV_RH,
+    BOOT_DEV_RL,
+    BOOT_DEV_TQ
+};
+
 /*
  * VM2 HALT-bank runtime stub:
  *   MOV  #177566, R1         ; DL11 TBUF
@@ -137,6 +145,56 @@ static int parse_cpu_model(const char *name, byte *model)
     }
 
     return -1;
+}
+
+static int parse_boot_device(const char *name, int *kind_out, int *unit_out)
+{
+    const char *suffix = NULL;
+    int kind = BOOT_DEV_NONE;
+    unsigned max_units = 0;
+    unsigned long unit = 0;
+    char *endp = NULL;
+
+    if (!name || !kind_out || !unit_out) {
+        return -1;
+    }
+
+    if (!strncmp(name, "rk", 2)) {
+        kind = BOOT_DEV_RK;
+        suffix = name + 2;
+        max_units = RK11_MAX_DRIVES;
+    } else if (!strncmp(name, "rh", 2) || !strncmp(name, "hk", 2)) {
+        kind = BOOT_DEV_RH;
+        suffix = name + 2;
+        max_units = RH11_MAX_DRIVES;
+    } else if (!strncmp(name, "rl", 2)) {
+        kind = BOOT_DEV_RL;
+        suffix = name + 2;
+        max_units = RL11_MAX_DRIVES;
+    } else if (!strncmp(name, "tq", 2)) {
+        kind = BOOT_DEV_TQ;
+        suffix = name + 2;
+        max_units = TQ11_MAX_UNITS;
+    } else {
+        return -1;
+    }
+
+    if (!suffix || *suffix == '\0') {
+        unit = 0;
+    } else {
+        unit = strtoul(suffix, &endp, 10);
+        if (!endp || *endp != '\0') {
+            return -1;
+        }
+    }
+
+    if (unit >= max_units) {
+        return -1;
+    }
+
+    *kind_out = kind;
+    *unit_out = (int)unit;
+    return 0;
 }
 
 static const char *cpu_model_name(byte model)
@@ -489,7 +547,7 @@ static void usage(const char *argv0)
             "Usage:\n"
             "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-rl <rl.img>] "
             "[-tq <tk50.tap>] "
-            "[-bootcopy|-bootrt11|-boottq] [-cpu <model>]\n"
+            "[-boot <dev>|-bootcopy|-bootrt11|-boottq] [-cpu <model>]\n"
             "\n"
             "Target profile:\n"
             "  %s\n"
@@ -522,6 +580,7 @@ static void usage(const char *argv0)
             "  -disable-rl     Disable RL11\n"
             "  -disable-tq     Disable TQ11/TMSCP tape controller\n"
             "  -disable-sr     Disable SR\n"
+            "  -boot <dev>     Boot selected unit: rkN|rhN|hkN|rlN|tqN (N defaults to 0)\n"
             "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
             "000000\n"
             "  -bootrt11       Run built-in RK/RH/RL bootstrap for the selected "
@@ -572,6 +631,9 @@ int main(int argc, char **argv)
     int do_bootcopy = 0;
     int do_bootrt11 = 0;
     int do_boottq = 0;
+    int do_boot = 0;
+    int boot_kind = BOOT_DEV_NONE;
+    int boot_unit = 0;
     long load_addr = 0;
     long start_pc = -1;
     long sr_value = -1;
@@ -689,6 +751,12 @@ int main(int argc, char **argv)
             do_bootrt11 = 1;
         } else if (!strcmp(argv[i], "-boottq")) {
             do_boottq = 1;
+        } else if (!strcmp(argv[i], "-boot") && i + 1 < argc) {
+            if (parse_boot_device(argv[++i], &boot_kind, &boot_unit) != 0) {
+                fprintf(stderr, "Invalid -boot device: %s\n", argv[i]);
+                return 2;
+            }
+            do_boot = 1;
         } else if (!strcmp(argv[i], "-traceirq")) {
             lsi11_set_trace_irq(1);
         } else if (!strcmp(argv[i], "-tracenxm")) {
@@ -870,6 +938,57 @@ int main(int argc, char **argv)
         fprintf(stderr, "-boottq requires -tq <image>\n");
         return 2;
     }
+    if (do_boot && (do_bootcopy || do_bootrt11 || do_boottq)) {
+        fprintf(stderr, "-boot cannot be combined with -bootcopy/-bootrt11/-boottq\n");
+        return 2;
+    }
+    if (do_boot) {
+        switch (boot_kind) {
+        case BOOT_DEV_RK:
+            if (!lsi11_device_enabled("rk11")) {
+                fprintf(stderr, "-boot rk* requires RK11 enabled\n");
+                return 2;
+            }
+            if (boot_unit >= rk_count || !rk_path[boot_unit]) {
+                fprintf(stderr, "-boot rk%o requires matching -rk attachment\n", boot_unit);
+                return 2;
+            }
+            break;
+        case BOOT_DEV_RH:
+            if (!lsi11_device_enabled("rh11")) {
+                fprintf(stderr, "-boot rh*/hk* requires RH11 enabled\n");
+                return 2;
+            }
+            if (boot_unit >= rh_count || !rh_path[boot_unit]) {
+                fprintf(stderr, "-boot rh%o requires matching -rh attachment\n", boot_unit);
+                return 2;
+            }
+            break;
+        case BOOT_DEV_RL:
+            if (!lsi11_device_enabled("rl11")) {
+                fprintf(stderr, "-boot rl* requires RL11 enabled\n");
+                return 2;
+            }
+            if (boot_unit >= rl_count || !rl_path[boot_unit].path) {
+                fprintf(stderr, "-boot rl%o requires matching -rl attachment\n", boot_unit);
+                return 2;
+            }
+            break;
+        case BOOT_DEV_TQ:
+            if (!lsi11_device_enabled("tq11")) {
+                fprintf(stderr, "-boot tq* requires TQ11 enabled\n");
+                return 2;
+            }
+            if (boot_unit >= tq_count || !tq_path[boot_unit]) {
+                fprintf(stderr, "-boot tq%o requires matching -tq attachment\n", boot_unit);
+                return 2;
+            }
+            break;
+        default:
+            fprintf(stderr, "Internal error: unknown boot device\n");
+            return 2;
+        }
+    }
 
     if (check_config_only) {
         const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184"
@@ -978,6 +1097,80 @@ int main(int argc, char **argv)
         r.SEL0 = 0200; // Disable FIS trap by default
         if (vm2_install_halt_stub(cfg_err, sizeof(cfg_err)) != 0) {
             fprintf(stderr, "VM2 HALT stub error: %s\n", cfg_err);
+            r.fini(&r);
+            return 1;
+        }
+    }
+
+    if (do_boot) {
+        switch (boot_kind) {
+        case BOOT_DEV_RK:
+            if (preload_rt11_boot_block(rk_path[boot_unit]) != 0) {
+                fprintf(stderr, "RT11 boot block not found in rk%o image\n", boot_unit);
+                r.fini(&r);
+                return 1;
+            }
+            if (install_bootstrap(RK_BOOT_ADDR, rk_bootstrap,
+                                  sizeof(rk_bootstrap) / sizeof(rk_bootstrap[0])) !=
+                    0) {
+                fprintf(stderr, "boot destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            bus_write16((uint16_t)(RK_BOOT_ADDR + 000010u), (uint16_t)boot_unit);
+            r.r[7] = RK_BOOT_ENTRY;
+            break;
+
+        case BOOT_DEV_RH:
+            if (preload_rt11_boot_block(rh_path[boot_unit]) != 0) {
+                fprintf(stderr, "RT11 boot block not found in rh%o image\n", boot_unit);
+                r.fini(&r);
+                return 1;
+            }
+            if (install_bootstrap(RH_BOOT_ADDR, rh_bootstrap,
+                                  sizeof(rh_bootstrap) / sizeof(rh_bootstrap[0])) !=
+                    0) {
+                fprintf(stderr, "boot destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            bus_write16((uint16_t)(RH_BOOT_ADDR + 000010u), (uint16_t)boot_unit);
+            r.r[7] = RH_BOOT_ENTRY;
+            break;
+
+        case BOOT_DEV_RL: {
+            uint16_t ds = (uint16_t)((boot_unit & 03) << 8);
+
+            if (install_bootstrap(RL_BOOT_ADDR, rl_bootstrap,
+                                  sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0])) !=
+                    0) {
+                fprintf(stderr, "boot destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            bus_write16((uint16_t)(RL_BOOT_ADDR + 000014u),
+                        (uint16_t)(0000004u | ds));
+            bus_write16((uint16_t)(RL_BOOT_ADDR + 000036u),
+                        (uint16_t)(0000014u | ds));
+            r.r[7] = RL_BOOT_ENTRY;
+            break;
+        }
+
+        case BOOT_DEV_TQ:
+            if (install_bootstrap(TQ_BOOT_ADDR, tq_bootstrap,
+                                  sizeof(tq_bootstrap) / sizeof(tq_bootstrap[0])) !=
+                    0) {
+                fprintf(stderr, "boot destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            bus_write16(TQ_BOOT_UNIT, (uint16_t)boot_unit);
+            bus_write16(TQ_BOOT_CSR, 0174500u);
+            r.r[7] = TQ_BOOT_ENTRY;
+            break;
+
+        default:
+            fprintf(stderr, "Internal error: unknown boot device\n");
             r.fini(&r);
             return 1;
         }
