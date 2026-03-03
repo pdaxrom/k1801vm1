@@ -16,14 +16,13 @@ KIND_RL   equ 3
 KIND_TQ   equ 4
 
 ASC_0     equ 0060
+ASC_1     equ 0061
+ASC_2     equ 0062
 ASC_3     equ 0063
+ASC_4     equ 0064
 ASC_7     equ 0067
 ASC_CR    equ 0015
 ASC_LF    equ 0012
-ASC_R     equ 0122
-ASC_H     equ 0110
-ASC_L     equ 0114
-ASC_T     equ 0124
 
 RK_BOOT_ADDR      equ 002000
 RK_BOOT_ENTRY     equ 002002
@@ -107,15 +106,14 @@ select_controller:
 ctl_loop:
         jsr     pc, read_key
         jsr     pc, echo_char_crlf
-        bic     #000040, r0
 
-        cmp     r0, #ASC_R
+        cmp     r0, #ASC_1
         beq     ctl_rk
-        cmp     r0, #ASC_H
+        cmp     r0, #ASC_2
         beq     ctl_rh
-        cmp     r0, #ASC_L
+        cmp     r0, #ASC_3
         beq     ctl_rl
-        cmp     r0, #ASC_T
+        cmp     r0, #ASC_4
         beq     ctl_tq
 
         mov     #msg_bad_ctl, r1
@@ -389,13 +387,13 @@ msg_found:
 msg_none:
         DB      "No RK11/RH11/RL11/TQ11 controllers detected.\r\n", 0
 msg_line_rk:
-        DB      "  R - RK11 (rk0..rk7)\r\n", 0
+        DB      "  1 - RK11 (rk0..rk7)\r\n", 0
 msg_line_rh:
-        DB      "  H - RH11/HK (rh0..rh7)\r\n", 0
+        DB      "  2 - RH11/HK (rh0..rh7)\r\n", 0
 msg_line_rl:
-        DB      "  L - RL11 (rl0..rl3)\r\n", 0
+        DB      "  3 - RL11 (rl0..rl3)\r\n", 0
 msg_line_tq:
-        DB      "  T - TQ11/TMSCP (tq0..tq7)\r\n", 0
+        DB      "  4 - TQ11/TMSCP (tq0..tq7)\r\n", 0
 msg_choose_ctl:
         DB      "Select controller [R/H/L/T]: ", 0
 msg_bad_ctl:
