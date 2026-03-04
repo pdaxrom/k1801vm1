@@ -26,6 +26,8 @@
 /* KW11-L CSR bits */
 #define KW11L_DONE 000200
 #define KW11L_IE   000100
+/* Approximate 1 MHz CPU: 1,000,000 / 60 ~= 16667 instructions per line tick. */
+#define KW11L_DEFAULT_STEPS_PER_TICK 16667u
 
 /* KW11-P CSR bits */
 #define KW11P_RUN         000001
@@ -59,6 +61,9 @@ static int kwp_clock_init = 0;
 static int kw11_l_visible = -1;
 static int kw11_p_visible = -1;
 static int kw11_trace = 0;
+static int kw11_step_clock = 0;
+static uint32_t kw11_steps_per_tick = KW11L_DEFAULT_STEPS_PER_TICK;
+static uint64_t kwl_steps_accum = 0;
 
 static int kw11_default_l_visible(void)
 {
@@ -95,6 +100,11 @@ void kw11_set_visibility(int enable_l, int enable_p)
 {
     kw11_l_visible = enable_l ? 1 : 0;
     kw11_p_visible = enable_p ? 1 : 0;
+}
+
+void kw11_set_step_clock(int on)
+{
+    kw11_step_clock = on ? 1 : 0;
 }
 
 static void kw11_tracef(const char *fmt, ...)
@@ -242,6 +252,9 @@ static uint8_t kw11_read8(uint16_t a)
         if (kwl_ie) {
             v |= KW11L_IE;
         }
+        /* KW11-L monitor is read-to-clear. */
+        kwl_done = 0;
+        kwl_irq_req = 0;
         return v;
     }
     if (a == (uint16_t)(KW11L_CSR + 1)) {
@@ -337,8 +350,6 @@ void kw11_irq_ack(void)
         return;
     }
     kwl_irq_req = 0;
-    /* KW11-L acknowledge clears monitor (DONE) in interrupt path. */
-    kwl_done = 0;
     kw11_tracef("L irq ack done=%o ie=%o irq=%o\n", kwl_done, kwl_ie, kwl_irq_req);
 }
 
@@ -350,6 +361,16 @@ int kw11_init(void)
     int p_on = kw11_p_visible_effective();
 
     kw11_trace = (getenv("LSI11_TRACE_KW11") != NULL) ? 1 : 0;
+    {
+        const char *env_steps = getenv("LSI11_KW11_STEPS_PER_TICK");
+        if (env_steps && *env_steps) {
+            char *end = NULL;
+            unsigned long v = strtoul(env_steps, &end, 10);
+            if (end && *end == '\0' && v > 0 && v <= 1000000ul) {
+                kw11_steps_per_tick = (uint32_t)v;
+            }
+        }
+    }
 
     if (l_on && devio_register(&l) != 0) {
         return -1;
@@ -378,6 +399,7 @@ void kw11_reset(void)
     kwl_irq_req = 0;
     kwl_clock_init = 0;
     kwl_last_tick_ns = 0;
+    kwl_steps_accum = 0;
 
     kwp_csr = 0;
     kwp_csb = 0;
@@ -388,9 +410,8 @@ void kw11_reset(void)
     kwp_last_tick_ns = 0;
 }
 
-/* KW11-L: 50 Hz ticks; monitor set on each tick.
-   KW11-P: programmable timer (100 kHz / 10 kHz / 60 Hz / external). */
-void kw11_poll(void)
+/* KW11-L/KW11-P realtime poll used for compatibility mode. */
+static void kw11_poll_realtime(void)
 {
     uint64_t t = now_ns();
     const uint64_t kwl_period_ns = 16666667ull; /* ~16.666 ms -> 60 Hz */
@@ -445,4 +466,39 @@ void kw11_poll(void)
     uint64_t pulses = elapsed / period_ns;
     kwp_last_tick_ns += pulses * period_ns;
     kwp_advance_pulses(pulses);
+}
+
+/* KW11-L deterministic poll tied to number of executed CPU instructions. */
+void kw11_poll_steps(uint32_t cpu_steps)
+{
+    if (!kw11_step_clock) {
+        kw11_poll_realtime();
+        return;
+    }
+
+    if (cpu_steps == 0) {
+        cpu_steps = 1;
+    }
+
+    kwl_steps_accum += cpu_steps;
+    if (kwl_steps_accum >= kw11_steps_per_tick) {
+        uint64_t ticks = kwl_steps_accum / kw11_steps_per_tick;
+        kwl_steps_accum %= kw11_steps_per_tick;
+        kwl_done = 1;
+        if (kwl_ie) {
+            kwl_irq_req = 1;
+        }
+        if (kw11_trace && kwl_ie) {
+            kw11_tracef("L step-tick ticks=%06o done=%o ie=%o irq=%o\n",
+                        (unsigned)(ticks & 0177777), kwl_done, kwl_ie, kwl_irq_req);
+        }
+    }
+
+    /* KW11-P is disabled by default on this target. */
+}
+
+/* Legacy poll API. */
+void kw11_poll(void)
+{
+    kw11_poll_steps(1);
 }

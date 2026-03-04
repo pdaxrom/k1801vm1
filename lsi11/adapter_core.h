@@ -34,6 +34,7 @@ void lsi11_hw_connect(regs *r);
 
 /* Machine poll (host-side): devices advance and host I/O. */
 void lsi11_poll_devices(void);
+void lsi11_poll_devices_steps(uint32_t cpu_steps);
 
 /* Optional: tracing toggles (stubs; fill if needed) */
 void lsi11_set_trace_irq(int on);

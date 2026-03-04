@@ -22,6 +22,7 @@ COMMON_SRCS := \
   emu_file.c \
   util_term.c \
   dev_dl11.c \
+  dev_dz11.c \
   dev_kw11.c \
   dev_tq11.c \
   dev_rl11.c \
@@ -54,6 +55,7 @@ TESTS_LSI11 := \
   tests/test_bus_map \
   tests/test_vm2_banking \
   tests/test_irq_semantics \
+  tests/test_dz11 \
   tests/test_rl11 \
   tests/test_rk11_regs \
   tests/test_rh11_lsi11_absent \
@@ -117,6 +119,9 @@ tests/test_vm2_banking: $(BUILD_DIR)/test-lsi11/tests/test_vm2_banking.o $(TEST_
 tests/test_irq_semantics: $(BUILD_DIR)/test-lsi11/tests/test_irq_semantics.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_dz11: $(BUILD_DIR)/test-lsi11/tests/test_dz11.o $(TEST_COMMON_OBJS_LSI11)
+	$(CC) $(CFLAGS) -o $@ $^
+
 tests/test_rl11: $(BUILD_DIR)/test-lsi11/tests/test_rl11.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -144,6 +149,8 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	./tests/test_vm2_banking
 	@echo "Running IRQ semantics test..."
 	./tests/test_irq_semantics
+	@echo "Running DZ11 register/interrupt test..."
+	./tests/test_dz11
 	@echo "Running RL11 register/transfer test..."
 	./tests/test_rl11
 	@echo "Running RK11 register/transfer test..."

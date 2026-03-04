@@ -5,6 +5,7 @@
 
 /* device modules */
 #include "dev_dl11.h"
+#include "dev_dz11.h"
 #include "dev_kw11.h"
 #include "dev_lp11.h"
 #include "dev_rh11.h"
@@ -48,6 +49,7 @@ static int term_raw_active = 0;
 
 typedef struct {
     int dl11;
+    int dz11;
     int kw11;
     int lp11;
     int rl11;
@@ -59,7 +61,7 @@ typedef struct {
     int vm1sav;
 } lsi11_device_mask_t;
 
-static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 0, 1, 0, 0};
+static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0};
 
 #ifdef ENABLE_J11_SHADOW_REGS
 static uint16_t j11_probe_shadow_regs[10];
@@ -163,6 +165,7 @@ static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
 {
     (void)machine;
     device_mask.dl11 = 1;
+    device_mask.dz11 = 1;
     device_mask.kw11 = 1;
     device_mask.lp11 = 1;
     device_mask.rl11 = 1;
@@ -245,6 +248,10 @@ int lsi11_set_device_enabled(const char *name, int on, char *err,
         device_mask.dl11 = v;
         return 0;
     }
+    if (!strcmp(name, "dz11") || !strcmp(name, "dz")) {
+        device_mask.dz11 = v;
+        return 0;
+    }
     if (!strcmp(name, "kw11")) {
         device_mask.kw11 = v;
         return 0;
@@ -295,6 +302,9 @@ int lsi11_device_enabled(const char *name)
     }
     if (!strcmp(name, "dl11")) {
         return device_mask.dl11;
+    }
+    if (!strcmp(name, "dz11") || !strcmp(name, "dz")) {
+        return device_mask.dz11;
     }
     if (!strcmp(name, "kw11")) {
         return device_mask.kw11;
@@ -838,6 +848,9 @@ static int impl_init(regs *r)
     if (device_mask.dl11 && dl11_init() != 0) {
         return -1;
     }
+    if (device_mask.dz11 && dz11_init() != 0) {
+        return -1;
+    }
     if (device_mask.kw11 && kw11_init() != 0) {
         return -1;
     }
@@ -890,6 +903,9 @@ static void impl_reset(regs *r)
     if (device_mask.dl11) {
         dl11_reset();
     }
+    if (device_mask.dz11) {
+        dz11_reset();
+    }
     if (device_mask.kw11) {
         kw11_reset();
     }
@@ -922,6 +938,7 @@ static void impl_reset(regs *r)
 static void impl_fini(regs *r)
 {
     (void)r;
+    dz11_shutdown();
     if (term_raw_active) {
         util_term_restore();
         term_raw_active = 0;
@@ -983,15 +1000,18 @@ void lsi11_hw_connect(regs *r)
     r->ramptr = core_ramptr;
 }
 
-void lsi11_poll_devices(void)
+void lsi11_poll_devices_steps(uint32_t cpu_steps)
 {
     /* Fast devices: poll under spinlock (no SD I/O) */
     uint32_t irqstate = io_lock_acquire();
     if (device_mask.dl11) {
         dl11_poll();
     }
+    if (device_mask.dz11) {
+        dz11_poll();
+    }
     if (device_mask.kw11) {
-        kw11_poll();
+        kw11_poll_steps(cpu_steps);
     }
     if (device_mask.lp11) {
         lp11_poll();
@@ -1014,6 +1034,11 @@ void lsi11_poll_devices(void)
     if (device_mask.tq11) {
         tq11_poll();
     }
+}
+
+void lsi11_poll_devices(void)
+{
+    lsi11_poll_devices_steps(1);
 }
 
 void lsi11_set_trace_irq(int on)

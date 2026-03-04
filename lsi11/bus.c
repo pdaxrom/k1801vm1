@@ -32,6 +32,7 @@ static vm2_ram_cfg_t g_vm2_cfg = {BUS_VM2_DEFAULT_USER_RAM_BYTES,
 static uint8_t *g_vm2_halt_ram = NULL;
 static size_t g_vm2_halt_ram_bytes = 0;
 static int g_pdp1184_io_16bit = 1;
+static int g_pdp1184_m22e = 0;
 static int g_watch_init;
 static int g_watch_on;
 static paddr_t g_watch_pa;
@@ -104,6 +105,7 @@ void bus_reset_config(void)
     g_cfg.machine = BUS_MACHINE_LSI11_1104;
     g_cfg.ram_kb = LSI11_FIXED_RAM_KB;
     g_pdp1184_io_16bit = 1;
+    g_pdp1184_m22e = 0;
     bus_vm2_reset_config();
 }
 
@@ -138,6 +140,7 @@ int bus_configure(bus_machine_t machine, uint32_t ram_kb, char *err,
         g_cfg.machine = BUS_MACHINE_PDP1184;
         g_cfg.ram_kb = ram_kb;
         g_pdp1184_io_16bit = 1;
+        g_pdp1184_m22e = 0;
         return 0;
 
     default:
@@ -169,6 +172,16 @@ void bus_set_pdp1184_io_16bit(int on)
 int bus_pdp1184_io_16bit(void)
 {
     return g_pdp1184_io_16bit;
+}
+
+void bus_set_pdp1184_m22e(int on)
+{
+    g_pdp1184_m22e = on ? 1 : 0;
+}
+
+int bus_pdp1184_m22e(void)
+{
+    return g_pdp1184_m22e;
 }
 
 int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes,
@@ -272,7 +285,8 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
                 *io_addr_out = a16;
                 return 1;
             }
-        } else if (g_cfg.machine == BUS_MACHINE_PDP1184 && g_pdp1184_io_16bit) {
+        } else if (g_cfg.machine == BUS_MACHINE_PDP1184 &&
+                   g_pdp1184_io_16bit) {
             if (devio_has(a16)) {
                 *io_addr_out = a16;
                 return 1;
@@ -280,21 +294,24 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
         }
     }
 
-    if (g_cfg.machine == BUS_MACHINE_PDP1184 && g_pdp1184_io_16bit &&
-            addr >= PDP11_18BIT_IO_PAGE_START &&
-            addr <= PDP11_18BIT_IO_PAGE_END) {
-        a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
-        if (devio_has(a16)) {
-            *io_addr_out = a16;
-            return 1;
+    if (g_cfg.machine == BUS_MACHINE_PDP1184) {
+        if (!g_pdp1184_m22e &&
+                addr >= PDP11_18BIT_IO_PAGE_START &&
+                addr <= PDP11_18BIT_IO_PAGE_END) {
+            a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
+            if (devio_has(a16)) {
+                *io_addr_out = a16;
+                return 1;
+            }
         }
-    }
-
-    if (addr >= PDP11_22BIT_IO_PAGE_START && addr <= PDP11_22BIT_IO_PAGE_END) {
-        a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
-        if (devio_has(a16)) {
-            *io_addr_out = a16;
-            return 1;
+        if (g_pdp1184_m22e &&
+                addr >= PDP11_22BIT_IO_PAGE_START &&
+                addr <= PDP11_22BIT_IO_PAGE_END) {
+            a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
+            if (devio_has(a16)) {
+                *io_addr_out = a16;
+                return 1;
+            }
         }
     }
 
@@ -324,10 +341,11 @@ int bus_addr_is_ram(paddr_t addr)
 
     /*
      * PDP-11/84:
-     * - 16-bit/18-bit compatibility mode:
+     * - 16-bit compatibility mode:
      *   reserve low 16-bit I/O page 0160000..0177777 and full 18-bit
      *   compatibility alias 0760000..0777777.
-     * - 22-bit mode: reserve full 017760000..017777777.
+     * - 18-bit MMU mode: reserve 0760000..0777777 only.
+     * - 22-bit mode: reserve 017760000..017777777 only.
      */
     if (g_pdp1184_io_16bit) {
         if (addr >= IO_PAGE_START && addr <= IO_PAGE_END) {
@@ -336,8 +354,12 @@ int bus_addr_is_ram(paddr_t addr)
         if (addr >= PDP11_18BIT_IO_PAGE_START && addr <= PDP11_18BIT_IO_PAGE_END) {
             return 0;
         }
-    } else {
+    } else if (g_pdp1184_m22e) {
         if (addr >= PDP11_22BIT_IO_PAGE_START && addr <= PDP11_22BIT_IO_PAGE_END) {
+            return 0;
+        }
+    } else {
+        if (addr >= PDP11_18BIT_IO_PAGE_START && addr <= PDP11_18BIT_IO_PAGE_END) {
             return 0;
         }
     }

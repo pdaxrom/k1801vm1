@@ -3387,6 +3387,9 @@ int core_step(regs *r)
                 r->psw = (word)(r->psw & ~FLAG_H);
                 r->r[5] -= 2;
                 store_word(r, r->r[5], r->r[0]);
+                if (r->fAbort) {
+                    return 0;
+                }
                 r->psw = psw_saved;
             }
             goto step_end;
@@ -3614,13 +3617,13 @@ int core_step(regs *r)
 
     case 00050: /* CLR */
         DECODE_DST();
-        put_data_word(r, dst_type, dst_offset, 0);
+        PUT_WORD(0);
         clear_flag(FLAG_N | FLAG_V | FLAG_C);
         set_flag(FLAG_Z);
         goto step_end;
     case 01050: /* CLRB */
         DECODE_DSTB();
-        put_data_byte(r, dst_type, dst_offset, 0);
+        PUT_BYTE(0);
         clear_flag(FLAG_N | FLAG_V | FLAG_C);
         set_flag(FLAG_Z);
         goto step_end;
@@ -3911,17 +3914,22 @@ int core_step(regs *r)
     }
     goto step_end;
 
-    case 00067: /* SXT */
+    case 00067: { /* SXT */
+        word sxt_val;
         DECODE_DST();
+        sxt_val = 0;
         if (flag_is_set(FLAG_N)) {
-            put_data_word(r, dst_type, dst_offset, NEG_1);
+            sxt_val = NEG_1;
+        }
+        PUT_WORD(sxt_val);
+        if (sxt_val == NEG_1) {
             clear_flag(FLAG_Z);
         } else {
-            put_data_word(r, dst_type, dst_offset, 0);
             set_flag(FLAG_Z);
         }
         clear_flag(FLAG_V);
         goto step_end;
+    }
 
     case 01067: { /* MFPS */
         DECODE_DSTB();

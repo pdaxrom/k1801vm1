@@ -86,7 +86,7 @@ This subproject now provides two separate executables:
   - Example: `4104 KB` valid
 
 ### I/O compatibility
-- RL11, RK11, RH11, DL11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
+- RL11, RK11, RH11, DL11, DZ11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
 - DL11 alias is **not forced** by default on this target.
 - DL11 terminal character width defaults to **7-bit** (UNIX V5 compatible).
   - Use `-tty8b` for 8-bit console behavior.
@@ -97,6 +97,19 @@ This subproject now provides two separate executables:
   - undecoded addresses in `160000..177777` are NXM (reserved I/O page, not RAM)
   - higher 18-bit/22-bit I/O windows are decoded to the same 16-bit device page for registered devices
   - for non-device addresses outside RAM range, bus returns NXM as usual
+
+### DZ11 terminal multiplexer
+- DZ11 controller is bus-visible by default:
+  - CSR base `0160100` (`0160100..0160107`)
+  - vectors: RX `000300`, TX `000304`
+  - priority: `5`
+  - `8` serial lines per controller
+- Host connectivity:
+  - `-dz <tcp-port>` enables a TCP listener and maps incoming client sessions to DZ lines
+  - `-disable-dz` hides DZ11 from the bus
+- Character width follows console mode:
+  - default 7-bit
+  - `-tty8b` enables 8-bit path for DL11 and DZ11
 
 ### RH11 controller
 - RH11 (Massbus adapter) is available in both `lsi11` and `pdp1184`.
@@ -215,6 +228,8 @@ This subproject now provides two separate executables:
 |---|---|---:|---:|---|---|---|---|
 | DL11 (console RX) | `0177560–0177563` (+ optional alias `0176500–0176503`) | `000060` | `4` | RCSR bit 7 | RCSR bit 6 | Read RBUF (`...62`) | RX IRQ does not repeat until RX DONE cleared |
 | DL11 (console TX) | `0177564–0177567` (+ optional alias `0176504–0176507`) | `000064` | `4` | TCSR bit 7 | TCSR bit 6 | Write TBUF (`...66`) | TX IRQ does not repeat until TX DONE cleared |
+| DZ11 (terminal RX) | `0160100–0160107` | `000300` | `5` | CSR bit 7 (RDONE) | CSR bit 6 (RIE) | Read RBUF (`0160102`) | RX interrupt source selected by `SAE`: silo alarm (`SA`) vs `RDONE` |
+| DZ11 (terminal TX) | `0160100–0160107` | `000304` | `5` | CSR bit 15 (TRDY) | CSR bit 14 (TIE) | Write TDR (`0160106`) | Round-robin transmit line selection via CSR `TLINE` + TCR enables |
 | LTC (`KW11-L`-compatible, default on `lsi11` and `pdp1184`) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | read CSR low byte (`0177546`) | Fixed line clock. On `lsi11`, this models CPU-board integrated LTC logic; on `pdp1184`, J-11 onboard LTC |
 | KW11-P (optional override) | `0172540–0172545` | `000100` | `6` | CSR bit 7 (DONE) | CSR bit 6 | write CSR with DONE=0 | Compatibility-only programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
@@ -449,6 +464,7 @@ This subproject now provides two separate executables:
 
 ## Device disable options
 - `-disable-dl` disable DL11
+- `-disable-dz` disable DZ11
 - `-disable-kw` disable all KW11 variants
 - `-enable-kw11-l` enable KW11-L decode (`0177546..0177547`)
 - `-disable-kw11-l` disable KW11-L decode

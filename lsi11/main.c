@@ -5,6 +5,7 @@
 #include "adapter_core.h"
 #include "bus.h"
 #include "dev_dl11.h"
+#include "dev_dz11.h"
 #include "dev_kw11.h"
 #include "dev_rl11.h"
 #include "dev_rh11.h"
@@ -258,13 +259,13 @@ static void ubmap_sync_from_cpu(const regs *r, lsi11_machine_t machine)
 static void bus_iowin_sync_from_cpu(const regs *r, lsi11_machine_t machine)
 {
     int io16 = 1;
+    int m22e = 0;
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     if (r && machine == LSI11_MACHINE_1184 && r->model == DCJ11) {
-        if ((r->mmu_ssr0 & MMR0_RELO_ENABLE) && (r->mmu_ssr3 & MMR3_M22E)) {
+        if (r->mmu_ssr0 & MMR0_RELO_ENABLE) {
             io16 = 0;
-        } else {
-            io16 = 1;
+            m22e = (r->mmu_ssr3 & MMR3_M22E) ? 1 : 0;
         }
     }
 #else
@@ -272,6 +273,7 @@ static void bus_iowin_sync_from_cpu(const regs *r, lsi11_machine_t machine)
     (void)machine;
 #endif
     bus_set_pdp1184_io_16bit(io16);
+    bus_set_pdp1184_m22e(m22e);
 }
 
 /*
@@ -568,7 +570,9 @@ static void usage(const char *argv0)
             "  -rl01 <path>    Attach image as RL01 (repeatable)\n"
             "  -rl02 <path>    Attach image as RL02 (repeatable)\n"
             "  -tq <path>      Attach TK50 TMSCP tape image (.tap) (repeatable: tq0,tq1,...)\n"
+            "  -dz <port>      Enable DZ11 and listen for line connections on TCP <port>\n"
             "  -disable-dl     Disable DL11\n"
+            "  -disable-dz     Disable DZ11\n"
             "  -disable-kw     Disable KW11\n"
             "  -enable-kw11-l  Enable KW11-L decode\n"
             "  -disable-kw11-l Disable KW11-L decode\n"
@@ -640,6 +644,7 @@ int main(int argc, char **argv)
     long ram_kb_arg = -1;
     int force_dl11_alias = -1;
     int disable_dl = 0;
+    int disable_dz = 0;
     int disable_kw = 0;
     int kw11_l_override = -1;
     int kw11_p_override = -1;
@@ -649,6 +654,8 @@ int main(int argc, char **argv)
     int disable_rl = 0;
     int disable_tq = 0;
     int disable_sr = 0;
+    long dz_port = -1;
+    int dz_port_set = 0;
 #if defined(LSI11_TARGET_PDP1184)
     byte cpu_model = DCJ11;
 #else
@@ -721,8 +728,13 @@ int main(int argc, char **argv)
                 return 2;
             }
             tq_path[tq_count++] = argv[++i];
+        } else if (!strcmp(argv[i], "-dz") && i + 1 < argc) {
+            dz_port = strtol(argv[++i], NULL, 10);
+            dz_port_set = 1;
         } else if (!strcmp(argv[i], "-disable-dl")) {
             disable_dl = 1;
+        } else if (!strcmp(argv[i], "-disable-dz")) {
+            disable_dz = 1;
         } else if (!strcmp(argv[i], "-disable-kw")) {
             disable_kw = 1;
         } else if (!strcmp(argv[i], "-enable-kw11-l")) {
@@ -843,6 +855,11 @@ int main(int argc, char **argv)
     if (force_dl11_alias >= 0) {
         lsi11_set_dl11_alias(force_dl11_alias);
     }
+    if (dz_port_set &&
+            dz11_set_listen_port((int)dz_port, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "DZ11 configuration error: %s\n", cfg_err);
+        return 2;
+    }
 
     {
         int kw11_l_on = 1;
@@ -855,6 +872,11 @@ int main(int argc, char **argv)
             kw11_p_on = kw11_p_override;
         }
         kw11_set_visibility(kw11_l_on, kw11_p_on);
+        if (getenv("LSI11_KW11_REALTIME") != NULL) {
+            kw11_set_step_clock(0);
+        } else {
+            kw11_set_step_clock(1);
+        }
     }
 
     if (cpu_model == K1801VM1) {
@@ -875,6 +897,11 @@ int main(int argc, char **argv)
 
     if (disable_dl &&
             lsi11_set_device_enabled("dl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
+    if (disable_dz &&
+            lsi11_set_device_enabled("dz11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
@@ -918,8 +945,21 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
+    if (dz_port_set && !disable_dz &&
+            lsi11_set_device_enabled("dz11", 1, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
     if (rk_count > 0 && !lsi11_device_enabled("rk11")) {
         fprintf(stderr, "-rk is not allowed with -disable-rk\n");
+        return 2;
+    }
+    if (dz_port_set && (dz_port > 65535 || dz_port <= 0)) {
+        fprintf(stderr, "-dz requires TCP port in range 1..65535\n");
+        return 2;
+    }
+    if (dz_port_set && !lsi11_device_enabled("dz11")) {
+        fprintf(stderr, "-dz is not allowed with -disable-dz\n");
         return 2;
     }
     if (rh_count > 0 && !lsi11_device_enabled("rh11")) {
@@ -1000,12 +1040,13 @@ int main(int argc, char **argv)
         fprintf(stderr,
                 "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
                 "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
-                "dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_tq=%d dev_sr=%d "
+                "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_tq=%d dev_sr=%d "
                 "dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
                 kw11_master, kw11_l_on, kw11_p_on,
-                lsi11_device_enabled("lp11"), lsi11_device_enabled("rk11"),
+                lsi11_device_enabled("dz11"), lsi11_device_enabled("lp11"),
+                lsi11_device_enabled("rk11"),
                 lsi11_device_enabled("rh11"), lsi11_device_enabled("rl11"),
                 lsi11_device_enabled("tq11"),
                 lsi11_device_enabled("sr"), lsi11_device_enabled("vm1sel"),
@@ -1019,6 +1060,7 @@ int main(int argc, char **argv)
 
     dl11_set_8bit(dl11_8bit);
     dl11_set_nl_to_cr(do_nl_to_cr);
+    dz11_set_8bit(dl11_8bit);
     lsi11_hw_connect(&r);
 
     if (r.model == K1806VM2) {
@@ -1325,6 +1367,7 @@ int main(int argc, char **argv)
         }
         /* Keep device service latency low so boot ROM wait loops do not stall. */
         int step_chunk = trace ? 1 : 64;
+        int steps_executed = 0;
         if (max_steps > 0 && step_chunk > max_steps) {
             step_chunk = (int)max_steps;
         }
@@ -1374,6 +1417,7 @@ int main(int argc, char **argv)
             /* TODO: replace with your core single-instruction executor */
             core_step(&r); /* must exist in your core */
             steps_done++;
+            steps_executed++;
             if (max_steps > 0) {
                 max_steps--;
             }
@@ -1386,7 +1430,7 @@ int main(int argc, char **argv)
         }
 
         ubmap_sync_from_cpu(&r, machine_kind);
-        lsi11_poll_devices();
+        lsi11_poll_devices_steps((uint32_t)steps_executed);
 
         if (r.fAbort) {
             if (exit_on_abort) {

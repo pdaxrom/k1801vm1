@@ -72,10 +72,15 @@ bus_machine_t bus_machine(void);
 /*
  * PDP-11/84 I/O window mode:
  *  - on=1:  16-bit I/O page at 0160000..0177777
- *  - on=0: 22-bit I/O page at 017760000..017777777
- * 18-bit I/O alias 0760000..0777777 is decoded only when on=1.
+ *  - on=0: extended mode (18-bit or 22-bit, selected by M22E flag below)
+ *
+ * Extended mode decode:
+ *  - M22E=0: 18-bit I/O page at 0760000..0777777
+ *  - M22E=1: 22-bit I/O page at 017760000..017777777
  */
 void bus_set_pdp1184_io_16bit(int on);
 int bus_pdp1184_io_16bit(void);
+void bus_set_pdp1184_m22e(int on);
+int bus_pdp1184_m22e(void);
 
 #endif
