@@ -6,7 +6,8 @@ BIN="$1"
 TMP1="$(mktemp /tmp/lsi11cfg.XXXXXX)"
 TMP2="$(mktemp /tmp/lsi11cfg.XXXXXX)"
 TMP3="$(mktemp /tmp/lsi11cfg.XXXXXX)"
-trap 'rm -f "$TMP1" "$TMP2" "$TMP3"' EXIT INT TERM
+TMP4="$(mktemp /tmp/lsi11cfg.XXXXXX)"
+trap 'rm -f "$TMP1" "$TMP2" "$TMP3" "$TMP4"' EXIT INT TERM
 
 "$BIN" -check-config >/dev/null 2>"$TMP1"
 
@@ -40,6 +41,11 @@ grep -q "rh11=1" "$TMP1" || {
   exit 1
 }
 
+grep -q "rh_mode=rh11" "$TMP1" || {
+  echo "FAIL: expected default rh_mode=rh11 on lsi11 profile" >&2
+  exit 1
+}
+
 grep -q "dev_tq=0" "$TMP1" || {
   echo "FAIL: expected dev_tq=0 by default on lsi11 profile" >&2
   exit 1
@@ -56,6 +62,23 @@ grep -q "dev_kw11_p=1" "$TMP3" || {
 
 grep -q "dev_tq=1" "$TMP3" || {
   echo "FAIL: expected dev_tq=1 with -tq" >&2
+  exit 1
+}
+
+"$BIN" -rh-mode rh70 -check-config >/dev/null 2>"$TMP4"
+
+grep -q "rh_mode=rh70" "$TMP4" || {
+  echo "FAIL: expected rh_mode=rh70 with -rh-mode rh70" >&2
+  exit 1
+}
+
+if "$BIN" -rh-mode invalid -check-config >/dev/null 2>"$TMP4"; then
+  echo "FAIL: invalid -rh-mode value must be rejected" >&2
+  exit 1
+fi
+
+grep -q "Invalid -rh-mode:" "$TMP4" || {
+  echo "FAIL: missing invalid -rh-mode error message" >&2
   exit 1
 }
 

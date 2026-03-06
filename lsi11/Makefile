@@ -62,6 +62,8 @@ TESTS_LSI11 := \
   tests/test_tq11_tap
 
 TESTS_PDP1184 := \
+  tests/test_rh70_regtrace_pdp1184 \
+  tests/test_rh70_pdp1184 \
   tests/test_rh11_pdp1184 \
   tests/test_pdp1184_io_window
 
@@ -137,6 +139,12 @@ tests/test_tq11_tap: $(BUILD_DIR)/test-lsi11/tests/test_tq11_tap.o $(TEST_COMMON
 tests/test_rh11_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh11_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_rh70_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh70_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
+	$(CC) $(CFLAGS) -o $@ $^
+
+tests/test_rh70_regtrace_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh70_regtrace_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
+	$(CC) $(CFLAGS) -o $@ $^
+
 tests/test_pdp1184_io_window: $(BUILD_DIR)/test-pdp1184/tests/test_pdp1184_io_window.o $(TEST_COMMON_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -164,8 +172,12 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	@echo "LSI11 TESTS PASSED"
 
 test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
+	@echo "Running RH70 pdp1184 tests..."
+	./tests/test_rh70_pdp1184
 	@echo "Running RH11 pdp1184 tests..."
 	./tests/test_rh11_pdp1184
+	@echo "Running RH70 SIMH compare tests..."
+	./tests/test_rh70_simh_compare.sh ./tests/test_rh70_regtrace_pdp1184
 	@echo "Running pdp1184 I/O window tests..."
 	./tests/test_pdp1184_io_window
 	@echo "Running pdp1184 RAM/config tests..."
@@ -175,10 +187,14 @@ test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
 	$(MAKE) -C .. CFLAGS="$(ROOT_MMU_CFLAGS)" test-mmu-on
 	@echo "PDP1184 TESTS PASSED"
 
+smoke-ultrix-rh: $(BIN_PDP1184)
+	@echo "Running ULTRIX RH smoke (rh11 + rh70)..."
+	./tests/test_ultrix_rh_smoke.sh ./$(BIN_PDP1184)
+
 test-matrix: test-lsi11 test-pdp1184
 	@echo "ALL TESTS PASSED"
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(TESTS_LSI11) $(TESTS_PDP1184)
 
-.PHONY: all test test-lsi11 test-pdp1184 test-matrix clean
+.PHONY: all test test-lsi11 test-pdp1184 smoke-ultrix-rh test-matrix clean

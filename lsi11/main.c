@@ -148,6 +148,24 @@ static int parse_cpu_model(const char *name, byte *model)
     return -1;
 }
 
+static int parse_rh_mode(const char *name, rh11_mode_t *mode_out)
+{
+    if (!name || !mode_out) {
+        return -1;
+    }
+
+    if (!strcmp(name, "rh11")) {
+        *mode_out = RH11_MODE_RH11;
+        return 0;
+    }
+    if (!strcmp(name, "rh70")) {
+        *mode_out = RH11_MODE_RH70;
+        return 0;
+    }
+
+    return -1;
+}
+
 static int parse_boot_device(const char *name, int *kind_out, int *unit_out)
 {
     const char *suffix = NULL;
@@ -545,6 +563,7 @@ static void usage(const char *argv0)
             "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
             "  -rk <path>      Attach RK05 image (repeatable: rk0,rk1,...)\n"
             "  -rh <path>      Attach RH11 (RK06/RK07) image (repeatable: rh0,rh1,...)\n"
+            "  -rh-mode <m>    RH controller mode: rh11 (default) | rh70\n"
             "  -rl <path>      Attach RL image (repeatable: rl0,rl1,...; auto RL01/RL02)\n"
             "  -rl01 <path>    Attach image as RL01 (repeatable)\n"
             "  -rl02 <path>    Attach image as RL02 (repeatable)\n"
@@ -651,6 +670,7 @@ int main(int argc, char **argv)
     int exit_on_abort = 0;
     int check_config_only = 0;
     int trace_loopvals = 0;
+    rh11_mode_t rh_mode = RH11_MODE_RH11;
     char cfg_err[160] = {0};
 
 #if defined(LSI11_TARGET_PDP1184)
@@ -677,6 +697,11 @@ int main(int argc, char **argv)
                 return 2;
             }
             rh_path[rh_count++] = argv[++i];
+        } else if (!strcmp(argv[i], "-rh-mode") && i + 1 < argc) {
+            if (parse_rh_mode(argv[++i], &rh_mode) != 0) {
+                fprintf(stderr, "Invalid -rh-mode: %s (expected rh11|rh70)\n", argv[i]);
+                return 2;
+            }
         } else if (!strcmp(argv[i], "-rl") && i + 1 < argc) {
             if (rl_count >= RL11_MAX_DRIVES) {
                 fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
@@ -802,6 +827,11 @@ int main(int argc, char **argv)
             usage(argv[0]);
             return 2;
         }
+    }
+
+    if (rh11_set_mode(rh_mode) != 0) {
+        fprintf(stderr, "RH11 mode configuration error\n");
+        return 2;
     }
 
     trace_loopvals = (getenv("LSI11_TRACE_LOOPVALS") != NULL) ? 1 : 0;
@@ -1017,12 +1047,13 @@ int main(int argc, char **argv)
         int kw11_l_on = kw11_master ? kw11_l_enabled() : 0;
         int kw11_p_on = kw11_master ? kw11_p_enabled() : 0;
         fprintf(stderr,
-                "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d "
+                "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d rh_mode=%s "
                 "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
                 "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_tq=%d dev_sr=%d "
                 "dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
-                lsi11_dl11_alias(), rh11_on, lsi11_device_enabled("dl11"),
+                lsi11_dl11_alias(), rh11_on, rh11_mode_name(rh11_get_mode()),
+                lsi11_device_enabled("dl11"),
                 kw11_master, kw11_l_on, kw11_p_on,
                 lsi11_device_enabled("dz11"), lsi11_device_enabled("lp11"),
                 lsi11_device_enabled("rk11"),

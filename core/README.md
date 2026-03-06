@@ -30,6 +30,16 @@ Those are documented in [`lsi11/README.md`](../lsi11/README.md).
   - Split I/D handling follows implemented model rules.
   - 22-bit path is supported for DCJ-11 MMU-enabled operation.
 
+## Recent DCJ11 Compatibility Fixes
+- DCJ11 stack limit register `0177774` (`J11_STKLIM`) is implemented:
+  - reset default is `0000400`
+  - yellow stack detection uses `J11_STKLIM` (fallback to `0000400` only if register is zero)
+- Bus-error trap stacks architectural trap-time PC from `r7`:
+  - operand faults use post-fetch PC
+  - instruction-fetch faults keep faulting PC
+- `core_bus_error_trap(regs *r)` is exported for machine adapters, so external bus/NXM
+  traps can reuse the same core trap path.
+
 ## Testing (core-level)
 From repository root:
 - `make test` (MMU-off baseline + core tests)

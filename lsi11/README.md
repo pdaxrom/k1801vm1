@@ -15,6 +15,10 @@ This subproject now provides two separate executables:
 - DL11 remains bus-visible on both profiles; the default system clock is an
   onboard `LTC` with a `KW11-L`-compatible interface at `0177546`, while
   `KW11-P` is available only as an explicit compatibility override.
+- `TM11/TU` is not implemented in this emulator; OS autoconfiguration may report
+  `tm ... skipped: No CSR`.
+- `xp` (RP/RM MASSBUS disk) is also not implemented; autoconfiguration may report
+  `xp ... skipped: No CSR`.
 - Bootstrap flow is loader-based (`-boot`, `-bootcopy`, `-bootrt11`), not bus-ROM emulation.
 - Full hardware front-panel semantics (`HALT switch`, `INIT`-driven halt,
   `RESTART` sequencing) are out of scope for both targets.
@@ -87,6 +91,7 @@ This subproject now provides two separate executables:
 
 ### I/O compatibility
 - RL11, RK11, RH11, DL11, DZ11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
+- TM11 is not supported.
 - DL11 alias is **not forced** by default on this target.
 - DL11 terminal character width defaults to **7-bit** (UNIX V5 compatible).
   - Use `-tty8b` for 8-bit console behavior.
@@ -113,6 +118,13 @@ This subproject now provides two separate executables:
 
 ### RH11 controller
 - RH11 (Massbus adapter) is available in both `lsi11` and `pdp1184`.
+- RH mode is selectable: `-rh-mode rh11|rh70` (default `rh11`).
+- `rh11` mode: RH11/RK611-compatible path (`RHBA` + `CS1 BA16/BA17`, 18-bit DMA path).
+- `rh70` mode: RH70-style data path (`RHBAE` at `0177474`, 22-bit DMA + BAE carry path).
+  On `pdp1184`, legacy HK software that uses only `CS1<BA16:BA17>` can still DMA
+  through UBMAP when BME is enabled (`RHBAE<5:2> == 0` compatibility path).
+- RH70 control/IRQ edge-cases are still converging to full reference parity.
+- RH11 vs RH70 baseline matrix: `../doc/rh11-rh70-baseline.md`.
 - CSR map (octal), 16-bit I/O page view, base `0177440`:
   - `0177440 RHCS1`, `0177442 RHWC`, `0177444 RHBA`, `0177446 RHDA`
   - `0177450 RHCS2`, `0177452 RHDS`, `0177454 RHER`, `0177456 RHAS`
@@ -183,8 +195,7 @@ This subproject now provides two separate executables:
   - this follows the `SIMH` `BOOT TQ0` style bootstrap for unit `0`
   - `-bootrt11` remains disk-only (`RK`/`RH`/`RL`)
 - Tracing:
-  - `LSI11_TRACE_TQ=1 ./pdp1184 -tq tapes/tk50.tap ...`
-  - logs controller init, packet flow, and IRQ delivery in octal
+  - runtime `TQ11` trace environment switch is disabled in current performance-focused build
 
 ### Examples
 - Default config check:
@@ -230,12 +241,12 @@ This subproject now provides two separate executables:
 | DL11 (console TX) | `0177564–0177567` (+ optional alias `0176504–0176507`) | `000064` | `4` | TCSR bit 7 | TCSR bit 6 | Write TBUF (`...66`) | TX IRQ does not repeat until TX DONE cleared |
 | DZ11 (terminal RX) | `0160100–0160107` | `000300` | `5` | CSR bit 7 (RDONE) | CSR bit 6 (RIE) | Read RBUF (`0160102`) | RX interrupt source selected by `SAE`: silo alarm (`SA`) vs `RDONE` |
 | DZ11 (terminal TX) | `0160100–0160107` | `000304` | `5` | CSR bit 15 (TRDY) | CSR bit 14 (TIE) | Write TDR (`0160106`) | Round-robin transmit line selection via CSR `TLINE` + TCR enables |
-| LTC (`KW11-L`-compatible, default on `lsi11` and `pdp1184`) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | read CSR low byte (`0177546`) | Fixed line clock. On `lsi11`, this models CPU-board integrated LTC logic; on `pdp1184`, J-11 onboard LTC |
+| LTC (`KW11-L`-compatible, default on `lsi11` and `pdp1184`) | `0177546–0177547` | `000100` | `6` | CSR bit 7 (monitor) | CSR bit 6 | read CSR low byte (`0177546`) or write CSR with DONE=0 | Fixed line clock. On `lsi11`, this models CPU-board integrated LTC logic; on `pdp1184`, J-11 onboard LTC |
 | KW11-P (optional override) | `0172540–0172545` | `000100` | `6` | CSR bit 7 (DONE) | CSR bit 6 | write CSR with DONE=0 | Compatibility-only programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
 | TQ11 (TK50 / TMSCP) | `0174500–0174503` | `000260` | `5` | port/ring driven | port/ring driven | host clears via descriptor ownership / UQ init flow | Opt-in controller, enabled by `-tq`, supports units `tq0..tq7`, SIMH `.tap` backend |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
-| RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 command subset, RHBA + BA16/BA17 DMA |
+| RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 subset; `rh11`: RHBA+BA16/BA17 (18-bit), `rh70`: RHBAE-backed 22-bit DMA data path; RH70 control/IRQ parity still WIP |
 | LP11 (printer) | `0177514–0177517` | `000200` | `4` | CSR bit 7 | CSR bit 6 | Write DBR (`0177516`) | Output to host stdout |
 | SR (switch reg) | `0177570–0177571` | — | — | — | — | — | Read-only 16-bit value, default `000000` |
 
@@ -252,6 +263,11 @@ This subproject now provides two separate executables:
   - `make -C lsi11 test-lsi11`
 - 11/84-like tests (RAM sizing + core MMU suite):
   - `make -C lsi11 test-pdp1184`
+  - includes RH70 mini SIMH compare (`tests/test_rh70_simh_compare.sh`)
+  - if SIMH `pdp11` binary is missing, compare test is skipped
+- Optional ULTRIX RH smoke (manual, longer run):
+  - `make -C lsi11 smoke-ultrix-rh`
+  - runs `rh11` and `rh70` boot probes on `disks/ultrix/sys.dsk`
 - Full matrix:
   - `make -C lsi11 test-matrix`
 
@@ -473,6 +489,7 @@ This subproject now provides two separate executables:
 - `-disable-lp` disable LP11
 - `-disable-rk` disable RK11
 - `-disable-rh` disable RH11
+- `-rh-mode rh11|rh70` select RH controller mode (`rh11` default)
 - `-disable-rl` disable RL11
 - `-disable-sr` disable SR register
 

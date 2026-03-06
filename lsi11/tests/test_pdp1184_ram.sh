@@ -6,7 +6,8 @@ BIN="$1"
 TMP1="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
 TMP2="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
 TMP3="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
-trap 'rm -f "$TMP1" "$TMP2" "$TMP3"' EXIT INT TERM
+TMP4="$(mktemp /tmp/pdp1184cfg.XXXXXX)"
+trap 'rm -f "$TMP1" "$TMP2" "$TMP3" "$TMP4"' EXIT INT TERM
 
 "$BIN" -check-config >/dev/null 2>"$TMP1"
 
@@ -35,6 +36,11 @@ grep -q "rh11=1" "$TMP1" || {
   exit 1
 }
 
+grep -q "rh_mode=rh11" "$TMP1" || {
+  echo "FAIL: expected default rh_mode=rh11 on pdp1184" >&2
+  exit 1
+}
+
 if "$BIN" --mem-kb 4101 -check-config >/dev/null 2>"$TMP2"; then
   echo "FAIL: expected --mem-kb 4101 to be rejected" >&2
   exit 1
@@ -49,6 +55,23 @@ grep -q "multiple of 4 KB" "$TMP2" || {
 
 grep -q "ram_kb=4104" "$TMP3" || {
   echo "FAIL: expected ram_kb=4104" >&2
+  exit 1
+}
+
+"$BIN" -rh-mode rh70 -check-config >/dev/null 2>"$TMP4"
+
+grep -q "rh_mode=rh70" "$TMP4" || {
+  echo "FAIL: expected rh_mode=rh70 with -rh-mode rh70" >&2
+  exit 1
+}
+
+if "$BIN" -rh-mode bad -check-config >/dev/null 2>"$TMP4"; then
+  echo "FAIL: invalid -rh-mode value must be rejected" >&2
+  exit 1
+fi
+
+grep -q "Invalid -rh-mode:" "$TMP4" || {
+  echo "FAIL: missing invalid -rh-mode error message" >&2
   exit 1
 }
 

@@ -31,6 +31,8 @@
 #define RHEC2 0177472
 #define RHMR2 0177474
 #define RHMR3 0177476
+#define RHBAE RHMR2
+#define RHCS3 RHMR3
 
 /* CS1 bits */
 #define RHCS1_GO          0000001
@@ -78,6 +80,7 @@
   (RHCS2_UFE | RHCS2_MDS | RHCS2_PGE | RHCS2_NEM | RHCS2_NED | RHCS2_UPE | \
    RHCS2_WCE | RHCS2_DLT)
 #define RHCS2_RW_MASK (RHCS2_DS_MASK | RHCS2_BAI | RHCS2_SCLR)
+#define RHBAE_IMP 0000077
 
 /* RKER bits (subset used) */
 #define RHER_ILF   0000001
@@ -106,6 +109,7 @@ static uint16_t rhspr, rhdb, rhmr, rhmr2, rhmr3;
 static irq_latch_t rh_l;
 static emu_file_t *rh_fp[RH11_MAX_DRIVES];
 static int rh_sec_one_based = 0;
+static rh11_mode_t rh_mode = RH11_MODE_RH11;
 
 static uint16_t rh_selected_drive(void)
 {
@@ -140,7 +144,29 @@ static void rh_cs1_ba_ext_set(uint8_t ext)
 {
     rhcs1 &= (uint16_t)~RHCS1_BA_EXT_MASK;
     rhcs1 |= (uint16_t)(((uint16_t)(ext & 03)) << 8);
+    if (rh_mode == RH11_MODE_RH70) {
+        rhmr2 &= (uint16_t)~03;
+        rhmr2 |= (uint16_t)(ext & 03);
+    }
     rh_spare_sync_from_cs1();
+}
+
+static uint8_t rh_dma_ext_get(void)
+{
+    if (rh_mode == RH11_MODE_RH70) {
+        return (uint8_t)(rhmr2 & RHBAE_IMP);
+    }
+    return rh_cs1_ba_ext_get();
+}
+
+static void rh_dma_ext_set(uint8_t ext)
+{
+    if (rh_mode == RH11_MODE_RH70) {
+        rhmr2 = (uint16_t)(ext & RHBAE_IMP);
+        rh_cs1_ba_ext_set((uint8_t)(ext & 03));
+        return;
+    }
+    rh_cs1_ba_ext_set(ext);
 }
 
 static uint16_t rh_da_get_sec(uint16_t da)
@@ -183,6 +209,10 @@ static uint16_t *rh_rw_reg_ptr(uint16_t addr)
         return &rhdb;
     case RHMR:
         return &rhmr;
+    case RHMR2:
+        return &rhmr2;
+    case RHMR3:
+        return &rhmr3;
     default:
         return NULL;
     }
@@ -243,6 +273,13 @@ static void rh_sync_status(void)
         rhcs1 |= RHCS1_CERR_CCLR;
     }
 
+    if (rh_mode == RH11_MODE_RH70) {
+        rhmr3 &= (uint16_t)~RHCS1_IE;
+        if (rh_l.ie) {
+            rhmr3 |= RHCS1_IE;
+        }
+    }
+
     rhds &= (uint16_t)~RHDS_DRDY;
     if (rh_drive_fp(drive)) {
         rhds |= RHDS_DRDY;
@@ -263,7 +300,7 @@ static void rh_set_cs2_error(uint16_t bit)
     rh_sync_status();
 }
 
-static void rh_ba_inc(uint16_t *ba, uint8_t *ext)
+static void rh_ba_inc_rh11(uint16_t *ba, uint8_t *ext)
 {
     uint16_t prev = *ba;
     *ba = (uint16_t)(*ba + 2);
@@ -272,7 +309,25 @@ static void rh_ba_inc(uint16_t *ba, uint8_t *ext)
     }
 }
 
-static paddr_t rh_dma_pa(uint16_t ba, uint8_t ext)
+static void rh_ba_inc_rh70(uint16_t *ba, uint8_t *ext)
+{
+    uint16_t prev = *ba;
+    *ba = (uint16_t)(*ba + 2);
+    if (*ba < prev) {
+        *ext = (uint8_t)((*ext + 1) & RHBAE_IMP);
+    }
+}
+
+static void rh_ba_inc_mode(uint16_t *ba, uint8_t *ext)
+{
+    if (rh_mode == RH11_MODE_RH70) {
+        rh_ba_inc_rh70(ba, ext);
+        return;
+    }
+    rh_ba_inc_rh11(ba, ext);
+}
+
+static paddr_t rh_dma_pa_rh11(uint16_t ba, uint8_t ext)
 {
     uint32_t uba = (((uint32_t)(ext & 03u)) << 16) | (uint32_t)ba; /* 18-bit */
     if (bus_machine() == BUS_MACHINE_PDP1184) {
@@ -281,9 +336,36 @@ static paddr_t rh_dma_pa(uint16_t ba, uint8_t ext)
     return (paddr_t)(uba & 000777777u);
 }
 
+static paddr_t rh_dma_pa_rh70(uint16_t ba, uint8_t ext)
+{
+    uint32_t pa22 = (((uint32_t)(ext & RHBAE_IMP)) << 16) | (uint32_t)ba;
+
+    /*
+     * Compatibility path for legacy RH11/HK software running in RH70 mode on
+     * PDP-11/84 profile: when only UAE bits are used (BAE<5:2> == 0) and UB map
+     * translation is enabled, honor UBMAP like RH11 path does.
+     */
+    if (bus_machine() == BUS_MACHINE_PDP1184 &&
+            ubmap_enabled() &&
+            ((ext & (uint8_t)~03u) == 0)) {
+        uint32_t uba18 = (((uint32_t)(ext & 03u)) << 16) | (uint32_t)ba;
+        return ubmap_map_addr(uba18 & 000777777u);
+    }
+
+    return (paddr_t)(pa22 & 017777777u);
+}
+
+static paddr_t rh_dma_pa_mode(uint16_t ba, uint8_t ext)
+{
+    if (rh_mode == RH11_MODE_RH70) {
+        return rh_dma_pa_rh70(ba, ext);
+    }
+    return rh_dma_pa_rh11(ba, ext);
+}
+
 static int rh_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 {
-    paddr_t pa = rh_dma_pa(ba, ext);
+    paddr_t pa = rh_dma_pa_mode(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
@@ -296,7 +378,7 @@ static int rh_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 
 static int rh_dma_write_word(uint16_t ba, uint8_t ext, uint16_t w)
 {
-    paddr_t pa = rh_dma_pa(ba, ext);
+    paddr_t pa = rh_dma_pa_mode(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
@@ -330,9 +412,9 @@ static void rh_controller_clear(void)
     rhcs2 &= RHCS2_DS_MASK;
     rhcs2 |= RHCS2_IR;
 
-    irq_latch_sw_clear_done(&rh_l);
+    rhcs1 &= (uint16_t)~(RHCS1_GO | RHCS1_BA_EXT_MASK);
+    irq_latch_reset(&rh_l);
     irq_latch_event_set_done(&rh_l);
-    rhcs1 &= (uint16_t)~RHCS1_GO;
     rh_sync_status();
 }
 
@@ -388,7 +470,7 @@ static void rh_transfer(enum rh_xfer_mode mode)
     uint16_t cur_ba = rhba;
     uint16_t cur_dc = rhdc;
     uint16_t cur_da = rhda;
-    uint8_t cur_ext = rh_cs1_ba_ext_get();
+    uint8_t cur_ext = rh_dma_ext_get();
     int w_in_sec = 0;
     int bai = (rhcs2 & RHCS2_BAI) ? 1 : 0;
     uint8_t secbuf[RH11_SECTOR_BYTES];
@@ -486,7 +568,7 @@ static void rh_transfer(enum rh_xfer_mode mode)
 
         cur_wc = (uint16_t)(cur_wc + 1);
         if (!bai) {
-            rh_ba_inc(&cur_ba, &cur_ext);
+            rh_ba_inc_mode(&cur_ba, &cur_ext);
         }
 
         w_in_sec++;
@@ -520,7 +602,7 @@ static void rh_transfer(enum rh_xfer_mode mode)
     rhba = cur_ba;
     rhdc = cur_dc;
     rhda = cur_da;
-    rh_cs1_ba_ext_set(cur_ext);
+    rh_dma_ext_set(cur_ext);
     (void)had_error;
     rh_finish_command();
 }
@@ -574,7 +656,11 @@ static uint8_t rh_read8(uint16_t addr)
         v = 0;
         break;
     case RHMR2:
-        v = rhmr2;
+        if (rh_mode == RH11_MODE_RH70) {
+            v = (uint16_t)(rhmr2 & RHBAE_IMP);
+        } else {
+            v = rhmr2;
+        }
         break;
     case RHMR3:
         v = rhmr3;
@@ -596,7 +682,7 @@ static void rh_write8(uint16_t addr, uint8_t b)
     uint16_t v;
 
     if (base == RHDS || base == RHER || base == RHEC1 || base == RHEC2 ||
-            base == RHMR2 || base == RHMR3) {
+            ((base == RHMR2 || base == RHMR3) && rh_mode != RH11_MODE_RH70)) {
         return; /* read-only registers */
     }
 
@@ -646,7 +732,18 @@ static void rh_write8(uint16_t addr, uint8_t b)
             rh_l.irq_req = 1;
         }
 
-        if ((b & RHCS1_GO) && !old_go && rh_l.done) {
+        if ((b & RHCS1_GO) && old_go && !rh_l.done) {
+            rh_set_cs2_error(RHCS2_PGE);
+            rh_finish_command();
+            return;
+        }
+
+        if ((b & RHCS1_GO) && !old_go) {
+            if (!rh_l.done) {
+                rh_set_cs2_error(RHCS2_PGE);
+                rh_sync_status();
+                return;
+            }
             irq_latch_sw_clear_done(&rh_l);
             rhcs1 |= RHCS1_GO;
             rher = 0;
@@ -704,8 +801,61 @@ static void rh_write8(uint16_t addr, uint8_t b)
         rhmr = v;
         return;
 
+    case RHMR2:
+        if (rh_mode != RH11_MODE_RH70 || (addr & 1)) {
+            return;
+        }
+        rhmr2 = (uint16_t)(v & RHBAE_IMP);
+        rh_cs1_ba_ext_set((uint8_t)(rhmr2 & 03));
+        rh_sync_status();
+        return;
+
+    case RHMR3:
+        if (rh_mode != RH11_MODE_RH70 || (addr & 1)) {
+            return;
+        }
+        rhmr3 &= (uint16_t)~0177;
+        rhmr3 |= (uint16_t)(v & 0177);
+        irq_latch_set_ie(&rh_l, (rhmr3 & RHCS1_IE) ? 1 : 0);
+        rh_sync_status();
+        return;
+
     default:
         return;
+    }
+}
+
+int rh11_set_mode(rh11_mode_t mode)
+{
+    switch (mode) {
+    case RH11_MODE_RH11:
+        rh_mode = RH11_MODE_RH11;
+        rhmr2 = 0;
+        rhmr3 = 0;
+        return 0;
+    case RH11_MODE_RH70:
+        rh_mode = RH11_MODE_RH70;
+        rhmr2 = (uint16_t)((rhmr2 & (uint16_t)~03) | (rh_cs1_ba_ext_get() & 03));
+        return 0;
+    default:
+        return -1;
+    }
+}
+
+rh11_mode_t rh11_get_mode(void)
+{
+    return rh_mode;
+}
+
+const char *rh11_mode_name(rh11_mode_t mode)
+{
+    switch (mode) {
+    case RH11_MODE_RH11:
+        return "rh11";
+    case RH11_MODE_RH70:
+        return "rh70";
+    default:
+        return "unknown";
     }
 }
 
