@@ -8,8 +8,6 @@
 #include "ubmap.h"
 
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #if defined(PICO_ON_DEVICE)
 #include "pico/time.h"
@@ -130,8 +128,6 @@ static uint16_t rl_rhdr_fifo[3];
 static int rl_rhdr_len;
 static int rl_rhdr_idx;
 
-static int rl_debug = 0;
-
 static size_t rl_image_bytes_for_type(int type)
 {
     size_t cyl = (type == RL11_TYPE_RL02) ? RL02_CYLINDERS : RL01_CYLINDERS;
@@ -180,13 +176,6 @@ static void rl_set_error(uint8_t ecode, int drive_error)
     rl_err_code = (uint8_t)(ecode & 017);
     if (drive_error) {
         rl_drive_error = 1;
-    }
-    if (rl_debug) {
-        fprintf(stderr,
-                "RL11 ERR e=%02o de=%d fn=%02o ds=%o ba=%06o ext=%o da=%06o mp=%06o\n",
-                (unsigned)rl_err_code, rl_drive_error ? 1 : 0,
-                (unsigned)((rlcs & RLCS_FUNC_MASK) >> 1), rl_selected_drive_index(),
-                rlba, rl_ba_ext_get(), rlda, rlmp);
     }
 }
 
@@ -388,10 +377,6 @@ static void rl_finish_command(void)
     rl_busy = 0;
     irq_latch_event_set_done(&rl_l);
     rl_sync_cs();
-    if (rl_debug) {
-        fprintf(stderr, "RL11 DONE cs=%06o ba=%06o ext=%o da=%06o mp=%06o\n", rlcs,
-                rlba, rl_ba_ext_get(), rlda, rlmp);
-    }
 }
 
 static void rl_exec_noop(void)
@@ -765,12 +750,6 @@ static void rl_exec_command(void)
 {
     uint16_t fn = (uint16_t)(rlcs & RLCS_FUNC_MASK);
 
-    if (rl_debug) {
-        fprintf(stderr, "RL11 EXEC fn=%02o ds=%o ba=%06o ext=%o da=%06o mp=%06o\n",
-                fn >> 1, rl_selected_drive_index(), rlba,
-                rl_ba_ext_get(), rlda, rlmp);
-    }
-
     switch (fn) {
     case RLCS_FN_NOOP:
         rl_exec_noop();
@@ -889,12 +868,6 @@ static void rl_write8(uint16_t addr, uint8_t b)
             rl_ready_ns = now_ns();
             rl_clear_errors();
             rl_rhdr_reset_fifo();
-            if (rl_debug) {
-                fprintf(stderr,
-                        "RL11 GO fn=%02o ds=%o ba=%06o ext=%o da=%06o mp=%06o\n",
-                        (rlcs & RLCS_FUNC_MASK) >> 1, rl_selected_drive_index(), rlba,
-                        rl_ba_ext_get(), rlda, rlmp);
-            }
             rl_sync_cs();
             return;
         }
@@ -943,7 +916,6 @@ int rl11_init(void)
                                    rl11_irq_ack
                                   };
 
-    rl_debug = (getenv("RL11_DEBUG") != NULL);
     if (devio_register(&r) != 0) {
         return -1;
     }
@@ -1081,7 +1053,7 @@ void rl11_close_image(void)
 
 void rl11_set_debug(int on)
 {
-    rl_debug = on ? 1 : 0;
+    (void)on;
 }
 
 int rl11_boot_copy(void *dest, size_t len)

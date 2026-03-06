@@ -8,8 +8,6 @@
 #include "ubmap.h"
 
 #include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /* RK11 CSR base range (octal) */
 #define RK_BASE 0177400
@@ -98,8 +96,6 @@ static irq_latch_t rk_l;
 static emu_file_t *rk_fp[RK11_MAX_DRIVES];
 static uint8_t rk_img_read_only[RK11_MAX_DRIVES];
 static int sector_one_based = 0;
-static int rk_debug = 0;
-static int rk_debug_active = 0;
 
 static int rk_drive_valid(uint16_t drive)
 {
@@ -335,12 +331,6 @@ static void rk_finish_command(void)
     rkcs &= (uint16_t)~RKCS_GO;
     irq_latch_event_set_done(&rk_l);
     rk_sync_status();
-    if (rk_debug && rk_debug_active) {
-        fprintf(stderr,
-                "RK11 DONE rkcs=%06o rkwc=%06o rkba=%06o mex=%o rkda=%06o rker=%06o\n",
-                rkcs, rkwc, rkba, rkmex, rkda, rker);
-        rk_debug_active = 0;
-    }
 }
 
 static void rk_do_control_reset(void)
@@ -515,13 +505,6 @@ static void rk_exec_command(void)
 
     if (!(rkcs & RKCS_GO)) {
         return;
-    }
-
-    if (rk_debug && !rk_debug_active) {
-        rk_debug_active = 1;
-        fprintf(stderr,
-                "RK11 GO fn=%02o rkcs=%06o rkwc=%06o rkba=%06o mex=%o rkda=%06o\n",
-                fn >> 1, rkcs, rkwc, rkba, rkmex, rkda);
     }
 
     switch (fn) {
@@ -736,8 +719,6 @@ int rk11_init(void)
                                    rk11_irq_ack
                                   };
 
-    rk_debug = (getenv("RK11_DEBUG") != NULL);
-
     if (devio_register(&r) != 0) {
         return -1;
     }
@@ -764,7 +745,6 @@ void rk11_reset(void)
     for (i = 0; i < RK11_MAX_DRIVES; i++) {
         rk_write_lock[i] = 0;
     }
-    rk_debug_active = 0;
 
     irq_latch_reset(&rk_l);
     irq_latch_event_set_done(&rk_l);
@@ -834,7 +814,7 @@ void rk11_set_sector_base(int one_based)
 
 void rk11_set_debug(int on)
 {
-    rk_debug = on ? 1 : 0;
+    (void)on;
 }
 
 int rk11_boot_copy(void *dest, size_t len)

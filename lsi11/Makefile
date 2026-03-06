@@ -25,7 +25,6 @@ COMMON_SRCS := \
   dev_dz11.c \
   dev_kw11.c \
   dev_tq11.c \
-  dev_tm11.c \
   dev_rl11.c \
   dev_rh11.c \
   dev_rk11.c \

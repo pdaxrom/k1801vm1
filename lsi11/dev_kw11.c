@@ -360,7 +360,7 @@ int kw11_init(void)
     int l_on = kw11_l_visible_effective();
     int p_on = kw11_p_visible_effective();
 
-    kw11_trace = (getenv("LSI11_TRACE_KW11") != NULL) ? 1 : 0;
+    kw11_trace = 0;
     {
         const char *env_steps = getenv("LSI11_KW11_STEPS_PER_TICK");
         if (env_steps && *env_steps) {

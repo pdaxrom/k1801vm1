@@ -4,7 +4,6 @@
 #include "irq_latch.h"
 #include "util_term.h"
 #include <stdio.h>
-#include <stdlib.h>
 #if defined(PICO_ON_DEVICE)
 #include "pico/time.h"
 #else
@@ -34,7 +33,6 @@ static uint8_t rx_buf = 0;
 static uint64_t tx_ready_ns = 0;
 static int tx_busy = 0;
 static int dl11_alias_enabled = 1;
-static int dl11_debug_tx = 0;
 static int dl11_8bit_mode = 0; /* default 7-bit TTY behavior */
 static int dl11_nl_to_cr = 0;
 static uint8_t tcsr_misc = 0;  /* MAINT (bit2) + BREAK (bit0) */
@@ -145,11 +143,6 @@ static void dl11_write8(uint16_t a, uint8_t v)
         /* “Software clears DONE”: writing TBUF clears TX DONE */
         irq_latch_sw_clear_done(&tx_l);
 
-        if (dl11_debug_tx) {
-            fprintf(stderr, "DL11 TX %03o '%c'\n", v & 000377,
-                    (v >= 32 && v < 127) ? (char)v : '.');
-        }
-
         /* output low byte */
         util_term_putc((char)dl11_mask_char(v));
 
@@ -197,7 +190,6 @@ void dl11_tx_irq_ack(void)
 
 int dl11_init(void)
 {
-    dl11_debug_tx = (getenv("DL11_DEBUG_TX") != NULL);
     /* Register primary range and optional alias. */
     static const io_range_t primary = { 0177560, 0177567, dl11_read8, dl11_write8, "DL11(primary)" };
     static const io_range_t alias   = { 0176500, 0176507, dl11_read8, dl11_write8, "DL11(alias)" };

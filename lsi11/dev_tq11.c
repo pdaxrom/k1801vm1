@@ -9,7 +9,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 /* TQ11/TMSCP controller registers (octal). */
@@ -1916,7 +1915,7 @@ int tq11_init(void)
                                      tq_irq_ack
                                     };
 
-    tq_trace = (getenv("LSI11_TRACE_TQ") != NULL) ? 1u : 0u;
+    tq_trace = 0u;
 
     if (devio_register(&io) != 0) {
         return -1;

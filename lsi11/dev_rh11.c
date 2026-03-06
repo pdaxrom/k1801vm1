@@ -8,7 +8,6 @@
 #include "emu_file.h"
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -106,8 +105,6 @@ static uint16_t rhcs1, rhwc, rhba, rhda, rhcs2, rhds, rher, rhas, rhdc;
 static uint16_t rhspr, rhdb, rhmr, rhmr2, rhmr3;
 static irq_latch_t rh_l;
 static emu_file_t *rh_fp[RH11_MAX_DRIVES];
-static int rh_debug = 0;
-static int rh_debug_active = 0;
 static int rh_sec_one_based = 0;
 
 static uint16_t rh_selected_drive(void)
@@ -316,13 +313,6 @@ static void rh_finish_command(void)
     rhds |= RHDS_DRDY;
     irq_latch_event_set_done(&rh_l);
     rh_sync_status();
-
-    if (rh_debug_active) {
-        fprintf(stderr,
-                "RH11 DONE cs1=%06o wc=%06o ba=%06o ext=%o dc=%06o da=%06o cs2=%06o er=%06o\n",
-                rhcs1, rhwc, rhba, rh_cs1_ba_ext_get(), rhdc, rhda, rhcs2, rher);
-        rh_debug_active = 0;
-    }
 }
 
 static void rh_controller_clear(void)
@@ -425,12 +415,6 @@ static void rh_transfer(enum rh_xfer_mode mode)
     if (words <= 0) {
         rh_finish_command();
         return;
-    }
-
-    if (rh_debug) {
-        fprintf(stderr,
-                "RH11 XFER start wc=%06o words=%d ba=%06o ext=%o dc=%06o da=%06o mode=%d bai=%d\n",
-                rhwc, words, cur_ba, cur_ext, cur_dc, cur_da, mode, bai);
     }
 
     for (int i = 0; i < words; i++) {
@@ -537,11 +521,6 @@ static void rh_transfer(enum rh_xfer_mode mode)
     rhdc = cur_dc;
     rhda = cur_da;
     rh_cs1_ba_ext_set(cur_ext);
-    if (rh_debug) {
-        fprintf(stderr,
-                "RH11 XFER end   wc=%06o ba=%06o ext=%o dc=%06o da=%06o err=%d\n",
-                rhwc, rhba, rh_cs1_ba_ext_get(), rhdc, rhda, had_error);
-    }
     (void)had_error;
     rh_finish_command();
 }
@@ -651,21 +630,11 @@ static void rh_write8(uint16_t addr, uint8_t b)
         if (addr & 1) {
             /* Controller clear request (bit 15) */
             if (((uint16_t)b << 8) & RHCS1_CERR_CCLR) {
-                if (rh_debug && ((old & RHCS1_IE) || rh_l.ie || rh_l.irq_req)) {
-                    fprintf(stderr,
-                            "RH11 CS1 hi write cclr old=%06o b=%03o done=%o ie=%o irq=%o\n",
-                            old, b, rh_l.done, rh_l.ie, rh_l.irq_req);
-                }
                 rh_controller_clear();
                 return;
             }
             /* BA16/17 writable in this model */
             rh_cs1_ba_ext_set((uint8_t)(((uint16_t)b >> 0) & 03));
-            if (rh_debug && ((old & RHCS1_IE) || (rhcs1 & RHCS1_IE) || rh_l.irq_req)) {
-                fprintf(stderr,
-                        "RH11 CS1 hi write old=%06o b=%03o new=%06o done=%o ie=%o irq=%o\n",
-                        old, b, rhcs1, rh_l.done, rh_l.ie, rh_l.irq_req);
-            }
             rh_sync_status();
             return;
         }
@@ -684,18 +653,6 @@ static void rh_write8(uint16_t addr, uint8_t b)
             rhcs2 &= RHCS2_RW_MASK;
             rhcs2 |= RHCS2_IR;
             rhds &= (uint16_t)~RHDS_DRDY;
-            if (rh_debug) {
-                rh_debug_active = 1;
-                fprintf(stderr,
-                        "RH11 GO cs1=%06o wc=%06o ba=%06o ext=%o dc=%06o da=%06o cs2=%06o func=%03o\n",
-                        rhcs1, rhwc, rhba, rh_cs1_ba_ext_get(), rhdc, rhda, rhcs2,
-                        rhcs1 & RHCS1_FUNC_MASK);
-            }
-        }
-        if (rh_debug && ((b & RHCS1_IE) || rh_l.irq_req)) {
-            fprintf(stderr,
-                    "RH11 CS1 lo write old=%06o b=%03o new=%06o done=%o ie=%o irq=%o\n",
-                    old, b, rhcs1, rh_l.done, rh_l.ie, rh_l.irq_req);
         }
         rh_sync_status();
         return;
@@ -771,7 +728,6 @@ int rh11_init(void)
                                    rh11_irq_ack
                                   };
 
-    rh_debug = (getenv("RH11_DEBUG") != NULL);
     rh_sec_one_based = (getenv("RH11_SECTOR_ONE_BASED") != NULL);
     if (devio_register(&r) != 0) {
         return -1;
@@ -887,7 +843,7 @@ void rh11_close_image(void)
 
 void rh11_set_debug(int on)
 {
-    rh_debug = on ? 1 : 0;
+    (void)on;
 }
 
 int rh11_boot_copy(void *dest, size_t len)

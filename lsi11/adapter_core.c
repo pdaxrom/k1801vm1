@@ -13,7 +13,6 @@
 #include "dev_rl11.h"
 #include "dev_sr.h"
 #include "dev_tq11.h"
-#include "dev_tm11.h"
 #include "ubmap.h"
 #include "dev_vm1sav.h"
 #include "dev_vm1sel.h"
@@ -540,9 +539,6 @@ static int impl_init(regs *r)
     if (device_mask.tq11 && tq11_init() != 0) {
         return -1;
     }
-    if (tm11_init() != 0) {
-        return -1;
-    }
     if (device_mask.lp11 && lp11_init() != 0) {
         return -1;
     }
@@ -595,7 +591,6 @@ static void impl_reset(regs *r)
     if (device_mask.tq11) {
         tq11_reset();
     }
-    tm11_reset();
     if (device_mask.lp11) {
         lp11_reset();
     }
@@ -691,7 +686,6 @@ void lsi11_poll_devices_steps(uint32_t cpu_steps)
     if (device_mask.lp11) {
         lp11_poll();
     }
-    tm11_poll();
     io_lock_release(irqstate);
 
     /* Disk controllers: poll outside spinlock.
