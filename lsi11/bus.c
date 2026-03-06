@@ -273,6 +273,19 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
                 return 1;
             }
         }
+    } else if (g_cfg.machine == BUS_MACHINE_LSI11_1104) {
+        /*
+         * Keep 22-bit I/O-page aliases decodable in LSI-11 profile too:
+         * some MMU-enabled core paths probe device CSRs via 01777xxxx aliases.
+         */
+        if (addr >= PDP11_22BIT_IO_PAGE_START &&
+                addr <= PDP11_22BIT_IO_PAGE_END) {
+            a16 = (uint16_t)(IO_PAGE_START | (addr & 017777));
+            if (devio_has(a16)) {
+                *io_addr_out = a16;
+                return 1;
+            }
+        }
     }
 
     return 0;

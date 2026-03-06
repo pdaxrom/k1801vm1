@@ -4,11 +4,6 @@
 #include "irq_latch.h"
 #include <stdint.h>
 #include <stdio.h>
-#if defined(PICO_ON_DEVICE)
-#include "pico/time.h"
-#else
-#include <time.h>
-#endif
 
 /* CSR/DBR (octal) */
 #define LP11_CSR 0177514
@@ -19,19 +14,6 @@
 #define CSR_IE   000100
 
 static irq_latch_t lp_l;
-static uint64_t lp_ready_ns = 0;
-static int lp_busy = 0;
-
-static uint64_t now_ns(void)
-{
-#if defined(PICO_ON_DEVICE)
-    return (uint64_t)time_us_64() * 1000ull;
-#else
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
-#endif
-}
 
 static uint8_t lp11_read8(uint16_t a)
 {
@@ -84,9 +66,8 @@ static void lp11_write8(uint16_t a, uint8_t v)
         fputc((int)v, stdout);
         fflush(stdout);
 
-        /* printer becomes busy */
-        lp_busy = 1;
-        lp_ready_ns = now_ns() + 10000000ull; /* 10ms */
+        /* Complete immediately in the emulator model. */
+        irq_latch_event_set_done(&lp_l);
         return;
     }
     if (a == (uint16_t)(LP11_DBR + 1)) {
@@ -132,11 +113,5 @@ void lp11_reset(void)
 
 void lp11_poll(void)
 {
-    if (!lp_busy) {
-        return;
-    }
-    if (now_ns() >= lp_ready_ns) {
-        lp_busy = 0;
-        irq_latch_event_set_done(&lp_l);
-    }
+    /* LP11 completion is immediate in this model. */
 }

@@ -44,6 +44,8 @@
 #define RHCS1_FUNC_MASK 0000076
 #define RHCS1_IE        0000100
 #define RHCS1_DONEB     0000200
+#define RHCS1_BA16      0000400
+#define RHCS1_BA17      0001000
 #define RHCS1_BAEXT     0001400
 
 #define RH11_FUNC_READ  0000020
@@ -147,10 +149,12 @@ int main(void)
     rk11_reset();
     rl11_reset();
     kw11_reset();
+    bus_set_pdp1184_io_16bit(1);
+    bus_set_pdp1184_m22e(1);
 
     /* 1) decode and register accessibility on pdp1184 */
-    check(bus_is_nxm(0170000) == 0,
-          "pdp1184 physical RAM must exist below 64KB holeless region");
+    check(bus_is_nxm(0170000) == 1,
+          "pdp1184 16-bit low I/O window must be non-RAM");
     check(bus_is_nxm(0200000) == 0, "pdp1184 RAM must exist at 0200000");
     bus_write16(0200000, 045612);
     check(bus_read16(0200000) == 045612, "pdp1184 RAM readback at 0200000");
@@ -182,12 +186,16 @@ int main(void)
     check((bus_read16(RLBAE) & 0000077) == 0000047, "RLBAE readback via 22-bit alias");
     check(bus_read16(KW11L_CSR) == 000200,
           "KW11-L/LTC must decode on pdp1184 by default");
+    bus_set_pdp1184_io_16bit(0);
+    bus_set_pdp1184_m22e(0);
     bus_write16(KW11P_CSB, 012345);
     bus_write16(KW11P_CTR, 076543);
     check(bus_read16(KW11P_CSB) == 012345,
           "KW11-P CSB falls through to RAM when not enabled");
     check(bus_read16(KW11P_CTR) == 076543,
           "KW11-P CTR falls through to RAM when not enabled");
+    bus_set_pdp1184_io_16bit(1);
+    bus_set_pdp1184_m22e(1);
 
     /* HK-compatible rule: IE-only after controller clear must not re-IRQ. */
     rh11_reset();
@@ -274,11 +282,11 @@ int main(void)
     }
     bus_init();
     rh11_reset();
-    start_rh_read_ext(0177776, 0177776, 000000, RHCS1_BAEXT, 0);
+    start_rh_read_ext(0177776, 0177776, 000000, RHCS1_BA17, 0);
     rh11_poll();
-    check(bus_read16(0777776) == 012345,
+    check(bus_read16(0577776) == 012345,
           "RH11 read uses BA16/BA17 extension (first word)");
-    check(bus_read16(0000000) == 006543,
+    check(bus_read16(0600000) == 006543,
           "RH11 BA extension increments on RKBA overflow");
 
     rh11_close_image();

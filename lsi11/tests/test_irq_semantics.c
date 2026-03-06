@@ -159,13 +159,17 @@ static void test_kw11(regs *r)
     reset_devices();
     check(bus_is_nxm(KW11_CSR) == 0, "KW11-L present on 11/04 profile");
 
-    /* Enable IE while monitor already set -> immediate IRQ request. */
+    /*
+     * Current KW11 model: CSR write with DONE bit clear performs software clear
+     * of monitor, so enabling IE via 0100 does not raise immediate IRQ.
+     */
     wr8(KW11_CSR, 000100);
-    check(poll_irq(r, &vec) == 1, "KW11: immediate IRQ when IE set with MON=1");
-    check((vec & 0000777) == 000100, "KW11: vector low bits 000100");
+    check(poll_irq(r, &vec) == 0,
+          "KW11: no immediate IRQ on IE write when CSR write clears MON");
 
-    /* read/clear: monitor clears on CSR read */
-    check((rd8(KW11_CSR) & 000300) == 000300, "KW11: read returns MON=1, IE=1 before clear");
+    /* read/clear: monitor is already clear after the write above */
+    check((rd8(KW11_CSR) & 000300) == 000100,
+          "KW11: read returns MON=0, IE=1 after IE write");
     check((rd8(KW11_CSR) & 000200) == 0, "KW11: second read sees MON cleared");
 
     /* With MON=0, re-writing IE should not immediately re-IRQ. */

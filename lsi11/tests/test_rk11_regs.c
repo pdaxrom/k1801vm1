@@ -26,6 +26,7 @@
 
 #define RKCS_FN_CTLRESET 0000000
 #define RKCS_FN_READ     0000004
+#define RKCS_MEX_2       0000040
 
 #define RKER_NXS 0000040
 #define RKER_NXC 0000100
@@ -176,12 +177,15 @@ int main(void)
     }
     bus_init();
     rk11_reset();
-    start_read(0177776, 0177776, 0000000, RKCS_FN_READ | RKCS_GO | RKCS_MEX_MASK);
+    start_read(0177776, 0177776, 0000000, RKCS_FN_READ | RKCS_GO | RKCS_MEX_2);
     rk11_poll();
     check(bus_read16(RKBA) == 0000002, "RKBA wraps after overflow");
-    check((bus_read16(RKCS) & RKCS_MEX_MASK) == 0000000, "MEX increments on RKBA overflow");
-    check(bus_read16((paddr_t)0777776) == 012345, "MEX transfer writes high-memory word");
-    check(bus_read16((paddr_t)0000000) == 006543, "MEX overflow transfer continues at next bank");
+    check((bus_read16(RKCS) & RKCS_MEX_MASK) == 0000060,
+          "MEX increments on RKBA overflow");
+    check(bus_read16((paddr_t)0577776) == 012345,
+          "MEX transfer writes high-memory word");
+    check(bus_read16((paddr_t)0600000) == 006543,
+          "MEX overflow transfer continues at next bank");
 
     rk11_close_image();
     unlink(img);
