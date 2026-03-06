@@ -9,6 +9,7 @@
 #include "dev_kw11.h"
 #include "dev_rl11.h"
 #include "dev_rh11.h"
+#include "dev_xp.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
 #include "dev_tq11.h"
@@ -544,7 +545,7 @@ static void usage(const char *argv0)
 
     fprintf(stderr,
             "Usage:\n"
-            "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-rl <rl.img>] "
+            "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-xp <rm05.img>] [-rl <rl.img>] "
             "[-tq <tk50.tap>] "
             "[-boot <dev>|-bootcopy|-bootrt11|-boottq] [-cpu <model>]\n"
             "\n"
@@ -563,6 +564,8 @@ static void usage(const char *argv0)
             "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
             "  -rk <path>      Attach RK05 image (repeatable: rk0,rk1,...)\n"
             "  -rh <path>      Attach RH11 (RK06/RK07) image (repeatable: rh0,rh1,...)\n"
+            "  -xp <path>      Attach XP/RP RM05 image (repeatable: xp0,xp1,...)\n"
+            "  -rp <path>      Alias for -xp\n"
             "  -rh-mode <m>    RH controller mode: rh11 (default) | rh70\n"
             "  -rl <path>      Attach RL image (repeatable: rl0,rl1,...; auto RL01/RL02)\n"
             "  -rl01 <path>    Attach image as RL01 (repeatable)\n"
@@ -579,6 +582,7 @@ static void usage(const char *argv0)
             "  -disable-lp     Disable LP11\n"
             "  -disable-rk     Disable RK11\n"
             "  -disable-rh     Disable RH11\n"
+            "  -disable-xp     Disable XP/RP controller\n"
             "  -disable-rl     Disable RL11\n"
             "  -disable-tq     Disable TQ11/TMSCP tape controller\n"
             "  -disable-sr     Disable SR\n"
@@ -620,6 +624,7 @@ int main(int argc, char **argv)
 {
     const char *rk_path[RK11_MAX_DRIVES] = {0};
     const char *rh_path[RH11_MAX_DRIVES] = {0};
+    const char *xp_path[XP_MAX_DRIVES] = {0};
     const char *tq_path[TQ11_MAX_UNITS] = {0};
     struct {
         const char *path;
@@ -627,6 +632,7 @@ int main(int argc, char **argv)
     } rl_path[RL11_MAX_DRIVES];
     int rk_count = 0;
     int rh_count = 0;
+    int xp_count = 0;
     int rl_count = 0;
     int tq_count = 0;
     const char *load_path = NULL;
@@ -649,6 +655,7 @@ int main(int argc, char **argv)
     int disable_lp = 0;
     int disable_rk = 0;
     int disable_rh = 0;
+    int disable_xp = 0;
     int disable_rl = 0;
     int disable_tq = 0;
     int disable_sr = 0;
@@ -697,6 +704,12 @@ int main(int argc, char **argv)
                 return 2;
             }
             rh_path[rh_count++] = argv[++i];
+        } else if ((!strcmp(argv[i], "-xp") || !strcmp(argv[i], "-rp")) && i + 1 < argc) {
+            if (xp_count >= XP_MAX_DRIVES) {
+                fprintf(stderr, "Too many -xp images (max %d)\n", XP_MAX_DRIVES);
+                return 2;
+            }
+            xp_path[xp_count++] = argv[++i];
         } else if (!strcmp(argv[i], "-rh-mode") && i + 1 < argc) {
             if (parse_rh_mode(argv[++i], &rh_mode) != 0) {
                 fprintf(stderr, "Invalid -rh-mode: %s (expected rh11|rh70)\n", argv[i]);
@@ -755,6 +768,8 @@ int main(int argc, char **argv)
             disable_rk = 1;
         } else if (!strcmp(argv[i], "-disable-rh")) {
             disable_rh = 1;
+        } else if (!strcmp(argv[i], "-disable-xp")) {
+            disable_xp = 1;
         } else if (!strcmp(argv[i], "-disable-rl")) {
             disable_rl = 1;
         } else if (!strcmp(argv[i], "-disable-tq")) {
@@ -934,6 +949,11 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
+    if (disable_xp &&
+            lsi11_set_device_enabled("xp11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
     if (disable_rl &&
             lsi11_set_device_enabled("rl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
@@ -946,6 +966,11 @@ int main(int argc, char **argv)
     }
     if (tq_count > 0 && !disable_tq &&
             lsi11_set_device_enabled("tq11", 1, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
+    if (xp_count > 0 && !disable_xp &&
+            lsi11_set_device_enabled("xp11", 1, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
@@ -973,6 +998,10 @@ int main(int argc, char **argv)
     }
     if (rh_count > 0 && !lsi11_device_enabled("rh11")) {
         fprintf(stderr, "-rh is not allowed with -disable-rh\n");
+        return 2;
+    }
+    if (xp_count > 0 && !lsi11_device_enabled("xp11")) {
+        fprintf(stderr, "-xp/-rp is not allowed with -disable-xp\n");
         return 2;
     }
     if (rl_count > 0 && !lsi11_device_enabled("rl11")) {
@@ -1049,7 +1078,7 @@ int main(int argc, char **argv)
         fprintf(stderr,
                 "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d rh_mode=%s "
                 "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
-                "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rl=%d dev_tq=%d dev_sr=%d "
+                "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_xp=%d dev_rl=%d dev_tq=%d dev_sr=%d "
                 "dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, rh11_mode_name(rh11_get_mode()),
@@ -1057,7 +1086,8 @@ int main(int argc, char **argv)
                 kw11_master, kw11_l_on, kw11_p_on,
                 lsi11_device_enabled("dz11"), lsi11_device_enabled("lp11"),
                 lsi11_device_enabled("rk11"),
-                lsi11_device_enabled("rh11"), lsi11_device_enabled("rl11"),
+                lsi11_device_enabled("rh11"), lsi11_device_enabled("xp11"),
+                lsi11_device_enabled("rl11"),
                 lsi11_device_enabled("tq11"),
                 lsi11_device_enabled("sr"), lsi11_device_enabled("vm1sel"),
                 lsi11_device_enabled("vm1sav"));
@@ -1106,11 +1136,21 @@ int main(int argc, char **argv)
             return 1;
         }
     }
+    for (int unit = 0; unit < xp_count; unit++) {
+        if (xp_open_image_unit((unsigned)unit, xp_path[unit]) != 0) {
+            fprintf(stderr, "xp_open_image failed: xp%o %s\n", unit, xp_path[unit]);
+            rh11_close_image();
+            rk11_close_image();
+            r.fini(&r);
+            return 1;
+        }
+    }
     for (int unit = 0; unit < rl_count; unit++) {
         if (rl11_open_image_typed_unit((unsigned)unit, rl_path[unit].path,
                                        rl_path[unit].type) != 0) {
             fprintf(stderr, "rl11_open_image failed: rl%o %s\n", unit,
                     rl_path[unit].path);
+            xp_close_image();
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
@@ -1121,6 +1161,7 @@ int main(int argc, char **argv)
         if (tq11_open_image_unit((unsigned)unit, tq_path[unit]) != 0) {
             fprintf(stderr, "tq11_open_image failed: tq%o %s\n", unit, tq_path[unit]);
             rl11_close_image();
+            xp_close_image();
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
@@ -1455,6 +1496,7 @@ int main(int argc, char **argv)
     r.fini(&r);
     tq11_close_image();
     rl11_close_image();
+    xp_close_image();
     rh11_close_image();
     rk11_close_image();
     return 0;

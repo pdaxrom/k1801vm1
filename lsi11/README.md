@@ -17,7 +17,8 @@ This subproject now provides two separate executables:
   `KW11-P` is available only as an explicit compatibility override.
 - `TM11/TU` is not implemented in this emulator; OS autoconfiguration may report
   `tm ... skipped: No CSR`.
-- `xp` (RP/RM MASSBUS disk) is also not implemented; autoconfiguration may report
+- `xp` (RP/RM MASSBUS disk, RM05 subset) is available as an opt-in controller
+  via `-xp`/`-rp`; if not enabled, OS autoconfiguration may report
   `xp ... skipped: No CSR`.
 - Bootstrap flow is loader-based (`-boot`, `-bootcopy`, `-bootrt11`), not bus-ROM emulation.
 - Full hardware front-panel semantics (`HALT switch`, `INIT`-driven halt,
@@ -90,7 +91,7 @@ This subproject now provides two separate executables:
   - Example: `4104 KB` valid
 
 ### I/O compatibility
-- RL11, RK11, RH11, DL11, DZ11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
+- RL11, RK11, RH11, XP/RP (RM05 subset), DL11, DZ11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
 - TM11 is not supported.
 - DL11 alias is **not forced** by default on this target.
 - DL11 terminal character width defaults to **7-bit** (UNIX V5 compatible).
@@ -147,6 +148,18 @@ This subproject now provides two separate executables:
   - flat image file
   - `RHDA[5:0]` sector, `RHDA[15:6]` linear track
   - `LBA = track * 64 + sector`, sector size `512` bytes (`01000` octal)
+
+### XP/RP controller (BSD `xp`)
+- XP/RP is modeled as an RH70 MBA+drive CSR block at `0176700..0176753`.
+- CLI:
+  - `-xp <path>` attach RM05 image (`xp0..xp7`)
+  - `-rp <path>` alias for `-xp`
+  - `-disable-xp` hide controller decode
+- IRQ: vector `000254`, priority `5`.
+- Current scope (v1):
+  - RM05 geometry path
+  - commands used by BSD autoconfig/boot path (`READ/WRITE/SEEK/PRESET/PACK/DCLR`)
+  - 22-bit DMA path via `BA/BAE` (no UBMAP on XP path)
 
 ### TK50 (TMSCP/TQ) support
 - `TQ11` models a minimal `TMSCP` tape controller for `TK50`-class units (`unit 0..7`).
@@ -206,8 +219,12 @@ This subproject now provides two separate executables:
   - `./pdp1184 -rk disks/rt11v400.dsk -bootrt11`
 - RH11 image attach:
   - `./pdp1184 -rh disks/rk07.img`
+- XP/RP RM05 image attach:
+  - `./pdp1184 -xp disks/bsd2.9/2.9BSD-usr.rm05`
 - RL image attach:
   - `./pdp1184 -rl disks/rl02.dsk`
+- BSD 2.9.1 root+usr split (`rl0` + `xp0`):
+  - `./pdp1184 -rl disks/bsd2.9/2.9BSD-root.rl02 -xp disks/bsd2.9/2.9BSD-usr.rm05 -boot rl0`
 - UNIX V5 boot:
   - `./pdp1184 -rk disks/unix_v5_rk.dsk -bootrt11`
 
@@ -264,10 +281,15 @@ This subproject now provides two separate executables:
 - 11/84-like tests (RAM sizing + core MMU suite):
   - `make -C lsi11 test-pdp1184`
   - includes RH70 mini SIMH compare (`tests/test_rh70_simh_compare.sh`)
+  - includes BSD 2.9.1 XP smoke (`tests/test_bsd291_xp_mount.sh`)
   - if SIMH `pdp11` binary is missing, compare test is skipped
+  - if BSD 2.9.1 images or `expect` are missing, BSD smoke is skipped
 - Optional ULTRIX RH smoke (manual, longer run):
   - `make -C lsi11 smoke-ultrix-rh`
   - runs `rh11` and `rh70` boot probes on `disks/ultrix/sys.dsk`
+- Optional BSD 2.9.1 XP mount smoke (manual run):
+  - `make -C lsi11 smoke-bsd291-xp`
+  - checks `xp 0 csr 176700 vector 254 attached` and `Mounted /usr on /dev/xp0h`
 - Full matrix:
   - `make -C lsi11 test-matrix`
 

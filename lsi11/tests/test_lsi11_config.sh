@@ -51,6 +51,11 @@ grep -q "dev_tq=0" "$TMP1" || {
   exit 1
 }
 
+grep -q "dev_xp=0" "$TMP1" || {
+  echo "FAIL: expected dev_xp=0 by default on lsi11 profile" >&2
+  exit 1
+}
+
 "$BIN" -enable-kw11-p -check-config >/dev/null 2>"$TMP3"
 
 grep -q "dev_kw11_p=1" "$TMP3" || {
@@ -62,6 +67,13 @@ grep -q "dev_kw11_p=1" "$TMP3" || {
 
 grep -q "dev_tq=1" "$TMP3" || {
   echo "FAIL: expected dev_tq=1 with -tq" >&2
+  exit 1
+}
+
+"$BIN" -xp /tmp/rm05.img -check-config >/dev/null 2>"$TMP3"
+
+grep -q "dev_xp=1" "$TMP3" || {
+  echo "FAIL: expected dev_xp=1 with -xp" >&2
   exit 1
 }
 

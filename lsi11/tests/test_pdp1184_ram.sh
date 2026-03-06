@@ -41,6 +41,11 @@ grep -q "rh_mode=rh11" "$TMP1" || {
   exit 1
 }
 
+grep -q "dev_xp=0" "$TMP1" || {
+  echo "FAIL: expected dev_xp=0 by default on pdp1184" >&2
+  exit 1
+}
+
 if "$BIN" --mem-kb 4101 -check-config >/dev/null 2>"$TMP2"; then
   echo "FAIL: expected --mem-kb 4101 to be rejected" >&2
   exit 1
@@ -72,6 +77,23 @@ fi
 
 grep -q "Invalid -rh-mode:" "$TMP4" || {
   echo "FAIL: missing invalid -rh-mode error message" >&2
+  exit 1
+}
+
+"$BIN" -xp /tmp/rm05.img -check-config >/dev/null 2>"$TMP4"
+
+grep -q "dev_xp=1" "$TMP4" || {
+  echo "FAIL: expected dev_xp=1 with -xp" >&2
+  exit 1
+}
+
+if "$BIN" -disable-xp -xp /tmp/rm05.img -check-config >/dev/null 2>"$TMP4"; then
+  echo "FAIL: -xp must be rejected with -disable-xp" >&2
+  exit 1
+fi
+
+grep -q -- "-xp/-rp is not allowed with -disable-xp" "$TMP4" || {
+  echo "FAIL: missing -disable-xp validation message" >&2
   exit 1
 }
 

@@ -27,6 +27,7 @@ COMMON_SRCS := \
   dev_tq11.c \
   dev_rl11.c \
   dev_rh11.c \
+  dev_xp.c \
   dev_rk11.c \
   dev_lp11.c \
   dev_sr.c \
@@ -65,6 +66,7 @@ TESTS_PDP1184 := \
   tests/test_rh70_regtrace_pdp1184 \
   tests/test_rh70_pdp1184 \
   tests/test_rh11_pdp1184 \
+  tests/test_xp_pdp1184 \
   tests/test_pdp1184_io_window
 
 ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
@@ -139,6 +141,9 @@ tests/test_tq11_tap: $(BUILD_DIR)/test-lsi11/tests/test_tq11_tap.o $(TEST_COMMON
 tests/test_rh11_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh11_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
 
+tests/test_xp_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_xp_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
+	$(CC) $(CFLAGS) -o $@ $^
+
 tests/test_rh70_pdp1184: $(BUILD_DIR)/test-pdp1184/tests/test_rh70_pdp1184.o $(TEST_COMMON_OBJS_PDP1184)
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -176,12 +181,16 @@ test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
 	./tests/test_rh70_pdp1184
 	@echo "Running RH11 pdp1184 tests..."
 	./tests/test_rh11_pdp1184
+	@echo "Running XP/RP pdp1184 tests..."
+	./tests/test_xp_pdp1184
 	@echo "Running RH70 SIMH compare tests..."
 	./tests/test_rh70_simh_compare.sh ./tests/test_rh70_regtrace_pdp1184
 	@echo "Running pdp1184 I/O window tests..."
 	./tests/test_pdp1184_io_window
 	@echo "Running pdp1184 RAM/config tests..."
 	./tests/test_pdp1184_ram.sh ./$(BIN_PDP1184)
+	@echo "Running BSD 2.9.1 XP mount smoke..."
+	./tests/test_bsd291_xp_mount.sh ./$(BIN_PDP1184)
 	@echo "Running core MMU suite (ENABLE_MMU=1)..."
 	$(MAKE) -C .. clean
 	$(MAKE) -C .. CFLAGS="$(ROOT_MMU_CFLAGS)" test-mmu-on
@@ -191,10 +200,14 @@ smoke-ultrix-rh: $(BIN_PDP1184)
 	@echo "Running ULTRIX RH smoke (rh11 + rh70)..."
 	./tests/test_ultrix_rh_smoke.sh ./$(BIN_PDP1184)
 
+smoke-bsd291-xp: $(BIN_PDP1184)
+	@echo "Running BSD 2.9.1 XP mount smoke..."
+	./tests/test_bsd291_xp_mount.sh ./$(BIN_PDP1184)
+
 test-matrix: test-lsi11 test-pdp1184
 	@echo "ALL TESTS PASSED"
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(TESTS_LSI11) $(TESTS_PDP1184)
 
-.PHONY: all test test-lsi11 test-pdp1184 smoke-ultrix-rh test-matrix clean
+.PHONY: all test test-lsi11 test-pdp1184 smoke-ultrix-rh smoke-bsd291-xp test-matrix clean

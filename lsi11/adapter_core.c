@@ -9,6 +9,7 @@
 #include "dev_kw11.h"
 #include "dev_lp11.h"
 #include "dev_rh11.h"
+#include "dev_xp.h"
 #include "dev_rk11.h"
 #include "dev_rl11.h"
 #include "dev_sr.h"
@@ -55,13 +56,14 @@ typedef struct {
     int rl11;
     int rk11;
     int rh11;
+    int xp11;
     int tq11;
     int sr;
     int vm1sel;
     int vm1sav;
 } lsi11_device_mask_t;
 
-static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0};
+static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0};
 
 static inline int vm2_model(const regs *r)
 {
@@ -89,6 +91,7 @@ static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
     device_mask.rk11 = 1;
     device_mask.sr = 1;
     device_mask.rh11 = 1;
+    device_mask.xp11 = 0;
     device_mask.tq11 = 0;
     /* VM1 extension devices are CPU-specific and must be enabled explicitly. */
     device_mask.vm1sel = 0;
@@ -189,6 +192,10 @@ int lsi11_set_device_enabled(const char *name, int on, char *err,
         device_mask.rh11 = v;
         return 0;
     }
+    if (!strcmp(name, "xp11") || !strcmp(name, "xp") || !strcmp(name, "rp")) {
+        device_mask.xp11 = v;
+        return 0;
+    }
     if (!strcmp(name, "tq11")) {
         device_mask.tq11 = v;
         return 0;
@@ -237,6 +244,9 @@ int lsi11_device_enabled(const char *name)
     }
     if (!strcmp(name, "rh11")) {
         return device_mask.rh11;
+    }
+    if (!strcmp(name, "xp11") || !strcmp(name, "xp") || !strcmp(name, "rp")) {
+        return device_mask.xp11;
     }
     if (!strcmp(name, "tq11")) {
         return device_mask.tq11;
@@ -536,6 +546,9 @@ static int impl_init(regs *r)
     if (device_mask.rh11 && rh11_init() != 0) {
         return -1;
     }
+    if (device_mask.xp11 && xp_init() != 0) {
+        return -1;
+    }
     if (device_mask.tq11 && tq11_init() != 0) {
         return -1;
     }
@@ -587,6 +600,9 @@ static void impl_reset(regs *r)
     }
     if (device_mask.rh11) {
         rh11_reset();
+    }
+    if (device_mask.xp11) {
+        xp_reset();
     }
     if (device_mask.tq11) {
         tq11_reset();
@@ -700,6 +716,9 @@ void lsi11_poll_devices_steps(uint32_t cpu_steps)
     }
     if (device_mask.rh11) {
         rh11_poll();
+    }
+    if (device_mask.xp11) {
+        xp_poll();
     }
     if (device_mask.tq11) {
         tq11_poll();
