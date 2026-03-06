@@ -220,40 +220,19 @@ static const char *cpu_model_name(byte model)
 
 static void ubmap_sync_from_cpu(const regs *r, lsi11_machine_t machine)
 {
-    static int trace_inited = 0;
-    static int trace_on = 0;
-    static int last_enabled = -1;
-    static uint16_t last_ssr3 = 0177777;
     int enabled = 0;
-    uint16_t ssr3_snapshot = 0;
 
-    if (!trace_inited) {
-        trace_on = (getenv("LSI11_TRACE_UBMAP") != NULL) ? 1 : 0;
-        trace_inited = 1;
-    }
-
-    if (getenv("LSI11_UBMAP_OFF") != NULL) {
-        enabled = 0;
-        ubmap_set_enabled(0);
-    } else if (!r || machine != LSI11_MACHINE_1184 || r->model != DCJ11) {
+    if (!r || machine != LSI11_MACHINE_1184 || r->model != DCJ11) {
         enabled = 0;
         ubmap_set_enabled(0);
     } else {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        ssr3_snapshot = (uint16_t)r->mmu_ssr3;
         enabled = (r->mmu_ssr3 & MMR3_BME) ? 1 : 0;
 #else
         enabled = 0;
 #endif
         ubmap_set_enabled(enabled);
     }
-
-    if (trace_on && r &&
-            (enabled != last_enabled || ssr3_snapshot != last_ssr3)) {
-        fprintf(stderr, "UBMAP sync ssr3=%06o on=%o\n", ssr3_snapshot, enabled & 1);
-    }
-    last_enabled = enabled;
-    last_ssr3 = ssr3_snapshot;
 }
 
 static void bus_iowin_sync_from_cpu(const regs *r, lsi11_machine_t machine)
@@ -1192,7 +1171,8 @@ int main(int argc, char **argv)
             }
             bus_write16((uint16_t)(RL_BOOT_ADDR + 000014u),
                         (uint16_t)(0000004u | ds));
-            bus_write16((uint16_t)(RL_BOOT_ADDR + 000036u),
+            /* Patch READ+GO command word (second immediate of MOV #14,(R1)). */
+            bus_write16((uint16_t)(RL_BOOT_ADDR + 000042u),
                         (uint16_t)(0000014u | ds));
             r.r[7] = RL_BOOT_ENTRY;
             break;

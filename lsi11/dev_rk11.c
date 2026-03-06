@@ -5,6 +5,7 @@
 #include "irq.h"
 #include "irq_latch.h"
 #include "emu_file.h"
+#include "ubmap.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -288,7 +289,11 @@ static void rk_set_error(uint16_t bit)
 
 static paddr_t rk_pa(uint8_t mex, uint16_t ba)
 {
-    return (paddr_t)(((uint32_t)(mex & 03) << 16) | ba);
+    uint32_t uba = (((uint32_t)(mex & 03u) << 16) | (uint32_t)ba) & 000777777u;
+    if (bus_machine() == BUS_MACHINE_PDP1184) {
+        return ubmap_map_addr(uba);
+    }
+    return (paddr_t)uba;
 }
 
 static void rk_ba_inc(uint16_t *ba, uint8_t *mex)

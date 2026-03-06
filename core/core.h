@@ -122,6 +122,7 @@ typedef struct _regs {
     word J11_CPUERR;              /* 0177766: CPU error register */
     word J11_RSVD_177770;         /* 0177770: reserved/implementation-defined */
     word J11_PIRQ;                /* 0177772: program interrupt request register */
+    word J11_STKLIM;              /* 0177774: stack limit register */
     word TVE_LIMIT;               /* 0177706 */
     word TVE_COUNT;               /* 0177710 */
     word TVE_CSR;                 /* 0177712 */
@@ -202,5 +203,6 @@ void core_init(regs *r);
 void core_reset(regs *r);
 int core_step(regs *r);
 void core_fini(regs *r);
+void core_bus_error_trap(regs *r);
 
 #endif

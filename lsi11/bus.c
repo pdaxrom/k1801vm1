@@ -33,46 +33,6 @@ static uint8_t *g_vm2_halt_ram = NULL;
 static size_t g_vm2_halt_ram_bytes = 0;
 static int g_pdp1184_io_16bit = 1;
 static int g_pdp1184_m22e = 0;
-static int g_watch_init;
-static int g_watch_on;
-static paddr_t g_watch_pa;
-
-static void bus_watch_init(void)
-{
-    const char *env;
-    char *endp = NULL;
-    unsigned long v;
-
-    if (g_watch_init) {
-        return;
-    }
-    g_watch_init = 1;
-    env = getenv("LSI11_WATCH_PA");
-    if (!env || !*env) {
-        return;
-    }
-    v = strtoul(env, &endp, 8);
-    if (endp == env || *endp != '\0' || v > PDP11_22BIT_IO_PAGE_END) {
-        return;
-    }
-    g_watch_pa = (paddr_t)v;
-    g_watch_on = 1;
-}
-
-static int bus_watch_hit_byte(paddr_t addr)
-{
-    bus_watch_init();
-    return (g_watch_on && addr == g_watch_pa) ? 1 : 0;
-}
-
-static int bus_watch_hit_word(paddr_t addr)
-{
-    bus_watch_init();
-    if (!g_watch_on) {
-        return 0;
-    }
-    return (addr == g_watch_pa || (addr + 1u) == g_watch_pa) ? 1 : 0;
-}
 
 static inline void *bus_alloc(size_t size)
 {
@@ -429,11 +389,6 @@ void bus_write8(paddr_t addr, uint8_t v)
 {
     uint16_t io_addr = 0;
 
-    if (bus_watch_hit_byte(addr)) {
-        fprintf(stderr, "BUSWATCH W8  pa=%08o v=%03o\n", (unsigned)addr,
-                (unsigned)v);
-    }
-
     if (io_decode_addr(addr, &io_addr)) {
         devio_write8(io_addr, v);
         return;
@@ -473,11 +428,6 @@ void bus_write16(paddr_t addr, uint16_t v)
 #endif
 {
     uint16_t io_addr = 0;
-
-    if (bus_watch_hit_word(addr)) {
-        fprintf(stderr, "BUSWATCH W16 pa=%08o v=%06o\n", (unsigned)addr,
-                (unsigned)v);
-    }
 
     if (io_decode_addr(addr, &io_addr)) {
         devio_write8(io_addr, (uint8_t)(v & 000377));

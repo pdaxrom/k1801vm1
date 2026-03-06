@@ -64,6 +64,8 @@ static uint16_t dz_tdr;
 static uint16_t dz_silo[DZ_SILO_ALM];
 static unsigned dz_scnt;
 static uint8_t dz_line_rcve[DZ11_LINES];
+static uint8_t dz_tx_irq_req;
+static uint8_t dz_tx_irq_armed;
 static int dz_8bit_mode;
 static int dz_initialized;
 
@@ -136,20 +138,38 @@ static void dz_update_receive_flags(void)
 static void dz_update_transmit_flags(void)
 {
     int next;
+    uint16_t old_csr = dz_csr;
 
     if (!(dz_csr & CSR_MSE)) {
         dz_csr &= (uint16_t)~CSR_TRDY;
+        dz_tx_irq_req = 0;
+        dz_tx_irq_armed = 1;
         return;
     }
 
     next = dz_find_next_tx_line(dz_csr_tline());
     if (next < 0) {
         dz_csr &= (uint16_t)~CSR_TRDY;
+        dz_tx_irq_req = 0;
+        dz_tx_irq_armed = 1;
         return;
     }
 
     dz_csr_set_tline((uint8_t)next);
     dz_csr |= CSR_TRDY;
+
+    if ((old_csr & CSR_TRDY) == 0 && (dz_csr & CSR_TRDY) != 0 &&
+            (dz_csr & CSR_TIE) && dz_tx_irq_armed) {
+        dz_tx_irq_req = 1;
+        dz_tx_irq_armed = 0;
+    }
+    if ((dz_csr & CSR_TRDY) == 0) {
+        dz_tx_irq_req = 0;
+        dz_tx_irq_armed = 1;
+    }
+    if ((dz_csr & CSR_TIE) == 0) {
+        dz_tx_irq_req = 0;
+    }
 }
 
 static void dz_silo_push(uint16_t v)
@@ -426,10 +446,14 @@ static void dz_soft_clear(void)
     dz_tcr = 0;
     dz_msr = 0;
     dz_tdr = 0;
+    dz_tx_irq_req = 0;
+    dz_tx_irq_armed = 1;
 }
 
 static void dz_write_csr(uint16_t data)
 {
+    uint16_t old = dz_csr;
+
     if (data & CSR_CLR) {
         dz_soft_clear();
     }
@@ -439,9 +463,20 @@ static void dz_write_csr(uint16_t data)
 
     if (!(dz_csr & CSR_MSE)) {
         dz_csr &= (uint16_t)~(CSR_SA | CSR_RDONE | CSR_TRDY);
+        dz_tx_irq_req = 0;
+        dz_tx_irq_armed = 1;
     } else {
         dz_update_receive_flags();
         dz_update_transmit_flags();
+    }
+
+    if ((old & CSR_TIE) == 0 && (dz_csr & CSR_TIE) &&
+            (dz_csr & CSR_TRDY) && dz_tx_irq_armed) {
+        dz_tx_irq_req = 1;
+        dz_tx_irq_armed = 0;
+    }
+    if ((dz_csr & CSR_TIE) == 0) {
+        dz_tx_irq_req = 0;
     }
 }
 
@@ -538,6 +573,8 @@ static void dz_write8(uint16_t addr, uint8_t b)
             uint8_t line = dz_csr_tline();
             if (dz_tcr & (uint16_t)(1u << line)) {
                 dz_csr &= (uint16_t)~CSR_TRDY;
+                dz_tx_irq_req = 0;
+                dz_tx_irq_armed = 1;
                 dz_transmit_line(line, dz_mask_char((uint8_t)(dz_tdr & TDR_CHAR)));
                 dz_update_transmit_flags();
             }
@@ -569,11 +606,12 @@ void dz11_rx_irq_ack(void)
 int dz11_tx_irq_pending(void)
 {
     dz_update_transmit_flags();
-    return ((dz_csr & CSR_TIE) && (dz_csr & CSR_TRDY)) ? 1 : 0;
+    return dz_tx_irq_req ? 1 : 0;
 }
 
 void dz11_tx_irq_ack(void)
 {
+    dz_tx_irq_req = 0;
 }
 
 int dz11_init(void)

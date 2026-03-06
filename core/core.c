@@ -256,6 +256,7 @@ static INLINE bool vm1_reg_block_store_byte(regs *r, word offset, byte value)
 #endif
 #define DCJ11_REG_CPUERR 0177766
 #define DCJ11_REG_PIRQ 0177772
+#define DCJ11_REG_STKLIM 0177774
 #define DCJ11_REG_PSW 0177776
 
 #define DCJ11_CPUERR_RED 0000004
@@ -381,6 +382,9 @@ static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
     case DCJ11_REG_PIRQ:
         *value = dcj11_pirq_visible(r->J11_PIRQ);
         return true;
+    case DCJ11_REG_STKLIM:
+        *value = r->J11_STKLIM;
+        return true;
     case DCJ11_REG_PSW:
         *value = r->psw;
         return true;
@@ -434,6 +438,10 @@ static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
 #endif
     case DCJ11_REG_PIRQ:
         r->J11_PIRQ = (word)(value & DCJ11_PIRQ_RW);
+        return true;
+    case DCJ11_REG_STKLIM:
+        /* Stack limit register is word-addressed. */
+        r->J11_STKLIM = (word)(value & 0177776);
         return true;
     case DCJ11_REG_PSW:
         dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
@@ -607,6 +615,8 @@ static INLINE void dcj11_set_psw(regs *r, word new_psw)
 
 static INLINE void dcj11_note_stack_reference(regs *r, word addr)
 {
+    word limit;
+
     if (r->model != DCJ11) {
         return;
     }
@@ -616,7 +626,11 @@ static INLINE void dcj11_note_stack_reference(regs *r, word addr)
     if (!dcj11_kernel_psw(r->psw)) {
         return;
     }
-    if (addr < DCJ11_STACK_YEL_LIMIT) {
+    limit = (word)(r->J11_STKLIM & 0177776);
+    if (limit == 0) {
+        limit = DCJ11_STACK_YEL_LIMIT;
+    }
+    if (addr < limit) {
         dcj11_set_cpuerr(r, DCJ11_CPUERR_YEL);
         r->dcj11_yellow_pending = 1;
     }
@@ -774,55 +788,6 @@ static INLINE int dcj11_io_alias_offset(const regs *r, dword pa, word *offset_ou
     (void)pa;
 #endif
     return 0;
-}
-
-static INLINE int core_watch_pa_get(dword *pa_out)
-{
-    static int init = 0;
-    static int on = 0;
-    static dword pa = 0;
-
-    if (!init) {
-        const char *env = getenv("CORE_WATCH_PA");
-        if (env && *env) {
-            char *endp = NULL;
-            unsigned long v = strtoul(env, &endp, 8);
-            if (endp != env && *endp == '\0' && v <= 017777777u) {
-                pa = (dword)v;
-                on = 1;
-            }
-        }
-        init = 1;
-    }
-
-    if (!on) {
-        return 0;
-    }
-    if (pa_out) {
-        *pa_out = pa;
-    }
-    return 1;
-}
-
-static INLINE void core_watch_store(const char *kind, regs *r, word va, dword pa,
-                                    word value, int is_word)
-{
-    dword want = 0;
-
-    if (!core_watch_pa_get(&want)) {
-        return;
-    }
-    if (is_word) {
-        if (pa != want && (pa + 1) != want) {
-            return;
-        }
-    } else if (pa != want) {
-        return;
-    }
-
-    fprintf(stderr,
-            "COREWATCH %s pc=%06o va=%06o pa=%08o v=%06o ps=%06o ir=%06o\n",
-            kind, r->r[7], va, (unsigned)pa, value, r->psw, r->ir);
 }
 
 static INLINE int dcj11_phys_internal_reg(word offset)
@@ -1159,13 +1124,6 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
 {
     int mode, space, is_par, seg;
     word a = (word)(addr & 0177776);
-    static int trace_init = 0;
-    static int trace_on = 0;
-
-    if (!trace_init) {
-        trace_on = (getenv("CORE_TRACE_MMU_WR") != NULL) ? 1 : 0;
-        trace_init = 1;
-    }
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
 #if !(MMU_STUB_REGS_WHEN_DISABLED)
@@ -1188,10 +1146,6 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
             (word)((r->mmu_ssr0 & ~MMU_SSR0_J_WR_MASK) | (data & MMU_SSR0_J_WR_MASK));
         if ((old_ssr0 ^ value) & MMU_SSR0_ENABLE) {
             mmu_tlb_flush_all(r);
-        }
-        if (trace_on) {
-            fprintf(stderr, "MMUWR pc=%06o reg=%06o old=%06o new=%06o\n", r->r[7], a,
-                    old_ssr0, r->mmu_ssr0);
         }
 #else
         (void)value;
@@ -1216,13 +1170,8 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (a == MMU_SSR3 || a == MMU_SSR3_ALT) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        word old = r->mmu_ssr3;
         r->mmu_ssr3 = (word)(value & MMU_SSR3_J_MASK);
         mmu_tlb_flush_all(r);
-        if (trace_on) {
-            fprintf(stderr, "MMUWR pc=%06o reg=%06o old=%06o new=%06o\n", r->r[7], a,
-                    old, r->mmu_ssr3);
-        }
 #else
         (void)value;
 #endif
@@ -1230,7 +1179,6 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
     }
     if (mmu_decode_parpdr(a, &mode, &space, &is_par, &seg)) {
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-        word old = is_par ? r->mmu_par[mode][space][seg] : r->mmu_pdr[mode][space][seg];
         if (is_par) {
             r->mmu_par[mode][space][seg] = (word)(value & MMU_PAR_J_MASK);
             /* Any APR write clears status bits in the paired PDR. */
@@ -1241,12 +1189,6 @@ static INLINE int mmu_io_write_word(regs *r, word addr, word value)
                 (word)((value & MMU_PDR_J_MASK) & ~(MMU_PDR_A | MMU_PDR_W));
         }
         mmu_tlb_update(r, mode, space, seg);
-        if (trace_on) {
-            word now = is_par ? r->mmu_par[mode][space][seg] : r->mmu_pdr[mode][space][seg];
-            fprintf(stderr,
-                    "MMUWR pc=%06o reg=%06o %s m=%d s=%d g=%d old=%06o new=%06o\n",
-                    r->r[7], a, is_par ? "PAR" : "PDR", mode, space, seg, old, now);
-        }
 #else
         (void)value;
 #endif
@@ -1904,7 +1846,6 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     /* Fast path: RAM access bypasses entire callback chain. */
     if (r->ram_fast && offset < r->ram_fast_size) {
         r->ram_fast[offset] = value;
-        core_watch_store("W8", r, offset, (dword)offset, (word)value, 0);
         return;
     }
 #else
@@ -1919,10 +1860,6 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             *p = value;
-            if (r->ram_fast && p >= r->ram_fast) {
-                core_watch_store("W8", r, offset, (dword)(p - r->ram_fast),
-                                 (word)value, 0);
-            }
             return;
         }
     }
@@ -1969,7 +1906,6 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
     }
 
     raw_store_byte_phys(r, pa, value);
-    core_watch_store("W8", r, offset, pa, (word)value, 0);
 }
 
 static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
@@ -2094,7 +2030,6 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
         r->ram_fast[offset] = (uint8_t)(value & 000377);
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
-        core_watch_store("W16", r, offset, (dword)offset, value, 1);
         return;
     }
 #else
@@ -2110,10 +2045,6 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
-            if (r->ram_fast && p >= r->ram_fast) {
-                core_watch_store("W16", r, offset, (dword)(p - r->ram_fast), value,
-                                 1);
-            }
             return;
         }
     }
@@ -2165,7 +2096,6 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         return;
     }
     raw_store_word_phys(r, pa, value);
-    core_watch_store("W16", r, offset, pa, value, 1);
 }
 
 static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
@@ -2231,7 +2161,8 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
                        seg);
         return 0;
     }
-    return raw_load_word_phys(r, pa);
+    value = raw_load_word_phys(r, pa);
+    return value;
 }
 
 static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
@@ -2257,10 +2188,6 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
             uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
-            if (r->ram_fast && p >= r->ram_fast) {
-                core_watch_store("W16M", r, offset, (dword)(p - r->ram_fast), value,
-                                 1);
-            }
             return;
         }
     }
@@ -2303,7 +2230,6 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
         return;
     }
     raw_store_word_phys(r, pa, value);
-    core_watch_store("W16M", r, offset, pa, value, 1);
 }
 
 static INLINE byte core_load_byte(regs *r, word offset)
@@ -2404,6 +2330,7 @@ void core_reset(regs *r)
     r->J11_RSVD_177770 = 0;
 #endif
     r->J11_PIRQ = 0;
+    r->J11_STKLIM = DCJ11_STACK_YEL_LIMIT;
     r->fWait = 0;
     r->fTrap = 0;
     r->fAbort = 0;
@@ -2456,26 +2383,7 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
     word new_pc = 0;
     word fetched_psw = 0;
     word new_psw = 0;
-    int trace_emit = 0;
-    static int trace_init = 0;
-    static int trace_on = 0;
-
-    if (!trace_init) {
-        trace_on = (getenv("CORE_TRACE_TRAPVEC") != NULL) ? 1 : 0;
-        trace_init = 1;
-    }
-    trace_emit = trace_on;
-    if (trace_emit && kind && strcmp(kind, "IRQ") == 0) {
-        trace_emit = 0;
-    }
-    if (trace_emit && kind && strcmp(kind, "TRAP") == 0 && vec == 000034) {
-        trace_emit = 0;
-    }
-    if (trace_emit) {
-        fprintf(stderr,
-                "TRAPVEC kind=%s vec=%06o oldpc=%06o oldps=%06o sp=%06o ir=%06o",
-                kind ? kind : "?", vec, old_pc, old_psw, r->r[6], r->ir);
-    }
+    (void)kind;
 
     fetched_psw = load_word_vector(r, (word)(vec + 2));
     if (r->fAbort) {
@@ -2484,52 +2392,6 @@ static INLINE void core_take_vector(regs *r, word vec, word old_pc,
     new_pc = load_word_vector(r, vec);
     if (r->fAbort) {
         return;
-    }
-    if (trace_emit) {
-        fprintf(stderr, " newpc=%06o newps=%06o\n", new_pc, fetched_psw);
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-        if (r->model == DCJ11 && vec == 000034) {
-            dword pa_pc = 0;
-            dword pa_ps = 0;
-            int fault_pc = MMU_FAULT_NONE;
-            int fault_ps = MMU_FAULT_NONE;
-            int space_pc = 0;
-            int seg_pc = 0;
-            int space_ps = 0;
-            int seg_ps = 0;
-            int kds = mmu_split_enabled(r, 0) ? 1 : 0;
-            int rc_pc = translate_va_mode_space(r, vec, 0, 0, 1, &pa_pc, &fault_pc,
-                                                &space_pc, &seg_pc);
-            int rc_ps = translate_va_mode_space(r, (word)(vec + 2), 0, 0, 1, &pa_ps,
-                                                &fault_ps, &space_ps, &seg_ps);
-            fprintf(stderr,
-                    "TRAPVEC034 mmr0=%06o mmr3=%06o kds=%o "
-                    "par0=%06o pdr0=%06o pcpa=%08o(rc=%d f=%d s=%d g=%d) "
-                    "pspa=%08o(rc=%d f=%d s=%d g=%d)\n",
-                    r->mmu_ssr0, r->mmu_ssr3, kds,
-                    r->mmu_par[0][kds][0], r->mmu_pdr[0][kds][0], pa_pc, rc_pc,
-                    fault_pc, space_pc, seg_pc, pa_ps, rc_ps, fault_ps, space_ps,
-                    seg_ps);
-        }
-        if (r->model == DCJ11 && vec == 000010) {
-            dword pa_oldpc = 0;
-            int fault_oldpc = MMU_FAULT_NONE;
-            int mode_oldpc = 0;
-            int space_oldpc = 0;
-            int seg_oldpc = 0;
-            int rc_oldpc = translate_va(r, old_pc, 0, 1, &pa_oldpc, &fault_oldpc,
-                                        &mode_oldpc, &space_oldpc, &seg_oldpc);
-            word phys_ir = 0;
-            if (rc_oldpc == 0) {
-                phys_ir = raw_load_word_phys(r, pa_oldpc);
-            }
-            fprintf(stderr,
-                    "TRAPVEC010 oldpc-map pa=%08o rc=%d f=%d m=%d s=%d g=%d "
-                    "phys_ir=%06o mmr0=%06o mmr3=%06o\n",
-                    pa_oldpc, rc_oldpc, fault_oldpc, mode_oldpc, space_oldpc,
-                    seg_oldpc, phys_ir, r->mmu_ssr0, r->mmu_ssr3);
-        }
-#endif
     }
 
     new_psw = trap_psw(r, old_psw, fetched_psw);
@@ -2600,7 +2462,11 @@ static INLINE int dcj11_take_red_stack_abort(regs *r, const char *cause)
     r->r[7] = old_pc;
     dcj11_set_cpuerr(r, DCJ11_CPUERR_RED);
 
-    vector_psw = load_word_vector(r, 000006);
+    /*
+     * Red-stack fallback must not re-enter VA/MMU translation paths.
+     * Use physical low-memory vector reads/writes for the emergency stack.
+     */
+    vector_psw = raw_load_word_phys(r, 000006);
     if (r->fAbort) {
         return 1;
     }
@@ -2614,17 +2480,17 @@ static INLINE int dcj11_take_red_stack_abort(regs *r, const char *cause)
     }
 
     r->r[6] -= 2;
-    store_word(r, r->r[6], old_psw);
+    raw_store_word_phys(r, r->r[6], old_psw);
     if (r->fAbort) {
         return 1;
     }
     r->r[6] -= 2;
-    store_word(r, r->r[6], old_pc);
+    raw_store_word_phys(r, r->r[6], old_pc);
     if (r->fAbort) {
         return 1;
     }
 
-    new_pc = load_word_vector(r, 000004);
+    new_pc = raw_load_word_phys(r, 000004);
     if (!r->fAbort) {
         r->r[7] = new_pc;
     }
@@ -2665,52 +2531,31 @@ static INLINE void trap_vector4(regs *r, const char *kind)
 static INLINE void bus_error_trap(regs *r)
 {
     word old_psw = r->psw;
-    static int trace_init = 0;
-    static int trace_on = 0;
+    /*
+     * Bus-error trap stacks the architectural PC at trap time.
+     * For operand faults this is the post-fetch next PC (already advanced),
+     * while instruction-fetch faults keep PC at the faulting instruction.
+     */
+    word fault_pc = r->r[7];
     if (dcj11_take_red_stack_abort(r, "BUSERR")) {
         return;
     }
-    if (!trace_init) {
-        trace_on = (getenv("CORE_TRACE_BUSERR") != NULL) ? 1 : 0;
-        trace_init = 1;
-    }
-    if (trace_on) {
-        fprintf(stderr, "BUSERR pc=%06o fault=%06o sp=%06o ps=%06o ir=%06o\n",
-                r->r[7], r->r[7], r->r[6], r->psw, r->ir);
-    }
-    core_take_vector(r, 000004, r->r[7], old_psw, "BUSERR");
+    core_take_vector(r, 000004, fault_pc, old_psw, "BUSERR");
     r->fAbort = 1;
+}
+
+void core_bus_error_trap(regs *r)
+{
+    bus_error_trap(r);
 }
 
 static INLINE void mmu_fault_trap(regs *r, word va, word pc, int fault,
                                   int mode, int space, int seg)
 {
     word old_psw = r->psw;
-    static int trace_init = 0;
-    static int trace_on = 0;
-
-    if (!trace_init) {
-        trace_on = (getenv("CORE_TRACE_MMU_FAULT") != NULL) ? 1 : 0;
-        trace_init = 1;
-    }
 
     if (dcj11_take_red_stack_abort(r, "MMU")) {
         return;
-    }
-    if (trace_on) {
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-        word ssr0 = r->mmu_ssr0;
-        word ssr2 = r->mmu_ssr2;
-        word ssr3 = r->mmu_ssr3;
-#else
-        word ssr0 = 0;
-        word ssr2 = 0;
-        word ssr3 = 0;
-#endif
-        fprintf(stderr,
-                "MMUFAULT pc=%06o va=%06o f=%o m=%o s=%o g=%o ssr0=%06o ssr2=%06o ssr3=%06o ps=%06o\n",
-                pc, va, fault & 07, mode & 03, space & 01, seg & 07,
-                ssr0, ssr2, ssr3, old_psw);
     }
     mmu_record_fault(r, va, pc, fault, mode, space, seg);
     core_take_vector(r, MMU_TRAP_VECTOR, pc, old_psw, "MMU");
@@ -3076,105 +2921,6 @@ int core_step(regs *r)
     r->ir = op;
     if (r->model == DCJ11) {
         r->r[7] += 2;
-    }
-
-    {
-        static int watch_pc_init = 0;
-        static int watch_pc_on = 0;
-        static word watch_pc = 0;
-        static word watch_hist_pc[64];
-        static word watch_hist_op[64];
-        static word watch_hist_ps[64];
-        static int watch_hist_idx = 0;
-        static int watch_hist_have = 0;
-        int hist_pos = watch_hist_idx;
-        watch_hist_pc[hist_pos] = fetch_pc;
-        watch_hist_op[hist_pos] = op;
-        watch_hist_ps[hist_pos] = r->psw;
-        watch_hist_idx = (watch_hist_idx + 1) & 077;
-        if (watch_hist_have < 64) {
-            watch_hist_have++;
-        }
-        if (!watch_pc_init) {
-            const char *env_pc = getenv("CORE_WATCH_PC");
-            if (env_pc && *env_pc) {
-                char *endp = NULL;
-                long v = strtol(env_pc, &endp, 8);
-                if (endp != env_pc && v >= 0 && v <= 0177777) {
-                    watch_pc = (word)v;
-                    watch_pc_on = 1;
-                }
-            }
-            watch_pc_init = 1;
-        }
-        if (watch_pc_on && fetch_pc == watch_pc) {
-            dword watch_pa = 0;
-            int watch_fault = MMU_FAULT_NONE;
-            int watch_mode = 0;
-            int watch_space = 0;
-            int watch_seg = 0;
-            word watch_par = 0;
-            word watch_pdr = 0;
-            word watch_ssr0 = 0;
-            word watch_ssr3 = 0;
-            word watch_raw = 0;
-            int watch_rc = translate_va_ex(r, fetch_pc, 0, 1, 0, &watch_pa,
-                                           &watch_fault, &watch_mode, &watch_space,
-                                           &watch_seg);
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-            if (r->model == DCJ11 && watch_mode >= 0 && watch_mode < 4 &&
-                    watch_space >= 0 && watch_space < 2 &&
-                    watch_seg >= 0 && watch_seg < 8) {
-                watch_par = r->mmu_par[watch_mode][watch_space][watch_seg];
-                watch_pdr = r->mmu_pdr[watch_mode][watch_space][watch_seg];
-            }
-            watch_ssr0 = r->mmu_ssr0;
-            watch_ssr3 = r->mmu_ssr3;
-#endif
-            if (watch_rc == 0) {
-                watch_raw = raw_load_word_phys(r, watch_pa & ~1u);
-            }
-            fprintf(stderr,
-                    "WATCHPC pc=%06o op=%06o ps=%06o sp=%06o "
-                    "pa=%08o rc=%d f=%d m=%d s=%d g=%d "
-                    "par=%06o pdr=%06o ssr0=%06o ssr3=%06o raw=%06o "
-                    "r0=%06o r1=%06o r2=%06o r3=%06o r4=%06o r5=%06o\n",
-                    fetch_pc, op, r->psw, r->r[6], (unsigned)watch_pa, watch_rc,
-                    watch_fault, watch_mode, watch_space, watch_seg,
-                    watch_par, watch_pdr, watch_ssr0, watch_ssr3, watch_raw,
-                    r->r[0], r->r[1], r->r[2],
-                    r->r[3], r->r[4], r->r[5]);
-            if (getenv("CORE_WATCH_HIST") != NULL) {
-                int i;
-                int start = (watch_hist_have < 64) ? 0 : watch_hist_idx;
-                for (i = 0; i < watch_hist_have; i++) {
-                    int p = (start + i) & 077;
-                    fprintf(stderr, "WATCHHIST pc=%06o op=%06o ps=%06o\n",
-                            watch_hist_pc[p], watch_hist_op[p], watch_hist_ps[p]);
-                }
-            }
-            if (getenv("CORE_WATCH_DUMP") != NULL) {
-                int d;
-                for (d = -6; d <= 10; d += 2) {
-                    word a = (word)(fetch_pc + d);
-                    word w = core_load_word_ex(r, a, 1, 0);
-                    if (r->fAbort) {
-                        r->fAbort = 0;
-                        continue;
-                    }
-                    fprintf(stderr, "WATCHMEM va=%06o w=%06o\n", a, w);
-                }
-                for (d = 0; d <= 12; d += 2) {
-                    word a = (word)(r->r[6] + d);
-                    word w = core_load_word_ex(r, a, 0, 0);
-                    if (r->fAbort) {
-                        r->fAbort = 0;
-                        continue;
-                    }
-                    fprintf(stderr, "WATCHSTK va=%06o w=%06o\n", a, w);
-                }
-            }
-        }
     }
 
     if ((op & 0177740) == 000240) { /* Condition Code Operators */
@@ -4058,7 +3804,7 @@ int core_step(regs *r)
         goto step_end;
     }
 
-    case 00065: { /* MFPD */
+    case 01065: { /* MFPD */
         word mfp_tmp = 0;
         if (!has_prev_space_ops(r)) {
             illegal_trap(r);
@@ -4097,7 +3843,7 @@ int core_step(regs *r)
         clear_flag(FLAG_V);
         goto step_end;
     }
-    case 01065: { /* MFPI */
+    case 00065: { /* MFPI */
         word mfp_tmp = 0;
         if (!has_prev_space_ops(r)) {
             illegal_trap(r);

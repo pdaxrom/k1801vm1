@@ -13,6 +13,7 @@
 #include "dev_rl11.h"
 #include "dev_sr.h"
 #include "dev_tq11.h"
+#include "dev_tm11.h"
 #include "ubmap.h"
 #include "dev_vm1sav.h"
 #include "dev_vm1sel.h"
@@ -63,10 +64,6 @@ typedef struct {
 
 static lsi11_device_mask_t device_mask = {1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0};
 
-#ifdef ENABLE_J11_SHADOW_REGS
-static uint16_t j11_probe_shadow_regs[10];
-#endif
-
 static inline int vm2_model(const regs *r)
 {
     return (r->model == K1801VM2 || r->model == K1806VM2) ? 1 : 0;
@@ -80,85 +77,6 @@ static inline int vm1_model(const regs *r)
 static inline int vm2_halt_mode(const regs *r)
 {
     return (vm2_model(r) && (r->psw & FLAG_H)) ? 1 : 0;
-}
-
-static inline int dcj11_mode_norm(int mode)
-{
-    mode &= 03;
-    return (mode == 02) ? 0 : mode;
-}
-
-static inline int dcj11_cur_mode(word psw)
-{
-    return dcj11_mode_norm((psw >> 14) & 03);
-}
-
-static inline int dcj11_regset(word psw)
-{
-    return (psw >> 11) & 01;
-}
-
-static inline word dcj11_set_cur_mode(word psw, int mode)
-{
-    int m = dcj11_mode_norm(mode);
-    return (word)((psw & ~0140000) | ((word)(m & 03) << 14));
-}
-
-static inline word dcj11_set_prev_mode(word psw, int mode)
-{
-    int m = dcj11_mode_norm(mode);
-    return (word)((psw & ~0030000) | ((word)(m & 03) << 12));
-}
-
-static inline void dcj11_sp_mode_init(regs *r)
-{
-    int mode;
-    if (r->sp_mode_init) {
-        return;
-    }
-    for (mode = 0; mode < 4; mode++) {
-        r->sp_mode[mode] = r->r[6];
-    }
-    r->sp_mode_init = 1;
-}
-
-static inline void dcj11_regset_init(regs *r)
-{
-    int reg;
-    if (r->rset_bank_init) {
-        return;
-    }
-    for (reg = 0; reg < 6; reg++) {
-        r->rset_bank[0][reg] = r->r[reg];
-        r->rset_bank[1][reg] = r->r[reg];
-    }
-    r->rset_bank_init = 1;
-}
-
-static inline void dcj11_apply_psw(regs *r, word new_psw)
-{
-    word old_psw = r->psw;
-    int old_mode = dcj11_cur_mode(old_psw);
-    int new_mode = dcj11_cur_mode(new_psw);
-    int old_set = dcj11_regset(old_psw);
-    int new_set = dcj11_regset(new_psw);
-    int reg;
-
-    if (old_mode != new_mode) {
-        dcj11_sp_mode_init(r);
-        r->sp_mode[old_mode] = r->r[6];
-        r->r[6] = r->sp_mode[new_mode];
-    }
-
-    if (old_set != new_set) {
-        dcj11_regset_init(r);
-        for (reg = 0; reg < 6; reg++) {
-            r->rset_bank[old_set][reg] = r->r[reg];
-            r->r[reg] = r->rset_bank[new_set][reg];
-        }
-    }
-
-    r->psw = new_psw;
 }
 
 static void lsi11_reset_device_mask_for_profile(lsi11_machine_t machine)
@@ -340,25 +258,22 @@ int lsi11_device_enabled(const char *name)
    This matches your previous approach: push PSW and PC, then vector through
    000004/000006. If your core already provides a bus error trap helper, use
    that instead. */
+static inline int nxm_addr_is_iopage(paddr_t addr)
+{
+    if (addr >= 0760000 && addr <= 0777777) {
+        return 1;
+    }
+    if (addr >= 017760000 && addr <= 017777777) {
+        return 1;
+    }
+    return 0;
+}
+
 static inline void nxm_trap(regs *r, paddr_t addr)
 {
-    word old_psw = r->psw;
-    word fault_pc = r->r[7];
-    word vector_psw = 0;
-
     if (r->model == DCJ11) {
-        int io_timeout = 0;
-        if (addr <= 0177777) {
-            io_timeout = (addr >= 0160000) ? 1 : 0;
-        } else {
-            io_timeout = (addr >= 017760000 && addr <= 017777777) ? 1 : 0;
-        }
-        if (io_timeout) {
-            r->J11_CPUERR |= 0000020; /* CPUE_TMO */
-        } else {
-            r->J11_CPUERR |= 0000040; /* CPUE_NXM */
-        }
-        r->J11_CPUERR &= 0000374;
+        word cpuerr_bit = nxm_addr_is_iopage(addr) ? 0000020 : 0000040; /* TMO : NXM */
+        r->J11_CPUERR = (word)((r->J11_CPUERR | cpuerr_bit) & 0000374);
     }
 
     /* Optional trace */
@@ -411,6 +326,16 @@ static inline void nxm_trap(regs *r, paddr_t addr)
                 "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
                 r->r[0], r->r[1], r->r[2], r->r[3], r->r[4], r->r[5], r->r[6],
                 r->psw);
+        {
+            word ssr0 = 0;
+            word ssr3 = 0;
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+            ssr0 = r->mmu_ssr0;
+            ssr3 = r->mmu_ssr3;
+#endif
+            fprintf(stderr, "NOFAULT=%06o SSR0=%06o SSR3=%06o CPUERR=%06o\n",
+                    r->load_word(r, 060060), ssr0, ssr3, r->J11_CPUERR);
+        }
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
         if (split_mask) {
             r->mmu_ssr3 = saved_ssr3;
@@ -418,208 +343,8 @@ static inline void nxm_trap(regs *r, paddr_t addr)
 #endif
     }
 
-    if (r->model == DCJ11 && r->dcj11_vector_push_active) {
-        word red_old_psw = r->dcj11_vector_old_psw;
-        word red_old_pc = r->dcj11_vector_old_pc;
-        int red_old_cm = dcj11_cur_mode(red_old_psw);
-
-        /* Red-stack fallback for abort during trap/interrupt stack pushes. */
-        r->dcj11_vector_push_active = 0;
-        r->dcj11_yellow_pending = 0;
-        r->J11_CPUERR = (word)((r->J11_CPUERR | 0000004) & 0000374);
-
-        dcj11_apply_psw(r, red_old_psw);
-        r->r[7] = red_old_pc;
-
-        vector_psw = r->load_word(r, 0000006);
-        vector_psw = dcj11_set_cur_mode(vector_psw, 0);
-        vector_psw = dcj11_set_prev_mode(vector_psw, red_old_cm);
-        dcj11_apply_psw(r, vector_psw);
-
-        dcj11_sp_mode_init(r);
-        r->sp_mode[0] = 0000004;
-        r->r[6] = 0000004;
-
-        r->r[6] -= 0000002;
-        r->store_word(r, r->r[6], red_old_psw);
-        r->r[6] -= 0000002;
-        r->store_word(r, r->r[6], red_old_pc);
-        r->r[7] = r->load_word(r, 0000004);
-        r->fAbort = 1;
-        return;
-    }
-
-    vector_psw = r->load_word(r, 0000006);
-    if (r->model == DCJ11) {
-        int old_cm = dcj11_cur_mode(old_psw);
-        vector_psw = dcj11_set_cur_mode(vector_psw, 0);
-        vector_psw = dcj11_set_prev_mode(vector_psw, old_cm);
-        dcj11_apply_psw(r, vector_psw);
-    } else {
-        r->psw = vector_psw;
-    }
-
-    /*
-     * Minimal VM2/HALT stack safety:
-     * keep trap frame pushes in available HALT RAM window.
-     */
-    if (vm2_halt_mode(r)) {
-        uint32_t halt_bytes = bus_vm2_halt_ram_bytes();
-        word halt_top = (word)(halt_bytes & 0177776);
-        if (halt_top >= 0000004) {
-            if ((r->r[6] < 0000004) || (r->r[6] > halt_top)) {
-                r->r[6] = halt_top;
-            } else if (r->r[6] & 1) {
-                r->r[6] &= 0177776;
-            }
-        }
-    }
-
-    /* Match core bus-error semantics: switch to vector PSW first, then push OLDPS/OLDPC. */
-    r->r[6] -= 0000002;
-    r->store_word(r, r->r[6], old_psw);
-    r->r[6] -= 0000002;
-    r->store_word(r, r->r[6], fault_pc);
-
-    r->r[7] = r->load_word(r, 0000004);
-
-    r->fAbort = 1;
+    core_bus_error_trap(r);
 }
-
-#ifdef ENABLE_J11_SHADOW_REGS
-static inline int j11_probe_shadow_to_a18(paddr_t addr, paddr_t *a18_out)
-{
-    if (!a18_out) {
-        return 0;
-    }
-
-    if (addr >= 017760000 && addr <= 017777777) {
-        *a18_out = (addr & 0777777);
-        return 1;
-    }
-    if (addr >= 0760000 && addr <= 0777777) {
-        *a18_out = addr;
-        return 1;
-    }
-    return 0;
-}
-
-static inline int j11_probe_shadow_index18(paddr_t a18_even)
-{
-    switch (a18_even & 0777776) {
-    case 0772000:
-        return 0;
-    case 0772474:
-        return 1;
-    case 0776350:
-        return 2;
-    case 0776450:
-        return 3;
-    case 0776750:
-        return 4;
-    case 0777754:
-        return 5;
-    case 0777756:
-        return 6;
-    case 0777760:
-        return 7;
-    case 0777762:
-        return 8;
-    case 0777764:
-        return 9;
-    default:
-        return -1;
-    }
-}
-
-static inline int j11_probe_shadow_lookup(paddr_t addr, int *idx, int *shift)
-{
-    paddr_t a18 = 0;
-    int i;
-
-    if (!j11_probe_shadow_to_a18(addr, &a18)) {
-        return 0;
-    }
-    i = j11_probe_shadow_index18(a18);
-    if (i < 0) {
-        return 0;
-    }
-    if (idx) {
-        *idx = i;
-    }
-    if (shift) {
-        *shift = (a18 & 1) ? 8 : 0;
-    }
-    return 1;
-}
-
-static inline void j11_probe_shadow_reset(void)
-{
-    memset(j11_probe_shadow_regs, 0, sizeof(j11_probe_shadow_regs));
-}
-
-static inline int j11_probe_shadow_hit(regs *r, paddr_t addr)
-{
-    int idx;
-
-    if (machine_profile != LSI11_MACHINE_1184) {
-        return 0;
-    }
-    if (r->model != DCJ11) {
-        return 0;
-    }
-
-    return j11_probe_shadow_lookup(addr, &idx, NULL);
-}
-
-static inline byte j11_probe_shadow_read_byte(paddr_t addr)
-{
-    int idx = -1;
-    int shift = 0;
-
-    if (j11_probe_shadow_lookup(addr, &idx, &shift)) {
-        return (byte)((j11_probe_shadow_regs[idx] >> shift) & 000377);
-    }
-    return 000000;
-}
-
-static inline word j11_probe_shadow_read_word(paddr_t addr)
-{
-    int idx = -1;
-
-    if (j11_probe_shadow_lookup(addr, &idx, NULL)) {
-        return j11_probe_shadow_regs[idx];
-    }
-    return 000000;
-}
-
-static inline void j11_probe_shadow_write_byte(paddr_t addr, byte v)
-{
-    int idx = -1;
-    int shift = 0;
-    uint16_t mask;
-    uint16_t cur;
-
-    if (!j11_probe_shadow_lookup(addr, &idx, &shift)) {
-        return;
-    }
-
-    mask = (uint16_t)(000377u << shift);
-    cur = j11_probe_shadow_regs[idx];
-    cur = (uint16_t)((cur & ~mask) | (((uint16_t)v << shift) & mask));
-    j11_probe_shadow_regs[idx] = cur;
-}
-
-static inline void j11_probe_shadow_write_word(paddr_t addr, word v)
-{
-    int idx = -1;
-
-    if (!j11_probe_shadow_lookup(addr, &idx, NULL)) {
-        return;
-    }
-    j11_probe_shadow_regs[idx] = (uint16_t)v;
-}
-#endif
 
 /* ---------- bus callbacks for core ---------- */
 
@@ -629,11 +354,6 @@ static byte __not_in_flash_func(core_load_byte)(regs *r, word addr)
 static byte core_load_byte(regs *r, word addr)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
-        return j11_probe_shadow_read_byte((paddr_t)addr);
-    }
-#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
@@ -655,12 +375,6 @@ static void __not_in_flash_func(core_store_byte)(regs *r, word addr, byte v)
 static void core_store_byte(regs *r, word addr, byte v)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
-        j11_probe_shadow_write_byte((paddr_t)addr, v);
-        return;
-    }
-#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
@@ -683,12 +397,6 @@ static word __not_in_flash_func(core_load_word)(regs *r, word addr)
 static word core_load_word(regs *r, word addr)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
-            j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
-        return j11_probe_shadow_read_word((paddr_t)addr);
-    }
-#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         uint16_t a1 = (uint16_t)(addr + 1);
@@ -712,13 +420,6 @@ static void __not_in_flash_func(core_store_word)(regs *r, word addr, word v)
 static void core_store_word(regs *r, word addr, word v)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
-            j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
-        j11_probe_shadow_write_word((paddr_t)addr, v);
-        return;
-    }
-#endif
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         uint16_t a1 = (uint16_t)(addr + 1);
@@ -743,11 +444,6 @@ static byte __not_in_flash_func(core_load_byte_pa)(regs *r, dword addr)
 static byte core_load_byte_pa(regs *r, dword addr)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
-        return j11_probe_shadow_read_byte((paddr_t)addr);
-    }
-#endif
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
         return 0;
@@ -761,12 +457,6 @@ static void __not_in_flash_func(core_store_byte_pa)(regs *r, dword addr, byte v)
 static void core_store_byte_pa(regs *r, dword addr, byte v)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr)) {
-        j11_probe_shadow_write_byte((paddr_t)addr, v);
-        return;
-    }
-#endif
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
         return;
@@ -780,12 +470,6 @@ static word __not_in_flash_func(core_load_word_pa)(regs *r, dword addr)
 static word core_load_word_pa(regs *r, dword addr)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
-            j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
-        return j11_probe_shadow_read_word((paddr_t)addr);
-    }
-#endif
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
         return 0;
@@ -799,13 +483,6 @@ static void __not_in_flash_func(core_store_word_pa)(regs *r, dword addr, word v)
 static void core_store_word_pa(regs *r, dword addr, word v)
 #endif
 {
-#ifdef ENABLE_J11_SHADOW_REGS
-    if (j11_probe_shadow_hit(r, (paddr_t)addr) &&
-            j11_probe_shadow_hit(r, (paddr_t)(addr + 1))) {
-        j11_probe_shadow_write_word((paddr_t)addr, v);
-        return;
-    }
-#endif
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
         return;
@@ -820,9 +497,6 @@ static int impl_init(regs *r)
 
     /* init bus RAM; devices register their I/O in *_init() */
     bus_init();
-#ifdef ENABLE_J11_SHADOW_REGS
-    j11_probe_shadow_reset();
-#endif
     dl11_set_alias(dl11_alias_on);
     if (ubmap_init() != 0) {
         return -1;
@@ -866,6 +540,9 @@ static int impl_init(regs *r)
     if (device_mask.tq11 && tq11_init() != 0) {
         return -1;
     }
+    if (tm11_init() != 0) {
+        return -1;
+    }
     if (device_mask.lp11 && lp11_init() != 0) {
         return -1;
     }
@@ -885,9 +562,6 @@ static int impl_init(regs *r)
 static void impl_reset(regs *r)
 {
     (void)r;
-#ifdef ENABLE_J11_SHADOW_REGS
-    j11_probe_shadow_reset();
-#endif
     ubmap_reset();
     if (r->model == DCJ11) {
         if (machine_profile == LSI11_MACHINE_1184) {
@@ -921,6 +595,7 @@ static void impl_reset(regs *r)
     if (device_mask.tq11) {
         tq11_reset();
     }
+    tm11_reset();
     if (device_mask.lp11) {
         lp11_reset();
     }
@@ -1016,6 +691,7 @@ void lsi11_poll_devices_steps(uint32_t cpu_steps)
     if (device_mask.lp11) {
         lp11_poll();
     }
+    tm11_poll();
     io_lock_release(irqstate);
 
     /* Disk controllers: poll outside spinlock.

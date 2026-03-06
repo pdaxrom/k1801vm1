@@ -5,6 +5,7 @@
 #include "irq.h"
 #include "irq_latch.h"
 #include "emu_file.h"
+#include "ubmap.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -245,6 +246,11 @@ static void rl_rhdr_advance_word(void)
 
 static paddr_t rl_pa(uint16_t ba, uint8_t ext)
 {
+    /* On 11/84 DMA is presented on 18-bit UBA and translated by UBMAP. */
+    if (bus_machine() == BUS_MACHINE_PDP1184) {
+        uint32_t uba = (((uint32_t)(ext & 03u) << 16) | (uint32_t)ba) & 000777777u;
+        return ubmap_map_addr(uba);
+    }
     return (paddr_t)(((uint32_t)(ext & RLBAE_IMP) << 16) | ba);
 }
 
@@ -837,10 +843,6 @@ static void rl_write8(uint16_t addr, uint8_t b)
     uint16_t old = 0;
     uint16_t v;
 
-    if (base != RLCS && !rl_l.done) {
-        return;
-    }
-
     if (base == RLCS) {
         old = rlcs;
     } else if (base == RLBA) {
@@ -879,7 +881,12 @@ static void rl_write8(uint16_t addr, uint8_t b)
         if ((b & RLCS_CRDY) == 0 && rl_l.done) {
             irq_latch_sw_clear_done(&rl_l);
             rl_busy = 1;
-            rl_ready_ns = now_ns() + 10000000ull; /* 10ms delay */
+            /*
+             * Autoconfig probes expect RL11 completion/IRQ almost immediately.
+             * A fixed wall-clock 10ms delay causes "didn't interrupt" during
+             * BSD 2.9.1 device probing on fast hosts.
+             */
+            rl_ready_ns = now_ns();
             rl_clear_errors();
             rl_rhdr_reset_fifo();
             if (rl_debug) {
