@@ -36,6 +36,7 @@ COMMON_SRCS := \
 
 MAIN_SRCS := \
   main.c \
+  options.c \
   adapter_core.c
 
 COMMON_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/lsi11/,$(COMMON_SRCS:.c=.o))

@@ -16,6 +16,7 @@
 #include "ubmap.h"
 #include "dev_vm1sel.h"
 #include "dev_vm1sav.h"
+#include "options.h"
 
 /* core headers (read-only) */
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
@@ -32,16 +33,7 @@
 #define VM2_VECTOR_PSW         0000400u
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define RL11_MAX_DRIVES 4
 #define VM2_TX_IMM(ch) 0112711u, (uint16_t)(uint8_t)(ch)
-
-enum {
-    BOOT_DEV_NONE = 0,
-    BOOT_DEV_RK,
-    BOOT_DEV_RH,
-    BOOT_DEV_RL,
-    BOOT_DEV_TQ
-};
 
 /*
  * VM2 HALT-bank runtime stub:
@@ -113,124 +105,6 @@ static int vm2_install_halt_stub(char *err, size_t err_len)
     }
 
     return 0;
-}
-
-static int parse_cpu_model(const char *name, byte *model)
-{
-    if (!name || !model) {
-        return -1;
-    }
-
-    if (!strcmp(name, "11/84")) {
-        *model = DCJ11;
-        return 0;
-    }
-    if (!strcmp(name, "11/34")) {
-        *model = K1801VM2;
-        return 0;
-    }
-    if (!strcmp(name, "dcj11") || !strcmp(name, "11/03")) {
-        *model = DCJ11;
-        return 0;
-    }
-    if (!strcmp(name, "k1801vm1") || !strcmp(name, "vm1")) {
-        *model = K1801VM1;
-        return 0;
-    }
-    if (!strcmp(name, "k1801vm2") || !strcmp(name, "vm2")) {
-        *model = K1801VM2;
-        return 0;
-    }
-    if (!strcmp(name, "k1806vm2")) {
-        *model = K1806VM2;
-        return 0;
-    }
-
-    return -1;
-}
-
-static int parse_rh_mode(const char *name, rh11_mode_t *mode_out)
-{
-    if (!name || !mode_out) {
-        return -1;
-    }
-
-    if (!strcmp(name, "rh11")) {
-        *mode_out = RH11_MODE_RH11;
-        return 0;
-    }
-    if (!strcmp(name, "rh70")) {
-        *mode_out = RH11_MODE_RH70;
-        return 0;
-    }
-
-    return -1;
-}
-
-static int parse_boot_device(const char *name, int *kind_out, int *unit_out)
-{
-    const char *suffix = NULL;
-    int kind = BOOT_DEV_NONE;
-    unsigned max_units = 0;
-    unsigned long unit = 0;
-    char *endp = NULL;
-
-    if (!name || !kind_out || !unit_out) {
-        return -1;
-    }
-
-    if (!strncmp(name, "rk", 2)) {
-        kind = BOOT_DEV_RK;
-        suffix = name + 2;
-        max_units = RK11_MAX_DRIVES;
-    } else if (!strncmp(name, "rh", 2) || !strncmp(name, "hk", 2)) {
-        kind = BOOT_DEV_RH;
-        suffix = name + 2;
-        max_units = RH11_MAX_DRIVES;
-    } else if (!strncmp(name, "rl", 2)) {
-        kind = BOOT_DEV_RL;
-        suffix = name + 2;
-        max_units = RL11_MAX_DRIVES;
-    } else if (!strncmp(name, "tq", 2)) {
-        kind = BOOT_DEV_TQ;
-        suffix = name + 2;
-        max_units = TQ11_MAX_UNITS;
-    } else {
-        return -1;
-    }
-
-    if (!suffix || *suffix == '\0') {
-        unit = 0;
-    } else {
-        unit = strtoul(suffix, &endp, 10);
-        if (!endp || *endp != '\0') {
-            return -1;
-        }
-    }
-
-    if (unit >= max_units) {
-        return -1;
-    }
-
-    *kind_out = kind;
-    *unit_out = (int)unit;
-    return 0;
-}
-
-static const char *cpu_model_name(byte model)
-{
-    switch (model) {
-    case K1801VM1:
-        return "k1801vm1";
-    case K1801VM2:
-        return "k1801vm2";
-    case K1806VM2:
-        return "k1806vm2";
-    case DCJ11:
-        return "dcj11";
-    default:
-        return "unknown";
-    }
 }
 
 #define MMR3_BME 0000040u
@@ -535,149 +409,10 @@ static int preload_rt11_boot_block(const char *path)
     return 0;
 }
 
-static void usage(const char *argv0)
-{
-#if defined(LSI11_TARGET_PDP1184)
-    const char *target = "pdp1184";
-#else
-    const char *target = "lsi11";
-#endif
-
-    fprintf(stderr,
-            "Usage:\n"
-            "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-xp <rm05.img>] [-rl <rl.img>] "
-            "[-tq <tk50.tap>] "
-            "[-boot <dev>|-bootcopy|-bootrt11|-boottq] [-cpu <model>]\n"
-            "\n"
-            "Target profile:\n"
-            "  %s\n"
-            "\n"
-            "Options:\n"
-#if defined(LSI11_TARGET_PDP1184)
-            "  -cpu <model>    CPU model: dcj11 (default), 11/03, 11/84, 11/34, "
-            "k1801vm1, k1801vm2, k1806vm2\n"
-#else
-            "  -cpu <model>    CPU model: dcj11 (default), 11/03, "
-            "k1801vm1, k1801vm2, k1806vm2\n"
-#endif
-            "  -force-fis      Enable FIS for unsupported CPUs\n"
-            "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
-            "  -rk <path>      Attach RK05 image (repeatable: rk0,rk1,...)\n"
-            "  -rh <path>      Attach RH11 (RK06/RK07) image (repeatable: rh0,rh1,...)\n"
-            "  -xp <path>      Attach XP/RP RM05 image (repeatable: xp0,xp1,...)\n"
-            "  -rp <path>      Alias for -xp\n"
-            "  -rh-mode <m>    RH controller mode: rh11 (default) | rh70\n"
-            "  -rl <path>      Attach RL image (repeatable: rl0,rl1,...; auto RL01/RL02)\n"
-            "  -rl01 <path>    Attach image as RL01 (repeatable)\n"
-            "  -rl02 <path>    Attach image as RL02 (repeatable)\n"
-            "  -tq <path>      Attach TK50 TMSCP tape image (.tap) (repeatable: tq0,tq1,...)\n"
-            "  -dz <port>      Enable DZ11 and listen for line connections on TCP <port>\n"
-            "  -disable-dl     Disable DL11\n"
-            "  -disable-dz     Disable DZ11\n"
-            "  -disable-kw     Disable KW11\n"
-            "  -enable-kw11-l  Enable KW11-L decode\n"
-            "  -disable-kw11-l Disable KW11-L decode\n"
-            "  -enable-kw11-p  Enable KW11-P decode\n"
-            "  -disable-kw11-p Disable KW11-P decode\n"
-            "  -disable-lp     Disable LP11\n"
-            "  -disable-rk     Disable RK11\n"
-            "  -disable-rh     Disable RH11\n"
-            "  -disable-xp     Disable XP/RP controller\n"
-            "  -disable-rl     Disable RL11\n"
-            "  -disable-tq     Disable TQ11/TMSCP tape controller\n"
-            "  -disable-sr     Disable SR\n"
-            "  -boot <dev>     Boot selected unit: rkN|rhN|hkN|rlN|tqN (N defaults to 0)\n"
-            "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
-            "000000\n"
-            "  -bootrt11       Run built-in RK/RH/RL bootstrap for the selected "
-            "controller\n"
-            "  -boottq         Run built-in TQ/TMSCP bootstrap at 016000 for unit 0\n"
-            "  -trace          Trace each instruction\n"
-            "  -trace-after N  Start tracing only after N executed instructions\n"
-            "  -traceregs      With -trace, also dump registers\n"
-            "  -traceirq       Trace delivered IRQ vectors\n"
-            "  -tracenxm       Trace NXM traps\n"
-            "  -tty7b          DL11 console 7-bit mode (default)\n"
-            "  -tty8b          DL11 console 8-bit mode\n"
-            "  -nl-to-cr       Map host newline (\\n) to CR (\\r) for input\n"
-            "  -exit-on-abort  Exit emulator on HALT/abort\n"
-            "  -steps N        Emulate N steps then exit\n"
-            "  -check-config   Validate machine config and exit\n",
-            argv0, target);
-    fprintf(stderr,
-            "  -load <file>    Load binary file into RAM\n"
-            "  -addr <oct>     Load address (octal) for -load (default 0)\n"
-            "  -pc <oct>       Set initial PC (R7) to octal address\n"
-            "  -sr <oct>       Set SR switch register (0177570) value\n"
-#if defined(LSI11_TARGET_PDP1184)
-            "  -ram <kb>       RAM size in KB (default 4096, must be multiple of 4)\n"
-            "  --mem-kb <kb>   Same as -ram (pdp1184 only)\n"
-            "  -dl11-alias     Enable DL11 alias 0176500..0176507\n"
-            "  -no-dl11-alias  Disable DL11 alias 0176500..0176507 (default)\n");
-#else
-            "  -dl11-alias     Keep DL11 alias enabled (default)\n"
-            "  -no-dl11-alias  Disable DL11 alias (non-standard for this target)\n");
-#endif
-}
-
 int main(int argc, char **argv)
 {
-    const char *rk_path[RK11_MAX_DRIVES] = {0};
-    const char *rh_path[RH11_MAX_DRIVES] = {0};
-    const char *xp_path[XP_MAX_DRIVES] = {0};
-    const char *tq_path[TQ11_MAX_UNITS] = {0};
-    struct {
-        const char *path;
-        int type;
-    } rl_path[RL11_MAX_DRIVES];
-    int rk_count = 0;
-    int rh_count = 0;
-    int xp_count = 0;
-    int rl_count = 0;
-    int tq_count = 0;
-    const char *load_path = NULL;
-    int do_bootcopy = 0;
-    int do_bootrt11 = 0;
-    int do_boottq = 0;
-    int do_boot = 0;
-    int boot_kind = BOOT_DEV_NONE;
-    int boot_unit = 0;
-    long load_addr = 0;
-    long start_pc = -1;
-    long sr_value = -1;
-    long ram_kb_arg = -1;
-    int force_dl11_alias = -1;
-    int disable_dl = 0;
-    int disable_dz = 0;
-    int disable_kw = 0;
-    int kw11_l_override = -1;
-    int kw11_p_override = -1;
-    int disable_lp = 0;
-    int disable_rk = 0;
-    int disable_rh = 0;
-    int disable_xp = 0;
-    int disable_rl = 0;
-    int disable_tq = 0;
-    int disable_sr = 0;
-    long dz_port = -1;
-    int dz_port_set = 0;
-#if defined(LSI11_TARGET_PDP1184)
-    byte cpu_model = DCJ11;
-#else
-    byte cpu_model = DCJ11;
-#endif
-    int force_fis = 0;
-    int force_fp11 = 0;
-    int trace = 0;
-    int trace_regs = 0;
-    long trace_after = -1;
-    long max_steps = -1;
-    int dl11_8bit = 0;
-    int do_nl_to_cr = 0;
-    int exit_on_abort = 0;
-    int check_config_only = 0;
+    lsi11_options_t opts;
     int trace_loopvals = 0;
-    rh11_mode_t rh_mode = RH11_MODE_RH11;
     char cfg_err[160] = {0};
 
 #if defined(LSI11_TARGET_PDP1184)
@@ -686,165 +421,19 @@ int main(int argc, char **argv)
     const lsi11_machine_t machine_kind = LSI11_MACHINE_1104;
 #endif
 
-    if (argc < 2) {
-        usage(argv[0]);
+    options_init(&opts);
+    if (options_parse(&opts, argc, argv) != 0) {
         return 2;
     }
 
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-rk") && i + 1 < argc) {
-            if (rk_count >= RK11_MAX_DRIVES) {
-                fprintf(stderr, "Too many -rk images (max %d)\n", RK11_MAX_DRIVES);
-                return 2;
-            }
-            rk_path[rk_count++] = argv[++i];
-        } else if (!strcmp(argv[i], "-rh") && i + 1 < argc) {
-            if (rh_count >= RH11_MAX_DRIVES) {
-                fprintf(stderr, "Too many -rh images (max %d)\n", RH11_MAX_DRIVES);
-                return 2;
-            }
-            rh_path[rh_count++] = argv[++i];
-        } else if ((!strcmp(argv[i], "-xp") || !strcmp(argv[i], "-rp")) && i + 1 < argc) {
-            if (xp_count >= XP_MAX_DRIVES) {
-                fprintf(stderr, "Too many -xp images (max %d)\n", XP_MAX_DRIVES);
-                return 2;
-            }
-            xp_path[xp_count++] = argv[++i];
-        } else if (!strcmp(argv[i], "-rh-mode") && i + 1 < argc) {
-            if (parse_rh_mode(argv[++i], &rh_mode) != 0) {
-                fprintf(stderr, "Invalid -rh-mode: %s (expected rh11|rh70)\n", argv[i]);
-                return 2;
-            }
-        } else if (!strcmp(argv[i], "-rl") && i + 1 < argc) {
-            if (rl_count >= RL11_MAX_DRIVES) {
-                fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
-                return 2;
-            }
-            rl_path[rl_count].path = argv[++i];
-            rl_path[rl_count].type = RL11_TYPE_AUTO;
-            rl_count++;
-        } else if (!strcmp(argv[i], "-rl01") && i + 1 < argc) {
-            if (rl_count >= RL11_MAX_DRIVES) {
-                fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
-                return 2;
-            }
-            rl_path[rl_count].path = argv[++i];
-            rl_path[rl_count].type = RL11_TYPE_RL01;
-            rl_count++;
-        } else if (!strcmp(argv[i], "-rl02") && i + 1 < argc) {
-            if (rl_count >= RL11_MAX_DRIVES) {
-                fprintf(stderr, "Too many -rl images (max %d)\n", RL11_MAX_DRIVES);
-                return 2;
-            }
-            rl_path[rl_count].path = argv[++i];
-            rl_path[rl_count].type = RL11_TYPE_RL02;
-            rl_count++;
-        } else if (!strcmp(argv[i], "-tq") && i + 1 < argc) {
-            if (tq_count >= TQ11_MAX_UNITS) {
-                fprintf(stderr, "Too many -tq images (max %d)\n", TQ11_MAX_UNITS);
-                return 2;
-            }
-            tq_path[tq_count++] = argv[++i];
-        } else if (!strcmp(argv[i], "-dz") && i + 1 < argc) {
-            dz_port = strtol(argv[++i], NULL, 10);
-            dz_port_set = 1;
-        } else if (!strcmp(argv[i], "-disable-dl")) {
-            disable_dl = 1;
-        } else if (!strcmp(argv[i], "-disable-dz")) {
-            disable_dz = 1;
-        } else if (!strcmp(argv[i], "-disable-kw")) {
-            disable_kw = 1;
-        } else if (!strcmp(argv[i], "-enable-kw11-l")) {
-            kw11_l_override = 1;
-        } else if (!strcmp(argv[i], "-disable-kw11-l")) {
-            kw11_l_override = 0;
-        } else if (!strcmp(argv[i], "-enable-kw11-p")) {
-            kw11_p_override = 1;
-        } else if (!strcmp(argv[i], "-disable-kw11-p")) {
-            kw11_p_override = 0;
-        } else if (!strcmp(argv[i], "-disable-lp")) {
-            disable_lp = 1;
-        } else if (!strcmp(argv[i], "-disable-rk")) {
-            disable_rk = 1;
-        } else if (!strcmp(argv[i], "-disable-rh")) {
-            disable_rh = 1;
-        } else if (!strcmp(argv[i], "-disable-xp")) {
-            disable_xp = 1;
-        } else if (!strcmp(argv[i], "-disable-rl")) {
-            disable_rl = 1;
-        } else if (!strcmp(argv[i], "-disable-tq")) {
-            disable_tq = 1;
-        } else if (!strcmp(argv[i], "-disable-sr")) {
-            disable_sr = 1;
-        } else if (!strcmp(argv[i], "-bootcopy")) {
-            do_bootcopy = 1;
-        } else if (!strcmp(argv[i], "-bootrt11")) {
-            do_bootrt11 = 1;
-        } else if (!strcmp(argv[i], "-boottq")) {
-            do_boottq = 1;
-        } else if (!strcmp(argv[i], "-boot") && i + 1 < argc) {
-            if (parse_boot_device(argv[++i], &boot_kind, &boot_unit) != 0) {
-                fprintf(stderr, "Invalid -boot device: %s\n", argv[i]);
-                return 2;
-            }
-            do_boot = 1;
-        } else if (!strcmp(argv[i], "-traceirq")) {
-            lsi11_set_trace_irq(1);
-        } else if (!strcmp(argv[i], "-tracenxm")) {
-            lsi11_set_trace_nxm(1);
-        } else if (!strcmp(argv[i], "-trace")) {
-            trace = 1;
-        } else if (!strcmp(argv[i], "-trace-after") && i + 1 < argc) {
-            trace_after = strtol(argv[++i], NULL, 10);
-            trace = 1;
-        } else if (!strcmp(argv[i], "-traceregs")) {
-            trace = 1;
-            trace_regs = 1;
-        } else if (!strcmp(argv[i], "-tty7b")) {
-            dl11_8bit = 0;
-        } else if (!strcmp(argv[i], "-tty8b")) {
-            dl11_8bit = 1;
-        } else if (!strcmp(argv[i], "-nl-to-cr")) {
-            do_nl_to_cr = 1;
-        } else if (!strcmp(argv[i], "-exit-on-abort")) {
-            exit_on_abort = 1;
-        } else if (!strcmp(argv[i], "-check-config")) {
-            check_config_only = 1;
-        } else if (!strcmp(argv[i], "-steps") && i + 1 < argc) {
-            max_steps = strtol(argv[++i], NULL, 10);
-        } else if (!strcmp(argv[i], "-load") && i + 1 < argc) {
-            load_path = argv[++i];
-        } else if (!strcmp(argv[i], "-addr") && i + 1 < argc) {
-            load_addr = strtol(argv[++i], NULL, 8);
-        } else if (!strcmp(argv[i], "-pc") && i + 1 < argc) {
-            start_pc = strtol(argv[++i], NULL, 8);
-        } else if (!strcmp(argv[i], "-sr") && i + 1 < argc) {
-            sr_value = strtol(argv[++i], NULL, 8);
-        } else if (!strcmp(argv[i], "-ram") && i + 1 < argc) {
-            ram_kb_arg = strtol(argv[++i], NULL, 10);
-        } else if (!strcmp(argv[i], "--mem-kb") && i + 1 < argc) {
-            ram_kb_arg = strtol(argv[++i], NULL, 10);
-        } else if (!strcmp(argv[i], "-dl11-alias")) {
-            force_dl11_alias = 1;
-        } else if (!strcmp(argv[i], "-no-dl11-alias")) {
-            force_dl11_alias = 0;
-        } else if (!strcmp(argv[i], "-cpu") && i + 1 < argc) {
-            if (parse_cpu_model(argv[++i], &cpu_model) != 0) {
-                fprintf(stderr, "Unknown CPU model: %s\n", argv[i]);
-                usage(argv[0]);
-                return 2;
-            }
-        } else if (!strcmp(argv[i], "-force-fis")) {
-            force_fis = 1;
-        } else if (!strcmp(argv[i], "-force-fp11")) {
-            force_fp11 = 1;
-        } else {
-            usage(argv[0]);
-            return 2;
-        }
+    if (opts.trace_irq) {
+        lsi11_set_trace_irq(1);
+    }
+    if (opts.trace_nxm) {
+        lsi11_set_trace_nxm(1);
     }
 
-    if (rh11_set_mode(rh_mode) != 0) {
+    if (rh11_set_mode(opts.rh_mode) != 0) {
         fprintf(stderr, "RH11 mode configuration error\n");
         return 2;
     }
@@ -852,23 +441,23 @@ int main(int argc, char **argv)
     trace_loopvals = (getenv("LSI11_TRACE_LOOPVALS") != NULL) ? 1 : 0;
 
 #if !defined(LSI11_TARGET_PDP1184)
-    if (ram_kb_arg >= 0) {
+    if (opts.ram_kb_arg >= 0) {
         fprintf(stderr,
                 "This lsi11 target is fixed 56KB RAM; -ram is not supported.\n");
         return 2;
     }
 #endif
 
-    if (ram_kb_arg < 0) {
-        ram_kb_arg = 0;
+    if (opts.ram_kb_arg < 0) {
+        opts.ram_kb_arg = 0;
     }
 
-    if (lsi11_machine_configure(machine_kind, (uint32_t)ram_kb_arg, cfg_err,
+    if (lsi11_machine_configure(machine_kind, (uint32_t)opts.ram_kb_arg, cfg_err,
                                 sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Machine configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (cpu_is_vm2(cpu_model)) {
+    if (cpu_is_vm2(opts.cpu_model)) {
         if (bus_vm2_configure(BUS_VM2_DEFAULT_USER_RAM_BYTES,
                               VM2_MIN_HALT_RAM_BYTES, cfg_err,
                               sizeof(cfg_err)) != 0) {
@@ -876,11 +465,11 @@ int main(int argc, char **argv)
             return 2;
         }
     }
-    if (force_dl11_alias >= 0) {
-        lsi11_set_dl11_alias(force_dl11_alias);
+    if (opts.force_dl11_alias >= 0) {
+        lsi11_set_dl11_alias(opts.force_dl11_alias);
     }
-    if (dz_port_set &&
-            dz11_set_listen_port((int)dz_port, cfg_err, sizeof(cfg_err)) != 0) {
+    if (opts.dz_port_set &&
+            dz11_set_listen_port((int)opts.dz_port, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "DZ11 configuration error: %s\n", cfg_err);
         return 2;
     }
@@ -889,11 +478,11 @@ int main(int argc, char **argv)
         int kw11_l_on = 1;
         int kw11_p_on = 0;
 
-        if (kw11_l_override >= 0) {
-            kw11_l_on = kw11_l_override;
+        if (opts.kw11_l_override >= 0) {
+            kw11_l_on = opts.kw11_l_override;
         }
-        if (kw11_p_override >= 0) {
-            kw11_p_on = kw11_p_override;
+        if (opts.kw11_p_override >= 0) {
+            kw11_p_on = opts.kw11_p_override;
         }
         kw11_set_visibility(kw11_l_on, kw11_p_on);
         if (getenv("LSI11_KW11_REALTIME") != NULL) {
@@ -903,7 +492,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (cpu_model == K1801VM1) {
+    if (opts.cpu_model == K1801VM1) {
         if (lsi11_set_device_enabled("vm1sel", 1, cfg_err, sizeof(cfg_err)) != 0 ||
                 lsi11_set_device_enabled("vm1sav", 1, cfg_err,
                                          sizeof(cfg_err)) != 0) {
@@ -919,116 +508,117 @@ int main(int argc, char **argv)
         }
     }
 
-    if (disable_dl &&
+    if (opts.disable_dl &&
             lsi11_set_device_enabled("dl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_dz &&
+    if (opts.disable_dz &&
             lsi11_set_device_enabled("dz11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_kw &&
+    if (opts.disable_kw &&
             lsi11_set_device_enabled("kw11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_lp &&
+    if (opts.disable_lp &&
             lsi11_set_device_enabled("lp11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_rk &&
+    if (opts.disable_rk &&
             lsi11_set_device_enabled("rk11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_rh &&
+    if (opts.disable_rh &&
             lsi11_set_device_enabled("rh11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_xp &&
+    if (opts.disable_xp &&
             lsi11_set_device_enabled("xp11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_rl &&
+    if (opts.disable_rl &&
             lsi11_set_device_enabled("rl11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_tq &&
+    if (opts.disable_tq &&
             lsi11_set_device_enabled("tq11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (tq_count > 0 && !disable_tq &&
+    if (opts.tq_count > 0 && !opts.disable_tq &&
             lsi11_set_device_enabled("tq11", 1, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (xp_count > 0 && !disable_xp &&
+    if (opts.xp_count > 0 && !opts.disable_xp &&
             lsi11_set_device_enabled("xp11", 1, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (disable_sr &&
+    if (opts.disable_sr &&
             lsi11_set_device_enabled("sr", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (dz_port_set && !disable_dz &&
+    if (opts.dz_port_set && !opts.disable_dz &&
             lsi11_set_device_enabled("dz11", 1, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
-    if (rk_count > 0 && !lsi11_device_enabled("rk11")) {
+    if (opts.rk_count > 0 && !lsi11_device_enabled("rk11")) {
         fprintf(stderr, "-rk is not allowed with -disable-rk\n");
         return 2;
     }
-    if (dz_port_set && (dz_port > 65535 || dz_port <= 0)) {
+    if (opts.dz_port_set && (opts.dz_port > 65535 || opts.dz_port <= 0)) {
         fprintf(stderr, "-dz requires TCP port in range 1..65535\n");
         return 2;
     }
-    if (dz_port_set && !lsi11_device_enabled("dz11")) {
+    if (opts.dz_port_set && !lsi11_device_enabled("dz11")) {
         fprintf(stderr, "-dz is not allowed with -disable-dz\n");
         return 2;
     }
-    if (rh_count > 0 && !lsi11_device_enabled("rh11")) {
+    if (opts.rh_count > 0 && !lsi11_device_enabled("rh11")) {
         fprintf(stderr, "-rh is not allowed with -disable-rh\n");
         return 2;
     }
-    if (xp_count > 0 && !lsi11_device_enabled("xp11")) {
+    if (opts.xp_count > 0 && !lsi11_device_enabled("xp11")) {
         fprintf(stderr, "-xp/-rp is not allowed with -disable-xp\n");
         return 2;
     }
-    if (rl_count > 0 && !lsi11_device_enabled("rl11")) {
+    if (opts.rl_count > 0 && !lsi11_device_enabled("rl11")) {
         fprintf(stderr, "-rl/-rl01/-rl02 is not allowed with -disable-rl\n");
         return 2;
     }
-    if (tq_count > 0 && !lsi11_device_enabled("tq11")) {
+    if (opts.tq_count > 0 && !lsi11_device_enabled("tq11")) {
         fprintf(stderr, "-tq is not allowed with -disable-tq\n");
         return 2;
     }
-    if (do_boottq && tq_count == 0) {
+    if (opts.do_boottq && opts.tq_count == 0) {
         fprintf(stderr, "-boottq requires -tq <image>\n");
         return 2;
     }
-    if (do_boot && (do_bootcopy || do_bootrt11 || do_boottq)) {
+    if (opts.do_boot && (opts.do_bootcopy || opts.do_bootrt11 || opts.do_boottq)) {
         fprintf(stderr, "-boot cannot be combined with -bootcopy/-bootrt11/-boottq\n");
         return 2;
     }
-    if (do_boot) {
-        switch (boot_kind) {
+    if (opts.do_boot) {
+        switch (opts.boot_kind) {
         case BOOT_DEV_RK:
             if (!lsi11_device_enabled("rk11")) {
                 fprintf(stderr, "-boot rk* requires RK11 enabled\n");
                 return 2;
             }
-            if (boot_unit >= rk_count || !rk_path[boot_unit]) {
-                fprintf(stderr, "-boot rk%o requires matching -rk attachment\n", boot_unit);
+            if (opts.boot_unit >= opts.rk_count || !opts.rk_path[opts.boot_unit]) {
+                fprintf(stderr, "-boot rk%o requires matching -rk attachment\n",
+                        opts.boot_unit);
                 return 2;
             }
             break;
@@ -1037,8 +627,9 @@ int main(int argc, char **argv)
                 fprintf(stderr, "-boot rh*/hk* requires RH11 enabled\n");
                 return 2;
             }
-            if (boot_unit >= rh_count || !rh_path[boot_unit]) {
-                fprintf(stderr, "-boot rh%o requires matching -rh attachment\n", boot_unit);
+            if (opts.boot_unit >= opts.rh_count || !opts.rh_path[opts.boot_unit]) {
+                fprintf(stderr, "-boot rh%o requires matching -rh attachment\n",
+                        opts.boot_unit);
                 return 2;
             }
             break;
@@ -1047,8 +638,9 @@ int main(int argc, char **argv)
                 fprintf(stderr, "-boot rl* requires RL11 enabled\n");
                 return 2;
             }
-            if (boot_unit >= rl_count || !rl_path[boot_unit].path) {
-                fprintf(stderr, "-boot rl%o requires matching -rl attachment\n", boot_unit);
+            if (opts.boot_unit >= opts.rl_count || !opts.rl_path[opts.boot_unit].path) {
+                fprintf(stderr, "-boot rl%o requires matching -rl attachment\n",
+                        opts.boot_unit);
                 return 2;
             }
             break;
@@ -1057,8 +649,9 @@ int main(int argc, char **argv)
                 fprintf(stderr, "-boot tq* requires TQ11 enabled\n");
                 return 2;
             }
-            if (boot_unit >= tq_count || !tq_path[boot_unit]) {
-                fprintf(stderr, "-boot tq%o requires matching -tq attachment\n", boot_unit);
+            if (opts.boot_unit >= opts.tq_count || !opts.tq_path[opts.boot_unit]) {
+                fprintf(stderr, "-boot tq%o requires matching -tq attachment\n",
+                        opts.boot_unit);
                 return 2;
             }
             break;
@@ -1068,7 +661,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (check_config_only) {
+    if (opts.check_config_only) {
         const char *m = (lsi11_machine_current() == LSI11_MACHINE_1184) ? "pdp1184"
                         : "lsi11";
         int rh11_on = lsi11_device_enabled("rh11");
@@ -1080,7 +673,7 @@ int main(int argc, char **argv)
                 "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
                 "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_xp=%d dev_rl=%d dev_tq=%d dev_sr=%d "
                 "dev_vm1sel=%d dev_vm1sav=%d\n",
-                m, cpu_model_name(cpu_model), lsi11_machine_ram_kb(),
+                m, cpu_model_name(opts.cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, rh11_mode_name(rh11_get_mode()),
                 lsi11_device_enabled("dl11"),
                 kw11_master, kw11_l_on, kw11_p_on,
@@ -1096,11 +689,11 @@ int main(int argc, char **argv)
 
     regs r;
     memset(&r, 0, sizeof(r));
-    r.model = cpu_model;
+    r.model = opts.cpu_model;
 
-    dl11_set_8bit(dl11_8bit);
-    dl11_set_nl_to_cr(do_nl_to_cr);
-    dz11_set_8bit(dl11_8bit);
+    dl11_set_8bit(opts.dl11_8bit);
+    dl11_set_nl_to_cr(opts.do_nl_to_cr);
+    dz11_set_8bit(opts.dl11_8bit);
     lsi11_hw_connect(&r);
 
     if (r.model == K1806VM2) {
@@ -1121,35 +714,38 @@ int main(int argc, char **argv)
     }
 
     /* Attach images by ascending unit index. */
-    for (int unit = 0; unit < rk_count; unit++) {
-        if (rk11_open_image_unit((unsigned)unit, rk_path[unit]) != 0) {
-            fprintf(stderr, "rk11_open_image failed: rk%o %s\n", unit, rk_path[unit]);
+    for (int unit = 0; unit < opts.rk_count; unit++) {
+        if (rk11_open_image_unit((unsigned)unit, opts.rk_path[unit]) != 0) {
+            fprintf(stderr, "rk11_open_image failed: rk%o %s\n", unit,
+                    opts.rk_path[unit]);
             r.fini(&r);
             return 1;
         }
     }
-    for (int unit = 0; unit < rh_count; unit++) {
-        if (rh11_open_image_unit((unsigned)unit, rh_path[unit]) != 0) {
-            fprintf(stderr, "rh11_open_image failed: rh%o %s\n", unit, rh_path[unit]);
+    for (int unit = 0; unit < opts.rh_count; unit++) {
+        if (rh11_open_image_unit((unsigned)unit, opts.rh_path[unit]) != 0) {
+            fprintf(stderr, "rh11_open_image failed: rh%o %s\n", unit,
+                    opts.rh_path[unit]);
             rk11_close_image();
             r.fini(&r);
             return 1;
         }
     }
-    for (int unit = 0; unit < xp_count; unit++) {
-        if (xp_open_image_unit((unsigned)unit, xp_path[unit]) != 0) {
-            fprintf(stderr, "xp_open_image failed: xp%o %s\n", unit, xp_path[unit]);
+    for (int unit = 0; unit < opts.xp_count; unit++) {
+        if (xp_open_image_unit((unsigned)unit, opts.xp_path[unit]) != 0) {
+            fprintf(stderr, "xp_open_image failed: xp%o %s\n", unit,
+                    opts.xp_path[unit]);
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
             return 1;
         }
     }
-    for (int unit = 0; unit < rl_count; unit++) {
-        if (rl11_open_image_typed_unit((unsigned)unit, rl_path[unit].path,
-                                       rl_path[unit].type) != 0) {
+    for (int unit = 0; unit < opts.rl_count; unit++) {
+        if (rl11_open_image_typed_unit((unsigned)unit, opts.rl_path[unit].path,
+                                       opts.rl_path[unit].type) != 0) {
             fprintf(stderr, "rl11_open_image failed: rl%o %s\n", unit,
-                    rl_path[unit].path);
+                    opts.rl_path[unit].path);
             xp_close_image();
             rh11_close_image();
             rk11_close_image();
@@ -1157,9 +753,10 @@ int main(int argc, char **argv)
             return 1;
         }
     }
-    for (int unit = 0; unit < tq_count; unit++) {
-        if (tq11_open_image_unit((unsigned)unit, tq_path[unit]) != 0) {
-            fprintf(stderr, "tq11_open_image failed: tq%o %s\n", unit, tq_path[unit]);
+    for (int unit = 0; unit < opts.tq_count; unit++) {
+        if (tq11_open_image_unit((unsigned)unit, opts.tq_path[unit]) != 0) {
+            fprintf(stderr, "tq11_open_image failed: tq%o %s\n", unit,
+                    opts.tq_path[unit]);
             rl11_close_image();
             xp_close_image();
             rh11_close_image();
@@ -1169,10 +766,10 @@ int main(int argc, char **argv)
         }
     }
 
-    if (force_fis) {
+    if (opts.force_fis) {
         r.has_fis = 1;
     }
-    if (force_fp11) {
+    if (opts.force_fp11) {
         r.has_fpu = 1;
     }
 
@@ -1180,8 +777,8 @@ int main(int argc, char **argv)
     bus_iowin_sync_from_cpu(&r, machine_kind);
     ubmap_sync_from_cpu(&r, machine_kind);
 
-    if (sr_value >= 0) {
-        sr_set((uint16_t)sr_value);
+    if (opts.sr_value >= 0) {
+        sr_set((uint16_t)opts.sr_value);
     }
 
     // FIXME: No-address register for initial configuration
@@ -1195,11 +792,12 @@ int main(int argc, char **argv)
         }
     }
 
-    if (do_boot) {
-        switch (boot_kind) {
+    if (opts.do_boot) {
+        switch (opts.boot_kind) {
         case BOOT_DEV_RK:
-            if (preload_rt11_boot_block(rk_path[boot_unit]) != 0) {
-                fprintf(stderr, "RT11 boot block not found in rk%o image\n", boot_unit);
+            if (preload_rt11_boot_block(opts.rk_path[opts.boot_unit]) != 0) {
+                fprintf(stderr, "RT11 boot block not found in rk%o image\n",
+                        opts.boot_unit);
                 r.fini(&r);
                 return 1;
             }
@@ -1210,13 +808,15 @@ int main(int argc, char **argv)
                 r.fini(&r);
                 return 1;
             }
-            bus_write16((uint16_t)(RK_BOOT_ADDR + 000010u), (uint16_t)boot_unit);
+            bus_write16((uint16_t)(RK_BOOT_ADDR + 000010u),
+                        (uint16_t)opts.boot_unit);
             r.r[7] = RK_BOOT_ENTRY;
             break;
 
         case BOOT_DEV_RH:
-            if (preload_rt11_boot_block(rh_path[boot_unit]) != 0) {
-                fprintf(stderr, "RT11 boot block not found in rh%o image\n", boot_unit);
+            if (preload_rt11_boot_block(opts.rh_path[opts.boot_unit]) != 0) {
+                fprintf(stderr, "RT11 boot block not found in rh%o image\n",
+                        opts.boot_unit);
                 r.fini(&r);
                 return 1;
             }
@@ -1227,12 +827,13 @@ int main(int argc, char **argv)
                 r.fini(&r);
                 return 1;
             }
-            bus_write16((uint16_t)(RH_BOOT_ADDR + 000010u), (uint16_t)boot_unit);
+            bus_write16((uint16_t)(RH_BOOT_ADDR + 000010u),
+                        (uint16_t)opts.boot_unit);
             r.r[7] = RH_BOOT_ENTRY;
             break;
 
         case BOOT_DEV_RL: {
-            uint16_t ds = (uint16_t)((boot_unit & 03) << 8);
+            uint16_t ds = (uint16_t)((opts.boot_unit & 03) << 8);
 
             if (install_bootstrap(RL_BOOT_ADDR, rl_bootstrap,
                                   sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0])) !=
@@ -1258,7 +859,7 @@ int main(int argc, char **argv)
                 r.fini(&r);
                 return 1;
             }
-            bus_write16(TQ_BOOT_UNIT, (uint16_t)boot_unit);
+            bus_write16(TQ_BOOT_UNIT, (uint16_t)opts.boot_unit);
             bus_write16(TQ_BOOT_CSR, 0174500u);
             r.r[7] = TQ_BOOT_ENTRY;
             break;
@@ -1270,7 +871,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (do_bootcopy) {
+    if (opts.do_bootcopy) {
         /* Copy first 010000 bytes (4 KB) into RAM[000000..007777] by default.
            Adjust if your bootstrap needs a different size. */
         const size_t n = 010000;
@@ -1281,11 +882,11 @@ int main(int argc, char **argv)
             r.fini(&r);
             return 1;
         }
-        if (rk_count > 0) {
+        if (opts.rk_count > 0) {
             rc = rk11_boot_copy(ram0, n);
-        } else if (rh_count > 0) {
+        } else if (opts.rh_count > 0) {
             rc = rh11_boot_copy(ram0, n);
-        } else if (rl_count > 0) {
+        } else if (opts.rl_count > 0) {
             rc = rl11_boot_copy(ram0, n);
         } else {
             fprintf(stderr,
@@ -1302,8 +903,8 @@ int main(int argc, char **argv)
         r.r[7] = 000000;
     }
 
-    if (do_bootrt11) {
-        if (rl_count > 0) {
+    if (opts.do_bootrt11) {
+        if (opts.rl_count > 0) {
             if (install_bootstrap(RL_BOOT_ADDR, rl_bootstrap,
                                   sizeof(rl_bootstrap) / sizeof(rl_bootstrap[0])) !=
                     0) {
@@ -1312,8 +913,8 @@ int main(int argc, char **argv)
                 return 1;
             }
             r.r[7] = RL_BOOT_ENTRY;
-        } else if (rk_count > 0) {
-            if (preload_rt11_boot_block(rk_path[0]) != 0) {
+        } else if (opts.rk_count > 0) {
+            if (preload_rt11_boot_block(opts.rk_path[0]) != 0) {
                 fprintf(stderr, "RT11 boot block not found in image\n");
                 r.fini(&r);
                 return 1;
@@ -1326,8 +927,8 @@ int main(int argc, char **argv)
                 return 1;
             }
             r.r[7] = RK_BOOT_ENTRY;
-        } else if (rh_count > 0) {
-            if (preload_rt11_boot_block(rh_path[0]) != 0) {
+        } else if (opts.rh_count > 0) {
+            if (preload_rt11_boot_block(opts.rh_path[0]) != 0) {
                 fprintf(stderr, "RT11 boot block not found in image\n");
                 r.fini(&r);
                 return 1;
@@ -1348,7 +949,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (do_boottq) {
+    if (opts.do_boottq) {
         if (install_bootstrap(TQ_BOOT_ADDR, tq_bootstrap,
                               sizeof(tq_bootstrap) / sizeof(tq_bootstrap[0])) != 0) {
             fprintf(stderr, "boottq destination is outside RAM\n");
@@ -1360,16 +961,16 @@ int main(int argc, char **argv)
         r.r[7] = TQ_BOOT_ENTRY;
     }
 
-    if (load_path) {
-        FILE *fload = fopen(load_path, "rb");
+    if (opts.load_path) {
+        FILE *fload = fopen(opts.load_path, "rb");
         if (!fload) {
-            fprintf(stderr, "Cannot open file: %s\n", load_path);
+            fprintf(stderr, "Cannot open file: %s\n", opts.load_path);
             r.fini(&r);
             return 1;
         }
 
         if (fseek(fload, 0, SEEK_END) != 0) {
-            fprintf(stderr, "Seek failed: %s\n", load_path);
+            fprintf(stderr, "Seek failed: %s\n", opts.load_path);
             fclose(fload);
             r.fini(&r);
             return 1;
@@ -1377,8 +978,8 @@ int main(int argc, char **argv)
         long fsize = ftell(fload);
         fseek(fload, 0, SEEK_SET);
 
-        if (load_addr < 0 || fsize < 0 ||
-                !bus_range_is_ram((paddr_t)load_addr, (size_t)fsize)) {
+        if (opts.load_addr < 0 || fsize < 0 ||
+                !bus_range_is_ram((paddr_t)opts.load_addr, (size_t)fsize)) {
             fprintf(stderr, "Load address/size out of RAM bounds\n");
             fclose(fload);
             r.fini(&r);
@@ -1386,7 +987,7 @@ int main(int argc, char **argv)
         }
 
         {
-            uint8_t *dst = bus_ram_ptr((paddr_t)load_addr);
+            uint8_t *dst = bus_ram_ptr((paddr_t)opts.load_addr);
             if (!dst) {
                 fprintf(stderr, "Load destination is outside RAM\n");
                 fclose(fload);
@@ -1394,47 +995,47 @@ int main(int argc, char **argv)
                 return 1;
             }
             if (fread(dst, 1, fsize, fload) != (size_t)fsize) {
-                fprintf(stderr, "Read failed: %s\n", load_path);
+                fprintf(stderr, "Read failed: %s\n", opts.load_path);
                 fclose(fload);
                 r.fini(&r);
                 return 1;
             }
         }
         fclose(fload);
-        fprintf(stderr, "Loaded %ld bytes from %s to octal %lo\n", fsize, load_path,
-                load_addr);
+        fprintf(stderr, "Loaded %ld bytes from %s to octal %lo\n", fsize,
+                opts.load_path, opts.load_addr);
     }
 
-    if (start_pc >= 0) {
-        r.r[7] = (uint16_t)start_pc;
-        fprintf(stderr, "Set PC to octal %lo\n", start_pc);
+    if (opts.start_pc >= 0) {
+        r.r[7] = (uint16_t)opts.start_pc;
+        fprintf(stderr, "Set PC to octal %lo\n", opts.start_pc);
     }
 
     /* -------- main emulation loop --------
        Replace cpu_step(&r) with your core's actual stepping API. */
     long steps_done = 0;
     for (;;) {
-        if (max_steps == 0) {
+        if (opts.max_steps == 0) {
             break;
         }
         /* Keep device service latency low so boot ROM wait loops do not stall. */
-        int step_chunk = trace ? 1 : 64;
+        int step_chunk = opts.trace ? 1 : 64;
         int steps_executed = 0;
-        if (max_steps > 0 && step_chunk > max_steps) {
-            step_chunk = (int)max_steps;
+        if (opts.max_steps > 0 && step_chunk > opts.max_steps) {
+            step_chunk = (int)opts.max_steps;
         }
         for (int k = 0; k < step_chunk; k++) {
             bus_iowin_sync_from_cpu(&r, machine_kind);
-            int trace_step = trace &&
-                             (trace_after < 0 || steps_done >= trace_after);
+            int trace_step = opts.trace &&
+                             (opts.trace_after < 0 || steps_done >= opts.trace_after);
             if (trace_step) {
                 char buf[128];
-                word start_pc = r.r[7];
-                word tmp = start_pc;
+                word cur_pc = r.r[7];
+                word tmp = cur_pc;
                 disas(&r, &tmp, buf);
-                fprintf(stderr, "%06o ", start_pc);
+                fprintf(stderr, "%06o ", cur_pc);
                 int i = 0;
-                for (word a = start_pc; a < tmp; a += 2) {
+                for (word a = cur_pc; a < tmp; a += 2) {
                     fprintf(stderr, "%06o ", r.load_word(&r, a));
                     i++;
                 }
@@ -1443,7 +1044,7 @@ int main(int argc, char **argv)
                     i++;
                 }
                 fprintf(stderr, "%s\n", buf);
-                if (trace_loopvals && start_pc == 0002032) {
+                if (trace_loopvals && cur_pc == 0002032) {
                     word v177766 = r.load_word(&r, 0177766);
                     word v177776 = r.load_word(&r, 0177776);
                     word v60542 = r.load_word(&r, 060542);
@@ -1452,14 +1053,14 @@ int main(int argc, char **argv)
                             "LOOPVALS 177766=%06o 177776=%06o 60542=%06o 60560=%06o\n",
                             v177766, v177776, v60542, v60560);
                 }
-                if (trace_loopvals && start_pc == 0002214) {
+                if (trace_loopvals && cur_pc == 0002214) {
                     word sp = r.r[6];
                     word stk_pc = r.load_word(&r, sp);
                     word stk_ps = r.load_word(&r, (word)(sp + 2));
                     fprintf(stderr, "LOOPSP  SP=%06o (SP)=%06o (SP+2)=%06o\n",
                             sp, stk_pc, stk_ps);
                 }
-                if (trace_regs) {
+                if (opts.trace_regs) {
                     fprintf(stderr,
                             "R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o R5=%06o SP=%06o PS=%06o\n",
                             r.r[0], r.r[1], r.r[2], r.r[3], r.r[4], r.r[5], r.r[6],
@@ -1470,13 +1071,13 @@ int main(int argc, char **argv)
             core_step(&r); /* must exist in your core */
             steps_done++;
             steps_executed++;
-            if (max_steps > 0) {
-                max_steps--;
+            if (opts.max_steps > 0) {
+                opts.max_steps--;
             }
             if (r.fAbort) {
                 break;
             }
-            if (max_steps == 0) {
+            if (opts.max_steps == 0) {
                 break;
             }
         }
@@ -1485,7 +1086,7 @@ int main(int argc, char **argv)
         lsi11_poll_devices_steps((uint32_t)steps_executed);
 
         if (r.fAbort) {
-            if (exit_on_abort) {
+            if (opts.exit_on_abort) {
                 break;
             }
             /* RT-11 and some monitor code may use HALT/abort vector path. */
