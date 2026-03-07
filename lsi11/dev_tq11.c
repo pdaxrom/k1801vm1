@@ -6,6 +6,7 @@
 #include "irq.h"
 #include "ubmap.h"
 
+#include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -278,7 +279,17 @@ typedef struct {
 } tq_unit_t;
 
 static tq_unit_t tq_units[TQ11_MAX_UNITS];
-static uint8_t tq_xfer_buf[TQ_MAX_RECORD];
+static uint8_t *tq_xfer_buf;
+
+static int tq_ensure_xfer_buf(void)
+{
+    if (tq_xfer_buf) {
+        return 0;
+    }
+
+    tq_xfer_buf = (uint8_t *)malloc((size_t)TQ_MAX_RECORD);
+    return tq_xfer_buf ? 0 : -1;
+}
 
 static tq_unit_t *tq_unit_ptr(uint16_t unit)
 {
@@ -1396,6 +1407,11 @@ static void tq_cmd_read_like(const uint16_t *cmd, uint16_t *rsp, uint16_t op)
         rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_CMD | TQ_I_BCNT);
         return;
     }
+    if (tq_ensure_xfer_buf() != 0) {
+        rsp[TQ_RSP_STS] = TQ_ST_HST;
+        tq_rsp_flags_from_status(rsp);
+        return;
+    }
 
     tap_st = tq_tap_read_forward(tq_xfer_buf, bc, &rec_len, &xfer_len);
     if (tap_st == TQ_TAP_OK) {
@@ -1481,6 +1497,11 @@ static void tq_cmd_write(const uint16_t *cmd, uint16_t *rsp)
     ba = tq_get_u32(cmd, TQ_RW_BAL);
     if (bc == 0u || bc > TQ_MAX_TRANSFER) {
         rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_CMD | TQ_I_BCNT);
+        return;
+    }
+    if (tq_ensure_xfer_buf() != 0) {
+        rsp[TQ_RSP_STS] = TQ_ST_HST;
+        tq_rsp_flags_from_status(rsp);
         return;
     }
 
@@ -1973,6 +1994,9 @@ int tq11_open_image_unit(unsigned unit, const char *path)
     if (!path || unit >= TQ11_MAX_UNITS) {
         return -1;
     }
+    if (tq_ensure_xfer_buf() != 0) {
+        return -1;
+    }
 
     u = &tq_units[unit];
     if (u->fp) {
@@ -2032,6 +2056,9 @@ void tq11_close_image(void)
         u->una_pending = 0;
     }
     tq_poll_pending = 0;
+
+    free(tq_xfer_buf);
+    tq_xfer_buf = NULL;
 }
 
 int tq11_attached(void)

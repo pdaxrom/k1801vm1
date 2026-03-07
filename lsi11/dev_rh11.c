@@ -998,11 +998,16 @@ void rh11_set_debug(int on)
 
 int rh11_boot_copy(void *dest, size_t len)
 {
-    if (!rh_fp[0]) {
+    return rh11_boot_copy_unit(0, dest, len);
+}
+
+int rh11_boot_copy_unit(unsigned unit, void *dest, size_t len)
+{
+    if (unit >= RH11_MAX_DRIVES || !rh_fp[unit]) {
         return -1;
     }
-    if (emu_fseek(rh_fp[0], 0, EMU_SEEK_SET) != 0) {
+    if (emu_fseek(rh_fp[unit], 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (emu_fread(dest, 1, len, rh_fp[0]) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, rh_fp[unit]) == len) ? 0 : -1;
 }

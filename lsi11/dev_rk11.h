@@ -23,5 +23,6 @@ void rk11_irq_ack(void);
 
 /* Bootstrap helper: copy first len bytes into RAM destination */
 int rk11_boot_copy(void *dest, size_t len);
+int rk11_boot_copy_unit(unsigned unit, void *dest, size_t len);
 
 #endif

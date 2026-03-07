@@ -45,6 +45,7 @@ typedef struct {
     long start_pc;
     long sr_value;
     long ram_kb_arg;
+    long sys_clock_mhz;
     int force_dl11_alias;
     int disable_dl;
     int disable_dz;
@@ -63,6 +64,8 @@ typedef struct {
     byte cpu_model;
     int force_fis;
     int force_fp11;
+    int disable_fis;
+    int disable_fp11;
     int trace;
     int trace_regs;
     int trace_irq;
@@ -70,6 +73,7 @@ typedef struct {
     long trace_after;
     long max_steps;
     int dl11_8bit;
+    int display_enable;
     int do_nl_to_cr;
     int exit_on_abort;
     int check_config_only;

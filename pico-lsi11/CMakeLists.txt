@@ -29,12 +29,17 @@ set(PICO_LSI11_COMMON_SOURCES
     ../lsi11/devio.c
     ../lsi11/irq.c
     ../lsi11/emu_file.c
+    ../lsi11/options.c
+    ../lsi11/ubmap.c
     ../lsi11/util_term.c
     ../lsi11/dev_dl11.c
+    ../lsi11/dev_dz11.c
     ../lsi11/dev_kw11.c
     ../lsi11/dev_rl11.c
     ../lsi11/dev_rh11.c
     ../lsi11/dev_rk11.c
+    ../lsi11/dev_xp.c
+    ../lsi11/dev_tq11.c
     ../lsi11/dev_lp11.c
     ../lsi11/dev_sr.c
     ../lsi11/dev_vm1sel.c

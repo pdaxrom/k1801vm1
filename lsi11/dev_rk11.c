@@ -819,11 +819,16 @@ void rk11_set_debug(int on)
 
 int rk11_boot_copy(void *dest, size_t len)
 {
-    if (!rk_fp[0]) {
+    return rk11_boot_copy_unit(0, dest, len);
+}
+
+int rk11_boot_copy_unit(unsigned unit, void *dest, size_t len)
+{
+    if (unit >= RK11_MAX_DRIVES || !rk_fp[unit]) {
         return -1;
     }
-    if (emu_fseek(rk_fp[0], 0, EMU_SEEK_SET) != 0) {
+    if (emu_fseek(rk_fp[unit], 0, EMU_SEEK_SET) != 0) {
         return -1;
     }
-    return (emu_fread(dest, 1, len, rk_fp[0]) == len) ? 0 : -1;
+    return (emu_fread(dest, 1, len, rk_fp[unit]) == len) ? 0 : -1;
 }

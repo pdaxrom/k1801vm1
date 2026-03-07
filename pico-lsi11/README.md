@@ -27,13 +27,44 @@ Shared device register and IRQ state is protected by a hardware spinlock (`io_lo
   - `SCK` = `GP18`
   - `MOSI` = `GP19`
 - Text I/O via `stdio usb`
-- On startup, the firmware presents interactive menus for:
+- Optional mirrored terminal output on the ST7565 display via `-display`
+- Startup config can come from either:
+  - `0:/default.conf`, which is loaded automatically if present
+  - another root-level `*.conf`, selectable after the `default.conf` check
+  - the built-in interactive menu if no config file is selected
+- The interactive menu supports:
   - RP2040 frequency (overclock) selection with voltage profile
-  - Machine mode selection (`lsi11` or `pdp11/84`) unless fixed at build time
   - CPU model selection (`dcj11`, `k1801vm1`, `k1801vm2`)
-  - Numbered disk image list from SD card
-  - Image type selection (`RK`, `RH`, `RL`)
-  - Boot trace mode (`off` / `on`)
+  - `FIS` and `FP11` overrides with `skip` / `force enable` / `force disable`
+  - multi-unit attachment for `RK`, `RH`, `XP/RP`, `RL`, and `TQ`
+  - boot-device selection from attached `rkN`, `rhN`, `rlN`, or `tqN`
+  - display enable toggle
+
+## Configuration
+
+`pico-lsi11` reuses the same option-file syntax as `../lsi11/options.c`, including
+`@nested.conf` references. `default.conf` is auto-loaded first if present, and then
+other root-level `*.conf` files can be selected before falling back to the menu.
+
+Example `0:/default.conf`:
+
+```text
+-freq 250
+-cpu k1801vm2
+-display
+-rl 0:/bsd-root.rl02
+-xp 0:/bsd-usr.rm05
+-boot rl0
+```
+
+Useful Pico-specific notes:
+
+- `-display` enables the ST7565 mirrored terminal output.
+- `-no-display` forces the display mirror off.
+- `-freq <mhz>` sets the RP2040 system clock from config (`125`, `133`, `150`,
+  `166`, `180`, `200`, `225`, `250`, `266`, `280`, `300`).
+- `pico_pdp1184` defaults to `128 KB` RAM and rejects larger `-ram` values.
+- `-dz` is not supported on the Pico target.
 
 ## Build
 

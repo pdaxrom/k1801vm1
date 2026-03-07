@@ -20,6 +20,7 @@ int rh11_open_image_unit(unsigned unit, const char *path);
 void rh11_close_image(void);
 void rh11_set_debug(int on);
 int rh11_boot_copy(void *dest, size_t len);
+int rh11_boot_copy_unit(unsigned unit, void *dest, size_t len);
 
 int rh11_set_mode(rh11_mode_t mode);
 rh11_mode_t rh11_get_mode(void);

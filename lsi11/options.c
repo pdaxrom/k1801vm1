@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "emu_file.h"
 #include "options.h"
 
 #if defined(LSI11_TARGET_1184)
@@ -14,6 +15,7 @@ void options_init(lsi11_options_t *opts)
     opts->start_pc = -1;
     opts->sr_value = -1;
     opts->ram_kb_arg = -1;
+    opts->sys_clock_mhz = -1;
     opts->force_dl11_alias = -1;
     opts->kw11_l_override = -1;
     opts->kw11_p_override = -1;
@@ -170,6 +172,8 @@ void options_usage(const char *argv0)
 #endif
             "  -force-fis      Enable FIS for unsupported CPUs\n"
             "  -force-fp11     Enable FP11-A for unsupported CPUs\n"
+            "  -freq <mhz>     RP2040 sys clock in MHz (pico-lsi11 only)\n"
+            "  -clock <mhz>    Alias for -freq\n"
             "  -rk <path>      Attach RK05 image (repeatable: rk0,rk1,...)\n"
             "  -rh <path>      Attach RH11 (RK06/RK07) image (repeatable: rh0,rh1,...)\n"
             "  -xp <path>      Attach XP/RP RM05 image (repeatable: xp0,xp1,...)\n"
@@ -209,6 +213,8 @@ void options_usage(const char *argv0)
     fprintf(stderr,
             "  -tty7b          DL11 console 7-bit mode (default)\n"
             "  -tty8b          DL11 console 8-bit mode\n"
+            "  -display        Enable mirrored ST7565 terminal display (pico-lsi11)\n"
+            "  -no-display     Disable mirrored ST7565 terminal display\n"
             "  -nl-to-cr       Map host newline (\\n) to CR (\\r) for input\n"
             "  -exit-on-abort  Exit emulator on HALT/abort\n"
             "  -steps N        Emulate N steps then exit\n"
@@ -239,7 +245,7 @@ void options_usage(const char *argv0)
  */
 static int load_options_file(const char *path, int *out_argc, char ***out_argv)
 {
-    FILE *f;
+    emu_file_t *f;
     long size;
     char *buf;
     size_t got;
@@ -248,17 +254,23 @@ static int load_options_file(const char *path, int *out_argc, char ***out_argv)
     int argc = 0;
     char *line;
 
-    f = fopen(path, "r");
+    f = emu_fopen(path, "r");
     if (!f) {
         return -1;
     }
 
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    if (emu_fseek(f, 0, EMU_SEEK_END) != 0) {
+        emu_fclose(f);
+        return -1;
+    }
+    size = emu_ftell(f);
+    if (size < 0 || emu_fseek(f, 0, EMU_SEEK_SET) != 0) {
+        emu_fclose(f);
+        return -1;
+    }
 
     if (size <= 0) {
-        fclose(f);
+        emu_fclose(f);
         *out_argc = 0;
         *out_argv = NULL;
         return 0;
@@ -266,12 +278,12 @@ static int load_options_file(const char *path, int *out_argc, char ***out_argv)
 
     buf = malloc((size_t)size + 1);
     if (!buf) {
-        fclose(f);
+        emu_fclose(f);
         return -1;
     }
 
-    got = fread(buf, 1, (size_t)size, f);
-    fclose(f);
+    got = emu_fread(buf, 1, (size_t)size, f);
+    emu_fclose(f);
     buf[got] = '\0';
 
     argv = malloc((size_t)capacity * sizeof(char *));
@@ -488,6 +500,12 @@ static int parse_arg_list(lsi11_options_t *opts, int argc, char **argv,
             opts->dl11_8bit = 0;
         } else if (!strcmp(argv[i], "-tty8b")) {
             opts->dl11_8bit = 1;
+        } else if (!strcmp(argv[i], "-display") ||
+                   !strcmp(argv[i], "-enable-display")) {
+            opts->display_enable = 1;
+        } else if (!strcmp(argv[i], "-no-display") ||
+                   !strcmp(argv[i], "-disable-display")) {
+            opts->display_enable = 0;
         } else if (!strcmp(argv[i], "-nl-to-cr")) {
             opts->do_nl_to_cr = 1;
         } else if (!strcmp(argv[i], "-exit-on-abort")) {
@@ -508,6 +526,16 @@ static int parse_arg_list(lsi11_options_t *opts, int argc, char **argv,
             opts->ram_kb_arg = strtol(argv[++i], NULL, 10);
         } else if (!strcmp(argv[i], "--mem-kb") && i + 1 < argc) {
             opts->ram_kb_arg = strtol(argv[++i], NULL, 10);
+        } else if ((!strcmp(argv[i], "-freq") || !strcmp(argv[i], "-clock")) &&
+                   i + 1 < argc) {
+            char *end = NULL;
+            long mhz = strtol(argv[++i], &end, 10);
+
+            if (!end || *end != '\0' || mhz <= 0) {
+                fprintf(stderr, "Invalid clock frequency: %s\n", argv[i]);
+                return -1;
+            }
+            opts->sys_clock_mhz = mhz;
         } else if (!strcmp(argv[i], "-dl11-alias")) {
             opts->force_dl11_alias = 1;
         } else if (!strcmp(argv[i], "-no-dl11-alias")) {
