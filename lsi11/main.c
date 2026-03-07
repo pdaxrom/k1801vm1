@@ -594,7 +594,7 @@ static void usage(const char *argv0)
             "  -boottq         Run built-in TQ/TMSCP bootstrap at 016000 for unit 0\n"
             "  -trace          Trace each instruction\n"
             "  -trace-after N  Start tracing only after N executed instructions\n"
-            "  -trace-regs     With -trace, also dump registers\n"
+            "  -traceregs      With -trace, also dump registers\n"
             "  -traceirq       Trace delivered IRQ vectors\n"
             "  -tracenxm       Trace NXM traps\n"
             "  -tty7b          DL11 console 7-bit mode (default)\n"
@@ -797,7 +797,7 @@ int main(int argc, char **argv)
         } else if (!strcmp(argv[i], "-trace-after") && i + 1 < argc) {
             trace_after = strtol(argv[++i], NULL, 10);
             trace = 1;
-        } else if (!strcmp(argv[i], "-trace-regs")) {
+        } else if (!strcmp(argv[i], "-traceregs")) {
             trace = 1;
             trace_regs = 1;
         } else if (!strcmp(argv[i], "-tty7b")) {
