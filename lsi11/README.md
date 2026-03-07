@@ -293,6 +293,26 @@ This subproject now provides two separate executables:
 - Full matrix:
   - `make -C lsi11 test-matrix`
 
+## Options file
+- Options can be loaded from a file using `@<file>`:
+  - `./pdp1184 @myconfig.conf`
+  - `./lsi11 @myconfig.conf -check-config`
+- File format:
+  - one option per line (option and argument on the same line)
+  - `#` comments (line must start with `#` after optional whitespace)
+  - empty lines are ignored
+- Example `myconfig.conf`:
+  ```
+  # PDP-11/84 with BSD 2.9.1
+  -cpu dcj11
+  -ram 4096
+  -rl disks/bsd2.9/2.9BSD-root.rl02
+  -xp disks/bsd2.9/2.9BSD-usr.rm05
+  -boot rl0
+  ```
+- `@file` can be mixed with command-line options; options are processed left to right.
+- Nested `@file` references inside option files are supported.
+
 ## Common debug options
 - `-trace` instruction trace
 - `-trace-regs` trace with registers
