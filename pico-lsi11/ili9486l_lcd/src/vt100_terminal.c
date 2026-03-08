@@ -1892,13 +1892,86 @@ void vt100_terminal_putc(vt100_terminal_t *terminal, char ch)
     vt100_terminal_show_cursor(terminal);
 }
 
+void vt100_terminal_write_n(vt100_terminal_t *terminal, const char *text, size_t len)
+{
+    bool batch_active = false;
+    uint8_t batch_row = 0u;
+    uint8_t batch_col_start = 0u;
+    uint8_t batch_col_end = 0u;
+
+    if (text == NULL || len == 0u) {
+        return;
+    }
+
+    for (size_t i = 0; i < len; ++i) {
+        const unsigned char uch = (unsigned char)text[i];
+
+        if (terminal->state == VT100_STATE_GROUND
+                && !terminal->insert_mode
+                && !terminal->wrap_pending
+                && uch >= 0x20u
+                && uch <= 0x7Eu) {
+            uint8_t write_row = terminal->cursor_row;
+            uint8_t write_col = terminal->cursor_col;
+            const vt100_terminal_cell_t cell = {
+                .ch = text[i],
+                .attr = vt100_terminal_current_attr(terminal),
+                .style = vt100_terminal_current_style(terminal),
+                .charset = vt100_terminal_current_charset(terminal),
+            };
+            const bool wrote = vt100_terminal_write_cell_fast(terminal, &cell, &write_row, &write_col);
+
+            terminal->single_shift_pending = false;
+
+            if (!wrote) {
+                continue;
+            }
+
+            if (!batch_active) {
+                vt100_terminal_hide_cursor(terminal);
+                batch_active = true;
+                batch_row = write_row;
+                batch_col_start = write_col;
+                batch_col_end = write_col;
+            } else if (write_row != batch_row) {
+                vt100_terminal_render_row_range(terminal, batch_row, batch_col_start, batch_col_end);
+                vt100_terminal_show_cursor(terminal);
+                vt100_terminal_hide_cursor(terminal);
+                batch_row = write_row;
+                batch_col_start = write_col;
+                batch_col_end = write_col;
+            } else if (write_col > batch_col_end) {
+                batch_col_end = write_col;
+            }
+
+            if (terminal->wrap_pending) {
+                vt100_terminal_render_row_range(terminal, batch_row, batch_col_start, batch_col_end);
+                vt100_terminal_show_cursor(terminal);
+                batch_active = false;
+            }
+            continue;
+        }
+
+        if (batch_active) {
+            vt100_terminal_render_row_range(terminal, batch_row, batch_col_start, batch_col_end);
+            vt100_terminal_show_cursor(terminal);
+            batch_active = false;
+        }
+
+        vt100_terminal_putc(terminal, text[i]);
+    }
+
+    if (batch_active) {
+        vt100_terminal_render_row_range(terminal, batch_row, batch_col_start, batch_col_end);
+        vt100_terminal_show_cursor(terminal);
+    }
+}
+
 void vt100_terminal_write(vt100_terminal_t *terminal, const char *text)
 {
     if (text == NULL) {
         return;
     }
 
-    while (*text != '\0') {
-        vt100_terminal_putc(terminal, *text++);
-    }
+    vt100_terminal_write_n(terminal, text, strlen(text));
 }

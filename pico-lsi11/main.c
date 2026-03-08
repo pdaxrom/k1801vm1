@@ -383,6 +383,7 @@ static void fatal_halt(const char *msg)
 {
     printf("\nError: %s\n", msg);
     for (;;) {
+        display_backend_task();
         sleep_ms(1000);
     }
 }
@@ -1984,6 +1985,7 @@ int main(void)
     if (opts.check_config_only) {
         printf("Configuration check completed.\n");
         for (;;) {
+            display_backend_task();
             sleep_ms(1000);
         }
     }

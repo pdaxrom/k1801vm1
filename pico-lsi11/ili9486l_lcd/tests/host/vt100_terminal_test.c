@@ -16,6 +16,11 @@ typedef struct {
     size_t len;
 } output_buffer_t;
 
+extern unsigned ili9486l_stub_begin_write_calls;
+extern unsigned ili9486l_stub_wire_write_calls;
+extern unsigned ili9486l_stub_wire_rect_calls;
+void ili9486l_stub_reset_counters(void);
+
 static void fail_check(const char *expr, const char *file, int line)
 {
     fprintf(stderr, "%s:%d: check failed: %s\n", file, line, expr);
@@ -75,6 +80,40 @@ static int test_string_controls_are_skipped(void)
     CHECK(terminal.cells[0][3].ch == 'D');
     CHECK(terminal.cells[0][4].ch == 'E');
     CHECK(terminal.cursor_col == 5u);
+    return 0;
+}
+
+static int test_write_n_accepts_embedded_nul(void)
+{
+    vt100_terminal_t terminal;
+    static const char data[] = {'A', '\0', 'B'};
+
+    vt100_terminal_init(&terminal, 0u, 0u);
+    vt100_terminal_write_n(&terminal, data, sizeof(data));
+
+    CHECK(terminal.cells[0][0].ch == 'A');
+    CHECK(terminal.cells[0][1].ch == 'B');
+    CHECK(terminal.cursor_row == 0u);
+    CHECK(terminal.cursor_col == 2u);
+    return 0;
+}
+
+static int test_write_n_batches_printable_ascii_runs(void)
+{
+    vt100_terminal_t terminal;
+
+    vt100_terminal_init(&terminal, 0u, 0u);
+    ili9486l_stub_reset_counters();
+    vt100_terminal_write_n(&terminal, "ABC", 3u);
+
+    CHECK(terminal.cells[0][0].ch == 'A');
+    CHECK(terminal.cells[0][1].ch == 'B');
+    CHECK(terminal.cells[0][2].ch == 'C');
+    CHECK(terminal.cursor_row == 0u);
+    CHECK(terminal.cursor_col == 3u);
+    CHECK(ili9486l_stub_begin_write_calls == 1u);
+    CHECK(ili9486l_stub_wire_write_calls == VT100_TERMINAL_CELL_HEIGHT);
+    CHECK(ili9486l_stub_wire_rect_calls == 2u);
     return 0;
 }
 
@@ -228,6 +267,8 @@ int main(void)
     } tests[] = {
         {"osc_is_skipped", test_osc_is_skipped},
         {"string_controls_are_skipped", test_string_controls_are_skipped},
+        {"write_n_accepts_embedded_nul", test_write_n_accepts_embedded_nul},
+        {"write_n_batches_printable_ascii_runs", test_write_n_batches_printable_ascii_runs},
         {"can_and_sub_cancel_sequences", test_can_and_sub_cancel_sequences},
         {"decom_cpr_is_relative", test_decom_cpr_is_relative},
         {"vt52_cursoring_and_exit", test_vt52_cursoring_and_exit},

@@ -98,6 +98,7 @@ void vt100_terminal_set_output(vt100_terminal_t *terminal, vt100_terminal_output
 void vt100_terminal_reset(vt100_terminal_t *terminal);
 void vt100_terminal_putc(vt100_terminal_t *terminal, char ch);
 void vt100_terminal_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms);
+void vt100_terminal_write_n(vt100_terminal_t *terminal, const char *text, size_t len);
 void vt100_terminal_write(vt100_terminal_t *terminal, const char *text);
 void vt100_terminal_render(vt100_terminal_t *terminal);
 

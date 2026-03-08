@@ -4,10 +4,8 @@
 
 #include "hardware/gpio.h"
 #include "hardware/spi.h"
-#include "pico/stdio/driver.h"
 #include "pico/stdlib.h"
 
-#include <stdio.h>
 #include <string.h>
 
 #define PIN_BL 9
@@ -153,22 +151,6 @@ static void terminal_putchar(char c)
     draw_cursor(cursor_x, cursor_y, 1);
 }
 
-static void stdio_term_out_chars(const char *buf, int len)
-{
-    for (int i = 0; i < len; i++) {
-        terminal_putchar(buf[i]);
-    }
-}
-
-static stdio_driver_t term_stdio_app = {
-    .out_chars = stdio_term_out_chars,
-    .out_flush = NULL,
-    .in_chars = NULL,
-#if PICO_SDK_VERSION_MAJOR >= 1 && PICO_SDK_VERSION_MINOR >= 4
-    .next = NULL,
-#endif
-};
-
 void st7565_term_display_init(void)
 {
     spi_init(spi1, 4000000);
@@ -230,5 +212,9 @@ void st7565_term_display_init(void)
     memset(lcd_buffer, 0, sizeof(lcd_buffer));
     lcd_update_all();
     draw_cursor(cursor_x, cursor_y, 1);
-    stdio_set_driver_enabled(&term_stdio_app, true);
+}
+
+void st7565_term_display_putc(char c)
+{
+    terminal_putchar(c);
 }

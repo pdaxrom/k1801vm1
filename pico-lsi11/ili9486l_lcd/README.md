@@ -255,6 +255,7 @@ Demo app использует этот API для boot logo, а сам JPEG-фа
 void vt100_terminal_init(vt100_terminal_t *terminal, uint16_t origin_x, uint16_t origin_y);
 void vt100_terminal_set_output(vt100_terminal_t *terminal, vt100_terminal_output_fn output_fn, void *user_data);
 void vt100_terminal_putc(vt100_terminal_t *terminal, char ch);
+void vt100_terminal_write_n(vt100_terminal_t *terminal, const char *text, size_t len);
 void vt100_terminal_write(vt100_terminal_t *terminal, const char *text);
 void vt100_terminal_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms);
 void vt100_terminal_render(vt100_terminal_t *terminal);
@@ -263,6 +264,7 @@ void vt100_terminal_render(vt100_terminal_t *terminal);
 Что реализовано:
 
 - потоковый приём символов по одному байту
+- приём буфера фиксированной длины через `vt100_terminal_write_n(...)`
 - символьный screen buffer без framebuffer дисплея
 - subset `VT100`, `ANSI`, `DEC Special Graphics`, `UK charset`, `VT52`
 - `SGR` цвета и атрибуты

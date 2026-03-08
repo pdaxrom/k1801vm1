@@ -1,5 +1,16 @@
 #include "ili9486l.h"
 
+unsigned ili9486l_stub_begin_write_calls = 0u;
+unsigned ili9486l_stub_wire_write_calls = 0u;
+unsigned ili9486l_stub_wire_rect_calls = 0u;
+
+void ili9486l_stub_reset_counters(void)
+{
+    ili9486l_stub_begin_write_calls = 0u;
+    ili9486l_stub_wire_write_calls = 0u;
+    ili9486l_stub_wire_rect_calls = 0u;
+}
+
 bool ili9486l_configure_vertical_scroll(uint16_t top_fixed, uint16_t scroll_area, uint16_t bottom_fixed)
 {
     (void)top_fixed;
@@ -14,6 +25,7 @@ bool ili9486l_begin_write(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     (void)y;
     (void)w;
     (void)h;
+    ++ili9486l_stub_begin_write_calls;
     return true;
 }
 
@@ -79,6 +91,7 @@ void ili9486l_draw_rgb666_wire_rect(const uint8_t *bitmap, uint16_t x, uint16_t 
     (void)y;
     (void)w;
     (void)h;
+    ++ili9486l_stub_wire_rect_calls;
 }
 
 void ili9486l_draw_rgb888_as_rgb666_rect(const uint8_t *bitmap, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
@@ -149,6 +162,7 @@ void ili9486l_write_rgb666_wire_pixels(const uint8_t *pixels, size_t pixel_count
 {
     (void)pixels;
     (void)pixel_count;
+    ++ili9486l_stub_wire_write_calls;
 }
 
 void ili9486l_write_rgb888_as_rgb666_pixels(const uint8_t *pixels, size_t pixel_count)
