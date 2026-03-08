@@ -1,3 +1,12 @@
+set(FATFS_SPI_RTC_SOURCE ${CMAKE_CURRENT_LIST_DIR}/src/rtc.c)
+set(FATFS_SPI_RTC_LIBS)
+
+if (TARGET hardware_rtc)
+    list(APPEND FATFS_SPI_RTC_LIBS hardware_rtc)
+else()
+    set(FATFS_SPI_RTC_SOURCE ${CMAKE_CURRENT_LIST_DIR}/src/rtc_stub.c)
+endif()
+
 add_library(FatFs_SPI INTERFACE)
 target_sources(FatFs_SPI INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/ff14a/source/ffsystem.c
@@ -13,7 +22,7 @@ target_sources(FatFs_SPI INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/src/f_util.c
     ${CMAKE_CURRENT_LIST_DIR}/src/ff_stdio.c
     ${CMAKE_CURRENT_LIST_DIR}/src/my_debug.c
-    ${CMAKE_CURRENT_LIST_DIR}/src/rtc.c
+    ${FATFS_SPI_RTC_SOURCE}
 )
 target_include_directories(FatFs_SPI INTERFACE
     ff14a/source
@@ -23,6 +32,6 @@ target_include_directories(FatFs_SPI INTERFACE
 target_link_libraries(FatFs_SPI INTERFACE
         hardware_spi
         hardware_dma
-        hardware_rtc
         pico_stdlib
+        ${FATFS_SPI_RTC_LIBS}
 )

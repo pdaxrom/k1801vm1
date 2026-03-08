@@ -1,10 +1,11 @@
 # pico-lsi11
 
-Pico port of the LSI-11 / PDP-11 emulator for Raspberry Pi Pico (RP2040), based on sources from `../lsi11` and `../core`.
+Pico port of the LSI-11 / PDP-11 emulator for Raspberry Pi Pico and Pico 2,
+based on sources from `../lsi11` and `../core`.
 
 ## Architecture
 
-The emulator takes advantage of the RP2040 dual-core design:
+The emulator takes advantage of the dual-core RP2xxx design:
 
 | Core | Role |
 |------|------|
@@ -20,7 +21,8 @@ Shared device register and IRQ state is protected by a hardware spinlock (`io_lo
 
 - Two separate firmware images:
   - `pico_lsi11.uf2` — `lsi11` profile, built with `ENABLE_MMU=0`
-  - `pico_pdp1184.uf2` — `pdp11/84` profile (RAM 128 KB), built with `ENABLE_MMU=1`
+  - `pico_pdp1184.uf2` — `pdp11/84` profile (`128 KB` RAM on Pico, `384 KB`
+    on Pico 2), built with `ENABLE_MMU=1`
 - SD card via `SPI0`:
   - `MISO` = `GP16`
   - `CS` = `GP17`
@@ -63,19 +65,32 @@ Useful Pico-specific notes:
 - `-no-display` forces the display mirror off.
 - `-freq <mhz>` sets the RP2040 system clock from config (`125`, `133`, `150`,
   `166`, `180`, `200`, `225`, `250`, `266`, `280`, `300`).
-- `pico_pdp1184` defaults to `128 KB` RAM and rejects larger `-ram` values.
+- `pico_pdp1184` defaults to `128 KB` RAM on Pico and `384 KB` on Pico 2, and
+  rejects larger `-ram` values for the selected board.
 - `-dz` is not supported on the Pico target.
 
 ## Build
+
+Build for the original Pico (`RP2040`):
 
 ```bash
 cmake -S . -B build -DPICO_SDK_PATH=/path/to/pico-sdk
 cmake --build build
 ```
 
-If `PICO_SDK_PATH` is already set in the environment, `-DPICO_SDK_PATH=...` can be omitted.
+Build for Pico 2 (`RP2350`):
+
+```bash
+cmake -S . -B build-pico2 -DPICO_BOARD=pico2 -DPICO_SDK_PATH=/path/to/pico-sdk
+cmake --build build-pico2
+```
+
+If `PICO_SDK_PATH` is already set in the environment, `-DPICO_SDK_PATH=...` can be
+omitted.
 
 Generated firmware files:
 
 - `build/pico_lsi11.uf2`
 - `build/pico_pdp1184.uf2`
+- `build-pico2/pico_lsi11.uf2`
+- `build-pico2/pico_pdp1184.uf2`

@@ -40,6 +40,10 @@
 #define LSI11_TARGET_PDP1184 1
 #endif
 
+#ifndef PICO_RP2350
+#define PICO_RP2350 0
+#endif
+
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 #define MAX_IMAGES 64
@@ -117,6 +121,15 @@ static int preload_rt11_boot_block_attached(boot_copy_unit_fn copy_fn, unsigned 
 
 static pico_run_config_t g_run_config = {0};
 static lsi11_machine_t g_machine_kind = LSI11_MACHINE_1104;
+
+static uint32_t pico_pdp1184_ram_limit_kb(void)
+{
+#if PICO_RP2350
+    return 384u;
+#else
+    return 128u;
+#endif
+}
 
 static const freq_profile_t freq_profiles[] = {
     {125, VREG_VOLTAGE_1_10, "1.10V"},
@@ -1223,11 +1236,14 @@ static int prepare_machine_options(lsi11_options_t *opts, lsi11_machine_t machin
     }
 
     if (machine_kind == LSI11_MACHINE_1184) {
+        uint32_t ram_limit_kb = pico_pdp1184_ram_limit_kb();
+
         if (opts->ram_kb_arg <= 0) {
-            opts->ram_kb_arg = 128;
+            opts->ram_kb_arg = (long)ram_limit_kb;
         }
-        if (opts->ram_kb_arg > 128) {
-            snprintf(err, err_len, "pico pdp11/84 is limited to 128 KB RAM");
+        if ((uint32_t)opts->ram_kb_arg > ram_limit_kb) {
+            snprintf(err, err_len, "pico pdp11/84 is limited to %u KB RAM",
+                     ram_limit_kb);
             return -1;
         }
     } else {
