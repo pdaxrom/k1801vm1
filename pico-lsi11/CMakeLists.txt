@@ -19,6 +19,44 @@ pico_sdk_init()
 
 add_subdirectory(FatFs_SPI)
 
+set(PICO_LSI11_DISPLAY_BACKEND "st7565" CACHE STRING
+    "Display backend to build into pico-lsi11 (none, st7565, ili9486l)")
+set_property(CACHE PICO_LSI11_DISPLAY_BACKEND PROPERTY STRINGS none st7565 ili9486l)
+string(TOLOWER "${PICO_LSI11_DISPLAY_BACKEND}" PICO_LSI11_DISPLAY_BACKEND)
+
+set(PICO_LSI11_DISPLAY_SOURCES
+    display_backend.c
+)
+set(PICO_LSI11_DISPLAY_LIBRARIES)
+set(PICO_LSI11_DISPLAY_DEFINITIONS)
+
+if(PICO_LSI11_DISPLAY_BACKEND STREQUAL "none")
+  list(APPEND PICO_LSI11_DISPLAY_DEFINITIONS
+      PICO_LSI11_DISPLAY_BACKEND_NONE=1
+  )
+elseif(PICO_LSI11_DISPLAY_BACKEND STREQUAL "st7565")
+  list(APPEND PICO_LSI11_DISPLAY_SOURCES
+      st7565_lcd/term_display.c
+  )
+  list(APPEND PICO_LSI11_DISPLAY_DEFINITIONS
+      PICO_LSI11_DISPLAY_BACKEND_ST7565=1
+  )
+elseif(PICO_LSI11_DISPLAY_BACKEND STREQUAL "ili9486l")
+  set(ILI9486L_LCD_BUILD_DEMO OFF CACHE BOOL "" FORCE)
+  add_subdirectory(ili9486l_lcd)
+  list(APPEND PICO_LSI11_DISPLAY_LIBRARIES
+      ili9486l::lcd
+      pico_sync
+  )
+  list(APPEND PICO_LSI11_DISPLAY_DEFINITIONS
+      PICO_LSI11_DISPLAY_BACKEND_ILI9486L=1
+  )
+else()
+  message(FATAL_ERROR
+      "Unsupported PICO_LSI11_DISPLAY_BACKEND='${PICO_LSI11_DISPLAY_BACKEND}'. "
+      "Expected one of: none, st7565, ili9486l")
+endif()
+
 set(PICO_LSI11_COMMON_SOURCES
     main.c
     hw_config.c
@@ -44,7 +82,7 @@ set(PICO_LSI11_COMMON_SOURCES
     ../lsi11/dev_sr.c
     ../lsi11/dev_vm1sel.c
     ../lsi11/dev_vm1sav.c
-    term_display.c
+    ${PICO_LSI11_DISPLAY_SOURCES}
 )
 
 function(add_pico_emu_target target_name mmu_value machine_define)
@@ -61,6 +99,7 @@ function(add_pico_emu_target target_name mmu_value machine_define)
   target_compile_definitions(${target_name} PRIVATE
       ENABLE_MMU=${mmu_value}
       ${machine_define}=1
+      ${PICO_LSI11_DISPLAY_DEFINITIONS}
   )
   if("${mmu_value}" STREQUAL "0")
     target_compile_definitions(${target_name} PRIVATE
@@ -74,6 +113,7 @@ function(add_pico_emu_target target_name mmu_value machine_define)
       hardware_sync
       hardware_spi
       FatFs_SPI
+      ${PICO_LSI11_DISPLAY_LIBRARIES}
   )
 
   pico_set_program_name(${target_name} "${target_name}")

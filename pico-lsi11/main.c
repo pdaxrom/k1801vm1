@@ -34,7 +34,7 @@
 #include "core.h"
 #include "disas.h"
 
-#include "term_display.h"
+#include "display_backend.h"
 
 #if defined(LSI11_TARGET_1184)
 #define LSI11_TARGET_PDP1184 1
@@ -1069,7 +1069,7 @@ static void collect_menu_options(lsi11_options_t *opts, lsi11_machine_t machine_
     default:
         break;
     }
-    opts->display_enable = prompt_yes_no("Enable ST7565 display mirroring?");
+    opts->display_enable = prompt_yes_no("Enable terminal display mirroring?");
 
     disk_count = list_images(disk_images, MAX_IMAGES, IMAGE_FILTER_DISK);
     tape_count = list_images(tape_images, MAX_IMAGES, IMAGE_FILTER_TAPE);
@@ -1440,12 +1440,13 @@ static void print_config_summary(const lsi11_options_t *opts)
                           "pdp1184" : "lsi11";
 
     printf("CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh_mode=%s "
-           "display=%d dev_dl=%d dev_dz=%d dev_kw=%d dev_lp=%d dev_rk=%d "
+           "display=%d display_backend=%s dev_dl=%d dev_dz=%d dev_kw=%d "
+           "dev_lp=%d dev_rk=%d "
            "dev_rh=%d dev_xp=%d dev_rl=%d dev_tq=%d dev_sr=%d "
            "dev_vm1sel=%d dev_vm1sav=%d\n",
            machine, cpu_model_name(opts->cpu_model), lsi11_machine_ram_kb(),
            lsi11_dl11_alias(), rh11_mode_name(opts->rh_mode),
-           opts->display_enable ? 1 : 0,
+           opts->display_enable ? 1 : 0, display_backend_name(),
            lsi11_device_enabled("dl11"), lsi11_device_enabled("dz11"),
            lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
            lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
@@ -1916,10 +1917,12 @@ static int start_emulator(const lsi11_options_t *opts, char *err, size_t err_len
 
     for (;;) {
         if (g_run_config.halted) {
+            display_backend_task();
             sleep_ms(10);
             continue;
         }
         lsi11_poll_devices();
+        display_backend_task();
         sleep_us(100);
     }
 }
@@ -1968,7 +1971,12 @@ int main(void)
     }
 
     if (opts.display_enable) {
-        term_display_init();
+        if (!display_backend_supported()) {
+            fatal_halt("display mirroring requested, but this firmware was built without display support");
+        }
+        if (!display_backend_init()) {
+            fatal_halt("display initialization failed");
+        }
     }
 
     print_config_summary(&opts);

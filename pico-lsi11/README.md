@@ -29,7 +29,8 @@ Shared device register and IRQ state is protected by a hardware spinlock (`io_lo
   - `SCK` = `GP18`
   - `MOSI` = `GP19`
 - Text I/O via `stdio usb`
-- Optional mirrored terminal output on the ST7565 display via `-display`
+- Optional mirrored terminal output via `-display`
+  - compile-time backend: `st7565`, `ili9486l`, or `none`
 - Startup config can come from either:
   - `0:/default.conf`, which is loaded automatically if present
   - another root-level `*.conf`, selectable after the `default.conf` check
@@ -61,7 +62,7 @@ Example `0:/default.conf`:
 
 Useful Pico-specific notes:
 
-- `-display` enables the ST7565 mirrored terminal output.
+- `-display` enables mirrored terminal output on the display backend compiled into the firmware.
 - `-no-display` forces the display mirror off.
 - `-freq <mhz>` sets the RP2040 system clock from config (`125`, `133`, `150`,
   `166`, `180`, `200`, `225`, `250`, `266`, `280`, `300`).
@@ -87,6 +88,20 @@ cmake --build build-pico2
 
 If `PICO_SDK_PATH` is already set in the environment, `-DPICO_SDK_PATH=...` can be
 omitted.
+
+Display backend selection at configure time:
+
+```bash
+cmake -S . -B build -DPICO_LSI11_DISPLAY_BACKEND=none
+cmake -S . -B build -DPICO_LSI11_DISPLAY_BACKEND=st7565
+cmake -S . -B build -DPICO_LSI11_DISPLAY_BACKEND=ili9486l
+```
+
+Backends:
+
+- `st7565` uses the legacy 128x64 mirrored text display.
+- `ili9486l` links `ili9486l_lcd` as a library and mirrors output into its VT100 terminal.
+- `none` builds firmware without any display support; `-display` then becomes a configuration error.
 
 Generated firmware files:
 

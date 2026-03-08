@@ -213,8 +213,8 @@ void options_usage(const char *argv0)
     fprintf(stderr,
             "  -tty7b          DL11 console 7-bit mode (default)\n"
             "  -tty8b          DL11 console 8-bit mode\n"
-            "  -display        Enable mirrored ST7565 terminal display (pico-lsi11)\n"
-            "  -no-display     Disable mirrored ST7565 terminal display\n"
+            "  -display        Enable mirrored terminal display (if built into pico-lsi11)\n"
+            "  -no-display     Disable mirrored terminal display\n"
             "  -nl-to-cr       Map host newline (\\n) to CR (\\r) for input\n"
             "  -exit-on-abort  Exit emulator on HALT/abort\n"
             "  -steps N        Emulate N steps then exit\n"

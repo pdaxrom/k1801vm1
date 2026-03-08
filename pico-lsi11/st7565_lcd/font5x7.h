@@ -1,5 +1,5 @@
-#ifndef FONT5X7_H
-#define FONT5X7_H
+#ifndef PICO_LSI11_ST7565_FONT5X7_H
+#define PICO_LSI11_ST7565_FONT5X7_H
 
 #include <stdint.h>
 
