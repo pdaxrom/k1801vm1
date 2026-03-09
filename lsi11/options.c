@@ -22,6 +22,7 @@ void options_init(lsi11_options_t *opts)
     opts->dz_port = -1;
     opts->trace_after = -1;
     opts->max_steps = -1;
+    opts->display_enable = -1;
     opts->rh_mode = RH11_MODE_RH11;
     opts->cpu_model = DCJ11;
 }
@@ -213,8 +214,8 @@ void options_usage(const char *argv0)
     fprintf(stderr,
             "  -tty7b          DL11 console 7-bit mode (default)\n"
             "  -tty8b          DL11 console 8-bit mode\n"
-            "  -display        Enable mirrored terminal display (if built into pico-lsi11)\n"
-            "  -no-display     Disable mirrored terminal display\n"
+            "  -display        Enable mirrored terminal display (default on when supported)\n"
+            "  -no-display     Disable mirrored terminal display after boot logo\n"
             "  -nl-to-cr       Map host newline (\\n) to CR (\\r) for input\n"
             "  -exit-on-abort  Exit emulator on HALT/abort\n"
             "  -steps N        Emulate N steps then exit\n"

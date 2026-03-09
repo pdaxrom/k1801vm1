@@ -671,18 +671,21 @@ static int read_line(char *buf, size_t buf_len)
     for (;;) {
         int c = getchar_timeout_us(100000);
         if (c == PICO_ERROR_TIMEOUT) {
+            display_backend_task();
             tight_loop_contents();
             continue;
         }
 
         if (c == '\r' || c == '\n') {
             putchar('\n');
+            display_backend_task();
             break;
         }
 
         if ((c == 0x08 || c == 0x7f) && n > 0) {
             n--;
             printf("\b \b");
+            display_backend_task();
             continue;
         }
 
@@ -693,6 +696,7 @@ static int read_line(char *buf, size_t buf_len)
         if ((n + 1) < buf_len) {
             buf[n++] = (char)c;
             putchar(c);
+            display_backend_task();
         }
     }
 
@@ -720,14 +724,6 @@ static int prompt_number(const char *prompt, int min_value, int max_value)
 
         printf("Enter a number from %d to %d.\n", min_value, max_value);
     }
-}
-
-static int prompt_yes_no(const char *prompt)
-{
-    printf("%s\n", prompt);
-    printf("0. no\n");
-    printf("1. yes\n");
-    return prompt_number("Option [0/1]: ", 0, 1);
 }
 
 static void prompt_and_set_clock(lsi11_options_t *opts)
@@ -1070,7 +1066,13 @@ static void collect_menu_options(lsi11_options_t *opts, lsi11_machine_t machine_
     default:
         break;
     }
-    opts->display_enable = prompt_yes_no("Enable terminal display mirroring?");
+    if (display_backend_supported()) {
+        opts->display_enable = 1;
+        printf("Terminal display mirroring: enabled (%s)\n", display_backend_name());
+    } else {
+        opts->display_enable = 0;
+        printf("Terminal display mirroring: unavailable in this firmware build\n");
+    }
 
     disk_count = list_images(disk_images, MAX_IMAGES, IMAGE_FILTER_DISK);
     tape_count = list_images(tape_images, MAX_IMAGES, IMAGE_FILTER_TAPE);
@@ -1214,6 +1216,16 @@ static int load_default_options(lsi11_options_t *opts)
     }
 
     return 1;
+}
+
+static void resolve_display_option(lsi11_options_t *opts)
+{
+    if (!opts) {
+        return;
+    }
+    if (opts->display_enable < 0) {
+        opts->display_enable = display_backend_supported() ? 1 : 0;
+    }
 }
 
 static int prepare_machine_options(lsi11_options_t *opts, lsi11_machine_t machine_kind,
@@ -1916,6 +1928,7 @@ static int start_emulator(const lsi11_options_t *opts, char *err, size_t err_len
     multicore_launch_core1(core1_entry);
     multicore_fifo_push_blocking((uint32_t)(uintptr_t)r);
 
+    int divisor = 0;
     for (;;) {
         if (g_run_config.halted) {
             display_backend_task();
@@ -1923,7 +1936,9 @@ static int start_emulator(const lsi11_options_t *opts, char *err, size_t err_len
             continue;
         }
         lsi11_poll_devices();
-        display_backend_task();
+        if (divisor % 500 == 0) {
+            display_backend_task();
+        }
         sleep_us(100);
     }
 }
@@ -1933,17 +1948,27 @@ int main(void)
     lsi11_options_t opts;
     char cfg_err[160] = {0};
     int default_cfg_state;
+    bool display_initialized = false;
+    bool title_printed = false;
 
     stdio_init_all();
     sleep_ms(2000);
-
-    printf("\nPico LSI11 emulator\n");
+    if (display_backend_supported()) {
+        if (!display_backend_init()) {
+            fatal_halt("display initialization failed");
+        }
+        display_initialized = true;
+        display_backend_set_output_enabled(true);
+    }
 
     while (mount_sd_card() != 0) {
         char line[8];
         printf("SD is not initialized. Check power/wiring and press Enter to "
                "retry...\n");
         read_line(line, sizeof(line));
+    }
+    if (display_initialized) {
+        (void)display_backend_show_boot_logo();
     }
 
 #if defined(LSI11_TARGET_PDP1184)
@@ -1961,8 +1986,11 @@ int main(void)
         fatal_halt("failed to parse selected config file");
     }
     if (default_cfg_state == 0) {
+        printf("\nPico LSI11 emulator\n");
+        title_printed = true;
         collect_menu_options(&opts, g_machine_kind);
     }
+    resolve_display_option(&opts);
     if (apply_configured_clock(&opts) != 0) {
         fatal_halt("failed to apply configured RP2040 frequency");
     }
@@ -1971,13 +1999,24 @@ int main(void)
         fatal_halt(cfg_err);
     }
 
-    if (opts.display_enable) {
+    if (opts.display_enable > 0) {
         if (!display_backend_supported()) {
             fatal_halt("display mirroring requested, but this firmware was built without display support");
         }
-        if (!display_backend_init()) {
-            fatal_halt("display initialization failed");
+        if (!display_initialized) {
+            if (!display_backend_init()) {
+                fatal_halt("display initialization failed");
+            }
+            display_initialized = true;
         }
+        display_backend_set_output_enabled(true);
+    } else if (display_initialized) {
+        display_backend_set_output_enabled(false);
+    }
+
+    if (!title_printed) {
+        printf("\nPico LSI11 emulator\n");
+        title_printed = true;
     }
 
     print_config_summary(&opts);
