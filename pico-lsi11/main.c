@@ -952,6 +952,25 @@ static void print_image_list(const char *title, const image_entry_t *images, int
     }
 }
 
+static const char *persist_menu_path(const char *path)
+{
+    size_t len;
+    char *copy;
+
+    if (!path) {
+        return NULL;
+    }
+
+    len = strlen(path) + 1u;
+    copy = (char *)malloc(len);
+    if (!copy) {
+        fatal_halt("out of memory while saving selected image path");
+    }
+
+    memcpy(copy, path, len);
+    return copy;
+}
+
 static int select_image_index(const char *controller_name, int unit,
                               const image_entry_t *images, int image_count)
 {
@@ -1098,28 +1117,28 @@ static void collect_menu_options(lsi11_options_t *opts, lsi11_machine_t machine_
                                      RK11_MAX_DRIVES);
         for (int unit = 0; unit < attach_count; unit++) {
             int idx = select_image_index("RK", unit, disk_images, disk_count);
-            opts->rk_path[opts->rk_count++] = disk_images[idx].path;
+            opts->rk_path[opts->rk_count++] = persist_menu_path(disk_images[idx].path);
         }
 
         attach_count = prompt_number("Number of RH images to attach: ", 0,
                                      RH11_MAX_DRIVES);
         for (int unit = 0; unit < attach_count; unit++) {
             int idx = select_image_index("RH", unit, disk_images, disk_count);
-            opts->rh_path[opts->rh_count++] = disk_images[idx].path;
+            opts->rh_path[opts->rh_count++] = persist_menu_path(disk_images[idx].path);
         }
 
         attach_count = prompt_number("Number of XP/RP images to attach: ", 0,
                                      XP_MAX_DRIVES);
         for (int unit = 0; unit < attach_count; unit++) {
             int idx = select_image_index("XP", unit, disk_images, disk_count);
-            opts->xp_path[opts->xp_count++] = disk_images[idx].path;
+            opts->xp_path[opts->xp_count++] = persist_menu_path(disk_images[idx].path);
         }
 
         attach_count = prompt_number("Number of RL images to attach: ", 0,
                                      RL11_MAX_DRIVES);
         for (int unit = 0; unit < attach_count; unit++) {
             int idx = select_image_index("RL", unit, disk_images, disk_count);
-            opts->rl_path[opts->rl_count].path = disk_images[idx].path;
+            opts->rl_path[opts->rl_count].path = persist_menu_path(disk_images[idx].path);
             opts->rl_path[opts->rl_count].type = prompt_rl_type();
             opts->rl_count++;
         }
@@ -1130,7 +1149,7 @@ static void collect_menu_options(lsi11_options_t *opts, lsi11_machine_t machine_
                                      TQ11_MAX_UNITS);
         for (int unit = 0; unit < attach_count; unit++) {
             int idx = select_image_index("TQ", unit, tape_images, tape_count);
-            opts->tq_path[opts->tq_count++] = tape_images[idx].path;
+            opts->tq_path[opts->tq_count++] = persist_menu_path(tape_images[idx].path);
         }
     }
 
