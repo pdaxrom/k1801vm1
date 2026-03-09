@@ -2,9 +2,13 @@
 #include "devio.h"
 
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(PICO_ON_DEVICE)
+#include <unistd.h>
+#endif
 
 #ifndef __not_in_flash_func
 #define __not_in_flash_func(func_name) func_name
@@ -38,10 +42,29 @@ static size_t g_vm2_halt_ram_bytes = 0;
 static int g_pdp1184_io_16bit = 1;
 static int g_pdp1184_m22e = 0;
 
+#if defined(PICO_ON_DEVICE)
+extern char __StackLimit;
+extern void *_sbrk(int incr);
+
+static size_t bus_free_heap_bytes(void)
+{
+    const uintptr_t heap_end = (uintptr_t)_sbrk(0);
+    const uintptr_t heap_limit = (uintptr_t)&__StackLimit;
+
+    return (heap_end < heap_limit) ? (size_t)(heap_limit - heap_end) : 0u;
+}
+#endif
+
 static inline void *bus_alloc(size_t size)
 {
 #if defined(PICO_ON_DEVICE)
-    return malloc(size);
+    void *p = malloc(size);
+
+    if (!p) {
+        fprintf(stderr, "bus_alloc: allocation failed (%zu bytes, free heap %zu bytes)\n",
+                size, bus_free_heap_bytes());
+    }
+    return p;
 #else
     void *p = NULL;
     if (posix_memalign(&p, BUS_PAGE_SIZE, size) != 0) {
@@ -194,8 +217,13 @@ void bus_init(void)
     if (!g_ram) {
         g_ram = (uint8_t *)bus_alloc(need_bytes);
         if (!g_ram) {
+#if defined(PICO_ON_DEVICE)
+            fprintf(stderr, "bus_init: PDP11 RAM allocation failed (%zu bytes requested, %zu bytes free)\n",
+                    need_bytes, bus_free_heap_bytes());
+#else
             fprintf(stderr, "bus_init: memory allocation failed (%zu bytes)\n",
                     need_bytes);
+#endif
             abort();
         }
         g_ram_bytes = need_bytes;
@@ -221,8 +249,13 @@ void bus_init(void)
     if (!g_vm2_halt_ram) {
         g_vm2_halt_ram = (uint8_t *)bus_alloc(halt_need);
         if (!g_vm2_halt_ram) {
+#if defined(PICO_ON_DEVICE)
+            fprintf(stderr, "bus_init: VM2 HALT RAM allocation failed (%zu bytes requested, %zu bytes free)\n",
+                    halt_need, bus_free_heap_bytes());
+#else
             fprintf(stderr, "bus_init: VM2 HALT RAM allocation failed (%zu bytes)\n",
                     halt_need);
+#endif
             abort();
         }
         g_vm2_halt_ram_bytes = halt_need;

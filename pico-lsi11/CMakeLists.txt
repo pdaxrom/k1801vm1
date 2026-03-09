@@ -98,6 +98,7 @@ function(add_pico_emu_target target_name mmu_value machine_define)
 
   target_compile_definitions(${target_name} PRIVATE
       ENABLE_MMU=${mmu_value}
+      PICO_MALLOC_PANIC=0
       ${machine_define}=1
       ${PICO_LSI11_DISPLAY_DEFINITIONS}
   )
