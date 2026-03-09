@@ -16,6 +16,10 @@
 #include "pico/stdlib.h"
 #endif
 
+#ifndef __not_in_flash_func
+#define __not_in_flash_func(func_name) func_name
+#endif
+
 #ifndef MMU_STUB_REGS_WHEN_DISABLED
 #define MMU_STUB_REGS_WHEN_DISABLED 1
 #endif
@@ -2836,11 +2840,7 @@ static INLINE byte decode_data(regs *r, byte data, byte data_type,
 
 static int fp11(regs *r, word IR);
 
-#ifdef PICO_ON_DEVICE
 int __not_in_flash_func(core_step)(regs *r)
-#else
-int core_step(regs *r)
-#endif
 {
     word src_offset;
     byte src_type;

@@ -1,6 +1,7 @@
 #include "ili9486l.h"
 
 #include "font5x7.h"
+#include "ili9486l_internal.h"
 
 #include "hardware/dma.h"
 #include "hardware/spi.h"
@@ -47,14 +48,23 @@ static uint16_t g_scroll_bottom_fixed = 0;
 static uint16_t g_scroll_start = 0;
 static int g_spi_tx_dma_channel = -1;
 static dma_channel_config_t g_spi_tx_dma_config;
+static bool g_spi_tx_dma_in_flight = false;
 
-static inline void ili9486l_set_dc(uint8_t data_mode)
+static void __not_in_flash_func(ili9486l_finish_spi_write)(void);
+
+static void __not_in_flash_func(ili9486l_set_dc)(uint8_t data_mode)
 {
+    if (g_spi_tx_dma_in_flight) {
+        dma_channel_wait_for_finish_blocking((uint)g_spi_tx_dma_channel);
+        g_spi_tx_dma_in_flight = false;
+        ili9486l_finish_spi_write();
+    }
+
     gpio_put(LCD_PIN_DC, data_mode);
     busy_wait_us_32(1);
 }
 
-static void ili9486l_finish_spi_write(void)
+static void __not_in_flash_func(ili9486l_finish_spi_write)(void)
 {
     while (spi_is_readable(LCD_SPI_PORT)) {
         (void)spi_get_hw(LCD_SPI_PORT)->dr;
@@ -85,7 +95,7 @@ static void ili9486l_init_dma(void)
     channel_config_set_dreq(&g_spi_tx_dma_config, spi_get_dreq(LCD_SPI_PORT, true));
 }
 
-static bool ili9486l_write_dma_if_beneficial(const uint8_t *data, size_t len)
+static bool __not_in_flash_func(ili9486l_write_dma_if_beneficial)(const uint8_t *data, size_t len)
 {
     if (data == NULL || len < ILI9486L_DMA_MIN_TRANSFER_BYTES || g_spi_tx_dma_channel < 0) {
         return false;
@@ -101,6 +111,17 @@ static bool ili9486l_write_dma_if_beneficial(const uint8_t *data, size_t len)
     dma_channel_wait_for_finish_blocking((uint)g_spi_tx_dma_channel);
     ili9486l_finish_spi_write();
     return true;
+}
+
+void __not_in_flash_func(ili9486l_wait_for_pending_write)(void)
+{
+    if (!g_spi_tx_dma_in_flight) {
+        return;
+    }
+
+    dma_channel_wait_for_finish_blocking((uint)g_spi_tx_dma_channel);
+    g_spi_tx_dma_in_flight = false;
+    ili9486l_finish_spi_write();
 }
 
 static void ili9486l_write_command(uint8_t command)
@@ -190,7 +211,7 @@ static inline void ili9486l_color_to_rgb666(lcd_color_t color, uint8_t out[3])
     out[2] = (uint8_t)((color & 0x3Fu) << 2);
 }
 
-static void ili9486l_set_address_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
+static void __not_in_flash_func(ili9486l_set_address_window)(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1)
 {
     const uint8_t column_address[] = {
         (uint8_t)(x0 >> 8), (uint8_t)(x0 & 0xFFu),
@@ -206,7 +227,7 @@ static void ili9486l_set_address_window(uint16_t x0, uint16_t y0, uint16_t x1, u
     ili9486l_write_command(0x2C);
 }
 
-static void ili9486l_write_rgb666_repeat(const uint8_t pixel[3], uint32_t pixel_count)
+static void __not_in_flash_func(ili9486l_write_rgb666_repeat)(const uint8_t pixel[3], uint32_t pixel_count)
 {
     uint8_t burst[64 * 3];
 
@@ -226,7 +247,7 @@ static void ili9486l_write_rgb666_repeat(const uint8_t pixel[3], uint32_t pixel_
     }
 }
 
-static void ili9486l_write_color_repeat(lcd_color_t color, uint32_t pixel_count)
+static void __not_in_flash_func(ili9486l_write_color_repeat)(lcd_color_t color, uint32_t pixel_count)
 {
     uint8_t pixel[3];
 
@@ -234,7 +255,7 @@ static void ili9486l_write_color_repeat(lcd_color_t color, uint32_t pixel_count)
     ili9486l_write_rgb666_repeat(pixel, pixel_count);
 }
 
-bool ili9486l_begin_write(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+bool __not_in_flash_func(ili9486l_begin_write)(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     if (w == 0 || h == 0 || x >= g_width || y >= g_height) {
         return false;
@@ -309,7 +330,7 @@ void ili9486l_reset_vertical_scroll(void)
     (void)ili9486l_set_vertical_scroll_start(0);
 }
 
-void ili9486l_write_rgb666_pixels(const uint8_t *pixels, size_t pixel_count)
+void __not_in_flash_func(ili9486l_write_rgb666_pixels)(const uint8_t *pixels, size_t pixel_count)
 {
     uint8_t burst[64 * 3];
     const uint8_t *src = pixels;
@@ -335,7 +356,7 @@ void ili9486l_write_rgb666_pixels(const uint8_t *pixels, size_t pixel_count)
     }
 }
 
-void ili9486l_write_rgb666_wire_pixels(const uint8_t *pixels, size_t pixel_count)
+void __not_in_flash_func(ili9486l_write_rgb666_wire_pixels)(const uint8_t *pixels, size_t pixel_count)
 {
     const size_t len = pixel_count * 3u;
 
@@ -349,7 +370,33 @@ void ili9486l_write_rgb666_wire_pixels(const uint8_t *pixels, size_t pixel_count
     }
 }
 
-void ili9486l_write_rgb888_as_rgb666_pixels(const uint8_t *pixels, size_t pixel_count)
+void __not_in_flash_func(ili9486l_write_rgb666_wire_pixels_async)(const uint8_t *pixels, size_t pixel_count)
+{
+    const size_t len = pixel_count * 3u;
+
+    if (pixels == NULL || pixel_count == 0u) {
+        return;
+    }
+
+    ili9486l_wait_for_pending_write();
+    ili9486l_set_dc(1);
+
+    if (len < ILI9486L_DMA_MIN_TRANSFER_BYTES || g_spi_tx_dma_channel < 0) {
+        spi_write_blocking(LCD_SPI_PORT, pixels, len);
+        return;
+    }
+
+    dma_channel_configure(
+        (uint)g_spi_tx_dma_channel,
+        &g_spi_tx_dma_config,
+        &spi_get_hw(LCD_SPI_PORT)->dr,
+        pixels,
+        dma_encode_transfer_count((uint)len),
+        true);
+    g_spi_tx_dma_in_flight = true;
+}
+
+void __not_in_flash_func(ili9486l_write_rgb888_as_rgb666_pixels)(const uint8_t *pixels, size_t pixel_count)
 {
     uint8_t burst[64 * 3];
     const uint8_t *src = pixels;
@@ -515,7 +562,7 @@ void ili9486l_draw_pixel(uint16_t x, uint16_t y, lcd_color_t color)
     ili9486l_write_color_repeat(color, 1);
 }
 
-void ili9486l_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, lcd_color_t color)
+void __not_in_flash_func(ili9486l_fill_rect)(uint16_t x, uint16_t y, uint16_t w, uint16_t h, lcd_color_t color)
 {
     if (w == 0 || h == 0 || x >= g_width || y >= g_height) {
         return;
@@ -532,8 +579,8 @@ void ili9486l_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, lcd_colo
     ili9486l_write_color_repeat(color, (uint32_t)w * h);
 }
 
-void ili9486l_fill_rect_rgb666(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t red, uint8_t green,
-                               uint8_t blue)
+void __not_in_flash_func(ili9486l_fill_rect_rgb666)(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint8_t red,
+                                                     uint8_t green, uint8_t blue)
 {
     uint8_t pixel[3];
 
@@ -575,7 +622,8 @@ static void ili9486l_draw_char_slow(uint16_t x, uint16_t y, char c, lcd_color_t 
     }
 }
 
-void ili9486l_draw_char(uint16_t x, uint16_t y, char c, lcd_color_t fg, lcd_color_t bg, uint8_t scale)
+void __not_in_flash_func(ili9486l_draw_char)(uint16_t x, uint16_t y, char c, lcd_color_t fg, lcd_color_t bg,
+                                             uint8_t scale)
 {
     const uint8_t *glyph_rows;
     const uint16_t glyph_w = (uint16_t)(6u * scale);

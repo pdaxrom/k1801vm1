@@ -2,6 +2,10 @@
 #include "io_lock.h"
 #include <stddef.h>
 
+#ifndef __not_in_flash_func
+#define __not_in_flash_func(func_name) func_name
+#endif
+
 #define IO_PAGE_START 0160000
 #define IO_PAGE_END 0177777
 
@@ -10,7 +14,7 @@
 static io_range_t g_ranges[MAX_RANGES];
 static int g_count = 0;
 
-static int range_valid(const io_range_t *r)
+static inline int range_valid(const io_range_t *r)
 {
     if (!r || !r->read8 || !r->write8) {
         return 0;
@@ -37,11 +41,7 @@ int devio_register(const io_range_t *r)
     return 0;
 }
 
-#ifdef PICO_ON_DEVICE
 int __not_in_flash_func(devio_has)(uint16_t addr)
-#else
-int devio_has(uint16_t addr)
-#endif
 {
     int i;
     for (i = 0; i < g_count; i++) {
@@ -52,11 +52,7 @@ int devio_has(uint16_t addr)
     return 0;
 }
 
-#ifdef PICO_ON_DEVICE
 uint8_t __not_in_flash_func(devio_read8)(uint16_t addr)
-#else
-uint8_t devio_read8(uint16_t addr)
-#endif
 {
     int i;
     uint32_t irqstate = io_lock_acquire();
@@ -71,11 +67,7 @@ uint8_t devio_read8(uint16_t addr)
     return 0;
 }
 
-#ifdef PICO_ON_DEVICE
 void __not_in_flash_func(devio_write8)(uint16_t addr, uint8_t v)
-#else
-void devio_write8(uint16_t addr, uint8_t v)
-#endif
 {
     int i;
     uint32_t irqstate = io_lock_acquire();

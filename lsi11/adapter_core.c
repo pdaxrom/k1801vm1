@@ -30,6 +30,10 @@
 #include "../core/core.h"  /* TODO: replace with your actual core header */
 #include "../core/disas.h" /* optional if you want disassembly on NXM */
 
+#ifndef __not_in_flash_func
+#define __not_in_flash_func(func_name) func_name
+#endif
+
 /* If your core defines word/byte types, use them; otherwise define here.
    TODO: remove these if core already defines them. */
 #ifndef word
@@ -357,11 +361,7 @@ static inline void nxm_trap(regs *r, paddr_t addr)
 
 /* ---------- bus callbacks for core ---------- */
 
-#ifdef PICO_ON_DEVICE
 static byte __not_in_flash_func(core_load_byte)(regs *r, word addr)
-#else
-static byte core_load_byte(regs *r, word addr)
-#endif
 {
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
@@ -378,11 +378,7 @@ static byte core_load_byte(regs *r, word addr)
     return bus_read8((paddr_t)addr);
 }
 
-#ifdef PICO_ON_DEVICE
 static void __not_in_flash_func(core_store_byte)(regs *r, word addr, byte v)
-#else
-static void core_store_byte(regs *r, word addr, byte v)
-#endif
 {
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
@@ -400,11 +396,7 @@ static void core_store_byte(regs *r, word addr, byte v)
     bus_write8((paddr_t)addr, v);
 }
 
-#ifdef PICO_ON_DEVICE
 static word __not_in_flash_func(core_load_word)(regs *r, word addr)
-#else
-static word core_load_word(regs *r, word addr)
-#endif
 {
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
@@ -423,11 +415,7 @@ static word core_load_word(regs *r, word addr)
     return (word)bus_read16((paddr_t)addr);
 }
 
-#ifdef PICO_ON_DEVICE
 static void __not_in_flash_func(core_store_word)(regs *r, word addr, word v)
-#else
-static void core_store_word(regs *r, word addr, word v)
-#endif
 {
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
@@ -447,11 +435,7 @@ static void core_store_word(regs *r, word addr, word v)
     bus_write16((paddr_t)addr, (uint16_t)v);
 }
 
-#ifdef PICO_ON_DEVICE
 static byte __not_in_flash_func(core_load_byte_pa)(regs *r, dword addr)
-#else
-static byte core_load_byte_pa(regs *r, dword addr)
-#endif
 {
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
@@ -460,11 +444,7 @@ static byte core_load_byte_pa(regs *r, dword addr)
     return bus_read8((paddr_t)addr);
 }
 
-#ifdef PICO_ON_DEVICE
 static void __not_in_flash_func(core_store_byte_pa)(regs *r, dword addr, byte v)
-#else
-static void core_store_byte_pa(regs *r, dword addr, byte v)
-#endif
 {
     if (bus_is_nxm((paddr_t)addr)) {
         nxm_trap(r, (paddr_t)addr);
@@ -473,11 +453,7 @@ static void core_store_byte_pa(regs *r, dword addr, byte v)
     bus_write8((paddr_t)addr, v);
 }
 
-#ifdef PICO_ON_DEVICE
 static word __not_in_flash_func(core_load_word_pa)(regs *r, dword addr)
-#else
-static word core_load_word_pa(regs *r, dword addr)
-#endif
 {
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
@@ -486,11 +462,7 @@ static word core_load_word_pa(regs *r, dword addr)
     return (word)bus_read16((paddr_t)addr);
 }
 
-#ifdef PICO_ON_DEVICE
 static void __not_in_flash_func(core_store_word_pa)(regs *r, dword addr, word v)
-#else
-static void core_store_word_pa(regs *r, dword addr, word v)
-#endif
 {
     if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
         nxm_trap(r, (paddr_t)addr);
@@ -632,11 +604,7 @@ static void impl_fini(regs *r)
 }
 
 /* IRQ poll callback: delegates to irq_poll() */
-#ifdef PICO_ON_DEVICE
 int __not_in_flash_func(core_poll_irq)(regs *r, word *vec)
-#else
-static int core_poll_irq(regs *r, word *vec)
-#endif
 {
     uint16_t v = 0;
     uint32_t irqstate = io_lock_acquire();

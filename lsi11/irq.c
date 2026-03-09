@@ -4,6 +4,10 @@
 #include "pico/stdlib.h"
 #endif
 
+#ifndef __not_in_flash_func
+#define __not_in_flash_func(func_name) func_name
+#endif
+
 #include "../core/core.h"
 
 #define MAX_IRQ 32
@@ -32,11 +36,7 @@ int irq_register(const irq_source_t *s)
     return 0;
 }
 
-#ifdef PICO_ON_DEVICE
 int __not_in_flash_func(irq_poll)(regs *r, uint16_t *vec_out)
-#else
-int irq_poll(regs *r, uint16_t *vec_out)
-#endif
 {
     int best = -1;
     uint8_t best_pri = 0;

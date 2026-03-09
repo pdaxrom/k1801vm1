@@ -2,6 +2,17 @@
 
 #include "font5x7.h"
 #include "ili9486l.h"
+#include "ili9486l_internal.h"
+
+#if defined(__has_include)
+#if __has_include("pico.h")
+#include "pico.h"
+#endif
+#endif
+
+#ifndef __not_in_flash_func
+#define __not_in_flash_func(func_name) func_name
+#endif
 
 #include <stddef.h>
 #include <stdio.h>
@@ -70,28 +81,30 @@ typedef struct {
     bool underline;
 } vt100_terminal_render_cache_t;
 
-static uint8_t g_scanline_buffer[VT100_TERMINAL_WIDTH_PIXELS * 3u];
+static uint8_t g_scanline_buffers[2][VT100_TERMINAL_WIDTH_PIXELS * 3u];
 static vt100_terminal_render_cache_t g_render_row_cache[VT100_TERMINAL_COLS];
-static void vt100_terminal_render_row(vt100_terminal_t *terminal, uint8_t row);
-static void vt100_terminal_render_row_range(vt100_terminal_t *terminal, uint8_t row, uint8_t col_start,
-        uint8_t col_end);
-static void vt100_terminal_scroll_up_region(vt100_terminal_t *terminal, uint8_t top, uint8_t bottom);
-static void vt100_terminal_scroll_down_region(vt100_terminal_t *terminal, uint8_t top, uint8_t bottom);
-static void vt100_terminal_commit_wrap(vt100_terminal_t *terminal);
-static void vt100_terminal_advance(vt100_terminal_t *terminal);
+static void __not_in_flash_func(vt100_terminal_render_row)(vt100_terminal_t *terminal, uint8_t row);
+static void __not_in_flash_func(vt100_terminal_render_row_range)(vt100_terminal_t *terminal, uint8_t row,
+        uint8_t col_start, uint8_t col_end);
+static void __not_in_flash_func(vt100_terminal_scroll_up_region)(vt100_terminal_t *terminal, uint8_t top,
+        uint8_t bottom);
+static void __not_in_flash_func(vt100_terminal_scroll_down_region)(vt100_terminal_t *terminal, uint8_t top,
+        uint8_t bottom);
+static void __not_in_flash_func(vt100_terminal_commit_wrap)(vt100_terminal_t *terminal);
+static void __not_in_flash_func(vt100_terminal_advance)(vt100_terminal_t *terminal);
 static uint8_t vt100_terminal_row_base(const vt100_terminal_t *terminal);
 
-static uint8_t vt100_terminal_current_attr(const vt100_terminal_t *terminal)
+static inline uint8_t vt100_terminal_current_attr(const vt100_terminal_t *terminal)
 {
     return VT100_ATTR(terminal->fg, terminal->bg);
 }
 
-static uint8_t vt100_terminal_current_style(const vt100_terminal_t *terminal)
+static inline uint8_t vt100_terminal_current_style(const vt100_terminal_t *terminal)
 {
     return terminal->style;
 }
 
-static uint8_t vt100_terminal_normal_charset(const vt100_terminal_t *terminal)
+static inline uint8_t vt100_terminal_normal_charset(const vt100_terminal_t *terminal)
 {
     if (terminal->vt52_mode) {
         return terminal->vt52_graphics ? VT100_CHARSET_DEC_SPECIAL : terminal->g0_charset;
@@ -100,7 +113,7 @@ static uint8_t vt100_terminal_normal_charset(const vt100_terminal_t *terminal)
     return terminal->gl_set == 0u ? terminal->g0_charset : terminal->g1_charset;
 }
 
-static uint8_t vt100_terminal_current_charset(const vt100_terminal_t *terminal)
+static inline uint8_t vt100_terminal_current_charset(const vt100_terminal_t *terminal)
 {
     if (terminal->single_shift_pending && !terminal->vt52_mode) {
         return terminal->single_shift_charset;
@@ -133,8 +146,8 @@ static uint8_t vt100_terminal_sanitize_char(char ch)
     return (uint8_t)ch;
 }
 
-static void vt100_terminal_set_cell(vt100_terminal_t *terminal, uint8_t row, uint8_t col, char ch, uint8_t attr,
-                                    uint8_t style, uint8_t charset)
+static inline void vt100_terminal_set_cell(vt100_terminal_t *terminal, uint8_t row, uint8_t col, char ch,
+                                           uint8_t attr, uint8_t style, uint8_t charset)
 {
     terminal->cells[row][col].ch = ch;
     terminal->cells[row][col].attr = attr;
@@ -314,21 +327,21 @@ static void vt100_terminal_alignment_display(vt100_terminal_t *terminal)
     vt100_terminal_render(terminal);
 }
 
-static void vt100_terminal_copy_color(uint8_t dst[3], const uint8_t src[3])
+static inline void vt100_terminal_copy_color(uint8_t dst[3], const uint8_t src[3])
 {
     dst[0] = src[0];
     dst[1] = src[1];
     dst[2] = src[2];
 }
 
-static void vt100_terminal_pack_wire_color(uint8_t color[3])
+static inline void vt100_terminal_pack_wire_color(uint8_t color[3])
 {
     color[0] = (uint8_t)((color[0] & 0x3Fu) << 2);
     color[1] = (uint8_t)((color[1] & 0x3Fu) << 2);
     color[2] = (uint8_t)((color[2] & 0x3Fu) << 2);
 }
 
-static void vt100_terminal_swap_colors(uint8_t first[3], uint8_t second[3])
+static inline void vt100_terminal_swap_colors(uint8_t first[3], uint8_t second[3])
 {
     for (uint8_t i = 0; i < 3u; ++i) {
         const uint8_t tmp = first[i];
@@ -337,7 +350,7 @@ static void vt100_terminal_swap_colors(uint8_t first[3], uint8_t second[3])
     }
 }
 
-static void vt100_terminal_dim_color(uint8_t color[3])
+static inline void vt100_terminal_dim_color(uint8_t color[3])
 {
     color[0] >>= 1;
     color[1] >>= 1;
@@ -492,7 +505,7 @@ static const uint8_t *vt100_terminal_get_dec_special_row_masks(char ch)
     }
 }
 
-static const uint8_t *vt100_terminal_get_cell_row_masks(const vt100_terminal_cell_t *cell)
+static const uint8_t *__not_in_flash_func(vt100_terminal_get_cell_row_masks)(const vt100_terminal_cell_t *cell)
 {
     const char ch = (char)vt100_terminal_sanitize_char(cell->ch);
     const uint8_t *builtin_rows = NULL;
@@ -521,8 +534,8 @@ static const uint8_t *vt100_terminal_get_cell_row_masks(const vt100_terminal_cel
     return builtin_rows;
 }
 
-static void vt100_terminal_resolve_colors(const vt100_terminal_t *terminal, const vt100_terminal_cell_t *cell,
-        bool invert, uint8_t fg[3], uint8_t bg[3])
+static void __not_in_flash_func(vt100_terminal_resolve_colors)(const vt100_terminal_t *terminal,
+        const vt100_terminal_cell_t *cell, bool invert, uint8_t fg[3], uint8_t bg[3])
 {
     uint8_t fg_index = VT100_ATTR_FG(cell->attr);
     const uint8_t bg_index = VT100_ATTR_BG(cell->attr);
@@ -562,7 +575,7 @@ static void vt100_terminal_resolve_colors(const vt100_terminal_t *terminal, cons
     vt100_terminal_pack_wire_color(bg);
 }
 
-static void vt100_terminal_prepare_cell_render(
+static void __not_in_flash_func(vt100_terminal_prepare_cell_render)(
     const vt100_terminal_t *terminal,
     const vt100_terminal_cell_t *cell,
     bool invert,
@@ -573,8 +586,8 @@ static void vt100_terminal_prepare_cell_render(
     vt100_terminal_resolve_colors(terminal, cell, invert, render_data->fg, render_data->bg);
 }
 
-static void vt100_terminal_render_cell_internal(const vt100_terminal_t *terminal, uint8_t row, uint8_t col,
-        bool invert)
+static void __not_in_flash_func(vt100_terminal_render_cell_internal)(const vt100_terminal_t *terminal, uint8_t row,
+        uint8_t col, bool invert)
 {
     uint8_t cell_pixels[VT100_TERMINAL_CELL_WIDTH * VT100_TERMINAL_CELL_HEIGHT * 3u];
     vt100_terminal_render_cache_t render_data;
@@ -607,7 +620,7 @@ static void vt100_terminal_render_cell_internal(const vt100_terminal_t *terminal
         VT100_TERMINAL_CELL_HEIGHT);
 }
 
-static void vt100_terminal_hide_cursor(vt100_terminal_t *terminal)
+static void __not_in_flash_func(vt100_terminal_hide_cursor)(vt100_terminal_t *terminal)
 {
     if (!terminal->cursor_visible) {
         return;
@@ -616,7 +629,7 @@ static void vt100_terminal_hide_cursor(vt100_terminal_t *terminal)
     vt100_terminal_render_cell_internal(terminal, terminal->cursor_row, terminal->cursor_col, false);
 }
 
-static void vt100_terminal_show_cursor(vt100_terminal_t *terminal)
+static void __not_in_flash_func(vt100_terminal_show_cursor)(vt100_terminal_t *terminal)
 {
     if (!terminal->cursor_visible) {
         return;
@@ -625,11 +638,12 @@ static void vt100_terminal_show_cursor(vt100_terminal_t *terminal)
     vt100_terminal_render_cell_internal(terminal, terminal->cursor_row, terminal->cursor_col, true);
 }
 
-static void vt100_terminal_render_row_range(vt100_terminal_t *terminal, uint8_t row, uint8_t col_start,
-        uint8_t col_end)
+static void __not_in_flash_func(vt100_terminal_render_row_range)(vt100_terminal_t *terminal, uint8_t row,
+        uint8_t col_start, uint8_t col_end)
 {
     const uint16_t pixel_x = (uint16_t)(terminal->origin_x + col_start * VT100_TERMINAL_CELL_WIDTH);
     const uint16_t pixel_w = (uint16_t)((uint16_t)(col_end - col_start + 1u) * VT100_TERMINAL_CELL_WIDTH);
+    uint8_t buffer_index = 0u;
 
     if (row >= VT100_TERMINAL_ROWS || col_start > col_end || col_end >= VT100_TERMINAL_COLS) {
         return;
@@ -650,7 +664,7 @@ static void vt100_terminal_render_row_range(vt100_terminal_t *terminal, uint8_t 
     }
 
     for (uint8_t py = 0; py < VT100_TERMINAL_CELL_HEIGHT; ++py) {
-        uint8_t *dst = g_scanline_buffer;
+        uint8_t *dst = g_scanline_buffers[buffer_index];
 
         for (uint8_t col = col_start; col <= col_end; ++col) {
             const vt100_terminal_render_cache_t *render_data = &g_render_row_cache[col];
@@ -669,16 +683,19 @@ static void vt100_terminal_render_row_range(vt100_terminal_t *terminal, uint8_t 
             }
         }
 
-        ili9486l_write_rgb666_wire_pixels(g_scanline_buffer, pixel_w);
+        ili9486l_write_rgb666_wire_pixels_async(g_scanline_buffers[buffer_index], pixel_w);
+        buffer_index ^= 1u;
     }
+
+    ili9486l_wait_for_pending_write();
 }
 
-static void vt100_terminal_render_row(vt100_terminal_t *terminal, uint8_t row)
+static void __not_in_flash_func(vt100_terminal_render_row)(vt100_terminal_t *terminal, uint8_t row)
 {
     vt100_terminal_render_row_range(terminal, row, 0u, (uint8_t)(VT100_TERMINAL_COLS - 1u));
 }
 
-static void vt100_terminal_refresh_blink_rows(vt100_terminal_t *terminal)
+static void __not_in_flash_func(vt100_terminal_refresh_blink_rows)(vt100_terminal_t *terminal)
 {
     bool cursor_row_redrawn = false;
 
@@ -878,7 +895,7 @@ static void vt100_terminal_write_cell(vt100_terminal_t *terminal, const vt100_te
     vt100_terminal_advance(terminal);
 }
 
-static bool vt100_terminal_write_cell_fast(
+static bool __not_in_flash_func(vt100_terminal_write_cell_fast)(
     vt100_terminal_t *terminal,
     const vt100_terminal_cell_t *cell,
     uint8_t *write_row,
@@ -915,7 +932,8 @@ static bool vt100_terminal_write_cell_fast(
     return true;
 }
 
-static void vt100_terminal_scroll_up_region(vt100_terminal_t *terminal, uint8_t top, uint8_t bottom)
+static void __not_in_flash_func(vt100_terminal_scroll_up_region)(vt100_terminal_t *terminal, uint8_t top,
+        uint8_t bottom)
 {
     if (top >= bottom || bottom >= VT100_TERMINAL_ROWS) {
         return;
@@ -939,7 +957,8 @@ static void vt100_terminal_scroll_up_region(vt100_terminal_t *terminal, uint8_t 
     }
 }
 
-static void vt100_terminal_scroll_down_region(vt100_terminal_t *terminal, uint8_t top, uint8_t bottom)
+static void __not_in_flash_func(vt100_terminal_scroll_down_region)(vt100_terminal_t *terminal, uint8_t top,
+        uint8_t bottom)
 {
     if (top >= bottom || bottom >= VT100_TERMINAL_ROWS) {
         return;
@@ -963,7 +982,7 @@ static void vt100_terminal_scroll_down_region(vt100_terminal_t *terminal, uint8_
     }
 }
 
-static void vt100_terminal_commit_wrap(vt100_terminal_t *terminal)
+static void __not_in_flash_func(vt100_terminal_commit_wrap)(vt100_terminal_t *terminal)
 {
     if (!terminal->wrap_pending) {
         return;
@@ -978,7 +997,7 @@ static void vt100_terminal_commit_wrap(vt100_terminal_t *terminal)
     }
 }
 
-static void vt100_terminal_newline(vt100_terminal_t *terminal)
+static void __not_in_flash_func(vt100_terminal_newline)(vt100_terminal_t *terminal)
 {
     terminal->wrap_pending = false;
 
@@ -1012,7 +1031,7 @@ static void vt100_terminal_reverse_index(vt100_terminal_t *terminal)
     }
 }
 
-static void vt100_terminal_advance(vt100_terminal_t *terminal)
+static void __not_in_flash_func(vt100_terminal_advance)(vt100_terminal_t *terminal)
 {
     if (terminal->cursor_col == VT100_TERMINAL_COLS - 1u) {
         if (terminal->autowrap) {
@@ -1542,7 +1561,7 @@ void vt100_terminal_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms)
     }
 }
 
-void vt100_terminal_putc(vt100_terminal_t *terminal, char ch)
+void __not_in_flash_func(vt100_terminal_putc)(vt100_terminal_t *terminal, char ch)
 {
     const unsigned char uch = (unsigned char)ch;
     const uint8_t old_cursor_row = terminal->cursor_row;
@@ -1892,7 +1911,7 @@ void vt100_terminal_putc(vt100_terminal_t *terminal, char ch)
     vt100_terminal_show_cursor(terminal);
 }
 
-void vt100_terminal_write_n(vt100_terminal_t *terminal, const char *text, size_t len)
+void __not_in_flash_func(vt100_terminal_write_n)(vt100_terminal_t *terminal, const char *text, size_t len)
 {
     bool batch_active = false;
     uint8_t batch_row = 0u;

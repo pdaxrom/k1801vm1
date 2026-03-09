@@ -13,6 +13,10 @@
 #include <string.h>
 #include "hardware.h"
 
+#ifndef __not_in_flash_func
+#define __not_in_flash_func(func_name) func_name
+#endif
+
 static byte *mem = NULL;
 static size_t mem_size = 0;
 
