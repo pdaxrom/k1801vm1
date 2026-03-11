@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "hardware/clocks.h"
 #include "hardware/sync.h"
@@ -122,6 +123,9 @@ static int preload_rt11_boot_block_attached(boot_copy_unit_fn copy_fn, unsigned 
 static pico_run_config_t g_run_config = {0};
 static lsi11_machine_t g_machine_kind = LSI11_MACHINE_1104;
 
+extern char __StackLimit;
+extern void *_sbrk(int incr);
+
 static uint32_t pico_pdp1184_ram_limit_kb(void)
 {
 #if PICO_RP2350
@@ -129,6 +133,16 @@ static uint32_t pico_pdp1184_ram_limit_kb(void)
 #else
     return 128u;
 #endif
+}
+
+static void print_startup_banner(void)
+{
+    const uintptr_t heap_end = (uintptr_t)_sbrk(0);
+    const uintptr_t heap_limit = (uintptr_t)&__StackLimit;
+    const uintptr_t free_ram_bytes = (heap_end < heap_limit) ? (heap_limit - heap_end) : 0u;
+
+    printf("\nPico LSI11 emulator\n");
+    printf("Free RAM: %lu KB\n", (unsigned long)(free_ram_bytes / 1024u));
 }
 
 static const freq_profile_t freq_profiles[] = {
@@ -2005,7 +2019,7 @@ int main(void)
         fatal_halt("failed to parse selected config file");
     }
     if (default_cfg_state == 0) {
-        printf("\nPico LSI11 emulator\n");
+        print_startup_banner();
         title_printed = true;
         collect_menu_options(&opts, g_machine_kind);
     }
@@ -2034,7 +2048,7 @@ int main(void)
     }
 
     if (!title_printed) {
-        printf("\nPico LSI11 emulator\n");
+        print_startup_banner();
         title_printed = true;
     }
 
