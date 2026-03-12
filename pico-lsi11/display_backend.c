@@ -6,12 +6,17 @@
 
 #define DISPLAY_BACKEND_QUEUE_CAPACITY 4096u
 #define DISPLAY_BACKEND_DRAIN_CHUNK 128u
+#define DISPLAY_BACKEND_INPUT_QUEUE_CAPACITY 256u
 
 static critical_section_t g_display_queue_lock;
 static char g_display_queue[DISPLAY_BACKEND_QUEUE_CAPACITY];
 static uint16_t g_display_queue_head = 0u;
 static uint16_t g_display_queue_tail = 0u;
 static uint16_t g_display_queue_count = 0u;
+static uint8_t g_display_input_queue[DISPLAY_BACKEND_INPUT_QUEUE_CAPACITY];
+static uint16_t g_display_input_queue_head = 0u;
+static uint16_t g_display_input_queue_tail = 0u;
+static uint16_t g_display_input_queue_count = 0u;
 static bool g_display_backend_initialized = false;
 static bool g_display_backend_queue_ready = false;
 static bool g_display_backend_output_enabled = false;
@@ -23,6 +28,9 @@ static void display_queue_reset(void)
         g_display_queue_head = 0u;
         g_display_queue_tail = 0u;
         g_display_queue_count = 0u;
+        g_display_input_queue_head = 0u;
+        g_display_input_queue_tail = 0u;
+        g_display_input_queue_count = 0u;
         g_display_last_output_char = '\0';
         return;
     }
@@ -31,6 +39,9 @@ static void display_queue_reset(void)
     g_display_queue_head = 0u;
     g_display_queue_tail = 0u;
     g_display_queue_count = 0u;
+    g_display_input_queue_head = 0u;
+    g_display_input_queue_tail = 0u;
+    g_display_input_queue_count = 0u;
     critical_section_exit(&g_display_queue_lock);
     g_display_last_output_char = '\0';
 }
@@ -76,6 +87,49 @@ static size_t display_queue_pop_n(char *buf, size_t buf_len)
     }
     critical_section_exit(&g_display_queue_lock);
     return popped;
+}
+
+static bool display_input_queue_try_push(uint8_t ch)
+{
+    bool pushed = false;
+
+    if (!g_display_backend_initialized) {
+        return false;
+    }
+
+    critical_section_enter_blocking(&g_display_queue_lock);
+    if (g_display_input_queue_count < DISPLAY_BACKEND_INPUT_QUEUE_CAPACITY) {
+        g_display_input_queue[g_display_input_queue_head] = ch;
+        g_display_input_queue_head++;
+        if (g_display_input_queue_head == DISPLAY_BACKEND_INPUT_QUEUE_CAPACITY) {
+            g_display_input_queue_head = 0u;
+        }
+        g_display_input_queue_count++;
+        pushed = true;
+    }
+    critical_section_exit(&g_display_queue_lock);
+    return pushed;
+}
+
+static int display_input_queue_pop(void)
+{
+    int ch = -1;
+
+    if (!g_display_backend_initialized) {
+        return -1;
+    }
+
+    critical_section_enter_blocking(&g_display_queue_lock);
+    if (g_display_input_queue_count > 0u) {
+        ch = g_display_input_queue[g_display_input_queue_tail];
+        g_display_input_queue_tail++;
+        if (g_display_input_queue_tail == DISPLAY_BACKEND_INPUT_QUEUE_CAPACITY) {
+            g_display_input_queue_tail = 0u;
+        }
+        g_display_input_queue_count--;
+    }
+    critical_section_exit(&g_display_queue_lock);
+    return ch;
 }
 
 static void display_backend_enqueue_char(char ch)
@@ -211,6 +265,31 @@ void display_backend_task(void)
 static vt100_terminal_t g_terminal;
 static uint32_t g_last_terminal_tick_ms = 0u;
 
+static void display_backend_ili_terminal_output(const char *data, size_t len, void *user_data)
+{
+    (void)user_data;
+
+    if (data == NULL || len == 0u) {
+        return;
+    }
+
+    for (size_t i = 0; i < len; ++i) {
+        (void)display_input_queue_try_push((uint8_t)data[i]);
+    }
+}
+
+static bool display_backend_ili_terminal_getch_hook(vt100_terminal_t *terminal, char ch, void *user_data)
+{
+    (void)user_data;
+
+    if (terminal == NULL || terminal->output_fn == NULL) {
+        return false;
+    }
+
+    terminal->output_fn(&ch, 1u, terminal->output_user_data);
+    return true;
+}
+
 static bool display_backend_read_file(const char *path, uint8_t **data_out, size_t *size_out)
 {
     FIL file;
@@ -283,6 +362,8 @@ bool display_backend_init(void)
 
     origin_y = (uint16_t)((ili9486l_height() - VT100_TERMINAL_HEIGHT_PIXELS) / 2u);
     vt100_terminal_init(&g_terminal, 0u, origin_y);
+    vt100_terminal_set_output(&g_terminal, display_backend_ili_terminal_output, NULL);
+    vt100_terminal_set_getch_hook(&g_terminal, display_backend_ili_terminal_getch_hook, NULL);
 
     g_last_terminal_tick_ms = (uint32_t)to_ms_since_boot(get_absolute_time());
     g_display_backend_initialized = true;
@@ -330,23 +411,15 @@ bool display_backend_show_boot_logo(void)
 
 int display_backend_getc_nonblock(void)
 {
-    const int ch = display_backend_stdio_getc_nonblock();
-
-    if (ch < 0) {
-        if (g_display_backend_initialized && g_display_backend_output_enabled) {
-            (void)vt100_terminal_getch(&g_terminal, ch);
-        }
-        return -1;
-    }
+    int ch = display_backend_stdio_getc_nonblock();
 
     if (!g_display_backend_initialized || !g_display_backend_output_enabled) {
         return ch;
     }
 
-    if (!vt100_terminal_getch(&g_terminal, ch)) {
-        return -1;
-    }
+    (void)vt100_terminal_getch(&g_terminal, ch);
 
+    ch = display_input_queue_pop();
     return ch;
 }
 
