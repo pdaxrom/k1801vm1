@@ -57,6 +57,7 @@ set(ILI9486L_LCD_LIBRARY_SOURCES
   src/ili9486l_jpeg.c
   src/tjpgd/tjpgd.c
   src/vt100_terminal.c
+  src/vt100_terminal_console.c
 )
 
 add_library(ili9486l_lcd STATIC

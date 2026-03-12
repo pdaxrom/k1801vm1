@@ -21,6 +21,8 @@ extern "C" {
 #define VT100_TERMINAL_BLINK_INTERVAL_MS 500u
 
 typedef void (*vt100_terminal_output_fn)(const char *data, size_t len, void *user_data);
+typedef struct vt100_terminal vt100_terminal_t;
+typedef bool (*vt100_terminal_getch_hook_fn)(vt100_terminal_t *terminal, char ch, void *user_data);
 
 typedef struct {
     char ch;
@@ -29,7 +31,7 @@ typedef struct {
     uint8_t charset;
 } vt100_terminal_cell_t;
 
-typedef struct {
+struct vt100_terminal {
     uint16_t origin_x;
     uint16_t origin_y;
     uint8_t cursor_row;
@@ -86,14 +88,19 @@ typedef struct {
     bool blink_visible;
     vt100_terminal_output_fn output_fn;
     void *output_user_data;
+    vt100_terminal_getch_hook_fn getch_hook;
+    void *getch_hook_user_data;
     uint32_t blink_elapsed_ms;
     bool tab_stops[VT100_TERMINAL_COLS];
     vt100_terminal_cell_t cells[VT100_TERMINAL_ROWS][VT100_TERMINAL_COLS];
     vt100_terminal_cell_t last_printable;
     uint16_t csi_params[8];
-} vt100_terminal_t;
+};
 
 void vt100_terminal_init(vt100_terminal_t *terminal, uint16_t origin_x, uint16_t origin_y);
+void vt100_terminal_set_getch_hook(vt100_terminal_t *terminal, vt100_terminal_getch_hook_fn getch_hook,
+                                   void *user_data);
+bool vt100_terminal_getch(vt100_terminal_t *terminal, int ch);
 void vt100_terminal_set_output(vt100_terminal_t *terminal, vt100_terminal_output_fn output_fn, void *user_data);
 void vt100_terminal_reset(vt100_terminal_t *terminal);
 void vt100_terminal_putc(vt100_terminal_t *terminal, char ch);

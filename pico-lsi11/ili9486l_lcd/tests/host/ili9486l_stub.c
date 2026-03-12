@@ -165,6 +165,15 @@ void ili9486l_write_rgb666_wire_pixels(const uint8_t *pixels, size_t pixel_count
     ++ili9486l_stub_wire_write_calls;
 }
 
+void ili9486l_write_rgb666_wire_pixels_async(const uint8_t *pixels, size_t pixel_count)
+{
+    ili9486l_write_rgb666_wire_pixels(pixels, pixel_count);
+}
+
+void ili9486l_wait_for_pending_write(void)
+{
+}
+
 void ili9486l_write_rgb888_as_rgb666_pixels(const uint8_t *pixels, size_t pixel_count)
 {
     (void)pixels;

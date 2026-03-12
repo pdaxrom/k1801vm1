@@ -21,6 +21,8 @@ typedef union {
     uint8_t bytes[ILI9486L_JPEG_WORKBUF_SIZE];
 } ili9486l_jpeg_workspace_t;
 
+static ili9486l_jpeg_workspace_t g_ili9486l_jpeg_workspace;
+
 static size_t ili9486l_jpeg_input(JDEC *decoder, uint8_t *buffer, size_t bytes_requested)
 {
     ili9486l_jpeg_stream_t *stream = (ili9486l_jpeg_stream_t *)decoder->device;
@@ -72,11 +74,10 @@ static bool ili9486l_jpeg_prepare(
 
 bool ili9486l_jpeg_get_info(const uint8_t *jpeg_data, size_t jpeg_size, ili9486l_jpeg_info_t *out_info)
 {
-    static ili9486l_jpeg_workspace_t workspace;
     ili9486l_jpeg_stream_t stream;
     JDEC decoder;
 
-    if (!ili9486l_jpeg_prepare(jpeg_data, jpeg_size, &decoder, &workspace, &stream)) {
+    if (!ili9486l_jpeg_prepare(jpeg_data, jpeg_size, &decoder, &g_ili9486l_jpeg_workspace, &stream)) {
         return false;
     }
 
@@ -90,11 +91,10 @@ bool ili9486l_jpeg_get_info(const uint8_t *jpeg_data, size_t jpeg_size, ili9486l
 
 bool ili9486l_jpeg_draw(const uint8_t *jpeg_data, size_t jpeg_size, uint16_t x, uint16_t y)
 {
-    static ili9486l_jpeg_workspace_t workspace;
     ili9486l_jpeg_stream_t stream;
     JDEC decoder;
 
-    if (!ili9486l_jpeg_prepare(jpeg_data, jpeg_size, &decoder, &workspace, &stream)) {
+    if (!ili9486l_jpeg_prepare(jpeg_data, jpeg_size, &decoder, &g_ili9486l_jpeg_workspace, &stream)) {
         return false;
     }
 

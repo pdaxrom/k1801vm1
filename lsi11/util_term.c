@@ -3,6 +3,7 @@
 #if defined(PICO_ON_DEVICE)
 
 #include "pico/stdlib.h"
+#include "display_backend.h"
 
 #include <stdio.h>
 
@@ -16,11 +17,7 @@ void util_term_restore(void)
 
 int util_term_getc_nonblock(void)
 {
-    int c = getchar_timeout_us(0);
-    if (c == PICO_ERROR_TIMEOUT) {
-        return -1;
-    }
-    return c & 0xff;
+    return display_backend_getc_nonblock();
 }
 
 void util_term_putc(char c)

@@ -4,12 +4,8 @@
 #include "pico/stdio/driver.h"
 #include "pico/stdlib.h"
 
-#include <string.h>
-
 #define DISPLAY_BACKEND_QUEUE_CAPACITY 4096u
 #define DISPLAY_BACKEND_DRAIN_CHUNK 128u
-#define DISPLAY_BACKEND_ILI_BATCH_CAPACITY 512u
-#define DISPLAY_BACKEND_ILI_BATCH_DELAY_MS 50u
 
 static critical_section_t g_display_queue_lock;
 static char g_display_queue[DISPLAY_BACKEND_QUEUE_CAPACITY];
@@ -20,11 +16,6 @@ static bool g_display_backend_initialized = false;
 static bool g_display_backend_queue_ready = false;
 static bool g_display_backend_output_enabled = false;
 static char g_display_last_output_char = '\0';
-#if defined(PICO_LSI11_DISPLAY_BACKEND_ILI9486L)
-static char g_display_ili_batch[DISPLAY_BACKEND_ILI_BATCH_CAPACITY];
-static size_t g_display_ili_batch_len = 0u;
-static uint32_t g_display_ili_batch_started_ms = 0u;
-#endif
 
 static void display_queue_reset(void)
 {
@@ -33,10 +24,6 @@ static void display_queue_reset(void)
         g_display_queue_tail = 0u;
         g_display_queue_count = 0u;
         g_display_last_output_char = '\0';
-#if defined(PICO_LSI11_DISPLAY_BACKEND_ILI9486L)
-        g_display_ili_batch_len = 0u;
-        g_display_ili_batch_started_ms = 0u;
-#endif
         return;
     }
 
@@ -46,10 +33,6 @@ static void display_queue_reset(void)
     g_display_queue_count = 0u;
     critical_section_exit(&g_display_queue_lock);
     g_display_last_output_char = '\0';
-#if defined(PICO_LSI11_DISPLAY_BACKEND_ILI9486L)
-    g_display_ili_batch_len = 0u;
-    g_display_ili_batch_started_ms = 0u;
-#endif
 }
 
 static bool display_queue_try_push(char ch)
@@ -127,6 +110,17 @@ static stdio_driver_t g_display_backend_stdio_driver = {
 #endif
 };
 
+static int display_backend_stdio_getc_nonblock(void)
+{
+    const int ch = getchar_timeout_us(0);
+
+    if (ch == PICO_ERROR_TIMEOUT) {
+        return -1;
+    }
+
+    return ch & 0xff;
+}
+
 void display_backend_set_output_enabled(bool enabled)
 {
     if (!g_display_backend_initialized) {
@@ -181,6 +175,11 @@ bool display_backend_show_boot_logo(void)
     return true;
 }
 
+int display_backend_getc_nonblock(void)
+{
+    return display_backend_stdio_getc_nonblock();
+}
+
 void display_backend_task(void)
 {
     char buf[DISPLAY_BACKEND_DRAIN_CHUNK];
@@ -211,39 +210,6 @@ void display_backend_task(void)
 
 static vt100_terminal_t g_terminal;
 static uint32_t g_last_terminal_tick_ms = 0u;
-
-static void display_backend_ili_flush_batch(void)
-{
-    if (g_display_ili_batch_len == 0u) {
-        return;
-    }
-
-    vt100_terminal_write_n(&g_terminal, g_display_ili_batch, g_display_ili_batch_len);
-    g_display_ili_batch_len = 0u;
-    g_display_ili_batch_started_ms = 0u;
-}
-
-static void display_backend_ili_append_batch(const char *buf, size_t len, uint32_t now_ms)
-{
-    size_t offset = 0u;
-
-    while (offset < len) {
-        const size_t available = sizeof(g_display_ili_batch) - g_display_ili_batch_len;
-        const size_t chunk = (len - offset < available) ? (len - offset) : available;
-
-        if (g_display_ili_batch_len == 0u) {
-            g_display_ili_batch_started_ms = now_ms;
-        }
-
-        memcpy(&g_display_ili_batch[g_display_ili_batch_len], &buf[offset], chunk);
-        g_display_ili_batch_len += chunk;
-        offset += chunk;
-
-        if (g_display_ili_batch_len == sizeof(g_display_ili_batch)) {
-            display_backend_ili_flush_batch();
-        }
-    }
-}
 
 static bool display_backend_read_file(const char *path, uint8_t **data_out, size_t *size_out)
 {
@@ -362,6 +328,28 @@ bool display_backend_show_boot_logo(void)
     return shown;
 }
 
+int display_backend_getc_nonblock(void)
+{
+    const int ch = display_backend_stdio_getc_nonblock();
+
+    if (ch < 0) {
+        if (g_display_backend_initialized && g_display_backend_output_enabled) {
+            (void)vt100_terminal_getch(&g_terminal, ch);
+        }
+        return -1;
+    }
+
+    if (!g_display_backend_initialized || !g_display_backend_output_enabled) {
+        return ch;
+    }
+
+    if (!vt100_terminal_getch(&g_terminal, ch)) {
+        return -1;
+    }
+
+    return ch;
+}
+
 void display_backend_task(void)
 {
     char buf[DISPLAY_BACKEND_DRAIN_CHUNK];
@@ -374,12 +362,7 @@ void display_backend_task(void)
     }
 
     while ((len = display_queue_pop_n(buf, sizeof(buf))) != 0u) {
-        display_backend_ili_append_batch(buf, len, now_ms);
-    }
-
-    if (g_display_ili_batch_len > 0u &&
-            (now_ms - g_display_ili_batch_started_ms) >= DISPLAY_BACKEND_ILI_BATCH_DELAY_MS) {
-        display_backend_ili_flush_batch();
+        vt100_terminal_write_n(&g_terminal, buf, len);
     }
 
     if (elapsed_ms != 0u) {
@@ -408,6 +391,11 @@ bool display_backend_init(void)
 bool display_backend_show_boot_logo(void)
 {
     return false;
+}
+
+int display_backend_getc_nonblock(void)
+{
+    return display_backend_stdio_getc_nonblock();
 }
 
 void display_backend_task(void)

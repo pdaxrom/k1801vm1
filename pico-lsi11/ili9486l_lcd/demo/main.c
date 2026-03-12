@@ -6,8 +6,19 @@
 
 #include <stdio.h>
 
+#ifndef ILI9486L_LCD_DEMO_RUN_FPS_TEST
+#define ILI9486L_LCD_DEMO_RUN_FPS_TEST 1
+#endif
+
 extern const uint8_t g_logo_jpg_start[];
 extern const uint8_t g_logo_jpg_end[];
+
+static uint8_t g_full_redraw_scanline[LCD_NATIVE_HEIGHT * 3u];
+
+typedef struct {
+    uint32_t rate_x10;
+    uint32_t ms_x10;
+} benchmark_result_t;
 
 static void terminal_stdio_output(const char *data, size_t len, void *user_data)
 {
@@ -28,6 +39,262 @@ static void show_boot_logo(void)
     }
 
     sleep_ms(3000);
+}
+
+static void format_fixed_x10(char *dst, size_t dst_size, uint32_t value_x10)
+{
+    snprintf(dst, dst_size, "%lu.%01lu", (unsigned long)(value_x10 / 10u), (unsigned long)(value_x10 % 10u));
+}
+
+static void draw_full_redraw_benchmark_frame(uint32_t frame_index)
+{
+    const uint16_t width = ili9486l_width();
+    const uint16_t height = ili9486l_height();
+
+    if (!ili9486l_begin_write(0u, 0u, width, height)) {
+        return;
+    }
+
+    for (uint16_t y = 0; y < height; ++y) {
+        const uint8_t y6 = (height > 1u) ? (uint8_t)(((uint32_t)y * 63u) / (uint32_t)(height - 1u)) : 0u;
+
+        for (uint16_t x = 0; x < width; ++x) {
+            const uint8_t x6 = (width > 1u) ? (uint8_t)(((uint32_t)x * 63u) / (uint32_t)(width - 1u)) : 0u;
+            const uint8_t r6 = (uint8_t)((x6 + frame_index * 3u) & 0x3Fu);
+            const uint8_t g6 = (uint8_t)((y6 + frame_index * 5u) & 0x3Fu);
+            const uint8_t b6 = (uint8_t)(((x6 ^ y6) + frame_index * 7u) & 0x3Fu);
+            const size_t offset = (size_t)x * 3u;
+
+            g_full_redraw_scanline[offset + 0u] = (uint8_t)(r6 << 2);
+            g_full_redraw_scanline[offset + 1u] = (uint8_t)(g6 << 2);
+            g_full_redraw_scanline[offset + 2u] = (uint8_t)(b6 << 2);
+        }
+
+        ili9486l_write_rgb666_wire_pixels(g_full_redraw_scanline, width);
+    }
+}
+
+static void run_full_redraw_fps_test(benchmark_result_t *result)
+{
+    static const uint32_t k_frame_count = 12u;
+    const uint64_t start_us = time_us_64();
+    uint64_t elapsed_us = 0u;
+
+    if (result == NULL) {
+        return;
+    }
+
+    for (uint32_t frame = 0; frame < k_frame_count; ++frame) {
+        draw_full_redraw_benchmark_frame(frame);
+    }
+
+    elapsed_us = time_us_64() - start_us;
+    if (elapsed_us == 0u) {
+        elapsed_us = 1u;
+    }
+
+    result->rate_x10 = (uint32_t)(((uint64_t)k_frame_count * 10000000u) / elapsed_us);
+    result->ms_x10 = (uint32_t)((elapsed_us * 10u) / ((uint64_t)k_frame_count * 1000u));
+}
+
+static void show_full_redraw_fps_test(void)
+{
+    const uint16_t width = ili9486l_width();
+    const uint16_t height = ili9486l_height();
+    benchmark_result_t result;
+    char fps_text[16];
+    char ms_text[16];
+    char line[48];
+
+    run_full_redraw_fps_test(&result);
+    format_fixed_x10(fps_text, sizeof(fps_text), result.rate_x10);
+    format_fixed_x10(ms_text, sizeof(ms_text), result.ms_x10);
+
+    printf("FULL REDRAW FPS TEST: %s FPS, %s ms/frame, %u frames at %ux%u\r\n",
+           fps_text,
+           ms_text,
+           12u,
+           width,
+           height);
+
+    ili9486l_fill_screen(LCD_RGB666(0x02, 0x03, 0x06));
+    ili9486l_fill_rect(16, 18, 448, 284, LCD_RGB666(0x06, 0x08, 0x0C));
+    ili9486l_draw_string(34, 34, "FULL REDRAW TEST", LCD_COLOR_YELLOW, LCD_RGB666(0x06, 0x08, 0x0C), 2);
+    ili9486l_draw_string(34, 74, "STREAMING RGB666", LCD_COLOR_WHITE, LCD_RGB666(0x06, 0x08, 0x0C), 2);
+
+    snprintf(line, sizeof(line), "%s FPS", fps_text);
+    ili9486l_draw_string(34, 128, line, LCD_COLOR_CYAN, LCD_RGB666(0x06, 0x08, 0x0C), 3);
+
+    snprintf(line, sizeof(line), "%s MS/FRAME", ms_text);
+    ili9486l_draw_string(34, 180, line, LCD_COLOR_WHITE, LCD_RGB666(0x06, 0x08, 0x0C), 2);
+
+    snprintf(line, sizeof(line), "%u FRAMES @ %ux%u", 12u, width, height);
+    ili9486l_draw_string(34, 224, line, LCD_COLOR_GREEN, LCD_RGB666(0x06, 0x08, 0x0C), 2);
+    ili9486l_draw_string(34, 268, "RESULT ALSO IN STDIO", LCD_COLOR_WHITE, LCD_RGB666(0x06, 0x08, 0x0C), 1);
+
+    sleep_ms(1500);
+}
+
+static void prepare_terminal_render_benchmark(vt100_terminal_t *terminal, uint16_t origin_y)
+{
+    static const char k_pattern[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}<>+-*/";
+
+    vt100_terminal_init(terminal, 0u, origin_y);
+
+    for (uint8_t row = 0; row < VT100_TERMINAL_ROWS; ++row) {
+        for (uint8_t col = 0; col < VT100_TERMINAL_COLS; ++col) {
+            vt100_terminal_cell_t *cell = &terminal->cells[row][col];
+            const uint8_t fg = (uint8_t)((8u + row + col) & 0x0Fu);
+            const uint8_t bg = (uint8_t)(((row / 5u) + (col / 20u)) & 0x07u);
+
+            cell->ch = k_pattern[(row * 7u + col) % (sizeof(k_pattern) - 1u)];
+            cell->attr = (uint8_t)(((bg & 0x0Fu) << 4) | (fg & 0x0Fu));
+            cell->style = 0u;
+            if (((row + col) % 9u) == 0u) {
+                cell->style |= 0x01u;
+            }
+            if (((row + col) % 11u) == 0u) {
+                cell->style |= 0x04u;
+            }
+            cell->charset = 0u;
+        }
+    }
+
+    terminal->cursor_row = (uint8_t)(VT100_TERMINAL_ROWS / 2u);
+    terminal->cursor_col = (uint8_t)(VT100_TERMINAL_COLS / 2u);
+    terminal->wrap_pending = false;
+    terminal->blink_visible = true;
+}
+
+static size_t build_terminal_benchmark_line(char *dst, uint32_t line_index)
+{
+    static const char k_pattern[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]{}<>|+-*/";
+    char prefix[16];
+    int prefix_len = snprintf(prefix, sizeof(prefix), "%04lu ", (unsigned long)(line_index % 10000u));
+
+    if (prefix_len < 0) {
+        prefix_len = 0;
+    }
+
+    for (uint16_t i = 0; i < VT100_TERMINAL_COLS; ++i) {
+        if (i < (uint16_t)prefix_len) {
+            dst[i] = prefix[i];
+        } else {
+            dst[i] = k_pattern[(i + line_index) % (sizeof(k_pattern) - 1u)];
+        }
+    }
+
+    dst[VT100_TERMINAL_COLS + 0u] = '\r';
+    dst[VT100_TERMINAL_COLS + 1u] = '\n';
+    return VT100_TERMINAL_COLS + 2u;
+}
+
+static void run_terminal_render_fps_test(uint16_t origin_y, benchmark_result_t *result)
+{
+    static const uint32_t k_frame_count = 6u;
+    static vt100_terminal_t terminal;
+    uint64_t elapsed_us = 0u;
+    const uint64_t start_us = time_us_64();
+
+    if (result == NULL) {
+        return;
+    }
+
+    prepare_terminal_render_benchmark(&terminal, origin_y);
+
+    for (uint32_t frame = 0; frame < k_frame_count; ++frame) {
+        vt100_terminal_render(&terminal);
+    }
+
+    elapsed_us = time_us_64() - start_us;
+    if (elapsed_us == 0u) {
+        elapsed_us = 1u;
+    }
+
+    result->rate_x10 = (uint32_t)(((uint64_t)k_frame_count * 10000000u) / elapsed_us);
+    result->ms_x10 = (uint32_t)((elapsed_us * 10u) / ((uint64_t)k_frame_count * 1000u));
+}
+
+static void run_terminal_scroll_fps_test(uint16_t origin_y, benchmark_result_t *result)
+{
+    static const uint32_t k_scroll_count = 12u;
+    static vt100_terminal_t terminal;
+    char line[VT100_TERMINAL_COLS + 2u];
+    uint64_t elapsed_us = 0u;
+
+    if (result == NULL) {
+        return;
+    }
+
+    vt100_terminal_init(&terminal, 0u, origin_y);
+
+    for (uint32_t row = 0; row < (uint32_t)(VT100_TERMINAL_ROWS - 1u); ++row) {
+        const size_t len = build_terminal_benchmark_line(line, row);
+        vt100_terminal_write_n(&terminal, line, len);
+    }
+
+    {
+        const uint64_t start_us = time_us_64();
+
+        for (uint32_t row = 0; row < k_scroll_count; ++row) {
+            const size_t len = build_terminal_benchmark_line(line, 1000u + row);
+            vt100_terminal_write_n(&terminal, line, len);
+        }
+
+        elapsed_us = time_us_64() - start_us;
+    }
+
+    if (elapsed_us == 0u) {
+        elapsed_us = 1u;
+    }
+
+    result->rate_x10 = (uint32_t)(((uint64_t)k_scroll_count * 10000000u) / elapsed_us);
+    result->ms_x10 = (uint32_t)((elapsed_us * 10u) / ((uint64_t)k_scroll_count * 1000u));
+}
+
+static void show_terminal_benchmark_results(uint16_t origin_y)
+{
+    benchmark_result_t render_result;
+    benchmark_result_t scroll_result;
+    char render_rate_text[16];
+    char render_ms_text[16];
+    char scroll_rate_text[16];
+    char scroll_ms_text[16];
+    char line[48];
+    const lcd_color_t background = LCD_RGB666(0x03, 0x03, 0x06);
+    const lcd_color_t panel = LCD_RGB666(0x06, 0x08, 0x0C);
+
+    run_terminal_render_fps_test(origin_y, &render_result);
+    run_terminal_scroll_fps_test(origin_y, &scroll_result);
+
+    format_fixed_x10(render_rate_text, sizeof(render_rate_text), render_result.rate_x10);
+    format_fixed_x10(render_ms_text, sizeof(render_ms_text), render_result.ms_x10);
+    format_fixed_x10(scroll_rate_text, sizeof(scroll_rate_text), scroll_result.rate_x10);
+    format_fixed_x10(scroll_ms_text, sizeof(scroll_ms_text), scroll_result.ms_x10);
+
+    printf("VT100 FULL RENDER TEST: %s FPS, %s ms/frame at 80x35\r\n",
+           render_rate_text,
+           render_ms_text);
+    printf("VT100 SCROLL TEST: %s lines/s, %s ms/line at 80 cols\r\n",
+           scroll_rate_text,
+           scroll_ms_text);
+
+    ili9486l_fill_screen(background);
+    ili9486l_fill_rect(16, 18, 448, 284, panel);
+    ili9486l_draw_string(34, 34, "VT100 BENCHMARK", LCD_COLOR_YELLOW, panel, 2);
+
+    snprintf(line, sizeof(line), "RENDER %s FPS", render_rate_text);
+    ili9486l_draw_string(34, 88, line, LCD_COLOR_CYAN, panel, 2);
+    snprintf(line, sizeof(line), "%s MS/FRAME", render_ms_text);
+    ili9486l_draw_string(34, 116, line, LCD_COLOR_WHITE, panel, 2);
+
+    snprintf(line, sizeof(line), "SCROLL %s L/S", scroll_rate_text);
+    ili9486l_draw_string(34, 172, line, LCD_COLOR_GREEN, panel, 2);
+    snprintf(line, sizeof(line), "%s MS/LINE", scroll_ms_text);
+    ili9486l_draw_string(34, 200, line, LCD_COLOR_WHITE, panel, 2);
+
+    ili9486l_draw_string(34, 254, "FULL RESULT ALSO IN STDIO", LCD_COLOR_WHITE, panel, 1);
+    sleep_ms(1800);
 }
 
 static void draw_native_scroll_demo_screen(uint16_t top_fixed, uint16_t bottom_fixed)
@@ -264,17 +531,22 @@ int main(void)
 
     ili9486l_init();
     show_boot_logo();
+#if ILI9486L_LCD_DEMO_RUN_FPS_TEST
+    show_full_redraw_fps_test();
+    show_terminal_benchmark_results((uint16_t)((ili9486l_height() - VT100_TERMINAL_HEIGHT_PIXELS) / 2u));
+#endif
     terminal_origin_y = (uint16_t)((ili9486l_height() - VT100_TERMINAL_HEIGHT_PIXELS) / 2u);
     ili9486l_fill_screen(LCD_COLOR_BLACK);
-    vt100_terminal_init(&terminal, 0, terminal_origin_y);
+    vt100_terminal_init(&terminal, 0u, terminal_origin_y);
     vt100_terminal_set_output(&terminal, terminal_stdio_output, NULL);
+    (void)vt100_terminal_getch(&terminal, PICO_ERROR_TIMEOUT);
     vt100_terminal_write(&terminal, "\x1b[2J\x1b[H");
-    vt100_terminal_write(&terminal, "ILI9486L VT100 TERMINAL 80X35\r\n");
-    vt100_terminal_write(&terminal, "UART/STDIO input is rendered directly to LCD.\r\n");
-    vt100_terminal_write(&terminal, "Supported: CSI A/B/C/D/E/F/G/H/I/S/T/Z/`/a/b/d/e/f/J/K/L/M/@/P/X.\r\n");
-    vt100_terminal_write(&terminal, "Plus: CSI m/r/n/c/g/h/l, ESC #8, DEC/UK/VT52, SS2/SS3, tab stops.\r\n");
-    vt100_terminal_write(&terminal, "Modes: IRM, LMN, DECSCNM, DECAWM, DECOM, DECANM, DECSTBM, RI, cursor show/hide.\r\n");
-    vt100_terminal_write(&terminal, "Blink: feed elapsed ms into vt100_terminal_tick() to animate SGR 5.\r\n");
+    vt100_terminal_write(&terminal, "ILI9486L VT100 TERMINAL 80X34 + STATUS\r\n");
+    vt100_terminal_write(&terminal, "Last line is reserved for status. Ctrl+E enters local command mode.\r\n");
+    vt100_terminal_write(&terminal, "Ctrl+E 1/2/3 switches 80x34 / 80x30 / 80x24. Ctrl+E S/P switches SCROLL / PAGED.\r\n");
+    vt100_terminal_write(&terminal, "In paged mode the status line asks for SPACE before a new page.\r\n");
+    vt100_terminal_write(&terminal, "Commands are handled locally by vt100_terminal_getch().\r\n");
+    vt100_terminal_write(&terminal, "Supported terminal core: ANSI, VT100, VT52, DEC graphics.\r\n");
     vt100_terminal_write(&terminal, "\r\n");
     vt100_terminal_write(&terminal, "\x1b[32mREADY\x1b[0m> ");
     last_terminal_tick_ms = (uint32_t)to_ms_since_boot(get_absolute_time());
@@ -286,9 +558,7 @@ int main(void)
         vt100_terminal_tick(&terminal, now_ms - last_terminal_tick_ms);
         last_terminal_tick_ms = now_ms;
 
-        if (ch != PICO_ERROR_TIMEOUT) {
-            vt100_terminal_putc(&terminal, (char)ch);
-        }
+        (void)vt100_terminal_getch(&terminal, ch);
 
         tight_loop_contents();
     }

@@ -4,6 +4,11 @@ set(ILI9486L_LCD_DEMO_LOGO_PATH
   "Path to the baseline JPEG asset embedded into the demo ELF"
 )
 
+option(ILI9486L_LCD_DEMO_RUN_FPS_TEST
+  "Run the full-screen redraw FPS benchmark during demo startup"
+  ON
+)
+
 if(NOT EXISTS "${ILI9486L_LCD_DEMO_LOGO_PATH}")
   message(FATAL_ERROR
     "Demo JPEG asset not found at ${ILI9486L_LCD_DEMO_LOGO_PATH}. "
@@ -25,6 +30,12 @@ target_link_libraries(ili9486l_lcd_demo PRIVATE
 target_compile_definitions(ili9486l_lcd_demo PRIVATE
   LOGO_JPG_PATH=\"${ILI9486L_LCD_DEMO_LOGO_PATH}\"
 )
+
+if(ILI9486L_LCD_DEMO_RUN_FPS_TEST)
+  target_compile_definitions(ili9486l_lcd_demo PRIVATE ILI9486L_LCD_DEMO_RUN_FPS_TEST=1)
+else()
+  target_compile_definitions(ili9486l_lcd_demo PRIVATE ILI9486L_LCD_DEMO_RUN_FPS_TEST=0)
+endif()
 
 if(ILI9486L_LCD_ENABLE_DEMO_STDIO_USB)
   pico_enable_stdio_usb(ili9486l_lcd_demo 1)

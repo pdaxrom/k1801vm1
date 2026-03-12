@@ -1,4 +1,6 @@
 #include "vt100_terminal.h"
+#include "vt100_terminal_console.h"
+#include "vt100_terminal_internal.h"
 
 #include "font5x7.h"
 #include "ili9486l.h"
@@ -1435,7 +1437,7 @@ static void vt100_terminal_dispatch_csi(vt100_terminal_t *terminal, char final_c
     }
 }
 
-void vt100_terminal_render(vt100_terminal_t *terminal)
+void vt100_terminal_core_render(vt100_terminal_t *terminal)
 {
     vt100_terminal_hide_cursor(terminal);
 
@@ -1444,6 +1446,16 @@ void vt100_terminal_render(vt100_terminal_t *terminal)
     }
 
     vt100_terminal_show_cursor(terminal);
+}
+
+void vt100_terminal_render(vt100_terminal_t *terminal)
+{
+    if (vt100_terminal_console_is_attached(terminal)) {
+        vt100_terminal_console_render(terminal);
+        return;
+    }
+
+    vt100_terminal_core_render(terminal);
 }
 
 void vt100_terminal_reset(vt100_terminal_t *terminal)
@@ -1533,6 +1545,17 @@ void vt100_terminal_init(vt100_terminal_t *terminal, uint16_t origin_x, uint16_t
     vt100_terminal_reset(terminal);
 }
 
+void vt100_terminal_set_getch_hook(vt100_terminal_t *terminal, vt100_terminal_getch_hook_fn getch_hook,
+                                   void *user_data)
+{
+    if (terminal == NULL) {
+        return;
+    }
+
+    terminal->getch_hook = getch_hook;
+    terminal->getch_hook_user_data = user_data;
+}
+
 void vt100_terminal_set_output(vt100_terminal_t *terminal, vt100_terminal_output_fn output_fn, void *user_data)
 {
     if (terminal == NULL) {
@@ -1543,7 +1566,29 @@ void vt100_terminal_set_output(vt100_terminal_t *terminal, vt100_terminal_output
     terminal->output_user_data = user_data;
 }
 
-void vt100_terminal_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms)
+bool vt100_terminal_getch(vt100_terminal_t *terminal, int ch)
+{
+    if (terminal == NULL) {
+        return false;
+    }
+
+    if (vt100_terminal_console_is_attached(terminal) || vt100_terminal_console_attach(terminal)) {
+        return vt100_terminal_console_getch(terminal, ch);
+    }
+
+    if (ch < 0) {
+        return false;
+    }
+
+    if (terminal->getch_hook != NULL && terminal->getch_hook(terminal, (char)ch, terminal->getch_hook_user_data)) {
+        return false;
+    }
+
+    vt100_terminal_putc(terminal, (char)ch);
+    return true;
+}
+
+void vt100_terminal_core_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms)
 {
     bool old_blink_visible = false;
 
@@ -1561,7 +1606,21 @@ void vt100_terminal_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms)
     }
 }
 
-void __not_in_flash_func(vt100_terminal_putc)(vt100_terminal_t *terminal, char ch)
+void vt100_terminal_tick(vt100_terminal_t *terminal, uint32_t elapsed_ms)
+{
+    if (terminal == NULL || elapsed_ms == 0u) {
+        return;
+    }
+
+    if (vt100_terminal_console_is_attached(terminal)) {
+        vt100_terminal_console_tick(terminal, elapsed_ms);
+        return;
+    }
+
+    vt100_terminal_core_tick(terminal, elapsed_ms);
+}
+
+void __not_in_flash_func(vt100_terminal_core_putc)(vt100_terminal_t *terminal, char ch)
 {
     const unsigned char uch = (unsigned char)ch;
     const uint8_t old_cursor_row = terminal->cursor_row;
@@ -1911,6 +1970,16 @@ void __not_in_flash_func(vt100_terminal_putc)(vt100_terminal_t *terminal, char c
     vt100_terminal_show_cursor(terminal);
 }
 
+void __not_in_flash_func(vt100_terminal_putc)(vt100_terminal_t *terminal, char ch)
+{
+    if (vt100_terminal_console_is_attached(terminal)) {
+        (void)vt100_terminal_console_write_n(terminal, &ch, 1u);
+        return;
+    }
+
+    vt100_terminal_core_putc(terminal, ch);
+}
+
 void __not_in_flash_func(vt100_terminal_write_n)(vt100_terminal_t *terminal, const char *text, size_t len)
 {
     bool batch_active = false;
@@ -1919,6 +1988,10 @@ void __not_in_flash_func(vt100_terminal_write_n)(vt100_terminal_t *terminal, con
     uint8_t batch_col_end = 0u;
 
     if (text == NULL || len == 0u) {
+        return;
+    }
+
+    if (vt100_terminal_console_write_n(terminal, text, len)) {
         return;
     }
 

@@ -14,6 +14,7 @@ add_executable(vt100_terminal_tests
   ../../src/font5x7.c
   ../../src/font5x7_row_masks.c
   ../../src/vt100_terminal.c
+  ../../src/vt100_terminal_console.c
 )
 
 target_include_directories(vt100_terminal_tests PRIVATE
