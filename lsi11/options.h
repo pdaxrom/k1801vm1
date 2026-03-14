@@ -34,6 +34,7 @@ typedef struct {
     int xp_count;
     int rl_count;
     int tq_count;
+    const char *socket_path;
     const char *load_path;
     int do_bootcopy;
     int do_bootrt11;

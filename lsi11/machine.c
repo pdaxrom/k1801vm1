@@ -9,7 +9,9 @@
 
 int lsi11_machine_init(void)
 {
-    util_term_init_raw();
+    if (util_term_init_raw() != 0) {
+        return -1;
+    }
 
     if (dl11_init() != 0) {
         return -1;

@@ -2,8 +2,8 @@
 #include "devio.h"
 #include "irq.h"
 #include "irq_latch.h"
+#include "util_term.h"
 #include <stdint.h>
-#include <stdio.h>
 
 /* CSR/DBR (octal) */
 #define LP11_CSR 0177514
@@ -63,8 +63,7 @@ static void lp11_write8(uint16_t a, uint8_t v)
         irq_latch_sw_clear_done(&lp_l);
 
         /* output char */
-        fputc((int)v, stdout);
-        fflush(stdout);
+        util_term_putc((char)v);
 
         /* Complete immediately in the emulator model. */
         irq_latch_event_set_done(&lp_l);

@@ -212,6 +212,7 @@ void options_usage(const char *argv0)
             "  -tracenxm       Trace NXM traps\n",
             argv0, argv0, target);
     fprintf(stderr,
+            "  -socket <path>  Use UNIX socket instead of host stdin/stdout (lsi11 host)\n"
             "  -tty7b          DL11 console 7-bit mode (default)\n"
             "  -tty8b          DL11 console 8-bit mode\n"
             "  -display        Enable mirrored terminal display (default on when supported)\n"
@@ -494,6 +495,8 @@ static int parse_arg_list(lsi11_options_t *opts, int argc, char **argv,
         } else if (!strcmp(argv[i], "-trace-after") && i + 1 < argc) {
             opts->trace_after = strtol(argv[++i], NULL, 10);
             opts->trace = 1;
+        } else if (!strcmp(argv[i], "-socket") && i + 1 < argc) {
+            opts->socket_path = argv[++i];
         } else if (!strcmp(argv[i], "-traceregs")) {
             opts->trace = 1;
             opts->trace_regs = 1;

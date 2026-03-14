@@ -17,6 +17,7 @@
 #include "dev_vm1sel.h"
 #include "dev_vm1sav.h"
 #include "options.h"
+#include "util_term.h"
 
 /* core headers (read-only) */
 #include "../core/core.h" /* TODO: replace with actual header providing regs + cpu step/run */
@@ -431,6 +432,11 @@ int main(int argc, char **argv)
     }
     if (opts.trace_nxm) {
         lsi11_set_trace_nxm(1);
+    }
+
+    if (util_term_set_socket_path(opts.socket_path, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Terminal configuration error: %s\n", cfg_err);
+        return 2;
     }
 
     if (rh11_set_mode(opts.rh_mode) != 0) {

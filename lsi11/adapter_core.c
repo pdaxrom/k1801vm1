@@ -494,8 +494,10 @@ static int impl_init(regs *r)
 
     /* init host terminal */
     term_raw_active = 0;
-    if (device_mask.dl11) {
-        util_term_init_raw();
+    if (device_mask.dl11 || device_mask.lp11) {
+        if (util_term_init_raw() != 0) {
+            return -1;
+        }
         term_raw_active = 1;
     }
 
