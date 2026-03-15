@@ -252,8 +252,8 @@ void display_backend_task(void)
 
 #elif defined(PICO_LSI11_DISPLAY_BACKEND_ILI9486L)
 
-#include "ili9486l.h"
-#include "ili9486l_jpeg.h"
+#include "lcd_driver.h"
+#include "lcd_jpeg.h"
 #include "vt100_terminal.h"
 
 #include "ff.h"
@@ -263,6 +263,7 @@ void display_backend_task(void)
 #include <stdlib.h>
 
 static vt100_terminal_t g_terminal;
+static lcd_driver_t *g_display_lcd = NULL;
 static uint32_t g_last_terminal_tick_ms = 0u;
 
 static void display_backend_ili_terminal_output(const char *data, size_t len, void *user_data)
@@ -358,10 +359,13 @@ bool display_backend_init(void)
     }
     display_queue_reset();
 
-    ili9486l_init();
+    g_display_lcd = lcd_init();
+    if (g_display_lcd == NULL) {
+        return false;
+    }
 
-    origin_y = (uint16_t)((ili9486l_height() - VT100_TERMINAL_HEIGHT_PIXELS) / 2u);
-    vt100_terminal_init(&g_terminal, 0u, origin_y);
+    origin_y = (uint16_t)((lcd_height(g_display_lcd) - VT100_TERMINAL_HEIGHT_PIXELS) / 2u);
+    vt100_terminal_init(&g_terminal, g_display_lcd, 0u, origin_y);
     vt100_terminal_set_output(&g_terminal, display_backend_ili_terminal_output, NULL);
     vt100_terminal_set_getch_hook(&g_terminal, display_backend_ili_terminal_getch_hook, NULL);
 
@@ -377,35 +381,35 @@ bool display_backend_show_boot_logo(void)
     static const char bootlogo_path[] = "0:/bootlogo.jpg";
     uint8_t *jpeg_data = NULL;
     size_t jpeg_size = 0u;
-    ili9486l_jpeg_info_t info;
+    lcd_jpeg_info_t info;
     uint16_t x = 0u;
     uint16_t y = 0u;
     bool shown = false;
 
-    if (!g_display_backend_initialized) {
+    if (!g_display_backend_initialized || g_display_lcd == NULL) {
         return false;
     }
     if (!display_backend_read_file(bootlogo_path, &jpeg_data, &jpeg_size)) {
-        ili9486l_fill_screen(LCD_COLOR_BLACK);
+        lcd_fill_screen(g_display_lcd, LCD_COLOR_BLACK);
         return false;
     }
 
-    if (ili9486l_jpeg_get_info(jpeg_data, jpeg_size, &info)) {
-        if (info.width < ili9486l_width()) {
-            x = (uint16_t)((ili9486l_width() - info.width) / 2u);
+    if (lcd_jpeg_get_info(jpeg_data, jpeg_size, &info)) {
+        if (info.width < lcd_width(g_display_lcd)) {
+            x = (uint16_t)((lcd_width(g_display_lcd) - info.width) / 2u);
         }
-        if (info.height < ili9486l_height()) {
-            y = (uint16_t)((ili9486l_height() - info.height) / 2u);
+        if (info.height < lcd_height(g_display_lcd)) {
+            y = (uint16_t)((lcd_height(g_display_lcd) - info.height) / 2u);
         }
     }
 
-    ili9486l_fill_screen(LCD_COLOR_BLACK);
-    shown = ili9486l_jpeg_draw(jpeg_data, jpeg_size, x, y);
+    lcd_fill_screen(g_display_lcd, LCD_COLOR_BLACK);
+    shown = lcd_jpeg_draw(g_display_lcd, jpeg_data, jpeg_size, x, y);
     free(jpeg_data);
     if (shown) {
         sleep_ms(2000);
     }
-    ili9486l_fill_screen(LCD_COLOR_BLACK);
+    lcd_fill_screen(g_display_lcd, LCD_COLOR_BLACK);
     return shown;
 }
 

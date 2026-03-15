@@ -43,7 +43,7 @@ elseif(PICO_LSI11_DISPLAY_BACKEND STREQUAL "st7565")
   )
 elseif(PICO_LSI11_DISPLAY_BACKEND STREQUAL "ili9486l")
   set(ILI9486L_LCD_BUILD_DEMO OFF CACHE BOOL "" FORCE)
-  add_subdirectory(ili9486l_lcd)
+  add_subdirectory(pico-vt100)
   list(APPEND PICO_LSI11_DISPLAY_LIBRARIES
       ili9486l::lcd
       pico_sync

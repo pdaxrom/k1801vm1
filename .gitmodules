@@ -1,3 +1,6 @@
 [submodule "microasm11"]
 	path = microasm11
 	url = git@github.com:pdaxrom/microasm11.git
+[submodule "pico-lsi11/pico-vt100"]
+	path = pico-lsi11/pico-vt100
+	url = git@github.com:pdaxrom/pico-vt100.git
