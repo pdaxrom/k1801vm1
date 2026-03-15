@@ -7,19 +7,22 @@ DL11_TBUF equ 0177566
 
 RKDS      equ 0177400
 RHCS1     equ 0177440
+XPCS1     equ 0176700
 RLCS      equ 0174400
 TQ_SA     equ 0174502
 
 KIND_RK   equ 1
 KIND_RH   equ 2
-KIND_RL   equ 3
-KIND_TQ   equ 4
+KIND_XP   equ 3
+KIND_RL   equ 4
+KIND_TQ   equ 5
 
 ASC_0     equ 0060
 ASC_1     equ 0061
 ASC_2     equ 0062
 ASC_3     equ 0063
 ASC_4     equ 0064
+ASC_5     equ 0065
 ASC_7     equ 0067
 ASC_CR    equ 0015
 ASC_LF    equ 0012
@@ -69,8 +72,13 @@ has_any:
         jsr     pc, print_str
 list_rh:
         tstb    present_rh
-        beq     list_rl
+        beq     list_xp
         mov     #msg_line_rh, r1
+        jsr     pc, print_str
+list_xp:
+        tstb    present_xp
+        beq     list_rl
+        mov     #msg_line_xp, r1
         jsr     pc, print_str
 list_rl:
         tstb    present_rl
@@ -95,8 +103,10 @@ ctl_loop:
         cmp     r0, #ASC_2
         beq     ctl_rh
         cmp     r0, #ASC_3
-        beq     ctl_rl
+        beq     ctl_xp
         cmp     r0, #ASC_4
+        beq     ctl_rl
+        cmp     r0, #ASC_5
         beq     ctl_tq
 
         mov     #msg_bad_ctl, r1
@@ -122,6 +132,17 @@ ctl_rh:
         br      ctl_loop
 ctl_rh_ok:
         movb    #KIND_RH, selected_kind
+        movb    #7, max_unit
+        br      select_unit
+
+ctl_xp:
+        tstb    present_xp
+        bne     ctl_xp_ok
+        mov     #msg_not_present, r1
+        jsr     pc, print_str
+        br      ctl_loop
+ctl_xp_ok:
+        movb    #KIND_XP, selected_kind
         movb    #7, max_unit
         br      select_unit
 
@@ -183,6 +204,8 @@ boot_dispatch:
         beq     boot_rk
         cmpb    selected_kind, #KIND_RH
         beq     boot_rh
+        cmpb    selected_kind, #KIND_XP
+        beq     boot_xp
         cmpb    selected_kind, #KIND_RL
         beq     boot_rl
         cmpb    selected_kind, #KIND_TQ
@@ -203,6 +226,11 @@ boot_rh:
         mov     #msg_boot_rh, r1
         jsr     pc, print_str
         jmp     rh_boot_run
+
+boot_xp:
+        mov     #msg_boot_xp, r1
+        jsr     pc, print_str
+        jmp     xp_boot_run
 
 boot_rl:
         mov     #msg_boot_rl, r1
@@ -229,6 +257,14 @@ det_rh:
         jsr     pc, probe_word
         movb    r0, present_rh
         tstb    present_rh
+        beq     det_xp
+        bisb    #1, present_any
+
+det_xp:
+        mov     #XPCS1, r0
+        jsr     pc, probe_word
+        movb    r0, present_xp
+        tstb    present_xp
         beq     det_rl
         bisb    #1, present_any
 
@@ -326,17 +362,19 @@ msg_banner:
 msg_found:
         DB      "Detected controllers:\r\n", 0
 msg_none:
-        DB      "No RK11/RH11/RL11/TQ11 controllers detected.\r\n", 0
+        DB      "No RK11/RH11/XP/RP/RL11/TQ11 controllers detected.\r\n", 0
 msg_line_rk:
         DB      "  1 - RK11 (rk0..rk7)\r\n", 0
 msg_line_rh:
         DB      "  2 - RH11/HK (rh0..rh7)\r\n", 0
+msg_line_xp:
+        DB      "  3 - XP/RP (xp0..xp7)\r\n", 0
 msg_line_rl:
-        DB      "  3 - RL11 (rl0..rl3)\r\n", 0
+        DB      "  4 - RL11 (rl0..rl3)\r\n", 0
 msg_line_tq:
-        DB      "  4 - TQ11/TMSCP (tq0..tq7)\r\n", 0
+        DB      "  5 - TQ11/TMSCP (tq0..tq7)\r\n", 0
 msg_choose_ctl:
-        DB      "Select controller [1/2/3/4]: ", 0
+        DB      "Select controller [1/2/3/4/5]: ", 0
 msg_bad_ctl:
         DB      "Invalid controller selection.\r\n", 0
 msg_not_present:
@@ -351,6 +389,8 @@ msg_boot_rk:
         DB      "Booting RK bootstrap...\r\n", 0
 msg_boot_rh:
         DB      "Booting RH/HK bootstrap...\r\n", 0
+msg_boot_xp:
+        DB      "Booting XP/RP bootstrap...\r\n", 0
 msg_boot_rl:
         DB      "Booting RL bootstrap...\r\n", 0
 msg_boot_tq:
@@ -364,6 +404,8 @@ present_any:
 present_rk:
         DB      0
 present_rh:
+        DB      0
+present_xp:
         DB      0
 present_rl:
         DB      0
@@ -445,6 +487,29 @@ rh_wait2:
         clr     r3
         mov     #002020, r4
         clr     r5
+        clr     pc
+
+xp_boot_run:
+        mov     #002000, sp
+        mov     selected_unit, r0
+        mov     #0176700, r1
+        mov     #0000040, 10(r1)
+        mov     r0, 10(r1)
+        mov     #0000021, (r1)
+        mov     #0010000, 32(r1)
+        mov     #0177000, 2(r1)
+        clr     4(r1)
+        clr     6(r1)
+        clr     34(r1)
+        mov     #0000071, (r1)
+xp_wait:
+        tstb    (r1)
+        bpl     xp_wait
+        clr     r2
+        clr     r3
+        mov     #002020, r4
+        clr     r5
+        clrb    (r1)
         clr     pc
 
 rl_boot_run:

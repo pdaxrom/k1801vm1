@@ -245,6 +245,39 @@ static const uint16_t rh_bootstrap[] = {
 };
 
 /*
+ * XP/RP (RM05) ROM bootstrap (SIMH RP-compatible sequence).
+ * Reads one 512-word block from unit 0 into 000000 and jumps to 000000.
+ * Loaded/executed from 02000 to avoid clobbering low memory before transfer.
+ */
+#define XP_BOOT_ADDR  002000
+#define XP_BOOT_ENTRY (XP_BOOT_ADDR + 000002)
+#define XP_BOOT_UNIT  (XP_BOOT_ADDR + 000010)
+#define XP_BOOT_CSR   (XP_BOOT_ADDR + 000014)
+static const uint16_t xp_bootstrap[] = {
+    0042102,                        /* "BD" */
+    0012706, XP_BOOT_ADDR,          /* MOV #BOOT_ADDR,SP */
+    0012700, 0000000,               /* MOV #unit,R0 */
+    0012701, 0176700,               /* MOV #XPCS1,R1 */
+    0012761, 0000040, 0000010,      /* MOV #CS2_CLR,10(R1) */
+    0010061, 0000010,               /* MOV R0,10(R1) */
+    0012711, 0000021,               /* MOV #RIP+GO,(R1) */
+    0012761, 0010000, 0000032,      /* MOV #FMT16B,32(R1) */
+    0012761, 0177000, 0000002,      /* MOV #-512.,2(R1) */
+    0005061, 0000004,               /* CLR 4(R1) */
+    0005061, 0000006,               /* CLR 6(R1) */
+    0005061, 0000034,               /* CLR 34(R1) */
+    0012711, 0000071,               /* MOV #READ+GO,(R1) */
+    0105711,                        /* TSTB (R1) */
+    0100376,                        /* BPL .-2 */
+    0005002,                        /* CLR R2 */
+    0005003,                        /* CLR R3 */
+    0012704, XP_BOOT_ADDR + 000020, /* MOV #BOOT_ADDR+20,R4 */
+    0005005,                        /* CLR R5 */
+    0105011,                        /* CLRB (R1) */
+    0005007                         /* CLR PC */
+};
+
+/*
  * TQ11/TMSCP ROM bootstrap (SIMH TQ-compatible sequence).
  * Initializes the controller, issues ONLINE, REWIND, and READ,
  * reads one 512-byte block to 000000, and then jumps to 000000.
@@ -639,6 +672,17 @@ int main(int argc, char **argv)
                 return 2;
             }
             break;
+        case BOOT_DEV_XP:
+            if (!lsi11_device_enabled("xp11")) {
+                fprintf(stderr, "-boot xp*/rp* requires XP/RP enabled\n");
+                return 2;
+            }
+            if (opts.boot_unit >= opts.xp_count || !opts.xp_path[opts.boot_unit]) {
+                fprintf(stderr, "-boot xp%o requires matching -xp attachment\n",
+                        opts.boot_unit);
+                return 2;
+            }
+            break;
         case BOOT_DEV_RL:
             if (!lsi11_device_enabled("rl11")) {
                 fprintf(stderr, "-boot rl* requires RL11 enabled\n");
@@ -836,6 +880,19 @@ int main(int argc, char **argv)
             bus_write16((uint16_t)(RH_BOOT_ADDR + 000010u),
                         (uint16_t)opts.boot_unit);
             r.r[7] = RH_BOOT_ENTRY;
+            break;
+
+        case BOOT_DEV_XP:
+            if (install_bootstrap(XP_BOOT_ADDR, xp_bootstrap,
+                                  sizeof(xp_bootstrap) / sizeof(xp_bootstrap[0])) !=
+                    0) {
+                fprintf(stderr, "boot destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            bus_write16(XP_BOOT_UNIT, (uint16_t)opts.boot_unit);
+            bus_write16(XP_BOOT_CSR, 0176700u);
+            r.r[7] = XP_BOOT_ENTRY;
             break;
 
         case BOOT_DEV_RL: {

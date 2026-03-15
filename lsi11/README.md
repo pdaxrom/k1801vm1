@@ -160,6 +160,8 @@ This subproject now provides two separate executables:
   - RM05 geometry path
   - commands used by BSD autoconfig/boot path (`READ/WRITE/SEEK/PRESET/PACK/DCLR`)
   - 22-bit DMA path via `BA/BAE` (no UBMAP on XP path)
+- Boot note:
+  - `-boot xp0`/`-boot rp0` boots via built-in XP/RP bootstrap (SIMH RP-compatible)
 
 ### TK50 (TMSCP/TQ) support
 - `TQ11` models a minimal `TMSCP` tape controller for `TK50`-class units (`unit 0..7`).
@@ -231,7 +233,7 @@ This subproject now provides two separate executables:
 ### Demo: interactive boot menu (`demo/boot_menu`)
 - Purpose:
   - interactive loader helper that detects disk/tape controllers and asks what to boot
-  - supports `RK11`, `RH11/HK`, `RL11`, `TQ11/TMSCP`
+  - supports `RK11`, `RH11/HK`, `XP/RP`, `RL11`, `TQ11/TMSCP`
 - Build:
   - `make -C lsi11/demo boot_menu.bin`
 - Load address:

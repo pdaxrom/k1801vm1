@@ -16,6 +16,7 @@ enum {
     BOOT_DEV_NONE = 0,
     BOOT_DEV_RK,
     BOOT_DEV_RH,
+    BOOT_DEV_XP,
     BOOT_DEV_RL,
     BOOT_DEV_TQ
 };

@@ -99,6 +99,10 @@ static int parse_boot_device(const char *name, int *kind_out, int *unit_out)
         kind = BOOT_DEV_RH;
         suffix = name + 2;
         max_units = RH11_MAX_DRIVES;
+    } else if (!strncmp(name, "xp", 2) || !strncmp(name, "rp", 2)) {
+        kind = BOOT_DEV_XP;
+        suffix = name + 2;
+        max_units = XP_MAX_DRIVES;
     } else if (!strncmp(name, "rl", 2)) {
         kind = BOOT_DEV_RL;
         suffix = name + 2;
@@ -199,7 +203,8 @@ void options_usage(const char *argv0)
             "  -disable-rl     Disable RL11\n"
             "  -disable-tq     Disable TQ11/TMSCP tape controller\n"
             "  -disable-sr     Disable SR\n"
-            "  -boot <dev>     Boot selected unit: rkN|rhN|hkN|rlN|tqN (N defaults to 0)\n"
+            "  -boot <dev>     Boot selected unit: rkN|rhN|hkN|xpN|rpN|rlN|tqN "
+            "(N defaults to 0)\n"
             "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
             "000000\n"
             "  -bootrt11       Run built-in RK/RH/RL bootstrap for the selected "
