@@ -27,6 +27,7 @@ COMMON_SRCS := \
   dev_tq11.c \
   dev_rl11.c \
   dev_rh11.c \
+  dev_rq11.c \
   dev_xp.c \
   dev_rk11.c \
   dev_lp11.c \
@@ -186,6 +187,8 @@ test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
 	./tests/test_xp_pdp1184
 	@echo "Running XP/RP boot smoke..."
 	./tests/test_xp_boot_smoke.sh ./$(BIN_PDP1184)
+	@echo "Running RQ boot smoke..."
+	./tests/test_rq_boot_smoke.sh ./$(BIN_PDP1184)
 	@echo "Running RH70 SIMH compare tests..."
 	./tests/test_rh70_simh_compare.sh ./tests/test_rh70_regtrace_pdp1184
 	@echo "Running pdp1184 I/O window tests..."

@@ -75,6 +75,7 @@ set(PICO_LSI11_COMMON_SOURCES
     ../lsi11/dev_kw11.c
     ../lsi11/dev_rl11.c
     ../lsi11/dev_rh11.c
+    ../lsi11/dev_rq11.c
     ../lsi11/dev_rk11.c
     ../lsi11/dev_xp.c
     ../lsi11/dev_tq11.c

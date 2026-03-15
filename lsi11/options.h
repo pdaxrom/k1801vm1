@@ -4,6 +4,7 @@
 #include "../core/core.h"
 #include "dev_rk11.h"
 #include "dev_rh11.h"
+#include "dev_rq11.h"
 #include "dev_xp.h"
 #include "dev_rl11.h"
 #include "dev_tq11.h"
@@ -17,6 +18,7 @@ enum {
     BOOT_DEV_RK,
     BOOT_DEV_RH,
     BOOT_DEV_XP,
+    BOOT_DEV_RQ,
     BOOT_DEV_RL,
     BOOT_DEV_TQ
 };
@@ -24,6 +26,7 @@ enum {
 typedef struct {
     const char *rk_path[RK11_MAX_DRIVES];
     const char *rh_path[RH11_MAX_DRIVES];
+    const char *rq_path[RQ11_MAX_UNITS];
     const char *xp_path[XP_MAX_DRIVES];
     const char *tq_path[TQ11_MAX_UNITS];
     struct {
@@ -32,6 +35,7 @@ typedef struct {
     } rl_path[RL11_MAX_DRIVES];
     int rk_count;
     int rh_count;
+    int rq_count;
     int xp_count;
     int rl_count;
     int tq_count;
@@ -57,6 +61,7 @@ typedef struct {
     int disable_lp;
     int disable_rk;
     int disable_rh;
+    int disable_rq;
     int disable_xp;
     int disable_rl;
     int disable_tq;

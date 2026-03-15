@@ -20,6 +20,8 @@ This subproject now provides two separate executables:
 - `xp` (RP/RM MASSBUS disk, RM05 subset) is available as an opt-in controller
   via `-xp`/`-rp`; if not enabled, OS autoconfiguration may report
   `xp ... skipped: No CSR`.
+- `rq` (MSCP disk) is available as an opt-in controller via `-rq`; if not
+  enabled, OS autoconfiguration may report `rq ... skipped: No CSR`.
 - Bootstrap flow is loader-based (`-boot`, `-bootcopy`, `-bootrt11`), not bus-ROM emulation.
 - Full hardware front-panel semantics (`HALT switch`, `INIT`-driven halt,
   `RESTART` sequencing) are out of scope for both targets.
@@ -91,7 +93,7 @@ This subproject now provides two separate executables:
   - Example: `4104 KB` valid
 
 ### I/O compatibility
-- RL11, RK11, RH11, XP/RP (RM05 subset), DL11, DZ11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
+- RL11, RK11, RH11, RQ (MSCP), XP/RP (RM05 subset), DL11, DZ11, KW11-L/LTC, optional KW11-P override, LP11, SR are supported.
 - TM11 is not supported.
 - DL11 alias is **not forced** by default on this target.
 - DL11 terminal character width defaults to **7-bit** (UNIX V5 compatible).
@@ -163,6 +165,19 @@ This subproject now provides two separate executables:
 - Boot note:
   - `-boot xp0`/`-boot rp0` boots via built-in XP/RP bootstrap (SIMH RP-compatible)
 
+### RQ (MSCP) disk controller
+- RQ is modeled as a UQSSP/MSCP port at `0172150..0172153`.
+- CLI:
+  - `-rq <path>` attach MSCP disk image (`rq0..rq3`)
+  - `-disable-rq` hide controller decode
+- IRQ: vector `000154`, priority `5`.
+- Current scope (v1):
+  - MSCP command subset: `SCC/GCS/GUS/AVL/ONL/SUC/ACC/READ/WRITE/COMPARE`
+  - flat image file, 512-byte blocks, LBN addressing
+  - UQSSP ring/descriptor path with optional UBMAP translation on `pdp1184`
+- Boot note:
+  - `-boot rq0` boots via built-in MSCP bootstrap (SIMH RQ-compatible)
+
 ### TK50 (TMSCP/TQ) support
 - `TQ11` models a minimal `TMSCP` tape controller for `TK50`-class units (`unit 0..7`).
 - Default controller interface (octal):
@@ -221,6 +236,8 @@ This subproject now provides two separate executables:
   - `./pdp1184 -rk disks/rt11v400.dsk -bootrt11`
 - RH11 image attach:
   - `./pdp1184 -rh disks/rk07.img`
+- RQ (MSCP) image attach:
+  - `./pdp1184 -rq disks/rd54.img`
 - XP/RP RM05 image attach:
   - `./pdp1184 -xp disks/bsd2.9/2.9BSD-usr.rm05`
 - RL image attach:
@@ -233,7 +250,7 @@ This subproject now provides two separate executables:
 ### Demo: interactive boot menu (`demo/boot_menu`)
 - Purpose:
   - interactive loader helper that detects disk/tape controllers and asks what to boot
-  - supports `RK11`, `RH11/HK`, `XP/RP`, `RL11`, `TQ11/TMSCP`
+  - supports `RK11`, `RH11/HK`, `XP/RP`, `RQ (MSCP)`, `RL11`, `TQ11/TMSCP`
 - Build:
   - `make -C lsi11/demo boot_menu.bin`
 - Load address:
@@ -244,10 +261,10 @@ This subproject now provides two separate executables:
 - Typical run (`lsi11`, boot from RH unit 0):
   - `./lsi11 -rh disks/rt11v503.dsk -load demo/boot_menu.bin -addr 0100000 -pc 0100000`
 - Interaction:
-  - select controller key: `R` (RK), `H` (RH/HK), `L` (RL), `T` (TQ)
+  - select controller number from the prompt (`1..6`)
   - select unit number:
-    - `0..7` for `RK/RH/TQ`
-    - `0..3` for `RL`
+    - `0..7` for `RK/RH/XP/TQ`
+    - `0..3` for `RQ/RL`
 - Notes:
   - menu probes controller CSRs and handles missing devices via bus-error (`000004`) recovery
   - after selection, it installs/copies built-in bootstrap words and transfers control to selected bootstrap
@@ -264,6 +281,7 @@ This subproject now provides two separate executables:
 | KW11-P (optional override) | `0172540–0172545` | `000100` | `6` | CSR bit 7 (DONE) | CSR bit 6 | write CSR with DONE=0 | Compatibility-only programmable `single/repeat`, `up/down`, rates `100 kHz/10 kHz/60 Hz/external`, ERR in CSR bit 8 |
 | RL11 (RL01/RL02) | `0174400–0174407` | `000160` | `5` | RLCS bit 7 (CRDY) | RLCS bit 6 | Start command by clearing CRDY (negative GO) | BAR/DA/MPR registers, BA16/BA17 in RLCS bits 4-5, commands: NO-OP/WCHK/GET STATUS/SEEK/READ HEADER/WRITE/READ |
 | TQ11 (TK50 / TMSCP) | `0174500–0174503` | `000260` | `5` | port/ring driven | port/ring driven | host clears via descriptor ownership / UQ init flow | Opt-in controller, enabled by `-tq`, supports units `tq0..tq7`, SIMH `.tap` backend |
+| RQ (MSCP disk) | `0172150–0172153` | `000154` | `5` | port/ring driven | port/ring driven | host clears via descriptor ownership / UQ init flow | Opt-in controller, enabled by `-rq`, supports units `rq0..rq3` |
 | RK11 (RK05) | `0177400–0177417` | `000220` | `5` | RKCS RDY bit 7 | RKCS IDE bit 6 | Start next command (`GO=1`) | Control Reset/Read/Write/Write Check/Read Check/Seek/Drive Reset/Write Lock, RKER hard/soft errors, RKBA+MEX DMA |
 | RH11 (RK611-compatible) | `0177440–0177462` | `000210` | `5` | RHCS1 bit 7 | RHCS1 bit 6 | Write RHCS1 with GO | READ/WRITE/SEEK + RK611 subset; `rh11`: RHBA+BA16/BA17 (18-bit), `rh70`: RHBAE-backed 22-bit DMA data path; RH70 control/IRQ parity still WIP |
 | LP11 (printer) | `0177514–0177517` | `000200` | `4` | CSR bit 7 | CSR bit 6 | Write DBR (`0177516`) | Output to host stdout |

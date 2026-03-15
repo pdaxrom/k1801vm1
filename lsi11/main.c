@@ -9,6 +9,7 @@
 #include "dev_kw11.h"
 #include "dev_rl11.h"
 #include "dev_rh11.h"
+#include "dev_rq11.h"
 #include "dev_xp.h"
 #include "dev_rk11.h"
 #include "dev_sr.h"
@@ -275,6 +276,68 @@ static const uint16_t xp_bootstrap[] = {
     0005005,                        /* CLR R5 */
     0105011,                        /* CLRB (R1) */
     0005007                         /* CLR PC */
+};
+
+/*
+ * RQ (MSCP) ROM bootstrap (SIMH RQ-compatible sequence).
+ * Initializes UQSSP, issues ONLINE+READ, reads one 512-byte block to 000000,
+ * and then jumps to 000000. Loaded/executed from 016000.
+ */
+#define RQ_BOOT_ADDR  016000
+#define RQ_BOOT_ENTRY (RQ_BOOT_ADDR + 000002)
+#define RQ_BOOT_UNIT  (RQ_BOOT_ADDR + 000010)
+#define RQ_BOOT_CSR   (RQ_BOOT_ADDR + 000014)
+static const uint16_t rq_bootstrap[] = {
+    0042125,                        /* "UD" */
+    0012706, 0016000,               /* MOV #016000,SP */
+    0012700, 0000000,               /* MOV #unit,R0 */
+    0012701, 0172150,               /* MOV #172150,R1 */
+    0012704, 0016162,               /* MOV #it,R4 */
+    0012705, 0004000,               /* MOV #4000,R5 */
+    0010102,                        /* MOV R1,R2 */
+    0005022,                        /* CLR (R2)+ */
+    0005712,                        /* 10$: TST (R2) */
+    0100001,                        /*      BPL 20$ */
+    0000000,                        /*      HALT */
+    0030512,                        /* 20$: BIT R5,(R2) */
+    0001773,                        /*      BEQ 10$ */
+    0012412,                        /*      MOV (R4)+,(R2) */
+    0006305,                        /*      ASL R5 */
+    0100370,                        /*      BPL 10$ */
+    0105714,                        /* 30$: TSTB (R4) */
+    0001434,                        /*      BEQ done */
+    0012702, 0007000,               /*      MOV #rpkt-4,R2 */
+    0005022,                        /* 40$: CLR (R2)+ */
+    0020227, 0007204,               /*      CMP R2,#comm */
+    0103774,                        /*      BLO 40$ */
+    0112437, 0007100,               /*      MOVB (R4)+,cpkt-4 */
+    0110037, 0007110,               /*      MOVB R0,cpkt+4 */
+    0112437, 0007114,               /*      MOVB (R4)+,cpkt+10 */
+    0112437, 0007121,               /*      MOVB (R4)+,cpkt+15 */
+    0012722, 0007004,               /*      MOV #rpkt,(R2)+ */
+    0010522,                        /*      MOV R5,(R2)+ */
+    0012722, 0007104,               /*      MOV #ckpt,(R2)+ */
+    0010512,                        /*      MOV R5,(R2) */
+    0024242,                        /*      CMP -(R2),-(R2) */
+    0005711,                        /*      TST (R1) */
+    0005712,                        /* 50$: TST (R2) */
+    0100776,                        /*      BMI 50$ */
+    0005737, 0007016,               /*      TST rpkt+12 */
+    0001743,                        /*      BEQ 30$ */
+    0000000,                        /*      HALT */
+    0005011,                        /* done: CLR (R1) */
+    0005003,                        /*       CLR R3 */
+    0012704, RQ_BOOT_ADDR + 000020, /*       MOV #016020,R4 */
+    0005005,                        /*       CLR R5 */
+    0005007,                        /*       CLR PC */
+    0100000,                        /* it: no ints, ring sz=1 */
+    0007204,                        /*     .word comm */
+    0000000,                        /*     .word 0 */
+    0000001,                        /*     .word 1 */
+    0004420,                        /*     .byte 20,11 */
+    0020000,                        /*     .byte 0,40 */
+    0001041,                        /*     .byte 41,2 */
+    0000000
 };
 
 /*
@@ -577,6 +640,11 @@ int main(int argc, char **argv)
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
+    if (opts.disable_rq &&
+            lsi11_set_device_enabled("rq11", 0, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
     if (opts.disable_xp &&
             lsi11_set_device_enabled("xp11", 0, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
@@ -594,6 +662,11 @@ int main(int argc, char **argv)
     }
     if (opts.tq_count > 0 && !opts.disable_tq &&
             lsi11_set_device_enabled("tq11", 1, cfg_err, sizeof(cfg_err)) != 0) {
+        fprintf(stderr, "Device configuration error: %s\n", cfg_err);
+        return 2;
+    }
+    if (opts.rq_count > 0 && !opts.disable_rq &&
+            lsi11_set_device_enabled("rq11", 1, cfg_err, sizeof(cfg_err)) != 0) {
         fprintf(stderr, "Device configuration error: %s\n", cfg_err);
         return 2;
     }
@@ -626,6 +699,10 @@ int main(int argc, char **argv)
     }
     if (opts.rh_count > 0 && !lsi11_device_enabled("rh11")) {
         fprintf(stderr, "-rh is not allowed with -disable-rh\n");
+        return 2;
+    }
+    if (opts.rq_count > 0 && !lsi11_device_enabled("rq11")) {
+        fprintf(stderr, "-rq is not allowed with -disable-rq\n");
         return 2;
     }
     if (opts.xp_count > 0 && !lsi11_device_enabled("xp11")) {
@@ -683,6 +760,17 @@ int main(int argc, char **argv)
                 return 2;
             }
             break;
+        case BOOT_DEV_RQ:
+            if (!lsi11_device_enabled("rq11")) {
+                fprintf(stderr, "-boot rq*/ra* requires RQ enabled\n");
+                return 2;
+            }
+            if (opts.boot_unit >= opts.rq_count || !opts.rq_path[opts.boot_unit]) {
+                fprintf(stderr, "-boot rq%o requires matching -rq attachment\n",
+                        opts.boot_unit);
+                return 2;
+            }
+            break;
         case BOOT_DEV_RL:
             if (!lsi11_device_enabled("rl11")) {
                 fprintf(stderr, "-boot rl* requires RL11 enabled\n");
@@ -721,7 +809,7 @@ int main(int argc, char **argv)
         fprintf(stderr,
                 "CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh11=%d rh_mode=%s "
                 "dev_dl=%d dev_kw=%d dev_kw11_l=%d dev_kw11_p=%d "
-                "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_xp=%d dev_rl=%d dev_tq=%d dev_sr=%d "
+                "dev_dz=%d dev_lp=%d dev_rk=%d dev_rh=%d dev_rq=%d dev_xp=%d dev_rl=%d dev_tq=%d dev_sr=%d "
                 "dev_vm1sel=%d dev_vm1sav=%d\n",
                 m, cpu_model_name(opts.cpu_model), lsi11_machine_ram_kb(),
                 lsi11_dl11_alias(), rh11_on, rh11_mode_name(rh11_get_mode()),
@@ -729,7 +817,8 @@ int main(int argc, char **argv)
                 kw11_master, kw11_l_on, kw11_p_on,
                 lsi11_device_enabled("dz11"), lsi11_device_enabled("lp11"),
                 lsi11_device_enabled("rk11"),
-                lsi11_device_enabled("rh11"), lsi11_device_enabled("xp11"),
+                lsi11_device_enabled("rh11"), lsi11_device_enabled("rq11"),
+                lsi11_device_enabled("xp11"),
                 lsi11_device_enabled("rl11"),
                 lsi11_device_enabled("tq11"),
                 lsi11_device_enabled("sr"), lsi11_device_enabled("vm1sel"),
@@ -738,6 +827,11 @@ int main(int argc, char **argv)
     }
 
     regs r;
+    int break_enabled = 0;
+    int break_addr_set = 0;
+    word break_pc = 0;
+    word break_addr = 0;
+    int break_words = 32;
     memset(&r, 0, sizeof(r));
     r.model = opts.cpu_model;
 
@@ -781,10 +875,21 @@ int main(int argc, char **argv)
             return 1;
         }
     }
+    for (int unit = 0; unit < opts.rq_count; unit++) {
+        if (rq11_open_image_unit((unsigned)unit, opts.rq_path[unit]) != 0) {
+            fprintf(stderr, "rq11_open_image failed: rq%o %s\n", unit,
+                    opts.rq_path[unit]);
+            rh11_close_image();
+            rk11_close_image();
+            r.fini(&r);
+            return 1;
+        }
+    }
     for (int unit = 0; unit < opts.xp_count; unit++) {
         if (xp_open_image_unit((unsigned)unit, opts.xp_path[unit]) != 0) {
             fprintf(stderr, "xp_open_image failed: xp%o %s\n", unit,
                     opts.xp_path[unit]);
+            rq11_close_image();
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
@@ -797,6 +902,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "rl11_open_image failed: rl%o %s\n", unit,
                     opts.rl_path[unit].path);
             xp_close_image();
+            rq11_close_image();
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
@@ -809,6 +915,7 @@ int main(int argc, char **argv)
                     opts.tq_path[unit]);
             rl11_close_image();
             xp_close_image();
+            rq11_close_image();
             rh11_close_image();
             rk11_close_image();
             r.fini(&r);
@@ -893,6 +1000,19 @@ int main(int argc, char **argv)
             bus_write16(XP_BOOT_UNIT, (uint16_t)opts.boot_unit);
             bus_write16(XP_BOOT_CSR, 0176700u);
             r.r[7] = XP_BOOT_ENTRY;
+            break;
+
+        case BOOT_DEV_RQ:
+            if (install_bootstrap(RQ_BOOT_ADDR, rq_bootstrap,
+                                  sizeof(rq_bootstrap) / sizeof(rq_bootstrap[0])) !=
+                    0) {
+                fprintf(stderr, "boot destination is outside RAM\n");
+                r.fini(&r);
+                return 1;
+            }
+            bus_write16(RQ_BOOT_UNIT, (uint16_t)opts.boot_unit);
+            bus_write16(RQ_BOOT_CSR, 0172150u);
+            r.r[7] = RQ_BOOT_ENTRY;
             break;
 
         case BOOT_DEV_RL: {
@@ -1074,6 +1194,26 @@ int main(int argc, char **argv)
         fprintf(stderr, "Set PC to octal %lo\n", opts.start_pc);
     }
 
+    {
+        const char *env_pc = getenv("LSI11_BREAK_PC");
+        const char *env_addr = getenv("LSI11_BREAK_ADDR");
+        const char *env_words = getenv("LSI11_BREAK_WORDS");
+        if (env_pc && *env_pc) {
+            break_pc = (word)strtol(env_pc, NULL, 8);
+            break_enabled = 1;
+        }
+        if (env_addr && *env_addr) {
+            break_addr = (word)strtol(env_addr, NULL, 8);
+            break_addr_set = 1;
+        }
+        if (env_words && *env_words) {
+            int v = (int)strtol(env_words, NULL, 10);
+            if (v > 0 && v < 256) {
+                break_words = v;
+            }
+        }
+    }
+
     /* -------- main emulation loop --------
        Replace cpu_step(&r) with your core's actual stepping API. */
     long steps_done = 0;
@@ -1130,6 +1270,35 @@ int main(int argc, char **argv)
                             r.psw);
                 }
             }
+            if (break_enabled && r.r[7] == break_pc) {
+                word dump_addr = break_addr_set ? break_addr : r.r[1];
+                fprintf(stderr,
+                        "BREAK PC=%06o R0=%06o R1=%06o R2=%06o R3=%06o R4=%06o "
+                        "R5=%06o SP=%06o PS=%06o\n",
+                        r.r[7], r.r[0], r.r[1], r.r[2], r.r[3], r.r[4], r.r[5],
+                        r.r[6], r.psw);
+                fprintf(stderr, "DUMP @%06o (%d words):\n", dump_addr, break_words);
+                for (int i = 0; i < break_words; i++) {
+                    word addr = (word)(dump_addr + (word)(i * 2));
+                    word val = r.load_word(&r, addr);
+                    fprintf(stderr, "%06o: %06o\n", addr, val);
+                }
+                {
+                    word dis_addr = (word)((break_pc - 020) & 0177776);
+                    fprintf(stderr, "DISASM @%06o:\n", dis_addr);
+                    for (int i = 0; i < 16; i++) {
+                        word start = dis_addr;
+                        char buf[128];
+                        disas(&r, &dis_addr, buf);
+                        fprintf(stderr, "%06o %s\n", start, buf);
+                        if (dis_addr == start) {
+                            dis_addr = (word)(dis_addr + 2);
+                        }
+                    }
+                }
+                opts.max_steps = 0;
+                break;
+            }
             /* TODO: replace with your core single-instruction executor */
             core_step(&r); /* must exist in your core */
             steps_done++;
@@ -1161,6 +1330,7 @@ int main(int argc, char **argv)
     tq11_close_image();
     rl11_close_image();
     xp_close_image();
+    rq11_close_image();
     rh11_close_image();
     rk11_close_image();
     return 0;

@@ -103,6 +103,10 @@ static int parse_boot_device(const char *name, int *kind_out, int *unit_out)
         kind = BOOT_DEV_XP;
         suffix = name + 2;
         max_units = XP_MAX_DRIVES;
+    } else if (!strncmp(name, "rq", 2) || !strncmp(name, "ra", 2)) {
+        kind = BOOT_DEV_RQ;
+        suffix = name + 2;
+        max_units = RQ11_MAX_UNITS;
     } else if (!strncmp(name, "rl", 2)) {
         kind = BOOT_DEV_RL;
         suffix = name + 2;
@@ -159,7 +163,7 @@ void options_usage(const char *argv0)
 
     fprintf(stderr,
             "Usage:\n"
-            "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-xp <rm05.img>] [-rl <rl.img>] "
+            "  %s [-rk <rk05.img>] [-rh <rk06rk07.img>] [-rq <mscp.img>] [-xp <rm05.img>] [-rl <rl.img>] "
             "[-tq <tk50.tap>] "
             "[-boot <dev>|-bootcopy|-bootrt11|-boottq] [-cpu <model>]\n"
             "  %s @<options.file>\n"
@@ -181,6 +185,7 @@ void options_usage(const char *argv0)
             "  -clock <mhz>    Alias for -freq\n"
             "  -rk <path>      Attach RK05 image (repeatable: rk0,rk1,...)\n"
             "  -rh <path>      Attach RH11 (RK06/RK07) image (repeatable: rh0,rh1,...)\n"
+            "  -rq <path>      Attach RQ (MSCP) disk image (repeatable: rq0,rq1,...)\n"
             "  -xp <path>      Attach XP/RP RM05 image (repeatable: xp0,xp1,...)\n"
             "  -rp <path>      Alias for -xp\n"
             "  -rh-mode <m>    RH controller mode: rh11 (default) | rh70\n"
@@ -199,11 +204,12 @@ void options_usage(const char *argv0)
             "  -disable-lp     Disable LP11\n"
             "  -disable-rk     Disable RK11\n"
             "  -disable-rh     Disable RH11\n"
+            "  -disable-rq     Disable RQ (MSCP)\n"
             "  -disable-xp     Disable XP/RP controller\n"
             "  -disable-rl     Disable RL11\n"
             "  -disable-tq     Disable TQ11/TMSCP tape controller\n"
             "  -disable-sr     Disable SR\n"
-            "  -boot <dev>     Boot selected unit: rkN|rhN|hkN|xpN|rpN|rlN|tqN "
+            "  -boot <dev>     Boot selected unit: rkN|rhN|hkN|xpN|rpN|rqN|raN|rlN|tqN "
             "(N defaults to 0)\n"
             "  -bootcopy       Copy first 010000 bytes from RK/RH/RL image into RAM at "
             "000000\n"
@@ -407,6 +413,12 @@ static int parse_arg_list(lsi11_options_t *opts, int argc, char **argv,
                 return -1;
             }
             opts->rh_path[opts->rh_count++] = argv[++i];
+        } else if (!strcmp(argv[i], "-rq") && i + 1 < argc) {
+            if (opts->rq_count >= RQ11_MAX_UNITS) {
+                fprintf(stderr, "Too many -rq images (max %d)\n", RQ11_MAX_UNITS);
+                return -1;
+            }
+            opts->rq_path[opts->rq_count++] = argv[++i];
         } else if ((!strcmp(argv[i], "-xp") || !strcmp(argv[i], "-rp")) && i + 1 < argc) {
             if (opts->xp_count >= XP_MAX_DRIVES) {
                 fprintf(stderr, "Too many -xp images (max %d)\n", XP_MAX_DRIVES);
@@ -471,6 +483,8 @@ static int parse_arg_list(lsi11_options_t *opts, int argc, char **argv,
             opts->disable_rk = 1;
         } else if (!strcmp(argv[i], "-disable-rh")) {
             opts->disable_rh = 1;
+        } else if (!strcmp(argv[i], "-disable-rq")) {
+            opts->disable_rq = 1;
         } else if (!strcmp(argv[i], "-disable-xp")) {
             opts->disable_xp = 1;
         } else if (!strcmp(argv[i], "-disable-rl")) {
