@@ -68,6 +68,13 @@ This subproject now provides two separate executables:
   - `./lsi11 -rl disk0.dsk -rl02 disk1.dsk` -> `rl0`, `rl1`
   - limits: `rk/rh/tq` up to `8` units, `rl` up to `4` units
 
+### Image creation helper
+- `lsi11-image` creates empty disk/tape images with emulator-compatible sizes.
+- List supported types: `./lsi11-image --list`
+- Create a default-sized image: `./lsi11-image -t rk05 -o disks/rk05.dsk`
+- Override size in bytes (suffix K/M/G allowed): `./lsi11-image -t rk05 -s 2494464 -o disks/rk05.dsk`
+- Tape image: `./lsi11-image -t tk50 -o tapes/tk50.tap`
+
 ## 2) `pdp1184` target (PDP-11/84-like, MMU enabled)
 
 ### Identity and MMU policy

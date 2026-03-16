@@ -10,6 +10,7 @@ BUILD_DIR := .build
 
 BIN_LSI11 := lsi11
 BIN_PDP1184 := pdp1184
+BIN_IMAGE := lsi11-image
 
 CFG_LSI11 := -DENABLE_MMU=0 -DMMU_STUB_REGS_WHEN_DISABLED=0 -DLSI11_TARGET_1104=1
 CFG_PDP1184 := -DENABLE_MMU=1 -DLSI11_TARGET_1184=1
@@ -73,12 +74,18 @@ TESTS_PDP1184 := \
 
 ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
 
-all: $(BIN_LSI11) $(BIN_PDP1184)
+all: $(BIN_LSI11) $(BIN_PDP1184) $(BIN_IMAGE)
 
 $(BIN_LSI11): $(MAIN_OBJS_LSI11) $(COMMON_OBJS_LSI11) $(CORE_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(BIN_PDP1184): $(MAIN_OBJS_PDP1184) $(COMMON_OBJS_PDP1184) $(CORE_OBJS_PDP1184)
+	$(CC) $(CFLAGS) -o $@ $^
+
+IMAGE_SRCS := lsi11_image.c
+IMAGE_OBJS := $(addprefix $(BUILD_DIR)/lsi11-image/,$(IMAGE_SRCS:.c=.o))
+
+$(BIN_IMAGE): $(IMAGE_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(BUILD_DIR)/lsi11/%.o: %.c
@@ -88,6 +95,10 @@ $(BUILD_DIR)/lsi11/%.o: %.c
 $(BUILD_DIR)/pdp1184/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1184) -c -o $@ $<
+
+$(BUILD_DIR)/lsi11-image/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/lsi11/core_%.o: ../core/%.c
 	@mkdir -p $(dir $@)
