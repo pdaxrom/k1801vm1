@@ -966,8 +966,8 @@ enum {
 #define MMU_TRAP_VECTOR 0000250
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg);
-static void INLINE mmu_tlb_flush_all(regs *r);
+static INLINE void mmu_tlb_update(regs *r, int mode, int space, int seg);
+static INLINE void mmu_tlb_flush_all(regs *r);
 static INLINE int mmu_split_enabled(const regs *r, int mode);
 #endif
 
@@ -1239,7 +1239,7 @@ static INLINE int mmu_phys_is_iopage(dword pa)
     return (pa >= 017760000 && pa <= 017777777) ? 1 : 0;
 }
 
-static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
+static INLINE void mmu_tlb_update(regs *r, int mode, int space, int seg)
 {
     word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
     word par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
@@ -1290,7 +1290,7 @@ static void INLINE mmu_tlb_update(regs *r, int mode, int space, int seg)
     }
 }
 
-static void INLINE mmu_tlb_flush_all(regs *r)
+static INLINE void mmu_tlb_flush_all(regs *r)
 {
     int mode, space, seg;
     for (mode = 0; mode < 4; mode++) {
@@ -1926,7 +1926,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM word access bypasses entire callback chain. */
-    if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
+    if (r->ram_fast && ((uint32_t)offset + 1u) < r->ram_fast_size) {
         return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
     }
 #else
@@ -2031,7 +2031,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM word access bypasses entire callback chain. */
-    if (r->ram_fast && (offset + 1) < r->ram_fast_size) {
+    if (r->ram_fast && ((uint32_t)offset + 1u) < r->ram_fast_size) {
         r->ram_fast[offset] = (uint8_t)(value & 000377);
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
         return;

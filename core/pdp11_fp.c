@@ -284,7 +284,6 @@ typedef int t_bool;
 /* Macros already defined in core.c */
 
 static fpac_t zero_fac = {0, 0};
-static fpac_t one_fac = {1, 0};
 static fpac_t fround_fac = {(1u << (FP_V_FROUND + 32)), 0};
 static fpac_t fround_guard_fac = {0, (1u << (FP_V_FROUND + FP_GUARD))};
 static fpac_t dround_guard_fac = {(1u << (FP_V_DROUND + FP_GUARD)), 0};

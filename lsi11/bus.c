@@ -272,9 +272,9 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
         return 0;
     }
 
-    if (addr <= 0177777) {
+    if (addr <= IO_PAGE_END) {
         a16 = (uint16_t)addr;
-        if (a16 < IO_PAGE_START || a16 > IO_PAGE_END) {
+        if (a16 < IO_PAGE_START) {
             return 0;
         }
         if (g_cfg.machine == BUS_MACHINE_LSI11_1104) {
@@ -464,13 +464,13 @@ void __not_in_flash_func(bus_write16)(paddr_t addr, uint16_t v)
     }
 }
 
-static int inline vm2_bankable_ram_addr(uint16_t addr)
+static inline int vm2_bankable_ram_addr(uint16_t addr)
 {
     /* CPU-side banking applies only to RAM window 000000..157777. */
     return (addr < IO_PAGE_START) ? 1 : 0;
 }
 
-static int inline vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
+static inline int vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
 {
     uint16_t io_addr = 0;
 
