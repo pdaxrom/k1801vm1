@@ -11,6 +11,7 @@ BUILD_DIR := .build
 BIN_LSI11 := lsi11
 BIN_PDP1184 := pdp1184
 BIN_IMAGE := lsi11-image
+BIN_RT11TOOL := rt11tool
 
 CFG_LSI11 := -DENABLE_MMU=0 -DMMU_STUB_REGS_WHEN_DISABLED=0 -DLSI11_TARGET_1104=1
 CFG_PDP1184 := -DENABLE_MMU=1 -DLSI11_TARGET_1184=1
@@ -74,7 +75,7 @@ TESTS_PDP1184 := \
 
 ROOT_MMU_CFLAGS := -Wall -g -I. $(shell sdl2-config --cflags) -DENABLE_MMU=1
 
-all: $(BIN_LSI11) $(BIN_PDP1184) $(BIN_IMAGE)
+all: $(BIN_LSI11) $(BIN_PDP1184) $(BIN_IMAGE) $(BIN_RT11TOOL)
 
 $(BIN_LSI11): $(MAIN_OBJS_LSI11) $(COMMON_OBJS_LSI11) $(CORE_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -88,6 +89,12 @@ IMAGE_OBJS := $(addprefix $(BUILD_DIR)/lsi11-image/,$(IMAGE_SRCS:.c=.o))
 $(BIN_IMAGE): $(IMAGE_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
+RT11_SRCS := tools/rt11tool.c tools/rt11fs.c
+RT11_OBJS := $(addprefix $(BUILD_DIR)/rt11tool/,$(RT11_SRCS:.c=.o))
+
+$(BIN_RT11TOOL): $(RT11_OBJS)
+	$(CC) $(CFLAGS) -o $@ $^
+
 $(BUILD_DIR)/lsi11/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_LSI11) -c -o $@ $<
@@ -97,6 +104,10 @@ $(BUILD_DIR)/pdp1184/%.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1184) -c -o $@ $<
 
 $(BUILD_DIR)/lsi11-image/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/rt11tool/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
@@ -189,6 +200,9 @@ test-lsi11: $(BIN_LSI11) $(TESTS_LSI11)
 	./tests/test_lsi11_config.sh ./$(BIN_LSI11)
 	@echo "LSI11 TESTS PASSED"
 
+test-rt11tool: $(BIN_RT11TOOL)
+	./tests/test_rt11tool.sh
+
 test-pdp1184: $(BIN_PDP1184) $(TESTS_PDP1184)
 	@echo "Running RH70 pdp1184 tests..."
 	./tests/test_rh70_pdp1184
@@ -225,6 +239,6 @@ test-matrix: test-lsi11 test-pdp1184
 	@echo "ALL TESTS PASSED"
 
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(TESTS_LSI11) $(TESTS_PDP1184)
+	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(BIN_RT11TOOL) $(TESTS_LSI11) $(TESTS_PDP1184)
 
-.PHONY: all test test-lsi11 test-pdp1184 smoke-ultrix-rh smoke-bsd291-xp test-matrix clean
+.PHONY: all test test-lsi11 test-pdp1184 test-rt11tool smoke-ultrix-rh smoke-bsd291-xp test-matrix clean

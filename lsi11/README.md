@@ -75,6 +75,58 @@ This subproject now provides two separate executables:
 - Override size in bytes (suffix K/M/G allowed): `./lsi11-image -t rk05 -s 2494464 -o disks/rk05.dsk`
 - Tape image: `./lsi11-image -t tk50 -o tapes/tk50.tap`
 
+### RT-11 disk utility (`rt11tool`)
+- Build: `make rt11tool`
+- List directory: `./rt11tool ls disks/rt11v400.dsk`
+- List directory (long): `./rt11tool ls disks/rt11v400.dsk --long`
+  (includes bytes, status text/flags, job, and date in YYYY-MM-DD)
+- Short listing with raw status: `./rt11tool ls disks/rt11v400.dsk --debug`
+- Include raw date/status words: `./rt11tool ls disks/rt11v400.dsk --long --debug`
+- Show RT-11 layout info: `./rt11tool info disks/rt11v400.dsk`
+- Dump boot block: `./rt11tool bootblock disks/rt11v400.dsk`
+- Write boot block: `./rt11tool bootblock disks/rt11v400.dsk --write boot.bin`
+- Work with a partitioned image: `./rt11tool ls big.dsk --partition 1`
+- Extract all files: `./rt11tool extract disks/rt11v400.dsk /tmp/out`
+- Extract one file: `./rt11tool extract disks/rt11v400.dsk /tmp/out STARTX.COM`
+- Add a file: `./rt11tool add disks/rt11v400.dsk host.bin TEST.BIN`
+- Add all files from a directory: `./rt11tool add disks/rt11v400.dsk --dir /tmp/out`
+- Remove a file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN`
+- Remove a protected file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN --force`
+- Protect a file: `./rt11tool protect disks/rt11v400.dsk TEST.BIN`
+- Unprotect a file: `./rt11tool protect disks/rt11v400.dsk TEST.BIN --clear`
+- Check directory consistency: `./rt11tool fsck disks/rt11v400.dsk`
+- Fix EOS length mismatches: `./rt11tool fsck disks/rt11v400.dsk --repair`
+- Squeeze free space: `./rt11tool squeeze disks/rt11v400.dsk`
+- List mkfs types: `./rt11tool mkfs --list`
+- Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --type rk05`
+- Set volume metadata and segments:
+  `./rt11tool mkfs new.dsk --type rk05 --segments 8 --volid RT11A --owner OPS --sysid DECRT11A`
+- `mkfs` initializes all partitions when the image exceeds 65535 blocks.
+
+Supported commands:
+- `ls`
+- `info`
+- `bootblock`
+- `extract`
+- `add`
+- `rm`
+- `protect`
+- `fsck`
+- `squeeze`
+- `mkfs`
+
+Limitations:
+- Contiguous allocation only (no fragmentation support).
+- `fsck` only checks directory consistency (no data recovery).
+- Partitioned layout uses 65535-block partitions (177777 octal) with one unused
+  block between partitions; use `--partition N` to select a partition.
+- Extra directory entry words are preserved but not interpreted.
+- `rm` refuses protected files (PROT flag set) unless `--force` is used.
+- `squeeze` refuses volumes with tentative files (TENT entries).
+
+Validation:
+- `./tests/test_rt11tool.sh`
+
 ## 2) `pdp1184` target (PDP-11/84-like, MMU enabled)
 
 ### Identity and MMU policy
