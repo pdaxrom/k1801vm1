@@ -122,6 +122,7 @@ static void usage(FILE *out)
             "  add <image> <hostfile> <NAME.EXT> [--partition N]\n"
             "  add <image> --dir <dir> [--partition N]\n"
             "  rm <image> <NAME.EXT> [--partition N] [--force]\n"
+            "  squeeze <image> [--partition N]\n"
             "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n"
             "       [--segments N] [--volid TEXT] [--owner TEXT] [--sysid TEXT]\n");
 }
@@ -930,6 +931,53 @@ static int cmd_rm(int argc, char **argv)
     return 0;
 }
 
+static int cmd_squeeze(int argc, char **argv)
+{
+    if (argc < 1) {
+        usage(stderr);
+        return 1;
+    }
+    const char *image = argv[0];
+    uint32_t partition = 0;
+    int have_partition = 0;
+    int i;
+    rt11_image_t img;
+
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
+            if (parse_partition_value(argv[i + 1], &partition) != 0) {
+                fprintf(stderr, "rt11tool: invalid partition\n");
+                return 1;
+            }
+            have_partition = 1;
+            i++;
+        } else {
+            usage(stderr);
+            return 1;
+        }
+    }
+
+    if (rt11_open_image(&img, image, "rb+") != 0) {
+        perror("rt11tool: open image");
+        return 1;
+    }
+
+    if (have_partition && rt11_set_partition(&img, partition) != 0) {
+        perror("rt11tool: partition");
+        rt11_close_image(&img);
+        return 1;
+    }
+
+    if (rt11_squeeze(&img) != 0) {
+        perror("rt11tool: squeeze");
+        rt11_close_image(&img);
+        return 1;
+    }
+
+    rt11_close_image(&img);
+    return 0;
+}
+
 static int cmd_mkfs(int argc, char **argv)
 {
     const char *image = argv[0];
@@ -1058,6 +1106,14 @@ int main(int argc, char **argv)
             return 1;
         }
         return cmd_rm(argc - 2, &argv[2]);
+    }
+
+    if (strcmp(argv[1], "squeeze") == 0) {
+        if (argc < 3) {
+            usage(stderr);
+            return 1;
+        }
+        return cmd_squeeze(argc - 2, &argv[2]);
     }
 
     if (strcmp(argv[1], "mkfs") == 0) {

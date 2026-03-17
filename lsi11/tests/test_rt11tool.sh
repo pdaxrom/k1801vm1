@@ -32,6 +32,7 @@ cmp "$tmpdir/a.bin" "$out/A.BIN"
 cmp "$tmpdir/b.bin" "$out/B.BIN"
 
 ./rt11tool rm "$img" A.BIN
+./rt11tool squeeze "$img"
 ./rt11tool add "$img" "$tmpdir/c.bin" C.BIN
 ./rt11tool ls "$img" >/dev/null
 

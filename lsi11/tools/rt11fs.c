@@ -40,11 +40,59 @@ static const char rt11_rad50_chars[40] =
     " ABCDEFGHIJKLMNOPQRSTUVWXYZ$.?0123456789";
 
 static uint16_t rt11_date_now(void);
+static int rt11_read_block(rt11_image_t *img, uint32_t block, uint8_t *buf);
+static int rt11_write_block(rt11_image_t *img, uint32_t block,
+                            const uint8_t *buf);
+static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
+                                uint16_t seg_num, uint16_t *next_out);
 
 static uint16_t rt11_get_word(const uint8_t *buf, size_t word_index)
 {
     size_t off = word_index * 2;
     return (uint16_t)(buf[off] | ((uint16_t)buf[off + 1] << 8));
+}
+
+static int rt11_move_blocks(rt11_image_t *img, uint32_t from, uint32_t to,
+                            uint32_t count)
+{
+    uint32_t i;
+
+    if (!img || !img->fp) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (count == 0 || from == to) {
+        return 0;
+    }
+    if (from + count > img->volume_blocks || to + count > img->volume_blocks) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (to < from) {
+        for (i = 0; i < count; i++) {
+            uint8_t buf[RT11_BLOCK_SIZE];
+            if (rt11_read_block(img, from + i, buf) != 0) {
+                return -1;
+            }
+            if (rt11_write_block(img, to + i, buf) != 0) {
+                return -1;
+            }
+        }
+    } else {
+        for (i = count; i > 0; i--) {
+            uint8_t buf[RT11_BLOCK_SIZE];
+            uint32_t idx = i - 1u;
+            if (rt11_read_block(img, from + idx, buf) != 0) {
+                return -1;
+            }
+            if (rt11_write_block(img, to + idx, buf) != 0) {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 static void rt11_set_word(uint8_t *buf, size_t word_index, uint16_t val)
@@ -1103,6 +1151,59 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
     return -1;
 }
 
+int rt11_squeeze(rt11_image_t *img)
+{
+    uint16_t dir_start;
+    uint16_t next_seg = 1;
+    uint16_t total_segments = 0;
+    uint32_t guard = 0;
+
+    if (!img || !img->fp) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    if (rt11_read_home(img, &dir_start) != 0) {
+        return -1;
+    }
+
+    while (next_seg != 0) {
+        uint16_t seg_num = next_seg;
+        uint16_t seg_next = 0;
+
+        if (rt11_squeeze_segment(img, dir_start, seg_num, &seg_next) != 0) {
+            return -1;
+        }
+
+        if (total_segments == 0) {
+            uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
+            rt11_dirseg_hdr_t hdr;
+            uint32_t seg_block =
+                (uint32_t)dir_start +
+                (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+            if (rt11_read_segment(img, seg_block, segbuf) != 0) {
+                return -1;
+            }
+            if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+                return -1;
+            }
+            total_segments = hdr.total_segments;
+            if (total_segments == 0) {
+                total_segments = 1;
+            }
+        }
+
+        next_seg = seg_next;
+        guard++;
+        if (guard > total_segments + 4) {
+            errno = EINVAL;
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
 static void rt11_home_set_ascii(uint8_t *buf, size_t off, const char *text,
                                 size_t len)
 {
@@ -1160,6 +1261,235 @@ static uint16_t rt11_date_now(void)
     }
 
     return (uint16_t)((age << 14) | (month << 10) | (day << 5) | year_field);
+}
+
+static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
+                                uint16_t seg_num, uint16_t *next_out)
+{
+    struct file_entry {
+        uint16_t status;
+        uint16_t name0;
+        uint16_t name1;
+        uint16_t ext;
+        uint16_t length;
+        uint16_t job;
+        uint16_t date;
+        uint32_t old_start;
+        uint16_t *extra;
+    };
+
+    rt11_dirseg_hdr_t hdr;
+    uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
+    uint16_t entry_words = 0;
+    uint16_t max_entries = 0;
+    uint16_t extra_words = 0;
+    uint16_t i;
+    uint32_t seg_block;
+    uint32_t total_len = 0;
+    uint32_t sum_files = 0;
+    uint32_t cur_block;
+    uint32_t new_block;
+    size_t file_count = 0;
+    size_t file_index = 0;
+    int saw_eos = 0;
+    int saw_empty = 0;
+    int saw_tent = 0;
+    struct file_entry *files = NULL;
+    uint16_t *extras = NULL;
+
+    seg_block = (uint32_t)dir_start +
+                (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+
+    if (rt11_read_segment(img, seg_block, segbuf) != 0) {
+        return -1;
+    }
+    if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        return -1;
+    }
+    if (next_out) {
+        *next_out = hdr.next_segment;
+    }
+    if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
+        return -1;
+    }
+    if (entry_words < 7u) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    extra_words = (uint16_t)(entry_words - 7u);
+    cur_block = hdr.data_start_block;
+
+    for (i = 0; i < max_entries; i++) {
+        size_t base_word = 5u + (size_t)i * entry_words;
+        uint16_t status = rt11_get_word(segbuf, base_word);
+        uint16_t length = rt11_get_word(segbuf, base_word + 4u);
+
+        if (rt11_entry_is_eos(status)) {
+            total_len += length;
+            saw_eos = 1;
+            break;
+        }
+
+        if (rt11_entry_is_empty(status)) {
+            saw_empty = 1;
+        }
+        if (status & RT11_E_TENT) {
+            saw_tent = 1;
+        }
+        if (rt11_entry_is_file(status)) {
+            file_count++;
+        }
+
+        total_len += length;
+        cur_block += length;
+    }
+
+    if (!saw_eos) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (saw_tent) {
+        errno = ENOTSUP;
+        return -1;
+    }
+    if (!saw_empty) {
+        return 0;
+    }
+
+    if (file_count > 0 && extra_words > 0) {
+        extras = (uint16_t *)calloc(file_count * (size_t)extra_words,
+                                    sizeof(uint16_t));
+        if (!extras) {
+            return -1;
+        }
+    }
+
+    if (file_count > 0) {
+        files = (struct file_entry *)calloc(file_count, sizeof(*files));
+        if (!files) {
+            free(extras);
+            return -1;
+        }
+    }
+
+    cur_block = hdr.data_start_block;
+    for (i = 0; i < max_entries; i++) {
+        size_t base_word = 5u + (size_t)i * entry_words;
+        uint16_t status = rt11_get_word(segbuf, base_word);
+        uint16_t length = rt11_get_word(segbuf, base_word + 4u);
+
+        if (rt11_entry_is_eos(status)) {
+            break;
+        }
+
+        if (rt11_entry_is_file(status)) {
+            struct file_entry *ent = &files[file_index];
+            ent->status = status;
+            ent->name0 = rt11_get_word(segbuf, base_word + 1u);
+            ent->name1 = rt11_get_word(segbuf, base_word + 2u);
+            ent->ext = rt11_get_word(segbuf, base_word + 3u);
+            ent->length = length;
+            ent->job = rt11_get_word(segbuf, base_word + 5u);
+            ent->date = rt11_get_word(segbuf, base_word + 6u);
+            ent->old_start = cur_block;
+            ent->extra = NULL;
+            if (extras) {
+                size_t e;
+                ent->extra = extras + file_index * (size_t)extra_words;
+                for (e = 0; e < extra_words; e++) {
+                    ent->extra[e] =
+                        rt11_get_word(segbuf, base_word + 7u + e);
+                }
+            }
+            file_index++;
+        }
+
+        cur_block += length;
+    }
+
+    new_block = hdr.data_start_block;
+    for (i = 0; i < file_count; i++) {
+        struct file_entry *ent = &files[i];
+        if (ent->length == 0) {
+            continue;
+        }
+        if (ent->old_start != new_block) {
+            if (rt11_move_blocks(img, ent->old_start, new_block,
+                                 ent->length) != 0) {
+                free(extras);
+                free(files);
+                return -1;
+            }
+        }
+        new_block += ent->length;
+        sum_files += ent->length;
+    }
+
+    if (sum_files > total_len) {
+        free(extras);
+        free(files);
+        errno = EINVAL;
+        return -1;
+    }
+
+    {
+        size_t header_bytes = 5u * 2u;
+        size_t seg_bytes = RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS;
+        memset(segbuf + header_bytes, 0, seg_bytes - header_bytes);
+    }
+
+    for (i = 0; i < file_count; i++) {
+        struct file_entry *ent = &files[i];
+        size_t base_word = 5u + (size_t)i * entry_words;
+        size_t e;
+
+        rt11_set_word(segbuf, base_word, ent->status);
+        rt11_set_word(segbuf, base_word + 1u, ent->name0);
+        rt11_set_word(segbuf, base_word + 2u, ent->name1);
+        rt11_set_word(segbuf, base_word + 3u, ent->ext);
+        rt11_set_word(segbuf, base_word + 4u, ent->length);
+        rt11_set_word(segbuf, base_word + 5u, ent->job);
+        rt11_set_word(segbuf, base_word + 6u, ent->date);
+
+        for (e = 0; e < extra_words; e++) {
+            uint16_t val = ent->extra ? ent->extra[e] : 0;
+            rt11_set_word(segbuf, base_word + 7u + e, val);
+        }
+    }
+
+    {
+        size_t eos_word = 5u + (size_t)file_count * entry_words;
+        uint32_t remaining = total_len - sum_files;
+        size_t e;
+
+        if (remaining > 0xffffu) {
+            free(extras);
+            free(files);
+            errno = ERANGE;
+            return -1;
+        }
+
+        rt11_set_word(segbuf, eos_word, RT11_E_EOS);
+        rt11_set_word(segbuf, eos_word + 1u, 0);
+        rt11_set_word(segbuf, eos_word + 2u, 0);
+        rt11_set_word(segbuf, eos_word + 3u, 0);
+        rt11_set_word(segbuf, eos_word + 4u, (uint16_t)remaining);
+        rt11_set_word(segbuf, eos_word + 5u, 0);
+        rt11_set_word(segbuf, eos_word + 6u, 0);
+        for (e = 0; e < extra_words; e++) {
+            rt11_set_word(segbuf, eos_word + 7u + e, 0);
+        }
+    }
+
+    free(extras);
+    free(files);
+
+    if (rt11_write_segment(img, seg_block, segbuf) != 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int rt11_mkfs(const char *path, uint32_t total_blocks,

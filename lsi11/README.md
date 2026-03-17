@@ -91,6 +91,7 @@ This subproject now provides two separate executables:
 - Add all files from a directory: `./rt11tool add disks/rt11v400.dsk --dir /tmp/out`
 - Remove a file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN`
 - Remove a protected file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN --force`
+- Squeeze free space: `./rt11tool squeeze disks/rt11v400.dsk`
 - Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --rk05`
 - Set volume metadata and segments:
   `./rt11tool mkfs new.dsk --rk05 --segments 8 --volid RT11A --owner OPS --sysid DECRT11A`
@@ -103,6 +104,7 @@ Supported commands:
 - `extract`
 - `add`
 - `rm`
+- `squeeze`
 - `mkfs`
 
 Limitations:
@@ -112,6 +114,7 @@ Limitations:
   block between partitions; use `--partition N` to select a partition.
 - Extra directory entry words are preserved but not interpreted.
 - `rm` refuses protected files (PROT flag set) unless `--force` is used.
+- `squeeze` refuses volumes with tentative files (TENT entries).
 
 Validation:
 - `./tests/test_rt11tool.sh`
