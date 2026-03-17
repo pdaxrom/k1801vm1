@@ -1,13 +1,19 @@
 #include "rt11fs.h"
 
 #include <ctype.h>
+#include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 
 #define RK05_BLOCKS 4872u
 #define RL01_BLOCKS 10240u
@@ -114,6 +120,7 @@ static void usage(FILE *out)
             "  bootblock <image> [--partition N]\n"
             "  extract <image> <outdir> [NAME.EXT] [--lower] [--partition N]\n"
             "  add <image> <hostfile> <NAME.EXT> [--partition N]\n"
+            "  add <image> --dir <dir> [--partition N]\n"
             "  rm <image> <NAME.EXT> [--partition N]\n"
             "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n"
             "       [--segments N] [--volid TEXT] [--owner TEXT] [--sysid TEXT]\n");
@@ -468,9 +475,71 @@ static int build_out_path(char *out, size_t out_size, const char *dir,
 {
     size_t len = strlen(dir);
     if (len > 0 && dir[len - 1] == '/') {
-        return snprintf(out, out_size, "%s%s", dir, name) < 0 ? -1 : 0;
+        int written = snprintf(out, out_size, "%s%s", dir, name);
+        return (written < 0 || (size_t)written >= out_size) ? -1 : 0;
     }
-    return snprintf(out, out_size, "%s/%s", dir, name) < 0 ? -1 : 0;
+    {
+        int written = snprintf(out, out_size, "%s/%s", dir, name);
+        return (written < 0 || (size_t)written >= out_size) ? -1 : 0;
+    }
+}
+
+static int add_dir(rt11_image_t *img, const char *dir)
+{
+    DIR *dp;
+    struct dirent *de;
+    int rc = 0;
+
+    dp = opendir(dir);
+    if (!dp) {
+        perror("rt11tool: opendir");
+        return 1;
+    }
+
+    while ((de = readdir(dp)) != NULL) {
+        char path[PATH_MAX];
+        struct stat st;
+        rt11_name_t name;
+
+        if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) {
+            continue;
+        }
+
+        if (build_out_path(path, sizeof(path), dir, de->d_name) != 0) {
+            fprintf(stderr, "rt11tool: path too long: %s\n", de->d_name);
+            rc = 1;
+            continue;
+        }
+
+        if (stat(path, &st) != 0) {
+            fprintf(stderr, "rt11tool: stat %s: %s\n", de->d_name,
+                    strerror(errno));
+            rc = 1;
+            continue;
+        }
+        if (!S_ISREG(st.st_mode)) {
+            continue;
+        }
+
+        if (rt11_name_from_host(de->d_name, &name) != 0) {
+            fprintf(stderr, "rt11tool: invalid RT-11 name: %s\n",
+                    de->d_name);
+            rc = 1;
+            continue;
+        }
+
+        if (rt11_add_file(img, path, &name) != 0) {
+            fprintf(stderr, "rt11tool: add %s: %s\n", de->d_name,
+                    strerror(errno));
+            rc = 1;
+            if (errno == ENOSPC) {
+                break;
+            }
+        }
+    }
+
+    closedir(dp);
+    return rc;
 }
 
 static int cmd_ls(int argc, char **argv)
@@ -716,20 +785,17 @@ static int cmd_extract(int argc, char **argv)
 
 static int cmd_add(int argc, char **argv)
 {
-    if (argc < 3) {
-        usage(stderr);
-        return 1;
-    }
     const char *image = argv[0];
-    const char *host = argv[1];
-    const char *target = argv[2];
+    const char *host = NULL;
+    const char *target = NULL;
     uint32_t partition = 0;
     int have_partition = 0;
+    int dir_mode = 0;
     int i;
     rt11_image_t img;
     rt11_name_t name;
 
-    for (i = 3; i < argc; i++) {
+    for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
             if (parse_partition_value(argv[i + 1], &partition) != 0) {
                 fprintf(stderr, "rt11tool: invalid partition\n");
@@ -737,14 +803,35 @@ static int cmd_add(int argc, char **argv)
             }
             have_partition = 1;
             i++;
+        } else if (strcmp(argv[i], "--dir") == 0) {
+            dir_mode = 1;
+            if (i + 1 < argc) {
+                host = argv[i + 1];
+                i++;
+            } else {
+                usage(stderr);
+                return 1;
+            }
+        } else if (!host) {
+            host = argv[i];
+        } else if (!target) {
+            target = argv[i];
         } else {
             usage(stderr);
             return 1;
         }
     }
 
-    if (rt11_name_from_host(target, &name) != 0) {
-        fprintf(stderr, "rt11tool: invalid RT-11 name\n");
+    if (!host) {
+        usage(stderr);
+        return 1;
+    }
+    if (dir_mode && target) {
+        usage(stderr);
+        return 1;
+    }
+    if (!dir_mode && !target) {
+        usage(stderr);
         return 1;
     }
 
@@ -759,10 +846,27 @@ static int cmd_add(int argc, char **argv)
         return 1;
     }
 
-    if (rt11_add_file(&img, host, &name) != 0) {
-        perror("rt11tool: add");
-        rt11_close_image(&img);
-        return 1;
+    if (dir_mode) {
+        if (ensure_dir(host) != 0) {
+            perror("rt11tool: dir");
+            rt11_close_image(&img);
+            return 1;
+        }
+        if (add_dir(&img, host) != 0) {
+            rt11_close_image(&img);
+            return 1;
+        }
+    } else {
+        if (rt11_name_from_host(target, &name) != 0) {
+            fprintf(stderr, "rt11tool: invalid RT-11 name\n");
+            rt11_close_image(&img);
+            return 1;
+        }
+        if (rt11_add_file(&img, host, &name) != 0) {
+            perror("rt11tool: add");
+            rt11_close_image(&img);
+            return 1;
+        }
     }
 
     rt11_close_image(&img);

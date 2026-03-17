@@ -38,6 +38,14 @@ cmp "$tmpdir/b.bin" "$out/B.BIN"
 ./rt11tool extract "$img" "$out" C.BIN
 cmp "$tmpdir/c.bin" "$out/C.BIN"
 
+img3="$tmpdir/diradd.dsk"
+out2="$tmpdir/out2"
+mkdir -p "$out2"
+./rt11tool mkfs "$img3" --rk05
+./rt11tool add "$img3" --dir "$out"
+./rt11tool extract "$img3" "$out2" A.BIN
+cmp "$tmpdir/a.bin" "$out2/A.BIN"
+
 img2="$tmpdir/part.dsk"
 ./rt11tool mkfs "$img2" --blocks 70000
 ./rt11tool info "$img2" --partition 1 >/dev/null
