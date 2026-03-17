@@ -45,6 +45,10 @@ static int rt11_write_block(rt11_image_t *img, uint32_t block,
                             const uint8_t *buf);
 static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
                                 uint16_t seg_num, uint16_t *next_out);
+static int rt11_fsck_segment(rt11_image_t *img, uint16_t dir_start,
+                             uint16_t seg_num, uint32_t expected_len,
+                             int repair, FILE *out, unsigned *errors,
+                             unsigned *fixes, uint16_t *next_out);
 
 static uint16_t rt11_get_word(const uint8_t *buf, size_t word_index)
 {
@@ -1282,6 +1286,236 @@ int rt11_squeeze(rt11_image_t *img)
             errno = EINVAL;
             return -1;
         }
+    }
+
+    return 0;
+}
+
+static int rt11_fsck_segment(rt11_image_t *img, uint16_t dir_start,
+                             uint16_t seg_num, uint32_t expected_len,
+                             int repair, FILE *out, unsigned *errors,
+                             unsigned *fixes, uint16_t *next_out)
+{
+    rt11_dirseg_hdr_t hdr;
+    uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
+    uint16_t entry_words;
+    uint16_t max_entries;
+    uint16_t i;
+    uint32_t seg_block;
+    uint32_t sum_before_eos = 0;
+    uint16_t eos_len = 0;
+    int saw_eos = 0;
+
+    seg_block = (uint32_t)dir_start +
+                (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+    if (rt11_read_segment(img, seg_block, segbuf) != 0) {
+        return -1;
+    }
+    if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        return -1;
+    }
+    if (next_out) {
+        *next_out = hdr.next_segment;
+    }
+    if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
+        if (errors) {
+            (*errors)++;
+        }
+        if (out) {
+            fprintf(out, "fsck: segment %o: invalid entry size\n", seg_num);
+        }
+        return 0;
+    }
+
+    for (i = 0; i < max_entries; i++) {
+        size_t base_word = 5u + (size_t)i * entry_words;
+        uint16_t status = rt11_get_word(segbuf, base_word);
+        uint16_t length = rt11_get_word(segbuf, base_word + 4u);
+
+        if (rt11_entry_is_eos(status)) {
+            eos_len = length;
+            saw_eos = 1;
+            break;
+        }
+
+        sum_before_eos += length;
+    }
+
+    if (!saw_eos) {
+        if (errors) {
+            (*errors)++;
+        }
+        if (out) {
+            fprintf(out, "fsck: segment %o: missing EOS entry\n", seg_num);
+        }
+        return 0;
+    }
+
+    if (expected_len == 0) {
+        return 0;
+    }
+
+    if (sum_before_eos > expected_len) {
+        if (errors) {
+            (*errors)++;
+        }
+        if (out) {
+            fprintf(out,
+                    "fsck: segment %o: entry lengths exceed segment space\n",
+                    seg_num);
+        }
+        return 0;
+    }
+
+    if (sum_before_eos + eos_len != expected_len) {
+        uint32_t new_len = expected_len - sum_before_eos;
+        if (repair && new_len <= 0xffffu) {
+            size_t eos_word = 5u + (size_t)i * entry_words;
+            rt11_set_word(segbuf, eos_word + 4u, (uint16_t)new_len);
+            if (rt11_write_segment(img, seg_block, segbuf) != 0) {
+                return -1;
+            }
+            if (fixes) {
+                (*fixes)++;
+            }
+            if (out) {
+                fprintf(out,
+                        "fsck: segment %o: fixed EOS length (%u -> %u)\n",
+                        seg_num, eos_len, (unsigned)new_len);
+            }
+            return 0;
+        }
+        if (errors) {
+            (*errors)++;
+        }
+        if (out) {
+            fprintf(out,
+                    "fsck: segment %o: EOS length mismatch (sum %u + eos %u, expected %u)\n",
+                    seg_num, sum_before_eos, eos_len, expected_len);
+        }
+    }
+
+    return 0;
+}
+
+int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
+              unsigned *fixes_out)
+{
+    struct seginfo {
+        uint16_t seg_num;
+        uint16_t next_seg;
+        uint16_t data_start;
+    };
+    struct seginfo *segs = NULL;
+    size_t count = 0;
+    size_t cap = 0;
+    uint16_t dir_start;
+    uint16_t next_seg = 1;
+    uint16_t total_segments = 0;
+    uint32_t guard = 0;
+    unsigned errors = 0;
+    unsigned fixes = 0;
+    size_t i;
+
+    if (!img || !img->fp) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (!out) {
+        out = stderr;
+    }
+
+    if (rt11_read_home(img, &dir_start) != 0) {
+        return -1;
+    }
+
+    while (next_seg != 0) {
+        uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
+        rt11_dirseg_hdr_t hdr;
+        uint32_t seg_block =
+            (uint32_t)dir_start +
+            (uint32_t)(next_seg - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+
+        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
+            free(segs);
+            return -1;
+        }
+        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+            free(segs);
+            return -1;
+        }
+
+        if (count == cap) {
+            size_t new_cap = cap ? cap * 2u : 8u;
+            struct seginfo *new_segs =
+                (struct seginfo *)realloc(segs, new_cap * sizeof(*segs));
+            if (!new_segs) {
+                free(segs);
+                return -1;
+            }
+            segs = new_segs;
+            cap = new_cap;
+        }
+
+        segs[count].seg_num = next_seg;
+        segs[count].next_seg = hdr.next_segment;
+        segs[count].data_start = hdr.data_start_block;
+        count++;
+
+        if (total_segments == 0) {
+            total_segments = hdr.total_segments;
+            if (total_segments == 0) {
+                total_segments = 1;
+            }
+        }
+
+        next_seg = hdr.next_segment;
+        guard++;
+        if (guard > total_segments + 4) {
+            errors++;
+            fprintf(out, "fsck: directory segment chain loop\n");
+            break;
+        }
+    }
+
+    for (i = 0; i < count; i++) {
+        uint32_t expected_len;
+        if (i + 1 < count) {
+            if (segs[i + 1].data_start < segs[i].data_start) {
+                errors++;
+                fprintf(out,
+                        "fsck: segment %o: data_start decreases (%o -> %o)\n",
+                        segs[i].seg_num, segs[i].data_start,
+                        segs[i + 1].data_start);
+                continue;
+            }
+            expected_len =
+                (uint32_t)(segs[i + 1].data_start - segs[i].data_start);
+        } else {
+            if (img->volume_blocks < segs[i].data_start) {
+                errors++;
+                fprintf(out,
+                        "fsck: segment %o: data_start beyond volume\n",
+                        segs[i].seg_num);
+                continue;
+            }
+            expected_len = img->volume_blocks - segs[i].data_start;
+        }
+
+        if (rt11_fsck_segment(img, dir_start, segs[i].seg_num, expected_len,
+                              repair, out, &errors, &fixes,
+                              &segs[i].next_seg) != 0) {
+            free(segs);
+            return -1;
+        }
+    }
+
+    free(segs);
+    if (errors_out) {
+        *errors_out = errors;
+    }
+    if (fixes_out) {
+        *fixes_out = fixes;
     }
 
     return 0;

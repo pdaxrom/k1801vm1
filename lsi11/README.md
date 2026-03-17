@@ -94,6 +94,8 @@ This subproject now provides two separate executables:
 - Remove a protected file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN --force`
 - Protect a file: `./rt11tool protect disks/rt11v400.dsk TEST.BIN`
 - Unprotect a file: `./rt11tool protect disks/rt11v400.dsk TEST.BIN --clear`
+- Check directory consistency: `./rt11tool fsck disks/rt11v400.dsk`
+- Fix EOS length mismatches: `./rt11tool fsck disks/rt11v400.dsk --repair`
 - Squeeze free space: `./rt11tool squeeze disks/rt11v400.dsk`
 - Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --rk05`
 - Set volume metadata and segments:
@@ -108,6 +110,7 @@ Supported commands:
 - `add`
 - `rm`
 - `protect`
+- `fsck`
 - `squeeze`
 - `mkfs`
 

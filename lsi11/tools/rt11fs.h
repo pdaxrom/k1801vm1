@@ -75,6 +75,8 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
 int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force);
 int rt11_set_protect(rt11_image_t *img, const rt11_name_t *name, int protect);
 int rt11_squeeze(rt11_image_t *img);
+int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
+              unsigned *fixes_out);
 
 int rt11_mkfs(const char *path, uint32_t total_blocks,
               const rt11_mkfs_opts_t *opts, uint32_t *usable_blocks_out);

@@ -32,6 +32,7 @@ fi
 ./rt11tool protect "$img" B.BIN --clear
 ./rt11tool ls "$img" >/dev/null
 ./rt11tool ls "$img" --long >/dev/null
+./rt11tool fsck "$img" >/dev/null
 
 ./rt11tool extract "$img" "$out"
 cmp "$tmpdir/a.bin" "$out/A.BIN"
