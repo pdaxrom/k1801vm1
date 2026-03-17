@@ -90,6 +90,7 @@ This subproject now provides two separate executables:
 - Add a file: `./rt11tool add disks/rt11v400.dsk host.bin TEST.BIN`
 - Add all files from a directory: `./rt11tool add disks/rt11v400.dsk --dir /tmp/out`
 - Remove a file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN`
+- Remove a protected file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN --force`
 - Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --rk05`
 - Set volume metadata and segments:
   `./rt11tool mkfs new.dsk --rk05 --segments 8 --volid RT11A --owner OPS --sysid DECRT11A`
@@ -110,6 +111,7 @@ Limitations:
 - Partitioned layout uses 65535-block partitions (177777 octal) with one unused
   block between partitions; use `--partition N` to select a partition.
 - Extra directory entry words are preserved but not interpreted.
+- `rm` refuses protected files (PROT flag set) unless `--force` is used.
 
 Validation:
 - `./tests/test_rt11tool.sh`

@@ -121,7 +121,7 @@ static void usage(FILE *out)
             "  extract <image> <outdir> [NAME.EXT] [--lower] [--partition N]\n"
             "  add <image> <hostfile> <NAME.EXT> [--partition N]\n"
             "  add <image> --dir <dir> [--partition N]\n"
-            "  rm <image> <NAME.EXT> [--partition N]\n"
+            "  rm <image> <NAME.EXT> [--partition N] [--force]\n"
             "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n"
             "       [--segments N] [--volid TEXT] [--owner TEXT] [--sysid TEXT]\n");
 }
@@ -883,6 +883,7 @@ static int cmd_rm(int argc, char **argv)
     const char *target = argv[1];
     uint32_t partition = 0;
     int have_partition = 0;
+    int force = 0;
     int i;
     rt11_image_t img;
     rt11_name_t name;
@@ -895,6 +896,8 @@ static int cmd_rm(int argc, char **argv)
             }
             have_partition = 1;
             i++;
+        } else if (strcmp(argv[i], "--force") == 0) {
+            force = 1;
         } else {
             usage(stderr);
             return 1;
@@ -917,7 +920,7 @@ static int cmd_rm(int argc, char **argv)
         return 1;
     }
 
-    if (rt11_remove_file(&img, &name) != 0) {
+    if (rt11_remove_file(&img, &name, force) != 0) {
         perror("rt11tool: rm");
         rt11_close_image(&img);
         return 1;

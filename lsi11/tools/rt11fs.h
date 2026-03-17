@@ -12,7 +12,7 @@
 #define RT11_E_PERM 002000
 #define RT11_E_EOS 004000
 #define RT11_E_READ 040000
-#define RT11_E_PROT 100000
+#define RT11_E_PROT 0100000
 
 typedef struct {
     FILE *fp;
@@ -72,7 +72,7 @@ int rt11_extract_file(rt11_image_t *img, const rt11_dirent_t *ent,
                       const char *out_path);
 int rt11_add_file(rt11_image_t *img, const char *host_path,
                   const rt11_name_t *name);
-int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name);
+int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force);
 
 int rt11_mkfs(const char *path, uint32_t total_blocks,
               const rt11_mkfs_opts_t *opts, uint32_t *usable_blocks_out);

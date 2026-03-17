@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #define RT11_DIR_START_BLOCK 000006
 #define RT11_DIR_SEGMENT_BLOCKS 2u
@@ -37,6 +38,8 @@ typedef struct {
 
 static const char rt11_rad50_chars[40] =
     " ABCDEFGHIJKLMNOPQRSTUVWXYZ$.?0123456789";
+
+static uint16_t rt11_date_now(void);
 
 static uint16_t rt11_get_word(const uint8_t *buf, size_t word_index)
 {
@@ -848,6 +851,7 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
     uint64_t file_size;
     uint32_t needed_blocks;
     FILE *in = NULL;
+    uint16_t date = 0;
 
     if (!img || !host_path || !name) {
         return -1;
@@ -862,6 +866,7 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
     if (needed_blocks == 0) {
         needed_blocks = 1;
     }
+    date = rt11_date_now();
 
     {
         rt11_dirent_t existing;
@@ -980,7 +985,7 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
                     return -1;
                 }
                 rt11_write_entry(segbuf, base_word, entry_words, RT11_E_PERM,
-                                 name, (uint16_t)needed_blocks, 0, 0);
+                                 name, (uint16_t)needed_blocks, 0, date);
                 rt11_write_entry(segbuf,
                                  5u + (size_t)(candidate + 1u) * entry_words,
                                  entry_words, RT11_E_EOS, NULL, remaining, 0,
@@ -997,7 +1002,7 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
                         entry_words, RT11_E_MPTY, NULL, remaining, 0, 0);
                 }
                 rt11_write_entry(segbuf, base_word, entry_words, RT11_E_PERM,
-                                 name, (uint16_t)needed_blocks, 0, 0);
+                                 name, (uint16_t)needed_blocks, 0, date);
             }
 
             if (rt11_write_segment(img, seg_block, segbuf) != 0) {
@@ -1018,7 +1023,7 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
     return -1;
 }
 
-int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name)
+int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
 {
     rt11_dirseg_hdr_t hdr;
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
@@ -1073,6 +1078,10 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name)
                 if (n0 == name->name_words[0] &&
                     n1 == name->name_words[1] && e0 == name->ext_word) {
                     uint16_t length = rt11_get_word(segbuf, base_word + 4u);
+                    if ((status & RT11_E_PROT) && !force) {
+                        errno = EACCES;
+                        return -1;
+                    }
                     rt11_write_entry(segbuf, base_word, entry_words,
                                      RT11_E_MPTY, NULL, length, 0, 0);
                     if (rt11_write_segment(img, seg_block, segbuf) != 0) {
@@ -1110,6 +1119,47 @@ static void rt11_home_set_ascii(uint8_t *buf, size_t off, const char *text,
     for (i = 0; i < len && text[i] != '\0'; i++) {
         buf[off + i] = (uint8_t)text[i];
     }
+}
+
+static uint16_t rt11_date_now(void)
+{
+    time_t now = time(NULL);
+    struct tm *tm_now;
+    unsigned int year;
+    unsigned int month;
+    unsigned int day;
+    unsigned int base;
+    unsigned int age;
+    unsigned int year_field;
+
+    if (now == (time_t)-1) {
+        return 0;
+    }
+
+    tm_now = localtime(&now);
+    if (!tm_now) {
+        return 0;
+    }
+
+    year = (unsigned int)(tm_now->tm_year + 1900);
+    month = (unsigned int)(tm_now->tm_mon + 1);
+    day = (unsigned int)tm_now->tm_mday;
+
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+        return 0;
+    }
+    if (year < 1972u || year > 2103u) {
+        return 0;
+    }
+
+    base = year - 1972u;
+    age = base / 32u;
+    year_field = base % 32u;
+    if (age > 3u) {
+        return 0;
+    }
+
+    return (uint16_t)((age << 14) | (month << 10) | (day << 5) | year_field);
 }
 
 int rt11_mkfs(const char *path, uint32_t total_blocks,
