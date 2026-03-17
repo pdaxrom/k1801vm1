@@ -97,9 +97,10 @@ This subproject now provides two separate executables:
 - Check directory consistency: `./rt11tool fsck disks/rt11v400.dsk`
 - Fix EOS length mismatches: `./rt11tool fsck disks/rt11v400.dsk --repair`
 - Squeeze free space: `./rt11tool squeeze disks/rt11v400.dsk`
-- Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --rk05`
+- List mkfs types: `./rt11tool mkfs --list`
+- Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --type rk05`
 - Set volume metadata and segments:
-  `./rt11tool mkfs new.dsk --rk05 --segments 8 --volid RT11A --owner OPS --sysid DECRT11A`
+  `./rt11tool mkfs new.dsk --type rk05 --segments 8 --volid RT11A --owner OPS --sysid DECRT11A`
 - `mkfs` initializes all partitions when the image exceeds 65535 blocks.
 
 Supported commands:
@@ -116,7 +117,7 @@ Supported commands:
 
 Limitations:
 - Contiguous allocation only (no fragmentation support).
-- No repair/fsck yet.
+- `fsck` only checks directory consistency (no data recovery).
 - Partitioned layout uses 65535-block partitions (177777 octal) with one unused
   block between partitions; use `--partition N` to select a partition.
 - Extra directory entry words are preserved but not interpreted.

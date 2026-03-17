@@ -17,7 +17,7 @@ dd if=/dev/urandom of="$tmpdir/a.bin" bs=512 count=2 2>/dev/null
 dd if=/dev/urandom of="$tmpdir/b.bin" bs=512 count=3 2>/dev/null
 dd if=/dev/urandom of="$tmpdir/c.bin" bs=512 count=1 2>/dev/null
 
-./rt11tool mkfs "$img" --rk05 --segments 8 --volid TESTVOL --owner TESTOWN \
+./rt11tool mkfs "$img" --type rk05 --segments 8 --volid TESTVOL --owner TESTOWN \
     --sysid TESTSYS
 ./rt11tool info "$img" | grep -q "Volume ID: TESTVOL"
 ./rt11tool info "$img" | grep -q "Owner: TESTOWN"
@@ -49,7 +49,7 @@ cmp "$tmpdir/c.bin" "$out/C.BIN"
 img3="$tmpdir/diradd.dsk"
 out2="$tmpdir/out2"
 mkdir -p "$out2"
-./rt11tool mkfs "$img3" --rk05
+./rt11tool mkfs "$img3" --type rk05
 ./rt11tool add "$img3" --dir "$out"
 ./rt11tool extract "$img3" "$out2" A.BIN
 cmp "$tmpdir/a.bin" "$out2/A.BIN"

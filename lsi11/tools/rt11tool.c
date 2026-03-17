@@ -15,12 +15,6 @@
 #define PATH_MAX 4096
 #endif
 
-#define RK05_BLOCKS 4872u
-#define RL01_BLOCKS 10240u
-#define RL02_BLOCKS 20480u
-#define RP06_BLOCKS 340670u
-#define RP07_BLOCKS 1008000u
-
 #define RT11_DIR_START_BLOCK 6u
 #define RT11_DIR_SEGMENT_BLOCKS 2u
 #define RT11_SEGMENTS_SMALL 16u
@@ -36,6 +30,70 @@
 #define RT11_HOME_OWNER_OFF 0744
 #define RT11_HOME_SYSID_OFF 0760
 #define RT11_HOME_FIELD_LEN 12u
+
+typedef struct {
+    const char *name;
+    uint32_t bytes;
+    uint16_t list_block_size;
+    const char *desc;
+} rt11_disk_type_t;
+
+static const rt11_disk_type_t rt11_disk_types[] = {
+    {"rk05", 2494464u, 512u, "RK11 RK05"},
+    {"rk06", 13888512u, 512u, "RH11 RK06"},
+    {"rk07", 27540480u, 512u, "RH11 RK07"},
+    {"rl01", 5242880u, 256u, "RL11 RL01"},
+    {"rl02", 10485760u, 256u, "RL11 RL02"},
+    {"rm05", 256196608u, 512u, "XP/RP RM05"},
+    {"rd31", 21278720u, 512u, "RQ RD31"},
+    {"rd32", 42600448u, 512u, "RQ RD32"},
+    {"rd51", 11059200u, 512u, "RQ RD51"},
+    {"rd52", 30965760u, 512u, "RQ RD52"},
+    {"rd53", 71000064u, 512u, "RQ RD53"},
+    {"rd54", 159334400u, 512u, "RQ RD54"},
+    {"ra60", 204890112u, 512u, "RQ RA60"},
+    {"ra70", 280084992u, 512u, "RQ RA70"},
+    {"ra71", 700062720u, 512u, "RQ RA71"},
+    {"ra80", 121452544u, 512u, "RQ RA80"},
+    {"ra81", 456228864u, 512u, "RQ RA81"},
+    {"ra82", 622932480u, 512u, "RQ RA82"},
+    {"rx50", 409600u, 512u, "RQ RX50"},
+    {"rx33", 1228800u, 512u, "RQ RX33"},
+};
+
+static const rt11_disk_type_t *rt11_find_disk_type(const char *name)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(rt11_disk_types) / sizeof(rt11_disk_types[0]);
+         i++) {
+        if (strcmp(rt11_disk_types[i].name, name) == 0) {
+            return &rt11_disk_types[i];
+        }
+    }
+
+    return NULL;
+}
+
+static void rt11_list_disk_types(FILE *out)
+{
+    size_t i;
+
+    fprintf(out, "Supported types:\n");
+    for (i = 0; i < sizeof(rt11_disk_types) / sizeof(rt11_disk_types[0]);
+         i++) {
+        const rt11_disk_type_t *t = &rt11_disk_types[i];
+        uint32_t blocks = t->bytes / t->list_block_size;
+
+        fprintf(out,
+                "  %-4s  disk  %9u bytes (%u blocks of %u)  %s\n",
+                t->name,
+                t->bytes,
+                blocks,
+                (unsigned)t->list_block_size,
+                t->desc);
+    }
+}
 
 static uint16_t default_segments(uint32_t total_blocks)
 {
@@ -125,7 +183,8 @@ static void usage(FILE *out)
             "  protect <image> <NAME.EXT> [--partition N] [--clear]\n"
             "  fsck <image> [--partition N] [--repair]\n"
             "  squeeze <image> [--partition N]\n"
-            "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n"
+            "  mkfs --list\n"
+            "  mkfs <image> (--blocks N | --type <type>)\n"
             "       [--segments N] [--volid TEXT] [--owner TEXT] [--sysid TEXT]\n");
 }
 
@@ -1174,22 +1233,41 @@ static int cmd_fsck(int argc, char **argv)
 
 static int cmd_mkfs(int argc, char **argv)
 {
-    const char *image = argv[0];
+    const char *image;
     uint32_t blocks = 0;
+    int blocks_set = 0;
+    int type_set = 0;
     rt11_mkfs_opts_t opts;
     int i;
 
+    if (argc < 1) {
+        usage(stderr);
+        return 1;
+    }
+
+    if (strcmp(argv[0], "--list") == 0) {
+        rt11_list_disk_types(stdout);
+        return 0;
+    }
+
+    image = argv[0];
     memset(&opts, 0, sizeof(opts));
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--blocks") == 0 && i + 1 < argc) {
             char *end = NULL;
             unsigned long v = strtoul(argv[i + 1], &end, 0);
-            if (!end || *end != '\0') {
+            if (!end || *end != '\0' || v == 0) {
                 fprintf(stderr, "rt11tool: invalid block count\n");
                 return 1;
             }
+            if (blocks_set || type_set) {
+                fprintf(stderr,
+                        "rt11tool: use either --blocks or --type, not both\n");
+                return 1;
+            }
             blocks = (uint32_t)v;
+            blocks_set = 1;
             i++;
         } else if (strcmp(argv[i], "--segments") == 0 && i + 1 < argc) {
             char *end = NULL;
@@ -1210,16 +1288,28 @@ static int cmd_mkfs(int argc, char **argv)
         } else if (strcmp(argv[i], "--sysid") == 0 && i + 1 < argc) {
             opts.sysid = argv[i + 1];
             i++;
-        } else if (strcmp(argv[i], "--rk05") == 0) {
-            blocks = RK05_BLOCKS;
-        } else if (strcmp(argv[i], "--rl01") == 0) {
-            blocks = RL01_BLOCKS;
-        } else if (strcmp(argv[i], "--rl02") == 0) {
-            blocks = RL02_BLOCKS;
-        } else if (strcmp(argv[i], "--rp06") == 0) {
-            blocks = RP06_BLOCKS;
-        } else if (strcmp(argv[i], "--rp07") == 0) {
-            blocks = RP07_BLOCKS;
+        } else if (strcmp(argv[i], "--type") == 0 && i + 1 < argc) {
+            const rt11_disk_type_t *type = rt11_find_disk_type(argv[i + 1]);
+            if (!type) {
+                fprintf(stderr, "rt11tool: unknown type '%s'\n", argv[i + 1]);
+                fprintf(stderr, "rt11tool: use --list to see supported types\n");
+                return 1;
+            }
+            if (blocks_set || type_set) {
+                fprintf(stderr,
+                        "rt11tool: use either --blocks or --type, not both\n");
+                return 1;
+            }
+            if (type->bytes % RT11_BLOCK_SIZE != 0) {
+                fprintf(stderr, "rt11tool: type size is not 512-byte aligned\n");
+                return 1;
+            }
+            blocks = type->bytes / RT11_BLOCK_SIZE;
+            type_set = 1;
+            i++;
+        } else if (strcmp(argv[i], "--list") == 0) {
+            rt11_list_disk_types(stdout);
+            return 0;
         } else {
             usage(stderr);
             return 1;
@@ -1327,7 +1417,7 @@ int main(int argc, char **argv)
     }
 
     if (strcmp(argv[1], "mkfs") == 0) {
-        if (argc < 4) {
+        if (argc < 3) {
             usage(stderr);
             return 1;
         }
