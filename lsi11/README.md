@@ -84,6 +84,7 @@ This subproject now provides two separate executables:
 - Include raw date/status words: `./rt11tool ls disks/rt11v400.dsk --long --debug`
 - Show RT-11 layout info: `./rt11tool info disks/rt11v400.dsk`
 - Dump boot block: `./rt11tool bootblock disks/rt11v400.dsk`
+- Write boot block: `./rt11tool bootblock disks/rt11v400.dsk --write boot.bin`
 - Work with a partitioned image: `./rt11tool ls big.dsk --partition 1`
 - Extract all files: `./rt11tool extract disks/rt11v400.dsk /tmp/out`
 - Extract one file: `./rt11tool extract disks/rt11v400.dsk /tmp/out STARTX.COM`
@@ -91,6 +92,8 @@ This subproject now provides two separate executables:
 - Add all files from a directory: `./rt11tool add disks/rt11v400.dsk --dir /tmp/out`
 - Remove a file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN`
 - Remove a protected file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN --force`
+- Protect a file: `./rt11tool protect disks/rt11v400.dsk TEST.BIN`
+- Unprotect a file: `./rt11tool protect disks/rt11v400.dsk TEST.BIN --clear`
 - Squeeze free space: `./rt11tool squeeze disks/rt11v400.dsk`
 - Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --rk05`
 - Set volume metadata and segments:
@@ -104,6 +107,7 @@ Supported commands:
 - `extract`
 - `add`
 - `rm`
+- `protect`
 - `squeeze`
 - `mkfs`
 

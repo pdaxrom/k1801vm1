@@ -117,11 +117,12 @@ static void usage(FILE *out)
             "Commands:\n"
             "  ls <image> [--partition N] [--long] [--debug]\n"
             "  info <image> [--partition N]\n"
-            "  bootblock <image> [--partition N]\n"
+            "  bootblock <image> [--partition N] [--write file]\n"
             "  extract <image> <outdir> [NAME.EXT] [--lower] [--partition N]\n"
             "  add <image> <hostfile> <NAME.EXT> [--partition N]\n"
             "  add <image> --dir <dir> [--partition N]\n"
             "  rm <image> <NAME.EXT> [--partition N] [--force]\n"
+            "  protect <image> <NAME.EXT> [--partition N] [--clear]\n"
             "  squeeze <image> [--partition N]\n"
             "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n"
             "       [--segments N] [--volid TEXT] [--owner TEXT] [--sysid TEXT]\n");
@@ -281,6 +282,28 @@ static int read_block(rt11_image_t *img, uint32_t block, uint8_t *buf)
     return 0;
 }
 
+static int write_block(rt11_image_t *img, uint32_t block, const uint8_t *buf)
+{
+    uint32_t abs_block;
+
+    if (block >= img->volume_blocks) {
+        errno = EINVAL;
+        return -1;
+    }
+    abs_block = img->base_block + block;
+    if (abs_block >= img->total_blocks) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (fseeko(img->fp, (off_t)abs_block * RT11_BLOCK_SIZE, SEEK_SET) != 0) {
+        return -1;
+    }
+    if (fwrite(buf, 1, RT11_BLOCK_SIZE, img->fp) != RT11_BLOCK_SIZE) {
+        return -1;
+    }
+    return 0;
+}
+
 static int cmd_info(int argc, char **argv)
 {
     if (argc < 1) {
@@ -423,6 +446,7 @@ static int cmd_bootblock(int argc, char **argv)
         return 1;
     }
     const char *image = argv[0];
+    const char *write_path = NULL;
     uint32_t partition = 0;
     int have_partition = 0;
     rt11_image_t img;
@@ -430,18 +454,27 @@ static int cmd_bootblock(int argc, char **argv)
     uint32_t i;
 
     if (argc > 1) {
-        if (argc != 3 || strcmp(argv[1], "--partition") != 0) {
-            usage(stderr);
-            return 1;
+        int argi;
+        for (argi = 1; argi < argc; argi++) {
+            if (strcmp(argv[argi], "--partition") == 0 && argi + 1 < argc) {
+                if (parse_partition_value(argv[argi + 1], &partition) != 0) {
+                    fprintf(stderr, "rt11tool: invalid partition\n");
+                    return 1;
+                }
+                have_partition = 1;
+                argi++;
+            } else if (strcmp(argv[argi], "--write") == 0 &&
+                       argi + 1 < argc) {
+                write_path = argv[argi + 1];
+                argi++;
+            } else {
+                usage(stderr);
+                return 1;
+            }
         }
-        if (parse_partition_value(argv[2], &partition) != 0) {
-            fprintf(stderr, "rt11tool: invalid partition\n");
-            return 1;
-        }
-        have_partition = 1;
     }
 
-    if (rt11_open_image(&img, image, "rb") != 0) {
+    if (rt11_open_image(&img, image, write_path ? "rb+" : "rb") != 0) {
         perror("rt11tool: open image");
         return 1;
     }
@@ -452,19 +485,56 @@ static int cmd_bootblock(int argc, char **argv)
         return 1;
     }
 
-    if (read_block(&img, 0, buf) != 0) {
-        perror("rt11tool: read boot block");
-        rt11_close_image(&img);
-        return 1;
-    }
-
-    for (i = 0; i < RT11_BLOCK_SIZE; i += 16) {
-        uint32_t j;
-        printf("%06o: ", i);
-        for (j = 0; j < 16; j++) {
-            printf("%02x ", buf[i + j]);
+    if (write_path) {
+        FILE *in = fopen(write_path, "rb");
+        int extra;
+        if (!in) {
+            perror("rt11tool: open boot block");
+            rt11_close_image(&img);
+            return 1;
         }
-        printf("\n");
+        memset(buf, 0, sizeof(buf));
+        (void)fread(buf, 1, sizeof(buf), in);
+        if (ferror(in)) {
+            perror("rt11tool: read boot block");
+            fclose(in);
+            rt11_close_image(&img);
+            return 1;
+        }
+        extra = fgetc(in);
+        if (extra != EOF) {
+            fprintf(stderr, "rt11tool: boot block too large\n");
+            fclose(in);
+            rt11_close_image(&img);
+            return 1;
+        }
+        fclose(in);
+
+        if (write_block(&img, 0, buf) != 0) {
+            perror("rt11tool: write boot block");
+            rt11_close_image(&img);
+            return 1;
+        }
+        if (fflush(img.fp) != 0) {
+            perror("rt11tool: flush");
+            rt11_close_image(&img);
+            return 1;
+        }
+    } else {
+        if (read_block(&img, 0, buf) != 0) {
+            perror("rt11tool: read boot block");
+            rt11_close_image(&img);
+            return 1;
+        }
+
+        for (i = 0; i < RT11_BLOCK_SIZE; i += 16) {
+            uint32_t j;
+            printf("%06o: ", i);
+            for (j = 0; j < 16; j++) {
+                printf("%02x ", buf[i + j]);
+            }
+            printf("\n");
+        }
     }
 
     rt11_close_image(&img);
@@ -931,6 +1001,63 @@ static int cmd_rm(int argc, char **argv)
     return 0;
 }
 
+static int cmd_protect(int argc, char **argv)
+{
+    if (argc < 2) {
+        usage(stderr);
+        return 1;
+    }
+    const char *image = argv[0];
+    const char *target = argv[1];
+    uint32_t partition = 0;
+    int have_partition = 0;
+    int protect = 1;
+    int i;
+    rt11_image_t img;
+    rt11_name_t name;
+
+    for (i = 2; i < argc; i++) {
+        if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
+            if (parse_partition_value(argv[i + 1], &partition) != 0) {
+                fprintf(stderr, "rt11tool: invalid partition\n");
+                return 1;
+            }
+            have_partition = 1;
+            i++;
+        } else if (strcmp(argv[i], "--clear") == 0) {
+            protect = 0;
+        } else {
+            usage(stderr);
+            return 1;
+        }
+    }
+
+    if (rt11_name_from_host(target, &name) != 0) {
+        fprintf(stderr, "rt11tool: invalid RT-11 name\n");
+        return 1;
+    }
+
+    if (rt11_open_image(&img, image, "rb+") != 0) {
+        perror("rt11tool: open image");
+        return 1;
+    }
+
+    if (have_partition && rt11_set_partition(&img, partition) != 0) {
+        perror("rt11tool: partition");
+        rt11_close_image(&img);
+        return 1;
+    }
+
+    if (rt11_set_protect(&img, &name, protect) != 0) {
+        perror("rt11tool: protect");
+        rt11_close_image(&img);
+        return 1;
+    }
+
+    rt11_close_image(&img);
+    return 0;
+}
+
 static int cmd_squeeze(int argc, char **argv)
 {
     if (argc < 1) {
@@ -1106,6 +1233,14 @@ int main(int argc, char **argv)
             return 1;
         }
         return cmd_rm(argc - 2, &argv[2]);
+    }
+
+    if (strcmp(argv[1], "protect") == 0) {
+        if (argc < 4) {
+            usage(stderr);
+            return 1;
+        }
+        return cmd_protect(argc - 2, &argv[2]);
     }
 
     if (strcmp(argv[1], "squeeze") == 0) {

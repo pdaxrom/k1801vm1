@@ -24,6 +24,12 @@ dd if=/dev/urandom of="$tmpdir/c.bin" bs=512 count=1 2>/dev/null
 ./rt11tool info "$img" | grep -q "System ID: TESTSYS"
 ./rt11tool add "$img" "$tmpdir/a.bin" A.BIN
 ./rt11tool add "$img" "$tmpdir/b.bin" B.BIN
+./rt11tool protect "$img" B.BIN
+if ./rt11tool rm "$img" B.BIN >/dev/null 2>&1; then
+    echo "rt11tool: expected rm to fail on protected file" >&2
+    exit 1
+fi
+./rt11tool protect "$img" B.BIN --clear
 ./rt11tool ls "$img" >/dev/null
 ./rt11tool ls "$img" --long >/dev/null
 

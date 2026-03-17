@@ -1151,6 +1151,89 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
     return -1;
 }
 
+int rt11_set_protect(rt11_image_t *img, const rt11_name_t *name, int protect)
+{
+    rt11_dirseg_hdr_t hdr;
+    uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
+    uint16_t dir_start;
+    uint16_t next_seg = 1;
+    uint16_t total_segments = 0;
+    uint32_t guard = 0;
+
+    if (!img || !name) {
+        return -1;
+    }
+
+    if (rt11_read_home(img, &dir_start) != 0) {
+        return -1;
+    }
+
+    while (next_seg != 0) {
+        uint16_t seg_num = next_seg;
+        uint32_t seg_block = (uint32_t)dir_start +
+                             (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+        uint16_t entry_words;
+        uint16_t max_entries;
+        uint16_t i;
+
+        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
+            return -1;
+        }
+        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+            return -1;
+        }
+        if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
+            return -1;
+        }
+
+        if (total_segments == 0) {
+            total_segments = hdr.total_segments;
+            if (total_segments == 0) {
+                total_segments = 1;
+            }
+        }
+
+        for (i = 0; i < max_entries; i++) {
+            size_t base_word = 5u + (size_t)i * entry_words;
+            uint16_t status = rt11_get_word(segbuf, base_word);
+            if (rt11_entry_is_eos(status)) {
+                break;
+            }
+            if (rt11_entry_is_file(status)) {
+                uint16_t n0 = rt11_get_word(segbuf, base_word + 1u);
+                uint16_t n1 = rt11_get_word(segbuf, base_word + 2u);
+                uint16_t e0 = rt11_get_word(segbuf, base_word + 3u);
+                if (n0 == name->name_words[0] &&
+                    n1 == name->name_words[1] && e0 == name->ext_word) {
+                    if (protect && !(status & RT11_E_PERM)) {
+                        errno = EINVAL;
+                        return -1;
+                    }
+                    if (protect) {
+                        status |= RT11_E_PROT;
+                    } else {
+                        status &= (uint16_t)~RT11_E_PROT;
+                    }
+                    rt11_set_word(segbuf, base_word, status);
+                    if (rt11_write_segment(img, seg_block, segbuf) != 0) {
+                        return -1;
+                    }
+                    return 0;
+                }
+            }
+        }
+
+        next_seg = hdr.next_segment;
+        guard++;
+        if (guard > total_segments + 4) {
+            break;
+        }
+    }
+
+    errno = ENOENT;
+    return -1;
+}
+
 int rt11_squeeze(rt11_image_t *img)
 {
     uint16_t dir_start;
