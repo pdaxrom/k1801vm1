@@ -7,6 +7,13 @@
 
 #define RT11_BLOCK_SIZE 512u
 
+#define RT11_E_TENT 000400
+#define RT11_E_MPTY 001000
+#define RT11_E_PERM 002000
+#define RT11_E_EOS 004000
+#define RT11_E_READ 040000
+#define RT11_E_PROT 100000
+
 typedef struct {
     FILE *fp;
     uint32_t total_blocks;

@@ -109,7 +109,7 @@ static void usage(FILE *out)
     fprintf(out,
             "Usage: rt11tool <command> [args]\n"
             "Commands:\n"
-            "  ls <image> [--partition N] [--long]\n"
+            "  ls <image> [--partition N] [--long] [--debug]\n"
             "  info <image> [--partition N]\n"
             "  bootblock <image> [--partition N]\n"
             "  extract <image> <outdir> [NAME.EXT] [--lower] [--partition N]\n"
@@ -151,6 +151,69 @@ static void rad50_decode3(uint16_t w, char out[4])
     out[1] = table[c1 < 40 ? c1 : 0];
     out[2] = table[c2 < 40 ? c2 : 0];
     out[3] = '\0';
+}
+
+static void rt11_date_to_string(uint16_t word, char *out, size_t out_size)
+{
+    unsigned int age;
+    unsigned int month;
+    unsigned int day;
+    unsigned int year;
+
+    if (out_size == 0) {
+        return;
+    }
+
+    if (word == 0) {
+        snprintf(out, out_size, "-");
+        return;
+    }
+
+    age = (unsigned int)((word >> 14) & 0x3u);
+    month = (unsigned int)((word >> 10) & 0xfu);
+    day = (unsigned int)((word >> 5) & 0x1fu);
+    year = (unsigned int)(word & 0x1fu);
+
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+        snprintf(out, out_size, "INVALID");
+        return;
+    }
+
+    year = 1972u + age * 32u + year;
+    snprintf(out, out_size, "%04u-%02u-%02u", year, month, day);
+}
+
+static void rt11_status_to_text(uint16_t status, char *type_out,
+                                size_t type_size, char *flags_out,
+                                size_t flags_size)
+{
+    const char *type = "UNK";
+    char flags[4];
+    size_t pos = 0;
+
+    if (status & RT11_E_EOS) {
+        type = "EOS";
+    } else if (status & RT11_E_MPTY) {
+        type = "MPTY";
+    } else if (status & RT11_E_TENT) {
+        type = "TENT";
+    } else if (status & RT11_E_PERM) {
+        type = "PERM";
+    }
+
+    if (status & RT11_E_READ) {
+        flags[pos++] = 'R';
+    }
+    if (status & RT11_E_PROT) {
+        flags[pos++] = 'P';
+    }
+    if (pos == 0) {
+        flags[pos++] = '-';
+    }
+    flags[pos] = '\0';
+
+    snprintf(type_out, type_size, "%s", type);
+    snprintf(flags_out, flags_size, "%s", flags);
 }
 
 static void home_get_field(const uint8_t *buf, size_t off, char *out,
@@ -420,6 +483,7 @@ static int cmd_ls(int argc, char **argv)
     uint32_t partition = 0;
     int have_partition = 0;
     int long_format = 0;
+    int debug = 0;
     rt11_image_t img;
     rt11_dirlist_t list;
     int argi;
@@ -435,6 +499,8 @@ static int cmd_ls(int argc, char **argv)
             argi++;
         } else if (strcmp(argv[argi], "--long") == 0) {
             long_format = 1;
+        } else if (strcmp(argv[argi], "--debug") == 0) {
+            debug = 1;
         } else {
             usage(stderr);
             return 1;
@@ -459,12 +525,26 @@ static int cmd_ls(int argc, char **argv)
     }
 
     if (long_format) {
-        printf("NAME.EXT  start  length  bytes    status  job   date\n");
+        if (debug) {
+            printf("%-12s %6s %6s %8s %-5s %-5s %6s %-10s %6s %6s\n",
+                   "NAME.EXT", "start", "length", "bytes", "stype", "flags",
+                   "status", "job", "date", "dateo");
+        } else {
+            printf("%-12s %6s %6s %8s %-5s %-5s %6s %-10s\n", "NAME.EXT",
+                   "start", "length", "bytes", "stype", "flags", "job",
+                   "date");
+        }
+    } else if (debug) {
+        printf("%-12s %6s %6s %6s\n", "NAME.EXT", "start", "length", "status");
     } else {
-        printf("NAME.EXT  start  length  status\n");
+        printf("%-12s %6s %6s %-5s %-5s\n", "NAME.EXT", "start", "length",
+               "stype", "flags");
     }
     for (i = 0; i < list.count; i++) {
         char fname[16];
+        char date_str[16];
+        char stype[8];
+        char sflags[8];
         uint32_t bytes = (uint32_t)list.entries[i].length * RT11_BLOCK_SIZE;
         if (list.entries[i].ext[0]) {
             snprintf(fname, sizeof(fname), "%s.%s", list.entries[i].name,
@@ -473,13 +553,30 @@ static int cmd_ls(int argc, char **argv)
             snprintf(fname, sizeof(fname), "%s", list.entries[i].name);
         }
         if (long_format) {
-            printf("%-9s %06o %06o %8u %06o %06o %06o\n", fname,
-                   list.entries[i].start_block, list.entries[i].length, bytes,
-                   list.entries[i].status, list.entries[i].job,
-                   list.entries[i].date);
-        } else {
-            printf("%-9s %06o %06o %06o\n", fname, list.entries[i].start_block,
+            rt11_date_to_string(list.entries[i].date, date_str,
+                                sizeof(date_str));
+            rt11_status_to_text(list.entries[i].status, stype, sizeof(stype),
+                                sflags, sizeof(sflags));
+            if (debug) {
+                printf("%-12s %06o %06o %8u %-5s %-5s %06o %06o %-10s %06o\n",
+                       fname, list.entries[i].start_block,
+                       list.entries[i].length, bytes, stype, sflags,
+                       list.entries[i].status, list.entries[i].job, date_str,
+                       list.entries[i].date);
+            } else {
+                printf("%-12s %06o %06o %8u %-5s %-5s %06o %-10s\n", fname,
+                       list.entries[i].start_block, list.entries[i].length,
+                       bytes, stype, sflags, list.entries[i].job, date_str);
+            }
+        } else if (debug) {
+            printf("%-12s %06o %06o %06o\n", fname, list.entries[i].start_block,
                    list.entries[i].length, list.entries[i].status);
+        } else {
+            rt11_status_to_text(list.entries[i].status, stype, sizeof(stype),
+                                sflags, sizeof(sflags));
+            printf("%-12s %06o %06o %-5s %-5s\n", fname,
+                   list.entries[i].start_block, list.entries[i].length, stype,
+                   sflags);
         }
     }
 

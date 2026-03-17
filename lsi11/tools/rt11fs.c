@@ -14,13 +14,6 @@
 #define RT11_PARTITION_USABLE 65535u
 #define RT11_PARTITION_MAX 256u
 
-#define RT11_E_TENT 000400
-#define RT11_E_MPTY 001000
-#define RT11_E_PERM 002000
-#define RT11_E_EOS 004000
-#define RT11_E_READ 040000
-#define RT11_E_PROT 100000
-
 #define RT11_SEGMENTS_MAX 31u
 #define RT11_SEGMENTS_SMALL 16u
 #define RT11_SEGMENTS_THRESHOLD 10000u
@@ -215,6 +208,39 @@ static int rt11_parse_segment_header(const uint8_t *buf, rt11_dirseg_hdr_t *hdr)
     hdr->highest_segment = rt11_get_word(buf, 2);
     hdr->extra_bytes = rt11_get_word(buf, 3);
     hdr->data_start_block = rt11_get_word(buf, 4);
+    return 0;
+}
+
+static int rt11_entry_layout(const rt11_dirseg_hdr_t *hdr,
+                             uint16_t *entry_words_out,
+                             uint16_t *max_entries_out)
+{
+    uint16_t entry_words;
+    uint16_t max_entries;
+
+    if (!hdr || !entry_words_out || !max_entries_out) {
+        errno = EINVAL;
+        return -1;
+    }
+    if ((hdr->extra_bytes & 1u) != 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    entry_words = (uint16_t)(7u + hdr->extra_bytes / 2u);
+    if (entry_words == 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    max_entries = (uint16_t)((512u - 5u) / entry_words);
+    if (max_entries == 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    *entry_words_out = entry_words;
+    *max_entries_out = max_entries;
     return 0;
 }
 
@@ -486,11 +512,9 @@ static int rt11_read_dir_entries(rt11_image_t *img, uint16_t dir_start,
         if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
             return -1;
         }
-        if (hdr.extra_bytes % 2 != 0) {
+        if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
         }
-        entry_words = (uint16_t)(7 + hdr.extra_bytes / 2u);
-        max_entries = (uint16_t)((512u - 5u) / entry_words);
 
         if (total_segments == 0) {
             total_segments = hdr.total_segments;
@@ -633,11 +657,9 @@ int rt11_find_file(rt11_image_t *img, const rt11_name_t *name,
         if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
             return -1;
         }
-        if (hdr.extra_bytes % 2 != 0) {
+        if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
         }
-        entry_words = (uint16_t)(7 + hdr.extra_bytes / 2u);
-        max_entries = (uint16_t)((512u - 5u) / entry_words);
 
         if (total_segments == 0) {
             total_segments = hdr.total_segments;
@@ -873,12 +895,9 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
         if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
             return -1;
         }
-        if (hdr.extra_bytes != 0) {
-            errno = ENOTSUP;
+        if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
         }
-        entry_words = (uint16_t)(7 + hdr.extra_bytes / 2u);
-        max_entries = (uint16_t)((512u - 5u) / entry_words);
 
         if (total_segments == 0) {
             total_segments = hdr.total_segments;
@@ -1030,12 +1049,9 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name)
         if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
             return -1;
         }
-        if (hdr.extra_bytes != 0) {
-            errno = ENOTSUP;
+        if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
         }
-        entry_words = (uint16_t)(7 + hdr.extra_bytes / 2u);
-        max_entries = (uint16_t)((512u - 5u) / entry_words);
 
         if (total_segments == 0) {
             total_segments = hdr.total_segments;

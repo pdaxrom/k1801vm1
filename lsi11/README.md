@@ -79,6 +79,9 @@ This subproject now provides two separate executables:
 - Build: `make rt11tool`
 - List directory: `./rt11tool ls disks/rt11v400.dsk`
 - List directory (long): `./rt11tool ls disks/rt11v400.dsk --long`
+  (includes bytes, status text/flags, job, and date in YYYY-MM-DD)
+- Short listing with raw status: `./rt11tool ls disks/rt11v400.dsk --debug`
+- Include raw date/status words: `./rt11tool ls disks/rt11v400.dsk --long --debug`
 - Show RT-11 layout info: `./rt11tool info disks/rt11v400.dsk`
 - Dump boot block: `./rt11tool bootblock disks/rt11v400.dsk`
 - Work with a partitioned image: `./rt11tool ls big.dsk --partition 1`
@@ -105,6 +108,7 @@ Limitations:
 - No repair/fsck yet.
 - Partitioned layout uses 65535-block partitions (177777 octal) with one unused
   block between partitions; use `--partition N` to select a partition.
+- Extra directory entry words are preserved but not interpreted.
 
 Validation:
 - `./tests/test_rt11tool.sh`
