@@ -32,6 +32,7 @@
 #define RT11_HOME_OWNER_OFF 0744
 #define RT11_HOME_SYSID_OFF 0760
 #define RT11_HOME_CKSUM_OFF 0776
+#define RT11_HOME_FIELD_LEN 12u
 
 typedef struct {
     uint16_t total_segments;
@@ -1081,13 +1082,22 @@ static void rt11_home_set_ascii(uint8_t *buf, size_t off, const char *text,
                                 size_t len)
 {
     size_t i;
-    for (i = 0; i < len; i++) {
+    if (len > RT11_HOME_FIELD_LEN) {
+        len = RT11_HOME_FIELD_LEN;
+    }
+    for (i = 0; i < RT11_HOME_FIELD_LEN; i++) {
+        buf[off + i] = ' ';
+    }
+    if (!text) {
+        return;
+    }
+    for (i = 0; i < len && text[i] != '\0'; i++) {
         buf[off + i] = (uint8_t)text[i];
     }
 }
 
 int rt11_mkfs(const char *path, uint32_t total_blocks,
-              uint32_t *usable_blocks_out)
+              const rt11_mkfs_opts_t *opts, uint32_t *usable_blocks_out)
 {
     uint8_t home[RT11_BLOCK_SIZE];
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
@@ -1099,9 +1109,29 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
     uint32_t partitions;
     uint32_t p;
     rt11_image_t img;
+    const char *volid = "RT11A";
+    const char *owner = "";
+    const char *sysid = "DECRT11A";
+    uint16_t segments_override = 0;
 
     if (!path || total_blocks < dir_start + RT11_DIR_SEGMENT_BLOCKS) {
         errno = EINVAL;
+        return -1;
+    }
+    if (opts) {
+        if (opts->volid) {
+            volid = opts->volid;
+        }
+        if (opts->owner) {
+            owner = opts->owner;
+        }
+        if (opts->sysid) {
+            sysid = opts->sysid;
+        }
+        segments_override = opts->segments;
+    }
+    if (segments_override > RT11_SEGMENTS_MAX) {
+        errno = ERANGE;
         return -1;
     }
 
@@ -1173,11 +1203,6 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
             return -1;
         }
 
-        total_segments = rt11_default_segments(img.volume_blocks);
-        if (total_segments > RT11_SEGMENTS_MAX) {
-            total_segments = RT11_SEGMENTS_MAX;
-        }
-
         if (img.volume_blocks <= dir_start + RT11_DIR_SEGMENT_BLOCKS) {
             rt11_close_image(&img);
             errno = ENOSPC;
@@ -1189,8 +1214,22 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
         if (max_segments == 0) {
             max_segments = 1;
         }
-        if (total_segments > max_segments) {
-            total_segments = max_segments;
+
+        if (segments_override) {
+            total_segments = segments_override;
+            if (total_segments > max_segments) {
+                rt11_close_image(&img);
+                errno = ENOSPC;
+                return -1;
+            }
+        } else {
+            total_segments = rt11_default_segments(img.volume_blocks);
+            if (total_segments > RT11_SEGMENTS_MAX) {
+                total_segments = RT11_SEGMENTS_MAX;
+            }
+            if (total_segments > max_segments) {
+                total_segments = max_segments;
+            }
         }
 
         dir_blocks = (uint32_t)total_segments * RT11_DIR_SEGMENT_BLOCKS;
@@ -1210,9 +1249,12 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
         rt11_set_word(home, RT11_HOME_SYSVER_OFF / 2u,
                       rt11_rad50_encode3("V3A"));
 
-        rt11_home_set_ascii(home, RT11_HOME_VOLID_OFF, "RT11A      ", 12);
-        rt11_home_set_ascii(home, RT11_HOME_OWNER_OFF, "            ", 12);
-        rt11_home_set_ascii(home, RT11_HOME_SYSID_OFF, "DECRT11A    ", 12);
+        rt11_home_set_ascii(home, RT11_HOME_VOLID_OFF, volid,
+                            RT11_HOME_FIELD_LEN);
+        rt11_home_set_ascii(home, RT11_HOME_OWNER_OFF, owner,
+                            RT11_HOME_FIELD_LEN);
+        rt11_home_set_ascii(home, RT11_HOME_SYSID_OFF, sysid,
+                            RT11_HOME_FIELD_LEN);
 
         rt11_set_word(home, RT11_HOME_CKSUM_OFF / 2u, 0);
         sum = 0;

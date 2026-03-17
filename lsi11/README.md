@@ -78,6 +78,7 @@ This subproject now provides two separate executables:
 ### RT-11 disk utility (`rt11tool`)
 - Build: `make rt11tool`
 - List directory: `./rt11tool ls disks/rt11v400.dsk`
+- List directory (long): `./rt11tool ls disks/rt11v400.dsk --long`
 - Show RT-11 layout info: `./rt11tool info disks/rt11v400.dsk`
 - Dump boot block: `./rt11tool bootblock disks/rt11v400.dsk`
 - Work with a partitioned image: `./rt11tool ls big.dsk --partition 1`
@@ -86,6 +87,8 @@ This subproject now provides two separate executables:
 - Add a file: `./rt11tool add disks/rt11v400.dsk host.bin TEST.BIN`
 - Remove a file: `./rt11tool rm disks/rt11v400.dsk TEST.BIN`
 - Create a blank RT-11 filesystem: `./rt11tool mkfs new.dsk --rk05`
+- Set volume metadata and segments:
+  `./rt11tool mkfs new.dsk --rk05 --segments 8 --volid RT11A --owner OPS --sysid DECRT11A`
 - `mkfs` initializes all partitions when the image exceeds 65535 blocks.
 
 Supported commands:

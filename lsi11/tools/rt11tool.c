@@ -23,6 +23,13 @@
 #define RT11_PARTITION_BLOCKS 65536u
 #define RT11_PARTITION_USABLE 65535u
 #define RT11_PARTITION_MAX 256u
+#define RT11_HOME_CLUSTER_OFF 0722
+#define RT11_HOME_DIR_START_OFF 0724
+#define RT11_HOME_SYSVER_OFF 0726
+#define RT11_HOME_VOLID_OFF 0730
+#define RT11_HOME_OWNER_OFF 0744
+#define RT11_HOME_SYSID_OFF 0760
+#define RT11_HOME_FIELD_LEN 12u
 
 static uint16_t default_segments(uint32_t total_blocks)
 {
@@ -32,7 +39,8 @@ static uint16_t default_segments(uint32_t total_blocks)
     return RT11_SEGMENTS_MAX;
 }
 
-static uint32_t calc_partition_usable(uint32_t part_blocks)
+static uint32_t calc_partition_usable(uint32_t part_blocks,
+                                      uint16_t segments_override)
 {
     uint32_t volume_blocks = part_blocks;
     uint16_t segs;
@@ -46,9 +54,12 @@ static uint32_t calc_partition_usable(uint32_t part_blocks)
         return 0;
     }
 
-    segs = default_segments(volume_blocks);
-    if (segs > RT11_SEGMENTS_MAX) {
-        segs = RT11_SEGMENTS_MAX;
+    segs = segments_override;
+    if (segs == 0) {
+        segs = default_segments(volume_blocks);
+        if (segs > RT11_SEGMENTS_MAX) {
+            segs = RT11_SEGMENTS_MAX;
+        }
     }
 
     max_segments = (uint16_t)((volume_blocks - RT11_DIR_START_BLOCK - 1u) /
@@ -69,7 +80,8 @@ static uint32_t calc_partition_usable(uint32_t part_blocks)
     return volume_blocks - data_start;
 }
 
-static uint32_t calc_total_usable(uint32_t total_blocks)
+static uint32_t calc_total_usable(uint32_t total_blocks,
+                                  uint16_t segments_override)
 {
     uint32_t partitions =
         (total_blocks + RT11_PARTITION_BLOCKS - 1u) / RT11_PARTITION_BLOCKS;
@@ -86,7 +98,7 @@ static uint32_t calc_total_usable(uint32_t total_blocks)
         if (part_blocks > RT11_PARTITION_BLOCKS) {
             part_blocks = RT11_PARTITION_BLOCKS;
         }
-        total += calc_partition_usable(part_blocks);
+        total += calc_partition_usable(part_blocks, segments_override);
     }
 
     return total;
@@ -97,13 +109,14 @@ static void usage(FILE *out)
     fprintf(out,
             "Usage: rt11tool <command> [args]\n"
             "Commands:\n"
-            "  ls <image> [--partition N]\n"
+            "  ls <image> [--partition N] [--long]\n"
             "  info <image> [--partition N]\n"
             "  bootblock <image> [--partition N]\n"
             "  extract <image> <outdir> [NAME.EXT] [--lower] [--partition N]\n"
             "  add <image> <hostfile> <NAME.EXT> [--partition N]\n"
             "  rm <image> <NAME.EXT> [--partition N]\n"
-            "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n");
+            "  mkfs <image> (--blocks N | --rk05 | --rl02 | --rp06 | --rp07)\n"
+            "       [--segments N] [--volid TEXT] [--owner TEXT] [--sysid TEXT]\n");
 }
 
 static int ensure_dir(const char *path)
@@ -138,6 +151,25 @@ static void rad50_decode3(uint16_t w, char out[4])
     out[1] = table[c1 < 40 ? c1 : 0];
     out[2] = table[c2 < 40 ? c2 : 0];
     out[3] = '\0';
+}
+
+static void home_get_field(const uint8_t *buf, size_t off, char *out,
+                           size_t out_size)
+{
+    size_t i;
+    size_t len = 0;
+
+    if (out_size == 0) {
+        return;
+    }
+
+    for (i = 0; i < RT11_HOME_FIELD_LEN && len + 1 < out_size; i++) {
+        out[len++] = (char)buf[off + i];
+    }
+    while (len > 0 && out[len - 1] == ' ') {
+        len--;
+    }
+    out[len] = '\0';
 }
 
 static int parse_partition_value(const char *s, uint32_t *partition_out)
@@ -193,6 +225,9 @@ static int cmd_info(int argc, char **argv)
     uint16_t cluster;
     uint16_t sysver;
     char sysver_str[4];
+    char volid[RT11_HOME_FIELD_LEN + 1u];
+    char owner[RT11_HOME_FIELD_LEN + 1u];
+    char sysid[RT11_HOME_FIELD_LEN + 1u];
     uint16_t seg_num = 1;
     uint16_t total_segments = 0;
     uint16_t highest_segment = 0;
@@ -228,9 +263,9 @@ static int cmd_info(int argc, char **argv)
         return 1;
     }
 
-    cluster = get_word_le(home, 0722 / 2u);
-    dir_start = get_word_le(home, 0724 / 2u);
-    sysver = get_word_le(home, 0726 / 2u);
+    cluster = get_word_le(home, RT11_HOME_CLUSTER_OFF / 2u);
+    dir_start = get_word_le(home, RT11_HOME_DIR_START_OFF / 2u);
+    sysver = get_word_le(home, RT11_HOME_SYSVER_OFF / 2u);
     if (cluster == 0) {
         cluster = 1;
     }
@@ -238,6 +273,9 @@ static int cmd_info(int argc, char **argv)
         dir_start = RT11_DIR_START_BLOCK;
     }
     rad50_decode3(sysver, sysver_str);
+    home_get_field(home, RT11_HOME_VOLID_OFF, volid, sizeof(volid));
+    home_get_field(home, RT11_HOME_OWNER_OFF, owner, sizeof(owner));
+    home_get_field(home, RT11_HOME_SYSID_OFF, sysid, sizeof(sysid));
 
     {
         uint32_t total_parts =
@@ -259,6 +297,9 @@ static int cmd_info(int argc, char **argv)
     printf("Directory start block: %o\n", dir_start);
     printf("Pack cluster size: %o\n", cluster);
     printf("System version: %s\n", sysver_str);
+    printf("Volume ID: %s\n", volid);
+    printf("Owner: %s\n", owner);
+    printf("System ID: %s\n", sysid);
 
     while (seg_num != 0) {
         uint8_t segbuf[RT11_BLOCK_SIZE];
@@ -378,20 +419,26 @@ static int cmd_ls(int argc, char **argv)
     const char *image = argv[0];
     uint32_t partition = 0;
     int have_partition = 0;
+    int long_format = 0;
     rt11_image_t img;
     rt11_dirlist_t list;
+    int argi;
     size_t i;
 
-    if (argc > 1) {
-        if (argc != 3 || strcmp(argv[1], "--partition") != 0) {
+    for (argi = 1; argi < argc; argi++) {
+        if (strcmp(argv[argi], "--partition") == 0 && argi + 1 < argc) {
+            if (parse_partition_value(argv[argi + 1], &partition) != 0) {
+                fprintf(stderr, "rt11tool: invalid partition\n");
+                return 1;
+            }
+            have_partition = 1;
+            argi++;
+        } else if (strcmp(argv[argi], "--long") == 0) {
+            long_format = 1;
+        } else {
             usage(stderr);
             return 1;
         }
-        if (parse_partition_value(argv[2], &partition) != 0) {
-            fprintf(stderr, "rt11tool: invalid partition\n");
-            return 1;
-        }
-        have_partition = 1;
     }
 
     if (rt11_open_image(&img, image, "rb") != 0) {
@@ -411,17 +458,29 @@ static int cmd_ls(int argc, char **argv)
         return 1;
     }
 
-    printf("NAME.EXT  start  length  status\n");
+    if (long_format) {
+        printf("NAME.EXT  start  length  bytes    status  job   date\n");
+    } else {
+        printf("NAME.EXT  start  length  status\n");
+    }
     for (i = 0; i < list.count; i++) {
         char fname[16];
+        uint32_t bytes = (uint32_t)list.entries[i].length * RT11_BLOCK_SIZE;
         if (list.entries[i].ext[0]) {
             snprintf(fname, sizeof(fname), "%s.%s", list.entries[i].name,
                      list.entries[i].ext);
         } else {
             snprintf(fname, sizeof(fname), "%s", list.entries[i].name);
         }
-        printf("%-9s %06o %06o %06o\n", fname, list.entries[i].start_block,
-               list.entries[i].length, list.entries[i].status);
+        if (long_format) {
+            printf("%-9s %06o %06o %8u %06o %06o %06o\n", fname,
+                   list.entries[i].start_block, list.entries[i].length, bytes,
+                   list.entries[i].status, list.entries[i].job,
+                   list.entries[i].date);
+        } else {
+            printf("%-9s %06o %06o %06o\n", fname, list.entries[i].start_block,
+                   list.entries[i].length, list.entries[i].status);
+        }
     }
 
     rt11_free_dirlist(&list);
@@ -671,7 +730,10 @@ static int cmd_mkfs(int argc, char **argv)
 {
     const char *image = argv[0];
     uint32_t blocks = 0;
+    rt11_mkfs_opts_t opts;
     int i;
+
+    memset(&opts, 0, sizeof(opts));
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--blocks") == 0 && i + 1 < argc) {
@@ -682,6 +744,25 @@ static int cmd_mkfs(int argc, char **argv)
                 return 1;
             }
             blocks = (uint32_t)v;
+            i++;
+        } else if (strcmp(argv[i], "--segments") == 0 && i + 1 < argc) {
+            char *end = NULL;
+            unsigned long v = strtoul(argv[i + 1], &end, 0);
+            if (!end || *end != '\0' || v == 0 ||
+                v > RT11_SEGMENTS_MAX) {
+                fprintf(stderr, "rt11tool: invalid segment count\n");
+                return 1;
+            }
+            opts.segments = (uint16_t)v;
+            i++;
+        } else if (strcmp(argv[i], "--volid") == 0 && i + 1 < argc) {
+            opts.volid = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "--owner") == 0 && i + 1 < argc) {
+            opts.owner = argv[i + 1];
+            i++;
+        } else if (strcmp(argv[i], "--sysid") == 0 && i + 1 < argc) {
+            opts.sysid = argv[i + 1];
             i++;
         } else if (strcmp(argv[i], "--rk05") == 0) {
             blocks = RK05_BLOCKS;
@@ -706,8 +787,8 @@ static int cmd_mkfs(int argc, char **argv)
 
     {
         uint32_t usable = 0;
-        uint32_t expected = calc_total_usable(blocks);
-        if (rt11_mkfs(image, blocks, &usable) != 0) {
+        uint32_t expected = calc_total_usable(blocks, opts.segments);
+        if (rt11_mkfs(image, blocks, &opts, &usable) != 0) {
             perror("rt11tool: mkfs");
             return 1;
         }

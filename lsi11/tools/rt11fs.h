@@ -39,6 +39,13 @@ typedef struct {
     uint16_t ext_word;
 } rt11_name_t;
 
+typedef struct {
+    const char *volid;
+    const char *owner;
+    const char *sysid;
+    uint16_t segments;
+} rt11_mkfs_opts_t;
+
 int rt11_open_image(rt11_image_t *img, const char *path, const char *mode);
 void rt11_close_image(rt11_image_t *img);
 int rt11_set_partition(rt11_image_t *img, uint32_t partition);
@@ -61,6 +68,6 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
 int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name);
 
 int rt11_mkfs(const char *path, uint32_t total_blocks,
-              uint32_t *usable_blocks_out);
+              const rt11_mkfs_opts_t *opts, uint32_t *usable_blocks_out);
 
 #endif
