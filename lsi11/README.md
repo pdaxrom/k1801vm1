@@ -569,3 +569,11 @@ Notes:
   `-enable-kw11-*` / `-disable-kw11-*` options override that default.
 - `-check-config` prints final per-device enable state (`dev_*` fields),
   including `dev_kw11_l` and `dev_kw11_p`.
+
+## KW11 timing
+- Default behavior is **realtime** (KW11 ticks follow host wall-clock).
+- Set `LSI11_KW11_STEPCLOCK=1` to use deterministic step-based ticking
+  (ticks derived from executed instruction count).
+- When using step clock, `LSI11_KW11_STEPS_PER_TICK` (1..1,000,000) controls
+  how many CPU steps correspond to one KW11 tick (default is tuned for
+  ~1 MHz at 60 Hz).

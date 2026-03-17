@@ -587,10 +587,10 @@ int main(int argc, char **argv)
             kw11_p_on = opts.kw11_p_override;
         }
         kw11_set_visibility(kw11_l_on, kw11_p_on);
-        if (getenv("LSI11_KW11_REALTIME") != NULL) {
-            kw11_set_step_clock(0);
-        } else {
+        if (getenv("LSI11_KW11_STEPCLOCK") != NULL) {
             kw11_set_step_clock(1);
+        } else {
+            kw11_set_step_clock(0);
         }
     }
 
