@@ -43,17 +43,59 @@ static uint16_t rt11_date_now(void);
 static int rt11_read_block(rt11_image_t *img, uint32_t block, uint8_t *buf);
 static int rt11_write_block(rt11_image_t *img, uint32_t block,
                             const uint8_t *buf);
+static int rt11_read_segment(rt11_image_t *img, uint32_t start_block,
+                             uint8_t *buf);
+static int rt11_parse_segment_header(const uint8_t *buf,
+                                     rt11_dirseg_hdr_t *hdr);
 static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
                                 uint16_t seg_num, uint16_t *next_out);
 static int rt11_fsck_segment(rt11_image_t *img, uint16_t dir_start,
                              uint16_t seg_num, uint32_t expected_len,
                              int repair, FILE *out, unsigned *errors,
                              unsigned *fixes, uint16_t *next_out);
+static uint32_t rt11_segment_block(uint16_t dir_start, uint16_t seg_num);
+static int rt11_load_segment(rt11_image_t *img, uint16_t dir_start,
+                             uint16_t seg_num,
+                             uint8_t segbuf[RT11_BLOCK_SIZE *
+                                             RT11_DIR_SEGMENT_BLOCKS],
+                             rt11_dirseg_hdr_t *hdr, uint32_t *seg_block_out);
 
 static uint16_t rt11_get_word(const uint8_t *buf, size_t word_index)
 {
     size_t off = word_index * 2;
     return (uint16_t)(buf[off] | ((uint16_t)buf[off + 1] << 8));
+}
+
+static uint32_t rt11_segment_block(uint16_t dir_start, uint16_t seg_num)
+{
+    return (uint32_t)dir_start +
+           (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+}
+
+static int rt11_load_segment(rt11_image_t *img, uint16_t dir_start,
+                             uint16_t seg_num,
+                             uint8_t segbuf[RT11_BLOCK_SIZE *
+                                             RT11_DIR_SEGMENT_BLOCKS],
+                             rt11_dirseg_hdr_t *hdr, uint32_t *seg_block_out)
+{
+    uint32_t seg_block;
+
+    if (!img || !hdr) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    seg_block = rt11_segment_block(dir_start, seg_num);
+    if (rt11_read_segment(img, seg_block, segbuf) != 0) {
+        return -1;
+    }
+    if (rt11_parse_segment_header(segbuf, hdr) != 0) {
+        return -1;
+    }
+    if (seg_block_out) {
+        *seg_block_out = seg_block;
+    }
+    return 0;
 }
 
 static int rt11_move_blocks(rt11_image_t *img, uint32_t from, uint32_t to,
@@ -559,12 +601,8 @@ static int rt11_read_dir_entries(rt11_image_t *img, uint16_t dir_start,
 
     while (next_seg != 0) {
         seg_num = next_seg;
-        seg_block = (uint32_t)dir_start +
-                    (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
-        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-            return -1;
-        }
-        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                              &seg_block) != 0) {
             return -1;
         }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
@@ -701,15 +739,12 @@ int rt11_find_file(rt11_image_t *img, const rt11_name_t *name,
 
     while (next_seg != 0) {
         uint16_t seg_num = next_seg;
-        uint32_t seg_block = (uint32_t)dir_start +
-                             (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+        uint32_t seg_block;
         uint16_t entry_words;
         uint16_t max_entries;
 
-        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-            return -1;
-        }
-        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                              &seg_block) != 0) {
             return -1;
         }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
@@ -934,8 +969,7 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
 
     while (next_seg != 0) {
         uint16_t seg_num = next_seg;
-        uint32_t seg_block = (uint32_t)dir_start +
-                             (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+        uint32_t seg_block;
         uint16_t entry_words;
         uint16_t max_entries;
         uint16_t eos_index = 0xffffu;
@@ -946,10 +980,8 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
         uint16_t candidate_len = 0;
         uint32_t candidate_start = 0;
 
-        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-            return -1;
-        }
-        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                              &seg_block) != 0) {
             return -1;
         }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
@@ -1094,16 +1126,13 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
 
     while (next_seg != 0) {
         uint16_t seg_num = next_seg;
-        uint32_t seg_block = (uint32_t)dir_start +
-                             (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+        uint32_t seg_block;
         uint16_t entry_words;
         uint16_t max_entries;
         uint16_t i;
 
-        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-            return -1;
-        }
-        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                              &seg_block) != 0) {
             return -1;
         }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
@@ -1174,16 +1203,13 @@ int rt11_set_protect(rt11_image_t *img, const rt11_name_t *name, int protect)
 
     while (next_seg != 0) {
         uint16_t seg_num = next_seg;
-        uint32_t seg_block = (uint32_t)dir_start +
-                             (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+        uint32_t seg_block;
         uint16_t entry_words;
         uint16_t max_entries;
         uint16_t i;
 
-        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-            return -1;
-        }
-        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                              &seg_block) != 0) {
             return -1;
         }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
@@ -1265,13 +1291,9 @@ int rt11_squeeze(rt11_image_t *img)
         if (total_segments == 0) {
             uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
             rt11_dirseg_hdr_t hdr;
-            uint32_t seg_block =
-                (uint32_t)dir_start +
-                (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
-            if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-                return -1;
-            }
-            if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+            uint32_t seg_block;
+            if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                                  &seg_block) != 0) {
                 return -1;
             }
             total_segments = hdr.total_segments;
@@ -1306,12 +1328,8 @@ static int rt11_fsck_segment(rt11_image_t *img, uint16_t dir_start,
     uint16_t eos_len = 0;
     int saw_eos = 0;
 
-    seg_block = (uint32_t)dir_start +
-                (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
-    if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-        return -1;
-    }
-    if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+    if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                          &seg_block) != 0) {
         return -1;
     }
     if (next_out) {
@@ -1432,15 +1450,10 @@ int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
     while (next_seg != 0) {
         uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
         rt11_dirseg_hdr_t hdr;
-        uint32_t seg_block =
-            (uint32_t)dir_start +
-            (uint32_t)(next_seg - 1u) * RT11_DIR_SEGMENT_BLOCKS;
+        uint32_t seg_block;
 
-        if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-            free(segs);
-            return -1;
-        }
-        if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+        if (rt11_load_segment(img, dir_start, next_seg, segbuf, &hdr,
+                              &seg_block) != 0) {
             free(segs);
             return -1;
         }
@@ -1614,13 +1627,8 @@ static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
     struct file_entry *files = NULL;
     uint16_t *extras = NULL;
 
-    seg_block = (uint32_t)dir_start +
-                (uint32_t)(seg_num - 1u) * RT11_DIR_SEGMENT_BLOCKS;
-
-    if (rt11_read_segment(img, seg_block, segbuf) != 0) {
-        return -1;
-    }
-    if (rt11_parse_segment_header(segbuf, &hdr) != 0) {
+    if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
+                          &seg_block) != 0) {
         return -1;
     }
     if (next_out) {
