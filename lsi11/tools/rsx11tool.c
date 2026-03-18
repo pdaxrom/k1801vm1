@@ -12,7 +12,7 @@ static void usage(FILE *out)
             "Usage: rsx11tool <command> [args]\n"
             "Commands:\n"
             "  info <image>\n"
-            "  ls <image> [MFD|[grp,user]]\n"
+            "  ls <image> [[MFD:|[grp,user]]NAME.EXT[;ver]]\n"
             "  extract <image> <outdir> [[grp,user]][NAME.EXT[;ver]]\n"
             "  add <image> <hostfile> [[grp,user]]NAME.EXT[;ver]\n"
             "  rm <image> [[grp,user]]NAME.EXT[;ver]\n"
@@ -61,6 +61,11 @@ static int parse_selector(const char *arg,
 
     if (strcmp(arg, "MFD") == 0) {
         upper_copy(dir_out, dir_out_size, arg);
+        return 0;
+    }
+    if (strncmp(arg, "MFD:", 4u) == 0) {
+        upper_copy(dir_out, dir_out_size, "MFD");
+        upper_copy(spec_out, spec_out_size, arg + 4u);
         return 0;
     }
     if (arg[0] == '[') {
@@ -188,6 +193,32 @@ static int match_spec(const rsx11_dirent_t *ent, const char *spec_filter)
         base[sizeof(base) - 1u] = '\0';
     }
 
+    if (strchr(spec_filter, '*') != NULL || strchr(spec_filter, '?') != NULL) {
+        const char *pattern = spec_filter;
+        const char *text = strchr(spec_filter, ';') != NULL ? spec : base;
+        const char *retry_pattern = NULL;
+        const char *retry_text = NULL;
+
+        while (*text != '\0') {
+            if (*pattern == '*') {
+                retry_pattern = ++pattern;
+                retry_text = text;
+            } else if (*pattern == '?' || *pattern == *text) {
+                pattern++;
+                text++;
+            } else if (retry_pattern != NULL) {
+                pattern = retry_pattern;
+                text = ++retry_text;
+            } else {
+                return 0;
+            }
+        }
+        while (*pattern == '*') {
+            pattern++;
+        }
+        return *pattern == '\0';
+    }
+
     if (strchr(spec_filter, ';') != NULL) {
         return strcmp(spec, spec_filter) == 0;
     }
@@ -281,7 +312,8 @@ static int cmd_info(const char *image_path)
     return 0;
 }
 
-static int cmd_ls(const char *image_path, const char *dir_filter)
+static int cmd_ls(const char *image_path,
+                  const char *dir_filter, const char *spec_filter)
 {
     rsx11_image_t img;
     rsx11_dirlist_t list;
@@ -305,7 +337,8 @@ static int cmd_ls(const char *image_path, const char *dir_filter)
         size_t dir_len;
         size_t spec_len;
 
-        if (!match_dir(&list.entries[i], dir_filter)) {
+        if (!match_dir(&list.entries[i], dir_filter) ||
+            !match_spec(&list.entries[i], spec_filter)) {
             continue;
         }
 
@@ -326,7 +359,8 @@ static int cmd_ls(const char *image_path, const char *dir_filter)
     for (i = 0; i < list.count; i++) {
         char spec[32];
 
-        if (!match_dir(&list.entries[i], dir_filter)) {
+        if (!match_dir(&list.entries[i], dir_filter) ||
+            !match_spec(&list.entries[i], spec_filter)) {
             continue;
         }
         format_filespec(&list.entries[i], spec, sizeof(spec));
@@ -341,7 +375,7 @@ static int cmd_ls(const char *image_path, const char *dir_filter)
     }
 
     if (shown == 0u) {
-        if (dir_filter[0] != '\0' &&
+        if (spec_filter[0] == '\0' && dir_filter[0] != '\0' &&
             find_empty_directory_marker(list.entries, list.count, dir_filter)) {
             rsx11_free_dirlist(&list);
             rsx11_close_image(&img);
@@ -606,11 +640,7 @@ int main(int argc, char **argv)
             perror("selector");
             return 1;
         }
-        if (spec_filter[0] != '\0') {
-            fprintf(stderr, "ls accepts only directory selectors\n");
-            return 1;
-        }
-        return cmd_ls(argv[2], dir_filter);
+        return cmd_ls(argv[2], dir_filter, spec_filter);
     }
     if (strcmp(argv[1], "extract") == 0) {
         if (argc < 4 || argc > 5) {

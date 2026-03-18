@@ -7,8 +7,10 @@ trap 'rm -rf "$tmpdir"' EXIT INT TERM
 ./rsx11tool info disks/rsxm26.dsk >"$tmpdir/info.txt"
 ./rsx11tool ls disks/rsx11m46-CC.rl02 >"$tmpdir/ls.txt"
 ./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,054]' >"$tmpdir/ls_uic.txt"
+./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,002]START*.CMD;11' \
+    >"$tmpdir/ls_wild.txt"
 ./rsx11tool extract disks/rsx11m46-CC.rl02 "$tmpdir/out" \
-    '[001,002]STARTUP.CMD;11' >"$tmpdir/extract.txt"
+    '[001,002]START*.CMD;11' >"$tmpdir/extract.txt"
 cp disks/rsx11m46-CC.rl02 "$tmpdir/work.rl02"
 cat >"$tmpdir/input.txt" <<'EOF'
 RSX11TOOL add/rm validation
@@ -22,7 +24,7 @@ EOF
 ./rsx11tool ls "$tmpdir/work.rl02" '[001,123]' >"$tmpdir/ls_add.txt"
 ./rsx11tool extract "$tmpdir/work.rl02" "$tmpdir/out_add" \
     '[001,123]ZZCODX.TXT;1' >"$tmpdir/extract_add.txt"
-./rsx11tool rm "$tmpdir/work.rl02" '[001,123]ZZCODX.TXT;1' >"$tmpdir/rm.txt"
+./rsx11tool rm "$tmpdir/work.rl02" '[001,123]ZZC*.TXT' >"$tmpdir/rm.txt"
 ./rsx11tool rmdir "$tmpdir/work.rl02" '[001,123]' >"$tmpdir/rmdir.txt"
 ./rsx11tool ls "$tmpdir/work.rl02" MFD >"$tmpdir/mfd_after_rmdir.txt"
 
@@ -63,6 +65,7 @@ grep -q "MFD.*INDEXF\\.SYS;1" "$tmpdir/ls.txt"
 grep -q "MFD.*BITMAP\\.SYS;1" "$tmpdir/ls.txt"
 grep -q "\\[001,002\\].*STARTUP\\.CMD;11" "$tmpdir/ls.txt"
 grep -q "\\[001,054\\].*MCR\\.TSK;1" "$tmpdir/ls_uic.txt"
+grep -q "\\[001,002\\].*STARTUP\\.CMD;11" "$tmpdir/ls_wild.txt"
 grep -q "extracted 1 file(s)" "$tmpdir/extract.txt"
 test -f "$tmpdir/out/001_002/STARTUP.CMD;11"
 test "$(wc -c < "$tmpdir/out/001_002/STARTUP.CMD;11")" -eq 1328

@@ -134,10 +134,12 @@ Validation:
 - Show volume info: `./rsx11tool info disks/rsxm26.dsk`
 - List MFD and UFD contents: `./rsx11tool ls disks/rsx11m46-CC.rl02`
 - List a single directory: `./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,054]'`
+- List with wildcard: `./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,054]M*.TSK'`
 - Extract all regular files with UFD subdirectories: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out`
-- Extract one file: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out '[001,002]STARTUP.CMD;11'`
+- Extract one file or wildcard set: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out '[001,002]START*.CMD;11'`
 - Add a file to a UFD: `./rsx11tool add disks/rsx11m46-CC.rl02 host.txt '[001,002]HOST.TXT'`
 - Remove a file: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST.TXT;1'`
+- Remove a uniquely matched wildcard: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST*.TXT'`
 - Create a UFD: `./rsx11tool mkdir disks/rsx11m46-CC.rl02 '[001,123]'`
 - Remove an empty UFD: `./rsx11tool rmdir disks/rsx11m46-CC.rl02 '[001,123]'`
 - Check directory/header/bitmap consistency: `./rsx11tool fsck disks/rsx11m46-CC.rl02`
@@ -164,7 +166,8 @@ Limitations:
   storage bitmap allocation bits.
 - `fsck --repair` only repairs missing bitmap allocation bits for reachable files;
   it does not rebuild missing headers, repair directory contents, or fix bad extents.
-- No wildcard matching yet.
+- `ls`, `extract`, and `rm` support `*` and `?` wildcards; `rm` still requires
+  the pattern to resolve to exactly one file.
 - Directory listing depends on readable MFD/UFD headers and does not attempt repair.
 
 Validation:
