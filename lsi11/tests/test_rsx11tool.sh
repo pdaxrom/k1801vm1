@@ -28,6 +28,25 @@ EOF
 ./rsx11tool rmdir "$tmpdir/work.rl02" '[001,123]' >"$tmpdir/rmdir.txt"
 ./rsx11tool ls "$tmpdir/work.rl02" MFD >"$tmpdir/mfd_after_rmdir.txt"
 
+cat >"$tmpdir/mkfs_input.txt" <<'EOF'
+Fresh mkfs validation
+EOF
+./rsx11tool mkfs "$tmpdir/mkfs.dsk" --blocks 2048 --label MKTEST \
+    >"$tmpdir/mkfs.txt"
+./rsx11tool info "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_info.txt"
+./rsx11tool ls "$tmpdir/mkfs.dsk" MFD >"$tmpdir/mkfs_ls.txt"
+./rsx11tool fsck "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_fsck.txt" 2>&1
+./rsx11tool mkdir "$tmpdir/mkfs.dsk" '[001,123]' >"$tmpdir/mkfs_mkdir.txt"
+./rsx11tool add "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_input.txt" \
+    '[001,123]MKTEST.TXT' >"$tmpdir/mkfs_add.txt"
+./rsx11tool ls "$tmpdir/mkfs.dsk" '[001,123]' >"$tmpdir/mkfs_ls_ufd.txt"
+./rsx11tool extract "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_out" \
+    '[001,123]MKTEST.TXT;1' >"$tmpdir/mkfs_extract.txt"
+./rsx11tool rm "$tmpdir/mkfs.dsk" '[001,123]MKTEST.TXT;1' \
+    >"$tmpdir/mkfs_rm.txt"
+./rsx11tool rmdir "$tmpdir/mkfs.dsk" '[001,123]' >"$tmpdir/mkfs_rmdir.txt"
+./rsx11tool fsck "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_fsck_after.txt" 2>&1
+
 cp disks/rsx11m46-CC.rl02 "$tmpdir/fsck.rl02"
 cat >"$tmpdir/fsck_input.txt" <<'EOF'
 RSX11 fsck validation
@@ -80,6 +99,21 @@ cmp -s "$tmpdir/input.txt" "$tmpdir/out_add/001_123/ZZCODX.TXT;1"
 grep -q "removed \\[001,123\\]ZZCODX\\.TXT;1" "$tmpdir/rm.txt"
 grep -q "removed \\[001,123\\]" "$tmpdir/rmdir.txt"
 ! grep -q "001123\\.DIR;1" "$tmpdir/mfd_after_rmdir.txt"
+grep -q "created $tmpdir/mkfs.dsk (2048 blocks)" "$tmpdir/mkfs.txt"
+grep -q "Volume label:   MKTEST" "$tmpdir/mkfs_info.txt"
+grep -q "MFD.*INDEXF\\.SYS;1" "$tmpdir/mkfs_ls.txt"
+grep -q "MFD.*BITMAP\\.SYS;1" "$tmpdir/mkfs_ls.txt"
+grep -q "MFD.*BADBLK\\.SYS;1" "$tmpdir/mkfs_ls.txt"
+grep -q "MFD.*000000\\.DIR;1" "$tmpdir/mkfs_ls.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_fsck.txt"
+grep -q "created \\[001,123\\]" "$tmpdir/mkfs_mkdir.txt"
+grep -q "added \\[001,123\\]MKTEST\\.TXT;1" "$tmpdir/mkfs_add.txt"
+grep -q "\\[001,123\\].*MKTEST\\.TXT;1" "$tmpdir/mkfs_ls_ufd.txt"
+grep -q "extracted 1 file(s)" "$tmpdir/mkfs_extract.txt"
+cmp -s "$tmpdir/mkfs_input.txt" "$tmpdir/mkfs_out/001_123/MKTEST.TXT;1"
+grep -q "removed \\[001,123\\]MKTEST\\.TXT;1" "$tmpdir/mkfs_rm.txt"
+grep -q "removed \\[001,123\\]" "$tmpdir/mkfs_rmdir.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_fsck_after.txt"
 test "$status_bad" -eq 2
 test "$status_repair" -eq 2
 test "$status_after" -eq 2

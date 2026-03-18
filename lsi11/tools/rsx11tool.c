@@ -18,6 +18,7 @@ static void usage(FILE *out)
             "  rm <image> [[grp,user]]NAME.EXT[;ver]\n"
             "  mkdir <image> [grp,user]\n"
             "  rmdir <image> [grp,user]\n"
+            "  mkfs <image> --blocks N [--label LABEL]\n"
             "  fsck <image> [--repair]\n");
 }
 
@@ -611,6 +612,55 @@ static int cmd_fsck(const char *image_path, int repair)
     return 0;
 }
 
+static int cmd_mkfs(const char *image_path, int argc, char **argv)
+{
+    const char *label = NULL;
+    uint32_t blocks = 0;
+    int i;
+
+    for (i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--blocks") == 0) {
+            char *endptr;
+            unsigned long value;
+
+            if (i + 1 >= argc) {
+                usage(stderr);
+                return 1;
+            }
+            value = strtoul(argv[++i], &endptr, 0);
+            if (*argv[i] == '\0' || *endptr != '\0' ||
+                value == 0u || value > 0xffffffffu) {
+                fprintf(stderr, "mkfs: invalid block count\n");
+                return 1;
+            }
+            blocks = (uint32_t)value;
+            continue;
+        }
+        if (strcmp(argv[i], "--label") == 0) {
+            if (i + 1 >= argc) {
+                usage(stderr);
+                return 1;
+            }
+            label = argv[++i];
+            continue;
+        }
+        usage(stderr);
+        return 1;
+    }
+
+    if (blocks == 0u) {
+        fprintf(stderr, "mkfs requires --blocks N\n");
+        return 1;
+    }
+    if (rsx11_mkfs(image_path, blocks, label) != 0) {
+        perror("mkfs");
+        return 1;
+    }
+
+    printf("created %s (%u blocks)\n", image_path, (unsigned)blocks);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     char dir_filter[16];
@@ -725,6 +775,13 @@ int main(int argc, char **argv)
             return 1;
         }
         return cmd_fsck(argv[2], argc == 4);
+    }
+    if (strcmp(argv[1], "mkfs") == 0) {
+        if (argc < 5) {
+            usage(stderr);
+            return 1;
+        }
+        return cmd_mkfs(argv[2], argc - 3, argv + 3);
     }
 
     usage(stderr);

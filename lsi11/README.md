@@ -142,6 +142,7 @@ Validation:
 - Remove a uniquely matched wildcard: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST*.TXT'`
 - Create a UFD: `./rsx11tool mkdir disks/rsx11m46-CC.rl02 '[001,123]'`
 - Remove an empty UFD: `./rsx11tool rmdir disks/rsx11m46-CC.rl02 '[001,123]'`
+- Create a blank ODS-1 volume: `./rsx11tool mkfs new.dsk --blocks 2048 --label MKTEST`
 - Check directory/header/bitmap consistency: `./rsx11tool fsck disks/rsx11m46-CC.rl02`
 - Repair missing index/storage allocation bits: `./rsx11tool fsck disks/rsx11m46-CC.rl02 --repair`
 
@@ -153,13 +154,15 @@ Supported commands:
 - `rm`
 - `mkdir`
 - `rmdir`
+- `mkfs`
 - `fsck`
 
 Limitations:
 - Files-11 ODS-1 only.
-- No `mkfs` yet.
 - No ODS-2 support.
 - Contiguous allocation only for new files.
+- `mkfs` creates a minimal ODS-1 layout with `INDEXF.SYS`, `BITMAP.SYS`,
+  `BADBLK.SYS`, and `000000.DIR`; it does not install RSX-11 bootstrap code.
 - `mkdir`/`rmdir` support UFD only; MFD is not creatable/removable.
 - `rmdir` only removes empty directories.
 - `fsck` checks reachable directory entries, file headers, index bitmap bits, and

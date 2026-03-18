@@ -78,6 +78,7 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
                    const char *dir, const char *name, const char *ext,
                    int have_version, uint16_t version,
                    rsx11_dirent_t *out);
+int rsx11_mkfs(const char *path, uint32_t blocks, const char *label);
 int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
                rsx11_fsck_report_t *report);
 void rsx11_free_dirlist(rsx11_dirlist_t *list);

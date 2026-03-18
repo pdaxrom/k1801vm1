@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #define RSX11_HOME_BLOCK 1u
 #define RSX11_HOME_OFF_IBSZ 0u
@@ -27,6 +28,7 @@
 
 #define RSX11_HEADER_MIN 128u
 #define RSX11_MAX_EXTENTS 128u
+#define RSX11_MAP_MAX_WORDS 0xccu
 #define RSX11_HDR_OFF_UFAT 14u
 #define RSX11_FCS_OFF_RATT 0u
 #define RSX11_FCS_OFF_RTYP 1u
@@ -57,6 +59,14 @@ typedef struct {
     char ext[4];
     uint16_t version;
 } rsx11_dir_record_t;
+
+typedef struct {
+    const char *name;
+    const char *ext;
+    rsx11_fid_t fid;
+    uint32_t start_lbn;
+    uint32_t blocks;
+} rsx11_mkfs_file_t;
 
 typedef struct {
     rsx11_home_t home;
@@ -190,6 +200,38 @@ static void trim_right(char *s)
     while (len > 0 && s[len - 1] == ' ') {
         s[--len] = '\0';
     }
+}
+
+static void copy_upper_padded(uint8_t *dst, size_t dst_len,
+                              const char *src, size_t src_len)
+{
+    size_t i;
+
+    memset(dst, ' ', dst_len);
+    for (i = 0; i < dst_len && i < src_len && src[i] != '\0'; i++) {
+        dst[i] = (uint8_t)toupper((unsigned char)src[i]);
+    }
+}
+
+static void format_volume_date(char out[15])
+{
+    static const char *months[12] = {
+        "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+        "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+    };
+    time_t now;
+    struct tm tm_now;
+
+    now = time(NULL);
+    if (localtime_r(&now, &tm_now) == NULL ||
+        tm_now.tm_mon < 0 || tm_now.tm_mon >= 12) {
+        snprintf(out, 15u, "01JAN70000000");
+        return;
+    }
+    snprintf(out, 15u, "%02d%s%02d%02d%02d%02d",
+             tm_now.tm_mday, months[tm_now.tm_mon],
+             (tm_now.tm_year + 1900) % 100,
+             tm_now.tm_hour, tm_now.tm_min, tm_now.tm_sec);
 }
 
 static uint16_t header_checksum(const uint8_t *buf)
@@ -1098,22 +1140,25 @@ static uint32_t header_map_pointer_count(uint32_t blocks)
     return (blocks + 255u) / 256u;
 }
 
-static int build_file_header(uint8_t block[RSX11_BLOCK_SIZE],
-                             uint16_t fnum, uint16_t seq, uint16_t owner_uic,
-                             uint16_t prot, const char *name, const char *ext,
-                             uint16_t version, uint32_t start_lbn,
-                             uint32_t blocks, uint64_t file_bytes)
+static int build_file_header_extents(uint8_t block[RSX11_BLOCK_SIZE],
+                                     uint16_t fnum, uint16_t seq,
+                                     uint16_t owner_uic, uint16_t prot,
+                                     const char *name, const char *ext,
+                                     uint16_t version,
+                                     const rsx11_extent_t *extents,
+                                     size_t extent_count,
+                                     uint64_t file_bytes)
 {
     static const size_t idof = 23u;
     static const size_t mpof = 46u;
     uint8_t *ident;
     uint8_t *map;
-    uint32_t ptr_count;
-    uint32_t rem_blocks;
-    uint32_t lbn;
-    size_t ptr_idx;
-    uint16_t ffby;
+    uint32_t ptr_count = 0;
+    uint32_t total_blocks = 0;
     uint32_t efbk;
+    uint16_t ffby;
+    size_t ptr_idx;
+    size_t i;
 
     memset(block, 0, RSX11_BLOCK_SIZE);
     block[0] = (uint8_t)idof;
@@ -1134,44 +1179,150 @@ static int build_file_header(uint8_t block[RSX11_BLOCK_SIZE],
     }
     put_le16(ident + 8u, version);
 
+    for (i = 0; i < extent_count; i++) {
+        if (extents[i].blocks == 0u) {
+            errno = EINVAL;
+            return -1;
+        }
+        total_blocks += extents[i].blocks;
+        ptr_count += header_map_pointer_count(extents[i].blocks);
+    }
+    if (ptr_count == 0u || ptr_count * 2u > RSX11_MAP_MAX_WORDS) {
+        errno = EFBIG;
+        return -1;
+    }
+
     ffby = (uint16_t)(file_bytes % RSX11_BLOCK_SIZE);
-    efbk = blocks == 0u ? 0u : blocks;
-    if (blocks != 0u && ffby == 0u) {
+    efbk = total_blocks == 0u ? 0u : (uint32_t)((file_bytes + RSX11_BLOCK_SIZE - 1u) /
+                                                 RSX11_BLOCK_SIZE);
+    if (total_blocks != 0u && ffby == 0u) {
         ffby = RSX11_BLOCK_SIZE;
     }
     block[RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_RTYP] = 1u;
     put_le16(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_RSIZ,
              RSX11_BLOCK_SIZE);
-    put_hiword32(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_HIBK, blocks);
+    put_hiword32(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_HIBK, total_blocks);
     put_hiword32(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_EFBK, efbk);
     put_le16(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_FFBY, ffby);
 
     map = block + mpof * 2u;
     map[6] = 1u;
     map[7] = 3u;
-    ptr_count = header_map_pointer_count(blocks);
-    if (ptr_count == 0u || ptr_count * 2u > 0204u) {
-        errno = EFBIG;
-        return -1;
-    }
     map[8] = (uint8_t)(ptr_count * 2u);
-    map[9] = 0204u;
+    map[9] = RSX11_MAP_MAX_WORDS;
 
-    rem_blocks = blocks;
-    lbn = start_lbn;
-    for (ptr_idx = 0; ptr_idx < ptr_count; ptr_idx++) {
-        uint32_t seg = rem_blocks > 256u ? 256u : rem_blocks;
-        uint8_t *ptr = map + 10u + ptr_idx * 4u;
+    ptr_idx = 0u;
+    for (i = 0; i < extent_count; i++) {
+        uint32_t rem_blocks = extents[i].blocks;
+        uint32_t lbn = extents[i].lbn;
 
-        ptr[0] = (uint8_t)(lbn >> 16);
-        ptr[1] = (uint8_t)(seg - 1u);
-        put_le16(ptr + 2u, (uint16_t)(lbn & 0xffffu));
-        lbn += seg;
-        rem_blocks -= seg;
+        while (rem_blocks != 0u) {
+            uint32_t seg = rem_blocks > 256u ? 256u : rem_blocks;
+            uint8_t *ptr = map + 10u + ptr_idx * 4u;
+
+            ptr[0] = (uint8_t)(lbn >> 16);
+            ptr[1] = (uint8_t)(seg - 1u);
+            put_le16(ptr + 2u, (uint16_t)(lbn & 0xffffu));
+            lbn += seg;
+            rem_blocks -= seg;
+            ptr_idx++;
+        }
     }
 
     put_le16(block + 510u, header_checksum(block));
     return 0;
+}
+
+static int build_file_header(uint8_t block[RSX11_BLOCK_SIZE],
+                             uint16_t fnum, uint16_t seq, uint16_t owner_uic,
+                             uint16_t prot, const char *name, const char *ext,
+                             uint16_t version, uint32_t start_lbn,
+                             uint32_t blocks, uint64_t file_bytes)
+{
+    rsx11_extent_t extent;
+
+    extent.lbn = start_lbn;
+    extent.blocks = (uint16_t)blocks;
+    return build_file_header_extents(block, fnum, seq, owner_uic, prot,
+                                     name, ext, version,
+                                     &extent, 1u, file_bytes);
+}
+
+static void build_home_block(uint8_t block[RSX11_BLOCK_SIZE],
+                             uint16_t ibsz, uint32_t iblb,
+                             uint16_t fmax, const char *label)
+{
+    char created[15];
+
+    memset(block, 0, RSX11_BLOCK_SIZE);
+    put_le16(block + RSX11_HOME_OFF_IBSZ, ibsz);
+    put_hiword32(block + RSX11_HOME_OFF_IBLB, iblb);
+    put_le16(block + RSX11_HOME_OFF_FMAX, fmax);
+    put_le16(block + RSX11_HOME_OFF_SBCL, 1u);
+    put_le16(block + RSX11_HOME_OFF_DVTY, 0u);
+    put_le16(block + RSX11_HOME_OFF_VLEV, 0401u);
+    copy_upper_padded(block + RSX11_HOME_OFF_VNAM, 12u, label, strlen(label));
+    put_le16(block + RSX11_HOME_OFF_VOWN, 0401u);
+    put_le16(block + RSX11_HOME_OFF_VPRO, 0u);
+    put_le16(block + RSX11_HOME_OFF_VCHA, 000030u);
+    put_le16(block + RSX11_HOME_OFF_DFPR, 0160000u);
+    block[RSX11_HOME_OFF_WISZ] = 7u;
+    block[RSX11_HOME_OFF_FIEX] = 5u;
+    block[RSX11_HOME_OFF_LRUC] = 3u;
+    format_volume_date(created);
+    memcpy(block + RSX11_HOME_OFF_VDAT, created, 14u);
+}
+
+static void init_storage_bitmap(uint8_t *data, size_t data_size,
+                                uint32_t total_blocks)
+{
+    uint8_t bitmap_blocks;
+
+    memset(data, 0, data_size);
+    if (data_size < RSX11_BLOCK_SIZE * 2u) {
+        return;
+    }
+
+    bitmap_blocks = (uint8_t)((total_blocks + 4095u) / 4096u);
+    data[3] = bitmap_blocks;
+    memset(data + RSX11_BLOCK_SIZE, 0xffu, data_size - RSX11_BLOCK_SIZE);
+}
+
+static void update_storage_bitmap_control(uint8_t *data, size_t data_size,
+                                          uint32_t total_blocks)
+{
+    uint8_t bitmap_blocks;
+    size_t unit_off;
+    uint32_t start;
+    size_t i;
+
+    if (data_size < RSX11_BLOCK_SIZE) {
+        return;
+    }
+    bitmap_blocks = data[3];
+    unit_off = 4u + (size_t)bitmap_blocks * 4u;
+    if (unit_off + 4u > RSX11_BLOCK_SIZE) {
+        return;
+    }
+
+    for (i = 0; i < bitmap_blocks; i++) {
+        uint32_t end;
+        uint32_t count = 0;
+        uint32_t blockno;
+
+        start = (uint32_t)i * 4096u;
+        end = start + 4096u;
+        if (end > total_blocks) {
+            end = total_blocks;
+        }
+        for (blockno = start; blockno < end; blockno++) {
+            if (storage_bitmap_is_free(data, data_size, blockno)) {
+                count++;
+            }
+        }
+        put_hiword32(data + 4u + i * 4u, count);
+    }
+    put_hiword32(data + unit_off, total_blocks);
 }
 
 static int build_dir_record(uint8_t rec[16], const rsx11_fid_t *fid,
@@ -2324,6 +2475,224 @@ out:
     free(dir_data);
     rsx11_free_dirlist(&dir_entries);
     free_header_cache(&cache);
+    return rc;
+}
+
+static int default_fmax_for_blocks(uint32_t total_blocks, uint16_t *fmax_out)
+{
+    uint32_t fmax;
+
+    fmax = total_blocks / 16u;
+    if (fmax < 16u) {
+        fmax = 16u;
+    }
+    if (fmax > 1024u) {
+        fmax = 1024u;
+    }
+    *fmax_out = (uint16_t)fmax;
+    return 0;
+}
+
+int rsx11_mkfs(const char *path, uint32_t blocks, const char *label)
+{
+    static const uint32_t badblk_blocks = 20u;
+    rsx11_image_t img;
+    rsx11_extent_t index_extents[2];
+    rsx11_mkfs_file_t files[4];
+    uint8_t home_block[RSX11_BLOCK_SIZE];
+    uint8_t header_block[RSX11_BLOCK_SIZE];
+    uint8_t mfd_block[RSX11_BLOCK_SIZE];
+    uint8_t *storage_bitmap = NULL;
+    uint8_t *index_bitmap = NULL;
+    const char *volume_label;
+    uint32_t iblb;
+    uint32_t bitmap_data_blocks;
+    uint32_t bitmap_total_blocks;
+    uint32_t sys_data_blocks;
+    uint32_t data_start;
+    uint32_t unit_blocks;
+    uint32_t min_blocks;
+    size_t storage_size;
+    size_t index_size;
+    uint16_t fmax;
+    size_t i;
+    int rc = -1;
+
+    if (path == NULL || path[0] == '\0' || blocks == 0u) {
+        errno = EINVAL;
+        return -1;
+    }
+    volume_label = (label != NULL && label[0] != '\0') ? label : "RSXVOL";
+    if (strlen(volume_label) > 12u) {
+        errno = ENAMETOOLONG;
+        return -1;
+    }
+    bitmap_data_blocks = (blocks + 4095u) / 4096u;
+    if (bitmap_data_blocks == 0u || bitmap_data_blocks > 255u) {
+        errno = EFBIG;
+        return -1;
+    }
+    bitmap_total_blocks = 1u + bitmap_data_blocks;
+    if (default_fmax_for_blocks(blocks, &fmax) != 0) {
+        return -1;
+    }
+
+    iblb = (blocks + 1u) / 2u;
+    sys_data_blocks = bitmap_total_blocks + badblk_blocks + 1u;
+    min_blocks = iblb + 1u + (uint32_t)fmax + sys_data_blocks + 16u;
+    if (blocks < min_blocks) {
+        errno = ENOSPC;
+        return -1;
+    }
+
+    memset(&img, 0, sizeof(img));
+    img.fp = fopen(path, "wb+");
+    if (img.fp == NULL) {
+        return -1;
+    }
+    img.size_bytes = (uint64_t)blocks * RSX11_BLOCK_SIZE;
+    img.total_blocks = blocks;
+    if (img.size_bytes != 0u) {
+        if (seek_to(img.fp, img.size_bytes - 1u) != 0) {
+            goto out;
+        }
+        if (fputc(0, img.fp) == EOF) {
+            errno = EIO;
+            goto out;
+        }
+        if (fflush(img.fp) != 0) {
+            goto out;
+        }
+    }
+
+    build_home_block(home_block, 1u, iblb, fmax, volume_label);
+    if (write_at(img.fp, (uint64_t)RSX11_HOME_BLOCK * RSX11_BLOCK_SIZE,
+                 home_block, sizeof(home_block)) != 0) {
+        goto out;
+    }
+
+    data_start = iblb + 1u + (uint32_t)fmax;
+    files[0] = (rsx11_mkfs_file_t){
+        "INDEXF", "SYS", { 1u, 1u, 0u }, 0u, 2u + 1u + (uint32_t)fmax
+    };
+    files[1] = (rsx11_mkfs_file_t){
+        "BITMAP", "SYS", { 2u, 2u, 0u }, data_start, bitmap_total_blocks
+    };
+    files[2] = (rsx11_mkfs_file_t){
+        "BADBLK", "SYS", { 3u, 3u, 0u },
+        data_start + bitmap_total_blocks, badblk_blocks
+    };
+    files[3] = (rsx11_mkfs_file_t){
+        "000000", "DIR", { 4u, 4u, 0u },
+        data_start + bitmap_total_blocks + badblk_blocks, 1u
+    };
+    unit_blocks = blocks;
+
+    index_extents[0].lbn = 0u;
+    index_extents[0].blocks = 2u;
+    index_extents[1].lbn = iblb;
+    index_extents[1].blocks = (uint16_t)(1u + (uint32_t)fmax);
+    if (build_file_header_extents(header_block,
+                                  files[0].fid.num, files[0].fid.seq,
+                                  0401u, 0160000u,
+                                  files[0].name, files[0].ext, 1u,
+                                  index_extents, 2u,
+                                  (uint64_t)files[0].blocks *
+                                      RSX11_BLOCK_SIZE) != 0) {
+        goto out;
+    }
+    if (write_header_slot(&img, &(rsx11_home_t){ .ibsz = 1u, .iblb = iblb },
+                          1u, header_block) != 0) {
+        goto out;
+    }
+
+    for (i = 1; i < 3; i++) {
+        if (build_file_header(header_block,
+                              files[i].fid.num, files[i].fid.seq,
+                              0401u, 0160000u,
+                              files[i].name, files[i].ext, 1u,
+                              files[i].start_lbn, files[i].blocks,
+                              (uint64_t)files[i].blocks *
+                                  RSX11_BLOCK_SIZE) != 0) {
+            goto out;
+        }
+        if (write_header_slot(&img, &(rsx11_home_t){ .ibsz = 1u, .iblb = iblb },
+                              files[i].fid.num, header_block) != 0) {
+            goto out;
+        }
+    }
+    if (build_directory_header(header_block,
+                               files[3].fid.num, files[3].fid.seq,
+                               0401u, files[3].name, files[3].start_lbn) != 0) {
+        goto out;
+    }
+    if (write_header_slot(&img, &(rsx11_home_t){ .ibsz = 1u, .iblb = iblb },
+                          files[3].fid.num, header_block) != 0) {
+        goto out;
+    }
+
+    memset(mfd_block, 0, sizeof(mfd_block));
+    for (i = 0; i < 4u; i++) {
+        if (build_dir_record(mfd_block + i * 16u, &files[i].fid,
+                             files[i].name, files[i].ext, 1u) != 0) {
+            goto out;
+        }
+    }
+    if (write_at(img.fp, (uint64_t)files[3].start_lbn * RSX11_BLOCK_SIZE,
+                 mfd_block, sizeof(mfd_block)) != 0) {
+        goto out;
+    }
+
+    storage_size = (size_t)bitmap_total_blocks * RSX11_BLOCK_SIZE;
+    storage_bitmap = malloc(storage_size);
+    if (storage_bitmap == NULL) {
+        goto out;
+    }
+    init_storage_bitmap(storage_bitmap, storage_size, unit_blocks);
+    for (i = 0; i < 2u; i++) {
+        uint32_t b;
+
+        for (b = 0; b < index_extents[i].blocks; b++) {
+            storage_bitmap_set_free(storage_bitmap, storage_size,
+                                    index_extents[i].lbn + b, 0);
+        }
+    }
+    for (i = 1; i < 4u; i++) {
+        uint32_t b;
+
+        for (b = 0; b < files[i].blocks; b++) {
+            storage_bitmap_set_free(storage_bitmap, storage_size,
+                                    files[i].start_lbn + b, 0);
+        }
+    }
+    update_storage_bitmap_control(storage_bitmap, storage_size, unit_blocks);
+    if (write_at(img.fp, (uint64_t)files[1].start_lbn * RSX11_BLOCK_SIZE,
+                 storage_bitmap, storage_size) != 0) {
+        goto out;
+    }
+
+    index_size = RSX11_BLOCK_SIZE;
+    index_bitmap = calloc(1u, index_size);
+    if (index_bitmap == NULL) {
+        goto out;
+    }
+    for (i = 0; i < 4u; i++) {
+        index_bitmap_set(index_bitmap, index_size, files[i].fid.num, 1);
+    }
+    if (write_at(img.fp, (uint64_t)iblb * RSX11_BLOCK_SIZE,
+                 index_bitmap, index_size) != 0) {
+        goto out;
+    }
+    if (fflush(img.fp) != 0) {
+        goto out;
+    }
+
+    rc = 0;
+
+out:
+    free(index_bitmap);
+    free(storage_bitmap);
+    rsx11_close_image(&img);
     return rc;
 }
 
