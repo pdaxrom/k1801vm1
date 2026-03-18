@@ -320,6 +320,63 @@ static int parse_partition_value(const char *s, uint32_t *partition_out)
     return 0;
 }
 
+static int set_partition_arg(const char *arg, uint32_t *partition_out,
+                             int *have_partition_out)
+{
+    if (parse_partition_value(arg, partition_out) != 0) {
+        fprintf(stderr, "rt11tool: invalid partition\n");
+        return -1;
+    }
+    *have_partition_out = 1;
+    return 0;
+}
+
+static int open_image_with_partition(rt11_image_t *img, const char *image,
+                                     const char *mode, int have_partition,
+                                     uint32_t partition)
+{
+    if (rt11_open_image(img, image, mode) != 0) {
+        perror("rt11tool: open image");
+        return -1;
+    }
+
+    if (have_partition && rt11_set_partition(img, partition) != 0) {
+        perror("rt11tool: partition");
+        rt11_close_image(img);
+        return -1;
+    }
+
+    return 0;
+}
+
+static void lowercase_ascii(char *s)
+{
+    size_t i;
+
+    for (i = 0; s[i]; i++) {
+        s[i] = (char)tolower((unsigned char)s[i]);
+    }
+}
+
+static void format_name_ext(const char *name, const char *ext, char *out,
+                            size_t out_size, int lower)
+{
+    if (ext && ext[0]) {
+        snprintf(out, out_size, "%s.%s", name, ext);
+    } else {
+        snprintf(out, out_size, "%s", name);
+    }
+    if (lower) {
+        lowercase_ascii(out);
+    }
+}
+
+static void format_dirent_name(const rt11_dirent_t *ent, char *out,
+                               size_t out_size, int lower)
+{
+    format_name_ext(ent->name, ent->ext, out, out_size, lower);
+}
+
 static int read_block(rt11_image_t *img, uint32_t block, uint8_t *buf)
 {
     uint32_t abs_block;
@@ -393,21 +450,13 @@ static int cmd_info(int argc, char **argv)
             usage(stderr);
             return 1;
         }
-        if (parse_partition_value(argv[2], &partition) != 0) {
-            fprintf(stderr, "rt11tool: invalid partition\n");
+        if (set_partition_arg(argv[2], &partition, &have_partition) != 0) {
             return 1;
         }
-        have_partition = 1;
     }
 
-    if (rt11_open_image(&img, image, "rb") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -517,11 +566,10 @@ static int cmd_bootblock(int argc, char **argv)
         int argi;
         for (argi = 1; argi < argc; argi++) {
             if (strcmp(argv[argi], "--partition") == 0 && argi + 1 < argc) {
-                if (parse_partition_value(argv[argi + 1], &partition) != 0) {
-                    fprintf(stderr, "rt11tool: invalid partition\n");
+                if (set_partition_arg(argv[argi + 1], &partition,
+                                      &have_partition) != 0) {
                     return 1;
                 }
-                have_partition = 1;
                 argi++;
             } else if (strcmp(argv[argi], "--write") == 0 &&
                        argi + 1 < argc) {
@@ -534,14 +582,8 @@ static int cmd_bootblock(int argc, char **argv)
         }
     }
 
-    if (rt11_open_image(&img, image, write_path ? "rb+" : "rb") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, write_path ? "rb+" : "rb",
+                                  have_partition, partition) != 0) {
         return 1;
     }
 
@@ -691,11 +733,10 @@ static int cmd_ls(int argc, char **argv)
 
     for (argi = 1; argi < argc; argi++) {
         if (strcmp(argv[argi], "--partition") == 0 && argi + 1 < argc) {
-            if (parse_partition_value(argv[argi + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[argi + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             argi++;
         } else if (strcmp(argv[argi], "--long") == 0) {
             long_format = 1;
@@ -707,14 +748,8 @@ static int cmd_ls(int argc, char **argv)
         }
     }
 
-    if (rt11_open_image(&img, image, "rb") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -746,12 +781,7 @@ static int cmd_ls(int argc, char **argv)
         char stype[8];
         char sflags[8];
         uint32_t bytes = (uint32_t)list.entries[i].length * RT11_BLOCK_SIZE;
-        if (list.entries[i].ext[0]) {
-            snprintf(fname, sizeof(fname), "%s.%s", list.entries[i].name,
-                     list.entries[i].ext);
-        } else {
-            snprintf(fname, sizeof(fname), "%s", list.entries[i].name);
-        }
+        format_dirent_name(&list.entries[i], fname, sizeof(fname), 0);
         if (long_format) {
             rt11_date_to_string(list.entries[i].date, date_str,
                                 sizeof(date_str));
@@ -804,11 +834,10 @@ static int cmd_extract(int argc, char **argv)
         if (strcmp(argv[i], "--lower") == 0) {
             lower = 1;
         } else if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
-            if (parse_partition_value(argv[i + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[i + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             i++;
         } else if (!name_arg) {
             name_arg = argv[i];
@@ -823,14 +852,8 @@ static int cmd_extract(int argc, char **argv)
         return 1;
     }
 
-    if (rt11_open_image(&img, image, "rb") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -881,19 +904,8 @@ static int cmd_extract(int argc, char **argv)
         for (i = 0; i < (int)list.count; i++) {
             char fname[32];
             char path[512];
-            size_t j;
 
-            if (list.entries[i].ext[0]) {
-                snprintf(fname, sizeof(fname), "%s.%s", list.entries[i].name,
-                         list.entries[i].ext);
-            } else {
-                snprintf(fname, sizeof(fname), "%s", list.entries[i].name);
-            }
-            if (lower) {
-                for (j = 0; fname[j]; j++) {
-                    fname[j] = (char)tolower((unsigned char)fname[j]);
-                }
-            }
+            format_dirent_name(&list.entries[i], fname, sizeof(fname), lower);
             if (build_out_path(path, sizeof(path), outdir, fname) != 0) {
                 rt11_free_dirlist(&list);
                 rt11_close_image(&img);
@@ -928,11 +940,10 @@ static int cmd_add(int argc, char **argv)
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
-            if (parse_partition_value(argv[i + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[i + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             i++;
         } else if (strcmp(argv[i], "--dir") == 0) {
             dir_mode = 1;
@@ -966,14 +977,8 @@ static int cmd_add(int argc, char **argv)
         return 1;
     }
 
-    if (rt11_open_image(&img, image, "rb+") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb+", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -1021,11 +1026,10 @@ static int cmd_rm(int argc, char **argv)
 
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
-            if (parse_partition_value(argv[i + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[i + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             i++;
         } else if (strcmp(argv[i], "--force") == 0) {
             force = 1;
@@ -1040,14 +1044,8 @@ static int cmd_rm(int argc, char **argv)
         return 1;
     }
 
-    if (rt11_open_image(&img, image, "rb+") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb+", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -1078,11 +1076,10 @@ static int cmd_protect(int argc, char **argv)
 
     for (i = 2; i < argc; i++) {
         if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
-            if (parse_partition_value(argv[i + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[i + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             i++;
         } else if (strcmp(argv[i], "--clear") == 0) {
             protect = 0;
@@ -1097,14 +1094,8 @@ static int cmd_protect(int argc, char **argv)
         return 1;
     }
 
-    if (rt11_open_image(&img, image, "rb+") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb+", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -1132,11 +1123,10 @@ static int cmd_squeeze(int argc, char **argv)
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
-            if (parse_partition_value(argv[i + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[i + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             i++;
         } else {
             usage(stderr);
@@ -1144,14 +1134,8 @@ static int cmd_squeeze(int argc, char **argv)
         }
     }
 
-    if (rt11_open_image(&img, image, "rb+") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, "rb+", have_partition,
+                                  partition) != 0) {
         return 1;
     }
 
@@ -1182,11 +1166,10 @@ static int cmd_fsck(int argc, char **argv)
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--partition") == 0 && i + 1 < argc) {
-            if (parse_partition_value(argv[i + 1], &partition) != 0) {
-                fprintf(stderr, "rt11tool: invalid partition\n");
+            if (set_partition_arg(argv[i + 1], &partition,
+                                  &have_partition) != 0) {
                 return 1;
             }
-            have_partition = 1;
             i++;
         } else if (strcmp(argv[i], "--repair") == 0) {
             repair = 1;
@@ -1196,14 +1179,8 @@ static int cmd_fsck(int argc, char **argv)
         }
     }
 
-    if (rt11_open_image(&img, image, repair ? "rb+" : "rb") != 0) {
-        perror("rt11tool: open image");
-        return 1;
-    }
-
-    if (have_partition && rt11_set_partition(&img, partition) != 0) {
-        perror("rt11tool: partition");
-        rt11_close_image(&img);
+    if (open_image_with_partition(&img, image, repair ? "rb+" : "rb",
+                                  have_partition, partition) != 0) {
         return 1;
     }
 

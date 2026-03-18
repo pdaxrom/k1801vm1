@@ -36,6 +36,14 @@ typedef struct {
     uint16_t data_start_block;
 } rt11_dirseg_hdr_t;
 
+typedef struct {
+    uint16_t dir_start;
+    uint16_t next_seg;
+    uint16_t total_segments;
+    uint32_t guard;
+    int looped;
+} rt11_walk_state_t;
+
 static const char rt11_rad50_chars[40] =
     " ABCDEFGHIJKLMNOPQRSTUVWXYZ$.?0123456789";
 
@@ -53,12 +61,31 @@ static int rt11_fsck_segment(rt11_image_t *img, uint16_t dir_start,
                              uint16_t seg_num, uint32_t expected_len,
                              int repair, FILE *out, unsigned *errors,
                              unsigned *fixes, uint16_t *next_out);
+static void rt11_walk_reset(rt11_walk_state_t *state, uint16_t dir_start);
+static int rt11_walk_begin(rt11_image_t *img, rt11_walk_state_t *state);
+static int rt11_walk_next(rt11_image_t *img, rt11_walk_state_t *state,
+                          uint16_t *seg_num_out,
+                          uint8_t segbuf[RT11_BLOCK_SIZE *
+                                          RT11_DIR_SEGMENT_BLOCKS],
+                          rt11_dirseg_hdr_t *hdr, uint32_t *seg_block_out);
 static uint32_t rt11_segment_block(uint16_t dir_start, uint16_t seg_num);
 static int rt11_load_segment(rt11_image_t *img, uint16_t dir_start,
                              uint16_t seg_num,
                              uint8_t segbuf[RT11_BLOCK_SIZE *
                                              RT11_DIR_SEGMENT_BLOCKS],
                              rt11_dirseg_hdr_t *hdr, uint32_t *seg_block_out);
+static void rt11_read_entry_name(const uint8_t *segbuf, size_t base_word,
+                                 rt11_name_t *name);
+static int rt11_name_equal(const rt11_name_t *lhs, const rt11_name_t *rhs);
+static int rt11_entry_name_matches(const uint8_t *segbuf, size_t base_word,
+                                   const rt11_name_t *name);
+static void rt11_name_to_fields(const rt11_name_t *name, char *name_out,
+                                size_t name_size, char *ext_out,
+                                size_t ext_size);
+static void rt11_decode_dirent(const uint8_t *segbuf, size_t base_word,
+                               uint32_t start_block, uint32_t seg_block,
+                               uint16_t seg_num, uint16_t entry_index,
+                               rt11_dirent_t *ent_out);
 
 static uint16_t rt11_get_word(const uint8_t *buf, size_t word_index)
 {
@@ -96,6 +123,70 @@ static int rt11_load_segment(rt11_image_t *img, uint16_t dir_start,
         *seg_block_out = seg_block;
     }
     return 0;
+}
+
+static void rt11_walk_reset(rt11_walk_state_t *state, uint16_t dir_start)
+{
+    state->dir_start = dir_start;
+    state->next_seg = 1;
+    state->total_segments = 0;
+    state->guard = 0;
+    state->looped = 0;
+}
+
+static int rt11_walk_begin(rt11_image_t *img, rt11_walk_state_t *state)
+{
+    if (!img || !state) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (rt11_read_home(img, &state->dir_start) != 0) {
+        return -1;
+    }
+    rt11_walk_reset(state, state->dir_start);
+    return 0;
+}
+
+static int rt11_walk_next(rt11_image_t *img, rt11_walk_state_t *state,
+                          uint16_t *seg_num_out,
+                          uint8_t segbuf[RT11_BLOCK_SIZE *
+                                          RT11_DIR_SEGMENT_BLOCKS],
+                          rt11_dirseg_hdr_t *hdr, uint32_t *seg_block_out)
+{
+    uint16_t seg_num;
+
+    if (!img || !state || !hdr) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (state->next_seg == 0) {
+        return 0;
+    }
+
+    seg_num = state->next_seg;
+    if (rt11_load_segment(img, state->dir_start, seg_num, segbuf, hdr,
+                          seg_block_out) != 0) {
+        return -1;
+    }
+
+    if (state->total_segments == 0) {
+        state->total_segments = hdr->total_segments;
+        if (state->total_segments == 0) {
+            state->total_segments = 1;
+        }
+    }
+
+    state->next_seg = hdr->next_segment;
+    state->guard++;
+    if (state->guard > state->total_segments + 4u) {
+        state->looped = 1;
+        state->next_seg = 0;
+    }
+
+    if (seg_num_out) {
+        *seg_num_out = seg_num;
+    }
+    return 1;
 }
 
 static int rt11_move_blocks(rt11_image_t *img, uint32_t from, uint32_t to,
@@ -577,20 +668,84 @@ void rt11_name_to_host(const rt11_name_t *name, char *out, size_t out_size,
     }
 }
 
+static void rt11_read_entry_name(const uint8_t *segbuf, size_t base_word,
+                                 rt11_name_t *name)
+{
+    name->name_words[0] = rt11_get_word(segbuf, base_word + 1u);
+    name->name_words[1] = rt11_get_word(segbuf, base_word + 2u);
+    name->ext_word = rt11_get_word(segbuf, base_word + 3u);
+}
+
+static int rt11_name_equal(const rt11_name_t *lhs, const rt11_name_t *rhs)
+{
+    return lhs->name_words[0] == rhs->name_words[0] &&
+           lhs->name_words[1] == rhs->name_words[1] &&
+           lhs->ext_word == rhs->ext_word;
+}
+
+static int rt11_entry_name_matches(const uint8_t *segbuf, size_t base_word,
+                                   const rt11_name_t *name)
+{
+    rt11_name_t entry_name;
+
+    rt11_read_entry_name(segbuf, base_word, &entry_name);
+    return rt11_name_equal(&entry_name, name);
+}
+
+static void rt11_name_to_fields(const rt11_name_t *name, char *name_out,
+                                size_t name_size, char *ext_out,
+                                size_t ext_size)
+{
+    char host[16];
+    char *dot;
+
+    rt11_name_to_host(name, host, sizeof(host), 0);
+    dot = strchr(host, '.');
+    if (dot) {
+        *dot = '\0';
+        snprintf(ext_out, ext_size, "%s", dot + 1);
+    } else if (ext_size > 0) {
+        ext_out[0] = '\0';
+    }
+    snprintf(name_out, name_size, "%s", host);
+}
+
+static void rt11_decode_dirent(const uint8_t *segbuf, size_t base_word,
+                               uint32_t start_block, uint32_t seg_block,
+                               uint16_t seg_num, uint16_t entry_index,
+                               rt11_dirent_t *ent_out)
+{
+    rt11_name_t name;
+
+    memset(ent_out, 0, sizeof(*ent_out));
+    rt11_read_entry_name(segbuf, base_word, &name);
+
+    ent_out->status = rt11_get_word(segbuf, base_word);
+    ent_out->length = rt11_get_word(segbuf, base_word + 4u);
+    ent_out->job = rt11_get_word(segbuf, base_word + 5u);
+    ent_out->date = rt11_get_word(segbuf, base_word + 6u);
+    ent_out->start_block = start_block;
+    ent_out->raw_offset =
+        (uint32_t)seg_block * RT11_BLOCK_SIZE + (uint32_t)base_word * 2u;
+    ent_out->segment = seg_num;
+    ent_out->entry_index = entry_index;
+    rt11_name_to_fields(&name, ent_out->name, sizeof(ent_out->name),
+                        ent_out->ext, sizeof(ent_out->ext));
+}
+
 static int rt11_read_dir_entries(rt11_image_t *img, uint16_t dir_start,
                                  rt11_dirlist_t *out)
 {
+    rt11_walk_state_t walk;
     rt11_dirseg_hdr_t hdr;
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
     uint32_t seg_block;
     uint16_t seg_num;
-    uint16_t total_segments = 0;
-    uint16_t next_seg = 1;
     uint16_t entry_words;
     uint16_t max_entries;
     size_t cap = 0;
     size_t count = 0;
-    uint32_t guard = 0;
+    int rc;
 
     if (!img || !out) {
         return -1;
@@ -598,22 +753,13 @@ static int rt11_read_dir_entries(rt11_image_t *img, uint16_t dir_start,
 
     out->entries = NULL;
     out->count = 0;
+    rt11_walk_reset(&walk, dir_start);
 
-    while (next_seg != 0) {
-        seg_num = next_seg;
-        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
-                              &seg_block) != 0) {
-            return -1;
-        }
+    while ((rc = rt11_walk_next(img, &walk, &seg_num, segbuf, &hdr,
+                                &seg_block)) > 0) {
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
+            rt11_free_dirlist(out);
             return -1;
-        }
-
-        if (total_segments == 0) {
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
         }
 
         {
@@ -629,44 +775,9 @@ static int rt11_read_dir_entries(rt11_image_t *img, uint16_t dir_start,
 
                 if (rt11_entry_is_file(status)) {
                     rt11_dirent_t ent;
-                    rt11_name_t name;
-                    char name_buf[16];
 
-                    name.name_words[0] = rt11_get_word(segbuf, base_word + 1u);
-                    name.name_words[1] = rt11_get_word(segbuf, base_word + 2u);
-                    name.ext_word = rt11_get_word(segbuf, base_word + 3u);
-
-                    rt11_name_to_host(&name, name_buf, sizeof(name_buf), 0);
-
-                    memset(&ent, 0, sizeof(ent));
-                    ent.status = status;
-                    ent.length = length;
-                    ent.job = rt11_get_word(segbuf, base_word + 5u);
-                    ent.date = rt11_get_word(segbuf, base_word + 6u);
-                    ent.start_block = cur_block;
-                    ent.raw_offset =
-                        (uint32_t)seg_block * RT11_BLOCK_SIZE +
-                        (uint32_t)base_word * 2u;
-                    ent.segment = seg_num;
-                    ent.entry_index = i;
-
-                    {
-                        char *dot = strchr(name_buf, '.');
-                        if (dot) {
-                            size_t nlen = (size_t)(dot - name_buf);
-                            if (nlen >= sizeof(ent.name)) {
-                                nlen = sizeof(ent.name) - 1;
-                            }
-                            memcpy(ent.name, name_buf, nlen);
-                            ent.name[nlen] = '\0';
-                            strncpy(ent.ext, dot + 1, sizeof(ent.ext) - 1);
-                            ent.ext[sizeof(ent.ext) - 1] = '\0';
-                        } else {
-                            strncpy(ent.name, name_buf, sizeof(ent.name) - 1);
-                            ent.name[sizeof(ent.name) - 1] = '\0';
-                            ent.ext[0] = '\0';
-                        }
-                    }
+                    rt11_decode_dirent(segbuf, base_word, cur_block, seg_block,
+                                       seg_num, i, &ent);
 
                     if (count == cap) {
                         size_t new_cap = cap ? cap * 2 : 16;
@@ -688,13 +799,12 @@ static int rt11_read_dir_entries(rt11_image_t *img, uint16_t dir_start,
         }
 
         out->count = count;
-        next_seg = hdr.next_segment;
-        guard++;
-        if (guard > total_segments + 4) {
-            break;
-        }
     }
 
+    if (rc < 0) {
+        rt11_free_dirlist(out);
+        return -1;
+    }
     out->count = count;
     return 0;
 }
@@ -722,40 +832,28 @@ void rt11_free_dirlist(rt11_dirlist_t *list)
 int rt11_find_file(rt11_image_t *img, const rt11_name_t *name,
                    rt11_dirent_t *ent_out)
 {
+    rt11_walk_state_t walk;
     rt11_dirseg_hdr_t hdr;
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
-    uint16_t dir_start;
-    uint16_t next_seg = 1;
-    uint16_t total_segments = 0;
-    uint32_t guard = 0;
+    uint32_t seg_block;
+    uint16_t seg_num;
+    int rc;
 
     if (!img || !name || !ent_out) {
         return -1;
     }
 
-    if (rt11_read_home(img, &dir_start) != 0) {
+    if (rt11_walk_begin(img, &walk) != 0) {
         return -1;
     }
 
-    while (next_seg != 0) {
-        uint16_t seg_num = next_seg;
-        uint32_t seg_block;
+    while ((rc = rt11_walk_next(img, &walk, &seg_num, segbuf, &hdr,
+                                &seg_block)) > 0) {
         uint16_t entry_words;
         uint16_t max_entries;
 
-        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
-                              &seg_block) != 0) {
-            return -1;
-        }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
-        }
-
-        if (total_segments == 0) {
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
         }
 
         {
@@ -769,64 +867,19 @@ int rt11_find_file(rt11_image_t *img, const rt11_name_t *name,
                     break;
                 }
                 if (rt11_entry_is_file(status)) {
-                    uint16_t n0 = rt11_get_word(segbuf, base_word + 1u);
-                    uint16_t n1 = rt11_get_word(segbuf, base_word + 2u);
-                    uint16_t e0 = rt11_get_word(segbuf, base_word + 3u);
-                    if (n0 == name->name_words[0] &&
-                        n1 == name->name_words[1] && e0 == name->ext_word) {
-                        rt11_dirent_t ent;
-                        rt11_name_t nm;
-                        char name_buf[16];
-
-                        nm.name_words[0] = n0;
-                        nm.name_words[1] = n1;
-                        nm.ext_word = e0;
-                        rt11_name_to_host(&nm, name_buf, sizeof(name_buf), 0);
-
-                        memset(&ent, 0, sizeof(ent));
-                        ent.status = status;
-                        ent.length = length;
-                        ent.job = rt11_get_word(segbuf, base_word + 5u);
-                        ent.date = rt11_get_word(segbuf, base_word + 6u);
-                        ent.start_block = cur_block;
-                        ent.raw_offset =
-                            (uint32_t)seg_block * RT11_BLOCK_SIZE +
-                            (uint32_t)base_word * 2u;
-                        ent.segment = seg_num;
-                        ent.entry_index = i;
-
-                        {
-                            char *dot = strchr(name_buf, '.');
-                            if (dot) {
-                                size_t nlen = (size_t)(dot - name_buf);
-                                if (nlen >= sizeof(ent.name)) {
-                                    nlen = sizeof(ent.name) - 1;
-                                }
-                                memcpy(ent.name, name_buf, nlen);
-                                ent.name[nlen] = '\0';
-                                strncpy(ent.ext, dot + 1, sizeof(ent.ext) - 1);
-                                ent.ext[sizeof(ent.ext) - 1] = '\0';
-                            } else {
-                                strncpy(ent.name, name_buf,
-                                        sizeof(ent.name) - 1);
-                                ent.name[sizeof(ent.name) - 1] = '\0';
-                                ent.ext[0] = '\0';
-                            }
-                        }
-
-                        *ent_out = ent;
+                    if (rt11_entry_name_matches(segbuf, base_word, name)) {
+                        rt11_decode_dirent(segbuf, base_word, cur_block,
+                                           seg_block, seg_num, i, ent_out);
                         return 0;
                     }
                 }
                 cur_block += length;
             }
         }
+    }
 
-        next_seg = hdr.next_segment;
-        guard++;
-        if (guard > total_segments + 4) {
-            break;
-        }
+    if (rc < 0) {
+        return -1;
     }
 
     errno = ENOENT;
@@ -929,16 +982,14 @@ static int rt11_insert_entry(uint8_t *segbuf, uint16_t entry_words,
 int rt11_add_file(rt11_image_t *img, const char *host_path,
                   const rt11_name_t *name)
 {
+    rt11_walk_state_t walk;
     rt11_dirseg_hdr_t hdr;
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
-    uint16_t dir_start;
-    uint16_t next_seg = 1;
-    uint16_t total_segments = 0;
-    uint32_t guard = 0;
     uint64_t file_size;
     uint32_t needed_blocks;
     FILE *in = NULL;
     uint16_t date = 0;
+    int rc;
 
     if (!img || !host_path || !name) {
         return -1;
@@ -963,12 +1014,11 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
         }
     }
 
-    if (rt11_read_home(img, &dir_start) != 0) {
+    if (rt11_walk_begin(img, &walk) != 0) {
         return -1;
     }
 
-    while (next_seg != 0) {
-        uint16_t seg_num = next_seg;
+    while (1) {
         uint32_t seg_block;
         uint16_t entry_words;
         uint16_t max_entries;
@@ -980,19 +1030,12 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
         uint16_t candidate_len = 0;
         uint32_t candidate_start = 0;
 
-        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
-                              &seg_block) != 0) {
-            return -1;
+        rc = rt11_walk_next(img, &walk, NULL, segbuf, &hdr, &seg_block);
+        if (rc <= 0) {
+            break;
         }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
-        }
-
-        if (total_segments == 0) {
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
         }
 
         cur_block = hdr.data_start_block;
@@ -1095,12 +1138,10 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
 
             return 0;
         }
+    }
 
-        next_seg = hdr.next_segment;
-        guard++;
-        if (guard > total_segments + 4) {
-            break;
-        }
+    if (rc < 0) {
+        return -1;
     }
 
     errno = ENOSPC;
@@ -1109,41 +1150,28 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
 
 int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
 {
+    rt11_walk_state_t walk;
     rt11_dirseg_hdr_t hdr;
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
-    uint16_t dir_start;
-    uint16_t next_seg = 1;
-    uint16_t total_segments = 0;
-    uint32_t guard = 0;
+    uint32_t seg_block;
+    int rc;
 
     if (!img || !name) {
         return -1;
     }
 
-    if (rt11_read_home(img, &dir_start) != 0) {
+    if (rt11_walk_begin(img, &walk) != 0) {
         return -1;
     }
 
-    while (next_seg != 0) {
-        uint16_t seg_num = next_seg;
-        uint32_t seg_block;
+    while ((rc = rt11_walk_next(img, &walk, NULL, segbuf, &hdr,
+                                &seg_block)) > 0) {
         uint16_t entry_words;
         uint16_t max_entries;
         uint16_t i;
 
-        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
-                              &seg_block) != 0) {
-            return -1;
-        }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
-        }
-
-        if (total_segments == 0) {
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
         }
 
         for (i = 0; i < max_entries; i++) {
@@ -1152,32 +1180,25 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
             if (rt11_entry_is_eos(status)) {
                 break;
             }
-            if (rt11_entry_is_file(status)) {
-                uint16_t n0 = rt11_get_word(segbuf, base_word + 1u);
-                uint16_t n1 = rt11_get_word(segbuf, base_word + 2u);
-                uint16_t e0 = rt11_get_word(segbuf, base_word + 3u);
-                if (n0 == name->name_words[0] &&
-                    n1 == name->name_words[1] && e0 == name->ext_word) {
-                    uint16_t length = rt11_get_word(segbuf, base_word + 4u);
-                    if ((status & RT11_E_PROT) && !force) {
-                        errno = EACCES;
-                        return -1;
-                    }
-                    rt11_write_entry(segbuf, base_word, entry_words,
-                                     RT11_E_MPTY, NULL, length, 0, 0);
-                    if (rt11_write_segment(img, seg_block, segbuf) != 0) {
-                        return -1;
-                    }
-                    return 0;
+            if (rt11_entry_is_file(status) &&
+                rt11_entry_name_matches(segbuf, base_word, name)) {
+                uint16_t length = rt11_get_word(segbuf, base_word + 4u);
+                if ((status & RT11_E_PROT) && !force) {
+                    errno = EACCES;
+                    return -1;
                 }
+                rt11_write_entry(segbuf, base_word, entry_words, RT11_E_MPTY,
+                                 NULL, length, 0, 0);
+                if (rt11_write_segment(img, seg_block, segbuf) != 0) {
+                    return -1;
+                }
+                return 0;
             }
         }
+    }
 
-        next_seg = hdr.next_segment;
-        guard++;
-        if (guard > total_segments + 4) {
-            break;
-        }
+    if (rc < 0) {
+        return -1;
     }
 
     errno = ENOENT;
@@ -1186,41 +1207,28 @@ int rt11_remove_file(rt11_image_t *img, const rt11_name_t *name, int force)
 
 int rt11_set_protect(rt11_image_t *img, const rt11_name_t *name, int protect)
 {
+    rt11_walk_state_t walk;
     rt11_dirseg_hdr_t hdr;
     uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
-    uint16_t dir_start;
-    uint16_t next_seg = 1;
-    uint16_t total_segments = 0;
-    uint32_t guard = 0;
+    uint32_t seg_block;
+    int rc;
 
     if (!img || !name) {
         return -1;
     }
 
-    if (rt11_read_home(img, &dir_start) != 0) {
+    if (rt11_walk_begin(img, &walk) != 0) {
         return -1;
     }
 
-    while (next_seg != 0) {
-        uint16_t seg_num = next_seg;
-        uint32_t seg_block;
+    while ((rc = rt11_walk_next(img, &walk, NULL, segbuf, &hdr,
+                                &seg_block)) > 0) {
         uint16_t entry_words;
         uint16_t max_entries;
         uint16_t i;
 
-        if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
-                              &seg_block) != 0) {
-            return -1;
-        }
         if (rt11_entry_layout(&hdr, &entry_words, &max_entries) != 0) {
             return -1;
-        }
-
-        if (total_segments == 0) {
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
         }
 
         for (i = 0; i < max_entries; i++) {
@@ -1229,35 +1237,28 @@ int rt11_set_protect(rt11_image_t *img, const rt11_name_t *name, int protect)
             if (rt11_entry_is_eos(status)) {
                 break;
             }
-            if (rt11_entry_is_file(status)) {
-                uint16_t n0 = rt11_get_word(segbuf, base_word + 1u);
-                uint16_t n1 = rt11_get_word(segbuf, base_word + 2u);
-                uint16_t e0 = rt11_get_word(segbuf, base_word + 3u);
-                if (n0 == name->name_words[0] &&
-                    n1 == name->name_words[1] && e0 == name->ext_word) {
-                    if (protect && !(status & RT11_E_PERM)) {
-                        errno = EINVAL;
-                        return -1;
-                    }
-                    if (protect) {
-                        status |= RT11_E_PROT;
-                    } else {
-                        status &= (uint16_t)~RT11_E_PROT;
-                    }
-                    rt11_set_word(segbuf, base_word, status);
-                    if (rt11_write_segment(img, seg_block, segbuf) != 0) {
-                        return -1;
-                    }
-                    return 0;
+            if (rt11_entry_is_file(status) &&
+                rt11_entry_name_matches(segbuf, base_word, name)) {
+                if (protect && !(status & RT11_E_PERM)) {
+                    errno = EINVAL;
+                    return -1;
                 }
+                if (protect) {
+                    status |= RT11_E_PROT;
+                } else {
+                    status &= (uint16_t)~RT11_E_PROT;
+                }
+                rt11_set_word(segbuf, base_word, status);
+                if (rt11_write_segment(img, seg_block, segbuf) != 0) {
+                    return -1;
+                }
+                return 0;
             }
         }
+    }
 
-        next_seg = hdr.next_segment;
-        guard++;
-        if (guard > total_segments + 4) {
-            break;
-        }
+    if (rc < 0) {
+        return -1;
     }
 
     errno = ENOENT;
@@ -1266,48 +1267,34 @@ int rt11_set_protect(rt11_image_t *img, const rt11_name_t *name, int protect)
 
 int rt11_squeeze(rt11_image_t *img)
 {
-    uint16_t dir_start;
-    uint16_t next_seg = 1;
-    uint16_t total_segments = 0;
-    uint32_t guard = 0;
+    rt11_walk_state_t walk;
+    rt11_dirseg_hdr_t hdr;
+    uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
+    uint16_t seg_num;
+    int rc;
 
     if (!img || !img->fp) {
         errno = EINVAL;
         return -1;
     }
 
-    if (rt11_read_home(img, &dir_start) != 0) {
+    if (rt11_walk_begin(img, &walk) != 0) {
         return -1;
     }
 
-    while (next_seg != 0) {
-        uint16_t seg_num = next_seg;
-        uint16_t seg_next = 0;
-
-        if (rt11_squeeze_segment(img, dir_start, seg_num, &seg_next) != 0) {
+    while ((rc = rt11_walk_next(img, &walk, &seg_num, segbuf, &hdr,
+                                NULL)) > 0) {
+        if (rt11_squeeze_segment(img, walk.dir_start, seg_num, NULL) != 0) {
             return -1;
         }
+    }
 
-        if (total_segments == 0) {
-            uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
-            rt11_dirseg_hdr_t hdr;
-            uint32_t seg_block;
-            if (rt11_load_segment(img, dir_start, seg_num, segbuf, &hdr,
-                                  &seg_block) != 0) {
-                return -1;
-            }
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
-        }
-
-        next_seg = seg_next;
-        guard++;
-        if (guard > total_segments + 4) {
-            errno = EINVAL;
-            return -1;
-        }
+    if (rc < 0) {
+        return -1;
+    }
+    if (walk.looped) {
+        errno = EINVAL;
+        return -1;
     }
 
     return 0;
@@ -1427,13 +1414,13 @@ int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
     struct seginfo *segs = NULL;
     size_t count = 0;
     size_t cap = 0;
-    uint16_t dir_start;
-    uint16_t next_seg = 1;
-    uint16_t total_segments = 0;
-    uint32_t guard = 0;
+    rt11_walk_state_t walk;
+    rt11_dirseg_hdr_t hdr;
+    uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
     unsigned errors = 0;
     unsigned fixes = 0;
     size_t i;
+    int rc;
 
     if (!img || !img->fp) {
         errno = EINVAL;
@@ -1443,21 +1430,17 @@ int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
         out = stderr;
     }
 
-    if (rt11_read_home(img, &dir_start) != 0) {
+    if (rt11_walk_begin(img, &walk) != 0) {
         return -1;
     }
 
-    while (next_seg != 0) {
-        uint8_t segbuf[RT11_BLOCK_SIZE * RT11_DIR_SEGMENT_BLOCKS];
-        rt11_dirseg_hdr_t hdr;
-        uint32_t seg_block;
+    while (1) {
+        uint16_t seg_num;
 
-        if (rt11_load_segment(img, dir_start, next_seg, segbuf, &hdr,
-                              &seg_block) != 0) {
-            free(segs);
-            return -1;
+        rc = rt11_walk_next(img, &walk, &seg_num, segbuf, &hdr, NULL);
+        if (rc <= 0) {
+            break;
         }
-
         if (count == cap) {
             size_t new_cap = cap ? cap * 2u : 8u;
             struct seginfo *new_segs =
@@ -1470,25 +1453,19 @@ int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
             cap = new_cap;
         }
 
-        segs[count].seg_num = next_seg;
+        segs[count].seg_num = seg_num;
         segs[count].next_seg = hdr.next_segment;
         segs[count].data_start = hdr.data_start_block;
         count++;
+    }
 
-        if (total_segments == 0) {
-            total_segments = hdr.total_segments;
-            if (total_segments == 0) {
-                total_segments = 1;
-            }
-        }
-
-        next_seg = hdr.next_segment;
-        guard++;
-        if (guard > total_segments + 4) {
-            errors++;
-            fprintf(out, "fsck: directory segment chain loop\n");
-            break;
-        }
+    if (rc < 0) {
+        free(segs);
+        return -1;
+    }
+    if (walk.looped) {
+        errors++;
+        fprintf(out, "fsck: directory segment chain loop\n");
     }
 
     for (i = 0; i < count; i++) {
@@ -1515,7 +1492,8 @@ int rt11_fsck(rt11_image_t *img, int repair, FILE *out, unsigned *errors_out,
             expected_len = img->volume_blocks - segs[i].data_start;
         }
 
-        if (rt11_fsck_segment(img, dir_start, segs[i].seg_num, expected_len,
+        if (rt11_fsck_segment(img, walk.dir_start, segs[i].seg_num,
+                              expected_len,
                               repair, out, &errors, &fixes,
                               &segs[i].next_seg) != 0) {
             free(segs);
