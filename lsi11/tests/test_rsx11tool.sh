@@ -26,6 +26,35 @@ EOF
 ./rsx11tool rmdir "$tmpdir/work.rl02" '[001,123]' >"$tmpdir/rmdir.txt"
 ./rsx11tool ls "$tmpdir/work.rl02" MFD >"$tmpdir/mfd_after_rmdir.txt"
 
+cp disks/rsx11m46-CC.rl02 "$tmpdir/fsck.rl02"
+cat >"$tmpdir/fsck_input.txt" <<'EOF'
+RSX11 fsck validation
+EOF
+./rsx11tool mkdir "$tmpdir/fsck.rl02" '[001,123]' >"$tmpdir/fsck_mkdir.txt"
+./rsx11tool add "$tmpdir/fsck.rl02" "$tmpdir/fsck_input.txt" \
+    '[001,123]ZZFSCK.TXT' >"$tmpdir/fsck_add.txt"
+./rsx11tool ls "$tmpdir/fsck.rl02" '[001,123]' >"$tmpdir/fsck_ls.txt"
+fnum_oct="$(awk '/ZZFSCK\.TXT;1/ {split($4,a,","); print a[1]}' \
+    "$tmpdir/fsck_ls.txt")"
+iblb="$(./rsx11tool info "$tmpdir/fsck.rl02" | awk '/Index bitmap:/ {print $8}')"
+fnum_dec="$(awk -v s="$fnum_oct" \
+    'BEGIN{n=0; for(i=1;i<=length(s);i++) n=n*8+substr(s,i,1); print n}')"
+byte_index=$(( (fnum_dec - 1) / 8 ))
+bit_index=$(( (fnum_dec - 1) % 8 ))
+offset=$(( iblb * 512 + byte_index ))
+cur_byte="$(od -An -tu1 -N1 -j "$offset" "$tmpdir/fsck.rl02" | tr -d ' ')"
+new_byte=$(( cur_byte & ~(1 << bit_index) ))
+printf '%b' "\\$(printf '%03o' "$new_byte")" | \
+    dd of="$tmpdir/fsck.rl02" bs=1 seek="$offset" conv=notrunc >/dev/null 2>&1
+set +e
+./rsx11tool fsck "$tmpdir/fsck.rl02" >"$tmpdir/fsck_bad.txt" 2>&1
+status_bad=$?
+./rsx11tool fsck "$tmpdir/fsck.rl02" --repair >"$tmpdir/fsck_repair.txt" 2>&1
+status_repair=$?
+./rsx11tool fsck "$tmpdir/fsck.rl02" >"$tmpdir/fsck_after.txt" 2>&1
+status_after=$?
+set -e
+
 grep -q "Files-11 ODS-1" "$tmpdir/info.txt"
 grep -q "Volume label:   RSXM26" "$tmpdir/info.txt"
 grep -q "Structure:      000401" "$tmpdir/info.txt"
@@ -48,5 +77,13 @@ cmp -s "$tmpdir/input.txt" "$tmpdir/out_add/001_123/ZZCODX.TXT;1"
 grep -q "removed \\[001,123\\]ZZCODX\\.TXT;1" "$tmpdir/rm.txt"
 grep -q "removed \\[001,123\\]" "$tmpdir/rmdir.txt"
 ! grep -q "001123\\.DIR;1" "$tmpdir/mfd_after_rmdir.txt"
+test "$status_bad" -eq 2
+test "$status_repair" -eq 2
+test "$status_after" -eq 2
+grep -q "\\[001,123\\]ZZFSCK\\.TXT;1: index bitmap bit is clear" \
+    "$tmpdir/fsck_bad.txt"
+grep -q "repaired" "$tmpdir/fsck_repair.txt"
+! grep -q "\\[001,123\\]ZZFSCK\\.TXT;1: index bitmap bit is clear" \
+    "$tmpdir/fsck_after.txt"
 
 echo "rsx11tool validation passed"

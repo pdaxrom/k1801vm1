@@ -140,6 +140,8 @@ Validation:
 - Remove a file: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST.TXT;1'`
 - Create a UFD: `./rsx11tool mkdir disks/rsx11m46-CC.rl02 '[001,123]'`
 - Remove an empty UFD: `./rsx11tool rmdir disks/rsx11m46-CC.rl02 '[001,123]'`
+- Check directory/header/bitmap consistency: `./rsx11tool fsck disks/rsx11m46-CC.rl02`
+- Repair missing index/storage allocation bits: `./rsx11tool fsck disks/rsx11m46-CC.rl02 --repair`
 
 Supported commands:
 - `info`
@@ -149,6 +151,7 @@ Supported commands:
 - `rm`
 - `mkdir`
 - `rmdir`
+- `fsck`
 
 Limitations:
 - Files-11 ODS-1 only.
@@ -157,7 +160,11 @@ Limitations:
 - Contiguous allocation only for new files.
 - `mkdir`/`rmdir` support UFD only; MFD is not creatable/removable.
 - `rmdir` only removes empty directories.
-- No wildcard matching or repair/fsck yet.
+- `fsck` checks reachable directory entries, file headers, index bitmap bits, and
+  storage bitmap allocation bits.
+- `fsck --repair` only repairs missing bitmap allocation bits for reachable files;
+  it does not rebuild missing headers, repair directory contents, or fix bad extents.
+- No wildcard matching yet.
 - Directory listing depends on readable MFD/UFD headers and does not attempt repair.
 
 Validation:

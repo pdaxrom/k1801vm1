@@ -709,9 +709,21 @@ static void format_host_file_name(const rsx11_dirent_t *ent,
     }
 }
 
-static int read_dir_file(rsx11_image_t *img, const rsx11_file_header_t *hdr,
-                         rsx11_header_cache_t *cache, const char *dir_name,
-                         rsx11_dirlist_t *out)
+static void format_entry_selector(const rsx11_dirent_t *ent,
+                                  char *out, size_t out_size)
+{
+    if (strcmp(ent->dir, "MFD") == 0) {
+        format_host_file_name(ent, out, out_size);
+    } else {
+        char spec[32];
+
+        format_host_file_name(ent, spec, sizeof(spec));
+        snprintf(out, out_size, "%s%s", ent->dir, spec);
+    }
+}
+
+static int read_dir_records_raw(rsx11_image_t *img, const rsx11_file_header_t *hdr,
+                                const char *dir_name, rsx11_dirlist_t *out)
 {
     uint8_t block[RSX11_BLOCK_SIZE];
     uint64_t remaining_bytes = hdr->size_bytes;
@@ -748,7 +760,6 @@ static int read_dir_file(rsx11_image_t *img, const rsx11_file_header_t *hdr,
             for (rec_off = 0; rec_off + 16u <= block_bytes; rec_off += 16u) {
                 rsx11_dir_record_t rec;
                 rsx11_dirent_t ent;
-                rsx11_file_header_t file_hdr;
 
                 if (!decode_dir_record(block + rec_off, &rec)) {
                     continue;
@@ -763,11 +774,6 @@ static int read_dir_file(rsx11_image_t *img, const rsx11_file_header_t *hdr,
                 ent.raw_offset =
                     (uint64_t)(lbn + b) * RSX11_BLOCK_SIZE + rec_off;
 
-                if (lookup_header(img, cache, &rec.fid, &file_hdr) != 0) {
-                    continue;
-                }
-                ent.blocks = header_total_blocks(&file_hdr);
-
                 if (append_dirent(out, &ent) != 0) {
                     return -1;
                 }
@@ -776,6 +782,37 @@ static int read_dir_file(rsx11_image_t *img, const rsx11_file_header_t *hdr,
         }
     }
 
+    return 0;
+}
+
+static int read_dir_file(rsx11_image_t *img, const rsx11_file_header_t *hdr,
+                         rsx11_header_cache_t *cache, const char *dir_name,
+                         rsx11_dirlist_t *out)
+{
+    rsx11_dirlist_t raw;
+    size_t i;
+
+    memset(&raw, 0, sizeof(raw));
+    if (read_dir_records_raw(img, hdr, dir_name, &raw) != 0) {
+        return -1;
+    }
+
+    for (i = 0; i < raw.count; i++) {
+        rsx11_file_header_t file_hdr;
+        rsx11_dirent_t ent;
+
+        if (lookup_header(img, cache, &raw.entries[i].fid, &file_hdr) != 0) {
+            continue;
+        }
+        ent = raw.entries[i];
+        ent.blocks = header_total_blocks(&file_hdr);
+        if (append_dirent(out, &ent) != 0) {
+            rsx11_free_dirlist(&raw);
+            return -1;
+        }
+    }
+
+    rsx11_free_dirlist(&raw);
     return 0;
 }
 
@@ -2286,6 +2323,266 @@ out:
     free(storage_bitmap);
     free(dir_data);
     rsx11_free_dirlist(&dir_entries);
+    free_header_cache(&cache);
+    return rc;
+}
+
+static void fsck_issue(FILE *out, rsx11_fsck_report_t *report,
+                       const rsx11_dirent_t *ent, const char *msg)
+{
+    char selector[64];
+
+    report->issues++;
+    if (ent != NULL) {
+        format_entry_selector(ent, selector, sizeof(selector));
+        fprintf(out, "issue: %s: %s\n", selector, msg);
+    } else {
+        fprintf(out, "issue: %s\n", msg);
+    }
+}
+
+static void fsck_fatal(FILE *out, rsx11_fsck_report_t *report,
+                       const rsx11_dirent_t *ent, const char *msg)
+{
+    report->fatal++;
+    fsck_issue(out, report, ent, msg);
+}
+
+static int collect_reachable_entries(rsx11_image_t *img,
+                                     rsx11_header_cache_t *cache,
+                                     rsx11_dirlist_t *out)
+{
+    rsx11_fid_t mfd_fid;
+    rsx11_file_header_t mfd_hdr;
+    rsx11_dirlist_t mfd_raw;
+    size_t i;
+
+    memset(out, 0, sizeof(*out));
+    memset(&mfd_raw, 0, sizeof(mfd_raw));
+    memset(&mfd_fid, 0, sizeof(mfd_fid));
+    mfd_fid.num = 4u;
+    mfd_fid.seq = 4u;
+    if (lookup_header(img, cache, &mfd_fid, &mfd_hdr) != 0) {
+        return -1;
+    }
+    if (read_dir_records_raw(img, &mfd_hdr, "MFD", &mfd_raw) != 0) {
+        return -1;
+    }
+    for (i = 0; i < mfd_raw.count; i++) {
+        if (append_dirent(out, &mfd_raw.entries[i]) != 0) {
+            rsx11_free_dirlist(&mfd_raw);
+            return -1;
+        }
+    }
+    for (i = 0; i < mfd_raw.count; i++) {
+        rsx11_file_header_t dir_hdr;
+        rsx11_dirlist_t ufd_raw;
+        char uic[16];
+        size_t j;
+
+        if (strcmp(mfd_raw.entries[i].ext, "DIR") != 0 ||
+            strcmp(mfd_raw.entries[i].name, "000000") == 0 ||
+            !format_uic(mfd_raw.entries[i].name, uic, sizeof(uic))) {
+            continue;
+        }
+        if (lookup_header(img, cache, &mfd_raw.entries[i].fid, &dir_hdr) != 0) {
+            continue;
+        }
+        memset(&ufd_raw, 0, sizeof(ufd_raw));
+        if (read_dir_records_raw(img, &dir_hdr, uic, &ufd_raw) != 0) {
+            continue;
+        }
+        for (j = 0; j < ufd_raw.count; j++) {
+            if (append_dirent(out, &ufd_raw.entries[j]) != 0) {
+                rsx11_free_dirlist(&ufd_raw);
+                rsx11_free_dirlist(&mfd_raw);
+                return -1;
+            }
+        }
+        rsx11_free_dirlist(&ufd_raw);
+    }
+
+    rsx11_free_dirlist(&mfd_raw);
+    return 0;
+}
+
+int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
+               rsx11_fsck_report_t *report)
+{
+    rsx11_fsck_report_t local_report;
+    rsx11_home_t home;
+    rsx11_header_cache_t cache;
+    rsx11_dirlist_t entries;
+    rsx11_file_header_t bitmap_hdr;
+    uint8_t *index_bitmap = NULL;
+    uint8_t *storage_bitmap = NULL;
+    uint16_t *seen_seq = NULL;
+    size_t index_size = 0;
+    size_t storage_size = 0;
+    uint32_t unit_blocks = 0;
+    int index_dirty = 0;
+    int storage_dirty = 0;
+    int rc = -1;
+    size_t i;
+
+    if (out == NULL) {
+        out = stdout;
+    }
+    if (report == NULL) {
+        report = &local_report;
+    }
+    memset(report, 0, sizeof(*report));
+    memset(&cache, 0, sizeof(cache));
+    memset(&entries, 0, sizeof(entries));
+
+    if (rsx11_read_home(img, &home) != 0) {
+        return -1;
+    }
+    if (home.vlev != 0401u) {
+        fsck_fatal(out, report, NULL, "volume structure is not ODS-1 (0401)");
+        errno = EINVAL;
+        return -1;
+    }
+    if (load_allocation_state(img, &cache, &home,
+                              &index_bitmap, &index_size,
+                              &storage_bitmap, &storage_size,
+                              &bitmap_hdr, &unit_blocks) != 0) {
+        goto out;
+    }
+    if (collect_reachable_entries(img, &cache, &entries) != 0) {
+        goto out;
+    }
+
+    seen_seq = calloc((size_t)home.fmax + 1u, sizeof(*seen_seq));
+    if (seen_seq == NULL) {
+        goto out;
+    }
+
+    for (i = 0; i < entries.count; i++) {
+        rsx11_file_header_t hdr;
+        uint32_t fnum;
+        uint32_t lbn;
+        uint32_t count;
+        size_t j;
+        size_t missing_blocks = 0u;
+
+        report->checked++;
+        fnum = entries.entries[i].fid.num;
+        if (fnum == 0u || fnum > home.fmax) {
+            fsck_fatal(out, report, &entries.entries[i],
+                       "directory record references invalid FID");
+            continue;
+        }
+        if (seen_seq[fnum] == entries.entries[i].fid.seq) {
+            continue;
+        }
+        if (lookup_header(img, &cache, &entries.entries[i].fid, &hdr) != 0) {
+            fsck_fatal(out, report, &entries.entries[i],
+                       "directory record points to missing header");
+            continue;
+        }
+        seen_seq[fnum] = entries.entries[i].fid.seq;
+
+        if (!index_bitmap_test(index_bitmap, index_size, (uint16_t)fnum)) {
+            fsck_issue(out, report, &entries.entries[i],
+                       "index bitmap bit is clear");
+            if (repair) {
+                index_bitmap_set(index_bitmap, index_size, (uint16_t)fnum, 1);
+                index_dirty = 1;
+                report->repaired++;
+            }
+        }
+
+        for (j = 0; j < hdr.extent_count; j++) {
+            uint32_t b;
+
+            lbn = hdr.extents[j].lbn;
+            count = hdr.extents[j].blocks;
+            if (count == 0u || lbn + count > unit_blocks ||
+                (uint64_t)(lbn + count) * RSX11_BLOCK_SIZE > img->size_bytes) {
+                fsck_fatal(out, report, &entries.entries[i],
+                           "header contains extent outside image bounds");
+                count = 0u;
+                break;
+            }
+            for (b = 0; b < count; b++) {
+                if (storage_bitmap_is_free(storage_bitmap, storage_size,
+                                           lbn + b)) {
+                    missing_blocks++;
+                }
+            }
+        }
+
+        if (missing_blocks != 0u) {
+            char msg[96];
+
+            snprintf(msg, sizeof(msg),
+                     "storage bitmap marks %lu referenced block(s) free",
+                     (unsigned long)missing_blocks);
+            fsck_issue(out, report, &entries.entries[i], msg);
+            if (repair) {
+                for (j = 0; j < hdr.extent_count; j++) {
+                    uint32_t b;
+
+                    lbn = hdr.extents[j].lbn;
+                    count = hdr.extents[j].blocks;
+                    if (count == 0u || lbn + count > unit_blocks ||
+                        (uint64_t)(lbn + count) * RSX11_BLOCK_SIZE >
+                            img->size_bytes) {
+                        break;
+                    }
+                    for (b = 0; b < count; b++) {
+                        storage_bitmap_set_free(storage_bitmap, storage_size,
+                                                lbn + b, 0);
+                    }
+                }
+                storage_dirty = 1;
+                report->repaired++;
+            }
+        }
+    }
+
+    if (repair) {
+        if (index_dirty &&
+            write_at(img->fp, (uint64_t)home.iblb * RSX11_BLOCK_SIZE,
+                     index_bitmap, index_size) != 0) {
+            goto out;
+        }
+        if (storage_dirty &&
+            write_header_data(img, &bitmap_hdr,
+                              storage_bitmap, storage_size) != 0) {
+            goto out;
+        }
+        if ((index_dirty || storage_dirty) && fflush(img->fp) != 0) {
+            goto out;
+        }
+    }
+
+    fprintf(out,
+            "summary: checked %lu record(s), %lu issue(s), %lu repaired, %lu fatal\n",
+            (unsigned long)report->checked,
+            (unsigned long)report->issues,
+            (unsigned long)report->repaired,
+            (unsigned long)report->fatal);
+    if (repair && report->fatal != 0u && report->repaired != 0u) {
+        fprintf(out, "repair: soft bitmap issues fixed, fatal issues remain\n");
+    } else if (repair && report->fatal != 0u) {
+        fprintf(out, "repair: nothing fixed, fatal issues remain\n");
+    }
+    if (report->issues == 0u) {
+        fprintf(out, "fsck: clean\n");
+    } else if (repair && report->fatal == 0u &&
+               report->issues == report->repaired) {
+        fprintf(out, "fsck: repaired\n");
+    }
+
+    rc = 0;
+
+out:
+    free(seen_seq);
+    free(storage_bitmap);
+    free(index_bitmap);
+    rsx11_free_dirlist(&entries);
     free_header_cache(&cache);
     return rc;
 }

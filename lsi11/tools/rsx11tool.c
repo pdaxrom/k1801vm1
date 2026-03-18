@@ -17,7 +17,8 @@ static void usage(FILE *out)
             "  add <image> <hostfile> [[grp,user]]NAME.EXT[;ver]\n"
             "  rm <image> [[grp,user]]NAME.EXT[;ver]\n"
             "  mkdir <image> [grp,user]\n"
-            "  rmdir <image> [grp,user]\n");
+            "  rmdir <image> [grp,user]\n"
+            "  fsck <image> [--repair]\n");
 }
 
 static void format_filespec(const rsx11_dirent_t *ent, char *out, size_t out_size)
@@ -545,6 +546,37 @@ static int cmd_rmdir(const char *image_path, const char *dir_filter)
     return 0;
 }
 
+static int cmd_fsck(const char *image_path, int repair)
+{
+    rsx11_image_t img;
+    rsx11_fsck_report_t report;
+    int rc;
+
+    if (repair) {
+        if (rsx11_open_image_rw(&img, image_path) != 0) {
+            perror(image_path);
+            return 1;
+        }
+    } else {
+        if (rsx11_open_image(&img, image_path) != 0) {
+            perror(image_path);
+            return 1;
+        }
+    }
+
+    rc = rsx11_fsck(&img, repair, stdout, &report);
+    rsx11_close_image(&img);
+    if (rc != 0) {
+        perror("fsck");
+        return 1;
+    }
+    if (report.issues != 0u &&
+        (!repair || report.fatal != 0u || report.issues != report.repaired)) {
+        return 2;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     char dir_filter[16];
@@ -652,6 +684,17 @@ int main(int argc, char **argv)
             return cmd_mkdir(argv[2], dir_filter);
         }
         return cmd_rmdir(argv[2], dir_filter);
+    }
+    if (strcmp(argv[1], "fsck") == 0) {
+        if (argc != 3 && argc != 4) {
+            usage(stderr);
+            return 1;
+        }
+        if (argc == 4 && strcmp(argv[3], "--repair") != 0) {
+            usage(stderr);
+            return 1;
+        }
+        return cmd_fsck(argv[2], argc == 4);
     }
 
     usage(stderr);

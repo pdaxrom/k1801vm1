@@ -53,6 +53,13 @@ typedef struct {
     size_t count;
 } rsx11_dirlist_t;
 
+typedef struct {
+    size_t checked;
+    size_t issues;
+    size_t repaired;
+    size_t fatal;
+} rsx11_fsck_report_t;
+
 int rsx11_open_image(rsx11_image_t *img, const char *path);
 int rsx11_open_image_rw(rsx11_image_t *img, const char *path);
 void rsx11_close_image(rsx11_image_t *img);
@@ -71,6 +78,8 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
                    const char *dir, const char *name, const char *ext,
                    int have_version, uint16_t version,
                    rsx11_dirent_t *out);
+int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
+               rsx11_fsck_report_t *report);
 void rsx11_free_dirlist(rsx11_dirlist_t *list);
 
 #endif
