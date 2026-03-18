@@ -66,6 +66,9 @@ typedef struct {
     size_t cap;
 } rsx11_header_cache_t;
 
+static int read_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
+                            uint16_t fnum, rsx11_file_header_t *out);
+
 static uint16_t get_le16(const uint8_t *p)
 {
     return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
@@ -464,6 +467,17 @@ static const rsx11_file_header_t *find_cached_header(
     return NULL;
 }
 
+static int load_home_cached(rsx11_image_t *img, rsx11_header_cache_t *cache)
+{
+    if (!cache->have_home) {
+        if (rsx11_read_home(img, &cache->home) != 0) {
+            return -1;
+        }
+        cache->have_home = 1;
+    }
+    return 0;
+}
+
 static int load_index_bitmap(rsx11_image_t *img, const rsx11_home_t *home,
                              uint8_t **bitmap_out, size_t *size_out)
 {
@@ -526,47 +540,33 @@ static void index_bitmap_set(uint8_t *bitmap, size_t size,
     }
 }
 
-static int scan_header_area(rsx11_image_t *img, rsx11_header_cache_t *cache)
-{
-    uint8_t block[RSX11_BLOCK_SIZE];
-    uint32_t lbn;
-
-    if (cache->count != 0u) {
-        return 0;
-    }
-    for (lbn = 0; lbn < img->total_blocks; lbn++) {
-        rsx11_file_header_t hdr;
-
-        if (read_at(img->fp, (uint64_t)lbn * RSX11_BLOCK_SIZE,
-                    block, sizeof(block)) != 0) {
-            return -1;
-        }
-        if (!parse_header_candidate(block, sizeof(block),
-                                    (uint64_t)lbn * RSX11_BLOCK_SIZE, &hdr)) {
-            continue;
-        }
-        if (append_cached_header(cache, &hdr) != 0) {
-            return -1;
-        }
-    }
-
-    return 0;
-}
-
 static int lookup_header(rsx11_image_t *img, rsx11_header_cache_t *cache,
                          const rsx11_fid_t *fid, rsx11_file_header_t *out)
 {
     const rsx11_file_header_t *cached;
+    rsx11_file_header_t hdr;
 
-    if (scan_header_area(img, cache) != 0) {
+    cached = find_cached_header(cache, fid);
+    if (cached != NULL) {
+        *out = *cached;
+        return 0;
+    }
+
+    if (load_home_cached(img, cache) != 0) {
         return -1;
     }
-    cached = find_cached_header(cache, fid);
-    if (cached == NULL) {
+    if (read_header_slot(img, &cache->home, fid->num, &hdr) != 0) {
+        return -1;
+    }
+    if (!same_fid(&hdr.fid, fid)) {
         errno = ENOENT;
         return -1;
     }
-    *out = *cached;
+    if (append_cached_header(cache, &hdr) != 0) {
+        return -1;
+    }
+
+    *out = hdr;
     return 0;
 }
 
