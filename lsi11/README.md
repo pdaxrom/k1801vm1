@@ -121,11 +121,42 @@ Limitations:
 - Partitioned layout uses 65535-block partitions (177777 octal) with one unused
   block between partitions; use `--partition N` to select a partition.
 - Extra directory entry words are preserved but not interpreted.
+- RT-11 directory entries store file length in blocks; host-side exact EOF for files
+  not divisible by 512 bytes is not preserved, so `extract` returns block-padded data.
 - `rm` refuses protected files (PROT flag set) unless `--force` is used.
 - `squeeze` refuses volumes with tentative files (TENT entries).
 
 Validation:
 - `./tests/test_rt11tool.sh`
+
+### RSX-11M Files-11 utility (`rsx11tool`)
+- Build: `make rsx11tool`
+- Show volume info: `./rsx11tool info disks/rsxm26.dsk`
+- List MFD and UFD contents: `./rsx11tool ls disks/rsx11m46-CC.rl02`
+- List a single directory: `./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,054]'`
+- Extract all regular files with UFD subdirectories: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out`
+- Extract one file: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out '[001,002]STARTUP.CMD;11'`
+- Add a file to a UFD: `./rsx11tool add disks/rsx11m46-CC.rl02 host.txt '[001,002]HOST.TXT'`
+- Remove a file: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST.TXT;1'`
+
+Supported commands:
+- `info`
+- `ls`
+- `extract`
+- `add`
+- `rm`
+
+Limitations:
+- Files-11 ODS-1 only.
+- No `mkfs` yet.
+- No ODS-2 support.
+- No directory create/remove yet.
+- Contiguous allocation only for new files.
+- No wildcard matching or repair/fsck yet.
+- Directory listing depends on readable MFD/UFD headers and does not attempt repair.
+
+Validation:
+- `./tests/test_rsx11tool.sh`
 
 ## 2) `pdp1184` target (PDP-11/84-like, MMU enabled)
 
