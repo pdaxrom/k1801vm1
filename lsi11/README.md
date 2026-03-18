@@ -138,6 +138,8 @@ Validation:
 - Extract one file: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out '[001,002]STARTUP.CMD;11'`
 - Add a file to a UFD: `./rsx11tool add disks/rsx11m46-CC.rl02 host.txt '[001,002]HOST.TXT'`
 - Remove a file: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST.TXT;1'`
+- Create a UFD: `./rsx11tool mkdir disks/rsx11m46-CC.rl02 '[001,123]'`
+- Remove an empty UFD: `./rsx11tool rmdir disks/rsx11m46-CC.rl02 '[001,123]'`
 
 Supported commands:
 - `info`
@@ -145,13 +147,16 @@ Supported commands:
 - `extract`
 - `add`
 - `rm`
+- `mkdir`
+- `rmdir`
 
 Limitations:
 - Files-11 ODS-1 only.
 - No `mkfs` yet.
 - No ODS-2 support.
-- No directory create/remove yet.
 - Contiguous allocation only for new files.
+- `mkdir`/`rmdir` support UFD only; MFD is not creatable/removable.
+- `rmdir` only removes empty directories.
 - No wildcard matching or repair/fsck yet.
 - Directory listing depends on readable MFD/UFD headers and does not attempt repair.
 

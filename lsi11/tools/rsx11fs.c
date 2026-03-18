@@ -1276,6 +1276,124 @@ static int find_directory_header(rsx11_image_t *img, rsx11_header_cache_t *cache
     return 0;
 }
 
+static void format_dir_name_from_uic(uint16_t uic, char out[7])
+{
+    snprintf(out, 7u, "%03o%03o",
+             (unsigned)((uic >> 8) & 0377u),
+             (unsigned)(uic & 0377u));
+}
+
+static int read_directory_storage(rsx11_image_t *img,
+                                  const rsx11_file_header_t *hdr,
+                                  uint8_t **data_out,
+                                  size_t *alloc_bytes_out,
+                                  uint64_t *logical_bytes_out)
+{
+    size_t alloc_bytes;
+    uint64_t logical_bytes;
+    uint8_t *data;
+
+    alloc_bytes = (size_t)header_total_blocks(hdr) * RSX11_BLOCK_SIZE;
+    logical_bytes = hdr->size_bytes != 0u
+                        ? hdr->size_bytes
+                        : (uint64_t)alloc_bytes;
+    if (logical_bytes > alloc_bytes || (logical_bytes % 16u) != 0u) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    data = malloc(alloc_bytes);
+    if (data == NULL) {
+        return -1;
+    }
+    if (read_header_data(img, hdr, data, alloc_bytes) != 0) {
+        free(data);
+        return -1;
+    }
+
+    *data_out = data;
+    if (alloc_bytes_out != NULL) {
+        *alloc_bytes_out = alloc_bytes;
+    }
+    if (logical_bytes_out != NULL) {
+        *logical_bytes_out = logical_bytes;
+    }
+    return 0;
+}
+
+static int find_directory_slot(const uint8_t *dir_data, size_t alloc_bytes,
+                               uint64_t logical_bytes, size_t *slot_out,
+                               int *append_out)
+{
+    size_t slot;
+
+    for (slot = 0; slot < (size_t)logical_bytes; slot += 16u) {
+        if (get_le16(dir_data + slot) == 0u) {
+            *slot_out = slot;
+            *append_out = 0;
+            return 0;
+        }
+    }
+    if (logical_bytes + 16u > alloc_bytes) {
+        errno = ENOSPC;
+        return -1;
+    }
+
+    *slot_out = (size_t)logical_bytes;
+    *append_out = 1;
+    return 0;
+}
+
+static int load_allocation_state(rsx11_image_t *img, rsx11_header_cache_t *cache,
+                                 const rsx11_home_t *home,
+                                 uint8_t **index_bitmap_out,
+                                 size_t *index_size_out,
+                                 uint8_t **storage_bitmap_out,
+                                 size_t *storage_size_out,
+                                 rsx11_file_header_t *bitmap_hdr_out,
+                                 uint32_t *unit_blocks_out)
+{
+    if (load_index_bitmap(img, home, index_bitmap_out, index_size_out) != 0) {
+        return -1;
+    }
+    if (load_storage_bitmap(img, cache,
+                            storage_bitmap_out, storage_size_out,
+                            bitmap_hdr_out, unit_blocks_out) != 0) {
+        free(*index_bitmap_out);
+        *index_bitmap_out = NULL;
+        return -1;
+    }
+    return 0;
+}
+
+static int is_directory_empty(const uint8_t *dir_data, uint64_t logical_bytes)
+{
+    size_t off;
+
+    for (off = 0; off < (size_t)logical_bytes; off += 16u) {
+        if (get_le16(dir_data + off) != 0u) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int build_directory_header(uint8_t block[RSX11_BLOCK_SIZE],
+                                  uint16_t fnum, uint16_t seq,
+                                  uint16_t uic, const char *dir_name,
+                                  uint32_t start_lbn)
+{
+    if (build_file_header(block, fnum, seq, uic, 0160000u,
+                          dir_name, "DIR", 1u,
+                          start_lbn, 1u, RSX11_BLOCK_SIZE) != 0) {
+        return -1;
+    }
+    put_hiword32(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_EFBK, 2u);
+    put_le16(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_FFBY, 0u);
+    put_le16(block + 510u, header_checksum(block));
+    return 0;
+}
+
 static int open_image_mode(rsx11_image_t *img, const char *path,
                            const char *mode)
 {
@@ -1605,6 +1723,297 @@ out:
     rsx11_free_dirlist(&list);
     free(index_bitmap);
     free(storage_bitmap);
+    free_header_cache(&cache);
+    return rc;
+}
+
+int rsx11_make_directory(rsx11_image_t *img, const char *dir)
+{
+    rsx11_home_t home;
+    rsx11_header_cache_t cache;
+    rsx11_file_header_t mfd_hdr;
+    rsx11_file_header_t bitmap_hdr;
+    rsx11_dirlist_t mfd_entries;
+    uint8_t *mfd_data = NULL;
+    uint8_t *index_bitmap = NULL;
+    uint8_t *storage_bitmap = NULL;
+    uint8_t new_dir_hdr_block[RSX11_BLOCK_SIZE];
+    uint8_t mfd_hdr_block[RSX11_BLOCK_SIZE];
+    uint8_t dir_rec[16];
+    uint8_t zero_block[RSX11_BLOCK_SIZE];
+    size_t mfd_alloc_bytes = 0;
+    uint64_t mfd_logical_bytes = 0;
+    size_t mfd_slot = 0;
+    int append_slot = 0;
+    size_t index_size = 0;
+    size_t storage_size = 0;
+    uint32_t unit_blocks = 0;
+    uint32_t start_lbn = 0;
+    uint16_t uic;
+    uint16_t fnum = 0;
+    uint16_t seq = 0;
+    char dir_name[7];
+    size_t i;
+    int rc = -1;
+
+    if (dir == NULL || strcmp(dir, "MFD") == 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    memset(&cache, 0, sizeof(cache));
+    memset(&mfd_entries, 0, sizeof(mfd_entries));
+    if (parse_uic_word(dir, &uic) != 0) {
+        return -1;
+    }
+    if (uic == 0u) {
+        errno = EINVAL;
+        return -1;
+    }
+    format_dir_name_from_uic(uic, dir_name);
+
+    if (rsx11_read_home(img, &home) != 0) {
+        goto out;
+    }
+    if (find_directory_header(img, &cache, "MFD", &mfd_hdr, &mfd_entries) != 0) {
+        goto out;
+    }
+    for (i = 0; i < mfd_entries.count; i++) {
+        if (strcmp(mfd_entries.entries[i].ext, "DIR") == 0 &&
+            strcmp(mfd_entries.entries[i].name, dir_name) == 0) {
+            errno = EEXIST;
+            goto out;
+        }
+    }
+
+    if (read_directory_storage(img, &mfd_hdr, &mfd_data,
+                               &mfd_alloc_bytes, &mfd_logical_bytes) != 0) {
+        goto out;
+    }
+    if (find_directory_slot(mfd_data, mfd_alloc_bytes, mfd_logical_bytes,
+                            &mfd_slot, &append_slot) != 0) {
+        goto out;
+    }
+
+    if (load_allocation_state(img, &cache, &home,
+                              &index_bitmap, &index_size,
+                              &storage_bitmap, &storage_size,
+                              &bitmap_hdr, &unit_blocks) != 0) {
+        goto out;
+    }
+    if (find_free_file_number(&home, index_bitmap, index_size, &fnum) != 0) {
+        goto out;
+    }
+    if (read_slot_sequence(img, &home, fnum, &seq) != 0) {
+        goto out;
+    }
+    seq = seq == 0xffffu ? 1u : (uint16_t)(seq + 1u);
+    if (seq == 0u) {
+        seq = 1u;
+    }
+    if (find_free_blocks(storage_bitmap, storage_size, unit_blocks,
+                         1u, &start_lbn) != 0) {
+        goto out;
+    }
+    if ((uint64_t)(start_lbn + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
+        errno = ENOSPC;
+        goto out;
+    }
+
+    if (build_directory_header(new_dir_hdr_block, fnum, seq, uic,
+                               dir_name, start_lbn) != 0) {
+        goto out;
+    }
+    if (build_dir_record(dir_rec, &(rsx11_fid_t){ fnum, seq, 0u },
+                         dir_name, "DIR", 1u) != 0) {
+        goto out;
+    }
+    memcpy(mfd_data + mfd_slot, dir_rec, sizeof(dir_rec));
+
+    if (append_slot) {
+        if (read_at(img->fp, mfd_hdr.raw_offset,
+                    mfd_hdr_block, sizeof(mfd_hdr_block)) != 0) {
+            goto out;
+        }
+        mfd_logical_bytes += 16u;
+        update_header_size_fields(mfd_hdr_block,
+                                  header_total_blocks(&mfd_hdr),
+                                  mfd_logical_bytes);
+    }
+
+    memset(zero_block, 0, sizeof(zero_block));
+    if (write_at(img->fp, (uint64_t)start_lbn * RSX11_BLOCK_SIZE,
+                 zero_block, sizeof(zero_block)) != 0) {
+        goto out;
+    }
+
+    storage_bitmap_set_free(storage_bitmap, storage_size, start_lbn, 0);
+    index_bitmap_set(index_bitmap, index_size, fnum, 1);
+
+    if (write_header_slot(img, &home, fnum, new_dir_hdr_block) != 0) {
+        goto out;
+    }
+    if (write_header_data(img, &bitmap_hdr,
+                          storage_bitmap, storage_size) != 0) {
+        goto out;
+    }
+    if (write_at(img->fp, (uint64_t)home.iblb * RSX11_BLOCK_SIZE,
+                 index_bitmap, index_size) != 0) {
+        goto out;
+    }
+    if (write_header_data(img, &mfd_hdr, mfd_data, mfd_alloc_bytes) != 0) {
+        goto out;
+    }
+    if (append_slot &&
+        write_at(img->fp, mfd_hdr.raw_offset,
+                 mfd_hdr_block, sizeof(mfd_hdr_block)) != 0) {
+        goto out;
+    }
+    if (fflush(img->fp) != 0) {
+        goto out;
+    }
+
+    rc = 0;
+
+out:
+    free(storage_bitmap);
+    free(index_bitmap);
+    free(mfd_data);
+    rsx11_free_dirlist(&mfd_entries);
+    free_header_cache(&cache);
+    return rc;
+}
+
+int rsx11_remove_directory(rsx11_image_t *img, const char *dir)
+{
+    rsx11_home_t home;
+    rsx11_header_cache_t cache;
+    rsx11_file_header_t mfd_hdr;
+    rsx11_file_header_t dir_hdr;
+    rsx11_file_header_t bitmap_hdr;
+    rsx11_dirlist_t mfd_entries;
+    rsx11_dirlist_t all_entries;
+    uint8_t *dir_data = NULL;
+    uint8_t *index_bitmap = NULL;
+    uint8_t *storage_bitmap = NULL;
+    size_t dir_alloc_bytes = 0;
+    uint64_t dir_logical_bytes = 0;
+    size_t index_size = 0;
+    size_t storage_size = 0;
+    uint32_t unit_blocks = 0;
+    rsx11_dirent_t *target = NULL;
+    uint16_t uic;
+    char dir_name[7];
+    size_t i;
+    unsigned refs = 0;
+    uint8_t zero[16];
+    int rc = -1;
+
+    if (dir == NULL || strcmp(dir, "MFD") == 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    memset(&cache, 0, sizeof(cache));
+    memset(&mfd_entries, 0, sizeof(mfd_entries));
+    memset(&all_entries, 0, sizeof(all_entries));
+    if (parse_uic_word(dir, &uic) != 0) {
+        return -1;
+    }
+    if (uic == 0u) {
+        errno = EINVAL;
+        return -1;
+    }
+    format_dir_name_from_uic(uic, dir_name);
+
+    if (rsx11_read_home(img, &home) != 0) {
+        goto out;
+    }
+    if (find_directory_header(img, &cache, "MFD", &mfd_hdr, &mfd_entries) != 0) {
+        goto out;
+    }
+    for (i = 0; i < mfd_entries.count; i++) {
+        if (strcmp(mfd_entries.entries[i].ext, "DIR") == 0 &&
+            strcmp(mfd_entries.entries[i].name, dir_name) == 0) {
+            target = &mfd_entries.entries[i];
+            break;
+        }
+    }
+    if (target == NULL) {
+        errno = ENOENT;
+        goto out;
+    }
+    if (lookup_header(img, &cache, &target->fid, &dir_hdr) != 0) {
+        goto out;
+    }
+    if (read_directory_storage(img, &dir_hdr, &dir_data,
+                               &dir_alloc_bytes, &dir_logical_bytes) != 0) {
+        goto out;
+    }
+    if (!is_directory_empty(dir_data, dir_logical_bytes)) {
+        errno = ENOTEMPTY;
+        goto out;
+    }
+
+    if (rsx11_read_directory(img, &all_entries) != 0) {
+        goto out;
+    }
+    for (i = 0; i < all_entries.count; i++) {
+        if (same_fid(&all_entries.entries[i].fid, &target->fid)) {
+            refs++;
+        }
+    }
+    if (refs != 1u) {
+        errno = EBUSY;
+        goto out;
+    }
+
+    if (load_allocation_state(img, &cache, &home,
+                              &index_bitmap, &index_size,
+                              &storage_bitmap, &storage_size,
+                              &bitmap_hdr, &unit_blocks) != 0) {
+        goto out;
+    }
+    for (i = 0; i < dir_hdr.extent_count; i++) {
+        uint32_t lbn = dir_hdr.extents[i].lbn;
+        uint32_t count = dir_hdr.extents[i].blocks;
+        uint32_t b;
+
+        if (lbn + count > unit_blocks) {
+            errno = EIO;
+            goto out;
+        }
+        for (b = 0; b < count; b++) {
+            storage_bitmap_set_free(storage_bitmap, storage_size,
+                                    lbn + b, 1);
+        }
+    }
+    index_bitmap_set(index_bitmap, index_size, target->fid.num, 0);
+
+    memset(zero, 0, sizeof(zero));
+    if (write_at(img->fp, target->raw_offset, zero, sizeof(zero)) != 0) {
+        goto out;
+    }
+    if (write_header_data(img, &bitmap_hdr,
+                          storage_bitmap, storage_size) != 0) {
+        goto out;
+    }
+    if (write_at(img->fp, (uint64_t)home.iblb * RSX11_BLOCK_SIZE,
+                 index_bitmap, index_size) != 0) {
+        goto out;
+    }
+    if (fflush(img->fp) != 0) {
+        goto out;
+    }
+
+    rc = 0;
+
+out:
+    free(storage_bitmap);
+    free(index_bitmap);
+    free(dir_data);
+    rsx11_free_dirlist(&all_entries);
+    rsx11_free_dirlist(&mfd_entries);
     free_header_cache(&cache);
     return rc;
 }

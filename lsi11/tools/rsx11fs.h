@@ -65,6 +65,8 @@ int rsx11_extract_selected(rsx11_image_t *img,
                            const char *outdir, int preserve_dirs,
                            unsigned *files_out);
 int rsx11_remove_entry(rsx11_image_t *img, const rsx11_dirent_t *ent);
+int rsx11_make_directory(rsx11_image_t *img, const char *dir);
+int rsx11_remove_directory(rsx11_image_t *img, const char *dir);
 int rsx11_add_file(rsx11_image_t *img, const char *host_path,
                    const char *dir, const char *name, const char *ext,
                    int have_version, uint16_t version,

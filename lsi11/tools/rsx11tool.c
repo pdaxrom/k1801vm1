@@ -15,7 +15,9 @@ static void usage(FILE *out)
             "  ls <image> [MFD|[grp,user]]\n"
             "  extract <image> <outdir> [[grp,user]][NAME.EXT[;ver]]\n"
             "  add <image> <hostfile> [[grp,user]]NAME.EXT[;ver]\n"
-            "  rm <image> [[grp,user]]NAME.EXT[;ver]\n");
+            "  rm <image> [[grp,user]]NAME.EXT[;ver]\n"
+            "  mkdir <image> [grp,user]\n"
+            "  rmdir <image> [grp,user]\n");
 }
 
 static void format_filespec(const rsx11_dirent_t *ent, char *out, size_t out_size)
@@ -191,6 +193,36 @@ static int match_spec(const rsx11_dirent_t *ent, const char *spec_filter)
     return strcmp(base, spec_filter) == 0;
 }
 
+static int find_empty_directory_marker(const rsx11_dirent_t *entries, size_t count,
+                                       const char *dir_filter)
+{
+    unsigned int group;
+    unsigned int user;
+    char dir_name[7];
+    size_t i;
+
+    if (dir_filter == NULL || dir_filter[0] == '\0') {
+        return 0;
+    }
+    if (strcmp(dir_filter, "MFD") == 0) {
+        return 1;
+    }
+    if (sscanf(dir_filter, "[%o,%o]", &group, &user) != 2 ||
+        group > 0377u || user > 0377u) {
+        return 0;
+    }
+    snprintf(dir_name, sizeof(dir_name), "%03o%03o", group, user);
+
+    for (i = 0; i < count; i++) {
+        if (strcmp(entries[i].dir, "MFD") == 0 &&
+            strcmp(entries[i].name, dir_name) == 0 &&
+            strcmp(entries[i].ext, "DIR") == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void format_selector(const rsx11_dirent_t *ent,
                             char *out, size_t out_size)
 {
@@ -307,12 +339,20 @@ static int cmd_ls(const char *image_path, const char *dir_filter)
         shown++;
     }
 
-    rsx11_free_dirlist(&list);
-    rsx11_close_image(&img);
     if (shown == 0u) {
+        if (dir_filter[0] != '\0' &&
+            find_empty_directory_marker(list.entries, list.count, dir_filter)) {
+            rsx11_free_dirlist(&list);
+            rsx11_close_image(&img);
+            return 0;
+        }
+        rsx11_free_dirlist(&list);
+        rsx11_close_image(&img);
         fprintf(stderr, "no matching directory entries\n");
         return 1;
     }
+    rsx11_free_dirlist(&list);
+    rsx11_close_image(&img);
     return 0;
 }
 
@@ -467,6 +507,44 @@ static int cmd_add(const char *image_path, const char *host_path,
     return 0;
 }
 
+static int cmd_mkdir(const char *image_path, const char *dir_filter)
+{
+    rsx11_image_t img;
+
+    if (rsx11_open_image_rw(&img, image_path) != 0) {
+        perror(image_path);
+        return 1;
+    }
+    if (rsx11_make_directory(&img, dir_filter) != 0) {
+        perror("mkdir");
+        rsx11_close_image(&img);
+        return 1;
+    }
+
+    printf("created %s\n", dir_filter);
+    rsx11_close_image(&img);
+    return 0;
+}
+
+static int cmd_rmdir(const char *image_path, const char *dir_filter)
+{
+    rsx11_image_t img;
+
+    if (rsx11_open_image_rw(&img, image_path) != 0) {
+        perror(image_path);
+        return 1;
+    }
+    if (rsx11_remove_directory(&img, dir_filter) != 0) {
+        perror("rmdir");
+        rsx11_close_image(&img);
+        return 1;
+    }
+
+    printf("removed %s\n", dir_filter);
+    rsx11_close_image(&img);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     char dir_filter[16];
@@ -553,6 +631,27 @@ int main(int argc, char **argv)
             snprintf(dir_filter, sizeof(dir_filter), "MFD");
         }
         return cmd_add(argv[2], argv[3], dir_filter, spec_filter);
+    }
+    if (strcmp(argv[1], "mkdir") == 0 || strcmp(argv[1], "rmdir") == 0) {
+        if (argc != 4) {
+            usage(stderr);
+            return 1;
+        }
+        if (parse_selector(argv[3], dir_filter, sizeof(dir_filter),
+                           spec_filter, sizeof(spec_filter)) != 0) {
+            perror("selector");
+            return 1;
+        }
+        if (dir_filter[0] == '\0' || spec_filter[0] != '\0' ||
+            strcmp(dir_filter, "MFD") == 0) {
+            fprintf(stderr, "%s requires a [grp,user] directory selector\n",
+                    argv[1]);
+            return 1;
+        }
+        if (strcmp(argv[1], "mkdir") == 0) {
+            return cmd_mkdir(argv[2], dir_filter);
+        }
+        return cmd_rmdir(argv[2], dir_filter);
     }
 
     usage(stderr);
