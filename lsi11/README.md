@@ -131,6 +131,7 @@ Validation:
 
 ### RSX-11M Files-11 utility (`rsx11tool`)
 - Build: `make rsx11tool`
+- List mkfs types: `./rsx11tool mkfs --list`
 - Show volume info: `./rsx11tool info disks/rsxm26.dsk`
 - List MFD and UFD contents: `./rsx11tool ls disks/rsx11m46-CC.rl02`
 - List a single directory: `./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,054]'`
@@ -138,11 +139,16 @@ Validation:
 - Extract all regular files with UFD subdirectories: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out`
 - Extract one file or wildcard set: `./rsx11tool extract disks/rsx11m46-CC.rl02 /tmp/rsx-out '[001,002]START*.CMD;11'`
 - Add a file to a UFD: `./rsx11tool add disks/rsx11m46-CC.rl02 host.txt '[001,002]HOST.TXT'`
+- Add a zero-length file: `: > empty.bin && ./rsx11tool add new.dsk empty.bin '[001,123]EMPTY.DAT'`
 - Remove a file: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST.TXT;1'`
 - Remove a uniquely matched wildcard: `./rsx11tool rm disks/rsx11m46-CC.rl02 '[001,002]HOST*.TXT'`
 - Create a UFD: `./rsx11tool mkdir disks/rsx11m46-CC.rl02 '[001,123]'`
 - Remove an empty UFD: `./rsx11tool rmdir disks/rsx11m46-CC.rl02 '[001,123]'`
 - Create a blank ODS-1 volume: `./rsx11tool mkfs new.dsk --blocks 2048 --label MKTEST`
+- Create a blank ODS-1 volume by disk type: `./rsx11tool mkfs new.dsk --type rk05 --label MKTEST`
+- Create a blank ODS-1 volume and copy bootstrap block 0 from an existing image:
+  `./rsx11tool mkfs new.dsk --blocks 2048 --label MKTEST --boot-from disks/rsxm26.dsk`
+- Export raw bootstrap block 0: `./rsx11tool bootblock disks/rsxm26.dsk --write rsx.boot`
 - Check directory/header/bitmap consistency: `./rsx11tool fsck disks/rsx11m46-CC.rl02`
 - Repair missing index/storage allocation bits: `./rsx11tool fsck disks/rsx11m46-CC.rl02 --repair`
 
@@ -155,20 +161,26 @@ Supported commands:
 - `mkdir`
 - `rmdir`
 - `mkfs`
+- `bootblock`
 - `fsck`
 
 Limitations:
 - Files-11 ODS-1 only.
 - No ODS-2 support.
+- Read-only handling supports multi-segment Files-11 extension headers.
 - Contiguous allocation only for new files.
 - `mkfs` creates a minimal ODS-1 layout with `INDEXF.SYS`, `BITMAP.SYS`,
-  `BADBLK.SYS`, and `000000.DIR`; it does not install RSX-11 bootstrap code.
+  `BADBLK.SYS`, `000000.DIR`, and `CORIMG.SYS`; raw bootstrap code can be
+  copied into block 0 with `--boot-from` or `--bootblock`, but `mkfs` does
+  not generate RSX-11 bootstrap code itself.
 - `mkdir`/`rmdir` support UFD only; MFD is not creatable/removable.
 - `rmdir` only removes empty directories.
 - `fsck` checks reachable directory entries, file headers, index bitmap bits, and
-  storage bitmap allocation bits.
-- `fsck --repair` only repairs missing bitmap allocation bits for reachable files;
-  it does not rebuild missing headers, repair directory contents, or fix bad extents.
+  storage bitmap allocation bits, and reports allocated orphan headers that are
+  no longer referenced by any directory.
+- `fsck --repair` repairs missing bitmap allocation bits for reachable files and
+  frees allocation tracked by orphan headers; it does not rebuild missing
+  headers, repair directory contents, or fix bad extents.
 - `ls`, `extract`, and `rm` support `*` and `?` wildcards; `rm` still requires
   the pattern to resolve to exactly one file.
 - Directory listing depends on readable MFD/UFD headers and does not attempt repair.

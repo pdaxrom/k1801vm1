@@ -6,6 +6,69 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+    const char *name;
+    uint32_t bytes;
+    uint16_t list_block_size;
+    const char *desc;
+} rsx11_disk_type_t;
+
+static const rsx11_disk_type_t rsx11_disk_types[] = {
+    {"rk05", 2494464u, 512u, "RK11 RK05"},
+    {"rk06", 13888512u, 512u, "RH11 RK06"},
+    {"rk07", 27540480u, 512u, "RH11 RK07"},
+    {"rl01", 5242880u, 256u, "RL11 RL01"},
+    {"rl02", 10485760u, 256u, "RL11 RL02"},
+    {"rm05", 256196608u, 512u, "XP/RP RM05"},
+    {"rd31", 21278720u, 512u, "RQ RD31"},
+    {"rd32", 42600448u, 512u, "RQ RD32"},
+    {"rd51", 11059200u, 512u, "RQ RD51"},
+    {"rd52", 30965760u, 512u, "RQ RD52"},
+    {"rd53", 71000064u, 512u, "RQ RD53"},
+    {"rd54", 159334400u, 512u, "RQ RD54"},
+    {"ra60", 204890112u, 512u, "RQ RA60"},
+    {"ra70", 280084992u, 512u, "RQ RA70"},
+    {"ra71", 700062720u, 512u, "RQ RA71"},
+    {"ra80", 121452544u, 512u, "RQ RA80"},
+    {"ra81", 456228864u, 512u, "RQ RA81"},
+    {"ra82", 622932480u, 512u, "RQ RA82"},
+    {"rx50", 409600u, 512u, "RQ RX50"},
+    {"rx33", 1228800u, 512u, "RQ RX33"},
+};
+
+static const rsx11_disk_type_t *rsx11_find_disk_type(const char *name)
+{
+    size_t i;
+
+    for (i = 0; i < sizeof(rsx11_disk_types) / sizeof(rsx11_disk_types[0]);
+         i++) {
+        if (strcmp(rsx11_disk_types[i].name, name) == 0) {
+            return &rsx11_disk_types[i];
+        }
+    }
+    return NULL;
+}
+
+static void rsx11_list_disk_types(FILE *out)
+{
+    size_t i;
+
+    fprintf(out, "Supported types:\n");
+    for (i = 0; i < sizeof(rsx11_disk_types) / sizeof(rsx11_disk_types[0]);
+         i++) {
+        const rsx11_disk_type_t *t = &rsx11_disk_types[i];
+        uint32_t blocks = t->bytes / t->list_block_size;
+
+        fprintf(out,
+                "  %-4s  disk  %9u bytes (%u blocks of %u)  %s\n",
+                t->name,
+                t->bytes,
+                blocks,
+                (unsigned)t->list_block_size,
+                t->desc);
+    }
+}
+
 static void usage(FILE *out)
 {
     fprintf(out,
@@ -18,7 +81,9 @@ static void usage(FILE *out)
             "  rm <image> [[grp,user]]NAME.EXT[;ver]\n"
             "  mkdir <image> [grp,user]\n"
             "  rmdir <image> [grp,user]\n"
-            "  mkfs <image> --blocks N [--label LABEL]\n"
+            "  mkfs --list\n"
+            "  mkfs <image> (--blocks N | --type <type>) [--label LABEL] [--boot-from image] [--bootblock file]\n"
+            "  bootblock <image> [--write file]\n"
             "  fsck <image> [--repair]\n");
 }
 
@@ -267,6 +332,79 @@ static void format_selector(const rsx11_dirent_t *ent,
     } else {
         snprintf(out, out_size, "%s%s", ent->dir, spec);
     }
+}
+
+static int read_bootblock_file(const char *path,
+                               uint8_t block[RSX11_BLOCK_SIZE])
+{
+    FILE *in;
+    int extra;
+
+    in = fopen(path, "rb");
+    if (in == NULL) {
+        return -1;
+    }
+    memset(block, 0, RSX11_BLOCK_SIZE);
+    (void)fread(block, 1, RSX11_BLOCK_SIZE, in);
+    if (ferror(in)) {
+        fclose(in);
+        errno = EIO;
+        return -1;
+    }
+    extra = fgetc(in);
+    fclose(in);
+    if (extra != EOF) {
+        errno = EFBIG;
+        return -1;
+    }
+    return 0;
+}
+
+static int install_bootblock_from_image(const char *image_path,
+                                        const char *source_path)
+{
+    rsx11_image_t dst;
+    rsx11_image_t src;
+    uint8_t block[RSX11_BLOCK_SIZE];
+    int rc = -1;
+
+    if (rsx11_open_image(&src, source_path) != 0) {
+        return -1;
+    }
+    if (rsx11_read_boot_block(&src, block) != 0) {
+        rsx11_close_image(&src);
+        return -1;
+    }
+    rsx11_close_image(&src);
+
+    if (rsx11_open_image_rw(&dst, image_path) != 0) {
+        return -1;
+    }
+    if (rsx11_write_boot_block(&dst, block) == 0) {
+        rc = 0;
+    }
+    rsx11_close_image(&dst);
+    return rc;
+}
+
+static int install_bootblock_from_file(const char *image_path,
+                                       const char *boot_path)
+{
+    rsx11_image_t dst;
+    uint8_t block[RSX11_BLOCK_SIZE];
+    int rc = -1;
+
+    if (read_bootblock_file(boot_path, block) != 0) {
+        return -1;
+    }
+    if (rsx11_open_image_rw(&dst, image_path) != 0) {
+        return -1;
+    }
+    if (rsx11_write_boot_block(&dst, block) == 0) {
+        rc = 0;
+    }
+    rsx11_close_image(&dst);
+    return rc;
 }
 
 static int cmd_info(const char *image_path)
@@ -612,13 +750,99 @@ static int cmd_fsck(const char *image_path, int repair)
     return 0;
 }
 
-static int cmd_mkfs(const char *image_path, int argc, char **argv)
+static int cmd_bootblock(int argc, char **argv)
 {
+    const char *image_path;
+    const char *write_path = NULL;
+    rsx11_image_t img;
+    uint8_t block[RSX11_BLOCK_SIZE];
+    uint32_t i;
+
+    if (argc < 1) {
+        usage(stderr);
+        return 1;
+    }
+    image_path = argv[0];
+    if (argc > 1) {
+        int argi;
+
+        for (argi = 1; argi < argc; argi++) {
+            if (strcmp(argv[argi], "--write") == 0 && argi + 1 < argc) {
+                write_path = argv[++argi];
+                continue;
+            }
+            usage(stderr);
+            return 1;
+        }
+    }
+
+    if (rsx11_open_image(&img, image_path) != 0) {
+        perror(image_path);
+        return 1;
+    }
+    if (rsx11_read_boot_block(&img, block) != 0) {
+        perror("bootblock");
+        rsx11_close_image(&img);
+        return 1;
+    }
+    rsx11_close_image(&img);
+
+    if (write_path != NULL) {
+        FILE *out = fopen(write_path, "wb");
+
+        if (out == NULL) {
+            perror(write_path);
+            return 1;
+        }
+        if (fwrite(block, 1, sizeof(block), out) != sizeof(block) ||
+            fclose(out) != 0) {
+            perror("bootblock");
+            return 1;
+        }
+        return 0;
+    }
+
+    for (i = 0; i < RSX11_BLOCK_SIZE; i += 16u) {
+        uint32_t j;
+
+        printf("%06o: ", (unsigned)i);
+        for (j = 0; j < 16u; j++) {
+            printf("%02x%s", block[i + j], j == 15u ? "" : " ");
+        }
+        printf("  ");
+        for (j = 0; j < 16u; j++) {
+            unsigned char c = block[i + j];
+
+            putchar((c >= 32u && c < 127u) ? (int)c : '.');
+        }
+        putchar('\n');
+    }
+    return 0;
+}
+
+static int cmd_mkfs(int argc, char **argv)
+{
+    const char *image_path;
     const char *label = NULL;
+    const char *boot_from = NULL;
+    const char *bootblock = NULL;
     uint32_t blocks = 0;
+    int blocks_set = 0;
+    int type_set = 0;
     int i;
 
-    for (i = 0; i < argc; i++) {
+    if (argc < 1) {
+        usage(stderr);
+        return 1;
+    }
+    if (strcmp(argv[0], "--list") == 0) {
+        rsx11_list_disk_types(stdout);
+        return 0;
+    }
+
+    image_path = argv[0];
+
+    for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--blocks") == 0) {
             char *endptr;
             unsigned long value;
@@ -633,7 +857,39 @@ static int cmd_mkfs(const char *image_path, int argc, char **argv)
                 fprintf(stderr, "mkfs: invalid block count\n");
                 return 1;
             }
+            if (blocks_set || type_set) {
+                fprintf(stderr,
+                        "mkfs: use either --blocks or --type, not both\n");
+                return 1;
+            }
             blocks = (uint32_t)value;
+            blocks_set = 1;
+            continue;
+        }
+        if (strcmp(argv[i], "--type") == 0) {
+            const rsx11_disk_type_t *type;
+
+            if (i + 1 >= argc) {
+                usage(stderr);
+                return 1;
+            }
+            type = rsx11_find_disk_type(argv[++i]);
+            if (type == NULL) {
+                fprintf(stderr, "mkfs: unknown type '%s'\n", argv[i]);
+                fprintf(stderr, "mkfs: use --list to see supported types\n");
+                return 1;
+            }
+            if (blocks_set || type_set) {
+                fprintf(stderr,
+                        "mkfs: use either --blocks or --type, not both\n");
+                return 1;
+            }
+            if ((type->bytes % RSX11_BLOCK_SIZE) != 0u) {
+                fprintf(stderr, "mkfs: type size is not 512-byte aligned\n");
+                return 1;
+            }
+            blocks = type->bytes / RSX11_BLOCK_SIZE;
+            type_set = 1;
             continue;
         }
         if (strcmp(argv[i], "--label") == 0) {
@@ -644,17 +900,52 @@ static int cmd_mkfs(const char *image_path, int argc, char **argv)
             label = argv[++i];
             continue;
         }
+        if (strcmp(argv[i], "--boot-from") == 0) {
+            if (i + 1 >= argc) {
+                usage(stderr);
+                return 1;
+            }
+            boot_from = argv[++i];
+            continue;
+        }
+        if (strcmp(argv[i], "--bootblock") == 0) {
+            if (i + 1 >= argc) {
+                usage(stderr);
+                return 1;
+            }
+            bootblock = argv[++i];
+            continue;
+        }
+        if (strcmp(argv[i], "--list") == 0) {
+            rsx11_list_disk_types(stdout);
+            return 0;
+        }
         usage(stderr);
         return 1;
     }
 
     if (blocks == 0u) {
-        fprintf(stderr, "mkfs requires --blocks N\n");
+        fprintf(stderr, "mkfs requires --blocks N or --type <type>\n");
+        return 1;
+    }
+    if (boot_from != NULL && bootblock != NULL) {
+        fprintf(stderr, "mkfs: use only one of --boot-from and --bootblock\n");
         return 1;
     }
     if (rsx11_mkfs(image_path, blocks, label) != 0) {
         perror("mkfs");
         return 1;
+    }
+    if (boot_from != NULL) {
+        if (install_bootblock_from_image(image_path, boot_from) != 0) {
+            perror("mkfs bootstrap");
+            return 1;
+        }
+    } else if (bootblock != NULL) {
+        if (install_bootblock_from_file(image_path, bootblock) != 0) {
+            perror("mkfs bootstrap");
+            return 1;
+        }
     }
 
     printf("created %s (%u blocks)\n", image_path, (unsigned)blocks);
@@ -776,12 +1067,15 @@ int main(int argc, char **argv)
         }
         return cmd_fsck(argv[2], argc == 4);
     }
+    if (strcmp(argv[1], "bootblock") == 0) {
+        return cmd_bootblock(argc - 2, &argv[2]);
+    }
     if (strcmp(argv[1], "mkfs") == 0) {
-        if (argc < 5) {
+        if (argc < 3) {
             usage(stderr);
             return 1;
         }
-        return cmd_mkfs(argv[2], argc - 3, argv + 3);
+        return cmd_mkfs(argc - 2, &argv[2]);
     }
 
     usage(stderr);

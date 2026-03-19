@@ -64,6 +64,10 @@ int rsx11_open_image(rsx11_image_t *img, const char *path);
 int rsx11_open_image_rw(rsx11_image_t *img, const char *path);
 void rsx11_close_image(rsx11_image_t *img);
 
+int rsx11_read_boot_block(rsx11_image_t *img,
+                          uint8_t block[RSX11_BLOCK_SIZE]);
+int rsx11_write_boot_block(rsx11_image_t *img,
+                           const uint8_t block[RSX11_BLOCK_SIZE]);
 int rsx11_read_home(rsx11_image_t *img, rsx11_home_t *home);
 
 int rsx11_read_directory(rsx11_image_t *img, rsx11_dirlist_t *out);

@@ -5,6 +5,10 @@ tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT INT TERM
 
 ./rsx11tool info disks/rsxm26.dsk >"$tmpdir/info.txt"
+./rsx11tool mkfs --list >"$tmpdir/mkfs_list.txt"
+./rsx11tool bootblock disks/rsxm26.dsk --write "$tmpdir/rsxm26.boot"
+dd if=disks/rsxm26.dsk of="$tmpdir/rsxm26.block0" bs=512 count=1 \
+    >/dev/null 2>&1
 ./rsx11tool ls disks/rsx11m46-CC.rl02 >"$tmpdir/ls.txt"
 ./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,054]' >"$tmpdir/ls_uic.txt"
 ./rsx11tool ls disks/rsx11m46-CC.rl02 '[001,002]START*.CMD;11' \
@@ -31,21 +35,352 @@ EOF
 cat >"$tmpdir/mkfs_input.txt" <<'EOF'
 Fresh mkfs validation
 EOF
+: >"$tmpdir/mkfs_empty.bin"
 ./rsx11tool mkfs "$tmpdir/mkfs.dsk" --blocks 2048 --label MKTEST \
     >"$tmpdir/mkfs.txt"
+./rsx11tool mkfs "$tmpdir/mkfs_type.dsk" --type rk05 --label MKTYPE \
+    >"$tmpdir/mkfs_type.txt"
+./rsx11tool mkfs "$tmpdir/mkfs_bootsrc.dsk" --blocks 2048 --label BOOTSRC \
+    --boot-from disks/rsxm26.dsk >"$tmpdir/mkfs_bootsrc.txt"
+./rsx11tool mkfs "$tmpdir/mkfs_bootfile.dsk" --blocks 2048 --label BOOTFILE \
+    --bootblock "$tmpdir/rsxm26.boot" >"$tmpdir/mkfs_bootfile.txt"
 ./rsx11tool info "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_info.txt"
+./rsx11tool info "$tmpdir/mkfs_type.dsk" >"$tmpdir/mkfs_type_info.txt"
+./rsx11tool info "$tmpdir/mkfs_bootsrc.dsk" >"$tmpdir/mkfs_bootsrc_info.txt"
+./rsx11tool info "$tmpdir/mkfs_bootfile.dsk" >"$tmpdir/mkfs_bootfile_info.txt"
 ./rsx11tool ls "$tmpdir/mkfs.dsk" MFD >"$tmpdir/mkfs_ls.txt"
 ./rsx11tool fsck "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_fsck.txt" 2>&1
+./rsx11tool fsck "$tmpdir/mkfs_type.dsk" >"$tmpdir/mkfs_type_fsck.txt" 2>&1
+./rsx11tool fsck "$tmpdir/mkfs_bootsrc.dsk" >"$tmpdir/mkfs_bootsrc_fsck.txt" 2>&1
+./rsx11tool fsck "$tmpdir/mkfs_bootfile.dsk" >"$tmpdir/mkfs_bootfile_fsck.txt" 2>&1
+dd if="$tmpdir/mkfs_bootsrc.dsk" of="$tmpdir/mkfs_bootsrc.block0" bs=512 count=1 \
+    >/dev/null 2>&1
+dd if="$tmpdir/mkfs_bootfile.dsk" of="$tmpdir/mkfs_bootfile.block0" bs=512 count=1 \
+    >/dev/null 2>&1
+cp "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_alt_home.dsk"
+dd if="$tmpdir/mkfs_alt_home.dsk" of="$tmpdir/mkfs_alt_home.dsk" \
+    bs=512 skip=1 seek=256 count=1 conv=notrunc >/dev/null 2>&1
+printf '\0\0' | dd of="$tmpdir/mkfs_alt_home.dsk" bs=1 seek=$((512 + 58)) \
+    conv=notrunc >/dev/null 2>&1
+printf '\0\0' | dd of="$tmpdir/mkfs_alt_home.dsk" bs=1 seek=$((512 + 510)) \
+    conv=notrunc >/dev/null 2>&1
+./rsx11tool info "$tmpdir/mkfs_alt_home.dsk" >"$tmpdir/mkfs_alt_info.txt"
+./rsx11tool fsck "$tmpdir/mkfs_alt_home.dsk" >"$tmpdir/mkfs_alt_fsck.txt" 2>&1
+strings -a "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_strings.txt"
+mkfs_iblb="$(./rsx11tool info "$tmpdir/mkfs.dsk" | awk '/Index bitmap:/ {print $8}')"
+mkfs_mfd_fcs_off=$(( (mkfs_iblb + 4) * 512 + 14 ))
+mkfs_bitmap_ptr_off=$(( (mkfs_iblb + 2) * 512 + 102 ))
+set -- $(od -An -tu1 -N 4 -j "$mkfs_bitmap_ptr_off" "$tmpdir/mkfs.dsk")
+mkfs_bitmap_lbn=$(( $1 * 65536 + $3 + 256 * $4 ))
+od -An -tu2 -N 8 -j $(( mkfs_bitmap_lbn * 512 + 4 )) "$tmpdir/mkfs.dsk" \
+    | tr -s ' ' | sed 's/^ //; s/ *$//' >"$tmpdir/mkfs_bitmap_ctrl.txt"
+od -An -tu1 -N 4 -j "$mkfs_mfd_fcs_off" "$tmpdir/mkfs.dsk" \
+    | tr -s ' ' | sed 's/^ //; s/ *$//' >"$tmpdir/mkfs_mfd_fcs.txt"
 ./rsx11tool mkdir "$tmpdir/mkfs.dsk" '[001,123]' >"$tmpdir/mkfs_mkdir.txt"
+./rsx11tool add "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_empty.bin" \
+    '[001,123]EMPTY.DAT' >"$tmpdir/mkfs_add_empty.txt"
 ./rsx11tool add "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_input.txt" \
     '[001,123]MKTEST.TXT' >"$tmpdir/mkfs_add.txt"
 ./rsx11tool ls "$tmpdir/mkfs.dsk" '[001,123]' >"$tmpdir/mkfs_ls_ufd.txt"
+./rsx11tool extract "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_empty_out" \
+    '[001,123]EMPTY.DAT;1' >"$tmpdir/mkfs_extract_empty.txt"
 ./rsx11tool extract "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_out" \
     '[001,123]MKTEST.TXT;1' >"$tmpdir/mkfs_extract.txt"
+./rsx11tool rm "$tmpdir/mkfs.dsk" '[001,123]EMPTY.DAT;1' \
+    >"$tmpdir/mkfs_rm_empty.txt"
 ./rsx11tool rm "$tmpdir/mkfs.dsk" '[001,123]MKTEST.TXT;1' \
     >"$tmpdir/mkfs_rm.txt"
 ./rsx11tool rmdir "$tmpdir/mkfs.dsk" '[001,123]' >"$tmpdir/mkfs_rmdir.txt"
 ./rsx11tool fsck "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_fsck_after.txt" 2>&1
+
+./rsx11tool mkfs "$tmpdir/chain.dsk" --blocks 2048 --label CHAIN \
+    >"$tmpdir/chain_mkfs.txt"
+./rsx11tool mkdir "$tmpdir/chain.dsk" '[001,123]' >"$tmpdir/chain_mkdir.txt"
+(dd if=/dev/zero bs=512 count=1 2>/dev/null | tr '\0' 'A') >"$tmpdir/chain_a.bin"
+printf 'CHAIN-A\n' | dd of="$tmpdir/chain_a.bin" conv=notrunc \
+    >/dev/null 2>&1
+(dd if=/dev/zero bs=512 count=1 2>/dev/null | tr '\0' 'B') >"$tmpdir/chain_b.bin"
+printf 'CHAIN-B\n' | dd of="$tmpdir/chain_b.bin" conv=notrunc \
+    >/dev/null 2>&1
+cat "$tmpdir/chain_a.bin" "$tmpdir/chain_b.bin" >"$tmpdir/chain_expected.bin"
+./rsx11tool add "$tmpdir/chain.dsk" "$tmpdir/chain_a.bin" \
+    '[001,123]CHAINA.BIN' >"$tmpdir/chain_add_a.txt"
+./rsx11tool add "$tmpdir/chain.dsk" "$tmpdir/chain_b.bin" \
+    '[001,123]CHAINB.BIN' >"$tmpdir/chain_add_b.txt"
+cat >"$tmpdir/patch_chain.c" <<'EOF'
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BLK 512u
+#define HOME_BLK 1u
+#define OFF_IBSZ 0u
+#define OFF_IBLB 2u
+#define OFF_UFAT 14u
+#define OFF_HIBK 4u
+#define OFF_EFBK 8u
+#define OFF_FFBY 12u
+
+static uint16_t get16(const uint8_t *p)
+{
+    return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
+}
+
+static uint32_t get32hi(const uint8_t *p)
+{
+    return ((uint32_t)get16(p) << 16) | (uint32_t)get16(p + 2u);
+}
+
+static void put16(uint8_t *p, uint16_t v)
+{
+    p[0] = (uint8_t)(v & 0xffu);
+    p[1] = (uint8_t)(v >> 8);
+}
+
+static void put32hi(uint8_t *p, uint32_t v)
+{
+    put16(p, (uint16_t)(v >> 16));
+    put16(p + 2u, (uint16_t)(v & 0xffffu));
+}
+
+static uint16_t checksum(const uint8_t *buf)
+{
+    uint16_t sum = 0;
+    size_t i;
+
+    for (i = 0; i < 255u; i++) {
+        sum = (uint16_t)(sum + get16(buf + i * 2u));
+    }
+    return sum;
+}
+
+static int rad50_enc(int c)
+{
+    if (c == ' ' || c == '\0') {
+        return 0;
+    }
+    if (c >= 'A' && c <= 'Z') {
+        return c - 'A' + 1;
+    }
+    if (c == '$') {
+        return 27;
+    }
+    if (c == '.') {
+        return 28;
+    }
+    if (c == '%') {
+        return 29;
+    }
+    if (c >= '0' && c <= '9') {
+        return c - '0' + 30;
+    }
+    return -1;
+}
+
+static uint16_t rad50_word(const char *s)
+{
+    int a = rad50_enc((unsigned char)s[0]);
+    int b = rad50_enc((unsigned char)s[1]);
+    int c = rad50_enc((unsigned char)s[2]);
+
+    if (a < 0 || b < 0 || c < 0) {
+        fprintf(stderr, "invalid RAD50\n");
+        exit(1);
+    }
+    return (uint16_t)(a * 1600 + b * 40 + c);
+}
+
+static void rad50_name3(const char *src, uint8_t out[6])
+{
+    char tmp[10];
+    size_t i;
+
+    memset(tmp, ' ', sizeof(tmp));
+    memcpy(tmp, src, strlen(src));
+    for (i = 0; i < 3u; i++) {
+        put16(out + i * 2u, rad50_word(tmp + i * 3u));
+    }
+}
+
+static int read_at(FILE *fp, uint64_t off, void *buf, size_t len)
+{
+    if (fseeko(fp, (off_t)off, SEEK_SET) != 0) {
+        return -1;
+    }
+    return fread(buf, 1, len, fp) == len ? 0 : -1;
+}
+
+static int write_at(FILE *fp, uint64_t off, const void *buf, size_t len)
+{
+    if (fseeko(fp, (off_t)off, SEEK_SET) != 0) {
+        return -1;
+    }
+    return fwrite(buf, 1, len, fp) == len ? 0 : -1;
+}
+
+static void header_lbn(const uint8_t *home, uint16_t fnum, uint32_t *lbn_out)
+{
+    uint16_t ibsz = get16(home + OFF_IBSZ);
+    uint32_t iblb = get32hi(home + OFF_IBLB);
+
+    *lbn_out = iblb + ibsz + (uint32_t)fnum - 1u;
+}
+
+static void first_extent_lbn(const uint8_t hdr[BLK], uint32_t *lbn_out)
+{
+    uint8_t mpof = hdr[1];
+    const uint8_t *map = hdr + (size_t)mpof * 2u;
+
+    *lbn_out = ((uint32_t)map[10] << 16) | (uint32_t)get16(map + 12u);
+}
+
+static int find_record(FILE *fp, uint32_t lbn,
+                       const char *name, const char *ext,
+                       uint16_t *fnum, uint16_t *seq, uint64_t *rec_off)
+{
+    uint8_t block[BLK];
+    uint8_t name50[6];
+    uint16_t ext50;
+    size_t off;
+
+    rad50_name3(name, name50);
+    ext50 = rad50_word(ext);
+    if (read_at(fp, (uint64_t)lbn * BLK, block, sizeof(block)) != 0) {
+        return -1;
+    }
+    for (off = 0; off + 16u <= BLK; off += 16u) {
+        if (get16(block + off) == 0u) {
+            continue;
+        }
+        if (memcmp(block + off + 6u, name50, 6u) == 0 &&
+            get16(block + off + 12u) == ext50) {
+            *fnum = get16(block + off);
+            *seq = get16(block + off + 2u);
+            *rec_off = (uint64_t)lbn * BLK + off;
+            return 0;
+        }
+    }
+    return -1;
+}
+
+int main(int argc, char **argv)
+{
+    FILE *fp;
+    uint8_t home[BLK];
+    uint8_t mfd_hdr[BLK];
+    uint8_t ufd_hdr[BLK];
+    uint8_t a_hdr[BLK];
+    uint8_t b_hdr[BLK];
+    uint8_t zero[16] = { 0 };
+    uint32_t mfd_lbn;
+    uint32_t ufd_lbn;
+    uint32_t a_lbn;
+    uint32_t b_lbn;
+    uint16_t dir_fnum;
+    uint16_t dir_seq;
+    uint16_t a_fnum;
+    uint16_t a_seq;
+    uint16_t b_fnum;
+    uint16_t b_seq;
+    uint64_t b_rec_off;
+    uint8_t *map;
+
+    if (argc != 2) {
+        return 2;
+    }
+    fp = fopen(argv[1], "r+b");
+    if (fp == NULL) {
+        return 1;
+    }
+    if (read_at(fp, (uint64_t)HOME_BLK * BLK, home, sizeof(home)) != 0) {
+        return 1;
+    }
+    header_lbn(home, 4u, &mfd_lbn);
+    if (read_at(fp, (uint64_t)mfd_lbn * BLK, mfd_hdr, sizeof(mfd_hdr)) != 0) {
+        return 1;
+    }
+    first_extent_lbn(mfd_hdr, &mfd_lbn);
+    if (find_record(fp, mfd_lbn, "001123", "DIR",
+                    &dir_fnum, &dir_seq, &b_rec_off) != 0) {
+        return 1;
+    }
+    (void)dir_seq;
+    header_lbn(home, dir_fnum, &ufd_lbn);
+    if (read_at(fp, (uint64_t)ufd_lbn * BLK, ufd_hdr, sizeof(ufd_hdr)) != 0) {
+        return 1;
+    }
+    first_extent_lbn(ufd_hdr, &ufd_lbn);
+    if (find_record(fp, ufd_lbn, "CHAINA", "BIN",
+                    &a_fnum, &a_seq, &b_rec_off) != 0) {
+        return 1;
+    }
+    if (find_record(fp, ufd_lbn, "CHAINB", "BIN",
+                    &b_fnum, &b_seq, &b_rec_off) != 0) {
+        return 1;
+    }
+    (void)a_seq;
+    header_lbn(home, a_fnum, &a_lbn);
+    header_lbn(home, b_fnum, &b_lbn);
+    if (read_at(fp, (uint64_t)a_lbn * BLK, a_hdr, sizeof(a_hdr)) != 0 ||
+        read_at(fp, (uint64_t)b_lbn * BLK, b_hdr, sizeof(b_hdr)) != 0) {
+        return 1;
+    }
+
+    map = a_hdr + (size_t)a_hdr[1] * 2u;
+    map[1] = 0u;
+    put16(map + 2u, b_fnum);
+    put16(map + 4u, b_seq);
+    put32hi(a_hdr + OFF_UFAT + OFF_HIBK, 2u);
+    put32hi(a_hdr + OFF_UFAT + OFF_EFBK, 2u);
+    put16(a_hdr + OFF_UFAT + OFF_FFBY, 512u);
+    put16(a_hdr + 510u, checksum(a_hdr));
+
+    map = b_hdr + (size_t)b_hdr[1] * 2u;
+    map[0] = 1u;
+    map[1] = 0u;
+    put16(map + 2u, 0u);
+    put16(map + 4u, 0u);
+    put16(b_hdr + 510u, checksum(b_hdr));
+
+    if (write_at(fp, (uint64_t)a_lbn * BLK, a_hdr, sizeof(a_hdr)) != 0 ||
+        write_at(fp, (uint64_t)b_lbn * BLK, b_hdr, sizeof(b_hdr)) != 0 ||
+        write_at(fp, b_rec_off, zero, sizeof(zero)) != 0 ||
+        fflush(fp) != 0) {
+        return 1;
+    }
+
+    fclose(fp);
+    return 0;
+}
+EOF
+${CC:-cc} -O2 -Wall -Wextra -o "$tmpdir/patch_chain" "$tmpdir/patch_chain.c"
+"$tmpdir/patch_chain" "$tmpdir/chain.dsk"
+./rsx11tool ls "$tmpdir/chain.dsk" '[001,123]' >"$tmpdir/chain_ls.txt"
+./rsx11tool extract "$tmpdir/chain.dsk" "$tmpdir/chain_out" \
+    '[001,123]CHAINA.BIN;1' >"$tmpdir/chain_extract.txt"
+./rsx11tool fsck "$tmpdir/chain.dsk" >"$tmpdir/chain_fsck.txt" 2>&1
+
+./rsx11tool mkfs "$tmpdir/orphan.dsk" --blocks 2048 --label ORPHAN \
+    >"$tmpdir/orphan_mkfs.txt"
+./rsx11tool mkdir "$tmpdir/orphan.dsk" '[001,123]' >"$tmpdir/orphan_mkdir.txt"
+iblb_orphan="$(./rsx11tool info "$tmpdir/orphan.dsk" | awk '/Index bitmap:/ {print $8}')"
+mfd_hdr_ptr_off=$(( (iblb_orphan + 4) * 512 + 102 ))
+set -- $(od -An -tu1 -N 4 -j "$mfd_hdr_ptr_off" "$tmpdir/orphan.dsk")
+mfd_lbn_orphan=$(( $1 * 65536 + $3 + 256 * $4 ))
+mfd_dir_slot_offset=$(( mfd_lbn_orphan * 512 + 80 ))
+dd if=/dev/zero of="$tmpdir/orphan.dsk" bs=1 seek="$mfd_dir_slot_offset" \
+    count=16 conv=notrunc >/dev/null 2>&1
+cp "$tmpdir/orphan.dsk" "$tmpdir/orphan_repair.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/orphan.dsk" >"$tmpdir/orphan_fsck.txt" 2>&1
+status_orphan=$?
+./rsx11tool fsck "$tmpdir/orphan_repair.dsk" --repair \
+    >"$tmpdir/orphan_repair_fsck.txt" 2>&1
+status_orphan_repair=$?
+set -e
+./rsx11tool fsck "$tmpdir/orphan_repair.dsk" \
+    >"$tmpdir/orphan_repair_check.txt" 2>&1
 
 cp disks/rsx11m46-CC.rl02 "$tmpdir/fsck.rl02"
 cat >"$tmpdir/fsck_input.txt" <<'EOF'
@@ -79,6 +414,10 @@ set -e
 grep -q "Files-11 ODS-1" "$tmpdir/info.txt"
 grep -q "Volume label:   RSXM26" "$tmpdir/info.txt"
 grep -q "Structure:      000401" "$tmpdir/info.txt"
+grep -q "^Supported types:$" "$tmpdir/mkfs_list.txt"
+grep -q "^  rk05  disk" "$tmpdir/mkfs_list.txt"
+grep -q "^  rl02  disk" "$tmpdir/mkfs_list.txt"
+cmp -s "$tmpdir/rsxm26.boot" "$tmpdir/rsxm26.block0"
 
 grep -q "MFD.*INDEXF\\.SYS;1" "$tmpdir/ls.txt"
 grep -q "MFD.*BITMAP\\.SYS;1" "$tmpdir/ls.txt"
@@ -100,24 +439,62 @@ grep -q "removed \\[001,123\\]ZZCODX\\.TXT;1" "$tmpdir/rm.txt"
 grep -q "removed \\[001,123\\]" "$tmpdir/rmdir.txt"
 ! grep -q "001123\\.DIR;1" "$tmpdir/mfd_after_rmdir.txt"
 grep -q "created $tmpdir/mkfs.dsk (2048 blocks)" "$tmpdir/mkfs.txt"
+grep -q "created $tmpdir/mkfs_type.dsk (4872 blocks)" "$tmpdir/mkfs_type.txt"
+grep -q "created $tmpdir/mkfs_bootsrc.dsk (2048 blocks)" "$tmpdir/mkfs_bootsrc.txt"
+grep -q "created $tmpdir/mkfs_bootfile.dsk (2048 blocks)" "$tmpdir/mkfs_bootfile.txt"
 grep -q "Volume label:   MKTEST" "$tmpdir/mkfs_info.txt"
+grep -q "Volume label:   MKTYPE" "$tmpdir/mkfs_type_info.txt"
+grep -q "Total blocks:   4872" "$tmpdir/mkfs_type_info.txt"
+grep -q "Volume label:   BOOTSRC" "$tmpdir/mkfs_bootsrc_info.txt"
+grep -q "Volume label:   BOOTFILE" "$tmpdir/mkfs_bootfile_info.txt"
+test "$(wc -c < "$tmpdir/mkfs_type.dsk")" -eq 2494464
+cmp -s "$tmpdir/rsxm26.boot" "$tmpdir/mkfs_bootsrc.block0"
+cmp -s "$tmpdir/rsxm26.boot" "$tmpdir/mkfs_bootfile.block0"
 grep -q "MFD.*INDEXF\\.SYS;1" "$tmpdir/mkfs_ls.txt"
 grep -q "MFD.*BITMAP\\.SYS;1" "$tmpdir/mkfs_ls.txt"
 grep -q "MFD.*BADBLK\\.SYS;1" "$tmpdir/mkfs_ls.txt"
 grep -q "MFD.*000000\\.DIR;1" "$tmpdir/mkfs_ls.txt"
+grep -q "MFD.*CORIMG\\.SYS;1" "$tmpdir/mkfs_ls.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_fsck.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_type_fsck.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_bootsrc_fsck.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_bootfile_fsck.txt"
+grep -q "Volume label:   MKTEST" "$tmpdir/mkfs_alt_info.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_alt_fsck.txt"
+grep -q "DECFILE11A" "$tmpdir/mkfs_strings.txt"
+grep -q "\\[001,001\\]" "$tmpdir/mkfs_strings.txt"
+grep -q "^1 0 16 0$" "$tmpdir/mkfs_mfd_fcs.txt"
+grep -q "^1894 0 0 2048$" "$tmpdir/mkfs_bitmap_ctrl.txt"
+grep -E -q "^Created:        [0-9]{2}[A-Z]{3}[0-9]{2}[0-9]{6}$" \
+    "$tmpdir/mkfs_info.txt"
 grep -q "created \\[001,123\\]" "$tmpdir/mkfs_mkdir.txt"
+grep -q "added \\[001,123\\]EMPTY\\.DAT;1" "$tmpdir/mkfs_add_empty.txt"
 grep -q "added \\[001,123\\]MKTEST\\.TXT;1" "$tmpdir/mkfs_add.txt"
+grep -q "\\[001,123\\].*EMPTY\\.DAT;1.*  *0  " "$tmpdir/mkfs_ls_ufd.txt"
 grep -q "\\[001,123\\].*MKTEST\\.TXT;1" "$tmpdir/mkfs_ls_ufd.txt"
+grep -q "extracted 1 file(s)" "$tmpdir/mkfs_extract_empty.txt"
+test "$(wc -c < "$tmpdir/mkfs_empty_out/001_123/EMPTY.DAT;1")" -eq 0
 grep -q "extracted 1 file(s)" "$tmpdir/mkfs_extract.txt"
 cmp -s "$tmpdir/mkfs_input.txt" "$tmpdir/mkfs_out/001_123/MKTEST.TXT;1"
+grep -q "removed \\[001,123\\]EMPTY\\.DAT;1" "$tmpdir/mkfs_rm_empty.txt"
 grep -q "removed \\[001,123\\]MKTEST\\.TXT;1" "$tmpdir/mkfs_rm.txt"
 grep -q "removed \\[001,123\\]" "$tmpdir/mkfs_rmdir.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_fsck_after.txt"
+grep -q "\\[001,123\\].*CHAINA\\.BIN;1" "$tmpdir/chain_ls.txt"
+grep -q "\\[001,123\\].*CHAINA\\.BIN;1.*  *2  " "$tmpdir/chain_ls.txt"
+grep -q "extracted 1 file(s)" "$tmpdir/chain_extract.txt"
+test "$(wc -c < "$tmpdir/chain_out/001_123/CHAINA.BIN;1")" -eq 1024
+cmp -s "$tmpdir/chain_expected.bin" "$tmpdir/chain_out/001_123/CHAINA.BIN;1"
+grep -q "fsck: clean" "$tmpdir/chain_fsck.txt"
+test "$status_orphan" -eq 2
+grep -q "orphan header 001123\\.DIR;1" "$tmpdir/orphan_fsck.txt"
+test "$status_orphan_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/orphan_repair_fsck.txt"
+grep -q "fsck: clean" "$tmpdir/orphan_repair_check.txt"
 test "$status_bad" -eq 2
 test "$status_repair" -eq 2
 test "$status_after" -eq 2
-grep -q "\\[001,123\\]ZZFSCK\\.TXT;1: index bitmap bit is clear" \
+grep -q "\\[001,123\\]ZZFSCK\\.TXT;1: index bitmap marks 1 header slot(s) free" \
     "$tmpdir/fsck_bad.txt"
 grep -q "repaired" "$tmpdir/fsck_repair.txt"
 ! grep -q "\\[001,123\\]ZZFSCK\\.TXT;1: index bitmap bit is clear" \

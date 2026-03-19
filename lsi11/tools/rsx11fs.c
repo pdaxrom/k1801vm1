@@ -24,10 +24,16 @@
 #define RSX11_HOME_OFF_FIEX 45u
 #define RSX11_HOME_OFF_LRUC 46u
 #define RSX11_HOME_OFF_REVD 48u
+#define RSX11_HOME_OFF_CHK1 58u
 #define RSX11_HOME_OFF_VDAT 60u
+#define RSX11_HOME_OFF_INDN 472u
+#define RSX11_HOME_OFF_INDO 484u
+#define RSX11_HOME_OFF_INDF 496u
+#define RSX11_HOME_OFF_CHK2 510u
 
 #define RSX11_HEADER_MIN 128u
-#define RSX11_MAX_EXTENTS 128u
+#define RSX11_MAX_EXTENTS 1024u
+#define RSX11_MAX_HEADER_SEGMENTS 64u
 #define RSX11_MAP_MAX_WORDS 0xccu
 #define RSX11_HDR_OFF_UFAT 14u
 #define RSX11_FCS_OFF_RATT 0u
@@ -45,6 +51,10 @@ typedef struct {
 typedef struct {
     uint64_t raw_offset;
     rsx11_fid_t fid;
+    uint8_t segment_number;
+    rsx11_fid_t next_fid;
+    size_t header_count;
+    rsx11_fid_t header_fids[RSX11_MAX_HEADER_SEGMENTS];
     char name[10];
     char ext[4];
     uint16_t version;
@@ -202,8 +212,19 @@ static void trim_right(char *s)
     }
 }
 
-static void copy_upper_padded(uint8_t *dst, size_t dst_len,
-                              const char *src, size_t src_len)
+static void copy_upper_zero_padded(uint8_t *dst, size_t dst_len,
+                                   const char *src, size_t src_len)
+{
+    size_t i;
+
+    memset(dst, 0, dst_len);
+    for (i = 0; i < dst_len && i < src_len && src[i] != '\0'; i++) {
+        dst[i] = (uint8_t)toupper((unsigned char)src[i]);
+    }
+}
+
+static void copy_upper_space_padded(uint8_t *dst, size_t dst_len,
+                                    const char *src, size_t src_len)
 {
     size_t i;
 
@@ -240,6 +261,17 @@ static uint16_t header_checksum(const uint8_t *buf)
     size_t i;
 
     for (i = 0; i < 255u; i++) {
+        sum = (uint16_t)(sum + get_le16(buf + i * 2u));
+    }
+    return sum;
+}
+
+static uint16_t checksum_words(const uint8_t *buf, size_t word_count)
+{
+    uint16_t sum = 0;
+    size_t i;
+
+    for (i = 0; i < word_count; i++) {
         sum = (uint16_t)(sum + get_le16(buf + i * 2u));
     }
     return sum;
@@ -350,6 +382,55 @@ static int same_fid(const rsx11_fid_t *a, const rsx11_fid_t *b)
     return a->num == b->num && a->seq == b->seq && a->rvn == b->rvn;
 }
 
+static int fid_is_null(const rsx11_fid_t *fid)
+{
+    return fid->num == 0u && fid->seq == 0u && fid->rvn == 0u;
+}
+
+static int header_contains_fid(const rsx11_file_header_t *hdr,
+                               const rsx11_fid_t *fid)
+{
+    size_t i;
+
+    for (i = 0; i < hdr->header_count; i++) {
+        if (same_fid(&hdr->header_fids[i], fid)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static int append_header_segment(rsx11_file_header_t *dst,
+                                 const rsx11_file_header_t *seg)
+{
+    if (dst->header_count >= RSX11_MAX_HEADER_SEGMENTS ||
+        dst->extent_count + seg->extent_count > RSX11_MAX_EXTENTS) {
+        errno = EFBIG;
+        return -1;
+    }
+    if (header_contains_fid(dst, &seg->fid)) {
+        errno = ELOOP;
+        return -1;
+    }
+
+    if (seg->segment_number != 0u && dst->header_count > 0u &&
+        seg->segment_number <= dst->segment_number) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    memcpy(dst->extents + dst->extent_count,
+           seg->extents, seg->extent_count * sizeof(seg->extents[0]));
+    dst->extent_count += seg->extent_count;
+    dst->segment_number = seg->segment_number;
+    dst->next_fid = seg->next_fid;
+    if (dst->size_bytes == 0u && seg->size_bytes != 0u) {
+        dst->size_bytes = seg->size_bytes;
+    }
+    dst->header_fids[dst->header_count++] = seg->fid;
+    return 0;
+}
+
 static int append_cached_header(rsx11_header_cache_t *cache,
                                 const rsx11_file_header_t *hdr)
 {
@@ -429,7 +510,7 @@ static int parse_header_candidate(const uint8_t *buf, size_t avail,
         return 0;
     }
     ptr_words = map[8];
-    if (ptr_words == 0u || (ptr_words & 1u) != 0u || ptr_words > map[9]) {
+    if ((ptr_words & 1u) != 0u || ptr_words > map[9]) {
         return 0;
     }
 
@@ -446,6 +527,12 @@ static int parse_header_candidate(const uint8_t *buf, size_t avail,
     out->fid.num = get_le16(buf + 2u);
     out->fid.seq = get_le16(buf + 4u);
     out->fid.rvn = 0;
+    out->segment_number = map[0];
+    out->next_fid.rvn = map[1];
+    out->next_fid.num = get_le16(map + 2u);
+    out->next_fid.seq = get_le16(map + 4u);
+    out->header_count = 1u;
+    out->header_fids[0] = out->fid;
     rad50_decode_name3(ident, out->name, sizeof(out->name));
     rad50_decode_name3(ident + 6u, out->ext, sizeof(out->ext));
     out->ext[3] = '\0';
@@ -477,7 +564,9 @@ static int parse_header_candidate(const uint8_t *buf, size_t avail,
             uint64_t size_bytes =
                 (uint64_t)(fcs_efbk - 1u) * RSX11_BLOCK_SIZE + fcs_ffby;
 
-            if (size_bytes <= alloc_bytes) {
+            if (size_bytes <= alloc_bytes ||
+                out->next_fid.num != 0u || out->next_fid.seq != 0u ||
+                out->next_fid.rvn != 0u) {
                 out->size_bytes = size_bytes;
             }
         }
@@ -486,7 +575,9 @@ static int parse_header_candidate(const uint8_t *buf, size_t avail,
             uint64_t size_bytes =
                 (uint64_t)(fcs_efbk - 1u) * RSX11_BLOCK_SIZE;
 
-            if (size_bytes <= alloc_bytes) {
+            if (size_bytes <= alloc_bytes ||
+                out->next_fid.num != 0u || out->next_fid.seq != 0u ||
+                out->next_fid.rvn != 0u) {
                 out->size_bytes = size_bytes;
             }
         }
@@ -587,6 +678,9 @@ static int lookup_header(rsx11_image_t *img, rsx11_header_cache_t *cache,
 {
     const rsx11_file_header_t *cached;
     rsx11_file_header_t hdr;
+    rsx11_file_header_t seg;
+    rsx11_fid_t next_fid;
+    size_t guard;
 
     cached = find_cached_header(cache, fid);
     if (cached != NULL) {
@@ -604,6 +698,25 @@ static int lookup_header(rsx11_image_t *img, rsx11_header_cache_t *cache,
         errno = ENOENT;
         return -1;
     }
+    next_fid = hdr.next_fid;
+    for (guard = 0u; !fid_is_null(&next_fid); guard++) {
+        if (guard >= RSX11_MAX_HEADER_SEGMENTS - 1u) {
+            errno = ELOOP;
+            return -1;
+        }
+        if (read_header_slot(img, &cache->home, next_fid.num, &seg) != 0) {
+            return -1;
+        }
+        if (!same_fid(&seg.fid, &next_fid)) {
+            errno = ENOENT;
+            return -1;
+        }
+        if (append_header_segment(&hdr, &seg) != 0) {
+            return -1;
+        }
+        next_fid = hdr.next_fid;
+    }
+    memset(&hdr.next_fid, 0, sizeof(hdr.next_fid));
     if (append_cached_header(cache, &hdr) != 0) {
         return -1;
     }
@@ -612,17 +725,57 @@ static int lookup_header(rsx11_image_t *img, rsx11_header_cache_t *cache,
     return 0;
 }
 
-static int read_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
-                            uint16_t fnum, rsx11_file_header_t *out)
+static int map_vbn_to_lbn(const rsx11_file_header_t *hdr,
+                          uint32_t vbn, uint32_t *lbn_out)
 {
-    uint8_t block[RSX11_BLOCK_SIZE];
+    uint32_t cur_vbn = 1u;
+    size_t i;
+
+    if (vbn == 0u) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    for (i = 0; i < hdr->extent_count; i++) {
+        uint32_t blocks = hdr->extents[i].blocks;
+
+        if (blocks == 0u) {
+            continue;
+        }
+        if (vbn >= cur_vbn && vbn < cur_vbn + blocks) {
+            *lbn_out = hdr->extents[i].lbn + (vbn - cur_vbn);
+            return 0;
+        }
+        cur_vbn += blocks;
+    }
+
+    errno = ENOENT;
+    return -1;
+}
+
+static int read_header_slot_direct(rsx11_image_t *img, const rsx11_home_t *home,
+                                   uint16_t fnum, uint8_t block[RSX11_BLOCK_SIZE])
+{
     uint32_t lbn;
 
-    if (fnum == 0u) {
+    if (fnum == 0u || fnum > 16u) {
         errno = ENOENT;
         return -1;
     }
     lbn = home->iblb + (uint32_t)home->ibsz + (uint32_t)fnum - 1u;
+    if ((uint64_t)(lbn + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
+        errno = EIO;
+        return -1;
+    }
+    return read_at(img->fp, (uint64_t)lbn * RSX11_BLOCK_SIZE,
+                   block, RSX11_BLOCK_SIZE);
+}
+
+static int read_header_at_lbn(rsx11_image_t *img, uint32_t lbn,
+                              uint16_t fnum, rsx11_file_header_t *out)
+{
+    uint8_t block[RSX11_BLOCK_SIZE];
+
     if ((uint64_t)(lbn + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
         errno = EIO;
         return -1;
@@ -641,6 +794,93 @@ static int read_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
         return -1;
     }
     return 0;
+}
+
+static int header_slot_lbn(rsx11_image_t *img, const rsx11_home_t *home,
+                           uint16_t fnum, uint32_t *lbn_out)
+{
+    uint8_t block[RSX11_BLOCK_SIZE];
+    rsx11_file_header_t index_hdr;
+    uint32_t header_vbn;
+    rsx11_fid_t next_fid;
+    rsx11_file_header_t seg;
+    size_t guard;
+
+    if (fnum == 0u) {
+        errno = ENOENT;
+        return -1;
+    }
+    if (fnum <= 16u) {
+        *lbn_out = home->iblb + (uint32_t)home->ibsz + (uint32_t)fnum - 1u;
+        return 0;
+    }
+
+    if (read_header_slot_direct(img, home, 1u, block) != 0) {
+        return -1;
+    }
+    if (!parse_header_candidate(block, sizeof(block),
+                                (uint64_t)(home->iblb + (uint32_t)home->ibsz) *
+                                    RSX11_BLOCK_SIZE,
+                                &index_hdr) ||
+        index_hdr.fid.num != 1u || index_hdr.fid.seq != 1u) {
+        errno = EINVAL;
+        return -1;
+    }
+    next_fid = index_hdr.next_fid;
+    for (guard = 0u; !fid_is_null(&next_fid); guard++) {
+        uint32_t next_lbn;
+        uint32_t next_vbn;
+
+        if (guard >= RSX11_MAX_HEADER_SEGMENTS - 1u) {
+            errno = ELOOP;
+            return -1;
+        }
+        next_vbn = 2u + (uint32_t)home->ibsz + (uint32_t)next_fid.num;
+        if (map_vbn_to_lbn(&index_hdr, next_vbn, &next_lbn) != 0) {
+            return -1;
+        }
+        if (read_header_at_lbn(img, next_lbn, next_fid.num, &seg) != 0) {
+            return -1;
+        }
+        if (!same_fid(&seg.fid, &next_fid)) {
+            errno = ENOENT;
+            return -1;
+        }
+        if (append_header_segment(&index_hdr, &seg) != 0) {
+            return -1;
+        }
+        next_fid = index_hdr.next_fid;
+    }
+
+    header_vbn = 2u + (uint32_t)home->ibsz + (uint32_t)fnum;
+    return map_vbn_to_lbn(&index_hdr, header_vbn, lbn_out);
+}
+
+static int read_header_slot_block(rsx11_image_t *img, const rsx11_home_t *home,
+                                  uint16_t fnum, uint8_t block[RSX11_BLOCK_SIZE])
+{
+    uint32_t lbn;
+
+    if (header_slot_lbn(img, home, fnum, &lbn) != 0) {
+        return -1;
+    }
+    if ((uint64_t)(lbn + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
+        errno = EIO;
+        return -1;
+    }
+    return read_at(img->fp, (uint64_t)lbn * RSX11_BLOCK_SIZE,
+                   block, RSX11_BLOCK_SIZE);
+}
+
+static int read_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
+                            uint16_t fnum, rsx11_file_header_t *out)
+{
+    uint32_t lbn;
+
+    if (header_slot_lbn(img, home, fnum, &lbn) != 0) {
+        return -1;
+    }
+    return read_header_at_lbn(img, lbn, fnum, out);
 }
 
 static int decode_dir_record(const uint8_t *rec, rsx11_dir_record_t *out)
@@ -761,6 +1001,20 @@ static void format_entry_selector(const rsx11_dirent_t *ent,
 
         format_host_file_name(ent, spec, sizeof(spec));
         snprintf(out, out_size, "%s%s", ent->dir, spec);
+    }
+}
+
+static void format_header_selector(const rsx11_file_header_t *hdr,
+                                   char *out, size_t out_size)
+{
+    if (hdr->ext[0] != '\0') {
+        snprintf(out, out_size, "%s.%s;%u (%06o,%06o,%06o)",
+                 hdr->name, hdr->ext, (unsigned)hdr->version,
+                 hdr->fid.num, hdr->fid.seq, hdr->fid.rvn);
+    } else {
+        snprintf(out, out_size, "%s;%u (%06o,%06o,%06o)",
+                 hdr->name, (unsigned)hdr->version,
+                 hdr->fid.num, hdr->fid.seq, hdr->fid.rvn);
     }
 }
 
@@ -992,7 +1246,9 @@ static int write_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
         errno = EINVAL;
         return -1;
     }
-    lbn = home->iblb + (uint32_t)home->ibsz + (uint32_t)fnum - 1u;
+    if (header_slot_lbn(img, home, fnum, &lbn) != 0) {
+        return -1;
+    }
     return write_at(img->fp, (uint64_t)lbn * RSX11_BLOCK_SIZE,
                     block, RSX11_BLOCK_SIZE);
 }
@@ -1093,6 +1349,45 @@ static void storage_bitmap_set_free(uint8_t *data, size_t data_size,
     }
 }
 
+static int release_header_chain_allocation(const rsx11_file_header_t *hdr,
+                                           uint8_t *index_bitmap,
+                                           size_t index_size,
+                                           uint8_t *storage_bitmap,
+                                           size_t storage_size,
+                                           uint32_t unit_blocks)
+{
+    size_t i;
+
+    if (hdr == NULL || index_bitmap == NULL || storage_bitmap == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    for (i = 0; i < hdr->extent_count; i++) {
+        uint32_t lbn = hdr->extents[i].lbn;
+        uint32_t count = hdr->extents[i].blocks;
+        uint32_t b;
+
+        if (count == 0u) {
+            continue;
+        }
+        if (lbn + count > unit_blocks) {
+            errno = EIO;
+            return -1;
+        }
+        for (b = 0; b < count; b++) {
+            storage_bitmap_set_free(storage_bitmap, storage_size,
+                                    lbn + b, 1);
+        }
+    }
+
+    for (i = 0; i < hdr->header_count; i++) {
+        index_bitmap_set(index_bitmap, index_size,
+                         hdr->header_fids[i].num, 0);
+    }
+    return 0;
+}
+
 static int find_free_blocks(uint8_t *data, size_t data_size,
                             uint32_t unit_blocks, uint32_t needed,
                             uint32_t *start_out)
@@ -1124,11 +1419,8 @@ static int read_slot_sequence(rsx11_image_t *img, const rsx11_home_t *home,
                               uint16_t fnum, uint16_t *seq_out)
 {
     uint8_t block[RSX11_BLOCK_SIZE];
-    uint32_t lbn;
 
-    lbn = home->iblb + (uint32_t)home->ibsz + (uint32_t)fnum - 1u;
-    if (read_at(img->fp, (uint64_t)lbn * RSX11_BLOCK_SIZE,
-                block, sizeof(block)) != 0) {
+    if (read_header_slot_block(img, home, fnum, block) != 0) {
         return -1;
     }
     *seq_out = get_le16(block + 4u);
@@ -1187,7 +1479,11 @@ static int build_file_header_extents(uint8_t block[RSX11_BLOCK_SIZE],
         total_blocks += extents[i].blocks;
         ptr_count += header_map_pointer_count(extents[i].blocks);
     }
-    if (ptr_count == 0u || ptr_count * 2u > RSX11_MAP_MAX_WORDS) {
+    if (ptr_count == 0u && (extent_count != 0u || file_bytes != 0u)) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (ptr_count * 2u > RSX11_MAP_MAX_WORDS) {
         errno = EFBIG;
         return -1;
     }
@@ -1241,6 +1537,12 @@ static int build_file_header(uint8_t block[RSX11_BLOCK_SIZE],
 {
     rsx11_extent_t extent;
 
+    if (blocks == 0u && file_bytes == 0u) {
+        return build_file_header_extents(block, fnum, seq, owner_uic, prot,
+                                         name, ext, version,
+                                         NULL, 0u, 0u);
+    }
+
     extent.lbn = start_lbn;
     extent.blocks = (uint16_t)blocks;
     return build_file_header_extents(block, fnum, seq, owner_uic, prot,
@@ -1261,7 +1563,8 @@ static void build_home_block(uint8_t block[RSX11_BLOCK_SIZE],
     put_le16(block + RSX11_HOME_OFF_SBCL, 1u);
     put_le16(block + RSX11_HOME_OFF_DVTY, 0u);
     put_le16(block + RSX11_HOME_OFF_VLEV, 0401u);
-    copy_upper_padded(block + RSX11_HOME_OFF_VNAM, 12u, label, strlen(label));
+    copy_upper_zero_padded(block + RSX11_HOME_OFF_VNAM, 12u,
+                           label, strlen(label));
     put_le16(block + RSX11_HOME_OFF_VOWN, 0401u);
     put_le16(block + RSX11_HOME_OFF_VPRO, 0u);
     put_le16(block + RSX11_HOME_OFF_VCHA, 000030u);
@@ -1271,6 +1574,60 @@ static void build_home_block(uint8_t block[RSX11_BLOCK_SIZE],
     block[RSX11_HOME_OFF_LRUC] = 3u;
     format_volume_date(created);
     memcpy(block + RSX11_HOME_OFF_VDAT, created, 14u);
+    copy_upper_space_padded(block + RSX11_HOME_OFF_INDN, 12u,
+                            label, strlen(label));
+    memcpy(block + RSX11_HOME_OFF_INDO, "[001,001]   ", 12u);
+    memcpy(block + RSX11_HOME_OFF_INDF, "DECFILE11A  ", 12u);
+    put_le16(block + RSX11_HOME_OFF_CHK1,
+             checksum_words(block, RSX11_HOME_OFF_CHK1 / 2u));
+    put_le16(block + RSX11_HOME_OFF_CHK2, header_checksum(block));
+}
+
+static int home_block_looks_valid(rsx11_image_t *img,
+                                  const uint8_t block[RSX11_BLOCK_SIZE])
+{
+    static const uint8_t files11_id[12] = "DECFILE11A  ";
+    uint16_t ibsz;
+    uint32_t iblb;
+
+    if (get_le16(block + RSX11_HOME_OFF_CHK1) !=
+        checksum_words(block, RSX11_HOME_OFF_CHK1 / 2u)) {
+        errno = EINVAL;
+        return 0;
+    }
+    if (get_le16(block + RSX11_HOME_OFF_CHK2) != header_checksum(block)) {
+        errno = EINVAL;
+        return 0;
+    }
+    ibsz = get_le16(block + RSX11_HOME_OFF_IBSZ);
+    iblb = get_hiword32(block + RSX11_HOME_OFF_IBLB);
+    if (ibsz == 0u || iblb == 0u ||
+        get_le16(block + RSX11_HOME_OFF_VLEV) != 0401u) {
+        errno = EINVAL;
+        return 0;
+    }
+    if (memcmp(block + RSX11_HOME_OFF_INDF, files11_id, sizeof(files11_id)) != 0) {
+        errno = EINVAL;
+        return 0;
+    }
+    if ((uint64_t)iblb * RSX11_BLOCK_SIZE >= img->size_bytes ||
+        (uint64_t)ibsz * RSX11_BLOCK_SIZE > img->size_bytes ||
+        ((uint64_t)iblb + (uint64_t)ibsz) * RSX11_BLOCK_SIZE > img->size_bytes) {
+        errno = EINVAL;
+        return 0;
+    }
+    return 1;
+}
+
+static int read_home_candidate(rsx11_image_t *img, uint32_t lbn,
+                               uint8_t block[RSX11_BLOCK_SIZE])
+{
+    if ((uint64_t)(lbn + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
+        errno = EIO;
+        return -1;
+    }
+    return read_at(img->fp, (uint64_t)lbn * RSX11_BLOCK_SIZE,
+                   block, RSX11_BLOCK_SIZE);
 }
 
 static void init_storage_bitmap(uint8_t *data, size_t data_size,
@@ -1320,7 +1677,8 @@ static void update_storage_bitmap_control(uint8_t *data, size_t data_size,
                 count++;
             }
         }
-        put_hiword32(data + 4u + i * 4u, count);
+        put_le16(data + 4u + i * 4u, (uint16_t)count);
+        put_le16(data + 4u + i * 4u + 2u, 0u);
     }
     put_hiword32(data + unit_off, total_blocks);
 }
@@ -1576,6 +1934,9 @@ static int build_directory_header(uint8_t block[RSX11_BLOCK_SIZE],
                           start_lbn, 1u, RSX11_BLOCK_SIZE) != 0) {
         return -1;
     }
+    block[RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_RATT] = 1u;
+    block[RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_RTYP] = 0u;
+    put_le16(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_RSIZ, 16u);
     put_hiword32(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_EFBK, 2u);
     put_le16(block + RSX11_HDR_OFF_UFAT + RSX11_FCS_OFF_FFBY, 0u);
     put_le16(block + 510u, header_checksum(block));
@@ -1630,12 +1991,62 @@ void rsx11_close_image(rsx11_image_t *img)
     img->total_blocks = 0;
 }
 
+int rsx11_read_boot_block(rsx11_image_t *img,
+                          uint8_t block[RSX11_BLOCK_SIZE])
+{
+    if (img == NULL || block == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (img->size_bytes < RSX11_BLOCK_SIZE) {
+        errno = EIO;
+        return -1;
+    }
+    return read_at(img->fp, 0u, block, RSX11_BLOCK_SIZE);
+}
+
+int rsx11_write_boot_block(rsx11_image_t *img,
+                           const uint8_t block[RSX11_BLOCK_SIZE])
+{
+    if (img == NULL || block == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (img->size_bytes < RSX11_BLOCK_SIZE) {
+        errno = EIO;
+        return -1;
+    }
+    if (write_at(img->fp, 0u, block, RSX11_BLOCK_SIZE) != 0) {
+        return -1;
+    }
+    if (fflush(img->fp) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
 int rsx11_read_home(rsx11_image_t *img, rsx11_home_t *home)
 {
     uint8_t block[RSX11_BLOCK_SIZE];
+    uint32_t lbn;
+    int found = 0;
 
-    if (read_at(img->fp, (uint64_t)RSX11_HOME_BLOCK * RSX11_BLOCK_SIZE,
-                block, sizeof(block)) != 0) {
+    if (read_home_candidate(img, RSX11_HOME_BLOCK, block) == 0 &&
+        home_block_looks_valid(img, block)) {
+        found = 1;
+    } else {
+        for (lbn = 256u; lbn < img->total_blocks; lbn += 256u) {
+            if (read_home_candidate(img, lbn, block) != 0) {
+                return -1;
+            }
+            if (home_block_looks_valid(img, block)) {
+                found = 1;
+                break;
+            }
+        }
+    }
+    if (!found) {
+        errno = EINVAL;
         return -1;
     }
 
@@ -1845,13 +2256,8 @@ int rsx11_remove_entry(rsx11_image_t *img, const rsx11_dirent_t *ent)
             rsx11_free_dirlist(&list);
             return -1;
         }
-        if (read_header_slot(img, &home, ent->fid.num, &hdr) != 0) {
+        if (lookup_header(img, &cache, &ent->fid, &hdr) != 0) {
             rsx11_free_dirlist(&list);
-            return -1;
-        }
-        if (hdr.fid.seq != ent->fid.seq) {
-            rsx11_free_dirlist(&list);
-            errno = ENOENT;
             return -1;
         }
         if (load_storage_bitmap(img, &cache, &storage_bitmap, &storage_size,
@@ -1866,25 +2272,16 @@ int rsx11_remove_entry(rsx11_image_t *img, const rsx11_dirent_t *ent)
             free_header_cache(&cache);
             return -1;
         }
-        for (i = 0; i < hdr.extent_count; i++) {
-            uint32_t lbn = hdr.extents[i].lbn;
-            uint32_t count = hdr.extents[i].blocks;
-            uint32_t b;
-
-            if (lbn + count > unit_blocks) {
-                rsx11_free_dirlist(&list);
-                free(index_bitmap);
-                free(storage_bitmap);
-                free_header_cache(&cache);
-                errno = EIO;
-                return -1;
-            }
-            for (b = 0; b < count; b++) {
-                storage_bitmap_set_free(storage_bitmap, storage_size,
-                                        lbn + b, 1);
-            }
+        if (release_header_chain_allocation(&hdr,
+                                            index_bitmap, index_size,
+                                            storage_bitmap, storage_size,
+                                            unit_blocks) != 0) {
+            rsx11_free_dirlist(&list);
+            free(index_bitmap);
+            free(storage_bitmap);
+            free_header_cache(&cache);
+            return -1;
         }
-        index_bitmap_set(index_bitmap, index_size, ent->fid.num, 0);
     }
 
     memset(zero, 0, sizeof(zero));
@@ -2162,21 +2559,12 @@ int rsx11_remove_directory(rsx11_image_t *img, const char *dir)
                               &bitmap_hdr, &unit_blocks) != 0) {
         goto out;
     }
-    for (i = 0; i < dir_hdr.extent_count; i++) {
-        uint32_t lbn = dir_hdr.extents[i].lbn;
-        uint32_t count = dir_hdr.extents[i].blocks;
-        uint32_t b;
-
-        if (lbn + count > unit_blocks) {
-            errno = EIO;
-            goto out;
-        }
-        for (b = 0; b < count; b++) {
-            storage_bitmap_set_free(storage_bitmap, storage_size,
-                                    lbn + b, 1);
-        }
+    if (release_header_chain_allocation(&dir_hdr,
+                                        index_bitmap, index_size,
+                                        storage_bitmap, storage_size,
+                                        unit_blocks) != 0) {
+        goto out;
     }
-    index_bitmap_set(index_bitmap, index_size, target->fid.num, 0);
 
     memset(zero, 0, sizeof(zero));
     if (write_at(img->fp, target->raw_offset, zero, sizeof(zero)) != 0) {
@@ -2273,10 +2661,6 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
     if (seek_to(host, 0) != 0) {
         goto out;
     }
-    if (file_bytes == 0u) {
-        errno = EINVAL;
-        goto out;
-    }
     blocks = (uint32_t)((file_bytes + RSX11_BLOCK_SIZE - 1u) /
                         RSX11_BLOCK_SIZE);
 
@@ -2370,18 +2754,20 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
                             &bitmap_hdr, &unit_blocks) != 0) {
         goto out;
     }
-    if (find_free_blocks(storage_bitmap, storage_size, unit_blocks,
-                         blocks, &start_lbn) != 0) {
-        goto out;
-    }
-    if ((uint64_t)(start_lbn + blocks) * RSX11_BLOCK_SIZE > img->size_bytes) {
-        errno = ENOSPC;
-        goto out;
-    }
+    if (blocks != 0u) {
+        if (find_free_blocks(storage_bitmap, storage_size, unit_blocks,
+                             blocks, &start_lbn) != 0) {
+            goto out;
+        }
+        if ((uint64_t)(start_lbn + blocks) * RSX11_BLOCK_SIZE > img->size_bytes) {
+            errno = ENOSPC;
+            goto out;
+        }
 
-    for (i = 0; i < blocks; i++) {
-        storage_bitmap_set_free(storage_bitmap, storage_size,
-                                start_lbn + (uint32_t)i, 0);
+        for (i = 0; i < blocks; i++) {
+            storage_bitmap_set_free(storage_bitmap, storage_size,
+                                    start_lbn + (uint32_t)i, 0);
+        }
     }
     index_bitmap_set(index_bitmap, index_size, fnum, 1);
 
@@ -2425,9 +2811,16 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
             goto out;
         }
     }
-    if (fgetc(host) != EOF) {
-        errno = EIO;
-        goto out;
+    if (blocks == 0u) {
+        if (fgetc(host) != EOF) {
+            errno = EIO;
+            goto out;
+        }
+    } else {
+        if (fgetc(host) != EOF) {
+            errno = EIO;
+            goto out;
+        }
     }
 
     if (write_header_slot(img, &home, fnum, file_hdr_block) != 0) {
@@ -2498,7 +2891,7 @@ int rsx11_mkfs(const char *path, uint32_t blocks, const char *label)
     static const uint32_t badblk_blocks = 20u;
     rsx11_image_t img;
     rsx11_extent_t index_extents[2];
-    rsx11_mkfs_file_t files[4];
+    rsx11_mkfs_file_t files[5];
     uint8_t home_block[RSX11_BLOCK_SIZE];
     uint8_t header_block[RSX11_BLOCK_SIZE];
     uint8_t mfd_block[RSX11_BLOCK_SIZE];
@@ -2576,15 +2969,18 @@ int rsx11_mkfs(const char *path, uint32_t blocks, const char *label)
         "INDEXF", "SYS", { 1u, 1u, 0u }, 0u, 2u + 1u + (uint32_t)fmax
     };
     files[1] = (rsx11_mkfs_file_t){
-        "BITMAP", "SYS", { 2u, 2u, 0u }, data_start, bitmap_total_blocks
+        "BITMAP", "SYS", { 2u, 2u, 0u }, data_start + 1u, bitmap_total_blocks
     };
     files[2] = (rsx11_mkfs_file_t){
         "BADBLK", "SYS", { 3u, 3u, 0u },
-        data_start + bitmap_total_blocks, badblk_blocks
+        blocks - badblk_blocks, badblk_blocks
     };
     files[3] = (rsx11_mkfs_file_t){
         "000000", "DIR", { 4u, 4u, 0u },
-        data_start + bitmap_total_blocks + badblk_blocks, 1u
+        data_start, 1u
+    };
+    files[4] = (rsx11_mkfs_file_t){
+        "CORIMG", "SYS", { 5u, 5u, 0u }, 0u, 0u
     };
     unit_blocks = blocks;
 
@@ -2630,9 +3026,20 @@ int rsx11_mkfs(const char *path, uint32_t blocks, const char *label)
                           files[3].fid.num, header_block) != 0) {
         goto out;
     }
+    if (build_file_header_extents(header_block,
+                                  files[4].fid.num, files[4].fid.seq,
+                                  0401u, 0160000u,
+                                  files[4].name, files[4].ext, 1u,
+                                  NULL, 0u, 0u) != 0) {
+        goto out;
+    }
+    if (write_header_slot(&img, &(rsx11_home_t){ .ibsz = 1u, .iblb = iblb },
+                          files[4].fid.num, header_block) != 0) {
+        goto out;
+    }
 
     memset(mfd_block, 0, sizeof(mfd_block));
-    for (i = 0; i < 4u; i++) {
+    for (i = 0; i < 5u; i++) {
         if (build_dir_record(mfd_block + i * 16u, &files[i].fid,
                              files[i].name, files[i].ext, 1u) != 0) {
             goto out;
@@ -2676,7 +3083,7 @@ int rsx11_mkfs(const char *path, uint32_t blocks, const char *label)
     if (index_bitmap == NULL) {
         goto out;
     }
-    for (i = 0; i < 4u; i++) {
+    for (i = 0; i < 5u; i++) {
         index_bitmap_set(index_bitmap, index_size, files[i].fid.num, 1);
     }
     if (write_at(img.fp, (uint64_t)iblb * RSX11_BLOCK_SIZE,
@@ -2786,6 +3193,7 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
     uint8_t *index_bitmap = NULL;
     uint8_t *storage_bitmap = NULL;
     uint16_t *seen_seq = NULL;
+    uint16_t *pred_seq = NULL;
     size_t index_size = 0;
     size_t storage_size = 0;
     uint32_t unit_blocks = 0;
@@ -2826,6 +3234,24 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
     if (seen_seq == NULL) {
         goto out;
     }
+    pred_seq = calloc((size_t)home.fmax + 1u, sizeof(*pred_seq));
+    if (pred_seq == NULL) {
+        goto out;
+    }
+
+    for (i = 1u; i <= home.fmax; i++) {
+        rsx11_file_header_t hdr;
+
+        if (!index_bitmap_test(index_bitmap, index_size, (uint16_t)i)) {
+            continue;
+        }
+        if (read_header_slot(img, &home, (uint16_t)i, &hdr) != 0) {
+            continue;
+        }
+        if (!fid_is_null(&hdr.next_fid) && hdr.next_fid.num <= home.fmax) {
+            pred_seq[hdr.next_fid.num] = hdr.next_fid.seq;
+        }
+    }
 
     for (i = 0; i < entries.count; i++) {
         rsx11_file_header_t hdr;
@@ -2850,18 +3276,37 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
                        "directory record points to missing header");
             continue;
         }
-        seen_seq[fnum] = entries.entries[i].fid.seq;
+        for (j = 0; j < hdr.header_count; j++) {
+            if (hdr.header_fids[j].num <= home.fmax) {
+                seen_seq[hdr.header_fids[j].num] =
+                    hdr.header_fids[j].seq;
+            }
+        }
 
-        if (!index_bitmap_test(index_bitmap, index_size, (uint16_t)fnum)) {
-            fsck_issue(out, report, &entries.entries[i],
-                       "index bitmap bit is clear");
+        for (j = 0; j < hdr.header_count; j++) {
+            if (!index_bitmap_test(index_bitmap, index_size,
+                                   hdr.header_fids[j].num)) {
+                missing_blocks++;
+            }
+        }
+        if (missing_blocks != 0u) {
+            char msg[96];
+
+            snprintf(msg, sizeof(msg),
+                     "index bitmap marks %lu header slot(s) free",
+                     (unsigned long)missing_blocks);
+            fsck_issue(out, report, &entries.entries[i], msg);
             if (repair) {
-                index_bitmap_set(index_bitmap, index_size, (uint16_t)fnum, 1);
+                for (j = 0; j < hdr.header_count; j++) {
+                    index_bitmap_set(index_bitmap, index_size,
+                                     hdr.header_fids[j].num, 1);
+                }
                 index_dirty = 1;
                 report->repaired++;
             }
         }
 
+        missing_blocks = 0u;
         for (j = 0; j < hdr.extent_count; j++) {
             uint32_t b;
 
@@ -2911,6 +3356,63 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
         }
     }
 
+    for (i = 1u; i <= home.fmax; i++) {
+        rsx11_file_header_t hdr;
+        rsx11_file_header_t chain_hdr;
+        char selector[64];
+        size_t j;
+
+        if (!index_bitmap_test(index_bitmap, index_size, (uint16_t)i)) {
+            continue;
+        }
+        report->checked++;
+        if (read_header_slot(img, &home, (uint16_t)i, &hdr) != 0) {
+            char msg[96];
+
+            snprintf(msg, sizeof(msg),
+                     "index bitmap marks FID %06o allocated, but header slot is empty or invalid",
+                     (unsigned)i);
+            fsck_fatal(out, report, NULL, msg);
+            continue;
+        }
+        if (seen_seq[i] == hdr.fid.seq) {
+            continue;
+        }
+        if (hdr.segment_number != 0u && pred_seq[i] == hdr.fid.seq) {
+            continue;
+        }
+        if (lookup_header(img, &cache, &hdr.fid, &chain_hdr) != 0) {
+            fsck_fatal(out, report, NULL,
+                       "allocated orphan header chain is inconsistent");
+            continue;
+        }
+        for (j = 0; j < chain_hdr.header_count; j++) {
+            if (chain_hdr.header_fids[j].num <= home.fmax) {
+                seen_seq[chain_hdr.header_fids[j].num] =
+                    chain_hdr.header_fids[j].seq;
+            }
+        }
+
+        format_header_selector(&chain_hdr, selector, sizeof(selector));
+        report->issues++;
+        fprintf(out,
+                "issue: orphan header %s is allocated but not referenced by any directory\n",
+                selector);
+        if (repair) {
+            if (release_header_chain_allocation(&chain_hdr,
+                                                index_bitmap, index_size,
+                                                storage_bitmap, storage_size,
+                                                unit_blocks) != 0) {
+                fsck_fatal(out, report, NULL,
+                           "cannot free orphan header chain: extent outside image bounds");
+                continue;
+            }
+            index_dirty = 1;
+            storage_dirty = 1;
+            report->repaired++;
+        }
+    }
+
     if (repair) {
         if (index_dirty &&
             write_at(img->fp, (uint64_t)home.iblb * RSX11_BLOCK_SIZE,
@@ -2948,6 +3450,7 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
     rc = 0;
 
 out:
+    free(pred_seq);
     free(seen_seq);
     free(storage_bitmap);
     free(index_bitmap);
