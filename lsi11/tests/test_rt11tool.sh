@@ -16,6 +16,7 @@ mkdir -p "$out"
 dd if=/dev/urandom of="$tmpdir/a.bin" bs=512 count=2 2>/dev/null
 dd if=/dev/urandom of="$tmpdir/b.bin" bs=512 count=3 2>/dev/null
 dd if=/dev/urandom of="$tmpdir/c.bin" bs=512 count=1 2>/dev/null
+dd if=/dev/urandom of="$tmpdir/d.bin" bs=1000 count=1 2>/dev/null
 
 ./rt11tool mkfs "$img" --type rk05 --segments 8 --volid TESTVOL --owner TESTOWN \
     --sysid TESTSYS
@@ -37,6 +38,10 @@ fi
 ./rt11tool extract "$img" "$out"
 cmp "$tmpdir/a.bin" "$out/A.BIN"
 cmp "$tmpdir/b.bin" "$out/B.BIN"
+./rt11tool add "$img" "$tmpdir/d.bin" D.BIN
+./rt11tool extract "$img" "$out" D.BIN
+test "$(wc -c < "$out/D.BIN")" -eq 1024
+cmp -n 1000 "$tmpdir/d.bin" "$out/D.BIN"
 
 ./rt11tool rm "$img" A.BIN
 ./rt11tool squeeze "$img"
