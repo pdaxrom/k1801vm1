@@ -469,6 +469,11 @@ static int same_fid(const rsx11_fid_t *a, const rsx11_fid_t *b)
     return a->num == b->num && a->seq == b->seq && a->rvn == b->rvn;
 }
 
+static int same_fid_num_seq(const rsx11_fid_t *a, const rsx11_fid_t *b)
+{
+    return a->num == b->num && a->seq == b->seq;
+}
+
 static int fid_is_null(const rsx11_fid_t *fid)
 {
     return fid->num == 0u && fid->seq == 0u && fid->rvn == 0u;
@@ -3459,6 +3464,19 @@ static int fsck_dir_record_matches_header(const rsx11_dirent_t *ent,
            ent->version == hdr->version;
 }
 
+static int fsck_dirent_same_record(const rsx11_dirent_t *a,
+                                   const rsx11_dirent_t *b)
+{
+    if (a == NULL || b == NULL) {
+        return 0;
+    }
+    return strcmp(a->dir, b->dir) == 0 &&
+           strcmp(a->name, b->name) == 0 &&
+           strcmp(a->ext, b->ext) == 0 &&
+           a->version == b->version &&
+           same_fid(&a->fid, &b->fid);
+}
+
 static int fsck_scan_directory(rsx11_image_t *img,
                                const rsx11_file_header_t *hdr,
                                const char *dir_name,
@@ -3622,9 +3640,11 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
     for (i = 0; i < entries.count; i++) {
         rsx11_file_header_t slot_hdr;
         rsx11_file_header_t hdr;
+        rsx11_fid_t lookup_fid;
         uint32_t fnum;
         uint32_t lbn;
         uint32_t count;
+        size_t k;
         size_t j;
         size_t missing_blocks = 0u;
 
@@ -3646,8 +3666,9 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             }
             continue;
         }
+        lookup_fid = entries.entries[i].fid;
         if (read_header_slot(img, &home, (uint16_t)fnum, &slot_hdr) != 0 ||
-            !same_fid(&slot_hdr.fid, &entries.entries[i].fid)) {
+            !same_fid_num_seq(&slot_hdr.fid, &entries.entries[i].fid)) {
             fsck_issue(out, report, &entries.entries[i],
                        "directory record points to missing header");
             if (repair) {
@@ -3662,6 +3683,30 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
                 report->fatal++;
             }
             continue;
+        }
+        if (!same_fid(&slot_hdr.fid, &entries.entries[i].fid)) {
+            fsck_issue(out, report, &entries.entries[i],
+                       "directory record FID disagrees with header RVN");
+            if (repair) {
+                if (fsck_rewrite_dir_record(img, &entries.entries[i], &slot_hdr) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot rewrite directory record FID from header");
+                    continue;
+                }
+                dir_dirty = 1;
+                report->repaired++;
+                entries.entries[i].fid = slot_hdr.fid;
+                strncpy(entries.entries[i].name, slot_hdr.name,
+                        sizeof(entries.entries[i].name) - 1u);
+                entries.entries[i].name[sizeof(entries.entries[i].name) - 1u] = '\0';
+                strncpy(entries.entries[i].ext, slot_hdr.ext,
+                        sizeof(entries.entries[i].ext) - 1u);
+                entries.entries[i].ext[sizeof(entries.entries[i].ext) - 1u] = '\0';
+                entries.entries[i].version = slot_hdr.version;
+            } else {
+                report->fatal++;
+            }
+            lookup_fid = slot_hdr.fid;
         }
         if (slot_hdr.segment_number != 0u) {
             fsck_issue(out, report, &entries.entries[i],
@@ -3679,7 +3724,7 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             }
             continue;
         }
-        if (lookup_header(img, &cache, &entries.entries[i].fid, &hdr) != 0) {
+        if (lookup_header(img, &cache, &lookup_fid, &hdr) != 0) {
             fsck_issue(out, report, &entries.entries[i],
                        "directory record points to inconsistent header chain");
             if (repair) {
@@ -3716,6 +3761,26 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             } else {
                 report->fatal++;
             }
+        }
+        for (k = 0; k < i; k++) {
+            if (!fsck_dirent_same_record(&entries.entries[k],
+                                         &entries.entries[i])) {
+                continue;
+            }
+            fsck_issue(out, report, &entries.entries[i],
+                       "directory record is a duplicate of an earlier entry");
+            if (repair) {
+                if (fsck_clear_dir_record(img, &entries.entries[i]) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot remove duplicate directory record");
+                } else {
+                    dir_dirty = 1;
+                    report->repaired++;
+                }
+            } else {
+                report->fatal++;
+            }
+            goto next_entry;
         }
         if (seen_seq[fnum] == entries.entries[i].fid.seq) {
             continue;
@@ -3798,6 +3863,8 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
                 report->repaired++;
             }
         }
+next_entry:
+        ;
     }
 
     for (i = 1u; i <= home.fmax; i++) {

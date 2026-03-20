@@ -608,6 +608,12 @@ int main(int argc, char **argv)
             fclose(fp);
             return 1;
         }
+    } else if (strcmp(argv[1], "dir-rvn") == 0) {
+        put16(dirblk + 4u, 1u);
+        if (write_at(fp, (uint64_t)ufd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+            fclose(fp);
+            return 1;
+        }
     } else if (strcmp(argv[1], "dir-mismatch") == 0) {
         rad50_name3("WRONGX", dirblk + 6u);
         put16(dirblk + 12u, rad50_word("TMP"));
@@ -616,6 +622,27 @@ int main(int argc, char **argv)
             fclose(fp);
             return 1;
         }
+    } else if (strcmp(argv[1], "dup-entry") == 0) {
+        size_t off;
+
+        for (off = 16u; off + 16u <= BLK; off += 16u) {
+            if (get16(dirblk + off) == 0u) {
+                memcpy(dirblk + off, dirblk, 16u);
+                if (write_at(fp, (uint64_t)ufd_lbn * BLK,
+                             dirblk, sizeof(dirblk)) != 0) {
+                    fclose(fp);
+                    return 1;
+                }
+                if (fflush(fp) != 0) {
+                    fclose(fp);
+                    return 1;
+                }
+                fclose(fp);
+                return 0;
+            }
+        }
+        fclose(fp);
+        return 1;
     } else if (strcmp(argv[1], "break-next") == 0) {
         for (bogus_fnum = fmax; bogus_fnum > 5u; bogus_fnum--) {
             uint8_t candidate[BLK];
@@ -674,6 +701,19 @@ status_nonprimary_after=$?
 set -e
 ./rsx11tool ls "$tmpdir/nonprimary.dsk" '[001,123]' >"$tmpdir/nonprimary_ls_after.txt"
 
+cp "$tmpdir/chain.dsk" "$tmpdir/rvnfix.dsk"
+"$tmpdir/patch_chain_ref" dir-rvn "$tmpdir/rvnfix.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/rvnfix.dsk" >"$tmpdir/rvnfix_fsck.txt" 2>&1
+status_rvnfix=$?
+./rsx11tool fsck "$tmpdir/rvnfix.dsk" --repair \
+    >"$tmpdir/rvnfix_repair.txt" 2>&1
+status_rvnfix_repair=$?
+./rsx11tool fsck "$tmpdir/rvnfix.dsk" >"$tmpdir/rvnfix_after.txt" 2>&1
+status_rvnfix_after=$?
+set -e
+./rsx11tool ls "$tmpdir/rvnfix.dsk" '[001,123]' >"$tmpdir/rvnfix_ls_after.txt"
+
 cp "$tmpdir/chain.dsk" "$tmpdir/mismatch.dsk"
 "$tmpdir/patch_chain_ref" dir-mismatch "$tmpdir/mismatch.dsk"
 set +e
@@ -686,6 +726,19 @@ status_mismatch_repair=$?
 status_mismatch_after=$?
 set -e
 ./rsx11tool ls "$tmpdir/mismatch.dsk" '[001,123]' >"$tmpdir/mismatch_ls_after.txt"
+
+cp "$tmpdir/chain.dsk" "$tmpdir/dupentry.dsk"
+"$tmpdir/patch_chain_ref" dup-entry "$tmpdir/dupentry.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/dupentry.dsk" >"$tmpdir/dupentry_fsck.txt" 2>&1
+status_dupentry=$?
+./rsx11tool fsck "$tmpdir/dupentry.dsk" --repair \
+    >"$tmpdir/dupentry_repair.txt" 2>&1
+status_dupentry_repair=$?
+./rsx11tool fsck "$tmpdir/dupentry.dsk" >"$tmpdir/dupentry_after.txt" 2>&1
+status_dupentry_after=$?
+set -e
+./rsx11tool ls "$tmpdir/dupentry.dsk" '[001,123]' >"$tmpdir/dupentry_ls_after.txt"
 
 cp "$tmpdir/chain.dsk" "$tmpdir/badchain.dsk"
 "$tmpdir/patch_chain_ref" break-next "$tmpdir/badchain.dsk"
@@ -1049,6 +1102,14 @@ grep -q "fsck: repaired" "$tmpdir/nonprimary_repair.txt"
 test "$status_nonprimary_after" -eq 0
 grep -q "fsck: clean" "$tmpdir/nonprimary_after.txt"
 ! grep -q "CHAINA\\.BIN;1" "$tmpdir/nonprimary_ls_after.txt"
+test "$status_rvnfix" -eq 2
+grep -q "CHAINA\\.BIN;1: directory record FID disagrees with header RVN" \
+    "$tmpdir/rvnfix_fsck.txt"
+test "$status_rvnfix_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/rvnfix_repair.txt"
+test "$status_rvnfix_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/rvnfix_after.txt"
+grep -q "CHAINA\\.BIN;1" "$tmpdir/rvnfix_ls_after.txt"
 test "$status_mismatch" -eq 2
 grep -q "WRONGX\\.TMP;7: directory record name/type/version disagrees with header" \
     "$tmpdir/mismatch_fsck.txt"
@@ -1058,6 +1119,14 @@ test "$status_mismatch_after" -eq 0
 grep -q "fsck: clean" "$tmpdir/mismatch_after.txt"
 grep -q "CHAINA\\.BIN;1" "$tmpdir/mismatch_ls_after.txt"
 ! grep -q "WRONGX\\.TMP;7" "$tmpdir/mismatch_ls_after.txt"
+test "$status_dupentry" -eq 2
+grep -q "CHAINA\\.BIN;1: directory record is a duplicate of an earlier entry" \
+    "$tmpdir/dupentry_fsck.txt"
+test "$status_dupentry_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/dupentry_repair.txt"
+test "$status_dupentry_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/dupentry_after.txt"
+test "$(grep -c 'CHAINA\.BIN;1' "$tmpdir/dupentry_ls_after.txt")" -eq 1
 test "$status_badchain" -eq 2
 grep -q "CHAINA\\.BIN;1: directory record points to inconsistent header chain" \
     "$tmpdir/badchain_fsck.txt"
