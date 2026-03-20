@@ -64,6 +64,38 @@ dd if="$tmpdir/mkfs_bootsrc.dsk" of="$tmpdir/mkfs_bootsrc.block0" bs=512 count=1
     >/dev/null 2>&1
 dd if="$tmpdir/mkfs_bootfile.dsk" of="$tmpdir/mkfs_bootfile.block0" bs=512 count=1 \
     >/dev/null 2>&1
+
+./rsx11tool mkfs "$tmpdir/frag.dsk" --blocks 128 --label FRAG \
+    >"$tmpdir/frag_mkfs.txt"
+./rsx11tool mkdir "$tmpdir/frag.dsk" '[001,123]' >"$tmpdir/frag_mkdir.txt"
+(dd if=/dev/zero bs=512 count=1 2>/dev/null | tr '\0' 'F') >"$tmpdir/frag_one.bin"
+(dd if=/dev/zero bs=512 count=2 2>/dev/null | tr '\0' 'G') >"$tmpdir/frag_pair.bin"
+printf 'FRAGPAIR\n' | dd of="$tmpdir/frag_pair.bin" conv=notrunc \
+    >/dev/null 2>&1
+frag_count=0
+while :; do
+    frag_spec="$(printf '[001,123]F%05o.BIN' "$frag_count")"
+    if ./rsx11tool add "$tmpdir/frag.dsk" "$tmpdir/frag_one.bin" \
+        "$frag_spec" >/dev/null 2>&1; then
+        frag_count=$((frag_count + 1))
+    else
+        break
+    fi
+done
+frag_i=0
+while [ "$frag_i" -lt "$frag_count" ]; do
+    if [ $((frag_i % 2)) -eq 0 ]; then
+        frag_spec="$(printf '[001,123]F%05o.BIN;1' "$frag_i")"
+        ./rsx11tool rm "$tmpdir/frag.dsk" "$frag_spec" >/dev/null
+    fi
+    frag_i=$((frag_i + 1))
+done
+./rsx11tool add "$tmpdir/frag.dsk" "$tmpdir/frag_pair.bin" \
+    '[001,123]PAIR.BIN' >"$tmpdir/frag_add_pair.txt"
+./rsx11tool ls "$tmpdir/frag.dsk" '[001,123]' >"$tmpdir/frag_ls.txt"
+./rsx11tool extract "$tmpdir/frag.dsk" "$tmpdir/frag_out" \
+    '[001,123]PAIR.BIN;1' >"$tmpdir/frag_extract.txt"
+./rsx11tool fsck "$tmpdir/frag.dsk" >"$tmpdir/frag_fsck.txt" 2>&1
 cp "$tmpdir/mkfs.dsk" "$tmpdir/mkfs_alt_home.dsk"
 dd if="$tmpdir/mkfs_alt_home.dsk" of="$tmpdir/mkfs_alt_home.dsk" \
     bs=512 skip=1 seek=256 count=1 conv=notrunc >/dev/null 2>&1
@@ -389,6 +421,34 @@ set -e
 ./rsx11tool fsck "$tmpdir/orphan_repair.dsk" \
     >"$tmpdir/orphan_repair_check.txt" 2>&1
 
+./rsx11tool mkfs "$tmpdir/dangling.dsk" --blocks 2048 --label DANGL \
+    >"$tmpdir/dangling_mkfs.txt"
+./rsx11tool mkdir "$tmpdir/dangling.dsk" '[001,123]' >"$tmpdir/dangling_mkdir.txt"
+./rsx11tool add "$tmpdir/dangling.dsk" "$tmpdir/input.txt" \
+    '[001,123]BROKEN.TXT' >"$tmpdir/dangling_add.txt"
+iblb_dangling="$(./rsx11tool info "$tmpdir/dangling.dsk" | awk '/Index bitmap:/ {print $8}')"
+mfd_hdr_ptr_off=$(( (iblb_dangling + 4) * 512 + 102 ))
+set -- $(od -An -tu1 -N 4 -j "$mfd_hdr_ptr_off" "$tmpdir/dangling.dsk")
+mfd_lbn_dangling=$(( $1 * 65536 + $3 + 256 * $4 ))
+mfd_dir_slot_offset=$(( mfd_lbn_dangling * 512 + 80 ))
+set -- $(od -An -tu1 -N 4 -j "$mfd_dir_slot_offset" "$tmpdir/dangling.dsk")
+ufd_fnum=$(( $1 + 256 * $2 ))
+ufd_hdr_ptr_off=$(( (iblb_dangling + ufd_fnum) * 512 + 102 ))
+set -- $(od -An -tu1 -N 4 -j "$ufd_hdr_ptr_off" "$tmpdir/dangling.dsk")
+ufd_lbn_dangling=$(( $1 * 65536 + $3 + 256 * $4 ))
+printf '\0\0' | dd of="$tmpdir/dangling.dsk" bs=1 seek=$(( ufd_lbn_dangling * 512 )) \
+    conv=notrunc >/dev/null 2>&1
+set +e
+./rsx11tool fsck "$tmpdir/dangling.dsk" >"$tmpdir/dangling_fsck.txt" 2>&1
+status_dangling=$?
+./rsx11tool fsck "$tmpdir/dangling.dsk" --repair \
+    >"$tmpdir/dangling_repair.txt" 2>&1
+status_dangling_repair=$?
+./rsx11tool fsck "$tmpdir/dangling.dsk" >"$tmpdir/dangling_after.txt" 2>&1
+status_dangling_after=$?
+set -e
+./rsx11tool ls "$tmpdir/dangling.dsk" '[001,123]' >"$tmpdir/dangling_ls_after.txt"
+
 cp disks/rsx11m46-CC.rl02 "$tmpdir/fsck.rl02"
 cat >"$tmpdir/fsck_input.txt" <<'EOF'
 RSX11 fsck validation
@@ -470,6 +530,12 @@ grep -q "fsck: clean" "$tmpdir/mkfs_type_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_bootcmd_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_bootsrc_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_bootfile_fsck.txt"
+test "$frag_count" -gt 3
+grep -q "added \\[001,123\\]PAIR\\.BIN;1" "$tmpdir/frag_add_pair.txt"
+grep -q "\\[001,123\\].*PAIR\\.BIN;1.*  *2  " "$tmpdir/frag_ls.txt"
+grep -q "extracted 1 file(s)" "$tmpdir/frag_extract.txt"
+cmp -s "$tmpdir/frag_pair.bin" "$tmpdir/frag_out/001_123/PAIR.BIN;1"
+grep -q "fsck: clean" "$tmpdir/frag_fsck.txt"
 grep -q "Volume label:   MKTEST" "$tmpdir/mkfs_alt_info.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_alt_fsck.txt"
 grep -q "DECFILE11A" "$tmpdir/mkfs_strings.txt"
@@ -502,6 +568,14 @@ grep -q "orphan header 001123\\.DIR;1" "$tmpdir/orphan_fsck.txt"
 test "$status_orphan_repair" -eq 0
 grep -q "fsck: repaired" "$tmpdir/orphan_repair_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/orphan_repair_check.txt"
+test "$status_dangling" -eq 2
+grep -q "BROKEN\\.TXT;1: directory record references invalid FID" \
+    "$tmpdir/dangling_fsck.txt"
+test "$status_dangling_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/dangling_repair.txt"
+test "$status_dangling_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/dangling_after.txt"
+! grep -q "BROKEN\\.TXT;1" "$tmpdir/dangling_ls_after.txt"
 test "$status_bad" -eq 2
 test "$status_repair" -eq 2
 test "$status_after" -eq 2

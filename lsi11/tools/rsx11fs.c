@@ -86,8 +86,95 @@ typedef struct {
     size_t cap;
 } rsx11_header_cache_t;
 
+typedef int (*rsx11_dir_record_cb_t)(const uint8_t *rec, uint64_t raw_offset,
+                                     void *opaque);
+
 static int read_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
                             uint16_t fnum, rsx11_file_header_t *out);
+static uint32_t header_total_blocks(const rsx11_file_header_t *hdr);
+static uint16_t get_le16(const uint8_t *p);
+static int read_at(FILE *fp, uint64_t off, void *buf, size_t len);
+static void trim_right(char *s);
+static void rad50_decode_word(uint16_t word, char out[4]);
+static void rad50_decode_name3(const uint8_t *p, char *out, size_t out_size);
+static void fsck_issue(FILE *out, rsx11_fsck_report_t *report,
+                       const rsx11_dirent_t *ent, const char *msg);
+static void fsck_fatal(FILE *out, rsx11_fsck_report_t *report,
+                       const rsx11_dirent_t *ent, const char *msg);
+static int fsck_clear_dir_record(rsx11_image_t *img, const rsx11_dirent_t *ent);
+
+static int dir_record_is_empty(const uint8_t *rec)
+{
+    size_t i;
+
+    for (i = 0; i < 16u; i++) {
+        if (rec[i] != 0u) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static void decode_dir_record_loose(const uint8_t *rec, rsx11_dir_record_t *out)
+{
+    memset(out, 0, sizeof(*out));
+    out->fid.num = get_le16(rec + 0u);
+    out->fid.seq = get_le16(rec + 2u);
+    out->fid.rvn = get_le16(rec + 4u);
+    rad50_decode_name3(rec + 6u, out->name, sizeof(out->name));
+    rad50_decode_word(get_le16(rec + 12u), out->ext);
+    trim_right(out->ext);
+    out->version = get_le16(rec + 14u);
+}
+
+static int walk_dir_records(rsx11_image_t *img, const rsx11_file_header_t *hdr,
+                            rsx11_dir_record_cb_t cb, void *opaque)
+{
+    uint8_t block[RSX11_BLOCK_SIZE];
+    uint64_t remaining_bytes = hdr->size_bytes;
+    size_t i;
+    uint32_t b;
+
+    if (remaining_bytes == 0u) {
+        remaining_bytes = (uint64_t)header_total_blocks(hdr) * RSX11_BLOCK_SIZE;
+    }
+
+    for (i = 0; i < hdr->extent_count; i++) {
+        uint32_t lbn = hdr->extents[i].lbn;
+        uint32_t count = hdr->extents[i].blocks;
+
+        for (b = 0; b < count; b++) {
+            size_t rec_off;
+            size_t block_bytes;
+
+            if (remaining_bytes == 0u) {
+                break;
+            }
+            if ((uint64_t)(lbn + b + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
+                errno = EIO;
+                return -1;
+            }
+            if (read_at(img->fp, (uint64_t)(lbn + b) * RSX11_BLOCK_SIZE,
+                        block, sizeof(block)) != 0) {
+                return -1;
+            }
+
+            block_bytes = remaining_bytes >= RSX11_BLOCK_SIZE
+                              ? RSX11_BLOCK_SIZE
+                              : (size_t)remaining_bytes;
+            for (rec_off = 0; rec_off + 16u <= block_bytes; rec_off += 16u) {
+                if (cb(block + rec_off,
+                       (uint64_t)(lbn + b) * RSX11_BLOCK_SIZE + rec_off,
+                       opaque) != 0) {
+                    return -1;
+                }
+            }
+            remaining_bytes -= block_bytes;
+        }
+    }
+
+    return 0;
+}
 
 static uint16_t get_le16(const uint8_t *p)
 {
@@ -885,19 +972,13 @@ static int read_header_slot(rsx11_image_t *img, const rsx11_home_t *home,
 
 static int decode_dir_record(const uint8_t *rec, rsx11_dir_record_t *out)
 {
-    memset(out, 0, sizeof(*out));
-    out->fid.num = get_le16(rec + 0u);
-    out->fid.seq = get_le16(rec + 2u);
-    out->fid.rvn = get_le16(rec + 4u);
-    if (out->fid.num == 0u) {
+    if (dir_record_is_empty(rec)) {
+        memset(out, 0, sizeof(*out));
         return 0;
     }
 
-    rad50_decode_name3(rec + 6u, out->name, sizeof(out->name));
-    rad50_decode_word(get_le16(rec + 12u), out->ext);
-    trim_right(out->ext);
-    out->version = get_le16(rec + 14u);
-    if (out->name[0] == '\0' || out->version == 0u) {
+    decode_dir_record_loose(rec, out);
+    if (out->fid.num == 0u || out->name[0] == '\0' || out->version == 0u) {
         return 0;
     }
     return 1;
@@ -932,6 +1013,94 @@ static uint32_t header_total_blocks(const rsx11_file_header_t *hdr)
         total += hdr->extents[i].blocks;
     }
     return total;
+}
+
+typedef struct {
+    const char *dir_name;
+    rsx11_dirlist_t *out;
+} rsx11_dir_read_ctx_t;
+
+typedef struct {
+    rsx11_image_t *img;
+    const char *dir_name;
+    int repair;
+    FILE *out;
+    rsx11_fsck_report_t *report;
+    int *dir_dirty;
+    rsx11_dirlist_t *entries;
+} rsx11_fsck_dir_ctx_t;
+
+static int collect_dir_record_cb(const uint8_t *rec, uint64_t raw_offset,
+                                 void *opaque)
+{
+    rsx11_dir_read_ctx_t *ctx = opaque;
+    rsx11_dir_record_t dir_rec;
+    rsx11_dirent_t ent;
+
+    if (!decode_dir_record(rec, &dir_rec)) {
+        return 0;
+    }
+
+    memset(&ent, 0, sizeof(ent));
+    strncpy(ent.dir, ctx->dir_name, sizeof(ent.dir) - 1u);
+    strncpy(ent.name, dir_rec.name, sizeof(ent.name) - 1u);
+    strncpy(ent.ext, dir_rec.ext, sizeof(ent.ext) - 1u);
+    ent.version = dir_rec.version;
+    ent.fid = dir_rec.fid;
+    ent.raw_offset = raw_offset;
+
+    if (append_dirent(ctx->out, &ent) != 0) {
+        return -1;
+    }
+    return 0;
+}
+
+static int fsck_dir_record_cb(const uint8_t *rec, uint64_t raw_offset,
+                              void *opaque)
+{
+    rsx11_fsck_dir_ctx_t *ctx = opaque;
+    rsx11_dir_record_t dir_rec;
+    rsx11_dirent_t ent;
+
+    if (dir_record_is_empty(rec)) {
+        return 0;
+    }
+
+    memset(&ent, 0, sizeof(ent));
+    strncpy(ent.dir, ctx->dir_name, sizeof(ent.dir) - 1u);
+    ent.raw_offset = raw_offset;
+
+    decode_dir_record_loose(rec, &dir_rec);
+    strncpy(ent.name, dir_rec.name, sizeof(ent.name) - 1u);
+    strncpy(ent.ext, dir_rec.ext, sizeof(ent.ext) - 1u);
+    ent.version = dir_rec.version;
+    ent.fid = dir_rec.fid;
+
+    if (dir_rec.fid.num == 0u || dir_rec.name[0] == '\0' ||
+        dir_rec.version == 0u) {
+        ctx->report->checked++;
+        fsck_issue(ctx->out, ctx->report, &ent,
+                   dir_rec.fid.num == 0u
+                       ? "directory record references invalid FID"
+                       : "directory record is malformed");
+        if (ctx->repair) {
+            if (fsck_clear_dir_record(ctx->img, &ent) != 0) {
+                fsck_fatal(ctx->out, ctx->report, &ent,
+                           "cannot remove malformed directory record");
+            } else {
+                *ctx->dir_dirty = 1;
+                ctx->report->repaired++;
+            }
+        } else {
+            ctx->report->fatal++;
+        }
+        return 0;
+    }
+
+    if (append_dirent(ctx->entries, &ent) != 0) {
+        return -1;
+    }
+    return 0;
 }
 
 static int format_uic(const char *name, char *out, size_t out_size)
@@ -1021,64 +1190,11 @@ static void format_header_selector(const rsx11_file_header_t *hdr,
 static int read_dir_records_raw(rsx11_image_t *img, const rsx11_file_header_t *hdr,
                                 const char *dir_name, rsx11_dirlist_t *out)
 {
-    uint8_t block[RSX11_BLOCK_SIZE];
-    uint64_t remaining_bytes = hdr->size_bytes;
-    size_t i;
-    uint32_t b;
+    rsx11_dir_read_ctx_t ctx;
 
-    if (remaining_bytes == 0u) {
-        remaining_bytes = (uint64_t)header_total_blocks(hdr) * RSX11_BLOCK_SIZE;
-    }
-
-    for (i = 0; i < hdr->extent_count; i++) {
-        uint32_t lbn = hdr->extents[i].lbn;
-        uint32_t count = hdr->extents[i].blocks;
-
-        for (b = 0; b < count; b++) {
-            size_t rec_off;
-            size_t block_bytes;
-
-            if (remaining_bytes == 0u) {
-                break;
-            }
-
-            if ((uint64_t)(lbn + b + 1u) * RSX11_BLOCK_SIZE > img->size_bytes) {
-                return -1;
-            }
-            if (read_at(img->fp, (uint64_t)(lbn + b) * RSX11_BLOCK_SIZE,
-                        block, sizeof(block)) != 0) {
-                return -1;
-            }
-            block_bytes = remaining_bytes >= RSX11_BLOCK_SIZE
-                              ? RSX11_BLOCK_SIZE
-                              : (size_t)remaining_bytes;
-
-            for (rec_off = 0; rec_off + 16u <= block_bytes; rec_off += 16u) {
-                rsx11_dir_record_t rec;
-                rsx11_dirent_t ent;
-
-                if (!decode_dir_record(block + rec_off, &rec)) {
-                    continue;
-                }
-
-                memset(&ent, 0, sizeof(ent));
-                strncpy(ent.dir, dir_name, sizeof(ent.dir) - 1u);
-                strncpy(ent.name, rec.name, sizeof(ent.name) - 1u);
-                strncpy(ent.ext, rec.ext, sizeof(ent.ext) - 1u);
-                ent.version = rec.version;
-                ent.fid = rec.fid;
-                ent.raw_offset =
-                    (uint64_t)(lbn + b) * RSX11_BLOCK_SIZE + rec_off;
-
-                if (append_dirent(out, &ent) != 0) {
-                    return -1;
-                }
-            }
-            remaining_bytes -= block_bytes;
-        }
-    }
-
-    return 0;
+    ctx.dir_name = dir_name;
+    ctx.out = out;
+    return walk_dir_records(img, hdr, collect_dir_record_cb, &ctx);
 }
 
 static int read_dir_file(rsx11_image_t *img, const rsx11_file_header_t *hdr,
@@ -1415,6 +1531,66 @@ static int find_free_blocks(uint8_t *data, size_t data_size,
     return -1;
 }
 
+static int allocate_file_extents(const uint8_t *data, size_t data_size,
+                                 uint32_t unit_blocks, uint32_t needed,
+                                 rsx11_extent_t *extents,
+                                 size_t *extent_count_out)
+{
+    size_t extent_count = 0;
+    uint32_t run_start = 0;
+    uint32_t run_blocks = 0;
+    uint32_t b;
+
+    if (extents == NULL || extent_count_out == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (needed == 0u) {
+        *extent_count_out = 0u;
+        return 0;
+    }
+
+    for (b = 0; b <= unit_blocks; b++) {
+        int is_free = (b < unit_blocks) &&
+                      storage_bitmap_is_free(data, data_size, b);
+
+        if (is_free) {
+            if (run_blocks == 0u) {
+                run_start = b;
+            }
+            run_blocks++;
+            continue;
+        }
+        if (run_blocks != 0u) {
+            uint32_t take = run_blocks > needed ? needed : run_blocks;
+            uint32_t pos = run_start;
+
+            while (take != 0u) {
+                uint32_t chunk = take > 256u ? 256u : take;
+
+                if (extent_count >= RSX11_MAX_EXTENTS) {
+                    errno = EFBIG;
+                    return -1;
+                }
+                extents[extent_count].lbn = pos;
+                extents[extent_count].blocks = (uint16_t)chunk;
+                extent_count++;
+                pos += chunk;
+                take -= chunk;
+                needed -= chunk;
+            }
+            if (needed == 0u) {
+                *extent_count_out = extent_count;
+                return 0;
+            }
+            run_blocks = 0u;
+        }
+    }
+
+    errno = ENOSPC;
+    return -1;
+}
+
 static int read_slot_sequence(rsx11_image_t *img, const rsx11_home_t *home,
                               uint16_t fnum, uint16_t *seq_out)
 {
@@ -1430,6 +1606,36 @@ static int read_slot_sequence(rsx11_image_t *img, const rsx11_home_t *home,
 static uint32_t header_map_pointer_count(uint32_t blocks)
 {
     return (blocks + 255u) / 256u;
+}
+
+static int header_segment_count_for_extents(const rsx11_extent_t *extents,
+                                            size_t extent_count,
+                                            size_t *segment_count_out)
+{
+    uint32_t ptr_count = 0;
+    size_t i;
+
+    if (segment_count_out == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    for (i = 0; i < extent_count; i++) {
+        ptr_count += header_map_pointer_count(extents[i].blocks);
+    }
+    if (ptr_count == 0u) {
+        *segment_count_out = 1u;
+        return 0;
+    }
+
+    *segment_count_out =
+        (size_t)((ptr_count + (RSX11_MAP_MAX_WORDS / 2u) - 1u) /
+                 (RSX11_MAP_MAX_WORDS / 2u));
+    if (*segment_count_out > RSX11_MAX_HEADER_SEGMENTS) {
+        errno = EFBIG;
+        return -1;
+    }
+    return 0;
 }
 
 static int build_file_header_extents(uint8_t block[RSX11_BLOCK_SIZE],
@@ -1525,6 +1731,37 @@ static int build_file_header_extents(uint8_t block[RSX11_BLOCK_SIZE],
         }
     }
 
+    put_le16(block + 510u, header_checksum(block));
+    return 0;
+}
+
+static int build_file_header_chain_segment(uint8_t block[RSX11_BLOCK_SIZE],
+                                           uint16_t fnum, uint16_t seq,
+                                           uint16_t owner_uic,
+                                           uint16_t prot,
+                                           const char *name,
+                                           const char *ext,
+                                           uint16_t version,
+                                           const rsx11_extent_t *extents,
+                                           size_t extent_count,
+                                           uint64_t file_bytes,
+                                           uint8_t segment_number,
+                                           const rsx11_fid_t *next_fid)
+{
+    uint8_t *map;
+
+    if (build_file_header_extents(block, fnum, seq, owner_uic, prot,
+                                  name, ext, version,
+                                  extents, extent_count, file_bytes) != 0) {
+        return -1;
+    }
+    map = block + (size_t)block[1] * 2u;
+    map[0] = segment_number;
+    if (next_fid != NULL) {
+        map[1] = (uint8_t)next_fid->rvn;
+        put_le16(map + 2u, next_fid->num);
+        put_le16(map + 4u, next_fid->seq);
+    }
     put_le16(block + 510u, header_checksum(block));
     return 0;
 }
@@ -2608,7 +2845,6 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
     uint8_t *storage_bitmap = NULL;
     uint8_t *index_bitmap = NULL;
     uint8_t dir_hdr_block[RSX11_BLOCK_SIZE];
-    uint8_t file_hdr_block[RSX11_BLOCK_SIZE];
     uint8_t dir_rec[16];
     size_t dir_alloc_bytes;
     uint64_t dir_logical_bytes;
@@ -2617,8 +2853,13 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
     size_t storage_size = 0;
     size_t index_size = 0;
     uint32_t unit_blocks = 0;
-    uint32_t start_lbn = 0;
     uint32_t blocks;
+    rsx11_extent_t extents[RSX11_MAX_EXTENTS];
+    size_t extent_count = 0;
+    size_t header_count = 1u;
+    uint16_t header_fnums[RSX11_MAX_HEADER_SEGMENTS];
+    uint16_t header_seqs[RSX11_MAX_HEADER_SEGMENTS];
+    uint8_t header_blocks[RSX11_MAX_HEADER_SEGMENTS][RSX11_BLOCK_SIZE];
     uint16_t fnum = 0;
     uint16_t seq = 0;
     uint16_t owner_uic;
@@ -2754,30 +2995,75 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
                             &bitmap_hdr, &unit_blocks) != 0) {
         goto out;
     }
-    if (blocks != 0u) {
-        if (find_free_blocks(storage_bitmap, storage_size, unit_blocks,
-                             blocks, &start_lbn) != 0) {
+    if (blocks != 0u &&
+        allocate_file_extents(storage_bitmap, storage_size, unit_blocks,
+                              blocks, extents, &extent_count) != 0) {
+        goto out;
+    }
+    if (header_segment_count_for_extents(extents, extent_count,
+                                         &header_count) != 0) {
+        goto out;
+    }
+
+    for (i = 0; i < header_count; i++) {
+        if (find_free_file_number(&home, index_bitmap, index_size, &fnum) != 0) {
             goto out;
         }
-        if ((uint64_t)(start_lbn + blocks) * RSX11_BLOCK_SIZE > img->size_bytes) {
+        if (read_slot_sequence(img, &home, fnum, &seq) != 0) {
+            goto out;
+        }
+        seq = seq == 0xffffu ? 1u : (uint16_t)(seq + 1u);
+        if (seq == 0u) {
+            seq = 1u;
+        }
+        header_fnums[i] = fnum;
+        header_seqs[i] = seq;
+        index_bitmap_set(index_bitmap, index_size, fnum, 1);
+    }
+
+    for (i = 0; i < extent_count; i++) {
+        uint32_t lbn = extents[i].lbn;
+        uint32_t count = extents[i].blocks;
+        uint32_t b;
+
+        if (count == 0u ||
+            (uint64_t)(lbn + count) * RSX11_BLOCK_SIZE > img->size_bytes) {
             errno = ENOSPC;
             goto out;
         }
-
-        for (i = 0; i < blocks; i++) {
-            storage_bitmap_set_free(storage_bitmap, storage_size,
-                                    start_lbn + (uint32_t)i, 0);
+        for (b = 0; b < count; b++) {
+            storage_bitmap_set_free(storage_bitmap, storage_size, lbn + b, 0);
         }
     }
-    index_bitmap_set(index_bitmap, index_size, fnum, 1);
 
-    if (build_file_header(file_hdr_block, fnum, seq, owner_uic,
-                          home.dfpr, name, ext, version_out,
-                          start_lbn, blocks, file_bytes) != 0) {
-        goto out;
+    for (i = 0; i < header_count; i++) {
+        size_t first_extent = i * (RSX11_MAP_MAX_WORDS / 2u);
+        size_t seg_extents = extent_count > first_extent
+                                 ? extent_count - first_extent
+                                 : 0u;
+        rsx11_fid_t next_fid = { 0u, 0u, 0u };
+
+        if (seg_extents > (RSX11_MAP_MAX_WORDS / 2u)) {
+            seg_extents = RSX11_MAP_MAX_WORDS / 2u;
+        }
+        if (i + 1u < header_count) {
+            next_fid.num = header_fnums[i + 1u];
+            next_fid.seq = header_seqs[i + 1u];
+        }
+        if (build_file_header_chain_segment(
+                header_blocks[i],
+                header_fnums[i], header_seqs[i],
+                owner_uic, home.dfpr,
+                name, ext, version_out,
+                extents + first_extent, seg_extents,
+                i == 0u ? file_bytes : 0u,
+                (uint8_t)i,
+                i + 1u < header_count ? &next_fid : NULL) != 0) {
+            goto out;
+        }
     }
     if (build_dir_record(dir_rec,
-                         &(rsx11_fid_t){ fnum, seq, 0u },
+                         &(rsx11_fid_t){ header_fnums[0], header_seqs[0], 0u },
                          name, ext, version_out) != 0) {
         goto out;
     }
@@ -2794,37 +3080,39 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
                                   dir_logical_bytes);
     }
 
-    for (i = 0; i < blocks; i++) {
-        uint8_t block[RSX11_BLOCK_SIZE];
-        size_t got = fread(block, 1, sizeof(block), host);
+    for (i = 0; i < extent_count; i++) {
+        uint32_t lbn = extents[i].lbn;
+        uint32_t count = extents[i].blocks;
+        uint32_t b;
 
-        if (got < sizeof(block)) {
-            if (ferror(host)) {
-                errno = EIO;
+        for (b = 0; b < count; b++) {
+            uint8_t block[RSX11_BLOCK_SIZE];
+            size_t got = fread(block, 1, sizeof(block), host);
+
+            if (got < sizeof(block)) {
+                if (ferror(host)) {
+                    errno = EIO;
+                    goto out;
+                }
+                memset(block + got, 0, sizeof(block) - got);
+            }
+            if (write_at(img->fp,
+                         (uint64_t)(lbn + b) * RSX11_BLOCK_SIZE,
+                         block, sizeof(block)) != 0) {
                 goto out;
             }
-            memset(block + got, 0, sizeof(block) - got);
-        }
-        if (write_at(img->fp,
-                     (uint64_t)(start_lbn + (uint32_t)i) * RSX11_BLOCK_SIZE,
-                     block, sizeof(block)) != 0) {
-            goto out;
         }
     }
-    if (blocks == 0u) {
-        if (fgetc(host) != EOF) {
-            errno = EIO;
-            goto out;
-        }
-    } else {
-        if (fgetc(host) != EOF) {
-            errno = EIO;
-            goto out;
-        }
+    if (fgetc(host) != EOF) {
+        errno = EIO;
+        goto out;
     }
 
-    if (write_header_slot(img, &home, fnum, file_hdr_block) != 0) {
-        goto out;
+    for (i = 0; i < header_count; i++) {
+        if (write_header_slot(img, &home,
+                              header_fnums[i], header_blocks[i]) != 0) {
+            goto out;
+        }
     }
     if (write_header_data(img, &bitmap_hdr,
                           storage_bitmap, storage_size) != 0) {
@@ -2851,8 +3139,8 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
         strncpy(out->name, name, sizeof(out->name) - 1u);
         strncpy(out->ext, ext, sizeof(out->ext) - 1u);
         out->version = version_out;
-        out->fid.num = fnum;
-        out->fid.seq = seq;
+        out->fid.num = header_fnums[0];
+        out->fid.seq = header_seqs[0];
         out->fid.rvn = 0u;
         out->blocks = blocks;
         out->raw_offset = 0u;
@@ -3124,61 +3412,104 @@ static void fsck_fatal(FILE *out, rsx11_fsck_report_t *report,
     fsck_issue(out, report, ent, msg);
 }
 
+static int fsck_clear_dir_record(rsx11_image_t *img, const rsx11_dirent_t *ent)
+{
+    static const uint8_t zero[16];
+
+    if (img == NULL || ent == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (ent->raw_offset + sizeof(zero) > img->size_bytes) {
+        errno = EIO;
+        return -1;
+    }
+    return write_at(img->fp, ent->raw_offset, zero, sizeof(zero));
+}
+
+static int fsck_scan_directory(rsx11_image_t *img,
+                               const rsx11_file_header_t *hdr,
+                               const char *dir_name,
+                               int repair, FILE *out,
+                               rsx11_fsck_report_t *report,
+                               int *dir_dirty,
+                               rsx11_dirlist_t *entries)
+{
+    rsx11_fsck_dir_ctx_t ctx;
+
+    ctx.img = img;
+    ctx.dir_name = dir_name;
+    ctx.repair = repair;
+    ctx.out = out;
+    ctx.report = report;
+    ctx.dir_dirty = dir_dirty;
+    ctx.entries = entries;
+    return walk_dir_records(img, hdr, fsck_dir_record_cb, &ctx);
+}
+
 static int collect_reachable_entries(rsx11_image_t *img,
                                      rsx11_header_cache_t *cache,
-                                     rsx11_dirlist_t *out)
+                                     int repair, FILE *out,
+                                     rsx11_fsck_report_t *report,
+                                     int *dir_dirty,
+                                     rsx11_dirlist_t *out_entries)
 {
     rsx11_fid_t mfd_fid;
     rsx11_file_header_t mfd_hdr;
-    rsx11_dirlist_t mfd_raw;
+    rsx11_dirlist_t mfd_entries;
     size_t i;
 
-    memset(out, 0, sizeof(*out));
-    memset(&mfd_raw, 0, sizeof(mfd_raw));
+    memset(out_entries, 0, sizeof(*out_entries));
+    memset(&mfd_entries, 0, sizeof(mfd_entries));
     memset(&mfd_fid, 0, sizeof(mfd_fid));
     mfd_fid.num = 4u;
     mfd_fid.seq = 4u;
     if (lookup_header(img, cache, &mfd_fid, &mfd_hdr) != 0) {
         return -1;
     }
-    if (read_dir_records_raw(img, &mfd_hdr, "MFD", &mfd_raw) != 0) {
+    if (fsck_scan_directory(img, &mfd_hdr, "MFD",
+                            repair, out, report, dir_dirty,
+                            &mfd_entries) != 0) {
         return -1;
     }
-    for (i = 0; i < mfd_raw.count; i++) {
-        if (append_dirent(out, &mfd_raw.entries[i]) != 0) {
-            rsx11_free_dirlist(&mfd_raw);
+    for (i = 0; i < mfd_entries.count; i++) {
+        if (append_dirent(out_entries, &mfd_entries.entries[i]) != 0) {
+            rsx11_free_dirlist(&mfd_entries);
             return -1;
         }
     }
-    for (i = 0; i < mfd_raw.count; i++) {
+    for (i = 0; i < mfd_entries.count; i++) {
         rsx11_file_header_t dir_hdr;
-        rsx11_dirlist_t ufd_raw;
+        rsx11_dirlist_t ufd_entries;
         char uic[16];
         size_t j;
 
-        if (strcmp(mfd_raw.entries[i].ext, "DIR") != 0 ||
-            strcmp(mfd_raw.entries[i].name, "000000") == 0 ||
-            !format_uic(mfd_raw.entries[i].name, uic, sizeof(uic))) {
+        if (strcmp(mfd_entries.entries[i].ext, "DIR") != 0 ||
+            strcmp(mfd_entries.entries[i].name, "000000") == 0 ||
+            !format_uic(mfd_entries.entries[i].name, uic, sizeof(uic))) {
             continue;
         }
-        if (lookup_header(img, cache, &mfd_raw.entries[i].fid, &dir_hdr) != 0) {
+        if (lookup_header(img, cache, &mfd_entries.entries[i].fid,
+                          &dir_hdr) != 0) {
             continue;
         }
-        memset(&ufd_raw, 0, sizeof(ufd_raw));
-        if (read_dir_records_raw(img, &dir_hdr, uic, &ufd_raw) != 0) {
+        memset(&ufd_entries, 0, sizeof(ufd_entries));
+        if (fsck_scan_directory(img, &dir_hdr, uic,
+                                repair, out, report, dir_dirty,
+                                &ufd_entries) != 0) {
             continue;
         }
-        for (j = 0; j < ufd_raw.count; j++) {
-            if (append_dirent(out, &ufd_raw.entries[j]) != 0) {
-                rsx11_free_dirlist(&ufd_raw);
-                rsx11_free_dirlist(&mfd_raw);
+        for (j = 0; j < ufd_entries.count; j++) {
+            if (append_dirent(out_entries, &ufd_entries.entries[j]) != 0) {
+                rsx11_free_dirlist(&ufd_entries);
+                rsx11_free_dirlist(&mfd_entries);
                 return -1;
             }
         }
-        rsx11_free_dirlist(&ufd_raw);
+        rsx11_free_dirlist(&ufd_entries);
     }
 
-    rsx11_free_dirlist(&mfd_raw);
+    rsx11_free_dirlist(&mfd_entries);
     return 0;
 }
 
@@ -3197,6 +3528,7 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
     size_t index_size = 0;
     size_t storage_size = 0;
     uint32_t unit_blocks = 0;
+    int dir_dirty = 0;
     int index_dirty = 0;
     int storage_dirty = 0;
     int rc = -1;
@@ -3226,7 +3558,9 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
                               &bitmap_hdr, &unit_blocks) != 0) {
         goto out;
     }
-    if (collect_reachable_entries(img, &cache, &entries) != 0) {
+    if (collect_reachable_entries(img, &cache,
+                                  repair, out, report, &dir_dirty,
+                                  &entries) != 0) {
         goto out;
     }
 
@@ -3264,16 +3598,38 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
         report->checked++;
         fnum = entries.entries[i].fid.num;
         if (fnum == 0u || fnum > home.fmax) {
-            fsck_fatal(out, report, &entries.entries[i],
+            fsck_issue(out, report, &entries.entries[i],
                        "directory record references invalid FID");
+            if (repair) {
+                if (fsck_clear_dir_record(img, &entries.entries[i]) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot remove directory record with invalid FID");
+                } else {
+                    dir_dirty = 1;
+                    report->repaired++;
+                }
+            } else {
+                report->fatal++;
+            }
             continue;
         }
         if (seen_seq[fnum] == entries.entries[i].fid.seq) {
             continue;
         }
         if (lookup_header(img, &cache, &entries.entries[i].fid, &hdr) != 0) {
-            fsck_fatal(out, report, &entries.entries[i],
+            fsck_issue(out, report, &entries.entries[i],
                        "directory record points to missing header");
+            if (repair) {
+                if (fsck_clear_dir_record(img, &entries.entries[i]) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot remove directory record with missing header");
+                } else {
+                    dir_dirty = 1;
+                    report->repaired++;
+                }
+            } else {
+                report->fatal++;
+            }
             continue;
         }
         for (j = 0; j < hdr.header_count; j++) {
@@ -3424,7 +3780,8 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
                               storage_bitmap, storage_size) != 0) {
             goto out;
         }
-        if ((index_dirty || storage_dirty) && fflush(img->fp) != 0) {
+        if ((dir_dirty || index_dirty || storage_dirty) &&
+            fflush(img->fp) != 0) {
             goto out;
         }
     }

@@ -169,7 +169,7 @@ Limitations:
 - Files-11 ODS-1 only.
 - No ODS-2 support.
 - Read-only handling supports multi-segment Files-11 extension headers.
-- Contiguous allocation only for new files.
+- New files may use fragmented allocation across multiple extents.
 - `mkfs` creates a minimal ODS-1 layout with `INDEXF.SYS`, `BITMAP.SYS`,
   `BADBLK.SYS`, `000000.DIR`, and `CORIMG.SYS`; raw bootstrap code can be
   copied into block 0 with `--boot-from` or `--bootblock`, but `mkfs` does
@@ -180,8 +180,9 @@ Limitations:
   storage bitmap allocation bits, and reports allocated orphan headers that are
   no longer referenced by any directory.
 - `fsck --repair` repairs missing bitmap allocation bits for reachable files and
-  frees allocation tracked by orphan headers; it does not rebuild missing
-  headers, repair directory contents, or fix bad extents.
+  frees allocation tracked by orphan headers, and removes dangling directory
+  records with invalid or missing FIDs; it does not rebuild missing headers or
+  fix bad extents.
 - `ls`, `extract`, and `rm` support `*` and `?` wildcards; `rm` still requires
   the pattern to resolve to exactly one file.
 - Directory listing depends on readable MFD/UFD headers and does not attempt repair.
