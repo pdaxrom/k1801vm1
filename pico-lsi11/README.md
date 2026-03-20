@@ -39,8 +39,8 @@ Shared device register and IRQ state is protected by a hardware spinlock (`io_lo
   - RP2040 frequency (overclock) selection with voltage profile
   - CPU model selection (`dcj11`, `k1801vm1`, `k1801vm2`)
   - `FIS` and `FP11` overrides with `skip` / `force enable` / `force disable`
-  - multi-unit attachment for `RK`, `RH`, `XP/RP`, `RL`, and `TQ`
-  - boot-device selection from attached `rkN`, `rhN`, `rlN`, or `tqN`
+  - multi-unit attachment for `RK`, `RH`, `RQ`, `XP/RP`, `RL`, and `TQ`
+  - boot-device selection from attached `rkN`, `rhN`, `rqN`, `rlN`, or `tqN`
   - display enable toggle
 
 ## Configuration
@@ -55,9 +55,10 @@ Example `0:/default.conf`:
 -freq 250
 -cpu k1801vm2
 -display
+-rq 0:/rsx11m46-CC.rl02
 -rl 0:/bsd-root.rl02
 -xp 0:/bsd-usr.rm05
--boot rl0
+-boot rq0
 ```
 
 Useful Pico-specific notes:

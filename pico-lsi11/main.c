@@ -24,6 +24,7 @@
 #include "dev_kw11.h"
 #include "dev_rh11.h"
 #include "dev_rk11.h"
+#include "dev_rq11.h"
 #include "dev_rl11.h"
 #include "dev_sr.h"
 #include "dev_tq11.h"
@@ -69,6 +70,10 @@
 #define RL_BOOT_ENTRY RL_BOOT_ADDR
 #define RH_BOOT_ADDR 002000u
 #define RH_BOOT_ENTRY (RH_BOOT_ADDR + 000002u)
+#define RQ_BOOT_ADDR 016000u
+#define RQ_BOOT_ENTRY (RQ_BOOT_ADDR + 000002u)
+#define RQ_BOOT_UNIT (RQ_BOOT_ADDR + 000010u)
+#define RQ_BOOT_CSR (RQ_BOOT_ADDR + 000014u)
 #define TQ_BOOT_ADDR 016000u
 #define TQ_BOOT_ENTRY (TQ_BOOT_ADDR + 000002u)
 #define TQ_BOOT_UNIT (TQ_BOOT_ADDR + 000010u)
@@ -312,6 +317,59 @@ static const uint16_t rh_bootstrap[] = {
     0005007u
 };
 
+static const uint16_t rq_bootstrap[] = {
+    0042125u,
+    0012706u, 0016000u,
+    0012700u, 0000000u,
+    0012701u, 0172150u,
+    0012704u, 0016162u,
+    0012705u, 0004000u,
+    0010102u,
+    0005022u,
+    0005712u,
+    0100001u,
+    0000000u,
+    0030512u,
+    0001773u,
+    0012412u,
+    0006305u,
+    0100370u,
+    0105714u,
+    0001434u,
+    0012702u, 0007000u,
+    0005022u,
+    0020227u, 0007204u,
+    0103774u,
+    0112437u, 0007100u,
+    0110037u, 0007110u,
+    0112437u, 0007114u,
+    0112437u, 0007121u,
+    0012722u, 0007004u,
+    0010522u,
+    0012722u, 0007104u,
+    0010512u,
+    0024242u,
+    0005711u,
+    0005712u,
+    0100776u,
+    0005737u, 0007016u,
+    0001743u,
+    0000000u,
+    0005011u,
+    0005003u,
+    0012704u, RQ_BOOT_ADDR + 000020u,
+    0005005u,
+    0005007u,
+    0100000u,
+    0007204u,
+    0000000u,
+    0000001u,
+    0004420u,
+    0020000u,
+    0001041u,
+    0000000u
+};
+
 static const uint16_t tq_bootstrap[] = {
     0046525u,
 
@@ -407,6 +465,7 @@ static void cleanup_media(void)
     tq11_close_image();
     rl11_close_image();
     xp_close_image();
+    rq11_close_image();
     rh11_close_image();
     rk11_close_image();
 }
@@ -1005,7 +1064,8 @@ static void prompt_boot_selection(lsi11_options_t *opts)
         int kind;
         int unit;
         const char *path;
-    } choices[RK11_MAX_DRIVES + RH11_MAX_DRIVES + RL11_MAX_DRIVES + TQ11_MAX_UNITS];
+    } choices[RK11_MAX_DRIVES + RH11_MAX_DRIVES + RQ11_MAX_UNITS +
+              RL11_MAX_DRIVES + TQ11_MAX_UNITS];
     int choice_count = 0;
     int selection;
 
@@ -1024,6 +1084,13 @@ static void prompt_boot_selection(lsi11_options_t *opts)
         choices[choice_count].kind = BOOT_DEV_RH;
         choices[choice_count].unit = unit;
         choices[choice_count].path = opts->rh_path[unit];
+        choice_count++;
+    }
+    for (int unit = 0; unit < opts->rq_count; unit++) {
+        printf("%d. rq%o (%s)\n", choice_count + 1, unit, opts->rq_path[unit]);
+        choices[choice_count].kind = BOOT_DEV_RQ;
+        choices[choice_count].unit = unit;
+        choices[choice_count].path = opts->rq_path[unit];
         choice_count++;
     }
     for (int unit = 0; unit < opts->rl_count; unit++) {
@@ -1146,6 +1213,13 @@ static void collect_menu_options(lsi11_options_t *opts, lsi11_machine_t machine_
         for (int unit = 0; unit < attach_count; unit++) {
             int idx = select_image_index("XP", unit, disk_images, disk_count);
             opts->xp_path[opts->xp_count++] = persist_menu_path(disk_images[idx].path);
+        }
+
+        attach_count = prompt_number("Number of RQ images to attach: ", 0,
+                                     RQ11_MAX_UNITS);
+        for (int unit = 0; unit < attach_count; unit++) {
+            int idx = select_image_index("RQ", unit, disk_images, disk_count);
+            opts->rq_path[opts->rq_count++] = persist_menu_path(disk_images[idx].path);
         }
 
         attach_count = prompt_number("Number of RL images to attach: ", 0,
@@ -1365,6 +1439,10 @@ static int prepare_machine_options(lsi11_options_t *opts, lsi11_machine_t machin
             lsi11_set_device_enabled("rh11", 0, err, err_len) != 0) {
         return -1;
     }
+    if (opts->disable_rq &&
+            lsi11_set_device_enabled("rq11", 0, err, err_len) != 0) {
+        return -1;
+    }
     if (opts->disable_xp &&
             lsi11_set_device_enabled("xp11", 0, err, err_len) != 0) {
         return -1;
@@ -1385,6 +1463,10 @@ static int prepare_machine_options(lsi11_options_t *opts, lsi11_machine_t machin
             lsi11_set_device_enabled("xp11", 1, err, err_len) != 0) {
         return -1;
     }
+    if (opts->rq_count > 0 && !opts->disable_rq &&
+            lsi11_set_device_enabled("rq11", 1, err, err_len) != 0) {
+        return -1;
+    }
     if (opts->tq_count > 0 && !opts->disable_tq &&
             lsi11_set_device_enabled("tq11", 1, err, err_len) != 0) {
         return -1;
@@ -1396,6 +1478,10 @@ static int prepare_machine_options(lsi11_options_t *opts, lsi11_machine_t machin
     }
     if (opts->rh_count > 0 && !lsi11_device_enabled("rh11")) {
         snprintf(err, err_len, "-rh is not allowed with -disable-rh");
+        return -1;
+    }
+    if (opts->rq_count > 0 && !lsi11_device_enabled("rq11")) {
+        snprintf(err, err_len, "-rq is not allowed with -disable-rq");
         return -1;
     }
     if (opts->xp_count > 0 && !lsi11_device_enabled("xp11")) {
@@ -1446,6 +1532,18 @@ static int prepare_machine_options(lsi11_options_t *opts, lsi11_machine_t machin
             }
             break;
 
+        case BOOT_DEV_RQ:
+            if (!lsi11_device_enabled("rq11")) {
+                snprintf(err, err_len, "-boot rq* requires RQ enabled");
+                return -1;
+            }
+            if (opts->boot_unit >= opts->rq_count || !opts->rq_path[opts->boot_unit]) {
+                snprintf(err, err_len, "-boot rq%o requires matching -rq attachment",
+                         opts->boot_unit);
+                return -1;
+            }
+            break;
+
         case BOOT_DEV_RL:
             if (!lsi11_device_enabled("rl11")) {
                 snprintf(err, err_len, "-boot rl* requires RL11 enabled");
@@ -1487,8 +1585,8 @@ static void print_config_summary(const lsi11_options_t *opts)
 
     printf("CONFIG machine=%s cpu=%s ram_kb=%u dl11_alias=%d rh_mode=%s "
            "display=%d display_backend=%s dev_dl=%d dev_dz=%d dev_kw=%d "
-           "dev_lp=%d dev_rk=%d "
-           "dev_rh=%d dev_xp=%d dev_rl=%d dev_tq=%d dev_sr=%d "
+           "dev_lp=%d dev_rk=%d dev_rh=%d dev_rq=%d dev_xp=%d dev_rl=%d "
+           "dev_tq=%d dev_sr=%d "
            "dev_vm1sel=%d dev_vm1sav=%d\n",
            machine, cpu_model_name(opts->cpu_model), lsi11_machine_ram_kb(),
            lsi11_dl11_alias(), rh11_mode_name(opts->rh_mode),
@@ -1496,7 +1594,8 @@ static void print_config_summary(const lsi11_options_t *opts)
            lsi11_device_enabled("dl11"), lsi11_device_enabled("dz11"),
            lsi11_device_enabled("kw11"), lsi11_device_enabled("lp11"),
            lsi11_device_enabled("rk11"), lsi11_device_enabled("rh11"),
-           lsi11_device_enabled("xp11"), lsi11_device_enabled("rl11"),
+           lsi11_device_enabled("rq11"), lsi11_device_enabled("xp11"),
+           lsi11_device_enabled("rl11"),
            lsi11_device_enabled("tq11"), lsi11_device_enabled("sr"),
            lsi11_device_enabled("vm1sel"), lsi11_device_enabled("vm1sav"));
 
@@ -1505,6 +1604,9 @@ static void print_config_summary(const lsi11_options_t *opts)
     }
     for (int unit = 0; unit < opts->rh_count; unit++) {
         printf("ATTACH rh%o=%s\n", unit, opts->rh_path[unit]);
+    }
+    for (int unit = 0; unit < opts->rq_count; unit++) {
+        printf("ATTACH rq%o=%s\n", unit, opts->rq_path[unit]);
     }
     for (int unit = 0; unit < opts->xp_count; unit++) {
         printf("ATTACH xp%o=%s\n", unit, opts->xp_path[unit]);
@@ -1530,6 +1632,9 @@ static void print_config_summary(const lsi11_options_t *opts)
             break;
         case BOOT_DEV_RH:
             kind = "rh";
+            break;
+        case BOOT_DEV_RQ:
+            kind = "rq";
             break;
         case BOOT_DEV_RL:
             kind = "rl";
@@ -1570,6 +1675,14 @@ static int attach_media(regs *r, const lsi11_options_t *opts, char *err, size_t 
         if (rh11_open_image_unit((unsigned)unit, opts->rh_path[unit]) != 0) {
             snprintf(err, err_len, "rh11_open_image failed: rh%o %s",
                      unit, opts->rh_path[unit]);
+            cleanup_media();
+            return -1;
+        }
+    }
+    for (int unit = 0; unit < opts->rq_count; unit++) {
+        if (rq11_open_image_unit((unsigned)unit, opts->rq_path[unit]) != 0) {
+            snprintf(err, err_len, "rq11_open_image failed: rq%o %s",
+                     unit, opts->rq_path[unit]);
             cleanup_media();
             return -1;
         }
@@ -1642,6 +1755,17 @@ static int apply_boot_options(regs *r, const lsi11_options_t *opts, char *err,
             bus_write16((uint16_t)(RH_BOOT_ADDR + 000010u),
                         (uint16_t)opts->boot_unit);
             r->r[7] = RH_BOOT_ENTRY;
+            break;
+
+        case BOOT_DEV_RQ:
+            if (install_bootstrap(RQ_BOOT_ADDR, rq_bootstrap,
+                                  ARRAY_SIZE(rq_bootstrap)) != 0) {
+                snprintf(err, err_len, "boot destination is outside RAM");
+                return -1;
+            }
+            bus_write16(RQ_BOOT_UNIT, (uint16_t)opts->boot_unit);
+            bus_write16(RQ_BOOT_CSR, 0172150u);
+            r->r[7] = RQ_BOOT_ENTRY;
             break;
 
         case BOOT_DEV_RL: {
