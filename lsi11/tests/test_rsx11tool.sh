@@ -421,6 +421,184 @@ set -e
 ./rsx11tool fsck "$tmpdir/orphan_repair.dsk" \
     >"$tmpdir/orphan_repair_check.txt" 2>&1
 
+cat >"$tmpdir/patch_orphan_chain.c" <<'EOF'
+#include <errno.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BLK 512u
+
+static uint16_t get16(const uint8_t *p)
+{
+    return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
+}
+
+static uint32_t get32hi(const uint8_t *p)
+{
+    return ((uint32_t)get16(p) << 16) | (uint32_t)get16(p + 2u);
+}
+
+static void put16(uint8_t *p, uint16_t v)
+{
+    p[0] = (uint8_t)(v & 0xffu);
+    p[1] = (uint8_t)(v >> 8);
+}
+
+static uint16_t checksum(const uint8_t *blk)
+{
+    uint32_t sum = 0;
+    size_t i;
+
+    for (i = 0; i < 510u; i += 2u) {
+        sum += get16(blk + i);
+    }
+    return (uint16_t)sum;
+}
+
+static int read_at(FILE *fp, uint64_t off, void *buf, size_t len)
+{
+    if (fseek(fp, (long)off, SEEK_SET) != 0) {
+        return -1;
+    }
+    return fread(buf, 1, len, fp) == len ? 0 : -1;
+}
+
+static int write_at(FILE *fp, uint64_t off, const void *buf, size_t len)
+{
+    if (fseek(fp, (long)off, SEEK_SET) != 0) {
+        return -1;
+    }
+    return fwrite(buf, 1, len, fp) == len ? 0 : -1;
+}
+
+int main(int argc, char **argv)
+{
+    FILE *fp;
+    uint8_t home[BLK];
+    uint8_t hdr[BLK];
+    uint8_t dirblk[BLK];
+    uint8_t zero[16];
+    uint8_t *map;
+    uint32_t iblb;
+    uint16_t fmax;
+    uint32_t mfd_lbn;
+    uint32_t ufd_lbn;
+    uint16_t ufd_fnum;
+    uint16_t file_fnum;
+    uint16_t bogus_fnum;
+
+    if (argc != 2) {
+        return 1;
+    }
+    memset(zero, 0, sizeof(zero));
+    fp = fopen(argv[1], "r+b");
+    if (fp == NULL) {
+        return 1;
+    }
+    if (read_at(fp, BLK, home, sizeof(home)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    iblb = get32hi(home + 2u);
+    fmax = get16(home + 6u);
+
+    if (read_at(fp, (uint64_t)(iblb + 4u) * BLK, hdr, sizeof(hdr)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    map = hdr + (size_t)hdr[1] * 2u;
+    mfd_lbn = ((uint32_t)map[10] << 16) | (uint32_t)get16(map + 12u);
+    if (read_at(fp, (uint64_t)mfd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    ufd_fnum = get16(dirblk + 80u);
+    if (ufd_fnum == 0u) {
+        fclose(fp);
+        return 1;
+    }
+
+    if (read_at(fp, (uint64_t)(iblb + ufd_fnum) * BLK, hdr, sizeof(hdr)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    map = hdr + (size_t)hdr[1] * 2u;
+    ufd_lbn = ((uint32_t)map[10] << 16) | (uint32_t)get16(map + 12u);
+    if (read_at(fp, (uint64_t)ufd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    file_fnum = get16(dirblk + 0u);
+    bogus_fnum = (uint16_t)(file_fnum + 20u);
+    if (file_fnum == 0u || bogus_fnum > fmax) {
+        fclose(fp);
+        return 1;
+    }
+
+    if (read_at(fp, (uint64_t)(iblb + file_fnum) * BLK, hdr, sizeof(hdr)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    map = hdr + (size_t)hdr[1] * 2u;
+    map[0] = 0u;
+    map[1] = 0u;
+    put16(map + 2u, bogus_fnum);
+    put16(map + 4u, 1u);
+    put16(hdr + 510u, checksum(hdr));
+
+    if (write_at(fp, (uint64_t)(iblb + file_fnum) * BLK, hdr, sizeof(hdr)) != 0 ||
+        write_at(fp, (uint64_t)ufd_lbn * BLK, zero, sizeof(zero)) != 0 ||
+        fflush(fp) != 0) {
+        fclose(fp);
+        return 1;
+    }
+
+    fclose(fp);
+    return 0;
+}
+EOF
+${CC:-cc} -O2 -Wall -Wextra -o "$tmpdir/patch_orphan_chain" \
+    "$tmpdir/patch_orphan_chain.c"
+./rsx11tool mkfs "$tmpdir/orphan_chain.dsk" --blocks 2048 --label OCHAIN \
+    >"$tmpdir/orphan_chain_mkfs.txt"
+./rsx11tool mkdir "$tmpdir/orphan_chain.dsk" '[001,123]' \
+    >"$tmpdir/orphan_chain_mkdir.txt"
+./rsx11tool add "$tmpdir/orphan_chain.dsk" "$tmpdir/input.txt" \
+    '[001,123]CHAINX.TXT' >"$tmpdir/orphan_chain_add.txt"
+"$tmpdir/patch_orphan_chain" "$tmpdir/orphan_chain.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/orphan_chain.dsk" >"$tmpdir/orphan_chain_fsck.txt" 2>&1
+status_orphan_chain=$?
+./rsx11tool fsck "$tmpdir/orphan_chain.dsk" --repair \
+    >"$tmpdir/orphan_chain_repair.txt" 2>&1
+status_orphan_chain_repair=$?
+./rsx11tool fsck "$tmpdir/orphan_chain.dsk" >"$tmpdir/orphan_chain_after.txt" 2>&1
+status_orphan_chain_after=$?
+set -e
+
+./rsx11tool mkfs "$tmpdir/badslot.dsk" --blocks 2048 --label BADSLOT \
+    >"$tmpdir/badslot_mkfs.txt"
+iblb_badslot="$(./rsx11tool info "$tmpdir/badslot.dsk" | awk '/Index bitmap:/ {print $8}')"
+badslot_fnum=64
+badslot_fnum_o="$(printf '%06o' "$badslot_fnum")"
+badslot_byte_index=$(( (badslot_fnum - 1) / 8 ))
+badslot_bit_index=$(( (badslot_fnum - 1) % 8 ))
+badslot_offset=$(( iblb_badslot * 512 + badslot_byte_index ))
+badslot_cur_byte="$(od -An -tu1 -N1 -j "$badslot_offset" "$tmpdir/badslot.dsk" | tr -d ' ')"
+badslot_new_byte=$(( badslot_cur_byte | (1 << badslot_bit_index) ))
+printf '%b' "\\$(printf '%03o' "$badslot_new_byte")" | \
+    dd of="$tmpdir/badslot.dsk" bs=1 seek="$badslot_offset" conv=notrunc >/dev/null 2>&1
+set +e
+./rsx11tool fsck "$tmpdir/badslot.dsk" >"$tmpdir/badslot_fsck.txt" 2>&1
+status_badslot=$?
+./rsx11tool fsck "$tmpdir/badslot.dsk" --repair >"$tmpdir/badslot_repair.txt" 2>&1
+status_badslot_repair=$?
+./rsx11tool fsck "$tmpdir/badslot.dsk" >"$tmpdir/badslot_after.txt" 2>&1
+status_badslot_after=$?
+set -e
+
 ./rsx11tool mkfs "$tmpdir/dangling.dsk" --blocks 2048 --label DANGL \
     >"$tmpdir/dangling_mkfs.txt"
 ./rsx11tool mkdir "$tmpdir/dangling.dsk" '[001,123]' >"$tmpdir/dangling_mkdir.txt"
@@ -568,6 +746,20 @@ grep -q "orphan header 001123\\.DIR;1" "$tmpdir/orphan_fsck.txt"
 test "$status_orphan_repair" -eq 0
 grep -q "fsck: repaired" "$tmpdir/orphan_repair_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/orphan_repair_check.txt"
+test "$status_orphan_chain" -eq 2
+grep -q "orphan header CHAINX\\.TXT;1" "$tmpdir/orphan_chain_fsck.txt"
+grep -q "chain is inconsistent" "$tmpdir/orphan_chain_fsck.txt"
+test "$status_orphan_chain_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/orphan_chain_repair.txt"
+test "$status_orphan_chain_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/orphan_chain_after.txt"
+test "$status_badslot" -eq 2
+grep -q "FID $badslot_fnum_o allocated, but header slot is empty or invalid" \
+    "$tmpdir/badslot_fsck.txt"
+test "$status_badslot_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/badslot_repair.txt"
+test "$status_badslot_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/badslot_after.txt"
 test "$status_dangling" -eq 2
 grep -q "BROKEN\\.TXT;1: directory record references invalid FID" \
     "$tmpdir/dangling_fsck.txt"

@@ -180,9 +180,10 @@ Limitations:
   storage bitmap allocation bits, and reports allocated orphan headers that are
   no longer referenced by any directory.
 - `fsck --repair` repairs missing bitmap allocation bits for reachable files and
-  frees allocation tracked by orphan headers, and removes dangling directory
-  records with invalid or missing FIDs; it does not rebuild missing headers or
-  fix bad extents.
+  frees allocation tracked by orphan headers, clears invalid allocated header
+  slots from the index bitmap, and removes dangling directory records with
+  invalid or missing FIDs; it does not rebuild missing headers or fix bad
+  extents.
 - `ls`, `extract`, and `rm` support `*` and `?` wildcards; `rm` still requires
   the pattern to resolve to exactly one file.
 - Directory listing depends on readable MFD/UFD headers and does not attempt repair.

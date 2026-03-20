@@ -3728,7 +3728,14 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             snprintf(msg, sizeof(msg),
                      "index bitmap marks FID %06o allocated, but header slot is empty or invalid",
                      (unsigned)i);
-            fsck_fatal(out, report, NULL, msg);
+            fsck_issue(out, report, NULL, msg);
+            if (repair) {
+                index_bitmap_set(index_bitmap, index_size, (uint16_t)i, 0);
+                index_dirty = 1;
+                report->repaired++;
+            } else {
+                report->fatal++;
+            }
             continue;
         }
         if (seen_seq[i] == hdr.fid.seq) {
@@ -3738,8 +3745,31 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             continue;
         }
         if (lookup_header(img, &cache, &hdr.fid, &chain_hdr) != 0) {
-            fsck_fatal(out, report, NULL,
-                       "allocated orphan header chain is inconsistent");
+            char selector[64];
+
+            format_header_selector(&hdr, selector, sizeof(selector));
+            report->issues++;
+            fprintf(out, "issue: orphan header %s chain is inconsistent\n",
+                    selector);
+            if (repair) {
+                if (!fid_is_null(&hdr.next_fid) &&
+                    hdr.next_fid.num <= home.fmax) {
+                    pred_seq[hdr.next_fid.num] = 0u;
+                }
+                if (release_header_chain_allocation(&hdr,
+                                                    index_bitmap, index_size,
+                                                    storage_bitmap, storage_size,
+                                                    unit_blocks) != 0) {
+                    fsck_fatal(out, report, NULL,
+                               "cannot free inconsistent orphan header segment");
+                    continue;
+                }
+                index_dirty = 1;
+                storage_dirty = 1;
+                report->repaired++;
+            } else {
+                report->fatal++;
+            }
             continue;
         }
         for (j = 0; j < chain_hdr.header_count; j++) {
