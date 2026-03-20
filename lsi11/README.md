@@ -148,7 +148,8 @@ Validation:
 - Create a blank ODS-1 volume by disk type: `./rsx11tool mkfs new.dsk --type rk05 --label MKTEST`
 - Create a blank ODS-1 volume and copy bootstrap block 0 from an existing image:
   `./rsx11tool mkfs new.dsk --blocks 2048 --label MKTEST --boot-from disks/rsxm26.dsk`
-- Export raw bootstrap block 0: `./rsx11tool bootblock disks/rsxm26.dsk --write rsx.boot`
+- Export raw bootstrap block 0: `./rsx11tool bootblock disks/rsxm26.dsk --dump rsx.boot`
+- Install raw bootstrap block 0 into an existing image: `./rsx11tool bootblock new.dsk --write rsx.boot`
 - Check directory/header/bitmap consistency: `./rsx11tool fsck disks/rsx11m46-CC.rl02`
 - Repair missing index/storage allocation bits: `./rsx11tool fsck disks/rsx11m46-CC.rl02 --repair`
 

@@ -83,7 +83,7 @@ static void usage(FILE *out)
             "  rmdir <image> [grp,user]\n"
             "  mkfs --list\n"
             "  mkfs <image> (--blocks N | --type <type>) [--label LABEL] [--boot-from image] [--bootblock file]\n"
-            "  bootblock <image> [--write file]\n"
+            "  bootblock <image> [--dump file | --write file]\n"
             "  fsck <image> [--repair]\n");
 }
 
@@ -405,6 +405,33 @@ static int install_bootblock_from_file(const char *image_path,
     }
     rsx11_close_image(&dst);
     return rc;
+}
+
+static int dump_bootblock_to_file(const char *image_path, const char *out_path)
+{
+    rsx11_image_t img;
+    uint8_t block[RSX11_BLOCK_SIZE];
+    FILE *out;
+
+    if (rsx11_open_image(&img, image_path) != 0) {
+        return -1;
+    }
+    if (rsx11_read_boot_block(&img, block) != 0) {
+        rsx11_close_image(&img);
+        return -1;
+    }
+    rsx11_close_image(&img);
+
+    out = fopen(out_path, "wb");
+    if (out == NULL) {
+        return -1;
+    }
+    if (fwrite(block, 1, sizeof(block), out) != sizeof(block) ||
+        fclose(out) != 0) {
+        errno = EIO;
+        return -1;
+    }
+    return 0;
 }
 
 static int cmd_info(const char *image_path)
@@ -753,6 +780,7 @@ static int cmd_fsck(const char *image_path, int repair)
 static int cmd_bootblock(int argc, char **argv)
 {
     const char *image_path;
+    const char *dump_path = NULL;
     const char *write_path = NULL;
     rsx11_image_t img;
     uint8_t block[RSX11_BLOCK_SIZE];
@@ -767,6 +795,10 @@ static int cmd_bootblock(int argc, char **argv)
         int argi;
 
         for (argi = 1; argi < argc; argi++) {
+            if (strcmp(argv[argi], "--dump") == 0 && argi + 1 < argc) {
+                dump_path = argv[++argi];
+                continue;
+            }
             if (strcmp(argv[argi], "--write") == 0 && argi + 1 < argc) {
                 write_path = argv[++argi];
                 continue;
@@ -774,6 +806,25 @@ static int cmd_bootblock(int argc, char **argv)
             usage(stderr);
             return 1;
         }
+    }
+    if (dump_path != NULL && write_path != NULL) {
+        usage(stderr);
+        return 1;
+    }
+
+    if (write_path != NULL) {
+        if (install_bootblock_from_file(image_path, write_path) != 0) {
+            perror("bootblock");
+            return 1;
+        }
+        return 0;
+    }
+    if (dump_path != NULL) {
+        if (dump_bootblock_to_file(image_path, dump_path) != 0) {
+            perror("bootblock");
+            return 1;
+        }
+        return 0;
     }
 
     if (rsx11_open_image(&img, image_path) != 0) {
@@ -786,21 +837,6 @@ static int cmd_bootblock(int argc, char **argv)
         return 1;
     }
     rsx11_close_image(&img);
-
-    if (write_path != NULL) {
-        FILE *out = fopen(write_path, "wb");
-
-        if (out == NULL) {
-            perror(write_path);
-            return 1;
-        }
-        if (fwrite(block, 1, sizeof(block), out) != sizeof(block) ||
-            fclose(out) != 0) {
-            perror("bootblock");
-            return 1;
-        }
-        return 0;
-    }
 
     for (i = 0; i < RSX11_BLOCK_SIZE; i += 16u) {
         uint32_t j;

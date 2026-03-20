@@ -6,7 +6,7 @@ trap 'rm -rf "$tmpdir"' EXIT INT TERM
 
 ./rsx11tool info disks/rsxm26.dsk >"$tmpdir/info.txt"
 ./rsx11tool mkfs --list >"$tmpdir/mkfs_list.txt"
-./rsx11tool bootblock disks/rsxm26.dsk --write "$tmpdir/rsxm26.boot"
+./rsx11tool bootblock disks/rsxm26.dsk --dump "$tmpdir/rsxm26.boot"
 dd if=disks/rsxm26.dsk of="$tmpdir/rsxm26.block0" bs=512 count=1 \
     >/dev/null 2>&1
 ./rsx11tool ls disks/rsx11m46-CC.rl02 >"$tmpdir/ls.txt"
@@ -40,19 +40,26 @@ EOF
     >"$tmpdir/mkfs.txt"
 ./rsx11tool mkfs "$tmpdir/mkfs_type.dsk" --type rk05 --label MKTYPE \
     >"$tmpdir/mkfs_type.txt"
+./rsx11tool mkfs "$tmpdir/mkfs_bootcmd.dsk" --blocks 2048 --label BOOTCMD \
+    >"$tmpdir/mkfs_bootcmd.txt"
 ./rsx11tool mkfs "$tmpdir/mkfs_bootsrc.dsk" --blocks 2048 --label BOOTSRC \
     --boot-from disks/rsxm26.dsk >"$tmpdir/mkfs_bootsrc.txt"
 ./rsx11tool mkfs "$tmpdir/mkfs_bootfile.dsk" --blocks 2048 --label BOOTFILE \
     --bootblock "$tmpdir/rsxm26.boot" >"$tmpdir/mkfs_bootfile.txt"
+./rsx11tool bootblock "$tmpdir/mkfs_bootcmd.dsk" --write "$tmpdir/rsxm26.boot"
 ./rsx11tool info "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_info.txt"
 ./rsx11tool info "$tmpdir/mkfs_type.dsk" >"$tmpdir/mkfs_type_info.txt"
+./rsx11tool info "$tmpdir/mkfs_bootcmd.dsk" >"$tmpdir/mkfs_bootcmd_info.txt"
 ./rsx11tool info "$tmpdir/mkfs_bootsrc.dsk" >"$tmpdir/mkfs_bootsrc_info.txt"
 ./rsx11tool info "$tmpdir/mkfs_bootfile.dsk" >"$tmpdir/mkfs_bootfile_info.txt"
 ./rsx11tool ls "$tmpdir/mkfs.dsk" MFD >"$tmpdir/mkfs_ls.txt"
 ./rsx11tool fsck "$tmpdir/mkfs.dsk" >"$tmpdir/mkfs_fsck.txt" 2>&1
 ./rsx11tool fsck "$tmpdir/mkfs_type.dsk" >"$tmpdir/mkfs_type_fsck.txt" 2>&1
+./rsx11tool fsck "$tmpdir/mkfs_bootcmd.dsk" >"$tmpdir/mkfs_bootcmd_fsck.txt" 2>&1
 ./rsx11tool fsck "$tmpdir/mkfs_bootsrc.dsk" >"$tmpdir/mkfs_bootsrc_fsck.txt" 2>&1
 ./rsx11tool fsck "$tmpdir/mkfs_bootfile.dsk" >"$tmpdir/mkfs_bootfile_fsck.txt" 2>&1
+dd if="$tmpdir/mkfs_bootcmd.dsk" of="$tmpdir/mkfs_bootcmd.block0" bs=512 count=1 \
+    >/dev/null 2>&1
 dd if="$tmpdir/mkfs_bootsrc.dsk" of="$tmpdir/mkfs_bootsrc.block0" bs=512 count=1 \
     >/dev/null 2>&1
 dd if="$tmpdir/mkfs_bootfile.dsk" of="$tmpdir/mkfs_bootfile.block0" bs=512 count=1 \
@@ -440,14 +447,17 @@ grep -q "removed \\[001,123\\]" "$tmpdir/rmdir.txt"
 ! grep -q "001123\\.DIR;1" "$tmpdir/mfd_after_rmdir.txt"
 grep -q "created $tmpdir/mkfs.dsk (2048 blocks)" "$tmpdir/mkfs.txt"
 grep -q "created $tmpdir/mkfs_type.dsk (4872 blocks)" "$tmpdir/mkfs_type.txt"
+grep -q "created $tmpdir/mkfs_bootcmd.dsk (2048 blocks)" "$tmpdir/mkfs_bootcmd.txt"
 grep -q "created $tmpdir/mkfs_bootsrc.dsk (2048 blocks)" "$tmpdir/mkfs_bootsrc.txt"
 grep -q "created $tmpdir/mkfs_bootfile.dsk (2048 blocks)" "$tmpdir/mkfs_bootfile.txt"
 grep -q "Volume label:   MKTEST" "$tmpdir/mkfs_info.txt"
 grep -q "Volume label:   MKTYPE" "$tmpdir/mkfs_type_info.txt"
 grep -q "Total blocks:   4872" "$tmpdir/mkfs_type_info.txt"
+grep -q "Volume label:   BOOTCMD" "$tmpdir/mkfs_bootcmd_info.txt"
 grep -q "Volume label:   BOOTSRC" "$tmpdir/mkfs_bootsrc_info.txt"
 grep -q "Volume label:   BOOTFILE" "$tmpdir/mkfs_bootfile_info.txt"
 test "$(wc -c < "$tmpdir/mkfs_type.dsk")" -eq 2494464
+cmp -s "$tmpdir/rsxm26.boot" "$tmpdir/mkfs_bootcmd.block0"
 cmp -s "$tmpdir/rsxm26.boot" "$tmpdir/mkfs_bootsrc.block0"
 cmp -s "$tmpdir/rsxm26.boot" "$tmpdir/mkfs_bootfile.block0"
 grep -q "MFD.*INDEXF\\.SYS;1" "$tmpdir/mkfs_ls.txt"
@@ -457,6 +467,7 @@ grep -q "MFD.*000000\\.DIR;1" "$tmpdir/mkfs_ls.txt"
 grep -q "MFD.*CORIMG\\.SYS;1" "$tmpdir/mkfs_ls.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_type_fsck.txt"
+grep -q "fsck: clean" "$tmpdir/mkfs_bootcmd_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_bootsrc_fsck.txt"
 grep -q "fsck: clean" "$tmpdir/mkfs_bootfile_fsck.txt"
 grep -q "Volume label:   MKTEST" "$tmpdir/mkfs_alt_info.txt"
