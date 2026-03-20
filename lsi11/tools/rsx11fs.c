@@ -3427,6 +3427,38 @@ static int fsck_clear_dir_record(rsx11_image_t *img, const rsx11_dirent_t *ent)
     return write_at(img->fp, ent->raw_offset, zero, sizeof(zero));
 }
 
+static int fsck_rewrite_dir_record(rsx11_image_t *img,
+                                   const rsx11_dirent_t *ent,
+                                   const rsx11_file_header_t *hdr)
+{
+    uint8_t rec[16];
+
+    if (img == NULL || ent == NULL || hdr == NULL) {
+        errno = EINVAL;
+        return -1;
+    }
+    if (ent->raw_offset + sizeof(rec) > img->size_bytes) {
+        errno = EIO;
+        return -1;
+    }
+    if (build_dir_record(rec, &hdr->fid, hdr->name, hdr->ext,
+                         hdr->version) != 0) {
+        return -1;
+    }
+    return write_at(img->fp, ent->raw_offset, rec, sizeof(rec));
+}
+
+static int fsck_dir_record_matches_header(const rsx11_dirent_t *ent,
+                                          const rsx11_file_header_t *hdr)
+{
+    if (ent == NULL || hdr == NULL) {
+        return 0;
+    }
+    return strcmp(ent->name, hdr->name) == 0 &&
+           strcmp(ent->ext, hdr->ext) == 0 &&
+           ent->version == hdr->version;
+}
+
 static int fsck_scan_directory(rsx11_image_t *img,
                                const rsx11_file_header_t *hdr,
                                const char *dir_name,
@@ -3588,6 +3620,7 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
     }
 
     for (i = 0; i < entries.count; i++) {
+        rsx11_file_header_t slot_hdr;
         rsx11_file_header_t hdr;
         uint32_t fnum;
         uint32_t lbn;
@@ -3613,10 +3646,8 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             }
             continue;
         }
-        if (seen_seq[fnum] == entries.entries[i].fid.seq) {
-            continue;
-        }
-        if (lookup_header(img, &cache, &entries.entries[i].fid, &hdr) != 0) {
+        if (read_header_slot(img, &home, (uint16_t)fnum, &slot_hdr) != 0 ||
+            !same_fid(&slot_hdr.fid, &entries.entries[i].fid)) {
             fsck_issue(out, report, &entries.entries[i],
                        "directory record points to missing header");
             if (repair) {
@@ -3630,6 +3661,63 @@ int rsx11_fsck(rsx11_image_t *img, int repair, FILE *out,
             } else {
                 report->fatal++;
             }
+            continue;
+        }
+        if (slot_hdr.segment_number != 0u) {
+            fsck_issue(out, report, &entries.entries[i],
+                       "directory record points to non-primary header segment");
+            if (repair) {
+                if (fsck_clear_dir_record(img, &entries.entries[i]) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot remove directory record with non-primary header");
+                } else {
+                    dir_dirty = 1;
+                    report->repaired++;
+                }
+            } else {
+                report->fatal++;
+            }
+            continue;
+        }
+        if (lookup_header(img, &cache, &entries.entries[i].fid, &hdr) != 0) {
+            fsck_issue(out, report, &entries.entries[i],
+                       "directory record points to inconsistent header chain");
+            if (repair) {
+                if (fsck_clear_dir_record(img, &entries.entries[i]) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot remove directory record with inconsistent header chain");
+                } else {
+                    dir_dirty = 1;
+                    report->repaired++;
+                }
+            } else {
+                report->fatal++;
+            }
+            continue;
+        }
+        if (!fsck_dir_record_matches_header(&entries.entries[i], &hdr)) {
+            fsck_issue(out, report, &entries.entries[i],
+                       "directory record name/type/version disagrees with header");
+            if (repair) {
+                if (fsck_rewrite_dir_record(img, &entries.entries[i], &hdr) != 0) {
+                    fsck_fatal(out, report, &entries.entries[i],
+                               "cannot rewrite directory record from header");
+                    continue;
+                }
+                dir_dirty = 1;
+                report->repaired++;
+                strncpy(entries.entries[i].name, hdr.name,
+                        sizeof(entries.entries[i].name) - 1u);
+                entries.entries[i].name[sizeof(entries.entries[i].name) - 1u] = '\0';
+                strncpy(entries.entries[i].ext, hdr.ext,
+                        sizeof(entries.entries[i].ext) - 1u);
+                entries.entries[i].ext[sizeof(entries.entries[i].ext) - 1u] = '\0';
+                entries.entries[i].version = hdr.version;
+            } else {
+                report->fatal++;
+            }
+        }
+        if (seen_seq[fnum] == entries.entries[i].fid.seq) {
             continue;
         }
         for (j = 0; j < hdr.header_count; j++) {

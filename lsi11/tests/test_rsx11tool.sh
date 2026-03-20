@@ -177,23 +177,6 @@ static void put16(uint8_t *p, uint16_t v)
     p[1] = (uint8_t)(v >> 8);
 }
 
-static void put32hi(uint8_t *p, uint32_t v)
-{
-    put16(p, (uint16_t)(v >> 16));
-    put16(p + 2u, (uint16_t)(v & 0xffffu));
-}
-
-static uint16_t checksum(const uint8_t *buf)
-{
-    uint16_t sum = 0;
-    size_t i;
-
-    for (i = 0; i < 255u; i++) {
-        sum = (uint16_t)(sum + get16(buf + i * 2u));
-    }
-    return sum;
-}
-
 static int rad50_enc(int c)
 {
     if (c == ' ' || c == '\0') {
@@ -240,6 +223,23 @@ static void rad50_name3(const char *src, uint8_t out[6])
     for (i = 0; i < 3u; i++) {
         put16(out + i * 2u, rad50_word(tmp + i * 3u));
     }
+}
+
+static void put32hi(uint8_t *p, uint32_t v)
+{
+    put16(p, (uint16_t)(v >> 16));
+    put16(p + 2u, (uint16_t)(v & 0xffffu));
+}
+
+static uint16_t checksum(const uint8_t *buf)
+{
+    uint16_t sum = 0;
+    size_t i;
+
+    for (i = 0; i < 255u; i++) {
+        sum = (uint16_t)(sum + get16(buf + i * 2u));
+    }
+    return sum;
 }
 
 static int read_at(FILE *fp, uint64_t off, void *buf, size_t len)
@@ -399,6 +399,306 @@ ${CC:-cc} -O2 -Wall -Wextra -o "$tmpdir/patch_chain" "$tmpdir/patch_chain.c"
 ./rsx11tool extract "$tmpdir/chain.dsk" "$tmpdir/chain_out" \
     '[001,123]CHAINA.BIN;1' >"$tmpdir/chain_extract.txt"
 ./rsx11tool fsck "$tmpdir/chain.dsk" >"$tmpdir/chain_fsck.txt" 2>&1
+
+cat >"$tmpdir/patch_chain_ref.c" <<'EOF'
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define BLK 512u
+#define HOME_BLK 1u
+#define OFF_IBSZ 0u
+#define OFF_IBLB 2u
+
+static uint16_t get16(const uint8_t *p)
+{
+    return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
+}
+
+static uint32_t get32hi(const uint8_t *p)
+{
+    return ((uint32_t)get16(p) << 16) | (uint32_t)get16(p + 2u);
+}
+
+static void put16(uint8_t *p, uint16_t v)
+{
+    p[0] = (uint8_t)(v & 0xffu);
+    p[1] = (uint8_t)(v >> 8);
+}
+
+static int rad50_enc(int c)
+{
+    if (c == ' ' || c == '\0') {
+        return 0;
+    }
+    if (c >= 'A' && c <= 'Z') {
+        return c - 'A' + 1;
+    }
+    if (c == '$') {
+        return 27;
+    }
+    if (c == '.') {
+        return 28;
+    }
+    if (c == '%') {
+        return 29;
+    }
+    if (c >= '0' && c <= '9') {
+        return c - '0' + 30;
+    }
+    return -1;
+}
+
+static uint16_t rad50_word(const char *s)
+{
+    int a = rad50_enc((unsigned char)s[0]);
+    int b = rad50_enc((unsigned char)s[1]);
+    int c = rad50_enc((unsigned char)s[2]);
+
+    if (a < 0 || b < 0 || c < 0) {
+        fprintf(stderr, "invalid RAD50\n");
+        exit(1);
+    }
+    return (uint16_t)(a * 1600 + b * 40 + c);
+}
+
+static void rad50_name3(const char *src, uint8_t out[6])
+{
+    char tmp[10];
+    size_t i;
+
+    memset(tmp, ' ', sizeof(tmp));
+    memcpy(tmp, src, strlen(src));
+    for (i = 0; i < 3u; i++) {
+        put16(out + i * 2u, rad50_word(tmp + i * 3u));
+    }
+}
+
+static uint16_t checksum(const uint8_t *buf)
+{
+    uint16_t sum = 0;
+    size_t i;
+
+    for (i = 0; i < 255u; i++) {
+        sum = (uint16_t)(sum + get16(buf + i * 2u));
+    }
+    return sum;
+}
+
+static int read_at(FILE *fp, uint64_t off, void *buf, size_t len)
+{
+    if (fseeko(fp, (off_t)off, SEEK_SET) != 0) {
+        return -1;
+    }
+    return fread(buf, 1, len, fp) == len ? 0 : -1;
+}
+
+static int write_at(FILE *fp, uint64_t off, const void *buf, size_t len)
+{
+    if (fseeko(fp, (off_t)off, SEEK_SET) != 0) {
+        return -1;
+    }
+    return fwrite(buf, 1, len, fp) == len ? 0 : -1;
+}
+
+static void header_lbn(const uint8_t *home, uint16_t fnum, uint32_t *lbn_out)
+{
+    uint16_t ibsz = get16(home + OFF_IBSZ);
+    uint32_t iblb = get32hi(home + OFF_IBLB);
+
+    *lbn_out = iblb + ibsz + (uint32_t)fnum - 1u;
+}
+
+static void first_extent_lbn(const uint8_t hdr[BLK], uint32_t *lbn_out)
+{
+    uint8_t mpof = hdr[1];
+    const uint8_t *map = hdr + (size_t)mpof * 2u;
+
+    *lbn_out = ((uint32_t)map[10] << 16) | (uint32_t)get16(map + 12u);
+}
+
+static int header_looks_free(const uint8_t hdr[BLK], uint16_t expect_fnum)
+{
+    if (checksum(hdr) != get16(hdr + 510u)) {
+        return 1;
+    }
+    if (get16(hdr + 2u) != expect_fnum || get16(hdr + 4u) == 0u ||
+        get16(hdr + 6u) != 0401u) {
+        return 1;
+    }
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    FILE *fp;
+    uint8_t home[BLK];
+    uint8_t mfd_hdr[BLK];
+    uint8_t ufd_hdr[BLK];
+    uint8_t file_hdr[BLK];
+    uint8_t dirblk[BLK];
+    uint8_t *map;
+    uint32_t mfd_lbn;
+    uint32_t ufd_lbn;
+    uint32_t file_hdr_lbn;
+    uint16_t fmax;
+    uint16_t ufd_fnum;
+    uint16_t file_fnum;
+    uint16_t bogus_fnum;
+
+    if (argc != 3) {
+        return 2;
+    }
+    fp = fopen(argv[2], "r+b");
+    if (fp == NULL) {
+        return 1;
+    }
+    if (read_at(fp, (uint64_t)HOME_BLK * BLK, home, sizeof(home)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    fmax = get16(home + 6u);
+    header_lbn(home, 4u, &mfd_lbn);
+    if (read_at(fp, (uint64_t)mfd_lbn * BLK, mfd_hdr, sizeof(mfd_hdr)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    first_extent_lbn(mfd_hdr, &mfd_lbn);
+    if (read_at(fp, (uint64_t)mfd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    ufd_fnum = get16(dirblk + 80u);
+    if (ufd_fnum == 0u) {
+        fclose(fp);
+        return 1;
+    }
+    header_lbn(home, ufd_fnum, &ufd_lbn);
+    if (read_at(fp, (uint64_t)ufd_lbn * BLK, ufd_hdr, sizeof(ufd_hdr)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    first_extent_lbn(ufd_hdr, &ufd_lbn);
+    if (read_at(fp, (uint64_t)ufd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    file_fnum = get16(dirblk + 0u);
+    if (file_fnum == 0u) {
+        fclose(fp);
+        return 1;
+    }
+    header_lbn(home, file_fnum, &file_hdr_lbn);
+    if (read_at(fp, (uint64_t)file_hdr_lbn * BLK, file_hdr, sizeof(file_hdr)) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    map = file_hdr + (size_t)file_hdr[1] * 2u;
+    if (get16(map + 2u) == 0u) {
+        fclose(fp);
+        return 1;
+    }
+
+    if (strcmp(argv[1], "dir-to-ext") == 0) {
+        put16(dirblk + 0u, get16(map + 2u));
+        put16(dirblk + 2u, get16(map + 4u));
+        put16(dirblk + 4u, map[1]);
+        if (write_at(fp, (uint64_t)ufd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+            fclose(fp);
+            return 1;
+        }
+    } else if (strcmp(argv[1], "dir-mismatch") == 0) {
+        rad50_name3("WRONGX", dirblk + 6u);
+        put16(dirblk + 12u, rad50_word("TMP"));
+        put16(dirblk + 14u, 7u);
+        if (write_at(fp, (uint64_t)ufd_lbn * BLK, dirblk, sizeof(dirblk)) != 0) {
+            fclose(fp);
+            return 1;
+        }
+    } else if (strcmp(argv[1], "break-next") == 0) {
+        for (bogus_fnum = fmax; bogus_fnum > 5u; bogus_fnum--) {
+            uint8_t candidate[BLK];
+            uint32_t candidate_lbn;
+
+            if (bogus_fnum == file_fnum || bogus_fnum == get16(map + 2u)) {
+                continue;
+            }
+            header_lbn(home, bogus_fnum, &candidate_lbn);
+            if (read_at(fp, (uint64_t)candidate_lbn * BLK,
+                        candidate, sizeof(candidate)) != 0) {
+                fclose(fp);
+                return 1;
+            }
+            if (header_looks_free(candidate, bogus_fnum)) {
+                put16(map + 2u, bogus_fnum);
+                put16(map + 4u, 1u);
+                put16(file_hdr + 510u, checksum(file_hdr));
+                if (write_at(fp, (uint64_t)file_hdr_lbn * BLK,
+                             file_hdr, sizeof(file_hdr)) != 0) {
+                    fclose(fp);
+                    return 1;
+                }
+                fflush(fp);
+                fclose(fp);
+                return 0;
+            }
+        }
+        fclose(fp);
+        return 1;
+    } else {
+        fclose(fp);
+        return 2;
+    }
+
+    if (fflush(fp) != 0) {
+        fclose(fp);
+        return 1;
+    }
+    fclose(fp);
+    return 0;
+}
+EOF
+${CC:-cc} -O2 -Wall -Wextra -o "$tmpdir/patch_chain_ref" \
+    "$tmpdir/patch_chain_ref.c"
+cp "$tmpdir/chain.dsk" "$tmpdir/nonprimary.dsk"
+"$tmpdir/patch_chain_ref" dir-to-ext "$tmpdir/nonprimary.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/nonprimary.dsk" >"$tmpdir/nonprimary_fsck.txt" 2>&1
+status_nonprimary=$?
+./rsx11tool fsck "$tmpdir/nonprimary.dsk" --repair \
+    >"$tmpdir/nonprimary_repair.txt" 2>&1
+status_nonprimary_repair=$?
+./rsx11tool fsck "$tmpdir/nonprimary.dsk" >"$tmpdir/nonprimary_after.txt" 2>&1
+status_nonprimary_after=$?
+set -e
+./rsx11tool ls "$tmpdir/nonprimary.dsk" '[001,123]' >"$tmpdir/nonprimary_ls_after.txt"
+
+cp "$tmpdir/chain.dsk" "$tmpdir/mismatch.dsk"
+"$tmpdir/patch_chain_ref" dir-mismatch "$tmpdir/mismatch.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/mismatch.dsk" >"$tmpdir/mismatch_fsck.txt" 2>&1
+status_mismatch=$?
+./rsx11tool fsck "$tmpdir/mismatch.dsk" --repair \
+    >"$tmpdir/mismatch_repair.txt" 2>&1
+status_mismatch_repair=$?
+./rsx11tool fsck "$tmpdir/mismatch.dsk" >"$tmpdir/mismatch_after.txt" 2>&1
+status_mismatch_after=$?
+set -e
+./rsx11tool ls "$tmpdir/mismatch.dsk" '[001,123]' >"$tmpdir/mismatch_ls_after.txt"
+
+cp "$tmpdir/chain.dsk" "$tmpdir/badchain.dsk"
+"$tmpdir/patch_chain_ref" break-next "$tmpdir/badchain.dsk"
+set +e
+./rsx11tool fsck "$tmpdir/badchain.dsk" >"$tmpdir/badchain_fsck.txt" 2>&1
+status_badchain=$?
+./rsx11tool fsck "$tmpdir/badchain.dsk" --repair \
+    >"$tmpdir/badchain_repair.txt" 2>&1
+status_badchain_repair=$?
+./rsx11tool fsck "$tmpdir/badchain.dsk" >"$tmpdir/badchain_after.txt" 2>&1
+status_badchain_after=$?
+set -e
+./rsx11tool ls "$tmpdir/badchain.dsk" '[001,123]' >"$tmpdir/badchain_ls_after.txt"
 
 ./rsx11tool mkfs "$tmpdir/orphan.dsk" --blocks 2048 --label ORPHAN \
     >"$tmpdir/orphan_mkfs.txt"
@@ -741,6 +1041,31 @@ grep -q "extracted 1 file(s)" "$tmpdir/chain_extract.txt"
 test "$(wc -c < "$tmpdir/chain_out/001_123/CHAINA.BIN;1")" -eq 1024
 cmp -s "$tmpdir/chain_expected.bin" "$tmpdir/chain_out/001_123/CHAINA.BIN;1"
 grep -q "fsck: clean" "$tmpdir/chain_fsck.txt"
+test "$status_nonprimary" -eq 2
+grep -q "CHAINA\\.BIN;1: directory record points to non-primary header segment" \
+    "$tmpdir/nonprimary_fsck.txt"
+test "$status_nonprimary_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/nonprimary_repair.txt"
+test "$status_nonprimary_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/nonprimary_after.txt"
+! grep -q "CHAINA\\.BIN;1" "$tmpdir/nonprimary_ls_after.txt"
+test "$status_mismatch" -eq 2
+grep -q "WRONGX\\.TMP;7: directory record name/type/version disagrees with header" \
+    "$tmpdir/mismatch_fsck.txt"
+test "$status_mismatch_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/mismatch_repair.txt"
+test "$status_mismatch_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/mismatch_after.txt"
+grep -q "CHAINA\\.BIN;1" "$tmpdir/mismatch_ls_after.txt"
+! grep -q "WRONGX\\.TMP;7" "$tmpdir/mismatch_ls_after.txt"
+test "$status_badchain" -eq 2
+grep -q "CHAINA\\.BIN;1: directory record points to inconsistent header chain" \
+    "$tmpdir/badchain_fsck.txt"
+test "$status_badchain_repair" -eq 0
+grep -q "fsck: repaired" "$tmpdir/badchain_repair.txt"
+test "$status_badchain_after" -eq 0
+grep -q "fsck: clean" "$tmpdir/badchain_after.txt"
+! grep -q "CHAINA\\.BIN;1" "$tmpdir/badchain_ls_after.txt"
 test "$status_orphan" -eq 2
 grep -q "orphan header 001123\\.DIR;1" "$tmpdir/orphan_fsck.txt"
 test "$status_orphan_repair" -eq 0
