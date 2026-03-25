@@ -12,6 +12,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <X11/Xutil.h>
+#include <X11/XKBlib.h>
 
 #include "bk_hw.h"
 #include "x11_gui.h"
@@ -25,6 +26,8 @@ static int screen_num;
    of the screen. The factor is calculated during initialization and used by
    both the window creation and the drawing routine. */
 static int scale_factor = 1;
+/* Keycode of the last key pressed; used to suppress X11 autorepeat. */
+static KeyCode last_pressed_keycode = 0;
 
 /* Convert X11 keysym to the same codes used by the SDL version.
  * This is a simplified mapping sufficient for the emulator's UI.
@@ -235,7 +238,11 @@ int x11_gui_init(void)
                                  BlackPixel(display, screen_num),
                                  WhitePixel(display, screen_num));
     XStoreName(display, window, "BK0010-01 X11");
-    XSelectInput(display, window, ExposureMask | KeyPressMask | StructureNotifyMask);
+    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask);
+    /* Ask the X server not to synthesise KeyRelease+KeyPress pairs for
+     * autorepeat — instead we get only KeyPress events during a hold.
+     * Combined with keycode tracking below this lets us suppress repeats. */
+    XkbSetDetectableAutoRepeat(display, True, NULL);
     XMapWindow(display, window);
     gc = XCreateGC(display, window, 0, NULL);
 
@@ -323,7 +330,17 @@ int x11_gui_handle_events(void)
         if (ev.type == DestroyNotify) {
             return -2;
         }
+        if (ev.type == KeyRelease) {
+            if (ev.xkey.keycode == last_pressed_keycode) {
+                last_pressed_keycode = 0;
+            }
+        }
         if (ev.type == KeyPress) {
+            /* Suppress autorepeat: ignore if this keycode is still held. */
+            if (ev.xkey.keycode == last_pressed_keycode) {
+                return 0;
+            }
+            last_pressed_keycode = ev.xkey.keycode;
             KeySym ks = XLookupKeysym(&ev.xkey, 0);
             int code = translate_key(ks, ev.xkey.state);
             return code;

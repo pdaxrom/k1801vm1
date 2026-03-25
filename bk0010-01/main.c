@@ -775,7 +775,7 @@ gui_fail:
         while (SDL_PollEvent(&ev)) {
             if (ev.type == SDL_QUIT) {
                 running = 0;
-            } else if (ev.type == SDL_KEYDOWN) {
+            } else if (ev.type == SDL_KEYDOWN && !ev.key.repeat) {
                 SDL_Keycode key = ev.key.keysym.sym;
                 int code = bk_translate_key(key, ev.key.keysym.mod);
                 if (code == BK_KEY_STOP) {
