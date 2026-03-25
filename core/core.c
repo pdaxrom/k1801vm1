@@ -1933,8 +1933,8 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     /* Fast path: RAM word access bypasses entire callback chain.
      * Skip for DCJ11 odd-address accesses: alignment trap must fire. */
     if (r->ram_fast &&
-        !(r->model == DCJ11 && (offset & 1)) &&
-        ((uint32_t)offset + 1u) < r->ram_fast_size) {
+            !(r->model == DCJ11 && (offset & 1)) &&
+            ((uint32_t)offset + 1u) < r->ram_fast_size) {
         return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
     }
 #else
@@ -2041,8 +2041,8 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     /* Fast path: RAM word access bypasses entire callback chain.
      * Skip for DCJ11 odd-address accesses: alignment trap must fire. */
     if (r->ram_fast &&
-        !(r->model == DCJ11 && (offset & 1)) &&
-        ((uint32_t)offset + 1u) < r->ram_fast_size) {
+            !(r->model == DCJ11 && (offset & 1)) &&
+            ((uint32_t)offset + 1u) < r->ram_fast_size) {
         r->ram_fast[offset] = (uint8_t)(value & 000377);
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
         return;

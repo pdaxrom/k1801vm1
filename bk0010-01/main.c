@@ -665,8 +665,9 @@ int main(int argc, char **argv)
 
     /* Initialise the chosen GUI backend */
 #ifdef USE_SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
         GUI_FAIL(SDL_GetError());
+    }
     SDL_Window *win = SDL_CreateWindow(
                           "BK0010-01",
                           SDL_WINDOWPOS_CENTERED,
@@ -674,21 +675,25 @@ int main(int argc, char **argv)
                           BK_SCREEN_WIDTH * 2,
                           BK_SCREEN_HEIGHT * 2,
                           SDL_WINDOW_SHOWN);
-    if (!win)
+    if (!win) {
         GUI_FAIL(SDL_GetError());
+    }
     SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
-    if (!renderer)
+    if (!renderer) {
         GUI_FAIL(SDL_GetError());
+    }
     SDL_Texture *tex = SDL_CreateTexture(renderer,
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_STREAMING,
                                          BK_SCREEN_WIDTH,
                                          BK_SCREEN_HEIGHT);
-    if (!tex)
+    if (!tex) {
         GUI_FAIL(SDL_GetError());
+    }
 #else /* USE_X11 */
-    if (x11_gui_init() != 0)
+    if (x11_gui_init() != 0) {
         GUI_FAIL("X11 GUI init failed");
+    }
 #endif
 
     /* Audio initialisation – only when SDL is available */
