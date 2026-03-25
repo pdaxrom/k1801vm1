@@ -58,7 +58,7 @@ static const enum inst itimtab[1024] = {
     bgt, bgt, bgt, bgt, ble, ble, ble, ble,
     jsr, jsr, jsr, jsr, jsr, jsr, jsr, jsr,
     clr, com, inc, dec, neg, adc, sbc, tst,
-    ror, rol, asr, asl, mark, illegal, illegal, sxt,
+    ror, rol, asr, asl, mark, mfpi, mtpi, sxt,
     illegal, illegal, illegal, illegal, illegal, illegal, illegal, illegal,
     mov, mov, mov, mov, mov, mov, mov, mov,
     mov, mov, mov, mov, mov, mov, mov, mov,
@@ -122,7 +122,7 @@ static const enum inst itimtab[1024] = {
     bcc, bcc, bcc, bcc, bcs, bcs, bcs, bcs,
     emt, emt, emt, emt, trap, trap, trap, trap,
     clrb, comb, incb, decb, negb, adcb, sbcb, tstb,
-    rorb, rolb, asrb, aslb, mtps, illegal, illegal, mfps,
+    rorb, rolb, asrb, aslb, mtps, mfpd, mtpd, mfps,
     illegal, illegal, illegal, illegal, illegal, illegal, illegal, illegal,
     movb, movb, movb, movb, movb, movb, movb, movb,
     movb, movb, movb, movb, movb, movb, movb, movb,
@@ -276,6 +276,12 @@ unsigned bk_timing_cycles(word op)
     case bpt:
     case iot:
         return 68;
+    case mfpi:
+    case mfpd:
+        return REGREG + ds_time[DST_MODE(op)];
+    case mtpi:
+    case mtpd:
+        return REGREG + ab_time[DST_MODE(op)];
     case xor:
         return REGREG + a2_time[DST_MODE(op)];
     case mark:

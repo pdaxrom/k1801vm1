@@ -238,7 +238,7 @@ int x11_gui_init(void)
                                  BlackPixel(display, screen_num),
                                  WhitePixel(display, screen_num));
     XStoreName(display, window, "BK0010-01 X11");
-    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask);
+    XSelectInput(display, window, ExposureMask | KeyPressMask | KeyReleaseMask | FocusChangeMask | StructureNotifyMask);
     /* Ask the X server not to synthesise KeyRelease+KeyPress pairs for
      * autorepeat — instead we get only KeyPress events during a hold.
      * Combined with keycode tracking below this lets us suppress repeats. */
@@ -330,6 +330,9 @@ int x11_gui_handle_events(void)
         if (ev.type == DestroyNotify) {
             return -2;
         }
+        if (ev.type == FocusOut) {
+            last_pressed_keycode = 0;
+        }
         if (ev.type == KeyRelease) {
             if (ev.xkey.keycode == last_pressed_keycode) {
                 last_pressed_keycode = 0;
@@ -359,6 +362,7 @@ void x11_gui_cleanup(void)
         ximage = NULL;
     }
     if (display) {
+        XkbSetDetectableAutoRepeat(display, False, NULL);
         XCloseDisplay(display);
         display = NULL;
     }

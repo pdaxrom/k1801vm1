@@ -160,9 +160,16 @@ static void draw_screen(SDL_Renderer *renderer, SDL_Texture *tex)
     word vram_size = bk_hw_vram_size();
     word shift = bk_hw_shift_reg();
 
-    static uint32_t *pixels;
-    static size_t pixels_size;
+    static uint32_t *pixels = NULL;
+    static size_t pixels_size = 0;
     const size_t needed = (size_t)BK_SCREEN_WIDTH * BK_SCREEN_HEIGHT;
+    if (!renderer) {
+        /* Called with NULL renderer as a cleanup signal. */
+        free(pixels);
+        pixels = NULL;
+        pixels_size = 0;
+        return;
+    }
     if (pixels_size != needed) {
         free(pixels);
         pixels = (uint32_t *)calloc(needed, sizeof(uint32_t));
@@ -597,9 +604,6 @@ int main(int argc, char **argv)
     }
 
     core_init(&r);
-
-    r.ram_fast_size = 0100000;
-
     core_reset(&r);
 
     bk_hw_set_tick_hz(cpu_hz);
@@ -652,19 +656,17 @@ int main(int argc, char **argv)
 
     if (have_start) {
         r.r[7] = start_addr;
-    } else {
-//        r.r[7] = MONITOR_BASE;
     }
 
-//    r.r[6] = 01000;
+#define GUI_FAIL(msg) do { \
+        fprintf(stderr, "%s\n", (msg)); \
+        core_fini(&r); free(monitor_rom); free(basic_rom); free(bk_mem); return 1; \
+    } while (0)
 
     /* Initialise the chosen GUI backend */
-    int gui_init_ok = 0;
 #ifdef USE_SDL
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
-        fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
-        goto gui_fail;
-    }
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0)
+        GUI_FAIL(SDL_GetError());
     SDL_Window *win = SDL_CreateWindow(
                           "BK0010-01",
                           SDL_WINDOWPOS_CENTERED,
@@ -672,40 +674,22 @@ int main(int argc, char **argv)
                           BK_SCREEN_WIDTH * 2,
                           BK_SCREEN_HEIGHT * 2,
                           SDL_WINDOW_SHOWN);
-    if (!win) {
-        fprintf(stderr, "SDL_CreateWindow failed: %s\n", SDL_GetError());
-        goto gui_fail;
-    }
+    if (!win)
+        GUI_FAIL(SDL_GetError());
     SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
-    if (!renderer) {
-        fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
-        goto gui_fail;
-    }
+    if (!renderer)
+        GUI_FAIL(SDL_GetError());
     SDL_Texture *tex = SDL_CreateTexture(renderer,
                                          SDL_PIXELFORMAT_ARGB8888,
                                          SDL_TEXTUREACCESS_STREAMING,
                                          BK_SCREEN_WIDTH,
                                          BK_SCREEN_HEIGHT);
-    if (!tex) {
-        fprintf(stderr, "SDL_CreateTexture failed: %s\n", SDL_GetError());
-        goto gui_fail;
-    }
-    gui_init_ok = 1;
+    if (!tex)
+        GUI_FAIL(SDL_GetError());
 #else /* USE_X11 */
-    if (x11_gui_init() != 0) {
-        fprintf(stderr, "X11 GUI init failed\n");
-        goto gui_fail;
-    }
-    gui_init_ok = 1;
+    if (x11_gui_init() != 0)
+        GUI_FAIL("X11 GUI init failed");
 #endif
-    if (!gui_init_ok) {
-gui_fail:
-        core_fini(&r);
-        free(monitor_rom);
-        free(basic_rom);
-        free(bk_mem);
-        return 1;
-    }
 
     /* Audio initialisation – only when SDL is available */
 #ifdef USE_SDL
@@ -758,8 +742,9 @@ gui_fail:
     while (running) {
         /* Timing start */
 #ifdef USE_SDL
-        Uint32 frame_start = 0;
-        frame_start = SDL_GetTicks();
+        Uint32 frame_start = SDL_GetTicks();
+#else
+        Uint64 frame_start = SDL_GetPerformanceCounter();
 #endif
         if (show_shift) {
             word shift = bk_hw_shift_reg();
@@ -888,21 +873,24 @@ gui_fail:
         }
 
         /* Frame pacing */
-        Uint32 frame_time = 0;
 #ifdef USE_SDL
-        frame_time = SDL_GetTicks() - frame_start;
+        Uint32 frame_time = SDL_GetTicks() - frame_start;
         if (!cpu_max && frame_time < frame_delay) {
             SDL_Delay(frame_delay - frame_time);
         }
 #else
-        if (!cpu_max && frame_time < frame_delay) {
-            usleep((frame_delay - frame_time) * 1000);
+        Uint64 frame_end = SDL_GetPerformanceCounter();
+        Uint64 frame_us = (frame_end - frame_start) * 1000000ULL / perf_freq;
+        Uint64 target_us = (Uint64)frame_delay * 1000ULL;
+        if (!cpu_max && frame_us < target_us) {
+            usleep((unsigned)(target_us - frame_us));
         }
 #endif
     }
 
     /* Cleanup */
 #ifdef USE_SDL
+    draw_screen(NULL, NULL);  /* free static pixel buffer */
     SDL_DestroyTexture(tex);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(win);

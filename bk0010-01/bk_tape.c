@@ -27,13 +27,13 @@ static size_t tape_out_size = 0;
 static size_t tape_out_cap = 0;
 static int tape_out_enabled = 0;
 
-static void tape_out_append(byte val, uint16_t duration)
+static void tape_out_append(byte val, uint64_t duration)
 {
     if (!tape_out_enabled) {
         return;
     }
     while (duration) {
-        uint16_t chunk = (duration > 32767) ? 32767 : duration;
+        uint16_t chunk = (duration > 32767) ? 32767 : (uint16_t)duration;
         byte b1 = (byte)((chunk >> 8) & 0x7f);
         b1 |= (byte)(val ? 0x80 : 0x00);
         byte b2 = (byte)(chunk & 0xff);
@@ -55,7 +55,7 @@ static void tape_out_append(byte val, uint16_t duration)
 static int tape_in_append(byte val, uint16_t duration, byte **buf, size_t *size, size_t *cap)
 {
     while (duration) {
-        uint16_t chunk = (duration > 32767) ? 32767 : duration;
+        uint16_t chunk = (duration > 32767) ? 32767 : (uint16_t)duration;
         byte b1 = (byte)((chunk >> 8) & 0x7f);
         b1 |= (byte)(val ? 0x80 : 0x00);
         byte b2 = (byte)(chunk & 0xff);
@@ -187,23 +187,23 @@ static int tape_raw_next_word(tape_raw_reader *r, uint16_t *out)
 static int tape_raw_get_strobe(tape_raw_reader *r, int *len, int *val)
 {
     uint16_t c;
-again:
-    if (tape_raw_next_word(r, &c) != 0) {
-        return -1;
+    for (;;) {
+        if (tape_raw_next_word(r, &c) != 0) {
+            return -1;
+        }
+        if ((c & 0x7fff) > 1) {
+            uint16_t toret = r->old_strobe;
+            r->old_strobe = c;
+            *len = toret & 0x7fff;
+            *val = (toret >> 15) & 1;
+            return 0;
+        }
+        r->old_strobe++;
+        if (tape_raw_next_word(r, &c) != 0) {
+            return -1;
+        }
+        r->old_strobe = (uint16_t)(r->old_strobe + (c & 0x7fff));
     }
-    if ((c & 0x7fff) > 1) {
-        uint16_t toret = r->old_strobe;
-        r->old_strobe = c;
-        *len = toret & 0x7fff;
-        *val = (toret >> 15) & 1;
-        return 0;
-    }
-    r->old_strobe++;
-    if (tape_raw_next_word(r, &c) != 0) {
-        return -1;
-    }
-    r->old_strobe = (uint16_t)(r->old_strobe + (c & 0x7fff));
-    goto again;
 }
 
 static int tape_read_bit_raw(tape_raw_reader *r, int polarity)
@@ -383,7 +383,7 @@ void bk_tape_init(void)
 {
     const char *synch_env = getenv("BK_TAPE_SYNCH");
     if (synch_env && *synch_env) {
-        long v = strtol(synch_env, NULL, 0);
+        unsigned long v = strtoul(synch_env, NULL, 0);
         if (v > 0 && v <= 100000) {
             tape_synch = (unsigned)v;
             tape_synch_forced = 1;
@@ -436,14 +436,14 @@ void bk_tape_write(int motor_on, int val)
         if (!tape_status) {
             tape_read_ticks = tape_write_ticks = tape_ticks;
         } else if (tape_out_enabled) {
-            tape_out_append(tape_write_val, (uint16_t)(tape_ticks - tape_write_ticks));
+            tape_out_append(tape_write_val, tape_ticks - tape_write_ticks);
             tape_write_ticks = tape_ticks;
         }
     }
     if (!tape_status && val != tape_write_val) {
         uint64_t delta = tape_ticks - tape_write_ticks;
         if (delta) {
-            tape_out_append(tape_write_val, (uint16_t)delta);
+            tape_out_append(tape_write_val, delta);
         }
         tape_write_ticks = tape_ticks;
         tape_write_val = (byte)(val ? 1 : 0);
@@ -639,7 +639,7 @@ const byte *bk_tape_output_data(size_t *size)
     if (tape_out_enabled && !tape_status) {
         uint64_t delta = tape_ticks - tape_write_ticks;
         if (delta) {
-            tape_out_append(tape_write_val, (uint16_t)delta);
+            tape_out_append(tape_write_val, delta);
             tape_write_ticks = tape_ticks;
         }
     }

@@ -22,8 +22,8 @@
 
 #define CSR_READY 0200
 #define SYS_PORT_TAPE_BIT 0040
-#define SYS_PORT_TAPE_BIT2 0100
-#define SYS_PORT_KEY_BIT  0100
+#define SYS_PORT_OUT_BEEPER_BIT 0100  /* write: tape data out / beeper */
+#define SYS_PORT_IN_KEY_BIT     0100  /* read:  keyboard data available */
 #define SYS_PORT_MOTOR_BIT 0200
 #define SYS_PORT_OUT_MASK 0360
 #define SYS_PORT_IN_MASK  0374
@@ -133,7 +133,7 @@ static byte bk_load_byte(regs *r, word offset)
         return 0;
     case BK_KBD_DATA:
         kbd_status &= (byte)~CSR_READY;
-        sys_port_in |= SYS_PORT_KEY_BIT;
+        sys_port_in |= SYS_PORT_IN_KEY_BIT;
         kbd_irq_pending = 0;
         return kbd_data & 0177;
     case (BK_KBD_DATA + 1):
@@ -151,11 +151,8 @@ static byte bk_load_byte(regs *r, word offset)
         sys_port_in &= ~(1 << 2);
         return (byte)(value & 0377);
     }
-    case (BK_SYS_CTRL + 1): {
-        word value = sys_ctrl;
-        sys_port_in &= ~(1 << 2);
-        return (byte)(value >> 8);
-    }
+    case (BK_SYS_CTRL + 1):
+        return (byte)(sys_ctrl >> 8);
     default:
         if (offset >= 0177600) {
             bus_error_pending = 1;
@@ -193,12 +190,12 @@ static void bk_store_byte(regs *r, word offset, byte value)
         break;
     case BK_SYS_CTRL:
         sys_port_out = (byte)(value & SYS_PORT_OUT_MASK);
-        beeper_on = (value & SYS_PORT_TAPE_BIT2) ? 1 : 0;
+        beeper_on = (value & SYS_PORT_OUT_BEEPER_BIT) ? 1 : 0;
         if (beeper_on) {
             beeper_pulse++;
         }
         bk_tape_write(tape_motor_on(),
-                      (value & SYS_PORT_TAPE_BIT2) ? 1 : 0);
+                      (value & SYS_PORT_OUT_BEEPER_BIT) ? 1 : 0);
         sys_port_in |= (1 << 2);
         break;
     case (BK_SYS_CTRL + 1):
@@ -251,7 +248,6 @@ static void bk_reset(regs *r)
     bus_error_pending = 0;
     beeper_on = 0;
     beeper_pulse = 0;
-//    sys_ctrl = 0160000;
     bk_tape_reset();
 }
 
@@ -267,6 +263,9 @@ static void bk_fini(regs *r)
 static byte *bk_ramptr(regs *r, word offset)
 {
     (void)r;
+    if (is_rom_addr(offset)) {
+        return NULL;
+    }
     return &mem[offset];
 }
 
@@ -281,6 +280,8 @@ void bk_hw_connect(regs *r)
     r->fini = bk_fini;
     r->poll_irq = bk_poll_irq;
     r->ramptr = bk_ramptr;
+    /* Fast-path limit: ROM starts at BK_ROM_LO; addresses below it are plain RAM/VRAM. */
+    r->ram_fast_size = BK_ROM_LO;
 }
 
 size_t bk_hw_required_memory_size(void)
@@ -322,6 +323,8 @@ void bk_hw_reset_state(void)
     sys_port_in = 0370;
     kbd_irq_pending = 0;
     bus_error_pending = 0;
+    beeper_on = 0;
+    beeper_pulse = 0;
     bk_tape_reset();
 }
 
@@ -367,7 +370,7 @@ void bk_hw_handle_key(int code)
     }
     kbd_data = (byte)code;
     kbd_status |= CSR_READY;
-    sys_port_in &= (byte)~SYS_PORT_KEY_BIT;
+    sys_port_in &= (byte)~SYS_PORT_IN_KEY_BIT;
     if ((kbd_status & 0100) == 0) {
         kbd_irq_pending = 1;
     }
