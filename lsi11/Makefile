@@ -253,6 +253,6 @@ test-matrix: test-lsi11 test-pdp1184
 	@echo "ALL TESTS PASSED"
 
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(BIN_RT11TOOL) $(BIN_RSX11TOOL) $(TESTS_LSI11) $(TESTS_PDP1184)
+	rm -rf $(BUILD_DIR) $(BIN_LSI11) $(BIN_PDP1184) $(BIN_IMAGE) $(BIN_RT11TOOL) $(BIN_RSX11TOOL) $(TESTS_LSI11) $(TESTS_PDP1184)
 
 .PHONY: all test test-lsi11 test-pdp1184 test-rt11tool test-rsx11tool smoke-ultrix-rh smoke-bsd291-xp test-matrix clean
