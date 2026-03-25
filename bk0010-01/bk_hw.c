@@ -26,7 +26,7 @@
 #define SYS_PORT_KEY_BIT  0100
 #define SYS_PORT_MOTOR_BIT 0200
 #define SYS_PORT_OUT_MASK 0360
-#define SYS_PORT_IN_MASK  0370
+#define SYS_PORT_IN_MASK  0374
 
 static byte *mem;
 static size_t mem_size;
@@ -148,10 +148,12 @@ static byte bk_load_byte(regs *r, word offset)
         return (byte)(ext_port >> 8);
     case BK_SYS_CTRL: {
         word value = (word)(sys_port_in & SYS_PORT_IN_MASK);
+        sys_port_in &= ~(1 << 2);
         return (byte)(value & 0377);
     }
     case (BK_SYS_CTRL + 1): {
         word value = sys_ctrl;
+        sys_port_in &= ~(1 << 2);
         return (byte)(value >> 8);
     }
     default:
@@ -197,8 +199,10 @@ static void bk_store_byte(regs *r, word offset, byte value)
         }
         bk_tape_write(tape_motor_on(),
                       (value & SYS_PORT_TAPE_BIT2) ? 1 : 0);
+        sys_port_in |= (1 << 2);
         break;
     case (BK_SYS_CTRL + 1):
+        sys_port_in |= (1 << 2);
         break;
     default:
         if (offset >= 0177600) {

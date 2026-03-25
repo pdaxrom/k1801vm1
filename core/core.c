@@ -2582,10 +2582,10 @@ static INLINE void handle_halt(regs *r)
 {
     word vec;
     if (r->model == K1801VM1) {
+        vec = (load_word(r, 0177716) & 0177400) | 002;
+        store_word(r, 0177716, load_word(r, 0177716) | 010);
         store_word(r, 0177676, r->psw);
         store_word(r, 0177674, r->r[7]);
-        store_word(r, 0177716, load_word(r, 0177716) | 010);
-        vec = (load_word(r, 0177716) & 0177400) | 002;
         r->r[7] = load_word_vector(r, vec);
         r->psw = load_word_vector(r, (word)(vec + 2));
     } else if (is_vm2(r)) {
@@ -2605,10 +2605,10 @@ static INLINE void handle_halt(regs *r)
         r->r[7] = load_word_vector(r, vec) & 0177776;
         dcj11_set_psw(r, 0340);
     } else {
+        vec = load_word(r, 0177716) & 0177400;
+        store_word(r, 0177716, load_word(r, 0177716) | 010);
         store_word(r, 0177676, r->psw);
         store_word(r, 0177674, r->r[7]);
-        store_word(r, 0177716, load_word(r, 0177716) | 010);
-        vec = load_word(r, 0177716) & 0177400;
         r->r[7] = load_word_vector(r, vec + 2) & 0177776;
         r->psw = load_word_vector(r, vec + 4);
     }
