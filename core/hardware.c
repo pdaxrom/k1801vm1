@@ -26,6 +26,13 @@ static size_t mem_size = 0;
 #define PHYS_MEM_SIZE (1u << 16)
 #endif
 
+/*
+ * The I/O page occupies 0160000..0177777 in the 16-bit address space.
+ * The ram_fast fast path must not cover that range so that model-specific
+ * register decode in core_load/store_*_ex fires for those addresses.
+ */
+#define RAM_FAST_LIMIT 0160000u
+
 size_t hwstub_required_memory_size(void)
 {
     return PHYS_MEM_SIZE;
@@ -63,13 +70,15 @@ static void hardware_store_byte(regs *r, word offset, byte value)
 
 static word hardware_load_word(regs *r, word offset)
 {
-    return r->load_byte(r, offset) | (r->load_byte(r, offset + 1) << 8);
+    (void)r;
+    return (word)(mem[offset] | ((word)mem[(word)(offset + 1)] << 8));
 }
 
 static void hardware_store_word(regs *r, word offset, word value)
 {
-    r->store_byte(r, offset,     value & 0377);
-    r->store_byte(r, offset + 1, value >> 8);
+    (void)r;
+    mem[offset] = (byte)(value & 0377);
+    mem[(word)(offset + 1)] = (byte)(value >> 8);
 }
 
 static int hardware_init(regs *r)
@@ -147,6 +156,7 @@ static void hardware_store_word_pa(regs *r, dword offset, word value)
 
 void hwstub_connect(regs *r)
 {
+    r->ram_fast_size = RAM_FAST_LIMIT;
     r->load_byte	= hardware_load_byte;
     r->store_byte	= hardware_store_byte;
     r->load_word	= hardware_load_word;

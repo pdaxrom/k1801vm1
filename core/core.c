@@ -83,6 +83,10 @@
 /*
  * Batch PSW flag helpers: compute multiple flags in one PSW write.
  * Avoids 3-4 separate read-modify-write cycles per instruction.
+ *
+ * PSW_SET_NZV_WORD/BYTE: clear N/Z/V, set N and Z from result.
+ * PSW_SET_NZVC_WORD/BYTE: clear N/Z/V/C, set N, Z, V, C from given bits.
+ *   n_cond, z_cond, v_cond, c_cond are int-valued boolean expressions.
  */
 #define PSW_SET_NZV_WORD(result)                                               \
   do {                                                                         \
@@ -107,6 +111,21 @@
       r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V)) | _f;                    \
     }                                                                          \
   } while (0)
+
+#define PSW_SET_NZVC_WORD(n_cond, z_cond, v_cond, c_cond)                     \
+  do {                                                                         \
+    if (!(r->model == DCJ11 && r->dcj11_explicit_psw_write)) {                \
+      word _f = 0;                                                             \
+      if (n_cond) _f |= FLAG_N;                                               \
+      if (z_cond) _f |= FLAG_Z;                                               \
+      if (v_cond) _f |= FLAG_V;                                               \
+      if (c_cond) _f |= FLAG_C;                                               \
+      r->psw = (r->psw & ~(FLAG_N | FLAG_Z | FLAG_V | FLAG_C)) | _f;          \
+    }                                                                          \
+  } while (0)
+
+#define PSW_SET_NZVC_BYTE(n_cond, z_cond, v_cond, c_cond)                     \
+  PSW_SET_NZVC_WORD(n_cond, z_cond, v_cond, c_cond)
 
 static INLINE dword arith_rshift32(dword value, word count)
 {
@@ -286,28 +305,14 @@ static INLINE void dcj11_set_cpuerr(regs *r, word bits)
 static INLINE int dcj11_pirq_highest_level(word pirq)
 {
     word req = (word)(pirq & DCJ11_PIRQ_RW);
-    if (req & 0100000) {
-        return 7;
+    if (!req) {
+        return 0;
     }
-    if (req & 0040000) {
-        return 6;
-    }
-    if (req & 0020000) {
-        return 5;
-    }
-    if (req & 0010000) {
-        return 4;
-    }
-    if (req & 0004000) {
-        return 3;
-    }
-    if (req & 0002000) {
-        return 2;
-    }
-    if (req & 0001000) {
-        return 1;
-    }
-    return 0;
+    /* PIRQ request bits are in bits 9..15 (levels 1..7).
+     * __builtin_clz counts leading zeros in an unsigned int;
+     * the highest set bit in req gives the level directly. */
+    return (int)((8 * sizeof(unsigned int) - 1) -
+                 (unsigned)__builtin_clz((unsigned int)req)) - 8;
 }
 
 static INLINE word dcj11_pirq_pri_field(int level)
@@ -1783,7 +1788,7 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
-        int space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
+        space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
@@ -1857,7 +1862,7 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
-        int space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
+        space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
@@ -1925,8 +1930,11 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     int rc;
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
-    /* Fast path: RAM word access bypasses entire callback chain. */
-    if (r->ram_fast && ((uint32_t)offset + 1u) < r->ram_fast_size) {
+    /* Fast path: RAM word access bypasses entire callback chain.
+     * Skip for DCJ11 odd-address accesses: alignment trap must fire. */
+    if (r->ram_fast &&
+        !(r->model == DCJ11 && (offset & 1)) &&
+        ((uint32_t)offset + 1u) < r->ram_fast_size) {
         return (word)(r->ram_fast[offset] | ((word)r->ram_fast[offset + 1] << 8));
     }
 #else
@@ -1934,7 +1942,7 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
-        int space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
+        space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
@@ -2030,8 +2038,11 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     int rc;
 
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
-    /* Fast path: RAM word access bypasses entire callback chain. */
-    if (r->ram_fast && ((uint32_t)offset + 1u) < r->ram_fast_size) {
+    /* Fast path: RAM word access bypasses entire callback chain.
+     * Skip for DCJ11 odd-address accesses: alignment trap must fire. */
+    if (r->ram_fast &&
+        !(r->model == DCJ11 && (offset & 1)) &&
+        ((uint32_t)offset + 1u) < r->ram_fast_size) {
         r->ram_fast[offset] = (uint8_t)(value & 000377);
         r->ram_fast[offset + 1] = (uint8_t)((value >> 8) & 000377);
         return;
@@ -2041,7 +2052,7 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         mode = mmu_mode_from_psw(r->psw);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
-        int space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
+        space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
         if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
                 po <= r->mmu_tlb[mode][space][seg].valid_max &&
                 r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
@@ -2347,6 +2358,7 @@ void core_reset(regs *r)
     r->mmu_ssr3 = 0;
     memset(r->mmu_par, 0, sizeof(r->mmu_par));
     memset(r->mmu_pdr, 0, sizeof(r->mmu_pdr));
+    mmu_tlb_flush_all(r);
 #endif
 
     r->reset(r);
@@ -3379,10 +3391,7 @@ int __not_in_flash_func(core_step)(regs *r)
         GET_WORD(tmp);
         tmp = ~tmp;
         PUT_WORD(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        clear_flag(FLAG_V);
-        set_flag(FLAG_C);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, 0, 1);
         goto step_end;
     }
     case 01051: { /* COMB */
@@ -3390,52 +3399,45 @@ int __not_in_flash_func(core_step)(regs *r)
         GET_BYTE(tmp);
         tmp = (~tmp) & 0377;
         PUT_BYTE(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        clear_flag(FLAG_V);
-        set_flag(FLAG_C);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, 0, 1);
         goto step_end;
     }
 
     case 00052: { /* INC */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if(tmp == MPI, FLAG_V);
+        word _inc_v = (tmp == MPI);
         tmp++;
         PUT_WORD(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN, FLAG_N);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, _inc_v, flag_is_set(FLAG_C));
         goto step_end;
     }
     case 01052: { /* INCB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if(tmp == MPI_B, FLAG_V);
+        word _inc_v = (tmp == MPI_B);
         tmp = (tmp + 1) & 0377;
         PUT_BYTE(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, _inc_v, flag_is_set(FLAG_C));
         goto step_end;
     }
 
     case 00053: { /* DEC */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if(tmp == MNI, FLAG_V);
+        word _dec_v = (tmp == MNI);
         tmp--;
         PUT_WORD(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN, FLAG_N);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, _dec_v, flag_is_set(FLAG_C));
         goto step_end;
     }
     case 01053: { /* DECB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if(tmp == MNI_B, FLAG_V);
+        word _dec_v = (tmp == MNI_B);
         tmp = (tmp - 1) & 0377;
         PUT_BYTE(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, _dec_v, flag_is_set(FLAG_C));
         goto step_end;
     }
 
@@ -3444,10 +3446,7 @@ int __not_in_flash_func(core_step)(regs *r)
         GET_WORD(tmp);
         tmp = (NEG_1 - tmp) + 1;
         PUT_WORD(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == MNI, FLAG_V);
-        set_flag_if(tmp != 0, FLAG_C);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, tmp == MNI, (word)tmp != 0);
         goto step_end;
     }
     case 01054: { /* NEGB */
@@ -3455,196 +3454,162 @@ int __not_in_flash_func(core_step)(regs *r)
         GET_BYTE(tmp);
         tmp = ((NEG_1_B - tmp) + 1) & 0377;
         PUT_BYTE(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == MNI_B, FLAG_V);
-        set_flag_if(tmp != 0, FLAG_C);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, tmp == MNI_B, (tmp & 0377) != 0);
         goto step_end;
     }
 
     case 00057: { /* TST */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        clear_flag(FLAG_V | FLAG_C);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, 0, 0);
         goto step_end;
     }
     case 01057: { /* TSTB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        clear_flag(FLAG_V | FLAG_C);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, 0, 0);
         goto step_end;
     }
 
     case 00062: { /* ASR */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if(tmp & 1, FLAG_C);
+        word _asr_c = tmp & 1;          /* 0 or 1 */
         tmp = (tmp & SIGN) | (tmp >> 1);
         PUT_WORD(tmp);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _asr_n = !!(tmp & SIGN);   /* normalize to 0/1 for XOR */
+        PSW_SET_NZVC_WORD(_asr_n, (word)tmp == 0, _asr_n ^ _asr_c, _asr_c);
         goto step_end;
     }
     case 01062: { /* ASRB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if(tmp & 1, FLAG_C);
+        word _asr_c = tmp & 1;
         tmp = (tmp & SIGN_B) | (tmp >> 1);
         PUT_BYTE(tmp);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _asr_n = !!(tmp & SIGN_B);
+        PSW_SET_NZVC_BYTE(_asr_n, (tmp & 0377) == 0, _asr_n ^ _asr_c, _asr_c);
         goto step_end;
     }
 
     case 00063: { /* ASL */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if(tmp & SIGN, FLAG_C);
+        word _asl_c = tmp & SIGN;
         tmp = tmp << 1;
         PUT_WORD(tmp);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _asl_n = tmp & SIGN;
+        PSW_SET_NZVC_WORD(_asl_n, (word)tmp == 0, _asl_n ^ _asl_c, _asl_c);
         goto step_end;
     }
     case 01063: { /* ASLB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if(tmp & SIGN_B, FLAG_C);
+        word _asl_c = tmp & SIGN_B;
         tmp = (tmp << 1) & 0377;
         PUT_BYTE(tmp);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _asl_n = tmp & SIGN_B;
+        PSW_SET_NZVC_BYTE(_asl_n, (tmp & 0377) == 0, _asl_n ^ _asl_c, _asl_c);
         goto step_end;
     }
 
     case 00060: { /* ROR */
         DECODE_DST();
         GET_WORD(tmp);
-        word tmp_c = tmp & 1;
-        tmp = tmp >> 1;
-        if (flag_is_set(FLAG_C)) {
-            tmp |= SIGN;
-        }
+        word _ror_c_old = flag_is_set(FLAG_C);
+        word _ror_c_new = tmp & 1;          /* 0 or 1 */
+        tmp = (tmp >> 1) | (_ror_c_old ? SIGN : 0);
         PUT_WORD(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _ror_n = !!(tmp & SIGN);       /* normalize to 0/1 for XOR */
+        PSW_SET_NZVC_WORD(_ror_n, (word)tmp == 0, _ror_n ^ _ror_c_new, _ror_c_new);
         goto step_end;
     }
     case 01060: { /* RORB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        byte tmp_c = tmp & 1;
-        tmp = tmp >> 1;
-        if (flag_is_set(FLAG_C)) {
-            tmp |= SIGN_B;
-        }
+        word _ror_c_old = flag_is_set(FLAG_C);
+        word _ror_c_new = tmp & 1;
+        tmp = (tmp >> 1) | (_ror_c_old ? SIGN_B : 0);
         PUT_BYTE(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _ror_n = !!(tmp & SIGN_B);
+        PSW_SET_NZVC_BYTE(_ror_n, (tmp & 0377) == 0, _ror_n ^ _ror_c_new, _ror_c_new);
         goto step_end;
     }
 
     case 00061: { /* ROL */
         DECODE_DST();
         GET_WORD(tmp);
-        word tmp_c = tmp & SIGN;
-        tmp = tmp << 1;
-        if (flag_is_set(FLAG_C)) {
-            tmp |= 1;
-        }
+        word _rol_c_old = flag_is_set(FLAG_C);
+        word _rol_c_new = tmp & SIGN;
+        tmp = (tmp << 1) | (_rol_c_old ? 1 : 0);
         PUT_WORD(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _rol_n = tmp & SIGN;
+        PSW_SET_NZVC_WORD(_rol_n, (word)tmp == 0, _rol_n ^ _rol_c_new, _rol_c_new);
         goto step_end;
     }
     case 01061: { /* ROLB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        byte tmp_c = tmp & SIGN_B;
-        tmp = (tmp << 1) & 0377;
-        if (flag_is_set(FLAG_C)) {
-            tmp |= 1;
-        }
-        tmp &= 0377;
+        word _rol_c_old = flag_is_set(FLAG_C);
+        word _rol_c_new = tmp & SIGN_B;
+        tmp = ((tmp << 1) | (_rol_c_old ? 1 : 0)) & 0377;
         PUT_BYTE(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
-        set_flag_if(flag_is_set(FLAG_N) ^ flag_is_set(FLAG_C), FLAG_V);
+        word _rol_n = tmp & SIGN_B;
+        PSW_SET_NZVC_BYTE(_rol_n, (tmp & 0377) == 0, _rol_n ^ _rol_c_new, _rol_c_new);
         goto step_end;
     }
 
     case 00055: { /* ADC */
         DECODE_DST();
         GET_WORD(tmp);
-        set_flag_if((tmp == MPI) && flag_is_set(FLAG_C), FLAG_V);
-        byte tmp_c = (tmp == NEG_1) && flag_is_set(FLAG_C);
-        if (flag_is_set(FLAG_C)) {
+        word _adc_c_in = flag_is_set(FLAG_C);
+        word _adc_v = _adc_c_in && (tmp == MPI);
+        word _adc_c = _adc_c_in && ((word)tmp == NEG_1);
+        if (_adc_c_in) {
             tmp = tmp + 1;
         }
         PUT_WORD(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, _adc_v, _adc_c);
         goto step_end;
     }
     case 01055: { /* ADCB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        set_flag_if((tmp == MPI_B) && flag_is_set(FLAG_C), FLAG_V);
-        byte tmp_c = (tmp == NEG_1_B) && flag_is_set(FLAG_C);
-        if (flag_is_set(FLAG_C)) {
+        word _adc_c_in = flag_is_set(FLAG_C);
+        word _adc_v = _adc_c_in && (tmp == MPI_B);
+        word _adc_c = _adc_c_in && ((tmp & 0377) == NEG_1_B);
+        if (_adc_c_in) {
             tmp = (tmp + 1) & 0377;
         }
         PUT_BYTE(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, _adc_v, _adc_c);
         goto step_end;
     }
 
     case 00056: { /* SBC */
         DECODE_DST();
         GET_WORD(tmp);
-        byte flag_c = flag_is_set(FLAG_C);
-        set_flag_if(flag_c && (tmp == MNI), FLAG_V);
-        byte tmp_c = flag_c && (tmp == 0);
-        if (flag_c) {
+        word _sbc_c_in = flag_is_set(FLAG_C);
+        word _sbc_v = _sbc_c_in && ((word)tmp == MNI);
+        word _sbc_c = _sbc_c_in && ((word)tmp == 0);
+        if (_sbc_c_in) {
             tmp = tmp - 1;
         }
         PUT_WORD(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        PSW_SET_NZVC_WORD(tmp & SIGN, (word)tmp == 0, _sbc_v, _sbc_c);
         goto step_end;
     }
     case 01056: { /* SBCB */
         DECODE_DSTB();
         GET_BYTE(tmp);
-        byte flag_c = flag_is_set(FLAG_C);
-        set_flag_if(flag_c && (tmp == MNI_B), FLAG_V);
-        byte tmp_c = flag_c && (tmp == 0);
-        if (flag_c) {
+        word _sbc_c_in = flag_is_set(FLAG_C);
+        word _sbc_v = _sbc_c_in && ((tmp & 0377) == MNI_B);
+        word _sbc_c = _sbc_c_in && ((tmp & 0377) == 0);
+        if (_sbc_c_in) {
             tmp = (tmp - 1) & 0377;
         }
         PUT_BYTE(tmp);
-        set_flag_if(tmp_c, FLAG_C);
-        set_flag_if(tmp & SIGN_B, FLAG_N);
-        set_flag_if(tmp == 0, FLAG_Z);
+        PSW_SET_NZVC_BYTE(tmp & SIGN_B, (tmp & 0377) == 0, _sbc_v, _sbc_c);
         goto step_end;
     }
 
