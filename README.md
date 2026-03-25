@@ -1,11 +1,85 @@
-# DCJ11 CPU Core — Compliance Report
+# k1801vm1 Documentation
 
-This report documents DCJ11 (J‑11) CPU core behavior implemented in `core/`
-and verified by tests in `tests/`. All PDP‑11 values below are in OCTAL.
+This repository centers on the PDP-11 / K1801 CPU core in `core/` and the
+machine/front-end projects built around it. The repository root `README.md` is
+the canonical entry point for CPU/core documentation, including scope, MMU
+policy, test entry points, and the detailed compliance report. All PDP-11
+values below are in OCTAL.
 
-Documentation split:
-- CPU/core topic index: `core/README.md`
-- Emulator/platform/device topic index: `lsi11/README.md`
+## Documentation Map
+
+- `README.md` (this file): CPU/core scope, models, MMU policy, references,
+  compatibility notes, and the detailed compliance/debugging report.
+- `lsi11/README.md`: machine profiles, devices, boot flows, CLI, and emulator
+  diagnostics for `lsi11` and `pdp1184`.
+- `bk0010-01/README.md`: BK-0010-01 SDL front-end built on the shared core.
+- `doc/rh11-rh70-baseline.md`: RH11/RH70 controller baseline and delta notes.
+- `TODO.md`: root project TODO and compliance work log.
+- `lsi11/TODO.md`: host-side disk tool backlog for the machine subproject.
+- External submodules keep their own documentation and are not duplicated here.
+
+## CPU Core (`core/`)
+
+### Scope
+
+This directory documents and implements CPU-level behavior only:
+- instruction execution and flags
+- trap/exception and interrupt entry/return semantics
+- model-specific CPU registers (DCJ11, VM1, VM2/K1806VM2)
+- MMU translation/protection logic when `ENABLE_MMU=1`
+
+Out of scope for `core/`:
+- machine bus wiring details
+- peripheral controllers (DL11/RK11/RH11/RL11/TQ11/KW11/etc.)
+- CLI options and boot media workflows
+
+Those topics are documented in [`lsi11/README.md`](lsi11/README.md).
+
+### CPU Models
+
+- `DCJ11` (`11/84` profile CPU)
+- `K1801VM1`
+- `K1801VM2`
+- `K1806VM2` (alias/variant handling via VM2 paths)
+
+### Addressing/MMU Policy
+
+- Build with `ENABLE_MMU=0`:
+  - CPU runs without MMU translation (identity-like behavior through machine
+    bus callbacks).
+- Build with `ENABLE_MMU=1`:
+  - Kernel/Supervisor/User modes and PAR/PDR sets are active.
+  - Split I/D handling follows implemented model rules.
+  - 22-bit path is supported for DCJ11 MMU-enabled operation.
+
+### Recent DCJ11 Compatibility Fixes
+
+- DCJ11 stack limit register `0177774` (`J11_STKLIM`) is implemented:
+  - reset default is `0000400`
+  - yellow stack detection uses `J11_STKLIM` (fallback to `0000400` only if
+    register is zero)
+- Bus-error trap stacks architectural trap-time PC from `r7`:
+  - operand faults use post-fetch PC
+  - instruction-fetch faults keep faulting PC
+- `core_bus_error_trap(regs *r)` is exported for machine adapters, so external
+  bus/NXM traps can reuse the same core trap path.
+
+### Testing (core-level)
+
+From repository root:
+- `make test` (MMU-off baseline + core tests)
+- `make test-mmu-on` (MMU-on test set)
+- `make test-matrix` (both)
+- `make diag` (CPU diagnostics harness)
+
+### Primary References
+
+- `doc/J-11_Programmers_Reference_Jan82.pdf`
+- `doc/EK-DCJ11-UG-PRE_J11ug_Oct83.pdf`
+- `doc/KM1801VM2.pdf`
+- `doc/Однокристальный-микропроцессор-К1801ВМ1.pdf`
+
+The remainder of this file is the detailed CPU compliance report.
 
 ---
 
@@ -630,5 +704,5 @@ examine 177440
 
 ## Appendix A: Checklist Mapping
 
-This report corresponds to:
-`DCJ11_COMPLIANCE.yaml`
+The earlier checklist draft was folded into this document. The repository no
+longer keeps a separate compliance checklist file.

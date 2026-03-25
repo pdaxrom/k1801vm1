@@ -653,7 +653,8 @@ Validation:
   - If `IRQ ACCEPT` is correct and mismatch appears on `RTI POST`: RTI restore path (PC/PSW/SP) is likely wrong.
 
 ## CPU/Emulator Documentation Boundary
-- CPU core semantics, MMU behavior, trap/IRQ frame rules and core test matrix are documented in [`core/README.md`](../core/README.md).
+- CPU core semantics, model/MMU policy, trap/IRQ frame rules, and the core test
+  matrix are documented in [`README.md`](../README.md).
 - This document (`lsi11/README.md`) covers machine integration only: buses, devices, CLI, boot flows, and emulator diagnostics.
 
 ## Recent PDP-11/84 Fix (ULTRIX boot path)
