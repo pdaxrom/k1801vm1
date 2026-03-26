@@ -655,6 +655,8 @@ static uint8_t *core_ramptr(regs *r, word offset)
 
 void lsi11_hw_connect(regs *r)
 {
+    r->ram_fast = NULL;
+    r->ram_fast_size = 0;
     r->load_byte = core_load_byte;
     r->store_byte = core_store_byte;
     r->load_word = core_load_word;

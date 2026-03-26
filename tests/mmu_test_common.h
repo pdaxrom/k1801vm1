@@ -38,7 +38,12 @@ static INLINE void mmu_fixture_setup(mmu_fixture *fx)
     }
     fx->r.model = DCJ11;
     hwstub_connect(&fx->r);
-    core_init(&fx->r);
+    if (core_init(&fx->r) != 0) {
+        fprintf(stderr, "FAIL: %s: core_init\n",
+                mmu_current_test ? mmu_current_test : "mmu_fixture_setup");
+        free(fx->mem_owner);
+        abort();
+    }
     fx->mem = fx->r.ramptr(&fx->r, 0);
     memset(fx->mem, 0, fx->mem_size);
     fx->r.SEL0 = 0;

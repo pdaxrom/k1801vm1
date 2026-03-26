@@ -590,7 +590,7 @@ int main(int argc, char **argv)
     }
     bk_hw_connect(&r);
     bk_tape_set_name_pad(name_pad_space);
-    if (r.init(&r) != 0) {
+    if (core_init(&r) != 0) {
         fprintf(stderr, "Hardware init failed\n");
         free(monitor_rom);
         free(basic_rom);
@@ -603,7 +603,6 @@ int main(int argc, char **argv)
         bk_hw_set_rom_segment(basic_rom, BASIC_BASE, basic_size);
     }
 
-    core_init(&r);
     core_reset(&r);
 
     bk_hw_set_tick_hz(cpu_hz);

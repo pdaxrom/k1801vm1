@@ -290,7 +290,11 @@ static void fixture_setup_model(cpu_fixture *fx, byte model)
     }
     fx->r.model = model;
     hwstub_connect(&fx->r);
-    core_init(&fx->r);
+    if (core_init(&fx->r) != 0) {
+        fprintf(stderr, "FAIL: core_init\n");
+        free(fx->mem_owner);
+        exit(1);
+    }
     fx->mem = fx->r.ramptr(&fx->r, 0);
     memset(fx->mem, 0, fx->mem_size);
 
@@ -318,6 +322,12 @@ static void fixture_teardown(cpu_fixture *fx)
     hwstub_clear_memory_binding();
     free(fx->mem_owner);
     fx->mem_owner = NULL;
+}
+
+static int failing_core_init(regs *r)
+{
+    (void)r;
+    return -1;
 }
 
 static INLINE int is_vm1_model(byte model);
@@ -1096,6 +1106,61 @@ static int test_disas_combined_flag_ops(void)
 
 cleanup:
     fixture_teardown(&fx);
+    return rc;
+}
+
+static int test_core_init_propagates_backend_failure(void)
+{
+    int rc = 0;
+    regs r;
+
+    current_test = "core_init_propagates_backend_failure";
+    memset(&r, 0, sizeof(r));
+    r.model = K1801VM1;
+    r.init = failing_core_init;
+    ASSERT_TRUE(core_init(&r) != 0,
+                "core_init should return backend init failure");
+
+cleanup:
+    return rc;
+}
+
+static int test_hwstub_fixture_memory_is_isolated(void)
+{
+    int rc = 0;
+    cpu_fixture fx_a;
+    cpu_fixture fx_b;
+    const word program_a[] = {
+        op_mov(operand(2, 7), operand(0, 0)),
+        012345
+    };
+    const word program_b[] = {
+        op_mov(operand(2, 7), operand(0, 0)),
+        065432
+    };
+
+    current_test = "hwstub_fixture_memory_is_isolated";
+    memset(&fx_a, 0, sizeof(fx_a));
+    memset(&fx_b, 0, sizeof(fx_b));
+
+    fixture_setup_model(&fx_a, K1801VM1);
+    load_program(&fx_a, TEST_BASE, program_a, sizeof(program_a) / sizeof(program_a[0]));
+
+    fixture_setup_model(&fx_b, K1801VM1);
+    load_program(&fx_b, TEST_BASE, program_b, sizeof(program_b) / sizeof(program_b[0]));
+
+    ASSERT_EQ(core_step(&fx_a.r), 0, "fixture A step should succeed");
+    ASSERT_EQ(fx_a.r.r[0], 012345, "fixture A must keep its own backing store");
+    ASSERT_EQ(core_step(&fx_b.r), 0, "fixture B step should succeed");
+    ASSERT_EQ(fx_b.r.r[0], 065432, "fixture B must keep its own backing store");
+
+cleanup:
+    if (fx_b.mem_owner) {
+        fixture_teardown(&fx_b);
+    }
+    if (fx_a.mem_owner) {
+        fixture_teardown(&fx_a);
+    }
     return rc;
 }
 
@@ -8042,6 +8107,8 @@ int main(void)
     failed += test_vm1_illegal_instructions_trap();
     failed += test_dcj11_special_ops_illegal_on_other_models();
     failed += test_dcj11_tstset_wrtlck_mode0_illegal();
+    failed += test_core_init_propagates_backend_failure();
+    failed += test_hwstub_fixture_memory_is_isolated();
     failed += test_dcj11_alignment_trap();
     failed += test_dcj11_alignment_trap_store();
     failed += test_dcj11_alignment_trap_fetch();

@@ -2291,7 +2291,7 @@ static INLINE void core_store_word(regs *r, word offset, word value)
 #define load_word_vector(a, b) core_load_word_vector((a), (b))
 #define store_word(a, b, c) core_store_word((a), (b), (c))
 
-void core_init(regs *r)
+int core_init(regs *r)
 {
     if (r->model == K1806VM2) {
         r->model = K1801VM2;
@@ -2303,7 +2303,11 @@ void core_init(regs *r)
         r->has_fis = 0;
         r->has_fpu = 0;
     }
-    r->init(r);
+    r->ram_fast = NULL;
+    if (!r->init) {
+        return -1;
+    }
+    return r->init(r);
 }
 
 void core_reset(regs *r)
@@ -2378,11 +2382,14 @@ void core_reset(regs *r)
     r->psw = 0340;
 
     /* Cache direct RAM pointer for fast-path access in core_step. */
+    r->ram_fast = NULL;
     if (r->ramptr) {
         r->ram_fast = r->ramptr(r, 0);
-        /* ram_fast_size set externally or defaults to bus_ram_bytes() */
+        if (!r->ram_fast) {
+            r->ram_fast_size = 0;
+        }
     } else {
-        r->ram_fast = NULL;
+        r->ram_fast_size = 0;
     }
 }
 
@@ -2391,6 +2398,8 @@ void core_fini(regs *r)
     if (r->fini) {
         r->fini(r);
     }
+    r->ram_fast = NULL;
+    r->ram_fast_size = 0;
 }
 
 static INLINE void core_take_vector(regs *r, word vec, word old_pc,

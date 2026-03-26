@@ -17,7 +17,7 @@ core/core.o: core/core.c core/core.h core/pdp11_fp.c
 core/disas.o: core/disas.c core/core.h
 core/hardware.o: core/hardware.c core/hardware.h core/core.h
 
-dis11: core/disas.o core/hardware.o dis11.o
+dis11: core/core.o core/disas.o core/hardware.o dis11.o
 	$(CC) -o $@ $^
 
 mk90: $(OBJS) mk90.o main.o

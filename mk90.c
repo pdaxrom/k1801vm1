@@ -221,6 +221,8 @@ static byte *hardware_ramptr(regs *r, word offset)
 
 void mk90_connect(regs *r)
 {
+	r->ram_fast = NULL;
+	r->ram_fast_size = 0;
 	r->load_byte	= hardware_load_byte;
 	r->store_byte	= hardware_store_byte;
 	r->load_word	= hardware_load_word;

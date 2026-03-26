@@ -155,7 +155,13 @@ int main(int argc, char *argv[])
 	}
 	hwstub_connect(&r);
 
-	core_init(&r);
+	if (core_init(&r) != 0) {
+		endwin();
+		fprintf(stderr, "Hardware init failed\n");
+		hwstub_clear_memory_binding();
+		free(stub_mem);
+		return 1;
+	}
 
 	byte *mem = r.ramptr(&r, 0);
 

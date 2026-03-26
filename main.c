@@ -159,7 +159,10 @@ int main(int argc, char *argv[])
 
 	mk90_connect(&r);
 
-	core_init(&r);
+	if (core_init(&r) != 0) {
+		fprintf(stderr, "Hardware init failed\n");
+		return 1;
+	}
 
 	byte *mem = r.ramptr(&r, 0);
 

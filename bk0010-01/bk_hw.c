@@ -266,6 +266,7 @@ static byte *bk_ramptr(regs *r, word offset)
 
 void bk_hw_connect(regs *r)
 {
+    r->ram_fast = NULL;
     r->load_byte = bk_load_byte;
     r->store_byte = bk_store_byte;
     r->load_word = bk_load_word;

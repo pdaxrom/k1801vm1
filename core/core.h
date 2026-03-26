@@ -17,6 +17,20 @@
 #define INLINE inline
 #endif
 
+#ifndef WARN_UNUSED_RESULT
+#if defined(__has_attribute)
+#if __has_attribute(warn_unused_result)
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#define WARN_UNUSED_RESULT
+#endif
+#elif defined(__GNUC__)
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#define WARN_UNUSED_RESULT
+#endif
+#endif
+
 #ifndef ENABLE_MMU
 #define ENABLE_MMU 0
 #endif
@@ -197,9 +211,12 @@ typedef struct _regs {
      */
     uint8_t *ram_fast;
     uint32_t ram_fast_size;
+    /* Per-instance hwstub backing store; NULL for non-hwstub backends. */
+    uint8_t *hwstub_mem;
+    uint32_t hwstub_mem_size;
 } regs;
 
-void core_init(regs *r);
+WARN_UNUSED_RESULT int core_init(regs *r);
 void core_reset(regs *r);
 int core_step(regs *r);
 void core_fini(regs *r);

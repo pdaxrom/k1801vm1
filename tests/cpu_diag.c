@@ -76,7 +76,11 @@ void cpu_diag_fixture_init(cpu_diag_fixture *fx, byte model)
     }
     fx->r.model = model;
     hwstub_connect(&fx->r);
-    core_init(&fx->r);
+    if (core_init(&fx->r) != 0) {
+        fprintf(stderr, "cpu_diag: core_init failed\n");
+        free(mem_owner);
+        abort();
+    }
     fx->mem = fx->r.ramptr(&fx->r, 0);
     fx->mem_owner = mem_owner;
     fx->mem_size = mem_size;

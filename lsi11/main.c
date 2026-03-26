@@ -930,6 +930,7 @@ int main(int argc, char **argv)
         r.has_fpu = 1;
     }
 
+    r.ram_fast_size = (uint32_t)bus_ram_bytes();
     core_reset(&r);
     bus_iowin_sync_from_cpu(&r, machine_kind);
     ubmap_sync_from_cpu(&r, machine_kind);
