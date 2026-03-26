@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "bk_hw.h"
+#include "core/core.h"
 #include "core/hardware.h"
 #include "bk_tape.h"
 
@@ -39,7 +40,6 @@ static word sys_ctrl = 0100000;
 static byte sys_port_out = 0220;
 static byte sys_port_in = 0370;
 static byte kbd_irq_pending = 0;
-static byte bus_error_pending = 0;
 static byte tape_in_bit = 1;
 static int beeper_on = 0;
 static int beeper_pulse = 0;
@@ -99,30 +99,6 @@ static INLINE int tape_motor_on(void)
     return (sys_port_out & SYS_PORT_MOTOR_BIT) == 0;
 }
 
-static byte mem_read(word addr)
-{
-    const rom_segment *seg = rom_for_addr(addr);
-    if (seg) {
-        return seg->data[rom_offset(seg, addr)];
-    }
-    if (is_rom_addr(addr)) {
-        bus_error_pending = 1;
-        return 0;
-    }
-    return mem[addr];
-}
-
-static void mem_write(word addr, byte value)
-{
-    if (rom_for_addr(addr)) {
-        return;
-    }
-    if (is_rom_addr(addr)) {
-        bus_error_pending = 1;
-        return;
-    }
-    mem[addr] = value;
-}
 
 static byte bk_load_byte(regs *r, word offset)
 {
@@ -155,10 +131,20 @@ static byte bk_load_byte(regs *r, word offset)
         return (byte)(sys_ctrl >> 8);
     default:
         if (offset >= 0177600) {
-            bus_error_pending = 1;
+            core_bus_error_trap(r);
             return 0;
         }
-        return mem_read(offset);
+        {
+            const rom_segment *seg = rom_for_addr(offset);
+            if (seg) {
+                return seg->data[rom_offset(seg, offset)];
+            }
+        }
+        if (is_rom_addr(offset)) {
+            core_bus_error_trap(r);
+            return 0;
+        }
+        return mem[offset];
     }
 }
 
@@ -203,10 +189,14 @@ static void bk_store_byte(regs *r, word offset, byte value)
         break;
     default:
         if (offset >= 0177600) {
-            bus_error_pending = 1;
+            core_bus_error_trap(r);
             break;
         }
-        mem_write(offset, value);
+        if (rom_for_addr(offset) || is_rom_addr(offset)) {
+            core_bus_error_trap(r);
+            break;
+        }
+        mem[offset] = value;
         break;
     }
 }
@@ -214,6 +204,9 @@ static void bk_store_byte(regs *r, word offset, byte value)
 static word bk_load_word(regs *r, word offset)
 {
     byte lo = bk_load_byte(r, offset);
+    if (r->fAbort) {
+        return 0;
+    }
     byte hi = bk_load_byte(r, (word)(offset + 1));
     return (word)(lo | (hi << 8));
 }
@@ -221,6 +214,9 @@ static word bk_load_word(regs *r, word offset)
 static void bk_store_word(regs *r, word offset, word value)
 {
     bk_store_byte(r, offset, (byte)(value & 0377));
+    if (r->fAbort) {
+        return;
+    }
     bk_store_byte(r, (word)(offset + 1), (byte)(value >> 8));
 }
 
@@ -245,7 +241,6 @@ static void bk_reset(regs *r)
     sys_port_out = 0220;
     sys_port_in = 0370;
     kbd_irq_pending = 0;
-    bus_error_pending = 0;
     beeper_on = 0;
     beeper_pulse = 0;
     bk_tape_reset();
@@ -322,7 +317,6 @@ void bk_hw_reset_state(void)
     sys_port_out = 0220;
     sys_port_in = 0370;
     kbd_irq_pending = 0;
-    bus_error_pending = 0;
     beeper_on = 0;
     beeper_pulse = 0;
     bk_tape_reset();
@@ -421,20 +415,7 @@ byte *bk_hw_vram_ptr(void)
 
 static int bk_poll_irq(regs *r, word *vector)
 {
-    if (is_rom_addr(r->r[7]) && !rom_for_addr(r->r[7])) {
-        bus_error_pending = 0;
-        if (vector) {
-            *vector = BK_BUS_VECTOR;
-        }
-        return 1;
-    }
-    if (bus_error_pending) {
-        bus_error_pending = 0;
-        if (vector) {
-            *vector = BK_BUS_VECTOR;
-        }
-        return 1;
-    }
+    (void)r;
     if (kbd_irq_pending && (kbd_status & CSR_READY) && ((kbd_status & 0100) == 0)) {
         kbd_irq_pending = 0;
         if (vector) {

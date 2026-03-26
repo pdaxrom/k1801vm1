@@ -2556,7 +2556,16 @@ static INLINE void bus_error_trap(regs *r)
     if (dcj11_take_red_stack_abort(r, "BUSERR")) {
         return;
     }
-    core_take_vector(r, 000004, fault_pc, old_psw, "BUSERR");
+
+    word vec;
+    if (r->model == K1801VM1 && (r->psw & 06000)) {
+        vec = 0160002;
+    } else {
+        vec = 000004;
+    }
+
+    core_take_vector(r, vec, fault_pc, old_psw, "BUSERR");
+
     r->fAbort = 1;
 }
 
@@ -2582,11 +2591,23 @@ static INLINE void handle_halt(regs *r)
 {
     word vec;
     if (r->model == K1801VM1) {
-        vec = (load_word(r, 0177716) & 0177400) | 002;
         store_word(r, 0177716, load_word(r, 0177716) | 010);
+        if (r->fAbort) {
+            return;
+        }
         store_word(r, 0177676, r->psw);
+        if (r->fAbort) {
+            return;
+        }
         store_word(r, 0177674, r->r[7]);
+        if (r->fAbort) {
+            return;
+        }
+        vec = 0160002;
         r->r[7] = load_word_vector(r, vec);
+        if (r->fAbort) {
+            return;
+        }
         r->psw = load_word_vector(r, (word)(vec + 2));
     } else if (is_vm2(r)) {
         r->cps = r->psw;
@@ -2878,6 +2899,8 @@ int __not_in_flash_func(core_step)(regs *r)
         if (is_vm2(r) && r->fStepDeferHalt) {
             r->fStepDeferHalt = 0;
             defer_halt = 1;
+        } else if (r->model == K1801VM1 && (r->psw & 06000)) {
+            r->fHaltSignal = 0;
         } else {
             r->fHaltSignal = 0;
             if (is_vm2(r) && flag_is_set(FLAG_H)) {
