@@ -81,6 +81,7 @@ void mk90_machine_tick_ms(uint32_t elapsed_ms);
 void mk90_machine_key_press(word scan_code);
 void mk90_machine_key_release(void);
 void mk90_machine_render(uint32_t *pixels, int pitch_pixels);
+word mk90_machine_lcd_base(void);
 byte mk90_machine_ram_peek(word addr);
 
 void mk90_machine_raise_evnt(mk90_state_t *state);

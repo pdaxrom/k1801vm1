@@ -43,6 +43,10 @@ run_case basic     51651fff3cf2dc3e3498f8da2ab6562b9091c40d --frames 260 --tap 2
 run_case test_sub  9a8cfce60f53cbce53c02b9cb2f55b277d39687b --frames 280 --tap 210:123 --tap 214:373
 run_case romt_test_select_1 d56fb92f4f73b68435710d4f6568eedbd7ccfcc8 \
     --frames 260 --tap 210:123 --type-frame 220 --type "1\\n"
+run_case romt_raw_test_1 86544ba954ff8b87ab229df4ce7053d928ec7aad \
+    --frames 620 --tap 210:123 --tap 352:043:12
+run_case romt_raw_test_2 638fa9caec583444af6f4866d906b8403771a1b5 \
+    --frames 620 --tap 210:123 --tap 352:103:12
 run_case romt_lcd_wait 0fe157e5dca040faeac232ccd0aeeaf05cb6db3d \
     --frames 560 --tap 210:123 --type-frame 300 --type-hold 12 --type 3 --tap 352:373
 run_case romt_lcd_digit_1 3eba3a4419d45a2ff091322b2f719a1c86c2e6bd \

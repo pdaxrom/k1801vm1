@@ -25,6 +25,12 @@ void mk90_syscon_write_word(mk90_state_t *state, word offset, word value)
     word *target = (offset < 2u) ? &state->syscon.rg1 : &state->syscon.rg2;
 
     *target = value;
+    mk90_machine_tracef(state,
+                        "syscon %s<=%06o rg1=%06o rg2=%06o\n",
+                        (offset < 2u) ? "rg1" : "rg2",
+                        value,
+                        state->syscon.rg1,
+                        state->syscon.rg2);
 }
 
 void mk90_syscon_write_byte(mk90_state_t *state, word offset, byte value)

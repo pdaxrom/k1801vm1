@@ -1,8 +1,14 @@
-Place MK-90 ROM images here.
+Place MK-90 ROM assets here.
 
-Expected filenames:
+Runtime images:
 
 - `rom.bin`
 - `romt.bin`
 
-These binary files are ignored by git in this repository.
+Reference sources:
+
+- `src/rom.src`
+- `src/romt.src`
+
+The emulator loads `rom.bin` and `romt.bin` from this directory by default.
+The `src/` subdirectory keeps source texts for the main ROM and the test ROM.
