@@ -50,6 +50,11 @@ Expected files:
 - `media/smp0.bin`
 - `media/smp1.bin`
 
+Reference ROM source texts:
+
+- `roms/src/rom.src`
+- `roms/src/romt.src`
+
 Optional bootable SMP:
 
 - `media/trex.bin` from [azya52/MK90](https://github.com/azya52/MK90)
@@ -64,10 +69,12 @@ Useful options:
 - `--dump-pgm <path>`
 - `--tap-key <octal>`
 - `--tap-frame <n>`
-- `--tap <frame>:<octal>` (repeatable scripted key taps for headless runs)
+- `--tap-hold <n>`
+- `--tap <frame>:<octal>[:<hold>]` (repeatable scripted key taps for headless runs)
 - `--type <text>` (repeatable headless host-key input; supports `\n`, `\r`, `\b`, `\\`)
 - `--type-frame <n>`
 - `--type-step <n>`
+- `--type-hold <n>`
 - `--rom <path>`
 - `--romt <path>`
 - `--smp0 <path>`
@@ -87,7 +94,8 @@ make -C mk90 smoke
 ```
 
 The smoke run exercises the current boot menu, BASIC entry, test menu entry,
-ROMT test-number input, and SMP menu paths via headless scripted key taps. If
+ROMT test-number input, the raw `T -> 3` ROMT jump to `040000`, ROMT LCD-test
+key handling, and SMP menu paths via headless scripted key taps. If
 `media/trex.bin` is present, smoke also verifies the bootable SMP path through
 that image. The non-bootable SMP check is pinned to `media/smp1.bin`, so
 replacing `media/smp0.bin` does not destabilize smoke baselines. Smoke uses a

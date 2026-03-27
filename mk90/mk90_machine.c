@@ -75,9 +75,29 @@ void mk90_machine_raise_keyboard(mk90_state_t *state)
 static byte mk90_read_byte(regs *r, word address)
 {
     mk90_state_t *state = mk90_machine_state();
+    int rd_ram;
+    int rd_rom;
+    int hole_rom;
 
     (void)r;
-    if (mk90_syscon_rd_ram(state, address)) {
+    rd_ram = mk90_syscon_rd_ram(state, address);
+    rd_rom = mk90_syscon_rd_rom(state, address);
+    /* The 16 KiB machine still selects a 32 KiB low-RAM window in some modes.
+     * The unpopulated upper half must not hide ROMT from the firmware. */
+    hole_rom = (address > state->ram_end &&
+                address >= MK90_ROM_START &&
+                (size_t)(address - MK90_ROM_START) < sizeof(state->rom));
+    if (state->trace && address >= 0040000u && address < 0040020u) {
+        mk90_machine_tracef(state,
+                            "rd8 [%06o] rg1=%06o rg2=%06o rd_ram=%d rd_rom=%d hole_rom=%d\n",
+                            address,
+                            state->syscon.rg1,
+                            state->syscon.rg2,
+                            rd_ram,
+                            rd_rom,
+                            hole_rom);
+    }
+    if (rd_ram) {
         if (address <= state->ram_end) {
             return state->ram[address];
         }
@@ -93,12 +113,20 @@ static byte mk90_read_byte(regs *r, word address)
         if (address >= MK90_RTC_BASE && address < MK90_RTC_BASE + 0200u) {
             return mk90_rtc_read_byte(state, (word)(address - MK90_RTC_BASE));
         }
-        return 0377u;
     }
 
-    if (mk90_syscon_rd_rom(state, address) &&
+    if (rd_rom &&
         address >= MK90_ROM_START &&
         (size_t)(address - MK90_ROM_START) < sizeof(state->rom)) {
+        return state->rom[address - MK90_ROM_START];
+    }
+    if (hole_rom) {
+        if (state->trace && address >= 0040000u && address < 0040020u) {
+            mk90_machine_tracef(state,
+                                "rd8 hole rom [%06o] -> %03o\n",
+                                address,
+                                state->rom[address - MK90_ROM_START]);
+        }
         return state->rom[address - MK90_ROM_START];
     }
 
@@ -138,9 +166,27 @@ static void mk90_write_byte(regs *r, word address, byte value)
 static word mk90_read_word(regs *r, word address)
 {
     mk90_state_t *state = mk90_machine_state();
+    int rd_ram;
+    int rd_rom;
+    int hole_rom;
 
     (void)r;
-    if (mk90_syscon_rd_ram(state, address)) {
+    rd_ram = mk90_syscon_rd_ram(state, address);
+    rd_rom = mk90_syscon_rd_rom(state, address);
+    hole_rom = ((word)(address + 1u) > state->ram_end &&
+                address >= MK90_ROM_START &&
+                (size_t)(address - MK90_ROM_START + 1u) < sizeof(state->rom));
+    if (state->trace && address >= 0040000u && address < 0040020u) {
+        mk90_machine_tracef(state,
+                            "rd16 [%06o] rg1=%06o rg2=%06o rd_ram=%d rd_rom=%d hole_rom=%d\n",
+                            address,
+                            state->syscon.rg1,
+                            state->syscon.rg2,
+                            rd_ram,
+                            rd_rom,
+                            hole_rom);
+    }
+    if (rd_ram) {
         if ((word)(address + 1u) <= state->ram_end) {
             return (word)(state->ram[address] |
                           ((word)state->ram[address + 1u] << 8));
@@ -171,14 +217,35 @@ static word mk90_read_word(regs *r, word address)
                 return value;
             }
         }
+        if (hole_rom) {
+            size_t index = (size_t)(address - MK90_ROM_START);
+            word value = (word)(state->rom[index] | ((word)state->rom[index + 1u] << 8));
+
+            if (state->trace && address >= 0040000u && address < 0040020u) {
+                mk90_machine_tracef(state,
+                                    "rd16 hole rom [%06o] -> %06o\n",
+                                    address,
+                                    value);
+            }
+            return value;
+        }
         return (word)(mk90_read_byte(r, address) |
                       ((word)mk90_read_byte(r, (word)(address + 1u)) << 8));
     }
 
-    if (mk90_syscon_rd_rom(state, address) &&
+    if (rd_rom &&
         address >= MK90_ROM_START &&
         (size_t)(address - MK90_ROM_START + 1u) < sizeof(state->rom)) {
         size_t index = (size_t)(address - MK90_ROM_START);
+        if (state->trace && address >= 0040000u && address < 0040020u) {
+            word value = (word)(state->rom[index] | ((word)state->rom[index + 1u] << 8));
+
+            mk90_machine_tracef(state,
+                                "rd16 rom [%06o] -> %06o\n",
+                                address,
+                                value);
+            return value;
+        }
         return (word)(state->rom[index] | ((word)state->rom[index + 1u] << 8));
     }
 
@@ -394,6 +461,11 @@ void mk90_machine_key_release(void)
 void mk90_machine_render(uint32_t *pixels, int pitch_pixels)
 {
     mk90_lcd_render(mk90_machine_state(), pixels, pitch_pixels);
+}
+
+word mk90_machine_lcd_base(void)
+{
+    return mk90_machine_state()->lcd.base;
 }
 
 byte mk90_machine_ram_peek(word addr)

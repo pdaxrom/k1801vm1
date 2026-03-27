@@ -59,6 +59,11 @@ The legacy emulator and the current `mk90/` target use two ROM files:
 These ranges describe how the images are loaded into the emulator's ROM backing
 array. CPU-visible access is still controlled by the `KA1835VG5` decoder.
 
+Reference source texts for these ROM images are stored in:
+
+- `mk90/roms/src/rom.src`
+- `mk90/roms/src/romt.src`
+
 ## Address Space Overview
 
 The MK-90 has a 64 KiB CPU address space (`000000-0177777`), but the visible
@@ -118,6 +123,12 @@ Reads use `RG1` bits `13:11`:
 | `4-7` | none | `000000-0157777` |
 
 Again, the I/O page stays readable independently of these windows.
+
+For the default 16 KiB machine, the current emulator also lets ROM answer from
+the unpopulated tail of a larger low-RAM window. This matters for the `romt`
+path: with `RG1 = 005000`, `040000-077777` is selected as low RAM by `VG5`,
+but only `000000-037777` is backed by physical RAM, so `romt.bin` remains
+visible at `040000-077777`.
 
 ### `RG2` Bits Currently Modeled
 
