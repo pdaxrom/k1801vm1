@@ -27,14 +27,17 @@ static void mk90_io_raise_data_irq(mk90_state_t *state)
 static void mk90_io_commit_reg_write(mk90_state_t *state, unsigned reg_index)
 {
     byte channel = (byte)(state->io.regs[2] & 0007u);
+    byte mode = (byte)(state->io.regs[2] & 0017u);
 
     switch (reg_index) {
     case 0:
         state->io.shiftreg = state->io.regs[0];
         state->io.rgrq = (word)(state->io.rgrq | (1u << channel));
+        mk90_machine_tracef(state, "io data<=%06o mode=%03o sel=%d\n",
+                            state->io.shiftreg, mode, state->io.select_active);
         if (state->io.select_active) {
             mk90_io_raise_data_irq(state);
-            switch (state->io.regs[2] & 0017u) {
+            switch (mode) {
             case 0000u:
                 state->io.shiftreg = mk90_smp_data(state, 0u,
                                                    (byte)state->io.shiftreg);
@@ -58,9 +61,11 @@ static void mk90_io_commit_reg_write(mk90_state_t *state, unsigned reg_index)
         }
         break;
     case 2:
+        mk90_machine_tracef(state, "io ctrl<=%06o mode=%03o sel=%d\n",
+                            state->io.regs[2], mode, state->io.select_active);
         if (state->io.select_active) {
             mk90_io_raise_data_irq(state);
-            switch (state->io.regs[2] & 0017u) {
+            switch (mode) {
             case 0000u:
                 state->io.shiftreg = mk90_smp_data(state, 0u, 0u);
                 break;
@@ -79,8 +84,10 @@ static void mk90_io_commit_reg_write(mk90_state_t *state, unsigned reg_index)
         state->io.select_active = 1;
         state->io.shiftreg = state->io.regs[3];
         state->io.rgrq = (word)(state->io.rgrq | (1u << channel));
+        mk90_machine_tracef(state, "io cmd<=%06o mode=%03o channel=%o\n",
+                            state->io.shiftreg, mode, channel);
         mk90_io_raise_data_irq(state);
-        switch (state->io.regs[2] & 0017u) {
+        switch (mode) {
         case 0000u:
             state->io.shiftreg = mk90_smp_cmd(state, 0u,
                                               (byte)state->io.shiftreg);
@@ -142,6 +149,10 @@ word mk90_io_read_word(mk90_state_t *state, word offset)
         value = state->io.shiftreg;
         state->io.shiftreg = 0177777u;
         state->io.rgrq = (word)(state->io.rgrq | (1u << (state->io.regs[2] & 7u)));
+        mk90_machine_tracef(state, "io data=>%06o mode=%03o sel=%d\n",
+                            value,
+                            (byte)(state->io.regs[2] & 0017u),
+                            state->io.select_active);
         if (state->io.select_active) {
             mk90_io_raise_data_irq(state);
             state->io.shiftreg = mk90_io_fetch_input(state);
@@ -161,6 +172,9 @@ word mk90_io_read_word(mk90_state_t *state, word offset)
             mk90_io_raise_data_irq(state);
         }
         value = state->io.shiftreg;
+        mk90_machine_tracef(state, "io cmd=>%06o mode=%03o\n",
+                            value,
+                            (byte)(state->io.regs[2] & 0017u));
         state->io.select_active = 0;
         break;
     default:

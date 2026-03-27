@@ -134,6 +134,10 @@ byte mk90_smp_cmd(mk90_state_t *state, unsigned slot_index, byte value)
 {
     if (slot_index < 2u) {
         state->smp[slot_index].cmd = value;
+        mk90_machine_tracef(state, "smp%u cmd=%03o pos=%08o\n",
+                            slot_index,
+                            value,
+                            (unsigned)state->smp[slot_index].position);
     }
     return 0;
 }
@@ -155,9 +159,13 @@ byte mk90_smp_data(mk90_state_t *state, unsigned slot_index, byte value)
     switch (slot->cmd & 0360u) {
     case 0000u:
         result = 0;
+        mk90_machine_tracef(state, "smp%u probe -> %03o\n",
+                            slot_index, result);
         break;
     case 0240u:
         slot->position = ((slot->position << 8) | value) & slot->mask;
+        mk90_machine_tracef(state, "smp%u addr <= %03o -> %08o\n",
+                            slot_index, value, (unsigned)slot->position);
         break;
     case 0020u:
     case 0320u:
@@ -171,6 +179,8 @@ byte mk90_smp_data(mk90_state_t *state, unsigned slot_index, byte value)
         } else {
             slot->position = (slot->position + 1u) & slot->mask;
         }
+        mk90_machine_tracef(state, "smp%u read -> %03o next=%08o\n",
+                            slot_index, result, (unsigned)slot->position);
         break;
     case 0040u:
     case 0300u:
@@ -184,8 +194,15 @@ byte mk90_smp_data(mk90_state_t *state, unsigned slot_index, byte value)
         } else {
             slot->position = (slot->position - 1u) & slot->mask;
         }
+        mk90_machine_tracef(state, "smp%u write <= %03o next=%08o\n",
+                            slot_index, value, (unsigned)slot->position);
         break;
     default:
+        mk90_machine_tracef(state, "smp%u data ignored cmd=%03o val=%03o pos=%08o\n",
+                            slot_index,
+                            slot->cmd,
+                            value,
+                            (unsigned)slot->position);
         break;
     }
 

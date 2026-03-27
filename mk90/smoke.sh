@@ -22,7 +22,7 @@ run_case() {
     shift 2
 
     output="$TMP_DIR/$name.pgm"
-    "$BIN" --headless --dump-pgm "$output" "$@" >/dev/null 2>&1
+    "$BIN" --headless --tick-ms 16 --dump-pgm "$output" "$@" >/dev/null 2>&1
     actual=$(hash_file "$output")
 
     if [ "$actual" != "$expected" ]; then

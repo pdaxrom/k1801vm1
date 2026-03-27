@@ -38,7 +38,7 @@ static void usage(const char *prog)
     fprintf(stderr,
             "Usage: %s [--rom <path>] [--romt <path>] [--smp0 <path>] [--smp1 <path>]\n"
             "          [--steps-per-frame <n>] [--frames <n>] [--scale <n>]\n"
-            "          [--headless] [--trace] [--dump-pgm <path>]\n"
+            "          [--headless] [--trace] [--tick-ms <n>] [--dump-pgm <path>]\n"
             "          [--tap-key <octal>] [--tap-frame <n>] [--tap <frame>:<octal>]\n"
             "Defaults: roms/rom.bin, roms/romt.bin, media/smp0.bin, media/smp1.bin\n",
             prog);
@@ -215,6 +215,7 @@ int main(int argc, char *argv[])
     int steps_per_frame = 2000;
     int frame_limit = -1;
     int scale = 4;
+    int tick_ms = -1;
     int tap_frame = 120;
     int tap_count = 0;
     int frame_count = 0;
@@ -244,6 +245,8 @@ int main(int argc, char *argv[])
             headless = 1;
         } else if (!strcmp(argv[i], "--trace")) {
             trace = 1;
+        } else if (!strcmp(argv[i], "--tick-ms") && i + 1 < argc) {
+            tick_ms = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "--dump-pgm") && i + 1 < argc) {
             dump_pgm_path = argv[++i];
         } else if (!strcmp(argv[i], "--tap-key") && i + 1 < argc) {
@@ -383,7 +386,9 @@ int main(int argc, char *argv[])
         uint32_t elapsed_ms = now_ticks - last_ticks;
 
         last_ticks = now_ticks;
-        if (elapsed_ms == 0u) {
+        if (tick_ms >= 0) {
+            elapsed_ms = (uint32_t)tick_ms;
+        } else if (elapsed_ms == 0u) {
             elapsed_ms = 1u;
         }
 

@@ -57,6 +57,7 @@ Useful options:
 - `--frames <n>`
 - `--steps-per-frame <n>`
 - `--trace`
+- `--tick-ms <n>` (fixed RTC/frame time step for deterministic headless runs)
 - `--dump-pgm <path>`
 - `--tap-key <octal>`
 - `--tap-frame <n>`
@@ -76,4 +77,5 @@ The smoke run exercises the current boot menu, BASIC entry, test menu entry,
 and SMP menu paths via headless scripted key taps. If `media/trex.bin` is
 present, smoke also verifies the bootable SMP path through that image. The
 non-bootable SMP check is pinned to `media/smp1.bin`, so replacing
-`media/smp0.bin` does not destabilize smoke baselines.
+`media/smp0.bin` does not destabilize smoke baselines. Smoke uses a fixed
+`--tick-ms 16` step so results do not depend on host timing.

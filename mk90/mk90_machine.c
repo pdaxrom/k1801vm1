@@ -147,16 +147,28 @@ static word mk90_read_word(regs *r, word address)
         }
         if ((address & 1u) == 0u) {
             if (address >= MK90_LCD_BASE && address <= MK90_LCD_BASE + 6u) {
-                return mk90_lcd_read_word(state, (word)(address - MK90_LCD_BASE));
+                word value = mk90_lcd_read_word(state, (word)(address - MK90_LCD_BASE));
+                mk90_machine_tracef(state, "bus lcd rd [%06o] -> %06o\n",
+                                    address, value);
+                return value;
             }
             if (address >= MK90_IO_BASE && address <= MK90_IO_BASE + 6u) {
-                return mk90_io_read_word(state, (word)(address - MK90_IO_BASE));
+                word value = mk90_io_read_word(state, (word)(address - MK90_IO_BASE));
+                mk90_machine_tracef(state, "bus io rd [%06o] -> %06o\n",
+                                    address, value);
+                return value;
             }
             if (address >= MK90_SYS_BASE && address <= MK90_SYS_BASE + 2u) {
-                return mk90_syscon_read_word(state, (word)(address - MK90_SYS_BASE));
+                word value = mk90_syscon_read_word(state, (word)(address - MK90_SYS_BASE));
+                mk90_machine_tracef(state, "bus sys rd [%06o] -> %06o\n",
+                                    address, value);
+                return value;
             }
             if (address >= MK90_RTC_BASE && address < MK90_RTC_BASE + 0177u) {
-                return mk90_rtc_read_word(state, (word)(address - MK90_RTC_BASE));
+                word value = mk90_rtc_read_word(state, (word)(address - MK90_RTC_BASE));
+                mk90_machine_tracef(state, "bus rtc rd [%06o] -> %06o\n",
+                                    address, value);
+                return value;
             }
         }
         return (word)(mk90_read_byte(r, address) |
@@ -190,18 +202,26 @@ static void mk90_write_word(regs *r, word address, word value)
     }
     if ((address & 1u) == 0u) {
         if (address >= MK90_LCD_BASE && address <= MK90_LCD_BASE + 6u) {
+            mk90_machine_tracef(state, "bus lcd wr [%06o] <= %06o\n",
+                                address, value);
             mk90_lcd_write_word(state, (word)(address - MK90_LCD_BASE), value);
             return;
         }
         if (address >= MK90_IO_BASE && address <= MK90_IO_BASE + 6u) {
+            mk90_machine_tracef(state, "bus io wr [%06o] <= %06o\n",
+                                address, value);
             mk90_io_write_word(state, (word)(address - MK90_IO_BASE), value);
             return;
         }
         if (address >= MK90_SYS_BASE && address <= MK90_SYS_BASE + 2u) {
+            mk90_machine_tracef(state, "bus sys wr [%06o] <= %06o\n",
+                                address, value);
             mk90_syscon_write_word(state, (word)(address - MK90_SYS_BASE), value);
             return;
         }
         if (address >= MK90_RTC_BASE && address < MK90_RTC_BASE + 0177u) {
+            mk90_machine_tracef(state, "bus rtc wr [%06o] <= %06o\n",
+                                address, value);
             mk90_rtc_write_word(state, (word)(address - MK90_RTC_BASE), value);
             return;
         }
