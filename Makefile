@@ -1,4 +1,4 @@
-all: emu11 dis11 mk90
+all: dis11
 
 BASE_CFLAGS = -Wall -g -I. $(shell sdl2-config --cflags)
 CFLAGS ?= $(BASE_CFLAGS)
@@ -10,20 +10,12 @@ MMU_TESTS_OFF = tests/test_mmu_disable_build
 MMU_TESTS_ON = tests/test_mmu_basic tests/test_mmu_faults tests/test_mmu_splitid tests/test_mmu_22bit
 DIAG = tests/cpu_diag
 
-emu11: $(OBJS) emu11.o
-	$(CC) -g -o $@ $^ -lncurses
-
 core/core.o: core/core.c core/core.h core/pdp11_fp.c
 core/disas.o: core/disas.c core/core.h
 core/hardware.o: core/hardware.c core/hardware.h core/core.h
 
 dis11: core/core.o core/disas.o core/hardware.o dis11.o
 	$(CC) -o $@ $^
-
-.PHONY: mk90
-
-mk90:
-	$(MAKE) -C mk90
 
 tests/core_tests: tests/core_tests.o core/core.o core/disas.o core/hardware.o
 	$(CC) -g -o $@ $^
@@ -75,5 +67,5 @@ diag: $(DIAG)
 	./tests/cpu_diag --all
 
 clean:
-	rm -f $(OBJS) *.o dis11 emu11 $(TESTS) $(MMU_TESTS_OFF) $(MMU_TESTS_ON) $(DIAG) tests/*.o
+	rm -f $(OBJS) *.o dis11 $(TESTS) $(MMU_TESTS_OFF) $(MMU_TESTS_ON) $(DIAG) tests/*.o
 	$(MAKE) -C mk90 clean
