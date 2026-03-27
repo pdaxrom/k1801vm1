@@ -48,9 +48,9 @@ typedef struct {
 
 typedef struct {
     byte evnt;
-    byte c0;
-    byte c4;
-    byte c8;
+    byte inrt;
+    byte data_ready;
+    byte keyboard;
 } mk90_irq_state_t;
 
 typedef struct mk90_state {
@@ -84,9 +84,9 @@ void mk90_machine_render(uint32_t *pixels, int pitch_pixels);
 byte mk90_machine_ram_peek(word addr);
 
 void mk90_machine_raise_evnt(mk90_state_t *state);
-void mk90_machine_raise_c0(mk90_state_t *state);
-void mk90_machine_raise_c4(mk90_state_t *state);
-void mk90_machine_raise_c8(mk90_state_t *state);
+void mk90_machine_raise_inrt(mk90_state_t *state);
+void mk90_machine_raise_data_ready(mk90_state_t *state);
+void mk90_machine_raise_keyboard(mk90_state_t *state);
 void mk90_machine_tracef(const mk90_state_t *state, const char *fmt, ...);
 
 #endif

@@ -20,7 +20,7 @@ static word mk90_io_fetch_input(mk90_state_t *state)
 static void mk90_io_raise_data_irq(mk90_state_t *state)
 {
     if ((state->io.regs[2] & 0040u) == 0) {
-        mk90_machine_raise_c4(state);
+        mk90_machine_raise_data_ready(state);
     }
 }
 
@@ -208,7 +208,7 @@ void mk90_io_write_byte(mk90_state_t *state, word offset, byte value)
 void mk90_io_timer_irq(mk90_state_t *state)
 {
     if ((state->io.regs[2] & 00100u) == 0) {
-        mk90_machine_raise_c0(state);
+        mk90_machine_raise_inrt(state);
     }
 }
 
@@ -216,6 +216,6 @@ void mk90_io_key_irq(mk90_state_t *state)
 {
     state->io.rgrq = (word)(state->io.rgrq & ~0004u);
     if ((state->io.regs[2] & 00020u) == 0) {
-        mk90_machine_raise_c8(state);
+        mk90_machine_raise_keyboard(state);
     }
 }

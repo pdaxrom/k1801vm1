@@ -3,6 +3,9 @@
 SDL front-end and machine adapter for the Elektronika MK-90, built on top of
 the shared PDP-11/K1801 `core/`.
 
+See `HARDWARE.md` for the MK-90 address map, interrupt vectors, peripheral
+registers, ROM layout, and notes on what the current emulator models.
+
 ## Layout
 
 - `main.c`: SDL event loop, CLI, CPU stepping.

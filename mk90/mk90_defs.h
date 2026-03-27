@@ -23,9 +23,9 @@
 #define MK90_RESET_PC        0173000u /* 0xF600 */
 
 #define MK90_VEC_EVNT        000100u /* 0x0040 */
-#define MK90_VEC_C0          000300u /* 0x00C0 */
-#define MK90_VEC_C4          000304u /* 0x00C4 */
-#define MK90_VEC_C8          000310u /* 0x00C8 */
+#define MK90_VEC_INRT        000300u /* 0x00C0 */
+#define MK90_VEC_DATA_READY  000304u /* 0x00C4 */
+#define MK90_VEC_KEYBOARD    000310u /* 0x00C8 */
 
 #define MK90_SCREEN_WIDTH    120
 #define MK90_SCREEN_HEIGHT   64

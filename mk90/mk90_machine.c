@@ -57,19 +57,19 @@ void mk90_machine_raise_evnt(mk90_state_t *state)
     state->irq.evnt = 1;
 }
 
-void mk90_machine_raise_c0(mk90_state_t *state)
+void mk90_machine_raise_inrt(mk90_state_t *state)
 {
-    state->irq.c0 = 1;
+    state->irq.inrt = 1;
 }
 
-void mk90_machine_raise_c4(mk90_state_t *state)
+void mk90_machine_raise_data_ready(mk90_state_t *state)
 {
-    state->irq.c4 = 1;
+    state->irq.data_ready = 1;
 }
 
-void mk90_machine_raise_c8(mk90_state_t *state)
+void mk90_machine_raise_keyboard(mk90_state_t *state)
 {
-    state->irq.c8 = 1;
+    state->irq.keyboard = 1;
 }
 
 static byte mk90_read_byte(regs *r, word address)
@@ -283,24 +283,24 @@ static int mk90_poll_irq(regs *r, word *vector)
         }
         return 1;
     }
-    if (state->irq.c0) {
-        state->irq.c0 = 0;
+    if (state->irq.inrt) {
+        state->irq.inrt = 0;
         if (vector) {
-            *vector = MK90_VEC_C0;
+            *vector = MK90_VEC_INRT;
         }
         return 1;
     }
-    if (state->irq.c4) {
-        state->irq.c4 = 0;
+    if (state->irq.data_ready) {
+        state->irq.data_ready = 0;
         if (vector) {
-            *vector = MK90_VEC_C4;
+            *vector = MK90_VEC_DATA_READY;
         }
         return 1;
     }
-    if (state->irq.c8) {
-        state->irq.c8 = 0;
+    if (state->irq.keyboard) {
+        state->irq.keyboard = 0;
         if (vector) {
-            *vector = MK90_VEC_C8;
+            *vector = MK90_VEC_KEYBOARD;
         }
         return 1;
     }
