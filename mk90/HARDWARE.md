@@ -202,8 +202,15 @@ Current emulator behavior:
 
 - channel `0/1` talk to SMP images
 - channel `2` returns the latched keyboard scan code
-- channel `3` only tracks a beeper level; no audio output yet
-- serial timing is simplified; the transfer-rate register is not cycle-accurate
+- channel `3` drives the piezo through the `CLK` output; the tone frequency comes
+  from `E812` (`800kHz / divider`), and each transmitted byte contributes eight clock
+  periods of sound
+- the emulator queues these channel-3 transfers and feeds a dedicated SDL audio
+  callback that synthesizes the resulting square wave
+- transfer-complete timing is driven by PDP-11 instruction cycles instead of
+  `steps_per_frame`, so buzzer pacing no longer depends on the frontend frame loop
+- serial timing is still simplified; the transfer-rate register is not yet a
+  cycle-accurate `KA1835VG4` model
 
 ### KA1835VG1 Keyboard Controller
 
@@ -303,7 +310,6 @@ Still approximate or incomplete:
 
 - exact `KA1835VG4` serial timing
 - exact `KA1835VG5` bit naming and all undocumented modes
-- beeper audio generation
 - any analog/power-management behavior
 
 ## Reference Files

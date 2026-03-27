@@ -1,5 +1,6 @@
 #include <SDL.h>
 
+#include "../bk0010-01/bk_timing.h"
 #include "../core/core.h"
 #include "../core/disas.h"
 #include "mk90_defs.h"
@@ -27,7 +28,10 @@ static const char mk90_letters[] =
     "12345:;67890/-ABWGDEVZIJKLMNOPRSTUFHC^[]XY_\\@Qaaa,.";
 
 enum {
-    MK90_MAX_TAP_EVENTS = 256
+    MK90_MAX_TAP_EVENTS = 256,
+    MK90_AUDIO_RATE     = 44100,
+    MK90_AUDIO_BUFSIZE  = 512,
+    MK90_AUDIO_QUEUE    = 256
 };
 
 typedef struct mk90_tap_event {
@@ -37,6 +41,96 @@ typedef struct mk90_tap_event {
     int pressed;
     int released;
 } mk90_tap_event;
+
+typedef struct mk90_audio_state {
+    int sample_rate;
+    int level;
+    double sample_us;
+    double half_period_us;
+    double half_period_left_us;
+    uint32_t half_cycles_left;
+    word queued_divider[MK90_AUDIO_QUEUE];
+    uint32_t queued_cycles[MK90_AUDIO_QUEUE];
+    unsigned head;
+    unsigned count;
+} mk90_audio_state;
+
+static void mk90_audio_push(mk90_audio_state *st, word divider, uint32_t cycles)
+{
+    unsigned tail;
+
+    if (!st || divider == 0u || cycles == 0u) {
+        return;
+    }
+
+    if (st->count != 0u) {
+        tail = (st->head + st->count - 1u) % MK90_AUDIO_QUEUE;
+        if (st->queued_divider[tail] == divider) {
+            st->queued_cycles[tail] += cycles;
+            return;
+        }
+    }
+
+    if (st->count >= MK90_AUDIO_QUEUE) {
+        tail = (st->head + st->count - 1u) % MK90_AUDIO_QUEUE;
+        st->queued_cycles[tail] += cycles;
+        return;
+    }
+
+    tail = (st->head + st->count) % MK90_AUDIO_QUEUE;
+    st->queued_divider[tail] = divider;
+    st->queued_cycles[tail] = cycles;
+    st->count++;
+}
+
+static void mk90_audio_callback(void *userdata, Uint8 *stream, int len)
+{
+    mk90_audio_state *st = (mk90_audio_state *)userdata;
+    int16_t *out = (int16_t *)stream;
+    int samples = len / (int)sizeof(int16_t);
+    double sample_us = st->sample_us;
+
+    for (int i = 0; i < samples; i++) {
+        double left = sample_us;
+        double acc = 0.0;
+
+        while (left > 0.0) {
+            double span;
+
+            if (st->half_cycles_left == 0u) {
+                if (st->count == 0u) {
+                    break;
+                }
+                st->half_period_us = (double)st->queued_divider[st->head] * 0.625;
+                st->half_period_left_us = st->half_period_us;
+                st->half_cycles_left = st->queued_cycles[st->head] * 2u;
+                st->head = (st->head + 1u) % MK90_AUDIO_QUEUE;
+                st->count--;
+                st->level = 1;
+            }
+
+            span = st->half_period_left_us;
+            if (span > left) {
+                span = left;
+            }
+            acc += (st->level ? span : -span);
+            left -= span;
+            st->half_period_left_us -= span;
+
+            if (st->half_period_left_us <= 1e-9) {
+                st->level ^= 1;
+                st->half_cycles_left--;
+                if (st->half_cycles_left == 0u) {
+                    st->level = 0;
+                } else {
+                    st->half_period_left_us = st->half_period_us;
+                }
+            }
+        }
+
+        out[i] = (int16_t)(8000.0 * (acc / sample_us));
+    }
+}
 
 static void usage(const char *prog)
 {
@@ -532,6 +626,11 @@ int main(int argc, char *argv[])
     SDL_Texture *texture = NULL;
     uint32_t *pixels = NULL;
     SDL_Scancode active_host_key = SDL_SCANCODE_UNKNOWN;
+    SDL_AudioDeviceID audio_dev = 0;
+    mk90_audio_state audio_state = { MK90_AUDIO_RATE, 0,
+                                     1000000.0 / (double)MK90_AUDIO_RATE,
+                                     0.0, 0.0, 0u,
+                                     { 0 }, { 0 }, 0u, 0u };
     int quit = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -545,10 +644,18 @@ int main(int argc, char *argv[])
             smp1_path = argv[++i];
         } else if (!strcmp(argv[i], "--steps-per-frame") && i + 1 < argc) {
             steps_per_frame = atoi(argv[++i]);
+            if (steps_per_frame < 1) {
+                fprintf(stderr, "mk90: --steps-per-frame must be >= 1\n");
+                return 1;
+            }
         } else if (!strcmp(argv[i], "--frames") && i + 1 < argc) {
             frame_limit = atoi(argv[++i]);
         } else if (!strcmp(argv[i], "--scale") && i + 1 < argc) {
             scale = atoi(argv[++i]);
+            if (scale < 1) {
+                fprintf(stderr, "mk90: --scale must be >= 1\n");
+                return 1;
+            }
         } else if (!strcmp(argv[i], "--headless")) {
             headless = 1;
         } else if (!strcmp(argv[i], "--trace")) {
@@ -677,7 +784,7 @@ int main(int argc, char *argv[])
     }
 
     if (!headless) {
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
+        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
             fprintf(stderr, "mk90: SDL_Init failed: %s\n", SDL_GetError());
             free(pixels);
             core_fini(&r);
@@ -692,6 +799,7 @@ int main(int argc, char *argv[])
                                   SDL_WINDOW_SHOWN);
         if (!window) {
             fprintf(stderr, "mk90: SDL_CreateWindow failed: %s\n", SDL_GetError());
+            free(pixels);
             core_fini(&r);
             SDL_Quit();
             return 1;
@@ -713,14 +821,32 @@ int main(int argc, char *argv[])
             SDL_Quit();
             return 1;
         }
+
+        {
+            SDL_AudioSpec want;
+            SDL_AudioSpec have;
+            SDL_zero(want);
+            want.freq     = MK90_AUDIO_RATE;
+            want.format   = AUDIO_S16SYS;
+            want.channels = 1;
+            want.samples  = MK90_AUDIO_BUFSIZE;
+            want.callback = mk90_audio_callback;
+            want.userdata = &audio_state;
+            audio_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+            if (audio_dev != 0) {
+                audio_state.sample_rate = have.freq;
+                audio_state.sample_us = 1000000.0 / (double)audio_state.sample_rate;
+                SDL_PauseAudioDevice(audio_dev, 0);
+            }
+        }
     }
 
     last_ticks = SDL_GetTicks();
     while (!quit) {
-        uint32_t now_ticks = SDL_GetTicks();
-        uint32_t elapsed_ms = now_ticks - last_ticks;
+        uint32_t frame_start = SDL_GetTicks();
+        uint32_t elapsed_ms = frame_start - last_ticks;
 
-        last_ticks = now_ticks;
+        last_ticks = frame_start;
         if (tick_ms >= 0) {
             elapsed_ms = (uint32_t)tick_ms;
         } else if (elapsed_ms == 0u) {
@@ -776,20 +902,40 @@ int main(int argc, char *argv[])
             }
         }
 
-        for (int i = 0; i < steps_per_frame; i++) {
-            if (trace) {
-                char text[256];
-                word pc = r.r[7];
-                word dis_pc = pc;
+        {
+            for (int i = 0; i < steps_per_frame; i++) {
+                unsigned cycles;
 
-                disas(&r, &dis_pc, text);
-                fprintf(stderr,
-                        "%06o  %06o  %06o  %06o  %06o  %06o  %06o  %06o  %06o  %s\n",
-                        r.psw,
-                        r.r[0], r.r[1], r.r[2], r.r[3],
-                        r.r[4], r.r[5], r.r[6], pc, text);
+                if (trace) {
+                    char text[256];
+                    word pc = r.r[7];
+                    word dis_pc = pc;
+
+                    disas(&r, &dis_pc, text);
+                    fprintf(stderr,
+                            "%06o  %06o  %06o  %06o  %06o  %06o  %06o  %06o  %06o  %s\n",
+                            r.psw,
+                            r.r[0], r.r[1], r.r[2], r.r[3],
+                            r.r[4], r.r[5], r.r[6], pc, text);
+                }
+                (void)core_step(&r);
+                cycles = bk_timing_cycles(r.ir);
+                if (cycles == 0u) {
+                    cycles = 1u;
+                }
+                mk90_machine_step(cycles);
             }
-            (void)core_step(&r);
+
+            if (audio_dev != 0) {
+                word divider;
+                uint32_t cycles;
+
+                SDL_LockAudioDevice(audio_dev);
+                while (mk90_machine_pop_audio_segment(&divider, &cycles)) {
+                    mk90_audio_push(&audio_state, divider, cycles);
+                }
+                SDL_UnlockAudioDevice(audio_dev);
+            }
         }
         mk90_machine_tick_ms(elapsed_ms);
 
@@ -810,7 +956,10 @@ int main(int argc, char *argv[])
         }
 
         if (!headless) {
-            SDL_Delay(16);
+            uint32_t frame_ms = SDL_GetTicks() - frame_start;
+            if (frame_ms < 16u) {
+                SDL_Delay(16u - frame_ms);
+            }
         }
     }
 
@@ -822,6 +971,9 @@ int main(int argc, char *argv[])
     }
     if (dump_vram_path && mk90_save_vram(dump_vram_path) != 0) {
         fprintf(stderr, "mk90: failed to save %s\n", dump_vram_path);
+    }
+    if (audio_dev != 0) {
+        SDL_CloseAudioDevice(audio_dev);
     }
     free(pixels);
     SDL_DestroyTexture(texture);

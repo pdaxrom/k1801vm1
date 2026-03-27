@@ -3,6 +3,57 @@
 #include "mk90_keyboard.h"
 #include "mk90_smp.h"
 
+static void mk90_io_queue_buzzer(mk90_state_t *state)
+{
+    word divider = state->io.regs[1];
+    unsigned tail;
+
+    if (divider == 0u || (state->io.regs[2] & 0200u) == 0) {
+        return;
+    }
+    if (state->io.beeper_count != 0u) {
+        tail = (state->io.beeper_head + state->io.beeper_count - 1u) %
+               MK90_BEEPER_QUEUE_SIZE;
+        if (state->io.beeper_divider[tail] == divider) {
+            state->io.beeper_cycles[tail] += 8u;
+            return;
+        }
+    }
+
+    if (state->io.beeper_count >= MK90_BEEPER_QUEUE_SIZE) {
+        tail = (state->io.beeper_head + state->io.beeper_count - 1u) %
+               MK90_BEEPER_QUEUE_SIZE;
+        state->io.beeper_cycles[tail] += 8u;
+        return;
+    }
+
+    tail = (state->io.beeper_head + state->io.beeper_count) %
+           MK90_BEEPER_QUEUE_SIZE;
+    state->io.beeper_divider[tail] = divider;
+    state->io.beeper_cycles[tail] = 8u;
+    state->io.beeper_count++;
+}
+
+static uint32_t mk90_io_transfer_cycles(const mk90_state_t *state)
+{
+    word divider = state->io.regs[1];
+
+    if (divider == 0u || (state->io.regs[2] & 0200u) == 0 ||
+        (state->io.regs[2] & 0017u) != 0013u) {
+        return 0u;
+    }
+    return (uint32_t)divider * 20u;
+}
+
+static void mk90_io_start_transfer(mk90_state_t *state)
+{
+    uint32_t cycles = mk90_io_transfer_cycles(state);
+
+    if (cycles != 0u) {
+        state->io.transfer_busy_cycles = cycles;
+    }
+}
+
 static word mk90_io_fetch_input(mk90_state_t *state)
 {
     switch (state->io.regs[2] & 0017u) {
@@ -55,6 +106,10 @@ static void mk90_io_commit_reg_write(mk90_state_t *state, unsigned reg_index)
             case 0011u:
                 (void)mk90_smp_data(state, 1u, (byte)state->io.shiftreg);
                 break;
+            case 0013u:
+                mk90_io_queue_buzzer(state);
+                mk90_io_start_transfer(state);
+                break;
             default:
                 break;
             }
@@ -105,9 +160,6 @@ static void mk90_io_commit_reg_write(mk90_state_t *state, unsigned reg_index)
         case 0011u:
             (void)mk90_smp_cmd(state, 1u, (byte)state->io.shiftreg);
             break;
-        case 0013u:
-            state->io.beeper_level = (state->io.shiftreg & 1u) ? 1 : 0;
-            break;
         default:
             break;
         }
@@ -126,7 +178,9 @@ void mk90_io_reset(mk90_state_t *state)
     state->io.shiftreg = 0177777u;
     state->io.rgrq = 0177777u;
     state->io.select_active = 0;
-    state->io.beeper_level = 0;
+    state->io.beeper_head = 0u;
+    state->io.beeper_count = 0u;
+    state->io.transfer_busy_cycles = 0u;
 }
 
 byte mk90_io_read_byte(mk90_state_t *state, word offset)
@@ -163,6 +217,9 @@ word mk90_io_read_word(mk90_state_t *state, word offset)
         break;
     case 2:
         value = (word)((state->io.regs[2] & 00160u) | 0177604u);
+        if (state->io.transfer_busy_cycles != 0u) {
+            value = (word)(value & ~0000200u);
+        }
         if (!state->io.select_active) {
             value = (word)(value | 0000010u);
         }
@@ -191,6 +248,9 @@ void mk90_io_write_word(mk90_state_t *state, word offset, word value)
 
     state->io.regs[reg_index] = value;
     mk90_io_commit_reg_write(state, reg_index);
+    if (reg_index == 3u) {
+        mk90_io_start_transfer(state);
+    }
 }
 
 void mk90_io_write_byte(mk90_state_t *state, word offset, byte value)
@@ -209,6 +269,15 @@ void mk90_io_timer_irq(mk90_state_t *state)
 {
     if ((state->io.regs[2] & 00100u) == 0) {
         mk90_machine_raise_inrt(state);
+    }
+}
+
+void mk90_io_step(mk90_state_t *state, unsigned cycles)
+{
+    if (state->io.transfer_busy_cycles <= cycles) {
+        state->io.transfer_busy_cycles = 0u;
+    } else {
+        state->io.transfer_busy_cycles -= cycles;
     }
 }
 

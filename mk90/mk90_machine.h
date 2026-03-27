@@ -7,6 +7,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define MK90_BEEPER_QUEUE_SIZE 64u
+
 typedef struct {
     byte *data;
     size_t size;
@@ -34,7 +36,11 @@ typedef struct {
     word shiftreg;
     word rgrq;
     int select_active;
-    int beeper_level;
+    word beeper_divider[MK90_BEEPER_QUEUE_SIZE];
+    uint32_t beeper_cycles[MK90_BEEPER_QUEUE_SIZE];
+    unsigned beeper_head;
+    unsigned beeper_count;
+    uint32_t transfer_busy_cycles;
 } mk90_io_state_t;
 
 typedef struct {
@@ -78,6 +84,8 @@ int mk90_machine_load_images(const char *rom_path, const char *romt_path,
                              const char *smp0_path, const char *smp1_path,
                              char *err, size_t err_len);
 void mk90_machine_tick_ms(uint32_t elapsed_ms);
+void mk90_machine_step(unsigned cycles);
+int mk90_machine_pop_audio_segment(word *divider, uint32_t *cycles);
 void mk90_machine_key_press(word scan_code);
 void mk90_machine_key_release(void);
 void mk90_machine_render(uint32_t *pixels, int pitch_pixels);

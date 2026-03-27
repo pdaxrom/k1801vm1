@@ -23,7 +23,8 @@ SRCS := \
 OBJS := $(addprefix $(BUILD_DIR)/,$(SRCS:.c=.o))
 CORE_OBJS := \
 	$(BUILD_DIR)/core_core.o \
-	$(BUILD_DIR)/core_disas.o
+	$(BUILD_DIR)/core_disas.o \
+	$(BUILD_DIR)/bk_timing.o
 DEPS := $(OBJS:.o=.d) $(CORE_OBJS:.o=.d)
 
 all: $(BIN)
@@ -40,6 +41,10 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(SDL_CFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG) -c -o $@ $<
 
 $(BUILD_DIR)/core_%.o: ../core/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(SDL_CFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG) -c -o $@ $<
+
+$(BUILD_DIR)/bk_timing.o: ../bk0010-01/bk_timing.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(SDL_CFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG) -c -o $@ $<
 

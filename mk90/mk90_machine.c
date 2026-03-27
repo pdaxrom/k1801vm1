@@ -40,7 +40,12 @@ static int mk90_load_file_into(byte *dst, size_t max_size, const char *path,
     }
     read_count = fread(dst, 1, max_size, fp);
     fclose(fp);
-    (void)read_count;
+    if (read_count == 0 && max_size > 0) {
+        if (err && err_len) {
+            snprintf(err, err_len, "Empty or unreadable file: %s", path);
+        }
+        return -1;
+    }
     return 0;
 }
 
@@ -445,7 +450,6 @@ void mk90_machine_connect(regs *r)
     r->ramptr = mk90_ramptr;
     r->ram_fast = NULL;
     r->ram_fast_size = 0;
-    mk90_machine_sync_fast_ram(state);
 }
 
 void mk90_machine_set_trace(int on)
@@ -487,6 +491,32 @@ int mk90_machine_load_images(const char *rom_path, const char *romt_path,
 void mk90_machine_tick_ms(uint32_t elapsed_ms)
 {
     mk90_rtc_tick_ms(mk90_machine_state(), elapsed_ms);
+}
+
+void mk90_machine_step(unsigned cycles)
+{
+    mk90_io_step(mk90_machine_state(), cycles);
+}
+
+int mk90_machine_pop_audio_segment(word *divider, uint32_t *cycles)
+{
+    mk90_state_t *state = mk90_machine_state();
+    unsigned head;
+
+    if (state->io.beeper_count == 0u) {
+        return 0;
+    }
+
+    head = state->io.beeper_head;
+    if (divider) {
+        *divider = state->io.beeper_divider[head];
+    }
+    if (cycles) {
+        *cycles = state->io.beeper_cycles[head];
+    }
+    state->io.beeper_head = (head + 1u) % MK90_BEEPER_QUEUE_SIZE;
+    state->io.beeper_count--;
+    return 1;
 }
 
 void mk90_machine_key_press(word scan_code)
