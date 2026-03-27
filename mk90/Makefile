@@ -1,3 +1,5 @@
+.PHONY: all clean smoke
+
 CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra -Wpedantic
 CPPFLAGS += -I. -I..
@@ -23,6 +25,9 @@ CORE_OBJS := \
 	$(BUILD_DIR)/core_disas.o
 
 all: $(BIN)
+
+smoke: $(BIN)
+	sh smoke.sh
 
 $(BIN): $(OBJS) $(CORE_OBJS)
 	@mkdir -p $(dir $@)

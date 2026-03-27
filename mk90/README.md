@@ -47,6 +47,10 @@ Expected files:
 - `media/smp0.bin`
 - `media/smp1.bin`
 
+Optional bootable SMP:
+
+- `media/trex.bin` from [azya52/MK90](https://github.com/azya52/MK90)
+
 Useful options:
 
 - `--headless`
@@ -56,7 +60,20 @@ Useful options:
 - `--dump-pgm <path>`
 - `--tap-key <octal>`
 - `--tap-frame <n>`
+- `--tap <frame>:<octal>` (repeatable scripted key taps for headless runs)
 - `--rom <path>`
 - `--romt <path>`
 - `--smp0 <path>`
 - `--smp1 <path>`
+
+## Smoke
+
+```sh
+make -C mk90 smoke
+```
+
+The smoke run exercises the current boot menu, BASIC entry, test menu entry,
+and SMP menu paths via headless scripted key taps. If `media/trex.bin` is
+present, smoke also verifies the bootable SMP path through that image. The
+non-bootable SMP check is pinned to `media/smp1.bin`, so replacing
+`media/smp0.bin` does not destabilize smoke baselines.

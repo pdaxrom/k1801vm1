@@ -26,13 +26,20 @@ static const word mk90_keytab[64] = {
 static const char mk90_letters[] =
     "12345:;67890/-ABWGDEVZIJKLMNOPRSTUFHC^[]XY_\\@Qaaa,.";
 
+typedef struct mk90_tap_event {
+    word scan_code;
+    int frame;
+    int pressed;
+    int released;
+} mk90_tap_event;
+
 static void usage(const char *prog)
 {
     fprintf(stderr,
             "Usage: %s [--rom <path>] [--romt <path>] [--smp0 <path>] [--smp1 <path>]\n"
             "          [--steps-per-frame <n>] [--frames <n>] [--scale <n>]\n"
             "          [--headless] [--trace] [--dump-pgm <path>]\n"
-            "          [--tap-key <octal>] [--tap-frame <n>]\n"
+            "          [--tap-key <octal>] [--tap-frame <n>] [--tap <frame>:<octal>]\n"
             "Defaults: roms/rom.bin, roms/romt.bin, media/smp0.bin, media/smp1.bin\n",
             prog);
 }
@@ -151,6 +158,43 @@ static int parse_octal_word(const char *text, word *value)
     return 0;
 }
 
+static int parse_tap_spec(const char *text, mk90_tap_event *event)
+{
+    const char *sep;
+    char frame_buf[32];
+    size_t frame_len;
+    char *end = NULL;
+    long frame_value;
+
+    if (!text || !event) {
+        return -1;
+    }
+
+    sep = strchr(text, ':');
+    if (!sep) {
+        return -1;
+    }
+    frame_len = (size_t)(sep - text);
+    if (frame_len == 0 || frame_len >= sizeof(frame_buf)) {
+        return -1;
+    }
+
+    memcpy(frame_buf, text, frame_len);
+    frame_buf[frame_len] = '\0';
+    frame_value = strtol(frame_buf, &end, 10);
+    if (!end || end[0] != '\0' || frame_value < 0 || frame_value > 1000000L) {
+        return -1;
+    }
+    if (parse_octal_word(sep + 1, &event->scan_code) != 0) {
+        return -1;
+    }
+
+    event->frame = (int)frame_value;
+    event->pressed = 0;
+    event->released = 0;
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     const char *rom_path = NULL;
@@ -162,6 +206,7 @@ int main(int argc, char *argv[])
     const char *default_smp0;
     const char *default_smp1;
     const char *dump_pgm_path = NULL;
+    mk90_tap_event tap_events[32];
     regs r;
     char err[256];
     word tap_scan_code = 0;
@@ -171,8 +216,7 @@ int main(int argc, char *argv[])
     int frame_limit = -1;
     int scale = 4;
     int tap_frame = 120;
-    int tap_pressed = 0;
-    int tap_released = 0;
+    int tap_count = 0;
     int frame_count = 0;
     uint32_t last_ticks;
     SDL_Window *window = NULL;
@@ -209,6 +253,13 @@ int main(int argc, char *argv[])
             }
         } else if (!strcmp(argv[i], "--tap-frame") && i + 1 < argc) {
             tap_frame = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "--tap") && i + 1 < argc) {
+            if (tap_count >= (int)(sizeof(tap_events) / sizeof(tap_events[0])) ||
+                parse_tap_spec(argv[++i], &tap_events[tap_count]) != 0) {
+                fprintf(stderr, "mk90: invalid tap spec, expected <frame>:<octal>\n");
+                return 1;
+            }
+            tap_count++;
         } else if (!strcmp(argv[i], "--help")) {
             usage(argv[0]);
             return 0;
@@ -244,6 +295,17 @@ int main(int argc, char *argv[])
         fprintf(stderr,
                 "mk90: no ROM image found; expected roms/rom.bin or use --rom <path>\n");
         return 1;
+    }
+    if (tap_scan_code != 0u) {
+        if (tap_count >= (int)(sizeof(tap_events) / sizeof(tap_events[0]))) {
+            fprintf(stderr, "mk90: too many tap events\n");
+            return 1;
+        }
+        tap_events[tap_count].scan_code = tap_scan_code;
+        tap_events[tap_count].frame = tap_frame;
+        tap_events[tap_count].pressed = 0;
+        tap_events[tap_count].released = 0;
+        tap_count++;
     }
 
     memset(&r, 0, sizeof(r));
@@ -325,12 +387,20 @@ int main(int argc, char *argv[])
             elapsed_ms = 1u;
         }
 
-        if (!tap_pressed && tap_scan_code != 0u && frame_count == tap_frame) {
-            mk90_machine_key_press(tap_scan_code);
-            tap_pressed = 1;
-        } else if (tap_pressed && !tap_released && frame_count == tap_frame + 1) {
-            mk90_machine_key_release();
-            tap_released = 1;
+        for (int tap_index = 0; tap_index < tap_count; tap_index++) {
+            if (tap_events[tap_index].pressed &&
+                !tap_events[tap_index].released &&
+                frame_count == tap_events[tap_index].frame + 1) {
+                mk90_machine_key_release();
+                tap_events[tap_index].released = 1;
+            }
+        }
+        for (int tap_index = 0; tap_index < tap_count; tap_index++) {
+            if (!tap_events[tap_index].pressed &&
+                frame_count == tap_events[tap_index].frame) {
+                mk90_machine_key_press(tap_events[tap_index].scan_code);
+                tap_events[tap_index].pressed = 1;
+            }
         }
 
         if (!headless) {
