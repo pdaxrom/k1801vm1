@@ -34,6 +34,8 @@ make -C mk90
 ```
 
 The current binary is produced as `.build/mk90`.
+The top-level repository `Makefile` no longer builds `mk90`; build it from the
+`mk90/` subdirectory only.
 
 ## Run
 
