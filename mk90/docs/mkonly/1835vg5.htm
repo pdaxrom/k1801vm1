@@ -1,0 +1,656 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1251">
+<title>КА1835ВГ5</title>
+</head>
+<body>
+
+<h1 align="center">МИКРОСХЕМА КА1835ВГ5<br>ТЕХНИЧЕСКОЕ ОПИСАНИЕ</h1>
+
+<h2 align="center">1. НАЗНАЧЕНИЕ</h2>
+
+<p>1.1. Микросхема КА1835ВГ5 - контроллер системный, предзначена для использования в персональной микро-ЭВМ (далее микро-ЭВМ) для выполнения функций диспетчера.</p>
+
+<p>1.2. Микросхема характеризуется следующими параметрами:</p>
+<table>
+<tr><td>количество каналов обмена</td><td align="center">1</td></tr>
+<tr><td>разрядность адреса</td><td align="center">1</td></tr>
+<tr><td>разрядность данных</td><td align="center">3</td></tr>
+<tr><td>Потребляемая мощность, мВт, не более</td><td align="center">0,022</td></tr>
+</table>
+
+<p>2.1. Назначение и нумерация выводов микросхемы приведены в <a href="#t1">табл.&nbsp;1</a>.</p>
+
+<p>2.2. Структурная схема микросхемы приведена на рис.&nbsp;1.</p>
+
+<p>2.3. Условное графическое обозначение приведено на рис.&nbsp;2.</p>
+
+<p>2.4. Микросхема обеспечивает:<br>
+1) управление подачей и снятием питания для процессора и контроллеров микро-ЭВМ;<br>
+2) выработку сигналов запуска процессора в двух режимах - одноразовым и периодическом;<br>
+3) программное распределение адресного пространства между оперативным запоминающим устройством (ОЗУ) и постоянным запоминающим устройством (ПЗУ) посредством формирования в заданных адресных пространствах сигналов &quot;Чтение ОЗУ&quot; <span style="text-decoration: overline">RDRAM</span> и &quot;Чтение ПЗУ&quot; <span style="text-decoration: overline">RDROM</span>;<br>
+4) программное изменение адресного пространства, в котором разрешено формирование сигнала &quot;Запись в ОЗУ&quot; <span style="text-decoration: overline">WRRAM</span>;<br>
+5) возможность расширения адресного пространства посредством формирования сигнала расширения адреса EXA16 и сигнала &quot;выбора окна&quot; <span style="text-decoration: overline">SESW</span>;<br>
+6) программное управление подачей частоты на преобразователь питания для жидкокристаллического индикатора (ЖКИ) микро-ЭВМ;<br>
+7) выработку сигналов для управления схемой индикации аварии питания;<br>
+8) программное управление амплитудой сигнала звонка COA.</p>
+
+<p>2.4.1. Микросхема выполняет вспомагательные функции:<br>
+1) формирует опорную частоту для контроллеров микро-ЭВМ;<br>
+2) управляет доступом к таймеру микро-ЭВМ;<br>
+3) формирует сигнал требования прерывания таймера <span style="text-decoration: overline">RQINRFM</span>;<br>
+4) осуществляет активный &quot;подброс&quot; шины МПИ &quot;Ответ&quot; <span style="text-decoration: overline">AN</span> (кратковременное подключение шины МПИ <span style="text-decoration: overline">AN</span> к &quot;выводу питания от источника напряжения&quot;) после снятя сигнала &quot;Запись&quot; <span style="text-decoration: overline">WR</span> или &quot;Чтение&quot; <span style="text-decoration: overline">RD</span>;<br>
+5) осуществляет активный &quot;подброс&quot; на выводе &quot;Захват магистрали&quot; <span style="text-decoration: overline">TR</span> (кратковременное подключение вывода &quot;Захват магистрали&quot; <span style="text-decoration: overline">TR</span> к &quot;выводу питания от источника напряжения&quot;);<br>
+6) осуществляет выдачу низких уровней напряжения на шинах AD8-AD15 по наличию сигнала &quot;прерывание разрешено&quot; <span style="text-decoration: overline">INRE</span> при вводе адрес-вектора;<br>
+7) формирует сигнал &quot;Блокировка чтения ОЗУ&quot; DERDRAM в цикле "Запись".</p>
+
+<p>2.5. Микросхема состоит из следующих блоков:<br>
+1) блока включения (U);<br>
+2) блока включения питающих напряжений (COVT);<br>
+3) блока запуска центрального процессора (STP);<br>
+4) генератора (G);<br>
+5) двунаправленного буфера (BFIO);<br>
+6) блока управления буфером (COBF);<br>
+7) селектора адреса (SLA);<br>
+8) восьмиразрядного регистра режима работы (RG1);<br>
+9) восьмиразрядного регистра режима работы (RG2);<br>
+10) формирователя сигнала <span style="text-decoration: overline">TR</span> (F1);<br>
+11) формирователя сигнала <span style="text-decoration: overline">INRAO</span> (F2);<br>
+12) формирователя сигнала <span style="text-decoration: overline">SYNO</span> (F3);<br>
+13) формирователя сигнала DERDRAM (F4);<br>
+14) формирователя сигнала <span style="text-decoration: overline">SESW</span> (F5);<br>
+15) формирователя сигнала <span style="text-decoration: overline">ANO</span> (F6);<br>
+16) формирователя сигналов <span style="text-decoration: overline">RDRAM</span>, <span style="text-decoration: overline">RDROM</span> (F7);<br>
+17) формирователя сигнала <span style="text-decoration: overline">WRRAM</span> (F8);<br>
+18) формирователя сигнала EXA16 (F9);<br>
+19) формирователя сигнала WRBF (F10);<br>
+20) блока управления подачей частоты (COF);<br>
+21) формирователя сигнала <span style="text-decoration: overline">RQINRTM</span> (F11);<br>
+22) блока управления схемой аварии питания (COPSB).</p>
+
+<p>2.5.1. Блок включения U предназначен для инициализации работы блока включения питающих напряжений COVT и блока запуска центрального процессора STP.</p>
+
+<p>2.5.1. Блок включения питающих напряжений (COVT) вырабатывает на выходе <span style="text-decoration: overline">COVT</span> сигнал включения питания, который управляет схемой подачи питания на процессор и контроллеры микро-ЭВМ.<br>
+Кроме того, сигнал <span style="text-decoration: overline">COVT</span> используется внутри микросхемы как сигнал разрешающий работу генератора G, формирователь сигнала <span style="text-decoration: overline">TR</span> (F1), формирователь сигнала <span style="text-decoration: overline">SESW</span> (F5), формирователь сигнала <span style="text-decoration: overline">ANO</span> (F6), формирователь сигналов <span style="text-decoration: overline">RDRAM</span>, <span style="text-decoration: overline">RDROM</span> (F7), формирователь сигнала <span style="text-decoration: overline">WRRAM</span> (F8), блока управления подачей частоты (COF), формирователь сигнала <span style="text-decoration: overline">RQINRTM</span> (F11), блока запуска ценнтрального процессора (STP), блока управления схемой аварии питания (COPSB).<br>
+В отсутствии сигнала <span style="text-decoration: overline">COVT</span> работа этих блоков запрещена, и при этом на выводах <span style="text-decoration: overline">TR</span>, <span style="text-decoration: overline">SESW</span>, <span style="text-decoration: overline">ANO</span>, <span style="text-decoration: overline">RDRAM</span>, <span style="text-decoration: overline">WRRAM</span>, FO2, <span style="text-decoration: overline">RQINRTM</span>, STP1, STP2, HPSB, FO1, <span style="text-decoration: overline">RDROM</span> устанавливаются низкие уровни напряжения, а выводы COA, DL, C1, C2 находятся в состоянии &quot;Выключено&quot;.</p>
+
+<p>2.5.3. Блок запуска центрального процессора (STP) предназначен для выработки сигналов запуска центрального процессора STP1, STP2.<br>
+Блок STP работает в следующих режимах:<br>
+1) одноразового запуска, когда на вход режима работы <span style="text-decoration: overline">MO</span> не подается напряжение низкого уровня;<br>
+2) периодического запуска, когда на вход режима работы <span style="text-decoration: overline">MO</span> подано напряжение низкого уровня.<br>
+Режим одноразового запуска - рабочий режим.<br>
+Временные диаграммы работы микросхемы в одноразовом режиме приведены на рис.&nbsp;3,&nbsp;4.<br>
+Режим периодического запуска используется при отладке процессора микро-ЭВМ.
+Временные диаграммы работы микросхемы в периодическом режиме приведены на рис. &nbsp;5.<br>
+В отсутствии сигнала запуска центрального процессора STP1 работа генератора G, формирователей сигналов <span style="text-decoration: overline">INRAO</span> (F2), <span style="text-decoration: overline">SYNO</span> (F3), DERDRAM (F4), EXA16 (F9), WRBF (F10), блока управления буфером (COB), блока управления схемой аварии питания (COPSB) запрещена, при этом на выводах C2, EXA16, DERDRAM, <span style="text-decoration: overline">INRAO</span> установлены низкие уровни напряжения, на выводах <span style="text-decoration: overline">SYNO</span>, HPSB высокие уровни напряжения, шины AD8-AD15, вывод C1 находится в состоянии &quot;Выключено&quot;, а регистры режима работы RG1, RG2 обнуляются.</p>
+
+<p>2.5.4. Генератор G предназначен для генерации опорной частоты (FO1) для контроллеров микро-ЭВМ. Частота генератора определяется внешним конденсатором подключенным к выводам времязадающей цепи генератора C1 и C2.</p>
+
+<p>2.5.5. Через двунаправленный буфер BFIO осуществляется передача адреса в селектор адреса SLA, приём и выдача данных из регистров режима работы RG1, RG2.<br>
+Во время приёма центральным процессором адрес-вектора двунаправленный буфер BFIO устанавливает низкие уровни напряжения на шинах AD8-AD15.</p>
+
+<p>2.5.6. Блок управления буфером COBF задаёт направление передачи адрес-вектора буфера BFIO, управляет переводом буфера BFIO в состояние &quot;Выключено&quot;, а при подаче сигнала низкого уровня на вход <span style="text-decoration: overline">INRE</span>, управляет установлением на шинах AD8-AD15 низких уровней напряжения.</p>
+
+<p>2.5.7. Селектор адреса SLA, анализируя адреса, поступающие из процессора, команд по шинам AD9-AD15, выдаёт разрешение формирователям сигналов <span style="text-decoration: overline">SESW</span>, <span style="text-decoration: overline">RDRAM</span>, <span style="text-decoration: overline">RDROM</span>, <span style="text-decoration: overline">WRRAM</span>, EXA16 на выработку соответствующих сигналов, в заданных адресных пространствах.</p>
+
+<p>2.5.8. Через регистры режима работы RG1 и RG2 осуществляется программное управление адресными пространствами, в которых разрешены формирования сигналов <span style="text-decoration: overline">SESW</span>, <span style="text-decoration: overline">RDROM</span>, <span style="text-decoration: overline">RDRAM</span>, <span style="text-decoration: overline">WRRAM</span>, EXA16, программное управление подачей частоты на преобразователь питания для ЖКИ микро-ЭВМ, управление амплитудой сигнала звонка COA, а также программный перевод микросхемы в исходное состояние.</p>
+
+<p>2.5.9. Формирователь сигнала <span style="text-decoration: overline">TR</span> (F1) предназначен для создания импульса (активного &quot;подброса&quot;) длительностью 50-100&nbsp;нс на выходе <span style="text-decoration: overline">TR</span>, через 150-300&nbsp;нс после появления сигнала <span style="text-decoration: overline">ACKTR</span>, и при наличии разрешающего сигнала включения питания <span style="text-decoration: overline">COVT</span>. После создания активного &quot;подброса&quot; вывод <span style="text-decoration: overline">TR</span> переходит в состояние &quot;Выключено&quot;.<br>
+Временная диаграмм формирования сигнала <span style="text-decoration: overline">TR</span> приведена на рис.&nbsp;11.</p>
+
+<p>2.5.10. Формирователь сигнала <span style="text-decoration: overline">INRAO</span> (F2) производит инвертирование входного сигнала прерывания по внешнему событию INRAI и транслирует его на выход <span style="text-decoration: overline">INRAO</span> при наличии разрешающего сигнала STP1.</p>
+
+<p>2.5.11. Формирователь сигнала <span style="text-decoration: overline">SYNO</span> (F3) предназначен для выработки сигнала обмен таймера <span style="text-decoration: overline">SYNO</span>, определяющего доступ к регистрам таймера микро-ЭВМ, при наличии разрешающего сигнала с блока запуска центрального процессора STP и при одновременной подаче входных сигналов <span style="text-decoration: overline">SYNI</span> и <span style="text-decoration: overline">SERGTM</span>.</p>
+
+<p>2.5.12. Формирователь сигнала DERDRAM (F4) вырабатывает сигнал, производящий блокировку выдачи данных из ОЗУ микро-ЭВМ в цикле &quot;Запись&quot;, при наличии разрешающего сигнала STP1.</p>
+
+<p>2.5.13. Формирователи сигналов <span style="text-decoration: overline">SESW</span> (F5), <span style="text-decoration: overline">RDRAM</span>, <span style="text-decoration: overline">RDROM</span> (F7), <span style="text-decoration: overline">WRRAM</span> (F8) предназначены для выработки соответствующих сигналов, при наличии разрешения с селектора адреса SLA, а также при наличии разрешающего сигнала с блока включения питающих напряжений COVT.</p>
+
+<p>2.5.14. Формирователь сигнала <span style="text-decoration: overline">ANO</span> (F6) формирует сигнал &quot;Ответ&quot; <span style="text-decoration: overline">ANO</span> для центрального процессора микро-ЭВМ при наличии разрешающего сигнала с блока включения питающих напряжений COVT в следующих случаях:<br>
+1) по входному сигналу &quot;Ответ&quot; <span style="text-decoration: overline">AN</span>;<br>
+2) по выходному сигналу &quot;Выбор окна&quot; <span style="text-decoration: overline">SESW</span>;<br>
+3) по выходному сигналу "&quot;Чтение ПЗУ&quot; <span style="text-decoration: overline">RDROM</span>.<br>
+
+<p>При формировании выходного сигнала <span style="text-decoration: overline">ANO</span> по сигналам <span style="text-decoration: overline">SESW</span> и <span style="text-decoration: overline">RDROM</span> на входе-выходе <span style="text-decoration: overline">AN</span> формируется выходной сигнал. При Этом ёмкость конденсатора, подключаемого к выводу DL определяет величину задержки установления сигналов <span style="text-decoration: overline">ANO</span> и <span style="text-decoration: overline">AN</span> после установления сигналов &quot;Запись&quot; <span style="text-decoration: overline">WR</span> или &quot;Чтение&quot; <span style="text-decoration: overline">RD</span>. Сигнал <span style="text-decoration: overline">ANO</span> транслируется в процессор только при наличии сигналов &quot;Чтение&quot; <span style="text-decoration: overline">RD</span> или &quot;Запись&quot; <span style="text-decoration: overline">WR</span>, поэтому по снятию этих сигналов сигнал <span style="text-decoration: overline">ANO</span> снимается независимо от наличия входного сигнала <span style="text-decoration: overline">AN</span>, при этом на выводе <span style="text-decoration: overline">AN</span> через 150-250&nbsp;нс формируется активный &quot;подброс&quot; длительностью 50-100&nbsp;нс.<br>
+Временные диаграммы формирования сигналов <span style="text-decoration: overline">AN</span> и <span style="text-decoration: overline">ANO</span> приведены на рис.&nbsp;6-9.</p>
+
+<p>2.5.15. Формирователь сигнала EXA16 (F9) предназначен для выработки сигнала расширения адреса EXA16 при наличии разрешающего сигнала с блока запуска центрального процессора STP постоянно, если установлен бит &quot;A16&quot; в регистре режима работы RG1, или на время цикла обращения к дополнительной внешней памяти микро-ЭВМ при наличии разрешения с селектора адреса SLA.</p>
+
+<p>2.5.16. Формирователь сигнала WRBF (F10) предназначен для выработки сигнала записи в цифро-аналоговый преобразователь WRBF при наличии входных сигналов <span style="text-decoration: overline">WR</span> и <span style="text-decoration: overline">SE2</span>, а также при наличии разрешающего сигнала STP1.</p>
+
+<p>2.5.17. Блок управления подачей частоты (COF) транслирует входную частоту FI на выход FO2, при наличии разрешающего сигнала с блока включения питающих напряжений (COVT) и если бит &quot;Запрет частоты&quot; регистра режима RG2 установлен на&nbsp;&quot;0&quot;. Если этот бит установлен на&nbsp;&quot;1&quot;, частота не транслируется.</p>
+
+<p>2.5.18. Формирователь сигнала <span style="text-decoration: overline">RQINRTM</span> (F11) транслирует на выход <span style="text-decoration: overline">RQINRTM</span> входной сигнал включения от таймера <span style="text-decoration: overline">BGTM</span> при наличии разрешающих сигналов STP1, STP2.</p>
+
+<p>2.5.19. Блок управления схемой аварии (COPSB) предназначен для фиксирования (после установления сигнала STP1) наличия низкого уровня напряжения на выводе <span style="text-decoration: overline">PSB</span> продолжительностью более двух периодов входной частоты, подаваемой на вход FI. После фиксации наличия низкого уровня блок сам поддерживает низкий уровень напряжения на выводе <span style="text-decoration: overline">PSB</span>, а на выход HPSB транслирует частоту для управления схемой визуальной индикации аварии питания. На выходе COA производится чередование низкого уровня напряжения и состояния &quot;Выключено&quot;, что используется для звуковой сигнализации аварии питания, с таким же периодам производится чередование значений бита &quot;COA&quot; регистра RG1. Временная диаграмма формирования сигналов управления схемой индикации аварии источника питания приведена на рис.&nbsp;12.</p>
+
+<h3>2.6. Функционирование микросхемы</h3>
+
+<p>2.6.1. В исходное состояние микросхема устанавливается при подаче низкого уровня напряжения на вход <span style="text-decoration: overline">STOP</span>. В этом случае при отсутствии сигнала <span style="text-decoration: overline">COVT</span>, работа всех блоков, за исключением блока включения&nbsp;U, блокирована.</p>
+
+<p>2.6.2. Начальный запуск микросхемы происходит при подаче сигнала на вход <span style="text-decoration: overline">START</span> или при подаче фронта нарастания сигнала на вход <span style="text-decoration: overline">BGTM</span>. При этом микросхема вырабатывает сигнал включения питания <span style="text-decoration: overline">COVT</span> и сигналы запуска центрального процессора STP1, STP2.</p>
+
+<p>2.6.3. При повторной подаче сигнала на вход <span style="text-decoration: overline">START</span> происходит перезапуск центрального процессора, т.е. сброс и повторное формирование сигналов STP1 и STP2.</p>
+
+<p>2.6.4. В отсутствии сигнала STP1 регистры режима работы RG1 и RG2 обнулены. Изменение информации в регистрах режима работы RG1 и RG2 производится в цикле &quot;Запись&quot; при наличии сигнала на входе SE1 или SE2 и сигнала на входе <span style="text-decoration: overline">SYNI</span>.<br>
+Содержимое регистров режима работы RG1 и RG2 можно прочесть пли наличии сигнала на входе <span style="text-decoration: overline">SE1</span> или <span style="text-decoration: overline">SE2</span> в цикле &quot;Чтение&quot;. При записи в регистры режима работы RG1 и RG2, а также при чтении содержимого регистров RG1, RG2 микросхема сигнал <span style="text-decoration: overline">ANO</span> не вырабатывает. Формат регистра режима работы RG1 приведен в <a href="#t4">табл.&nbsp;4</a>. Формат регистра режима работы RG2 приведен в <a href="#t5">табл.&nbsp;5</a>.<br>
+Временные диаграммы работы микросхемы в цикле &quot;Чтение&quot;, &quot;Запись&quot; приведены на рис.&nbsp;13,&nbsp;14.</p>
+
+<p>2.6.5. Информация в битах &quot;Запись&nbsp;1&quot; и &quot;Запись&nbsp;2&quot; регистра режима работы RG1 определяет адресные пространства в которых разрешено формирование сигнала <span style="text-decoration: overline">WRRAM</span>, в <a href="#t2">табл.&nbsp;2</a> приведена эта зависимость.<br>
+Информация в битах &quot;ПЗУ&quot;, &quot;Чтение&nbsp;1&quot;, &quot;Чтение&nbsp;2&quot; регистра режима работы RG1 определяет адресные пространства в которых разрешено формирование сигналов <span style="text-decoration: overline">RDROM</span>, <span style="text-decoration: overline">RDRAM</span>. В <a href="#t3">табл.&nbsp;3</a> приведены эти зависимости. При установке бита &quot;Запрет <span style="text-decoration: overline">RDROM</span>&quot; регистра режима работы RG2 в &quot;1&quot; выработка сигнала <span style="text-decoration: overline">RDROM</span> запрещена.<br>
+При установке бита &quot;Разрешение окна&quot; регистра работы RG2 в &quot;0&quot; сигнал <span style="text-decoration: overline">SESW</span> вырабатывается при обращении к адресам 160000...163777, а при установке этого бита в &quot;1&quot; сигнал <span style="text-decoration: overline">SESW</span> формируется дополнительно про обращении к адресному пространству 160000...163777.<br>
+При установке бита &quot;Системный&quot; регистра работы RG2 в &quot;0&quot; в адресном пространстве формирования сигнала <span style="text-decoration: overline">SESW</span> всегда вырабатывается сигнал &quot;Запись в ОЗУ&quot; <span style="text-decoration: overline">WRRAM</span> и &quot;Чтение ОЗУ&quot; <span style="text-decoration: overline">RDRAM</span>. При установке бита &quot;Системный&quot; в &quot;1&quot; сигнал &quot;Запись в ОЗУ&quot; <span style="text-decoration: overline">WRRAM</span> блокируется в адресах 160000...163777.<br>
+При установке бита &quot;Разрешение окна&quot; регистра работы RG2 в &quot;1&quot; выработка сигнала <span style="text-decoration: overline">SESW</span> запрещена.<br>
+При установке бита &quot;ПЗУ системное&quot; регистра работы RG2 в &quot;1&quot; в адресном пространстве 160000...163777 формируется сигнал <span style="text-decoration: overline">RDROM</span>, при этом сигнал <span style="text-decoration: overline">SESW</span> не вырабатывается.<br>
+При установке бита &quot;Расширение ОЗУ&quot; регистра работы RG2 в &quot;1&quot; в адресных пространствах, приведенных в <a href="#t6">табл.&nbsp;6</a>, на выходе расширения сигнала EXA16 формируется сигнал по длительности совпадающей с сигналом &quot;Обмен&quot; <span style="text-decoration: overline">SYNI</span>. При этом запрещается формирование сигнала &quot;Чтение ПЗУ&quot; <span style="text-decoration: overline">RDROM</span> в адресном пространстве 0...157776.<br>
+При установке бита &quot;A16&quot; регистра работы RG2 в &quot;1&quot; на выходе расширения адреса EXA16 устанавливается постоянно высокий уровень напряжения и запрещается выработка сигналов &quot;Запись в ОЗУ&quot; <span style="text-decoration: overline">WRRAM</span>, &quot;Чтение ОЗУ&quot; <span style="text-decoration: overline">RDRAM</span>, &quot;Чтение ПЗУ&quot; <span style="text-decoration: overline">RDROM</span> во всем адресном пространстве, кроме адресного пространства в котором формируется сигнал &quot;Выбор окна&quot; <span style="text-decoration: overline">SESW</span>.<br>
+При установке бита &quot;Запрет сигнала <span style="text-decoration: overline">AN</span> по сигналу <span style="text-decoration: overline">RDROM</span>&quot; регистра работы RG2 в &quot;1&quot; сигналы &quot;Ответ&quot; <span style="text-decoration: overline">ANO</span> и <span style="text-decoration: overline">AN</span> по сигналу &quot;Чтение ПЗУ&quot; <span style="text-decoration: overline">RDROM</span> микросхемой не вырабатываются.</p>
+
+<p>2.6.6. Если блоком управления схемой аварии питания (COPSB) не было зафиксировано наличия низкого уровня напряжения на выводе <span style="text-decoration: overline">PSB</span>, то состояние вывода управления амплитудой сигнала звонка COA можно изменить программно. При установке бита &quot;COA&quot; регистра режима работы RG1 в &quot;0&quot; на выходе COA устанавливается низкий уровень напряжения, при установке этого бита в &quot;1&quot; - выход COA переходит в состояние &quot;Выключено&quot;.</p>
+
+<p>2.6.7. При установке бита &quot;Выключено&quot; регистра работы RG1 в &quot;1&quot; происходит снятие сигнала включения питания <span style="text-decoration: overline">COVT</span>, и следовательно, установка микросхемы в исходное состояние.</p>
+
+<p>2.7. Схема применения микросхемы приведена на рис.&nbsp;15.</p>
+
+<p>2.8. Входные, выходные и входные-выходные каскады микросхемы приведены на рис.&nbsp;16-23.</p>
+
+<p>2.9. Микросхема выполнена в корпусе 4222.48-2.<br>
+Масса микросхемы не более 1,0&nbsp;г.</p>
+
+<h2 align="center">3. УКАЗАНИЯ ПО ЭКСПЛУАТАЦИИ</h2>
+
+<p>3.1. При работе с микросхемами необходимо предусматривать защиту от статического электричества.
+Величина допустимого статического потенциала 100&nbsp;В.</p>
+
+<p>3.2. Подача и отключение входных сигналов на микросхему допускается только при включенных источниках питания.</p>
+
+<p>3.3. Входная ёмкость не более 15&nbsp;пФ, выходная ёмкость не более 15&nbsp;пФ, ёмкость входа/выхода не более 15&nbsp;пФ.</p>
+
+<hr>
+
+<h2><a name="t1">Таблица&nbsp;1</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center">Номер<br>вывода</th>
+<th align="center" colspan="2">Назначение</th>
+</tr>
+<tr>
+<td align="center">01</td>
+<td>Выход запуска центрального процессора</td>
+<td align="center">STP1</td>
+</tr>
+<tr>
+<td align="center">02</td>
+<td>Выход запуска центрального процессора</td>
+<td align="center">STP2</td>
+</tr>
+<tr>
+<td align="center">03</td>
+<td>Выход частоты для преобразователя питания ЖКИ</td>
+<td align="center">FO2</td>
+</tr>
+<tr>
+<td align="center">04</td>
+<td>Выход управления амплитудой сигнала звонка</td>
+<td align="center">COA</td>
+</tr>
+<tr>
+<td align="center">05</td>
+<td>Выход требования прерывания таймера</td>
+<td align="center"><span style="text-decoration: overline">RQINRTM</span></td>
+</tr>
+<tr>
+<td align="center">06</td>
+<td>Выход сигнала индикации аварии источника питания</td>
+<td align="center">HPSB</td>
+</tr>
+<tr>
+<td align="center">07</td>
+<td>Вход/выход сигнала аварии источника питания</td>
+<td align="center"><span style="text-decoration: overline">PSB</span></td>
+</tr>
+<tr>
+<td align="center">08</td>
+<td>Выход сигнала &quot;Выбор окна&quot;</td>
+<td align="center"><span style="text-decoration: overline">SESW</span></td>
+</tr>
+<tr>
+<td align="center">09</td>
+<td>Вход/выход сигнала &quot;Задержка&quot;</td>
+<td align="center">DL</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td>Выход расширения адреса</td>
+<td align="center">EXA16</td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td>Вход шины МПИ &quot;Запись&quot;</td>
+<td align="center"><span style="text-decoration: overline">WR</span></td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td>Выход сигнала &quot;Запись в ОЗУ&quot;</td>
+<td align="center"><span style="text-decoration: overline">WRRAM</span></td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td>Вход/выход шины МПИ &quot;Ответ&quot;</td>
+<td align="center"><span style="text-decoration: overline">AN</span></td>
+</tr>
+<tr>
+<td align="center">14</td>
+<td>Выход сигнала &quot;Ответ&quot;</td>
+<td align="center"><span style="text-decoration: overline">ANO</span></td>
+</tr>
+<tr>
+<td align="center">15</td>
+<td>Вход шины МПИ &quot;Чтение&quot;</td>
+<td align="center"><span style="text-decoration: overline">RD</span></td>
+</tr>
+<tr>
+<td align="center">16</td>
+<td>Выход сигнала &quot;Чтение ПЗУ&quot;</td>
+<td align="center"><span style="text-decoration: overline">RDROM</span></td>
+</tr>
+<tr>
+<td align="center">17</td>
+<td>Выход сигнала &quot;Чтение ОЗУ&quot;</td>
+<td align="center"><span style="text-decoration: overline">RDRAM</span></td>
+</tr>
+<tr>
+<td align="center">18</td>
+<td>Общий вывод</td>
+<td align="center">OV</td>
+</tr>
+<tr>
+<td align="center">19</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD15</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD14</td>
+</tr>
+<tr>
+<td align="center">21</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD13</td>
+</tr>
+<tr>
+<td align="center">22</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD12</td>
+</tr>
+<tr>
+<td align="center">23</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD11</td>
+</tr>
+<tr>
+<td align="center">24</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD10</td>
+</tr>
+<tr>
+<td align="center">25</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD09</td>
+</tr>
+<tr>
+<td align="center">26</td>
+<td>Вход/выход шины МПИ</td>
+<td align="center">AD08</td>
+</tr>
+<tr>
+<td align="center">27</td>
+<td>Вход шины МПИ &quot;Обмен&quot;</td>
+<td align="center"><span style="text-decoration: overline">SYNI</span></td>
+</tr>
+<tr>
+<td align="center">28</td>
+<td>Выход сигнала &quot;Обмен таймера&quot;</td>
+<td align="center"><span style="text-decoration: overline">SYNO</span></td>
+</tr>
+<tr>
+<td align="center">29</td>
+<td>Вход выбора регистров таймера</td>
+<td align="center"><span style="text-decoration: overline">SERGTM</span></td>
+</tr>
+<tr>
+<td align="center">30</td>
+<td>Выход сигнала &quot;Прерывание по внешнему событию&quot;</td>
+<td align="center"><span style="text-decoration: overline">INRAO</span></td>
+</tr>
+<tr>
+<td align="center">31</td>
+<td>Вход сигнала &quot;Прерывание по внешнему событию&quot;</td>
+<td align="center"><span style="text-decoration: overline">INRAI</span></td>
+</tr>
+<tr>
+<td align="center">32</td>
+<td>Вход/выход захвата магистрали</td>
+<td align="center"><span style="text-decoration: overline">TR</span></td>
+</tr>
+<tr>
+<td align="center">33</td>
+<td>Вход подтверждения захвата магистрали</td>
+<td align="center"><span style="text-decoration: overline">ACKTR</span></td>
+</tr>
+<tr>
+<td align="center">34</td>
+<td>Вход сигнала &quot;Прерывание разрешено&quot;</td>
+<td align="center"><span style="text-decoration: overline">INRE</span></td>
+</tr>
+<tr>
+<td align="center">35</td>
+<td>Выход сигнала &quot;Запись в цифро-аналоговый преобразователь&quot;</td>
+<td align="center">WRBF</td>
+</tr>
+<tr>
+<td align="center">36</td>
+<td>Выход сигнала &quot;Блокировка чтения ПЗУ&quot;</td>
+<td align="center">DERDRAM</td>
+</tr>
+<tr>
+<td align="center">37</td>
+<td>Вход выбора регистра RG1</td>
+<td align="center"><span style="text-decoration: overline">SE1</span></td>
+</tr>
+<tr>
+<td align="center">38</td>
+<td>Вход выбора регистра RG2</td>
+<td align="center"><span style="text-decoration: overline">SE2</span></td>
+</tr>
+<tr>
+<td align="center">39</td>
+<td>Вход/выход времязадающей цепи генератора</td>
+<td align="center">C1</td>
+</tr>
+<tr>
+<td align="center">40</td>
+<td>Вход/выход времязадающей цепи генератора</td>
+<td align="center">C2</td>
+</tr>
+<tr>
+<td align="center">41</td>
+<td>Выход частоты генератора</td>
+<td align="center">FO1</td>
+</tr>
+<tr>
+<td align="center">42</td>
+<td>Вывод питания от источника напряжения</td>
+<td align="center">U</td>
+</tr>
+<tr>
+<td align="center">43</td>
+<td>Выход включения питания</td>
+<td align="center"><span style="text-decoration: overline">COVT</span></td>
+</tr>
+<tr>
+<td align="center">44</td>
+<td>Вход/выход режима работы</td>
+<td align="center"><span style="text-decoration: overline">MO</span></td>
+</tr>
+<tr>
+<td align="center">45</td>
+<td>Вход/выход включения от таймера</td>
+<td align="center"><span style="text-decoration: overline">BGTM</span></td>
+</tr>
+<tr>
+<td align="center">46</td>
+<td>Вход/выход включения</td>
+<td align="center"><span style="text-decoration: overline">START</span></td>
+</tr>
+<tr>
+<td align="center">47</td>
+<td>Вход/выход выключения</td>
+<td align="center"><span style="text-decoration: overline">STOP</span></td>
+</tr>
+<tr>
+<td align="center">48</td>
+<td>Вход частоты</td>
+<td align="center">FI</td>
+</tr>
+</table>
+<hr>
+
+<h2><a name="t2">Таблица&nbsp;2</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center" rowspan="2">Назна-<br>чение<br>бита</th>
+<th align="center" colspan="2">Биты&nbsp;RG1</th>
+<th align="center" rowspan="2">Адресные&nbsp;пространства<br>формирования&nbsp;сигнала<br><span style="text-decoration: overline">WRRAM</span></th>
+</tr>
+<tr>
+<th align="center">ЗАПИСЬ&nbsp;1<br>(AD10)</th>
+<th align="center">ЗАПИСЬ&nbsp;2<br>(AD9)</th>
+</tr>
+<tr>
+<th align="center" rowspan="4">Зна-<br>чение<br>бита</th>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0-157777,&nbsp;164000-165777</td>
+</tr>
+<tr>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0-77777,&nbsp;164000-165777</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0-37777,&nbsp;164000-165777</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0-17777,&nbsp;164000-165777</td>
+</tr>
+</table>
+<hr>
+
+<h2><a name="t3">Таблица&nbsp;3</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center" rowspan="2">Назна-<br>чение<br>бита</th>
+<th align="center" colspan="3">Биты&nbsp;RG1</th>
+<th align="center" rowspan="2">Адресные&nbsp;пространства<br>формирования&nbsp;сигнала<br><span style="text-decoration: overline">RDRAM</span></th>
+<th align="center" rowspan="2">Адресные&nbsp;пространства<br>формирования&nbsp;сигнала<br><span style="text-decoration: overline">RDROM</span></th>
+</tr>
+<tr>
+<th align="center">ПЗУ<br>(AD13)</th>
+<th align="center">ЧТЕНИЕ&nbsp;1<br>(AD12)</th>
+<th align="center">ЧТЕНИЕ&nbsp;2<br>(AD11)</th>
+</tr>
+<tr>
+<th align="center" rowspan="5">Зна-<br>чение<br>бита</th>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0-157776,<br>164000-165776</td>
+<td align="center">166000-176776</td>
+</tr>
+<tr>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0-77776,<br>164000-165776</td>
+<td align="center">100000-157776,<br>166000-176776</td>
+</tr>
+<tr>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0-37776,<br>164000-165776</td>
+<td align="center">40000-157776,<br>166000-176776</td>
+</tr>
+<tr>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0-17776,<br>164000-165776</td>
+<td align="center">20000-157776,<br>166000-176776</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">*</td>
+<td align="center">*</td>
+<td align="center">164000-165776</td>
+<td align="center">0-157776,<br>166000-176776</td>
+</tr>
+</table>
+<p>* - состояние бита безразлично</p>
+<hr>
+
+<h2><a name="t4">Таблица&nbsp;4</a> - формат регистра режима работы RG1</h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center">Номер&nbsp;бита<br>на&nbsp;линии<br>МПИ&nbsp;AD</th>
+<th align="center">AD15</th>
+<th align="center">AD14</th>
+<th align="center">AD13</th>
+<th align="center">AD12</th>
+<th align="center">AD11</th>
+<th align="center">AD10</th>
+<th align="center">AD9</th>
+<th align="center">AD8</th>
+</tr>
+<tr>
+<th align="center">Назначение<br>бита</th>
+<td align="center">Включено</td>
+<td align="center">A16</td>
+<td align="center">ПЗУ</td>
+<td align="center">ЧТЕНИЕ&nbsp;1</td>
+<td align="center">ЧТЕНИЕ&nbsp;2</td>
+<td align="center">ЗАПИСЬ&nbsp;1</td>
+<td align="center">ЗАПИСЬ&nbsp;2</td>
+<td align="center">COA</td>
+</tr>
+</table>
+<hr>
+
+<h2><a name="t5">Таблица&nbsp;5</a> - формат регистра режима работы RG2</h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center">Номер&nbsp;бита<br>на&nbsp;линии<br>МПИ&nbsp;AD</th>
+<th align="center">AD15</th>
+<th align="center">AD14</th>
+<th align="center">AD13</th>
+<th align="center">AD12</th>
+<th align="center">AD11</th>
+<th align="center">AD10</th>
+<th align="center">AD9</th>
+<th align="center">AD8</th>
+</tr>
+<tr>
+<th align="center">Назначение<br>бита</th>
+<td align="center">Запрет<br>частоты</td>
+<td align="center">Запрет<br>окна</td>
+<td align="center">Запрет<br>сигнала<br><span style="text-decoration: overline">RDROM</span></td>
+<td align="center">Расширение<br>окна</td>
+<td align="center">Системный</td>
+<td align="center">Расширение<br>ОЗУ</td>
+<td align="center">ПЗУ<br>системное</td>
+<td align="center">Запрет<br>сигнала<br><span style="text-decoration: overline">AN</span>&nbsp;по<br>сигналу<br><span style="text-decoration: overline">RDROM</span></td>
+</tr>
+</table>
+<hr>
+
+<h2><a name="t6">Таблица&nbsp;6</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center" rowspan="2">Назна-<br>чение<br>бита</th>
+<th align="center">Бит&nbsp;RG2</th>
+<th align="center" colspan="4">Биты&nbsp;RG1</th>
+<th align="center" rowspan="2">Адресные<br>пространства<br>формирования<br>сигнала<br><span style="text-decoration: overline">RDRAM</span></th>
+<th align="center" rowspan="2">Адресные<br>пространства<br>формирования<br>сигнала<br>EXA16</th>
+</tr>
+<tr>
+<th align="center">Расширение<br>ОЗУ&nbsp;(AD10)</th>
+<th align="center">ПЗУ<br>(AD13)</th>
+<th align="center">A16<br>(AD14)</th>
+<th align="center">ЧТЕНИЕ&nbsp;1<br>(AD12)</th>
+<th align="center">ЧТЕНИЕ&nbsp;2<br>(AD11)</th>
+</tr>
+<tr>
+<th align="center" rowspan="7">Зна-<br>чение<br>бита</th>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0-157776,<br>164000-165776</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0-157776,<br>164000-165776</td>
+<td align="center">177000-177777</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0-77776,<br>164000-165776</td>
+<td align="center">100000-157777,<br>177000-177777</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0-37776,<br>164000-165776</td>
+<td align="center">40000-157777,<br>177000-177777</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0-17776,<br>164000-165776</td>
+<td align="center">20000-157777,<br>177000-177777</td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">*</td>
+<td align="center">*</td>
+<td align="center">164000-165776</td>
+<td align="center">0-157777,<br>177000-177777</td>
+</tr>
+<tr>
+<td align="center">*</td>
+<td align="center">*</td>
+<td align="center">1</td>
+<td align="center">*</td>
+<td align="center">*</td>
+<td align="center">164000-165776</td>
+<td align="center">**</td>
+</tr>
+</table>
+<p>* - состояние бита безразлично<br>
+** - сигнал на выходе присутствует постоянно</p>
+<hr>
+
+</body>
+</html>
+

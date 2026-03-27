@@ -1,0 +1,280 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - algorithms</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="bcd, cordic, iteration, arithmetic, pseudo-multiplication, pseudo-division">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk85">Index</a></td>
+<td align="right"><a href="mk85alp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85alp.htm">wersja polska</a><a href="mk85alp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85alp.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-85 - algorithms</h1>
+
+<h2><a name="ran">Function RAN# (ROM subroutine 2FC6)</a></h2>
+<p>The calculator actually generates pseudo-random integer numbers in range 0-32767.
+The result is later multiplied by 0.30517578125E-4 (=1/32768) to return a real number in range 0-0.9999...</p>
+<p>The BASIC program below calculates pseudo-random 15-bit integer numbers using the same <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Linear_congruential_generator  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Linear_congruential_generator%27" tppabs="http://en.wikipedia.org/wiki/Linear_congruential_generator">algorithm</a> as function <b>RAN#</b>.
+For comparison it also prints values returned by actual <b>RAN#</b> function.</p>
+<pre>
+10 S=32768*RAN#
+20 S=12869*S+6925
+30 S=S-32768*INT(S/32768)
+40 PRINT S;32768*RAN#
+50 GOTO 20
+</pre>
+<hr>
+
+<h2><a name="sqr">Square root (ROM subroutine 300E)</a></h2>
+<p>The BASIC program shown below illustrates the algorithm used by the MK-85.
+It calculates square roots of numbers in range 1&nbsp;to&nbsp;99.9999... with a precision of R&nbsp;digits.</p>
+<p>The original procedure uses only simple and effective math operations: shift, add/subtract, compare and table lookup.
+The BASIC version thereof had to simulate shifts of BCD numbers with multiplications by powers of 10.</p>
+<p>The detailed algorithm description of this and the following functions can be found in the article <a href="meggitt.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/meggitt.pdf">J.E. Meggitt, Pseudo Division and Pseudo Multiplication processes, IBM Journal, Res & Dev, April 1962</a>.</p>
+<pre>
+5 R=7
+10 INPUT &quot;Radicand=&quot;,A
+20 IF A&lt;1 THEN 40
+30 IF A&lt;100 THEN 50
+40 PRINT &quot;Invalid!&quot;:GOTO 10
+50 B=1:Q=0:J=0
+
+200 IF J&gt;=R THEN 600
+210 IF A&lt;B THEN 400
+
+300 A=A-B
+310 GOSUB 800
+320 B=B+2*D
+330 Q=Q+1
+340 GOTO 200
+
+400 A=10*A
+410 B=B-D
+420 Q=10*Q
+430 J=J+1
+440 GOSUB 800
+450 B=B+D
+460 GOTO 200
+
+600 PRINT &quot;SQR=&quot;;Q/10^R
+610 GOTO 10
+
+800 D=10^-J
+810 RETURN
+</pre>
+<hr>
+
+<h2><a name="exp">Function EXP (ROM subroutine 30A2)</a></h2>
+<p>The following BASIC program calculates EXP(x) for numbers in range 0&nbsp;to&nbsp;LN(10) with a precision of R&nbsp;digits.
+It uses the same algorithm as the original code in the MK-85 ROM.</p>
+<pre>
+10 R=7:IF R&gt;6; DEFM(R-1)
+20 FOR J=0 TO R-1
+30 T(J)=LN(1+10^-J)*10^J
+40 NEXT J
+
+100 INPUT "Argument=",A
+110 IF A&lt;0 THEN 130
+120 IF A&lt;LN(10) THEN 140
+130 PRINT &quot;Invalid!&quot;:GOTO 100
+140 Q=0:J=0
+150 GOTO 500
+
+200 IF J&gt;=R THEN 600
+210 IF A&lt;B THEN 400
+
+300 A=A-B
+310 Q=Q+1
+320 GOTO 200
+
+400 A=A*10
+410 Q=Q*10
+420 J=J+1
+
+500 B=T(J)
+510 GOTO 200
+
+600 A=0:B=10^R
+
+700 IF FRAC(Q/10)&lt;&gt;0 THEN 800
+710 IF Q&lt;&gt;0 THEN 900
+720 GOTO 1000
+
+800 M=INT(B/10^J)
+810 A=A+B
+820 B=B+M
+830 Q=Q-1
+840 GOTO 700
+
+900 A=INT(A/10)
+910 Q=INT(Q/10)
+920 J=J-1
+930 GOTO 700
+
+1000 PRINT &quot;EXP=&quot;;1+A/10^(R+J)
+1010 GOTO 100
+</pre>
+<hr>
+
+<h2><a name="ln">Natural logarithm (ROM subroutine 31AC)</a></h2>
+<p>The following BASIC program calculates LN(x) for numbers in range 1&nbsp;to&nbsp;10 with a precision of R&nbsp;digits.
+It uses the same algorithm as the original code in the MK-85 ROM.</p>
+<pre>
+10 R=7:IF R&gt;6; DEFM(R-1)
+20 FOR J=0 TO R-1
+30 T(J)=LN(1+10^-J)*10^J
+40 NEXT J
+
+100 INPUT &quot;Argument=&quot;,A
+110 IF A&lt;1 THEN 130
+120 IF A&lt;10 THEN 140
+130 PRINT &quot;Invalid!&quot;:GOTO 100
+140 Q=0:B=1:J=0
+150 A=A-1
+
+200 IF J&gt;=R THEN 500
+210 IF A&lt;B THEN 400
+
+300 M=B*10^-J
+310 A=A-B
+320 B=B+M
+330 Q=Q+1
+340 GOTO 200
+
+400 A=A*10
+410 Q=Q*10
+420 J=J+1
+430 GOTO 200
+
+500 A=0
+510 GOTO 900
+
+600 IF 10*FRAC(Q/10)&lt;&gt;0 THEN 700
+610 IF Q&lt;&gt;0 THEN 800
+620 GOTO 1000
+
+700 A=A+B
+710 Q=Q-1
+720 GOTO 600
+
+800 A=INT(A/10)
+810 Q=INT(Q/10)
+820 J=J-1
+
+900 B=T(J)
+910 GOTO 600
+
+1000 PRINT &quot;LN=&quot;;A*10^-J
+1010 GOTO 100
+</pre>
+<hr>
+
+<h2><a name="atn">Arcus tangent (ROM subroutine 33E4)</a></h2>
+<p>The following BASIC program calculates ATN(x) for arguments in range 0&nbsp;to&nbsp;1 with a precision of R&nbsp;digits.
+It uses the same algorithm as the original code in the MK-85 ROM.</p>
+<pre>
+10 R=7:IF R&gt;6; DEFM(R-1)
+20 FOR J=0 TO R-1
+30 T(J)=ATN(10^-J)*10^J
+40 NEXT J
+
+100 INPUT &quot;Argument=&quot;,A
+110 IF A&lt;0 THEN 130
+120 IF A&lt;1 THEN 140
+130 PRINT &quot;Invalid!&quot;:GOTO 100
+140 Q=0:B=1:J=0
+
+200 IF J&gt;=R THEN 500
+210 IF A&lt;B THEN 400
+
+300 M=A*10^(-2*J)
+310 A=A-B
+320 B=B+M
+330 Q=Q+1
+340 GOTO 200
+
+400 A=A*10
+410 Q=Q*10
+420 J=J+1
+430 GOTO 200
+
+500 A=0
+510 GOTO 900
+
+600 IF 10*FRAC(Q/10)&lt;&gt;0 THEN 700
+610 IF Q&lt;&gt;0 THEN 800
+620 GOTO 1000
+
+700 A=A+B
+710 Q=Q-1
+720 GOTO 600
+
+800 A=INT(A/10)
+810 Q=INT(Q/10)
+820 J=J-1
+
+900 B=T(J)
+910 GOTO 600
+
+1000 PRINT &quot;ATN=&quot;;A*10^-J
+1010 GOTO 100
+</pre>
+<hr>
+
+<h2><a name="tan">Tangent (ROM subroutine 362C)</a></h2>
+<p>The following BASIC program calculates TAN(x) for angles in range 0&nbsp;to&nbsp;PI/2&nbsp;radians with a precision of R&nbsp;digits.
+It uses the same algorithm as the original code in the MK-85 ROM.</p>
+<pre>
+10 MODE 5:R=7:IF R&gt;6; DEFM(R-1)
+20 FOR J=0 TO R-1
+30 T(J)=ATN(10^-J)*10^J
+40 NEXT J
+
+100 INPUT &quot;Argument=&quot;,A
+110 IF A&lt;0 THEN 130
+120 IF A&lt;PI/2 THEN 140
+130 PRINT "Invalid!":GOTO 100
+140 Q=0:J=0
+150 GOTO 500
+
+200 IF J&gt;=R THEN 600
+210 IF A&lt;B THEN 400
+
+300 A=A-B
+310 Q=Q+1
+320 GOTO 200
+
+400 A=A*10
+410 Q=Q*10
+420 J=J+1
+
+500 B=T(J)
+510 GOTO 200
+
+600 A=0:B=10^R
+
+700 IF 10*FRAC(Q/10)&lt;&gt;0 THEN 800
+710 IF Q&lt;&gt;0 THEN 900
+720 GOTO 1000
+
+800 M=INT(A*10^(-2*J))
+810 A=A+B
+820 B=B-M
+830 Q=Q-1
+840 GOTO 700
+
+900 A=INT(A/10)
+910 Q=INT(Q/10)
+920 J=J-1
+930 GOTO 700
+
+1000 PRINT &quot;TAN=&quot;;A/B/10^J
+1010 GOTO 100
+</pre>
+
+</body>
+</html>

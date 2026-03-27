@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Programator modułu pamięci RAM od mikrokomputera Elektronika MK-90</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<meta name="keywords" content="MK90, MK 90, smp, karta pamięci, pamięć zewnętrzna, rosyjski, kalkulator, czytnik">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk90">Indeks</a></td> 
+<td align="right"><a href="mk90prge.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prge.htm">English version</a><a href="mk90prge.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prge.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td></tr>
+</table>
+<hr>
+
+<h1>Programator modułu pamięci RAM od mikrokomputera Elektronika MK-90</h1>
+
+<p>Odczyt i zapis modułu pamięci RAM jest możliwy za pomocą prostego układu podłączonego do portu równoległego komputera PC.
+Napięcie zasilające +5V można podciągnąć z portu klawiatury, myszy PS2 lub portu USB.</p>
+<p>Podobne urządzenie, ale sterowane przez port USB zaprojektował Ilya Danilov - <a href="javascript:if(confirm(%27http://mk90.blogspot.com/search/label/%D0%A1%D0%9C%D0%9F  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://mk90.blogspot.com/search/label/%D0%A1%D0%9C%D0%9F%27" tppabs="http://mk90.blogspot.com/search/label/%D0%A1%D0%9C%D0%9F">SMPReaderUSB</a>.</p>
+
+<h2>Schemat programatora</h2>
+<p><img src="mk90prcd.png" tppabs="http://www.pisi.com.pl/piotr433/mk90prcd.png" width="388" height="403" alt="schemat programatora modułu pamięci"></p>
+<p>Nadają się dowolne typy tranzystorów npn małej mocy, np. BC547.</p>
+<p><img src="mk90prg1.jpg" tppabs="http://www.pisi.com.pl/piotr433/mk90prg1.jpg" width="505" height="325" alt="fotografia programatora modułu pamięci"></p>
+
+<h2>Software</h2>
+<p>Program jest równie prosty jak układ.</p>
+<p><a href="mk90prog.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90prog.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk90prog.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90prog.zip">mk90prog.zip</a> - rozmiar pliku: 18kB, tekst źródłowy i kod wykonywalny</p>
+<h3>Wymagania</h3>
+<ul>
+<li>komputer PC z systemem DOS lub Windows 95/98/ME</li>
+<li>port równoległy pod adresem 0x0378 pracujący w trybie SPP</li>
+</ul>
+<p>Program nie będzie działał pod Windows 2000, NT, XP, ponieważ te systemy nie zezwalają na bezpośredni dostęp do sprzętu przez programy użytkownika.</p>
+<h3>Sposób użycia</h3>
+<p>Podłączyć moduł pamięci, załączyć zasilanie +5V a następnie uruchomić jeden z poniższych programów:</p>
+<ul>
+<li>READ.COM - odczytuje pamięć modułu do pliku binarnego MK90.BIN</li>
+<li>WRITE.COM - zapisuje plik binarny MK90.BIN do pamięci modułu</li>
+</ul>
+<h3>Wersja dla Linuxa</h3>
+<p><a href="javascript:if(confirm(%27http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz%27" tppabs="http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz">http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz</a></p>
+
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>MK-90 emulator</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk90">Index</a></td>
+<td align="right"><a href="mk90emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90emup.htm">wersja polska</a><a href="mk90emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90emup.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>MK-90 emulator</h1>
+
+<p>The program emulates a PDP-11 compatible CPU and uses a ROM dump from the original calculator, therefore it should function almost exactly like the real one.<br>
+It works on PC-compatible machines with Microsoft Windows operating system.</p>
+
+<h2><a name="files">Files to download</a></h2>
+<p>Program version 17, updated 2019/11/30</p>
+<p><a href="mk90emsr.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90emsr.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a>
+<a href="mk90emsr.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90emsr.zip">mk90emsr.zip</a> - Delphi sources</p>
+<p><a href="mk90emex.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90emex.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a>
+<a href="mk90emex.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90emex.zip">mk90emex.zip</a> - compiled executable</p>
+<p>Usage: extract the files into an empty directory, then run the program <b>mk90.exe</b></p>
+<p><a href="mk90ro10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ro10.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90ro10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ro10.zip">mk90ro10.zip</a> - ROM image of an earlier
+MK-90 version with BASIC V1.0</p>
+<p>Usage: replace the file <code>rom.bin</code><br>
+Note: after the ROM change the memory modules should be reformatted with the command <b>INIT</b>.</p>
+
+<h2><a name="scr">The screenshots</a></h2>
+<p><img src="mk90emu1.png" tppabs="http://www.pisi.com.pl/piotr433/mk90emu1.png" width="640" height="253" alt="Screenshot of the MK-90 emulator"></p>
+<p><img src="mk90emu2.png" tppabs="http://www.pisi.com.pl/piotr433/mk90emu2.png" width="625" height="373" alt="The debug window of the MK-90 emulator"></p>
+
+<h2><a name="usage">Usage hints</a></h2>
+<ul>
+<li>The files <b>rom.bin</b> and <b>romt.bin</b> contain the ROM images (currently BASIC V2.0).
+There isn't any file representing the RAM image, as the actual MK-90 doesn't preserve the RAM contents when turned off.</li>
+<li>The files <b>smp0.bin</b> and <b>smp1.bin</b> contain the memory images of the removable memory modules SMP.
+If a file is missing, the emulated calculator assumes that the module is absent.<br>
+The file size specifies the SMP memory size.
+Files larger than 64kB represent images of ROM modules.</li>
+<li>The emulator can be operated with the mouse or the keyboard.
+Special function keys:
+<pre>  Cursor keys and Page Up/Down
+  Backspace:   [ZV]
+  Enter:       [VK]
+  F2:          keyboard overlay
+  F3:      suspends the code execution and opens the debugger window
+  F6:          [SU]
+  F7:          [R/L] - selects between Russian and Latin characters
+  F8:          [FK] - alternate key function (keywords)
+  F9:          [V/N] - alternate key function
+</pre></li>
+</ul>
+
+<h2><a name="debug">Integrated debugger</a></h2>
+<h3>Disassembly box</h3>
+<ul>
+<li>On entry, the starting address matches the Program Counter.
+It can be modified by clicking on the address in the first line.
+Accepted values: $0000..$3FFE for the RAM area and $4000..$FEFE for the ROM area.
+New value must be confirmed with Enter.</li>
+<li>Access to the I/O area $E800..$EBFE can disturb communication with the SMP memory modules.</li>
+<li>After clicking on a disassembled instruction, a new instruction can be typed.
+As with the starting address, pressing Enter accepts the changes.
+The changes aren't saved upon program termination.</li>
+</ul>
+
+<h3>Binary Editor box</h3>
+<ul>
+<li>The binary editor box allows viewing/changing the RAM contents only.</li>
+<li>It is possible to modify the starting address and the RAM contents by clicking on them.
+Enter accepts the changes.</li>
+</ul>
+
+<h3>Registers box</h3>
+<ul>
+<li>The contents of the registers can be modified by clicking on them.
+Enter accepts the changes.</li>
+<li>The bottom line in the register box shows bits TNZVC of the PSW register.</li>
+</ul>
+
+<h3>Program execution control</h3>
+<ul>
+<li>Closing the debugger windows resumes the program execution without tracing.</li>
+<li>Pressing the button [Run] in the <b>Single step</b> group box executes a single machine code instruction without servicing of the interrupts.</li>
+<li>To execute a specified number of machine code instructions type the required value to the field in the <b>Number of steps</b> group box, then press the associated [Run] button.</li>
+<li>The <b>Breakpoint</b> group box allows to specify condition that determine when the program execution should be interrupted.
+Currently it only compares the Breakpoint Address typed in the field with the Program Counter.
+When they match, the program execution is stopped and the debugger window reappears.</li>
+</ul>
+
+<h2><a name="ini">The mk90.ini file</a></h2>
+<p>Some parameters of the emulator can be customised by editing the <b>mk90.ini</b> file with any text editor.<br>
+Description of the contents of this file:</p>
+<dl>
+<dt><code>CpuSpeed=1000</code></dt>
+<dd>This setting controls the emulated CPU execution speed (number of instructions executed every 10ms).</dd>
+<dt><code>RamSize=16384</code></dt>
+<dd>This setting defines the physical size of emulated RAM.
+<b>It is intended for test purposes only!</b>
+The default value shouldn't be modified, because the system supports only fixed RAM size of 16kB.
+Since the entire address space is occupied, the extra RAM takes precedence over the ROM containing the test routines.</dd>
+<dt><code>Radix=16</code></dt>
+<dd>This setting changes the base of the numeral system used by the debugger (16&nbsp;for the hexadecimal system, 8&nbsp;for the octal system).</dd>
+<dt><code>SaveRom=0</code></dt>
+<dd>Value other than&nbsp;0 invokes on program exit a file dialog that allows the user to save the modified ROM image.</dd>
+</dl>
+
+<h2><a name="un">Uninstalling</a></h2>
+<p>To uninstall the emulator, simply delete the directory where it was installed.
+The program doesn't modify anything outside its installation directory.</p>
+
+<h2><a name="acknowl">Acknowledgments</a></h2>
+<ul>
+<li>Significant part of the code is based on the <a href="javascript:if(confirm(%27http://zx.pk.ru/showpost.php?p=105439&postcount=161  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://zx.pk.ru/showpost.php?p=105439&postcount=161%27" tppabs="http://zx.pk.ru/showpost.php?p=105439&postcount=161">PDP-11/03 emulator</a> written by Ovsienko V.A.</li>
+<li>The disassembler is based on the program <a href="javascript:if(confirm(%27http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/rsx/decus/rsx80a/310111/pinst.c  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/rsx/decus/rsx80a/310111/pinst.c%27" tppabs="http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/rsx/decus/rsx80a/310111/pinst.c">pinst.c</a> written by Martin Minow.</li>
+<li>The program includes a freeware component <b>ThreadedTimer</b> developed by <a href="javascript:if(confirm(%27http://www.carlosb.com/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.carlosb.com/%27" tppabs="http://www.carlosb.com/">Carlos Barbosa</a>.</li>
+</ul>
+
+<h2><a name="knownbugs">Known limitations and issues of the current version</a></h2>
+<ul>
+<li>The program emulates the <a href="1806vm2.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/1806vm2.pdf">1806&#1042;&#1052;2</a> CPU which may slightly differ from the actual one (mostly in the interrupt system and in the non-user mode).</li>
+<li>The sound isn't supported yet.</li>
+<li>The serial transfer rate settings are ignored.</li>
+<li>The small battery backed RAM is <b>deliberately</b> emulated as volatile memory.</li>
+<li>BASIC V1.0 - failure of the memory module self test.
+The problem is unrelated to the emulator, but caused by a bug in the original system software.
+It can be fixed by replacing the faulty instruction at the address $EEF8 with DEC&nbsp;33CA.</li>
+</ul>
+<hr>
+
+<h2><a name="util">File copy utility</a></h2>
+<p><a href="mk90util.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90util.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a>
+<a href="mk90util.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90util.zip">mk90util.zip</a> - file size: 19kB, sources and executables, DOS and Windows (in a DOS window)</p>
+<p>The archive contains two separate programs for each BASIC version:<br>
+&nbsp;&nbsp;<code>tosmp10.com</code> - for BASIC version&nbsp;1.0<br>
+&nbsp;&nbsp;<code>tosmp20.com</code> - for BASIC version&nbsp;2.0</p>
+<p>The utility copies a list of BASIC programs in ASCII format (cyrillic characters are expected to be encoded in Windows-1251) specified in the command line to the MK-90 cartridge memory image.
+Example:<br>
+&nbsp;&nbsp;<code>tosmp10.com prog1.bas [prog2.bas prog3.bas ...]</code></p>
+<p>As a result an output file <b>SMP0.BIN</b> is created, which can be used by the emulator or <a href="mk90prge.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prge.htm">written into a real cartridge</a>.</p>
+<p>To load a program in BASIC&nbsp;2.0 use the command LOAD with the parameter&nbsp;A, for example:<br>
+&nbsp;&nbsp;<code>LOAD "PROG1.BAS",A</code></p>
+<hr>
+
+</body>
+</html>

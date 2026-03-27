@@ -1,0 +1,337 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - programowanie w asemblerze</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk85">Indeks</a></td>
+<td align="right"><a href="mk85mc1e.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm">English version</a>
+<a href="mk85mc1e.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0"
+width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-85 - programowanie w asemblerze</h1>
+
+<p>Uruchamianie programów maszynowych okazało się możliwe dzięki lukom
+w implementacji komendy <b>INPUT</b>.</p>
+
+<h2><a name="first">Pierwszy przykładowy program</a></h2>
+<p>Tradycyjnie pierwszym przykładem, który się pisze przy poznawaniu
+nowego systemu lub języka programowania, jest program wyświetlający
+napis &quot;Hello world&quot;.
+Tak będzie również w tym przypadku:</p>
+<blockquote><pre>
+        .radix  16              ;wszystkie liczby szesnastkowe
+
+start:  mov     #41,@#8264      ;zmienna systemowa
+loop:   jsr     r4,print1
+        .asciz  &quot;HELLO WORLD! &quot;
+        br      loop
+
+print1: jsr     pc,@#1248       ;procedura ROM wyświetlająca łańcuch
+        rts     r4
+</pre></blockquote>
+<p>Niestety, tego programu nie da się wpisać, ponieważ nie wszystkie
+kody znaków są dostępne z klawiatury, a poza tym program musi trochę
+wyglądać jak BASIC żeby został zaakceptowany przez edytor.
+Oto zmodyfikowana wersja programu spełniająca te warunki:</p>
+<blockquote><pre>
+start:
+8272:   bmi     82B6
+
+8296:   jsr     r4,@#82B0
+829A:   .asciz  &quot;HELLO=WORLD!=&quot;
+82A8:   jsr     r5,@#82AE
+82AC:   sob     r0,8296
+82AE:   rts     r5
+82B0:   jsr     pc,@#1248
+82B4:   rts     r4
+82B6:   mov     #8041,@#8264
+82BC:   sob     r0,8296
+</pre></blockquote>
+<p>Tak wygląda gotowy program, który należy zapisać jako P0
+(w odróżnieniu od pozostałych ma stały adres początkowy):</p>
+<p><img src="mk85fipr.png" tppabs="http://www.pisi.com.pl/piotr433/mk85fipr.png" width="256" height="188"
+alt="pierwszy program maszynowy"></p>
+<p>Zwykłe znaki alfabetu łacińskiego są w kolorze
+<font color="#000000"><b>czarnym</b></font>,
+cyrylica w kolorze
+<font color="#C80000"><b>czerwonym</b></font>,
+znaki graficzne w kolorze
+<font color="#008000"><b>zielonym</b></font>,
+słowa kluczowe BASIC w kolorze
+<font color="#0000C0"><b>niebieskim</b></font>.
+Trzeba na to bardzo uważać, ponieważ różne znaki z różnych zestawów
+mogą wyglądać podobnie lub identycznie.</p>
+<h3>Szesnastkowy wydruk zawartości pamięci RAM przechowującej
+program</h3>
+<pre>
+8260:  7B 81 00 00  81 00 00 00  00 08 00 0A  00 DF 38 32  {.............82
+8270:  35 36 21 81  30 00 14 00  E7 00 1E 00  21 30 31 32  56!.0.......!012
+8280:  33 34 35 36  37 38 39 00  28 00 21 30  31 32 33 34  3456789.(.!01234
+8290:  35 36 37 38  39 00 1F 09  B0 82 48 45  4C 4C 4F 3D  56789.....HELLO=
+82A0:  57 4F 52 4C  44 21 3D 00  5F 09 AE 82  0C 7E 85 00  WORLD!=._.......
+82B0:  DF 09 48 12  84 00 DF 15  41 80 64 82  14 7E 00 00  ..H.....A.d.....
+</pre>
+<p><a href="mk85fipr.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85fipr.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14"
+height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk85fipr.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85fipr.zip">mk85fipr.zip</a> - plik obrazu pamięci RAM dla
+<a href="mk85emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85emup.htm">emulatora</a></p>
+<h3><a name="exec">Uruchomienie programu</a></h3>
+<ol>
+<li>Start programu za pomocą komendy <b>RUN</b>.</li>
+<li>Gdy pojawi się znak zapytania wyświetlony przez komendę
+<b>INPUT</b>, należy wpisać <img src="mk85mcin.png" tppabs="http://www.pisi.com.pl/piotr433/mk85mcin.png" width="60"
+height="24" alt="input string"> i potwierdzić klawiszem [EXE].
+Zamiast tego można również po prostu wcisnąć klawisz [AC].</li>
+<li>Gdy program się ponownie zatrzyma wyświetlając kursor, należy
+wcinąć klawisz [EXE].</li>
+<li>Na wyświetlaczu powinien się teraz pojawić przesuwający się tekst.
+Program można zatrzymać klawiszem [STOP].</li>
+</ol>
+<hr>
+
+<h2><a name="how">Jak to działa</a></h2>
+<h3>Modyfikacja zawartości pamięci</h3>
+<p>Komenda <b>INPUT</b> traktuje stałą numeryczną w polu argumentu tak
+jak zmienną łańcuchową&nbsp;<b>$</b> (w wyniku braku sprawdzenia co
+rzeczywiście jest zwracane przez procedurę przetwarzającą wyrażenia
+w okolicy adresu 1C62).
+Kopiuje ona wpisany łańcuch o długości do 1E znaków pod adres pamięci
+przeznaczonej dla zmiennej.
+Adres zmiennej jest pobierany z drugiego słowa danej na stosie.
+W przypadku stałej numerycznej to słowo zawiera pierwsze cztery cyfry
+mantysy.</p>
+<h3>Uruchamianie programów maszynowych</h3>
+<p>Jest to możliwe przez wykorzystanie instrukcji skoku pośredniego
+poprzez zmienną 8258, znajdującego się w pamięci ROM pod adresem 0E76.
+Ten fragment kodu jest między innymi dostępny z głównej pętli obsługi
+trybu interaktywnego, mniej więcej pod adresem 0BC6.
+Oryginalnie jest przeznaczony do wznowienia wykonywania programu BASIC
+po wystąpieniu warunku STOP.</p>
+<p>Procedura obsługi komendy <b>INPUT</b> używa zmiennej 8258 do
+tymczasowego przechowania wskaźnika do interpretowanego programu
+BASIC.
+Wynika z tego, że można wykonać jako program maszynowy dane
+następujące po <b>INPUT</b>, jeżeli udałoby się przejść do pętli trybu
+interaktywnego przy spełnieniu poniższych warunków:</p>
+<ul>
+<li>zmienna 8258 pozostaje niezainicjowana i w dalszym ciągu wskazuje
+następną instrukcję programu BASIC do wykonania (można tam umieścić
+swój program maszynowy)</li>
+<li>bit 15 (dziesiętnie) zmiennej 8256 (<b>mode</b>) pozostaje
+ustawiony (służy do odróżnienia trybu interpretacji programu BASIC od
+trybu interaktywnego)</li>
+</ul>
+<p>W takiej sytuacji wciśnięcie klawisza [EXE] jest błędnie
+interpretowane jako żądanie wznowienia wykonywania programu BASIC,
+co w efekcie powoduje uruchomienie kodu maszynowego użytkownika
+wskazywanego przez zmienną 8258.</p>
+<p>Aktualnie znane mi są dwie metody przejścia do pętli trybu
+interaktywnego:</p>
+<h4>1. Spowodowanie fałszywego stanu STOP</h4>
+<p>Zwykle stan STOP jest spowodowany przez wciśnięcie klawisza [STOP],
+wykonaniem instrukcji <b>STOP</b>, lub pracą w trybie TRACE.
+Obsługą tego stanu zajmuje się procedura 179A, która wyświetla numer
+programu i wiersza, a następnie przechodzi do trybu interaktywnego.</p>
+<p>Można wymusić taki stan przez ustawienie bitu&nbsp;0 zmiennej 8256
+(<b>mode</b>) zmieniając jej zawartość z 8000 na 8001.
+Odbywa się to przez wpisanie łańcucha <img src="mk85mcin.png" tppabs="http://www.pisi.com.pl/piotr433/mk85mcin.png"
+width="60" height="24" alt="input string"> w odpowiedzi na komendę
+<code>INPUT 8256</code> w wierszu&nbsp;10.
+Znaku o kodzie&nbsp;01 wprawdzie nie da się wpisać z klawiatury, ale
+znak o kodzie&nbsp;31 ('1') pasuje również.
+Jednak sam znak '1' zmieniłby również bardziej znaczący bajt zmiennej
+<b>mode</b> na&nbsp;00, ponieważ łańcuch zakończony jest zerem.
+Konieczne jest wpisanie jeszcze trzech dalszych znaków, żeby również
+zachować stan zmiennej 8258.
+Końcowy bajt&nbsp;00 naruszy dopiero zmienną 825A, która nie jest w
+ważna w tym kontekście.</p>
+<p>W celu przejścia to trybu interaktywnego pozostało wykonać jakąś
+komendę BASIC dozwoloną zarówno w programie jak i w trybie
+interaktywnym, na przykład <b>VAC</b> (w wierszu&nbsp;20).
+Ta grupa komend ma wspólny punkt wyjścia pod adresem 1652, a stamtąd
+do pętli trybu interaktywnego 0BA0 lub pętli interpretacji programu
+BASIC, zależnie od stanu bitu&nbsp;0 zmiennej <b>mode</b>.</p>
+<h4>2. Wyjście z INPUT klawiszem [AC]</h4>
+<p>Wciśnięcie klawisza [AC] jest obsługiwane pod adresem 05C0 w ROM.
+Ta procedura kasuje bufor wejściowy oraz wyświetlacz, a następnie
+przechodzi do pętli trybu interaktywnego, nie modyfikując zmiennych
+8256 i 8258.
+Przy tej metodzie argument komendy <b>INPUT</b> jest bez znaczenia
+(nie musi to być stała numeryczna, można użyć dowolnej zmiennej).
+Również zbędna jest komenda <b>VAC</b> w wierszu&nbsp;20 (nigdy nie
+jest wykonywana).</p>
+<hr>
+
+<h2><a name="advan">Bardziej zaawansowane programowanie</a></h2>
+<p>Pisanie programów maszynowych wyglądających jak BASIC okazało się
+kłopotliwym i czasochłonnym zajęciem.
+Poniżej opisana metoda pozwala na uruchamianie dowolnych programów
+bez żadnych sztucznych ograniczeń.</p>
+<h3><a name="alloc">Przydział pamięci</a></h3>
+<p>Ten etap rezerwuje bezpieczne miejsce w pamięci dla programów
+maszynowych przez modyfikację zmiennej systemowej <b>ramtop</b> pod
+adresem 8252.
+Obszar pamięci od <b>ramtop</b> aż do końca pozostanie niedostępny
+dla systemu BASIC.<br>
+Poniższy program modyfikuje zmienną <b>ramtop</b>:</p>
+<blockquote><pre>10 INPUT 8252:VAC
+</pre></blockquote>
+<p>Wpisanie do zmiennej <b>ramtop</b> wartości 8680 rezerwuje obszar
+pamięci o rozmiarze 0180 bajtów rozpoczynający się od adresu 8680
+(wszystkie liczby szesnastkowe).
+Ta wartość odpowiada łańcuchowi <img src="mk85mci2.png" tppabs="http://www.pisi.com.pl/piotr433/mk85mci2.png" width="32"
+height="24" alt="input string">, który trzeba wpisać w odpowiedzi na
+<b>INPUT</b>.
+Program wystarczy uruchomić tylko raz.
+Nowa konfiguracja pamięci będzie zachowana tak długo, jak nie zostanie
+wciśnięty przełącznik <b>init</b> na tylnej ściance lub wywołana
+komenda <b>TEST</b>.</p>
+<h3><a name="loader">Program ładujący</a></h3>
+<p>Następny program kopiuje do przydzielonego obszaru plik binarny
+zapisany jako ciąg liczb szesnastkowych w wierszach programu BASIC,
+a następnie wykonuje instrukcję skoku na początek tego obszaru.
+Tak jak w poprzednim przykładzie, pewne udziwnienia są spowodowane
+koniecznością dopasowania się do struktury wymuszonej przez język
+BASIC.</p>
+<blockquote><pre>
+        .radix  16
+
+        .loc    8272
+start:  bmi     start1
+
+        .loc    8286
+exec:   jmp     (r5)
+
+loop:   tstb    (r2)+           ;separator lub znak końca wiersza
+        nop
+        bne     byte
+        nop
+        jsr     r0,@#return     ;wypełniacz bez funkcji
+line:   tstb    (r2)+
+        cmpb    (r2)+,#2727     ;test czy numer wiersza &gt; 9987
+        bcc     exec1
+        tstb    (r2)+           ;pominięcie znaku '!'
+        nop
+        jsr     r0,return       ;wypełniacz bez funkcji
+byte:   jsr     pc,@#digit
+        nop
+        jsr     pc,digit
+        inc     r4              ;wypełniacz bez funkcji
+        movb    r0,(r3)+
+        sob     r1,loop
+exec1:  sob     r2,exec
+
+start1: bmi     start2
+
+return: rts     r0
+
+digit:  asl     r0
+        asl     r0
+        asl     r0
+        asl     r0
+        nop
+        mov     r0,-(sp)
+        movb    (r2)+,r0
+        cmpb    r0,#4141        ;'A'
+        bcs     digit1
+        sub     #3737,r0
+        add     (sp)+,r0
+        rts     pc
+
+start2: mov     #4080,r1
+        add     #8800-4080,r1   ;r1 = koniec pamięci RAM
+        nop
+        mov     #4080,r2
+        add     #data+1-4080,r2 ;r2 = adres źródłowy
+        nop
+        mov     8252,r3         ;adres docelowy = zmienna ramtop
+        mov     r3,r5           ;wektor skoku
+        sub     r3,r1           ;maksymalna ilość bajtów
+        sob     r2,line
+
+digit1: sub     #3030,r0
+        add     (sp)+,r0
+        rts     pc
+
+data:                           ;tu rozpoczynają się dane
+</pre></blockquote>
+<p><img src="mk85load.png" tppabs="http://www.pisi.com.pl/piotr433/mk85load.png" width="466" height="342"
+alt="program ładujący"></p>
+<p>Po programie ładującym oczekiwane są wiersze BASIC zawierające listę
+bajtów w formacie szesnastkowym poprzedzoną wykrzyknikiem.
+Poszczególne bajty rozdzielone są pojedynczym znakiem (preferowany
+przecinek lub spacja).
+Ilość bajtów w wierszu może być dowolna.
+Wszystko powinno być zakończone wierszem o numerze 9988 lub większym.
+Poniższy przykład powstał w wyniku asemblacji pierwotnej wersji
+programu &quot;Hello world&quot;:</p>
+<blockquote><pre>
+9000 !DF,15,41,00,64,82,37,09
+9010 !10,00,48,45,4C,4C,4F,20
+9020 !57,4F,52,4C,44,21,20,00
+9030 !F6,01,DF,09,48,12,84,00
+9999 END
+</pre></blockquote>
+<p>Jest to sporo wpisywania i łatwo się pomylić.
+Wszystko trzeba dwukrotnie sprawdzić!<br>
+Program ładujący razem z danymi wyglądają w pamięci tak:</p>
+<pre>
+8260:  6D 81 00 80  00 80 00 00  00 00 00 0A  00 DF 38 32  m.............82
+8270:  35 36 21 81  30 00 14 00  E7 00 1E 00  21 30 31 32  56!.0.......!012
+8280:  33 34 35 36  37 00 4D 00  D2 8B A0 00  0B 02 A0 00  34567.M.........
+8290:  1F 08 B8 82  D2 8B 97 A4  27 27 0C 86  D2 8B A0 00  ........''......
+82A0:  37 08 14 00  DF 09 BA 82  A0 00 F7 09  0C 00 84 0A  7...............
+82B0:  13 90 56 7E  98 7E 0F 81  80 00 C0 0C  C0 0C C0 0C  ..V.............
+82C0:  C0 0C A0 00  26 10 80 94  17 A0 41 41  13 87 C0 E5  ....&amp;.....AA....
+82D0:  37 37 80 65  87 00 C1 15  80 40 C1 65  80 47 A0 00  77.e.....@.e.G..
+82E0:  C2 15 80 40  C2 65 7D 42  A0 00 C3 17  52 82 C5 10  ...@.e}B....R...
+82F0:  C1 E0 B0 7E  C0 E5 30 30  80 65 87 00  28 23 21 44  ......00.e..(#!D
+8300:  46 2C 31 35  2C 34 31 2C  30 30 2C 36  34 2C 38 32  F,15,41,00,64,82
+8310:  2C 33 37 2C  30 39 00 32  23 21 31 30  2C 30 30 2C  ,37,09.2#!10,00,
+8320:  34 38 2C 34  35 2C 34 43  2C 34 43 2C  34 46 2C 32  48,45,4C,4C,4F,2
+8330:  30 00 3C 23  21 35 37 2C  34 46 2C 35  32 2C 34 43  0.&lt;#!57,4F,52,4C
+8340:  2C 34 34 2C  32 31 2C 32  30 2C 30 30  00 46 23 21  ,44,21,20,00.F#!
+8350:  46 36 2C 30  31 2C 44 46  2C 30 39 2C  34 38 2C 31  F6,01,DF,09,48,1
+8360:  32 2C 38 34  2C 30 30 00  0F 27 E4 00  00 00 00 00  2,84,00..'......
+</pre>
+<p><a href="mk85load.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85load.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14"
+height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk85load.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85load.zip">mk85load.zip</a> - plik obrazu pamięci RAM dla
+<a href="mk85emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85emup.htm">emulatora</a></p>
+<p>Program uruchamia się w identyczny sposób jak poprzednią wersję
+&quot;Hello world&quot;.</p>
+<p>Gdy kod maszynowy zostanie przekopiowany we właściwe miejsce,
+program ładujący może zostać skasowany.
+Kod pozostanie w pamięci dopóki nie zostanie wciśnięty przełącznik
+<b>init</b> na tylnej ściance lub wywołana komenda <b>TEST</b>.</p>
+<h3><a name="starter">Program startujący</a></h3>
+<p>Poniższy krótki program uruchamia załadowany kod maszynowy przy
+braku programu ładującego:</p>
+<blockquote><pre>
+82B6:   mov     @#8252,r0
+82BA:   jmp     (r0)
+</pre></blockquote>
+<p><img src="mk85strt.png" tppabs="http://www.pisi.com.pl/piotr433/mk85strt.png" width="256" height="166"
+alt="program startujący"></p>
+<pre>
+8260:  6D 81 00 80  00 80 00 00  00 00 00 0A  00 DF 38 32  m.............82
+8270:  35 36 21 81  30 00 14 00  E7 00 1E 00  21 30 31 32  56!.0.......!012
+8280:  33 34 35 36  37 38 39 00  28 00 21 30  31 32 33 34  3456789.(.!01234
+8290:  35 36 37 38  39 00 32 00  21 30 31 32  33 34 35 36  56789.2.!0123456
+82A0:  37 38 39 00  3C 00 21 30  31 32 33 34  35 36 37 38  789.&lt;.!012345678
+82B0:  39 30 31 32  33 00 C0 17  52 82 48 00  00 00 00 00  90123...R.H.....
+</pre>
+<p><a href="mk85strt.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85strt.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14"
+height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk85strt.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85strt.zip">mk85strt.zip</a> - plik obrazu pamięci RAM dla
+<a href="mk85emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85emup.htm">emulatora</a></p>
+<hr>
+
+</body>
+</html>

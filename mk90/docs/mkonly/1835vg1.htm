@@ -1,0 +1,349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1251">
+<title>КА1835ВГ1</title>
+</head>
+<body>
+
+<h1 align="center">МИКРОСХЕМА КА1835ВГ1<br>ТЕХНИЧЕСКОЕ ОПИСАНИЕ</h1>
+
+<h2 align="center">1. НАЗНАЧЕНИЕ</h2>
+
+<p>1.1. Микросхема КА1835ВГ1 - контроллер клавиатуры, предназначена для использования в персональной микро-ЭВМ.</p>
+<p>1.2. Микросхема характеризуется следующими параметрами:</p>
+<table>
+<tr><td>Количество каналов обмена:</td><td align="center">1</td></tr>
+<tr><td>Скорость обмена информации с внешними устройствами, Кбод</td><td align="center">500</td></tr>
+<tr><td>Разрядность данных</td><td align="center">8</td></tr>
+<tr><td>Количество режимов работы</td><td align="center">2</td></tr>
+<tr><td>Потребляемая мощность, мВт, не более</td><td align="center">0,11</td></tr>
+</table>
+
+<h2 align="center">2. УСТРОЙСТВО И РАБОТА</h2>
+
+<p>2.1. Назначение выводов микросхемы приведено в <a href="#t1">табл.&nbsp;1</a>.</p>
+
+<p>2.2. Структурная схема микросхемы приведена на рис.&nbsp;1.</p>
+
+<p>2.3. Условные графическое обозначение микросхемы приведено на рис.&nbsp;2.</p>
+
+<p>2.4. Микросхема включает следующие основные блоки:<br>
+1) счётчик (CT);<br>
+2) дешифратор (DC);<br>
+3) кодер со схемой фиксации нажатия (CDBG);<br>
+4) счётчик битов с дешифратором (CTDC);<br>
+5) шестиразрядный регистр кода нажатой клавиши (RG);<br>
+6) мультиплексор (MUX);<br>
+7) устройство формирования запроса (FRG);<br>
+8) блок управления записью в запоминающее устройство (далее ЗУ) (COWR);<br>
+9) дешифратор адреса запоминающего устройства (DCA).<br>
+Счётчик (CT) предназначен для отсчёта циклов сканирования кода нажатой клавиши.<br>
+Дешифратор (DC) дешифрует код счётчика (CT).<br>
+Кодер со схемой фиксации нажатия клавиши (CDBG), предназначен для фиксации нажатия клавиши и кодирования номера возбужденного столбца матрицы.<br>
+Счётчик битов с дешифратором CTDC предназначены для отсчёта битов и подачи управляющих сигналов на мультиплексор MUX.<br>
+Регистр кода RG предназначен для хранения кода нажатой клавиши. Три старших разряда регистра кода RG хранят состояние счётчика CT, три младших разряда регистра кода RG хранят состояние выходов кодера CDBG.<br>
+Мультиплексор MUX коммутирует выходы регистра кода RG поочерёдно в соответствии с номером приходящего от CTDC импульса строба последовательных данных и выдаёт на линию D&gt;.
+Устройство формирования запроса FRG производит запись кода нажатой клавиши в регистр кода RG.</p>
+
+<p>2.5. Микросхема работает в одном из двух режимов:<br>
+1) контроллера клавиатуры<br>
+2) дешифратора<br>
+В режиме контроллера клавиатуры микросхема обеспечивает:<br>
+1) формирование и фиксацию кода нажатой клавиши, выдачу запроса на обслуживание;<br>
+2) защиту от дребезга при нажатии клавиши;<br>
+3) считывание и кодирование информации с матрицы клавиатуры восемь строк на восемь столбцов, в которой нажатие клавиши приводит к замыканию выбранных столбца и строки;<br>
+4) передачу кода нажатой клавиши в последовательном виде<br>
+В режиме дешифратора микросхема обеспечивает:<br>
+1) дешифрацию 4&nbsp;&times;&nbsp;15;<br>
+2) выработку сигналов записи информации в старший или младший или одновременно в оба байта оперативного запоминающего устройства (ОЗУ) в зависимости от сигналов МПИ по <a href="gost_26765.51-86.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/gost_26765.51-86.pdf">ГОСТ 26765.51-86</a>.<br>
+Особенностью микросхемы является то, что в период ожидания все блоки микросхемы находятся в статическом состоянии. Микросхема самовозбуждается при нажатии любой из клавиши клавиатуры. В результате нескольких циклов автогенерации происходит определение и фиксация кода нажатой клавиши. Такая организация микросхемы позволяет исключить традиционное использование внешнего генератора для сканирования нажатой клавиши и обеспечить статический режим в период ожидания.</p>
+
+<p>2.6. Начальную установку микросхемы проводят подачей напряжения низкого уровня на вход установки в исходное состояние <span style="text-decoration: overline">SR</span>.</p>
+
+<h3>2.7. Работа микросхемы в режиме контроллера клавиатуры.</h3>
+<p>Передача данных осуществляется в последовательном коде.<br>
+В момент нажатия клавиши происходит замыкание одного из выходов на клавишную матрицу <span style="text-decoration: overline">KO1</span>-<span style="text-decoration: overline">KO8</span> с одним из входов с клавишной матрицы KI1/<span style="text-decoration: overline">DE</span>, KI2-KI8. При этом один из входов кодера CDBG устанавливается в состояние &quot;логического нуля&quot;. При наличии хотя бы одного уровня &quot;логического нуля&quot; на входе кодера CDBG, последний вырабатывает сигнал низкого уровня, разрешающий работу дешифратора кода DC, в результате чего все выходы на клавишную матрицу <span style="text-decoration: overline">KO1</span>-<span style="text-decoration: overline">KO8</span> устанавливаются в состояние &quot;логической единицы&quot;, за исключением выхода, соответствующего коду, поступающему со счётчика CT.<br>
+При несовпадении замкнутого выхода на клавишную матрицу <span style="text-decoration: overline">KO1</span>-<span style="text-decoration: overline">KO8</span> с выходом, соответствующим текущему состоянию счётчика CT, происходит инкремент и все выходы на клавишную матрицу <span style="text-decoration: overline">KO1</span>-<span style="text-decoration: overline">KO8</span> устанавливаются в состояние &quot;логического нуля&quot;. Сканирование продолжается до совпадения кодов, в этом случае состояние счётчика CT и кодера CDBG заносятся в регистр кода RG и вырабатывается сигнал запроса на обслуживание RQ.<br>
+Временная диаграмма работы микросхемы при сканировании приведена на рис.&nbsp;3.<br>
+Выдача данных по последовательному интерфейсу D&gt; происходит путём поочерёдного считывания кода RG, стробируемых сигналом с выхода CTDC.<br>
+Временная диаграмма работы микросхемы при передаче данных в последовательный канал приведена на рис.&nbsp;4.</p>
+
+<h3>2.8. Работа микросхемы в режиме дешифратора.</h3>
+<p>Дешифратор формирует сигналы выбора микросхемы запоминающего устройства (ЗУ) <span style="text-decoration: overline">CS1</span>-<span style="text-decoration: overline">CS16</span> по состоянию четырёх старших разрядов адреса линии A12-A15. Переключение микросхемы в режим дешифратора осуществляется подачей напряжения низкого уровня на вход управления дешифратором CODC и высокого уровня на вход KI/<span style="text-decoration: overline">DE</span>.<br>
+Блок управления записью в ЗУ COWR при наличии низкого уровня на входах END/<span style="text-decoration: overline">SYN</span> и <span style="text-decoration: overline">WR</span> вырабатывает сигналы записи <span style="text-decoration: overline">WRLSB</span>, <span style="text-decoration: overline">WRMSB</span> и анализирует состояние линии AD0 при наличии низкого уровня на входе <span style="text-decoration: overline">FLBY</span>.<br>
+Если линия AD0/<span style="text-decoration: overline">SR</span> находится в состоянии &quot;логического нуля&quot;, то микросхема вырабатывает сигнал низкого уровня на выход <span style="text-decoration: overline">WRLSB</span>. Состоянию &quot;логической единицы&quot; на линии AD0/<span style="text-decoration: overline">SR</span> соответствует сигнал низкого уровня на выходе <span style="text-decoration: overline">WRMSB</span>.<br>
+Если на входе линии <span style="text-decoration: overline">FLBY</span> высокий уровень, то запись происходит в оба байта сразу.<br>
+Временная диаграмма работы микросхемы в режиме дешифратора приведена на рис.&nbsp;5.</p>
+
+<p>2.9. Схемы электрические принципиальные входных, выходных и входных-выходных каскадов микросхемы приведены на рис.&nbsp;6-9.</p>
+
+<p>2.10. Схема применения микросхемы приведена на рис.&nbsp;10.</p>
+
+<p>2.11. Микросхема выполнена в корпусе 4222.8-2.<br>
+Масса микросхемы не более 1,0&nbsp;г.</p>
+
+<h2 align="center">3. УКАЗАНИЯ ПО ЭКСПЛУАТАЦИИ</h2>
+
+<p>3.1. При работе с микросхемами необходимо предусматривать защиту от статического электричества. Величина допустимого значения статического потенциала 100&nbsp;В.</p>
+
+<p>3.2. Подача и отключение входных сигналов на микросхему допускается только при включенных источниках питания.</p>
+
+<p>3.3. Входная ёмкость микросхемы, выходная ёмкость микросхемы, ёмкость входа-выхода микросхемы не более 5&nbsp;пф.</p>
+
+<h2><a name="t1">Таблица&nbsp;1</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center">Номер<br>вывода</th>
+<th align="center" colspan="2">Назначение</th>
+</tr>
+<tr>
+<td align="center">01</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO3</span></td>
+</tr>
+<tr>
+<td align="center">02</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO4</span></td>
+</tr>
+<tr>
+<td align="center">03</td>
+<td>Вход &quot;клавишная матрица&quot; / &quot;блокировка сигналов CS&quot;</td>
+<td align="center">KI1/<span style="text-decoration: overline">DE</span></td>
+</tr>
+<tr>
+<td align="center">04</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI2</td>
+</tr>
+<tr>
+<td align="center">05</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI3</td>
+</tr>
+<tr>
+<td align="center">06</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI4</td>
+</tr>
+<tr>
+<td align="center">07</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI5</td>
+</tr>
+<tr>
+<td align="center">08</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI6</td>
+</tr>
+<tr>
+<td align="center">09</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI7</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td>Вход с клавишной матрицы</td>
+<td align="center">KI8</td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO5</span></td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO6</span></td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO7</span></td>
+</tr>
+<tr>
+<td align="center">14</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO8</span></td>
+</tr>
+<tr>
+<td align="center">15</td>
+<td>Вход/выход линии задержки на 20&nbsp;нс</td>
+<td align="center">DL2</td>
+</tr>
+<tr>
+<td align="center">16</td>
+<td>Вход/выход линии задержки на 1&nbsp;мкс</td>
+<td align="center">DL1</td>
+</tr>
+<tr>
+<td align="center">17</td>
+<td>Вход/выход &quot;Строб выдачи данных&quot; / &quot;Запрос на обслуживание&quot;</td>
+<td align="center">C/RQ</td>
+</tr>
+<tr>
+<td align="center">18</td>
+<td>Общий вывод</td>
+<td align="center">OV</td>
+</tr>
+<tr>
+<td align="center">19</td>
+<td>Выход последовательных данных</td>
+<td align="center">D&gt;</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td>Вход управления дешифратором</td>
+<td align="center">CODC</td>
+</tr>
+<tr>
+<td align="center">21</td>
+<td>Вход адреса линии МПИ</td>
+<td align="center">A12</td>
+</tr>
+<tr>
+<td align="center">22</td>
+<td>Вход адреса линии МПИ</td>
+<td align="center">A13</td>
+</tr>
+<tr>
+<td align="center">23</td>
+<td>Вход адреса линии МПИ</td>
+<td align="center">A14</td>
+</tr>
+<tr>
+<td align="center">24</td>
+<td>Вход адреса линии МПИ</td>
+<td align="center">A15</td>
+</tr>
+<tr>
+<td align="center">25</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS15</span></td>
+</tr>
+<tr>
+<td align="center">26</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS14</span></td>
+</tr>
+<tr>
+<td align="center">27</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS13</span></td>
+</tr>
+<tr>
+<td align="center">28</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS12</span></td>
+</tr>
+<tr>
+<td align="center">29</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS11</span></td>
+</tr>
+<tr>
+<td align="center">30</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS10</span></td>
+</tr>
+<tr>
+<td align="center">31</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS9</span></td>
+</tr>
+<tr>
+<td align="center">32</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS8</span></td>
+</tr>
+<tr>
+<td align="center">33</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS7</span></td>
+</tr>
+<tr>
+<td align="center">34</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS6</span></td>
+</tr>
+<tr>
+<td align="center">35</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS5</span></td>
+</tr>
+<tr>
+<td align="center">36</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS4</span></td>
+</tr>
+<tr>
+<td align="center">37</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS3</span></td>
+</tr>
+<tr>
+<td align="center">38</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS2</span></td>
+</tr>
+<tr>
+<td align="center">39</td>
+<td>Выход сигнала выбора микросхемы ЗУ</td>
+<td align="center"><span style="text-decoration: overline">CS1</span></td>
+</tr>
+<tr>
+<td align="center">40</td>
+<td>Выход сигнала записи в старший байт</td>
+<td align="center"><span style="text-decoration: overline">WRMSB</span></td>
+</tr>
+<tr>
+<td align="center">41</td>
+<td>Выход сигнала записи в младший байт</td>
+<td align="center"><span style="text-decoration: overline">WRLSB</span></td>
+</tr>
+<tr>
+<td align="center">42</td>
+<td>Вывод питания от источника напряжения</td>
+<td align="center">U&nbsp;(+5V)</td>
+</tr>
+<tr>
+<td align="center">43</td>
+<td>Вход линии МПИ &quot;Признак записи байта&quot;</td>
+<td align="center"><span style="text-decoration: overline">FLBY</span></td>
+</tr>
+<tr>
+<td align="center">44</td>
+<td>Вход линии МПИ &quot;Запись данных&quot;</td>
+<td align="center"><span style="text-decoration: overline">WR</span></td>
+</tr>
+<tr>
+<td align="center">45</td>
+<td>Вход линии МПИ &quot;Адрес данных&quot; / &quot;Установка в исходное состояние&quot;</td>
+<td align="center">AD0/<span style="text-decoration: overline">SR</span></td>
+</tr>
+<tr>
+<td align="center">46</td>
+<td>Вход сигнала &quot;Конец обмена&quot; линии МПИ &quot;Обмен&quot;</td>
+<td align="center">END/<span style="text-decoration: overline">SYN</span></td>
+</tr>
+<tr>
+<td align="center">47</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO1</span></td>
+</tr>
+<tr>
+<td align="center">48</td>
+<td>Выход на клавишную матрицу</td>
+<td align="center"><span style="text-decoration: overline">KO2</span></td>
+</tr>
+</table>
+
+<h3>Примечание:</h3>
+<p>МПИ - межмодульный параллельный интерфейс по <a href="gost_26765.51-86.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/gost_26765.51-86.pdf">ГОСТ 26765.51-86</a><br>
+ЗУ - запоминающее устройство</p>
+
+</body>
+</html>
+

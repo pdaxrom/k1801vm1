@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Różnice pomiędzy kalkulatorami Elektronika MK-85 i Casio FX-700P</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk85">Indeks</a></td>
+<td align="right"><a href="mk85die.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85die.htm">English version</a><a href="mk85die.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85die.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Różnice pomiędzy kalkulatorami Elektronika MK-85 i Casio FX-700P</h1>
+
+<p>Mimo że kalkulator Elektronika MK-85 jest wzorowany na Casio FX-700P, istnieją między nimi znaczące różnice.
+Poniższe informacje mają na celu ułatwienie użytkownikom FX-700P opanowania obsługi MK-85 oraz przenoszenia programów pomiędzy oboma modelami.</p>
+
+<ul>
+<li>W <b>MK-85</b> nie ma następujących rozkazów z powodu braku drukarki i pamięci masowej:
+<pre>
+  SAVE, SAVE&nbsp;A, LOAD, LIST&nbsp;A, GET, PUT, VER
+</pre></li>
+<li>Odmienna składnia instrukcji <b>SET</b>
+<p>W kalkulatorze <b>FX-700P</b> instrukcja <b>SET</b> określa ilość wyświetlanych cyfr przed i po kropce dziesiętnej.
+Przykłady:</p>
+<pre>
+  SET E n  - liczba cyfr przed kropką dziesiętną w zakresie 0 do 8,
+             wartość 0 oznacza 8 cyfr
+  SET F n  - liczba cyfr po kropce dziesiętnej w zakresie 0 do 9
+  SET N    - przywraca domyślny format wyświetlania
+</pre>
+<p>Przykłady:</p>
+<pre>
+  SET E4
+  100/6    - wyświetla 1.667E01
+  SET F2
+  123/7    - wyświetla 17.57
+  SET N
+  1/3      - wyświetla 0.3333333333
+</pre>
+<p>W kalkulatorze <b>MK-85</b> instrukcja <b>SET</b> określa całkowitą ilość wyświetlanych cyfr (w zakresie 1 do 10).
+W przeciwieństwie do <b>FX-700P</b> gdzie argument musi być pojedynczą cyfrą, kalkulator <b>MK-85</b> dopuszcza również wyrażenia arytmetyczne.
+Opcja <b>SET&nbsp;N</b> działa podobnie jak w <b>FX-700P</b>, ale nie jest udokumentowana.
+Przykłady:</p>
+<pre>
+  SET 4
+  10/3     - wyświetla 3.333
+  100/3    - wyświetla 33.33
+  SET 10   - usuwa ograniczenia, zalecana metoda
+  SET N    - usuwa ograniczenia, nieudokumentowana metoda
+  10/3     - wyświetla 3.3333333333
+</pre>
+<li>Odmienna składnia <b>CSR</b>
+<p>Argument operatora <b>CSR</b> określa pozycję od której będą wyświetlane następujące po nim dane.
+W obu kalkulatorach może być zadany również jako wyrażenie arytmetyczne.
+Część ułamkowa jest ignorowana, część całkowita powinna zawierać się w zakresie 0 do&nbsp;11.</p>
+<p>W <b>FX-700P</b> operator <b>CSR</b> następuje po instrukcji <b>PRINT</b>.
+Przykład:</p>
+<pre>
+  10 PRINT CSR 2;&quot;ABC&quot;          wyświetla: [ | |A|B|C| | | | | | | ]
+</pre>
+<p>W <b>MK-85</b> operatora <b>CSR</b> używa się przed instrukcją <b>PRINT</b>.
+Opcje:</p>
+<pre>
+  CSR n    - poprzednia informacja na wyświetlaczu pozostaje niezmieniona
+  CSR ,    - prawa strona wyświetlacza począwszy od bieżącej pozycji jest
+             kasowana a następne dane są wyświetlane od tej pozycji
+  CSR n ,  - prawa strona wyświetlacza począwszy od podanej pozycji jest
+             kasowana a następne dane są wyświetlane od tej pozycji
+  CSR , n  - prawa strona wyświetlacza aż od podanej pozycji jest kasowana
+             a następne dane są wyświetlane od tej pozycji
+</pre>
+<p>Przykłady:</p>
+<pre>
+  10 PRINT &quot;012345678901&quot;;      wyświetla: [0|1|2|3|4|5|6|7|8|9|0|1]
+  20 CSR 2: PRINT &quot;ABC&quot;;        wyświetla: [0|1|A|B|C|5|6|7|8|9|0|1]
+  30 CSR ,: PRINT &quot;XYZ&quot;         wyświetla: [0|1|A|B|C|X|Y|Z| | | | ]
+  30 CSR 7,: PRINT &quot;XYZ&quot;        wyświetla: [0|1|A|B|C|5|6|X|Y|Z| | ]
+  30 CSR ,7: PRINT &quot;XYZ&quot;        wyświetla: [ | | | | | | |X|Y|Z|0|1]
+</pre></li>
+<li>Kalkulator <b>MK-85</b> nie jest obarczony następującymi błędami występującymi w <b>FX-700P</b>:<br>
+- Instrukcja <b>VAC</b> musi być jedyną instrukcją w wierszu, nie można w tym samym wierszu umieszczać innych instrukcji oddzielonych dwukropkiem.<br>
+- Funkcja <b>EXP</b> nie może występować w wierszu zawierającym kilka instrukcji rozdzielonych dwukropkiem ani w złożonych wyrażeniach arytmetycznych.
+Powinna być używana tylko z argumentem&nbsp;1 do obliczania stałej matematycznej&nbsp;<i>e</i> (podstawa logarytmów naturalnych).
+<p>Przykład użycia funkcji wykładniczej w <b>FX-700P</b>, wzięty z instrukcji:</p>
+<pre>
+  10 E=EXP 1
+  20 INPUT A,B
+  30 C=(A+E^1.5)/B
+  40 PRINT C
+  50 GOTO 20
+</pre>
+<p>Kalkulator <b>MK-85</b> nie wymaga obchodzenia tych ograniczeń, zatem program może być prostszy:</p>
+<pre>
+  20 INPUT A,B
+  30 C=(A+EXP 1.5)/B
+  40 PRINT C
+  50 GOTO 20
+</pre></li>
+<li>W kalkulatorze <b>MK-85</b> łańcuchy mogą być porównywane tylko za pomocą operatorów = oraz &ne;, podczas gdy <b>FX-700P</b> dopuszcza również &gt;, &ge;, &lt;, &le;.</li>
+<li>Kalkulator <b>MK-85</b> wymaga podania obu argumentów funkcji <b>MID</b>, podczas gdy w <b>FX-700P</b> drugi argument jest opcjonalny.</li>
+<li>W kalkulatorze <b>MK-85</b> funkcja <b>VAL</b> akceptuje zmienną łańcuchową lub literał łańcuchowy.
+Argument nie musi być ujęty w nawiasy, są one opcjonalne.<br>
+W <b>FX-700P</b> funkcja <b>VAL</b> akceptuje tylko zmienną łańcuchową w obowiązkowych nawiasach.</li>
+<li>W <b>MK-85</b> indeks tablicy może być ujemny, na przykład A(1) i D(-2) odnoszą się do tej samej komórki pamięci, natomiast w <b>FX-700P</b> może być tylko dodatni lub zero.</li>
+</ul>
+<hr>
+
+<h2>Nowe instrukcje występujące tylko w MK-85</h2>
+
+<p><b>CHR</b> n - zwraca znak o podanym kodzie</p>
+<pre>
+  CHR 65                 - wyświetla A
+</pre>
+
+<p><b>ASCI</b> "character" - zwraca kod podanego znaku</p>
+<pre>
+  ASCI "A"               - wyświetla 65
+</pre>
+
+<p><b>GETC</b> string, n - zwraca wybrany znak z łańcucha lub zmiennej łańcuchowej</p>
+<pre>
+  A$ = &quot;ABCDEF&quot;
+  GETC (A$,3)           - wyświetla znak &quot;C&quot;
+</pre>
+
+<p><b>LETC</b> "*******" - określa wzór znaku definiowanego przez użytkownika o kodzie 96, gwiazdki oznaczają kody bitmap z poniższej tablicy:</p>
+<pre>
+  00000 0    01000 8    10000 G    11000 O
+  00001 1    01001 9    10001 H    11001 P
+  00010 2    01010 A    10010 I    11010 Q
+  00011 3    01011 B    10011 J    11011 R
+  00100 4    01100 C    10100 K    11100 S
+  00101 5    01101 D    10101 L    11101 T
+  00110 6    01110 E    10110 M    11110 U
+  00111 7    01111 F    10111 N    11111 V
+
+  LETC "LALALAL"        - definiuje wzór szachownicy
+  CHR 96                - wyświetla zdefiniowany znak
+</pre>
+<p>Tej instrukcji nie można używać w podprogramach z powodu <a href="mk85bup.htm#letc" tppabs="http://www.pisi.com.pl/piotr433/mk85bup.htm#letc">błędu</a>.</p>
+
+<p><b>DRAW</b> x, y - wyświetla piksel na współrzędnych ekranu x (dozwolony zakres 0 do 59) oraz y (dozwolony zakres 0 do 6), piksel w lewym dolnym rogu ma współrzędne 0,0</p>
+<pre>
+  10 FOR X=0 TO 59 STEP 2
+  20 DRAW X, SIN(X*18)*3+3.5
+  30 NEXT X
+</pre>
+
+<p><b>DRAWC</b> x, y - podobna do <b>DRAW</b> z wyjątkiem tego, że piksel jest kasowany</p>
+
+<p><b>AUTO</b> skok_numerowania - automatycznie poprzedza wpisywane wiersze programu numerem wiersza</p>
+
+<p><b>TEST</b> - przeprowadza test pamięci ROM, RAM oraz wyświetlacza, wszystkie programy i dane zostaną przy tym skasowane</p>
+
+<p><b>WHO</b> - wyświetla informację o autorze oprogramowania sytemowego (nieudokumentowana)</p>
+<hr>
+
+<h2>Różnice ilościowe</h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Silver">&nbsp;</th>
+<th align="center" bgcolor="Yellow">FX-700P</th>
+<th align="center" bgcolor="Yellow">MK-85&nbsp;lub&nbsp;MK-85M</th></tr>
+<tr><td>Ilość kroków programu</td>
+<td align="center">1568</td>
+<td align="center">1221 lub 5317</td></tr>
+<tr><td>Ilość zmiennych</td>
+<td align="center">26 do 222</td>
+<td align="center">26 do 178 lub 690</td></tr>
+<tr><td>Zakres wyświetlanych liczb</td>
+<td align="center">&plusmn;1*10<sup>-99</sup> do &plusmn;9.999999999*10<sup>99</sup></td>
+<td align="center">&plusmn;1*10<sup>-4095</sup> do &plusmn;9.999999999*10<sup>4094</sup></td></tr>
+<tr><th colspan="3" align="center">Zakres argumentów funkcji</th></tr>
+<tr><td align="center">sin x, cos x, tan x</td>
+<td align="center">|x| &lt; 1440&deg; (8&pi; rad, 1600 gra)</td>
+<td align="center">ograniczony tylko reprezentacją liczb</td></tr>
+<tr><td align="center">arcsin x, arccos x</td>
+<td align="center">|x| &le; 1</td>
+<td align="center">|x| &le; 1</td></tr>
+<tr><td align="center">arctan x</td>
+<td align="center">nie określony</td>
+<td align="center">|x| &lt; 10<sup>4094</sup></td></tr>
+<tr><td align="center">log x, ln x</td>
+<td align="center">x &gt; 0</td>
+<td align="center">0 &lt; x &lt; 10<sup>4094</sup></td></tr>
+<tr><td align="center">e<sup>x</sup></td>
+<td align="center">x = 1 <font size="-1">(uwaga 1)</font></td>
+<td align="center">-9429 &le; x &le; +9429</td></tr>
+<tr><td align="center">pierwiastek kwadratowy</td>
+<td align="center">x &ge; 0</td>
+<td align="center">0 &le; x &le; 10<sup>4094</sup></td></tr>
+<tr><td align="center">x<sup>y</sup></td>
+<td align="center">x &gt; 0 <font size="-1">(uwaga 2)</font></td>
+<td align="center">|x| &lt; 10<sup>4094</sup><br>
+jeżeli x &lt; 0 to y musi być liczbą całkowitą</td></tr></table>
+<h3>Uwagi</h3>
+<ol>
+<li>Instrukcja obsługi modelu PC-4 (wersja OEM kalkulatora FX-700P) podaje następujący zakres argumentów:<br>
+-227 &le; x &le; +230<br>
+Jednakowoż w instrukcji FX-700P firma Casio niewyraźnie przyznaje się do obecności błędu w funkcji <b>EXP</b> i zaleca ograniczenie jej używania tylko do obliczania stałej matematycznej&nbsp;<i>e</i> (podstawa logarytmu naturalnego).</li>
+<li>W instrukcji obsługi modelu PC-4 zezwala się na ujemne wartości podstawy funkcji wykładniczej jeżeli wykładnik jest dodatnią liczbą całkowitą.</li>
+</ol>
+<hr>
+
+<h2>Tryby pracy klawiatury MK-85</h2>
+<p>Sekwencja klawiszy [MODE][.] przełącza klawiaturę pomiędzy trybem normalnym i rozszerzonym.</p>
+<h3>Tryb normalny</h3>
+<ul>
+<li>Bez żadnego klawisza modyfikującego wprowadzane są znaki namalowane na powierzchni klawiszy - wielkie litery alfabetu łacińskiego, cyfry i inne.</li>
+<li>Klawisz modyfikujący z czerwoną literą [<font color="#C80000">S</font>] wybiera znaki lub słowa kluczowe namalowane na czerwono nad klawiszami.</li>
+<li>Klawisz modyfikujący z niebieską literą [<font color="#0000C0">F</font>] wybiera słowa kluczowe namalowane na niebiesko pod klawiszami.</li>
+<li>Klawisz modyfikujący [MODE] wybiera wielkie litery cyrylicy przypisane do klawiszy [SPC], [=], [EE], [/], [*], [-], [+], oraz małe litery alfabetu łacińskiego przypisane do pozostałych klawiszy.</li>
+</ul>
+<h3>Tryb rozszerzony (wskazywany przez symbol EXT na wyświetlaczu)</h3>
+<ul>
+<li>Bez żadnego klawisza modyfikującego wprowadzane są małe litery cyrylicy namalowane po prawej stronie klawiszy.</li>
+<li>Klawisz modyfikujący z czerwoną literą [<font color="#C80000">S</font>] wybiera specjalne symbole widoczne na przezroczystej nakładce na klawiaturę.</li>
+<li>Klawisz modyfikujący z niebieską literą [<font color="#0000C0">F</font>] wybiera wielkie litery alfabetu łacińskiego.</li>
+<li>Klawisz modyfikujący [MODE] wybiera małe litery cyrylicy przypisane do klawiszy [SPC], [=], [EE], [/], [*], [-], [+], oraz wielkie litery cyrylicy przypisane do pozostałych klawiszy.</li>
+</ul>
+<hr>
+
+<h2>Inne unikalne właściwości MK-85</h2>
+<ul>
+<li>Włączenie kalkulatora z wciśniętym klawiszem [+] lub [M] przełącza go w tryb &quot;turbo&quot; - kilkakrotny wzrost prędkości kosztem zwiększonego poboru prądu.</li>
+<li>Jeżeli wykonywanie programu zostanie przerwane przez błąd, wciśnięcie klawisza [ANS] wyświetla do edycji wiersz programu z kursorem w miejscu wystąpienia błędu.</li>
+</ul>
+<hr>
+
+</body>
+</html>

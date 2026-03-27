@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Modyfikacja mikrokomputera Elektronika MK-85</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk85">Indeks</a></td> 
+<td align="right"><a href="stmk85_e.htm" tppabs="http://www.pisi.com.pl/piotr433/stmk85_e.htm">English version</a><a href="stmk85_e.htm" tppabs="http://www.pisi.com.pl/piotr433/stmk85_e.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td></tr>
+</table>
+<hr>
+
+<h1>Modyfikacja mikrokomputera Elektronika MK-85</h1>
+
+<p>Trafił mi się kalkulator MK-85 z uszkodzonym mikroprocesorem.
+Ponieważ oryginalny procesor jest raczej nie do zdobycia, postanowiłem go zastąpić (razem z pamięciami ROM i RAM) mikrokontrolerem STM32F103C8T6.
+Trzeba było zatem przekonwertować oryginalny interpreter języka BASIC (napisany w asemblerze PDP-11) najdokładniej jak możliwe na język&nbsp;C.
+Zostały przy tym usunięte niektóre <a href="mk85bup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bup.htm">znane błędy</a>.</p>
+
+<h2>Pliki projektu</h2>
+<p>Zawartość archiwum <a href="stmk85.zip" tppabs="http://www.pisi.com.pl/piotr433/stmk85.zip">stmk85.zip</a>:
+<ul>
+<li>program dla mikrokontrolera, do kompilacji potrzebne są narzędzia STM32CubeMX i STM32CubeIDE (64-bitowe)</li>
+<li>schemat i płytka drukowana utworzone za pomocą narzędzia <a href="javascript:if(confirm(%27https://kicad-pcb.org/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://kicad-pcb.org/%27" tppabs="https://kicad-pcb.org/">KiCad</a></li>
+</ul>
+<p>Ze względu na ograniczoną ilość miejsca w kalkulatorze zalecana jest grubość płytki ok. 1mm.</p>
+
+<h2>Uproszczony prototyp na module Blue Pill</h2>
+<p><img src="stmk85_1.jpg" tppabs="http://www.pisi.com.pl/piotr433/stmk85_1.jpg" alt="kalkulator MK-85 z podłączoną płytką Blue Pill" style="width:100%;height:auto;"></p>
+<p>Różnice w stosunku do schematu:</p>
+<ul>
+<li>sterownik wyświetlacza &#1050;&#1040;1013&#1042;&#1043;2 jest podłączony bezpośrednio do portu SPI mikrokontrolera z pominięciem translatora poziomów logicznych na układzie 74HCT4053</li>
+<li>mikrokontroler jest zasilany napięciem 3.3V ze znajdującego się na płytce regulatora RT9193 zamiast 2.5V z regulatora TPS62745DSSR</li>
+<li>nie ma możliwości wyłączenia kalkulatora - suwakowy przełącznik nie jest podłączony, szyna zasilania OV2 jest na stałe zwarta z OV1 (zamiast przez tranzystor 2N7002)</li>
+</ul>
+
+<h2>Wersja finalna</h2>
+<p><img src="stmk85_2.jpg" tppabs="http://www.pisi.com.pl/piotr433/stmk85_2.jpg" alt="płytka z mikrokontrolerem STM32 zamontowana w kalkulatorze MK-85" style="width:100%;height:auto;"></p>
+<p>Oprócz oryginalnych układów scalonych, z kalkulatora trzeba wylutować rezystor R10=2M&Omega; i kondensator C17=0.15&mu;F.
+Diodę VD1=&#1050;&#1044;521&#1040; w obwodzie zasilania trzeba zastąpić zworką.
+Sygnał ON_SW jest doprowadzony niebieskim kabelkiem do miejsca połączenia rezystora R10 i kondensatora C17.</p>
+
+<p>Elementy oryginalnego generatora taktującego (oporniki R1, R2 oraz kondensatory C2, C3) nie są już potrzebne.
+Można je pozostawić lub usunąć.
+Ja wlutowałem w ich miejsce rezonator kwarcowy 8MHz i dwa kondensatory 15pF.
+Kiedyś może zostaną podłączone do końcówek PD0 i PD1 mikrokontrolera, co umożliwi wykorzystanie portu USB.</p>
+<p>Sygnały z płytki są dostępne na polach kontaktowych pozostałych po wylutowanych pamięciach ROM i RAM.
+Widoczne na zdjęciu fioletowe przewody idą do programatora ST-LINK.</p>
+<p><img src="stmk85_3.png" tppabs="http://www.pisi.com.pl/piotr433/stmk85_3.png" alt="sygnały dostępne na polach kontaktowych" style="width:90%;height:auto;"></p>
+
+<h2>Rezultaty pomiarów (przy częstotliwości taktowania 2MHz)</h2>
+<h3>Pobór prądu</h3>
+<ul>
+<li>przy wyłączonym kalkulatorze: 7&mu;A (oryginalnie &lt;&nbsp;1&mu;A)</li>
+<li>oczekiwanie na wciśnięcie klawisza: 0.15mA (oryginalnie 0.35mA)</li>
+<li>wykonywanie programu: 1.25 do 1.60mA zależnie od intensywności wysyłania danych na wyświetlacz (oryginalnie 1.45mA przy normalnej częstotliwości taktowania i 5.15mA przy podwyższonej)</li>
+</ul>
+<h3>Szybkość</h3>
+<ul>
+<li>Czas wykonania poniższego przykładowego programu rysującego sinusoidę wynosi 1.7&nbsp;sekundy (oryginalnie 194 lub 34 sekundy):<br>
+<pre>10 FOR X=0 TO 59
+20 DRAW X, 3.5+3.5*SIN(20*X)
+30 NEXT X</pre></li>
+<li>Rozwiązanie <a href="javascript:if(confirm(%27https://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/articles.cgi?read=700  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/articles.cgi?read=700%27" tppabs="https://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/articles.cgi?read=700">problemu ośmiu hetmanów</a> zajmuje 28&nbsp;sekund.</li>
+</ul>
+</body>
+</html>

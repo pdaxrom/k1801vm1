@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - opis sprzętu</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk85">Indeks</a></td>
+<td align="right"><a href="mk85hwe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85hwe.htm">English version</a><a href="mk85hwe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85hwe.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td></tr>
+</table>
+<hr>
+
+<h1>Elektronika MK-85 - opis sprzętu</h1>
+<p>Starsza wersja mikrokomputera MK-85 była zbudowana z następujących układów scalonych:</p>
+<ul>
+<li>mikroprocesor &#1058;234-2</li>
+<li>sterownik wejścia/wyjścia &#1058;241-2-015</li>
+<li>sterownik wyświetlacza &#1058;241-2-014</li>
+<li>pamięć ROM o pojemności 8kB typu &#1058;242-2 (2 szt.)</li>
+<li>pamięć RAM o pojemności 2kB typu &#1058;244-2</li>
+</ul>
+<p>W nowszej, bardziej rozpowszechnionej wersji, mikroprocesor i sterownik wejścia/wyjścia znalazły się na jednym chipie a dwie pamięci ROM o pojemności 8kB zostały zastąpione jedną o pojemności 16kB.
+Lista układów scalonych:</p>
+<ul>
+<li>mikroprocesor + sterownik wejścia/wyjścia <a href="mk85cpu.png" tppabs="http://www.pisi.com.pl/piotr433/mk85cpu.png">&#1058;36&#1042;&#1052;1-2</a>
+= &#1050;&#1040;1013&#1042;&#1052;1, jest to rozszerzenie procesora <a href="1806vm2.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/1806vm2.pdf">1806&#1042;&#1052;2</a> o generator taktujący, zarządzanie energią, 13-bitowy port klawiatury, 15-bitowy port równoległy, specjalizowany port sterownika wyświetlacza.
+Dostęp do pamięci odbywa się przez nie multipleksowaną szynę adresową (do 15&nbsp;bitów) i danych (8&nbsp;bitów) + maksymalnie 8&nbsp;wyjść Chip Select.<br>
+Zeskanowana oryginalna dokumentacja:
+<a href="javascript:if(confirm(%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part1.zip  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part1.zip%27" tppabs="http://vladimir.poletaev.googlepages.com/KA1013BM1_part1.zip">część&nbsp;1</a>,
+<a href="javascript:if(confirm(%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part2.zip  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part2.zip%27" tppabs="http://vladimir.poletaev.googlepages.com/KA1013BM1_part2.zip">część&nbsp;2</a><br>
+Ten sam dokument w wygodniejszym formacie (również znacznie mniejszy rozmiar plików):
+<a href="ka1013vm1.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/ka1013vm1.pdf">opis</a>,
+<a href="ka1013vm1.png" tppabs="http://www.pisi.com.pl/piotr433/manuals/ka1013vm1.png">schemat blokowy</a></li>
+<li>sterownik wyświetlacza <a href="mk85lcdc.png" tppabs="http://www.pisi.com.pl/piotr433/mk85lcdc.png">&#1058;36&#1042;&#1043;1-2</a> = &#1050;&#1040;1013&#1042;&#1043;2, <a href="1013vg2.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/1013vg2.pdf">dokumentacja</a></li>
+<li>pamięć ROM o pojemności 32kB typu <a href="mk85rom.png" tppabs="http://www.pisi.com.pl/piotr433/mk85rom.png">&#1058;36&#1056;&#1045;1-2</a> = &#1050;&#1040;1013&#1056;&#1045;1, z czego wykorzystana jest tylko połowa</li>
+<li>pamięć RAM o pojemności 2kB typu <a href="mk85ram.png" tppabs="http://www.pisi.com.pl/piotr433/mk85ram.png">&#1058;36&#1056;&#1059;1-2</a> = &#1050;&#1040;1013&#1056;&#1059;1, wygląda na odpowiednik typowych pamięci CMOS RAM w rodzaju HM6116 lub TC5517</li>
+</ul>
+<p>Przedstawione tu informacje dotyczą tej nowszej wersji.</p>
+<p>Informacja, gdzie można znaleźć schemat jest podana na <a href="linksp.htm" tppabs="http://www.pisi.com.pl/piotr433/linksp.htm">stronie odnośników</a>.</p>
+<hr>
+
+<h2><a name="cpuio">Rejestry wejścia/wyjścia</a></h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Adres</th>
+<th align="center" bgcolor="Yellow">Rozmiar danej</th>
+<th align="center" bgcolor="Yellow">Funkcja</th></tr>
+<tr><td align="center">$80-$FF</td><td align="center">bajt</td>
+<td>Port szeregowy <a href="#lcdc">sterownika wyświetlacza ciekłokrystalicznego</a></td></tr>
+<tr><td align="center">$100</td><td align="center">słowo</td>
+<td>Rejestr danych równoległego portu wejsciowego <b>KB</b>, bity 8-2 używane jako wejścia kolumn matrycy <a href="#keyb">klawiatury</a></td></tr>
+<tr><td align="center">$102</td><td align="center">słowo</td>
+<td>Rejestr danych równoległego portu dwukierunkowego <b>PP</b>, bity 3-1 używane jako wyjścia wierszy matrycy <a href="#keyb">klawiatury</a></td></tr>
+<tr><td align="center">$104</td><td align="center">słowo</td>
+<td><a href="#cpucr">Rejestr sterujący/stanu</a></td></tr>
+</table>
+<hr>
+
+<h2><a name="lcdc">Sterownik wyświetlacza</a></h2>
+<p>Sterownik wyświetlacza stosowany w starszej wersji mikrokomputera Elektronika MK-85 nie ma własnej pamięci i korzysta z systemowej pamięci RAM.
+W procedurę wyświetlania jest również zaangażowany sterownik wejścia/wyjścia.
+Co 0.4&nbsp;ms przerywa on wykonywanie programu przez procesor i za pomocą DMA przesyła wybrany fragment pamięci RAM do sterownika wyświetlacza.</p>
+<p>Nowsza wersja sterownika wyświetlacza ma wbudowaną pamięć RAM i w związku z tym wymaga obsługi tylko wtedy, gdy nastąpiła zmiana wyświetlanej informacji.
+Nie ma już potrzeby bezpośredniego dostępu do pamięci (DMA).</p>
+<p>Łączność ze sterownikiem wyświetlacza odbywa się przez szeregową magistralę.
+Wysyłanie danych następuje przez zapis pod adres z przedziału $0080-$00FF.
+Ważne jest tylko 5&nbsp;mniej znaczących bitów danej.</p>
+<h3>Opis sygnałów magistrali sterownika wyświetlacza</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th width="5%" align="center" bgcolor="Yellow">Końcówka</th>
+<th align="center" bgcolor="Yellow">Nazwa</th>
+<th align="center" bgcolor="Yellow">Funkcja</th></tr>
+<tr><td align="center">2</td><td align="center">SYNC</td>
+<td>Poziom wysoki przy przesyłaniu adresu, niski przy przesyłaniu danych.</td></tr>
+<tr><td align="center">62</td><td align="center">SHIFT</td>
+<td>Impulsy zegarowe dla rejestru przesuwającego.</td></tr>
+<tr><td align="center">1</td><td align="center">AD</td>
+<td>Przesyłane dane, najpierw bit najmniej znaczący, jako zero logiczne przyjęty został wysoki poziom, jako jedynka logiczna niski poziom.</td></tr>
+</table>
+<p>Na poniższym wykresie przesyłana jest przykładowa dana&nbsp;$12 pod adres $00A8.</p>
+<p><img src="mk85dbus.png" tppabs="http://www.pisi.com.pl/piotr433/mk85dbus.png" width="694" height="160" alt="przebiegi na magistrali sterownika LCD"></p>
+<p>Na wykresie z analizatora logicznego widać dodatkowy krótki impuls SHIFT o szerokości ok. 0.1&nbsp;&micro;s.</p>
+<p><img src="mk85dbu1.png" tppabs="http://www.pisi.com.pl/piotr433/mk85dbu1.png" width="502" height="162" alt="przebiegi na magistrali sterownika LCD"></p>
+<p>Późniejsze wersje mikroprocesora &#1058;36&#1042;&#1052;1-2 wysyłają 8 bitów danych zamiast&nbsp;5.
+Zmiana nastąpiła gdzieś pomiędzy datami produkcji 9105 do 9109.</p>
+<p><img src="mk85dbu2.png" tppabs="http://www.pisi.com.pl/piotr433/mk85dbu2.png" width="702" height="162" alt="przebiegi na magistrali sterownika LCD"></p>
+<p>Z przeprowadzonych testów wynika, że sterownik wyświetlacza bierze pod uwagę tylko pierwszych 5 odebranych bitów danych.
+Wszystkie następne są ignorowane.</p>
+<h3>Funkcje rejestrów sterownika wyświetlacza</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th width="5%" align="center" bgcolor="Yellow">Adres</th>
+<th align="center" bgcolor="Yellow">Funkcja</th></tr>
+<tr><td align="center">$80-$DF</td><td>Ten przedział adresów wybiera wewnętrzną pamięć RAM sterownika LCD.</td></tr>
+<tr><td align="center">$E0</td><td>Ten rejestr określa pozycję i kształt sprzętowo generowanego kursora.<br>
+bity&nbsp;3-0 definiują pozycję kursora (wartość&nbsp;$0C gdy kursor nie ma być wyświetlany)<br>
+bit&nbsp;4 definiuje kształt kursora, wypełniony prostokąt gdy bit skasowany, podkreślenie gdy bit ustawiony</td></tr>
+<tr><td align="center">$E8</td><td>Funkcja niewiadoma, wartość inicjowana na&nbsp;0</td></tr>
+</table><hr>
+
+<h2><a name="lcd">Układ wyświetlacza</a></h2>
+<p><img src="mk85scr.png" tppabs="http://www.pisi.com.pl/piotr433/mk85scr.png" width="700" height="175" alt="układ wyświetlacza"></p>
+<p>Rysunek przedstawia przyporządkowanie pikseli wyświetlacza ciekłokrystalicznego do adresów w pamięci RAM.<br>
+Liczby w <font color="#C80000">kolorze czerwonym</font> reprezentują ofsety adresów licząc od początku pamięci wyświetlacza.<br>
+Liczby w <font color="#008000">kolorze zielonym</font> reprezentują numer bitu w bajcie.</p>
+<hr>
+
+<h2><a name="keyb">Klawiatura</a></h2>
+<p>Interfejs klawiatury składa się z dwóch 16-bitowych portów:</p>
+<ul>
+<li>port wejściowy pod adresem $100, bity 8-2 zwracają stan kolumn matrycy klawiatury</li>
+<li>port wyjściowy pod adresem $102, bity 3-1 wybierają wiersz matrycy klawiatury</li>
+</ul>
+<p>Matryca klawiatury jest skanowana przez wpisywanie logicznych jedynek do kolejnych bitów portu wybierającego wiersze, a następnie odczyt portu kolumn.
+Wciśnięcie klawisza powoduje połączenie wiersza z dwoma kolumnami za pomocą podwójnych styków.</p>
+<p>Interfejs klawiatury ma możliwość obudzenia procesora ze stanu bezczynności, gdy któryś bit portu kolumn zmieni stan z&nbsp;0 na&nbsp;1.</p>
+<hr>
+
+<h2><a name="interrupts">Przerwania, reset, załączanie zasilania</a></h2>
+<p>Jednoczesne pojawienie się niskiego poziomu na wejściach KB9 i KB10 (końcówki 10 i 11) lub na wejściach KB0 i KB10 (końcówki 1 i 11) wyzwala przerwanie HALT.<br>
+W mikrokomuterze Elektronika MK-85 wejścia KB9/KB10 odczytują stan klawisza <b>STOP</b> wybieranego wyjściem PP1.
+Wciśnięcie tego klawisza powoduje zgłoszenie przerwania HALT, którego wektor procedury obsługi znajduje się pod adresem $0078.</p>
+<p>Gdy bit priorytetu przerwania I (bit 7) w rejestrze PSW jest skasowany, to pojawienie się niskiego poziomu na porcie PP1 (końcówka 15), niezależnie od tego czy jest skonfigurowany jako wejście lub wyjście, powoduje zgłoszenie przerwania EVNT.
+Wektor procedury obsługi tego przerwania znajduje się pod adresem $0040 (nie używane w MK-85).</p>
+<p>Jednoczesne pojawienie się niskiego poziomu na wejściach KB0 i KB1 (końcówki 1 i 2) wprowadza procesor w stan wyłączonego zasilania.
+Stan ten jest zachowywany przy podaniu niskich poziomów na wejścia KB9 i KB10 (końcówki 10 i 11) lub wejścia KB0 i KB10 (końcówki 1 i 11).
+Zmiana poziomu chociaż jednego z tych wejść na wysoki powoduje reset mikroprocesora.
+Powtórna zmiana poziomu wejść KB0/KB10 lub KB9/KB10 na niski wyzwala przerwanie HALT.<br>
+System może być zatem wyłączany za pomocą pary styków wymuszających niski poziom na wejściach KB0/KB1, oraz włączany za pomocą pary styków wymuszających niski poziom na wejściach KB0/KB10 lub KB9/KB10.
+Wybór zależy od rozmiaru zastosowanej pamięci ROM (8kB lub 32kB).</p>
+<hr>
+
+<h2><a name="cpucr">Rejestr sterujący/stanu procesora pod adresem $104</a></h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Bit (dzies.)</th>
+<th align="center" bgcolor="Yellow">Funkcja</th></tr>
+<tr><td align="center">0</td>
+<td>Ten bit wybiera kierunek grupy końcówek PP3-PP1 portu dwukierunkowego (wejścia gdy bit ustawiony).
+W mikrokomputerze Elektronika MK-85 sterują one wierszami matrycy klawiatury, są zatem skonfigurowane jako wyjścia.</td></tr>
+<tr><td align="center">1</td>
+<td>Ten bit wybiera kierunek grupy końcówek PP7-PP4 portu dwukierunkowego (wejścia gdy bit ustawiony).</td></tr>
+<tr><td align="center">2</td>
+<td>Ten bit wybiera kierunek grupy końcówek PP11-PP8 portu dwukierunkowego (wejścia gdy bit ustawiony).</td></tr>
+<tr><td align="center">3</td>
+<td>Ten bit wybiera kierunek grupy końcówek PP15-PP12 portu dwukierunkowego (wejścia gdy bit ustawiony).
+W mikrokomputerze Elektronika MK-85 przełączają one stałą czasową obwodu RC generatora częstotliwości zegarowej.
+Ustawienie tego bitu przyspiesza pracę procesora.</td></tr>
+<tr><td align="center">4</td>
+<td>Ten bit jest ustawiany, gdy na końcówce PP1 zostanie wykryty niski poziom trwający conajmniej&nbsp;20ns.
+Może być skasowany tylko przez zapis do rejestru.</td></tr>
+<tr><td align="center">5-9</td>
+<td>Te bity wybierają konfigurację zewnętrznej pamięci (wielkość pamięci ROM i RAM).</td></tr>
+<tr><td align="center">10</td>
+<td>Skasowanie tego bitu zatrzymuje zegar procesora.</td></tr>
+<tr><td align="center">11</td>
+<td>Skasowanie tego bitu dzieli częstotliwość zegara procesora przez&nbsp;8.
+Program w pamięci ROM mikrokomputera Elektronika MK-85 obsługuje w tym trybie klawiaturę i generację opóźnień.</td></tr>
+<tr><td align="center">12</td>
+<td>Ustawienie tego bitu wyłącza zasilanie procesora.</td></tr>
+</table>
+<hr>
+
+<h2><a name="modes">Tryby pracy procesora</a></h2>
+<h3>Mikroprocesor może pracować w jednym z dwóch trybów:</h3>
+<ul>
+<li>USER mode, w którym normalnie wykonywane są programy użytkownika</li>
+<li>HALT mode (tryb konsoli operatora)</li>
+</ul>
+<h3>Przejście do trybu HALT jest możliwe w następujące sposoby:</h3>
+<ul>
+<li>wykonanie instrukcji HALT</li>
+<li>zewnętrzny sygnał przerwania (klawisz STOP w MK-85)</li>
+<li>podwójny błąd magistrali (gdy w trakcie wykonywania obsługi trap nastąpił błąd dostępu do pamięci przy próbie zapisu PSW i PC)</li>
+<li>wykonanie instrukcji FIS - po natrafieniu na taką instrukcję procesor odczytuje w specjalnym, bezadresowym trybie rejestr SEL.
+Gdy bit 7 tego rejestru jest ustawiony, następuje wykonanie trap przez wektor pod adresem $0008.
+W przeciwnym razie następuje przejście w tryb HALT poprzez wektor pod adresem utworzonym z bardziej znaczącego bajtu rejestru SEL oraz stałej wartości $08 w mniej znaczącym bajcie.</li>
+<li>powrót z przerwania pod adres większy lub równy $E000</li>
+</ul>
+<p>Przy przejściu w tryb HALT procesor zapisuje poprzednie wartości PC i PSW w specjalnych wewnętrznych rejestrach procesora CPC i CPS (dostępnych w trybie HALT za pomocą instrukcji RCPC/RCPS i WCPC/WCPS), a następnie następuje przekazanie sterowania do procedury obsługi przerwania HALT poprzez wektor pod adresem utworzonym z bardziej znaczącego bajtu rejestru SEL oraz stałej wartości $78 w mniej znaczącym bajcie.</p>
+<h3>Dodatkowy zestaw instrukcji dostępnych w trybie HALT</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Instrukcja</th>
+<th align="center" bgcolor="Yellow">Opcode</th>
+<th align="center" bgcolor="Yellow">Funkcja</th>
+<th align="center" bgcolor="Yellow">Opis</th></tr>
+<tr><td align="center">GO</td><td align="center">$000A</td>
+<td>PC&nbsp;&lt;-&nbsp;CPC<br>PSW&nbsp;&lt;-&nbsp;CPS</td>
+<td>powrót do USER mode</td></tr>
+<tr><td align="center">STEP</td><td align="center">$000E</td> 
+<td>PC&nbsp;&lt;-&nbsp;CPC<br>PSW&nbsp;&lt;-&nbsp;CPS</td>
+<td>tak jak GO, z wyjątkiem zablokowania przerwań HALT na czas wykonywania następnej instrukcji, używana do pracy krokowej programu</td></tr>
+<tr><td align="center">RSEL</td><td align="center">$0010</td>
+<td>R0&nbsp;&lt;-&nbsp;SEL</td><td>odczyt rejestru SEL, w przypadku MK-85 zwraca $0000</td></tr>
+<tr><td align="center">MFUS</td><td align="center">$0011</td>
+<td>R0&nbsp;&lt;-&nbsp;(R5)+</td><td>odczyt z obszaru adresowego USER</td></tr>
+<tr><td align="center">RCPC</td><td align="center">$0012</td>
+<td>R0&nbsp;&lt;-&nbsp;CPC</td><td>odczyt rejestru CPC</td></tr>
+<tr><td align="center">RCPS</td><td align="center">$0014</td>
+<td>R0&nbsp;&lt;-&nbsp;CPS</td><td>odczyt rejestru CPS</td></tr>
+<tr><td align="center">MTUS</td><td align="center">$0019</td>
+<td>-(R5)&nbsp;&lt;-&nbsp;R0</td><td>zapis do obszaru adresowego USER</td></tr>
+<tr><td align="center">WCPC</td><td align="center">$001A</td>
+<td>CPC&nbsp;&lt;-&nbsp;R0</td><td>zapis rejestru CPC</td></tr>
+<tr><td align="center">WCPS</td><td align="center">$001C</td>
+<td>CPS&nbsp;&lt;-&nbsp;R0</td><td>zapis rejestru CPS</td></tr>
+</table>
+
+<p>Przy zbieraniu powyższych informacji bardzo mi pomógł <a href="javascript:if(confirm(%27http://vladimir.poletaev.googlepages.com/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://vladimir.poletaev.googlepages.com/%27" tppabs="http://vladimir.poletaev.googlepages.com/">Vladimir Poletaev</a>, dziękuję!</p>
+
+</body>
+</html>

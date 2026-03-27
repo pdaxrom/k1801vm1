@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 memory cartridge</title>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<meta name="keywords"
+content="smp, memory card, memory module, ram card, ram module, storage module, ram cartridge, external memory, soviet, calculator, A1835WG2, KA1835WG2, A537RU10, KA537RU10">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk90">Index</a></td> 
+<td align="right"><a href="mk90cahp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90cahp.htm">wersja polska</a>
+<a href="mk90cahp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90cahp.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td></tr>
+</table>
+<hr>
+
+<h1>Elektronika MK-90 memory cartridge</h1>
+
+<p><strong>UPDATE: The information shown here was initially obtained through reverse engineering and therefore may differ from the contents of the original datasheet published on 2011/12/22.</strong></p>
+
+<h2>Description</h2>
+<p>The cartridge is designed as removable storage medium for the <b>Elektronika MK-90</b> pocket computer.
+The RAM inside the cartridge is accessed by the computer through a serial interface with a transfer rate of ca. 100kbits/s.
+Although there's only 10kB RAM on-board, the built-in controller chip is capable of addressing up to 64kB of RAM.</p>
+
+<h2>What's inside</h2>
+<p>The cartridge consists of 5 static RAM chips KA537RU10 with battery backup and a KA1835VG2 controller.</p>
+<ul>
+<li><a href="mpo10.png" tppabs="http://www.pisi.com.pl/piotr433/mpo10.png">Circuit diagram</a></li>
+<li>KA1835VG2 <a href="1835vg2.png" tppabs="http://www.pisi.com.pl/piotr433/1835vg2.png">pin assignment diagram</a>, <a href="guide11.djvu" tppabs="http://www.pisi.com.pl/piotr433/manuals/guide11.djvu">original datasheet</a>, <a href="1835vg2.htm" tppabs="http://www.pisi.com.pl/piotr433/manuals/1835vg2.htm">text and tables copied from the original datasheet</a></li>
+<li><a href="mk90cato.jpg" tppabs="http://www.pisi.com.pl/piotr433/mk90cato.jpg">Photograph of the PCB (top side)</a></li>
+<li><a href="mk90cabo.jpg" tppabs="http://www.pisi.com.pl/piotr433/mk90cabo.jpg">Photograph of the PCB (bottom side)</a></li>
+</ul>
+
+<h2>Connector pin functions</h2>
+<p><img src="mk90caco.png" tppabs="http://www.pisi.com.pl/piotr433/mk90caco.png" width="205" height="74"
+alt="RAM cartridge connector"></p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Pin</th>
+<th align="center" bgcolor="Yellow">Symbol</th>
+<th align="center" bgcolor="Yellow">Function</th></tr>
+<tr><td align="center">1</td><td>BATT.</td>
+<td>plus pole of an internal 3V lithium battery</td></tr>
+<tr><td align="center">2</td><td>VCC</td>
+<td>positive supply voltage +5V</td></tr>
+<tr><td align="center">3</td><td>CLOCK</td>
+<td>serial clock input</td></tr>
+<tr><td align="center">4</td><td>DATA</td>
+<td>serial data input/output</td></tr>
+<tr><td align="center">5</td><td>SELECT</td>
+<td>chip select input</td></tr>
+<tr><td align="center">6</td><td>GND</td>
+<td>ground</td></tr>
+</table>
+
+<h2>Bus communication protocol</h2>
+<p>Data written to the cartridge change at rising edges of the CLOCK pulses, and are shifted-in on falling edges of the CLOCK pulses beginning with the most significant bit.
+The first transmitted byte after the SELECT high to low transition is the command op-code.
+Following the op-code, any addresses and data are then transferred.<br>
+The waveform below shows an example of Write Address command (signals SELECT, CLOCK, DATA).</p>
+<p><img src="mk90cawr.png" tppabs="http://www.pisi.com.pl/piotr433/mk90cawr.png" width="754" height="107" alt="write command bus timing"></p>
+<p>Data read from the cartridge change at falling edges of the CLOCK pulses, and are sampled at rising edges of the CLOCK pulses.<br>
+The waveform below shows an example of Read Data command.</p>
+<p><img src="mk90care.png" tppabs="http://www.pisi.com.pl/piotr433/mk90care.png" width="754" height="107" alt="read command bus timing"></p>
+
+<h2>Commands</h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Op-code</th>
+<th align="center" bgcolor="Yellow">Command name</th>
+<th align="center" bgcolor="Yellow">Function</th></tr>
+<tr><td align="center">0x00</td><td>Read&nbsp;Status</td>
+<td>&nbsp;</td></tr>
+<tr><td align="center">0x10</td><td>Read&nbsp;Postdecrement</td>
+<td>Read any amount of data bytes from the cartridge starting from the location pointed to by the address register.
+The address register is decremented after each received byte.
+This command is not used by the MK-90.</td></tr>
+<tr><td align="center">0x20</td><td>Erase&nbsp;Postdecrement</td>
+<td>Write any amount of data bytes to the cartridge starting from the location pointed to by the address register.
+The address register has to be initialised to 0xFFFF (otherwise the command is ignored) and is decremented after each transmitted byte.
+This command is used by the MK-90 to clear the cartridge RAM with spaces when formatting with <b>INIT</b>.</td></tr>
+<tr><td align="center">0x80</td><td>Lock</td>
+<td>&nbsp;</td></tr>
+<tr><td align="center">0x90</td><td>Unlock</td>
+<td>&nbsp;</td></tr>
+<tr><td align="center">0xA0</td><td>Write&nbsp;Address</td>
+<td>Write the 16-bit address register, the most significant byte first.</td></tr>
+<tr><td align="center">0xB0</td><td>Read&nbsp;Address</td>
+<td>Read the 16-bit address register, the most significant byte first.
+This command is not used by the MK-90.</td></tr>
+<tr><td align="center">0xC0</td><td>Write&nbsp;Postincrement</td>
+<td>Write any amount of data bytes to the cartridge starting from the location pointed to by the address register.
+The address register is incremented after each transmitted byte.</td></tr>
+<tr><td align="center">0xD0</td><td>Read&nbsp;Postincrement</td>
+<td>Read any amount of data bytes from the cartridge starting from the location pointed to by the address register.
+The address register is incremented after each received byte.</td></tr>
+<tr><td align="center">0xE0</td><td>Write&nbsp;Postdecrement</td>
+<td>Write any amount of data bytes to the cartridge starting from the location pointed to by the address register.
+The address register is decremented after each transmitted byte.
+Not used by the MK-90.</td></tr>
+</table>
+<p>The lower four bits of the command op-code are &quot;don't care&quot; values.
+All other op-codes not listed in the above table are ignored along with any following data.</p>
+
+</body>
+</html>

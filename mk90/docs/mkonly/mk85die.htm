@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Differences between Elektronika MK-85 and Casio FX-700P</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk85">Index</a></td>
+<td align="right"><a href="mk85dip.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85dip.htm">wersja polska</a><a href="mk85dip.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85dip.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Differences between Elektronika MK-85 and Casio FX-700P</h1>
+
+<p>Even if the Elektronika MK-85 very closely resembles the Casio FX-700P, there exist significant differences between them.
+Following information is meant as an addendum to the Casio manual for non-Russian MK-85 users, and should help to port programs between both models.</p>
+
+<ul>
+<li>Operators missing in the <b>MK-85</b> due to lack of printer and external storage support:
+<pre>
+  SAVE, SAVE&nbsp;A, LOAD, LIST&nbsp;A, GET, PUT, VER
+</pre></li>
+<li>Different <b>SET</b> syntax
+<p>In the <b>FX-700P</b> the operator <b>SET</b> specifies the number of displayed digits before and after the decimal point.
+Examples:</p>
+<pre>
+  SET E n  - number of integer positions in range 0 to 8,
+             value of 0 specifies 8 positions
+  SET F n  - number of fractional positions in range 0 to 9
+  SET N    - restores the default display format
+</pre>
+<p>Examples:</p>
+<pre>
+  SET E4
+  100/6    - displays 1.667E01
+  SET F2
+  123/7    - displays 17.57
+  SET N
+  1/3      - displays 0.3333333333
+</pre>
+<p>In the <b>MK-85</b> the operator <b>SET</b> specifies the total number of displayed positions (in range 1 to 10).
+Unlike the <b>FX-700P</b> where the number must be specified as a single digit, the <b>MK-85</b> also accepts an expression.
+The option <b>SET&nbsp;N</b> works similarly as in the <b>FX-700P</b>, but is not documented.
+Examples:</p>
+<pre>
+  SET 4
+  10/3     - displays 3.333
+  100/3    - displays 33.33
+  SET 10   - releases the limits, recommended method
+  SET N    - releases the limits, undocumented method
+  10/3     - displays 3.3333333333
+</pre>
+<li>Different <b>CSR</b> syntax
+<p>The operand of the <b>CSR</b> operator specifies the location where the following data is to be displayed.
+It can be specified either as a constant or a numerical expression.
+The fraction part is ignored, the integer part should be in range 0 to&nbsp;11.</p>
+<p>In the <b>FX-700P</b> the <b>CSR</b> operator follows the <b>PRINT</b> statement.
+Example:</p>
+<pre>
+  10 PRINT CSR 2;&quot;ABC&quot;          displays: [ | |A|B|C| | | | | | | ]
+</pre>
+<p>In the <b>MK-85</b> the <b>CSR</b> operator is used before the <b>PRINT</b> statement.
+Options:</p>
+<pre>
+  CSR n    - previous information on the display remains unchanged
+  CSR ,    - the right part of the display starting from the current
+             position is cleared, then data is displayed at this position
+  CSR n ,  - the right part of the display starting from the specified
+             position is cleared, then data is displayed at this position
+  CSR , n  - the left part of the display up to the specified position
+             is cleared, then data is displayed at this position
+</pre>
+<p>Examples:</p>
+<pre>
+  10 PRINT &quot;012345678901&quot;;      displays: [0|1|2|3|4|5|6|7|8|9|0|1]
+  20 CSR 2: PRINT &quot;ABC&quot;;        displays: [0|1|A|B|C|5|6|7|8|9|0|1]
+  30 CSR ,: PRINT &quot;XYZ&quot;         displays: [0|1|A|B|C|X|Y|Z| | | | ]
+  30 CSR 7,: PRINT &quot;XYZ&quot;        displays: [0|1|A|B|C|5|6|X|Y|Z| | ]
+  30 CSR ,7: PRINT &quot;XYZ&quot;        displays: [ | | | | | | |X|Y|Z|0|1]
+</pre></li>
+<li>The <b>MK-85</b> doesn't suffer from following bugs present in the <b>FX-700P</b>:<br>
+- The <b>VAC</b> command isn't allowed to be used in a multistatement line.<br>
+- The <b>EXP</b> function can appear neither in a multistatement line nor in a complex expression.
+It should be used only with the argument&nbsp;1 to calculate the mathematical constant&nbsp;<i>e</i> (the base of the natural logarithm).
+<p>Example usage of an exponential function on the <b>FX-700P</b>, taken from the manual:</p>
+<pre>
+  10 E=EXP 1
+  20 INPUT A,B
+  30 C=(A+E^1.5)/B
+  40 PRINT C
+  50 GOTO 20
+</pre>
+<p>The <b>MK-85</b> doesn't require such workarounds, thus the program can be simpler:</p>
+<pre>
+  20 INPUT A,B
+  30 C=(A+EXP 1.5)/B
+  40 PRINT C
+  50 GOTO 20
+</pre></li>
+<li>In the <b>MK-85</b> the strings can be compared only with the operators = and &ne;, while the <b>FX-700P</b> also supports &gt;, &ge;, &lt;, &le;.</li>
+<li>In the <b>MK-85</b> the function <b>MID</b> requires both operands to be specified, while in the <b>FX-700P</b> the second operand may be omitted.</li>
+<li>In the <b>MK-85</b> the function <b>VAL</b> accepts a string variable or a string literal.
+The parentheses enclosing the argument are optional and can be omitted.<br>
+In the <b>FX-700P</b> the function <b>VAL</b> accepts only a string variable in parentheses.</li>
+<li>In the <b>MK-85</b> the index of an array can be negatve, for example A(1) and D(-2) refer to the same memory location, while in the <b>FX-700P</b> it can only take positive or zero values.</li>
+</ul>
+<hr>
+
+<h2>New operators specific to the MK-85</h2>
+
+<p><b>CHR</b> n - returns a character of specified code</p>
+<pre>
+  CHR 65                 - displays A
+</pre>
+
+<p><b>ASCI</b> "character" - returns the code of specified character</p>
+<pre>
+  ASCI "A"               - displays 65
+</pre>
+
+<p><b>GETC</b> string, n - extracts a single character from a string or a string variable</p>
+<pre>
+  A$ = &quot;ABCDEF&quot;
+  GETC (A$,3)           - displays the character &quot;C&quot;
+</pre>
+
+<p><b>LETC</b> "*******" - defines an user defined character of code 96, asterisks denote bitmap codes from the table below:</p>
+<pre>
+  00000 0    01000 8    10000 G    11000 O
+  00001 1    01001 9    10001 H    11001 P
+  00010 2    01010 A    10010 I    11010 Q
+  00011 3    01011 B    10011 J    11011 R
+  00100 4    01100 C    10100 K    11100 S
+  00101 5    01101 D    10101 L    11101 T
+  00110 6    01110 E    10110 M    11110 U
+  00111 7    01111 F    10111 N    11111 V
+
+  LETC "LALALAL"        - defines a checkboard pattern
+  CHR 96                - displays the defined character
+</pre>
+<p>This function cannot be used in a subroutine due to a <a href="mk85bue.htm#letc" tppabs="http://www.pisi.com.pl/piotr433/mk85bue.htm#letc">bug</a>.</p>
+
+<p><b>DRAW</b> x, y - plots a dot at screen coordinates x (in range 0 to 59) and y (in range 0 to 6), the pixel in the lower-left corner has coordinates 0,0</p>
+<pre>
+  10 FOR X=0 TO 59 STEP 2
+  20 DRAW X, SIN(X*18)*3+3.5
+  30 NEXT X
+</pre>
+
+<p><b>DRAWC</b> x, y - similar to <b>DRAW</b> except that it clears the pixel</p>
+
+<p><b>AUTO</b> line_number_interval - automatically supplies line numbers when typing in a new program</p>
+
+<p><b>TEST</b> - performs a test of the ROM, RAM and display, all programs and data will be erased</p>
+
+<p><b>WHO</b> - displays information about the author of the firmware (undocumented)</p>
+<hr>
+
+<h2>Quantitative differences</h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Silver">&nbsp;</th>
+<th align="center" bgcolor="Yellow">FX-700P</th>
+<th align="center" bgcolor="Yellow">MK-85&nbsp;or&nbsp;MK-85M</th></tr>
+<tr><td>Number of program steps</td>
+<td align="center">1568</td>
+<td align="center">1221 or 5317</td></tr>
+<tr><td>Number of variables</td>
+<td align="center">26 up to 222</td>
+<td align="center">26 up to 178 or 690</td></tr>
+<tr><td>Range of displayed numbers</td>
+<td align="center">&plusmn;1*10<sup>-99</sup> to &plusmn;9.999999999*10<sup>99</sup></td>
+<td align="center">&plusmn;1*10<sup>-4095</sup> to &plusmn;9.999999999*10<sup>4094</sup></td></tr>
+<tr><th colspan="3" align="center">Operand ranges for the functions</th></tr>
+<tr><td align="center">sin x, cos x, tan x</td>
+<td align="center">|x| &lt; 1440&deg; (8&pi; rad, 1600 gra)</td>
+<td align="center">limited only by the representation of numbers</td></tr>
+<tr><td align="center">arcsin x, arccos x</td>
+<td align="center">|x| &le; 1</td>
+<td align="center">|x| &le; 1</td></tr>
+<tr><td align="center">arctan x</td>
+<td align="center">not specified</td>
+<td align="center">|x| &lt; 10<sup>4094</sup></td></tr>
+<tr><td align="center">log x, ln x</td>
+<td align="center">x &gt; 0</td>
+<td align="center">0 &lt; x &lt; 10<sup>4094</sup></td></tr>
+<tr><td align="center">e<sup>x</sup></td>
+<td align="center">x = 1 <font size="-1">(note 1)</font></td>
+<td align="center">-9429 &le; x &le; +9429</td></tr>
+<tr><td align="center">square root</td>
+<td align="center">x &ge; 0</td>
+<td align="center">0 &le; x &le; 10<sup>4094</sup></td></tr>
+<tr><td align="center">x<sup>y</sup></td>
+<td align="center">x &gt; 0 <font size="-1">(note 2)</font></td>
+<td align="center">|x| &lt; 10<sup>4094</sup><br>
+if x &lt; 0 then y must be an integer</td></tr></table>
+<h3>Notes</h3>
+<ol>
+<li>The PC-4 manual (OEM version of the FX-700P) specifies the supported operand range as:<br>
+-227 &le; x &le; +230<br>
+However, in the FX-700P manual Casio acknowledges some bug in the function <b>EXP</b> and recommends using it only for calculating the mathematical constant&nbsp;<i>e</i> (the base of the natural logarithm).</li>
+<li>In the PC-4 manual negative values for the base of the power function are allowed when the exponent is a positive integer.</li>
+</ol>
+<hr>
+
+<h2>MK-85 keyboard modes</h2>
+<p>The key sequence [MODE][.] toggles between the normal and extended keyboard mode.</p>
+<h3>Normal mode</h3>
+<ul>
+<li>Pressing a key without any shift enters characters painted on the key caps - upper case Latin letters, digits and other.</li>
+<li>The red [<font color="#C80000">S</font>] shift key selects red characters or keywords above the keys.</li>
+<li>The blue [<font color="#0000C0">F</font>] shift key selects blue keywords below the keys.</li>
+<li>The [MODE] shift key selects upper case Cyrillic letters assigned to keys [SPC], [=], [EE], [/], [*], [-], [+], and lower case Latin letters assigned to remaining keys.</li>
+</ul>
+<h3>Extended mode (indicated by the EXT sign on the display)</h3>
+<ul>
+<li>Pressing a key without any shift enters lower case Cyrillic letters painted right from the keys.</li>
+<li>The red [<font color="#C80000">S</font>] shift key selects special symbols shown on the transparent keyboard overlay.</li>
+<li>The blue [<font color="#0000C0">F</font>] shift key selects upper case Latin letters.</li>
+<li>The [MODE] shift key selects lower case Cyrillic letters assigned to keys [SPC], [=], [EE], [/], [*], [-], [+], and upper case Cyrillic letters assigned to remaining keys.</li>
+</ul>
+<hr>
+
+<h2>Other MK-85 features</h2>
+<ul>
+<li>Turning the calculator on with the key [+] or [M] pressed makes it run several times faster at the cost of increased power consumption.</li>
+<li>If an error occurs during program execution, pressing [ANS] displays the program line for editing with the cursor at the position of the error.</li>
+</ul>
+<hr>
+
+</body>
+</html>

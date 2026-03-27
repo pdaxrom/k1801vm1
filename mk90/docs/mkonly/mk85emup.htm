@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Emulator kalkulatora Elektronika MK-85</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk85">Indeks</a></td>
+<td align="right"><a href="mk85emue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85emue.htm">English version</a><a href="mk85emue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85emue.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Emulator kalkulatora Elektronika MK-85</h1>
+
+<p>Program emuluje mikroprocesor kompatybilny z PDP-11 oraz używa oryginalnej zawartości pamięci ROM kalkulatora.
+Dzięki temu zachowuje się prawie dokładnie jak oryginał, łącznie ze wszystkimi <a href="mk85bup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bup.htm">błędami</a> oraz możliwością <a href="mk85mc1p.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1p.htm">programowania w języku maszynowym</a>.<br>
+Wymaga komputera PC z systemem Windows.</p>
+
+<h2><a name="files">Pliki do ściągnięcia</a></h2>
+<p>Wersja programu 49, ostatnie uaktualnienie 2019/09/07</p>
+<p><a href="mk85emsr.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emsr.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk85emsr.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emsr.zip">mk85emsr.zip</a> - teksty źródłowe programu w Delphi</p>
+<p><a href="mk85emex.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emex.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk85emex.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emex.zip">mk85emex.zip</a> - skompilowana wersja programu</p>
+<p>Sposób użycia: rozpakować pliki do pustego katalogu a następnie uruchomić program <b>mk85m.exe</b></p>
+<p><a href="mk85emsl.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emsl.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk85emsl.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emsl.zip">mk85emsl.zip</a> - wersja dla środowiska <a href="javascript:if(confirm(%27http://www.lazarus-ide.org/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.lazarus-ide.org/%27" tppabs="http://www.lazarus-ide.org/">Lazarus</a></p>
+
+<h2><a name="scr">Zrzuty ekranu</a></h2>
+<p><img src="mk85emu3.png" tppabs="http://www.pisi.com.pl/piotr433/mk85emu3.png" width="760" height="330" alt="Zrzut ekranu emulatora MK-85"></p>
+<p><img src="mk85emu2.png" tppabs="http://www.pisi.com.pl/piotr433/mk85emu2.png" width="625" height="373" alt="Okno debugera emulatora MK-85"></p>
+
+<h2><a name="usage">Wskazówki dotyczące użytkowania</a></h2>
+<ul>
+<li>Pliki <b>rom.bin</b> i <b>ram.bin</b> zawierają odpowiednio obrazy pamięci ROM i RAM.
+Są załadowywane po starcie programu.
+Po zakończeniu programu zapisywana jest na dysk zaktualizowana wersja pliku <b>ram.bin</b>.<br>
+Brakujący plik <b>ram.bin</b> jest odtwarzany, ale musi wtedy zostać zainicjowany klawiszem&nbsp;F8 lub komendą <b>TEST</b>.</li>
+<li>Emulator może być obsługiwany myszą lub z klawiatury.
+Specjalne funkcje klawiszy:<pre>
+  Insert:  MODE
+  Left:    &lt;-
+  Right:   -&gt;
+  Home:    [S]
+  End:     [F]
+  Esc:     AC
+  Delete:  DEL
+  Enter:   EXE
+  F2:      przełącza opis klawiszy na symbole graficzne
+  F3:      wstrzymuje wykonywanie programu i wywołuje okno debugera
+  F8:      inicjowanie zawartości pamięci RAM (odpowiada przyciskowi z tyłu)
+</pre></li>
+</ul>
+
+<h2><a name="debug">Wbudowany debuger</a></h2>
+<h3>Panel deasemblera</h3>
+<ul>
+<li>Przy wywołaniu okna debugera początkowy adres deasemblacji jest zgodny z zawartością rejestru Program Counter.
+Można go zmienić klikając na adres w pierwszym wierszu i wpisując nową wartość.
+Dozwolony zakres: $0000..$7FFE dla obszaru ROM, oraz $8000..$7FFE+RamSize dla obszaru RAM.
+Nowa wartość musi być potwierdzona klawiszem Enter.</li>
+<li>Po kliknięciu na zdeasemblowaną instrukcję można wpisać nową.
+Podobnie jak w przypadku adresu, konieczne jest wciśnięcie klawisza Enter żeby zmiany zostały przyjęte.
+Po zakończeniu programu zapamiętywane są tylko modyfikacje zawartości pamięci RAM, natomiast wszelkie zmiany dokonane w obszarze ROM są utracone.</li>
+</ul>
+
+<h3>Panel edytora binarnego</h3>
+<ul>
+<li>Edytor binarny pozwala na przeglądanie/edycję zawartości pamięci RAM.</li>
+<li>Można zmienić adres początkowy oraz zawartość pamięci klikając na nie i wpisując nową wartość.
+Zmiany muszą być potwierdzone klawiszem Enter.</li>
+</ul>
+
+<h3>Panel rejestrów</h3>
+<ul>
+<li>Kliknięcie na zawartość rejestru umożliwia wpisanie nowej wartości.
+Zmiany muszą być potwierdzone klawiszem Enter.</li>
+<li>Ostatni wiersz pokazuje stan bitów TNZVC rejestru PSW.</li>
+</ul>
+
+<h3>Sterowanie programem</h3>
+<ul>
+<li>Zamknięcie okna debugera wznawia wykonywanie programu bez żadnego śledzenia.</li>
+<li>Wciśnięcie klawisza [Run] w grupie <b>Single step</b> powoduje wykonanie jednego rozkazu maszynowego.</li>
+<li>W celu wykonania określonej ilości rozkazów maszynowych należy wpisać żądaną wartość (dziesiętnie) do pola <b>Number of steps</b> a następnie wcisnąć przyporządkowany klawisz [Run].
+Uwaga: przejście do debugera gdy symulowany mikrokomputer jest bezczynny zwykle trafia w adres PC=$014A, gdzie oscylator jest
+zatrzymany a procesor oczekuje na przerwanie z klawiatury.
+Próba pracy krokowej w tym stanie nie przynosi żadnych efektów.</li>
+<li>Panel <b>Breakpoint</b> umożliwia zdefiniowanie pułapki, tzn. wartości licznika programu, której osiągnięcie powoduje wstrzymanie wykonywania programu i ponowne wywołanie okna debugera.</li>
+</ul>
+
+<h2><a name="ini">Plik mk85m.ini</a></h2>
+<p>Niektóre parametry emulatora można dostosować do indywidualnych potrzeb modyfikując plik <b>mk85m.ini</b> za pomocą dowolnego edytora tekstowego.<br>
+Opis zawartości tego pliku:</p>
+<dl>
+<dt><code>CpuSpeed=250</code></dt>
+<dd>Ta wartość określa prędkość emulowanego procesora (ilość instrukcji wykonywanych co 10ms).</dd>
+<dt><code>RamSize=2048</code></dt>
+<dd>Ta wartość definiuje fizyczny rozmiar emulowanej pamięci RAM.
+Typowe wartości to 2048 dla modelu MK85 z 2kB pamięci RAM, oraz 6144 dla modelu MK85M z 6kB pamięci RAM.
+Po każdej zmianie konieczne jest skasowanie pliku <b>ram.bin</b> (w celu uniknięcia ostrzeżenia o próbie odczytu poza końcem pliku) oraz inicjalizacja pamięci za pomocą klawisza&nbsp;F8 lub komendy <b>TEST</b>.</dd>
+<dt><code>Radix=16</code></dt>
+<dd>Ta wartość określa podstawę systemu liczbowego używaną przez debuger (16&nbsp;dla szesnastkowego, 8&nbsp;dla oktalnego).</dd>
+</dl>
+
+<h2><a name="un">Odinstalowanie</a></h2>
+<p>W celu usunięcia emulatora wystarczy skasować podkatalog w którym został zainstalowany.
+Program nie dokonuje w systemie żadnych zmian poza swoim podkatalogiem.</p>
+
+<h2><a name="acknowl">Podziękowania</a></h2>
+<ul>
+<li>Program jest rozwinięciem <a href="javascript:if(confirm(%27http://mk85.narod.ru/Soft/MKEmuProj.zip  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://mk85.narod.ru/Soft/MKEmuProj.zip%27" tppabs="http://mk85.narod.ru/Soft/MKEmuProj.zip">niezakończonego projektu emulatora MK-85</a>, którego autorem jest Aleksei Akatov (Arigato Software).</li>
+<li>Znaczna część kodu jest oparta o projekt <a href="javascript:if(confirm(%27http://zx.pk.ru/showpost.php?p=105439&postcount=161  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://zx.pk.ru/showpost.php?p=105439&postcount=161%27" tppabs="http://zx.pk.ru/showpost.php?p=105439&postcount=161">emulatora PDP-11/03</a>, którego autorem jest Ovsienko V.A.</li>
+<li>Disassembler powstał na podstawie programu <a href="javascript:if(confirm(%27http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/rsx/decus/rsx80a/310111/pinst.c  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/rsx/decus/rsx80a/310111/pinst.c%27" tppabs="http://www.ibiblio.org/pub/academic/computer-science/history/pdp-11/rsx/decus/rsx80a/310111/pinst.c">pinst.c</a>, którego autorem jest Martin Minow.</li>
+<li>W programie użyty został darmowy komponent <b>ThreadedTimer</b>, którego autorem jest <a href="javascript:if(confirm(%27http://www.carlosb.com/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.carlosb.com/%27" tppabs="http://www.carlosb.com/">Carlos Barbosa</a>.</li>
+</ul>
+<hr>
+
+<h2><a name="util">Programy do konwersji formatów</a></h2>
+<p><a href="mk85emut.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emut.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a>
+<a href="mk85emut.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85emut.zip">mk85emut.zip</a> - rozmiar pliku: 31kB, teksty źródłowe i kody wykonywalne, DOS lub Windows (w okienku DOS)</p>
+<h3>BAS2RAM</h3>
+<p>Ten program dokonuje konwersji listy programów BASIC w formacie ASCII na obraz pamięci RAM mikrokomputera MK-85.</p>
+<p>Sposób użycia:
+<code>bas2ram.com program1.bas [program2.bas program3.bas ...]</code></p>
+<ul>
+<li>Program tworzy plik wyjściowy RAM.BIN, który może być wykorzystany przez emulator.
+Jeżeli kod wynikowy mieści się w 2kB, plik ma organizację pamięci MK-85 z 2kB RAM, w przeciwnym razie przyjęta jest organizacja pamięci MK-85M z 6kB RAM.</li>
+<li>Program oczekuje rosyjskich czcionek kodowanych w Windows-1251.</li>
+<li>Operatory relacji <b>&lt;&gt;</b>, <b>&lt;=</b> oraz <b>&gt;=</b> są zamieniane na odpowiednie kody MK-85: 0x5C, 0x5F, 0x7E.
+Akceptowane są również formy <b>&gt;&lt;</b>, <b>=&lt;</b> oraz <b>=&gt;</b>.</li>
+<li>Stałe numeryczne w postaci wykładniczej można zapisać jako <b>1.23E5</b> lub <b>5.67E-8</b>, przy czym łańcuchy <b>E</b> i <b>E-</b> są zastępowane odpowiednimi kodami MK-85: 0x7B i 0x7D.</li>
+<li>Łańcuch <b>PI</b> jest zastępowany kodem MK-85: 0x7C.</li>
+</ul>
+<h3>RAM2BAS</h3>
+<p>Ten program dokonuje przeciwnej operacji, tzn. wyświetla programy BASIC z pliku obrazu pamięci RAM o nazwie podanej w wierszu komend.</p>
+<p>Sposób użycia: <code>ram2bas.com infile.bin</code></p>
+<ul>
+<li>Rosyjskie czcionki są kodowane w Windows-1251.</li>
+<li>Wyjście można przekierować do pliku lub drukarki.</li>
+</ul>
+<h3>RAM2VARS</h3>
+<p>Funkcja zbliżona do poprzedniego, ale wyświetla listę zmiennych zamiast programów.</p>
+<hr>
+
+</body>
+</html>

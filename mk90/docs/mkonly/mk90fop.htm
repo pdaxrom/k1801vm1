@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 - formaty danych</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk90">Indeks</a></td>
+<td align="right"><a href="mk90foe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90foe.htm">English version</a>
+<a href="mk90foe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90foe.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-90 - formaty danych</h1>
+<p>Liczby na tej stronie są w kodzie szesnastkowym, chyba że zanaczono inaczej.</p>
+<hr>
+
+<h2>Kody i wzory znaków alfanumerycznych</h2>
+<p>Znaki są kodowane zgodnie ze standardem <a href="javascript:if(confirm(%27http://ru.wikipedia.org/wiki/%D0%9A%D0%9E%D0%98-7  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://ru.wikipedia.org/wiki/%D0%9A%D0%9E%D0%98-7%27" tppabs="http://ru.wikipedia.org/wiki/%D0%9A%D0%9E%D0%98-7">KOI-7</a>.</p>
+<h3>Znaki o kodach w zakresie 20-3F</h3>
+<p><img src="mk90chr1.png" tppabs="http://www.pisi.com.pl/piotr433/mk90chr1.png" width="640" height="147" alt="znaki alfanumeryczne"></p>
+<h3>Znaki alfabetu łacińskiego (zestaw N0), kody w zakresie 40-7F</h3>
+<p><img src="mk90chr2.png" tppabs="http://www.pisi.com.pl/piotr433/mk90chr2.png" width="640" height="255" alt="Znaki alfabetu łacińskiego"></p>
+<h3>Cyrylica (zestaw N1), kody w zakresie 40-7F</h3>
+<p><img src="mk90chr3.png" tppabs="http://www.pisi.com.pl/piotr433/mk90chr3.png" width="640" height="255" alt="Cyrylica"></p>
+<p><i>Rysunek został wygenerowany programowo na podstawie danych wyciągniętych z pamięci ROM.</i></p>
+<hr>
+
+<h2>Reprezentacja liczb zmiennoprzecinkowych</h2>
+<p>Liczba zmiennoprzecinkowa zajmuje trzy słowa 16-bitowe.
+Pierwsze dwa słowa zawierają 32-bitową mantysę w kodzie uzupełnienia do dwóch.
+Wykładnik w kodzie z przesunięciem 0x8000 zajmuje trzecie 16-bitowe słowo.
+Przykłady:</p>
+<table border="1" cellspacing="0" cellpadding="5">
+<tr><th align="center" bgcolor="Yellow">Liczba</th>
+<th align="center" bgcolor="Yellow">Kodowanie</th></tr>
+<tr><td align="center"><pre>0
+1
+10
+100
+255
+1000
+65535
+0.5
+0.125
+0.1
+0.001
+-1
+-10
+-0.1</pre></td>
+<td align="center">
+<pre>0000&nbsp;0000&nbsp;0000
+0000&nbsp;4000&nbsp;8001
+0000&nbsp;5000&nbsp;8004
+0000&nbsp;6400&nbsp;8007
+0000&nbsp;7F80&nbsp;8008
+0000&nbsp;7D00&nbsp;800A
+8000&nbsp;7FFF&nbsp;8010
+0000&nbsp;4000&nbsp;8000
+0000&nbsp;4000&nbsp;7FFE
+6666&nbsp;6666&nbsp;7FFD
+374B&nbsp;4189&nbsp;7FF7
+0000&nbsp;C000&nbsp;8001
+0000&nbsp;B000&nbsp;8004
+999A&nbsp;9999&nbsp;7FFD</pre></td></tr>
+</table>
+<hr>
+
+<h2>Obiekty obszaru roboczego</h2>
+
+<h3>Zmienna lub tablica</h3>
+<pre>
+    1 słowo     bity 15-13: identyfikator 000
+                bity 11-6:  pierwsza litera nazwy ('A'=00, 'B'=01, ...)
+                bity 5-0:   druga litera nazwy (cyfra w kodzie ASCII)
+    1 słowo     maksymalny pierwszy indeks w górnym bajcie,
+                maksymalny drugi indeks w dolnym bajcie,
+                zero gdy prosta zmienna
+    3 słowa     pierwsza wartość
+    3 słowa     druga wartość
+    ...
+    3 słowa     ostatnia wartość
+</pre>
+<p>Przykłady:</p>
+<pre>
+    0600 0000           prosta zmienna X
+    0000 6400 8007      wartość=100
+
+    0675 0000           prosta zmienna Y5
+    0000 6400 8008      wartość=200
+
+    0440 0300           jednowymiarowa tablica DIM Q(3)
+    3333 B333 7FFF      wartość Q(0)=-0.3
+    6666 6666 7FFC      wartość Q(1)=0.05
+    0000 7FFC 800D      wartość Q(2)=8191
+    0000 8004 800D      wartość Q(3)=-8191
+
+    06B1 0102           dwuwymiarowa tablica DIM Z1(1,2)
+    9400 7735 801E      wartość Z1(0,0)=1E9
+    2F9E 44B8 7FE3      wartość Z1(0,1)=1E-9
+    6C00 88CA 801E      wartość Z1(0,2)=-1E9
+    D062 BB47 7FE3      wartość Z1(1,0)=-1E-9
+    0000 4000 8010      wartość Z1(1,1)=32768
+    0000 C000 8010      wartość Z1(1,2)=-32768
+</pre>
+
+<h3>Struktura GOSUB</h3>
+<pre>
+    1 słowo     bity 15-13: identyfikator 001
+                bity 12-0:  numer wiersza zawierającego operator GOSUB
+</pre>
+
+<h3>Struktura FOR</h3>
+<pre>
+    1 słowo     bity 15-13: identyfikator 010 
+                bity 11-0:  nazwa zmiennej sterującej
+    1 słowo     addres za znakiem '=' w operatorze FOR
+    3 słowa     wartość TO
+    3 słowa     wartość STEP
+</pre>
+
+<h3>Funkcja zdefiniowana przez użytkownika</h3>
+<pre>
+    1 słowo     bity 15-13: identyfikator 011
+                bity 7-0:   trzecia litera nazwy funkcji (ASCII)
+    1 słowo     bity 11-0:  nazwa zmiennej będącej argumentem funkcji
+    1 słowo     addres wyrażenia arytmetycznego
+</pre>
+<hr>
+
+</body>
+</html>

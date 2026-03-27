@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 - machine code programming</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="assembler, assembly, mk90">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk90">Index</a></td>
+<td align="right"><a href="mk90mc1p.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90mc1p.htm">wersja polska</a><a href="mk90mc1p.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90mc1p.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-90 - machine code programming</h1>
+
+<p>The first 512 bytes of the memory module contain a boot loader program which can be loaded and executed by selecting the <b>SMP0</b> or <b>SMP1</b> entry from the start menu.
+The code is loaded into the RAM locations 0x0000-0x01FF, then executed from the address 0x0000.
+The stack pointer (SP) is initialised to 0x0200.
+The first instruction (at the location 0x0000) must be a NOP (opcode 0x00A0).</p>
+<p>The default loader written by the INIT command simply displays a message &quot;SMP without loader&quot; then locks the system, but the <a href="mk90prge.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prge.htm">programmer</a> makes possible to put there own machine code programs.
+Currently it's the only known way to run machine code on BASIC&nbsp;1.0 systems (BASIC&nbsp;2.0 provides this feature with the command PATCH).</p>
+
+<h2>Sample programs</h2>
+
+<p>Source code can be assembled with <a href="javascript:if(confirm(%27http://www.dbit.com/pub/ibmpc/pdpxasm/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.dbit.com/pub/ibmpc/pdpxasm/%27" tppabs="http://www.dbit.com/pub/ibmpc/pdpxasm/">PDPXASM</a> assembler.</p>
+
+<h3><a name="auto">Auto-starter for BASIC programs</a></h3>
+<p>This program can automatically execute any predefined sequence of BASIC instructions at the boot from the memory module.
+In particular, it allows to load and run a BASIC program with only two key strokes.<br>
+In the example code the command <code>LOAD&quot;SMx:AUTO&quot;,R</code> is executed.
+Any occurrence of the lower-case character <b>x</b> in the command string is replaced by the loader with 0 or&nbsp;1, depending on the slot from which it was booted.<br>
+<b>Note:</b> In the BASIC&nbsp;2.0 the option <b>R</b> of the instruction LOAD doesn't seem to work, at least on the <a href="mk90emue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90emue.htm">emulator</a>.</p>
+<p><a href="mk90au10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au10.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90au10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au10.zip">version for BASIC&nbsp;1.0</a><br>
+<a href="mk90au20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au20.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90au20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au20.zip">version for BASIC&nbsp;2.0</a></p>
+
+<h3><a name="disa">Start menu disable</a></h3>
+<p>This program <b>permanently</b> disables the start menu and immediately skips to the BASIC interpreter after power-on or reset.
+It modifies the reset vector stored in the battery backed RAM in the Real Time Clock chip so that it points to the BASIC interpreter &quot;cold start&quot; instead of the usual &quot;welcome screen&quot; routine.<br>
+There don't seem to be any other possible entry points in the ROM.<br>
+To reverse the changes the batteries have to be removed from the calculator for a while.<br>
+<b>Note:</b> Unlike a real MK-90, the <a href="mk90emue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90emue.htm">emulated one</a> intentionally doesn't preserve the battery backed RAM contents between sessions!</p>
+<p><a href="mk90ba10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba10.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90ba10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba10.zip">version for BASIC&nbsp;1.0</a><br>
+<a href="mk90ba20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba20.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90ba20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba20.zip">version for BASIC&nbsp;2.0</a></p>
+
+<h3><a name="graphics">Simple graphics routines</a></h3>
+<p>A set of routines performing basic graphics functions:</p>
+<ul>
+<li>plotting a dot</li>
+<li>line drawing using the <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Bresenham\%27s_line_algorithm  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Bresenham\%27s_line_algorithm%27" tppabs="http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm">Bresenham's algorithm</a></li>
+<li>circle drawing using the <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Midpoint_circle_algorithm  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Midpoint_circle_algorithm%27" tppabs="http://en.wikipedia.org/wiki/Midpoint_circle_algorithm">midpoint algorithm</a></li>
+</ul>
+<p><img src="mk90grph.png" tppabs="http://www.pisi.com.pl/piotr433/mk90grph.png" width="416" height="228" alt="screenshot of the graphics routines demo for the Elektronika MK-90"></p>
+<p><a href="mk90grph.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90grph.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90grph.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90grph.zip">Graphics routines</a></p>
+
+<h3><a name="life">Game of Life</a></h3>
+<p>This machine code program implements <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Conway\%27s_Game_of_Life  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Conway\%27s_Game_of_Life%27" tppabs="http://en.wikipedia.org/wiki/Conway%27s_Game_of_Life">Conway's Game of Life</a>.
+Because its size exceeds 512&nbsp;bytes, it has to be stored in the cartridge data area.
+In order to prevent the system from overwriting it, the value at the location 0x0412 (in the cartridge directory area) is changed from 0x10 to 0x0D.
+This step allocates three last sectors for machine code programs of size up to 1.5&nbsp;kBytes, leaving the remaining space of 6.5&nbsp;kBytes available for the system.
+The original boot loader is replaced by another one reading the code from the three last sectors to the RAM, then starting it.</p>
+<p>Since the program doesn't use any ROM calls, it should work with any BASIC version.<br>
+The program can be terminated only by the reset key or power switch.</p>
+<p><img src="mk90life.png" tppabs="http://www.pisi.com.pl/piotr433/mk90life.png" width="416" height="228" alt="screenshot of the Game of Life for the Elektronika MK-90"></p>
+<p><a href="mk90life.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90life.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90life.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90life.zip">Game of life</a></p>
+
+<h3><a name="inflate">INFLATE decompressor</a></h3>
+<p>The program loads to the MK-90 memory and executes machine code compressed with the <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Deflate  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Deflate%27" tppabs="http://en.wikipedia.org/wiki/Deflate">DEFLATE algorithm</a>.
+It allowed for example to store the <a href="games_pack.zip" tppabs="http://www.pisi.com.pl/piotr433/smp92-1/games_pack.zip">Boxing game</a> of 12066&nbsp;bytes size on the SMP-10 cartridge of 10kB capacity.<br>
+It's my adaptation of the <a href="javascript:if(confirm(%27https://github.com/pfusik/zlib6502  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://github.com/pfusik/zlib6502%27" tppabs="https://github.com/pfusik/zlib6502">INFLATE routine written by Piotr Fusik in the 6502 assembly language</a>.<br>
+The original 6502 version is distributed with a suitable compression utility.</p>
+<p><a href="mk90infl.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90infl.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90infl.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90infl.zip">INFLATE decompressor</a></p>
+
+</body>
+</html>

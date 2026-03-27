@@ -4,6 +4,9 @@ build/
 *.elf
 *.hex
 *.bin
+!mk90/media/*.bin
+!mk90/roms/*.bin
+mk90/docs/mkonly/mk90emsrc/
 *.map
 *.uf2
 *.o

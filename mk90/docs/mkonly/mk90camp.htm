@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Mapa pamięci modułu RAM od mikrokomputera Elektronika MK-90</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<meta name="keywords" content="MK90, MK 90, smp, karta pamięci, pamięć zewnętrzna, rosyjski, kalkulator">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk90">Indeks</a></td> 
+<td align="right"><a href="mk90came.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90came.htm">English version</a><a href="mk90came.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90came.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Mapa pamięci modułu RAM od mikrokomputera Elektronika MK-90 (BASIC&nbsp;V1.0)</h1>
+
+<p><strong>UZUPEŁNIENIE: Struktury danych okazują się być zgodne <a href="javascript:if(confirm(%27http://www.trailing-edge.com/~shoppa/rt11fs/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.trailing-edge.com/~shoppa/rt11fs/%27" tppabs="http://www.trailing-edge.com/~shoppa/rt11fs/">organizacją plików systemu operacyjnego RT-11</a>.</strong></p>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Zakres adresów</th>
+<th align="center" bgcolor="Yellow">Zawartość</th></tr>
+<tr><td align="center">0x0000-0x03FF</td>
+<td><a href="#loader">Obszar loadera</a></td></tr>
+<tr><td align="center">0x0400-0x07FF</td>
+<td><a href="#directory">Obszar katalogu</a></td></tr>
+<tr><td align="center">0x0800-0x27FF</td>
+<td><a href="#data">Obszar danych</a></td></tr>
+</table>
+<hr>
+
+<h2><a name="loader">Loader</a></h2>
+<p>Menu startowe mikrokomputera MK-90 udostępnia trzy opcje: <b>BASIC</b>, <b>SMP0</b>, <b>SMP1</b>.
+Wybór <b>SMP0</b> (lub <b>SMP1</b>) powoduje załadowanie i wykonanie kodu loadera z modułu pamięci&nbsp;0 (lub&nbsp;1).
+Moduły sformatowane komendą <b>INIT</b> zawierają kod wyświetlający komunikat w języku rosyjskim oznaczający &quot;moduł bez loadera&quot;:</p>
+<blockquote><pre>
+000000: nop
+000002: jsr     r7, @#153700
+000006: jsr     r7, @#120536
+000012: mov     @#034022, @#164000
+000020: mov     #104306, @#164002
+000026: jsr     r0, 000062
+000032: .asciz  &quot;\016\r\n smp BEZ ZAGRUZ^IKA&quot;
+000061: .even
+000062: movb    (r0)+, r2
+000064: beq     000064
+000066: jsr     r7, @#116542
+000072: br      000062
+</pre></blockquote>
+<hr>
+
+<h2><a name="directory">Organizacja katalogu</a></h2>
+<p>Wydruk szesnastkowy przykładowego katalogu (z pliku MK90.BIN znajdującego się w archiwum <a href="mk90prog.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90prog.zip">mk90prog.zip</a>):</p>
+<blockquote><pre>
+0400: 01 00 00 00 01 00 00 00 04 00
+040A: 00 02 EA 27 00 00 BB 0C 01 00 00 00 36 89  ;pierwszy wpis katalogu
+0418: 00 04 3A 14 A5 14 BB 0C 01 00 00 00 36 89  ;drugi wpis katalogu
+0426: 00 04 9B 54 B8 38 BB 0C 01 00 00 00 36 89  ;trzeci wpis katalogu
+0434: 00 02 20 20 20 20 20 20 0D 00 20 20 20 20  ;czwarty wpis katalogu
+0442: 00 08
+</pre></blockquote>
+<p>Każdy wpis katalogu zajmuje 7&nbsp;słów (czyli 14&nbsp;bajtów).
+Kolejność bajtów w słowie - najpierw bajt mniej znaczący, potem bardziej znaczący.</p>
+
+<h3>Struktura wpisu katalogu</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th width="5%" align="center" bgcolor="Yellow">Ofset</th>
+<th width="5%" align="center" bgcolor="Yellow">Rozmiar</th>
+<th align="center" bgcolor="Yellow">Zawartość</th></tr>
+<tr><td align="center">0</td><td align="center">1</td>
+<td><a href="#attr">Atrybut</a></td></tr>
+<tr><td align="center">1</td><td align="center">2</td>
+<td><a href="#fname">Nazwa pliku</a> (2&nbsp;grupy po 3&nbsp;znaki), uzupełniona na końcu spacjami</td></tr>
+<tr><td align="center">3</td><td align="center">1</td>
+<td><a href="#fname">Rozszerzenie nazwy pliku</a> (grupa 3&nbsp;znaków), domyślnie <b>BAS</b></td></tr>
+<tr><td align="center">4</td><td align="center">1</td>
+<td>Ilość bloków (sektorów) przypisanych do wpisu katalogu.
+Suma tych wartości dla wszystkich wpisów katalogu musi być równa&nbsp;16.<br>
+0x0001&nbsp;+&nbsp;0x0001&nbsp;+&nbsp;0x0001&nbsp;+&nbsp;0x000D&nbsp;=&nbsp;16</td></tr>
+<tr><td align="center">5</td><td align="center">1</td>
+<td>Nieznana</td></tr>
+<tr><td align="center">6</td><td align="center">1</td>
+<td>Nieznana</td></tr>
+</table>
+
+<h3><a name="attr">Atrybut wpisu katalogu</a></h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Kod</th>
+<th align="center" bgcolor="Yellow">Znaczenie</th></tr>
+<tr><td align="center">0x0200</td>
+<td>Wpis wolny lub skasowany</td></tr>
+<tr><td align="center">0x0400</td>
+<td>Wpis zajęty przez plik</td></tr>
+<tr><td align="center">0x0800</td>
+<td>Koniec katalogu</td></tr>
+</table>
+
+<h3><a name="fname">Kodowanie nazw plików</a></h3>
+<p>Nazwy plików i rozszerzenia są przechowywane w postaci skompresowanej - 3&nbsp;znaki w&nbsp;2&nbsp;bajtach.</p>
+<table border="0" cellspacing="2" cellpadding="0">
+<tr><td align="center" colspan="4">
+<table border="1" cellspacing="0" cellpadding="3" width="100%">
+<tr><th align="center" bgcolor="Yellow">Tablica kodów znaków (dziesiętnie)</th></tr>
+</table>
+</td></tr>
+<tr>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Kod</th>
+<th align="center" bgcolor="Yellow">Znak</th></tr>
+<tr><td align="center">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</td>
+<td align="center">spacja<br>A<br>B<br>C<br>D<br>E<br>F<br>G<br>H<br>I</td></tr>
+</table></td>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Kod</th>
+<th align="center" bgcolor="Yellow">Znak</th></tr>
+<tr><td align="center">10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19</td>
+<td align="center">J<br>K<br>L<br>M<br>N<br>O<br>P<br>Q<br>R<br>S</td></tr>
+</table></td>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Kod</th>
+<th align="center" bgcolor="Yellow">Znak</th></tr>
+<tr><td align="center">20<br>21<br>22<br>23<br>24<br>25<br>26<br>27<br>28<br>29</td>
+<td align="center">T<br>U<br>V<br>W<br>X<br>Y<br>Z<br>$<br>.<br>/</td></tr>
+</table></td>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Kod</th>
+<th align="center" bgcolor="Yellow">Znak</th></tr>
+<tr><td align="center">30<br>31<br>32<br>33<br>34<br>35<br>36<br>37<br>38<br>39</td>
+<td align="center">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</td></tr>
+</table></td>
+</tr></table>
+<p>Przykładowo, drugi wpis katalogu pod adresem 0x0418 zawiera nazwę pliku <b>CIRCLE.BAS</b>.
+Każda grupa trzech znaków jest kodowana w następujący sposób:</p>
+<ol>
+<li><b>CIR</b> - kody znaków: 3, 9, 18<br>
+40*40*3 + 40*9 + 18 = 5178 = 0x143A</li>
+<li><b>CLE</b> - kody znaków: 3, 12, 5<br>
+40*40*3 + 40*12 + 5 = 5285 = 0x14A5</li>
+<li><b>BAS</b> - kody znaków: 2, 1, 19<br>
+40*40*2 + 40*1 + 19 = 3259 = 0x0CBB</li>
+</ol>
+<p>Te trzy słowa są widoczne pod adresem 0x041A do 0x041F.<br>
+Można traktować ten sposób kodowania jako liczby przy podstawie&nbsp;40.
+Znany jest również pod nazwą Radix-50 (co zauważył Alec Voropay, dziękuję!).</p>
+<hr>
+
+<h2><a name="data">Obszar danych</a></h2>
+<p>Obszar danych składa się z 16&nbsp;bloków (sektorów), każdy po 512&nbsp;bajtów.
+Programy są zapisywane jako pliki tekstowe ASCII (brak tokenizacji słów kluczowych).
+Zaczynają się pustym wierszem (sekwencja CR,LF) i kończą się znacznikiem&nbsp;0x00.</p>
+<p>System nie obsługuje sfragmentowanych plików, tzn. do zapisania pliku musi dysponować dostatecznie dużą ciągłą grupą wolnych bloków pamięci.</p>
+
+</body>
+</html>

@@ -20,8 +20,10 @@ core/hardware.o: core/hardware.c core/hardware.h core/core.h
 dis11: core/core.o core/disas.o core/hardware.o dis11.o
 	$(CC) -o $@ $^
 
-mk90: $(OBJS) mk90.o main.o
-	$(CC) -o $@ $^ $(shell sdl2-config --libs) $(VIDEOLIB)
+.PHONY: mk90
+
+mk90:
+	$(MAKE) -C mk90
 
 tests/core_tests: tests/core_tests.o core/core.o core/disas.o core/hardware.o
 	$(CC) -g -o $@ $^
@@ -73,4 +75,5 @@ diag: $(DIAG)
 	./tests/cpu_diag --all
 
 clean:
-	rm -f $(OBJS) *.o dis11 emu11 mk90 $(TESTS) $(MMU_TESTS_OFF) $(MMU_TESTS_ON) $(DIAG) tests/*.o
+	rm -f $(OBJS) *.o dis11 emu11 $(TESTS) $(MMU_TESTS_OFF) $(MMU_TESTS_ON) $(DIAG) tests/*.o
+	$(MAKE) -C mk90 clean

@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 cartridge programmer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="MK90, MK 90, smp, memory card, memory module, ram card, ram module, storage module, ram cartridge, external memory, soviet, calculator, diy, reader, cheap, free">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk90">Index</a></td> 
+<td align="right"><a href="mk90prgp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prgp.htm">wersja polska</a><a href="mk90prgp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prgp.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td></tr>
+</table>
+<hr>
+
+<h1>Elektronika MK-90 cartridge reader/programmer</h1>
+
+<p>The MK-90 cartridge can be read and written with a simple circuit connected to the parallel port.
+The required +5V supply can be drawn from the keyboard, PS2 mouse, or USB port.</p>
+<p>For a similar device controlled through the USB port please refer to the <a href="javascript:if(confirm(%27http://mk90.blogspot.com/search/label/%D0%A1%D0%9C%D0%9F  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://mk90.blogspot.com/search/label/%D0%A1%D0%9C%D0%9F%27" tppabs="http://mk90.blogspot.com/search/label/%D0%A1%D0%9C%D0%9F">SMPReaderUSB</a> designed by Ilya Danilov.</p>
+
+<h2>Circuit diagram</h2>
+<p><img src="mk90prcd.png" tppabs="http://www.pisi.com.pl/piotr433/mk90prcd.png" width="388" height="403" alt="circuit diagram of the MK-90 cartridge programmer"></p>
+<p>Any general purpose small signal npn transistors can be used, for example 2N3904, BC547.</p>
+<p><img src="mk90prg1.jpg" tppabs="http://www.pisi.com.pl/piotr433/mk90prg1.jpg" width="505" height="325" alt="Photograph of the MK-90 cartridge programmer"></p>
+
+<h2>Software</h2>
+<p>The control software is as simple as the circuit.</p>
+<p><a href="mk90prog.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90prog.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk90prog.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90prog.zip">mk90prog.zip</a> - file size: 18kB, source and executable</p>
+<h3>Requirements</h3>
+<ul>
+<li>a PC running DOS or Windows 95/98/ME</li>
+<li>a parallel port at address 0x0378, configured as SPP</li>
+</ul>
+<p>The program won't run under Windows 2000, NT, XP, because these systems don't allow direct hardware access from user programs.</p>
+<h3>Usage</h3>
+<p>Insert the cartridge, apply +5V then run one of these programs:</p>
+<ul>
+<li>READ.COM - reads the cartridge RAM contents to the MK90.BIN binary file</li>
+<li>WRITE.COM - writes the MK90.BIN binary file to the cartridge RAM</li>
+</ul>
+<h3>Linux version</h3>
+<p><a href="javascript:if(confirm(%27http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz%27" tppabs="http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz">http://www.sensi.org/~tnt23/mk90/mk90_lpt.tgz</a></p>
+
+</body>
+</html>

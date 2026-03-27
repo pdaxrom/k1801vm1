@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - undocumented features, quirks, bugs</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk85">Index</a></td>
+<td align="right"><a href="mk85bup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bup.htm">wersja polska</a><a href="mk85bup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bup.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-85 - undocumented features, quirks, bugs</h1>
+
+<ul>
+<li><a name="who">Command</a> <b>WHO</b> displays information about the author of the firmware.</li>
+<li><a name="rem">The</a> exclamation point allows to enter comments into the program.
+All characters after the exclamation point up to the end of the line are ignored.
+Lines containing only a comment (i.e. starting with an exclamation point) aren't allowed.
+Example:
+<pre>
+  10 A=1!This is a comment
+</pre></li>
+<li><a name="set">Command</a> <b>SET</b> accepts the <b>SET&nbsp;N</b> syntax, which cancels the precision setting for printed numbers.</li>
+<li><a name="err">The</a> error message <b>ERR!</b> reports interpreter internal errors.
+Examples:
+<pre>
+  SIN (0/0)
+  TAN (1>0)
+</pre></li>
+<li><a name="defm">Command</a> <b>DEFM</b> followed by a comma and variable name assigns maximal number of additional variables to the specified variable.
+Valid only in programs, not in direct mode.
+Example:
+<pre>
+  10 DEFM ,A
+  20 PRINT &quot;Max=&quot;;A
+</pre></li>
+<li><a name="assign">Both</a> a sole variable name and a variable with assigned value are allowed for some commands accepting a variable as an argument.
+For example, the following bizarre program doesn't cause any errors:
+<pre>
+  10 PRINT A=123;B$=&quot;ABC&quot;
+  20 INPUT C=5,D$=&quot;DEF&quot;
+  30 SET K=2
+  40 DEFM ,M=3
+  50 I=3
+  60 FOR I TO 5
+  70 NEXT I=10
+  80 GOTO X=10
+</pre></li>
+<li><a name="comp">The</a> MK-85 doesn't mind comparing a string with a number.
+It choses between the string/number comparison routine testing only the expression on the right side of the relational operator.
+For example, it happily executes the following program:
+<pre>
+  10 A=1: $=&quot;ABC&quot;
+  20 IF A=$ THEN 30
+  30 IF $&gt;5 THEN 40
+  40 END
+</pre></li>
+<li><a name="concat">The</a> string concatenation routine doesn't anticipate a concatenated string as a second argument.
+For example, following expression is calculated wrong:<br>
+<pre>
+  &quot;12&quot;+(&quot;34&quot;+&quot;56&quot;)
+</pre></li>
+<li><a name="stack">The</a> same memory area is allocated for the buffer for concatenated strings and the stack for evaluated
+expressions.
+This stack can be overwritten by the string, leading to various, unrelated error messages, as in the following malicious example:<br>
+<pre>
+  $=&quot;123456789012345&quot;
+  LEN($+$)
+</pre></li>
+<li><a name="val">Function <b>VAL</b> of a string longer than 37 characters can overwrite the data stack or the expression evaluator stack.
+For example, the following expression causes an ERR2 error message:<br>
+<pre>
+  2*VAL&quot;123456789012345678901234567890123456789012345&quot;
+</pre></li>
+<li><a name="input1"><b>INPUT</b></a> doesn't check if a value written to a numerical variable is actually a number.
+Typing a string after the <b>INPUT</b> prompt trashes the variable contents.
+Try to enter some string (in quotes) or a string variable (for example&nbsp;<b>$</b>) in response to <b>INPUT</b> in following program:<br>
+<pre>
+  10 VAC
+  20 INPUT A
+  30 PRINT A$
+</pre></li>
+<li><a name="input2"><b>INPUT</b></a> fails to write an empty string to a string variable.
+The problem is caused by missing test of the length of the input string before copying it to the variable.
+Example:<br>
+<pre>
+  10 INPUT $
+</pre>
+When the <b>INPUT</b> prompt appears, try to type [SPC], arrow-left, [DEL] and [EXE].
+The system will crash and the RAM contents will be lost.<br>
+This bug was submitted by Sergei Gaidukov on 22.11.2005 09:45 to the <a href="javascript:if(confirm(%27http://forum.ixbt.com/topic.cgi?id=15:53034:88  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://forum.ixbt.com/topic.cgi?id=15:53034:88#88%27" tppabs="http://forum.ixbt.com/topic.cgi?id=15:53034:88#88">iXBT Hardware BBS forum</a>.</li>
+<li><a name="input3">Due</a> to incomplete type checking, the command <b>INPUT</b> accepts a number for a string variable as an argument.
+Typed input string is stored at the address formed of first four digits of the mantissa.<br>
+In the example below the variable&nbsp;<b>$</b> will be overwritten by the string typed in response to the <b>INPUT</b> prompt:
+<pre>
+  10 $=&quot;0123456789&quot;
+  20 INPUT 8150
+  30 PRINT $
+</pre></li>
+<li><a name="input4">Yet</a> another <b>INPUT</b> bug submitted by Denis Gorbunov to the <a href="javascript:if(confirm(%27http://mk85.narod.ru/gb  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://mk85.narod.ru/gb%27" tppabs="http://mk85.narod.ru/gb">guestbook of the mk85.narod.ru web site</a> in an entry dated 09.01.2003 00:20.<br>
+Type this short line to the program area <b>P0</b>, then <b>RUN</b> it:
+<pre>
+  1 INPUT A$:HH
+</pre>
+When the <b>INPUT</b> prompt appears, press [AC] then [EXE] - the system will hang.
+Other characters than HH may cause different failures, for example system restart or memory contents corruption.
+The author came to a correct conclusion that the processor starts to execute the BASIC program as machine code!</li>
+<li><a name="letc">Instruction</a> <b>LETC</b> cannot be used within a subroutine, because it overwrites the first byte of the <b>GOSUB</b> stack.
+For example, this program causes an error when trying to <b>RETURN</b>:
+<pre>
+  10 GOSUB 30
+  20 END
+  30 LETC &quot;2222222&quot;
+  40 RETURN
+</pre>
+This bug was discovered by Aleksei Akatov.</li>
+<li><a name="underflow">Arithmetic</a> operations can produce small numbers out of allowed limits, in range
+1E-4097..9.999999999E-4097 or -1E-4097..-9.999999999E-4097 (biased exponent=0), without reporting an underflow.
+Examples:<br>
+<pre>
+  1E-4096 / 2
+  -1E-4096 * 0.1
+  1E-4095 - 0.99E-4095
+</pre>
+</li>
+<li><a name="tan">Finding</a> the tangent (or any other function derived from the tangent, i.e. SIN, COS) of a number with an exponent of 4094 takes quite some time.
+For such large arguments the result is obviously meaningless.
+Examples:<br>
+<pre>
+  TAN 1E4094
+  SIN -9E4094
+</pre></li>
+<li><a name="e-127">Trigonometric</a> functions with angles lower than &plusmn;1E-127 radians return invalid results or restart the system.
+Example:<br>
+<pre>
+  TAN 1E-130
+</pre></li>
+<li><a name="cheat">Near-integer</a> numbers are excessively rounded, <a href="javascript:if(confirm(%27http://web.archive.org/web/20170628024356fw_/spiderpixel.co.uk/caspro/subhtml/casf1.html  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://web.archive.org/web/20170628024356fw_/spiderpixel.co.uk/caspro/subhtml/casf1.html%27" tppabs="http://web.archive.org/web/20170628024356fw_/spiderpixel.co.uk/caspro/subhtml/casf1.html">similarly as in the Casio calculators</a>, i.e. the results of all numeric calculations are corrected following way:<br>
+- if the last four mantissa digits are in range 0001..0009 then they are replaced with 0000<br>
+- if the last four mantissa digits are in range 9950..9999 then the number is rounded up until its last four digits are 0000<br>
+Examples:
+<p>The calculator displays only 10&nbsp;digits, but the numbers are internally stored with a precision of 12&nbsp;digits.
+How to extract those extra two digits:<br>
+- store in the variable A the result of the expression 7+34E-11<br>
+- the contents of the variable A is displayed as 7, thus the last two mantissa digits are not shown<br>
+- calculating the expression A-7 reveals the hidden digits showing 3.4E-10 as the answer</p>
+<p>Perform the same test for the value of an expression 7+4E-11 stored in the variable A.
+This time calculating A-7 returns 0 instead of expected 4E-11.</p>
+<p>Two more tests:<br>
+- for A=7+9934E-11 the expression A-7 evaluates as expected to 9.934E-8<br>
+- however, for A=7+9956E-11 the expression A-7 is surprisingly evaluated to 1E-7</p></li>
+</ul>
+
+</body>
+</html>

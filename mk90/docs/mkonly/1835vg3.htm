@@ -1,0 +1,471 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1251">
+<title>КА1835ВГ3</title>
+</head>
+<body>
+
+<h1 align="center">МИКРОСХЕМА КА1835ВГ3<br>ТЕХНИЧЕСКОЕ ОПИСАНИЕ</h1>
+
+<h2 align="center">1. НАЗНАЧЕНИЕ</h2>
+
+<p>1.1. Микросхема КА1835ВГ3 - контроллер запоминающего устройства, предназначена для использования в персональной микро-ЭВМ, для организации блоков памяти на основе оперативного запоминающего устройства (ОЗУ) и постоянного запоминающего устройства (ПЗУ), подключенных к системной шине межмодульного параллельного интерфейса (МПИ) по <a href="gost_26765.51-86.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/gost_26765.51-86.pdf">ГОСТ 26765.51-86</a>.</p>
+<p>1.2. Микросхема характеризуется следующими параметрами:</p>
+<table>
+<tr><td>Количество каналов обмена:</td><td align="center">2</td></tr>
+<tr><td>Разрядность адреса</td><td align="center">15</td></tr>
+<tr><td>Разрядность данных</td><td align="center">16</td></tr>
+<tr><td>Объём адресуемой памяти, Кбайт</td><td align="center">32</td></tr>
+<tr><td>Количество режимов работы</td><td align="center">2</td></tr>
+<tr><td>Потребляемая мощность, мВт, не более</td><td align="center">0,11</td></tr>
+</table>
+
+<h2 align="center">2. УСТРОЙСТВО И РАБОТА</h2>
+
+<p>2.1. Назначение выводов микросхемы приведено в <a href="#t1">табл.&nbsp;1</a>.<br>
+Структурная схема микросхемы приведена на рис.&nbsp;1.<br>
+Условные графическое обозначение микросхемы приведено на рис.&nbsp;2.</p>
+
+<p>2.2. Микросхема состоит из следующих блоков:<br>
+1) селектора адреса (SLA)<br>
+2) регистра адреса (RGA1)<br>
+3) регистра начального адреса (RGA2)<br>
+4) регистра режима со схемой управления регенерацией (RGMO)<br>
+5) логики работы с МПИ (L2)<br>
+6) логики прямого доступа (L1)<br>
+7) мультиплексора адреса (MUX)<br>
+8) счётчика управления обменом (CTCO)<br>
+9) счётчика текущего адреса (CTA)<br>
+Селектор адреса (SLA) предназначен для декодирования адресов регистров микросхемы и разрешения программного обмена с запоминающим устройством (ЗУ).<br>
+Регистр адреса (RGA1) предназначен для фиксации адреса при программном обмене с ЗУ.<br>
+Регистр начального адреса (RGA2) предназначен для хранения начального адреса области ЗУ, регенерируемой на ЖКИ.<br>
+Регистр режима со схемой управления регенерации (RGMO) предназначен для программирования режима регенерации ЖКИ и выработки сигналов управления регенерацией.<br>
+Логика работы с МПИ (L1) предназначена для выработки сигналов &quot;Запрос на захват магистрали&quot; <span style="text-decoration: overline">RQTR</span> и &quot;подтверждеие захвата&quot; <span style="text-decoration: overline">ACKTR</span>, регламентирующих прямой доступ к ЗУ.<br>
+Мультиплексор адреса (MUX) предназначен для подачи на адресную шину A1-A15 адреса из регистра адреса или из счётчика текущего адреса.<br>
+Счётчик управления обменом CTCO предназначен для формирования сигналов &quot;строб&nbsp;1&quot;, &quot;строб&nbsp;2&quot;, &quot;строб&nbsp;3&quot;, определяющих временные соотношения процесса регенерации.<br>
+Счётчик текущего адреса (CTA) предназначен для отсчёта текущего адреса регенерируемой области ЗУ.</p>
+
+<p>2.3. Микросхема работает в следующих режимах:<br>
+1) непротокольного прямого доступа (без передачи адреса по шине AD);<br>
+2) протокольного обмена с ЗУ.<br>
+Микросхема управляет матричными жидкокристаллическими индикаторами (ЖКИ) со следующими параметрами:<br>
+1) мультиплексное отношение от 8 до 256 (при управлении телевизором - 312);<br>
+2) частота регенерации от 5 до 300&nbsp;Гц;<br>
+3) длина строки от 32 до 1240 точек;<br>
+4) количество байтов на одну микросхему управления индикатором - 4 или 5.<br>
+Все параметры матричного ЖКИ задаются программно.<br>
+Все функции микросхема выполняет под управлением внешних сигналов интерфейса МПИ.<br>
+В режиме непротокольного прямого доступа микросхема позволяет вводить информацию блоками заданной величины, начиная с программно задаваемого адреса в диапазоне 0-177777<sub>8</sub>.<br>
+В режиме протокольного обмена микросхема обеспечивает запись данных в ОЗУ шестнадцатеричными словами или байтами, чтением данных из ОЗУ и ПЗУ только шестнадцатеричными словами.</p>
+
+<h3>2.4. Работа микросхемы в режиме непротокольного прямого доступа.</h3>
+<p>Непротокольный прямой доступ (адрес передается по шине A1-A15, данные - через МПИ) используется для осуществления регенерации изображения ЖКИ.<br>
+Схема регенерации микросхемы синхронная, работает под управлением синхрогенератора.<br>
+Задающий синхрогенератор вырабатывает тактовую частоту по входу FSYN. Эта частота поступает на счётчик управления обменом, где образуются сигналы управления микросхемой &quot;строб&nbsp;1&quot;, &quot;строб&nbsp;2&quot;, &quot;строб&nbsp;3&quot;.<br>
+Временная диаграмма работы микросхемы при передаче в схему управления ЖКИ приведена на рис.&nbsp;3.<br>
+Формат регистра режима приведен в <a href="#t2">табл.&nbsp;2</a>.<br>
+Регенерация ЖКИ производится построчно. Микросхема отслеживает время &quot;свечения&quot; одной строки ЖКИ. В соответствии с запрограммированным в регистре режима размером экрана выдается запрос на регенерацию новой строки ЖКИ.<br>
+При наличии запроса по сигналу <span style="text-decoration: overline">ETRI</span> &quot;Разрешение захвата магистрали&quot; вырабатывается сигнал <span style="text-decoration: overline">ASKTR</span> &quot;Подтверждение захвата&quot;.<br>
+Начало передачи данных синхронизовано по фронту нарастания сигнала &quot;строб&nbsp;1&quot;.<br>
+Временная диаграмма работы микросхемы в момент начала и окончания передачи данных в схему управления ЖКИ приведена на рис.&nbsp;4.<br>
+Временная диаграмма работы ЖКИ приведена на рис.&nbsp;5. Сигналы &quot;строка&nbsp;1&quot;, &quot;строка&nbsp;2&quot;, &quot;строка&nbsp;64&quot; показаны условно.</p>
+
+<h3>2.5. Работа микросхемы в режиме протокольного обмена с ЗУ.</h3>
+<p>При обмене данными между процессором и ЗУ микросхема работает по стандартным процедурам.<br>
+Формат адреса регистра режима и регистра начального адреса приведен в <a href="#t3">табл.&nbsp;3</a>.<br>
+Запись в регистр адреса происходит по фронту спада сигнала &quot;Обмен&quot; (<span style="text-decoration: overline">SYN</span>).<br>
+Для формирования сигналов обращения к ОЗУ микросхема вырабатывает сигнал &nbsp;Управление дешифратором&nbsp; <span style="text-decoration: overline">CODC</span>.<br>
+Временные диаграммы работы микросхемы в режиме протокольного обмена с ЗУ при чтении и записи приведены на рис.&nbsp;6,&nbsp;7.</p>
+
+<h3>2.6. Работа микросхемы при выводе информации на экран телевизора.</h3>
+<p>Регенерация экрана телевизора производится путём прогрессивной развертки.<br>
+Микросхема ведёт отсчёт 312 строк, из них:<br>
+&nbsp;&nbsp;256 строк - &quot;активный&quot; кадр,<br>
+&nbsp;&nbsp;56 строк - обратный ход кадра.<br>
+При отсчёте &quot;активных&quot; строк идёт регенерация экрана аналогично работе микросхемы в режиме непротокольного прямого доступа.<br>
+При отсчёте строк &quot;обратного хода кадра&quot; микросхема работает в режиме протокольного обмена с ЗУ.<br>
+Временная диаграмма формирования сигнала &quot;Управление телевизором&quot; <span style="text-decoration: overline">COTV</span> приведена на рис.&nbsp;8.</p>
+
+<p>2.7. Начальная установка микросхемы производится при подаче на вход <span style="text-decoration: overline">SR</span> &quot;Установка в исходное состояние&quot; сигнала низкого уровня напряжения, при этом микросхема устанавливается в режим отсутствия сигнала &quot;Запрос на захват магистрали&quot; <span style="text-decoration: overline">RQTR</span>.</p>
+
+<p>2.8. Схемы электрические принципиальные входных, выходных и входных-выходных каскадов микросхемы приведены на рис.&nbsp;9-12.</p>
+
+<p>2.9. Схема применения микросхемы приведена на рис.&nbsp;13.</p>
+
+<p>2.10. Микросхема выполнена в корпусе 4222.8-2.<br>
+Масса микросхемы не более 1,0&nbsp;г.</p>
+
+<h2 align="center">3. УКАЗАНИЯ ПО ЭКСПЛУАТАЦИИ</h2>
+
+<p>3.1. Подача и отключение входных сигналов на микросхему допускается только при включенных источниках питания.</p>
+
+<p>3.2. При работе с микросхемами необходимо предусматривать защиту от статического электричества.<br>
+Величина допустимого значения статического потенциала 100&nbsp;В.</p>
+
+<p>3.3. Входная ёмкость микросхемы C<sub>I</sub>, выходная ёмкость микросхемы C<sub>O</sub>, ёмкость входа-выхода микросхемы C<sub>I/O</sub> не более 5&nbsp;пф.</p>
+
+<h2><a name="t1">Таблица&nbsp;1</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th align="center">Номер<br>вывода</th>
+<th align="center" colspan="2">Назначение</th>
+</tr>
+<tr>
+<td align="center">01</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD13</td>
+</tr>
+<tr>
+<td align="center">02</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD12</td>
+</tr>
+<tr>
+<td align="center">03</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD11</td>
+</tr>
+<tr>
+<td align="center">04</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD10</td>
+</tr>
+<tr>
+<td align="center">05</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD9</td>
+</tr>
+<tr>
+<td align="center">06</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD8</td>
+</tr>
+<tr>
+<td align="center">07</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD7</td>
+</tr>
+<tr>
+<td align="center">08</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD6</td>
+</tr>
+<tr>
+<td align="center">09</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD5</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD4</td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD3</td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD2</td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD1</td>
+</tr>
+<tr>
+<td align="center">14</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A1</td>
+</tr>
+<tr>
+<td align="center">15</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A2</td>
+</tr>
+<tr>
+<td align="center">16</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A3</td>
+</tr>
+<tr>
+<td align="center">17</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A4</td>
+</tr>
+<tr>
+<td align="center">18</td>
+<td>Общий вывод</td>
+<td align="center">OV</td>
+</tr>
+<tr>
+<td align="center">19</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A5</td>
+</tr>
+<tr>
+<td align="center">20</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A6</td>
+</tr>
+<tr>
+<td align="center">21</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A7</td>
+</tr>
+<tr>
+<td align="center">22</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A8</td>
+</tr>
+<tr>
+<td align="center">23</td>
+<td>Вход линии МПИ &quot;Обмен&quot;</td>
+<td align="center"><span style="text-decoration: overline">SYN</span></td>
+</tr>
+<tr>
+<td align="center">24</td>
+<td>Выход &quot;РЗМ&quot; / управление телевизором</td>
+<td align="center"><span style="text-decoration: overline">ETRO</span>/<span style="text-decoration: overline">COTV</span></td>
+</tr>
+<tr>
+<td align="center">25</td>
+<td>Выход на линию МПИ &quot;Подтверждение захвата&quot;</td>
+<td align="center"><span style="text-decoration: overline">ASKTR</span></td>
+</tr>
+<tr>
+<td align="center">26</td>
+<td>Вход/выход сигнала задержки линии МПИ &quot;Ответ&quot;</td>
+<td align="center">DLAN</td>
+</tr>
+<tr>
+<td align="center">27</td>
+<td>Выход на линию МПИ &quot;Ответ&quot;</td>
+<td align="center"><span style="text-decoration: overline">AN</span></td>
+</tr>
+<tr>
+<td align="center">28</td>
+<td>Выход на линию МПИ &quot;Запрос на захват магистрали&quot;</td>
+<td align="center"><span style="text-decoration: overline">RQTR</span></td>
+</tr>
+<tr>
+<td align="center">29</td>
+<td>Вход линии МПИ &quot;Разрешение захвата магистрали&quot;</td>
+<td align="center"><span style="text-decoration: overline">ETRI</span></td>
+</tr>
+<tr>
+<td align="center">30</td>
+<td>Вход линии МПИ &quot;Запись данных&quot;</td>
+<td align="center"><span style="text-decoration: overline">WR</span></td>
+</tr>
+<tr>
+<td align="center">31</td>
+<td>Вход линии МПИ &quot;Чтение данных&quot;</td>
+<td align="center"><span style="text-decoration: overline">RD</span></td>
+</tr>
+<tr>
+<td align="center">32</td>
+<td>Выход сигнала &quot;Перезапись из буфера&quot;</td>
+<td align="center">WRBF</td>
+</tr>
+<tr>
+<td align="center">33</td>
+<td>Вход установки в исходное состояние</td>
+<td align="center"><span style="text-decoration: overline">SR</span></td>
+</tr>
+<tr>
+<td align="center">34</td>
+<td>Вход опорной частоты синхрогенератора</td>
+<td align="center">FSYN</td>
+</tr>
+<tr>
+<td align="center">35</td>
+<td>Выход строба записи данных ЖКИ</td>
+<td align="center">CWR</td>
+</tr>
+<tr>
+<td align="center">36</td>
+<td>Выход сигнала управления дешифратором</td>
+<td align="center"><span style="text-decoration: overline">CODC</span></td>
+</tr>
+<tr>
+<td align="center">37</td>
+<td>Выход сигнала управления селектором напряжений</td>
+<td align="center">COSL</td>
+</tr>
+<tr>
+<td align="center">38</td>
+<td>Выход сигнала &quot;Установка схем управления ЖКИ&quot;</td>
+<td align="center">SRH</td>
+</tr>
+<tr>
+<td align="center">39</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A9</td>
+</tr>
+<tr>
+<td align="center">40</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A10</td>
+</tr>
+<tr>
+<td align="center">41</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A11</td>
+</tr>
+<tr>
+<td align="center">42</td>
+<td>Вывод питания от источника напряжения</td>
+<td align="center">U&nbsp;(+5V)</td>
+</tr>
+<tr>
+<td align="center">43</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A12</td>
+</tr>
+<tr>
+<td align="center">44</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A13</td>
+</tr>
+<tr>
+<td align="center">45</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A14</td>
+</tr>
+<tr>
+<td align="center">46</td>
+<td>Выход шины &quot;Адрес&quot;</td>
+<td align="center">A15</td>
+</tr>
+<tr>
+<td align="center">47</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD15</td>
+</tr>
+<tr>
+<td align="center">48</td>
+<td>Вход линии МПИ</td>
+<td align="center">AD14</td>
+</tr>
+</table>
+
+<h3>Примечание:</h3>
+<p>МПИ - межмодульный параллельный интерфейс по <a href="gost_26765.51-86.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/gost_26765.51-86.pdf">ГОСТ 26765.51-86</a><br>
+РЗМ - разрешение захвата магистрали<br>
+TV - телевизор</p>
+
+<h2><a name="t2">Таблица&nbsp;2</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th>Назначение<br>поля<br>регистра</th>
+<th>Программирование<br>числа<br>передаваемых<br>
+байт&nbsp;в&nbsp;одну<br>микросхему<br>управления&nbsp;ЖКИ</th>
+<th colspan="6">Программирование&nbsp;длительности&nbsp;строки<br>
+Согласование опорной частоты генератора с длительностью строки</th>
+<th colspan="3">Программирование<br>мультиплексного<br>
+отношения<br>(число&nbsp;строк)<br>ЖКИ</th>
+<th colspan="5">Программирование&nbsp;числа<br>
+используемых&nbsp;микросхем<br>управления&nbsp;ЖКИ</th>
+</tr>
+<tr>
+<th>Номер&nbsp;бита<br>на&nbsp;линии<br>AD&nbsp;МПИ</th>
+<td align="center">15</td>
+<td align="center">14</td>
+<td align="center">13</td>
+<td align="center">12</td>
+<td align="center">11</td>
+<td align="center">10</td>
+<td align="center">9</td>
+<td align="center">8</td>
+<td align="center">7</td>
+<td align="center">6</td>
+<td align="center">5</td>
+<td align="center">4</td>
+<td align="center">3</td>
+<td align="center">2</td>
+<td align="center">1</td>
+</tr>
+<tr>
+<th>Значение<br>бита</th>
+<td align="center"><table><tr><td>1&nbsp;-&nbsp;5&nbsp;байт<br>0&nbsp;-&nbsp;4&nbsp;байта</td></tr></table></td>
+<td colspan="6">Частота кадров определяется по формуле<br>
+F&nbsp;=&nbsp;f&nbsp;/&nbsp;(1536&nbsp;*&nbsp;N&nbsp;*&nbsp;M)<br>
+где<br>
+F - частота кадров<br>
+f - опорная частота генератора, кГц<br>
+N - число байтов на одну микросхему управления ЖКИ<br>
+M - число, записанное в поле AD9-AD4<br>
+Диапазон изменения числа M&nbsp;=&nbsp;1-63</td>
+<td colspan="3">000&nbsp;-&nbsp;256&nbsp;строк<br>
+001&nbsp;-&nbsp;128&nbsp;строк<br>
+010&nbsp;-&nbsp;64&nbsp;строки<br>
+011&nbsp;-&nbsp;32&nbsp;строки<br>
+100&nbsp;-&nbsp;16&nbsp;строк<br>
+101&nbsp;-&nbsp;8&nbsp;строк<br>
+110&nbsp;-&nbsp;312&nbsp;строки<br>
+111&nbsp;-&nbsp;запрос строк не производится</td>
+<td colspan="5">Число, записанное в это поле, указывает количество используемых микросхем управления ЖКИ<br><br>
+Максимальное число микросхем управления ЖКИ -&nbsp;31<br><br>
+Минимальное число микросхем управления ЖКИ -&nbsp;1</td>
+</tr>
+</table>
+
+<h2><a name="t3">Таблица&nbsp;3</a></h2>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr>
+<th>Номер&nbsp;бита<br>на&nbsp;линии<br>МПИ&nbsp;AD</th>
+<td align="center">15</td>
+<td align="center">14</td>
+<td align="center">13</td>
+<td align="center">12</td>
+<td align="center">11</td>
+<td align="center">10</td>
+<td align="center">09</td>
+<td align="center">08</td>
+<td align="center">07</td>
+<td align="center">06</td>
+<td align="center">05</td>
+<td align="center">04</td>
+<td align="center">03</td>
+<td align="center">02</td>
+<td align="center">01</td>
+</tr>
+<tr>
+<th rowspan="2">Значение<br>бита</th>
+<td rowspan="2" align="center">1</td>
+<td rowspan="2" align="center">1</td>
+<td rowspan="2" align="center">1</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">1</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td rowspan="2" align="center">0</td>
+<td align="center">0<br>адресуется<br>слово</td>
+<td align="center">0<br>адресация к<br>регистру<br>начального<br>адреса</td>
+</tr>
+<tr>
+<td align="center">1<br>адресуется<br>младший байт</td>
+<td align="center">1<br>адресация к<br>регистру режима</td>
+</tr>
+</table>
+
+<p>164000<sub>8</sub> - адрес регистра начального адреса<br>
+164002<sub>8</sub> - адрес регистра режима<br>
+164004<sub>8</sub> - младший байт регистра начального адреса<br>
+164006<sub>8</sub> - младший байт регистра режима</p>
+
+</body>
+</html>
+

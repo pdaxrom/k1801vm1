@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 - data formats</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk90">Index</a></td>
+<td align="right"><a href="mk90fop.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90fop.htm">wersja polska</a>
+<a href="mk90fop.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90fop.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-90 - data formats</h1>
+<p>All numbers on this page are hexadecimal, unless stated otherwise.</p>
+<hr>
+
+<h2>Character set</h2>
+<p>Characters are encoded according to the <a href="javascript:if(confirm(%27http://ru.wikipedia.org/wiki/%D0%9A%D0%9E%D0%98-7  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://ru.wikipedia.org/wiki/%D0%9A%D0%9E%D0%98-7%27" tppabs="http://ru.wikipedia.org/wiki/%D0%9A%D0%9E%D0%98-7">KOI-7</a> standard.</p>
+<h3>Character codes 20-3F</h3>
+<p><img src="mk90chr1.png" tppabs="http://www.pisi.com.pl/piotr433/mk90chr1.png" width="640" height="147" alt="characters"></p>
+<h3>Latin characters (set N0), codes 40-7F</h3>
+<p><img src="mk90chr2.png" tppabs="http://www.pisi.com.pl/piotr433/mk90chr2.png" width="640" height="255" alt="Latin characters"></p>
+<h3>Cyrillic characters (set N1), codes 40-7F</h3>
+<p><img src="mk90chr3.png" tppabs="http://www.pisi.com.pl/piotr433/mk90chr3.png" width="640" height="255" alt="Cyrillic characters"></p>
+<p><i>These drawings were machine generated from the ROM image.</i></p>
+<hr>
+
+<h2>Representation of floating point numbers</h2>
+<p>A floating point number occupies three 16-bit words.
+First two words contain the 32-bit mantissa in two's complement form.
+The third word contains the 16-bit exponent with a bias of 0x8000.
+Examples:</p>
+<table border="1" cellspacing="0" cellpadding="5">
+<tr><th align="center" bgcolor="Yellow">Number</th>
+<th align="center" bgcolor="Yellow">Encoding</th></tr>
+<tr><td align="center"><pre>0
+1
+10
+100
+255
+1000
+65535
+0.5
+0.125
+0.1
+0.001
+-1
+-10
+-0.1</pre></td>
+<td align="center">
+<pre>0000&nbsp;0000&nbsp;0000
+0000&nbsp;4000&nbsp;8001
+0000&nbsp;5000&nbsp;8004
+0000&nbsp;6400&nbsp;8007
+0000&nbsp;7F80&nbsp;8008
+0000&nbsp;7D00&nbsp;800A
+8000&nbsp;7FFF&nbsp;8010
+0000&nbsp;4000&nbsp;8000
+0000&nbsp;4000&nbsp;7FFE
+6666&nbsp;6666&nbsp;7FFD
+374B&nbsp;4189&nbsp;7FF7
+0000&nbsp;C000&nbsp;8001
+0000&nbsp;B000&nbsp;8004
+999A&nbsp;9999&nbsp;7FFD</pre></td></tr>
+</table>
+<hr>
+
+<h2>Workspace objects</h2>
+
+<h3>Variable or array</h3>
+<pre>
+    1 word      bits 15-13: identifier 000
+                bits 11-6:  first character of the name ('A'=00, 'B'=01, ...)
+                bits 5-0:   second character of the name (digit in ASCII)
+    1 word      maximal first subscript in the upper byte,
+                maximal second subscript in the lower byte,
+                zero in case of a simple variable
+    3 words     first value
+    3 words     second value
+    ...
+    3 words     last value
+</pre>
+<p>Examples:</p>
+<pre>
+    0600 0000           simple variable X
+    0000 6400 8007      value=100
+
+    0675 0000           simple variable Y5
+    0000 6400 8008      value=200
+
+    0440 0300           one-dimensional array DIM Q(3)
+    3333 B333 7FFF      value Q(0)=-0.3
+    6666 6666 7FFC      value Q(1)=0.05
+    0000 7FFC 800D      value Q(2)=8191
+    0000 8004 800D      value Q(3)=-8191
+
+    06B1 0102           two-dimensional array DIM Z1(1,2)
+    9400 7735 801E      value Z1(0,0)=1E9
+    2F9E 44B8 7FE3      value Z1(0,1)=1E-9
+    6C00 88CA 801E      value Z1(0,2)=-1E9
+    D062 BB47 7FE3      value Z1(1,0)=-1E-9
+    0000 4000 8010      value Z1(1,1)=32768
+    0000 C000 8010      value Z1(1,2)=-32768
+</pre>
+
+<h3>GOSUB entry</h3>
+<pre>
+    1 word      bits 15-13: identifier 001
+                bits 12-0:  number of the line with the GOSUB statement
+</pre>
+
+<h3>FOR entry</h3>
+<pre>
+    1 word      bits 15-13: identifier 010 
+                bits 11-0:  name of the control variable
+    1 word      address after the '=' character in the FOR statement
+    3 words     TO value
+    3 words     STEP value
+</pre>
+
+<h3>User-defined function</h3>
+<pre>
+    1 word      bits 15-13: identifier 011
+                bits 7-0:   third letter of the function name (ASCII)
+    1 word      bits 11-0:  name of the function variable
+    1 word      address of the expression
+</pre>
+<hr>
+
+</body>
+</html>

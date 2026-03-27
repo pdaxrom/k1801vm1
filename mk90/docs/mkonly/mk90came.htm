@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 cartridge memory map</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="keywords" content="MK90, MK 90, smp, memory card, memory module, ram card, ram module, storage module, ram cartridge, external memory, soviet, calculator">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk90">Index</a></td> 
+<td align="right"><a href="mk90camp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90camp.htm">wersja polska</a><a href="mk90camp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90camp.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-90 cartridge memory map (BASIC&nbsp;V1.0)</h1>
+
+<p><strong>UPDATE: The data structures appear to be compatible with the <a href="javascript:if(confirm(%27http://www.trailing-edge.com/~shoppa/rt11fs/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.trailing-edge.com/~shoppa/rt11fs/%27" tppabs="http://www.trailing-edge.com/~shoppa/rt11fs/">RT-11 file system</a>.</strong></p>
+
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Address range</th>
+<th align="center" bgcolor="Yellow">Contents</th></tr>
+<tr><td align="center">0x0000-0x03FF</td>
+<td><a href="#loader">Loader area</a></td></tr>
+<tr><td align="center">0x0400-0x07FF</td>
+<td><a href="#directory">Directory area</a></td></tr>
+<tr><td align="center">0x0800-0x27FF</td>
+<td><a href="#data">Data area</a></td></tr>
+</table>
+<hr>
+
+<h2><a name="loader">Loader</a></h2>
+<p>The MK-90 start menu gives you three options: <b>BASIC</b>, <b>SMP0</b>, <b>SMP1</b>.
+Selecting <b>SMP0</b> (or <b>SMP1</b>) causes the calculator to read the loader code from the cartridge&nbsp;0 (or cartridge&nbsp;1) and execute it.
+Cartridges formatted with <b>INIT</b> contain code displaying message which means &quot;cartridge without loader&quot;:</p>
+<blockquote><pre>
+000000: nop
+000002: jsr     r7, @#153700
+000006: jsr     r7, @#120536
+000012: mov     @#034022, @#164000
+000020: mov     #104306, @#164002
+000026: jsr     r0, 000062
+000032: .asciz  &quot;\016\r\n smp BEZ ZAGRUZ^IKA&quot;
+000061: .even
+000062: movb    (r0)+, r2
+000064: beq     000064
+000066: jsr     r7, @#116542
+000072: br      000062
+</pre></blockquote>
+<hr>
+
+<h2><a name="directory">Directory organisation</a></h2>
+
+<p>Hex dump of an example directory (file MK90.BIN in the <a href="mk90prog.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90prog.zip">mk90prog.zip</a> archive):</p>
+<blockquote><pre>
+0400: 01 00 00 00 01 00 00 00 04 00
+040A: 00 02 EA 27 00 00 BB 0C 01 00 00 00 36 89  ;1st directory entry
+0418: 00 04 3A 14 A5 14 BB 0C 01 00 00 00 36 89  ;2nd directory entry
+0426: 00 04 9B 54 B8 38 BB 0C 01 00 00 00 36 89  ;3rd directory entry
+0434: 00 02 20 20 20 20 20 20 0D 00 20 20 20 20  ;4th directory entry
+0442: 00 08
+</pre></blockquote>
+<p>Each directory entry occupies 7&nbsp;words (=14&nbsp;bytes).
+Bytes in a word are arranged in &quot;little-endian&quot; order (the least significant byte first).</p>
+
+<h3>Directory entry layout</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th width="5%" align="center" bgcolor="Yellow">Offset</th>
+<th width="5%" align="center" bgcolor="Yellow">Size</th>
+<th align="center" bgcolor="Yellow">Contents</th></tr>
+<tr><td align="center">0</td><td align="center">1</td>
+<td><a href="#attr">Attribute</a></td></tr>
+<tr><td align="center">1</td><td align="center">2</td>
+<td><a href="#fname">File name</a> (2&nbsp;groups of 3&nbsp;characters), padded with blanks</td></tr>
+<tr><td align="center">3</td><td align="center">1</td>
+<td><a href="#fname">File name extension</a> (group of 3&nbsp;characters), default is <b>BAS</b></td></tr>
+<tr><td align="center">4</td><td align="center">1</td>
+<td>Number of blocks (sectors) assigned to the directory entry.
+The sum of these words for all directory entries must be equal&nbsp;16.<br>
+0x0001&nbsp;+&nbsp;0x0001&nbsp;+&nbsp;0x0001&nbsp;+&nbsp;0x000D&nbsp;=&nbsp;16</td></tr>
+<tr><td align="center">5</td><td align="center">1</td>
+<td>Unknown</td></tr>
+<tr><td align="center">6</td><td align="center">1</td>
+<td>Unknown</td></tr>
+</table>
+
+<h3><a name="attr">Directory entry attribute</a></h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Code</th>
+<th align="center" bgcolor="Yellow">Meaning</th></tr>
+<tr><td align="center">0x0200</td>
+<td>Deleted or free directory entry</td></tr>
+<tr><td align="center">0x0400</td>
+<td>Occupied directory entry</td></tr>
+<tr><td align="center">0x0800</td>
+<td>End of the directory</td></tr>
+</table>
+
+<h3><a name="fname">File name encoding</a></h3>
+<p>The file names and extensions are stored in compressed form - 3&nbsp;characters in 2&nbsp;bytes.</p>
+<table border="0" cellspacing="2" cellpadding="0">
+<tr><td align="center" colspan="4">
+<table border="1" cellspacing="0" cellpadding="3" width="100%">
+<tr><th align="center" bgcolor="Yellow">Character codes (decimal)</th></tr>
+</table>
+</td></tr>
+<tr>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Code</th>
+<th align="center" bgcolor="Yellow">Char.</th></tr>
+<tr><td align="center">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</td>
+<td align="center">blank<br>A<br>B<br>C<br>D<br>E<br>F<br>G<br>H<br>I</td></tr>
+</table></td>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Code</th>
+<th align="center" bgcolor="Yellow">Char.</th></tr>
+<tr><td align="center">10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19</td>
+<td align="center">J<br>K<br>L<br>M<br>N<br>O<br>P<br>Q<br>R<br>S</td></tr>
+</table></td>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Code</th>
+<th align="center" bgcolor="Yellow">Char.</th></tr>
+<tr><td align="center">20<br>21<br>22<br>23<br>24<br>25<br>26<br>27<br>28<br>29</td>
+<td align="center">T<br>U<br>V<br>W<br>X<br>Y<br>Z<br>$<br>.<br>/</td></tr>
+</table></td>
+<td><table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Code</th>
+<th align="center" bgcolor="Yellow">Char.</th></tr>
+<tr><td align="center">30<br>31<br>32<br>33<br>34<br>35<br>36<br>37<br>38<br>39</td>
+<td align="center">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</td></tr>
+</table></td>
+</tr></table>
+<p>For example, the second directory entry at address 0x0418 contains the file name <b>CIRCLE.BAS</b>.
+Each group of three characters is encoded following way:</p>
+<ol>
+<li><b>CIR</b> - character codes: 3, 9, 18<br>
+40*40*3 + 40*9 + 18 = 5178 = 0x143A</li>
+<li><b>CLE</b> - character codes: 3, 12, 5<br>
+40*40*3 + 40*12 + 5 = 5285 = 0x14A5</li>
+<li><b>BAS</b> - character codes: 2, 1, 19<br>
+40*40*2 + 40*1 + 19 = 3259 = 0x0CBB</li>
+</ol>
+<p>These words can be found at address 0x041A to 0x041F.<br>
+This encoding scheme can be considered as numbers in base&nbsp;40.
+It's also known as Radix-50 (thanks to Alec Voropay for spotting this).</p>
+<hr>
+
+<h2><a name="data">Data area</a></h2>
+<p>The data area consists of 16&nbsp;blocks (sectors) of 512&nbsp;bytes each.
+Programs are stored in plain ASCII (the keywords aren't tokenised).
+They begin with an empty line (CR,LF sequence) and are terminated with an end marker 0x00.</p>
+<p>The system doesn't support fragmented files, i.e. requires a contiguous group of free memory blocks of sufficient size to store the file.</p>
+
+</body>
+</html>

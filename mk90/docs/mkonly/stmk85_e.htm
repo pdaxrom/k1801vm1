@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Modification of the Elektronika MK-85</title>
+<meta http-equiv="Content-Type"
+content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk85">Index</a></td> 
+<td align="right"><a href="stmk85_p.htm" tppabs="http://www.pisi.com.pl/piotr433/stmk85_p.htm">wersja polska</a>
+<a href="stmk85_p.htm" tppabs="http://www.pisi.com.pl/piotr433/stmk85_p.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td></tr>
+</table>
+<hr>
+
+<h1>Modification of the Elektronika MK-85</h1>
+
+<p>I got an MK-85 with a bad microprocessor.
+As the original microprocessor is rather unobtainable, I decided to replace it (along with the ROM and RAM chips) with
+an STM32F103C8T6 microcontroller.
+So the original BASIC interpreter (written in PDP-11 assembler) had to be ported as accurately as possible to the C&nbsp;language.
+Some <a href="mk85bue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bue.htm">known bugs</a> have also been fixed.</p>
+
+<h2>Project files</h2>
+<p>Contents of the <a href="stmk85.zip" tppabs="http://www.pisi.com.pl/piotr433/stmk85.zip">stmk85.zip</a> archive:
+<ul>
+<li>microcontroller software, to be compiled with the STM32CubeMX and STM32CubeIDE tools (64-bit)</li>
+<li>schematic and PCB layout created with the <a href="javascript:if(confirm(%27https://kicad-pcb.org/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://kicad-pcb.org/%27" tppabs="https://kicad-pcb.org/">KiCad</a> utility</li>
+</ul>
+<p>Due to limited space in the calculator, the board thickness of about 1mm is recommended.</p>
+
+<h2>Simplified prototype using a Blue Pill module</h2>
+<p><img src="stmk85_1.jpg" tppabs="http://www.pisi.com.pl/piotr433/stmk85_1.jpg" alt="MK-85 calculator with a Blue Pill module connected" style="width:100%;height:auto;"></p>
+<p>Differences from the schematic:</p>
+<ul>
+<li>the LCD controller &#1050;&#1040;1013&#1042;&#1043;2 is connected directly to the microcontroller's SPI port, bypassing the 74HCT4053 chip used as a logic level translator</li>
+<li>the microcontroller is powered with 3.3V from an on-board RT9193 regulator instead of 2.5V from the TPS62745DSSR regulator</li>
+<li>the calculator cannot be turned off - the slide switch is not connected, the OV2 power rail is permanently shorted to OV1 (instead of through the 2N7002 transistor)</li>
+</ul>
+
+<h2>Final version</h2>
+<p><img src="stmk85_2.jpg" tppabs="http://www.pisi.com.pl/piotr433/stmk85_2.jpg" alt="board with an STM32 microcontroller installed in the MK-85 calculator" style="width:100%;height:auto;"></p>
+<p>Apart from the original integrated circuits, the resistor R10=2M&Omega; and the capacitor C17=0.15&mu;F must be desoldered from the calculator.
+The diode VD1=&#1050;&#1044;521&#1040; in the power circuit must be replaced with a jumper.
+The ON_SW signal is connected with a blue wire to the junction of the R10 resistor and the C17 capacitor.</p>
+
+<p>The components of the original clock generator (resistors R1, R2 and capacitors C2, C3) are no longer needed.
+They can be left in place or removed.
+I soldered an 8MHz crystal resonator and two 15pF capacitors in their place.
+One day they may be wired to the PD0 and PD1 pins of the microprocessor, which would allow to use the USB port.</p>
+<p>Signals from the board are available on the pads left after desoldering the ROM and RAM chips.
+The purple wires visible on the photo go to an ST-LINK programmer.</p>
+<p><img src="stmk85_3.png" tppabs="http://www.pisi.com.pl/piotr433/stmk85_3.png" alt="signals available on the pads" style="width:90%;height:auto;"></p>
+
+<h2>Measurement results (at the clock frequency of 2MHz)</h2>
+<h3>Power consumption</h3>
+<ul>
+<li>turned off: 7&mu;A (originally &lt;&nbsp;1&mu;A)</li>
+<li>waiting for a key press: 0.15mA (originally 0.35mA)</li>
+<li>program execution: 1.25 to 1.60mA depending on the intensity of sending data to the LCD controller (originally 1.45mA at normal clock frequency and 5.15mA at fast clock)</li>
+</ul>
+<h3>Speed</h3>
+<ul>
+<li>The execution time for the following sample sine-drawing program is 1.7&nbsp;seconds (originally 194 or 34 seconds):<br>
+<pre>10 FOR X=0 TO 59
+20 DRAW X, 3.5+3.5*SIN(20*X)
+30 NEXT X</pre></li>
+<li>Solving the <a href="javascript:if(confirm(%27https://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/articles.cgi?read=700  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/articles.cgi?read=700%27" tppabs="https://www.hpmuseum.org/cgi-sys/cgiwrap/hpmuseum/articles.cgi?read=700">eight queens puzzle</a> takes 28&nbsp;seconds.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 - programowanie w asemblerze</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk90">Indeks</a></td>
+<td align="right"><a href="mk90mc1e.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90mc1e.htm">English version</a><a href="mk90mc1e.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90mc1e.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-90 - programowanie w asemblerze</h1>
+
+<p>Początkowe 512&nbsp;bajtów modułu pamięci zewnętrznej zawiera program rozruchowy, który można załadować i wykonać wybierając z menu startowego opcję <b>SMP0</b> lub <b>SMP1</b>.
+Kod jest ładowany do pamięci RAM pod adres 0x0000-0x01FF a następnie uruchamiany z adresu 0x0000.
+Wskaźnik stosu (SP) jest inicjowany na 0x0200.
+Pierwszą instrukcją (pod adresem 0x0000) musi być NOP (kod 0x00A0).</p>
+<p>Domyślny program wpisywany przy formatowaniu przez komendę INIT wyświetla tylko komunikat o treści &quot;moduł bez loadera&quot; a następnie blokuje system.
+Przy użyciu <a href="mk90prgp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90prgp.htm">programatora</a> można go zastąpić własnym kodem.
+Obecnie jest to jedyna znana metoda uruchamiania programów maszynowych w systemie z BASIC&nbsp;1.0 (BASIC&nbsp;2.0 ma w tym celu komendę PATCH).</p>
+
+<h2>Przykładowe programy</h2>
+
+<p>Kody źródłowe można skompilować za pomocą asemblera <a href="javascript:if(confirm(%27http://www.dbit.com/pub/ibmpc/pdpxasm/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://www.dbit.com/pub/ibmpc/pdpxasm/%27" tppabs="http://www.dbit.com/pub/ibmpc/pdpxasm/">PDPXASM</a>.</p>
+
+<h3><a name="auto">Automatyczne uruchamianie programów BASIC</a></h3>
+<p>Program przy starcie systemu automatycznie wykonuje dowolną wstępnie zdefiniowaną sekwencję instrukcji języka BASIC.
+W szczególności umożliwia wciśnięciem tylko dwóch klawiszy załadowanie i uruchomienie wybranego programu w języku BASIC.<br>
+Przykładowy kod wykonuje instrukcję <code>LOAD&quot;SMx:AUTO&quot;,R</code>.
+Każde wystąpienie małej litery <b>x</b> w wierszu instrukcji jest zastępowane cyfrą 0 lub&nbsp;1, zależnie od gniazda modułu pamięci.<br>
+<b>Uwaga:</b> BASIC&nbsp;2.0 wydaje się ignorować opcję <b>R</b> instrukcji LOAD, przynajmniej na <a href="mk90emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90emup.htm">emulatorze</a>.</p>
+<p><a href="mk90au10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au10.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90au10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au10.zip">wersja dla BASIC&nbsp;1.0</a><br>
+<a href="mk90au20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au20.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90au20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90au20.zip">wersja dla BASIC&nbsp;2.0</a></p>
+
+<h3><a name="disa">Pominięcie menu startowego</a></h3>
+<p>Program <b>trwale</b> blokuje menu startowe i po włączeniu lub po resecie od razu przechodzi do interpretera BASICa.
+Odbywa się to przez modyfikację wektora reset w pamięci RAM podtrzymywanej baterią (część układu zegara czasu rzeczywistego) tak, że zamiast zwykłego &quot;ekranu powitalnego&quot; wskazuje on procedurę &quot;zimnego startu&quot; interpretera BASICa.<br>
+Prawdopodobnie pamięć ROM nie zawiera innych adresów startowych, a więc są to jedyne możliwe opcje.<br>
+W celu przywrócenia poprzedniego stanu należy na chwilę wyjąć baterie.<br>
+<b>Uwaga:</b> <a href="mk90emup.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90emup.htm">Emulator MK-90</a> (w przeciwieństwie do rzeczywistego komputerka) celowo nie zachowuje zawartości nieulotnej pamięci RAM między sesjami!</p>
+<p><a href="mk90ba10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba10.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90ba10.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba10.zip">wersja dla BASIC&nbsp;1.0</a><br>
+<a href="mk90ba20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba20.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90ba20.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90ba20.zip">wersja dla BASIC&nbsp;2.0</a></p>
+
+<h3><a name="graphics">Proste procedury graficzne</a></h3>
+<p>Zestaw podprogramów realizujących podstawowe operacje graficzne:</p>
+<ul>
+<li>rysowanie kropki</li>
+<li>rysowanie linii za pomocą <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Bresenham\%27s_line_algorithm  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Bresenham\%27s_line_algorithm%27" tppabs="http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm">algorytmu Bresenhama</a></li>
+<li>rysowanie okręgu za pomocą <a href="javascript:if(confirm(%27http://en.wikipedia.org/wiki/Midpoint_circle_algorithm  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://en.wikipedia.org/wiki/Midpoint_circle_algorithm%27" tppabs="http://en.wikipedia.org/wiki/Midpoint_circle_algorithm">algorytmu &quot;midpoint&quot;</a></li>
+</ul>
+<p><img src="mk90grph.png" tppabs="http://www.pisi.com.pl/piotr433/mk90grph.png" width="416" height="228" alt="zrzut ekranu programu demonstrującego procedury graficzne na mikrokomputerze Elektronika MK-90"></p>
+<p><a href="mk90grph.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90grph.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90grph.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90grph.zip">Procedury graficzne</a></p>
+
+<h3><a name="life">Gra w życie</a></h3>
+<p>Jest to przykładowy program maszynowy realizujący <a href="javascript:if(confirm(%27http://pl.wikipedia.org/wiki/Gra_w_%C5%BCycie  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://pl.wikipedia.org/wiki/Gra_w_%C5%BCycie%27" tppabs="http://pl.wikipedia.org/wiki/Gra_w_%C5%BCycie">Grę w życie</a> Johna Conwaya.
+Ponieważ rozmiar programu przekracza 512&nbsp;bajtów, musiał zostać umieszczony w obszarze danych modułu pamięci.
+Aby zapobiec przepisaniu tego obszaru przez system, została zmieniona wartość pod adresem 0x0412 (w obszarze katalogu) z 0x10 na 0x0D.
+W ten sposób trzy ostatnie sektory modułu pamięci zostały zarezerwowane dla programów maszynowych o rozmiarze do 1.5&nbsp;kB, pozostawiając resztę obszaru danych (6.5&nbsp;kB) do dyspozycji systemu.
+Oryginalny program rozruchowy został zastąpiony innym, który ładuje kod z trzech ostatnich sektorów do pamięci RAM mikrokomputera, a następnie uruchamia go.</p>
+<p>Program powinien działać z dowolną wersją BASICa, ponieważ nie odwołuje się do pamięci ROM.<br>
+Program można zakończyć tylko klawiszem reset lub wyłącznikiem.</p>
+<p><img src="mk90life.png" tppabs="http://www.pisi.com.pl/piotr433/mk90life.png" width="416" height="228" alt="zrzut ekranu programu Gra w życie na mikrokomputerze Elektronika MK-90"></p>
+<p><a href="mk90life.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90life.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90life.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90life.zip">Gra w życie</a></p>
+
+<h3><a name="inflate">Dekompresor INFLATE</a></h3>
+<p>Program wczytuje do pamięci MK-90 oraz uruchamia kod maszynowy skompresowany <a href="javascript:if(confirm(%27http://pl.wikipedia.org/wiki/Deflate  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://pl.wikipedia.org/wiki/Deflate%27" tppabs="http://pl.wikipedia.org/wiki/Deflate">algorytmem DEFLATE</a>.
+Umożliwił na przykład zapis <a href="games_pack.zip" tppabs="http://www.pisi.com.pl/piotr433/smp92-1/games_pack.zip">gry &quot;Boks&quot;</a> o rozmiarze 12066&nbsp;bajtów na module SMP-10 o pojemności&nbsp;10kB.<br>
+Jest to moja adaptacja <a href="javascript:if(confirm(%27https://github.com/pfusik/zlib6502  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27https://github.com/pfusik/zlib6502%27" tppabs="https://github.com/pfusik/zlib6502">procedury INFLATE, którą napisał Piotr Fusik w języku asemblera 6502</a>.<br>
+Do oryginalnej wersji dla procesora 6502 jest dołączony pasujący kompresor plików.</p>
+<p><a href="mk90infl.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90infl.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="plik"></a><a href="mk90infl.zip" tppabs="http://www.pisi.com.pl/piotr433/mk90infl.zip">Dekompresor INFLATE</a></p>
+
+</body>
+</html>

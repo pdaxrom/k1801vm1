@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-90 - opis sprzętu</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<meta name="keywords" content="MK90, KA1835VG1, KA1835VG3, KA1835VG4, KA512VI1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk90">Indeks</a></td>
+<td align="right"><a href="mk90hwe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90hwe.htm">English version</a><a href="mk90hwe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90hwe.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-90 - opis sprzętu</h1>
+
+<p><strong>UZUPEŁNIENIE: Podane informacje były dotychczas uzyskane za pomocą &quot;inżynierii wstecznej&quot;, mogą się zatem różnić od treści oryginalnej dokumentacji opublikowanej w dniu 22-12-2011.</strong></p>
+
+<h2>Schematy</h2>
+<h3>Płyta mikroprocesora</h3>
+<ul>
+<li><a href="mk90pp01.png" tppabs="http://www.pisi.com.pl/piotr433/mk90pp01.png">pamięć mikrokodu</a></li>
+<li><a href="mk90pp02.png" tppabs="http://www.pisi.com.pl/piotr433/mk90pp02.png">jednostka arytmetyczno-logiczna, jednostka sterująca, pamięć ROM</a></li>
+<li><a href="mk90pp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90pp.htm">lista połączeń, opis złączek</a></li>
+</ul>
+<h3>Płyta systemowa</h3>
+<ul>
+<li><a href="mk90pu01.png" tppabs="http://www.pisi.com.pl/piotr433/mk90pu01.png">urządzenia we/wy</a></li>
+<li><a href="mk90pu02.png" tppabs="http://www.pisi.com.pl/piotr433/mk90pu02.png">pamięć RAM</a></li>
+<li><a href="mk90_sch.pdf" tppabs="http://www.pisi.com.pl/piotr433/mk90_sch.pdf">obwód zasilania, rozmieszczenie elementów na płytce drukowanej, lista elementów</a></li>
+<li><a href="mk90pu.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90pu.htm">lista połączeń, opis złączek</a></li>
+</ul>
+<hr>
+
+<h2>Sterownik klawiatury oraz dekoder adresu &#1050;&#1040;1835&#1042;&#1043;1</h2>
+<ul>
+<li><a href="1835vg1.png" tppabs="http://www.pisi.com.pl/piotr433/1835vg1.png">schemat wyprowadzeń końcówek</a></li>
+<li><a href="guide10.djvu" tppabs="http://www.pisi.com.pl/piotr433/manuals/guide10.djvu">oryginalna dokumentacja układu</a></li>
+<li><a href="1835vg1.htm" tppabs="http://www.pisi.com.pl/piotr433/manuals/1835vg1.htm">tekst i tablice przepisane z oryginalnej dokumentacji</a></li>
+</ul>
+<p>Układ zwraca wiersz i kolumnę wciśniętego klawisza poprzez kanał&nbsp;2 magistrali szeregowej sterownika &#1050;&#1040;1835&#1042;&#1043;4.
+Wciśnięcie klawisza powoduje również zgłoszenie przerwania, którego wektor procedury obsługi znajduje się pod adresem $00C8.</p>
+<hr>
+
+<h2>Sterownik wyświetlacza oraz interfejs pamięci &#1050;&#1040;1835&#1042;&#1043;3</h2>
+<ul>
+<li><a href="1835vg3.png" tppabs="http://www.pisi.com.pl/piotr433/1835vg3.png">schemat wyprowadzeń końcówek</a></li>
+<li><a href="guide12.djvu" tppabs="http://www.pisi.com.pl/piotr433/manuals/guide12.djvu">oryginalna dokumentacja układu</a></li>
+<li><a href="1835vg4.htm" tppabs="http://www.pisi.com.pl/piotr433/manuals/1835vg4.htm">tekst i tablice przepisane z oryginalnej dokumentacji</a></li>
+</ul>
+<p>Ten układ jest odpowiedzialny za transfer danych z pamięci RAM do układów <a href="ka1835id1.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/ka1835id1.pdf">&#1050;&#1040;1835&#1048;&#1044;1</a> sterujących segmentami wyświetlacza LCD.</p>
+<dl>
+<dt><b>$E800</b> - rejestr adresu, rozmiar słowa, tylko do zapisu</dt>
+<dd>Ten rejestr zawiera początkowy adres pamięci wyświetlacza.</dd>
+<dt><b>$E802</b> - rejestr trybu pracy, rozmiar słowa, tylko do zapisu</dt>
+<dd>Ten rejestr jest inicjowany stałą wartością $88C6.</dd>
+<dt><b>$E804</b> - mniej znaczący bajt rejestru adresu</dt>
+<dt><b>$E806</b> - mniej znaczący bajt rejestru trybu pracy</dt>
+</dl>
+<hr>
+
+<h2>Sterownik układów&nbsp;we/wy &#1050;&#1040;1835&#1042;&#1043;4</h2>
+
+<ul>
+<li><a href="1835vg4.png" tppabs="http://www.pisi.com.pl/piotr433/1835vg4.png">schemat wyprowadzeń końcówek</a></li>
+<li><a href="guide13.djvu" tppabs="http://www.pisi.com.pl/piotr433/manuals/guide13.djvu">oryginalna dokumentacja układu</a></li>
+<li><a href="1835vg4.htm" tppabs="http://www.pisi.com.pl/piotr433/manuals/1835vg4.htm">tekst i tablice przepisane z oryginalnej dokumentacji</a></li>
+</ul>
+
+<p>Układ obsługuje osiem kanałów szeregowych, z czego tylko cztery są wykorzystywane w mikrokomputerze MK-90.
+Wszystkie urządzenia na magistrali dzielą wspólne sygnały DATA oraz SELECT, używają natomiast osobnych sygnałów CLK.</p>
+<p>Kanały&nbsp;0 i&nbsp;1 są używane przez moduły pamięci SMP.<br>
+Kanał&nbsp;2 obsługuje sterownik klawiatury &#1050;&#1040;1835&#1042;&#1043;1.<br>
+Wyjście CLK kanału&nbsp;3 steruje głośniczkiem piezoelektrycznym.</p>
+<dl>
+<dt><b>$E810</b> - rejestr danych, rozmiar bajtu</dt>
+<dd>Dana wpisana do tego rejestru zostaje wysłana szeregowo.<br>
+Odczyt zwraca zawartość rejestru przesuwającego, do którego następnie wczytywany jest kolejny bajt z magistrali szeregowej.</dd>
+<dt><b>$E812</b> - rejestr prędkości transmisji, rozmiar słowa</dt>
+<dd>Ten rejestr definiuje częstotliwość sygnału CLK.<br>
+<code>częstotliwość = 800kHz / wartość_rejestru</code><br>
+Odczyt zwraca stan rejestru zgłoszeń przerwań.</dd>
+<dt><b>$E814</b> - rejestr sterujący i stanu, rozmiar bajtu</dt>
+<dd><b>Funkcja poszczególnych bitów przy zapisie</b><br>
+bity&nbsp;2-0 wybierają kanał szeregowy<br>
+bit&nbsp;3 określa kierunek transmisji: 0=wejście, 1=wyjście<br>
+Ustawienie kierunku transmisji na wejście powoduje odczyt bajtu z magistrali szeregowej do rejestru przesuwającego.<br>
+skasowany bit&nbsp;4 zezwala na zewnętrzne przerwania (tzn. sygnał CLK w trybie slave), wektor $00C8, najniższy priorytet<br>
+skasowany bit&nbsp;5 zezwala na przerwania od rejestru danych, wektor $00C4<br>
+skasowany bit&nbsp;6 zezwala na przerwania z wejścia INRT, wektor $00C0, najwyższy priorytet<br>
+bit&nbsp;7 określa tryb przesyłania danych (tzn. które urządzenie steruje linią CLK): 0=slave, 1=master<br>
+<b>Funkcja poszczególnych bitów przy odczycie</b><br>
+bity&nbsp;1-0 są skasowane<br>
+bit&nbsp;2 zwraca stan linii RA<br>
+bit&nbsp;3 zwraca stan linii SELECT<br>
+bity&nbsp;6-4 zwracają wartości wpisane do bitów zezwoleń na przerwania<br>
+bit&nbsp;7 jest ustawiony gdy układ jest gotowy do zapisu/odczytu rejestru danych</dd>
+<dt><b>$E816</b> - rejestr komend, rozmiar bajtu</dt>
+<dd>Zapis do tego rejestru aktywuje sygnał SELECT, a następnie wpisany bajt zostaje wysłany przez magistralę szeregową lub bajt z magistrali szeregowej zostaje wczytany do rejestru przesuwającego, zależnie od bitu&nbsp;3 rejestru $E814.<br>
+Odczyt zwraca zawartość rejestru przesuwającego oraz deaktywuje sygnał SELECT.</dd>
+</dl>
+<hr>
+
+<h2>Sterownik systemowy &#1050;&#1040;1835&#1042;&#1043;5</h2>
+<ul>
+<li><a href="1835vg5.png" tppabs="http://www.pisi.com.pl/piotr433/1835vg5.png">schemat wyprowadzeń końcówek</a></li>
+<li><a href="guide14.djvu" tppabs="http://www.pisi.com.pl/piotr433/manuals/guide14.djvu">oryginalna dokumentacja układu</a></li>
+<li><a href="1835vg5.htm" tppabs="http://www.pisi.com.pl/piotr433/manuals/1835vg5.htm">tekst i tablice przepisane z oryginalnej dokumentacji</a></li>
+</ul>
+<dl>
+<dt><b>$E81A</b> - rejestr trybu pracy RG1, rozmiar słowa</dt>
+<dt><b>$E81C</b> - rejestr trybu pracy RG2, rozmiar słowa</dt>
+</dl>
+<hr>
+
+<h2>Zegar czasu rzeczywistego &#1050;&#1040;512&#1042;&#1048;1</h2>
+<ul>
+<li><a href="ka512vi1.png" tppabs="http://www.pisi.com.pl/piotr433/ka512vi1.png">schemat wyprowadzeń końcówek (dwa warianty obudowy)</a></li>
+<li><a href="ka512vi1.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/ka512vi1.pdf">oryginalna dokumentacja układu</a></li>
+<li><a href="mk90tim1.png" tppabs="http://www.pisi.com.pl/piotr433/mk90tim1.png">schemat podłączenia timera w systemie</a></li>
+</ul>
+<p>Jest to ścisły odpowiednik popularnego układu zegara MC146818.
+Jako podstawa czasu użyty został oscylator kwarcowy 32768Hz.<br>
+Wyjście Square Wave Output SQW generuje impulsy na wejściu przerwań EVNT (wektor $0040) z nominalną częstotliwością 32Hz.<br>
+Wyjście Interrupt Request IRQ jest podłączone do wejścia przerwań INRT (wektor $00C0).</p>
+<p>Linie magistrali układu scalonego AD0-AD7 są podłączone do linii magistrali systemu AD1-AD8.
+Z tego powodu dane zapisywane do układu scalonego muszą być przesunięte w lewo o jeden bit, podczas gdy dane odczytywane muszą być przesuwane w prawo o jeden bit.
+Takie połączenie wpływa również na adresowanie.
+Rejestry układu są wybierane przez kolejne parzyste adresy.</p>
+<p>Układ zajmuje przestrzeń adresową <b>$EA00-$EA7E</b>.</p>
+<p>Wyprowadzenia układów &#1050;&#1040;512&#1042;&#1048;1 oraz MC146818 są różnie oznaczone.
+Tablica odpowiadających sobie nazw:</p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">&#1050;&#1040;512&#1042;&#1048;1</th><th align="center" bgcolor="Yellow">MC146818</th></tr>
+<tr><td align="center">GN1,GN2</td><td align="center">OSC1,OSC2</td></tr>
+<tr><td align="center">AD0-AD7</td><td align="center">AD0-AD7</td></tr>
+<tr><td align="center">OV</td><td align="center">VSS</td></tr>
+<tr><td align="center">SE</td><td align="center">CE</td></tr>
+<tr><td align="center">MAC</td><td align="center">AS</td></tr>
+<tr><td align="center">RD/WR</td><td align="center">R/W</td></tr>
+<tr><td align="center">CD</td><td align="center">DS</td></tr>
+<tr><td align="center">SR</td><td align="center">RESET</td></tr>
+<tr><td align="center">RQINR</td><td align="center">IRQ</td></tr>
+<tr><td align="center">SED</td><td align="center">CKFS</td></tr>
+<tr><td align="center">SYN1</td><td align="center">CKOUT</td></tr>
+<tr><td align="center">FL</td><td align="center">PS</td></tr>
+<tr><td align="center">SYN2</td><td align="center">SQW</td></tr>
+<tr><td align="center">U</td><td align="center">VDD</td></tr>
+</table>
+<hr>
+
+<h2><a name="misc">Różności</a></h2>
+<ul>
+<li><a href="gost_26765.51-86.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/gost_26765.51-86.pdf">Państwowa norma opisująca standard magistrali MPI</a> (po rosyjsku)</li>
+</ul>
+<hr>
+
+</body>
+</html>

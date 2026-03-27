@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Moduł pamięci RAM do mikrokomputera Elektronika MK-90</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<meta name="keywords" content="smp, karta pamięci, pamięć zewnętrzna, rosyjski, kalkulator, A1835WG2, KA1835WG2, A537RU10, KA537RU10">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk90" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk90">Indeks</a></td> 
+<td align="right"><a href="mk90cahe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90cahe.htm">English version</a><a href="mk90cahe.htm" tppabs="http://www.pisi.com.pl/piotr433/mk90cahe.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td></tr>
+</table>
+<hr>
+
+<h1>Moduł pamięci RAM do mikrokomputera Elektronika MK-90</h1>
+
+<p><strong>UZUPEŁNIENIE: Podane informacje były dotychczas uzyskane za pomocą &quot;inżynierii wstecznej&quot;, mogą się zatem różnić od treści oryginalnej dokumentacji opublikowanej w dniu 22-12-2011.</strong></p>
+
+<h2>Opis</h2>
+<p>Moduł jest przeznaczony do współpracy z przenośnym mikrokomputerem <b>Elektronika MK-90</b> jako wymienny nośnik pamięci do zapisywania programów.
+Wymiana danych odbywa się przez magistralę szeregową z prędkością ok. 100kbit/s.
+Moduł zawiera tylko 10kB pamięci RAM, ale znajdujący się w nim układ sterownika potrafi adresować do 64kB.</p>
+
+<h2>Co jest w środku</h2>
+<p>Moduł zawiera 5 układów scalonych pamięci statycznej RAM typu KA537RU10 podtrzymywanych baterią litową oraz układ sterownika KA1835WG2.</p>
+<ul>
+<li><a href="mpo10.png" tppabs="http://www.pisi.com.pl/piotr433/mpo10.png">Schemat modułu</a></li>
+<li><a href="1835vg2.png" tppabs="http://www.pisi.com.pl/piotr433/1835vg2.png">Schemat wyprowadzeń końcówek</a>, <a href="guide11.djvu" tppabs="http://www.pisi.com.pl/piotr433/manuals/guide11.djvu">oryginalna dokumentacja</a> oraz <a href="1835vg2.htm" tppabs="http://www.pisi.com.pl/piotr433/manuals/1835vg2.htm">tekst i tablice przepisane z oryginalnej dokumentacji</a> układu KA1835VG2</li>
+<li><a href="mk90cato.jpg" tppabs="http://www.pisi.com.pl/piotr433/mk90cato.jpg">Fotografia płytki drukowanej od góry</a></li>
+<li><a href="mk90cabo.jpg" tppabs="http://www.pisi.com.pl/piotr433/mk90cabo.jpg">Fotografia płytki drukowanej od spodu</a></li>
+</ul>
+
+<h2>Opis złącza</h2>
+<p><img src="mk90caco.png" tppabs="http://www.pisi.com.pl/piotr433/mk90caco.png" width="205" height="74" alt="złącze modułu pamięci RAM"></p>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Końcówka</th>
+<th align="center" bgcolor="Yellow">Symbol</th>
+<th align="center" bgcolor="Yellow">Funkcja</th></tr>
+<tr><td align="center">1</td><td>BATT.</td>
+<td>wyprowadzenie plusa wewnętrznej baterii litowej 3V</td></tr>
+<tr><td align="center">2</td><td>VCC</td>
+<td>napięcie zasilające +5V</td></tr>
+<tr><td align="center">3</td><td>CLOCK</td>
+<td>wejście impulsów zegarowych</td></tr>
+<tr><td align="center">4</td><td>DATA</td>
+<td>wejście/wyjście danych szeregowych</td></tr>
+<tr><td align="center">5</td><td>SELECT</td>
+<td>wejście wyboru układu</td></tr>
+<tr><td align="center">6</td><td>GND</td>
+<td>masa</td></tr>
+</table>
+
+<h2>Protokół transmisji</h2>
+<p>Dane zapisywane do pamięci są taktowane narastającym zboczem impulsu CLOCK a pobierane przez moduł przy opadającym zboczu.
+Najpierw jest przesyłany bit najbardziej znaczący.
+Pierwszym przesyłanym bajtem po zmianie stanu wejścia SELECT z wysokiego na niski jest kod instrukcji.
+Po kodzie instrukcji następuje 16-bitowy adres lub dane.<br>
+Poniższy wykres przedstawia przykładową instrukcję Write Address (sygnały SELECT, CLOCK, DATA).</p>
+<p><img src="mk90cawr.png" tppabs="http://www.pisi.com.pl/piotr433/mk90cawr.png" width="754" height="107" alt="przebiegi czasowe operacji zapisu"></p>
+<p>Dane odczytywane z pamięci są taktowane opadającym zboczem impulsu CLOCK a pobierane przez mikrokomputer przy narastającym zboczu.<br>
+Poniższy wykres przedstawia przykładową instrukcję Read Data.</p>
+<p><img src="mk90care.png" tppabs="http://www.pisi.com.pl/piotr433/mk90care.png" width="754" height="107" alt="przebiegi czasowe operacji odczytu"></p>
+
+<h2>Tablica instrukcji</h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Kod<br>instrukcji</th>
+<th align="center" bgcolor="Yellow">Nazwa instrukcji</th>
+<th align="center" bgcolor="Yellow">Funkcja</th></tr>
+<tr><td align="center">0x00</td><td>Read&nbsp;Status</td>
+<td>&nbsp;</td></tr>
+<tr><td align="center">0x10</td><td>Read&nbsp;Postdecrement</td>
+<td>Odczyt dowolnej ilości bajtów z pamięci modułu począwszy od lokacji wskazywanej przez rejestr adresu.
+Rejestr adresu jest automatycznie zmniejszany po każdym odebranym bajcie.
+Instrukcja nie używana przez mikrokomputer MK-90.</td></tr>
+<tr><td align="center">0x20</td><td>Erase&nbsp;Postdecrement</td>
+<td>Zapis dowolnej ilości bajtów do pamięci modułu począwszy od lokacji wskazywanej przez rejestr adresu.
+Do rejestru adresu musi być wstępnie wpisana wartość 0xFFFF, w przeciwnym razie komenda jest ignorowana.
+Po każdym wysłanym bajcie jest on automatycznie zmniejszany.
+Instrukcja jest używana przez mikrokomputer MK-90 do kasowania pamięci modułu spacjami w czasie formatowania za pomocą <b>INIT</b>.
+</td></tr>
+<tr><td align="center">0x80</td><td>Lock</td>
+<td>&nbsp;</td></tr>
+<tr><td align="center">0x90</td><td>Unlock</td>
+<td>&nbsp;</td></tr>
+<tr><td align="center">0xA0</td><td>Write&nbsp;Address</td>
+<td>Zapis 16-bitowego rejestru adresu, najpierw bajt bardziej znaczący.</td></tr>
+<tr><td align="center">0xB0</td><td>Read&nbsp;Address</td>
+<td>Odczyt 16-bitowego rejestru adresu, najpierw bajt bardziej znaczący.
+Instrukcja nie używana przez mikrokomputer MK-90.</td></tr>
+<tr><td align="center">0xC0</td><td>Write&nbsp;Postincrement</td>
+<td>Zapis dowolnej ilości bajtów do pamięci modułu począwszy od lokacji wskazywanej przez rejestr adresu.
+Rejestr adresu jest automatycznie zwiększany po każdym wysłanym bajcie.</td></tr>
+<tr><td align="center">0xD0</td><td>Read&nbsp;Postincrement</td>
+<td>Odczyt dowolnej ilości bajtów z pamięci modułu począwszy od lokacji wskazywanej przez rejestr adresu.
+Rejestr adresu jest automatycznie zwiększany po każdym odebranym bajcie.</td></tr>
+<tr><td align="center">0xE0</td><td>Write&nbsp;Postdecrement</td>
+<td>Instrukcja nie używana przez mikrokomputer MK-90.</td></tr>
+</table>
+<p>Mniej znaczące cztery bity kodu instrukcji są bez znaczenia.
+Pozostałe kody nie wymienione w powyższej tablicy są ignorowane razem z następującymi po nich danymi.</p>
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - nieudokumentowane możliwości i błędy</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-2">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="indeks.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/indeks.htm#mk85">Indeks</a></td>
+<td align="right"><a href="mk85bue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bue.htm">English version</a><a href="mk85bue.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85bue.htm"><img src="english.png" tppabs="http://www.pisi.com.pl/piotr433/english.png" align="middle" border="0" width="32" height="20" hspace="5" alt="English version"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-85 - nieudokumentowane możliwości i błędy</h1>
+
+<ul>
+<li><a name="who">Komenda</a> <b>WHO</b> wyświetla informację o autorze programu.</li>
+<li><a name="rem">Wykrzyknik</a> pozwala wprowadzać komentarze do programu.
+Wszystkie znaki po wykrzykniku aż do końca wiersza są ignorowane.
+Wiersze zawierające tylko komentarz (tzn. zaczynające się wykrzyknikiem) nie są dozwolone.
+Przykład:
+<pre>
+  10 A=1!To jest komentarz
+</pre></li>
+<li><a name="set">Komenda</a> <b>SET</b> akceptuje składnię <b>SET&nbsp;N</b>, która kasuje ograniczenie precyzji wyświetlania liczb.</li>
+<li><a name="err">Kod</a> błędu <b>ERR!</b> sygnalizuje błędy wewnętrzne interpretatora.
+Przykłady:
+<pre>
+  SIN (0/0)
+  TAN (1>0)
+</pre></li>
+<li><a name="defm">Komenda</a> <b>DEFM</b> po której następuje przecinek i nazwa zmiennej przypisuje tej zmiennej maksymalną ilość możliwych do zarezerwowania dodatkowych zmiennych.
+Ta opcja działa tylko w programach.
+Przykład:
+<pre>
+  10 DEFM ,A
+  20 PRINT &quot;Max=&quot;;A
+</pre></li>
+<li><a name="assign">Niektóre</a> komendy akceptujące zmienną jako argument zezwalają na użycie zarówno samej nazwy zmiennej, jak i zmiennej z przypisaną wartością.
+Na przykład, poniższy dziwny program jest wykonywany bez zgłaszania błędów:
+<pre>
+  10 PRINT A=123;B$=&quot;ABC&quot;
+  20 INPUT C=5,D$=&quot;DEF&quot;
+  30 SET K=2
+  40 DEFM ,M=3
+  50 I=3
+  60 FOR I TO 5
+  70 NEXT I=10
+  80 GOTO X=10
+</pre></li>
+<li><a name="comp">Komputer</a> MK-85 nie ma nic przeciwko porównywaniu liczby z łańcuchem.
+Wybiera pomiędzy procedurą porównywania łańcuchów lub liczb testując tylko wyrażenie po prawej stronie operatora relacji.
+Bez problemów wykonuje poniższy przykładowy program:
+<pre>
+  10 A=1: $=&quot;ABC&quot;
+  20 IF A=$ THEN 30
+  30 IF $&gt;5 THEN 40
+  40 END
+</pre></li>
+<li><a name="concat">Procedura</a> łączenia łańcuchów nie spodziewa się wyniku połączenia łańcuchów jako drugiego argumentu.
+Poniższe przykładowe wyrażenie jest obliczane źle:<br>
+<pre>
+  &quot;12&quot;+(&quot;34&quot;+&quot;56&quot;)
+</pre></li>
+<li><a name="stack">Ten</a> sam obszar pamięci został zarezerwowany dla bufora łączonych łańcuchów i dla stosu przetwarzania wyrażeń.
+Czasem ten stos może zostać przepisany przez łańcuch, co prowadzi do różnych komunikatów o błędach.
+Taki przypadek zachodzi w poniższym przykładzie:<br>
+<pre>
+  $=&quot;123456789012345&quot;
+  LEN($+$)
+</pre></li>
+<li><a name="val">Funkcja <b>VAL</b> dla łańcucha dłuższego niż 37 znaków może przepisać stos danych lub stos przetwarzania wyrażeń.
+Na przykład następujące wyrażenie powoduje błąd ERR2:<br>
+<pre>
+  2*VAL&quot;123456789012345678901234567890123456789012345&quot;
+</pre></li>
+<li><a name="input1"><b>INPUT</b></a> nie sprawdza, czy wartość wpisywana do zmiennej numerycznej jest rzeczywiście liczbą, co powoduje zamazanie zmiennej śmieciami.
+Spróbuj wpisać jakiś łańcuch (w cudzysłowach) lub zmienną łańcuchową (np.&nbsp;<b>$</b>) w odpowiedzi na <b>INPUT</b> w poniższym programie:<br>
+<pre>
+  10 VAC
+  20 INPUT A
+  30 PRINT A$
+</pre></li>
+<li><a name="input2"><b>INPUT</b></a> nie potrafi wpisać pustego łańcucha do zmiennej łańcuchowej.
+Problem spowodowany jest brakiem testu długości łańcucha przed przekopiowaniem go do zmiennej.
+Przykład:<br>
+<pre>
+  10 INPUT $
+</pre>
+Gdy pojawi się znak zapytania, wciśnij kolejno klawisze [SPC], strzałka w lewo, [DEL] i [EXE].
+Spowoduje to zawieszenie systemu i utratę zawartości pamięci RAM.<br>
+Ten błąd zgłosił Sergei Gaidukov na forum <a href="javascript:if(confirm(%27http://forum.ixbt.com/topic.cgi?id=15:53034:88  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://forum.ixbt.com/topic.cgi?id=15:53034:88#88%27" tppabs="http://forum.ixbt.com/topic.cgi?id=15:53034:88#88">iXBT Hardware BBS</a>, data wpisu 22.11.2005 09:45.</li>
+<li><a name="input3">Z</a> powodu niepełnego sprawdzania typów danych, komenda <b>INPUT</b> akceptuje jako argument liczbę zamiast zmiennej łańcuchowej.
+Wpisany łańcuch zostanie zapamiętany pod adresem utworzonym z pierwszych czterech cyfr mantysy.<br>
+W poniższym przykładzie zmienna&nbsp;<b>$</b> zostanie przepisana znakami wpisanymi w odpowiedzi na <b>INPUT</b>:
+<pre>
+  10 $=&quot;0123456789&quot;
+  20 INPUT 8150
+  30 PRINT $
+</pre></li>
+<li><a name="input4">Kolejny</a> błąd komendy <b>INPUT</b>, który zgłosił Denis Gorbunov w <a href="javascript:if(confirm(%27http://mk85.narod.ru/gb  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://mk85.narod.ru/gb%27" tppabs="http://mk85.narod.ru/gb">księdze gości witryny mk85.narod.ru</a> (data wpisu 09.01.2003 00:20), ilustruje poniższy program umieszczony w obszarze <b>P0</b>:
+<pre>
+  1 INPUT A$:HH
+</pre>
+Wciśnięcie klawisza [AC] a następnie [EXE] w odpowiedzi na znak zapytania wyświetlony przez <b>INPUT</b> spowoduje zawieszenie systemu.
+Znaki różne od HH mogą powodować inne awarie, np. restart systemu lub uszkodzenie zawartości pamięci.
+Autor wpisu trafnie wywnioskował, że dalsza część programu BASIC rozpoczynająca się od dwukropka jest wykonywana przez procesor jako program maszynowy!</li>
+<li><a name="letc">Instrukcja</a> <b>LETC</b> nie może być używana wewnątrz podprogramu, ponieważ przepisuje pierwszy bajt stosu <b>GOSUB</b>.
+Na przykład, próba wykonania <b>RETURN</b> w poniższym programie kończy się błędem:
+<pre>
+  10 GOSUB 30
+  20 END
+  30 LETC &quot;2222222&quot;
+  40 RETURN
+</pre>
+Ten błąd znalazł Aleksei Akatov.</li>
+<li><a name="underflow">Operacje</a> arytmetyczne mogą zwracać małe liczby nie mieszczące się w dozwolonym zakresie, w przedziale 1E-4097..9.999999999E-4097 lub -1E-4097..-9.999999999E-4097 (wykładnik w kodzie z nadmiarem=0), bez sygnalizacji niedomiaru.
+Przykłady:<br>
+<pre>
+  1E-4096 / 2
+  -1E-4096 * 0.1
+  1E-4095 - 0.99E-4095
+</pre>
+</li>
+<li><a name="tan">Obliczenie</a> tangensa (lub innej funkcji pochodzącej od tangensa, tzn. SIN, COS) z liczby o wykładniku równym 4094 zajmuje bardzo dużo czasu.
+Dla tak dużych argumentów wynik jest oczywiście bez sensu.
+Przykład:<br>
+<pre>
+  TAN 1E4094
+  SIN -9E4094
+</pre></li>
+<li><a name="e-127">Funkcje</a> trygonometryczne dla kątów poniżej &plusmn;1E-127 radianów zwracają błedny wynik lub powodują restart systemu.
+Przykład:<br>
+<pre>
+  TAN 1E-130
+</pre></li>
+<li><a name="cheat">Liczby</a> zbliżone do całkowitych są nadmiernie zaokrąglane <a href="javascript:if(confirm(%27http://web.archive.org/web/20170628024356fw_/spiderpixel.co.uk/caspro/subhtml/casf1.html  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://web.archive.org/web/20170628024356fw_/spiderpixel.co.uk/caspro/subhtml/casf1.html%27" tppabs="http://web.archive.org/web/20170628024356fw_/spiderpixel.co.uk/caspro/subhtml/casf1.html">podobnie jak w kalkulatorach Casio</a>, tzn. wynik każdej operacji arytmetycznej poddawany jest następującej obróbce:<br>
+- jeżeli cztery ostatnie cyfry mantysy są w przedziale 0001..0009 to zastępowane są 0000<br>
+- jeżeli cztery ostatnie cyfry mantysy są w przedziale 9950..9999 to liczba jest zaokrąglana w górę, tak żeby ostatnie cztery cyfry były równe 0000<br>
+Przykłady:
+<p>Kalkulator wyświetla wprawdzie tylko 10&nbsp;cyfr, ale przechowuje w pamięci 12&nbsp;cyfr mantysy.
+Można się o tym przekonać np. w następujący sposób:<br>
+- wpisujemy do zmiennej A wartość wyrażenia 7+34E-11<br>
+- wyświetlając zawartość zmiennej A otrzymujemy wynik 7, dwie ostatnie cyfry mantysy nie zostały pokazane<br>
+- wyświetlając wynik obliczenia wyrażenia A-7 otrzymujemy wynik 3.4E-10 ujawniający ukryte cyfry</p>
+<p>Powtórzmy ten test dla wpisanej do zmiennej A wartości 7+4E-11.
+Obliczając wartość wyrażenia A-7 otrzymujemy 0 zamiast oczekiwanego wyniku 4E-11.</p>
+<p>Przeprowadźmy jeszcze dwa testy:<br>
+- dla A=7+9934E-11 wartość wyrażenia A-7 wynosi zgodnie z oczekiwaniami 9.934E-8<br>
+- natomiast dla A=7+9956E-11 wartość wyrażenia A-7 wynosi niespodziewanie 1E-7</p></li>
+</ul>
+
+</body>
+</html>

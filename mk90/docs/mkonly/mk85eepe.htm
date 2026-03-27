@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - external storage</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk85">Index</a></td>
+<td align="right"><a href="mk85eepp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85eepp.htm">wersja polska</a><a href="mk85eepp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85eepp.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-85 - external storage</h1>
+<p>In my opinion, the biggest disadvantage of the MK-85 against the design prototype <a href="index.htm#fx700" tppabs="http://www.pisi.com.pl/piotr433/index.htm#fx700">Casio FX-700P</a> is the lack of an external storage support.
+The ability of <a href="mk85mc1e.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm">machine code programming</a> makes possible to solve this problem.
+The proposed project allows to save BASIC programs to a nonvolatile serial memory.</p>
+
+<h2><a name="hard">Hardware</a></h2>
+<p>As a mass storage device serves a popular serial EEPROM 93C86 with Microwire bus, connected to the keyboard port.
+The EEPROM should be inserted or removed only when the calculator is turned off.</p>
+<h3><a name="sch">Wiring diagram</a></h3>
+<p><img src="mk85eepr.png" tppabs="http://www.pisi.com.pl/piotr433/mk85eepr.png" width="365" height="185" alt="wiring diagram"></p>
+
+<h2><a name="soft">Software</a></h2>
+<p>Data stored in the EEPROM consist of the BASIC programs address table 822C-823F followed by the code segment starting from address 826A.</p>
+
+<h3><a name="usage">Usage</a></h3>
+<ol>
+<li><a href="mk85mc1e.htm#alloc" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm#alloc">Allocate</a> 00B0 bytes of RAM by writing value 8750 to the <b>ramtop</b> system variable 8252, which is equivalent to a string <img src="mk85mci4.png" tppabs="http://www.pisi.com.pl/piotr433/mk85mci4.png" width="32" height="24" alt="input string"> typed at the <b>INPUT</b> prompt.</li>
+<li>Use the <a href="mk85mc1e.htm#loader" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm#loader">hex loader</a> to write the <a href="#data">program code</a> to the allocated area.</li>
+<li>The program should be <a href="mk85mc1e.htm#starter" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm#starter">started</a> with a string <img src="mk85eeps.png" tppabs="http://www.pisi.com.pl/piotr433/mk85eeps.png" width="84" height="24" alt="input string"> when saving BASIC programs, or with a string <img src="mk85eepl.png" tppabs="http://www.pisi.com.pl/piotr433/mk85eepl.png" width="84" height="24" alt="input string"> when loading BASIC programs.
+Don't press any keys while transfer is in progress.
+It takes several seconds, depending on the file size.
+When the transfer is completed, <b>READY&nbsp;P0</b> should appear on the display.</li>
+</ol>
+<p>It is convenient to leave the <a href="mk85mc1e.htm#starter" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm#starter">machine code starter</a> in the program <b>P0</b> and use only <b>P1-P9</b> for other BASIC programs.</p>
+
+<h3><a name="src">Program listing</a></h3>
+<blockquote><pre>
+; port 100, bit 7 - Data Output
+; port 102, bit 1 - Data Input
+; port 102, bit 2 - Clock
+; port 102, bit 3 - Chip Select
+
+        .radix  16
+
+start:  mov     #E,@#102        ;CE=0, CK=0, DO=0
+        mov     #822C,r4        ;starting RAM address
+        mov     #C000,r3        ;READ command and EEPROM address
+        clr     r5              ;no delay after transfer
+        cmpb    @#825A,#4C      ;'L', load
+        beq     loop
+        mov     #A000,r3        ;WRITE command and EEPROM address
+        mov     #20,r5          ;delay of ca. 10ms after transfer
+        cmpb    @#825A,#53      ;'S', save
+        bne     end
+
+; Write Enable
+        mov     #9800,r1        ;command EWEN
+        mov     #E,r2           ;13 (decimal) clock cycles
+        jsr     pc,xfer
+        mov     #E,@#102        ;CE=0, CK=0, DO=0
+; transfer data
+loop:   mov     r3,r1
+        add     #8,r3           ;increment EEPROM address
+        mov     #E,r2           ;13 (decimal) clock cycles
+        jsr     pc,xfer
+        mov     (r4),r1         ;data to save, ignored when loading
+        mov     #11,r2          ;16 (decimal) clock cycles
+        jsr     pc,xfer
+        mov     #E,@#102        ;CE=0, CK=0, DO=0
+        mov     r5,r0           ;delay after transfer
+        beq     load
+        jsr     pc,@#10FC       ;EEPROM write time of ca. 10ms
+        br      next
+load:   mov     r1,(r4)         ;loaded data
+next:   cmpb    (r4)+,(r4)+     ;advance the RAM address
+        cmp     r4,#8240
+        bcs     loop
+        bne     next1
+        mov     #826A,r4        ;skip system variables
+next1:  cmp     r4,@#823E
+        bcs     loop
+; Write Disable
+end:    mov     #8000,r1        ;command EWDS
+        mov     #E,r2           ;13 (decimal) clock cycles
+        jsr     pc,xfer
+        mov     #E,@#102        ;CE=0, CK=0, DO=0
+; system restart
+        clr     r0              ;reset vector
+        jmp     (r0)
+
+xfer1:  bic     #4,r0           ;CK=1
+        mov     r0,@#102
+        mov     @#100,r0
+        rolb    r0              ;Carry=/DO
+; send r1 through DI, and read from DO to r1
+; expects number_of_bits+1 in r2
+xfer:   rol     r1              ;Carry=/DI, bit 0 of r1 = /DO
+        mov     #3,r0           ;CE=1, CK=0, DI=0
+        sbc     r0              ;CE=1, CK=0, DI=/Carry
+        asl     r0
+        mov     r0,@#102
+        sob     r2,xfer1
+        com     r1
+        rts     pc
+</pre></blockquote>
+
+<h3><a name="data">Loader data</a></h3>
+<blockquote><pre>
+9000 !DF,15,0E,00,02,01,C4,15
+9010 !2C,82,C3,15,00,C0,05,0A
+9020 !D7,A7,5A,82,4C,00,11,03
+9030 !C3,15,00,A0,C5,15,20,00
+9040 !D7,A7,5A,82,53,00,28,02
+9050 !C1,15,00,98,C2,15,0E,00
+9060 !F7,09,68,00,DF,15,0E,00
+9070 !02,01,C1,10,C3,65,08,00
+9080 !C2,15,0E,00,F7,09,54,00
+9090 !01,13,C2,15,11,00,F7,09
+9100 !4A,00,DF,15,0E,00,02,01
+9110 !40,11,03,03,DF,09,FC,10
+9120 !01,01,4C,10,14,A5,17,21
+9130 !40,82,E7,87,02,02,C4,15
+9140 !6A,82,1F,21,3E,82,E1,87
+9150 !C1,15,00,80,C2,15,0E,00
+9160 !F7,09,18,00,DF,15,0E,00
+9170 !02,01,00,0A,48,00,C0,45
+9180 !04,00,1F,10,02,01,C0,17
+9190 !00,01,40,8C,41,0C,C0,15
+9200 !03,00,80,0B,C0,0C,1F,10
+9210 !02,01,8F,7E,41,0A,87,00
+9999 END
+</pre></blockquote>
+<hr>
+
+<h2><a name="util">Conversion utilities</a></h2>
+<p><a href="mk85util.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85util.zip"><img src="file.png" tppabs="http://www.pisi.com.pl/piotr433/file.png" align="middle" width="14" height="16" hspace="15" border="0" alt="download"></a><a href="mk85util.zip" tppabs="http://www.pisi.com.pl/piotr433/mk85util.zip">mk85util.zip</a> - file size: 21kB, sources and executables, DOS and Windows (in a DOS window)</p>
+<h3>BAS2MK85</h3>
+<p>This utility converts a list of BASIC programs in ASCII format to the internal MK-85 data format.</p>
+<p>Usage:
+<code>bas2mk85.com program1.bas [program2.bas program3.bas ...]</code></p>
+<ul>
+<li>The utility creates an output file MK85EPR.BIN which can be programmed to the EEPROM 93C86.</li>
+<li>The <a href="mk85mc1e.htm#starter" tppabs="http://www.pisi.com.pl/piotr433/mk85mc1e.htm#starter">machine code starter</a> is placed in the program <b>P0</b>.</li>
+<li>Cyrillic characters are expected to be encoded in the Windows-1251 character set.</li>
+<li>Relational operators <b>&lt;&gt;</b>, <b>&lt;=</b> and <b>&gt;=</b> are converted to equivalent MK-85 codes 0x5C, 0x5F, 0x7E.
+Forms <b>&gt;&lt;</b>, <b>=&lt;</b> and <b>=&gt;</b> are accepted as well.</li>
+<li>Numerical constants in exponential form can be noted as <b>1.23E5</b> or <b>5.67E-8</b>, the <b>E</b> and <b>E-</b> strings are replaced with equivalent MK-85 codes 0x7B and 0x7D.</li>
+<li>The string <b>PI</b> is converted to the MK-85 code 0x7C.</li>
+</ul>
+<h3>MK852BAS</h3>
+<p>This utility does the opposite to the previous one, i.e. displays the contents of the EEPROM image.</p>
+<p>Usage: <code>mk852bas.com infile.bin</code></p>
+<ul>
+<li>Cyrillic characters are encoded in the Windows-1251 character set.</li>
+<li>The output can be redirected to a file or a printer.</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Elektronika MK-85 - hardware</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" width="100%">
+<tr><td align="left"><a href="index.htm#mk85" tppabs="http://www.pisi.com.pl/piotr433/index.htm#mk85">Index</a></td>
+<td align="right"><a href="mk85hwp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85hwp.htm">wersja polska</a><a href="mk85hwp.htm" tppabs="http://www.pisi.com.pl/piotr433/mk85hwp.htm"><img src="polska.png" tppabs="http://www.pisi.com.pl/piotr433/polska.png" align="middle" border="0" width="32" height="20" hspace="5" alt="wersja polska"></a></td>
+</tr></table>
+<hr>
+
+<h1>Elektronika MK-85 - hardware</h1>
+<p>Earlier versions of the MK-85 were built with following chips:</p>
+<ul>
+<li>microprocessor &#1058;234-2</li>
+<li>input/output controller &#1058;241-2-015</li>
+<li>LCD controller &#1058;241-2-014</li>
+<li>8kB ROM &#1058;242-2 (2 pcs.)</li>
+<li>2kB RAM &#1058;244-2</li>
+</ul>
+<p>In the later, more widespread version, the microprocessor and the I/O&nbsp;controller are integrated on a single chip, and two 8kB ROM chips have been replaced with a single 16kB one.
+List of chips used:</p>
+<ul>
+<li>microprocessor + I/O controller <a href="mk85cpu.png" tppabs="http://www.pisi.com.pl/piotr433/mk85cpu.png">&#1058;36&#1042;&#1052;1-2</a>
+= &#1050;&#1040;1013&#1042;&#1052;1, based on the <a href="1806vm2.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/1806vm2.pdf">1806&#1042;&#1052;2</a> with additional on-chip peripherals: clock oscillator, power control, 13-bit keyboard port, 15-bit parallel port, dedicated LCD controller port.
+The memory access is performed through a demultiplexed address bus (up to 15&nbsp;bits) and an 8-bit data bus + up to 8&nbsp;chip select outputs.<br>
+Scanned original documentation:
+<a href="javascript:if(confirm(%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part1.zip  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part1.zip%27" tppabs="http://vladimir.poletaev.googlepages.com/KA1013BM1_part1.zip">part&nbsp;1</a>,
+<a href="javascript:if(confirm(%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part2.zip  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://vladimir.poletaev.googlepages.com/KA1013BM1_part2.zip%27" tppabs="http://vladimir.poletaev.googlepages.com/KA1013BM1_part2.zip">part&nbsp;2</a><br>
+The same files converted to a more convenient and compact format:
+<a href="ka1013vm1.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/ka1013vm1.pdf">manual</a>,
+<a href="ka1013vm1.png" tppabs="http://www.pisi.com.pl/piotr433/manuals/ka1013vm1.png">block diagram</a></li>
+<li>LCD controller
+<a href="mk85lcdc.png" tppabs="http://www.pisi.com.pl/piotr433/mk85lcdc.png">&#1058;36&#1042;&#1043;1-2</a>
+= &#1050;&#1040;1013&#1042;&#1043;2, <a href="1013vg2.pdf" tppabs="http://www.pisi.com.pl/piotr433/manuals/1013vg2.pdf">datasheet</a></li>
+<li>32kB ROM <a href="mk85rom.png" tppabs="http://www.pisi.com.pl/piotr433/mk85rom.png">&#1058;36&#1056;&#1045;1-2</a> = &#1050;&#1040;1013&#1056;&#1045;1, of which only 16kB are used</li>
+<li>2kB RAM <a href="mk85ram.png" tppabs="http://www.pisi.com.pl/piotr433/mk85ram.png">&#1058;36&#1056;&#1059;1-2</a> = &#1050;&#1040;1013&#1056;&#1059;1, looks pin compatible with the standard CMOS RAMs like HM6116 or TC5517</li>
+</ul>
+<p>All information presented herein apply to this newer version.</p>
+<p>Please refer to the <a href="links.htm" tppabs="http://www.pisi.com.pl/piotr433/links.htm">Links page</a> for the circuit diagram.</p>
+<hr>
+
+<h2><a name="cpuio">Summary of the CPU I/O registers</a></h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Address</th>
+<th align="center" bgcolor="Yellow">Access size</th>
+<th align="center" bgcolor="Yellow">Function</th></tr>
+<tr><td align="center">$80-$FF</td><td align="center">byte</td>
+<td><a href="#lcdc">LCD controller</a> serial communication port</td></tr>
+<tr><td align="center">$100</td><td align="center">word</td>
+<td>Data register of the fixed input parallel port <b>KB</b>, bits 8-2 used as <a href="#keyb">keyboard</a> matrix columns inputs</td></tr>
+<tr><td align="center">$102</td><td align="center">word</td>
+<td>Data register of the bi-directional parallel port <b>PP</b>, bits 3-1 used as <a href="#keyb">keyboard</a> matrix rows outputs</td></tr>
+<tr><td align="center">$104</td><td align="center">word</td>
+<td><a href="#cpucr">Control and status register</a></td></tr>
+</table>
+<hr>
+
+<h2><a name="lcdc">The LCD controller</a></h2>
+<p>The LCD controller found in the earlier version of the Elektronika MK-85 doesn't have its own memory, but uses the system RAM instead.
+The I/O controller is involved into the display refresh procedure.
+Every 0.4&nbsp;ms it suspends the program execution by the microprocessor and performs a DMA cycle to transfer a specific part of the RAM to the LCD controller.</p>
+<p>Newer version of the LCD controller has its own display RAM on chip and is only accessed when the information on the display needs to be updated.
+The DMA isn't used any more.</p>
+<p>The communication with the LCD controller takes place through a serial bus.
+Data transfer is initiated by writing to the address range $0080-$00FF.
+Only the less significant 5&nbsp;data bits are relevant.</p>
+<h3>Description of bus signals of the LCD controller</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th width="5%" align="center" bgcolor="Yellow">Pin</th>
+<th align="center" bgcolor="Yellow">Name</th>
+<th align="center" bgcolor="Yellow">Function</th></tr>
+<tr><td align="center">2</td><td align="center">SYNC</td>
+<td>High level when transferring address, low level when transferring data.</td></tr>
+<tr><td align="center">62</td><td align="center">SHIFT</td>
+<td>This signal clocks the data shift register.</td></tr>
+<tr><td align="center">1</td><td align="center">AD</td>
+<td>Serial data, the least significant bit first, high level is assumed as logical&nbsp;0 while low level as logical&nbsp;1.</td></tr>
+</table>
+<p>On the diagram below an example value of&nbsp;$12 is written to the address $00A8.</p>
+<p><img src="mk85dbus.png" tppabs="http://www.pisi.com.pl/piotr433/mk85dbus.png" width="694" height="160" alt="LCD controller bus waveforms"></p>
+<p>A logical analyzer shows an additional short SHIFT pulse of ca. 0.1&nbsp;&micro;s width.</p>
+<p><img src="mk85dbu1.png" tppabs="http://www.pisi.com.pl/piotr433/mk85dbu1.png" width="502" height="162" alt="LCD controller bus waveforms"></p>
+<p>Later releases of the &#1058;36&#1042;&#1052;1-2 microprocessor transmit 8 data bits instead of&nbsp;5.
+The change occurred somewhere between the manufacturing date codes 9105 to 9109.</p>
+<p><img src="mk85dbu2.png" tppabs="http://www.pisi.com.pl/piotr433/mk85dbu2.png" width="702" height="162" alt="LCD controller bus waveforms"></p>
+<p>Tests showed that the LCD controller chip pays attention only to the first 5 received data bits.
+Any subsequent ones are discarded.</p>
+<h3>Register functions</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th width="5%" align="center" bgcolor="Yellow">Address</th>
+<th align="center" bgcolor="Yellow">Function</th></tr>
+<tr><td align="center">$80-$DF</td><td>This address range maps the internal RAM of the LCD controller.</td></tr>
+<tr><td align="center">$E0</td><td>This register controls the hardware generated cursor.<br>
+bits&nbsp;3-0 define the cursor position (value&nbsp;$0C when no cursor should be shown)<br>
+bit&nbsp;4 defines the cursor shape, filled rectangle when bit cleared, underscore when set</td></tr>
+<tr><td align="center">$E8</td><td>Some control register of unknown function, initialised to&nbsp;0</td></tr>
+</table>
+<hr>
+
+<h2><a name="lcd">The LCD layout</a></h2>
+<p><img src="mk85scr.png" tppabs="http://www.pisi.com.pl/piotr433/mk85scr.png" width="700" height="175" alt="the LCD layout"></p>
+<p>The drawing shows pixel assignments to the display RAM locations.<br>
+<font color="#C80000">Red coloured</font> values represent address offsets from start of the display RAM.<br>
+<font color="#008000">Green coloured</font> values represent bit numbers within a byte.</p>
+<hr>
+
+<h2><a name="keyb">The keyboard</a></h2>
+<p>The keyboard interface consists of two 16-bit ports:</p>
+<ul>
+<li>an input port at address $100, bits 8-2 return the state of the keyboard matrix columns</li>
+<li>an output port at address $102, bits 3-1 select the keyboard matrix rows</li>
+</ul>
+<p>The keyboard is scanned by sequential writing of logical ones to the bits of the row select port, then reading the column port.
+A pressed key connects a row with two columns using a pair of contacts.</p>
+<p>The keyboard interface can wake the processor from idle mode when any bit of the column port changes state from&nbsp;0 to&nbsp;1.</p>
+<hr>
+
+<h2><a name="interrupts">Interrupts, reset, power switch</a></h2>
+<p>Low level appearing simultaneously either on the KB9 and KB10 inputs (pins 10 and 11) or on the KB0 and KB10 (pins 1 and 11) triggers the HALT interrupt.<br>
+In the Elektronika MK-85 the KB9/KB10 inputs handle the <b>STOP</b> key selected by the PP1 output.
+Pressing this key causes a HALT interrupt request to the vector at address $0078.</p>
+<p>If the Interrupt Priority bit I (bit 7) in the PSW register is cleared, then low level appearing on the PP1 port (pin 15) configured either as input or output triggers an EVNT interrupt request to the vector at address $0040 (not used in the Elektronika MK-85).</p>
+<p>Low level appearing simultaneously on the KB0 and KB1 inputs (pins 1 and 2) makes the CPU enter the power-off mode.
+The power-off mode is sustained while either the KB9 and KB10 inputs (pins 10 and 11) or the KB0 and KB10 (pins 1 and 11) are kept at low level.
+Any change to a high level causes a CPU Reset.
+Subsequent change to low level on the KB0/KB10 or KB9/KB10 inputs triggers the HALT interrupt.<br>
+Therefore, the system can be turned off by a contact pair connecting the KB0/KB1 inputs to a low level, or turned on by a contact pair connecting either the KB0/KB10 or the KB9/KB10 inputs to a low level.
+The choice of inputs depends on the ROM size (8kB or 32kB).</p>
+<hr>
+
+<h2><a name="cpucr">The CPU control and status register at address $104</a></h2>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Bit (decimal)</th>
+<th align="center" bgcolor="Yellow">Function</th></tr>
+<tr><td align="center">0</td>
+<td>This bit controls the direction of the bi-directional port's group of pins PP3-PP1 (inputs when set).
+In the Elektronika MK-85 they drive the keyboard matrix rows, and therefore are configured as outputs.</td></tr>
+<tr><td align="center">1</td><td>This bit controls the direction of the bi-directional port's group of pins PP7-PP4 (inputs when set).</td></tr>
+<tr><td align="center">2</td><td>This bit controls the direction of the bi-directional port's group of pins PP11-PP8 (inputs when set).</td></tr>
+<tr><td align="center">3</td><td>This bit controls the direction of the bi-directional port's group of pins PP15-PP12 (inputs when set).
+In the Elektronika MK-85 they switch the RC timing constant of the clock oscillator circuit.
+Setting this bit selects fast CPU clock.</td></tr>
+<tr><td align="center">4</td><td>This bit is set when a low level signal lasting more than 20ns was captured on the PP1 pin (either in the input or in the output mode).
+It can be cleared only by writing to the register.</td></tr>
+<tr><td align="center">5-9</td><td>These bits select the external memory configuration (ROM and RAM size).</td></tr>
+<tr><td align="center">10</td><td>This bit stops the CPU clock when cleared.</td></tr>
+<tr><td align="center">11</td><td>This bit divides the CPU clock frequency by&nbsp;8 when cleared.
+The MK-85 firmware uses this mode to handle the keyboard and to generate delays.</td></tr>
+<tr><td align="center">12</td><td>Setting this bit powers down the CPU.</td></tr>
+</table>
+<hr>
+
+<h2><a name="modes">The CPU operation modes</a></h2>
+<h3>The processor can operate in either of two modes:</h3>
+<ul>
+<li>USER mode (to run ordinary user programs)</li>
+<li>HALT mode (console mode)</li>
+</ul>
+<h3>The HALT mode can be entered in following ways:</h3>
+<ul>
+<li>execution of the HALT instruction</li>
+<li>external interrupt signal (key STOP in the MK-85)</li>
+<li>double bus error (failed execution of a trap due to memory error while saving PSW and PC)</li>
+<li>execution of a FIS instruction - upon encountering such instruction the processor tests the bit 7 of the SEL register.
+If the bit is set, an illegal instruction trap is taken (vector at address $0008).
+Otherwise the processor enters the HALT mode through a vector at address consisting of the most significant byte of the SEL register and $08 in the least significant byte.</li>
+<li>return from an interrupt to address greater than or equal $E000</li>
+</ul>
+<p>When entering the HALT mode, the processor saves the previous PC and the PSW in special internal registers CPC and CPS (accessible in the HALT mode with instructions RCPC/RCPS and WCPC/WCPS), then the control passes to the HALT service routine through a vector in the ROM.
+The least significant byte of the vector address has fixed value of $78, while the most significant byte is determined by the SEL register.</p>
+<h3>Additional instructions available in the HALT mode</h3>
+<table border="1" cellspacing="0" cellpadding="3">
+<tr><th align="center" bgcolor="Yellow">Instruction</th>
+<th align="center" bgcolor="Yellow">Opcode</th>
+<th align="center" bgcolor="Yellow">Operation</th>
+<th align="center" bgcolor="Yellow">Description</th></tr>
+<tr><td align="center">GO</td><td align="center">$000A</td>
+<td>PC&nbsp;&lt;-&nbsp;CPC<br>PSW&nbsp;&lt;-&nbsp;CPS</td>
+<td>return to the USER mode</td></tr>
+<tr><td align="center">STEP</td><td align="center">$000E</td>
+<td>PC&nbsp;&lt;-&nbsp;CPC<br>PSW&nbsp;&lt;-&nbsp;CPS</td>
+<td>function equivalent to GO, except that it disables the HALT mode interrupt for a single instruction cycle, used to single-step the program</td></tr> 
+<tr><td align="center">RSEL</td><td align="center">$0010</td>
+<td>R0&nbsp;&lt;-&nbsp;SEL</td><td>read the SEL register, returns $0000 in the MK-85</td></tr>
+<tr><td align="center">MFUS</td><td align="center">$0011</td>
+<td>R0&nbsp;&lt;-&nbsp;(R5)+</td><td>read from the USER address space</td></tr>
+<tr><td align="center">RCPC</td><td align="center">$0012</td>
+<td>R0&nbsp;&lt;-&nbsp;CPC</td><td>read the CPC register</td></tr>
+<tr><td align="center">RCPS</td><td align="center">$0014</td>
+<td>R0&nbsp;&lt;-&nbsp;CPS</td><td>read the CPS register</td></tr>
+<tr><td align="center">MTUS</td><td align="center">$0019</td>
+<td>-(R5)&nbsp;&lt;-&nbsp;R0</td><td>write to the USER address space</td></tr>
+<tr><td align="center">WCPC</td><td align="center">$001A</td>
+<td>CPC&nbsp;&lt;-&nbsp;R0</td><td>write the CPC register</td></tr>
+<tr><td align="center">WCPS</td><td align="center">$001C</td>
+<td>CPS&nbsp;&lt;-&nbsp;R0</td><td>write the CPS register</td></tr>
+</table>
+
+<p>Thanks to <a href="javascript:if(confirm(%27http://vladimir.poletaev.googlepages.com/  \n\nThis file was not retrieved by Teleport Ultra, because it is addressed on a domain or path outside the boundaries set for its Starting Address.  \n\nDo you want to open it from the server?%27))window.location=%27http://vladimir.poletaev.googlepages.com/%27" tppabs="http://vladimir.poletaev.googlepages.com/">Vladimir Poletaev</a> for his great help!</p>
+
+</body>
+</html>
