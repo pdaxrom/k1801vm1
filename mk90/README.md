@@ -62,10 +62,20 @@ Useful options:
 - `--tap-key <octal>`
 - `--tap-frame <n>`
 - `--tap <frame>:<octal>` (repeatable scripted key taps for headless runs)
+- `--type <text>` (repeatable headless host-key input; supports `\n`, `\r`, `\b`, `\\`)
+- `--type-frame <n>`
+- `--type-step <n>`
 - `--rom <path>`
 - `--romt <path>`
 - `--smp0 <path>`
 - `--smp1 <path>`
+
+Example: enter the test ROM, type test number `1`, and press Enter:
+
+```sh
+mk90/.build/mk90 --headless --tick-ms 16 --frames 260 \
+  --tap 210:123 --type-frame 220 --type '1\n'
+```
 
 ## Smoke
 
@@ -74,8 +84,8 @@ make -C mk90 smoke
 ```
 
 The smoke run exercises the current boot menu, BASIC entry, test menu entry,
-and SMP menu paths via headless scripted key taps. If `media/trex.bin` is
-present, smoke also verifies the bootable SMP path through that image. The
-non-bootable SMP check is pinned to `media/smp1.bin`, so replacing
-`media/smp0.bin` does not destabilize smoke baselines. Smoke uses a fixed
-`--tick-ms 16` step so results do not depend on host timing.
+ROMT test-number input, and SMP menu paths via headless scripted key taps. If
+`media/trex.bin` is present, smoke also verifies the bootable SMP path through
+that image. The non-bootable SMP check is pinned to `media/smp1.bin`, so
+replacing `media/smp0.bin` does not destabilize smoke baselines. Smoke uses a
+fixed `--tick-ms 16` step so results do not depend on host timing.

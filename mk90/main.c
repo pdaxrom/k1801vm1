@@ -26,6 +26,10 @@ static const word mk90_keytab[64] = {
 static const char mk90_letters[] =
     "12345:;67890/-ABWGDEVZIJKLMNOPRSTUFHC^[]XY_\\@Qaaa,.";
 
+enum {
+    MK90_MAX_TAP_EVENTS = 256
+};
+
 typedef struct mk90_tap_event {
     word scan_code;
     int frame;
@@ -40,6 +44,7 @@ static void usage(const char *prog)
             "          [--steps-per-frame <n>] [--frames <n>] [--scale <n>]\n"
             "          [--headless] [--trace] [--tick-ms <n>] [--dump-pgm <path>]\n"
             "          [--tap-key <octal>] [--tap-frame <n>] [--tap <frame>:<octal>]\n"
+            "          [--type <text>] [--type-frame <n>] [--type-step <n>]\n"
             "Defaults: roms/rom.bin, roms/romt.bin, media/smp0.bin, media/smp1.bin\n",
             prog);
 }
@@ -75,6 +80,20 @@ static word mk90_lookup_text_key(SDL_Keycode key)
         }
     }
     return 0;
+}
+
+static word mk90_lookup_host_char(char ch)
+{
+    if (ch == '\n' || ch == '\r') {
+        return mk90_keytab[56];
+    }
+    if (ch == ' ') {
+        return mk90_keytab[60];
+    }
+    if (ch == '\b') {
+        return mk90_keytab[55];
+    }
+    return mk90_lookup_text_key((SDL_Keycode)(unsigned char)ch);
 }
 
 static word mk90_translate_key(SDL_Keycode key)
@@ -195,6 +214,62 @@ static int parse_tap_spec(const char *text, mk90_tap_event *event)
     return 0;
 }
 
+static int append_tap_event(mk90_tap_event *events, int *count, int max_count,
+                            int frame, word scan_code)
+{
+    if (!events || !count || *count < 0 || *count >= max_count || scan_code == 0u) {
+        return -1;
+    }
+
+    events[*count].scan_code = scan_code;
+    events[*count].frame = frame;
+    events[*count].pressed = 0;
+    events[*count].released = 0;
+    (*count)++;
+    return 0;
+}
+
+static int append_type_text(mk90_tap_event *events, int *count, int max_count,
+                            int *frame, int frame_step, const char *text)
+{
+    const unsigned char *p = (const unsigned char *)text;
+
+    if (!events || !count || !frame || !text || frame_step < 1) {
+        return -1;
+    }
+
+    while (*p) {
+        word scan_code;
+        unsigned char ch = *p++;
+
+        if (ch == '\\' && *p) {
+            switch (*p++) {
+            case 'n':
+            case 'r':
+                ch = '\n';
+                break;
+            case 'b':
+                ch = '\b';
+                break;
+            case '\\':
+                ch = '\\';
+                break;
+            default:
+                return -1;
+            }
+        }
+
+        scan_code = mk90_lookup_host_char((char)ch);
+        if (scan_code == 0u ||
+            append_tap_event(events, count, max_count, *frame, scan_code) != 0) {
+            return -1;
+        }
+        *frame += frame_step;
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     const char *rom_path = NULL;
@@ -206,7 +281,7 @@ int main(int argc, char *argv[])
     const char *default_smp0;
     const char *default_smp1;
     const char *dump_pgm_path = NULL;
-    mk90_tap_event tap_events[32];
+    mk90_tap_event tap_events[MK90_MAX_TAP_EVENTS];
     regs r;
     char err[256];
     word tap_scan_code = 0;
@@ -217,6 +292,8 @@ int main(int argc, char *argv[])
     int scale = 4;
     int tick_ms = -1;
     int tap_frame = 120;
+    int type_frame = 120;
+    int type_step = 4;
     int tap_count = 0;
     int frame_count = 0;
     uint32_t last_ticks;
@@ -263,6 +340,21 @@ int main(int argc, char *argv[])
                 return 1;
             }
             tap_count++;
+        } else if (!strcmp(argv[i], "--type-frame") && i + 1 < argc) {
+            type_frame = atoi(argv[++i]);
+        } else if (!strcmp(argv[i], "--type-step") && i + 1 < argc) {
+            type_step = atoi(argv[++i]);
+            if (type_step < 1) {
+                fprintf(stderr, "mk90: --type-step must be >= 1\n");
+                return 1;
+            }
+        } else if (!strcmp(argv[i], "--type") && i + 1 < argc) {
+            if (append_type_text(tap_events, &tap_count,
+                                 (int)(sizeof(tap_events) / sizeof(tap_events[0])),
+                                 &type_frame, type_step, argv[++i]) != 0) {
+                fprintf(stderr, "mk90: invalid --type text or too many tap events\n");
+                return 1;
+            }
         } else if (!strcmp(argv[i], "--help")) {
             usage(argv[0]);
             return 0;
@@ -300,15 +392,12 @@ int main(int argc, char *argv[])
         return 1;
     }
     if (tap_scan_code != 0u) {
-        if (tap_count >= (int)(sizeof(tap_events) / sizeof(tap_events[0]))) {
+        if (append_tap_event(tap_events, &tap_count,
+                             (int)(sizeof(tap_events) / sizeof(tap_events[0])),
+                             tap_frame, tap_scan_code) != 0) {
             fprintf(stderr, "mk90: too many tap events\n");
             return 1;
         }
-        tap_events[tap_count].scan_code = tap_scan_code;
-        tap_events[tap_count].frame = tap_frame;
-        tap_events[tap_count].pressed = 0;
-        tap_events[tap_count].released = 0;
-        tap_count++;
     }
 
     memset(&r, 0, sizeof(r));
