@@ -14,6 +14,17 @@
 
 static mk90_state_t g_mk90;
 
+static byte *mk90_ramptr(regs *r, word offset)
+{
+    mk90_state_t *state = mk90_machine_state();
+
+    (void)r;
+    if ((uint32_t)offset >= state->ram_size) {
+        return NULL;
+    }
+    return &state->ram[offset];
+}
+
 static int mk90_load_file_into(byte *dst, size_t max_size, const char *path,
                                char *err, size_t err_len)
 {
@@ -70,6 +81,39 @@ void mk90_machine_raise_data_ready(mk90_state_t *state)
 void mk90_machine_raise_keyboard(mk90_state_t *state)
 {
     state->irq.keyboard = 1;
+}
+
+void mk90_machine_sync_fast_ram(mk90_state_t *state)
+{
+    uint32_t fast_size = 0;
+    uint32_t old_size;
+
+    if (!state || !state->cpu) {
+        return;
+    }
+
+    old_size = state->cpu->ram_fast_size;
+    while (fast_size < state->ram_size) {
+        word address = (word)fast_size;
+
+        if (!mk90_syscon_rd_ram(state, address) ||
+            !mk90_syscon_wr_ram(state, address) ||
+            mk90_syscon_rd_rom(state, address)) {
+            break;
+        }
+        fast_size++;
+    }
+
+    state->cpu->ram_fast = (fast_size != 0u) ? state->ram : NULL;
+    state->cpu->ram_fast_size = fast_size;
+
+    if (state->trace && old_size != fast_size) {
+        mk90_machine_tracef(state,
+                            "ram_fast_size=%06o rg1=%06o rg2=%06o\n",
+                            (word)fast_size,
+                            state->syscon.rg1,
+                            state->syscon.rg2);
+    }
 }
 
 static byte mk90_read_byte(regs *r, word address)
@@ -304,6 +348,7 @@ static int mk90_init(regs *r)
 
     state->cpu = r;
     memset(state->ram, 0, sizeof(state->ram));
+    mk90_machine_sync_fast_ram(state);
     return 0;
 }
 
@@ -324,6 +369,7 @@ static void mk90_reset(regs *r)
     if (cold_reset) {
         mk90_rtc_reset(state);
     }
+    mk90_machine_sync_fast_ram(state);
     memset(&state->irq, 0, sizeof(state->irq));
     state->cpu->SEL0 = MK90_RESET_PC;
 }
@@ -396,9 +442,10 @@ void mk90_machine_connect(regs *r)
     r->reset = mk90_reset;
     r->fini = mk90_fini;
     r->poll_irq = mk90_poll_irq;
-    r->ramptr = NULL;
+    r->ramptr = mk90_ramptr;
     r->ram_fast = NULL;
     r->ram_fast_size = 0;
+    mk90_machine_sync_fast_ram(state);
 }
 
 void mk90_machine_set_trace(int on)

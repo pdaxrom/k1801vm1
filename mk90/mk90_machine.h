@@ -89,5 +89,6 @@ void mk90_machine_raise_inrt(mk90_state_t *state);
 void mk90_machine_raise_data_ready(mk90_state_t *state);
 void mk90_machine_raise_keyboard(mk90_state_t *state);
 void mk90_machine_tracef(const mk90_state_t *state, const char *fmt, ...);
+void mk90_machine_sync_fast_ram(mk90_state_t *state);
 
 #endif

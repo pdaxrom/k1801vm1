@@ -4,6 +4,7 @@ void mk90_syscon_reset(mk90_state_t *state)
 {
     state->syscon.rg1 = 0;
     state->syscon.rg2 = 0;
+    mk90_machine_sync_fast_ram(state);
 }
 
 word mk90_syscon_read_word(const mk90_state_t *state, word offset)
@@ -31,6 +32,7 @@ void mk90_syscon_write_word(mk90_state_t *state, word offset, word value)
                         value,
                         state->syscon.rg1,
                         state->syscon.rg2);
+    mk90_machine_sync_fast_ram(state);
 }
 
 void mk90_syscon_write_byte(mk90_state_t *state, word offset, byte value)
