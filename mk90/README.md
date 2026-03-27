@@ -4,7 +4,8 @@ SDL front-end and machine adapter for the Elektronika MK-90, built on top of
 the shared PDP-11/K1801 `core/`.
 
 See `HARDWARE.md` for the MK-90 address map, interrupt vectors, peripheral
-registers, ROM layout, and notes on what the current emulator models.
+registers, ROM layout, and notes on what the current emulator models. Open
+bring-up items live in `TODO.md`.
 
 ## Layout
 
@@ -86,6 +87,34 @@ Example: enter the test ROM, type test number `1`, and press Enter:
 mk90/.build/mk90 --headless --tick-ms 16 --frames 260 \
   --tap 210:123 --type-frame 220 --type '1\n'
 ```
+
+## SDL Keyboard
+
+The SDL front-end now follows a normal PC physical keyboard layout based on
+`SDL_Scancode`, so the mapping no longer depends on the current host text
+layout.
+
+- printable keys are remapped to ordinary PC positions:
+  - top row: `` ` 1 2 3 4 5 6 7 8 9 0 - = ``
+  - letter rows: `QWERTYUIOP[]\\`, `ASDFGHJKL;'`, `ZXCVBNM,./`
+  - punctuation coverage keeps all MK-90 printable scan codes reachable:
+    `` ` -> @ ``, `= -> ^`, `; -> :`, `' -> ;`, `/ -> /`
+- `Tab`, `F6`, or either host `Ctrl` -> `[SU]`
+- cursor keys -> `up`, `left`, `right`, `down`
+- `Backspace` or `Delete` -> `[ZV]`
+- `Enter` or keypad Enter -> `[VK]`
+- `Home` or `F7` -> `[R/L]`
+- `End` or `PageDown` -> the right key left of the space bar
+- `Space` -> space bar
+- `Insert` or `PageUp` -> the left key right of the space bar
+- `F8` or either host `Alt` -> `[FK]`
+- `F9` or either host `Shift` -> `[V/N]`
+- keypad digits `/ - .` are mirrored to the matching MK-90 numeric/punctuation
+  scan codes
+
+The SDL key handling also now tracks the currently pressed host key, so focus
+loss or releasing a different host key no longer clears the latched MK-90 key
+spuriously.
 
 ## Smoke
 
