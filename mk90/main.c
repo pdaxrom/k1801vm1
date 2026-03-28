@@ -1,4 +1,26 @@
+#ifdef USE_SDL
 #include <SDL.h>
+#else
+#include <stddef.h>
+#include <sys/time.h>
+/* Minimal SDL-like stubs used by the X11 backend. */
+typedef void *SDL_Window;
+typedef void *SDL_Renderer;
+typedef void *SDL_Texture;
+typedef unsigned int  Uint32;
+typedef unsigned char Uint8;
+typedef int SDL_Scancode;
+typedef int SDL_Keycode;
+typedef int SDL_AudioDeviceID;
+#define SDL_SCANCODE_UNKNOWN 0
+static Uint32 SDL_GetTicks(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (Uint32)(tv.tv_sec * 1000u + (Uint32)(tv.tv_usec / 1000u));
+}
+#include "x11_gui.h"
+#endif /* USE_SDL */
 
 #include "../bk0010-01/bk_timing.h"
 #include "../core/core.h"
@@ -55,6 +77,7 @@ typedef struct mk90_audio_state {
     unsigned count;
 } mk90_audio_state;
 
+#ifdef USE_SDL
 static void mk90_audio_push(mk90_audio_state *st, word divider, uint32_t cycles)
 {
     unsigned tail;
@@ -131,6 +154,7 @@ static void mk90_audio_callback(void *userdata, Uint8 *stream, int len)
         out[i] = (int16_t)(8000.0 * (acc / sample_us));
     }
 }
+#endif /* USE_SDL */
 
 static void usage(const char *prog)
 {
@@ -191,6 +215,7 @@ static word mk90_lookup_host_char(char ch)
     return mk90_lookup_text_key((SDL_Keycode)(unsigned char)ch);
 }
 
+#ifdef USE_SDL
 static word mk90_translate_special_key(SDL_Scancode scancode)
 {
     switch (scancode) {
@@ -394,6 +419,7 @@ static word mk90_translate_key(SDL_Scancode scancode, SDL_Keycode key)
 
     return mk90_lookup_text_key(key);
 }
+#endif /* USE_SDL */
 
 static int mk90_save_pgm(const char *path, const uint32_t *pixels)
 {
@@ -621,16 +647,18 @@ int main(int argc, char *argv[])
     int tap_count = 0;
     int frame_count = 0;
     uint32_t last_ticks;
+#ifdef USE_SDL
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
     SDL_Texture *texture = NULL;
-    uint32_t *pixels = NULL;
-    SDL_Scancode active_host_key = SDL_SCANCODE_UNKNOWN;
     SDL_AudioDeviceID audio_dev = 0;
     mk90_audio_state audio_state = { MK90_AUDIO_RATE, 0,
                                      1000000.0 / (double)MK90_AUDIO_RATE,
                                      0.0, 0.0, 0u,
                                      { 0 }, { 0 }, 0u, 0u };
+#endif /* USE_SDL */
+    uint32_t *pixels = NULL;
+    SDL_Scancode active_host_key = SDL_SCANCODE_UNKNOWN;
     int quit = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -784,6 +812,7 @@ int main(int argc, char *argv[])
     }
 
     if (!headless) {
+#ifdef USE_SDL
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO) != 0) {
             fprintf(stderr, "mk90: SDL_Init failed: %s\n", SDL_GetError());
             free(pixels);
@@ -839,6 +868,13 @@ int main(int argc, char *argv[])
                 SDL_PauseAudioDevice(audio_dev, 0);
             }
         }
+#else /* USE_X11 */
+        if (x11_gui_init(MK90_SCREEN_WIDTH, MK90_SCREEN_HEIGHT, scale) != 0) {
+            free(pixels);
+            core_fini(&r);
+            return 1;
+        }
+#endif /* USE_SDL */
     }
 
     last_ticks = SDL_GetTicks();
@@ -871,6 +907,7 @@ int main(int argc, char *argv[])
         }
 
         if (!headless) {
+#ifdef USE_SDL
             SDL_Event event;
             while (SDL_PollEvent(&event)) {
                 if (event.type == SDL_QUIT) {
@@ -900,6 +937,31 @@ int main(int argc, char *argv[])
                     active_host_key = SDL_SCANCODE_UNKNOWN;
                 }
             }
+#else /* USE_X11 */
+            {
+                unsigned int ev_scan;
+                int ev_keycode;
+                int ev_type;
+                while ((ev_type = x11_gui_handle_events(&ev_scan, &ev_keycode)) !=
+                       MK90_X11_EVENT_NONE) {
+                    if (ev_type == MK90_X11_EVENT_QUIT) {
+                        quit = 1;
+                        break;
+                    } else if (ev_type == MK90_X11_EVENT_PRESS && ev_scan != 0u) {
+                        if (active_host_key != SDL_SCANCODE_UNKNOWN &&
+                            active_host_key != (SDL_Scancode)ev_keycode) {
+                            mk90_machine_key_release();
+                        }
+                        mk90_machine_key_press((word)ev_scan);
+                        active_host_key = (SDL_Scancode)ev_keycode;
+                    } else if (ev_type == MK90_X11_EVENT_RELEASE &&
+                               active_host_key == (SDL_Scancode)ev_keycode) {
+                        mk90_machine_key_release();
+                        active_host_key = (SDL_Scancode)SDL_SCANCODE_UNKNOWN;
+                    }
+                }
+            }
+#endif /* USE_SDL */
         }
 
         {
@@ -926,6 +988,7 @@ int main(int argc, char *argv[])
                 mk90_machine_step(cycles);
             }
 
+#ifdef USE_SDL
             if (audio_dev != 0) {
                 word divider;
                 uint32_t cycles;
@@ -936,16 +999,21 @@ int main(int argc, char *argv[])
                 }
                 SDL_UnlockAudioDevice(audio_dev);
             }
+#endif /* USE_SDL */
         }
         mk90_machine_tick_ms(elapsed_ms);
 
         if (!headless) {
             mk90_machine_render(pixels, MK90_SCREEN_WIDTH);
+#ifdef USE_SDL
             SDL_UpdateTexture(texture, NULL, pixels,
                               MK90_SCREEN_WIDTH * (int)sizeof(uint32_t));
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, texture, NULL, NULL);
             SDL_RenderPresent(renderer);
+#else
+            x11_gui_draw(pixels, MK90_SCREEN_WIDTH, MK90_SCREEN_HEIGHT);
+#endif
         } else if (dump_pgm_path) {
             mk90_machine_render(pixels, MK90_SCREEN_WIDTH);
         }
@@ -958,7 +1026,11 @@ int main(int argc, char *argv[])
         if (!headless) {
             uint32_t frame_ms = SDL_GetTicks() - frame_start;
             if (frame_ms < 16u) {
+#ifdef USE_SDL
                 SDL_Delay(16u - frame_ms);
+#else
+                usleep((16u - frame_ms) * 1000u);
+#endif
             }
         }
     }
@@ -972,16 +1044,24 @@ int main(int argc, char *argv[])
     if (dump_vram_path && mk90_save_vram(dump_vram_path) != 0) {
         fprintf(stderr, "mk90: failed to save %s\n", dump_vram_path);
     }
+#ifdef USE_SDL
     if (audio_dev != 0) {
         SDL_CloseAudioDevice(audio_dev);
     }
+#endif
     free(pixels);
+#ifdef USE_SDL
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     if (!headless) {
         SDL_Quit();
     }
+#else
+    if (!headless) {
+        x11_gui_cleanup();
+    }
+#endif
     core_fini(&r);
     return 0;
 }

@@ -4,11 +4,25 @@ CC ?= cc
 CFLAGS ?= -O2 -Wall -Wextra -Wpedantic
 CPPFLAGS += -I. -I..
 DEPFLAGS := -MMD -MP
-SDL_CFLAGS := $(shell sdl2-config --cflags)
-SDL_LIBS := $(shell sdl2-config --libs)
 BUILD_DIR := .build
 BIN := $(BUILD_DIR)/mk90
 CFG := -DENABLE_MMU=0
+
+# Choose GUI backend at build time (default SDL2).
+# Use:  make GUI=x11   to build with the X11 backend.
+GUI ?= sdl
+
+ifeq ($(GUI),x11)
+    CPPFLAGS += -DUSE_X11
+    SDL_CFLAGS :=
+    SDL_LIBS := -lX11
+    GUI_SRCS := x11_gui.c
+else
+    CPPFLAGS += -DUSE_SDL
+    SDL_CFLAGS := $(shell sdl2-config --cflags)
+    SDL_LIBS := $(shell sdl2-config --libs)
+    GUI_SRCS :=
+endif
 
 SRCS := \
 	main.c \
@@ -18,7 +32,8 @@ SRCS := \
 	mk90_io.c \
 	mk90_syscon.c \
 	mk90_smp.c \
-	mk90_keyboard.c
+	mk90_keyboard.c \
+	$(GUI_SRCS)
 
 OBJS := $(addprefix $(BUILD_DIR)/,$(SRCS:.c=.o))
 CORE_OBJS := \
