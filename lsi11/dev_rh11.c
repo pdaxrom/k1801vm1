@@ -327,16 +327,16 @@ static void rh_ba_inc_mode(uint16_t *ba, uint8_t *ext)
     rh_ba_inc_rh11(ba, ext);
 }
 
-static paddr_t rh_dma_pa_rh11(uint16_t ba, uint8_t ext)
+static bus_paddr_t rh_dma_pa_rh11(uint16_t ba, uint8_t ext)
 {
     uint32_t uba = (((uint32_t)(ext & 03u)) << 16) | (uint32_t)ba; /* 18-bit */
     if (bus_machine() == BUS_MACHINE_PDP1184) {
         return ubmap_map_addr(uba & 000777777u);
     }
-    return (paddr_t)(uba & 000777777u);
+    return (bus_paddr_t)(uba & 000777777u);
 }
 
-static paddr_t rh_dma_pa_rh70(uint16_t ba, uint8_t ext)
+static bus_paddr_t rh_dma_pa_rh70(uint16_t ba, uint8_t ext)
 {
     uint32_t pa22 = (((uint32_t)(ext & RHBAE_IMP)) << 16) | (uint32_t)ba;
 
@@ -352,10 +352,10 @@ static paddr_t rh_dma_pa_rh70(uint16_t ba, uint8_t ext)
         return ubmap_map_addr(uba18 & 000777777u);
     }
 
-    return (paddr_t)(pa22 & 017777777u);
+    return (bus_paddr_t)(pa22 & 017777777u);
 }
 
-static paddr_t rh_dma_pa_mode(uint16_t ba, uint8_t ext)
+static bus_paddr_t rh_dma_pa_mode(uint16_t ba, uint8_t ext)
 {
     if (rh_mode == RH11_MODE_RH70) {
         return rh_dma_pa_rh70(ba, ext);
@@ -365,11 +365,11 @@ static paddr_t rh_dma_pa_mode(uint16_t ba, uint8_t ext)
 
 static int rh_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 {
-    paddr_t pa = rh_dma_pa_mode(ba, ext);
+    bus_paddr_t pa = rh_dma_pa_mode(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     *w = bus_read16(pa);
@@ -378,11 +378,11 @@ static int rh_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 
 static int rh_dma_write_word(uint16_t ba, uint8_t ext, uint16_t w)
 {
-    paddr_t pa = rh_dma_pa_mode(ba, ext);
+    bus_paddr_t pa = rh_dma_pa_mode(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     bus_write16(pa, w);

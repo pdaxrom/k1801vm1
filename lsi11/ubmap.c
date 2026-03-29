@@ -99,25 +99,25 @@ int ubmap_enabled(void)
     return ubmap_enabled_flag;
 }
 
-paddr_t ubmap_map_addr(uint32_t unibus_addr)
+bus_paddr_t ubmap_map_addr(uint32_t unibus_addr)
 {
     uint32_t page;
     uint32_t off;
 
     if (bus_machine() != BUS_MACHINE_PDP1184) {
-        return (paddr_t)(unibus_addr & 000777777u);
+        return (bus_paddr_t)(unibus_addr & 000777777u);
     }
 
     if (!ubmap_enabled_flag) {
-        return (paddr_t)(unibus_addr & 000777777u);
+        return (bus_paddr_t)(unibus_addr & 000777777u);
     }
 
     page = (unibus_addr >> UBM_PAGE_SHIFT) & UBM_PAGE_MASK;
     off = unibus_addr & UBM_OFFSET_MASK;
 
     if (page == UBM_PAGE_MASK) {
-        return (paddr_t)((PDP11_22BIT_IO_PAGE_START + off) & PDP11_22BIT_PHYS_MASK);
+        return (bus_paddr_t)((PDP11_22BIT_IO_PAGE_START + off) & PDP11_22BIT_PHYS_MASK);
     }
 
-    return (paddr_t)((ubmap_regs[page] + off) & PDP11_22BIT_PHYS_MASK);
+    return (bus_paddr_t)((ubmap_regs[page] + off) & PDP11_22BIT_PHYS_MASK);
 }

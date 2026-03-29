@@ -281,7 +281,7 @@ int lsi11_device_enabled(const char *name)
    This matches your previous approach: push PSW and PC, then vector through
    000004/000006. If your core already provides a bus error trap helper, use
    that instead. */
-static inline int nxm_addr_is_iopage(paddr_t addr)
+static inline int nxm_addr_is_iopage(bus_paddr_t addr)
 {
     if (addr >= 0760000 && addr <= 0777777) {
         return 1;
@@ -292,7 +292,7 @@ static inline int nxm_addr_is_iopage(paddr_t addr)
     return 0;
 }
 
-static inline void nxm_trap(regs *r, paddr_t addr)
+static inline void nxm_trap(regs *r, bus_paddr_t addr)
 {
     if (r->model == DCJ11) {
         word cpuerr_bit = nxm_addr_is_iopage(addr) ? 0000020 : 0000040; /* TMO : NXM */
@@ -376,16 +376,16 @@ static byte __not_in_flash_func(core_load_byte)(regs *r, word addr)
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
-            nxm_trap(r, (paddr_t)addr);
+            nxm_trap(r, (bus_paddr_t)addr);
             return 0;
         }
         return bus_vm2_cpu_read8((uint16_t)addr, halt_mode);
     }
-    if (bus_is_nxm((paddr_t)addr)) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr)) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return 0;
     }
-    return bus_read8((paddr_t)addr);
+    return bus_read8((bus_paddr_t)addr);
 }
 
 static void __not_in_flash_func(core_store_byte)(regs *r, word addr, byte v)
@@ -393,17 +393,17 @@ static void __not_in_flash_func(core_store_byte)(regs *r, word addr, byte v)
     if (vm2_model(r)) {
         int halt_mode = vm2_halt_mode(r);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode)) {
-            nxm_trap(r, (paddr_t)addr);
+            nxm_trap(r, (bus_paddr_t)addr);
             return;
         }
         bus_vm2_cpu_write8((uint16_t)addr, halt_mode, (uint8_t)v);
         return;
     }
-    if (bus_is_nxm((paddr_t)addr)) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr)) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return;
     }
-    bus_write8((paddr_t)addr, v);
+    bus_write8((bus_paddr_t)addr, v);
 }
 
 static word __not_in_flash_func(core_load_word)(regs *r, word addr)
@@ -413,16 +413,16 @@ static word __not_in_flash_func(core_load_word)(regs *r, word addr)
         uint16_t a1 = (uint16_t)(addr + 1);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode) ||
                 bus_vm2_cpu_is_nxm(a1, halt_mode)) {
-            nxm_trap(r, (paddr_t)addr);
+            nxm_trap(r, (bus_paddr_t)addr);
             return 0;
         }
         return (word)bus_vm2_cpu_read16((uint16_t)addr, halt_mode);
     }
-    if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr) || bus_is_nxm((bus_paddr_t)(addr + 1))) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return 0;
     }
-    return (word)bus_read16((paddr_t)addr);
+    return (word)bus_read16((bus_paddr_t)addr);
 }
 
 static void __not_in_flash_func(core_store_word)(regs *r, word addr, word v)
@@ -432,53 +432,53 @@ static void __not_in_flash_func(core_store_word)(regs *r, word addr, word v)
         uint16_t a1 = (uint16_t)(addr + 1);
         if (bus_vm2_cpu_is_nxm((uint16_t)addr, halt_mode) ||
                 bus_vm2_cpu_is_nxm(a1, halt_mode)) {
-            nxm_trap(r, (paddr_t)addr);
+            nxm_trap(r, (bus_paddr_t)addr);
             return;
         }
         bus_vm2_cpu_write16((uint16_t)addr, halt_mode, (uint16_t)v);
         return;
     }
-    if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr) || bus_is_nxm((bus_paddr_t)(addr + 1))) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return;
     }
-    bus_write16((paddr_t)addr, (uint16_t)v);
+    bus_write16((bus_paddr_t)addr, (uint16_t)v);
 }
 
 static byte __not_in_flash_func(core_load_byte_pa)(regs *r, dword addr)
 {
-    if (bus_is_nxm((paddr_t)addr)) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr)) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return 0;
     }
-    return bus_read8((paddr_t)addr);
+    return bus_read8((bus_paddr_t)addr);
 }
 
 static void __not_in_flash_func(core_store_byte_pa)(regs *r, dword addr, byte v)
 {
-    if (bus_is_nxm((paddr_t)addr)) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr)) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return;
     }
-    bus_write8((paddr_t)addr, v);
+    bus_write8((bus_paddr_t)addr, v);
 }
 
 static word __not_in_flash_func(core_load_word_pa)(regs *r, dword addr)
 {
-    if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr) || bus_is_nxm((bus_paddr_t)(addr + 1))) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return 0;
     }
-    return (word)bus_read16((paddr_t)addr);
+    return (word)bus_read16((bus_paddr_t)addr);
 }
 
 static void __not_in_flash_func(core_store_word_pa)(regs *r, dword addr, word v)
 {
-    if (bus_is_nxm((paddr_t)addr) || bus_is_nxm((paddr_t)(addr + 1))) {
-        nxm_trap(r, (paddr_t)addr);
+    if (bus_is_nxm((bus_paddr_t)addr) || bus_is_nxm((bus_paddr_t)(addr + 1))) {
+        nxm_trap(r, (bus_paddr_t)addr);
         return;
     }
-    bus_write16((paddr_t)addr, (uint16_t)v);
+    bus_write16((bus_paddr_t)addr, (uint16_t)v);
 }
 
 /* core expects init/reset/fini */
@@ -650,7 +650,7 @@ int __not_in_flash_func(core_poll_irq)(regs *r, word *vec)
 static uint8_t *core_ramptr(regs *r, word offset)
 {
     (void)r;
-    return bus_ram_ptr((paddr_t)offset);
+    return bus_ram_ptr((bus_paddr_t)offset);
 }
 
 void lsi11_hw_connect(regs *r)

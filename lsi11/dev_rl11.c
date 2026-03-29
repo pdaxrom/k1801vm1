@@ -233,14 +233,14 @@ static void rl_rhdr_advance_word(void)
     }
 }
 
-static paddr_t rl_pa(uint16_t ba, uint8_t ext)
+static bus_paddr_t rl_pa(uint16_t ba, uint8_t ext)
 {
     /* On 11/84 DMA is presented on 18-bit UBA and translated by UBMAP. */
     if (bus_machine() == BUS_MACHINE_PDP1184) {
         uint32_t uba = (((uint32_t)(ext & 03u) << 16) | (uint32_t)ba) & 000777777u;
         return ubmap_map_addr(uba);
     }
-    return (paddr_t)(((uint32_t)(ext & RLBAE_IMP) << 16) | ba);
+    return (bus_paddr_t)(((uint32_t)(ext & RLBAE_IMP) << 16) | ba);
 }
 
 static void rl_ba_inc(uint16_t *ba, uint8_t *ext)
@@ -307,11 +307,11 @@ static int rl_write_sector(rl_drive_t *d, uint32_t lba, const uint8_t *buf)
 
 static int rl_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 {
-    paddr_t pa = rl_pa(ba, ext);
+    bus_paddr_t pa = rl_pa(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     *w = bus_read16(pa);
@@ -320,11 +320,11 @@ static int rl_dma_read_word(uint16_t ba, uint8_t ext, uint16_t *w)
 
 static int rl_dma_write_word(uint16_t ba, uint8_t ext, uint16_t w)
 {
-    paddr_t pa = rl_pa(ba, ext);
+    bus_paddr_t pa = rl_pa(ba, ext);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     bus_write16(pa, w);

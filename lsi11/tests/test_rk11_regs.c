@@ -182,9 +182,9 @@ int main(void)
     check(bus_read16(RKBA) == 0000002, "RKBA wraps after overflow");
     check((bus_read16(RKCS) & RKCS_MEX_MASK) == 0000060,
           "MEX increments on RKBA overflow");
-    check(bus_read16((paddr_t)0577776) == 012345,
+    check(bus_read16((bus_paddr_t)0577776) == 012345,
           "MEX transfer writes high-memory word");
-    check(bus_read16((paddr_t)0600000) == 006543,
+    check(bus_read16((bus_paddr_t)0600000) == 006543,
           "MEX overflow transfer continues at next bank");
 
     rk11_close_image();

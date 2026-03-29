@@ -288,19 +288,19 @@ static void xp_finish_command(void)
     xp_sync_status();
 }
 
-static paddr_t xp_dma_pa(uint16_t ba, uint8_t bae)
+static bus_paddr_t xp_dma_pa(uint16_t ba, uint8_t bae)
 {
     uint32_t pa = (((uint32_t)(bae & XP_BAE_IMP)) << 16) | (uint32_t)ba;
-    return (paddr_t)(pa & 017777777u);
+    return (bus_paddr_t)(pa & 017777777u);
 }
 
 static int xp_dma_read_word(uint16_t ba, uint8_t bae, uint16_t *w)
 {
-    paddr_t pa = xp_dma_pa(ba, bae);
+    bus_paddr_t pa = xp_dma_pa(ba, bae);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     *w = bus_read16(pa);
@@ -309,11 +309,11 @@ static int xp_dma_read_word(uint16_t ba, uint8_t bae, uint16_t *w)
 
 static int xp_dma_write_word(uint16_t ba, uint8_t bae, uint16_t w)
 {
-    paddr_t pa = xp_dma_pa(ba, bae);
+    bus_paddr_t pa = xp_dma_pa(ba, bae);
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     bus_write16(pa, w);

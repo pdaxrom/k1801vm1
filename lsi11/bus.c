@@ -264,7 +264,7 @@ void bus_init(void)
     memset(g_vm2_halt_ram, 0, g_vm2_halt_ram_bytes);
 }
 
-static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
+static inline int io_decode_addr(bus_paddr_t addr, uint16_t *io_addr_out)
 {
     uint16_t a16;
 
@@ -328,13 +328,13 @@ static inline int io_decode_addr(paddr_t addr, uint16_t *io_addr_out)
     return 0;
 }
 
-static inline int io_is_decoded(paddr_t addr)
+static inline int io_is_decoded(bus_paddr_t addr)
 {
     uint16_t io_addr = 0;
     return io_decode_addr(addr, &io_addr);
 }
 
-int __not_in_flash_func(bus_addr_is_ram)(paddr_t addr)
+int __not_in_flash_func(bus_addr_is_ram)(bus_paddr_t addr)
 {
     if (io_is_decoded(addr)) {
         return 0;
@@ -373,21 +373,21 @@ int __not_in_flash_func(bus_addr_is_ram)(paddr_t addr)
     return (addr < g_ram_bytes) ? 1 : 0;
 }
 
-int __not_in_flash_func(bus_range_is_ram)(paddr_t addr, size_t len)
+int __not_in_flash_func(bus_range_is_ram)(bus_paddr_t addr, size_t len)
 {
     if (len == 0) {
         return 1;
     }
 
     for (size_t i = 0; i < len; i++) {
-        if (!bus_addr_is_ram(addr + (paddr_t)i)) {
+        if (!bus_addr_is_ram(addr + (bus_paddr_t)i)) {
             return 0;
         }
     }
     return 1;
 }
 
-int __not_in_flash_func(bus_is_nxm)(paddr_t addr)
+int __not_in_flash_func(bus_is_nxm)(bus_paddr_t addr)
 {
     if (io_is_decoded(addr)) {
         return 0;
@@ -400,7 +400,7 @@ int __not_in_flash_func(bus_is_nxm)(paddr_t addr)
     return 1;
 }
 
-uint8_t __not_in_flash_func(bus_read8)(paddr_t addr)
+uint8_t __not_in_flash_func(bus_read8)(bus_paddr_t addr)
 {
     uint16_t io_addr = 0;
 
@@ -415,7 +415,7 @@ uint8_t __not_in_flash_func(bus_read8)(paddr_t addr)
     return 0;
 }
 
-void __not_in_flash_func(bus_write8)(paddr_t addr, uint8_t v)
+void __not_in_flash_func(bus_write8)(bus_paddr_t addr, uint8_t v)
 {
     uint16_t io_addr = 0;
 
@@ -430,7 +430,7 @@ void __not_in_flash_func(bus_write8)(paddr_t addr, uint8_t v)
     }
 }
 
-uint16_t __not_in_flash_func(bus_read16)(paddr_t addr)
+uint16_t __not_in_flash_func(bus_read16)(bus_paddr_t addr)
 {
     uint16_t io_addr = 0;
 
@@ -447,7 +447,7 @@ uint16_t __not_in_flash_func(bus_read16)(paddr_t addr)
     return 0;
 }
 
-void __not_in_flash_func(bus_write16)(paddr_t addr, uint16_t v)
+void __not_in_flash_func(bus_write16)(bus_paddr_t addr, uint16_t v)
 {
     uint16_t io_addr = 0;
 
@@ -474,10 +474,10 @@ static inline int vm2_cpu_is_nxm_byte(uint16_t addr, int halt_mode)
 {
     uint16_t io_addr = 0;
 
-    if (io_decode_addr((paddr_t)addr, &io_addr)) {
+    if (io_decode_addr((bus_paddr_t)addr, &io_addr)) {
         return 0;
     }
-    if (!bus_addr_is_ram((paddr_t)addr)) {
+    if (!bus_addr_is_ram((bus_paddr_t)addr)) {
         return 1;
     }
     if (!vm2_bankable_ram_addr(addr)) {
@@ -501,7 +501,7 @@ uint8_t __not_in_flash_func(bus_vm2_cpu_read8)(uint16_t addr, int halt_mode)
 {
     uint16_t io_addr = 0;
 
-    if (io_decode_addr((paddr_t)addr, &io_addr)) {
+    if (io_decode_addr((bus_paddr_t)addr, &io_addr)) {
         return devio_read8(io_addr);
     }
     if (vm2_cpu_is_nxm_byte(addr, halt_mode ? 1 : 0)) {
@@ -517,7 +517,7 @@ void __not_in_flash_func(bus_vm2_cpu_write8)(uint16_t addr, int halt_mode, uint8
 {
     uint16_t io_addr = 0;
 
-    if (io_decode_addr((paddr_t)addr, &io_addr)) {
+    if (io_decode_addr((bus_paddr_t)addr, &io_addr)) {
         devio_write8(io_addr, v);
         return;
     }
@@ -545,7 +545,7 @@ void __not_in_flash_func(bus_vm2_cpu_write16)(uint16_t addr, int halt_mode, uint
                        (uint8_t)((v >> 8) & 000377));
 }
 
-uint8_t __not_in_flash_func(*bus_ram_ptr)(paddr_t addr)
+uint8_t __not_in_flash_func(*bus_ram_ptr)(bus_paddr_t addr)
 {
     if (!bus_addr_is_ram(addr)) {
         return NULL;

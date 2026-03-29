@@ -8,7 +8,7 @@
 #include "pico/stdlib.h"
 #endif
 
-typedef uint32_t paddr_t;
+typedef uint32_t bus_paddr_t;
 
 /* PDP-11 fixed I/O page map (OCTAL) */
 #define RAM_END 0157777
@@ -47,15 +47,15 @@ int bus_vm2_configure(uint32_t user_ram_bytes, uint32_t halt_ram_bytes, char *er
 uint32_t bus_vm2_user_ram_bytes(void);
 uint32_t bus_vm2_halt_ram_bytes(void);
 
-int bus_is_nxm(paddr_t addr);
-int bus_addr_is_ram(paddr_t addr);
-int bus_range_is_ram(paddr_t addr, size_t len);
+int bus_is_nxm(bus_paddr_t addr);
+int bus_addr_is_ram(bus_paddr_t addr);
+int bus_range_is_ram(bus_paddr_t addr, size_t len);
 
-uint8_t bus_read8(paddr_t addr);
-uint16_t bus_read16(paddr_t addr);
+uint8_t bus_read8(bus_paddr_t addr);
+uint16_t bus_read16(bus_paddr_t addr);
 
-void bus_write8(paddr_t addr, uint8_t v);
-void bus_write16(paddr_t addr, uint16_t v);
+void bus_write8(bus_paddr_t addr, uint8_t v);
+void bus_write16(bus_paddr_t addr, uint16_t v);
 
 /* VM2 CPU-side accessors: bank RAM for 000000..157777, never bank 160000..177777. */
 int bus_vm2_cpu_is_nxm(uint16_t addr, int halt_mode);
@@ -64,7 +64,7 @@ void bus_vm2_cpu_write8(uint16_t addr, int halt_mode, uint8_t v);
 uint16_t bus_vm2_cpu_read16(uint16_t addr, int halt_mode);
 void bus_vm2_cpu_write16(uint16_t addr, int halt_mode, uint16_t v);
 
-uint8_t *bus_ram_ptr(paddr_t addr);
+uint8_t *bus_ram_ptr(bus_paddr_t addr);
 uint32_t bus_ram_kb(void);
 size_t bus_ram_bytes(void);
 bus_machine_t bus_machine(void);

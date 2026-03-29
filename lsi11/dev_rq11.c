@@ -401,20 +401,20 @@ static void rq_raise_irq(void)
     rq_log("irq req vec=%06o pri=%o", (unsigned)RQ_VECTOR, (unsigned)RQ_PRIORITY);
 }
 
-static paddr_t rq_dma_map_addr(uint32_t bus_addr)
+static bus_paddr_t rq_dma_map_addr(uint32_t bus_addr)
 {
     if (rq_ubus_mode) {
-        return (paddr_t)(bus_addr & 000777777u);
+        return (bus_paddr_t)(bus_addr & 000777777u);
     }
     if (bus_machine() == BUS_MACHINE_PDP1184) {
-        return (paddr_t)(bus_addr & 017777777u);
+        return (bus_paddr_t)(bus_addr & 017777777u);
     }
-    return (paddr_t)(bus_addr & 000777777u);
+    return (bus_paddr_t)(bus_addr & 000777777u);
 }
 
-static int rq_dma_read8_checked(paddr_t addr, uint8_t *v)
+static int rq_dma_read8_checked(bus_paddr_t addr, uint8_t *v)
 {
-    paddr_t pa = rq_dma_map_addr((uint32_t)addr);
+    bus_paddr_t pa = rq_dma_map_addr((uint32_t)addr);
 
     if (!v) {
         return -1;
@@ -426,9 +426,9 @@ static int rq_dma_read8_checked(paddr_t addr, uint8_t *v)
     return 0;
 }
 
-static int rq_dma_write8_checked(paddr_t addr, uint8_t v)
+static int rq_dma_write8_checked(bus_paddr_t addr, uint8_t v)
 {
-    paddr_t pa = rq_dma_map_addr((uint32_t)addr);
+    bus_paddr_t pa = rq_dma_map_addr((uint32_t)addr);
 
     if (!bus_range_is_ram(pa, 1) || bus_is_nxm(pa)) {
         return -1;
@@ -437,7 +437,7 @@ static int rq_dma_write8_checked(paddr_t addr, uint8_t v)
     return 0;
 }
 
-static int rq_dma_read16_checked(paddr_t addr, uint16_t *v)
+static int rq_dma_read16_checked(bus_paddr_t addr, uint16_t *v)
 {
     uint8_t lo;
     uint8_t hi;
@@ -446,24 +446,24 @@ static int rq_dma_read16_checked(paddr_t addr, uint16_t *v)
         return -1;
     }
     if (rq_dma_read8_checked(addr, &lo) != 0 ||
-            rq_dma_read8_checked((paddr_t)(addr + 1u), &hi) != 0) {
+            rq_dma_read8_checked((bus_paddr_t)(addr + 1u), &hi) != 0) {
         return -1;
     }
     *v = (uint16_t)((uint16_t)lo | ((uint16_t)hi << 8));
     return 0;
 }
 
-static int rq_dma_write16_checked(paddr_t addr, uint16_t v)
+static int rq_dma_write16_checked(bus_paddr_t addr, uint16_t v)
 {
     if (rq_dma_write8_checked(addr, (uint8_t)(v & 000377u)) != 0 ||
-            rq_dma_write8_checked((paddr_t)(addr + 1u),
+            rq_dma_write8_checked((bus_paddr_t)(addr + 1u),
                                   (uint8_t)((v >> 8) & 000377u)) != 0) {
         return -1;
     }
     return 0;
 }
 
-static int rq_dma_read32_checked(paddr_t addr, uint32_t *v)
+static int rq_dma_read32_checked(bus_paddr_t addr, uint32_t *v)
 {
     uint16_t lo;
     uint16_t hi;
@@ -479,7 +479,7 @@ static int rq_dma_read32_checked(paddr_t addr, uint32_t *v)
     return 0;
 }
 
-static int rq_dma_write32_checked(paddr_t addr, uint32_t v)
+static int rq_dma_write32_checked(bus_paddr_t addr, uint32_t v)
 {
     if (rq_dma_write16_checked(addr, (uint16_t)(v & 0xFFFFu)) != 0 ||
             rq_dma_write16_checked(addr + 2u, (uint16_t)((v >> 16) & 0xFFFFu)) !=
@@ -489,26 +489,26 @@ static int rq_dma_write32_checked(paddr_t addr, uint32_t v)
     return 0;
 }
 
-static int rq_dma_read_words(paddr_t addr, uint16_t *dst, size_t words)
+static int rq_dma_read_words(bus_paddr_t addr, uint16_t *dst, size_t words)
 {
     if (!dst) {
         return -1;
     }
     for (size_t i = 0; i < words; i++) {
-        if (rq_dma_read16_checked(addr + (paddr_t)(i * 2u), &dst[i]) != 0) {
+        if (rq_dma_read16_checked(addr + (bus_paddr_t)(i * 2u), &dst[i]) != 0) {
             return -1;
         }
     }
     return 0;
 }
 
-static int rq_dma_write_words(paddr_t addr, const uint16_t *src, size_t words)
+static int rq_dma_write_words(bus_paddr_t addr, const uint16_t *src, size_t words)
 {
     if (!src) {
         return -1;
     }
     for (size_t i = 0; i < words; i++) {
-        if (rq_dma_write16_checked(addr + (paddr_t)(i * 2u), src[i]) != 0) {
+        if (rq_dma_write16_checked(addr + (bus_paddr_t)(i * 2u), src[i]) != 0) {
             return -1;
         }
     }
@@ -521,7 +521,7 @@ static int rq_dma_read_bytes(uint32_t addr, uint8_t *dst, uint32_t len)
         return -1;
     }
     for (uint32_t i = 0; i < len; i++) {
-        if (rq_dma_read8_checked((paddr_t)(addr + i), &dst[i]) != 0) {
+        if (rq_dma_read8_checked((bus_paddr_t)(addr + i), &dst[i]) != 0) {
             return -1;
         }
     }
@@ -534,7 +534,7 @@ static int rq_dma_write_bytes(uint32_t addr, const uint8_t *src, uint32_t len)
         return -1;
     }
     for (uint32_t i = 0; i < len; i++) {
-        if (rq_dma_write8_checked((paddr_t)(addr + i), src[i]) != 0) {
+        if (rq_dma_write8_checked((bus_paddr_t)(addr + i), src[i]) != 0) {
             return -1;
         }
     }
@@ -590,7 +590,7 @@ static int rq_ring_peek_owned(const rq_ring_t *ring, uint32_t *desc_out,
     }
 
     slot = rq_ring_slot_addr(ring);
-    if (rq_dma_read32_checked((paddr_t)slot, &desc) != 0) {
+    if (rq_dma_read32_checked((bus_paddr_t)slot, &desc) != 0) {
         return -1;
     }
     if ((desc & RQ_DESC_OWN) == 0) {
@@ -615,14 +615,14 @@ static void rq_write_intr_flag(int off)
         return;
     }
 
-    (void)rq_dma_write16_checked((paddr_t)sum, 000001u);
+    (void)rq_dma_write16_checked((bus_paddr_t)sum, 000001u);
 }
 
 static int rq_release_desc(rq_ring_t *ring, uint32_t slot_addr, uint32_t desc)
 {
     uint32_t released = (desc & ~RQ_DESC_OWN) | RQ_DESC_F;
 
-    if (rq_dma_write32_checked((paddr_t)slot_addr, released) != 0) {
+    if (rq_dma_write32_checked((bus_paddr_t)slot_addr, released) != 0) {
         return -1;
     }
 
@@ -654,7 +654,7 @@ static int rq_clear_comm_area(void)
 {
     int32_t start;
     uint32_t end;
-    paddr_t addr;
+    bus_paddr_t addr;
 
     if (rq_comm < 4u) {
         return -1;
@@ -666,7 +666,7 @@ static int rq_clear_comm_area(void)
         return -1;
     }
 
-    for (addr = (paddr_t)start; addr < end; addr += 2u) {
+    for (addr = (bus_paddr_t)start; addr < end; addr += 2u) {
         if (rq_dma_write16_checked(addr, 0) != 0) {
             return -1;
         }
@@ -1218,7 +1218,7 @@ static int rq_post_attention_una(void)
 
     rq_prepare_una(unit, rsp);
     rq_apply_credits(rsp);
-    if (rq_dma_write_words((paddr_t)(rsp_addr + RQ_HDR_OFF), rsp,
+    if (rq_dma_write_words((bus_paddr_t)(rsp_addr + RQ_HDR_OFF), rsp,
                            ((uint32_t)rsp[RQ_HLNT] + 4u) / 2u) != 0) {
         rq_fail(0000002u);
         return -1;
@@ -1315,7 +1315,7 @@ static int rq_process_one(void)
         rq_log_pkt_addr++;
     }
 
-    if (rq_dma_read_words((paddr_t)(cmd_addr + RQ_HDR_OFF), cmd, RQ_PKT_WORDS) != 0) {
+    if (rq_dma_read_words((bus_paddr_t)(cmd_addr + RQ_HDR_OFF), cmd, RQ_PKT_WORDS) != 0) {
         rq_fail(0000001u);
         return -1;
     }
@@ -1339,7 +1339,7 @@ static int rq_process_one(void)
     }
     rq_apply_credits(rsp);
     rsp_bytes = (uint32_t)rsp[RQ_HLNT] + 4u;
-    if (rq_dma_write_words((paddr_t)(rsp_addr + RQ_HDR_OFF), rsp, rsp_bytes / 2u) !=
+    if (rq_dma_write_words((bus_paddr_t)(rsp_addr + RQ_HDR_OFF), rsp, rsp_bytes / 2u) !=
             0) {
         rq_fail(0000002u);
         return -1;

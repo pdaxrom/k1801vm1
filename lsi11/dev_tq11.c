@@ -377,7 +377,7 @@ static void tq_raise_irq(void)
     tq_log("irq req vec=%06o pri=%o", (unsigned)TQ_VECTOR, (unsigned)TQ_PRIORITY);
 }
 
-static paddr_t tq_dma_map_addr(uint32_t bus_addr)
+static bus_paddr_t tq_dma_map_addr(uint32_t bus_addr)
 {
     /*
      * TQ11 is modelled as a UNIBUS DMA device on pdp1184:
@@ -386,12 +386,12 @@ static paddr_t tq_dma_map_addr(uint32_t bus_addr)
     if (bus_machine() == BUS_MACHINE_PDP1184) {
         return ubmap_map_addr(bus_addr & 000777777u);
     }
-    return (paddr_t)bus_addr;
+    return (bus_paddr_t)bus_addr;
 }
 
-static int tq_dma_read8_checked(paddr_t addr, uint8_t *v)
+static int tq_dma_read8_checked(bus_paddr_t addr, uint8_t *v)
 {
-    paddr_t pa = tq_dma_map_addr((uint32_t)addr);
+    bus_paddr_t pa = tq_dma_map_addr((uint32_t)addr);
 
     if (!v) {
         return -1;
@@ -403,9 +403,9 @@ static int tq_dma_read8_checked(paddr_t addr, uint8_t *v)
     return 0;
 }
 
-static int tq_dma_write8_checked(paddr_t addr, uint8_t v)
+static int tq_dma_write8_checked(bus_paddr_t addr, uint8_t v)
 {
-    paddr_t pa = tq_dma_map_addr((uint32_t)addr);
+    bus_paddr_t pa = tq_dma_map_addr((uint32_t)addr);
 
     if (!bus_range_is_ram(pa, 1) || bus_is_nxm(pa)) {
         return -1;
@@ -414,7 +414,7 @@ static int tq_dma_write8_checked(paddr_t addr, uint8_t v)
     return 0;
 }
 
-static int tq_dma_read16_checked(paddr_t addr, uint16_t *v)
+static int tq_dma_read16_checked(bus_paddr_t addr, uint16_t *v)
 {
     uint8_t lo;
     uint8_t hi;
@@ -423,24 +423,24 @@ static int tq_dma_read16_checked(paddr_t addr, uint16_t *v)
         return -1;
     }
     if (tq_dma_read8_checked(addr, &lo) != 0 ||
-            tq_dma_read8_checked((paddr_t)(addr + 1u), &hi) != 0) {
+            tq_dma_read8_checked((bus_paddr_t)(addr + 1u), &hi) != 0) {
         return -1;
     }
     *v = (uint16_t)((uint16_t)lo | ((uint16_t)hi << 8));
     return 0;
 }
 
-static int tq_dma_write16_checked(paddr_t addr, uint16_t v)
+static int tq_dma_write16_checked(bus_paddr_t addr, uint16_t v)
 {
     if (tq_dma_write8_checked(addr, (uint8_t)(v & 000377u)) != 0 ||
-            tq_dma_write8_checked((paddr_t)(addr + 1u),
+            tq_dma_write8_checked((bus_paddr_t)(addr + 1u),
                                   (uint8_t)((v >> 8) & 000377u)) != 0) {
         return -1;
     }
     return 0;
 }
 
-static int tq_dma_read32_checked(paddr_t addr, uint32_t *v)
+static int tq_dma_read32_checked(bus_paddr_t addr, uint32_t *v)
 {
     uint16_t lo;
     uint16_t hi;
@@ -456,7 +456,7 @@ static int tq_dma_read32_checked(paddr_t addr, uint32_t *v)
     return 0;
 }
 
-static int tq_dma_write32_checked(paddr_t addr, uint32_t v)
+static int tq_dma_write32_checked(bus_paddr_t addr, uint32_t v)
 {
     if (tq_dma_write16_checked(addr, (uint16_t)(v & 0xFFFFu)) != 0 ||
             tq_dma_write16_checked(addr + 2u, (uint16_t)((v >> 16) & 0xFFFFu)) !=
@@ -466,7 +466,7 @@ static int tq_dma_write32_checked(paddr_t addr, uint32_t v)
     return 0;
 }
 
-static int tq_dma_read_words(paddr_t addr, uint16_t *dst, size_t words)
+static int tq_dma_read_words(bus_paddr_t addr, uint16_t *dst, size_t words)
 {
     size_t i;
 
@@ -474,14 +474,14 @@ static int tq_dma_read_words(paddr_t addr, uint16_t *dst, size_t words)
         return -1;
     }
     for (i = 0; i < words; i++) {
-        if (tq_dma_read16_checked(addr + (paddr_t)(i * 2u), &dst[i]) != 0) {
+        if (tq_dma_read16_checked(addr + (bus_paddr_t)(i * 2u), &dst[i]) != 0) {
             return -1;
         }
     }
     return 0;
 }
 
-static int tq_dma_write_words(paddr_t addr, const uint16_t *src, size_t words)
+static int tq_dma_write_words(bus_paddr_t addr, const uint16_t *src, size_t words)
 {
     size_t i;
 
@@ -489,7 +489,7 @@ static int tq_dma_write_words(paddr_t addr, const uint16_t *src, size_t words)
         return -1;
     }
     for (i = 0; i < words; i++) {
-        if (tq_dma_write16_checked(addr + (paddr_t)(i * 2u), src[i]) != 0) {
+        if (tq_dma_write16_checked(addr + (bus_paddr_t)(i * 2u), src[i]) != 0) {
             return -1;
         }
     }
@@ -504,7 +504,7 @@ static int tq_dma_read_bytes(uint32_t addr, uint8_t *dst, uint32_t len)
         return -1;
     }
     for (i = 0; i < len; i++) {
-        if (tq_dma_read8_checked((paddr_t)(addr + i), &dst[i]) != 0) {
+        if (tq_dma_read8_checked((bus_paddr_t)(addr + i), &dst[i]) != 0) {
             return -1;
         }
     }
@@ -519,7 +519,7 @@ static int tq_dma_write_bytes(uint32_t addr, const uint8_t *src, uint32_t len)
         return -1;
     }
     for (i = 0; i < len; i++) {
-        if (tq_dma_write8_checked((paddr_t)(addr + i), src[i]) != 0) {
+        if (tq_dma_write8_checked((bus_paddr_t)(addr + i), src[i]) != 0) {
             return -1;
         }
     }
@@ -564,7 +564,7 @@ static int tq_ring_peek_owned(const tq_ring_t *ring, uint32_t *desc_out,
     }
 
     slot = tq_ring_slot_addr(ring);
-    if (tq_dma_read32_checked((paddr_t)slot, &desc) != 0) {
+    if (tq_dma_read32_checked((bus_paddr_t)slot, &desc) != 0) {
         return -1;
     }
     if ((desc & TQ_DESC_OWN) == 0) {
@@ -589,14 +589,14 @@ static void tq_write_intr_flag(int off)
         return;
     }
 
-    (void)tq_dma_write16_checked((paddr_t)sum, 000001u);
+    (void)tq_dma_write16_checked((bus_paddr_t)sum, 000001u);
 }
 
 static int tq_release_desc(tq_ring_t *ring, uint32_t slot_addr, uint32_t desc)
 {
     uint32_t released = desc & ~TQ_DESC_OWN;
 
-    if (tq_dma_write32_checked((paddr_t)slot_addr, released) != 0) {
+    if (tq_dma_write32_checked((bus_paddr_t)slot_addr, released) != 0) {
         return -1;
     }
 
@@ -628,7 +628,7 @@ static int tq_clear_comm_area(void)
 {
     int32_t start;
     uint32_t end;
-    paddr_t addr;
+    bus_paddr_t addr;
 
     if (tq_comm < 4u) {
         return -1;
@@ -640,7 +640,7 @@ static int tq_clear_comm_area(void)
         return -1;
     }
 
-    for (addr = (paddr_t)start; addr < end; addr += 2u) {
+    for (addr = (bus_paddr_t)start; addr < end; addr += 2u) {
         if (tq_dma_write16_checked(addr, 0) != 0) {
             return -1;
         }
@@ -1371,7 +1371,7 @@ static int tq_dma_compare_bytes(uint32_t ba, const uint8_t *buf, uint32_t len)
     for (i = 0; i < len; i++) {
         uint8_t host_byte = 0;
 
-        if (tq_dma_read_bytes((paddr_t)(ba + i), &host_byte, 1u) != 0) {
+        if (tq_dma_read_bytes((bus_paddr_t)(ba + i), &host_byte, 1u) != 0) {
             return -1;
         }
         if (host_byte != buf[i]) {
@@ -1700,14 +1700,14 @@ static int tq_process_one(void)
         return -1;
     }
 
-    if (tq_dma_read_words((paddr_t)(cmd_addr + TQ_HDR_OFF), cmd, TQ_PKT_WORDS) != 0) {
+    if (tq_dma_read_words((bus_paddr_t)(cmd_addr + TQ_HDR_OFF), cmd, TQ_PKT_WORDS) != 0) {
         tq_fail(0000001u);
         return -1;
     }
 
     tq_process_command(cmd, rsp);
     rsp_bytes = (uint32_t)rsp[TQ_HLNT] + 4u;
-    if (tq_dma_write_words((paddr_t)(rsp_addr + TQ_HDR_OFF), rsp, rsp_bytes / 2u) !=
+    if (tq_dma_write_words((bus_paddr_t)(rsp_addr + TQ_HDR_OFF), rsp, rsp_bytes / 2u) !=
             0) {
         tq_fail(0000002u);
         return -1;
@@ -1758,7 +1758,7 @@ static int tq_post_attention_una(void)
     }
 
     tq_prepare_una(unit, rsp);
-    if (tq_dma_write_words((paddr_t)(rsp_addr + TQ_HDR_OFF), rsp,
+    if (tq_dma_write_words((bus_paddr_t)(rsp_addr + TQ_HDR_OFF), rsp,
                            ((uint32_t)rsp[TQ_HLNT] + 4u) / 2u) != 0) {
         tq_fail(0000002u);
         return -1;

@@ -283,13 +283,13 @@ static void rk_set_error(uint16_t bit)
     rk_sync_status();
 }
 
-static paddr_t rk_pa(uint8_t mex, uint16_t ba)
+static bus_paddr_t rk_pa(uint8_t mex, uint16_t ba)
 {
     uint32_t uba = (((uint32_t)(mex & 03u) << 16) | (uint32_t)ba) & 000777777u;
     if (bus_machine() == BUS_MACHINE_PDP1184) {
         return ubmap_map_addr(uba);
     }
-    return (paddr_t)uba;
+    return (bus_paddr_t)uba;
 }
 
 static void rk_ba_inc(uint16_t *ba, uint8_t *mex)
@@ -302,24 +302,24 @@ static void rk_ba_inc(uint16_t *ba, uint8_t *mex)
     }
 }
 
-static int rk_dma_read_word(paddr_t pa, uint16_t *w)
+static int rk_dma_read_word(bus_paddr_t pa, uint16_t *w)
 {
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     *w = bus_read16(pa);
     return 0;
 }
 
-static int rk_dma_write_word(paddr_t pa, uint16_t w)
+static int rk_dma_write_word(bus_paddr_t pa, uint16_t w)
 {
     if (!bus_range_is_ram(pa, 2)) {
         return -1;
     }
-    if (bus_is_nxm(pa) || bus_is_nxm((paddr_t)(pa + 1))) {
+    if (bus_is_nxm(pa) || bus_is_nxm((bus_paddr_t)(pa + 1))) {
         return -1;
     }
     bus_write16(pa, w);
@@ -420,7 +420,7 @@ static void rk_transfer(enum rk_xfer_mode mode)
         uint32_t off = 0;
         uint16_t w = 0;
         uint8_t lo, hi;
-        paddr_t pa = rk_pa(cur_mex, cur_ba);
+        bus_paddr_t pa = rk_pa(cur_mex, cur_ba);
 
         if (rk_da_to_lba(cur_da, &lba) != 0) {
             rk_set_error(RKER_NXS);

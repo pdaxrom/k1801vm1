@@ -1163,7 +1163,7 @@ int main(int argc, char **argv)
         fseek(fload, 0, SEEK_SET);
 
         if (opts.load_addr < 0 || fsize < 0 ||
-                !bus_range_is_ram((paddr_t)opts.load_addr, (size_t)fsize)) {
+                !bus_range_is_ram((bus_paddr_t)opts.load_addr, (size_t)fsize)) {
             fprintf(stderr, "Load address/size out of RAM bounds\n");
             fclose(fload);
             r.fini(&r);
@@ -1171,7 +1171,7 @@ int main(int argc, char **argv)
         }
 
         {
-            uint8_t *dst = bus_ram_ptr((paddr_t)opts.load_addr);
+            uint8_t *dst = bus_ram_ptr((bus_paddr_t)opts.load_addr);
             if (!dst) {
                 fprintf(stderr, "Load destination is outside RAM\n");
                 fclose(fload);
