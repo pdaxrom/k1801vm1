@@ -1,4 +1,4 @@
-#if !defined(PICO_ON_DEVICE)
+#if !defined(PICO_ON_DEVICE) && !defined(__sgi)
 #define _POSIX_C_SOURCE 200809L
 #endif
 #include "dev_kw11.h"
