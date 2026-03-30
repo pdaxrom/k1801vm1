@@ -1,4 +1,5 @@
 #include "rsx11fs.h"
+#include "fileio_compat.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -200,7 +201,7 @@ static void put_hiword32(uint8_t *p, uint32_t v)
 
 static int seek_to(FILE *fp, uint64_t off)
 {
-    if (fseeko(fp, (off_t)off, SEEK_SET) != 0) {
+    if (lsi11_fseeko(fp, (off_t)off, SEEK_SET) != 0) {
         return -1;
     }
     return 0;
@@ -2893,11 +2894,11 @@ int rsx11_add_file(rsx11_image_t *img, const char *host_path,
     if (seek_to(host, 0) != 0) {
         goto out;
     }
-    if (fseeko(host, 0, SEEK_END) != 0) {
+    if (lsi11_fseeko(host, 0, SEEK_END) != 0) {
         goto out;
     }
     {
-        off_t end = ftello(host);
+        off_t end = lsi11_ftello(host);
 
         if (end < 0) {
             goto out;

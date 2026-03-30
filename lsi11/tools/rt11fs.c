@@ -1,4 +1,5 @@
 #include "rt11fs.h"
+#include "fileio_compat.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -260,7 +261,7 @@ static int rt11_seek(rt11_image_t *img, uint32_t block, uint32_t extra_bytes)
     }
 
     off = (off_t)abs_block * (off_t)RT11_BLOCK_SIZE + (off_t)extra_bytes;
-    if (fseeko(img->fp, off, SEEK_SET) != 0) {
+    if (lsi11_fseeko(img->fp, off, SEEK_SET) != 0) {
         return -1;
     }
     return 0;
@@ -469,13 +470,13 @@ int rt11_open_image(rt11_image_t *img, const char *path, const char *mode)
         return -1;
     }
 
-    if (fseeko(img->fp, 0, SEEK_END) != 0) {
+    if (lsi11_fseeko(img->fp, 0, SEEK_END) != 0) {
         fclose(img->fp);
         img->fp = NULL;
         return -1;
     }
 
-    size = ftello(img->fp);
+    size = lsi11_ftello(img->fp);
     if (size < 0 || (size % RT11_BLOCK_SIZE) != 0) {
         fclose(img->fp);
         img->fp = NULL;
@@ -484,7 +485,7 @@ int rt11_open_image(rt11_image_t *img, const char *path, const char *mode)
     }
 
     img->total_blocks = (uint32_t)(size / RT11_BLOCK_SIZE);
-    if (fseeko(img->fp, 0, SEEK_SET) != 0) {
+    if (lsi11_fseeko(img->fp, 0, SEEK_SET) != 0) {
         fclose(img->fp);
         img->fp = NULL;
         return -1;
@@ -1852,7 +1853,7 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
     {
         off_t end = (off_t)total_blocks * RT11_BLOCK_SIZE;
         if (end > 0) {
-            if (fseeko(fp, end - 1, SEEK_SET) != 0) {
+            if (lsi11_fseeko(fp, end - 1, SEEK_SET) != 0) {
                 fclose(fp);
                 return -1;
             }

@@ -1,4 +1,5 @@
 #include "rt11fs.h"
+#include "fileio_compat.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -390,7 +391,7 @@ static int read_block(rt11_image_t *img, uint32_t block, uint8_t *buf)
         errno = EINVAL;
         return -1;
     }
-    if (fseeko(img->fp, (off_t)abs_block * RT11_BLOCK_SIZE, SEEK_SET) != 0) {
+    if (lsi11_fseeko(img->fp, (off_t)abs_block * RT11_BLOCK_SIZE, SEEK_SET) != 0) {
         return -1;
     }
     if (fread(buf, 1, RT11_BLOCK_SIZE, img->fp) != RT11_BLOCK_SIZE) {
@@ -412,7 +413,7 @@ static int write_block(rt11_image_t *img, uint32_t block, const uint8_t *buf)
         errno = EINVAL;
         return -1;
     }
-    if (fseeko(img->fp, (off_t)abs_block * RT11_BLOCK_SIZE, SEEK_SET) != 0) {
+    if (lsi11_fseeko(img->fp, (off_t)abs_block * RT11_BLOCK_SIZE, SEEK_SET) != 0) {
         return -1;
     }
     if (fwrite(buf, 1, RT11_BLOCK_SIZE, img->fp) != RT11_BLOCK_SIZE) {
