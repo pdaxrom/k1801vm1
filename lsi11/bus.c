@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(__sgi)
+#include <malloc.h>
+#endif
 #if defined(PICO_ON_DEVICE)
 #include <unistd.h>
 #endif
@@ -65,6 +68,8 @@ static inline void *bus_alloc(size_t size)
                 size, bus_free_heap_bytes());
     }
     return p;
+#elif defined(__sgi)
+    return memalign(BUS_PAGE_SIZE, size);
 #else
     void *p = NULL;
     if (posix_memalign(&p, BUS_PAGE_SIZE, size) != 0) {
