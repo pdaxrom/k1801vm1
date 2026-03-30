@@ -5,15 +5,11 @@
 #include "irq.h"
 #include "irq_latch.h"
 #include "emu_file.h"
+#include "time_compat.h"
 #include "ubmap.h"
 
 #include <stdint.h>
 #include <string.h>
-#if defined(PICO_ON_DEVICE)
-#include "pico/time.h"
-#else
-#include <time.h>
-#endif
 
 /* RL11 registers (octal) */
 #define RL11_BASE 0174400
@@ -111,17 +107,6 @@ static uint64_t rl_ready_ns;
 
 static irq_latch_t rl_l;
 static rl_drive_t rl_drv[RL_MAX_DRIVES];
-
-static uint64_t now_ns(void)
-{
-#if defined(PICO_ON_DEVICE)
-    return (uint64_t)time_us_64() * 1000ull;
-#else
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
-#endif
-}
 
 /* Read Header returns three words sequentially via MP reads. */
 static uint16_t rl_rhdr_fifo[3];
@@ -865,7 +850,7 @@ static void rl_write8(uint16_t addr, uint8_t b)
              * A fixed wall-clock 10ms delay causes "didn't interrupt" during
              * BSD 2.9.1 device probing on fast hosts.
              */
-            rl_ready_ns = now_ns();
+            rl_ready_ns = lsi11_now_ns();
             rl_clear_errors();
             rl_rhdr_reset_fifo();
             rl_sync_cs();
@@ -955,7 +940,7 @@ void rl11_poll(void)
     if (!rl_busy) {
         return;
     }
-    if (now_ns() < rl_ready_ns) {
+    if (lsi11_now_ns() < rl_ready_ns) {
         return;
     }
     rl_exec_command();

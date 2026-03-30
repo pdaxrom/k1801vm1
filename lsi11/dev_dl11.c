@@ -2,13 +2,9 @@
 #include "devio.h"
 #include "irq.h"
 #include "irq_latch.h"
+#include "time_compat.h"
 #include "util_term.h"
 #include <stdio.h>
-#if defined(PICO_ON_DEVICE)
-#include "pico/time.h"
-#else
-#include <time.h>
-#endif
 
 /* CSR addresses (octal) */
 #define DL11_BASE_PRIMARY 0177560
@@ -36,17 +32,6 @@ static int dl11_alias_enabled = 1;
 static int dl11_8bit_mode = 0; /* default 7-bit TTY behavior */
 static int dl11_nl_to_cr = 0;
 static uint8_t tcsr_misc = 0;  /* MAINT (bit2) + BREAK (bit0) */
-
-static uint64_t now_ns(void)
-{
-#if defined(PICO_ON_DEVICE)
-    return (uint64_t)time_us_64() * 1000ull;
-#else
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
-#endif
-}
 
 /* Do not bind TX completion to host wall-clock by default.
    In unthrottled CPU mode, real-time delays can starve guest polling loops. */
@@ -161,7 +146,7 @@ static void dl11_write8(uint16_t a, uint8_t v)
         tx_ready_ns = 0;
 #else
         tx_busy = 1;
-        tx_ready_ns = now_ns() + DL11_TX_CHAR_NS;
+        tx_ready_ns = lsi11_now_ns() + DL11_TX_CHAR_NS;
 #endif
         return;
     default:
@@ -238,7 +223,7 @@ void dl11_set_alias(int on)
 void dl11_poll(void)
 {
     if (tx_busy) {
-        uint64_t t = now_ns();
+        uint64_t t = lsi11_now_ns();
         if (t >= tx_ready_ns) {
             tx_busy = 0;
             irq_latch_event_set_done(&tx_l);

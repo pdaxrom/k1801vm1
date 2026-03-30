@@ -5,15 +5,11 @@
 #include "bus.h"
 #include "devio.h"
 #include "irq.h"
+#include "time_compat.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#if defined(PICO_ON_DEVICE)
-#include "pico/time.h"
-#else
-#include <time.h>
-#endif
 
 /* KW11-L address (octal) */
 #define KW11L_CSR 0177546
@@ -83,17 +79,6 @@ static int kw11_l_visible_effective(void)
 static int kw11_p_visible_effective(void)
 {
     return (kw11_p_visible >= 0) ? kw11_p_visible : kw11_default_p_visible();
-}
-
-static uint64_t now_ns(void)
-{
-#if defined(PICO_ON_DEVICE)
-    return (uint64_t)time_us_64() * 1000ull;
-#else
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
-#endif
 }
 
 void kw11_set_visibility(int enable_l, int enable_p)
@@ -413,7 +398,7 @@ void kw11_reset(void)
 /* KW11-L/KW11-P realtime poll used for compatibility mode. */
 static void kw11_poll_realtime(void)
 {
-    uint64_t t = now_ns();
+    uint64_t t = lsi11_now_ns();
     const uint64_t kwl_period_ns = 16666667ull; /* ~16.666 ms -> 60 Hz */
 
     /* --- KW11-L --- */
