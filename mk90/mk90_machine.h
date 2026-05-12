@@ -17,6 +17,7 @@ typedef struct {
     byte cmd;
     int present;
     int dirty;
+    int owns_data;
     char path[MK90_IMAGE_PATH_MAX];
 } mk90_smp_slot_t;
 

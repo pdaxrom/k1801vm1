@@ -33,7 +33,9 @@ static void mk90_smp_release_slot(mk90_smp_slot_t *slot)
         return;
     }
     (void)mk90_smp_save_slot(slot);
-    free(slot->data);
+    if (slot->owns_data) {
+        free(slot->data);
+    }
     memset(slot, 0, sizeof(*slot));
 }
 
@@ -109,6 +111,7 @@ int mk90_smp_load(mk90_state_t *state, unsigned slot_index, const char *path,
         }
         return -1;
     }
+    slot->owns_data = 1;
     if (file_size != 0 &&
         fread(slot->data, 1, (size_t)file_size, fp) != (size_t)file_size) {
         fclose(fp);

@@ -156,6 +156,19 @@ static void mk90_rtc_periodic_tick(mk90_state_t *state)
 
 void mk90_rtc_reset(mk90_state_t *state)
 {
+#ifdef PICO_ON_DEVICE
+    memset(state->rtc.data, 0, sizeof(state->rtc.data));
+    state->rtc.second_accum_ms = 0;
+    state->rtc.periodic_accum_ms = 0;
+
+    state->rtc.data[RTC_REG_YEAR] = 26u;
+    state->rtc.data[RTC_REG_MONTH] = 1u;
+    state->rtc.data[RTC_REG_DAY] = 1u;
+    state->rtc.data[RTC_REG_WEEKDAY] = 4u;
+    state->rtc.data[RTC_REG_HOURS] = 0u;
+    state->rtc.data[RTC_REG_MINUTES] = 0u;
+    state->rtc.data[RTC_REG_SECONDS] = 0u;
+#else
     time_t now_time = time(NULL);
     struct tm now_tm;
 
@@ -176,6 +189,7 @@ void mk90_rtc_reset(mk90_state_t *state)
     state->rtc.data[RTC_REG_HOURS] = (byte)now_tm.tm_hour;
     state->rtc.data[RTC_REG_MINUTES] = (byte)now_tm.tm_min;
     state->rtc.data[RTC_REG_SECONDS] = (byte)now_tm.tm_sec;
+#endif
 }
 
 void mk90_rtc_tick_ms(mk90_state_t *state, uint32_t elapsed_ms)
