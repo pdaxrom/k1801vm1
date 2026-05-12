@@ -158,6 +158,13 @@ typedef struct _regs {
     uint32_t fpu_fps;
     uint32_t fpu_fea;
     uint32_t fpu_fec;
+    /* Per-instance transient FP11 instruction state. */
+    byte fp11_reg_delta_mask;
+    sbyte fp11_reg_delta[8];
+    byte fp11_trap_pending;
+    word fp11_trap_old_pc;
+    word fp11_trap_old_psw;
+    word fp11_backup_pc;
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     /*

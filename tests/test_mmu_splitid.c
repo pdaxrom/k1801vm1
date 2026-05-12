@@ -80,12 +80,50 @@ static int test_vector_fetch_uses_kernel_d_space(void)
     return 0;
 }
 
+static INLINE word mmu_op_fp11(word op11_8, byte ac, word dst)
+{
+    return 0170000 | ((op11_8 & 017) << 8) | ((ac & 03) << 6) | (dst & 077);
+}
+
+static int test_fp11_immediate_uses_i_space(void)
+{
+    mmu_fixture fx;
+    const word fps_value = 000355;
+
+    mmu_set_test("fp11_immediate_uses_i_space");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_ssr0 = 000001;
+    fx.r.mmu_ssr3 = MMU_SSR3_KD;
+
+    fx.r.mmu_par[0][0][0] = 0100;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+
+    fx.r.mmu_par[0][1][0] = 0120;
+    fx.r.mmu_pdr[0][1][0] = 0177006;
+
+    fx.r.r[7] = 000000;
+
+    mmu_phys_write_word(&fx, 010000, mmu_op_fp11(000, 1, mmu_operand(2, 7)));
+    mmu_phys_write_word(&fx, 010002, fps_value);
+    mmu_phys_write_word(&fx, 012002, 000000);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "LDFPS immediate step");
+
+    MMU_ASSERT_EQ(fx.r.fpu_fps, fps_value, "FP11 immediate word must come from I-space");
+    MMU_ASSERT_EQ(fx.r.r[7], 000004, "LDFPS # should consume one extension word");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
 int main(void)
 {
     int failed = 0;
 
     failed += test_split_id_data_uses_d_space();
     failed += test_vector_fetch_uses_kernel_d_space();
+    failed += test_fp11_immediate_uses_i_space();
 
     if (failed) {
         return 1;

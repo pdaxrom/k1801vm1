@@ -296,11 +296,6 @@ static const uint32_t and_mask[33] = {
     0xFFFFFF,   0x1FFFFFF,  0x3FFFFFF, 0x7FFFFFF, 0xFFFFFFF, 0x1FFFFFFF,
     0x3FFFFFFF, 0x7FFFFFFF, 0xFFFFFFFF
 };
-static sdword backup_PC;
-static sdword fp_change;
-static t_bool fp_trap_pending;
-static word fp_trap_old_pc;
-static word fp_trap_old_psw;
 
 static t_bool fpnotrap(regs *r, sdword code);
 static sdword GeteaFW(regs *r, sdword spec);
@@ -322,11 +317,28 @@ static sdword round_and_pack(regs *r, fpac_t *fac, sdword exp, fpac_t *frac, int
 /* Emulate SIMH memory read/write logic mapping to k1801vm1 callbacks */
 static inline uint16_t ReadW(regs *r, int32_t addr)
 {
-    return load_word(r, addr);
+    if (r->fAbort) {
+        return 0;
+    }
+    return load_word(r, (word)addr);
+}
+static inline uint16_t ReadWI(regs *r, int32_t addr)
+{
+    if (r->fAbort) {
+        return 0;
+    }
+    return load_word_ifetch(r, (word)addr);
+}
+static inline uint16_t ReadFW(regs *r, int32_t addr, int32_t spec)
+{
+    return (spec == 027) ? ReadWI(r, addr) : ReadW(r, addr);
 }
 static inline void WriteW(regs *r, int32_t data, int32_t addr)
 {
-    store_word(r, addr, data);
+    if (r->fAbort) {
+        return;
+    }
+    store_word(r, (word)addr, (word)data);
 }
 
 /* Set up for instruction decode and execution */
@@ -342,11 +354,12 @@ static int fp11(regs *r, word IR)
         {0x80000000, 0x80000001}
     };
 
-    backup_PC = r->r[7]; /* save PC for FEA */
-    fp_change = 0;       /* assume no reg chg */
-    fp_trap_pending = FALSE;
-    fp_trap_old_pc = r->r[7];
-    fp_trap_old_psw = r->psw;
+    r->fp11_backup_pc = r->r[7]; /* save PC for FEA */
+    r->fp11_reg_delta_mask = 0;  /* assume no reg chg */
+    memset(r->fp11_reg_delta, 0, sizeof(r->fp11_reg_delta));
+    r->fp11_trap_pending = FALSE;
+    r->fp11_trap_old_pc = r->r[7];
+    r->fp11_trap_old_psw = r->psw;
     ac = (IR >> 6) & 03; /* fac is IR<7:6> */
     dstspec = IR & 077;
     qdouble = FPS & FPS_D;
@@ -376,7 +389,10 @@ static int fp11(regs *r, word IR)
             break;
 
         case 1: /* LDFPS */
-            dst = (dstspec <= 07) ? R[dstspec] : ReadW(r, GeteaFW(r, dstspec));
+            dst = (dstspec <= 07) ? R[dstspec] : ReadFW(r, GeteaFW(r, dstspec), dstspec);
+            if (r->fAbort) {
+                break;
+            }
             FPS = dst & FPS_RW;
             break;
 
@@ -385,7 +401,10 @@ static int fp11(regs *r, word IR)
             if (dstspec <= 07) {
                 R[dstspec] = FPS;
             } else {
-                WriteW(r, FPS, GeteaFW(r, dstspec));
+                ea = GeteaFW(r, dstspec);
+                if (!r->fAbort) {
+                    WriteW(r, FPS, ea);
+                }
             }
             break;
 
@@ -393,7 +412,10 @@ static int fp11(regs *r, word IR)
             if (dstspec <= 07) {
                 R[dstspec] = FEC;
             } else {
-                WriteI(r, (FEC << 16) | FEA, GeteaFP(r, dstspec, LONG), dstspec, LONG);
+                ea = GeteaFP(r, dstspec, LONG);
+                if (!r->fAbort) {
+                    WriteI(r, (FEC << 16) | FEA, ea, dstspec, LONG);
+                }
             }
             break;
         } /* end switch <7:6> */
@@ -505,7 +527,10 @@ static int fp11(regs *r, word IR)
         break;
 
     case 015: /* LDEXP */
-        dst = (dstspec <= 07) ? R[dstspec] : ReadW(r, GeteaFW(r, dstspec));
+        dst = (dstspec <= 07) ? R[dstspec] : ReadFW(r, GeteaFW(r, dstspec), dstspec);
+        if (r->fAbort) {
+            break;
+        }
         F_LOAD(qdouble, FR[ac], fac);
         fac.h = (fac.h & ~FP_EXP) | (((dst + FP_BIAS) & FP_M_EXP) << FP_V_EXP);
         newV = 0;
@@ -545,6 +570,9 @@ static int fp11(regs *r, word IR)
             fac.l = R[dstspec] << 16;
         } else {
             fac.l = ReadI(r, GeteaFP(r, dstspec, leni), dstspec, leni);
+            if (r->fAbort) {
+                break;
+            }
         }
         fac.h = 0;
         if (fac.l) {
@@ -669,17 +697,18 @@ static int fp11(regs *r, word IR)
 
     /* Now process any general register modification */
 
-    if (fp_change != 0) {
-        sdword reg = FPCHG_GETREG(fp_change); /* get register */
-        sdword val = FPCHG_GETVAL(fp_change); /* get value */
-        if (val & 020) {                      /* negative? */
-            val = val | (-16);                  /* ensure proper sext */
+    if (!r->fAbort && r->fp11_reg_delta_mask != 0) {
+        for (i = 0; i < 8; i++) {
+            if (r->fp11_reg_delta_mask & (1u << i)) {
+                R[i] = (word)((R[i] + r->fp11_reg_delta[i]) & 0177777);
+            }
         }
-        R[reg] = (R[reg] + val) & 0177777; /* commit change */
     }
-    if (fp_trap_pending && !r->fAbort) {
-        core_take_vector(r, TRAP_FPE, fp_trap_old_pc, fp_trap_old_psw, "FPE");
-        fp_trap_pending = FALSE;
+    r->fp11_reg_delta_mask = 0;
+    memset(r->fp11_reg_delta, 0, sizeof(r->fp11_reg_delta));
+    if (r->fp11_trap_pending && !r->fAbort) {
+        core_take_vector(r, TRAP_FPE, r->fp11_trap_old_pc, r->fp11_trap_old_psw, "FPE");
+        r->fp11_trap_pending = FALSE;
     }
     return 0;
 }
@@ -706,7 +735,10 @@ static sdword GeteaFW(regs *r, sdword spec)
     case 3:                     /* @(R)+ */
         adr = R[reg];             /* post increment */
         fp_reg_change(r, 2, reg); /* update */
-        adr = ReadW(r, adr | ds);
+        adr = (reg == 7) ? ReadWI(r, adr | ds) : ReadW(r, adr | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         return (adr | ds);
 
     case 4:                         /* -(R) */
@@ -718,17 +750,29 @@ static sdword GeteaFW(regs *r, sdword spec)
         adr = (R[reg] - 2) & 0177777; /* predecrement */
         fp_reg_change(r, -2, reg);    /* update */
         adr = ReadW(r, adr | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         return (adr | ds);
 
     case 6: /* d(r) */
-        adr = ReadW(r, r->r[7] | ds);
+        adr = ReadWI(r, r->r[7] | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         r->r[7] = (r->r[7] + 2) & 0177777;
         return (((R[reg] + adr) & 0177777) | ds);
 
     case 7: /* @d(R) */
-        adr = ReadW(r, r->r[7] | ds);
+        adr = ReadWI(r, r->r[7] | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         r->r[7] = (r->r[7] + 2) & 0177777;
         adr = ReadW(r, ((R[reg] + adr) & 0177777) | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         return (adr | ds);
     } /* end switch */
 }
@@ -778,7 +822,10 @@ static sdword GeteaFP(regs *r, sdword spec, sdword len)
     case 3:                     /* @(R)+ */
         adr = R[reg];             /* post increment */
         fp_reg_change(r, 2, reg); /* update */
-        adr = ReadW(r, adr | ds);
+        adr = (reg == 7) ? ReadWI(r, adr | ds) : ReadW(r, adr | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         return (adr | ds);
 
     case 4:                           /* -(R) */
@@ -790,17 +837,29 @@ static sdword GeteaFP(regs *r, sdword spec, sdword len)
         adr = (R[reg] - 2) & 0177777; /* predecrement */
         fp_reg_change(r, -2, reg);    /* update */
         adr = ReadW(r, adr | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         return (adr | ds);
 
     case 6: /* d(r) */
-        adr = ReadW(r, r->r[7] | ds);
+        adr = ReadWI(r, r->r[7] | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         r->r[7] = (r->r[7] + 2) & 0177777;
         return (((R[reg] + adr) & 0177777) | ds);
 
     case 7: /* @d(R) */
-        adr = ReadW(r, r->r[7] | ds);
+        adr = ReadWI(r, r->r[7] | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         r->r[7] = (r->r[7] + 2) & 0177777;
         adr = ReadW(r, ((R[reg] + adr) & 0177777) | ds);
+        if (r->fAbort) {
+            return 0;
+        }
         return (adr | ds);
     } /* end switch */
 
@@ -823,11 +882,15 @@ static sdword GeteaFP(regs *r, sdword spec, sdword len)
 
 static void fp_reg_change(regs *r, sdword len, sdword reg)
 {
-    /* We implement straight register modification here for simplicity,
-       matching the non-J11 behavior without full MMR1 tracking since
-       k1801vm1 operates differently. */
-    R[reg] = (R[reg] + len) & 0177777; /* commit reg changes immediately */
-    return;
+    reg &= 07;
+
+    if (r->model == DCJ11 && reg != 7) {
+        r->fp11_reg_delta[reg] = (sbyte)(r->fp11_reg_delta[reg] + len);
+        r->fp11_reg_delta_mask |= (byte)(1u << reg);
+        return;
+    }
+
+    R[reg] = (R[reg] + len) & 0177777;
 }
 
 /* Read integer operand
@@ -843,10 +906,13 @@ static void fp_reg_change(regs *r, sdword len, sdword reg)
 static uint32_t ReadI(regs *r, sdword VA, sdword spec, sdword len)
 {
     if ((len == WORD) || (spec == 027)) {
-        return (ReadW(r, VA) << 16);
+        return (ReadFW(r, VA, spec) << 16);
     }
-    return ((ReadW(r, VA) << 16) |
-            ReadW(r, (VA & ~0177777) | ((VA + 2) & 0177777)));
+    uint32_t hi = ReadW(r, VA);
+    if (r->fAbort) {
+        return 0;
+    }
+    return ((hi << 16) | ReadW(r, (VA & ~0177777) | ((VA + 2) & 0177777)));
 }
 
 /* Read floating operand
@@ -865,21 +931,36 @@ static t_bool ReadFP(regs *r, fpac_t *fptr, sdword VA, sdword spec, sdword len)
 {
     sdword exta;
 
+    if (r->fAbort) {
+        return FALSE;
+    }
     if (spec <= 07) {
         F_LOAD_P(len == QUAD, FR[spec], fptr);
         return TRUE;
     }
     if (spec == 027) {
-        fptr->h = (ReadW(r, VA) << FP_V_F0);
+        fptr->h = (ReadWI(r, VA) << FP_V_F0);
         fptr->l = 0;
     } else {
         exta = VA & ~0177777;
-        fptr->h = (ReadW(r, VA) << FP_V_F0) |
-                  (ReadW(r, exta | ((VA + 2) & 0177777)) << FP_V_F1);
-        if (len == QUAD)
-            fptr->l = (ReadW(r, exta | ((VA + 4) & 0177777)) << FP_V_F2) |
-                      (ReadW(r, exta | ((VA + 6) & 0177777)) << FP_V_F3);
-        else {
+        fptr->h = (ReadW(r, VA) << FP_V_F0);
+        if (r->fAbort) {
+            return FALSE;
+        }
+        fptr->h |= (ReadW(r, exta | ((VA + 2) & 0177777)) << FP_V_F1);
+        if (r->fAbort) {
+            return FALSE;
+        }
+        if (len == QUAD) {
+            fptr->l = (ReadW(r, exta | ((VA + 4) & 0177777)) << FP_V_F2);
+            if (r->fAbort) {
+                return FALSE;
+            }
+            fptr->l |= (ReadW(r, exta | ((VA + 6) & 0177777)) << FP_V_F3);
+            if (r->fAbort) {
+                return FALSE;
+            }
+        } else {
             fptr->l = 0;
         }
     }
@@ -902,6 +983,9 @@ static t_bool ReadFP(regs *r, fpac_t *fptr, sdword VA, sdword spec, sdword len)
 
 static void WriteI(regs *r, sdword data, sdword VA, sdword spec, sdword len)
 {
+    if (r->fAbort) {
+        return;
+    }
     if ((len == WORD) || (spec == 027)) {
         WriteW(r, (data >> 16) & 0177777, VA);
         return;
@@ -913,6 +997,9 @@ static void WriteI(regs *r, sdword data, sdword VA, sdword spec, sdword len)
     }
 
     WriteW(r, (data >> 16) & 0177777, VA);
+    if (r->fAbort) {
+        return;
+    }
     WriteW(r, data & 0177777, (VA & ~0177777) | ((VA + 2) & 0177777));
     return;
 }
@@ -931,6 +1018,9 @@ static void WriteFP(regs *r, fpac_t *fptr, sdword VA, sdword spec, sdword len)
 {
     sdword exta;
 
+    if (r->fAbort) {
+        return;
+    }
     if (spec <= 07) {
         F_STORE_P(len == QUAD, fptr, FR[spec]);
         return;
@@ -947,11 +1037,20 @@ static void WriteFP(regs *r, fpac_t *fptr, sdword VA, sdword spec, sdword len)
 
     exta = VA & ~0177777;
     WriteW(r, (fptr->h >> FP_V_F0) & 0177777, VA);
+    if (r->fAbort) {
+        return;
+    }
     WriteW(r, (fptr->h >> FP_V_F1) & 0177777, exta | ((VA + 2) & 0177777));
+    if (r->fAbort) {
+        return;
+    }
     if (len == LONG) {
         return;
     }
     WriteW(r, (fptr->l >> FP_V_F2) & 0177777, exta | ((VA + 4) & 0177777));
+    if (r->fAbort) {
+        return;
+    }
     WriteW(r, (fptr->l >> FP_V_F3) & 0177777, exta | ((VA + 6) & 0177777));
     return;
 }
@@ -1397,12 +1496,12 @@ static t_bool fpnotrap(regs *r, sdword code)
     }
     FPS = FPS | FPS_ER;
     FEC = code;
-    FEA = (backup_PC - 2) & 0177777;
+    FEA = (r->fp11_backup_pc - 2) & 0177777;
     if ((FPS & FPS_ID) == 0) {
-        if (!fp_trap_pending) {
-            fp_trap_pending = TRUE;
-            fp_trap_old_pc = r->r[7];
-            fp_trap_old_psw = r->psw;
+        if (!r->fp11_trap_pending) {
+            r->fp11_trap_pending = TRUE;
+            r->fp11_trap_old_pc = r->r[7];
+            r->fp11_trap_old_psw = r->psw;
         }
     }
     return FALSE;

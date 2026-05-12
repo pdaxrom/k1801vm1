@@ -2355,6 +2355,12 @@ void core_reset(regs *r)
     r->fAbort = 0;
     r->fHaltSignal = 0;
     r->fStepDeferHalt = 0;
+    r->fp11_reg_delta_mask = 0;
+    memset(r->fp11_reg_delta, 0, sizeof(r->fp11_reg_delta));
+    r->fp11_trap_pending = 0;
+    r->fp11_trap_old_pc = 0;
+    r->fp11_trap_old_psw = 0;
+    r->fp11_backup_pc = 0;
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     r->mmu_ssr0 = 0;
     r->mmu_ssr1 = 0;

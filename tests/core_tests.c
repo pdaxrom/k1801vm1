@@ -4596,6 +4596,49 @@ cleanup:
     return rc;
 }
 
+static int test_fp11_autoinc_abort_does_not_update_register(void)
+{
+    cpu_fixture fx;
+    int rc = 0;
+    const word handler = 02600;
+    const word new_psw = 000340;
+    const word program[] = {
+        op_fp11(005, 0, operand(2, 0)), /* LDF (R0)+,F0 */
+    };
+
+    current_test = "fp11_autoinc_abort_no_reg_update";
+    fixture_setup_model(&fx, DCJ11);
+    load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+
+    store_word(&fx, 000004, handler);
+    store_word(&fx, 000006, new_psw);
+
+    fx.r.has_fpu = 1;
+    fx.r.r[0] = 000001; /* odd word read traps before operand completes */
+    fx.r.r[6] = 01000;
+    fx.r.psw = 000003;
+    fx.r.fpu_fr[0].h = ((uint32_t)012345 << 16) | 0670;
+    fx.r.fpu_fr[0].l = ((uint32_t)076543 << 16) | 0210;
+
+    ASSERT_EQ(core_step(&fx.r), 0, "FP11 LDF odd autoinc should trap");
+    ASSERT_EQ(fx.r.r[7], handler, "FP11 operand abort should vector to bus error");
+    ASSERT_EQ(fx.r.psw, new_psw, "FP11 operand abort should load vector PSW");
+    ASSERT_EQ(fx.r.r[0], 000001, "Autoincrement register must not commit on abort");
+    ASSERT_EQ(fx.r.r[6], 00774, "FP11 operand abort should push bus-error frame");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00774), TEST_BASE + 2,
+              "FP11 operand abort frame PC incorrect");
+    ASSERT_EQ(fx.r.load_word(&fx.r, 00776), 000003,
+              "FP11 operand abort frame PSW incorrect");
+    ASSERT_EQ((word)(fx.r.fpu_fr[0].h >> 16), 012345,
+              "FP register high word should remain unchanged");
+    ASSERT_EQ((word)(fx.r.fpu_fr[0].l >> 16), 076543,
+              "FP register low word should remain unchanged");
+
+cleanup:
+    fixture_teardown(&fx);
+    return rc;
+}
+
 static int test_dcj11_special_ops(void)
 {
     cpu_fixture fx;
@@ -8172,6 +8215,7 @@ int main(void)
     failed += test_fis_odd_register_allowed_model(K1806VM2, "K1806VM2");
     failed += test_fis_odd_register_allowed_model(DCJ11, "DCJ11");
     failed += test_fp11_divf_divzero_trap();
+    failed += test_fp11_autoinc_abort_does_not_update_register();
     failed += test_dcj11_special_ops();
     failed += test_dcj11_mxpi_prev_mode2_uses_user_sp();
     failed += test_dcj11_csm_disabled_illegal();
