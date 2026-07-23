@@ -371,6 +371,22 @@ Validation:
 - UNIX V5 boot:
   - `./pdp1184 -rk disks/unix_v5_rk.dsk -bootrt11`
 
+### Manual OS boot validation
+- BSD 2.9:
+  - `./pdp1184 -rl disks/bsd2.9/2.9BSD-root.rl02 -rl disks/bsd2.9/swap.rl02 -rp disks/bsd2.9/2.9BSD-usr.rm05 -boot rl0`
+  - at the loader prompt, enter `rl(0,0)rlunix`
+- RSX-11M:
+  - `./pdp1184 -rq disks/rsx11/rsxm11sys.dsk -rq disks/rsx11/rsx11mpbl87.dsk -load demo/boot_menu.bin -addr 0100000 -pc 0100000`
+  - in the boot loader, enter `4 1`
+- RT-11 V4:
+  - `./pdp1184 -rk disks/rt11v400.dsk -boot rk0`
+  - `./lsi11 -rk disks/rt11v400.dsk -boot rk0`
+- RT-11 V5.03:
+  - `./pdp1184 -rh disks/rt11v503.dsk -boot rh0`
+  - `./lsi11 -rh disks/rt11v503.dsk -boot rh0`
+- ULTRIX-11 3.1 (RH11 mode):
+  - `./pdp1184 -rh disks/ultrix/sys.dsk -bootrt11 -rh-mode rh11`
+
 ### Demo: interactive boot menu (`demo/boot_menu`)
 - Purpose:
   - interactive loader helper that detects disk/tape controllers and asks what to boot
