@@ -659,7 +659,6 @@ static void rl_exec_xfer(enum rl_xfer_mode mode)
                 had_error = 1;
             } else {
                 sec_lba = lba;
-                sec_valid = 1;
                 sec_word = w_in_sector;
             }
         }

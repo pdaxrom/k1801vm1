@@ -5,6 +5,7 @@
 CC ?= cc
 CFLAGS ?= -O2 -Wall -Wpedantic -Wextra
 CPPFLAGS ?= -I. -I../core
+DEPFLAGS := -MMD -MP
 
 BUILD_DIR := .build
 
@@ -99,55 +100,66 @@ $(BIN_RT11TOOL): $(RT11_OBJS)
 RSX11_SRCS := tools/rsx11tool.c tools/rsx11fs.c
 RSX11_OBJS := $(addprefix $(BUILD_DIR)/rsx11tool/,$(RSX11_SRCS:.c=.o))
 
+TEST_OBJS_LSI11 := $(addprefix $(BUILD_DIR)/test-lsi11/,$(addsuffix .o,$(TESTS_LSI11)))
+TEST_OBJS_PDP1184 := $(addprefix $(BUILD_DIR)/test-pdp1184/,$(addsuffix .o,$(TESTS_PDP1184)))
+DEPS := $(MAIN_OBJS_LSI11:.o=.d) $(COMMON_OBJS_LSI11:.o=.d) \
+  $(CORE_OBJS_LSI11:.o=.d) $(MAIN_OBJS_PDP1184:.o=.d) \
+  $(COMMON_OBJS_PDP1184:.o=.d) $(CORE_OBJS_PDP1184:.o=.d) \
+  $(IMAGE_OBJS:.o=.d) $(RT11_OBJS:.o=.d) $(RSX11_OBJS:.o=.d) \
+  $(TEST_COMMON_OBJS_LSI11:.o=.d) $(TEST_COMMON_OBJS_PDP1184:.o=.d) \
+  $(TEST_OBJS_LSI11:.o=.d) $(TEST_OBJS_PDP1184:.o=.d)
+
+-include $(DEPS)
+
 $(BIN_RSX11TOOL): $(RSX11_OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(BUILD_DIR)/lsi11/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_LSI11) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG_LSI11) -c -o $@ $<
 
 $(BUILD_DIR)/pdp1184/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1184) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG_PDP1184) -c -o $@ $<
 
 $(BUILD_DIR)/lsi11-image/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/rt11tool/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/rsx11tool/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/lsi11/core_%.o: ../core/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_LSI11) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG_LSI11) -c -o $@ $<
 
 $(BUILD_DIR)/pdp1184/core_%.o: ../core/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(CFG_PDP1184) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) $(CFG_PDP1184) -c -o $@ $<
 
 $(BUILD_DIR)/lsi11/core_core.o: ../core/core.c ../core/core.h ../core/pdp11_fp.c
 $(BUILD_DIR)/pdp1184/core_core.o: ../core/core.c ../core/core.h ../core/pdp11_fp.c
 
 $(BUILD_DIR)/test-lsi11/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_LSI11) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(DEPFLAGS) $(CFG_LSI11) -c -o $@ $<
 
 $(BUILD_DIR)/test-lsi11/tests/%.o: tests/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_LSI11) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(DEPFLAGS) $(CFG_LSI11) -c -o $@ $<
 
 $(BUILD_DIR)/test-pdp1184/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_PDP1184) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(DEPFLAGS) $(CFG_PDP1184) -c -o $@ $<
 
 $(BUILD_DIR)/test-pdp1184/tests/%.o: tests/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(CFG_PDP1184) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(TEST_CFLAGS) $(DEPFLAGS) $(CFG_PDP1184) -c -o $@ $<
 
 tests/test_bus_map: $(BUILD_DIR)/test-lsi11/tests/test_bus_map.o $(TEST_COMMON_OBJS_LSI11)
 	$(CC) $(CFLAGS) -o $@ $^

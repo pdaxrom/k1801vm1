@@ -190,13 +190,15 @@ static const struct _OPCODE {
     { NULL, 0177000, 0177400, FP11_F3, NAME_LDCIF, OPF_NONE },
 };
 
-static const char *REG[] = {
+static const char *const REG[] = {
     "R0", "R1", "R2", "R3", "R4", "R5", "SP", "PC"
 };
 
-static const char *FPREG[] = {
+static const char *const FPREG[] = {
     "AC0", "AC1", "AC2", "AC3", "AC4", "AC5", "AC6", "AC7"
 };
+
+#define DISAS_OPERAND_BUFSZ 32
 
 #define FP11_FPS_D 0000200
 #define FP11_FPS_L 0000100
@@ -342,8 +344,8 @@ static const char *opcode_name(const regs *r, const struct _OPCODE *op,
 
 char *disas(regs *r, word *addr, char *out)
 {
-    char tmpbuf[256];
-    char tmpbuf2[256];
+    char tmpbuf[DISAS_OPERAND_BUFSZ];
+    char tmpbuf2[DISAS_OPERAND_BUFSZ];
     word instr = r->load_word(r, *addr);
     const struct _OPCODE *op = NULL;
     const char *name;
@@ -396,7 +398,7 @@ char *disas(regs *r, word *addr, char *out)
             sep = "|";
         }
         if (mask & FLAG_C) {
-            p += sprintf(p, "%s%sC", sep, name);
+            sprintf(p, "%s%sC", sep, name);
         }
     }
     break;

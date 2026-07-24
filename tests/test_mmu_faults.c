@@ -13,6 +13,7 @@
 #define MMU_SSR0_NONRES 0100000
 #define MMU_SSR0_FREEZE 0160000
 #define MMU_PDR_W 0000100
+#define DCJ11_CPUERR_ADR 0000100
 
 static INLINE void setup_mmu_fault_vector(mmu_fixture *fx)
 {
@@ -26,6 +27,16 @@ static INLINE void setup_mmu_fault_vector(mmu_fixture *fx)
 
     mmu_phys_write_word(fx, MMU_TRAP_VECTOR + 0, 000400);
     mmu_phys_write_word(fx, MMU_TRAP_VECTOR + 2, 000340);
+}
+
+static INLINE void rebuild_tlb_with_reset(mmu_fixture *fx, word pc)
+{
+    fx->r.mmu_ssr0 = 0;
+    fx->r.mmu_ssr3 = 0;
+    fx->r.psw = 0;
+    fx->r.r[7] = pc;
+    mmu_phys_write_word(fx, pc, 0000005);
+    (void)core_step(&fx->r);
 }
 
 static int test_fault_nonresident_ifetch(void)
@@ -139,6 +150,125 @@ static int test_fault_protect_on_data_write(void)
     return 0;
 }
 
+static int test_tlb_rejects_unreadable_acf(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("tlb_rejects_unreadable_acf");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_par[0][0][0] = 0000;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][1][0] = 0000;
+    fx.r.mmu_pdr[0][1][0] = 0177006;
+    fx.r.mmu_par[0][1][1] = 0000;
+    fx.r.mmu_pdr[0][1][1] = 0177004;
+    rebuild_tlb_with_reset(&fx, 000600);
+
+    fx.r.mmu_ssr0 = MMU_SSR0_ENABLE;
+    fx.r.mmu_ssr3 = 0000004;
+    fx.r.r[7] = 000000;
+    fx.r.r[6] = MMU_TEST_STACK;
+    mmu_phys_write_word(&fx, 000000,
+                        mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys_write_word(&fx, 000002, 020200);
+    mmu_phys_write_word(&fx, 000200, 012345);
+    mmu_phys_write_word(&fx, MMU_TRAP_VECTOR + 0, 000400);
+    mmu_phys_write_word(&fx, MMU_TRAP_VECTOR + 2, 000340);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "unreadable ACF must trap");
+    MMU_ASSERT_EQ(fx.r.r[7], 000400, "unreadable ACF must use MMU trap vector");
+    MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & MMU_SSR0_NONRES) != 0,
+                    "unreadable ACF must latch nonresident fault");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
+static int test_tlb_keeps_read_only_after_write_fault_and_flush(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("tlb_keeps_read_only_after_write_fault_flush");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_par[0][0][0] = 0000;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][1][0] = 0000;
+    fx.r.mmu_pdr[0][1][0] = 0177006;
+    fx.r.mmu_par[0][1][1] = 0000;
+    fx.r.mmu_pdr[0][1][1] = 0177002;
+    rebuild_tlb_with_reset(&fx, 000600);
+
+    fx.r.mmu_ssr0 = MMU_SSR0_ENABLE;
+    fx.r.mmu_ssr3 = 0000004;
+    fx.r.r[7] = 000000;
+    fx.r.r[6] = MMU_TEST_STACK;
+    mmu_phys_write_word(&fx, 000000,
+                        mmu_op_mov(mmu_operand(2, 7), mmu_operand(3, 7)));
+    mmu_phys_write_word(&fx, 000002, 000001);
+    mmu_phys_write_word(&fx, 000004, 020200);
+    mmu_phys_write_word(&fx, 000200, 076543);
+    mmu_phys_write_word(&fx, MMU_TRAP_VECTOR + 0, 000400);
+    mmu_phys_write_word(&fx, MMU_TRAP_VECTOR + 2, 000340);
+    mmu_phys_write_word(&fx, 000400, 0000005);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "first protected write must trap");
+    MMU_ASSERT_EQ(fx.r.r[7], 000400, "first write must use MMU trap vector");
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "abort latch must clear");
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "RESET must rebuild TLB");
+
+    fx.r.mmu_ssr0 = MMU_SSR0_ENABLE;
+    fx.r.mmu_ssr3 = 0000004;
+    fx.r.r[7] = 000010;
+    mmu_phys_write_word(&fx, 000010,
+                        mmu_op_mov(mmu_operand(2, 7), mmu_operand(3, 7)));
+    mmu_phys_write_word(&fx, 000012, 000002);
+    mmu_phys_write_word(&fx, 000014, 020200);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "write after TLB flush must still trap");
+    MMU_ASSERT_EQ(fx.r.r[7], 000400, "second write must use MMU trap vector");
+    MMU_ASSERT_TRUE((fx.r.mmu_ssr0 & MMU_SSR0_PROT) != 0,
+                    "second write must latch protection fault");
+    MMU_ASSERT_EQ(mmu_phys_read_word(&fx, 000200), 076543,
+                  "read-only mapping must not be modified after TLB flush");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
+static int test_tlb_word_read_preserves_odd_address_trap(void)
+{
+    mmu_fixture fx;
+
+    mmu_set_test("tlb_word_read_odd_address_trap");
+    mmu_fixture_setup(&fx);
+
+    fx.r.mmu_par[0][0][0] = 0000;
+    fx.r.mmu_pdr[0][0][0] = 0177006;
+    fx.r.mmu_par[0][1][0] = 0000;
+    fx.r.mmu_pdr[0][1][0] = 0177006;
+    rebuild_tlb_with_reset(&fx, 000600);
+
+    fx.r.mmu_ssr0 = MMU_SSR0_ENABLE;
+    fx.r.mmu_ssr3 = 0000004;
+    fx.r.r[7] = 000000;
+    fx.r.r[6] = MMU_TEST_STACK;
+    mmu_phys_write_word(&fx, 000000,
+                        mmu_op_mov(mmu_operand(3, 7), mmu_operand(0, 0)));
+    mmu_phys_write_word(&fx, 000002, 000201);
+    mmu_phys_write_word(&fx, 000004, 000400);
+    mmu_phys_write_word(&fx, 000006, 000340);
+
+    MMU_ASSERT_EQ(core_step(&fx.r), 0, "odd word read must trap");
+    MMU_ASSERT_EQ(fx.r.r[7], 000400, "odd read must use vector 4");
+    MMU_ASSERT_TRUE((fx.r.J11_CPUERR & DCJ11_CPUERR_ADR) != 0,
+                    "odd read must set CPUERR.ADR");
+
+    mmu_fixture_teardown(&fx);
+    return 0;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -146,6 +276,9 @@ int main(void)
     failed += test_fault_nonresident_ifetch();
     failed += test_fault_length_on_data_write();
     failed += test_fault_protect_on_data_write();
+    failed += test_tlb_rejects_unreadable_acf();
+    failed += test_tlb_keeps_read_only_after_write_fault_and_flush();
+    failed += test_tlb_word_read_preserves_odd_address_trap();
 
     if (failed) {
         return 1;

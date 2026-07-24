@@ -964,6 +964,9 @@ enum {
 #define MMU_PDR_W 0000100
 #define MMU_PDR_A 0000200
 
+#define MMU_TLB_VALID_MIN_MASK 0x1FFFu
+#define MMU_TLB_WRITE_ALLOWED  0x8000u
+
 #define MMU_PA16_MASK 000177777
 #define MMU_PA18_MASK 000777777
 #define MMU_PA22_MASK 017777777
@@ -1246,29 +1249,36 @@ static INLINE int mmu_phys_is_iopage(dword pa)
 
 static INLINE void mmu_tlb_update(regs *r, int mode, int space, int seg)
 {
+    mmu_tlb_entry_t *entry = &r->mmu_tlb[mode][space][seg];
     word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
     word par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
-    int acf = pdr & 07;
     int ed = (pdr >> 3) & 01;
     int len = (pdr >> 8) & 0177;
 
-    r->mmu_tlb[mode][space][seg].host_read_base = NULL;
-    r->mmu_tlb[mode][space][seg].host_write_base = NULL;
-    r->mmu_tlb[mode][space][seg].valid_min = 0;
-    r->mmu_tlb[mode][space][seg].valid_max = 0;
+    entry->host_base = NULL;
+    entry->valid_min_flags = 0;
+    entry->valid_max = 0;
 
-    if (acf == 0) {
-        return; /* Non-resident */
+    if (!mmu_acf_read_ok(pdr)) {
+        return;
     }
 
     if (ed) {
         /* Expand Down: valid from (len*64) to 8191 */
-        r->mmu_tlb[mode][space][seg].valid_min = (uint16_t)(len << 6);
-        r->mmu_tlb[mode][space][seg].valid_max = 0x1FFF;
+        entry->valid_min_flags = (uint16_t)(len << 6);
+        entry->valid_max = 0x1FFF;
     } else {
         /* Expand Up: valid from 0 to (len*64 + 63) */
-        r->mmu_tlb[mode][space][seg].valid_min = 0;
-        r->mmu_tlb[mode][space][seg].valid_max = (uint16_t)((len << 6) | 0x3F);
+        entry->valid_min_flags = 0;
+        entry->valid_max = (uint16_t)((len << 6) | 0x3F);
+    }
+    /*
+     * Preserve the previous fast-path policy: the first legal write goes
+     * through translation to set PDR<W>.  A later TLB rebuild may cache it,
+     * but only when the segment itself is writable.
+     */
+    if ((pdr & MMU_PDR_W) && mmu_acf_write_ok(pdr)) {
+        entry->valid_min_flags |= MMU_TLB_WRITE_ALLOWED;
     }
 
     if (r->ram_fast) {
@@ -1285,14 +1295,27 @@ static INLINE void mmu_tlb_update(regs *r, int mode, int space, int seg)
                 !mmu_phys_is_iopage(pa_base) &&
                 !mmu_phys_is_iopage(pa_last) &&
                 (pa_base + 0020000) <= r->ram_fast_size) {
-            uint8_t *base_ptr = r->ram_fast + pa_base;
-            r->mmu_tlb[mode][space][seg].host_read_base = base_ptr;
-            /* Writes bypassed only if segment already has W bit set */
-            if ((pdr & 0000100) && (acf == 2 || acf == 3 || acf == 6 || acf == 7)) {
-                r->mmu_tlb[mode][space][seg].host_write_base = base_ptr;
-            }
+            entry->host_base = r->ram_fast + pa_base;
         }
     }
+}
+
+static INLINE uint8_t *mmu_tlb_ptr(regs *r, int mode, int space, int seg,
+                                   uint16_t po, uint16_t width, int is_write)
+{
+    mmu_tlb_entry_t *entry = &r->mmu_tlb[mode][space][seg];
+    uint16_t valid_min =
+        (uint16_t)(entry->valid_min_flags & MMU_TLB_VALID_MIN_MASK);
+    uint16_t last = (uint16_t)(po + width - 1u);
+
+    if (!entry->host_base || po < valid_min || last > entry->valid_max) {
+        return NULL;
+    }
+    if (is_write &&
+            (entry->valid_min_flags & MMU_TLB_WRITE_ALLOWED) == 0) {
+        return NULL;
+    }
+    return entry->host_base + po;
 }
 
 static INLINE void mmu_tlb_flush_all(regs *r)
@@ -1789,11 +1812,10 @@ static INLINE byte core_load_byte_ex(regs *r, word offset, int is_ifetch,
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
         space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
-        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
-                po <= r->mmu_tlb[mode][space][seg].valid_max &&
-                r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+        uint8_t *p = mmu_tlb_ptr(r, mode, space, seg, po, 1, 0);
+        if (p) {
             r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-            return r->mmu_tlb[mode][space][seg].host_read_base[po];
+            return *p;
         }
     }
 #endif
@@ -1863,11 +1885,9 @@ static INLINE void core_store_byte_ex(regs *r, word offset, byte value,
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
         space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
-        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
-                po <= r->mmu_tlb[mode][space][seg].valid_max &&
-                r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+        uint8_t *p = mmu_tlb_ptr(r, mode, space, seg, po, 1, 1);
+        if (p) {
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             *p = value;
             return;
         }
@@ -1929,6 +1949,12 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
     int seg = 0;
     int rc;
 
+    if (r->model == DCJ11 && (offset & 1)) {
+        dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
+        bus_error_trap(r);
+        return 0;
+    }
+
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM word access bypasses entire callback chain.
      * Skip for DCJ11 odd-address accesses: alignment trap must fire. */
@@ -1943,11 +1969,9 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
         space = (is_ifetch || !mmu_split_enabled(r, mode)) ? 0 : 1;
-        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
-                po <= r->mmu_tlb[mode][space][seg].valid_max &&
-                r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+        uint8_t *p = mmu_tlb_ptr(r, mode, space, seg, po, 2, 0);
+        if (p) {
             r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + po;
             return (word)(p[0] | ((word)p[1] << 8));
         }
     }
@@ -1960,12 +1984,6 @@ static INLINE word core_load_word_ex(regs *r, word offset, int is_ifetch,
 #endif
 
     if (r->model == DCJ11 && dcj11_decode_va_regs) {
-        if (offset & 1) {
-            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
-            bus_error_trap(r);
-            return 0;
-        }
-
         word regv;
         if (dcj11_reg_block_load_word(r, offset, &regv)) {
             if (is_ifetch) {
@@ -2037,6 +2055,12 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
     int seg = 0;
     int rc;
 
+    if (r->model == DCJ11 && (offset & 1)) {
+        dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
+        bus_error_trap(r);
+        return;
+    }
+
 #if (!defined(ENABLE_MMU) || !(ENABLE_MMU))
     /* Fast path: RAM word access bypasses entire callback chain.
      * Skip for DCJ11 odd-address accesses: alignment trap must fire. */
@@ -2053,11 +2077,9 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
         space = (!mmu_split_enabled(r, mode)) ? 0 : 1;
-        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
-                po <= r->mmu_tlb[mode][space][seg].valid_max &&
-                r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+        uint8_t *p = mmu_tlb_ptr(r, mode, space, seg, po, 2, 1);
+        if (p) {
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
             return;
@@ -2072,12 +2094,6 @@ static INLINE void core_store_word_ex(regs *r, word offset, word value,
 #endif
 
     if (r->model == DCJ11 && dcj11_decode_va_regs) {
-        if (offset & 1) {
-            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
-            bus_error_trap(r);
-            return;
-        }
-
         if (dcj11_reg_block_store_word(r, offset, value)) {
             mmu_note_internal_reg_write(r, offset, force_kernel_d);
             return;
@@ -2124,17 +2140,21 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
     int rc;
     word value;
 
+    if (r->model == DCJ11 && (offset & 1)) {
+        dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
+        bus_error_trap(r);
+        return 0;
+    }
+
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = psw_mode_normalize(mode);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
         int space = (data_space && mmu_split_enabled(r, mode)) ? 1 : 0;
-        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
-                po <= r->mmu_tlb[mode][space][seg].valid_max &&
-                r->mmu_tlb[mode][space][seg].host_read_base != NULL) {
+        uint8_t *p = mmu_tlb_ptr(r, mode, space, seg, po, 2, 0);
+        if (p) {
             r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_read_base + po;
             return (word)(p[0] | ((word)p[1] << 8));
         }
     }
@@ -2147,12 +2167,6 @@ static INLINE word core_load_word_mode_space(regs *r, word offset, int mode,
 #endif
 
     if (r->model == DCJ11 && dcj11_decode_va_regs) {
-        if (offset & 1) {
-            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
-            bus_error_trap(r);
-            return 0;
-        }
-
         word value;
         if (dcj11_reg_block_load_word(r, offset, &value)) {
             return value;
@@ -2190,17 +2204,21 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
     int seg = 0;
     int rc;
 
+    if (r->model == DCJ11 && (offset & 1)) {
+        dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
+        bus_error_trap(r);
+        return;
+    }
+
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
     if (r->model == DCJ11 && (r->mmu_ssr0 & MMU_SSR0_ENABLE)) {
         mode = psw_mode_normalize(mode);
         seg = offset >> 13;
         uint16_t po = offset & 0017777;
         int space = (data_space && mmu_split_enabled(r, mode)) ? 1 : 0;
-        if (po >= r->mmu_tlb[mode][space][seg].valid_min &&
-                po <= r->mmu_tlb[mode][space][seg].valid_max &&
-                r->mmu_tlb[mode][space][seg].host_write_base != NULL) {
+        uint8_t *p = mmu_tlb_ptr(r, mode, space, seg, po, 2, 1);
+        if (p) {
             r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-            uint8_t *p = r->mmu_tlb[mode][space][seg].host_write_base + po;
             p[0] = (uint8_t)(value & 000377);
             p[1] = (uint8_t)((value >> 8) & 000377);
             return;
@@ -2215,12 +2233,6 @@ static INLINE void core_store_word_mode_space(regs *r, word offset, word value,
 #endif
 
     if (r->model == DCJ11 && dcj11_decode_va_regs) {
-        if (offset & 1) {
-            dcj11_set_cpuerr(r, DCJ11_CPUERR_ADR);
-            bus_error_trap(r);
-            return;
-        }
-
         if (dcj11_reg_block_store_word(r, offset, value)) {
             mmu_note_write_pdrw(r, mode, data_space ? 1 : 0, (offset >> 13) & 07);
             return;

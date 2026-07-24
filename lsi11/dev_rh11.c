@@ -686,7 +686,6 @@ static void rh_write8(uint16_t addr, uint8_t b)
         return; /* read-only registers */
     }
 
-    old = 0;
     if (base == RHCS1) {
         old = rhcs1;
     } else {

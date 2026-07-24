@@ -1,5 +1,58 @@
 # J-11 / LSI-11 TODO (NEW TABLES)
 
+## Autonomous core/LSI11 review pass (2026-07-24)
+
+Constraints for this pass:
+- do not commit before manual user verification
+- do not increase persistent or peak RAM usage
+- keep the code suitable for microcontroller builds
+- validate supported operating systems with real boot runs, not only controller
+  or filesystem-tool tests
+
+Measured baseline on the current 64-bit host:
+- `sizeof(regs)` with `ENABLE_MMU=0`: 328 bytes
+- `sizeof(regs)` with `ENABLE_MMU=1`: 2128 bytes
+- MMU TLB inside `regs`: 1536 bytes
+- attaching a TQ/TK50 image allocates a 65534-byte transfer buffer
+- `disas()` reserves two 256-byte operand buffers on every call
+
+Work items:
+- [x] Replace the 65534-byte TQ/TK50 transfer allocation with bounded chunked
+  streaming while preserving full-length SIMH TAP record support.
+- [x] Reduce `disas()` transient stack use and move immutable register-name
+  pointer tables out of writable data.
+- [x] Compact each MMU TLB entry to one RAM base pointer; preserve read/write
+  permission behavior without adding replacement state.
+- [x] Remove confirmed dead stores in the reviewed core/LSI11 paths where doing
+  so cannot affect device timing or externally visible state.
+- [x] Restore Pico builds after the bus physical-address type was renamed from
+  `paddr_t` to `bus_paddr_t`.
+- [x] Isolate `bk0010-01` build artifacts by GUI/MMU configuration so it cannot
+  link against an incompatible shared `core.o`.
+- [x] Run the core test matrix with MMU disabled and enabled, including
+  ASan/UBSan builds.
+- [x] Run the LSI11/PDP-11/84 machine test matrix.
+- [x] Boot BSD 2.9 on `pdp1184` and enter `rl(0,0)rlunix`.
+- [x] Boot RSX-11M on `pdp1184` through `demo/boot_menu.bin` with selection
+  `4 1`.
+- [x] Boot RT-11 V4 on both `pdp1184` and `lsi11`.
+- [x] Boot RT-11 V5.03 on both `pdp1184` and `lsi11`.
+- [x] Boot ULTRIX-11 3.1 on `pdp1184` in RH11 mode and reach the setup program
+  without a panic.
+- [x] Record final RAM deltas and leave all changes uncommitted for manual
+  verification.
+
+Measured result:
+- host `sizeof(regs)`, MMU off: unchanged at 328 bytes
+- host `sizeof(regs)`, MMU on: 2128 -> 1616 bytes (-512)
+- Pico `cpu_regs`, MMU off: unchanged at 256 bytes
+- Pico `cpu_regs`, MMU on: 1288 -> 1032 bytes (-256)
+- TQ/TK50 transfer storage: 65534-byte heap allocation removed; transfers now
+  use a 256-byte stack chunk (-65278 bytes at transfer peak)
+- `disas()` operand buffers: 512 -> 64 stack bytes (-448 per call); register
+  name pointer tables moved from writable data to read-only data
+- both `pico_lsi11` and `pico_pdp1184` firmware targets build successfully
+
 ## Workflow
 
 - [x] Table 1: `Instructions or Instruction sets` processed

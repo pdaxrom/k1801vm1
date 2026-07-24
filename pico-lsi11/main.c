@@ -671,12 +671,13 @@ static int load_binary_into_ram(const char *path, long load_addr)
         emu_fclose(f);
         return -1;
     }
-    if (load_addr < 0 || !bus_range_is_ram((paddr_t)load_addr, (size_t)fsize)) {
+    if (load_addr < 0 ||
+            !bus_range_is_ram((bus_paddr_t)load_addr, (size_t)fsize)) {
         emu_fclose(f);
         return -1;
     }
 
-    dst = bus_ram_ptr((paddr_t)load_addr);
+    dst = bus_ram_ptr((bus_paddr_t)load_addr);
     if (!dst) {
         emu_fclose(f);
         return -1;

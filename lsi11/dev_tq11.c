@@ -6,7 +6,6 @@
 #include "irq.h"
 #include "ubmap.h"
 
-#include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -229,6 +228,7 @@
 #define TQ_MAX_TRANSFER    0x0000FFFEu
 #define TQ_MAX_RECORD      0x0000FFFEu
 #define TQ_NOISE_RECORD    0000016u
+#define TQ_IO_CHUNK        256u
 
 /* Minimal SIMH .tap backend markers. */
 #define TQ_TAP_TMK         0x00000000u
@@ -279,17 +279,6 @@ typedef struct {
 } tq_unit_t;
 
 static tq_unit_t tq_units[TQ11_MAX_UNITS];
-static uint8_t *tq_xfer_buf;
-
-static int tq_ensure_xfer_buf(void)
-{
-    if (tq_xfer_buf) {
-        return 0;
-    }
-
-    tq_xfer_buf = (uint8_t *)malloc((size_t)TQ_MAX_RECORD);
-    return tq_xfer_buf ? 0 : -1;
-}
 
 static tq_unit_t *tq_unit_ptr(uint16_t unit)
 {
@@ -505,6 +494,19 @@ static int tq_dma_read_bytes(uint32_t addr, uint8_t *dst, uint32_t len)
     }
     for (i = 0; i < len; i++) {
         if (tq_dma_read8_checked((bus_paddr_t)(addr + i), &dst[i]) != 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+static int tq_dma_readable_range(uint32_t addr, uint32_t len)
+{
+    uint32_t i;
+
+    for (i = 0; i < len; i++) {
+        bus_paddr_t pa = tq_dma_map_addr(addr + i);
+        if (!bus_range_is_ram(pa, 1) || bus_is_nxm(pa)) {
             return -1;
         }
     }
@@ -731,14 +733,19 @@ static uint32_t tq_tap_padded(uint32_t len)
     return (len + 1u) & ~1u;
 }
 
-static tq_tap_status_t tq_tap_read_forward(uint8_t *buf, uint32_t max_len,
-        uint32_t *rec_len, uint32_t *xfer_len)
+typedef int (*tq_tap_sink_fn)(void *opaque, uint32_t offset,
+                              const uint8_t *data, uint32_t len);
+
+static tq_tap_status_t tq_tap_read_forward_stream(uint32_t max_len,
+        uint32_t *rec_len, uint32_t *xfer_len, tq_tap_sink_fn sink,
+        void *opaque, int *sink_result)
 {
+    uint8_t chunk[TQ_IO_CHUNK];
     uint32_t mark;
     uint32_t data_len;
     uint32_t padded;
     uint32_t trailer;
-    uint32_t i;
+    uint32_t offset;
     uint8_t pad;
 
     if (rec_len) {
@@ -746,6 +753,9 @@ static tq_tap_status_t tq_tap_read_forward(uint8_t *buf, uint32_t max_len,
     }
     if (xfer_len) {
         *xfer_len = 0;
+    }
+    if (sink_result) {
+        *sink_result = 0;
     }
     if (!tq_fp) {
         return TQ_TAP_EOM_STATUS;
@@ -767,16 +777,33 @@ static tq_tap_status_t tq_tap_read_forward(uint8_t *buf, uint32_t max_len,
         *rec_len = data_len;
     }
 
-    for (i = 0; i < data_len; i++) {
-        uint8_t c;
-        if (emu_fread(&c, 1, 1, tq_fp) != 1) {
+    for (offset = 0; offset < data_len;) {
+        uint32_t chunk_len = data_len - offset;
+        uint32_t deliver_len;
+
+        if (chunk_len > TQ_IO_CHUNK) {
+            chunk_len = TQ_IO_CHUNK;
+        }
+        if (emu_fread(chunk, 1, chunk_len, tq_fp) != chunk_len) {
             return TQ_TAP_IOERR;
         }
-        if (buf && i < max_len) {
-            buf[i] = c;
+        tq_tape_pos += chunk_len;
+
+        deliver_len = chunk_len;
+        if (offset >= max_len) {
+            deliver_len = 0;
+        } else if (deliver_len > max_len - offset) {
+            deliver_len = max_len - offset;
         }
+        if (sink && deliver_len != 0u &&
+                (!sink_result || *sink_result == 0)) {
+            int rc = sink(opaque, offset, chunk, deliver_len);
+            if (sink_result) {
+                *sink_result = rc;
+            }
+        }
+        offset += chunk_len;
     }
-    tq_tape_pos += data_len;
 
     if ((padded & 1u) != (data_len & 1u)) {
         if (emu_fread(&pad, 1, 1, tq_fp) != 1) {
@@ -796,6 +823,29 @@ static tq_tap_status_t tq_tap_read_forward(uint8_t *buf, uint32_t max_len,
         *xfer_len = (data_len < max_len) ? data_len : max_len;
     }
     return TQ_TAP_OK;
+}
+
+typedef struct {
+    uint8_t *buf;
+} tq_buffer_sink_t;
+
+static int tq_tap_buffer_sink(void *opaque, uint32_t offset,
+                              const uint8_t *data, uint32_t len)
+{
+    tq_buffer_sink_t *sink = (tq_buffer_sink_t *)opaque;
+
+    memcpy(sink->buf + offset, data, len);
+    return 0;
+}
+
+static tq_tap_status_t tq_tap_read_forward(uint8_t *buf, uint32_t max_len,
+        uint32_t *rec_len, uint32_t *xfer_len)
+{
+    tq_buffer_sink_t sink = {buf};
+
+    return tq_tap_read_forward_stream(max_len, rec_len, xfer_len,
+                                      buf ? tq_tap_buffer_sink : NULL,
+                                      buf ? &sink : NULL, NULL);
 }
 
 static tq_tap_status_t tq_tap_peek_prev(uint32_t *mark, uint32_t *start,
@@ -867,6 +917,7 @@ static tq_tap_status_t tq_tap_peek_prev(uint32_t *mark, uint32_t *start,
     return TQ_TAP_OK;
 }
 
+#if defined(LSI11_TESTS)
 static tq_tap_status_t tq_tap_write_record(const uint8_t *buf, uint32_t len)
 {
     static const uint8_t zero = 0;
@@ -891,6 +942,73 @@ static tq_tap_status_t tq_tap_write_record(const uint8_t *buf, uint32_t len)
         return TQ_TAP_IOERR;
     }
     tq_tape_pos += len;
+    if (padded != len) {
+        if (emu_fwrite(&zero, 1, 1, tq_fp) != 1) {
+            return TQ_TAP_IOERR;
+        }
+        tq_tape_pos += 1u;
+    }
+    if (tq_tap_write_u32(len) != 0) {
+        return TQ_TAP_IOERR;
+    }
+    if (emu_fflush(tq_fp) != 0) {
+        return TQ_TAP_IOERR;
+    }
+    return TQ_TAP_OK;
+}
+#endif
+
+static tq_tap_status_t tq_tap_write_record_dma(uint32_t addr, uint32_t len,
+        int *dma_error)
+{
+    static const uint8_t zero = 0;
+    uint8_t chunk[TQ_IO_CHUNK];
+    uint32_t padded;
+    uint32_t offset;
+
+    if (dma_error) {
+        *dma_error = 0;
+    }
+    if (!tq_fp) {
+        return TQ_TAP_EOM_STATUS;
+    }
+    if (tq_read_only) {
+        return TQ_TAP_WRP_STATUS;
+    }
+    if (len > TQ_TAP_MAXLEN) {
+        return TQ_TAP_INVRL;
+    }
+    if (tq_dma_readable_range(addr, len) != 0) {
+        if (dma_error) {
+            *dma_error = 1;
+        }
+        return TQ_TAP_IOERR;
+    }
+
+    padded = tq_tap_padded(len);
+    if (tq_tap_write_u32(len) != 0) {
+        return TQ_TAP_IOERR;
+    }
+
+    for (offset = 0; offset < len;) {
+        uint32_t chunk_len = len - offset;
+
+        if (chunk_len > TQ_IO_CHUNK) {
+            chunk_len = TQ_IO_CHUNK;
+        }
+        if (tq_dma_read_bytes(addr + offset, chunk, chunk_len) != 0) {
+            if (dma_error) {
+                *dma_error = 1;
+            }
+            return TQ_TAP_IOERR;
+        }
+        if (emu_fwrite(chunk, 1, chunk_len, tq_fp) != chunk_len) {
+            return TQ_TAP_IOERR;
+        }
+        tq_tape_pos += chunk_len;
+        offset += chunk_len;
+    }
+
     if (padded != len) {
         if (emu_fwrite(&zero, 1, 1, tq_fp) != 1) {
             return TQ_TAP_IOERR;
@@ -1382,6 +1500,25 @@ static int tq_dma_compare_bytes(uint32_t ba, const uint8_t *buf, uint32_t len)
     return 0;
 }
 
+typedef struct {
+    uint32_t ba;
+    uint16_t op;
+} tq_dma_sink_t;
+
+static int tq_tap_dma_sink(void *opaque, uint32_t offset,
+                           const uint8_t *data, uint32_t len)
+{
+    tq_dma_sink_t *sink = (tq_dma_sink_t *)opaque;
+
+    if (sink->op == TQ_OP_RD) {
+        return tq_dma_write_bytes(sink->ba + offset, data, len);
+    }
+    if (sink->op == TQ_OP_CMP) {
+        return tq_dma_compare_bytes(sink->ba + offset, data, len);
+    }
+    return 0;
+}
+
 static void tq_cmd_read_like(const uint16_t *cmd, uint16_t *rsp, uint16_t op)
 {
     uint16_t status;
@@ -1389,6 +1526,8 @@ static void tq_cmd_read_like(const uint16_t *cmd, uint16_t *rsp, uint16_t op)
     uint32_t ba;
     uint32_t rec_len = 0;
     uint32_t xfer_len = 0;
+    int sink_result = 0;
+    tq_dma_sink_t sink;
     tq_tap_status_t tap_st;
 
     tq_prepare_rsp(rsp, cmd, op, 0, 0, TQ_RW_LNT);
@@ -1407,36 +1546,24 @@ static void tq_cmd_read_like(const uint16_t *cmd, uint16_t *rsp, uint16_t op)
         rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_CMD | TQ_I_BCNT);
         return;
     }
-    if (tq_ensure_xfer_buf() != 0) {
-        rsp[TQ_RSP_STS] = TQ_ST_HST;
-        tq_rsp_flags_from_status(rsp);
-        return;
-    }
 
-    tap_st = tq_tap_read_forward(tq_xfer_buf, bc, &rec_len, &xfer_len);
+    sink.ba = ba;
+    sink.op = op;
+    tap_st = tq_tap_read_forward_stream(bc, &rec_len, &xfer_len,
+                                        op == TQ_OP_ACC ? NULL : tq_tap_dma_sink,
+                                        &sink, &sink_result);
     if (tap_st == TQ_TAP_OK) {
-        if (op == TQ_OP_RD) {
-            if (tq_dma_write_bytes(ba, tq_xfer_buf, xfer_len) != 0) {
-                rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_HST | TQ_SB_HST_NXM);
-                tq_rw_rsp_common(rsp, 0, tq_tape_pos, rec_len);
-                tq_rsp_flags_from_status(rsp);
-                return;
-            }
-        } else if (op == TQ_OP_CMP) {
-            int cmp_rc = tq_dma_compare_bytes(ba, tq_xfer_buf, xfer_len);
-
-            if (cmp_rc < 0) {
-                rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_HST | TQ_SB_HST_NXM);
-                tq_rw_rsp_common(rsp, 0, tq_tape_pos, rec_len);
-                tq_rsp_flags_from_status(rsp);
-                return;
-            }
-            if (cmp_rc > 0) {
-                rsp[TQ_RSP_STS] = TQ_ST_SXC;
-                tq_rw_rsp_common(rsp, xfer_len, tq_tape_pos, rec_len);
-                tq_rsp_flags_from_status(rsp);
-                return;
-            }
+        if (sink_result < 0) {
+            rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_HST | TQ_SB_HST_NXM);
+            tq_rw_rsp_common(rsp, 0, tq_tape_pos, rec_len);
+            tq_rsp_flags_from_status(rsp);
+            return;
+        }
+        if (sink_result > 0) {
+            rsp[TQ_RSP_STS] = TQ_ST_SXC;
+            tq_rw_rsp_common(rsp, xfer_len, tq_tape_pos, rec_len);
+            tq_rsp_flags_from_status(rsp);
+            return;
         }
 
         if (rec_len > bc) {
@@ -1474,6 +1601,7 @@ static void tq_cmd_write(const uint16_t *cmd, uint16_t *rsp)
     uint16_t status;
     uint32_t bc;
     uint32_t ba;
+    int dma_error = 0;
     tq_tap_status_t tap_st;
 
     tq_prepare_rsp(rsp, cmd, TQ_OP_WR, 0, 0, TQ_RW_LNT);
@@ -1499,19 +1627,14 @@ static void tq_cmd_write(const uint16_t *cmd, uint16_t *rsp)
         rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_CMD | TQ_I_BCNT);
         return;
     }
-    if (tq_ensure_xfer_buf() != 0) {
-        rsp[TQ_RSP_STS] = TQ_ST_HST;
-        tq_rsp_flags_from_status(rsp);
-        return;
-    }
 
-    if (tq_dma_read_bytes(ba, tq_xfer_buf, bc) != 0) {
+    tap_st = tq_tap_write_record_dma(ba, bc, &dma_error);
+    if (dma_error) {
         rsp[TQ_RSP_STS] = (uint16_t)(TQ_ST_HST | TQ_SB_HST_NXM);
         tq_rsp_flags_from_status(rsp);
         return;
     }
 
-    tap_st = tq_tap_write_record(tq_xfer_buf, bc);
     rsp[TQ_RSP_STS] = tq_status_from_tap_motion(tap_st);
     if (tap_st == TQ_TAP_OK) {
         tq_rw_rsp_common(rsp, bc, tq_tape_pos, bc);
@@ -1994,9 +2117,6 @@ int tq11_open_image_unit(unsigned unit, const char *path)
     if (!path || unit >= TQ11_MAX_UNITS) {
         return -1;
     }
-    if (tq_ensure_xfer_buf() != 0) {
-        return -1;
-    }
 
     u = &tq_units[unit];
     if (u->fp) {
@@ -2056,9 +2176,6 @@ void tq11_close_image(void)
         u->una_pending = 0;
     }
     tq_poll_pending = 0;
-
-    free(tq_xfer_buf);
-    tq_xfer_buf = NULL;
 }
 
 int tq11_attached(void)

@@ -96,6 +96,14 @@ typedef struct {
     uint32_t h;
 } fpac_t;
 
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+typedef struct {
+    uint8_t *host_base;
+    uint16_t valid_min_flags;
+    uint16_t valid_max;
+} mmu_tlb_entry_t;
+#endif
+
 typedef struct _regs {
     byte model;
 
@@ -181,12 +189,7 @@ typedef struct _regs {
     word mmu_par[4][2][8];
     word mmu_pdr[4][2][8];
 
-    struct {
-        uint8_t *host_read_base;
-        uint8_t *host_write_base;
-        uint16_t valid_min;
-        uint16_t valid_max;
-    } mmu_tlb[4][2][8];
+    mmu_tlb_entry_t mmu_tlb[4][2][8];
 #endif
 
     byte (*load_byte)(struct _regs *r, word offset);

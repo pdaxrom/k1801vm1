@@ -115,19 +115,16 @@ static int vm2_install_halt_stub(char *err, size_t err_len)
 
 static void ubmap_sync_from_cpu(const regs *r, lsi11_machine_t machine)
 {
-    int enabled = 0;
-
     if (!r || machine != LSI11_MACHINE_1184 || r->model != DCJ11) {
-        enabled = 0;
         ubmap_set_enabled(0);
-    } else {
-#if defined(ENABLE_MMU) && (ENABLE_MMU)
-        enabled = (r->mmu_ssr3 & MMR3_BME) ? 1 : 0;
-#else
-        enabled = 0;
-#endif
-        ubmap_set_enabled(enabled);
+        return;
     }
+
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+    ubmap_set_enabled((r->mmu_ssr3 & MMR3_BME) ? 1 : 0);
+#else
+    ubmap_set_enabled(0);
+#endif
 }
 
 static void bus_iowin_sync_from_cpu(const regs *r, lsi11_machine_t machine)

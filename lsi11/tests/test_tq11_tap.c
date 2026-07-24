@@ -102,7 +102,8 @@
 #define RSP_PKT_PAYLOAD  0001404u
 
 #define HOST_BUF_A       0002000u
-#define HOST_BUF_B       0002020u
+#define HOST_BUF_B       0005000u
+#define TEST_RECORD_LEN  513u
 
 static int g_fail = 0;
 static uint16_t g_ref = 1;
@@ -228,11 +229,15 @@ int main(void)
     int fd;
     uint16_t cmd[32];
     uint16_t rsp[32];
-    static const uint8_t rec[] = {'A', 'B', 'C'};
+    static uint8_t rec[TEST_RECORD_LEN];
+    size_t i;
 
     memset(&g_regs, 0, sizeof(g_regs));
     g_regs.model = K1801VM2;
     g_regs.psw = 0;
+    for (i = 0; i < sizeof(rec); i++) {
+        rec[i] = (uint8_t)(i ^ (i >> 3));
+    }
 
     fd = mkstemp(img);
     if (fd < 0) {
@@ -306,9 +311,9 @@ int main(void)
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_SUC, "TQ11 FLU succeeds");
 
-    bus_write8(HOST_BUF_A + 0u, rec[0]);
-    bus_write8(HOST_BUF_A + 1u, rec[1]);
-    bus_write8(HOST_BUF_A + 2u, rec[2]);
+    for (i = 0; i < sizeof(rec); i++) {
+        bus_write8((uint16_t)(HOST_BUF_A + i), rec[i]);
+    }
 
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
@@ -335,7 +340,7 @@ int main(void)
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_CMP;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_A);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_SUC, "TQ11 CMP succeeds");
@@ -352,7 +357,7 @@ int main(void)
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_ACC;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_B);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_SUC, "TQ11 ACC succeeds");
@@ -368,7 +373,7 @@ int main(void)
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_RD;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_B);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_SUC, "TQ11 RD succeeds");
@@ -377,11 +382,14 @@ int main(void)
     check(bus_read8(HOST_BUF_B + 0u) == rec[0], "TQ11 RD byte 0");
     check(bus_read8(HOST_BUF_B + 1u) == rec[1], "TQ11 RD byte 1");
     check(bus_read8(HOST_BUF_B + 2u) == rec[2], "TQ11 RD byte 2");
+    check(bus_read8(HOST_BUF_B + 256u) == rec[256], "TQ11 RD byte 256");
+    check(bus_read8(HOST_BUF_B + TEST_RECORD_LEN - 1u) ==
+          rec[TEST_RECORD_LEN - 1u], "TQ11 RD final byte");
 
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_RD;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_B);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_TMK, "TQ11 RD sees tape mark");
@@ -397,7 +405,7 @@ int main(void)
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_RD;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_B);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_TMK, "TQ11 RD sees tape mark again after reverse-space mark");
@@ -422,7 +430,7 @@ int main(void)
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_RD;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_B);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_SUC, "TQ11 RD succeeds again after reverse-space record");
@@ -445,7 +453,7 @@ int main(void)
     memset(cmd, 0, sizeof(cmd));
     cmd[TQ_HLNT] = TQ_RW_LNT;
     cmd[TQ_CMD_OPC] = TQ_OP_RD;
-    pkt_put_u32(cmd, TQ_RW_BCL, 8u);
+    pkt_put_u32(cmd, TQ_RW_BCL, (uint32_t)sizeof(rec));
     pkt_put_u32(cmd, TQ_RW_BAL, HOST_BUF_B);
     issue_cmd(cmd, rsp);
     check(rsp[TQ_RSP_STS] == TQ_ST_TMK, "TQ11 RD sees tape mark after forward-space record");
