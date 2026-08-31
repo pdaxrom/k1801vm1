@@ -55,9 +55,11 @@ No additional EBR is required. The final build consumes all seven EBRs.
 | `004000..004777` | SD bootstrap through MicROM spare bits |
 | `000000..157776` | guest SPI FRAM, bank 0 |
 | `160000..160476` | private RK611 interrupt service while selected |
+| `166000/166001` | HC1200 panel rows and serial-output latch |
 | `177440..177476` | RK611 window; writable words use FRAM bank 1 |
 | `177500` | SD SPI data register |
 | `177502` | SD SPI control register |
+| `177546` | KW11-L-compatible line-clock CSR |
 | `177560..177566` | KL11 console |
 
 Normal memory accesses use FRAM bank 0. RK611 register storage uses invisible
@@ -72,7 +74,8 @@ so ODT remains available if boot fails.
 After loading sectors 0 and 1 into FRAM, the bootstrap writes control value 7
 to `177502`. Bit 2 arms overlay removal. The following `CLR PC` is still
 fetched from boot ROM; the first read at address zero removes the overlay and
-exposes FRAM. Interrupts remain gated until this transition completes.
+exposes FRAM. The KW11-L CSR resets with interrupt enable clear, so the
+free-running line clock cannot interrupt this transition.
 
 ## UART and interrupts
 
@@ -81,9 +84,19 @@ KL11 registers at `177560..177566`; RX and TX request vectors `060` and `064`.
 The board adapter chooses RX first when both are pending and acknowledges the
 chosen request directly. The general `wbc_vic` is not instantiated.
 
-The 50 Hz timer is an EVNT edge. It remains disarmed until RT-11 writes a
-nonzero vector-100 handler to FRAM, preventing an early tick from returning
-through address zero during the slow software RK service.
+The 50 Hz line clock has a KW11-L-compatible CSR at `177546`. Bit 7 is
+MON/DONE and bit 6 is interrupt enable. The counter runs continuously, reset
+leaves DONE set and IE clear, and a tick raises DONE. When IE is set, the same
+tick emits the EVNT edge used by the AM4 interrupt latch at vector `100`.
+Writing bit 7 as zero clears DONE. The timer never reads or snoops guest RAM.
+RT-11 installs its vector and explicitly enables the CSR as part of normal
+device initialization.
+
+The HC1200 human-interface pins use a private register at `166000/166001`.
+Only a six-bit output latch and keyboard-row readback are in FPGA logic; the
+HCMS displays, RGB outputs and keyboard columns are clocked by software. This
+keeps the interface usable without consuming another framebuffer, font ROM or
+scanner. See [PANEL-IO.md](PANEL-IO.md) for the bit layout and protocols.
 
 ## RK611 execution model
 

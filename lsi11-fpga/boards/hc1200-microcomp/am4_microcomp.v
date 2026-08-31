@@ -2,7 +2,7 @@
 
 // Isolated AM4/LSI-11M checkpoint for HC1200.  The original datapath and
 // 56-bit MicROM use a board-native request/ready interface backed by external
-// SPI FRAM; cpu11 KL11/VIC and retained ODT remain unchanged.
+// SPI FRAM; KL11, KW11-L, panel GPIO and retained ODT share the board bus.
 module am4_hc1200_microcomp #(
 	parameter integer FRAM_CLK_DIV = 2,
 	parameter integer TICK_DIVISOR = 532000
@@ -57,8 +57,11 @@ module am4_hc1200_microcomp #(
 		.virq(virq), .interrupt_vector(interrupt_vector),
 		.interrupt_strobe(interrupt_strobe),
 		.interrupt_acknowledge(interrupt_acknowledge),
-		.event_irq(timer_event), .timer_enable(1'b1),
+		.event_irq(timer_event),
 		.uart_rx(rx), .uart_tx(tx), .spi_cs_n(gpio_mcs),
+		.panel_key_rows(gpio_key_row), .panel_din(gpio_din),
+		.panel_ce(gpio_ce), .panel_clk(gpio_clk), .panel_rs(gpio_rs),
+		.panel_blank(gpio_blank), .panel_reg_latch(gpio_reg_latch),
 		.spi_sck(gpio_msck), .spi_mosi(gpio_mosi), .spi_miso(gpio_miso),
 		.sd_cs_n(sd_cs_n), .sd_sck(sd_sck), .sd_mosi(sd_mosi),
 		.sd_miso(sd_miso), .boot_rom_ena(boot_rom_ena),
@@ -71,7 +74,7 @@ module am4_hc1200_microcomp #(
 	) engine (
 		.clk(clk), .peripheral_reset(peripheral_reset), .reset(reset),
 		.power_fail(1'b0), .halt_request(1'b0),
-		.event_request(boot_complete ? timer_event : 1'b0), .vector_irq(virq),
+		.event_request(timer_event), .vector_irq(virq),
 		.bus_address(bus_address), .bus_write_data(bus_wdata),
 		.bus_read_data(bus_rdata), .bus_request(bus_request),
 		.bus_write(bus_write), .bus_byte_select(bus_byte_select),
@@ -82,12 +85,4 @@ module am4_hc1200_microcomp #(
 		.boot_select(2'b11)
 	);
 
-	assign gpio_din = bus_request;
-	assign gpio_ce = 1'b1;
-	assign gpio_clk = bus_write;
-	assign gpio_rs = peripheral_reset;
-	assign gpio_blank = 1'b0;
-	assign gpio_reg_latch = 1'b0;
-
-	wire [3:0] unused_gpio_key_row = gpio_key_row;
 endmodule

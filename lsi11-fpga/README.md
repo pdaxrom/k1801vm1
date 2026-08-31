@@ -13,7 +13,9 @@ The currently verified configuration provides:
 - a MicROM fix for store-only `MOVB memory,memory` destination cycles;
 - retained ODT over the console UART;
 - KL11-compatible console at `177560`, vectors `060` and `064`, 115200 8N1;
-- 50 Hz EVNT interrupt at vector `100` after RT-11 installs its handler;
+- KW11-L-compatible 50 Hz clock CSR at `177546`, with EVNT vector `100`;
+- software-driven HCMS-3917 displays, RGB/keyboard shift register and four
+  keyboard rows through the private panel register at `166000/166001`;
 - guest memory in external SPI FRAM;
 - reset bootstrap in otherwise unused physical bits of the seven MicROM EBRs;
 - SDHC initialization and two-sector RT-11 handoff;
@@ -65,6 +67,7 @@ erase/program/verify.
 - [MicROM source and modifications](docs/MICROCODE.md)
 - [SD bootstrap and RK611 service](docs/SD-BOOT-RK611.md)
 - [Build, Diamond, Programmer and UART](docs/BUILD-DEBUG-PROGRAM.md)
+- [HC1200 display, RGB and keyboard register](docs/PANEL-IO.md)
 - [Regression coverage and limitations](docs/TESTING.md)
 - [Port history and design decisions](docs/PORTING-NOTES.md)
 

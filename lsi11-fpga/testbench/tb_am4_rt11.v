@@ -42,7 +42,9 @@ module tb_am4_rt11;
 		.acknowledge(ready), .virq(virq), .interrupt_vector(vector_data),
 		.interrupt_strobe(vector_request),
 		.interrupt_acknowledge(vector_ready), .event_irq(timer_event),
-		.timer_enable(1'b1), .uart_rx(1'b1), .uart_tx(uart_tx),
+		.uart_rx(1'b1), .uart_tx(uart_tx), .panel_key_rows(4'b0),
+		.panel_din(), .panel_ce(), .panel_clk(), .panel_rs(),
+		.panel_blank(), .panel_reg_latch(),
 		.spi_cs_n(fram_cs_n), .spi_sck(fram_sck),
 		.spi_mosi(fram_mosi), .spi_miso(fram_miso),
 		.sd_cs_n(sd_cs_n), .sd_sck(sd_sck), .sd_mosi(sd_mosi),
@@ -57,7 +59,7 @@ module tb_am4_rt11;
 	) engine (
 		.clk(clk), .peripheral_reset(peripheral_reset), .reset(reset),
 		.power_fail(1'b0), .halt_request(1'b0),
-		.event_request(ENABLE_TIMER && boot_complete ? timer_event : 1'b0),
+		.event_request(ENABLE_TIMER ? timer_event : 1'b0),
 		.vector_irq(virq),
 		.bus_address(address), .bus_write_data(write_data),
 		.bus_read_data(read_data), .bus_request(request),
@@ -109,7 +111,7 @@ module tb_am4_rt11;
 				saw_banner <= 1;
 			if (saw_banner && previous_uart == 8'h0a &&
 				write_data[7:0] == ".") begin
-				if (!guest_bus.timer_armed || timer_edges == 0)
+				if (!guest_bus.timer_ie || timer_edges == 0)
 					$fatal(1, "AM4 RT11 prompt arrived without an active 50 Hz timer");
 				$display("\nPASS: AM4 RT-11 prompt after %0d RKCS1 writes and %0d timer edges (%0d clocks)",
 					rk_writes, timer_edges, clocks);

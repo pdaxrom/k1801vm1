@@ -6,7 +6,7 @@
 | `am4-eis-test` | MUL/DIV/ASH/ASHC/XOR results and NZVC edge cases (20 cases) |
 | `am4-fis-test` | FADD/FSUB/FMUL/FDIV, pointer rules, PSW, vector 244 and error classes (12 cases) |
 | `am4-movb-bus-test` | MOVB modes 1..7, no final destination read, byte steps |
-| `am4-fram-test` | FRAM mapping, bytes/words, private RK bank, execution |
+| `am4-fram-test` | FRAM mapping, bytes/words, private RK bank, panel GPIO, KW11-L and execution |
 | `am4-sd-boot-test` | SD init, CS boundaries, two-sector load, failure path |
 | `am4-rk-test` | geometry, three reads, one sector write, vector 210, integrity |
 | `am4-odt-test` | retained ODT output through selected UART |
@@ -22,7 +22,8 @@ bench more slowly under Icarus.
 
 ## Limitations
 
-- MachXO2-1200HC is full: 640/640 slices, 1272/1280 LUT4s and 7/7 EBRs.
+- MachXO2-1200HC is nearly full: 634/640 slices, 1263/1280 LUT4s and
+  7/7 EBRs.
   The `NOP` before `command_bytes` is an intentional spare-ROM packing spacer;
   removing it was measured at 643 slices and failed Map.
 - SPI FRAM serializes memory and is much slower than BRAM.
@@ -30,7 +31,9 @@ bench more slowly under Icarus.
 - Media must be SDHC/SDXC with 512-byte block addressing.
 - The compact write-busy path uses six spaced 16-bit waits but lacks Stable
   J11's full timer/CMD13 sequence.
-- Timer starts only after a nonzero vector-100 handler is installed.
+- HCMS display data, the RGB/keyboard-column shift register and keyboard
+  scanning are driven in software through `166000/166001`; there is no
+  hardware character framebuffer, font ROM or autonomous scanner.
 - Basic-instruction confidence still relies on the recovered upstream MicROM.
   Local directed coverage now includes EIS and FIS, while the full base PDP-11
   instruction/addressing-mode matrix is not exhaustively tested.

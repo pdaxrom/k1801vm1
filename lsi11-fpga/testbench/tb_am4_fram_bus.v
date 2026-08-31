@@ -15,6 +15,8 @@ module tb_am4_fram_bus;
 	wire virq, vector_ready, event_irq, uart_tx;
 	wire [15:0] vector_data;
 	wire spi_cs_n, spi_sck, spi_mosi, spi_miso;
+	wire panel_din, panel_ce, panel_clk, panel_rs, panel_blank;
+	wire panel_reg_latch;
 	integer transactions;
 	integer clocks;
 	integer timer_clocks;
@@ -30,7 +32,10 @@ module tb_am4_fram_bus;
 		.acknowledge(acknowledge), .virq(virq),
 		.interrupt_vector(vector_data), .interrupt_strobe(1'b0),
 		.interrupt_acknowledge(vector_ready), .event_irq(event_irq),
-		.timer_enable(1'b1), .uart_rx(1'b1), .uart_tx(uart_tx),
+		.uart_rx(1'b1), .uart_tx(uart_tx),
+		.panel_key_rows(4'b1010), .panel_din(panel_din),
+		.panel_ce(panel_ce), .panel_clk(panel_clk), .panel_rs(panel_rs),
+		.panel_blank(panel_blank), .panel_reg_latch(panel_reg_latch),
 		.spi_cs_n(spi_cs_n), .spi_sck(spi_sck), .spi_mosi(spi_mosi),
 		.spi_miso(spi_miso), .sd_cs_n(), .sd_sck(), .sd_mosi(),
 		.sd_miso(1'b1), .boot_rom_ena(), .boot_rom_addr(),
@@ -144,19 +149,46 @@ module tb_am4_fram_bus;
 		if ({fram.memory[17'o000201], fram.memory[17'o000200]} !== 16'o012345)
 			$fatal(1, "odd word write modified FRAM");
 
-		if (event_irq)
-			$fatal(1, "AM4 timer fired before vector 100 was installed");
+		if ({panel_reg_latch, panel_blank, panel_rs, panel_clk,
+			panel_ce, panel_din} !== 6'b010010)
+			$fatal(1, "AM4 panel reset state mismatch");
+		complete_cycle(0, 2'b11, 16'o166000, 0, result);
+		if (result !== 16'h12a0)
+			$fatal(1, "AM4 panel initial read mismatch: %04x", result);
+		complete_cycle(1, 2'b10, 16'o166001, 16'h2d00, result);
+		if ({panel_reg_latch, panel_blank, panel_rs, panel_clk,
+			panel_ce, panel_din} !== 6'b101101)
+			$fatal(1, "AM4 panel output write mismatch");
+		complete_cycle(0, 2'b11, 16'o166000, 0, result);
+		if (result !== 16'h2da0)
+			$fatal(1, "AM4 panel readback mismatch: %04x", result);
+
+		// Installing vector 100 has no side effect on the line clock.
 		complete_cycle(1, 2'b11, 16'o000100, 16'o001234, result);
+		repeat (140) @(negedge clk);
+		if (event_irq)
+			$fatal(1, "AM4 timer depends on vector 100 contents");
+		complete_cycle(0, 2'b11, 16'o177546, 0, result);
+		if (result !== 16'o000200)
+			$fatal(1, "AM4 KW11-L reset CSR mismatch: %06o", result);
+		complete_cycle(1, 2'b11, 16'o177546, 16'o000100, result);
 		timer_clocks = 0;
 		while (!event_irq && timer_clocks < 200) begin
 			@(negedge clk);
 			timer_clocks = timer_clocks + 1;
 		end
 		if (!event_irq)
-			$fatal(1, "AM4 timer did not start after vector 100 was installed: armed=%b counter=%0d complete=%b",
-				dut.timer_armed, dut.tick_counter, dut.boot_complete);
+			$fatal(1, "AM4 KW11-L did not interrupt after IE: counter=%0d",
+				dut.tick_counter);
+		complete_cycle(0, 2'b11, 16'o177546, 0, result);
+		if (result !== 16'o000300)
+			$fatal(1, "AM4 KW11-L active CSR mismatch: %06o", result);
+		complete_cycle(1, 2'b11, 16'o177546, 0, result);
+		complete_cycle(0, 2'b11, 16'o177546, 0, result);
+		if (result !== 0)
+			$fatal(1, "AM4 KW11-L clear mismatch: %06o", result);
 
-		$display("PASS: AM4 reset overlay, FRAM/RK banks, byte lanes, timer arm, odd and I/O isolation");
+		$display("PASS: AM4 reset overlay, FRAM/RK banks, panel GPIO, KW11-L, byte lanes, odd and I/O isolation");
 		$finish;
 	end
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BaliProject version="3.2" title="microcomp-am4" device="LCMXO2-1200HC-4SG32C" default_implementation="impl1">
     <Options/>
-    <Implementation title="impl1" dir="impl1-am4" description="EXPERIMENTAL AM4 LSI-11M direct bus, SPI FRAM guest RAM, retained ODT and cpu11 KL11/EVNT" synthesis="synplify" default_strategy="Strategy1">
+    <Implementation title="impl1" dir="impl1-am4" description="AM4 LSI-11M direct bus, SPI FRAM, SD/RK611, ODT, KL11, KW11-L and panel GPIO" synthesis="synplify" default_strategy="Strategy1">
         <Options def_top="am4_hc1200_microcomp"/>
         <Source name="am4_microcomp.v" type="Verilog" type_short="Verilog"><Options top_module="am4_hc1200_microcomp"/></Source>
         <Source name="am4_cpu11_bus.v" type="Verilog" type_short="Verilog"><Options/></Source>

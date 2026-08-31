@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
-// HC1200 system bus for the direct-bus AM4 checkpoint.  It combines the cpu11
-// KL11/VIC and EVNT devices with bank-zero SPI FRAM guest memory.  During SD
+// HC1200 system bus for the direct-bus AM4 checkpoint.  It combines KL11, a
+// KW11-L-compatible clock and panel GPIO with bank-zero SPI FRAM.  During SD
 // boot, a second MicROM port supplies an ordinary PDP-11 bootstrap and a byte
 // SPI service at 177500/2.  Six reset/ODT words remain available on failure;
 // the complete overlay disappears before a successful transfer to address 0.
@@ -30,9 +30,15 @@ module am4_hc1200_cpu11_bus #(
 	input  wire        interrupt_strobe,
 	output wire        interrupt_acknowledge,
 	output reg         event_irq,
-	input  wire        timer_enable,
 	input  wire        uart_rx,
 	output wire        uart_tx,
+	input  wire [3:0]  panel_key_rows,
+	output wire        panel_din,
+	output wire        panel_ce,
+	output wire        panel_clk,
+	output wire        panel_rs,
+	output wire        panel_blank,
+	output wire        panel_reg_latch,
 	output wire        spi_cs_n,
 	output wire        spi_sck,
 	output wire        spi_mosi,
@@ -47,6 +53,10 @@ module am4_hc1200_cpu11_bus #(
 	output reg         boot_complete
 );
 	localparam [15:0] KL11_BASE = 16'o177560;
+	localparam [15:0] LTC_CSR = 16'o177546;
+	// 166000 starts DEC's recommended customer/third-party CSR range.  Keep
+	// 177750 free for the processor-owned DCJ11 MAINT register.
+	localparam [15:0] PANEL_BASE = 16'o166000;
 	localparam [15:0] SD_BASE = 16'o177500;
 	localparam [15:0] BOOT_BASE = 16'o004000;
 	localparam [15:0] BOOT_LAST = 16'o004777;
@@ -88,6 +98,8 @@ module am4_hc1200_cpu11_bus #(
 	wire program_selected = boot_program_selected || service_program_selected;
 	wire uart_selected = word_address >= KL11_BASE &&
 		word_address <= 16'o177566;
+	wire ltc_selected = word_address == LTC_CSR;
+	wire panel_selected = word_address == PANEL_BASE;
 	wire sd_selected = SD_BOOT_ENABLE &&
 		(word_address == SD_BASE || word_address == SD_BASE + 2);
 	wire rk_selected = RK_SERVICE_ENABLE &&
@@ -130,7 +142,9 @@ module am4_hc1200_cpu11_bus #(
 	reg [2:0] boot_rom_phase;
 	reg [15:0] boot_program_word;
 	reg [TICK_WIDTH-1:0] tick_counter;
-	reg timer_armed;
+	reg timer_done;
+	reg timer_ie;
+	reg [5:0] panel_output;
 	reg [15:0] local_rdata;
 
 	spi_fram_guest_ram #(.CLK_DIV(FRAM_CLK_DIV)) guest_memory (
@@ -192,12 +206,17 @@ module am4_hc1200_cpu11_bus #(
 	);
 	end endgenerate
 
+	wire [15:0] ltc_rdata = {8'b0, timer_done, timer_ie, 6'b0};
+	wire [15:0] panel_rdata = {{2'b0, panel_output}, panel_key_rows, 4'b0};
 	assign rdata = uart_selected ? uart_rdata :
+		ltc_selected ? ltc_rdata :
+		panel_selected ? panel_rdata :
 		sd_selected ? sd_rdata :
 		rk_fixed_selected ? (rk_ds_selected ? 16'o100701 : 16'o000200) :
 		local_boot_selected ? local_rdata :
 		program_selected ? boot_program_word : fram_rdata;
-	assign acknowledge = uart_ack || (sd_ready && !sd_error) || boot_ack ||
+	assign acknowledge = uart_ack || (request && ltc_selected) ||
+		(request && panel_selected) || (sd_ready && !sd_error) || boot_ack ||
 		boot_program_ack || (request && rk_fixed_selected) ||
 		(fram_ready && !fram_error);
 	assign virq = rk_service_pending || rk_irq_pending || uart_irq;
@@ -207,7 +226,7 @@ module am4_hc1200_cpu11_bus #(
 
 	// The bootstrap sets control bit 2 immediately before CLR PC.  Its first
 	// read at address zero can then expose all RAM, including 024/026 and the
-	// retained ODT words.  Interrupts remain gated until EVNT is low.
+	// retained ODT words.
 	always @(posedge clk) begin
 		if (rst) begin
 			boot_overlay_active <= 1;
@@ -223,7 +242,7 @@ module am4_hc1200_cpu11_bus #(
 				boot_release_armed <= 0;
 				boot_release_wait <= 1;
 			end
-			if (boot_release_wait && !event_irq) begin
+			if (boot_release_wait) begin
 				boot_release_wait <= 0;
 				boot_complete <= 1;
 			end
@@ -372,32 +391,51 @@ module am4_hc1200_cpu11_bus #(
 			boot_ack <= request && local_boot_selected && !boot_ack;
 	end
 
-	// The reset/sector-zero loaders leave vector 100 empty.  Start the clock
-	// only after the guest installs a nonzero handler, otherwise a tick during
-	// the slow software RK service vectors straight back through address zero.
+	// Legacy HC1200 panel register.  The low byte reads the four keyboard rows;
+	// the high byte directly drives the HCMS and external output-register pins.
+	// RGB and keyboard-column selection use that external shift register, so no
+	// display framebuffer or keyboard scanner is required in the full FPGA.
 	always @(posedge clk) begin
-		if (rst || !boot_complete)
-			timer_armed <= 0;
-		else if (fram_ready && guest_fram_selected && write &&
-			word_address == 16'o000100 && wdata != 0)
-			timer_armed <= 1;
+		if (rst || peripheral_reset)
+			panel_output <= 6'b010010; // CE high, display blanked
+		else if (request && panel_selected && write && byte_select[1])
+			panel_output <= wdata[13:8];
 	end
+	assign panel_din = panel_output[0];
+	assign panel_ce = panel_output[1];
+	assign panel_clk = panel_output[2];
+	assign panel_rs = panel_output[3];
+	assign panel_blank = panel_output[4];
+	assign panel_reg_latch = panel_output[5];
 
-	// AM4 latches the rising EVNT edge.  A one-clock pulse every 20 ms keeps the
-	// cpu11 interrupt rate without a second wide half-period comparator.
+	// KW11-L-compatible line-time clock.  The counter is free-running, while
+	// CSR bit 6 explicitly enables EVNT.  CSR bit 7 is the monitor/DONE latch;
+	// writing it as zero clears DONE.  No guest-memory contents are inspected.
 	always @(posedge clk) begin
-		if (rst) begin
+		if (rst || peripheral_reset) begin
 			tick_counter <= 0;
 			event_irq <= 0;
-		end else if (!timer_enable || !timer_armed) begin
-			tick_counter <= 0;
-			event_irq <= 0;
-		end else if (tick_counter == TICK_DIVISOR - 1) begin
-			tick_counter <= 0;
-			event_irq <= 1;
+			timer_done <= 1;
+			timer_ie <= 0;
 		end else begin
-			tick_counter <= tick_counter + 1'b1;
 			event_irq <= 0;
+			if (tick_counter == TICK_DIVISOR - 1) begin
+				tick_counter <= 0;
+				timer_done <= 1;
+				if (timer_ie)
+					event_irq <= 1;
+			end else begin
+				tick_counter <= tick_counter + 1'b1;
+			end
+			if (request && ltc_selected && write && byte_select[0]) begin
+				timer_ie <= wdata[6];
+				if (!wdata[7])
+					timer_done <= 0;
+				if (!wdata[6])
+					event_irq <= 0;
+				else if (wdata[7] && timer_done)
+					event_irq <= 1;
+			end
 		end
 	end
 
