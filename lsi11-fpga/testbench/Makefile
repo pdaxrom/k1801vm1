@@ -21,7 +21,8 @@ AM4_SYSTEM_RTL = ../boards/hc1200-microcomp/am4_cpu11_bus.v \
 	../rtl/experimental/lsi11/wbc_uart_xo2.v
 
 .PHONY: test test-fast-local test-local python-test am4-direct-test \
-	am4-movb-bus-test am4-fram-test am4-sd-boot-test am4-rk-test \
+	am4-eis-test am4-fis-test am4-movb-bus-test am4-fram-test \
+	am4-sd-boot-test am4-rk-test \
 	am4-rk-test-icarus \
 	am4-odt-test am4-rt11-boot-fast am4-mcrom-ebr-test clean
 .DELETE_ON_ERROR:
@@ -42,8 +43,8 @@ build/am4_bootrom.rom: ../boards/hc1200-microcomp/am4_sd_boot.rom | build
 
 test: test-local
 
-test-fast-local: am4-direct-test am4-movb-bus-test am4-fram-test \
-	am4-sd-boot-test am4-odt-test python-test
+test-fast-local: am4-direct-test am4-eis-test am4-fis-test \
+	am4-movb-bus-test am4-fram-test am4-sd-boot-test am4-odt-test python-test
 
 test-local: test-fast-local am4-rk-test
 
@@ -54,6 +55,17 @@ am4-direct-test: build/lsi11_original_smoke.hex build/am4_interrupt.hex
 	$(IVERILOG) -g2012 -Wall -s tb_am4_interrupt -o build/am4_interrupt.vvp \
 		tb_am4_interrupt.v $(AM4_CORE_RTL)
 	$(VVP) build/am4_interrupt.vvp
+
+build/am4_fis.bin: native_programs/am4_fis_test.inc
+
+build/am4_arith.vvp: tb_am4_arith.v $(AM4_CORE_RTL) | build
+	$(IVERILOG) -g2012 -Wall -s tb_am4_arith -o $@ $< $(AM4_CORE_RTL)
+
+am4-eis-test: build/am4_eis.hex build/am4_arith.vvp
+	$(VVP) build/am4_arith.vvp +PROGRAM=build/am4_eis.hex
+
+am4-fis-test: build/am4_fis.hex build/am4_arith.vvp
+	$(VVP) build/am4_arith.vvp +PROGRAM=build/am4_fis.hex
 
 am4-movb-bus-test: build/am4_movb_bus.hex
 	$(IVERILOG) -g2012 -Wall -s tb_am4_movb_bus -o build/am4_movb_bus.vvp \

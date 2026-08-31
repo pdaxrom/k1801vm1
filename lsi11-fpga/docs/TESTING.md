@@ -3,6 +3,8 @@
 | Target | Coverage |
 |---|---|
 | `am4-direct-test` | MOV/CMP/BNE, 0..3 wait states, stable bus controls, interrupt/RTI |
+| `am4-eis-test` | MUL/DIV/ASH/ASHC/XOR results and NZVC edge cases (20 cases) |
+| `am4-fis-test` | FADD/FSUB/FMUL/FDIV, pointer rules, PSW, vector 244 and error classes (12 cases) |
 | `am4-movb-bus-test` | MOVB modes 1..7, no final destination read, byte steps |
 | `am4-fram-test` | FRAM mapping, bytes/words, private RK bank, execution |
 | `am4-sd-boot-test` | SD init, CS boundaries, two-sector load, failure path |
@@ -29,8 +31,11 @@ bench more slowly under Icarus.
 - The compact write-busy path uses six spaced 16-bit waits but lacks Stable
   J11's full timer/CMD13 sequence.
 - Timer starts only after a nonzero vector-100 handler is installed.
-- Instruction confidence still relies on upstream MicROM; local coverage
-  focuses on bus semantics, interrupts, boot and RT-11.
+- Basic-instruction confidence still relies on the recovered upstream MicROM.
+  Local directed coverage now includes EIS and FIS, while the full base PDP-11
+  instruction/addressing-mode matrix is not exhaustively tested.
+- FIS boundary rounding is MicROM-specific; local FIS vectors use exact results
+  and cover zero, sign, overflow, underflow and divide-by-zero behavior.
 - No MMU is added; this remains the 16-bit LSI-11M memory model.
 
 Any expansion must state which existing resource it replaces. Moving to a

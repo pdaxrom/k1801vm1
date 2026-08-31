@@ -9,6 +9,7 @@ small SD/RK611 integration layer for booting RT-11.
 The currently verified configuration provides:
 
 - AM4/LSI-11M CPU with the recovered 1024 x 56 control store;
+- recovered EIS (MUL/DIV/ASH/ASHC/XOR) and FIS (FADD/FSUB/FMUL/FDIV);
 - a MicROM fix for store-only `MOVB memory,memory` destination cycles;
 - retained ODT over the console UART;
 - KL11-compatible console at `177560`, vectors `060` and `064`, 115200 8N1;

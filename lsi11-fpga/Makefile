@@ -117,7 +117,7 @@ distclean: clean
 
 help:
 	@echo "make                  assemble MicROM/firmware and generate seven-EBR ROM"
-	@echo "make test-fast        core, interrupts, MOVB, FRAM, SD boot, ODT and Python checks"
+	@echo "make test-fast        core, EIS/FIS, interrupts, MOVB, FRAM, SD boot, ODT and Python checks"
 	@echo "make test             test-fast plus RK611 READ/WRITE"
 	@echo "make test-rt11        boot RT-11 image with Verilator"
 	@echo "make test-vendor      verify generated ROM with Diamond DP8KC model"
