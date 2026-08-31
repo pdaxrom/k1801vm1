@@ -1,0 +1,15 @@
+.DS_Store
+__pycache__/
+*.pyc
+/build/
+/testbench/build/
+/boards/hc1200-microcomp/impl1-am4/
+/boards/hc1200-microcomp/am4_mcrom_ebr.v
+/boards/hc1200-microcomp/am4_sd_boot.bin
+/boards/hc1200-microcomp/am4_sd_boot.lst
+/boards/hc1200-microcomp/am4_sd_boot.asm.log
+/boards/hc1200-microcomp/am4_sd_boot.rom
+/boards/hc1200-microcomp/am4_rk_service.bin
+/boards/hc1200-microcomp/am4_rk_service.lst
+/boards/hc1200-microcomp/am4_rk_service.asm.log
+/images/*.dsk
