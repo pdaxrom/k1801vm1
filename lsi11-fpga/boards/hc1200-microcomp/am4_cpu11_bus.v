@@ -24,6 +24,7 @@ module am4_hc1200_cpu11_bus #(
 	input  wire [1:0]  byte_select,
 	input  wire [15:0] address,
 	input  wire [15:0] wdata,
+	input  wire        instruction_fetch,
 	output wire [15:0] rdata,
 	output wire        acknowledge,
 	output wire        virq,
@@ -79,6 +80,8 @@ module am4_hc1200_cpu11_bus #(
 	reg boot_release_wait;
 	reg rk_service_pending;
 	reg rk_service_active;
+	reg rk_service_movb;
+	reg rk_write_command;
 	reg rk_service_release;
 	reg rk_local_vector_ack;
 	reg rk_irq_pending;
@@ -95,8 +98,19 @@ module am4_hc1200_cpu11_bus #(
 	wire boot_selected = local_boot_selected || boot_program_selected;
 	// 160000..160777 share one seven-bit prefix.  Bit 8 selects the compact
 	// extension; the service never branches into its unused upper aliases.
+	// The service executes from a ROM overlay in the CPU I/O page, but RK DMA
+	// addresses are physical Q-bus addresses and may occupy that same block.
+	// A fetched MOVB word latches the service-copy phase until the next program
+	// word. READ copies use the write operand as physical memory; WRITE copies
+	// use the non-fetch read operand. This avoids a wide instruction-register
+	// decoder while keeping opcode and extension reads in the private ROM.
+	wire service_dma_selected = RK_SERVICE_ENABLE && rk_service_active &&
+		rk_service_movb && word_address[15:9] == SERVICE_BASE[15:9] &&
+		((!rk_write_command && write) ||
+		 (rk_write_command && !write && !instruction_fetch));
 	wire service_program_selected = RK_SERVICE_ENABLE && rk_service_active &&
-		!write && word_address[15:9] == SERVICE_BASE[15:9];
+		!service_dma_selected && !write &&
+		word_address[15:9] == SERVICE_BASE[15:9];
 	wire service_extension_selected = service_program_selected && word_address[8];
 	wire program_selected = boot_program_selected || service_program_selected;
 	wire uart_selected = word_address >= KL11_BASE &&
@@ -115,7 +129,8 @@ module am4_hc1200_cpu11_bus #(
 		 (!rk_cs1_initialized || rk_immediate_done));
 	wire rk_fram_selected = rk_selected && !rk_fixed_selected;
 	wire io_page = address[15:13] == 3'b111;
-	wire guest_fram_selected = !io_page && !boot_selected;
+	wire guest_fram_selected = (!io_page && !boot_selected) ||
+		service_dma_selected;
 	wire fram_selected = guest_fram_selected || rk_fram_selected;
 	wire uart_strobe = request && uart_selected;
 	wire sd_strobe = request && sd_selected;
@@ -321,6 +336,8 @@ module am4_hc1200_cpu11_bus #(
 		if (rst || peripheral_reset) begin
 			rk_service_pending <= 0;
 			rk_service_active <= 0;
+			rk_service_movb <= 0;
+			rk_write_command <= 0;
 			rk_service_release <= 0;
 			rk_local_vector_ack <= 0;
 			rk_irq_pending <= 0;
@@ -349,6 +366,7 @@ module am4_hc1200_cpu11_bus #(
 					if (wdata[5:2] == 4'o4) begin
 						rk_service_pending <= 1;
 						rk_irq_pending <= 0;
+						rk_write_command <= wdata[1];
 					end else if (wdata[5:1] == 5'o0 ||
 						wdata[5:1] == 5'o1) begin
 						// NOP and PACK ACK complete without media traffic.
@@ -371,7 +389,12 @@ module am4_hc1200_cpu11_bus #(
 				rk_service_pending <= 0;
 				rk_irq_pending <= 0;
 				rk_immediate_done <= 0;
+				rk_service_movb <= 0;
+				rk_write_command <= 0;
 			end
+
+			if (rk_service_active && boot_program_ack && request)
+				rk_service_movb <= boot_program_word[15:12] == 4'h9;
 
 			if (rk_service_active && boot_program_ack && request &&
 				word_address == SERVICE_RTI)
@@ -379,6 +402,7 @@ module am4_hc1200_cpu11_bus #(
 			if (rk_service_release && !request) begin
 				rk_service_release <= 0;
 				rk_service_active <= 0;
+				rk_service_movb <= 0;
 				if (rk_interrupt_enable)
 					rk_irq_pending <= 1;
 			end

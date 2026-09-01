@@ -9,6 +9,7 @@ module tb_am4_rk_service;
 	reg reset = 1;
 	wire peripheral_reset;
 	wire request, write_enable, ready;
+	wire instruction_fetch;
 	wire [1:0] byte_select;
 	wire [15:0] address, write_data, read_data;
 	wire virq, vector_request, vector_ready, timer_event, uart_tx;
@@ -34,7 +35,8 @@ module tb_am4_rk_service;
 	) guest_bus (
 		.clk(clk), .rst(reset), .peripheral_reset(peripheral_reset),
 		.request(request), .write(write_enable), .byte_select(byte_select),
-		.address(address), .wdata(write_data), .rdata(read_data),
+		.address(address), .wdata(write_data),
+		.instruction_fetch(instruction_fetch), .rdata(read_data),
 		.acknowledge(ready), .virq(virq), .interrupt_vector(vector_data),
 		.interrupt_strobe(vector_request),
 		.interrupt_acknowledge(vector_ready), .event_irq(timer_event),
@@ -59,6 +61,7 @@ module tb_am4_rk_service;
 		.bus_address(address), .bus_write_data(write_data),
 		.bus_read_data(read_data), .bus_request(request),
 		.bus_write(write_enable), .bus_byte_select(byte_select),
+		.bus_instruction_fetch(instruction_fetch),
 		.bus_ready(ready), .vector_data(vector_data),
 		.vector_ready(vector_ready), .vector_request(vector_request),
 		.boot_rom_ena(boot_rom_ena), .boot_rom_addr(boot_rom_addr),
@@ -128,12 +131,8 @@ module tb_am4_rk_service;
 			card.memory[i] = 0;
 		end
 		$readmemh("build/am4_rk_read.hex", card.memory);
-		card.memory[21*512+0] = 8'h5a;
-		card.memory[21*512+1] = 8'hb0;
-		card.memory[21*512+2] = 8'h5b;
-		card.memory[21*512+3] = 8'hb0;
-		card.memory[21*512+4] = 8'h58;
-		card.memory[21*512+5] = 8'hb0;
+		for (i = 0; i < 512; i = i + 1)
+			card.memory[21*512+i] = (i * 7 + 3) & 8'hff;
 		repeat (15) @(negedge clk);
 		reset = 0;
 		while ({fram.memory[17'o003201], fram.memory[17'o003200]} != 16'o012345 &&
@@ -157,7 +156,7 @@ module tb_am4_rk_service;
 		if (!boot_complete || guest_bus.boot_overlay_active ||
 			guest_bus.rk_service_active || guest_bus.rk_service_pending)
 			$fatal(1, "AM4 RK service did not restore guest execution");
-		if (card.read_count != 3 || card.write_commands != 1 || card.writes != 1)
+		if (card.read_count != 4 || card.write_commands != 2 || card.writes != 2)
 			$fatal(1, "AM4 RK command count mismatch: reads=%0d writes=%0d",
 				card.read_count, card.write_commands);
 		for (i = 0; i < 256; i = i + 1)
@@ -165,11 +164,19 @@ module tb_am4_rk_service;
 				(16'o012345 + i[15:0]))
 				$fatal(1, "AM4 RK WRITE data mismatch at word %0d: %06o",
 					i, {card.memory[7*512+i*2+1], card.memory[7*512+i*2]});
-		if ({fram.memory[17'o014001], fram.memory[17'o014000]} !== 16'o000002)
-			$fatal(1, "AM4 RK completion vector was not delivered twice");
+		for (i = 0; i < 512; i = i + 1) begin
+			if (fram.memory[17'o160000+i] !== ((i * 7 + 3) & 8'hff))
+				$fatal(1, "AM4 high physical READ mismatch at byte %0d: %03o",
+					i, fram.memory[17'o160000+i]);
+			if (card.memory[8*512+i] !== ((i * 7 + 3) & 8'hff))
+				$fatal(1, "AM4 high physical WRITE mismatch at byte %0d: %03o",
+					i, card.memory[8*512+i]);
+		end
+		if ({fram.memory[17'o014001], fram.memory[17'o014000]} !== 16'o000004)
+			$fatal(1, "AM4 RK completion vector was not delivered four times");
 		if (engine.cc6)
 			$fatal(1, "AM4 RK service raised Q-bus timeout");
-		$display("PASS: AM4 private MicROM service completed RK READ/WRITE and vector 0210 (%0d clocks)",
+		$display("PASS: AM4 private MicROM service completed low/high physical RK READ/WRITE and vector 0210 (%0d clocks)",
 			clocks);
 		$finish;
 	end

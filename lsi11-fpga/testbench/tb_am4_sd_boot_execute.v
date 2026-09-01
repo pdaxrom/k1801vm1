@@ -10,6 +10,7 @@ module tb_am4_sd_boot_execute;
 	reg fail_boot = 0;
 	wire peripheral_reset;
 	wire request, write_enable, ready;
+	wire instruction_fetch;
 	wire [1:0] byte_select;
 	wire [15:0] address, write_data, read_data;
 	wire virq, vector_request, vector_ready, timer_event, uart_tx;
@@ -32,7 +33,8 @@ module tb_am4_sd_boot_execute;
 	) guest_bus (
 		.clk(clk), .rst(reset), .peripheral_reset(peripheral_reset),
 		.request(request), .write(write_enable), .byte_select(byte_select),
-		.address(address), .wdata(write_data), .rdata(read_data),
+		.address(address), .wdata(write_data),
+		.instruction_fetch(instruction_fetch), .rdata(read_data),
 		.acknowledge(ready), .virq(virq), .interrupt_vector(vector_data),
 		.interrupt_strobe(vector_request),
 		.interrupt_acknowledge(vector_ready), .event_irq(timer_event),
@@ -57,6 +59,7 @@ module tb_am4_sd_boot_execute;
 		.bus_address(address), .bus_write_data(write_data),
 		.bus_read_data(read_data), .bus_request(request),
 		.bus_write(write_enable), .bus_byte_select(byte_select),
+		.bus_instruction_fetch(instruction_fetch),
 		.bus_ready(ready), .vector_data(vector_data),
 		.vector_ready(vector_ready), .vector_request(vector_request),
 		.boot_rom_ena(boot_rom_ena), .boot_rom_addr(boot_rom_addr),

@@ -29,7 +29,8 @@ module tb_am4_fram_bus;
 	) dut (
 		.clk(clk), .rst(reset), .peripheral_reset(1'b0),
 		.request(request), .write(write), .byte_select(byte_select),
-		.address(address), .wdata(write_data), .rdata(read_data),
+		.address(address), .wdata(write_data),
+		.instruction_fetch(1'b0), .rdata(read_data),
 		.acknowledge(acknowledge), .virq(virq),
 		.interrupt_vector(vector_data), .interrupt_strobe(1'b0),
 		.interrupt_acknowledge(vector_ready), .event_irq(event_irq),

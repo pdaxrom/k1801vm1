@@ -42,6 +42,7 @@ module tb_am4_movb_bus;
 		.bus_address(address), .bus_write_data(write_data),
 		.bus_read_data(read_data), .bus_request(request),
 		.bus_write(write_enable), .bus_byte_select(byte_select),
+		.bus_instruction_fetch(),
 		.bus_ready(ready), .vector_data(16'b0), .vector_ready(1'b0),
 		.vector_request(vector_request), .boot_rom_ena(1'b0),
 		.boot_rom_addr(10'b0), .boot_rom_data(), .boot_select(2'b11)

@@ -26,6 +26,7 @@ module am4_direct #(
    output         bus_request,
    output         bus_write,
    output [1:0]   bus_byte_select,
+   output         bus_instruction_fetch,
    input          bus_ready,
 
    input  [15:0]  vector_data,
@@ -658,6 +659,7 @@ assign bus_write_data  = dreg_o;
 assign bus_request     = request;
 assign bus_write       = write_cycle;
 assign bus_byte_select = byte_select;
+assign bus_instruction_fetch = ir_stb;
 assign vector_request  = irq_request;
 
 //

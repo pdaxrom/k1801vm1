@@ -8,7 +8,7 @@
 | `am4-movb-bus-test` | MOVB modes 1..7, no final destination read, byte steps |
 | `am4-fram-test` | FRAM mapping, bytes/words, private RK bank, panel GPIO, KW11-L and execution |
 | `am4-sd-boot-test` | SD init, CS boundaries, two-sector load, failure path |
-| `am4-rk-test` | geometry, three reads, one sector write, vector 210, integrity |
+| `am4-rk-test` | geometry, low/high physical READ/WRITE, service-ROM-page DMA aliasing, vector 210 |
 | `am4-odt-test` | retained ODT output through selected UART |
 | Python tests | source reproduction, seven EBR lanes, firmware partitions |
 | `test-vendor` | all MicROM/spare firmware locations through DP8KC model |

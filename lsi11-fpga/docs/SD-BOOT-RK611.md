@@ -53,6 +53,27 @@ READ/WRITE enter `rk_service.asm` at private vector `160000`. The service:
 READ waits for token `FE`, copies the requested words, discards a partial
 sector remainder and both CRC bytes, then closes the transaction.
 
+RK BA is a physical 16-bit Q-bus address. The RT-11 sector buffer may therefore
+use FRAM at `160000..160777`, even though the CPU sees the private service ROM
+at the same numeric addresses. The adapter latches the byte-copy phase from
+the service ROM's `MOVB` instruction word. During RK READ its destination
+writes, and during RK WRITE its non-fetch source reads, go directly to FRAM
+bank 0 in that block; the SD-register operand remains ordinary I/O. Only an
+instruction fetch of the fixed RTI at `160476` releases the service overlay.
+A data read of physical `160476` neither reads the RTI nor releases it.
+
+The MachXO2-1200 is resource-full, so this compact bypass is deliberately
+limited to the service-ROM block used by the RT-11 sector buffer. It does not
+claim DMA aliasing over unrelated CPU I/O registers elsewhere in
+`160000..177777`.
+
+Without this distinction, an RK WRITE whose buffer crossed `160476` exposed
+guest FRAM in the middle of `MOVB (R2)+,(R4)`. The next fetched word happened
+to be `RTI`, before the service had restored its saved registers and stack.
+RT-11 then reached a stray `HALT` at `127470` (ODT reported `127472`) and the
+partly written SD sector was corrupt. The RK regression covers full-sector
+READ and WRITE through physical `160000..160777`, including that address.
+
 ## WRITE fixes
 
 The service sends `FE`, uses MicROM-fixed `MOVB (R2)+,(R4)` for 512 bytes, and

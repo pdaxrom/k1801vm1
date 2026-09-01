@@ -56,9 +56,9 @@ wait_irq
 	check #003006, @#rkba
 	check #000400, @#rkda
 	check #0, @#rkdc
-	check #0xB05A, @#003000
-	check #0xB05B, @#003002
-	check #0xB058, @#003004
+	check #0x0A03, @#003000
+	check #0x1811, @#003002
+	check #0x261F, @#003004
 
 	; Fill one complete guest block and issue RK WRITE to LBA 7.  The private
 	; service must send CMD24, update WC/BA/DA, and deliver a second vector.
@@ -84,6 +84,39 @@ wait_write_irq
 	check #005000, @#rkba
 	check #000010, @#rkda
 	check #0, @#rkdc
+
+	; Q-bus DMA uses physical addresses.  Exercise the 8 KiB hidden under the
+	; CPU I/O page: a full-sector READ must write FRAM 160000..160777 instead
+	; of timing out against I/O, and the following WRITE must read it back
+	; without confusing physical address 160476 with the service ROM's RTI.
+	mov #0160000, @#rkba
+	mov #000025, @#rkda
+	mov #-000400, @#rkwc
+	mov #000121, r3
+	bis r2, r3
+	mov r3, @#rkcs1
+wait_high_read_irq
+	cmp #3, @#014000
+	bne wait_high_read_irq
+	check #002320, @#rkcs1
+	check #0, @#rkwc
+	check #0161000, @#rkba
+	check #000400, @#rkda
+
+	mov #0160000, @#rkba
+	mov #000010, @#rkda
+	clr @#rkdc
+	mov #-000400, @#rkwc
+	mov #000123, r3
+	bis r2, r3
+	mov r3, @#rkcs1
+wait_high_write_irq
+	cmp #4, @#014000
+	bne wait_high_write_irq
+	check #002322, @#rkcs1
+	check #0, @#rkwc
+	check #0161000, @#rkba
+	check #000011, @#rkda
 	mov #012345, @#003200
 passed
 	br passed
