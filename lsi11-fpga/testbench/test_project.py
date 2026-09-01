@@ -54,6 +54,10 @@ class StandaloneAm4Project(unittest.TestCase):
         self.assertNotIn("timer_armed", board)
         self.assertIn(".panel_key_rows(gpio_key_row)", top)
         self.assertIn(".panel_reg_latch(gpio_reg_latch)", top)
+        self.assertIn("inout  wire [3:0] gpio_key_row", top)
+        self.assertIn("assign gpio_key_row[3] = host_miso_oe ?", top)
+        self.assertIn("assign host_miso = panel_output[6]", board)
+        self.assertIn("assign host_miso_oe = panel_output[7]", board)
         self.assertIn("localparam [15:0] SD_BASE = 16'o177500", board)
         self.assertIn("localparam [15:0] RK_BASE = 16'o177440", board)
         self.assertIn("spi_fram_guest_ram", board)
@@ -122,6 +126,23 @@ source $::env(TEST_SCRIPT)
             self.assertEqual(len(image), 2048)
             self.assertIn(banner, image)
             self.assertIn(b"\x01\xec", image)  # PANELO = 166001
+
+    def test_rt11_host_disk_has_handler_and_host_sources(self):
+        demo = ROOT / "demos/rt11/hostdisk"
+        handler = (demo / "HG.MAC").read_text()
+        self.assertIn("\t.DRDEF\tHG,350,FILST$,65535.,166000,0", handler)
+        self.assertIn("HOSTOE\t= 200", handler)
+        self.assertIn("\tJSR\tPC,HGQUIE", handler)
+        self.assertIn("\tMOV\t#HGRDOP,HGOPER\n\tTST\tR4\n\tBPL\t10$", handler)
+        self.assertIn("\t.DREND\tHG", handler)
+        self.assertEqual(len((demo / "HG.SYS").read_bytes()), 1024)
+
+        host = ROOT / "host/hg"
+        protocol = (host / "hg_protocol.h").read_text()
+        self.assertIn("#define HG_HEADER_SIZE 10u", protocol)
+        self.assertIn("#define HG_BLOCK_SIZE 512u", protocol)
+        self.assertTrue((host / "hgfsd.c").is_file())
+        self.assertTrue((host / "hg_mpsse.c").is_file())
 
 
 if __name__ == "__main__":

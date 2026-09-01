@@ -1,0 +1,285 @@
+	.TITLE	HG
+	.IDENT	/01.00/
+
+;	HG: synchronous RT-11 disk handler for the HC1200 host GPIO link.
+;	This first version is for the unmapped SJ and FB monitors.  It performs
+;	queued I/O synchronously and therefore needs no interrupt vector.
+;
+	.MCALL	.DRDEF
+	.DRDEF	HG,350,FILST$,65535.,166000,0
+	.DRPTR
+	.DREST	CLASS=DVC.DK
+	.DRINS	HG
+
+PANEL	= 166000
+PANELO	= PANEL+1
+
+PINDIN	= 1
+PINCE	= 2
+PINCLK	= 4
+PINLAT	= 40
+
+PINSEL	= 20			; TMS, keyboard row 0
+PINSCK	= 40			; TCK, keyboard row 1
+PINMOSI	= 100			; TDI, keyboard row 2
+HOSTDAT	= 100			; TDO data in the high-byte latch
+HOSTOE	= 200			; TDO output enable
+
+HGRDOP	= 1
+HGWRIT	= 2
+HGMORE	= 200
+HGWAIT	= 177777
+
+;	Header: "HG", version, operation, unit, block, byte count, XOR.
+;	All multibyte values and serial bytes are least-significant first.
+	;
+	.DRBEG	HG
+	MOV	HGCQE,R5
+	MOV	@R5,BLKNUM
+	MOV	Q$BUFF(R5),BUFPTR
+	MOV	Q$WCNT(R5),R4
+	BEQ	HGDONE
+	MOV	#HGRDOP,HGOPER
+	TST	R4
+	BPL	10$
+	NEG	R4
+	MOV	#HGWRIT,HGOPER
+10$:	MOV	R4,WLEFT
+	JSR	PC,HGQUIE		; release all keyboard columns
+
+HGNEXT:
+	MOV	WLEFT,R0
+	CMP	R0,#400		; at most 256 words per transaction
+	BLOS	20$
+	MOV	#400,R0
+20$:	MOV	R0,THISWC
+	ASL	R0
+	MOV	R0,BYTCNT
+	SUB	THISWC,WLEFT
+	JSR	PC,HGXFER
+	BCS	HGERR
+	ADD	BYTCNT,BUFPTR
+	INC	BLKNUM
+	TST	WLEFT
+	BNE	HGNEXT
+
+HGINT::
+HGDONE:
+	BICB	#HOSTOE+HOSTDAT,@#PANELO
+	.DRFIN	HG
+
+HGERR:	BICB	#HOSTOE+HOSTDAT,@#PANELO
+	MOV	HGCQE,R5
+	BIS	#HDERR$,@-(R5)
+	BR	HGDONE
+
+;	Make all five keyboard column outputs inactive before TDO becomes an
+;	output.  CE is high, so the shared DIN/CLK activity cannot alter HCMS.
+HGQUIE:
+	BICB	#HOSTOE+HOSTDAT,@#PANELO
+	BISB	#PINCE+PINDIN,@#PANELO
+	MOV	#10,R0
+10$:	BISB	#PINCLK,@#PANELO
+	BICB	#PINCLK,@#PANELO
+	SOB	R0,10$
+	BISB	#PINLAT,@#PANELO
+	BICB	#PINLAT,@#PANELO
+	RTS	PC
+
+;	Perform one request of BYTCNT bytes at BLKNUM.
+HGXFER:
+	BISB	#HOSTOE+HOSTDAT,@#PANELO	; request host service
+	MOV	#20,R2
+10$:	MOV	#HGWAIT,R3
+20$:	BIT	#PINSEL,@#PANEL
+	BNE	HGHEAD
+	SOB	R3,20$
+	SOB	R2,10$
+	JMP	HGXERR
+
+HGXER1:
+	JMP	HGXERR
+HGHEAD:
+	CLR	HDRXOR
+	MOV	#110,R0		; H
+	JSR	PC,HGTXHD
+	BCS	HGXER1
+	MOV	#107,R0		; G
+	JSR	PC,HGTXHD
+	BCS	HGXER1
+	MOV	#1,R0			; protocol version
+	JSR	PC,HGTXHD
+	BCS	HGXERR
+	MOV	HGOPER,R0
+	TST	WLEFT
+	BEQ	40$
+	BIS	#HGMORE,R0
+40$:	JSR	PC,HGTXHD
+	BCS	HGXERR
+	CLR	R0			; unit zero
+	JSR	PC,HGTXHD
+	BCS	HGXERR
+	MOV	BLKNUM,R0
+	BIC	#177400,R0
+	JSR	PC,HGTXHD
+	BCS	HGXERR
+	MOV	BLKNUM,R0
+	SWAB	R0
+	BIC	#177400,R0
+	JSR	PC,HGTXHD
+	BCS	HGXERR
+	MOV	BYTCNT,R0
+	BIC	#177400,R0
+	JSR	PC,HGTXHD
+	BCS	HGXERR
+	MOV	BYTCNT,R0
+	SWAB	R0
+	BIC	#177400,R0
+	JSR	PC,HGTXHD
+	BCS	HGXERR
+	MOV	HDRXOR,R0
+	JSR	PC,HGTXBY
+	BCS	HGXERR
+
+;	The host returns a status byte before the data phase.
+	JSR	PC,HGRXBY
+	BCS	HGXERR
+	TSTB	R0
+	BNE	HGXERR
+	CMP	#HGRDOP,HGOPER
+	BEQ	HGRDAT
+
+;	WRITE: guest data and checksum, then final host status.
+	MOV	BUFPTR,R1
+	MOV	BYTCNT,R4
+	CLR	DATASU
+50$:	MOVB	(R1)+,R0
+	BIC	#177400,R0
+	ADD	R0,DATASU
+	JSR	PC,HGTXBY
+	BCS	HGXERR
+	SOB	R4,50$
+	MOV	DATASU,R0
+	BIC	#177400,R0
+	JSR	PC,HGTXBY
+	BCS	HGXERR
+	MOV	DATASU,R0
+	SWAB	R0
+	BIC	#177400,R0
+	JSR	PC,HGTXBY
+	BCS	HGXERR
+	JSR	PC,HGRXBY
+	BCS	HGXERR
+	TSTB	R0
+	BNE	HGXERR
+	BR	HGXOK
+
+;	READ: host data and checksum into the user buffer.
+HGRDAT:
+	MOV	BUFPTR,R1
+	MOV	BYTCNT,R4
+	CLR	DATASU
+60$:	JSR	PC,HGRXBY
+	BCS	HGXERR
+	MOVB	R0,(R1)+
+	BIC	#177400,R0
+	ADD	R0,DATASU
+	SOB	R4,60$
+	JSR	PC,HGRXBY
+	BCS	HGXERR
+	MOV	R0,R2
+	JSR	PC,HGRXBY
+	BCS	HGXERR
+	SWAB	R0
+	BIS	R0,R2
+	CMP	DATASU,R2
+	BNE	HGXERR
+
+HGXOK:	BICB	#HOSTOE+HOSTDAT,@#PANELO
+	CLC
+	RTS	PC
+HGXERR:
+	BICB	#HOSTOE+HOSTDAT,@#PANELO
+	SEC
+	RTS	PC
+
+;	Transmit a header byte and include it in the XOR.
+HGTXHD:
+	XOR	R0,HDRXOR
+	BR	HGTXBY
+
+;	Transmit R0 low byte, LSB first.  Host samples TDO on rising TCK.
+HGTXBY:
+	MOV	R2,-(SP)
+	MOV	R3,-(SP)
+	MOV	#10,R2
+10$:	BICB	#HOSTDAT,@#PANELO
+	BIT	#1,R0
+	BEQ	20$
+	BISB	#HOSTDAT,@#PANELO
+20$:	MOV	#HGWAIT,R3
+30$:	BIT	#PINSCK,@#PANEL
+	BNE	40$
+	SOB	R3,30$
+	BR	70$
+40$:	MOV	#HGWAIT,R3
+50$:	BIT	#PINSCK,@#PANEL
+	BEQ	60$
+	SOB	R3,50$
+	BR	70$
+60$:	ASR	R0
+	SOB	R2,10$
+	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	CLC
+	RTS	PC
+70$:	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	SEC
+	RTS	PC
+
+;	Receive one byte LSB first.  Guest samples TDI on rising TCK.
+HGRXBY:
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	MOV	R3,-(SP)
+	CLR	R0
+	MOV	#1,R1
+	MOV	#10,R2
+10$:	MOV	#HGWAIT,R3
+20$:	BIT	#PINSCK,@#PANEL
+	BNE	30$
+	SOB	R3,20$
+	BR	60$
+30$:	BIT	#PINMOSI,@#PANEL
+	BEQ	40$
+	BIS	R1,R0
+40$:	MOV	#HGWAIT,R3
+50$:	BIT	#PINSCK,@#PANEL
+	BEQ	55$
+	SOB	R3,50$
+	BR	60$
+55$:	ASL	R1
+	SOB	R2,10$
+	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	CLC
+	RTS	PC
+60$:	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	SEC
+	RTS	PC
+
+BLKNUM:	.WORD	0
+BUFPTR:	.WORD	0
+WLEFT:	.WORD	0
+THISWC:	.WORD	0
+BYTCNT:	.WORD	0
+HGOPER:	.WORD	0
+HDRXOR:	.WORD	0
+DATASU:	.WORD	0
+
+	.DREND	HG
+	.END

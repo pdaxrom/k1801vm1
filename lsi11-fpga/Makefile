@@ -24,7 +24,7 @@ JED := $(BOARD)/impl1-am4/microcomp-am4_impl1.jed
 XCF := $(BUILD)/hc1200-am4.xcf
 
 .PHONY: all firmware microcode-check test test-fast test-rt11 test-vendor \
-	project-test diamond xcf program clean distclean help
+	project-test host-test diamond xcf program clean distclean help
 .DELETE_ON_ERROR:
 
 all: $(MICROM_EBR)
@@ -65,7 +65,10 @@ $(MICROM_EBR): $(MICROM_BUILD) $(BOOT_BIN) $(SERVICE_BIN) \
 
 firmware: $(MICROM_EBR)
 
-test-fast: all
+host-test:
+	$(MAKE) -C host/hg test
+
+test-fast: all host-test
 	$(MAKE) -C testbench test-fast-local \
 		ASM11="$(abspath $(ASM11))" PYTHON="$(PYTHON)" \
 		IVERILOG="$(IVERILOG)" VVP="$(VVP)"
@@ -108,6 +111,7 @@ program: $(XCF)
 
 clean:
 	rm -rf $(BUILD) testbench/build
+	$(MAKE) -C host/hg clean
 	rm -f $(BOOT_BIN) $(BOARD)/am4_sd_boot.lst $(BOARD)/am4_sd_boot.asm.log
 	rm -f $(SERVICE_BIN) $(BOARD)/am4_rk_service.lst $(BOARD)/am4_rk_service.asm.log
 	rm -f $(BOOT_ROM) $(MICROM_EBR)
@@ -120,6 +124,7 @@ help:
 	@echo "make test-fast        core, EIS/FIS, interrupts, MOVB, FRAM, SD boot, ODT and Python checks"
 	@echo "make test             test-fast plus RK611 READ/WRITE"
 	@echo "make test-rt11        boot RT-11 image with Verilator"
+	@echo "make host-test        validate HG protocol, image and directory mirror"
 	@echo "make test-vendor      verify generated ROM with Diamond DP8KC model"
 	@echo "make diamond          synthesize/place/route/export JED with Diamond 3.14"
 	@echo "make program          generate XCF and erase/program/verify HC1200"

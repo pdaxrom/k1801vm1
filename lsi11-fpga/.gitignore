@@ -13,3 +13,5 @@ __pycache__/
 /boards/hc1200-microcomp/am4_rk_service.lst
 /boards/hc1200-microcomp/am4_rk_service.asm.log
 /images/*.dsk
+/host/hg/hgfsd
+/host/hg/test_hg

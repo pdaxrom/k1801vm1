@@ -17,6 +17,7 @@ module tb_am4_fram_bus;
 	wire spi_cs_n, spi_sck, spi_mosi, spi_miso;
 	wire panel_din, panel_ce, panel_clk, panel_rs, panel_blank;
 	wire panel_reg_latch;
+	wire host_miso, host_miso_oe;
 	integer transactions;
 	integer clocks;
 	integer timer_clocks;
@@ -39,7 +40,8 @@ module tb_am4_fram_bus;
 		.spi_cs_n(spi_cs_n), .spi_sck(spi_sck), .spi_mosi(spi_mosi),
 		.spi_miso(spi_miso), .sd_cs_n(), .sd_sck(), .sd_mosi(),
 		.sd_miso(1'b1), .boot_rom_ena(), .boot_rom_addr(),
-		.boot_rom_data(8'b0), .boot_complete()
+		.boot_rom_data(8'b0), .boot_complete(),
+		.host_miso(host_miso), .host_miso_oe(host_miso_oe)
 	);
 
 	spi_fram_model fram (
@@ -152,15 +154,19 @@ module tb_am4_fram_bus;
 		if ({panel_reg_latch, panel_blank, panel_rs, panel_clk,
 			panel_ce, panel_din} !== 6'b010010)
 			$fatal(1, "AM4 panel reset state mismatch");
+		if (host_miso_oe !== 1'b0)
+			$fatal(1, "AM4 host output enabled after reset");
 		complete_cycle(0, 2'b11, 16'o166000, 0, result);
 		if (result !== 16'h12a0)
 			$fatal(1, "AM4 panel initial read mismatch: %04x", result);
-		complete_cycle(1, 2'b10, 16'o166001, 16'h2d00, result);
+		complete_cycle(1, 2'b10, 16'o166001, 16'hed00, result);
 		if ({panel_reg_latch, panel_blank, panel_rs, panel_clk,
 			panel_ce, panel_din} !== 6'b101101)
 			$fatal(1, "AM4 panel output write mismatch");
+		if ({host_miso_oe, host_miso} !== 2'b11)
+			$fatal(1, "AM4 host output write mismatch");
 		complete_cycle(0, 2'b11, 16'o166000, 0, result);
-		if (result !== 16'h2da0)
+		if (result !== 16'heda0)
 			$fatal(1, "AM4 panel readback mismatch: %04x", result);
 
 		// Installing vector 100 has no side effect on the line clock.

@@ -14,15 +14,15 @@ standard device address.
 A word read from `166000` returns:
 
 ```text
- 15        14 13                         8 7                 4 3          0
-+------------+----------------------------+-------------------+------------+
-|      0     |       output readback      |   keyboard rows   |      0     |
-+------------+----------------------------+-------------------+------------+
+ 15                                      8 7                 4 3          0
++------------------------------------------+-------------------+------------+
+|              output readback             |   keyboard rows   |      0     |
++------------------------------------------+-------------------+------------+
 ```
 
 The low byte at `166000` is read-only. Its bits 7:4 reflect physical
-`gpio_key_row[3:0]`; bits 3:0 read zero. The high byte at `166001` is a
-six-bit read/write output latch:
+`gpio_key_row[3:0]`; bits 3:0 read zero. The high byte at `166001` is an
+eight-bit read/write output latch:
 
 | Byte bit | Physical output | Use |
 |---:|---|---|
@@ -32,13 +32,21 @@ six-bit read/write output latch:
 | 3 | `gpio_rs` | HCMS register select |
 | 4 | `gpio_blank` | HCMS blanking |
 | 5 | `gpio_reg_latch` | latch external RGB/keyboard output register |
-| 7:6 | none | read zero, writes ignored |
+| 6 | JTAG TDO pad | host-link data output |
+| 7 | JTAG TDO output enable | `0` leaves the keyboard row as an input |
+
+The JTAG pads are GPIO only while the physical `JTAG_EN` jumper is in its GPIO
+position. Bits 7:6 have no effect on TCK, TDI or TMS; those three pads remain
+inputs to the FPGA. Do not enable TDO until every keyboard column has been
+released, because TDO shares keyboard row 3 and a pressed key could otherwise
+cause electrical contention.
 
 Reset sets the latch to `000022` as a high byte: DIN=0, CE=1, CLK=0, RS=0,
-BLANK=1 and REG_LATCH=0. This deselects and blanks the displays while leaving
-the shared clock low.
+BLANK=1, REG_LATCH=0 and host output disabled. This deselects and blanks the
+displays, leaves the shared clock low and keeps TDO available as a keyboard
+row input.
 
-A byte write to `166001` updates all six outputs together. A word write to
+A byte write to `166001` updates all eight outputs together. A word write to
 `166000` has the same effect through its high byte. Low-byte-only writes do
 not change the outputs.
 
@@ -107,3 +115,7 @@ sources, and the shared `PNLDRV.MAC` driver are under
 HCMS displays, all RGB combinations, and the original 20-entry keyboard map
 through this register. The applications use the physical panel ESC key to
 return to the RT-11 monitor.
+
+The [`HG:` host-disk handler](../demos/rt11/hostdisk/README.md) uses the same
+register and the four jumper-selected JTAG pads. Keyboard scanning and HG disk
+I/O are mutually exclusive.

@@ -51,7 +51,9 @@ module am4_hc1200_cpu11_bus #(
 	output wire        boot_rom_ena,
 	output wire [9:0]  boot_rom_addr,
 	input  wire [7:0]  boot_rom_data,
-	output reg         boot_complete
+	output reg         boot_complete,
+	output wire        host_miso,
+	output wire        host_miso_oe
 );
 	localparam [15:0] KL11_BASE = 16'o177560;
 	localparam [15:0] LTC_CSR = 16'o177546;
@@ -145,7 +147,7 @@ module am4_hc1200_cpu11_bus #(
 	reg [TICK_WIDTH-1:0] tick_counter;
 	reg timer_done;
 	reg timer_ie;
-	reg [5:0] panel_output;
+	reg [7:0] panel_output;
 	reg [15:0] local_rdata;
 
 	spi_fram_guest_ram #(.CLK_DIV(FRAM_CLK_DIV)) guest_memory (
@@ -208,7 +210,7 @@ module am4_hc1200_cpu11_bus #(
 	end endgenerate
 
 	wire [15:0] ltc_rdata = {8'b0, timer_done, timer_ie, 6'b0};
-	wire [15:0] panel_rdata = {{2'b0, panel_output}, panel_key_rows, 4'b0};
+	wire [15:0] panel_rdata = {panel_output, panel_key_rows, 4'b0};
 	assign rdata = uart_selected ? uart_rdata :
 		ltc_selected ? ltc_rdata :
 		panel_selected ? panel_rdata :
@@ -217,7 +219,8 @@ module am4_hc1200_cpu11_bus #(
 		local_boot_selected ? local_rdata :
 		program_selected ? boot_program_word : fram_rdata;
 	assign acknowledge = uart_ack || (request && ltc_selected) ||
-		(request && panel_selected) || (sd_ready && !sd_error) || boot_ack ||
+		(request && panel_selected) ||
+		(sd_ready && !sd_error) || boot_ack ||
 		boot_program_ack || (request && rk_fixed_selected) ||
 		(fram_ready && !fram_error);
 	assign virq = rk_service_pending || rk_irq_pending || uart_irq;
@@ -393,14 +396,15 @@ module am4_hc1200_cpu11_bus #(
 	end
 
 	// Legacy HC1200 panel register.  The low byte reads the four keyboard rows;
-	// the high byte directly drives the HCMS and external output-register pins.
+	// high-byte bits 5:0 drive the panel and bits 7:6 provide a software-clocked
+	// host data output and output enable on the TDO pad.
 	// RGB and keyboard-column selection use that external shift register, so no
 	// display framebuffer or keyboard scanner is required in the full FPGA.
 	always @(posedge clk) begin
 		if (rst || peripheral_reset)
-			panel_output <= 6'b010010; // CE high, display blanked
+			panel_output <= 8'b00010010; // CE high, display blanked, host Z
 		else if (request && panel_selected && write && byte_select[1])
-			panel_output <= wdata[13:8];
+			panel_output <= wdata[15:8];
 	end
 	assign panel_din = panel_output[0];
 	assign panel_ce = panel_output[1];
@@ -408,6 +412,8 @@ module am4_hc1200_cpu11_bus #(
 	assign panel_rs = panel_output[3];
 	assign panel_blank = panel_output[4];
 	assign panel_reg_latch = panel_output[5];
+	assign host_miso = panel_output[6];
+	assign host_miso_oe = panel_output[7];
 
 	// KW11-L-compatible line-time clock.  The counter is free-running, while
 	// CSR bit 6 explicitly enables EVNT.  CSR bit 7 is the monitor/DONE latch;

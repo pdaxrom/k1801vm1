@@ -16,6 +16,7 @@ The current configuration provides:
 - KW11-L-compatible 50 Hz clock CSR at `177546`, with EVNT vector `100`;
 - software-driven HCMS-3917 displays, RGB/keyboard shift register and four
   keyboard rows through the private panel register at `166000/166001`;
+- a jumper-selected FT2232 GPIO link and RT-11 `HG:` host-directory disk;
 - guest memory in external MR45V100A SPI FRAM, clocked at 14.78 MHz;
 - reset bootstrap in otherwise unused physical bits of the seven MicROM EBRs;
 - SDHC initialization and two-sector RT-11 handoff;
@@ -74,6 +75,7 @@ erase/program/verify.
 - [Build, Diamond, Programmer and UART](docs/BUILD-DEBUG-PROGRAM.md)
 - [HC1200 display, RGB and keyboard register](docs/PANEL-IO.md)
 - [RT-11 display, RGB and keyboard demos](demos/rt11/panel/README.md)
+- [RT-11 HG host-directory disk](demos/rt11/hostdisk/README.md)
 - [Regression coverage and limitations](docs/TESTING.md)
 - [Port history and design decisions](docs/PORTING-NOTES.md)
 
@@ -87,6 +89,7 @@ rtl/                      SD byte service and SPI FRAM memory controller
 ucode/experimental/am4/  MicROM source/tools, bootstrap and RK611 service
 testbench/                Icarus/Verilator tests and SD/FRAM models
 scripts/                  MicROM-diff and Programmer-XCF helpers
+host/hg/                  FT2232 MPSSE host-disk daemon and tests
 images/                   local operating-system media; ignored by Git
 docs/                     design, build and debugging documentation
 ```

@@ -22,7 +22,7 @@ module am4_hc1200_microcomp #(
 	output wire gpio_rs,
 	output wire gpio_blank,
 	output wire gpio_reg_latch,
-	input  wire [3:0] gpio_key_row
+	inout  wire [3:0] gpio_key_row
 );
 	wire clk;
 	reg [1:0] reset_sync = 2'b11;
@@ -36,6 +36,9 @@ module am4_hc1200_microcomp #(
 	wire boot_complete, boot_rom_ena;
 	wire [9:0] boot_rom_addr;
 	wire [7:0] boot_rom_data;
+	wire host_miso;
+	wire host_miso_oe;
+	assign gpio_key_row[3] = host_miso_oe ? host_miso : 1'bz;
 
 	OSCH #(.NOM_FREQ("29.56")) internal_oscillator (
 		.STDBY(1'b0), .OSC(clk)
@@ -67,7 +70,8 @@ module am4_hc1200_microcomp #(
 		.sd_cs_n(sd_cs_n), .sd_sck(sd_sck), .sd_mosi(sd_mosi),
 		.sd_miso(sd_miso), .boot_rom_ena(boot_rom_ena),
 		.boot_rom_addr(boot_rom_addr), .boot_rom_data(boot_rom_data),
-		.boot_complete(boot_complete)
+		.boot_complete(boot_complete), .host_miso(host_miso),
+		.host_miso_oe(host_miso_oe)
 	);
 
 	am4_direct #(
