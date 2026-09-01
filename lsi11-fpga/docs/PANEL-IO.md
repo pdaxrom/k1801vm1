@@ -98,3 +98,12 @@ PANELO = PANEL+1
 The assembly is illustrative rather than a standalone program. Production
 code should wrap pin transitions in routines for shift-byte, HCMS-select and
 output-register-latch operations, and should exclude concurrent callers.
+
+## RT-11 demos
+
+Ready-to-run `DSPDEM.SAV`, `RGBDEM.SAV`, and `KEYDEM.SAV`, their MACRO-11
+sources, and the shared `PNLDRV.MAC` driver are under
+[`demos/rt11/panel`](../demos/rt11/panel/README.md). They exercise the two
+HCMS displays, all RGB combinations, and the original 20-entry keyboard map
+through this register. The applications use the physical panel ESC key to
+return to the RT-11 monitor.

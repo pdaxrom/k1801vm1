@@ -73,6 +73,7 @@ erase/program/verify.
 - [SD bootstrap and RK611 service](docs/SD-BOOT-RK611.md)
 - [Build, Diamond, Programmer and UART](docs/BUILD-DEBUG-PROGRAM.md)
 - [HC1200 display, RGB and keyboard register](docs/PANEL-IO.md)
+- [RT-11 display, RGB and keyboard demos](demos/rt11/panel/README.md)
 - [Regression coverage and limitations](docs/TESTING.md)
 - [Port history and design decisions](docs/PORTING-NOTES.md)
 

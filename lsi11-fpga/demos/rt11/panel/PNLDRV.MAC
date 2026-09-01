@@ -1,0 +1,295 @@
+	.TITLE	PNLDRV
+	.IDENT	/01.00/
+
+;	HC1200 panel driver for RT-11 on the AM4 FPGA build.
+;
+;	The private CSR is deliberately raw: its high byte directly drives the
+;	HCMS-3917 and 74HC595 pins.  This module follows the proven transfer order
+;	from microcpu/asm/modules/display.asm.
+;
+;	Public entry points:
+;	  PNINIT                 initialise and clear the panel
+;	  PNDISP  R0=16-byte     display exactly sixteen ASCII characters
+;	  PNRGB   R0=0..7        set active-high RGB mask (R=1,G=2,B=4)
+;	  PNKEY                  return key code 0..19, or -1 if no key
+;	  PNWAIT  R0=ticks       wait for RT-11 line-clock interrupts (50 Hz)
+;
+	.GLOBL	PNINIT,PNDISP,PNRGB,PNKEY,PNWAIT
+
+PANEL	= 166000
+PANELO	= PANEL+1
+
+PINDIN	= 1
+PINCE	= 2
+PINCLK	= 4
+PINRS	= 10
+PINBL	= 20
+PINLAT	= 40
+
+	.PSECT	PNCODE,I,RO
+
+;	Initialise the HCMS chain, turn the RGB LED off and clear all 16 digits.
+PNINIT:
+	MOV	R0,-(SP)
+	MOV	#PINCE+PINRS+PINBL,R0
+	MOVB	R0,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	#1000,R0
+10$:	SOB	R0,10$
+	JSR	PC,PNCMD
+	CLR	R0
+	JSR	PC,PNRGB
+	MOV	#BLANKS,R0
+	JSR	PC,PNDISP
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Load Control Word 0 (0x4c) through all eight devices in the chain.
+PNCMD:
+	MOV	R0,-(SP)
+	MOV	R1,-(SP)
+	BISB	#PINCE+PINRS,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	#10,R1
+	MOV	#114,R0
+10$:	JSR	PC,SHBYTE
+	SOB	R1,10$
+	BISB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Display 16 characters.  The downstream eight-character module is sent
+;	first, matching the original HC1200 firmware and physical daisy chain.
+PNDISP:
+	MOV	R0,-(SP)
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	MOV	R3,-(SP)
+	MOV	R4,-(SP)
+	MOV	R5,-(SP)
+	BISB	#PINCE,SHADOW
+	BICB	#PINRS,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	R0,R5
+	ADD	#10,R5
+	MOV	#10,R4
+10$:	JSR	PC,PNCHAR
+	SOB	R4,10$
+	MOV	R0,R5
+	MOV	#10,R4
+20$:	JSR	PC,PNCHAR
+	SOB	R4,20$
+	BISB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINBL,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	(SP)+,R5
+	MOV	(SP)+,R4
+	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Send one 5-column glyph.  The compact font covers ASCII 040..137.
+PNCHAR:
+	MOVB	(R5)+,R1
+	BIC	#177400,R1
+	CMP	R1,#40
+	BLO	10$
+	CMP	R1,#137
+	BHI	10$
+	SUB	#40,R1
+	BR	20$
+10$:	CLR	R1
+20$:	MOV	R1,R3
+	ASL	R3
+	ASL	R3
+	ADD	R1,R3
+	ADD	#FONT,R3
+	MOV	#5,R2
+30$:	MOVB	(R3)+,R0
+	BIC	#177400,R0
+	JSR	PC,SHBYTE
+	SOB	R2,30$
+	RTS	PC
+
+;	Set RGB using an intuitive active-high mask.  The external register uses
+;	active-low LED outputs, while its upper five bits select key columns.
+PNRGB:
+	MOV	R0,-(SP)
+	BIC	#177770,R0
+	COM	R0
+	BIC	#177770,R0
+	MOVB	R0,RGBRAW
+	BIS	#370,R0
+	JSR	PC,PNLATC
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Scan the 4-by-5 keyboard.  The mapping is the one used by the original
+;	HC1200 display module: 0..15 are hex keys and 16..19 are function keys.
+PNKEY:
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	MOV	R3,-(SP)
+	MOV	R4,-(SP)
+	CLR	R2
+	MOV	#10,R3
+10$:	MOV	R3,R0
+	BIS	RGBRAW,R0
+	JSR	PC,PNLATC
+	MOV	@#PANEL,R4
+	ASH	#-4,R4
+	BIC	#177760,R4
+	BNE	30$
+	ADD	#4,R2
+	ASL	R3
+	CMP	R3,#400
+	BLO	10$
+	MOV	#-1,R0
+	BR	50$
+30$:	INC	R2
+	ASR	R4
+	BNE	30$
+	MOVB	KEYMAP(R2),R0
+	BIC	#177400,R0
+50$:	MOV	(SP)+,R4
+	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	RTS	PC
+
+;	Wait R0 line-clock ticks.  RT-11 keeps KW11-L interrupts running while a
+;	foreground job executes, so WAIT gives stable, clock-independent timing.
+PNWAIT:
+	TST	R0
+	BEQ	20$
+10$:	WAIT
+	SOB	R0,10$
+20$:	RTS	PC
+
+;	Shift one byte, MSB first.  CE/latch selection is owned by the caller.
+SHBYTE:
+	MOV	R0,-(SP)
+	MOV	R1,-(SP)
+	MOV	#10,R1
+10$:	ASLB	R0
+	BCC	20$
+	BISB	#PINDIN,SHADOW
+	BR	30$
+20$:	BICB	#PINDIN,SHADOW
+30$:	MOVB	SHADOW,@#PANELO
+	BISB	#PINCLK,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINCLK,SHADOW
+	MOVB	SHADOW,@#PANELO
+	SOB	R1,10$
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Shift and latch the external RGB/keyboard register.  HCMS CE is forced
+;	high so the shared DIN/CLK transitions cannot change display contents.
+PNLATC:
+	BISB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	JSR	PC,SHBYTE
+	BISB	#PINLAT,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINLAT,SHADOW
+	MOVB	SHADOW,@#PANELO
+	RTS	PC
+
+	.PSECT	PNDATA,D,RW
+SHADOW:
+	.BYTE	PINCE+PINBL,0
+RGBRAW:
+	.WORD	7
+BLANKS:
+	.ASCII	/                /
+KEYMAP:
+	.BYTE	377
+	.BYTE	0,1,4,7
+	.BYTE	12,2,5,10
+	.BYTE	13,3,6,11
+	.BYTE	17,16,15,14
+	.BYTE	20,21,22,23
+	.EVEN
+
+;	Five-column font copied from the proven HC1200 microcpu display module.
+;	Each byte maps directly to one HCMS dot column.
+FONT:
+	.BYTE	000,000,000,000,000	; space
+	.BYTE	000,000,137,000,000	; !
+	.BYTE	000,007,000,007,000	; "
+	.BYTE	024,177,024,177,024	; #
+	.BYTE	044,052,177,052,022	; $
+	.BYTE	043,023,010,144,142	; %
+	.BYTE	066,111,125,042,120	; &
+	.BYTE	000,005,003,000,000	; apostrophe
+	.BYTE	000,034,042,101,000	; (
+	.BYTE	000,101,042,034,000	; )
+	.BYTE	010,052,034,052,010	; *
+	.BYTE	010,010,076,010,010	; +
+	.BYTE	000,120,060,000,000	; comma
+	.BYTE	010,010,010,010,010	; -
+	.BYTE	000,140,140,000,000	; .
+	.BYTE	040,020,010,004,002	; /
+	.BYTE	076,121,111,105,076	; 0
+	.BYTE	000,102,177,100,000	; 1
+	.BYTE	102,141,121,111,106	; 2
+	.BYTE	041,101,105,113,061	; 3
+	.BYTE	030,024,022,177,020	; 4
+	.BYTE	047,105,105,105,071	; 5
+	.BYTE	074,112,111,111,060	; 6
+	.BYTE	001,161,011,005,003	; 7
+	.BYTE	066,111,111,111,066	; 8
+	.BYTE	006,111,111,051,036	; 9
+	.BYTE	000,066,066,000,000	; :
+	.BYTE	000,126,066,000,000	; ;
+	.BYTE	000,010,024,042,101	; <
+	.BYTE	024,024,024,024,024	; =
+	.BYTE	101,042,024,010,000	; >
+	.BYTE	002,001,121,011,006	; ?
+	.BYTE	062,111,171,101,076	; @
+	.BYTE	176,021,021,021,176	; A
+	.BYTE	177,111,111,111,066	; B
+	.BYTE	076,101,101,101,042	; C
+	.BYTE	177,101,101,042,034	; D
+	.BYTE	177,111,111,111,101	; E
+	.BYTE	177,011,011,001,001	; F
+	.BYTE	076,101,101,121,062	; G
+	.BYTE	177,010,010,010,177	; H
+	.BYTE	000,101,177,101,000	; I
+	.BYTE	040,100,101,077,001	; J
+	.BYTE	177,010,024,042,101	; K
+	.BYTE	177,100,100,100,100	; L
+	.BYTE	177,002,004,002,177	; M
+	.BYTE	177,004,010,020,177	; N
+	.BYTE	076,101,101,101,076	; O
+	.BYTE	177,011,011,011,006	; P
+	.BYTE	076,101,121,041,136	; Q
+	.BYTE	177,011,031,051,106	; R
+	.BYTE	106,111,111,111,061	; S
+	.BYTE	001,001,177,001,001	; T
+	.BYTE	077,100,100,100,077	; U
+	.BYTE	037,040,100,040,037	; V
+	.BYTE	177,040,030,040,177	; W
+	.BYTE	143,024,010,024,143	; X
+	.BYTE	003,004,170,004,003	; Y
+	.BYTE	141,121,111,105,103	; Z
+	.BYTE	000,000,177,101,101	; [
+	.BYTE	002,004,010,020,040	; backslash
+	.BYTE	101,101,177,000,000	; ]
+	.BYTE	004,002,001,002,004	; ^
+	.BYTE	100,100,100,100,100	; _
+	.EVEN
+
+	.END
