@@ -56,9 +56,9 @@ make diamond DIAMOND_HOME=/opt/lscc/diamond/3.14 \
 
 `build-am4.tcl` runs synthesis, translate, map, PAR and TRACE. It refuses to
 export JED if cumulative negative slack is nonzero, and never programs the
-board. The verified standalone gate is 634/640 slices, 1263/1280 LUT4s,
-7/7 EBRs, zero unrouted connections, 5.857 ns setup slack, 0.304 ns hold
-slack and zero setup/hold errors.  Resource totals must come from a clean
+board. The current clean 29.56 MHz gate uses 635/640 slices, 1266/1280 LUT4s
+and 7/7 EBRs, with zero unrouted connections, 3.001 ns setup slack, 0.304 ns
+hold slack and zero setup/hold errors. Resource totals must come from a clean
 implementation directory; an incremental no-op is not evidence of fit.
 
 For a remote Diamond host:
@@ -103,6 +103,6 @@ printf '\r' >/dev/ttyUSB1
 - ODT only: inspect `157774` and `157776` for SD value and bootstrap stage.
 - RT-11 banner without prompt: verify MOVB destination reads, `E5` response
   decoding, CS boundaries, busy completion and RTI `160476`.
-- No UART: check LPF, 26.6 MHz clock, 115200 8N1 and `/dev/ttyUSB1` ownership.
+- No UART: check LPF, 29.56 MHz clock, 115200 8N1 and `/dev/ttyUSB1` ownership.
 - Simulation passes/hardware fails: run vendor EBR test, inspect TRACE, compare
   programmed JED SHA-256, and capture UART before programming.

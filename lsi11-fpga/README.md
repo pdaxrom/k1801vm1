@@ -6,7 +6,7 @@ the CPU is the original Am2900-style AM4 datapath and 56-bit MicROM, with a
 direct request/ready bus adapter, external SPI FRAM as PDP-11 memory, and a
 small SD/RK611 integration layer for booting RT-11.
 
-The currently verified configuration provides:
+The current configuration provides:
 
 - AM4/LSI-11M CPU with the recovered 1024 x 56 control store;
 - recovered EIS (MUL/DIV/ASH/ASHC/XOR) and FIS (FADD/FSUB/FMUL/FDIV);
@@ -16,11 +16,16 @@ The currently verified configuration provides:
 - KW11-L-compatible 50 Hz clock CSR at `177546`, with EVNT vector `100`;
 - software-driven HCMS-3917 displays, RGB/keyboard shift register and four
   keyboard rows through the private panel register at `166000/166001`;
-- guest memory in external SPI FRAM;
+- guest memory in external MR45V100A SPI FRAM, clocked at 14.78 MHz;
 - reset bootstrap in otherwise unused physical bits of the seven MicROM EBRs;
 - SDHC initialization and two-sector RT-11 handoff;
 - software RK611 at `177440..177476`, including SD `CMD17` and `CMD24`;
 - a Diamond project for `LCMXO2-1200HC-4SG32C`.
+
+The board clock is 29.56 MHz, the nearest supported MachXO2 internal-oscillator
+setting above 28 MHz. The source passes clean Diamond map, place/route and
+timing at that frequency. The last physically programmed image is retained as
+a historical checkpoint in [Porting notes](docs/PORTING-NOTES.md).
 
 ## Quick start
 

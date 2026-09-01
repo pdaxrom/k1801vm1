@@ -65,6 +65,21 @@ No additional EBR is required. The final build consumes all seven EBRs.
 Normal memory accesses use FRAM bank 0. RK611 register storage uses invisible
 bank 1, so controller state does not consume FPGA registers.
 
+## FRAM transport
+
+The MachXO2 internal oscillator runs at 29.56 MHz. With `FRAM_CLK_DIV=1`, the
+SPI engine changes SCK phase on every FPGA clock and therefore supplies a
+14.78 MHz FRAM clock. This is below the MR45V100A READ limit of 34 MHz.
+
+Each access sends the ordinary READ or WREN/WRITE command and 24-bit address.
+The controller acknowledges a CPU cycle only after all of its data bytes have
+completed; it does not speculate, prefetch or reorder memory accesses.
+
+A transparent auto-increment prototype was tested, including exact checks for
+direction, bank and next address. Even a read-only form mapped to 672/640
+slices, versus 635/640 for the current controller, so it cannot be enabled on
+LCMXO2-1200 without replacing another function or moving to a larger device.
+
 ## Reset and overlay removal
 
 On reset AM4 reads vector `024`, gets PC `004000`, and starts the bootstrap
@@ -79,7 +94,7 @@ free-running line clock cannot interrupt this transition.
 
 ## UART and interrupts
 
-`wbc_uart_xo2` is configured for 26.6 MHz and fixed 115200/8/N/1. It provides
+`wbc_uart_xo2` is configured for 29.56 MHz and fixed 115200/8/N/1. It provides
 KL11 registers at `177560..177566`; RX and TX request vectors `060` and `064`.
 The board adapter chooses RX first when both are pending and acknowledges the
 chosen request directly. The general `wbc_vic` is not instantiated.

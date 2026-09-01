@@ -21,7 +21,7 @@ module tb_am4_odt;
 	reg saw_cr = 0;
 	reg saw_lf = 0;
 
-	always #18.797 clk = !clk;
+	always #16.915 clk = !clk;
 	always @(posedge clk) begin
 		if (!reset) cycles <= cycles + 1;
 		if (cycles >= MAX_CYCLES)

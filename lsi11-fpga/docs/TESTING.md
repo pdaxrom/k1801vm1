@@ -22,11 +22,14 @@ bench more slowly under Icarus.
 
 ## Limitations
 
-- MachXO2-1200HC is nearly full: 634/640 slices, 1263/1280 LUT4s and
-  7/7 EBRs.
+- The current clean 29.56 MHz build is nearly full: 635/640 slices,
+  1266/1280 LUT4s and 7/7 EBRs.
   The `NOP` before `command_bytes` is an intentional spare-ROM packing spacer;
   removing it was measured at 643 slices and failed Map.
-- SPI FRAM serializes memory and is much slower than BRAM.
+- SPI FRAM still serializes memory and is slower than BRAM. Divider 1 doubles
+  SCK relative to the old board setting, but every access still sends a command
+  and 24-bit address. A transparent sequential-read prototype required
+  672/640 slices and did not fit this device.
 - RK611 is a compatibility subset for RT-11, not cycle-accurate hardware.
 - Media must be SDHC/SDXC with 512-byte block addressing.
 - The compact write-busy path uses six spaced 16-bit waits but lacks Stable
@@ -43,3 +46,11 @@ bench more slowly under Icarus.
 
 Any expansion must state which existing resource it replaces. Moving to a
 larger FPGA would remove the constraint that motivated spare-bit packing.
+
+## Performance checkpoints
+
+With the same behavioral models, the direct CPU/FRAM smoke test fell from
+5556 clocks at 26.60 MHz/divider 2 to 3221 clocks at 29.56 MHz/divider 1:
+approximately 209 us to 109 us, or 1.92x faster. Full RT-11 boot to the monitor
+prompt fell from 82,651,018 to 53,269,735 clocks; after accounting for clock
+frequency, approximately 3.107 s to 1.802 s, or 1.72x faster.

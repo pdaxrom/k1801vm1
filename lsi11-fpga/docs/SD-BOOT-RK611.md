@@ -7,7 +7,10 @@
 | `177500` | read/write | transfer one SPI byte; reads transmit `FF` |
 | `177502` | read/write | bit 0 CS high, bit 1 fast clock, bit 2 remove overlay |
 
-Default divisors are 68 for initialization and 2 for transfers at 26.6 MHz.
+The SD divisors remain unchanged at 68 for initialization and 2 for transfers.
+At the 29.56 MHz board clock this produces approximately 217.35 kHz and
+7.39 MHz respectively; no SD protocol or divider change is part of the FRAM
+performance work.
 
 ## Reset bootstrap
 

@@ -5,7 +5,7 @@
 // The board contract is fixed at 115200/8/N/1. Register addresses, CSR ready
 // and IE bits, RX/TX interrupt handshakes, active-low CTS and RTS/DTR behavior
 // match wbc_uart. Variable word length, parity and test mode are omitted.
-module wbc_uart_xo2 #(parameter REFCLK=26600000)
+module wbc_uart_xo2 #(parameter REFCLK=29560000)
 (
 	input wire wb_clk_i,
 	input wire wb_rst_i,

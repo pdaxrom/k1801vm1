@@ -4,8 +4,8 @@
 // 56-bit MicROM use a board-native request/ready interface backed by external
 // SPI FRAM; KL11, KW11-L, panel GPIO and retained ODT share the board bus.
 module am4_hc1200_microcomp #(
-	parameter integer FRAM_CLK_DIV = 2,
-	parameter integer TICK_DIVISOR = 532000
+	parameter integer FRAM_CLK_DIV = 1,
+	parameter integer TICK_DIVISOR = 591200
 ) (
 	output wire sd_cs_n, sd_sck, sd_mosi,
 	input  wire sd_miso,
@@ -37,7 +37,7 @@ module am4_hc1200_microcomp #(
 	wire [9:0] boot_rom_addr;
 	wire [7:0] boot_rom_data;
 
-	OSCH #(.NOM_FREQ("26.60")) internal_oscillator (
+	OSCH #(.NOM_FREQ("29.56")) internal_oscillator (
 		.STDBY(1'b0), .OSC(clk)
 	);
 
@@ -47,7 +47,8 @@ module am4_hc1200_microcomp #(
 	end
 
 	am4_hc1200_cpu11_bus #(
-		.FRAM_CLK_DIV(FRAM_CLK_DIV), .TICK_DIVISOR(TICK_DIVISOR),
+		.CLOCK_HZ(29560000), .FRAM_CLK_DIV(FRAM_CLK_DIV),
+		.TICK_DIVISOR(TICK_DIVISOR),
 		.SD_BOOT_ENABLE(1), .RK_SERVICE_ENABLE(1)
 	) guest_bus (
 		.clk(clk), .rst(reset), .peripheral_reset(peripheral_reset),

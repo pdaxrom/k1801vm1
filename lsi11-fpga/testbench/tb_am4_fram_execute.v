@@ -18,7 +18,7 @@ module tb_am4_fram_execute;
 	always #5 clk = !clk;
 
 	am4_hc1200_cpu11_bus #(
-		.FRAM_CLK_DIV(2), .TICK_DIVISOR(1000), .BOOT_ROM_ENABLE(0)
+		.FRAM_CLK_DIV(1), .TICK_DIVISOR(1000), .BOOT_ROM_ENABLE(0)
 	) guest_bus (
 		.clk(clk), .rst(reset), .peripheral_reset(peripheral_reset),
 		.request(request), .write(write_enable), .byte_select(byte_select),

@@ -33,7 +33,7 @@ module tb_am4_rt11;
 	initial trace_rk = $test$plusargs("TRACE_RK");
 
 	am4_hc1200_cpu11_bus #(
-		.FRAM_CLK_DIV(2), .TICK_DIVISOR(532000), .SD_BOOT_ENABLE(1),
+		.FRAM_CLK_DIV(1), .TICK_DIVISOR(591200), .SD_BOOT_ENABLE(1),
 		.RK_SERVICE_ENABLE(1), .SD_SLOW_DIV(68), .SD_FAST_DIV(2)
 	) guest_bus (
 		.clk(clk), .rst(reset), .peripheral_reset(peripheral_reset),

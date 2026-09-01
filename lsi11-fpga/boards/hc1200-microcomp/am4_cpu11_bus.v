@@ -6,9 +6,10 @@
 // SPI service at 177500/2.  Six reset/ODT words remain available on failure;
 // the complete overlay disappears before a successful transfer to address 0.
 module am4_hc1200_cpu11_bus #(
-	parameter integer TICK_DIVISOR = 532000,
+	parameter integer CLOCK_HZ = 29560000,
+	parameter integer TICK_DIVISOR = 591200,
 	parameter integer UART_XO2 = 1,
-	parameter integer FRAM_CLK_DIV = 2,
+	parameter integer FRAM_CLK_DIV = 1,
 	parameter integer BOOT_ROM_ENABLE = 1,
 	parameter integer SD_BOOT_ENABLE = 0,
 	parameter integer RK_SERVICE_ENABLE = 0,
@@ -183,7 +184,7 @@ module am4_hc1200_cpu11_bus #(
 	end
 
 	generate if (UART_XO2) begin : fixed_uart
-	wbc_uart_xo2 #(.REFCLK(26600000)) console (
+	wbc_uart_xo2 #(.REFCLK(CLOCK_HZ)) console (
 		.wb_clk_i(clk), .wb_rst_i(rst || peripheral_reset),
 		.wb_adr_i(address[2:0]), .wb_dat_i(wdata),
 		.wb_dat_o(uart_rdata), .wb_cyc_i(uart_strobe),
@@ -193,7 +194,7 @@ module am4_hc1200_cpu11_bus #(
 		.rx_irq_o(rx_irq), .rx_ack_i(rx_irq_ack)
 	);
 	end else begin : original_uart
-	wbc_uart #(.REFCLK(26600000)) console (
+	wbc_uart #(.REFCLK(CLOCK_HZ)) console (
 		.wb_clk_i(clk), .wb_rst_i(rst || peripheral_reset),
 		.wb_adr_i(address[2:0]), .wb_dat_i(wdata),
 		.wb_dat_o(uart_rdata), .wb_cyc_i(uart_strobe),
