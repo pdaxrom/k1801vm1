@@ -85,13 +85,13 @@ wait_write_irq
 	check #000010, @#rkda
 	check #0, @#rkdc
 
-	; Q-bus DMA uses physical addresses.  Exercise the 8 KiB hidden under the
-	; CPU I/O page: a full-sector READ must write FRAM 160000..160777 instead
-	; of timing out against I/O, and the following WRITE must read it back
-	; without confusing physical address 160476 with the service ROM's RTI.
+	; Q-bus DMA uses physical addresses.  Exercise two sectors hidden under the
+	; CPU I/O page so the transfer crosses from 160000 into 161000.  The READ
+	; must write physical FRAM rather than the service ROM, and the following
+	; WRITE must read both sectors back without treating 160476 as service code.
 	mov #0160000, @#rkba
 	mov #000025, @#rkda
-	mov #-000400, @#rkwc
+	mov #-001000, @#rkwc
 	mov #000121, r3
 	bis r2, r3
 	mov r3, @#rkcs1
@@ -100,13 +100,13 @@ wait_high_read_irq
 	bne wait_high_read_irq
 	check #002320, @#rkcs1
 	check #0, @#rkwc
-	check #0161000, @#rkba
-	check #000400, @#rkda
+	check #0162000, @#rkba
+	check #000401, @#rkda
 
 	mov #0160000, @#rkba
 	mov #000010, @#rkda
 	clr @#rkdc
-	mov #-000400, @#rkwc
+	mov #-001000, @#rkwc
 	mov #000123, r3
 	bis r2, r3
 	mov r3, @#rkcs1
@@ -115,8 +115,41 @@ wait_high_write_irq
 	bne wait_high_write_irq
 	check #002322, @#rkcs1
 	check #0, @#rkwc
-	check #0161000, @#rkba
-	check #000011, @#rkda
+	check #0162000, @#rkba
+	check #000012, @#rkda
+
+	; Exercise the actual device-CSR end of the physical I/O page.  READ one
+	; sector through 177000..177777, including the RK and KL11 addresses.  Then
+	; issue a one-word WRITE.  The SD backend still consumes a complete sector,
+	; but RK WC/BA must stop after one word and the remaining words are zero-fill.
+	mov #0177000, @#rkba
+	mov #000401, @#rkda
+	mov #-000400, @#rkwc
+	mov #000121, r3
+	bis r2, r3
+	mov r3, @#rkcs1
+wait_io_page_read_irq
+	cmp #5, @#014000
+	bne wait_io_page_read_irq
+	check #002320, @#rkcs1
+	check #0, @#rkwc
+	check #0, @#rkba
+	check #000402, @#rkda
+
+	mov #0177000, @#rkba
+	mov #000012, @#rkda
+	clr @#rkdc
+	mov #-1, @#rkwc
+	mov #000123, r3
+	bis r2, r3
+	mov r3, @#rkcs1
+	wait_partial_write_irq
+	cmp #6, @#014000
+	bne wait_partial_write_irq
+	check #002322, @#rkcs1
+	check #0, @#rkwc
+	check #0177002, @#rkba
+	check #000013, @#rkda
 	mov #012345, @#003200
 passed
 	br passed

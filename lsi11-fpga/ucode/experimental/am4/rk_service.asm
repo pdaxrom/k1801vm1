@@ -17,24 +17,23 @@ service
 	mov #rkcs1, r5
 	mov #sd_data, r4
 	mov 002(r5), r3
-	mov 004(r5), r2
 
 	; DB is private while the service owns the CPU; use it for current LBA.
 	mov 006(r5), r0
-	mov r0, -(sp)
+	mov r0, r2
 	; DA head bits become the low three bits after SWAB; this is equivalent to
 	; ASH #-8 here and saves one private-service word.
 	swab r0
 	bic #0177770, r0
 	mul #000026, r0
-	mov (sp)+, r0
-	bic #0177740, r0
-	add r0, r1
-	mov r1, -(sp)
+	bic #0177740, r2
+	add r2, r1
+	mov r1, r2
 	mov 020(r5), r0
 	mul #000102, r0
-	add (sp)+, r1
+	add r2, r1
 	mov r1, 022(r5)
+	mov 004(r5), r2
 
 next_sector
 	; The bootstrap and every completed sector leave fast mode with CS high (3).
@@ -51,8 +50,10 @@ next_sector
 	swab r0
 	mov r0, (r4)
 	mov r1, (r4)
-	mov #1, (r4)
-	mov #000020, r0
+	; CRC is ignored after card initialization, but its end bit must be one.
+	; The active RK command in CS1 already has GO set, so reuse its low byte.
+	mov (r5), (r4)
+	mov r4, r0
 response
 	tst (r4)
 	beq response_done
@@ -62,7 +63,7 @@ response_done
 	bit #2, (r5)
 	bne write_sector
 wait_token
-	clr r0
+	; Reuse the still-large response timeout as the data-token timeout.
 token
 	mov (r4), r1
 	cmp #000376, r1
@@ -93,7 +94,7 @@ sector_done
 	mov r2, 004(r5)
 	inc 022(r5)
 
-	; RK05 geometry is 22 sectors x 3 heads.  Advance DA after every
+	; RK06 geometry is 22 sectors x 3 heads.  Advance DA after every
 	; transferred sector, including the last/partial sector of a command.
 	incb 006(r5)
 	cmpb #000026, 006(r5)
@@ -111,8 +112,10 @@ address_done
 	beq finished
 	br next_sector
 
-	; SD writes always transfer one complete 512-byte sector.  RT-11 issues
-	; block-sized RK611 transfers, so add a sector to WC after the byte loop.
+	; SD writes always transfer one complete 512-byte sector.  The RK611 write
+	; sequence (DEC EK-RK067-UG-001, Figure 7-28) specifies that a partial final
+	; WRITE stops memory DMA at WC zero and zero-fills the rest of the sector;
+	; BA advances only for words actually transferred from memory.
 	; After the accepted-token check, keep CS asserted but stop clocking while
 	; the card programs the sector.  Tight back-to-back AM4 polls can leave the
 	; physical card busy indefinitely.  The accepted response becomes six
@@ -121,11 +124,20 @@ write_sector
 	mov #000376, (r4)
 	; The patched AM4 MOVB path resolves a store-only destination EA, so this
 	; memory-to-memory byte transfer does not read and clock SD_DATA first.
-	mov #001000, r0
-write_byte
+	mov #000400, r0
+write_word
 	movb (r2)+, (r4)
-	sob r0, write_byte
-	add #000400, r3
+	movb (r2)+, (r4)
+	inc r3
+	beq write_zero_entry
+	sob r0, write_word
+	br write_data_done
+write_zero
+	clr (r4)
+	clr (r4)
+write_zero_entry
+	sob r0, write_zero
+write_data_done
 	dec r0				; SOB left zero; use FFFF for both CRC bytes
 	mov r0, (r4)
 	mov r0, (r4)
@@ -152,8 +164,7 @@ write_busy_poll
 	br failed
 
 	; Keep the following high-bit literal at the resource-proven spare-ROM
-	; address.  This one-word packing spacer saves three HC1200 slices.
-	nop
+	; address; the zero-fill loop now occupies the former packing-spacer word.
 command_bytes
 	dw 000121
 	dw 000130

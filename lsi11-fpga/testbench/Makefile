@@ -24,7 +24,8 @@ AM4_SYSTEM_RTL = ../boards/hc1200-microcomp/am4_cpu11_bus.v \
 	am4-eis-test am4-fis-test am4-movb-bus-test am4-fram-test \
 	am4-sd-boot-test am4-rk-test \
 	am4-rk-test-icarus \
-	am4-odt-test am4-rt11-boot-fast am4-mcrom-ebr-test clean
+	am4-odt-test am4-rt11-boot-fast am4-rt11-ctrlc \
+	am4-rt11-ctrlc-full am4-mcrom-ebr-test clean
 .DELETE_ON_ERROR:
 
 build:
@@ -121,6 +122,23 @@ build/am4_rt11_verilator/Vtb_am4_rt11: tb_am4_rt11.v $(AM4_SYSTEM_RTL) \
 am4-rt11-boot-fast: build/am4_rt11_verilator/Vtb_am4_rt11
 	@test -f "$(RT11_IMAGE)" || { echo "RT11_IMAGE does not exist: $(RT11_IMAGE)"; exit 1; }
 	build/am4_rt11_verilator/Vtb_am4_rt11 +SD_IMAGE="$(RT11_IMAGE)"
+
+build/am4_ctrlc_verilator/Vtb_am4_ctrlc: tb_am4_ctrlc.v $(AM4_SYSTEM_RTL) \
+		build/am4_bootrom.rom | build
+	$(VERILATOR) --binary --timing -j $(VERILATOR_JOBS) -CFLAGS '-O3' \
+		-Wno-fatal --top-module tb_am4_ctrlc \
+		--Mdir build/am4_ctrlc_verilator $< $(AM4_SYSTEM_RTL) \
+		> build/am4_ctrlc_verilator.log 2>&1 || \
+		{ cat build/am4_ctrlc_verilator.log; exit 1; }
+
+am4-rt11-ctrlc: build/am4_ctrlc_verilator/Vtb_am4_ctrlc
+	@test -f "$(RT11_IMAGE)" || { echo "RT11_IMAGE does not exist: $(RT11_IMAGE)"; exit 1; }
+	build/am4_ctrlc_verilator/Vtb_am4_ctrlc \
+		+SD_IMAGE="$(RT11_IMAGE)" +FAST_BUSY_WAIT
+
+am4-rt11-ctrlc-full: build/am4_ctrlc_verilator/Vtb_am4_ctrlc
+	@test -f "$(RT11_IMAGE)" || { echo "RT11_IMAGE does not exist: $(RT11_IMAGE)"; exit 1; }
+	build/am4_ctrlc_verilator/Vtb_am4_ctrlc +SD_IMAGE="$(RT11_IMAGE)"
 
 am4-mcrom-ebr-test: build/am4_bootrom.rom
 	@test -f "$(LATTICE_SIM_DIR)/DP8KC.v" || \

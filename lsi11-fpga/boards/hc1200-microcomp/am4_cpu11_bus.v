@@ -96,16 +96,17 @@ module am4_hc1200_cpu11_bus #(
 		boot_overlay_active && !write && word_address >= BOOT_BASE &&
 		word_address <= BOOT_LAST;
 	wire boot_selected = local_boot_selected || boot_program_selected;
+	wire io_page = &address[15:13];
 	// 160000..160777 share one seven-bit prefix.  Bit 8 selects the compact
 	// extension; the service never branches into its unused upper aliases.
 	// The service executes from a ROM overlay in the CPU I/O page, but RK DMA
-	// addresses are physical Q-bus addresses and may occupy that same block.
+	// addresses are physical Q-bus addresses and may occupy the full I/O page.
 	// A fetched MOVB word latches the service-copy phase until the next program
 	// word. READ copies use the write operand as physical memory; WRITE copies
 	// use the non-fetch read operand. This avoids a wide instruction-register
 	// decoder while keeping opcode and extension reads in the private ROM.
 	wire service_dma_selected = RK_SERVICE_ENABLE && rk_service_active &&
-		rk_service_movb && word_address[15:9] == SERVICE_BASE[15:9] &&
+		rk_service_movb && io_page &&
 		((!rk_write_command && write) ||
 		 (rk_write_command && !write && !instruction_fetch));
 	wire service_program_selected = RK_SERVICE_ENABLE && rk_service_active &&
@@ -113,14 +114,20 @@ module am4_hc1200_cpu11_bus #(
 		word_address[15:9] == SERVICE_BASE[15:9];
 	wire service_extension_selected = service_program_selected && word_address[8];
 	wire program_selected = boot_program_selected || service_program_selected;
-	wire uart_selected = word_address >= KL11_BASE &&
-		word_address <= 16'o177566;
-	wire ltc_selected = word_address == LTC_CSR;
-	wire panel_selected = word_address == PANEL_BASE;
-	wire sd_selected = SD_BOOT_ENABLE &&
-		(word_address == SD_BASE || word_address == SD_BASE + 2);
-	wire rk_selected = RK_SERVICE_ENABLE &&
-		word_address[15:5] == RK_BASE[15:5];
+	// A physical RK DMA operand wins over every CPU-visible device decode.
+	// Share the inhibited I/O-page term across the small-device decoders; this
+	// also prevents a DMA write from changing a coincident device CSR.
+	wire cpu_io_page = io_page && !service_dma_selected;
+	wire uart_selected = cpu_io_page &&
+		word_address[12:0] >= KL11_BASE[12:0] &&
+		word_address[12:0] <= 13'o17566;
+	wire ltc_selected = cpu_io_page && word_address[12:0] == LTC_CSR[12:0];
+	wire panel_selected = cpu_io_page && word_address[12:0] == PANEL_BASE[12:0];
+	wire sd_selected = cpu_io_page && SD_BOOT_ENABLE &&
+		(word_address[12:0] == SD_BASE[12:0] ||
+		 word_address[12:0] == SD_BASE[12:0] + 2);
+	wire rk_selected = cpu_io_page && RK_SERVICE_ENABLE &&
+		word_address[12:5] == RK_BASE[12:5];
 	wire rk_cs1_selected = rk_selected && word_address[4:1] == 4'o0;
 	wire rk_cs2_selected = rk_selected && word_address[4:1] == 4'o4;
 	wire rk_ds_selected = rk_selected && word_address[4:1] == 4'o5;
@@ -128,7 +135,6 @@ module am4_hc1200_cpu11_bus #(
 		(rk_cs1_selected && !write &&
 		 (!rk_cs1_initialized || rk_immediate_done));
 	wire rk_fram_selected = rk_selected && !rk_fixed_selected;
-	wire io_page = address[15:13] == 3'b111;
 	wire guest_fram_selected = (!io_page && !boot_selected) ||
 		service_dma_selected;
 	wire fram_selected = guest_fram_selected || rk_fram_selected;

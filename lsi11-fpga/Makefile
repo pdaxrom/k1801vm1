@@ -23,8 +23,9 @@ MICROM_EBR := $(BOARD)/am4_mcrom_ebr.v
 JED := $(BOARD)/impl1-am4/microcomp-am4_impl1.jed
 XCF := $(BUILD)/hc1200-am4.xcf
 
-.PHONY: all firmware microcode-check test test-fast test-rt11 test-vendor \
-	project-test host-test diamond xcf program clean distclean help
+.PHONY: all firmware microcode-check test test-fast test-rt11 \
+	test-rt11-ctrlc test-rt11-ctrlc-full test-vendor project-test host-test \
+	diamond xcf program clean distclean help
 .DELETE_ON_ERROR:
 
 all: $(MICROM_EBR)
@@ -85,6 +86,18 @@ test-rt11: all
 		VERILATOR="$(VERILATOR)" VERILATOR_JOBS="$(VERILATOR_JOBS)" \
 		RT11_IMAGE="$(abspath $(RT11_IMAGE))"
 
+test-rt11-ctrlc: all
+	$(MAKE) -C testbench am4-rt11-ctrlc \
+		ASM11="$(abspath $(ASM11))" PYTHON="$(PYTHON)" \
+		VERILATOR="$(VERILATOR)" VERILATOR_JOBS="$(VERILATOR_JOBS)" \
+		RT11_IMAGE="$(abspath $(RT11_IMAGE))"
+
+test-rt11-ctrlc-full: all
+	$(MAKE) -C testbench am4-rt11-ctrlc-full \
+		ASM11="$(abspath $(ASM11))" PYTHON="$(PYTHON)" \
+		VERILATOR="$(VERILATOR)" VERILATOR_JOBS="$(VERILATOR_JOBS)" \
+		RT11_IMAGE="$(abspath $(RT11_IMAGE))"
+
 test-vendor: all
 	$(MAKE) -C testbench am4-mcrom-ebr-test \
 		ASM11="$(abspath $(ASM11))" PYTHON="$(PYTHON)" \
@@ -124,6 +137,8 @@ help:
 	@echo "make test-fast        core, EIS/FIS, interrupts, MOVB, FRAM, SD boot, ODT and Python checks"
 	@echo "make test             test-fast plus RK611 READ/WRITE"
 	@echo "make test-rt11        boot RT-11 image with Verilator"
+	@echo "make test-rt11-ctrlc  run RT-11 MACRO/Ctrl-C regression with shortened SD delay"
+	@echo "make test-rt11-ctrlc-full  run the same regression with the complete SD delay"
 	@echo "make host-test        validate HG protocol, image and directory mirror"
 	@echo "make test-vendor      verify generated ROM with Diamond DP8KC model"
 	@echo "make diamond          synthesize/place/route/export JED with Diamond 3.14"
