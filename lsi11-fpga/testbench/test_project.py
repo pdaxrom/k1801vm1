@@ -102,6 +102,9 @@ source $::env(TEST_SCRIPT)
         self.assertIn("MOV\t#114,R0", driver)  # HCMS command 0x4c
         self.assertIn("MOV\t#10,R1", driver)   # eight control bytes
         self.assertIn("CMP\tR3,#400", driver) # five keyboard columns
+        halves = driver.split("PNDISP:", 1)[1].split(";\tSend one 5-column glyph", 1)[0]
+        self.assertIn("MOV\t12(SP),R5\t; PNCHAR uses R0", halves)
+        self.assertEqual(halves.count("MOV\tR0,R5"), 1)
         self.assertNotIn("^X", driver)
 
         font = driver.split("FONT:", 1)[1]

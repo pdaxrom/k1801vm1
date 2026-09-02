@@ -81,7 +81,7 @@ PNDISP:
 	MOV	#10,R4
 10$:	JSR	PC,PNCHAR
 	SOB	R4,10$
-	MOV	R0,R5
+	MOV	12(SP),R5	; PNCHAR uses R0; recover the saved buffer pointer
 	MOV	#10,R4
 20$:	JSR	PC,PNCHAR
 	SOB	R4,20$
