@@ -7,6 +7,9 @@ host finishes it. `HG0:` is a data disk, not a boot device.
 
 `HG.SYS` was assembled and linked by the distributed RT-11 V5.03 tools. The
 source is included so the handler can also be rebuilt on the target system.
+It carries `H.GEN=5`, matching the distributed unmapped `RT11SJ` and `RT11FB`
+monitors (`ERL$G` and `TIM$IT`). A handler built with the default `H.GEN=0`
+is rejected by `INSTALL` with `Conflicting SYSGEN options`.
 
 The link uses the pins only while the physical `JTAG_EN` jumper selects GPIO:
 
@@ -53,8 +56,11 @@ the end of their last 512-byte block. Host-side edits are imported when the
 daemon is restarted. Deleting a file in RT-11 does not delete the corresponding
 host file in this initial implementation.
 
-The default MPSSE clock is deliberately conservative at 10 kHz. Use
-`--clock 20000` only after the 10 kHz link is stable.
+The default MPSSE clock is 1 kHz. The RT-11 handler bit-bangs this link in
+software, so faster symmetric TCK periods can overrun its per-bit GPIO loop.
+The host also clocks one byte per MPSSE command, leaving TCK low while the
+handler prepares the next byte. Use `--clock 2000` only after the 1 kHz link is
+stable on the target CPU.
 
 ## Assemble and install HG.SYS under RT-11
 
@@ -69,16 +75,18 @@ Copy `HG.MAC` to the RT-11 system disk as CRLF text. At the RT-11 prompt:
 ```
 
 On systems without the MACRO and LINK command-language shortcuts, the exact
-utility command strings are:
+MACRO utility command string is:
 
 ```text
 .R MACRO
 *HG.OBJ,HG.LST=HG.MAC
 *^C
-.R LINK
-*HG.SYS/B:0=HG.OBJ
-*^C
 ```
+
+Use the monitor `LINK/NOBITMAP/EXECUTE:HG.SYS HG` command shown above for the
+link step. Do not substitute `HG.SYS/B:0=HG.OBJ` at the interactive LINK
+prompt: that produces a two-block file and truncates the resident handler,
+which then crashes during `LOAD HG`.
 
 If `SHOW DEVICE` reports no free handler slot, remove an unused device before
 `INSTALL HG` and reinstall it afterward if needed.

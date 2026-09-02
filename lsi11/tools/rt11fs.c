@@ -1027,7 +1027,6 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
         uint16_t i;
         uint32_t cur_block;
         uint16_t candidate = 0xffffu;
-        uint16_t candidate_status = 0;
         uint16_t candidate_len = 0;
         uint32_t candidate_start = 0;
 
@@ -1047,19 +1046,12 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
 
             if (rt11_entry_is_eos(status)) {
                 eos_index = i;
-                if (candidate == 0xffffu && length >= needed_blocks) {
-                    candidate = i;
-                    candidate_status = status;
-                    candidate_len = length;
-                    candidate_start = cur_block;
-                }
                 break;
             }
 
             if (rt11_entry_is_empty(status) && candidate == 0xffffu &&
                 length >= needed_blocks) {
                 candidate = i;
-                candidate_status = status;
                 candidate_len = length;
                 candidate_start = cur_block;
             }
@@ -1106,32 +1098,18 @@ int rt11_add_file(rt11_image_t *img, const char *host_path,
                 return -1;
             }
 
-            if (rt11_entry_is_eos(candidate_status)) {
+            if (remaining > 0) {
                 if (rt11_insert_entry(segbuf, entry_words, max_entries,
                                       candidate + 1u, eos_index) != 0) {
                     errno = ENOSPC;
                     return -1;
                 }
-                rt11_write_entry(segbuf, base_word, entry_words, RT11_E_PERM,
-                                 name, (uint16_t)needed_blocks, 0, date);
-                rt11_write_entry(segbuf,
-                                 5u + (size_t)(candidate + 1u) * entry_words,
-                                 entry_words, RT11_E_EOS, NULL, remaining, 0,
-                                 0);
-            } else {
-                if (remaining > 0) {
-                    if (rt11_insert_entry(segbuf, entry_words, max_entries,
-                                          candidate + 1u, eos_index) != 0) {
-                        errno = ENOSPC;
-                        return -1;
-                    }
-                    rt11_write_entry(
-                        segbuf, 5u + (size_t)(candidate + 1u) * entry_words,
-                        entry_words, RT11_E_MPTY, NULL, remaining, 0, 0);
-                }
-                rt11_write_entry(segbuf, base_word, entry_words, RT11_E_PERM,
-                                 name, (uint16_t)needed_blocks, 0, date);
+                rt11_write_entry(
+                    segbuf, 5u + (size_t)(candidate + 1u) * entry_words,
+                    entry_words, RT11_E_MPTY, NULL, remaining, 0, 0);
             }
+            rt11_write_entry(segbuf, base_word, entry_words, RT11_E_PERM,
+                             name, (uint16_t)needed_blocks, 0, date);
 
             if (rt11_write_segment(img, seg_block, segbuf) != 0) {
                 return -1;
@@ -1763,9 +1741,8 @@ static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
     }
 
     {
-        size_t eos_word = 5u + (size_t)file_count * entry_words;
+        size_t eos_index = file_count;
         uint32_t remaining = total_len - sum_files;
-        size_t e;
 
         if (remaining > 0xffffu) {
             free(extras);
@@ -1774,16 +1751,21 @@ static int rt11_squeeze_segment(rt11_image_t *img, uint16_t dir_start,
             return -1;
         }
 
-        rt11_set_word(segbuf, eos_word, RT11_E_EOS);
-        rt11_set_word(segbuf, eos_word + 1u, 0);
-        rt11_set_word(segbuf, eos_word + 2u, 0);
-        rt11_set_word(segbuf, eos_word + 3u, 0);
-        rt11_set_word(segbuf, eos_word + 4u, (uint16_t)remaining);
-        rt11_set_word(segbuf, eos_word + 5u, 0);
-        rt11_set_word(segbuf, eos_word + 6u, 0);
-        for (e = 0; e < extra_words; e++) {
-            rt11_set_word(segbuf, eos_word + 7u + e, 0);
+        if (remaining > 0) {
+            if (eos_index + 1u >= max_entries) {
+                free(extras);
+                free(files);
+                errno = ENOSPC;
+                return -1;
+            }
+            rt11_write_entry(segbuf,
+                             5u + eos_index * (size_t)entry_words,
+                             entry_words, RT11_E_MPTY, NULL,
+                             (uint16_t)remaining, 0, 0);
+            eos_index++;
         }
+        rt11_write_entry(segbuf, 5u + eos_index * (size_t)entry_words,
+                         entry_words, RT11_E_EOS, NULL, 0, 0, 0);
     }
 
     free(extras);
@@ -1885,9 +1867,6 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
         uint32_t dir_blocks;
         uint32_t data_start;
         uint32_t data_blocks;
-        uint32_t remaining;
-        uint32_t base;
-        uint16_t seg;
 
         if (part_blocks > RT11_PARTITION_BLOCKS) {
             part_blocks = RT11_PARTITION_BLOCKS;
@@ -1971,40 +1950,32 @@ int rt11_mkfs(const char *path, uint32_t total_blocks,
             return -1;
         }
 
-        remaining = data_blocks;
-        base = data_start;
+        if (data_blocks > 0xffffu) {
+            rt11_close_image(&img);
+            errno = ERANGE;
+            return -1;
+        }
 
-        for (seg = 0; seg < total_segments; seg++) {
-            uint32_t seg_left = (uint32_t)total_segments - seg;
-            uint32_t seg_len =
-                seg_left ? (remaining + seg_left - 1u) / seg_left : remaining;
-            uint32_t seg_block = (uint32_t)dir_start +
-                                 (uint32_t)seg * RT11_DIR_SEGMENT_BLOCKS;
-            uint16_t next_seg =
-                (seg + 1u < total_segments) ? (uint16_t)(seg + 2u) : 0;
+        /*
+         * The segment count reserves directory space; only segment 1 is in
+         * the active chain initially.  RT-11 PIP recognizes free space as an
+         * E.MPTY entry followed by a zero-length E.EOS marker.  Encoding the
+         * free extent in E.EOS makes a host-created volume appear full to the
+         * real monitor even though the host-side reader can still walk it.
+         */
+        memset(segbuf, 0, sizeof(segbuf));
+        rt11_set_word(segbuf, 0, total_segments);
+        rt11_set_word(segbuf, 1, 0);
+        rt11_set_word(segbuf, 2, 1);
+        rt11_set_word(segbuf, 3, 0);
+        rt11_set_word(segbuf, 4, (uint16_t)data_start);
+        rt11_write_entry(segbuf, 5u, 7u, RT11_E_MPTY, NULL,
+                         (uint16_t)data_blocks, 0, 0);
+        rt11_write_entry(segbuf, 12u, 7u, RT11_E_EOS, NULL, 0, 0, 0);
 
-            if (seg_len > 0xffffu) {
-                rt11_close_image(&img);
-                errno = ERANGE;
-                return -1;
-            }
-
-            memset(segbuf, 0, sizeof(segbuf));
-            rt11_set_word(segbuf, 0, total_segments);
-            rt11_set_word(segbuf, 1, next_seg);
-            rt11_set_word(segbuf, 2, total_segments);
-            rt11_set_word(segbuf, 3, 0);
-            rt11_set_word(segbuf, 4, (uint16_t)base);
-            rt11_write_entry(segbuf, 5u, 7u, RT11_E_EOS, NULL,
-                             (uint16_t)seg_len, 0, 0);
-
-            if (rt11_write_segment(&img, seg_block, segbuf) != 0) {
-                rt11_close_image(&img);
-                return -1;
-            }
-
-            base += seg_len;
-            remaining -= seg_len;
+        if (rt11_write_segment(&img, dir_start, segbuf) != 0) {
+            rt11_close_image(&img);
+            return -1;
         }
     }
 

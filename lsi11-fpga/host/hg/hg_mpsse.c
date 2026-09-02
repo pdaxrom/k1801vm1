@@ -182,9 +182,8 @@ int hg_mpsse_select(struct hg_mpsse *link, int selected)
 int hg_mpsse_exchange(struct hg_mpsse *link, const uint8_t *tx,
 	uint8_t *rx, size_t length)
 {
-	uint8_t command[3 + HG_BLOCK_SIZE + 2 + 1];
-	uint8_t discard[HG_BLOCK_SIZE + 2];
-	uint8_t *input = rx ? rx : discard;
+	uint8_t command[5];
+	uint8_t input;
 	size_t i;
 
 	if (!link || !link->ftdi || length == 0 ||
@@ -192,14 +191,26 @@ int hg_mpsse_exchange(struct hg_mpsse *link, const uint8_t *tx,
 		errno = EINVAL;
 		return -1;
 	}
+	/*
+	 * The PDP-11 side bit-bangs the link in software.  It needs time after
+	 * each byte to return from HGTXBY/HGRXBY and prepare the next one.  A
+	 * single continuous MPSSE transfer overruns that boundary; at low clocks
+	 * a whole 514-byte transfer also exceeds the USB read timeout.  Complete
+	 * one byte (and one USB readback) at a time so TCK remains low between
+	 * bytes and both ends naturally pace each other.
+	 */
 	command[0] = MPSSE_DO_WRITE | MPSSE_DO_READ | MPSSE_WRITE_NEG |
 		MPSSE_LSB;
-	command[1] = (uint8_t)((length - 1u) & 0xffu);
-	command[2] = (uint8_t)(((length - 1u) >> 8) & 0xffu);
-	for (i = 0; i < length; i++)
-		command[3 + i] = tx ? tx[i] : 0;
-	command[3 + length] = SEND_IMMEDIATE;
-	if (hg_write_all(link->ftdi, command, 4u + length) != 0)
-		return -1;
-	return hg_read_exact(link->ftdi, input, length);
+	command[1] = 0;
+	command[2] = 0;
+	command[4] = SEND_IMMEDIATE;
+	for (i = 0; i < length; i++) {
+		command[3] = tx ? tx[i] : 0;
+		if (hg_write_all(link->ftdi, command, sizeof(command)) != 0 ||
+		    hg_read_exact(link->ftdi, &input, 1) != 0)
+			return -1;
+		if (rx)
+			rx[i] = input;
+	}
+	return 0;
 }

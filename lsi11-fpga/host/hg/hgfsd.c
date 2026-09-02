@@ -75,7 +75,12 @@ static int hg_serve_one(struct hg_mpsse *link, struct hg_image *image,
 	if (hg_mpsse_exchange(link, NULL, header, sizeof(header)) != 0)
 		goto link_error;
 	if (hg_decode_header(header, &request) != 0) {
-		fprintf(stderr, "hgfsd: rejected malformed request\n");
+		size_t i;
+
+		fprintf(stderr, "hgfsd: rejected malformed request:");
+		for (i = 0; i < sizeof(header); i++)
+			fprintf(stderr, " %02x", header[i]);
+		fputc('\n', stderr);
 		if (hg_send_status(link, HG_STATUS_PROTOCOL) != 0)
 			goto link_error;
 		goto done;
@@ -147,7 +152,7 @@ static void hg_usage(FILE *out)
 		"usage: hgfsd (--image FILE | --directory DIR) [options]\n"
 		"  --read-only       reject RT-11 writes\n"
 		"  --blocks N        directory image size (default 8192)\n"
-		"  --clock HZ        MPSSE clock (default 10000)\n"
+		"  --clock HZ        MPSSE clock (default 1000)\n"
 		"  --serial TEXT     select an FT2232 by serial number\n"
 		"  --index N         select matching FT2232 index (default 0)\n"
 		"  --vid N --pid N   USB ids (defaults 0x0403:0x6010)\n");
@@ -174,7 +179,7 @@ int main(int argc, char **argv)
 	const char *serial = NULL;
 	char directory_image[PATH_MAX];
 	unsigned int blocks = 8192;
-	unsigned int clock_hz = 10000;
+	unsigned int clock_hz = 1000;
 	unsigned int index = 0;
 	int vendor = 0x0403;
 	int product = 0x6010;

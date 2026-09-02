@@ -5,6 +5,13 @@
 ;	This first version is for the unmapped SJ and FB monitors.  It performs
 ;	queued I/O synchronously and therefore needs no interrupt vector.
 ;
+;	The distributed V5.03 SJ/FB monitors and their unmapped handlers were
+;	built with error-logging and device-timeout support (H.GEN = 5).  These
+;	conditionals must match the monitor even though HG does not call either
+;	service directly; otherwise INSTALL rejects HG.SYS as incompatible.
+ERL$G	= 1
+TIM$IT	= 1
+
 	.MCALL	.DRDEF
 	.DRDEF	HG,350,FILST$,65535.,166000,0
 	.DRPTR
@@ -88,6 +95,14 @@ HGQUIE:
 
 ;	Perform one request of BYTCNT bytes at BLKNUM.
 HGXFER:
+	MOV	#20,R2
+5$:	MOV	#HGWAIT,R3
+7$:	BIT	#PINSEL,@#PANEL
+	BEQ	8$			; host released the previous request
+	SOB	R3,7$
+	SOB	R2,5$
+	JMP	HGXERR
+8$:
 	BISB	#HOSTOE+HOSTDAT,@#PANELO	; request host service
 	MOV	#20,R2
 10$:	MOV	#HGWAIT,R3

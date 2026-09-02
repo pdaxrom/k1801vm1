@@ -133,12 +133,18 @@ source $::env(TEST_SCRIPT)
     def test_rt11_host_disk_has_handler_and_host_sources(self):
         demo = ROOT / "demos/rt11/hostdisk"
         handler = (demo / "HG.MAC").read_text()
+        self.assertIn("ERL$G\t= 1", handler)
+        self.assertIn("TIM$IT\t= 1", handler)
         self.assertIn("\t.DRDEF\tHG,350,FILST$,65535.,166000,0", handler)
         self.assertIn("HOSTOE\t= 200", handler)
         self.assertIn("\tJSR\tPC,HGQUIE", handler)
         self.assertIn("\tMOV\t#HGRDOP,HGOPER\n\tTST\tR4\n\tBPL\t10$", handler)
         self.assertIn("\t.DREND\tHG", handler)
-        self.assertEqual(len((demo / "HG.SYS").read_bytes()), 1024)
+        system = (demo / "HG.SYS").read_bytes()
+        self.assertEqual(len(system), 1536)
+        self.assertEqual(system[0o60], 0o5)
+        resident_size = int.from_bytes(system[0o52:0o54], "little")
+        self.assertLessEqual(resident_size, len(system) - 512)
 
         host = ROOT / "host/hg"
         protocol = (host / "hg_protocol.h").read_text()

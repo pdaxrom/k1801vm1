@@ -54,6 +54,12 @@ static void test_image(void)
 	unlink(path);
 }
 
+static uint16_t test_word(const uint8_t *data, size_t word)
+{
+	return (uint16_t)(data[word * 2u] |
+		((uint16_t)data[word * 2u + 1u] << 8));
+}
+
 static void test_directory(void)
 {
 	char directory[] = "/tmp/hg-directory.XXXXXX";
@@ -63,6 +69,7 @@ static void test_directory(void)
 	rt11_image_t image;
 	rt11_name_t name;
 	rt11_dirent_t entry;
+	uint8_t segment[RT11_BLOCK_SIZE * 2u];
 	int fd;
 
 	assert(mkdtemp(directory) != NULL);
@@ -74,6 +81,20 @@ static void test_directory(void)
 	assert(write(fd, "hello", 5) == 5);
 	close(fd);
 	assert(hg_directory_prepare(directory, image_path, 256) == 0);
+	fd = open(image_path, O_RDONLY);
+	assert(fd >= 0);
+	assert(lseek(fd, 6 * RT11_BLOCK_SIZE, SEEK_SET) ==
+		6 * RT11_BLOCK_SIZE);
+	assert(read(fd, segment, sizeof(segment)) == (ssize_t)sizeof(segment));
+	close(fd);
+	assert(test_word(segment, 0) == 16);
+	assert(test_word(segment, 1) == 0);
+	assert(test_word(segment, 2) == 1);
+	assert((test_word(segment, 5) & RT11_E_PERM) != 0);
+	assert((test_word(segment, 12) & RT11_E_MPTY) != 0);
+	assert(test_word(segment, 12 + 4) > 0);
+	assert((test_word(segment, 19) & RT11_E_EOS) != 0);
+	assert(test_word(segment, 19 + 4) == 0);
 	assert(rt11_open_image(&image, image_path, "rb") == 0);
 	assert(rt11_name_from_host("HELLO.TXT", &name) == 0);
 	assert(rt11_find_file(&image, &name, &entry) == 0);
