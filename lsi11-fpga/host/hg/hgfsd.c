@@ -152,7 +152,7 @@ static void hg_usage(FILE *out)
 		"usage: hgfsd (--image FILE | --directory DIR) [options]\n"
 		"  --read-only       reject RT-11 writes\n"
 		"  --blocks N        directory image size (default 8192)\n"
-		"  --clock HZ        MPSSE clock (default 1000)\n"
+		"  --clock HZ        MPSSE clock (default 4000)\n"
 		"  --serial TEXT     select an FT2232 by serial number\n"
 		"  --index N         select matching FT2232 index (default 0)\n"
 		"  --vid N --pid N   USB ids (defaults 0x0403:0x6010)\n");
@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 	const char *serial = NULL;
 	char directory_image[PATH_MAX];
 	unsigned int blocks = 8192;
-	unsigned int clock_hz = 1000;
+	unsigned int clock_hz = 4000;
 	unsigned int index = 0;
 	int vendor = 0x0403;
 	int product = 0x6010;

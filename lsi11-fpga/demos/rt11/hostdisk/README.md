@@ -56,11 +56,12 @@ the end of their last 512-byte block. Host-side edits are imported when the
 daemon is restarted. Deleting a file in RT-11 does not delete the corresponding
 host file in this initial implementation.
 
-The default MPSSE clock is 1 kHz. The RT-11 handler bit-bangs this link in
-software, so faster symmetric TCK periods can overrun its per-bit GPIO loop.
-The host also clocks one byte per MPSSE command, leaving TCK low while the
-handler prepares the next byte. Use `--clock 2000` only after the 1 kHz link is
-stable on the target CPU.
+The default MPSSE clock is 4 kHz, verified for both reads and writes on the
+HC1200/AM4 target. The RT-11 handler bit-bangs this link in software, so faster
+symmetric TCK periods can overrun its per-bit GPIO loop. The host clocks one
+byte per MPSSE command, leaving TCK low while the handler prepares the next
+byte. Use `--clock 1000` as a conservative fallback for a marginal link;
+frequencies above 4 kHz should be validated read-only before enabling writes.
 
 ## Assemble and install HG.SYS under RT-11
 
