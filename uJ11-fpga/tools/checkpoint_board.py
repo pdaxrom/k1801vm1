@@ -15,7 +15,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('name')
     args=p.parse_args()
-    assert re.fullmatch(r'cp28[a-z][a-z0-9-]*',args.name)
+    assert re.fullmatch(r'cp(?:28|29)[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
     assert not (out/'impl1').exists(), 'fresh implementation directory required'

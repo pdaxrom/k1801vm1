@@ -1205,7 +1205,7 @@ test: test-fis
 
 # CP28 full physical HC1200 board, firmware assembled by the existing microasm11.
 .PHONY: board board-firmware board-decode test-board-units test-board-isa test-board-rt11 synthesis-board verify-cp28
-BOARD_CHECKPOINT ?= cp28m
+BOARD_CHECKPOINT ?= cp29a
 board: microcode-m0 board-firmware board-decode
 board-firmware: | build
 	$(PYTHON) tools/build_firmware.py
@@ -1222,3 +1222,11 @@ synthesis-board: board
 	$(PYTHON) tools/checkpoint_board.py $(BOARD_CHECKPOINT)
 verify-cp28:
 	$(PYTHON) tools/verify_cp28.py --yosys $(YOSYS)
+
+# CP29: panel/HG pins and explicitly invoked hardware deployment.
+.PHONY: test-board-panel export-board
+# Use a fresh BOARD_CHECKPOINT for synthesis; the published CP29a is immutable.
+test-board-panel: board
+	$(PYTHON) tools/check_panel.py
+export-board:
+	$(PYTHON) tools/export_board.py $(BOARD_CHECKPOINT)

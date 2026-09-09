@@ -1,5 +1,9 @@
 # Synthesis checkpoints
 
+## CP29a — panel input synchronizers and physical programming
+
+Clean full-board result: **1239 LUT4, 326 FF, 6 EBR, 621 slices, 30.609 MHz TRACE**, 29.56 MHz PASS, fully routed. Microcode remains 954×36. The exact JED was programmed with FLASH verify and boots RT-11 on the real board. [Reports and hardware evidence](board-bringup-cp29.md).
+
 ## CP28 — полный board top, 2026-09-10
 
 **1217 LUT /318 FF /6 EBR /610 slices; 29.56 MHz PASS, TRACE 31.186 MHz.**

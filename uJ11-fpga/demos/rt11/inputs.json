@@ -1,0 +1,38 @@
+{
+  "demos/rt11/panel/PNLDRV.MAC": {
+    "source": "../lsi11-fpga/demos/rt11/panel/PNLDRV.MAC",
+    "sha256": "13af32da914fcf248ad62573c4588b1e87d66756af7cdb029afe19c7bf4fc0cb"
+  },
+  "demos/rt11/panel/DSPDEM.MAC": {
+    "source": "../lsi11-fpga/demos/rt11/panel/DSPDEM.MAC",
+    "sha256": "aab43c442c690ded46f0ef6c7ca6586ed8c4a01022dd7442725899ba30595265"
+  },
+  "demos/rt11/panel/DSPDEM.SAV": {
+    "source": "../lsi11-fpga/demos/rt11/panel/DSPDEM.SAV",
+    "sha256": "5365c227a2187575d38f78d57ec43db1f3a61c51da6bc2d3f77a1b39c5e6784d"
+  },
+  "demos/rt11/panel/RGBDEM.MAC": {
+    "source": "../lsi11-fpga/demos/rt11/panel/RGBDEM.MAC",
+    "sha256": "bca76739a9a3a60d53154508b6f3c7c5d93ed6ba3e8a54b83b07280e688805fb"
+  },
+  "demos/rt11/panel/RGBDEM.SAV": {
+    "source": "../lsi11-fpga/demos/rt11/panel/RGBDEM.SAV",
+    "sha256": "a29e5d584918ccd8defd11167b969d7d1b659ac0b157eafc0dc9dcd12eea8f58"
+  },
+  "demos/rt11/panel/KEYDEM.MAC": {
+    "source": "../lsi11-fpga/demos/rt11/panel/KEYDEM.MAC",
+    "sha256": "d5dbb3b5c6d9d58483e97f0eb69a71eab132f7893812394a6f3f7a97ead765b2"
+  },
+  "demos/rt11/panel/KEYDEM.SAV": {
+    "source": "../lsi11-fpga/demos/rt11/panel/KEYDEM.SAV",
+    "sha256": "9394b5ce5c79a559817c0bc54e787e9ee6ec50476a0c8ef8ccb16812b07d2460"
+  },
+  "demos/rt11/hostdisk/HG.MAC": {
+    "source": "../lsi11-fpga/demos/rt11/hostdisk/HG.MAC",
+    "sha256": "744bba02bb5b7d7d8c70c445463f35647c9dae0578d245b9948af8eb370ae954"
+  },
+  "demos/rt11/hostdisk/HG.SYS": {
+    "source": "../lsi11-fpga/demos/rt11/hostdisk/HG.SYS",
+    "sha256": "38cf7b77fc4172c785132d14dfdef6c886aa6840b3f8db5111f9b51048776fa3"
+  }
+}

@@ -1,5 +1,9 @@
 # CP28: полный HC1200 top, FRAM и RT-11
 
+This is the CP28 integration baseline. [CP29 physical bring-up](board-bringup-cp29.md)
+adds synchronized panel/HG inputs and records the successful FPGA programming,
+RT-11 boot, panel/keyboard and HG read/write hardware tests.
+
 Дата: 2026-09-10. **Холодная загрузка RT-11 и DIR прошли в RTL simulation;
 полный физический top прошёл Diamond MAP/PAR/TRACE.** Итоговый
 [CP28m](../synth/reports/cp28m/result.json): **1217 LUT4 / 318 FF / 6 EBR /

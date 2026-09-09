@@ -1,0 +1,110 @@
+{
+  "checkpoint": "CP29a",
+  "date": "2026-09-10",
+  "synthesis": {
+    "device": "LCMXO2-1200HC-4SG32C",
+    "lut4": 1239,
+    "ff": 326,
+    "ebr": 6,
+    "slices": 621,
+    "fmax_mhz": 30.609,
+    "constraint_mhz": 29.56,
+    "timing_pass": true,
+    "fully_routed": true
+  },
+  "jed": {
+    "checkpoint": "cp29a",
+    "jed": "/tmp/uj11-cp29-a/uJ11-fpga/build/cp29a/impl1/cp29a_impl1.jed",
+    "sha256": "fa131b809f5f75a92b29c69acf18d57d8862e8467b31073bfaafa17d7ac988d4",
+    "checksum": "E682",
+    "input_revision_sha256": "73dafeaa80cd42b9f4282012c29e19fa2e011e28485e596bd5c4ece2862aced5"
+  },
+  "hardware": {
+    "flash_erase_program_verify": "PASS",
+    "boot": "RT-11FB (S) V05.03",
+    "dir": {
+      "files": 117,
+      "blocks": 2292,
+      "free_blocks": 51364
+    },
+    "rgb_and_hdsp": "user confirmed working",
+    "keyboard": "user confirmed key codes change and panel ESC exits KEYDEM",
+    "hg": {
+      "result": "PASS",
+      "clock_hz": 1000,
+      "bytes": 512,
+      "sha256": "4d7985a77f29d7d0da2822f3645b5d432bd4aff022c098c35fcb02838e9bc997",
+      "commands": [
+        "DIR HG:",
+        "TYPE HG:HELLO.TXT",
+        "COPY HG:HELLO.TXT HG:ROUND.TXT",
+        "TYPE HG:ROUND.TXT"
+      ],
+      "readback_text": "uJ11 CP29 real HC1200 host disk test.",
+      "daemon_stopped": [
+        62786
+      ]
+    },
+    "state_after_test": "RT-11 monitor prompt; JTAG_EN GPIO; test HG daemon stopped and channel A released"
+  },
+  "verification": {
+    "panel_top_bus_beats": 2958,
+    "board_bus_beats": 29,
+    "cold_rt11_boot_dir": "PASS",
+    "copied_image_boot_dir": "PASS",
+    "vendor_rom_units": "PASS",
+    "full_vendor_board_boot": "not run",
+    "uart_incidents": "Early captures did not wait for the monitor prompt; 55s COPY capture expired at 1kHz. Final DIR/TYPE/SHOW completed with command echo and following prompt checks; helper now leaves unowned UART raw 115200."
+  },
+  "logs": {
+    "tb/reports/cp29/hg-load-2-session.json": "10b4d45482a71ca415f88f7e186c85715025551da57ccb5a5f641e01a4e60af2",
+    "tb/reports/cp29/console-without-hg-session.json": "f5ca13b2819b49aa1400aa3dfdf19c36d15e4db781b08527597a2922f6a50e29",
+    "tb/reports/cp29/cp29-image-repro.json": "eeef168d2f50c7f4e47ddde5bf1b12d702bd6f11166c1b10e0be93fdb31fca6c",
+    "tb/reports/cp29/cp29-panel.log": "f140ccbe1f1483539acf17ecf583766d45113932158aff992f55575e4013b908",
+    "tb/reports/cp29/hardware-1-uart.txt": "97e8ae46a6142759eef485bc603dc5c20bc2d038ae1df239882c9281b75a1386",
+    "tb/reports/cp29/hardware-1-programmer-old.log": "c3ed251e7a9d526f252ba651e39f2b09830d8bc42a0e0240f211bf0d17645d61",
+    "tb/reports/cp29/hg-host-tests.log": "ea623bcdf660cee3f06738249c26e360287a987bdb7f868b6521f67ca01fb07b",
+    "tb/reports/cp29/hg-live-2.log": "35628b047a9b907dd88e4c3c5b86746333f967b905cadb4a46069a141e335f57",
+    "tb/reports/cp29/hg-copy-session.json": "7b9f293e131a7e82d13c8e40bf7a1a171a29ce55e66ca944eca1a7a98afe9e40",
+    "tb/reports/cp29/cp29-board-rt11.log": "edb4f8745d2d145b62ea60f34010327ded8ce62ff8c6a4b6b1e6a20ccd7a51e1",
+    "tb/reports/cp29/keyboard-live-uart.txt": "e2e2a3d215b793edc2780ce18852f4e586e3c43c11171662c08b0ea73a8613cf",
+    "tb/reports/cp29/console-without-hg-uart.txt": "fb30065b57ea1ed3f8aed13afb77ae3c619c3e852c6354d5cab4e1454c38f951",
+    "tb/reports/cp29/hg-dir-2-uart.txt": "921103715ed9069fcbee022c413598eb80518eb7bece32c778860ecbff2ea178",
+    "tb/reports/cp29/cp29-units.log": "781ff8380e05f15333f172995f6d618dd8cec73c04ecce5adf12e16cd52e5432",
+    "tb/reports/cp29/hg-live.log": "fbc5e6621337360fc74aa203010f5556e9214285dd1c91996771faf6bdb0a27b",
+    "tb/reports/cp29/hg-load-2-uart.txt": "63920d1f98c8e52217d5a0a2ea899b2a62d23a1be236ee4c77ca99de39f9930c",
+    "tb/reports/cp29/hg-install-uart.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp29/hg-copy-drain-session.json": "bae5543f68cf8be7c7bf31b719d82635e6d0dd397197e57869d59d9e7dcd5522",
+    "tb/reports/cp29/hg-console-probe-session.json": "e62130130c33de91d239b53caa29e058de1180472c08c05c9e61b32ef83bd99d",
+    "tb/reports/cp29/hg-console-probe-uart.txt": "026b5eb26df47c0d2548709b0392975fdeb1baedf4fba5038bd7d1f3ec874f45",
+    "tb/reports/cp29/cp29-uart.txt": "ed90841f47c780605a610dc3a4ca61dd31389ff4ecbc230911083dc8692f587f",
+    "tb/reports/cp29/cp29-board-inputs.json": "bfe1f97ae52666c03674f9b92e1ee7dbdd675c33dd41ae5cabfdae05b7c3f836",
+    "tb/reports/cp29/hg-type-uart.txt": "20b657ecc24ac0cd2666fa5121252a743f1dfb2fa3a0f16245171ba4c528aded",
+    "tb/reports/cp29/hg-copy-uart.txt": "174b27e68fe31a65c3058f029b0057522dc60322ee7f7ad35c71cf87ab9214a0",
+    "tb/reports/cp29/panel-live-uart.txt": "26183fba16beebe2551a08774ee75c88a95551793ab49229b25be4c3f5b05e6c",
+    "tb/reports/cp29/hg-readback-session.json": "e6a66d4aadad752c8c66b9434ebace304f66b138ab4384f5024dcb321df7db6b",
+    "tb/reports/cp29/cp29-panel-image-boot.log": "1c71ef500dbb368afaaf1e77e2bf183c222a04c7b4fd99892848a1d9d9556181",
+    "tb/reports/cp29/hg-readback-uart.txt": "dc8dff8767504fbbf4a7783d8f3710dec33d2f7a0e0001e431636dbeca38b733",
+    "tb/reports/cp29/hg-roundtrip.json": "55195da424ff332d3337b87d61b8121258ecf87f6fd878de9a7e67dd4b46c6ea",
+    "tb/reports/cp29/hg-type-session.json": "0b1071171e446873473700897312744ec94b8a132913cbc9140d918010ed7d68",
+    "tb/reports/cp29/hardware-1-programmer-stdout.log": "29d4b245b960ba819583b6a4c552c89cdb4bb71fe92976eaba9605ad203dd9bc",
+    "tb/reports/cp29/keyboard-live-session.json": "e1a3025631b8aaac2ab3e4ea8e39ebe6a81d341775730a17547c4b8859316c5c",
+    "tb/reports/cp29/cp29-bus.log": "c9a9ca5523192ae8a2fa03adff4539d1d96e73cca2df14ccec49ec5f737f84d1",
+    "tb/reports/cp29/hg-dir-2-session.json": "76c04ddcf5873adad25c382a419f396cb206021373a9879b39aea78637868bca",
+    "tb/reports/cp29/panel-live-session.json": "0181a28d9de3ff00e6d26a96763b3e1a654a34af423ee85ea47f6999328dc033",
+    "tb/reports/cp29/cp29-panel-image-uart.txt": "e750e383d258c20ef8a7109acb0f9076c6c55d1c7ff6c05ee4d008df711c2be1",
+    "tb/reports/cp29/hg-copy-drain-uart.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp29/hardware-1-session.json": "9e051e48041f1a6e71599fba11a44e7232eff09825dbeff72131bfdf32d2d1be",
+    "tb/reports/cp29/hardware-1-programmer.log": "b080334e5b54640ce7c0208e7cfe965ae3a3206b9366e75d99ce4da25c071487",
+    "tb/reports/cp29/hg-install-session.json": "2fbe08642348fbf99b6bbda73c7b31e47ad6c0bbad42d8207c90c6d0984d27eb",
+    "tb/reports/cp29/cp29-hg-source.json": "e8a3c4c63301ee82ed73540726997f6e0fa26132c8a903f7d824456824520d0d"
+  },
+  "files": {
+    "tools/hardware_uart.py": "c8a26928d57ff86492312b756174980f5cd64ee0fb7e20e3c59da6ca310e1bc9",
+    "tools/export_board.py": "f448954b5caa655dbb62003dfd0b39a16b2f6e33f3e9c2e92704231a69681ed9",
+    "tools/make_programmer_xcf.py": "7a430b0d39ce5cdd21dc798ea47828468db464e303e2385231b32d8534355b6a",
+    "tools/build_panel_image.py": "69879a2e4a9aa5f6ac675724d35a0d50b5929a613ace7bac55d46177aea6790e",
+    "tools/check_panel.py": "fe6913d168ed628d0ad45b7f303a7e3e8eaa6a148adc48ae5a642eab234dfe46",
+    "tb/tb_board_panel.v": "915f619039bbc92a83b383c2e9bec0c99ff7f3b491445cab45221db240554648"
+  }
+}

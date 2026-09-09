@@ -1,0 +1,25 @@
+hgfsd: serving /tmp/uj11-cp29-a/hg-share/.hg-volume.dsk at 1000 Hz
+hgfsd: read block 1, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 38, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: read block 38, 512 bytes
+hgfsd: write block 39, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: read block 1, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 39, 512 bytes

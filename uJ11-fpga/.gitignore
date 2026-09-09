@@ -13,3 +13,4 @@ synth/machxo2/*.html
 !synth/reports/*/diamond.log
 !tb/reports/*.log
 !tb/reports/**/*.log
+!synth/reports/*/*.jed

@@ -174,7 +174,7 @@ module uj11_board_bus #(
 	uj11_tick #(.DIVISOR(TICK_DIVISOR)) timebase(clk,rst || peripheral_reset,tick_terminal);
 	reg timer_done;
 	reg timer_ie;
-	reg [7:0] panel_output;
+	wire [7:0] panel_output;
 	reg [15:0] local_rdata;
 
 	uj11_board_fram #(.CLK_DIV(FRAM_CLK_DIV)) guest_memory (
@@ -239,7 +239,7 @@ module uj11_board_bus #(
 	end endgenerate
 
 	wire [15:0] ltc_rdata = {8'b0, timer_done, timer_ie, 6'b0};
-	wire [15:0] panel_rdata = {panel_output, panel_key_rows, 4'b0};
+	wire [15:0] panel_rdata;
 	assign rdata = uart_selected ? uart_rdata :
 		maint_selected ? 16'o000031 :
 		ltc_selected ? ltc_rdata :
@@ -403,12 +403,12 @@ module uj11_board_bus #(
 	// host data output and output enable on the TDO pad.
 	// RGB and keyboard-column selection use that external shift register, so no
 	// display framebuffer or keyboard scanner is required in the full FPGA.
-	always @(posedge clk) begin
-		if (rst || peripheral_reset)
-			panel_output <= 8'b00010010; // CE high, display blanked, host Z
-		else if (request && panel_selected && write && byte_select[1])
-			panel_output <= wdata[15:8];
-	end
+	uj11_panel panel_io (
+		.clk(clk), .reset(rst || peripheral_reset),
+		.write_enable(request && panel_selected && write && byte_select[1]),
+		.rows(panel_key_rows), .write_data(wdata[15:8]),
+		.pins(panel_output), .read_data(panel_rdata)
+	);
 	assign panel_din = panel_output[0];
 	assign panel_ce = panel_output[1];
 	assign panel_clk = panel_output[2];

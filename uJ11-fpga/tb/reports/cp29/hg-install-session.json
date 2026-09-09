@@ -1,0 +1,12 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-09T20:51:13Z",
+  "commands": [
+    "INSTALL HG",
+    "LOAD HG",
+    "DIR HG:"
+  ],
+  "uart_bytes": 0,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-09T20:51:53Z"
+}

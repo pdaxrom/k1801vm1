@@ -3,6 +3,8 @@
 import argparse
 import hashlib
 import json
+import os
+import re
 from pathlib import Path
 import subprocess
 from board_common import ROOT, CORE, BOARD
@@ -11,34 +13,52 @@ from board_common import ROOT, CORE, BOARD
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--image',type=Path,default=ROOT/'../lsi11-fpga/images/rt11v503.dsk')
+    p.add_argument('--tag',default='cp28')
+    p.add_argument('--vendor',action='store_true')
     args=p.parse_args()
+    assert re.fullmatch(r'[a-z0-9-]+',args.tag)
     assert args.image.exists()
     sources=CORE+BOARD+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
+    if args.vendor:
+        sources.remove('rtl/uj11_rom.v')
+        vendor=Path(os.environ.get('LATTICE_SIM_DIR',ROOT/'build/vendor'))
+        sources+=['microcode/generated/uj11_m0_ebr.v']+[str(vendor/(n+'.v')) for n in ('DP8KC','GSR','PUR')]
     source_hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in
                    sources+['tb/tb_board_rt11.v','tools/run_board.py','tools/board_common.py','microcode/generated/m0.mem','microcode/generated/firmware.mem','microcode/generated/decode.mem']}
     image_hash=hashlib.sha256(args.image.read_bytes()).hexdigest()
     manifest=dict(files=source_hashes,image_sha256=image_hash,image_bytes=args.image.stat().st_size,
-                  mode='portable Verilator; cold CPU reset; actual UART wire scoreboard; SD read-only backing + RAM overlay')
-    (ROOT/'build/cp28-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
+                  mode=('vendor DP8KC' if args.vendor else 'portable')+' Verilator; cold CPU reset; actual UART wire scoreboard; SD read-only backing + RAM overlay')
+    (ROOT/f'build/{args.tag}-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     # Freeze the imported models; scope their established implicit-width
     # conventions to those files only. New board/core RTL keeps fatal warnings.
-    copies=ROOT/'build/board-reference'; copies.mkdir(exist_ok=True)
+    copies=ROOT/f'build/{args.tag}-board-reference'; copies.mkdir(exist_ok=True)
     for i, name in enumerate(sources):
         if name.startswith('reference/'):
             data=(ROOT/name).read_text()
             path=copies/Path(name).name
             path.write_text('/* verilator lint_off WIDTH */\n'+data+'\n/* verilator lint_on WIDTH */\n')
             sources[i]=str(path)
-    command=['verilator','--binary','--timing','--top-module','tb_board_rt11','-j','4',
-             '--Mdir','build/obj-board-rt11','tb/tb_board_rt11.v']+sources
-    with (ROOT/'build/cp28-board-build.log').open('w') as log:
+    if args.vendor:
+        # The unmodified Lattice model uses procedural assign/deassign that
+        # Verilator does not implement. Keep its four-state semantics in Icarus.
+        command=['iverilog','-g2012','-DUJ11_VENDOR_ROM','-s','tb_board_rt11',
+                 '-o',f'build/{args.tag}-board.vvp','tb/tb_board_rt11.v']+sources
+        executable=['vvp',f'build/{args.tag}-board.vvp']
+        manifest['mode']=manifest['mode'].replace('Verilator','Icarus (unmodified Lattice models)')
+        (ROOT/f'build/{args.tag}-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
+    else:
+        command=['verilator','--binary','--timing','--top-module','tb_board_rt11','-j','4',
+                 '--Mdir',f'build/obj-{args.tag}-board-rt11','tb/tb_board_rt11.v']+sources
+        executable=[f'build/obj-{args.tag}-board-rt11/Vtb_board_rt11']
+    with (ROOT/f'build/{args.tag}-board-build.log').open('w') as log:
         subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
-    with (ROOT/'build/cp28-board-rt11.log').open('w') as log:
-        subprocess.run(['build/obj-board-rt11/Vtb_board_rt11',f'+SD_IMAGE={args.image.resolve()}','+TRACE_RK'],
+    with (ROOT/f'build/{args.tag}-board-rt11.log').open('w') as log:
+        subprocess.run(executable+[f'+SD_IMAGE={args.image.resolve()}',
+                        f'+UART_LOG=build/{args.tag}-uart.txt','+TRACE_RK'],
                        cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     assert hashlib.sha256(args.image.read_bytes()).hexdigest()==image_hash, 'backing SD image modified'
     for n,h in source_hashes.items():assert hashlib.sha256((ROOT/n).read_bytes()).hexdigest()==h,n
-    print((ROOT/'build/cp28-board-rt11.log').read_text())
+    print((ROOT/f'build/{args.tag}-board-rt11.log').read_text())
 
 
 if __name__=='__main__':main()

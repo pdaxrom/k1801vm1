@@ -1,0 +1,7 @@
+DIR HG:
+ 
+HELLO .TXT     1  10-Sep-2026    
+ 1 Files, 1 Blocks
+ 8153 Free blocks
+
+..[K

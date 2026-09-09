@@ -1,5 +1,9 @@
 # Implementation status, 2026-09-10
 
+## CP29 — physical HC1200 bring-up
+
+FLASH verification, real RT-11 boot/DIR and RGB/HDSP operation are confirmed. Keyboard codes and panel ESC are user-confirmed. HG read/write and file readback passed on real hardware at 1 kHz; the test daemon was stopped afterward. [Evidence and limits](board-bringup-cp29.md).
+
 **CP28: полный board integration baseline синтезирован, RT-11/DIR прошли в RTL simulation.**
 1217 LUT /318 FF /6 EBR /610 slices, 29.56 MHz PASS, TRACE 31.186 MHz,
 полный MAP/PAR. Microcode 954/1024×36 v12, 349 labels, без изменений относительно CP27.

@@ -1,0 +1,16 @@
+{
+  "result": "PASS",
+  "clock_hz": 1000,
+  "bytes": 512,
+  "sha256": "4d7985a77f29d7d0da2822f3645b5d432bd4aff022c098c35fcb02838e9bc997",
+  "commands": [
+    "DIR HG:",
+    "TYPE HG:HELLO.TXT",
+    "COPY HG:HELLO.TXT HG:ROUND.TXT",
+    "TYPE HG:ROUND.TXT"
+  ],
+  "readback_text": "uJ11 CP29 real HC1200 host disk test.",
+  "daemon_stopped": [
+    62786
+  ]
+}

@@ -1,0 +1,2 @@
+PASS board bus: 29 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK bank/vector/DMA/RTI
+tb/tb_board_bus.v:81: $finish called at 19980000 (1ps)

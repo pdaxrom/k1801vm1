@@ -13,10 +13,15 @@ module tb_board_rt11;
     reg [7:0] expected_tx[0:8191];
     integer bus_chars=0,serial_chars=0,uart_file,bit_index;
     reg [7:0] serial_value;
+    string uart_path;
+`ifdef UJ11_VENDOR_ROM
+    GSR GSR_INST(.GSR(1'b1)); PUR PUR_INST(.PUR(1'b1));
+`endif
     // Check the actual pin waveform, including every stop bit. The CSR
     // transcript alone would miss a dropped holding-register byte.
     initial begin
-        uart_file=$fopen("build/cp28-uart.txt","w");
+        if(!$value$plusargs("UART_LOG=%s",uart_path))uart_path="build/cp28-uart.txt";
+        uart_file=$fopen(uart_path,"w");
         if(uart_file==0)$fatal(1,"UART transcript open failed");
         wait(!reset);
         forever begin
