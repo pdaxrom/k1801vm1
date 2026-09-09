@@ -637,3 +637,26 @@ AM4 PORTING-NOTES фиксирует физически проверенную �
 HC1200. У uJ11 полный board top ещё не измерен: перенос периферии должен
 иметь свой gate, а не оценку сложением отдельных modules. [FIS](fis.md),
 [следующий integration gate](hc1200-integration.md). MMU отсутствует.
+
+
+## CP28: первая полная плата uJ11 и RT-11
+
+2026-09-10: исходный CP27 закоммичен как `0f1047e`. Интеграция FRAM,
+KL11/KW11/panel/SD/RK/firmware сначала дала **1413 LUT/381 FF/5 EBR** —MAP fail.
+Синхронный EBR dispatch, группировка ALU, компактный held-request FRAM и
+точный LFSR timebase довели полный top до **1217 LUT/318 FF/6 EBR/610 slices**,
+29.56 MHz PASS, TRACE **31.186 MHz**, полностью routed.
+Неудачные read/next-address mux и промежуточные результаты сохранены в
+[таблице CP28](synthesis.md); отсутствующие MAP/Fmax цифры не дописаны.
+
+Cold RT-11/DIR прошёл через реальный SPI FRAM/SD и UART waveform:
+355132188 clocks,3983731 retirements,98 файлов,3270 UART bytes,162 SD reads/6 writes.
+Микрокод остался 954×36; существующий microasm11 собирает 426-byte bootstrap и
+320-byte RK service в отдельный одно-EBR firmware ROM.
+
+Документированный AM4 board от 2026-09-05 имел 1271 LUT/639 slices/7 EBR;
+uJ11 CP28 экономит 54 LUT/29 slices/1 EBR. Сопоставимого AM4 cycle log нет,
+преимущество скорости не заявляется. CP27b1095 LUT был неполным board scope
+с prefetch/probe; CP28 prefetch пока выключен. Желательная площадь 900–1100 LUT,
+полный FP11, external pin timing и физическая проверка uJ11 ещё впереди.
+[Полные условия](hc1200-integration.md), [manifest](verification-cp28.json).

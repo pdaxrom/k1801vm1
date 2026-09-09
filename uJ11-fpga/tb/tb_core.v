@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_core;
+module tb_core #(parameter integer ROM_DECODE=0);
     localparam CASES=12928, FIELDS=21;
     reg clk=0,reset=1,error=0;
     reg [7:0] wait_states=0;
@@ -13,7 +13,7 @@ module tb_core;
     reg [15:0] vectors[0:CASES*FIELDS-1];
     integer c,k,base,cycles,total_cycles=0;
     reg [15:0] pc;
-    uj11_core dut(.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(8'b0),.irq_ack(),.waiting(),.peripheral_reset(),.clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),
+    uj11_core #(.ROM_DECODE(ROM_DECODE)) dut(.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(8'b0),.irq_ack(),.waiting(),.peripheral_reset(),.clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),
         .mem_request(request),.mem_read(reading),.mem_write(writing),.mem_byte(byte_access),
         .mem_ack(ack),.mem_error(error),.mem_read_data(rdata),.stopped(stopped),
         .fault_code(fault),.retire(retire),.debug_upc(upc),.debug_uword(uword),
@@ -51,7 +51,7 @@ module tb_core;
             ram.bytes[pc+16'd1]=vectors[base][15:8];
             cycles=0;
             while(!retire && cycles<12) begin tick; cycles=cycles+1; end
-            if(!retire || stopped || fault || cycles!==2+wait_states)
+            if(!retire || stopped || fault || cycles!==2+wait_states+ROM_DECODE)
                 $fatal(1,"case%0d opcode%o retirement/fault/cycles=%0d",c,vectors[base],cycles);
             total_cycles=total_cycles+cycles;
             for(k=0;k<8;k=k+1)
@@ -67,7 +67,7 @@ module tb_core;
         start;
         @(negedge clk); wait_states=0; dut.engine.dp.rf.words[7]=16'hfffe;
         ram.bytes[16'hfffe]=8'h00; ram.bytes[16'hffff]=8'h01; // BR +0
-        tick; tick;
+        tick; tick; if(ROM_DECODE!=0)tick;
         if(!retire || dut.engine.dp.rf.words[7]!==0 || transactions!==1)
             $fatal(1,"16-bit PC wrap");
         // Reserved/unsupported instruction frames have their own oracle suite.
@@ -75,5 +75,5 @@ module tb_core;
         $display("PASS core boundaries: 16-bit PC wrap");
         $finish;
     end
-    initial begin #3000000; $fatal(1,"core timeout"); end
+    initial begin #3500000; $fatal(1,"core timeout"); end
 endmodule

@@ -1,0 +1,798 @@
+
+    Lattice Mapping Report File for Design Module 'uj11_hc1200_microcomp'
+
+
+Design Information
+------------------
+
+Command line:   map -a MachXO2 -p LCMXO2-1200HC -t QFN32 -s 4 -oc Commercial
+     cp28c_impl1.ngd -o cp28c_impl1_map.ncd -pr cp28c_impl1.prf -mp
+     cp28c_impl1.mrp -lpf
+     /tmp/uj11-cp28-c/uJ11-fpga/build/cp28c/impl1/cp28c_impl1_synplify.lpf -lpf
+     /tmp/uj11-cp28-c/uJ11-fpga/build/cp28c/clock.lpf -c 0 -pe 
+Target Vendor:  LATTICE
+Target Device:  LCMXO2-1200HCQFN32
+Target Performance:   4
+Mapper:  xo2c00,  version:  Diamond (64-bit) 3.14.0.75.2
+Mapped on:  09/09/26  23:03:22
+
+Design Summary
+--------------
+
+   Number of registers:    381 out of  1346 (28%)
+      PFU registers:          376 out of  1280 (29%)
+      PIO registers:            5 out of    66 (8%)
+   Number of SLICEs:       701 out of   640 (110%)
+      SLICEs as Logic/ROM:    677 out of   640 (106%)
+      SLICEs as RAM:           24 out of   480 (5%)
+      SLICEs as Carry:         46 out of   640 (7%)
+   Number of LUT4s:        1391 out of  1280 (109%)
+      Number used as logic LUTs:        1251
+      Number used as distributed RAM:    48
+      Number used as ripple logic:       92
+      Number used as shift registers:     0
+   Number of PIO sites used: 21 + 1(JTAGENB) out of 22 (100%)
+   Number of block RAMs:  5 out of 7 (71%)
+   Number of GSRs:        1 out of 1 (100%)
+   EFB used :        No
+   JTAG used :       No
+   Readback used :   No
+   Oscillator used : Yes
+   Startup used :    No
+   POR :             On
+   Bandgap :         On
+   Number of Power Controller:  0 out of 1 (0%)
+   Number of Dynamic Bank Controller (BCINRD):  0 out of 4 (0%)
+   Number of Dynamic Bank Controller (BCLVDSO):  0 out of 1 (0%)
+   Number of DCCA:  0 out of 8 (0%)
+   Number of DCMA:  0 out of 2 (0%)
+   Number of PLLs:  0 out of 1 (0%)
+   Number of DQSDLLs:  0 out of 2 (0%)
+   Number of CLKDIVC:  0 out of 4 (0%)
+   Number of ECLKSYNCA:  0 out of 4 (0%)
+   Number of ECLKBRIDGECS:  0 out of 2 (0%)
+   Notes:-
+      1. Total number of LUT4s = (Number of logic LUT4s) + 2*(Number of
+     distributed RAMs) + 2*(Number of ripple logic)
+      2. Number of logic LUT4s does not include count of distributed RAM and
+     ripple logic.
+   Number of clocks:  1
+     Net clk: 267 loads, 267 rising, 0 falling (Driver: oscillator )
+   Number of Clock Enables:  61
+     Net system.bus.guest_memory.N_180_i: 1 loads, 0 LSLICEs
+
+                                    Page 1
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Design Summary (cont)
+---------------------
+     Net system.bus.guest_memory.un1_state_10_i[0]: 1 loads, 0 LSLICEs
+     Net system.bus.byte_sd.ready_0_sqmuxa_1: 5 loads, 4 LSLICEs
+     Net system/bus/un1_request: 8 loads, 8 LSLICEs
+     Net system/bus/boot_rom_phase_d[2]: 8 loads, 8 LSLICEs
+     Net system/bus/N_51_i: 1 loads, 1 LSLICEs
+     Net system/bus/fixed_uart.console/un1_rx_busy21_i: 3 loads, 3 LSLICEs
+     Net system/bus/fixed_uart.console/tx_ready_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/fixed_uart.console/un1_rx_busy20_4_i: 5 loads, 5 LSLICEs
+     Net system/bus/fixed_uart.console/rx_busy23: 4 loads, 4 LSLICEs
+     Net system/bus/fixed_uart.console/un1_tx_timer18_1_i: 2 loads, 2 LSLICEs
+     Net system/bus/fixed_uart.console/rx_csr_write: 1 loads, 1 LSLICEs
+     Net system/bus/fixed_uart.console/rx_full_1_sqmuxa_i: 2 loads, 2 LSLICEs
+     Net system/bus/fixed_uart.console/tx_buffer_write: 4 loads, 4 LSLICEs
+     Net system/bus/fixed_uart.console/un1_tx_timer18_i: 5 loads, 5 LSLICEs
+     Net system/bus/fixed_uart.console/un1_tx_bits_0_sqmuxa_i: 5 loads, 5
+     LSLICEs
+     Net system/bus/fixed_uart.console/un1_tx_ack_i_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/fixed_uart.console/tx_csr_write: 1 loads, 1 LSLICEs
+     Net system/bus/fixed_uart.console/un1_rx_busy24_i: 5 loads, 5 LSLICEs
+     Net system/bus/fixed_uart.console/un1_rx_full8_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/byte_sd/busy_RNO: 1 loads, 1 LSLICEs
+     Net system/bus/byte_sd/ready_2_sqmuxa_1_0_RNIGKQKL: 4 loads, 4 LSLICEs
+     Net system/bus/byte_sd/seen_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/byte_sd/un1_divider20_i: 4 loads, 4 LSLICEs
+     Net system/bus/byte_sd/un1_ready_2_sqmuxa_1: 1 loads, 1 LSLICEs
+     Net system/bus/byte_sd/control_1_sqmuxa: 2 loads, 2 LSLICEs
+     Net system/bus/guest_memory/state_RNIOMMG9[15]: 4 loads, 4 LSLICEs
+     Net system/bus/guest_memory/un1_state_10_RNINS1U8[0]: 4 loads, 4 LSLICEs
+     Net system/bus/guest_memory/latched_address_0_sqmuxa: 19 loads, 19 LSLICEs
+     Net system/bus/guest_memory/request_seen_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/guest_memory/un1_state_14_i[0]: 1 loads, 1 LSLICEs
+     Net system/bus/guest_memory/spi_sck_en: 1 loads, 1 LSLICEs
+     Net system.bus.guest_memory.un1_state_11_i[0]: 5 loads, 4 LSLICEs
+     Net system/bus/guest_memory/un1_spi_active_1_0_a3: 4 loads, 4 LSLICEs
+     Net system/bus/rk_service_release_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/timer_ie7: 1 loads, 1 LSLICEs
+     Net system/bus/timer_done_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/rk_service_pending_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/rk_service_pending_0_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/rk_service_movb_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/rk_service_active_0_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/un1_rk_local_vector_ack19_i: 1 loads, 1 LSLICEs
+     Net system/bus/rk_irq_pending_en: 1 loads, 1 LSLICEs
+     Net system/bus/rk_immediate_done_2_sqmuxa_i: 3 loads, 3 LSLICEs
+     Net system/bus/boot_release_armed_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/rom_enable: 4 loads, 0 LSLICEs
+     Net system/cpu/engine/irq_active_4_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/engine/fault_redirectdup_RNI54BF2: 8 loads, 0 LSLICEs
+     Net system/cpu/engine/un1_step: 1 loads, 1 LSLICEs
+     Net system/cpu/engine/seq/un1_upc6_1_i: 6 loads, 6 LSLICEs
+     Net system/cpu/engine/un1_stepdup: 5 loads, 5 LSLICEs
+     Net system/cpu/engine/seq/un1_upc6_i: 1 loads, 1 LSLICEs
+     Net system/cpu/engine/status/un1_psw14_i: 3 loads, 3 LSLICEs
+     Net system/cpu/engine/status/pswce[4]: 10 loads, 10 LSLICEs
+     Net system/cpu/engine/step: 1 loads, 1 LSLICEs
+     Net system/cpu/engine/dp/un1_q20_i: 10 loads, 10 LSLICEs
+
+                                    Page 2
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Design Summary (cont)
+---------------------
+     Net system/cpu/engine/frame_active_RNO: 1 loads, 1 LSLICEs
+     Net system/cpu/engine/irq_ackdup_RNI80NDC: 5 loads, 5 LSLICEs
+     Net system/cpu/engine/ir6: 13 loads, 13 LSLICEs
+     Net system/cpu/engine/mdr_1_sqmuxa_i: 5 loads, 5 LSLICEs
+     Net system/cpu/engine/fault_latched5: 1 loads, 1 LSLICEs
+   Number of local set/reset loads for net system.timer_pending8 merged into
+     GSR:  77
+   Number of LSRs:  11
+     Net system.timer_pending8: 89 loads, 86 LSLICEs
+     Net system/acknowledgedupdup_RNIKCP04: 6 loads, 6 LSLICEs
+     Net reset_sync[0]: 61 loads, 61 LSLICEs
+     Net system/bus/byte_sd/un1_rst: 1 loads, 1 LSLICEs
+     Net system/bus/byte_sd/un1_divider20_RNIK6VBE: 3 loads, 3 LSLICEs
+     Net system/bus/byte_sd/ready_2_sqmuxa_RNI0OENH: 4 loads, 4 LSLICEs
+     Net un1_state_8_i_a2_RNI05MD8: 5 loads, 4 LSLICEs
+     Net system/bus/guest_memory/latched_address_0_sqmuxa_0_a2_RNINP87A: 4
+     loads, 4 LSLICEs
+     Net system/bus/N_34_1_i: 4 loads, 4 LSLICEs
+     Net system/cpu/engine/irq_ackdup_RNIK02UD: 5 loads, 5 LSLICEs
+     Net res_c: 1 loads, 1 LSLICEs
+   Number of nets driven by tri-state buffers:  0
+   Top 10 highest fanout non-clock nets:
+     Net system.timer_pending8: 110 loads
+     Net system/uword[34]: 98 loads
+     Net reset_sync[0]: 91 loads
+     Net system/cpu/uword[31]: 77 loads
+     Net system/cpu/uword[33]: 75 loads
+     Net system/opcode_fetch: 64 loads
+     Net system/bus/guest_memory/spi_active: 47 loads
+     Net system/uword[32]: 43 loads
+     Net system/address[1]: 42 loads
+     Net system/address[2]: 39 loads
+
+
+
+
+   Number of warnings:  3
+   Number of errors:    1
+     
+
+Design Errors/Warnings
+----------------------
+
+WARNING - map: The JTAG port has been disabled in this project and JTAG pins
+     will be configured as General Purpose IO.  You have to use JTAGENB pin in
+     hardware to change the personality of the port from JTAG pins to general
+     purpose IO.  Reference MachXO2 Handbook for details on dual function JTAG
+     port.
+WARNING - map: All configuration ports of the design have been disabled.
+     Reference MachXO2 Handbook for information on the Configuration Ports of
+     MachXO2
+WARNING - map: Using local reset signal 'system.timer_pending8' to infer global
+     GSR net.
+ERROR - map: Design doesn't fit into device specified, refer to the Map report
+     for more details.
+
+
+                                    Page 3
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+IO (PIO) Attributes
+-------------------
+
++---------------------+-----------+-----------+------------+
+| IO Name             | Direction | Levelmode | IO         |
+|                     |           |  IO_TYPE  | Register   |
++---------------------+-----------+-----------+------------+
+| gpio_key_row[0]     | BIDIR     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_cs_n             | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_miso             | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| gpio_key_row[3]     | BIDIR     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_key_row[2]     | BIDIR     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_key_row[1]     | BIDIR     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_reg_latch      | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_blank          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_rs             | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_clk            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_ce             | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_din            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_mcs            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| gpio_msck           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| gpio_miso           | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| gpio_mosi           | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| tx                  | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| rx                  | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| res                 | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_mosi             | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_sck              | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+
+Removed logic
+-------------
+
+Block system/VCC undriven or does not drive anything - clipped.
+Block system/cpu/GND undriven or does not drive anything - clipped.
+Block system/cpu/VCC undriven or does not drive anything - clipped.
+Block system/cpu/decode/VCC undriven or does not drive anything - clipped.
+Block system/cpu/decode/GND undriven or does not drive anything - clipped.
+
+                                    Page 4
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Removed logic (cont)
+--------------------
+Block system/cpu/engine/VCC undriven or does not drive anything - clipped.
+Block system/cpu/engine/GND undriven or does not drive anything - clipped.
+Block system/cpu/engine/dp/VCC undriven or does not drive anything - clipped.
+Block system/cpu/engine/dp/GND undriven or does not drive anything - clipped.
+Block system/cpu/engine/dp/alu/VCC undriven or does not drive anything -
+     clipped.
+Block system/cpu/engine/dp/rf/GND undriven or does not drive anything - clipped.
+     
+Block system/cpu/engine/dp/rf/VCC undriven or does not drive anything - clipped.
+     
+Block system/cpu/engine/status/GND undriven or does not drive anything -
+     clipped.
+Block system/cpu/engine/status/VCC undriven or does not drive anything -
+     clipped.
+Block system/cpu/engine/memory/VCC undriven or does not drive anything -
+     clipped.
+Block system/cpu/engine/memory/GND undriven or does not drive anything -
+     clipped.
+Block system/bus/guest_memory/VCC undriven or does not drive anything - clipped.
+     
+Block system/bus/guest_memory/GND undriven or does not drive anything - clipped.
+     
+Block system/bus/byte_sd/VCC undriven or does not drive anything - clipped.
+Signal res_c_i was merged into signal res_c
+Signal host_miso_oe_i was merged into signal system/bus/host_miso_oe
+Signal VCC undriven or does not drive anything - clipped.
+Signal system/GND undriven or does not drive anything - clipped.
+Signal system/cpu/engine/dp/alu/GND undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/seq/GND undriven or does not drive anything - clipped.
+Signal system/cpu/engine/rom/VCC undriven or does not drive anything - clipped.
+Signal system/cpu/engine/rom/GND undriven or does not drive anything - clipped.
+Signal system/firmware/GND undriven or does not drive anything - clipped.
+Signal system/bus/GND undriven or does not drive anything - clipped.
+Signal system/bus/byte_sd/GND undriven or does not drive anything - clipped.
+Signal system/bus/fixed_uart.console/GND undriven or does not drive anything -
+     clipped.
+Signal system/un1_timeout_count_cry_9_0_COUT undriven or does not drive anything
+     - clipped.
+Signal system/cpu/engine/dp/alu/un1_arithmetic_b_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/cpu/engine/dp/alu/N_1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/dp/alu/un1_arithmetic_b_cry_15_0_COUT undriven or does
+     not drive anything - clipped.
+Signal system/cpu/engine/seq/un1_upc_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/engine/seq/un1_upc_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/engine/seq/N_1 undriven or does not drive anything - clipped.
+Signal system/cpu/engine/seq/un1_upc_s_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/engine/seq/un1_upc_s_9_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/cpu/engine/rom/lane_3_DOB8 undriven or does not drive anything -
+     clipped.
+
+                                    Page 5
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Removed logic (cont)
+--------------------
+Signal system/cpu/engine/rom/lane_3_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_2_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_1_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB7 undriven or does not drive anything -
+     clipped.
+
+                                    Page 6
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Removed logic (cont)
+--------------------
+Signal system/cpu/engine/rom/lane_0_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/firmware/firmware_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/firmware/firmware_DOA8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/un5_tick_counter_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/un5_tick_counter_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/N_2 undriven or does not drive anything - clipped.
+Signal system/bus/un5_tick_counter_s_19_0_S1 undriven or does not drive anything
+     - clipped.
+Signal system/bus/un5_tick_counter_s_19_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/byte_sd/un1_divider_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/byte_sd/N_1 undriven or does not drive anything - clipped.
+Signal system/bus/byte_sd/un1_divider_cry_5_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/fixed_uart.console/tx_timer_cry_0_S0[0] undriven or does not
+     drive anything - clipped.
+Signal system/bus/fixed_uart.console/N_1 undriven or does not drive anything -
+     clipped.
+Signal system/bus/fixed_uart.console/tx_timer_cry_0_COUT[7] undriven or does not
+     drive anything - clipped.
+Signal system/bus/fixed_uart.console/rx_timer_cry_0_S0[0] undriven or does not
+     drive anything - clipped.
+Signal system/bus/fixed_uart.console/N_2 undriven or does not drive anything -
+     clipped.
+Signal system/bus/fixed_uart.console/rx_timer_cry_0_COUT[7] undriven or does not
+     drive anything - clipped.
+Signal system/un1_timeout_count_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/N_1 undriven or does not drive anything - clipped.
+Signal oscillator_SEDSTDBY undriven or does not drive anything - clipped.
+Block res_pad_RNIU56U5 was optimized away.
+Block system/bus/panel_output_RNIQV532[7] was optimized away.
+Block VCC was optimized away.
+Block system/GND was optimized away.
+Block system/cpu/engine/dp/alu/GND was optimized away.
+Block system/cpu/engine/seq/GND was optimized away.
+Block system/cpu/engine/rom/VCC was optimized away.
+Block system/cpu/engine/rom/GND was optimized away.
+
+                                    Page 7
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Removed logic (cont)
+--------------------
+Block system/firmware/GND was optimized away.
+Block system/bus/GND was optimized away.
+Block system/bus/byte_sd/GND was optimized away.
+Block system/bus/fixed_uart.console/GND was optimized away.
+
+Memory Usage
+------------
+
+/system:
+    EBRs: 0
+    RAM SLICEs: 12
+    Logic SLICEs: 54
+    PFU Registers: 70
+/system/cpu/engine/dp/rf/words_1_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_1_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_1_ram_1:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_1_ram_2:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_ram_1:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_ram_2:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/rom:
+    EBRs: 4
+    RAM SLICEs: 0
+
+                                    Page 8
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+Memory Usage (cont)
+-------------------
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR lane_0:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_1:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_2:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_3:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+/system/firmware:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR firmware:  TYPE= DP8KC,  Width_A= 8,  Width_B= 8,  Depth_A=
+         512,  Depth_B= 512,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE=
+         SYNC,  ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B=
+         NORMAL,  GSR= DISABLED
+
+OSC Summary
+-----------
+
+OSC 1:                                     Pin/Node Value
+  OSC Instance Name:                                oscillator
+  OSC Type:                                         OSCH
+  STDBY Input:                                      NONE
+  OSC Output:                              NODE     clk
+  OSC Nominal Frequency (MHz):                      29.56
+
+ASIC Components
+---------------
+
+Instance Name: oscillator
+         Type: OSCH
+Instance Name: system/firmware/firmware
+         Type: DP8KC
+Instance Name: system/cpu/engine/rom/lane_0
+         Type: DP8KC
+Instance Name: system/cpu/engine/rom/lane_1
+         Type: DP8KC
+Instance Name: system/cpu/engine/rom/lane_2
+         Type: DP8KC
+Instance Name: system/cpu/engine/rom/lane_3
+         Type: DP8KC
+
+GSR Usage
+---------
+
+GSR Component:
+   The local reset signal 'system.timer_pending8' of the design has been
+        inferred as Global Set Reset (GSR). The reset signal used for GSR
+
+                                    Page 9
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+GSR Usage (cont)
+----------------
+        control is 'system.timer_pending8'.
+        
+
+     GSR Property:
+   The design components with GSR property set to ENABLED will respond to global
+        set reset while the components with GSR property set to DISABLED will
+        not.
+        
+
+     Components on inferred reset domain with GSR Property disabled
+--------------------------------------------------------------
+
+     These components have the GSR property set to DISABLED and are on the
+     inferred reset domain. The components will respond to the reset signal
+     'system.timer_pending8' via the local reset on the component and not the
+     GSR component.
+
+     Type and number of components of the type: 
+   Register = 130 
+
+     Type and instance name of component: 
+   Register : system/timer_pending
+   Register : system/bus/boot_ack
+   Register : system/bus/boot_program_word[15]
+   Register : system/bus/boot_program_word[14]
+   Register : system/bus/boot_program_word[13]
+   Register : system/bus/boot_program_word[12]
+   Register : system/bus/boot_program_word[11]
+   Register : system/bus/boot_program_word[10]
+   Register : system/bus/boot_program_word[9]
+   Register : system/bus/boot_program_word[8]
+   Register : system/bus/boot_program_word[7]
+   Register : system/bus/boot_program_word[6]
+   Register : system/bus/boot_program_word[5]
+   Register : system/bus/boot_program_word[4]
+   Register : system/bus/boot_program_word[3]
+   Register : system/bus/boot_program_word[2]
+   Register : system/bus/boot_program_word[1]
+   Register : system/bus/boot_program_word[0]
+   Register : system/bus/event_irq
+   Register : system/bus/panel_output[7]
+   Register : system/bus/panel_output[6]
+   Register : system/bus/panel_output[5]
+   Register : system/bus/panel_output[3]
+   Register : system/bus/panel_output[2]
+   Register : system/bus/panel_output[1]
+   Register : system/bus/panel_output[0]
+   Register : system/bus/rk_cs1_initialized
+   Register : system/bus/rk_immediate_done
+   Register : system/bus/rk_interrupt_enable
+   Register : system/bus/rk_irq_pending
+   Register : system/bus/rk_local_vector_ack
+   Register : system/bus/rk_service_active
+   Register : system/bus/rk_service_movb
+   Register : system/bus/rk_service_pending
+   Register : system/bus/rk_service_release
+
+                                   Page 10
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+GSR Usage (cont)
+----------------
+   Register : system/bus/rk_write_command
+   Register : system/bus/tick_counter[18]
+   Register : system/bus/tick_counter[17]
+   Register : system/bus/tick_counter[15]
+   Register : system/bus/tick_counter[14]
+   Register : system/bus/tick_counter[13]
+   Register : system/bus/tick_counter[12]
+   Register : system/bus/tick_counter[11]
+   Register : system/bus/tick_counter[9]
+   Register : system/bus/tick_counter[7]
+   Register : system/bus/tick_counter[4]
+   Register : system/bus/tick_counter[3]
+   Register : system/bus/tick_counter[2]
+   Register : system/bus/tick_counter[1]
+   Register : system/bus/tick_counter[0]
+   Register : system/bus/timer_done
+   Register : system/bus/timer_ie
+   Register : system/bus/guest_memory/bit_count[2]
+   Register : system/bus/guest_memory/bit_count[1]
+   Register : system/bus/guest_memory/bit_count[0]
+   Register : system/bus/guest_memory/latched_address[15]
+   Register : system/bus/guest_memory/latched_address[14]
+   Register : system/bus/guest_memory/latched_address[13]
+   Register : system/bus/guest_memory/latched_address[12]
+   Register : system/bus/guest_memory/latched_address[11]
+   Register : system/bus/guest_memory/latched_address[10]
+   Register : system/bus/guest_memory/latched_address[9]
+   Register : system/bus/guest_memory/latched_address[8]
+   Register : system/bus/guest_memory/latched_address[7]
+   Register : system/bus/guest_memory/latched_address[6]
+   Register : system/bus/guest_memory/latched_address[5]
+   Register : system/bus/guest_memory/latched_address[4]
+   Register : system/bus/guest_memory/latched_address[3]
+   Register : system/bus/guest_memory/latched_address[2]
+   Register : system/bus/guest_memory/latched_address[1]
+   Register : system/bus/guest_memory/latched_address[0]
+   Register : system/bus/guest_memory/latched_bank
+   Register : system/bus/guest_memory/latched_byte
+   Register : system/bus/guest_memory/latched_wdata[7]
+   Register : system/bus/guest_memory/latched_wdata[6]
+   Register : system/bus/guest_memory/latched_wdata[5]
+   Register : system/bus/guest_memory/latched_wdata[4]
+   Register : system/bus/guest_memory/latched_wdata[3]
+   Register : system/bus/guest_memory/latched_wdata[2]
+   Register : system/bus/guest_memory/latched_wdata[1]
+   Register : system/bus/guest_memory/latched_wdata[0]
+   Register : system/bus/guest_memory/rdata[15]
+   Register : system/bus/guest_memory/rdata[14]
+   Register : system/bus/guest_memory/rdata[13]
+   Register : system/bus/guest_memory/rdata[12]
+   Register : system/bus/guest_memory/rdata[11]
+   Register : system/bus/guest_memory/rdata[10]
+   Register : system/bus/guest_memory/rdata[9]
+   Register : system/bus/guest_memory/rdata[8]
+   Register : system/bus/guest_memory/rdata[7]
+   Register : system/bus/guest_memory/rdata[6]
+
+                                   Page 11
+
+
+
+
+Design:  uj11_hc1200_microcomp                         Date:  09/09/26  23:03:22
+
+GSR Usage (cont)
+----------------
+   Register : system/bus/guest_memory/rdata[5]
+   Register : system/bus/guest_memory/rdata[4]
+   Register : system/bus/guest_memory/rdata[3]
+   Register : system/bus/guest_memory/rdata[2]
+   Register : system/bus/guest_memory/rdata[1]
+   Register : system/bus/guest_memory/rdata[0]
+   Register : system/bus/guest_memory/ready
+   Register : system/bus/guest_memory/request_seen
+   Register : system/bus/guest_memory/spi_active
+   Register : system/bus/guest_memory/spi_sck
+   Register : system/bus/byte_sd/bit_count[2]
+   Register : system/bus/byte_sd/bit_count[1]
+   Register : system/bus/byte_sd/bit_count[0]
+   Register : system/bus/byte_sd/busy
+   Register : system/bus/byte_sd/control[1]
+   Register : system/bus/byte_sd/control[0]
+   Register : system/bus/byte_sd/ready
+   Register : system/bus/byte_sd/rx_shift[7]
+   Register : system/bus/byte_sd/rx_shift[6]
+   Register : system/bus/byte_sd/rx_shift[5]
+   Register : system/bus/byte_sd/rx_shift[4]
+   Register : system/bus/byte_sd/rx_shift[3]
+   Register : system/bus/byte_sd/rx_shift[2]
+   Register : system/bus/byte_sd/rx_shift[1]
+   Register : system/bus/byte_sd/sck
+   Register : system/bus/byte_sd/seen
+   Register : system/bus/byte_sd/tx_shift[7]
+   Register : system/bus/byte_sd/tx_shift[6]
+   Register : system/bus/byte_sd/tx_shift[5]
+   Register : system/bus/byte_sd/tx_shift[4]
+   Register : system/bus/byte_sd/tx_shift[3]
+   Register : system/bus/byte_sd/tx_shift[2]
+   Register : system/bus/byte_sd/tx_shift[1]
+   Register : system/bus/byte_sd/tx_shift[0]
+   Register : system/bus/boot_program_ack
+   Register : system/bus/panel_output[4]
+   Register : system_bus_byte_sd_rx_shiftio[0]
+   Register : system_bus_guest_memory_spi_mosiio
+   Register : system_bus_guest_memory_spi_cs_nio
+
+Run Time and Memory Usage
+-------------------------
+
+   Total CPU Time: 0 secs  
+   Total REAL Time: 0 secs  
+   Peak Memory Usage: 162 MB
+        
+
+
+
+
+
+
+
+
+
+
+                                   Page 12
+
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+     Copyright (c) 1995 AT&T Corp.   All rights reserved.
+     Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+     Copyright (c) 2001 Agere Systems   All rights reserved.
+     Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights
+     reserved.

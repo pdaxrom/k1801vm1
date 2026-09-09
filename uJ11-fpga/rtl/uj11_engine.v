@@ -1,11 +1,11 @@
 `timescale 1ns/1ps
 // Microcoded execution engine. Dispatch is an external, separately measured
 // combinational function of dispatch_ir (incoming data during FETCH).
-module uj11_engine (
+module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, parameter [15:0] UNMASKED_VECTOR=0) (
     input wire clk, reset,
     input wire irq_valid,
     input wire [2:0] irq_priority,
-    input wire [8:1] irq_vector,
+    input wire [IRQ_VECTOR_BITS:1] irq_vector,
     output wire irq_ack, waiting,
     output reg peripheral_reset,
     input wire [9:0] dispatch_address,
@@ -38,7 +38,10 @@ module uj11_engine (
     // 0 instruction, 1 IRQ frame, 2 memory-fault frame, 3 trace frame.
     reg [1:0] irq_active;
     wire trap_command = control && command==4'd15;
-    wire irq_pending = irq_valid && irq_priority > psw[7:5] && !irq_active[1];
+    wire [15:0] resolved_vector={{(15-IRQ_VECTOR_BITS){1'b0}},irq_vector,1'b0};
+    // Optional private board firmware assist. External IRQs retain IPL rules.
+    wire irq_pending = irq_valid && (irq_priority > psw[7:5] ||
+                       (UNMASKED_VECTOR!=0 && resolved_vector==UNMASKED_VECTOR)) && !irq_active[1];
     wire alu_boundary = !control &&
                         (uword[9:8]==2'd2 || (uword[9:8]==2'd3 && read_a==16'd1));
     // A resolved vector is held by the source through the accepting clock.
@@ -58,6 +61,20 @@ module uj11_engine (
         else peripheral_reset <= running && control && command==4'd0 && uword[0];
     end
 
+    // Synchronous opcode lookup adds one internal clock after a successful
+    // fetch. Capture IR/MDR on the physical ACK and issue no repeated beat.
+    reg decode_wait;
+    wire fetch_capture=ROM_DECODE!=0 && fetching && mem_request && mem_ack && !mem_error;
+    wire effective_ack=(ROM_DECODE!=0 && fetching) ?
+                       (decode_wait || (mem_ack && mem_error)) : mem_ack;
+    wire raw_request, raw_read, raw_write;
+    assign mem_request=raw_request && !decode_wait;
+    assign mem_read=raw_read && !decode_wait;
+    assign mem_write=raw_write && !decode_wait;
+    always @(posedge clk)begin
+        if(reset || ROM_DECODE==0)decode_wait<=0;
+        else decode_wait<=fetch_capture;
+    end
     wire memory_op = fetching || reading || writing;
     wire [4:0] a_select = uword[30:26];
     wire [4:0] b_select = uword[25:21];
@@ -122,8 +139,8 @@ module uj11_engine (
         .nzvc(nzvc),.value(result),.psw(psw));
     uj11_mem memory(.active(memory_op && !reset && !stopped),
         .writing(writing),.byte_access(control && (uword[6] || (uword[3] && byte_instruction)) && !fetching),
-        .address(read_a),.data(read_b),.ack(mem_ack),.error(mem_error),
-        .request(mem_request),.read(mem_read),.write(mem_write),.byte_word(mem_byte),
+        .address(read_a),.data(read_b),.ack(effective_ack),.error(mem_error && !decode_wait),
+        .request(raw_request),.read(raw_read),.write(raw_write),.byte_word(mem_byte),
         .addr(mem_addr),.write_data(mem_write_data),.complete(complete),.fault(bus_fault));
     uj11_microseq seq(.clk(clk),.reset(reset),.enable(advance),.uword(uword),.ir(ir),
         .nzvc(psw[3:0]),.dispatch_address(dispatch_address),.address_odd(read_a[0]),
@@ -163,12 +180,14 @@ module uj11_engine (
             else if (trace_ack) irq_active <= 2'd3;
             else if (irq_ack) irq_active <= 2'd1;
             else if (step && alu_boundary) irq_active <= 0;
-            if (irq_ack) mdr <= {7'b0,irq_vector,1'b0};
+            // Board firmware service may use a private vector in 16-bit ROM.
+            // The default 8-bit external interrupt-vector interface is unchanged.
+            if (irq_ack) mdr <= resolved_vector;
             if (bus_fault!=0 && frame_active) fault_latched <= bus_fault;
             if (step && trap_command) frame_active <= 1;
             else if (step && alu_boundary) frame_active <= 0;
-            if (step && (fetching || reading)) mdr <= mem_read_data;
-            if (step && fetching) begin
+            if ((step && (reading || (fetching && ROM_DECODE==0))) || fetch_capture) mdr <= mem_read_data;
+            if ((step && fetching && ROM_DECODE==0) || fetch_capture) begin
                 ir <= mem_read_data;
                 trace_latched <= psw[4];
             end

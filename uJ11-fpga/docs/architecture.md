@@ -203,3 +203,25 @@ T0…T7/Q как рабочее состояние и прежний ALU. Pair5 
 EBR не добавлено. Exact rounded F-format и exception profile описаны
 отдельно от исторического KE11-F guard-bit поведения. Полный store —
 954/1024×36 v12. [FIS](fis.md), [полный board top как следующий gate](hc1200-integration.md).
+
+
+## CP28 full-board baseline
+
+Этот board top использует один FRAM controller без prefetch. Предыдущий
+prefetch subsystem остаётся отдельным вариантом для следующего area comparison.
+CPU address 16-bit, никаких MMU stages или reserved MMU resources.
+
+```mermaid
+flowchart LR
+    U[Microstore 4 EBR] --> C[uJ11 core: RF16x16 / ALU / Q]
+    D[Opcode dispatch 1 EBR] --> C
+    C <-->|16-bit physical bus| B[Board bus + timeout + IRQ]
+    F[Bootstrap / RK firmware 1 EBR] --> B
+    B <-->|SPI| R[MR45V100A FRAM]
+    B <--> P[KL11 / KW11 / panel]
+    B <-->|SPI byte service| S[SD card]
+```
+
+[CP28 measured baseline](hc1200-integration.md): 1217 LUT,318 FF, 6 EBR;
+RT-11/DIR в simulation, internal timing 29.56 MHz PASS. External pin timing и
+физическая плата ещё не проверены; FP11 не реализован.

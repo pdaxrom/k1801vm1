@@ -1,0 +1,3 @@
+# Raw evidence is hashed byte-for-byte, including the UART's CR/LF stream.
+synth/reports/** -text
+tb/reports/** -text

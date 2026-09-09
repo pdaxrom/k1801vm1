@@ -12,3 +12,4 @@ synth/machxo2/*.html
 !synth/machxo2/*.tcl
 !synth/reports/*/diamond.log
 !tb/reports/*.log
+!tb/reports/**/*.log

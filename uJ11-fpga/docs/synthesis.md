@@ -1,5 +1,41 @@
 # Synthesis checkpoints
 
+## CP28 — полный board top, 2026-09-10
+
+**1217 LUT /318 FF /6 EBR /610 slices; 29.56 MHz PASS, TRACE 31.186 MHz.**
+Синтез включает physical SG32 top, OSCH/reset, core с FIS, SPI FRAM,
+KL11/KW11/panel/SD/RK и firmware. Prefetch в данном top выключен.
+Финальные [source/report hashes](../synth/reports/cp28m/inputs.json),
+[area breakdown](../synth/reports/cp28m/design.areasrr),
+[PAR](../synth/reports/cp28m/design.par), [TRACE](../synth/reports/cp28m/design.twr).
+Внешние pin delays не заданы; Fmax описывает внутренние constrained paths.
+
+После каждого изменения запускался отдельный Diamond gate; MAP failures
+сохраняют только реально доступные цифры. PAR/TRACE не подменяются оценкой.
+Во всех вариантах microstore **954/1024×36**, без нового ISA/MMU RTL.
+
+| Revision / input SHA | LUT4 | FF | EBR | Slices | TRACE MHz | 29.56 MHz gate | Изменение / решение |
+|---|---:|---:|---:|---:|---:|---|---|
+| [cp28a](../synth/reports/cp28a/result.json) / `3d6d9e1246b1` | 1413 | 381 | 5 | 710 | — | FAIL | Первый полный top; превышение capacity |
+| [cp28b](../synth/reports/cp28b/result.json) / `2a74b4d1882a` | 1437 | 381 | 5 | 722 | — | FAIL | Параллельный read mux увеличил LUT; отклонён |
+| [cp28c](../synth/reports/cp28c/result.json) / `87c72d77dc37` | 1391 | 381 | 5 | 701 | — | FAIL | Иерархический combinational decoder; всё ещё over-map |
+| [cp28d](../synth/reports/cp28d/result.json) / `ed50bdab7f40` | 1328 | 382 | 6 | 670 | — | FAIL | Первый synchronous decoder EBR; over-map |
+| [cp28e](../synth/reports/cp28e/result.json) / `8abf0db654ff` | — | — | — | — | — | FAIL | Синтаксис SV cast не принят Verilog frontend; цифр MAP нет |
+| [cp28f](../synth/reports/cp28f/result.json) / `24cbf4393480` | 1315 | 318 | 6 | 661 | — | FAIL | Компактный FRAM + удалён firmware data latch |
+| [cp28g](../synth/reports/cp28g/result.json) / `9d8130a0c016` | 1315 | 318 | 6 | 661 | — | FAIL | Synthesis target 29.56 вместо 50 MHz; без выигрыша |
+| [cp28h](../synth/reports/cp28h/result.json) / `a5848e437c13` | 1266 | 318 | 6 | 637 | 32.366 | PASS | Группировка ALU: fit, но four-state reset issue; отклонён |
+| [cp28i](../synth/reports/cp28i/result.json) / `0ac64cb9dbf5` | 1275 | 318 | 6 | 640 | 31.023 | PASS | Исправлен four-state ALU; 640/640 slices, недостаточный запас |
+| [cp28j](../synth/reports/cp28j/result.json) / `47c60cb8c313` | 1251 | 318 | 6 | 630 | 31.701 | PASS | Все dispatch entries в EBR; малый запас |
+| [cp28k](../synth/reports/cp28k/result.json) / `fe29136feac8` | 1317 | 318 | 6 | 661 | — | FAIL | Параллельный next-address mux: +66 LUT; отклонён |
+| [cp28l](../synth/reports/cp28l/result.json) / `80bfae512f7d` | 1217 | 318 | 6 | 610 | 31.186 | PASS | Точный LFSR KW11 timebase; функциональный baseline |
+| [cp28m](../synth/reports/cp28m/result.json) / `e4d5e8680e16` | 1217 | 318 | 6 | 610 | 31.186 | PASS | Итоговый повтор, area report включён в hashes |
+
+Это сокращение на 196 LUT от первого полного top. До физического лимита
+остаётся 63 LUT/30 slices/1 EBR. **Предпочтительный предел 1100 LUT не достигнут.**
+CP27b=1095 LUT включал иной scope (prefetch/probe, без полной периферии),
+поэтому его разница с CP28 не измеряет стоимость одного блока.
+Полный FP11 и его fit пока не реализованы. [Архитектура и verification](hc1200-integration.md).
+
 **CP27a/b FIS: оба fit прошли.** Core **863/299/4**, 35 MHz PASS,
 TRACE **35.954 MHz**; FRAM/prefetch/IRQ+probe **1095/416/4**,
 29.56 MHz PASS, TRACE **31.300 MHz**. 954×36 v12: +254 слова и −4 LUT

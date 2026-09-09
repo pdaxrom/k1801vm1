@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_trace_bit #(parameter integer MEMORY_MODE=-1, parameter integer SYSTEM_FLAGS=0, parameter integer PSW_TRANSFER=0, parameter integer SYSTEM_CONTROL=0, parameter integer EIS_ASHC=0, parameter integer EIS_ASH=0, parameter integer EIS_XOR=0, parameter integer EIS_MUL=0, parameter integer EIS_DIV=0);
+module tb_trace_bit #(parameter integer ROM_DECODE=0, MEMORY_MODE=-1, parameter integer SYSTEM_FLAGS=0, parameter integer PSW_TRANSFER=0, parameter integer SYSTEM_CONTROL=0, parameter integer EIS_ASHC=0, parameter integer EIS_ASH=0, parameter integer EIS_XOR=0, parameter integer EIS_MUL=0, parameter integer EIS_DIV=0);
     reg clk=0,reset=1,irq_valid=0;
     reg [15:0] irq_request=0;
     wire irq_ack,waiting,peripheral_reset;
@@ -19,7 +19,7 @@ module tb_trace_bit #(parameter integer MEMORY_MODE=-1, parameter integer SYSTEM
     string suite;
     wire prefetch_enable;
     uj11_prefetch_control policy(.clk(clk),.reset(reset),.uword(uword),.allow(prefetch_enable));
-    uj11_core dut(.irq_valid(irq_valid),.irq_priority(irq_request[11:9]),.irq_vector(irq_request[8:1]),.irq_ack(irq_ack),.waiting(waiting),.peripheral_reset(peripheral_reset),.clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),.mem_request(request),
+    uj11_core #(.ROM_DECODE(ROM_DECODE)) dut(.irq_valid(irq_valid),.irq_priority(irq_request[11:9]),.irq_vector(irq_request[8:1]),.irq_ack(irq_ack),.waiting(waiting),.peripheral_reset(peripheral_reset),.clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),.mem_request(request),
         .mem_read(reading),.mem_write(writing),.mem_byte(byte_access),.mem_ack(ack),.mem_error(error),
         .mem_read_data(rdata),.stopped(stopped),.fault_code(fault),.retire(retire),.debug_upc(upc),
         .debug_uword(uword),.ir(ir),.mdr(mdr),.psw(psw),.q(q),.debug_rf_write(rf_write),

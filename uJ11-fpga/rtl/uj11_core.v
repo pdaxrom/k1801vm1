@@ -1,11 +1,11 @@
 `timescale 1ns/1ps
 // uJ11 M0: a small predecoder dispatches directly into the microcoded engine.
 // All architectural execution, including PC+2 and BR, uses the shared ALU/RF.
-module uj11_core (
+module uj11_core #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, parameter [15:0] UNMASKED_VECTOR=0) (
     input wire clk, reset,
     input wire irq_valid,
     input wire [2:0] irq_priority,
-    input wire [8:1] irq_vector,
+    input wire [IRQ_VECTOR_BITS:1] irq_vector,
     output wire irq_ack, waiting, peripheral_reset,
     output wire [15:0] mem_addr, mem_write_data,
     output wire mem_request, mem_read, mem_write, mem_byte,
@@ -23,8 +23,14 @@ module uj11_core (
 );
     wire [15:0] dispatch_ir;
     wire [9:0] dispatch_address;
-    uj11_decode decode(.ir(dispatch_ir),.entry(dispatch_address));
-    uj11_engine engine(.clk(clk),.reset(reset),
+    generate if(ROM_DECODE!=0)begin: sync_decode
+        wire fetch=debug_uword[35] && debug_uword[34:31]==4'd2;
+        uj11_decode_rom decode(.clk(clk),.enable(fetch && mem_request && mem_ack && !mem_error),
+            .incoming(mem_read_data),.entry(dispatch_address));
+    end else begin: logic_decode
+        uj11_decode decode(.ir(dispatch_ir),.entry(dispatch_address));
+    end endgenerate
+    uj11_engine #(.ROM_DECODE(ROM_DECODE),.IRQ_VECTOR_BITS(IRQ_VECTOR_BITS),.UNMASKED_VECTOR(UNMASKED_VECTOR)) engine(.clk(clk),.reset(reset),
         .irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),.irq_ack(irq_ack),.waiting(waiting),.peripheral_reset(peripheral_reset),.dispatch_address(dispatch_address),
         .dispatch_ir(dispatch_ir),.mem_addr(mem_addr),.mem_write_data(mem_write_data),
         .mem_request(mem_request),.mem_read(mem_read),.mem_write(mem_write),.mem_byte(mem_byte),

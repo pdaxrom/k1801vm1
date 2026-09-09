@@ -377,3 +377,19 @@ N/Z по полному 32-bit результату, независимо от a
 T4:Q сдвигается прежними RFQ_L/R; count хранится в RF. На один bit — 5 cycles.
 Новых полей и состояния нет; microstore CP22 — 592×36.
 [Алгоритм, исправление C oracle и проверки](eis-ashc.md).
+
+
+## CP28 board specialization
+
+Default `ROM_DECODE=0` сохраняет прежний combinational dispatch и latency.
+Physical HC1200 top выбирает `ROM_DECODE=1`: successful FETCH ACK захватывает
+IR/MDR и читает 1024×9 dispatch EBR; один внутренний clock позднее исполняется
+PC+2/dispatch, без второго memory request. Failed FETCH идёт прежним fault path.
+Второй opcode register не добавлен. Decoder address compression проверяется
+на всех 65536 encodings; microstore по-прежнему 1024×36 с 954 занятыми words.
+
+ALU Boolean/arithmetic/left/right paths формально эквивалентны CP27. RF/Q и
+microsequencer не расширены. Параметры `IRQ_VECTOR_BITS=15` и
+`UNMASKED_VECTOR=160000` используются только платой для private RK assist;
+default external IRQ profile остаётся 8-bit/обычный IPL. Transport, firmware
+mapping и ограничения описаны в [CP28 integration](hc1200-integration.md).

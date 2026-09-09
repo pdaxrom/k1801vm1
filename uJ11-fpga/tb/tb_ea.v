@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_ea #(parameter integer MEMORY_MODE=-1, SUITE=0);
+module tb_ea #(parameter integer ROM_DECODE=0, MEMORY_MODE=-1, SUITE=0);
     reg clk=0,reset=1,irq_valid=0;
     reg [15:0] irq_request=0;
     wire irq_ack,waiting;
@@ -26,7 +26,7 @@ module tb_ea #(parameter integer MEMORY_MODE=-1, SUITE=0);
     string suite_name;
     wire prefetch_enable;
     uj11_prefetch_control policy(.clk(clk),.reset(reset),.uword(uword),.allow(prefetch_enable));
-    uj11_core dut(.irq_valid(irq_valid),.irq_priority(irq_request[11:9]),.irq_vector(irq_request[8:1]),.irq_ack(irq_ack),.waiting(waiting),.peripheral_reset(),.clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),.mem_request(request),
+    uj11_core #(.ROM_DECODE(ROM_DECODE)) dut(.irq_valid(irq_valid),.irq_priority(irq_request[11:9]),.irq_vector(irq_request[8:1]),.irq_ack(irq_ack),.waiting(waiting),.peripheral_reset(),.clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),.mem_request(request),
         .mem_read(reading),.mem_write(writing),.mem_byte(byte_access),.mem_ack(ack),.mem_error(error),
         .mem_read_data(rdata),.stopped(stopped),.fault_code(fault),.retire(retire),.debug_upc(upc),
         .debug_uword(uword),.ir(ir),.mdr(mdr),.psw(psw),.q(q),.debug_rf_write(rf_write),

@@ -1,0 +1,1 @@
+PASS grouped ALU: complete SAT equivalence; lost carry rejected. Four-state reset covered by datapath simulation.

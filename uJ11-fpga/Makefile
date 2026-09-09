@@ -1202,3 +1202,23 @@ verify-cp27:
 	$(PYTHON) tools/verify_cp27.py
 
 test: test-fis
+
+# CP28 full physical HC1200 board, firmware assembled by the existing microasm11.
+.PHONY: board board-firmware board-decode test-board-units test-board-isa test-board-rt11 synthesis-board verify-cp28
+BOARD_CHECKPOINT ?= cp28m
+board: microcode-m0 board-firmware board-decode
+board-firmware: | build
+	$(PYTHON) tools/build_firmware.py
+board-decode: | build
+	$(PYTHON) tools/build_decode_rom.py
+test-board-units: board
+	$(PYTHON) tools/check_board_units.py
+test-board-isa: board build/isa_vectors.mem build/ea-vectors.txt build/irq-vectors.txt build/trace_bit-vectors.txt build/bus-fault-vectors.txt build/fis-vectors.txt
+	$(PYTHON) tools/check_sync_decode.py
+	$(PYTHON) tools/check_sync_decode.py --suite fis
+test-board-rt11: board
+	$(PYTHON) tools/run_board.py
+synthesis-board: board
+	$(PYTHON) tools/checkpoint_board.py $(BOARD_CHECKPOINT)
+verify-cp28:
+	$(PYTHON) tools/verify_cp28.py --yosys $(YOSYS)

@@ -269,3 +269,13 @@ Byte classification: `IR[15] && IR[14:12]!=6 && |IR[14:11]`. Она отлича
 поддержанные byte classes от SUB и branches. При добавлении будущих
 system/EIS instructions этот predicate нужно перепроверить. Unsupported
 opcodes с CP15 входят в reserved trap до operand execution.
+
+
+## CP28 board ROMs
+
+36-bit v12 microinstruction и все 954 microcode words CP27 сохранены.
+Board dispatch использует отдельный 1024×9 EBR; это таблица entry addresses,
+не расширение microinstruction. Все текущие entries меньше512, диапазон
+проверяется генератором. Firmware512×16 использует ещё один EBR через два
+byte ports. Итого полный board top использует6 EBR, microstore по-прежнему4.
+[Адресная компрессия, FETCH clock и проверки](hc1200-integration.md).

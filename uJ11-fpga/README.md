@@ -3,59 +3,56 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, строго **без MMU**, адрес 16 bits.
 
-**CP27 завершён: микрокодный FIS — FADD/FSUB/FMUL/FDIV.**
-RF 16×16/Q и FRAM transport сохранены;
-pair5 расширен до D/Q без новых FF/EBR. Microstore **954/1024×36 v12**;
-все 700 слов CP26 остались на своих адресах, свободны 70 слов.
+**CP28: полный HC1200 top прошёл fit и холодную загрузку RT-11 в симуляции.**
+Включены integer/EIS/FIS core, FRAM, KL11/KW11, panel, SD/RK service,
+bootstrap, OSCH/reset и реальные pins. MMU отсутствует.
 
-| Измеренный scope | LUT4 | FF | EBR | Constraint | TRACE Fmax |
+| Scope | LUT4 | FF | EBR | Constraint | TRACE Fmax |
 |---|---:|---:|---:|---|---:|
-| Core + probe, CP27a | **863** | 299 | 4 | **35 MHz PASS** | **35.954 MHz** |
-| Core + FRAM/prefetch + IRQ adapter + probe, CP27b | **1095** | 416 | 4 | **29.56 MHz PASS** | **31.300 MHz** |
+| Полная плата, CP28m, пока без prefetch | **1217** | **318** | **6** | **29.56 MHz PASS** | **31.186 MHz** |
+| Исторический CP27a, core + probe | 863 | 299 | 4 | 35 MHz PASS | 35.954 MHz |
+| Исторический CP27b, FRAM/prefetch/IRQ + probe | 1095 | 416 | 4 | 29.56 MHz PASS | 31.300 MHz |
 
-До желательных 1100 осталось **5 LUT**, до физических 1280 —185. Полные
-UART/timer/panel/SD/RK и external pin timing в fit не входят. Следующий gate —
-[общий top с периферией и bootstrap RT-11](docs/hc1200-integration.md).
-50 MHz и 900–1000 LUT ещё не достигнуты.
+RT-11 выполнила DIR: **98 файлов**, 3270 проверенных bytes UART TX,
+162 SD reads / 6 writes. Cold boot + startup + DIR: **355132188 clocks**.
+Исходный SD image не изменён. Microstore прежний: **954/1024×36 v12**,
+349 labels; 70 свободных microinstructions.
 
-FIS прошёл **23840 случаев** arithmetic/registers/PSW/trace/IRQ/memory faults
-на каждой RAM/FRAM × portable/vendor; эталон использует точные Fraction. 24 FIS benchmarks/ROM
-побайтно совпали между portable и Lattice DP8KC. Все 15 намеренных ошибок
-отвергнуты. Сохранение старого datapath доказано Yosys; свежая portable
-integer-регрессия прошла **268843 instruction cases +49596 fault frames**
-на каждой RAM/FRAM. Прежняя полная integer vendor-регрессия и 1146 benchmarks
-остаются результатами CP26. [FIS, документы и границы профиля](docs/fis.md),
-[manifest](docs/verification-cp27.json), [измерения](docs/benchmarks-cp27.json).
+До физического предела осталось **63 LUT / 30 slices / 1 EBR**. Желаемые
+900–1100 LUT и 50 MHz не достигнуты. Полный top пока без prefetch; external
+pin timing и физическая плата не проверены. FP11 не реализован.
+[CP28: архитектура, источники, проверки и ограничения](docs/hc1200-integration.md),
+[manifest](docs/verification-cp28.json), [UART transcript](tb/reports/cp28/cp28-uart.txt).
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
 HALT restart, peripheral RESET, ASH/ASHC/XOR/MUL/DIV и FIS. Один kernel register set,
 CM=PM=RS=0, NZVC/IPL/T. Память — **MR45V100A SPI FRAM**. Для DIV DEC требует
-even R; odd R — отдельное программное расширение. Banking, native ODT и
-запуск ОС ещё предстоят. FP11 не реализован. MMU отсутствует; FPGA не программировалась.
+even R; odd R — отдельное программное расширение. Banking и native ODT ещё
+предстоят; RT-11 проверена в симуляции. FPGA не программировалась.
 
 ```
 make all                         # ROM, listing, labels, occupancy, DP8KC lanes
 make test                        # full portable regression and lint
 make test-fis test-fis-negative
 make vendor-fis                  # unmodified Lattice ROM, four simulation shards
-make verify-cp27                 # current gate, proof, parity and archive (YOSYS required)
+make board                      # firmware + synchronous dispatch ROM
+make verify-cp28 YOSYS=/path/to/yosys # current integration gate
+make synthesis-board BOARD_CHECKPOINT=cp28n # fresh Linux/Diamond implementation
 make test-reference-core         # existing C core regression
 make benchmark-fis               # 8 workloads x3 memory modes
-make synthesis                   # CP27a, 35 MHz; Linux host with Diamond
-make synthesis-fram              # CP27b, 29.56 MHz; same host
 ```
 
 Нужны Python 3, Icarus Verilog, Verilator, C compiler и Lattice simulation
-models для vendor tests. Yosys нужен для формальной проверки datapath в
-`verify-cp27`; [pinned установка и CP23 proof](docs/area-sequencer.md).
+models для vendor tests. Yosys нужен для формальной проверки ALU в
+`verify-cp28`; [pinned установка и CP23 proof](docs/area-sequencer.md).
 Integer oracle собирается из существующего `../core/` с `ENABLE_MMU=0`; проект находится
 внутри k1801vm1. Diamond 3.14.0.75.2 настроен на `sash@192.168.1.108`, default
 path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` можно
 переопределить; локальные vendor tests используют `LATTICE_SIM_DIR=build/vendor`.
 Каждый synthesis gate требует свежего implementation directory.
 
-Следующий этап — полный board top с периферией lsi11-fpga и свой resource gate.
+Следующий этап — снижение площади и prefetch в полном top, затем board timing и физическая проверка.
 MMU в эти этапы не входит; ресурсы под него не резервируются.
 
 * [CP27: FIS, exact reference и измерения](docs/fis.md)

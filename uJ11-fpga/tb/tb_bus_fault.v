@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Fault injection is a logical bus slave in front of RAM/FRAM. An injected
 // failed write never reaches the slave; SPI FRAM itself has no error response.
-module tb_bus_fault #(parameter integer MEMORY_MODE=-1, parameter integer PSW_TRANSFER=0, parameter integer EIS_ASHC=0, parameter integer EIS_ASH=0, parameter integer EIS_XOR=0, parameter integer EIS_MUL=0, parameter integer EIS_DIV=0);
+module tb_bus_fault #(parameter integer ROM_DECODE=0, MEMORY_MODE=-1, parameter integer PSW_TRANSFER=0, parameter integer EIS_ASHC=0, parameter integer EIS_ASH=0, parameter integer EIS_XOR=0, parameter integer EIS_MUL=0, parameter integer EIS_DIV=0);
     reg clk=0,reset=1,active=0;
     wire [15:0] addr,wdata,rdata,ir,mdr,psw,q,rf_data;
     wire request,reading,writing,byte_access,ack,error,stopped,retire,rf_write,stream;
@@ -19,7 +19,7 @@ module tb_bus_fault #(parameter integer MEMORY_MODE=-1, parameter integer PSW_TR
     assign ack=request && (injected ? age>=waits : slave_ack);
     assign error=injected;
     assign rdata=injected ? 16'b0 : slave_data;
-    uj11_core dut(.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(8'b0),.irq_ack(),.waiting(),.peripheral_reset(),
+    uj11_core #(.ROM_DECODE(ROM_DECODE)) dut(.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(8'b0),.irq_ack(),.waiting(),.peripheral_reset(),
         .clk(clk),.reset(reset),.mem_addr(addr),.mem_write_data(wdata),.mem_request(request),
         .mem_read(reading),.mem_write(writing),.mem_byte(byte_access),.mem_ack(ack),.mem_error(error),
         .mem_read_data(rdata),.stopped(stopped),.fault_code(fault),.retire(retire),.debug_upc(upc),

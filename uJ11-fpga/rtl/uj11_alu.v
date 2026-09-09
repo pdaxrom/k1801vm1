@@ -1,60 +1,52 @@
+// Four shared output paths: carry chain, Boolean truth table, left, right.
+// Bit-exact with CP27 for all operands, all 16 operations, carry and width.
 `timescale 1ns/1ps
-// Encoding v1. A single 17-bit carry chain serves ADD/ADC/SUB/SBC.
-// Subtraction reports PDP-11 borrow, not the inverted carry-chain output.
 module uj11_alu (
-    input wire [15:0] a, b,
-    input wire [3:0] operation,
-    input wire carry, byte_mode,
-    output reg [15:0] result,
-    output wire [3:0] nzvc
-);
-    wire subtract = operation[2]; // relevant only for arithmetic opcodes 2..5
-    wire carry_in = subtract ? ~(operation[0] & carry) : (operation[0] & carry);
-    wire [15:0] arithmetic_b = b ^ {16{subtract}};
-    wire [16:0] sum = {1'b0,a} + {1'b0,arithmetic_b} + {16'b0,carry_in};
-    // Carry into bit 8 is recovered from sum[8], retaining one 17-bit adder.
-    wire carry8 = sum[8] ^ a[8] ^ arithmetic_b[8];
-    wire sign_a = byte_mode ? a[7] : a[15];
-    wire sign_b = byte_mode ? arithmetic_b[7] : arithmetic_b[15];
-    wire sign_sum = byte_mode ? sum[7] : sum[15];
-    wire negative = byte_mode ? result[7] : result[15];
-    reg v, c;
-    always @* begin
-        result = a;
-        v = 0;
-        c = 0;
-        case (operation)
-            4'd0: result = a;
-            4'd1: result = b;
-            4'd2, 4'd3, 4'd4, 4'd5: begin
-                result = sum[15:0];
-                c = (byte_mode ? carry8 : sum[16]) ^ subtract;
-                v = ~(sign_a ^ sign_b) & (sign_a ^ sign_sum);
-            end
-            4'd6: result = a & b;
-            4'd7: result = a | b;
-            4'd8: result = a ^ b;
-            4'd9: result = a & ~b;
-            4'd10: begin result = ~a; c = 1; end
-            4'd11: begin result = {a[14:0],1'b0}; c=sign_a; end
-            4'd12: begin
-                result = {1'b0,a[15:1]};
-                if(byte_mode)result[7]=0;
-                c=a[0];
-            end
-            4'd13: begin
-                result = {a[15],a[15:1]};
-                if(byte_mode)result[7]=a[7];
-                c=a[0];
-            end
-            4'd14: begin result = {a[14:0],carry}; c=sign_a; end
-            4'd15: begin
-                result = {carry,a[15:1]};
-                if(byte_mode)result[7]=carry;
-                c=a[0];
-            end
-        endcase
-    end
-    assign nzvc = {negative, (result[7:0]==0 && (byte_mode || result[15:8]==0)),
-                   operation>=4'd11 ? negative^c : v, c};
+    input wire [15:0] a,b,input wire [3:0] operation,
+    input wire carry,byte_mode,output wire [15:0] result,output wire [3:0] nzvc);
+    wire subtract=operation[2];
+    wire carry_in=(operation[0]&carry)^subtract;
+    wire [15:0] arithmetic_b=b^{16{subtract}};
+    wire [16:0] sum={1'b0,a}+{1'b0,arithmetic_b}+{16'b0,carry_in};
+    wire carry8=sum[8]^a[8]^arithmetic_b[8];
+    wire arithmetic=(operation[3:1]==1 || operation[3:1]==2);
+    wire left=(operation==11 || operation==14);
+    wire right=(operation==12 || operation==13 || operation==15);
+    wire logic_op=!arithmetic && !left && !right;
+    function [3:0] boolean_truth;
+        input [3:0] op;
+        begin case(op)
+        0:boolean_truth=4'b1100;
+        1:boolean_truth=4'b1010;
+        6:boolean_truth=4'b1000;
+        7:boolean_truth=4'b1110;
+        8:boolean_truth=4'b0110;
+        9:boolean_truth=4'b0100;
+        10:boolean_truth=4'b0011;
+        default:boolean_truth=0;
+        endcase end
+    endfunction
+    wire [3:0] truth=boolean_truth(operation);
+    wire [15:0] logic_value;
+    genvar bit_index;
+    generate for(bit_index=0;bit_index<16;bit_index=bit_index+1)begin: boolean_bit
+        // Ternary Shannon form also preserves PASS with an uninitialized
+        // unused RF input in four-state simulation (b | ~b would be X).
+        assign logic_value[bit_index]=a[bit_index] ?
+            (b[bit_index]?truth[3]:truth[2]) : (b[bit_index]?truth[1]:truth[0]);
+    end endgenerate
+    wire [15:0] left_value={a[14:0],carry && operation==14};
+    wire right_sign=(operation==13 && a[15]) || (operation==15 && carry);
+    wire right_byte=(operation==13 && a[7]) || (operation==15 && carry);
+    wire [15:0] right_value={right_sign,a[15:9],byte_mode?right_byte:a[8],a[7:1]};
+    assign result=(sum[15:0]&{16{arithmetic}})|(logic_value&{16{logic_op}})|
+                  (left_value&{16{left}})|(right_value&{16{right}});
+    wire sa=byte_mode?a[7]:a[15];
+    wire sb=byte_mode?arithmetic_b[7]:arithmetic_b[15];
+    wire ss=byte_mode?sum[7]:sum[15];
+    wire n=byte_mode?result[7]:result[15];
+    wire c=(arithmetic && ((byte_mode?carry8:sum[16])^subtract)) ||
+           (left && sa) || (right && a[0]) || operation==10;
+    wire v=(left||right)?n^c:(arithmetic && !(sa^sb) && (sa^ss));
+    assign nzvc={n,(result[7:0]==0 && (byte_mode || result[15:8]==0)),v,c};
 endmodule

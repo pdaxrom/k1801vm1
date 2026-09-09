@@ -1,0 +1,129 @@
+python3 -m unittest discover -s tb -p 'test_*.py' -v
+test_actual_program (test_microasm.AssemblerTests.test_actual_program) ... ok
+test_conflicts (test_microasm.AssemblerTests.test_conflicts) ... ok
+test_control_selectors_are_aligned (test_microasm.AssemblerTests.test_control_selectors_are_aligned) ... ok
+test_invalid_physical_image (test_microasm.AssemblerTests.test_invalid_physical_image) ... ok
+test_page_and_immediate (test_microasm.AssemblerTests.test_page_and_immediate) ... ok
+test_physical_packing_roundtrip (test_microasm.AssemblerTests.test_physical_packing_roundtrip) ... ok
+test_prefetch_policy (test_microasm.AssemblerTests.test_prefetch_policy) ... ok
+test_reverse_operands (test_microasm.AssemblerTests.test_reverse_operands) ... ok
+test_rr_encoding (test_microasm.AssemblerTests.test_rr_encoding) ... ok
+test_stream_extension (test_microasm.AssemblerTests.test_stream_extension) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.008s
+
+OK
+iverilog -g2012 -Wall -s tb_microseq -o build/seq tb/tb_microseq.v rtl/uj11_microseq.v
+vvp build/seq
+PASS microseq: 4323 combinational checks, CALL/RETURN stalls and reset
+tb/tb_microseq.v:110: $finish called at 4496000 (1ps)
+iverilog -g2012 -Wall -s tb_rom -o build/rom tb/tb_rom.v rtl/uj11_rom.v
+vvp build/rom
+PASS ROM: all 1024 words and 1024 enable holds
+tb/tb_rom.v:29: $finish called at 20576000 (1ps)
+iverilog -g2012 -Wall -s tb_control_store -o build/store tb/tb_control_store.v rtl/uj11_microseq.v rtl/uj11_rom.v
+vvp build/store
+PASS control store: 17 transitions, no sequencing bubbles, stalls preserve uIR alignment
+tb/tb_control_store.v:43: $finish called at 606000 (1ps)
+iverilog -g2012 -Wall -s tb_alu -o build/alu tb/tb_alu.v rtl/uj11_alu.v
+vvp build/alu
+PASS ALU: 66592 independent result/NZVC checks
+tb/tb_alu.v:61: $finish called at 66592000 (1ps)
+iverilog -g2012 -Wall -s tb_datapath -o build/datapath tb/tb_datapath.v rtl/uj11_alu.v rtl/uj11_regfile.v rtl/uj11_datapath.v
+vvp build/datapath
+PASS datapath: 16 RF words, 256 dual reads, 4096 pair checks, BA SUB/BIC writeback, Q/shift/stall/reset
+tb/tb_datapath.v:65: $finish called at 4646000 (1ps)
+iverilog -g2012 -Wall -s tb_engine -o build/engine tb/tb_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/engine
+PASS engine: RF reset, fetch waits, single-cycle ADD, odd/bus/unsupported stops
+tb/tb_engine.v:73: $finish called at 756000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_engine synth/machxo2/uj11_probe_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.237 MB sources in 10 modules, into 0.119 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.014 s (elab=0.002, cvt=0.007, bld=0.000); cpu 0.014 s on 1 threads; allocated 12.016 MB
+iverilog -g2012 -Wall -s tb_mem_psw -o build/mem_psw tb/tb_mem_psw.v tb/uj11_ram.v rtl/uj11_mem.v rtl/uj11_psw.v
+vvp build/mem_psw
+PASS memory/PSW: word/byte lanes, back-to-back beats, 0..3 waits, odd address, flag masks
+tb/tb_mem_psw.v:67: $finish called at 552000 (1ps)
+iverilog -g2012 -Wall -s tb_memory_engine -o build/memory_engine tb/tb_memory_engine.v tb/uj11_ram.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/memory_engine
+PASS memory engine: microcoded word/byte READ/WRITE/MDR, 0..7 waits, exact beat/cycle counts
+tb/tb_memory_engine.v:44: $finish called at 2096000 (1ps)
+iverilog -g2012 -Wall -s tb_decode -o build/decode tb/tb_decode.v rtl/uj11_decode.v
+vvp build/decode
+PASS decoder: all 65536 opcodes, exactly 33280 supported encodings
+tb/tb_decode.v:39: $finish called at 65536000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_decode synth/machxo2/uj11_probe_decode.v rtl/uj11_decode.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.049 MB sources in 3 modules, into 0.019 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.004 s (elab=0.000, cvt=0.001, bld=0.000); cpu 0.004 s on 1 threads; allocated 9.844 MB
+iverilog -g2012 -Wall -s tb_core -o build/core tb/tb_core.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/core
+PASS differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 45248 clocks
+PASS core boundaries: 16-bit PC wrap, JMP/byte/HALT rejection
+tb/tb_core.v:91: $finish called at 2780476000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_core synth/machxo2/uj11_probe_core.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.287 MB sources in 12 modules, into 0.132 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.016 s (elab=0.002, cvt=0.009, bld=0.000); cpu 0.016 s on 1 threads; allocated 12.219 MB
+verilator --lint-only --Wall --top-module uj11_probe_seq synth/machxo2/uj11_probe_seq.v rtl/uj11_microseq.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.071 MB sources in 4 modules, into 0.047 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.007 s (elab=0.001, cvt=0.003, bld=0.000); cpu 0.007 s on 1 threads; allocated 10.438 MB
+verilator --lint-only --Wall --top-module uj11_probe_datapath synth/machxo2/uj11_probe_datapath.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.088 MB sources in 5 modules, into 0.072 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.008 s (elab=0.001, cvt=0.004, bld=0.000); cpu 0.008 s on 1 threads; allocated 10.609 MB
+iverilog -g2012 -Wall -s tb_core_fram -o build/core_fram tb/tb_core_fram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v rtl/uj11_rom.v
+vvp build/core_fram
+PASS FRAM differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 1383296 clocks
+tb/tb_core_fram.v:84: $finish called at 16160096000 (1ps)
+iverilog -g2012 -Wall -s tb_stream_engine -o build/stream_engine tb/tb_stream_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v rtl/uj11_rom.v
+vvp build/stream_engine
+PASS stream engine: opcode+3 extension words, one READ transaction, 226 clocks, 112 SPI clocks incl discarded lookahead
+tb/tb_stream_engine.v:53: $finish called at 9504000 (1ps)
+iverilog -g2012 -Wall -s tb_stream_hint -o build/stream_hint tb/tb_stream_hint.v rtl/uj11_stream.v
+vvp build/stream_hint
+PASS stream hint: 65536 control encodings and ALU rejection
+tb/tb_stream_hint.v:19: $finish called at 131072000 (1ps)
+iverilog -g2012 -Wall -s tb_prefetch_control -o build/prefetch_control tb/tb_prefetch_control.v rtl/uj11_prefetch_control.v
+vvp build/prefetch_control
+PASS prefetch control: pause/resume, inheritance over ALU/immediate, stalls/reset
+tb/tb_prefetch_control.v:20: $finish called at 86000 (1ps)
+iverilog -g2012 -Wall -Wno-timescale -s tb_lsi11_io -o build/lsi11_io tb/tb_lsi11_io.v rtl/uj11_prefetch.v rtl/uj11_fram_transport.v reference/lsi11/*.v
+vvp build/lsi11_io
+PASS lsi11 peripherals: 19 beats; KL11 RX/TX lanes, KW11, panel, SD side effects, unknown I/O
+tb/tb_lsi11_io.v:107: $finish called at 43520000 (1ps)
+iverilog -g2012 -Wall -s tb_prefetch -o build/prefetch tb/tb_prefetch.v rtl/uj11_prefetch.v rtl/uj11_fram_transport.v reference/lsi11/spi_fram_model.v
+vvp build/prefetch
+PASS prefetch: 503 beats, tags/park/redirects/SMC/bytes/odd/I-O/reset/random
+tb/tb_prefetch.v:144: $finish called at 1610036000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_fram_pf synth/machxo2/uj11_probe_fram_pf.v synth/machxo2/uj11_probe_fram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.627 MB sources in 20 modules, into 0.226 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.026 s (elab=0.004, cvt=0.013, bld=0.000); cpu 0.026 s on 1 threads; allocated 14.500 MB
+verilator --lint-only --Wall --top-module uj11_probe_fram_seq synth/machxo2/uj11_probe_fram_seq.v synth/machxo2/uj11_probe_fram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.627 MB sources in 20 modules, into 0.214 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.026 s (elab=0.004, cvt=0.013, bld=0.000); cpu 0.026 s on 1 threads; allocated 14.578 MB
+PASS ea differential mode-1: 31671 DCJ11 cases, 948247 clocks, 137006 exact bus beats
+tb/tb_ea.v:131: $finish called at 15500056000 (1ps)
+PASS ea differential mode2: 31671 DCJ11 cases, 14739672 clocks, 137006 exact bus beats
+tb/tb_ea.v:131: $finish called at 153414306000 (1ps)
+iverilog -g2012 -Wall -s tb_ea_faults -o build/ea_faults tb/tb_ea_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/ea_faults
+PASS EA directed: 14 cases, seven word operations demand I/O, odd source/pointer, five store errors preserve flags and memory
+tb/tb_ea_faults.v:87: $finish called at 5326000 (1ps)
+PASS single differential mode-1: 7080 DCJ11 cases, 99242 clocks, 19588 exact bus beats
+tb/tb_ea.v:131: $finish called at 2337716000 (1ps)
+PASS single differential mode2: 7080 DCJ11 cases, 2035650 clocks, 19588 exact bus beats
+tb/tb_ea.v:131: $finish called at 21701796000 (1ps)
+iverilog -g2012 -Wall -s tb_single_faults -o build/single_faults tb/tb_single_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/single_faults
+PASS single directed: 46 I/O/read-error/write-error/odd-address cases, 0..3 waits
+tb/tb_single_faults.v:81: $finish called at 15586000 (1ps)
+PASS branch differential mode-1: 7440 DCJ11 cases, 35464 clocks, 7440 exact bus beats
+tb/tb_ea.v:131: $finish called at 1768336000 (1ps)
+PASS branch differential mode2: 7440 DCJ11 cases, 805504 clocks, 7440 exact bus beats
+tb/tb_ea.v:131: $finish called at 9468736000 (1ps)

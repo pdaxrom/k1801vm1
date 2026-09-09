@@ -1,4 +1,25 @@
-# Implementation status, 2026-09-09
+# Implementation status, 2026-09-10
+
+**CP28: полный board integration baseline синтезирован, RT-11/DIR прошли в RTL simulation.**
+1217 LUT /318 FF /6 EBR /610 slices, 29.56 MHz PASS, TRACE 31.186 MHz,
+полный MAP/PAR. Microcode 954/1024×36 v12, 349 labels, без изменений относительно CP27.
+
+FRAM, UART/timer/panel/SD/RK, firmware ROM, reset и физический top включены.
+ROM dispatch добавляет один внутренний FETCH clock; 65536 opcode проверены
+с portable/vendor ROM. ALU эквивалентен CP27 по SAT и четырёхзначной симуляции.
+KW11 timebase имеет прежний точный период при меньшей площади.
+
+RT-11 cold boot + DIR: 355132188 clocks, 3270 UART wire bytes, 98 файлов,
+162 SD reads/6 writes; backing image read-only. Прошли scoped integer/fault/FIS,
+FRAM и периферийные проверки. [Подробный gate](hc1200-integration.md),
+[manifest](verification-cp28.json).
+
+**Ограничения:** всего 63 LUT/30 slices/1 EBR запаса, цель 900–1100 LUT не достигнута.
+В общем top нет prefetch; физического программирования, external pin timing,
+vendor whole-board RT-11, полного FP11 и register banking нет. MMU отсутствует.
+Далее — площадь/prefetch, disk-error/file-write/Ctrl-C coverage, pin timing и плата.
+
+## Исторический CP27
 
 **CP27 завершён: FIS реализован и прошёл portable/vendor проверки.**
 FADD/FSUB/FMUL/FDIV: **954/1024×36 v12, 349 labels**. 223 FIS words +31

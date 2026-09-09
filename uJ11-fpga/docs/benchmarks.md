@@ -1,5 +1,26 @@
 # Benchmarks: CP27 и предыдущие этапы
 
+## CP28 — полный cold RT-11 workload
+
+Полный HC1200 top без prefetch, microstore 954×36 и ROM dispatch:
+**355132188 clocks /3983731 retirements** от холодного reset до prompt после DIR.
+Включены bootstrap, STARTF.COM, private RK firmware и ожидания устройств;
+это не warm ALU loop. Получены 98 Files, 2201 Blocks и 51455 Free blocks.
+
+* 5215901 read beats /423446 write beats, включая error responses;
+* 3393830 FRAM CS assertions;
+* 162 SD reads /6 writes в RAM overlay неизменённого backing image;
+* 3270 проверенных UART wire bytes, 576 KW11 events.
+
+Среднее 89.145625 microclocks/retirement. При nominal 29.56 MHz:
+12.013944 s и 331592 retirements/s; это расчёт по RTL counters, не измерение FPGA.
+В ideal RAM mode новый board decoder добавляет один FETCH clock: MOV/ADD/CMP/BR
+занимают 3 clocks с 0 waits; default combinational core сохраняет 2 clocks.
+Число memory beats не увеличилось. Предыдущие CP27 prefetch/FIS benchmarks
+остаются историческими данными другого memory scope.
+[Методика/границы](hc1200-integration.md), [машинные данные](verification-cp28.json),
+[UART transcript](../tb/reports/cp28/cp28-uart.txt).
+
 ## CP27: FIS на RAM и SPI FRAM
 
 24 новых workload runs на каждую ROM-модель; portable Verilator и Lattice
@@ -242,7 +263,7 @@ modes: register/immediate/memory count, значения0,+1,+15,+16,+31,−32,�
 shift. Это latency, не CPI loop. Register loops дают1 demand beat/instruction;
 immediate/memory —1.96875 с учётом BR. FRAM prefetch не скрывает длинные serial shifts.
 [Полные данные](benchmarks-cp21.json), [algorithm и ограничения](eis-ash.md).
-CPU/SPI nominal29.56/14.78 MHz; физическая плата не измерялась.
+CPU/SPI nominal 29.56/14.78 MHz; физическая плата не измерялась.
 
 
 ## CP20: HALT restart / RESET
@@ -280,7 +301,7 @@ RESET alone с ideal FETCH —4 clocks, HALT —12. Warmup исключён:256/
 каждая инструкция содержит extension word. Отдельная MFPS Rn занимает 2 clocks
 с ideal FETCH, MTPS Rn — 8; loop CPI включает более быстрый BR.
 Prefetch скрывает дополнительную ALU работу MTPS в register stream; при
-nominal29.56 MHz получается~0.736 M instructions/s. В immediate варианте READ
+nominal 29.56 MHz получается~0.736 M instructions/s. В immediate варианте READ
 из T1 пока относится к data, а не stream. Memory-forms ограничены SPI.
 
 Новая differential группа:12852 completed cases,54492 bus beats,
@@ -313,7 +334,7 @@ PSW/R0..R7 и отсутствие неожиданных control effects про
 
 Все loops имеют один logical bus beat на instruction, но разные SPI CS/restart
 counts. Поэтому MFPT40.15625 CPI здесь нельзя напрямую сравнивать с39.078125
-старого RR loop другой длины. При nominal29.56 MHz новые NOP/MFPT streams
+старого RR loop другой длины. При nominal 29.56 MHz новые NOP/MFPT streams
 дают расчётные~0.736 M instructions/s, CC_mask~0.737 M; это RTL simulation,
 не результат платы. Full counts и calculated IPS — [benchmarks-cp18.json](benchmarks-cp18.json).
 [Microcode и ограничения](system-flags.md).

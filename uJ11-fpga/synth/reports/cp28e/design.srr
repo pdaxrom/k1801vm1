@@ -1,0 +1,86 @@
+#Build: Synplify Pro (R) V-2023.09L-2, Build 349R, Sep 17 2024
+#install: /home/sash/.local/lscc/diamond/3.14/synpbase
+#OS: Linux 
+#Hostname: sashz-ubuntu
+
+# Wed Sep  9 23:22:13 2026
+
+#Implementation: impl1
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys HDL Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Verilog Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/pmi_def.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/vlog/hypermods.v" (library __hyper__lib__)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_core.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_decode_rom.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/microcode/generated/uj11_decode_table.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_engine.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_decode.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_microseq.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_datapath.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_regfile.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_alu.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_psw.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/rtl/uj11_mem.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_board.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_board_bus.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_board_fram.v" (library work)
+@E: CG431 :"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_board_fram.v":17:49:17:50|Expecting radix character (one of b, o, h, or d) or unsized single bit literal (one of '1, '0, 'x, 'z) 
+@E: CG342 :"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_board_fram.v":27:13:27:21|Expecting target variable, found next_byte -- possible misspelling
+@E: CG342 :"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_board_fram.v":38:12:38:16|Expecting target variable, found state -- possible misspelling
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/reference/lsi11/spi_byte_service.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/microcode/generated/uj11_firmware_rom.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/boards/hc1200/uj11_microcomp.v" (library work)
+@I::"/tmp/uj11-cp28-e/uJ11-fpga/microcode/generated/uj11_m0_ebr.v" (library work)
+@N|stack limit increased to max
+3 syntax errors
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Wed Sep  9 23:22:13 2026
+
+###########################################################]
+@END
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Wed Sep  9 23:22:13 2026
+
+###########################################################]

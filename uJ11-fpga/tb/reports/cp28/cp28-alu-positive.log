@@ -1,0 +1,296 @@
+
+-- Running command `read_verilog build/cp28-alu-proof/miter.v reference/uj11/alu_cp27.v build/cp28-alu-proof/candidate.v; prep -top miter -flatten; sat -verify -prove mismatch 0 -show-inputs' --
+
+1. Executing Verilog-2005 frontend: build/cp28-alu-proof/miter.v
+Parsing Verilog input from `build/cp28-alu-proof/miter.v' to AST representation.
+Generating RTLIL representation for module `\miter'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: reference/uj11/alu_cp27.v
+Parsing Verilog input from `reference/uj11/alu_cp27.v' to AST representation.
+Generating RTLIL representation for module `\uj11_alu_cp27'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: build/cp28-alu-proof/candidate.v
+Parsing Verilog input from `build/cp28-alu-proof/candidate.v' to AST representation.
+Generating RTLIL representation for module `\uj11_alu'.
+Successfully finished Verilog frontend.
+
+4. Executing PREP pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \uj11_alu
+Used module:     \uj11_alu_cp27
+
+4.1.2. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \uj11_alu
+Used module:     \uj11_alu_cp27
+Removed 0 unused modules.
+Mapping positional arguments of cell miter.newalu (uj11_alu).
+Mapping positional arguments of cell miter.refalu (uj11_alu_cp27).
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$build/cp28-alu-proof/candidate.v:29$105 in module uj11_alu.
+Removed 1 dead cases from process $proc$reference/uj11/alu_cp27.v:23$15 in module uj11_alu_cp27.
+Marked 4 switch rules as full_case in process $proc$reference/uj11/alu_cp27.v:23$15 in module uj11_alu_cp27.
+Removed a total of 1 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 6 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~5 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\uj11_alu.$proc$build/cp28-alu-proof/candidate.v:29$105'.
+     1/1: $1\boolean_truth$func$build/cp28-alu-proof/candidate.v:29$36.$result[3:0]$109
+Creating decoders for process `\uj11_alu_cp27.$proc$reference/uj11/alu_cp27.v:23$15'.
+     1/8: $4\result[7:7]
+     2/8: $1\result[15:0] [15:8]
+     3/8: $1\result[15:0] [7]
+     4/8: $3\result[7:7]
+     5/8: $1\result[15:0] [6:0]
+     6/8: $2\result[7:7]
+     7/8: $1\v[0:0]
+     8/8: $1\c[0:0]
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\uj11_alu.\boolean_truth$func$build/cp28-alu-proof/candidate.v:29$35.$result' from process `\uj11_alu.$proc$build/cp28-alu-proof/candidate.v:29$105'.
+No latch inferred for signal `\uj11_alu_cp27.\c' from process `\uj11_alu_cp27.$proc$reference/uj11/alu_cp27.v:23$15'.
+No latch inferred for signal `\uj11_alu_cp27.\result' from process `\uj11_alu_cp27.$proc$reference/uj11/alu_cp27.v:23$15'.
+No latch inferred for signal `\uj11_alu_cp27.\v' from process `\uj11_alu_cp27.$proc$reference/uj11/alu_cp27.v:23$15'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\uj11_alu.$proc$build/cp28-alu-proof/candidate.v:29$105'.
+Removing empty process `uj11_alu.$proc$build/cp28-alu-proof/candidate.v:29$105'.
+Found and cleaned up 4 empty switches in `\uj11_alu_cp27.$proc$reference/uj11/alu_cp27.v:23$15'.
+Removing empty process `uj11_alu_cp27.$proc$reference/uj11/alu_cp27.v:23$15'.
+Cleaned up 5 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module uj11_alu.
+<suppressed ~3 debug messages>
+Optimizing module uj11_alu_cp27.
+<suppressed ~7 debug messages>
+Optimizing module miter.
+
+4.3. Executing FLATTEN pass (flatten design).
+Deleting now unused module uj11_alu.
+Deleting now unused module uj11_alu_cp27.
+<suppressed ~2 debug messages>
+
+4.4. Executing FUTURE pass.
+
+4.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 71 unused wires.
+<suppressed ~1 debug messages>
+
+4.7. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+4.8. Executing OPT pass (performing simple optimizations).
+
+4.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 258 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 170 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 164 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~282 debug messages>
+Removed a total of 94 cells.
+
+4.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $flatten\refalu.$procmux$170.
+    dead port 2/2 on $mux $flatten\refalu.$procmux$205.
+    dead port 2/2 on $mux $flatten\refalu.$procmux$227.
+Removed 3 multiplexer ports.
+<suppressed ~173 debug messages>
+
+4.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+    New ctrl vector for $pmux cell $flatten\refalu.$procmux$172: { $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:14$53_Y $auto$opt_reduce.cc:137:opt_pmux$260 $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:14$51_Y $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:14$50_Y $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:49$91_Y $flatten\newalu.$procmux$161_CMP $flatten\newalu.$procmux$162_CMP $flatten\newalu.$procmux$163_CMP $flatten\newalu.$procmux$164_CMP $flatten\refalu.$procmux$183_CTRL $flatten\newalu.$procmux$165_CMP $flatten\newalu.$procmux$166_CMP }
+    New ctrl vector for $pmux cell $flatten\refalu.$procmux$186: { $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:14$53_Y $auto$opt_reduce.cc:137:opt_pmux$262 $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:14$51_Y $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:14$50_Y $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:49$91_Y $flatten\newalu.$procmux$161_CMP $flatten\newalu.$procmux$162_CMP $flatten\newalu.$procmux$163_CMP $flatten\newalu.$procmux$164_CMP $flatten\refalu.$procmux$183_CTRL $flatten\newalu.$procmux$165_CMP $flatten\newalu.$procmux$166_CMP }
+    New ctrl vector for $pmux cell $flatten\refalu.$procmux$207: { $auto$opt_reduce.cc:137:opt_pmux$264 $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:13$48_Y $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:13$47_Y $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:49$91_Y $flatten\newalu.$procmux$161_CMP $flatten\newalu.$procmux$162_CMP $flatten\newalu.$procmux$163_CMP $flatten\newalu.$procmux$164_CMP $flatten\refalu.$procmux$183_CTRL $flatten\newalu.$procmux$165_CMP $flatten\newalu.$procmux$166_CMP }
+    New ctrl vector for $pmux cell $flatten\refalu.$procmux$229: { $auto$opt_reduce.cc:137:opt_pmux$266 $flatten\refalu.$procmux$183_CTRL }
+    New ctrl vector for $pmux cell $flatten\refalu.$procmux$243: { $auto$opt_reduce.cc:137:opt_pmux$272 $auto$opt_reduce.cc:137:opt_pmux$270 $flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:49$91_Y $auto$opt_reduce.cc:137:opt_pmux$268 $flatten\refalu.$procmux$183_CTRL }
+  Optimizing cells in module \miter.
+Performed a total of 5 changes.
+
+4.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 168 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 163 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 162 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~18 debug messages>
+Removed a total of 6 cells.
+
+4.8.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 88 unused wires.
+<suppressed ~1 debug messages>
+
+4.8.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.8.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~166 debug messages>
+
+4.8.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+4.8.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 162 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+4.8.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.8.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.14. Finished fast OPT passes. (There is nothing left to do.)
+
+4.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\refalu.$procmux$183_CMP3 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\refalu.$procmux$183_CMP2 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\refalu.$procmux$183_CMP1 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\refalu.$procmux$183_CMP0 ($eq).
+Removed top 16 bits (of 17) from port B of cell miter.$flatten\refalu.$add$reference/uj11/alu_cp27.v:15$8 ($add).
+Removed top 1 bits (of 17) from port A of cell miter.$flatten\refalu.$add$reference/uj11/alu_cp27.v:15$7 ($add).
+Removed top 1 bits (of 17) from port B of cell miter.$flatten\refalu.$add$reference/uj11/alu_cp27.v:15$7 ($add).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\newalu.$procmux$165_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\newalu.$procmux$164_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\newalu.$procmux$163_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell miter.$flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:12$45 ($eq).
+Removed top 2 bits (of 3) from port B of cell miter.$flatten\newalu.$eq$build/cp28-alu-proof/candidate.v:12$44 ($eq).
+Removed top 16 bits (of 17) from port B of cell miter.$flatten\newalu.$add$build/cp28-alu-proof/candidate.v:10$41 ($add).
+
+4.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.11. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.12. Executing OPT pass (performing simple optimizations).
+
+4.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 162 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+4.12.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.12.4. Finished fast OPT passes.
+
+4.13. Executing SORT pass.
+
+4.14. Printing statistics.
+
+=== miter ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      164 wires
+      647 wire bits
+       57 public wires
+      341 public wire bits
+        6 ports
+       39 port bits
+      162 cells
+        3   $add
+        8   $and
+       17   $eq
+        1   $ge
+       13   $logic_and
+        9   $logic_not
+       12   $logic_or
+       63   $mux
+        1   $ne
+        4   $not
+        4   $or
+        6   $pmux
+        5   $reduce_or
+        2   $scopeinfo
+       14   $xor
+
+4.15. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+5. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up SAT problem:
+Final constraint equation: { } = { }
+Imported 162 cells to SAT database.
+Import proof-constraint: \mismatch = 1'0
+Final proof equation: \mismatch = 1'0
+Import show expression: \a
+Import show expression: \b
+Import show expression: \byte_mode
+Import show expression: \carry
+Import show expression: \op
+
+Solving problem with 3324 variables and 9081 clauses..
+SAT proof finished - no model found: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+

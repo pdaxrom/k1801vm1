@@ -1,0 +1,40 @@
+CONTROL BENCH mode-1 JMP_indirect_self: 1792 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 JMP_absolute_self: 2560 clocks / 256 instructions, 512 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 JSR_R5_RTS: 2176 clocks / 384 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 JSR_PC_absolute_RTS: 2560 clocks / 384 instructions, 768 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 nested_JSR_R5_R4: 2048 clocks / 320 instructions, 576 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 SOB_countdown_16: 5184 clocks / 576 instructions, 608 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 stack_31_push_31_pop: 8696 clocks / 504 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 program_sum_1_to_16: 1712 clocks / 296 instructions, 328 memory beats, 0 CS, 0 SPI clocks
+PASS control benchmarks mode-1: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 284306000 (1ps)
+CONTROL BENCH mode0 JMP_indirect_self: 28672 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CONTROL BENCH mode0 JMP_absolute_self: 56320 clocks / 256 instructions, 512 memory beats, 512 CS, 24576 SPI clocks
+CONTROL BENCH mode0 JSR_R5_RTS: 71552 clocks / 384 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+CONTROL BENCH mode0 JSR_PC_absolute_RTS: 85376 clocks / 384 instructions, 768 memory beats, 896 CS, 37888 SPI clocks
+CONTROL BENCH mode0 nested_JSR_R5_R4: 64704 clocks / 320 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+CONTROL BENCH mode0 SOB_countdown_16: 69024 clocks / 576 instructions, 608 memory beats, 608 CS, 29184 SPI clocks
+CONTROL BENCH mode0 stack_31_push_31_pop: 117912 clocks / 504 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+CONTROL BENCH mode0 program_sum_1_to_16: 36288 clocks / 296 instructions, 328 memory beats, 336 CS, 15808 SPI clocks
+PASS control benchmarks mode0: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 5540026000 (1ps)
+CONTROL BENCH mode1 JMP_indirect_self: 28672 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CONTROL BENCH mode1 JMP_absolute_self: 38912 clocks / 256 instructions, 512 memory beats, 256 CS, 16384 SPI clocks
+CONTROL BENCH mode1 JSR_R5_RTS: 71552 clocks / 384 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+CONTROL BENCH mode1 JSR_PC_absolute_RTS: 76672 clocks / 384 instructions, 768 memory beats, 768 CS, 33792 SPI clocks
+CONTROL BENCH mode1 nested_JSR_R5_R4: 64704 clocks / 320 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+CONTROL BENCH mode1 SOB_countdown_16: 62496 clocks / 576 instructions, 608 memory beats, 512 CS, 26112 SPI clocks
+CONTROL BENCH mode1 stack_31_push_31_pop: 117912 clocks / 504 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+CONTROL BENCH mode1 program_sum_1_to_16: 24864 clocks / 296 instructions, 328 memory beats, 168 CS, 10432 SPI clocks
+PASS control benchmarks mode1: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 5081706000 (1ps)
+CONTROL BENCH mode2 JMP_indirect_self: 28672 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CONTROL BENCH mode2 JMP_absolute_self: 38912 clocks / 256 instructions, 512 memory beats, 256 CS, 16384 SPI clocks
+CONTROL BENCH mode2 JSR_R5_RTS: 71552 clocks / 384 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+CONTROL BENCH mode2 JSR_PC_absolute_RTS: 76672 clocks / 384 instructions, 768 memory beats, 768 CS, 33792 SPI clocks
+CONTROL BENCH mode2 nested_JSR_R5_R4: 64704 clocks / 320 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+CONTROL BENCH mode2 SOB_countdown_16: 76480 clocks / 576 instructions, 608 memory beats, 512 CS, 33792 SPI clocks
+CONTROL BENCH mode2 stack_31_push_31_pop: 117912 clocks / 504 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+CONTROL BENCH mode2 program_sum_1_to_16: 28224 clocks / 296 instructions, 328 memory beats, 168 CS, 12352 SPI clocks
+PASS control benchmarks mode2: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 5263716000 (1ps)

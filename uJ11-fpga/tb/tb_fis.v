@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Real production core, synchronous ROM and RAM or MR45V100A SPI transport.
 // Expectations come from exact rational arithmetic and a separate ISA model.
-module tb_fis #(parameter integer MEMORY_MODE=-1, CANDIDATE_ROM=1);
+module tb_fis #(parameter integer ROM_DECODE=0, MEMORY_MODE=-1, CANDIDATE_ROM=1);
     reg clk=0,reset=1,active=0,irq_valid=0;
     wire [15:0] addr,wdata,rdata,ir,mdr,psw,q,rf_data;
     wire request,reading,writing,byte_access,ack,error,stopped,retire,rf_write;
@@ -25,7 +25,7 @@ module tb_fis #(parameter integer MEMORY_MODE=-1, CANDIDATE_ROM=1);
     assign ack=inject_error || raw_ack;
     assign error=inject_error || raw_error;
     assign rdata=inject_error ? 16'b0 : raw_data;
-    uj11_core dut(.clk(clk),.reset(reset),.irq_valid(irq_valid),.irq_priority(3'd7),
+    uj11_core #(.ROM_DECODE(ROM_DECODE)) dut(.clk(clk),.reset(reset),.irq_valid(irq_valid),.irq_priority(3'd7),
         .irq_vector(8'o040),.irq_ack(irq_ack),.waiting(waiting),.peripheral_reset(),
         .mem_addr(addr),.mem_write_data(wdata),.mem_request(request),.mem_read(reading),
         .mem_write(writing),.mem_byte(byte_access),.mem_ack(ack),.mem_error(error),
