@@ -1,5 +1,16 @@
 # Synthesis checkpoints
 
+## CP30 — FP11 control/state, полный HC1200 top
+
+Первое FP-подмножество измерено до расширения арифметики:
+**CP30d: 1265 LUT4 / 327 FF / 6 EBR / 635 slices, 31.284 MHz, 29.56 PASS**.
+Тот же оптимизированный RTL с опцией FP выключенной: **CP30e: 1230 LUT4 /
+326 FF / 6 EBR / 618 slices, 30.116 MHz, PASS**. Microstore 987/1024×36 v13.
+CP30a/b/c не прошли MAP (1329/1275/1281 LUT и 668/643/644 slices); raw reports
+сохранены. [Полная таблица, причины и ограничения](fp11a.md). Полный FP11
+не реализован; на плате остаётся CP29. Запас CP30d — 15 LUT и 5 slices.
+
+
 ## CP29a — panel input synchronizers and physical programming
 
 Clean full-board result: **1239 LUT4, 326 FF, 6 EBR, 621 slices, 30.609 MHz TRACE**, 29.56 MHz PASS, fully routed. Microcode remains 954×36. The exact JED was programmed with FLASH verify and boots RT-11 on the real board. [Reports and hardware evidence](board-bringup-cp29.md).

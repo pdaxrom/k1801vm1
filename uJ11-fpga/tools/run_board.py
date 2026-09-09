@@ -15,6 +15,7 @@ def main():
     p.add_argument('--image',type=Path,default=ROOT/'../lsi11-fpga/images/rt11v503.dsk')
     p.add_argument('--tag',default='cp28')
     p.add_argument('--vendor',action='store_true')
+    p.add_argument('--fp11-control',action='store_true')
     args=p.parse_args()
     assert re.fullmatch(r'[a-z0-9-]+',args.tag)
     assert args.image.exists()
@@ -28,6 +29,7 @@ def main():
     image_hash=hashlib.sha256(args.image.read_bytes()).hexdigest()
     manifest=dict(files=source_hashes,image_sha256=image_hash,image_bytes=args.image.stat().st_size,
                   mode=('vendor DP8KC' if args.vendor else 'portable')+' Verilator; cold CPU reset; actual UART wire scoreboard; SD read-only backing + RAM overlay')
+    manifest['fp11_control_enabled']=args.fp11_control
     (ROOT/f'build/{args.tag}-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     # Freeze the imported models; scope their established implicit-width
     # conventions to those files only. New board/core RTL keeps fatal warnings.
@@ -51,6 +53,8 @@ def main():
                  '--Mdir',f'build/obj-{args.tag}-board-rt11','tb/tb_board_rt11.v']+sources
         executable=[f'build/obj-{args.tag}-board-rt11/Vtb_board_rt11']
     with (ROOT/f'build/{args.tag}-board-build.log').open('w') as log:
+        if args.fp11_control:
+            command += ['-Ptb_board_rt11.FP11_CONTROL=1'] if args.vendor else ['-GFP11_CONTROL=1']
         subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     with (ROOT/f'build/{args.tag}-board-rt11.log').open('w') as log:
         subprocess.run(executable+[f'+SD_IMAGE={args.image.resolve()}',

@@ -240,14 +240,17 @@ module uj11_board_bus #(
 
 	wire [15:0] ltc_rdata = {8'b0, timer_done, timer_ie, 6'b0};
 	wire [15:0] panel_rdata;
-	assign rdata = uart_selected ? uart_rdata :
-		maint_selected ? 16'o000031 :
-		ltc_selected ? ltc_rdata :
-		panel_selected ? panel_rdata :
-		sd_selected ? sd_rdata :
-		rk_fixed_selected ? (rk_ds_selected ? 16'o100701 : 16'o000200) :
-		local_boot_selected ? local_rdata :
-		program_selected ? boot_program_word : fram_rdata;
+	// Decodes are mutually exclusive, including boot overlays and RK physical
+	// copy cycles. Parallel masked buses avoid an eight-level priority chain.
+	assign rdata = (uart_rdata & {16{uart_selected}}) |
+		(16'o000031 & {16{maint_selected}}) |
+		(ltc_rdata & {16{ltc_selected}}) |
+		(panel_rdata & {16{panel_selected}}) |
+		(sd_rdata & {16{sd_selected}}) |
+		((rk_ds_selected ? 16'o100701 : 16'o000200) & {16{rk_fixed_selected}}) |
+		(local_rdata & {16{local_boot_selected}}) |
+		(boot_program_word & {16{program_selected}}) |
+		(fram_rdata & {16{fram_selected}});
 	assign acknowledge = uart_ack || (request && ltc_selected) ||
 		(request && maint_selected) ||
 		(request && panel_selected) ||

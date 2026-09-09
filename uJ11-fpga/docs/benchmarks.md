@@ -1,5 +1,15 @@
 # Benchmarks: CP27 и предыдущие этапы
 
+## CP30 — первый FP control subset
+
+При sync decode и RAM без ожиданий: LDFPS/STFPS Rn — 6 microclocks,
+CFCC и SETF/I/D/L — 10; у каждой один внешний opcode fetch. Corpus из
+90112 состояний с 0…3 wait states: 757760 clocks. Это ещё не FP arithmetic
+benchmark. FP-enabled cold RT-11 + DIR: 355134893 clocks, 3983747 retirements,
+3270 UART wire bytes; физическую прошивку CP29 не меняли.
+[Методика и ограничения](fp11a.md).
+
+
 ## CP28 — полный cold RT-11 workload
 
 Полный HC1200 top без prefetch, microstore 954×36 и ROM dispatch:

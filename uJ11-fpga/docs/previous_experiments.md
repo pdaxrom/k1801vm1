@@ -660,3 +660,20 @@ uJ11 CP28 экономит 54 LUT/29 slices/1 EBR. Сопоставимого AM
 с prefetch/probe; CP28 prefetch пока выключен. Желательная площадь 900–1100 LUT,
 полный FP11, external pin timing и физическая проверка uJ11 ещё впереди.
 [Полные условия](hc1200-integration.md), [manifest](verification-cp28.json).
+
+
+## CP30: начало FP11(A), 2026-09-10
+
+Повторно проверены существующий `core/pdp11_fp.c`, AM4 `mc.asm` и
+`/Users/sash/Work/FPGA/microcpu/ucode/j11_fis.asm`. В AM4/microcpu найден
+FIS; готового полного FP11 в их текущих микропрограммах не найдено.
+Существующий DCJ11 FP11 C core использован как независимый oracle только
+для первого управляющего подмножества. Ни core, ни microasm11 не изменены.
+Первичный ISA источник — DEC FP11-A User's Guide.
+
+uJ11 CP30: общая память decoder/FP state, семь управляющих мнемоник,
+33 новых слова, всего 987/1024×36. Полный top с FP: 1265 LUT4/327 FF/6 EBR,
+635 slices, 31.284 MHz. Тот же RTL без FP: 1230 LUT4/326 FF/6 EBR,
+618 slices, 30.116 MHz. Оба 29.56 MHz PASS. Первые три варианты не прошли
+MAP: 1329/1275/1281 LUT, 668/643/644 slices. Это не fit полной FP11 ISA.
+[Полные источники, raw reports, тесты и границы](fp11a.md).

@@ -14,13 +14,21 @@ from report_synthesis import extract
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('name')
+    p.add_argument('--fp11-control',action='store_true',help='Measure the experimental FP control/state checkpoint')
     args=p.parse_args()
-    assert re.fullmatch(r'cp(?:28|29)[a-z][a-z0-9-]*',args.name)
+    assert re.fullmatch(r'cp(?:28|29|30)[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
     assert not (out/'impl1').exists(), 'fresh implementation directory required'
     top='uj11_hc1200_microcomp'
     sources=CORE+BOARD+['boards/hc1200/uj11_microcomp.v','microcode/generated/uj11_m0_ebr.v']
+    if args.fp11_control:
+        source=(ROOT/'boards/hc1200/uj11_microcomp.v').read_text()
+        assert source.count('uj11_board system(')==1
+        source=source.replace('uj11_board system(', 'uj11_board #(.FP11_CONTROL(1)) system(')
+        generated=f'build/{args.name}/fp11_top.v'
+        (ROOT/generated).write_text(source)
+        sources[sources.index('boards/hc1200/uj11_microcomp.v')]=generated
     proj=ET.Element('BaliProject',version='3.2',title=args.name,device='LCMXO2-1200HC-4SG32C',default_implementation='impl1')
     ET.SubElement(proj,'Options')
     impl=ET.SubElement(proj,'Implementation',title='impl1',dir='impl1',synthesis='synplify',default_strategy='Strategy1')
@@ -49,7 +57,8 @@ exit 0
     inputs=sources+['boards/hc1200/pins.lpf','synth/machxo2/uj11-board.sty','tools/checkpoint_board.py','tools/board_common.py',
                    'tools/build_firmware.py','tools/build_decode_rom.py','tools/make_ebr.py','tools/report_synthesis.py',
                    'firmware/sd_boot.asm','firmware/rk_service.asm',
-                   'microcode/m0.uasm','microcode/fis.uasm','microasm/uj11asm.py','tools/link_fis.py']
+                   'microcode/m0.uasm','microcode/fis.uasm','microcode/fp11_control.uasm',
+                   'boards/hc1200/uj11_microcomp.v','microasm/uj11asm.py','tools/link_fis.py']
     hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in sorted(inputs)}
     hashes['generated:clock.lpf']=hashlib.sha256(lpf.encode()).hexdigest()
     manifest=dict(name=args.name,top=top,files=hashes,
@@ -64,6 +73,7 @@ exit 0
     report=dict(inputs=manifest,scope='Full board: core/FIS + SPI FRAM + KL11/KW11/panel/SD/RK + bootstrap + OSCH/reset/pins; prefetch disabled',
                 device='LCMXO2-1200HC-4SG32C',constraint_mhz=29.56,expected_ebr=6,diamond_returncode=rc,
                 external_pin_delays_constrained=False)
+    report['fp11_control_enabled']=args.fp11_control
     try:
         report.update(extract(prefix.with_suffix('.mrp').read_text(),prefix.with_suffix('.twr').read_text(),prefix.with_suffix('.par').read_text()))
     except (OSError,ValueError) as error:

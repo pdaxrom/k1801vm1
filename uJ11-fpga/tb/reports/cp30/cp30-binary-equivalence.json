@@ -1,0 +1,14 @@
+{
+  "cp30d": {
+    "different_files": [
+      "microasm/uj11asm.py"
+    ],
+    "rom_sha256": "c15abd1b265d6cca322c7121cf9ad5f132ff97b462513c657b106a3e328fe3cf"
+  },
+  "cp30e": {
+    "different_files": [
+      "microasm/uj11asm.py"
+    ],
+    "rom_sha256": "c15abd1b265d6cca322c7121cf9ad5f132ff97b462513c657b106a3e328fe3cf"
+  }
+}

@@ -2,7 +2,7 @@
 // CP28 complete board system. A single legacy FRAM transport owns the pins.
 // No prefetch in this initial full-peripheral resource baseline; no MMU.
 module uj11_board #(
-    parameter integer CLOCK_HZ=29560000, TICK_DIVISOR=591200,
+    parameter integer CLOCK_HZ=29560000, TICK_DIVISOR=591200, FP11_CONTROL=0,
     parameter integer SD_SLOW_DIV=68, SD_FAST_DIV=2
 ) (
     input wire clk, reset, uart_rx,
@@ -51,7 +51,7 @@ module uj11_board #(
             else if(!timeout) timeout_count<=timeout_count+1'b1;
         end
     end
-    uj11_core #(.ROM_DECODE(1),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
+    uj11_core #(.ROM_DECODE(1),.FP11_CONTROL(FP11_CONTROL),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
         .clk(clk),.reset(reset),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector[15:1]),
         .irq_ack(irq_ack),.waiting(),.peripheral_reset(peripheral_reset),
         .mem_addr(address),.mem_write_data(data),.mem_request(request),.mem_read(),

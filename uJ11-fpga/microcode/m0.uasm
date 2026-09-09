@@ -21,7 +21,7 @@ RESET:
     alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
     alu PASSA, pair=DA, d=ZERO, b=T6, dst=RF
     alu PASSA, pair=DA, d=ZERO, b=T7, dst=RF
-    JUMP, target=FETCH
+    JUMP, target=FETCH, fp_init=1
 .org $020
 FETCH:
     FETCH

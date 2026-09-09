@@ -1,0 +1,2 @@
+PASS shared decode/FP EBR: 66720 checks, 32 words, walking bits, all 65536 dispatch entries after writes
+tb/tb_fp_state.v:53: $finish called at 1333506000 (1ps)

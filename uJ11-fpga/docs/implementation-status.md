@@ -1,5 +1,15 @@
 # Implementation status, 2026-09-10
 
+## CP30 — FP11(A) начат, полная ISA ещё не реализована
+
+ODT отложен в [TODO](../TODO.md). Есть семь микрокодных FP control commands
+(21 encoding): CFCC, SETF/I/D/L, LDFPS/STFPS Rn. FP state использует свободные
+ячейки EBR decoder, основной RF16×16 сохранён. 987/1024×36 v13.
+Экспериментальный полный top: 1265 LUT4/327 FF/6 EBR, TRACE 31.284 MHz,
+29.56 MHz PASS. Default `FP11_CONTROL=0`; плату не перепрошивали.
+[Источники, результаты проверок и оставшаяся работа](fp11a.md).
+
+
 ## CP29 — physical HC1200 bring-up
 
 FLASH verification, real RT-11 boot/DIR and RGB/HDSP operation are confirmed. Keyboard codes and panel ESC are user-confirmed. HG read/write and file readback passed on real hardware at 1 kHz; the test daemon was stopped afterward. [Evidence and limits](board-bringup-cp29.md).

@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_board_bus;
+module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
     reg clk=0,reset=1,peripheral_reset=0,request=0,writing=0,fetch=0,irq_ack=0;
     reg [1:0] lanes=3;reg [15:0] address=0,data=0;
     wire [15:0] value,vector,rom_data;wire [2:0] priority_level;
@@ -7,7 +7,11 @@ module tb_board_bus;
     wire [8:0] rom_address;wire [5:0] panel;wire host,host_enable,tx;
     reg [15:0] answer;reg [15:0] firmware[0:511];
     integer clocks=0,sd_edges=0,ticks=0,checks=0,guard,previous_edges,i,movb_address=-1;
-    always #5 clk=~clk;
+    reg run_clock=1;
+    integer scenario,probe,selection_count,selector_checks=0;
+    reg [8:0] selections;
+    reg [15:0] priority_value;
+    always #5 if(run_clock)clk=~clk;
     always @(posedge clk)begin clocks=clocks+1;if(event_irq)ticks=ticks+1;end
     always @(posedge ss)sd_edges=sd_edges+1;
     uj11_board_bus #(.TICK_DIVISOR(37),.SD_BOOT_ENABLE(1),.RK_SERVICE_ENABLE(1)) dut(
@@ -78,7 +82,37 @@ module tb_board_bus;
         beat(1,1,16'o177566,16'h0041,0);
         if(memory.memory[16'o177566]!=8'h41 || !dut.fixed_uart.console.tx_ready)$fatal(1,"DMA hit UART instead of physical FRAM");
         beat(0,3,16'o160476,0,1);if(dut.rk_service_active)$fatal(1,"RTI overlay release");
-        $display("PASS board bus: %0d beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK bank/vector/DMA/RTI",checks);$finish;
+        $display("PASS board bus: %0d beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK bank/vector/DMA/RTI",checks);
+        if(CHECK_SELECTORS!=0)begin
+            // Freeze sequential devices; exhaust the combinational decode over
+            // all addresses and all relevant overlay/RK/direction states.
+            @(negedge clk);run_clock=0;request=0;
+            for(scenario=0;scenario<256;scenario=scenario+1)begin
+                dut.boot_overlay_active=scenario[0];dut.boot_release_armed=scenario[1];
+                dut.rk_service_active=scenario[2];dut.rk_service_movb=scenario[3];
+                dut.rk_write_command=scenario[4];dut.rk_cs1_initialized=scenario[5];
+                writing=scenario[6];fetch=scenario[7];
+                for(probe=0;probe<65536;probe=probe+1)begin
+                    address=probe[15:0];#1;
+                    selections={dut.uart_selected,dut.maint_selected,dut.ltc_selected,
+                        dut.panel_selected,dut.sd_selected,dut.rk_fixed_selected,
+                        dut.local_boot_selected,dut.program_selected,dut.fram_selected};
+                    selection_count=$countones(selections);
+                    if(selection_count>1)$fatal(1,"overlapping selectors scenario %0d addr %o: %b",scenario,address,selections);
+                    priority_value=dut.uart_selected ? dut.uart_rdata :
+                        dut.maint_selected ? 16'o31 : dut.ltc_selected ? dut.ltc_rdata :
+                        dut.panel_selected ? dut.panel_rdata : dut.sd_selected ? dut.sd_rdata :
+                        dut.rk_fixed_selected ? (dut.rk_ds_selected ? 16'o100701 : 16'o200) :
+                        dut.local_boot_selected ? dut.local_rdata :
+                        dut.program_selected ? dut.boot_program_word : dut.fram_rdata;
+                    if(selection_count==1 && value!==priority_value)
+                        $fatal(1,"read mux changed scenario %0d addr %o",scenario,address);
+                    selector_checks=selector_checks+1;
+                end
+            end
+            $display("PASS board selector/mux equivalence: %0d combinations, all 16-bit addresses and overlay/RK states",selector_checks);
+        end
+        $finish;
     end
-    initial begin #1000000;$fatal(1,"board bus watchdog");end
+    initial begin #(CHECK_SELECTORS!=0 ? 20000000 : 1000000);$fatal(1,"board bus watchdog");end
 endmodule

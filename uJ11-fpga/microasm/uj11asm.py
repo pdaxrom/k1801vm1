@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""uJ11 semi-horizontal backend v12. D/Q pair, conditional retirement and byte operations."""
+"""uJ11 semi-horizontal backend v13. Private FP state cycles and reset hook; v12 datapath preserved."""
 import argparse
 import json
 import re
@@ -126,9 +126,9 @@ def encode(line, addr, labels):
         if cmd == 'CJUMP':
             allowed.add('cond')
         if cmd == 'JUMP':
-            allowed.add('init')
+            allowed.update({'init','fp_init'})
         if cmd in {'READ','WRITE'}:
-            allowed.update({'a','b','byte'})
+            allowed.update({'a','b','byte','private'})
         if cmd == 'READ':
             allowed.update({'stream','fault_inc'})
         if cmd == 'OR_R67':
@@ -141,6 +141,13 @@ def encode(line, addr, labels):
         byte_fixed = 0 if byte_auto else bounded(number(f.get('byte','0')), 1, 'byte')
         stream = bounded(number(f.get('stream','0')), 1, 'stream')
         fault_inc = bounded(number(f.get('fault_inc','0')), 1, 'fault_inc')
+        private = bounded(number(f.get('private','0')), 1, 'private')
+        fp_init = bounded(number(f.get('fp_init','0')),1,'fp_init')
+        if fp_init and (init or f.get('target','').upper()!='FETCH'):
+            raise AssemblyError('fp_init requires JUMP to FETCH without peripheral init')
+        if private and (byte_auto or byte_fixed or stream or fault_inc or
+                        bounded(number(f.get('prefetch','1')),1,'prefetch')):
+            raise AssemblyError('private READ/WRITE requires word, prefetch=0 and no stream/fault_inc')
         if stream and (f.get('a','R0').upper() not in {'R7','RS','RD'} or byte_fixed):
             raise AssemblyError('stream READ requires a=R7/RS/RD and byte=0/IR')
         if 'target' in allowed and 'target' not in f:
@@ -163,7 +170,7 @@ def encode(line, addr, labels):
                 enum(f.get('cond','ALWAYS'), CONDS) << 7 |
                 enum(f.get('a', a_default), REGS) << 26 |
                 enum(f.get('b', b_default), REGS) << 21 |
-                byte_fixed << 6 | int(byte_auto) << 3 | stream << 5 | fault_inc << 2 |
+                byte_fixed << 6 | int(byte_auto) << 3 | stream << 5 | fault_inc << 2 | (private | fp_init) << 1 |
                 (1-bounded(number(f.get('prefetch','1')),1,'prefetch')) << 4 | init)
         if cmd == 'FETCH':
             # command 2 == ALU ADD; target/condition are unused by FETCH.
@@ -234,7 +241,7 @@ def assemble(source):
         end = groups[index+1][0] if index+1 < len(groups) else 1024
         routines[name] = {'address': start,
                           'words_until_next_label': sum(start <= a < end for a in instructions)}
-    stats = {'encoding_version': 12, 'word_bits': 36, 'physical_words': 1024,
+    stats = {'encoding_version': 13, 'word_bits': 36, 'physical_words': 1024,
              'used_words': len(instructions), 'occupancy_percent': len(instructions)*100/1024,
              'highest_address': max(instructions), 'routines': routines,
              'note': 'Label spans are static word counts, not dynamic instruction CPI.'}

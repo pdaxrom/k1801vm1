@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // Hierarchical predecode; instruction bits form all dynamic entry fields.
-module uj11_decode(input wire [15:0] ir, output reg [9:0] entry);
+module uj11_decode #(parameter integer FP11_CONTROL=0)(input wire [15:0] ir, output reg [9:0] entry);
     wire memory_mode=|ir[5:3];
     wire rr=!(|ir[11:9]) && !memory_mode;
     always @* begin
@@ -50,6 +50,19 @@ module uj11_decode(input wire [15:0] ir, output reg [9:0] entry);
                 endcase
                 default: entry=10'h042;
             endcase
+            4'hf: if(FP11_CONTROL!=0) begin
+                case(ir[11:0])
+                    12'o0000: entry=10'h116; // CFCC
+                    12'o0001: entry=10'h136; // SETF
+                    12'o0002: entry=10'h146; // SETI
+                    12'o0011: entry=10'h156; // SETD
+                    12'o0012: entry=10'h166; // SETL
+                    default: begin
+                        if(ir[11:3]==9'o010)entry=10'h0a1; // LDFPS Rn
+                        if(ir[11:3]==9'o020)entry=10'h10e; // STFPS Rn
+                    end
+                endcase
+            end
             default: entry=10'h042;
         endcase
     end

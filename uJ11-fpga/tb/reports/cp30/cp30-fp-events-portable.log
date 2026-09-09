@@ -1,0 +1,2 @@
+PASS FP reset/trace/IRQ: 448 cases, seven controls, all NZVC, trace wins over IRQ, post-FP PC/PSW frame
+tb/tb_fp_events.v:79: $finish called at 281696000 (1ps)

@@ -1,0 +1,251 @@
+{
+  "checkpoint": "CP30 FP11 control/state; full FP11 not implemented",
+  "date": "2026-09-10",
+  "mmu": false,
+  "board_programmed": false,
+  "physical_board_revision": "CP29a",
+  "fp11_control_default": false,
+  "microcode_words": 987,
+  "microcode_width": 36,
+  "encoding_version": 13,
+  "supported_encodings": 21,
+  "mnemonics": [
+    "CFCC",
+    "SETF",
+    "SETI",
+    "SETD",
+    "SETL",
+    "LDFPS Rn",
+    "STFPS Rn"
+  ],
+  "synthesis": {
+    "cp30a": {
+      "lut4": 1329,
+      "ff": 327,
+      "ebr": 6,
+      "slices": 668,
+      "fmax_mhz": null,
+      "timing_pass": false,
+      "fully_routed": false,
+      "fp11_control_enabled": true
+    },
+    "cp30b": {
+      "lut4": 1275,
+      "ff": 327,
+      "ebr": 6,
+      "slices": 643,
+      "fmax_mhz": null,
+      "timing_pass": false,
+      "fully_routed": false,
+      "fp11_control_enabled": true
+    },
+    "cp30c": {
+      "lut4": 1281,
+      "ff": 327,
+      "ebr": 6,
+      "slices": 644,
+      "fmax_mhz": null,
+      "timing_pass": false,
+      "fully_routed": false,
+      "fp11_control_enabled": true
+    },
+    "cp30d": {
+      "lut4": 1265,
+      "ff": 327,
+      "ebr": 6,
+      "slices": 635,
+      "fmax_mhz": 31.284,
+      "timing_pass": true,
+      "fully_routed": true,
+      "fp11_control_enabled": true
+    },
+    "cp30e": {
+      "lut4": 1230,
+      "ff": 326,
+      "ebr": 6,
+      "slices": 618,
+      "fmax_mhz": 30.116,
+      "timing_pass": true,
+      "fully_routed": true,
+      "fp11_control_enabled": false
+    }
+  },
+  "full_fp11_fit_proven": false,
+  "tests": {
+    "control_cases_per_rom": 90112,
+    "control_total_clocks_per_rom": 757760,
+    "trace_irq_reset_cases_per_rom": 448,
+    "state_checks_per_rom": 66720,
+    "selector_combinations": 16777216,
+    "integer_cases": 12928,
+    "fis_cases": 23840,
+    "fis_fp_enabled_cases_per_memory": 23840,
+    "fis_fp_enabled_memory_modes": [
+      "RAM",
+      "SPI FRAM no prefetch"
+    ],
+    "python_tests": 24
+  },
+  "benchmarks": {
+    "portable": {
+      "LDFPS R0": {
+        "microclocks": 6,
+        "external_beats": 1
+      },
+      "STFPS R0": {
+        "microclocks": 6,
+        "external_beats": 1
+      },
+      "CFCC": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETF": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETI": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETD": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETL": {
+        "microclocks": 10,
+        "external_beats": 1
+      }
+    },
+    "vendor": {
+      "LDFPS R0": {
+        "microclocks": 6,
+        "external_beats": 1
+      },
+      "STFPS R0": {
+        "microclocks": 6,
+        "external_beats": 1
+      },
+      "CFCC": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETF": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETI": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETD": {
+        "microclocks": 10,
+        "external_beats": 1
+      },
+      "SETL": {
+        "microclocks": 10,
+        "external_beats": 1
+      }
+    }
+  },
+  "rt11": {
+    "fp11_control_enabled": true,
+    "clocks": 355134893,
+    "retirements": 3983747,
+    "read_beats": 5215923,
+    "write_beats": 423448,
+    "fram_cs": 3393856,
+    "uart_wire_bytes": 3270,
+    "sd_read_commands": 162,
+    "sd_write_commands": 6,
+    "backing_image_modified": false
+  },
+  "manual": {
+    "title": "DEC EK-FP11A-UG-001 FP11-A User's Guide",
+    "url": "https://ftpmirror.your.org/pub/misc/bitsavers/www.computer.museum.uq.edu.au/pdf/EK-FP11A-UG-001%20FP11-A%20Floating%20Point%20User%27s%20Manual.pdf",
+    "sha256": "be6446903afc3d6ca0e1b0efed85301853979e3a1c5631c8a6e707165c63ecf6",
+    "sections": [
+      "4.4 / Table 4-1",
+      "5.1",
+      "Table 5-2",
+      "5.3.15-5.3.22"
+    ]
+  },
+  "fitted_source_note": "Only assembler statistics encoding_version 12->13 changed after CP30d/e; HDL and ROM unchanged.",
+  "source_sha256": {
+    "../core/core.c": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+    "../core/core.h": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+    "../core/hardware.c": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+    "../core/pdp11_fp.c": "ad5ef37ef0ee8fa9221632ad903224599759cf95a4bcbe4f5dfd77e0870f2220",
+    "boards/hc1200/uj11_board.v": "642cee3ecea4b3638e45ce93ffebbe659dfe068967fb33eb71c253ebd20679df",
+    "boards/hc1200/uj11_board_bus.v": "3eb8ca2f5cfa122d93978735479031400ccc979e910822b9dcaf5dbc76f9c917",
+    "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "microasm/uj11asm.py": "ae413951af9310b69b69733a98e7ec636a57ea90ad29c18ac0b8d40e4daddc55",
+    "microcode/fis.uasm": "176c697098954b00851da729de36f7765ca60e0e7f06758d30b6b48f301890e2",
+    "microcode/fp11_control.uasm": "bfb7d8cf513dbc0b8e5226fe62f175b0f064c857350840cbb0cf8238d6d350e5",
+    "microcode/generated/uj11_decode_table.v": "30f3f27c28d39ef6ff13ae397235d7272f34bbf18370b0682054255607ea4e7e",
+    "microcode/generated/uj11_firmware_rom.v": "e22de9feed4619d88ffa5878a102547aa10ad561d79f33cd15d9536ab5d04b25",
+    "microcode/m0.uasm": "3ad9236ccfdeac1961ed3ef7882156f9fdbfb0a4b1f8c308653730f15fce3dd2",
+    "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "rtl/uj11_alu.v": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+    "rtl/uj11_core.v": "7c6c959ecdcf02f10d64e61eb8d9b76ed52be932bba321f6ae6efbc5bba5a312",
+    "rtl/uj11_datapath.v": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+    "rtl/uj11_decode.v": "a1c5f8fd7054a8af37b8755a991e9c86769859b66c0a5c13a3d4aab00449775e",
+    "rtl/uj11_decode_rom.v": "58f6c77657a2bd176f579670b15426869960d64c19f0f197f72f66279ce906c7",
+    "rtl/uj11_engine.v": "5f991b318e0d24010fd6d3cb4dd347214b68bc7b047df711be22d4396d33d31b",
+    "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_microseq.v": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+    "rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "tb/reference_fp_control.c": "5d88bac829ca612eef2ac8b35230136c000f2b1aad5270e404d4d359ece475f3",
+    "tb/tb_board_bus.v": "68b457518f4bfa5b4f4aa76b9cdb4e2ef7f0b3e40c161e21cf727f7df0d7bf1c",
+    "tb/tb_fp_control.v": "79978acdee1cd5a7ff4f15346e06e57510ffd51ae91f37a7d3c29261e81a180d",
+    "tb/tb_fp_events.v": "c196eeca265696587e5212dc9f8eaa14259bbb26994c41838f5df42b0c5ae8b4",
+    "tb/tb_fp_state.v": "b468ce1f292dbffa0881296432a7384ac97dbc77b856000004638356d9521ac5",
+    "tb/test_fp_control.py": "eba5f0f6c582d965a9ef8909235b8a09480c9c53f5e92b8570e442f1577493cf",
+    "tools/benchmark_fp_control.py": "097ec7c59ac4ecbc6fd13334c3a46a85aebfddf6d139b7ae855ee5cf52024431",
+    "tools/build_decode_rom.py": "17d0971fea68e561f8e3b5b5cbc269a857c774015b3eb4be9b27b1a8d7580fae",
+    "tools/check_fp_compat.py": "2ee7889ca99c9629dd3d5258ca0afce918f02ea9cfa6a9239d3891d2654e793a",
+    "tools/link_fis.py": "d6f8d1bed8a03060555dd81cc425995ab6c545044cf3f5f16e26c93249247a84",
+    "tools/record_cp30.py": "64ee95e3c904848bd9b039ba552ea89cd77c1d65f2de293270e5f809987dc7d2",
+    "tools/run_fp_control.py": "a94f4b4b26a063d6e55c30fbeff0d5b1622631c8f2b595c61e6a7b6497dcb68b"
+  },
+  "logs_sha256": {
+    "tb/reports/cp30/cp30-binary-equivalence.json": "28b68553b7a8e20032b581a72395f38373505f81ac1bcfb8a672fc0d143bc68d",
+    "tb/reports/cp30/cp30-board-selector.log": "f3112a6aeb31125c6862976d19cc8feae606aa6c02290ba9aa0de625fd1e6ff1",
+    "tb/reports/cp30/cp30-board-units.log": "b0904aa585e4cb01c1acbf7d1dd9792ac44f00fdc79e81d9a1524a7139a86ffa",
+    "tb/reports/cp30/cp30-core-baseline.log": "f991feabf0df452d3893b3becf5ae85a33efe3a8fe192c530a1e4e0132a7ccf5",
+    "tb/reports/cp30/cp30-fis-fp--1.csv.gz": "26e74e51d5e558eb3f258b0b06e13358bd8f7bf05f941224c6f6c53e36b01214",
+    "tb/reports/cp30/cp30-fis-fp--1.log": "101cc0ca7ff63511c4f2cb1d5e55e35a9972406acfe3ecbefab743f23748caf8",
+    "tb/reports/cp30/cp30-fis-fp-1.csv.gz": "fa3eb9bc8112e65dbf2552692b76d027cc5026c18d4a1a3680956a946d52cb4f",
+    "tb/reports/cp30/cp30-fis-fp-1.log": "8624571fc5095b03e3b50fcb09ee1e4bd1b53176ca81ac5accc769ba06f66e88",
+    "tb/reports/cp30/cp30-fp-bench-portable.log": "c5972924ec8cfeba3c78ced2e56a9b5c0655247ef7c293a30d12e0c4274e71ba",
+    "tb/reports/cp30/cp30-fp-bench-vendor.log": "c5972924ec8cfeba3c78ced2e56a9b5c0655247ef7c293a30d12e0c4274e71ba",
+    "tb/reports/cp30/cp30-fp-bench.json": "133ca4c25a4831d62063ad9399942e63fbeadedc2fbc22c084d8d2a6debcdb7d",
+    "tb/reports/cp30/cp30-fp-board-build.log": "e8bab6bbad0a06e3650b1ab98d1a0204bf111fd50216fc463c2f2bc492de2a34",
+    "tb/reports/cp30/cp30-fp-board-driver.log": "f8a325bf5c5774c2d5919da45c66f624d1646b0ed672f9e340ba1fb71646b6a4",
+    "tb/reports/cp30/cp30-fp-board-inputs.json": "5637dbd9f6ab9bdd2480eef2541bff1a01176d55ecf5e5a72da783c7ec737db1",
+    "tb/reports/cp30/cp30-fp-board-rt11.log": "3916af8e8c98f5dff32f9c0f587b808285fe41c7ce30135c81fb54ae861792e4",
+    "tb/reports/cp30/cp30-fp-events-portable.log": "a7f60c2adfe3b7b087dc8baf6ca7f16bf2a1efff2a2250a2f24f6ca81fd9ac34",
+    "tb/reports/cp30/cp30-fp-events-vendor.log": "a7f60c2adfe3b7b087dc8baf6ca7f16bf2a1efff2a2250a2f24f6ca81fd9ac34",
+    "tb/reports/cp30/cp30-fp-portable-tb_fp_control.log": "6a00f35424f55952965831a975000ed13ad03e1019257f3746cdd48b02d7c40e",
+    "tb/reports/cp30/cp30-fp-portable-tb_fp_state.log": "dd7963f3475febeb6c1cf841bc3017dc4d75600c6350b1b00f2e01e6ec306e3e",
+    "tb/reports/cp30/cp30-fp-uart.txt": "ed90841f47c780605a610dc3a4ca61dd31389ff4ecbc230911083dc8692f587f",
+    "tb/reports/cp30/cp30-fp-vendor-tb_fp_control.log": "6a00f35424f55952965831a975000ed13ad03e1019257f3746cdd48b02d7c40e",
+    "tb/reports/cp30/cp30-fp-vendor-tb_fp_state.log": "dd7963f3475febeb6c1cf841bc3017dc4d75600c6350b1b00f2e01e6ec306e3e",
+    "tb/reports/cp30/cp30-python.log": "698ece4111cf7d3c1ad1766dbed6108874f7f96efaba198313107ac6769bdb71",
+    "tb/reports/cp30/cp30-sync-fis.log": "4296ef4f91d28910ce68aabd786beee1bce0313bdffcdcdc457133175119cc8e",
+    "tb/reports/cp30/fp-control-bench.mem.gz": "79ae0f00cee7f86dae1e38403ded512c5b251458b2addcd7650e71cea80bebb1",
+    "tb/reports/cp30/fp-control-vectors.mem.gz": "af9b7033a6ca1b9b93a3edbd61265f68cb1811e9f5f9517e734a57b03f8b4b1a"
+  },
+  "limits": [
+    "Memory addressing modes, STST, FP exceptions, AC transfers and F/D arithmetic absent.",
+    "90,112-case corpus ran before optional benchmark parameters were added to the testbench; default case semantics unchanged.",
+    "No full native-FP diagnostic or differential arithmetic corpus yet.",
+    "FP-enabled top leaves 15 LUT and 5 slices; control store leaves 37 words.",
+    "External pin timing and worst-case OSCH tolerance closure not claimed."
+  ]
+}
