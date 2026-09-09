@@ -53,10 +53,11 @@ module wbc_uart_xo2 #(parameter REFCLK=29560000)
 
 	wire request = wb_cyc_i && wb_stb_i;
 	wire accept = request && !wb_ack_o;
-	wire rx_csr_write = accept && wb_we_i && wb_adr_i[2:1] == 2'b00;
+	wire low_byte_write = accept && wb_we_i && !wb_adr_i[0];
+	wire rx_csr_write = low_byte_write && wb_adr_i[2:1] == 2'b00;
 	wire rx_buffer_read = accept && !wb_we_i && wb_adr_i[2:1] == 2'b01;
-	wire tx_csr_write = accept && wb_we_i && wb_adr_i[2:1] == 2'b10;
-	wire tx_buffer_write = accept && wb_we_i && wb_adr_i[2:1] == 2'b11;
+	wire tx_csr_write = low_byte_write && wb_adr_i[2:1] == 2'b10;
+	wire tx_buffer_write = low_byte_write && wb_adr_i[2:1] == 2'b11;
 	wire rx_data = rx_sync[1];
 	wire tx_condition = tx_ready && tx_ie;
 	wire rx_condition = rx_full && rx_ie;

@@ -90,5 +90,6 @@ int hg_image_write(struct hg_image *image, uint16_t block,
 			errno = EIO;
 		return -1;
 	}
-	return 0;
+	/* A success response must follow durable storage, not precede it. */
+	return fsync(image->fd);
 }

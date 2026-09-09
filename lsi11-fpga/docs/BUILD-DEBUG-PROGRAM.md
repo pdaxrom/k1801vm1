@@ -56,8 +56,8 @@ make diamond DIAMOND_HOME=/opt/lscc/diamond/3.14 \
 
 `build-am4.tcl` runs synthesis, translate, map, PAR and TRACE. It refuses to
 export JED if cumulative negative slack is nonzero, and never programs the
-board. The current clean 29.56 MHz gate uses 640/640 slices, 1274/1280 LUT4s
-and 7/7 EBRs, with zero unrouted connections, 3.269 ns setup slack, 0.304 ns
+board. The current clean 29.56 MHz gate uses 639/640 slices, 1271/1280 LUT4s
+and 7/7 EBRs, with zero unrouted connections, 1.543 ns setup slack, 0.304 ns
 hold slack and zero setup/hold errors. Resource totals must come from a clean
 implementation directory; an incremental no-op is not evidence of fit.
 

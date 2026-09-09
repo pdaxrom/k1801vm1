@@ -57,7 +57,7 @@ Removing one word from the service moved the sole high-bit literal and changed
 logic sharing, producing an unrouteable 643/640-slice build.  The intentional
 `NOP` immediately before `command_bytes` restores the resource-proven address
 (`boot_addr[4:0] == 18`); the historical adapter then returned to 640 slices.
-The current adapter maps to 635 slices. Do not remove or move this packing
+That adapter mapped to 635 slices. Do not remove or move this packing
 spacer without rerunning a clean Diamond implementation.
 
 ## Previous verified checkpoint, 2026-08-31
@@ -94,3 +94,29 @@ Clean-build JED SHA-256:
 `804168220609a3c514377482cd623fb04eb045eafc920bfc1d4c26760630b615`;
 JEDEC checksum `BBCA`. The matching generated XCF records file time
 `09/01/26 14:11:16`.
+
+## Correctness fixes, 2026-09-05
+
+- RK bank-one byte writes retain address bit 0; reads remain word-aligned.
+- Both UART implementations ignore high-byte writes to low-byte CSRs and TX
+  data, while still acknowledging the bus cycle.
+- SD write-response polling is bounded at 65535 reads. The READ/discard loop
+  and idle-byte clocking were shortened to fit the timeout without moving
+  `command_bytes` or the fixed service RTI. The absent-response regression
+  fails on the old firmware and passes with the timeout.
+- HG reuses an existing directory image after restart and flushes each guest
+  write before its final success response. Host files are imported only when
+  creating a new image; see the host-disk README for the changed restart rule.
+- Clean Diamond: 639/640 slices, 1271/1280 LUT4s, 7/7 EBRs, zero unrouted
+  connections, 1.543 ns setup slack, 0.304 ns hold slack and zero timing errors.
+- Icarus core/bus/boot/ODT checks, 12 Python checks, host tests, vendor EBR test,
+  Verilator RK READ/WRITE/response-timeout, RT-11 boot and full-delay Ctrl-C
+  regression passed. Verilator checks ran on macOS; the Linux host has Icarus
+  and Diamond but no Verilator executable.
+- FLASH erase/program/verify succeeded. The physical board booted RT-11 and
+  `HWR905` reported `RK HIGH BYTE PASS` and `UART HIGH BYTE PASS`. DIR returned
+  normally, and MACRO wrote its OBJ/LST files and returned by Ctrl-C.
+
+Programmed JED SHA-256:
+`3b11123475d0d3392dd5449b8174b01db6d5d791ab516eac42374ae55a65f719`;
+JEDEC checksum `C434`.

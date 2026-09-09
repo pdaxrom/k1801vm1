@@ -85,12 +85,19 @@ card may return `E5`, not only `05`. The service rejects the CRC/write-error
 class via status bit 3 and clears bits 7:3, normalizing accepted `E5`. The SD
 model intentionally returns `E5`, permanently covering this bug.
 
+Waiting for that response is limited to 65535 SPI reads. If the card keeps
+returning `FF`, the service reports RK error and returns through RTI instead
+of retaining the CPU indefinitely at priority 7. The fault regression models
+this missing response and verifies the guest completion interrupt. A shorter
+READ/discard loop and an equivalent idle-byte read free the two ROM words
+needed for the timeout without moving `command_bytes`.
+
 That full-byte comparison was one fault that let RT-11 print its banner and
 then stop before the prompt. A single short fixed hold was also marginal on
 the physical card. The compact service now performs up to six full 16-bit
 no-clock intervals, sampling busy once between intervals. This is bounded and
-does not flood the card with SPI clocks.  A one-word `NOP` after this loop is
-an intentional EBR spare-bit packing spacer: without it the clean Diamond Map
-requires 643/640 slices. A future expansion should use a two-second timer and
+does not flood the card with SPI clocks. Firmware positions affect EBR
+spare-bit packing; the former NOP spacer is now occupied by useful code.
+A future expansion should use a two-second timer and
 `CMD13` like Stable J11, but must preserve the 640-slice and firmware-store
 limits.

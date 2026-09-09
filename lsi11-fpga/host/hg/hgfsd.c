@@ -251,6 +251,9 @@ int main(int argc, char **argv)
 	signal(SIGTERM, hg_signal);
 	fprintf(stderr, "hgfsd: serving %s at %u Hz%s\n", image_path,
 		link.clock_hz, read_only ? " read-only" : "");
+	/* Re-export a preserved image after restart, including writes that reached
+	 * disk before a crash but missed the previous idle export. */
+	mirror_dirty = directory != NULL && !read_only;
 	while (!hg_stop) {
 		int pending = hg_mpsse_request_pending(&link);
 		if (pending < 0) {
@@ -267,7 +270,6 @@ int main(int argc, char **argv)
 			if (served) {
 				mirror_dirty = directory != NULL;
 				last_write = hg_milliseconds();
-				fsync(image.fd);
 			}
 			if (request.operation != 0)
 				fprintf(stderr, "hgfsd: %s block %u, %u bytes%s\n",

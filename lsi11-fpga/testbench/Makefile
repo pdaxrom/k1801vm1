@@ -80,6 +80,12 @@ am4-fram-test: build/am4_fram.hex
 		../rtl/experimental/lsi11/wbc_uart.v \
 		../rtl/experimental/lsi11/wbc_uart_xo2.v
 	$(VVP) build/am4_fram_bus.vvp
+	$(IVERILOG) -g2012 -s tb_am4_fram_bus -Ptb_am4_fram_bus.UART_XO2=0 \
+		-o build/am4_fram_bus_original_uart.vvp tb_am4_fram_bus.v \
+		../boards/hc1200-microcomp/am4_cpu11_bus.v ../rtl/spi_fram_guest_ram.v \
+		../rtl/spi_byte_service.v spi_fram_model.v \
+		../rtl/experimental/lsi11/wbc_uart.v ../rtl/experimental/lsi11/wbc_uart_xo2.v
+	$(VVP) build/am4_fram_bus_original_uart.vvp
 	$(IVERILOG) -g2012 -Wall -s tb_am4_fram_execute -o build/am4_fram_execute.vvp \
 		tb_am4_fram_execute.v $(AM4_SYSTEM_RTL)
 	$(VVP) build/am4_fram_execute.vvp
@@ -98,8 +104,9 @@ build/am4_rk_verilator/Vtb_am4_rk_service: tb_am4_rk_service.v \
 		> build/am4_rk_verilator.log 2>&1 || \
 		{ cat build/am4_rk_verilator.log; exit 1; }
 
-am4-rk-test: build/am4_rk_verilator/Vtb_am4_rk_service
+am4-rk-test: build/am4_rk_verilator/Vtb_am4_rk_service build/am4_rk_timeout.hex
 	build/am4_rk_verilator/Vtb_am4_rk_service
+	build/am4_rk_verilator/Vtb_am4_rk_service +NO_WRITE_RESPONSE
 
 am4-rk-test-icarus: build/am4_rk_read.hex build/am4_bootrom.rom
 	$(IVERILOG) -g2012 -Wall -s tb_am4_rk_service \

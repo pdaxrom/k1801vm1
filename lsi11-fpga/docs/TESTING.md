@@ -6,11 +6,12 @@
 | `am4-eis-test` | MUL/DIV/ASH/ASHC/XOR results and NZVC edge cases (20 cases) |
 | `am4-fis-test` | FADD/FSUB/FMUL/FDIV, pointer rules, PSW, vector 244 and error classes (12 cases) |
 | `am4-movb-bus-test` | MOVB modes 1..7, no final destination read, byte steps |
-| `am4-fram-test` | FRAM mapping, bytes/words, private RK bank, panel GPIO, KW11-L and execution |
+| `am4-fram-test` | FRAM mapping, bytes/words, private RK byte lanes, both UART byte-write decoders, panel GPIO, KW11-L and execution |
 | `am4-sd-boot-test` | SD init, CS boundaries, two-sector load, failure path |
-| `am4-rk-test` | geometry, low/high physical READ/WRITE, service-ROM-page DMA aliasing, vector 210 |
+| `am4-rk-test` | geometry, low/high physical READ/WRITE, service-ROM-page DMA aliasing, vector 210, absent write-response timeout |
 | `am4-odt-test` | retained ODT output through selected UART |
 | Python tests | source reproduction, seven EBR lanes, firmware partitions |
+| `host-test` | HG protocol/image I/O, restart before export, preservation of invalid existing images |
 | `test-vendor` | all MicROM/spare firmware locations through DP8KC model |
 | `test-rt11` | complete SD boot to RT-11 monitor prompt |
 | project test | direct-bus isolation, board devices, timing-gated Tcl |
@@ -22,10 +23,9 @@ bench more slowly under Icarus.
 
 ## Limitations
 
-- The current clean 29.56 MHz build is nearly full: 635/640 slices,
-  1266/1280 LUT4s and 7/7 EBRs.
-  The `NOP` before `command_bytes` is an intentional spare-ROM packing spacer;
-  removing it was measured at 643 slices and failed Map.
+- The current clean 29.56 MHz build is nearly full: 639/640 slices,
+  1271/1280 LUT4s and 7/7 EBRs. Firmware layout affects spare-ROM LUT packing;
+  changes require a clean Map/PAR even if the byte size is unchanged.
 - SPI FRAM still serializes memory and is slower than BRAM. Divider 1 doubles
   SCK relative to the old board setting, but every access still sends a command
   and 24-bit address. A transparent sequential-read prototype required

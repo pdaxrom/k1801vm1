@@ -153,8 +153,10 @@ module am4_hc1200_cpu11_bus #(
 	assign tx_irq_ack = vic_ack && !rx_irq && tx_irq;
 	wire fram_request = request && fram_selected;
 	wire fram_byte_access = write && byte_select != 2'b11;
-	wire [15:0] fram_address = rk_fram_selected ?
-		{11'b0, word_address[4:0]} : write ? address : word_address;
+	// Reads return an aligned word; writes retain the byte address in both banks.
+	wire [15:0] fram_address = {
+		rk_fram_selected ? 11'b0 : address[15:5], address[4:1],
+		write && address[0]};
 	wire [15:0] fram_wdata = byte_select == 2'b10 ?
 		{8'b0, wdata[15:8]} : wdata;
 	wire [15:0] fram_rdata;

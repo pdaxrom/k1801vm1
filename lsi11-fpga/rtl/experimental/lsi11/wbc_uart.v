@@ -114,10 +114,10 @@ end
 assign tx_csr = 16'o000000 | (tx_csr_flg<<7) | (tx_csr_ie<<6) | (tx_csr_brk<<0) | (tx_csr_tst<<2) ;
 assign rx_csr = 16'o000000 | (rx_csr_flg<<7) | (rx_csr_ie<<6) | (rx_csr_brk<<0) | (rx_csr_perr<<15) | (rx_csr_ovf<<12);
 
-assign rx_csr_wstb = wb_cyc_i & wb_stb_i &  wb_we_i &  wb_ack_o & (wb_adr_i[2:1] == 2'b00);
+assign rx_csr_wstb = wb_cyc_i & wb_stb_i &  wb_we_i &  wb_ack_o & ~wb_adr_i[0] & (wb_adr_i[2:1] == 2'b00);
 assign rx_rbr_rstb = wb_cyc_i & wb_stb_i & ~wb_we_i & ~wb_ack_o & (wb_adr_i[2:1] == 2'b01);
-assign tx_csr_wstb = wb_cyc_i & wb_stb_i &  wb_we_i &  wb_ack_o & (wb_adr_i[2:1] == 2'b10);
-assign tx_thr_wstb = wb_cyc_i & wb_stb_i &  wb_we_i &  wb_ack_o & (wb_adr_i[2:1] == 2'b11);
+assign tx_csr_wstb = wb_cyc_i & wb_stb_i &  wb_we_i &  wb_ack_o & ~wb_adr_i[0] & (wb_adr_i[2:1] == 2'b10);
+assign tx_thr_wstb = wb_cyc_i & wb_stb_i &  wb_we_i &  wb_ack_o & ~wb_adr_i[0] & (wb_adr_i[2:1] == 2'b11);
 //
 // Output data multiplexed register
 //

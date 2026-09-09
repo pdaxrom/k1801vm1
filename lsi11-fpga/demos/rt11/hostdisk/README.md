@@ -52,8 +52,13 @@ The directory mode creates `shared/.hg-volume.dsk` on first use and imports
 regular files whose names already fit RT-11 6.3 RAD50 syntax. RT-11 writes are
 exported back as uppercase host files after a short idle period. RT-11 files
 have block-granular lengths, so exported files can contain zero padding through
-the end of their last 512-byte block. Host-side edits are imported when the
-daemon is restarted. Deleting a file in RT-11 does not delete the corresponding
+the end of their last 512-byte block. An existing `.hg-volume.dsk` is reused on
+restart and is authoritative: this preserves guest writes after a crash before
+the idle export. Host files are imported only when creating a new image. To
+import later host-side edits, stop the daemon, retain a backup of the existing
+image and create a fresh mirror. `--blocks` sets the size of new images only.
+Writes are flushed before the daemon sends the final success status.
+Deleting a file in RT-11 does not delete the corresponding
 host file in this initial implementation.
 
 The default MPSSE clock is 4 kHz, verified for both reads and writes on the

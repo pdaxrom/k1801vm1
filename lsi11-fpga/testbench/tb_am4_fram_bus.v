@@ -3,6 +3,7 @@
 // Check the AM4-specific lane conversion and address decode around the shared
 // SPI FRAM engine without relying on the CPU microprogram.
 module tb_am4_fram_bus;
+	parameter UART_XO2 = 1;
 	reg clk = 0;
 	reg reset = 1;
 	reg request = 0;
@@ -25,7 +26,8 @@ module tb_am4_fram_bus;
 	always #5 clk = !clk;
 
 	am4_hc1200_cpu11_bus #(
-		.FRAM_CLK_DIV(1), .TICK_DIVISOR(128), .RK_SERVICE_ENABLE(1)
+		.FRAM_CLK_DIV(1), .TICK_DIVISOR(128), .RK_SERVICE_ENABLE(1),
+		.UART_XO2(UART_XO2)
 	) dut (
 		.clk(clk), .rst(reset), .peripheral_reset(1'b0),
 		.request(request), .write(write), .byte_select(byte_select),
@@ -64,13 +66,16 @@ module tb_am4_fram_bus;
 		write_data = cycle_data;
 		request = 1;
 		clocks = 0;
-		while (!acknowledge && clocks < 1000) begin
-			@(negedge clk);
+		// The CPU samples ready on a rising edge. Keep request asserted
+		// through that edge, including the original UART's registered ack.
+		do begin
+			@(posedge clk);
 			clocks = clocks + 1;
-		end
+		end while (!acknowledge && clocks < 1000);
 		if (!acknowledge)
 			$fatal(1, "AM4 FRAM bus timeout at %06o", cycle_address);
 		result = read_data;
+		@(negedge clk);
 		request = 0;
 		@(negedge clk);
 	end
@@ -142,6 +147,36 @@ module tb_am4_fram_bus;
 		complete_cycle(0, 2'b11, 16'o177440, 0, result);
 		if (result !== 16'o000200)
 			$fatal(1, "AM4 RK NOP did not complete: %06o", result);
+
+		// Bank-one byte writes must use exactly the same lanes as guest RAM.
+		complete_cycle(1, 2'b11, 16'o177442, 16'h1234, result);
+		complete_cycle(1, 2'b10, 16'o177443, 16'hab00, result);
+		complete_cycle(0, 2'b11, 16'o177442, 0, result);
+		if (result !== 16'hab34)
+			$fatal(1, "RK high byte overwrote low byte: %04x", result);
+		complete_cycle(1, 2'b01, 16'o177442, 16'h00cd, result);
+		complete_cycle(0, 2'b11, 16'o177443, 0, result);
+		if (result !== 16'habcd)
+			$fatal(1, "RK low byte/aligned read mismatch: %04x", result);
+
+		// Odd-address UART writes must acknowledge without changing low CSRs
+		// or transmitting a byte. Check both RX and TX interrupt enables.
+		complete_cycle(1, 2'b11, 16'o177560, 16'o100, result);
+		complete_cycle(1, 2'b10, 16'o177561, 0, result);
+		complete_cycle(0, 2'b11, 16'o177560, 0, result);
+		if (!result[6]) $fatal(1, "UART high byte cleared RX IE");
+		complete_cycle(1, 2'b11, 16'o177564, 16'o100, result);
+		complete_cycle(1, 2'b10, 16'o177565, 0, result);
+		complete_cycle(0, 2'b11, 16'o177564, 0, result);
+		if (!result[6]) $fatal(1, "UART high byte cleared TX IE");
+		complete_cycle(1, 2'b10, 16'o177567, 0, result);
+		repeat (20) begin
+			@(negedge clk);
+			if (!uart_tx) $fatal(1, "UART high byte started transmission");
+		end
+		complete_cycle(1, 2'b01, 16'o177564, 0, result);
+		complete_cycle(0, 2'b11, 16'o177564, 0, result);
+		if (result[6]) $fatal(1, "UART low byte failed to clear TX IE");
 
 		transactions = fram.transaction_count;
 		expect_no_ack(0, 2'b11, 16'o177000);

@@ -70,6 +70,7 @@ static void test_directory(void)
 	rt11_name_t name;
 	rt11_dirent_t entry;
 	uint8_t segment[RT11_BLOCK_SIZE * 2u];
+	uint8_t recovered[5];
 	int fd;
 
 	assert(mkdtemp(directory) != NULL);
@@ -99,7 +100,33 @@ static void test_directory(void)
 	assert(rt11_name_from_host("HELLO.TXT", &name) == 0);
 	assert(rt11_find_file(&image, &name, &entry) == 0);
 	rt11_close_image(&image);
+	/* Simulate a guest write followed by a daemon crash before idle export.
+	 * The stale host file still says hello; restart must preserve guest data. */
+	fd = open(image_path, O_RDWR);
+	assert(fd >= 0);
+	assert(pwrite(fd, "guest", 5, (off_t)entry.start_block * RT11_BLOCK_SIZE) == 5);
+	assert(fsync(fd) == 0);
+	close(fd);
+	assert(hg_directory_prepare(directory, image_path, 512) == 0);
+	fd = open(image_path, O_RDONLY);
+	assert(fd >= 0);
+	assert(pread(fd, recovered, 5, (off_t)entry.start_block * RT11_BLOCK_SIZE) == 5);
+	assert(memcmp(recovered, "guest", 5) == 0);
+	assert(lseek(fd, 0, SEEK_END) == 256 * RT11_BLOCK_SIZE);
+	close(fd);
 	assert(hg_directory_export(directory, image_path) == 0);
+	fd = open(exported, O_RDONLY);
+	assert(fd >= 0 && read(fd, recovered, 5) == 5);
+	assert(memcmp(recovered, "guest", 5) == 0);
+	close(fd);
+	/* Even an invalid existing mirror must not be silently reformatted. */
+	fd = open(image_path, O_WRONLY | O_TRUNC);
+	assert(fd >= 0 && write(fd, "broken", 6) == 6);
+	close(fd);
+	assert(hg_directory_prepare(directory, image_path, 256) != 0);
+	fd = open(image_path, O_RDONLY);
+	assert(fd >= 0 && lseek(fd, 0, SEEK_END) == 6);
+	close(fd);
 	unlink(source);
 	unlink(exported);
 	unlink(image_path);

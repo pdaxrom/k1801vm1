@@ -22,6 +22,7 @@ module spi_sd_model #(
 	reg initialized = 0, app_command = 0, hold_busy = 0;
 	// Optional diagnostic fault injection; defaults leave existing tests alone.
 	reg corrupt_read_crc = 0, no_read_token = 0, never_ready = 0;
+	reg no_write_response = 0;
 	reg cmd0_bad_prefix = 0;
 	reg require_command_cs_toggle = 0;
 	integer commands_this_select = 0;
@@ -182,12 +183,14 @@ module spi_sd_model #(
 					write_count = -1; head = 0; tail = 0;
 					// Bits 7:5 of an SD data-response token are unspecified.  Drive
 					// them high so controllers must decode the low five status bits.
-					enqueue(fail_write ? 8'hed : 8'he5);
+					if (!no_write_response)
+						enqueue(fail_write ? 8'hed : 8'he5);
 					if (!fail_write) begin
 						store_sector(write_lba);
 						writes = writes + 1;
 					end
-					busy_bytes = 4; hold_busy = stuck_busy;
+					busy_bytes = no_write_response ? 0 : 4;
+					hold_busy = stuck_busy && !no_write_response;
 				end
 			end else if (busy_bytes == 0 && !hold_busy) begin
 				if (packet_count != 0 || value[7:6] == 2'b01) begin

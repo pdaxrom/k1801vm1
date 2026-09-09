@@ -35,6 +35,8 @@ int hg_directory_prepare(const char *directory, const char *image_path,
 		.sysid = "DECRT11A"
 	};
 	rt11_image_t image;
+	rt11_dirlist_t list;
+	struct stat image_st;
 	DIR *dir;
 	struct dirent *entry;
 
@@ -42,7 +44,27 @@ int hg_directory_prepare(const char *directory, const char *image_path,
 		errno = EINVAL;
 		return -1;
 	}
-	/* Rebuild the mirror on every start so host-side edits are imported. */
+	/* The image may contain acknowledged guest writes that were not exported
+	 * before a crash. Never replace it with the older host-directory contents.
+	 * Invalid existing images also remain untouched for recovery. */
+	if (stat(image_path, &image_st) == 0) {
+		int result;
+		if (!S_ISREG(image_st.st_mode) || image_st.st_size <= 0 ||
+		    image_st.st_size % RT11_BLOCK_SIZE != 0) {
+			errno = EINVAL;
+			return -1;
+		}
+		if (rt11_open_image(&image, image_path, "rb") != 0)
+			return -1;
+		result = rt11_read_directory(&image, &list);
+		if (result == 0)
+			rt11_free_dirlist(&list);
+		rt11_close_image(&image);
+		return result;
+	}
+	if (errno != ENOENT)
+		return -1;
+	/* Import host files only when creating a new mirror. */
 	if (rt11_mkfs(image_path, blocks, &options, NULL) != 0)
 		return -1;
 	if (rt11_open_image(&image, image_path, "r+b") != 0)

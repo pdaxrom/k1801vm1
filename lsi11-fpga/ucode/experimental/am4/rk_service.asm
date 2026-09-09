@@ -77,19 +77,19 @@ copy_word
 	movb (r4), (r2)+
 	movb (r4), (r2)+
 	inc r3
-	dec r0
-	beq sector_done
-	tst r3
-	bne copy_word
+	beq discard_entry
+	sob r0, copy_word
+	br sector_done
 discard_word
 	tst (r4)
 	tst (r4)
+discard_entry
 	sob r0, discard_word
 sector_done
 	tst (r4)
 	tst (r4)
 	inc 002(r4)
-	mov #000377, (r4)
+	tst (r4)			; a read clocks the same idle FF byte
 	mov r3, 002(r5)
 	mov r2, 004(r5)
 	inc 022(r5)
@@ -144,7 +144,12 @@ write_data_done
 write_response
 	mov (r4), r1
 	incb r1			; FF becomes zero; status 5/13/15 becomes 6/14/16
-	beq write_response
+	bne write_response_done
+	; R0 still holds FFFF from the CRC bytes. Bound absent-card/FF polling;
+	; individual SPI reads acknowledge, so the CPU bus timer cannot do this.
+	sob r0, write_response
+	br failed
+write_response_done
 	bit #000010, r1		; CRC/write-error responses both set status bit 3
 	bne failed
 	; SD_DATA is zero-extended by the board register.  Clear only response
