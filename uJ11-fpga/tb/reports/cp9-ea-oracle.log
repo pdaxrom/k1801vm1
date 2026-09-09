@@ -1,0 +1,9 @@
+EA DCJ11 ENABLE_MMU=0: 31671 completed cases; 627 trapping/I-O cases excluded (Stage 2).
+  opcode class 01: 4529 complete, 85 excluded
+  opcode class 02: 4529 complete, 85 excluded
+  opcode class 06: 4529 complete, 85 excluded
+  opcode class 03: 4529 complete, 85 excluded
+  opcode class 04: 4529 complete, 85 excluded
+  opcode class 05: 4529 complete, 85 excluded
+  opcode class 16: 4497 complete, 117 excluded
+  exclusion reasons (may overlap): abort=595 trap=0 I/O=32 odd=0

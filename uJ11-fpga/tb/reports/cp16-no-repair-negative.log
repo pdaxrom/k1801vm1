@@ -1,0 +1,2 @@
+FATAL: tb/tb_bus_fault.v:114: fault case14 op012001 R0 got2000 expected2002
+       Time: 7226000  Scope: tb_bus_fault

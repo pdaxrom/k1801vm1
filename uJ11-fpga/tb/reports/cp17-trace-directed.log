@@ -1,0 +1,8 @@
+iverilog -g2012 -Wall -s tb_trace_system -o build/trace_system tb/tb_trace_system.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v rtl/uj11_rom.v
+vvp build/trace_system
+PASS trace system: 24 real FRAM trace/RTI/RTT/WAIT/IRQ and I/O-fault cases
+tb/tb_trace_system.v:105: $finish called at 410156000 (1ps)
+iverilog -g2012 -Wall -s tb_trace_faults -o build/trace_faults tb/tb_trace_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/trace_faults
+PASS trace faults: 140 trace/RTI frames and T-set fault priority cases, all four frame errors, odd SP and 0..3 waits
+tb/tb_trace_faults.v:86: $finish called at 63916000 (1ps)

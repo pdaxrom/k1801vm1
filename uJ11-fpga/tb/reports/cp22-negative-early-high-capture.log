@@ -1,0 +1,3 @@
+Archive: cp22c; ASHC-only mutation: ('CALL, target=DESTINATION_EA, prefetch=0\n    alu PASSA, a=RS, b=T4, dst=RF\n    alu PASSA, a=RS1, dst=Q', 'alu PASSA, a=RS, b=T4, dst=RF\n    CALL, target=DESTINATION_EA, prefetch=0\n    alu PASSA, a=RS1, dst=Q')
+FATAL: tb/tb_trace_bit.v:123: trace case25984 op073020 R0 got4000 expected4002
+       Time: 526000  Scope: tb_trace_bit

@@ -1,0 +1,534 @@
+
+     Lattice Mapping Report File for Design Module 'uj11_probe_fram_irq'
+
+
+Design Information
+------------------
+
+Command line:   map -a MachXO2 -p LCMXO2-1200HC -t QFN32 -s 4 -oc Commercial
+     cp16b_impl1.ngd -o cp16b_impl1_map.ncd -pr cp16b_impl1.prf -mp
+     cp16b_impl1.mrp -lpf
+     /tmp/uj11-cp16ab-20260909/build/cp16b/impl1/cp16b_impl1_synplify.lpf -lpf
+     /tmp/uj11-cp16ab-20260909/build/cp16b/clock.lpf -c 0 -pe 
+Target Vendor:  LATTICE
+Target Device:  LCMXO2-1200HCQFN32
+Target Performance:   4
+Mapper:  xo2c00,  version:  Diamond (64-bit) 3.14.0.75.2
+Mapped on:  09/09/26  05:11:38
+
+Design Summary
+--------------
+
+   Number of registers:    413 out of  1346 (31%)
+      PFU registers:          412 out of  1280 (32%)
+      PIO registers:            1 out of    66 (2%)
+   Number of SLICEs:       532 out of   640 (83%)
+      SLICEs as Logic/ROM:    508 out of   640 (79%)
+      SLICEs as RAM:           24 out of   480 (5%)
+      SLICEs as Carry:         33 out of   640 (5%)
+   Number of LUT4s:        1062 out of  1280 (83%)
+      Number used as logic LUTs:        948
+      Number used as distributed RAM:    48
+      Number used as ripple logic:       66
+      Number used as shift registers:     0
+   Number of PIO sites used: 4 + 4(JTAG) out of 22 (36%)
+   Number of block RAMs:  4 out of 7 (57%)
+   Number of GSRs:        0 out of 1 (0%)
+   EFB used :        No
+   JTAG used :       No
+   Readback used :   No
+   Oscillator used : No
+   Startup used :    No
+   POR :             On
+   Bandgap :         On
+   Number of Power Controller:  0 out of 1 (0%)
+   Number of Dynamic Bank Controller (BCINRD):  0 out of 4 (0%)
+   Number of Dynamic Bank Controller (BCLVDSO):  0 out of 1 (0%)
+   Number of DCCA:  0 out of 8 (0%)
+   Number of DCMA:  0 out of 2 (0%)
+   Number of PLLs:  0 out of 1 (0%)
+   Number of DQSDLLs:  0 out of 2 (0%)
+   Number of CLKDIVC:  0 out of 4 (0%)
+   Number of ECLKSYNCA:  0 out of 4 (0%)
+   Number of ECLKBRIDGECS:  0 out of 2 (0%)
+   Notes:-
+      1. Total number of LUT4s = (Number of logic LUT4s) + 2*(Number of
+     distributed RAMs) + 2*(Number of ripple logic)
+      2. Number of logic LUT4s does not include count of distributed RAM and
+     ripple logic.
+   Number of clocks:  1
+     Net clk_c: 247 loads, 247 rising, 0 falling (Driver: PIO clk )
+   Number of Clock Enables:  30
+     Net system/sequential.memory/transport/un1_spi_active_3_0: 1 loads, 1
+
+                                    Page 1
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+Design Summary (cont)
+---------------------
+     LSLICEs
+     Net system/sequential.memory/transport/un1_state_10_RNIH4AT5[0]: 4 loads, 4
+     LSLICEs
+     Net system/sequential.memory/buffer_state8: 1 loads, 1 LSLICEs
+     Net system/sequential.memory/transport/state_RNI2A1H5[15]: 4 loads, 4
+     LSLICEs
+     Net system/sequential.memory/transport/request_seen_1_sqmuxa_i: 1 loads, 1
+     LSLICEs
+     Net system/sequential.memory/transport/un1_state_14_i[0]: 1 loads, 1
+     LSLICEs
+     Net system/sequential.memory/transport/un1_state_10_i[0]: 1 loads, 1
+     LSLICEs
+     Net system/sequential.memory/transport/spi_sck_en: 1 loads, 1 LSLICEs
+     Net system/sequential.memory/transport/un1_state_11_i[0]: 4 loads, 4
+     LSLICEs
+     Net system/sequential.memory/transport/spi_cs_n_0_sqmuxa_1: 18 loads, 18
+     LSLICEs
+     Net system/sequential.memory/transport/un1_spi_active_1_0_a3: 4 loads, 4
+     LSLICEs
+     Net system/sequential.memory/consumed: 8 loads, 8 LSLICEs
+     Net system/sequential.memory/prediction_state_1_sqmuxa_i: 1 loads, 1
+     LSLICEs
+     Net system/sequential.memory/buffer_state_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net uword[35]: 1 loads, 1 LSLICEs
+     Net system/core/engine/un1_reset: 8 loads, 0 LSLICEs
+     Net system/core/engine/advancedup: 5 loads, 5 LSLICEs
+     Net system/core/engine/seq/un1_upc6_i: 1 loads, 1 LSLICEs
+     Net system/core/engine/seq/un1_upc6_1_i: 6 loads, 6 LSLICEs
+     Net system/core/engine/fault_latched5: 1 loads, 1 LSLICEs
+     Net system/core/engine/status/un1_psw14_i: 3 loads, 3 LSLICEs
+     Net system/core/engine/status/pswce[4]: 8 loads, 8 LSLICEs
+     Net system/core/engine/status/pswcedup[4]: 3 loads, 3 LSLICEs
+     Net system.core.engine.step: 1 loads, 1 LSLICEs
+     Net system/core/engine/dp/un1_q20_i: 9 loads, 9 LSLICEs
+     Net system/core/engine/ir6: 8 loads, 8 LSLICEs
+     Net system/core/engine/frame_active_RNO_0: 1 loads, 1 LSLICEs
+     Net system/core/engine/irq_active_RNO: 1 loads, 1 LSLICEs
+     Net system/core/engine/N_185_i: 4 loads, 4 LSLICEs
+     Net system/core/engine/mdr_1_sqmuxa_i: 4 loads, 4 LSLICEs
+   Number of LSRs:  3
+     Net reset_c: 205 loads, 204 LSLICEs
+     Net system/sequential.memory/transport/un1_state_7_i_a2_RNIU8ANC: 4 loads,
+     4 LSLICEs
+     Net system/core/engine/mdr_1_sqmuxadup_RNIKF127: 4 loads, 4 LSLICEs
+   Number of nets driven by tri-state buffers:  0
+   Top 10 highest fanout non-clock nets:
+     Net reset_c: 250 loads
+     Net uword[34]: 92 loads
+     Net uword[31]: 87 loads
+     Net uword[33]: 76 loads
+     Net system/sequential.memory/transport/spi_active: 55 loads
+     Net uword[32]: 45 loads
+     Net uword[35]: 34 loads
+     Net system/core/fetching: 29 loads
+     Net uword[19]: 28 loads
+     Net uword[18]: 27 loads
+
+                                    Page 2
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+
+
+
+
+   Number of warnings:  0
+   Number of errors:    0
+     
+
+Design Errors/Warnings
+----------------------
+
+   No errors or warnings present.
+
+IO (PIO) Attributes
+-------------------
+
++---------------------+-----------+-----------+------------+
+| IO Name             | Direction | Levelmode | IO         |
+|                     |           |  IO_TYPE  | Register   |
++---------------------+-----------+-----------+------------+
+| serial_out          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| clk                 | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| serial_in           | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| reset               | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+
+Removed logic
+-------------
+
+Block VCC undriven or does not drive anything - clipped.
+Block GSR_INST undriven or does not drive anything - clipped.
+Block GND undriven or does not drive anything - clipped.
+Block irq/GND undriven or does not drive anything - clipped.
+Block irq/VCC undriven or does not drive anything - clipped.
+Block system/GND undriven or does not drive anything - clipped.
+Block system/VCC undriven or does not drive anything - clipped.
+Block system/core/GND undriven or does not drive anything - clipped.
+Block system/core/VCC undriven or does not drive anything - clipped.
+Block system/core/decode/VCC undriven or does not drive anything - clipped.
+Block system/core/decode/GND undriven or does not drive anything - clipped.
+Block system/core/engine/VCC undriven or does not drive anything - clipped.
+Block system/core/engine/GND undriven or does not drive anything - clipped.
+Block system/core/engine/dp/VCC undriven or does not drive anything - clipped.
+Block system/core/engine/dp/GND undriven or does not drive anything - clipped.
+Block system/core/engine/dp/alu/VCC undriven or does not drive anything -
+     clipped.
+Block system/core/engine/dp/rf/GND undriven or does not drive anything -
+     clipped.
+Block system/core/engine/dp/rf/VCC undriven or does not drive anything -
+     clipped.
+Block system/core/engine/status/GND undriven or does not drive anything -
+     clipped.
+Block system/core/engine/status/VCC undriven or does not drive anything -
+     clipped.
+Block system/core/engine/memory/VCC undriven or does not drive anything -
+
+                                    Page 3
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+Removed logic (cont)
+--------------------
+     clipped.
+Block system/core/engine/memory/GND undriven or does not drive anything -
+     clipped.
+Block system/sequential.stream_hint/VCC undriven or does not drive anything -
+     clipped.
+Block system/sequential.stream_hint/GND undriven or does not drive anything -
+     clipped.
+Block system/sequential.prefetch_policy/GND undriven or does not drive anything
+     - clipped.
+Block system/sequential.prefetch_policy/VCC undriven or does not drive anything
+     - clipped.
+Block system/sequential.memory/transport/VCC undriven or does not drive anything
+     - clipped.
+Block system/sequential.memory/transport/GND undriven or does not drive anything
+     - clipped.
+Signal system/core/engine/dp/alu/GND undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/seq/GND undriven or does not drive anything - clipped.
+     
+Signal system/core/engine/rom/VCC undriven or does not drive anything - clipped.
+     
+Signal system/core/engine/rom/GND undriven or does not drive anything - clipped.
+     
+Signal system/sequential.memory/GND undriven or does not drive anything -
+     clipped.
+Signal VCC undriven or does not drive anything - clipped.
+Signal system/core/engine/dp/alu/un1_arithmetic_b_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal system/core/engine/dp/alu/N_1 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/dp/alu/un1_arithmetic_b_cry_15_0_COUT undriven or does
+     not drive anything - clipped.
+Signal system/core/engine/seq/un1_upc_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/core/engine/seq/un1_upc_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/core/engine/seq/N_3 undriven or does not drive anything - clipped.
+     
+Signal system/core/engine/seq/un1_upc_s_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/core/engine/seq/un1_upc_s_9_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/core/engine/rom/lane_2_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB2 undriven or does not drive anything -
+     clipped.
+
+                                    Page 4
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+Removed logic (cont)
+--------------------
+Signal system/core/engine/rom/lane_2_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_2_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_1_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB1 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_0_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB7 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB6 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB5 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB4 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB3 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB2 undriven or does not drive anything -
+     clipped.
+Signal system/core/engine/rom/lane_3_DOB1 undriven or does not drive anything -
+     clipped.
+
+                                    Page 5
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+Removed logic (cont)
+--------------------
+Signal system/core/engine/rom/lane_3_DOB0 undriven or does not drive anything -
+     clipped.
+Signal system/sequential.memory/un1_address_2_cry_13_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_1_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_1_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/N_3 undriven or does not drive anything -
+     clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_9_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_9_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_27_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_27_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_33_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_33_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_21_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_pc_data_0_I_21_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_1_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_1_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/N_8 undriven or does not drive anything -
+     clipped.
+Signal system/sequential.memory/un1_address_1_0_I_9_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_9_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_21_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_21_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_33_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_33_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_45_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_1_0_I_45_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_2_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/un1_address_2_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/sequential.memory/N_2 undriven or does not drive anything -
+     clipped.
+Block system/core/engine/dp/alu/GND was optimized away.
+Block system/core/engine/seq/GND was optimized away.
+
+                                    Page 6
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+Removed logic (cont)
+--------------------
+Block system/core/engine/rom/VCC was optimized away.
+Block system/core/engine/rom/GND was optimized away.
+Block system/sequential.memory/GND was optimized away.
+
+Memory Usage
+------------
+
+/:
+    EBRs: 0
+    RAM SLICEs: 8
+    Logic SLICEs: 100
+    PFU Registers: 214
+/system:
+    EBRs: 0
+    RAM SLICEs: 8
+    Logic SLICEs: 24
+    PFU Registers: 40
+/system/core/engine/dp/rf/words_1_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_1_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_1_ram_1:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_1_ram_2:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_ram_1:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/core/engine/dp/rf/words_ram_2:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+
+                                    Page 7
+
+
+
+
+Design:  uj11_probe_fram_irq                           Date:  09/09/26  05:11:38
+
+Memory Usage (cont)
+-------------------
+    PFU Registers: 0
+/system/core/engine/rom:
+    EBRs: 4
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR lane_3:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_0:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_1:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_2:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+
+     
+
+ASIC Components
+---------------
+
+Instance Name: system/core/engine/rom/lane_3
+         Type: DP8KC
+Instance Name: system/core/engine/rom/lane_0
+         Type: DP8KC
+Instance Name: system/core/engine/rom/lane_1
+         Type: DP8KC
+Instance Name: system/core/engine/rom/lane_2
+         Type: DP8KC
+
+Run Time and Memory Usage
+-------------------------
+
+   Total CPU Time: 0 secs  
+   Total REAL Time: 0 secs  
+   Peak Memory Usage: 160 MB
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    Page 8
+
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+     Copyright (c) 1995 AT&T Corp.   All rights reserved.
+     Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+     Copyright (c) 2001 Agere Systems   All rights reserved.
+     Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights
+     reserved.

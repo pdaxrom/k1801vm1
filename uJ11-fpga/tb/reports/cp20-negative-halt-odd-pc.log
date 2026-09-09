@@ -1,0 +1,3 @@
+Archive: cp20c; mutation: ('alu BIC, a=T3, pair=AD, d=ONE, b=R7, dst=RF, seq=FETCH', 'alu PASSA, a=T3, b=R7, dst=RF, seq=FETCH')
+FATAL: tb/tb_trace_bit.v:123: trace case3 op000000 R7 gotff01 expectedff00
+       Time: 516000  Scope: tb_trace_bit

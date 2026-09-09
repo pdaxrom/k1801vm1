@@ -1,0 +1,12 @@
+PASS FIS memory_mode=2: 5960 exact state/PSW/bus/memory cases, 0 injected faults
+tb/tb_fis.v:150: $finish called at 68135616000 (1ps)
+
+PASS FIS memory_mode=2: 5960 exact state/PSW/bus/memory cases, 0 injected faults
+tb/tb_fis.v:150: $finish called at 76323346000 (1ps)
+
+PASS FIS memory_mode=2: 5960 exact state/PSW/bus/memory cases, 0 injected faults
+tb/tb_fis.v:150: $finish called at 85457916000 (1ps)
+
+PASS FIS memory_mode=2: 5960 exact state/PSW/bus/memory cases, 3072 injected faults
+tb/tb_fis.v:150: $finish called at 68017796000 (1ps)
+PASS FIS aggregate: 23840 exact state/PSW/bus/memory cases; 4 independent shards

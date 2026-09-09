@@ -1,0 +1,16 @@
+{
+  "name": "cp10a",
+  "top": "uj11_probe_datapath",
+  "files": {
+    "rtl/uj11_alu.v": "356007cd3c9af3c3bb3dd9a59994620ec63c6b8d238cc3b19930d0d215feb59d",
+    "rtl/uj11_datapath.v": "490d2e7f9b3c5a2b530d35f2571cb98fe54975c1d9cd8443638e16a1855c57e6",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+    "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+    "synth/machxo2/uj11_probe_datapath.v": "890a39dede0b0d81048a5be102886e1042d8338ae2730601a736b6791682ae17",
+    "tools/checkpoint.py": "575a80551b54d702291b7b72d6a17dfff3501171870715b919560430687c35f4",
+    "tools/report_synthesis.py": "1d769774887bd6bb7341ae8fa7124bd496dafcf0475860d75db94f66b894d683",
+    "generated:clock.lpf": "70b9a0718a1247db842791426eca88a68b963f93ffdadd19ca279522da128a52"
+  },
+  "input_revision_sha256": "78c5f8ea5fa9b15a99d8fe0586570b3386062be34ad212c654d201a3a8dc1d33"
+}

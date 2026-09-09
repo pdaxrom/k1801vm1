@@ -1,0 +1,26 @@
+{
+  "name": "cp5",
+  "top": "uj11_probe_core",
+  "files": {
+    "microasm/uj11asm.py": "40a7296edb8108d0818253c65f54d88f3bd9960b780aef14ca5eb2de2212eb95",
+    "microcode/generated/uj11_m0_ebr.v": "959e7f9b95f12927eef6d54c3b7ba16151715d8045c785997a094286939b2836",
+    "microcode/m0.uasm": "d33180fd9e4258d12eadfe226696720e1c51491ee4f0d85fa1e22455517e25ff",
+    "rtl/uj11_alu.v": "55a2dff269d3910ac9053d2123194cf3f429085e10cf4586a0902ce191f0e82a",
+    "rtl/uj11_core.v": "f494a42592f3e21feebfdc13317ca878f480eeca7adb360de907512e86b2db2c",
+    "rtl/uj11_datapath.v": "84714c49c51e61db4b92ce1180db9f49521ae5c4c7916e9b44ddde062d1c197e",
+    "rtl/uj11_decode.v": "0ec04af8d5090fbd6419ff10974ebc07c34794540ead8ba72fab97cf97925200",
+    "rtl/uj11_engine.v": "d6871876cfa5172fafb9b80900c61348d1479d0b5a6c68c40c549bfa41731358",
+    "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_microseq.v": "fae065d882a980ef1af560f1062bbbdf0462aac154715f126e19894064f5d10c",
+    "rtl/uj11_psw.v": "dc4f7c41bb11e132b5099f4fec6c75890d124c5f6387097f239c45367b52880b",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+    "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+    "synth/machxo2/uj11_probe_core.v": "2ac40784610b0b5a143ad0283107fe1e7379cc974672683b3f0082703075d22b",
+    "tools/checkpoint.py": "1391c418bd29cd4e421c0cceea204434d0b2f578fb0d8740543fef8dcbb08320",
+    "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+    "tools/report_synthesis.py": "1d769774887bd6bb7341ae8fa7124bd496dafcf0475860d75db94f66b894d683",
+    "generated:clock.lpf": "70b9a0718a1247db842791426eca88a68b963f93ffdadd19ca279522da128a52"
+  },
+  "input_revision_sha256": "2bbbef62d0917f52c6e8a6cdd552c8299b6556b8c86c2bf1d6ae83eb6362343f"
+}

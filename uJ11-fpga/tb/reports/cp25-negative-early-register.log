@@ -1,0 +1,3 @@
+Archive: cp25a; mutations: [('microcode/m0.uasm', 'MUL_INIT:\n    alu PASSA, a=RS, b=T0, dst=RF', 'MUL_INIT:\n    alu SUB, a=RS, pair=AD, d=TWO, b=T0, dst=RF')]
+FATAL: tb/tb_trace_bit.v:123: trace case4864 op070020 R0 gote715 expectede714
+       Time: 1496000  Scope: tb_trace_bit

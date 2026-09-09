@@ -1,0 +1,72 @@
+; CP1 is an execution-independent sequencer resource probe, not PDP-11 ROM.
+; Deliberately exercises conditions, link, all OR dispatches and all pages.
+.org $000
+RESET:
+    JUMP, target=START
+.org $010
+START:
+    CJUMP, target=CALLSITE, cond=C
+    JUMP, target=START
+CALLSITE:
+    CALL, target=SUBROUTINE
+    OR_MS, target=MS_TABLE
+.org $020
+MD_SELECT:
+    OR_MD, target=MD_TABLE
+RR_SELECT:
+    OR_RR, target=RR_TABLE
+BT_SELECT:
+    OR_BT, target=BT_TABLE
+R67_SELECT:
+    OR_R67, target=R67_TABLE, a=RS
+OPCODE:
+    DISPATCH
+.org $030
+SUBROUTINE:
+    RETURN
+.org $040
+MS_TABLE:
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+    JUMP, target=MD_SELECT
+MD_TABLE:
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+    JUMP, target=RR_SELECT
+RR_TABLE:
+    JUMP, target=BT_SELECT
+    JUMP, target=BT_SELECT
+    JUMP, target=BT_SELECT
+    JUMP, target=BT_SELECT
+BT_TABLE:
+    JUMP, target=R67_SELECT
+    JUMP, target=R67_SELECT
+    JUMP, target=R67_SELECT
+    JUMP, target=R67_SELECT
+R67_TABLE:
+    JUMP, target=OPCODE
+    JUMP, target=OPCODE
+.org $060
+MEMORY_ENCODING:
+    FETCH
+    READ, target=$062, a=RD, byte=1
+    WRITE, target=$063, a=RS, b=RD
+    STOP
+.org $110
+ALU_ENCODING:
+    alu ADD, a=RS, b=RD, pair=AB, dst=RF, flags=NZVC, seq=PAGE, next=$112
+    alu NOTA, a=T7, b=T6, pair=AQ, dst=Q, d=IMM, imm=$a5
+    alu SUB, a=RD, b=RS1, pair=DB, dst=RFQ_R, flags=LOAD, d=PSW, seq=FETCH
+.org $3ff
+UNUSED:
+    STOP

@@ -1,0 +1,10 @@
+python3 tools/oracle_core.py --vectors
+Audited DCJ11 build copy: four address hooks, 1 vector hook; source unchanged
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DORACLE_PSW_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/eis_div_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/eis_div_vectors
+build/eis_div_vectors > build/eis_div-vectors.txt.tmp 2> build/eis_div-oracle.log
+mv build/eis_div-vectors.txt.tmp build/eis_div-vectors.txt
+python3 tools/fault_oracle.py
+Fault audit: four address hooks, vector entry and successful frame boundary; original core unchanged
+cc -O2 -Wall -DENABLE_MMU=0 -I.. -I../core tb/eis_div_fault_vectors.c build/oracle_fault_core.c ../core/hardware.c -lm -o build/eis_div_fault_vectors
+build/eis_div_fault_vectors > build/eis-div-fault-vectors.txt.tmp 2> build/eis-div-fault-oracle.log
+mv build/eis-div-fault-vectors.txt.tmp build/eis-div-fault-vectors.txt

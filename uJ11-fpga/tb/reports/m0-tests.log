@@ -1,0 +1,105 @@
+python3 -m unittest discover -s tb -p 'test_*.py' -v
+test_actual_program (test_microasm.AssemblerTests.test_actual_program) ... ok
+test_conflicts (test_microasm.AssemblerTests.test_conflicts) ... ok
+test_control_selectors_are_aligned (test_microasm.AssemblerTests.test_control_selectors_are_aligned) ... ok
+test_invalid_physical_image (test_microasm.AssemblerTests.test_invalid_physical_image) ... ok
+test_page_and_immediate (test_microasm.AssemblerTests.test_page_and_immediate) ... ok
+test_physical_packing_roundtrip (test_microasm.AssemblerTests.test_physical_packing_roundtrip) ... ok
+test_rr_encoding (test_microasm.AssemblerTests.test_rr_encoding) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.005s
+
+OK
+python3 microasm/uj11asm.py microcode/checkpoint_seq.uasm -o microcode/generated/checkpoint_seq.mem --list microcode/generated/checkpoint_seq.lst --labels microcode/generated/checkpoint_seq.labels.json --stats microcode/generated/checkpoint_seq.stats.json
+uJ11: 45/1024 microinstructions, 36 bits, 4.39% occupied
+python3 tools/make_ebr.py microcode/generated/checkpoint_seq.mem microcode/generated/uj11_rom_ebr.v
+iverilog -g2012 -Wall -s tb_microseq -o build/seq tb/tb_microseq.v rtl/uj11_microseq.v
+vvp build/seq
+PASS microseq: 4323 combinational checks, CALL/RETURN stalls and reset
+tb/tb_microseq.v:110: $finish called at 4496000 (1ps)
+iverilog -g2012 -Wall -s tb_rom -o build/rom tb/tb_rom.v rtl/uj11_rom.v
+vvp build/rom
+PASS ROM: all 1024 words and 1024 enable holds
+tb/tb_rom.v:29: $finish called at 20576000 (1ps)
+iverilog -g2012 -Wall -s tb_control_store -o build/store tb/tb_control_store.v rtl/uj11_microseq.v rtl/uj11_rom.v
+vvp build/store
+PASS control store: 17 transitions, no sequencing bubbles, stalls preserve uIR alignment
+tb/tb_control_store.v:43: $finish called at 606000 (1ps)
+iverilog -g2012 -Wall -s tb_alu -o build/alu tb/tb_alu.v rtl/uj11_alu.v
+vvp build/alu
+PASS ALU: 66592 independent result/NZVC checks
+tb/tb_alu.v:61: $finish called at 66592000 (1ps)
+iverilog -g2012 -Wall -s tb_datapath -o build/datapath tb/tb_datapath.v rtl/uj11_alu.v rtl/uj11_regfile.v rtl/uj11_datapath.v
+vvp build/datapath
+PASS datapath: 16 RF words, 256 dual reads, ALU writeback, Q/shift/stall/reset
+tb/tb_datapath.v:43: $finish called at 526000 (1ps)
+python3 microasm/uj11asm.py microcode/m0.uasm -o microcode/generated/m0.mem --list microcode/generated/m0.lst --labels microcode/generated/m0.labels.json --stats microcode/generated/m0.stats.json
+uJ11: 23/1024 microinstructions, 36 bits, 2.25% occupied
+python3 tools/make_ebr.py microcode/generated/m0.mem microcode/generated/uj11_m0_ebr.v
+iverilog -g2012 -Wall -s tb_engine -o build/engine tb/tb_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/engine
+PASS engine: RF reset, fetch waits, single-cycle ADD, odd/bus/unsupported stops
+tb/tb_engine.v:73: $finish called at 756000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_engine synth/machxo2/uj11_probe_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.237 MB sources in 10 modules, into 0.118 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.027 s (elab=0.006, cvt=0.010, bld=0.000); cpu 0.020 s on 1 threads; allocated 11.922 MB
+iverilog -g2012 -Wall -s tb_mem_psw -o build/mem_psw tb/tb_mem_psw.v tb/uj11_ram.v rtl/uj11_mem.v rtl/uj11_psw.v
+vvp build/mem_psw
+PASS memory/PSW: word/byte lanes, back-to-back beats, 0..3 waits, odd address, flag masks
+tb/tb_mem_psw.v:67: $finish called at 552000 (1ps)
+python3 microasm/uj11asm.py microcode/memory_test.uasm -o microcode/generated/memory_test.mem
+uJ11: 11/1024 microinstructions, 36 bits, 1.07% occupied
+iverilog -g2012 -Wall -s tb_memory_engine -o build/memory_engine tb/tb_memory_engine.v tb/uj11_ram.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/memory_engine
+PASS memory engine: microcoded word/byte READ/WRITE/MDR, 0..7 waits, exact beat/cycle counts
+tb/tb_memory_engine.v:44: $finish called at 2096000 (1ps)
+iverilog -g2012 -Wall -s tb_decode -o build/decode tb/tb_decode.v rtl/uj11_decode.v
+vvp build/decode
+PASS decoder: all 65536 opcodes, exactly 448 supported encodings
+tb/tb_decode.v:23: $finish called at 65536000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_decode synth/machxo2/uj11_probe_decode.v rtl/uj11_decode.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.049 MB sources in 3 modules, into 0.016 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.004 s (elab=0.000, cvt=0.001, bld=0.000); cpu 0.004 s on 1 threads; allocated 9.766 MB
+iverilog -g2012 -Wall -s tb_core -o build/core tb/tb_core.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/core
+PASS differential: 6272 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 21952 clocks
+PASS core boundaries: 16-bit PC wrap, memory-mode/byte/HALT rejection
+tb/tb_core.v:91: $finish called at 1349436000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_core synth/machxo2/uj11_probe_core.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.285 MB sources in 12 modules, into 0.125 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.016 s (elab=0.002, cvt=0.008, bld=0.000); cpu 0.016 s on 1 threads; allocated 12.094 MB
+verilator --lint-only --Wall --top-module uj11_probe_seq synth/machxo2/uj11_probe_seq.v rtl/uj11_microseq.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.071 MB sources in 4 modules, into 0.047 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.006 s (elab=0.001, cvt=0.003, bld=0.000); cpu 0.006 s on 1 threads; allocated 10.281 MB
+verilator --lint-only --Wall --top-module uj11_probe_datapath synth/machxo2/uj11_probe_datapath.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.088 MB sources in 5 modules, into 0.070 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.008 s (elab=0.001, cvt=0.004, bld=0.000); cpu 0.008 s on 1 threads; allocated 10.688 MB
+test -f "build/vendor/DP8KC.v"
+iverilog -g2012 -DVENDOR_ROM -s tb_rom -o build/vendor_rom tb/tb_rom.v microcode/generated/uj11_rom_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_rom
+PASS ROM: all 1024 words and 1024 enable holds
+tb/tb_rom.v:29: $finish called at 20576000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_control_store -o build/vendor_store tb/tb_control_store.v rtl/uj11_microseq.v microcode/generated/uj11_rom_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_store
+PASS control store: 17 transitions, no sequencing bubbles, stalls preserve uIR alignment
+tb/tb_control_store.v:43: $finish called at 606000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_engine -o build/vendor_engine tb/tb_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_engine
+PASS engine: RF reset, fetch waits, single-cycle ADD, odd/bus/unsupported stops
+tb/tb_engine.v:73: $finish called at 756000 (1ps)
+python3 tools/make_ebr.py microcode/generated/memory_test.mem microcode/generated/uj11_memory_test_ebr.v
+iverilog -g2012 -DVENDOR_ROM -s tb_memory_engine -o build/vendor_memory_engine tb/tb_memory_engine.v tb/uj11_ram.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_memory_test_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_memory_engine
+PASS memory engine: microcoded word/byte READ/WRITE/MDR, 0..7 waits, exact beat/cycle counts
+tb/tb_memory_engine.v:44: $finish called at 2096000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_core -o build/vendor_core tb/tb_core.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_core
+PASS differential: 6272 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 21952 clocks
+PASS core boundaries: 16-bit PC wrap, memory-mode/byte/HALT rejection
+tb/tb_core.v:91: $finish called at 1349436000 (1ps)

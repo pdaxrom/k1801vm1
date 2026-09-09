@@ -1,0 +1,32 @@
+TRAP BENCH mode-1 BPT_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 IOT_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 EMT_377_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 TRAP_377_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 nested_BPT_IOT_RTI: 3328 clocks / 320 instructions, 1088 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 MOV_SP_RTI: 3200 clocks / 256 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+PASS trap benchmarks mode-1: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 206546000 (1ps)
+TRAP BENCH mode0 BPT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 IOT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 EMT_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 TRAP_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 nested_BPT_IOT_RTI: 121920 clocks / 320 instructions, 1088 memory beats, 1344 CS, 54272 SPI clocks
+TRAP BENCH mode0 MOV_SP_RTI: 70400 clocks / 256 instructions, 640 memory beats, 640 CS, 30720 SPI clocks
+PASS trap benchmarks mode0: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 7139886000 (1ps)
+TRAP BENCH mode1 BPT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 IOT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 EMT_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 TRAP_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 nested_BPT_IOT_RTI: 121920 clocks / 320 instructions, 1088 memory beats, 1344 CS, 54272 SPI clocks
+TRAP BENCH mode1 MOV_SP_RTI: 52992 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trap benchmarks mode1: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 6964446000 (1ps)
+TRAP BENCH mode2 BPT_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 IOT_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 EMT_377_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 TRAP_377_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 nested_BPT_IOT_RTI: 126144 clocks / 320 instructions, 1088 memory beats, 1344 CS, 56320 SPI clocks
+TRAP BENCH mode2 MOV_SP_RTI: 52224 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trap benchmarks mode2: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 7169886000 (1ps)

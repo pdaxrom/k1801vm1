@@ -1,0 +1,16 @@
+{
+  "method": "Yosys equiv_simple + equiv_induct -seq 4 + equiv_status -assert; all inputs unconstrained; unchanged state update block; deliberate changed fault-repair vector must fail.",
+  "baseline": "cp22c",
+  "baseline_sha256": "896ca1092f88ac140ac204fbdbb3051cec58a924c7ac8426ab1ccc7cabe69476",
+  "candidate_sha256": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+  "results": {
+    "positive": {
+      "returncode": 0,
+      "log_sha256": "8e30b1a09f5bb61efdb9ea5a3cbdba8d5071bf0814ae45896d4f08bd49528429"
+    },
+    "negative": {
+      "returncode": 1,
+      "log_sha256": "b48f7560250fae8ba7728167ad5372ac225454c3102a926b6daa7228e83f5656"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+PASS eis_xor differential mode-1: 11028 DCJ11 cases, 293814 clocks, 57356 exact bus beats
+tb/tb_trace_bit.v:137: $finish called at 5033556000 (1ps)
+PASS eis_xor differential mode2: 11028 DCJ11 cases, 6418544 clocks, 57356 exact bus beats
+tb/tb_trace_bit.v:137: $finish called at 66280856000 (1ps)
+PASS XOR fault differential mode-1: 5760 DCJ11 vector-boundary cases, 199520 clocks, 38112 exact bus beats, 448 repair clocks
+tb/tb_bus_fault.v:131: $finish called at 3089696000 (1ps)
+PASS XOR fault differential mode2: 5760 DCJ11 vector-boundary cases, 3753440 clocks, 38112 exact bus beats, 448 repair clocks
+tb/tb_bus_fault.v:131: $finish called at 38628896000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_xor_io -o build/vendor_xor_io tb/tb_xor_io.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "/private/tmp/uj11-cp24-vendor-20260909/uJ11-fpga/build/vendor/DP8KC.v" "/private/tmp/uj11-cp24-vendor-20260909/uJ11-fpga/build/vendor/GSR.v" "/private/tmp/uj11-cp24-vendor-20260909/uJ11-fpga/build/vendor/PUR.v"
+vvp build/vendor_xor_io
+PASS XOR CSR: 1024 read-clear/write/flags/error/odd-address cases, all NZVC and 0..3 waits
+tb/tb_xor_io.v:89: $finish called at 303456000 (1ps)

@@ -1,0 +1,18 @@
+; Verification-only microprogram, not part of the M0 ISA image.
+.org $000
+START:
+    alu PASSA, pair=DA, d=IMM, imm=$80, b=R0, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=$a5, b=R1, dst=RF
+    WRITE, a=R0, b=R1, target=READ_WORD
+READ_WORD:
+    READ, a=R0, target=SAVE_WORD
+SAVE_WORD:
+    alu PASSA, pair=DA, d=MDR, b=R2, dst=RF
+    alu ADD, a=R0, b=R0, pair=AD, d=ONE, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=$5a, b=R1, dst=RF
+    WRITE, a=R0, b=R1, byte=1, target=READ_BYTE
+READ_BYTE:
+    READ, a=R0, byte=1, target=SAVE_BYTE
+SAVE_BYTE:
+    alu PASSA, pair=DA, d=MDR, b=R3, dst=RF
+    STOP

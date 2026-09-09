@@ -1,0 +1,3 @@
+Archive: cp19a; mutation: ('d=PSW, b=RD, dst=MOV, flags=NZV', 'd=PSW, b=RD, dst=RF, flags=NZV')
+FATAL: tb/tb_trace_bit.v:116: trace case256 op106700 R0 got0080 expectedff80
+       Time: 296000  Scope: tb_trace_bit

@@ -1,0 +1,27 @@
+; Transport-only test: consume opcode, immediate, displacement, absolute words.
+; This is not an implementation of the corresponding PDP-11 addressing modes.
+START:
+    alu PASSA, a=R7, b=R7, pair=DA, d=ZERO, dst=RF
+    JUMP, target=FETCH_WORD
+.org $020
+FETCH_WORD:
+    FETCH
+.org $030
+SAVE_OPCODE:
+    alu PASSA, a=T0, b=T0, pair=DA, d=MDR, dst=RF
+IMM_WORD:
+    READ, a=R7, stream=1, target=ADVANCE_IMM
+ADVANCE_IMM:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu PASSA, a=T1, b=T1, pair=DA, d=MDR, dst=RF
+DISPLACEMENT_WORD:
+    READ, a=R7, stream=1, target=ADVANCE_DISPLACEMENT
+ADVANCE_DISPLACEMENT:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu PASSA, a=T2, b=T2, pair=DA, d=MDR, dst=RF
+ABSOLUTE_WORD:
+    READ, a=R7, stream=1, target=ADVANCE_ABSOLUTE
+ADVANCE_ABSOLUTE:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu PASSA, a=T3, b=T3, pair=DA, d=MDR, dst=RF
+    STOP

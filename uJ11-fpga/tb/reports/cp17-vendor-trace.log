@@ -1,0 +1,40 @@
+PASS trace_bit differential mode-1: 11196 DCJ11 cases, 328315 clocks, 58965 exact bus beats
+tb/tb_trace_bit.v:128: $finish called at 5410486000 (1ps)
+PASS trace_bit differential mode2: 11196 DCJ11 cases, 6684208 clocks, 58965 exact bus beats
+tb/tb_trace_bit.v:128: $finish called at 68969416000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_trace_system -o build/vendor_trace_system tb/tb_trace_system.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_trace_system
+PASS trace system: 24 real FRAM trace/RTI/RTT/WAIT/IRQ and I/O-fault cases
+tb/tb_trace_system.v:105: $finish called at 410156000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_trace_faults -o build/vendor_trace_faults tb/tb_trace_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_trace_faults
+PASS trace faults: 140 trace/RTI frames and T-set fault priority cases, all four frame errors, odd SP and 0..3 waits
+tb/tb_trace_faults.v:86: $finish called at 63916000 (1ps)
+TRACE BENCH mode-1 ADD_trace_RTT: 4992 clocks / 384 instructions, 1536 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 MOV_mem_trace_RTT: 6240 clocks / 384 instructions, 1632 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 RTI_restored_T_loop: 6144 clocks / 256 instructions, 1792 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 WAIT_trace_RTT: 5088 clocks / 384 instructions, 1536 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 MOV_SP_RTT_T0: 3200 clocks / 256 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+PASS trace benchmarks mode-1: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 260086000 (1ps)
+TRACE BENCH mode0 ADD_trace_RTT: 172800 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode0 MOV_mem_trace_RTT: 184128 clocks / 384 instructions, 1632 memory beats, 2016 CS, 81408 SPI clocks
+TRACE BENCH mode0 RTI_restored_T_loop: 203008 clocks / 256 instructions, 1792 memory beats, 2304 CS, 90112 SPI clocks
+TRACE BENCH mode0 WAIT_trace_RTT: 172896 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode0 MOV_SP_RTT_T0: 70400 clocks / 256 instructions, 640 memory beats, 640 CS, 30720 SPI clocks
+PASS trace benchmarks mode0: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 8110936000 (1ps)
+TRACE BENCH mode1 ADD_trace_RTT: 172800 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode1 MOV_mem_trace_RTT: 184128 clocks / 384 instructions, 1632 memory beats, 2016 CS, 81408 SPI clocks
+TRACE BENCH mode1 RTI_restored_T_loop: 203008 clocks / 256 instructions, 1792 memory beats, 2304 CS, 90112 SPI clocks
+TRACE BENCH mode1 WAIT_trace_RTT: 172896 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode1 MOV_SP_RTT_T0: 52992 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trace benchmarks mode1: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 7935496000 (1ps)
+TRACE BENCH mode2 ADD_trace_RTT: 175872 clocks / 384 instructions, 1536 memory beats, 1920 CS, 78336 SPI clocks
+TRACE BENCH mode2 MOV_mem_trace_RTT: 184128 clocks / 384 instructions, 1632 memory beats, 2016 CS, 81408 SPI clocks
+TRACE BENCH mode2 RTI_restored_T_loop: 203008 clocks / 256 instructions, 1792 memory beats, 2304 CS, 90112 SPI clocks
+TRACE BENCH mode2 WAIT_trace_RTT: 172896 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode2 MOV_SP_RTT_T0: 52224 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trace benchmarks mode2: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 7959116000 (1ps)

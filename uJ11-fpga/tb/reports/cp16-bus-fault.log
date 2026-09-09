@@ -1,0 +1,4 @@
+PASS bus fault differential mode-1: 32780 DCJ11 vector-boundary cases, 1179328 clocks, 213080 exact bus beats, 3536 repair clocks
+tb/tb_bus_fault.v:125: $finish called at 18021576000 (1ps)
+PASS bus fault differential mode2: 32780 DCJ11 vector-boundary cases, 20896206 clocks, 213080 exact bus beats, 3536 repair clocks
+tb/tb_bus_fault.v:125: $finish called at 215190356000 (1ps)

@@ -1,0 +1,1742 @@
+[
+  {
+    "lut4": 133,
+    "lut4_capacity": 1280,
+    "ff": 62,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 67,
+    "slices_capacity": 640,
+    "fmax_mhz": 54.885,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp1",
+    "scope": "uj11_probe_seq",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "b7d860d0a264937e44eada8fdf14ff3d96b6573fda4628d9ceec3695e827b846",
+    "reports": {
+      "source.tgz": "8ab9d7c6b78b82fe7522f0540e16c6617f681d1b7966a5ab46cc032e7358894a",
+      "inputs.json": "8a11e0a1b4f4d9f613531bd98ffba65f593e4ab65e92a2ed3bfafedc86363bf7",
+      "design.mrp": "19e116d7a7d0ed9d1180bab9baba5a9f6c2163cfaaedffdc44b11320aa0a1b62",
+      "design.par": "828962d54fbc8c62158ddfb0f0f76225452da2e086ba361c75f5c77e6fe89972",
+      "design.twr": "85a074c8d67291e61d63dfaf5f5768fdf5eca1a51469541ff26140b49a56016e",
+      "design.srr": "e9ddb45708a24b0e20d9e15b68b0f566bd1c59d9ec5d3ea311f54f86ba04f588"
+    }
+  },
+  {
+    "lut4": 434,
+    "lut4_capacity": 1280,
+    "ff": 138,
+    "ff_capacity": 1346,
+    "ebr": 0,
+    "ebr_capacity": 7,
+    "slices": 217,
+    "slices_capacity": 640,
+    "fmax_mhz": 52.348,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10a",
+    "scope": "uj11_probe_datapath",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "78c5f8ea5fa9b15a99d8fe0586570b3386062be34ad212c654d201a3a8dc1d33",
+    "reports": {
+      "source.tgz": "087f5d2db9788516508d05bf4618e0a2115c8e145883dde98fa53a0b99d70dae",
+      "inputs.json": "5441d37848a7ae633c90588d283ed805724a61a0ec7242e763983c46ce18f1ca",
+      "design.mrp": "ae35a29532ce44b54e3d589585d7445ee40dd8df0ea535181698edf6f2f0bc88",
+      "design.par": "19247d64ea8151bed05a897ceb203c74297378176f2323c1b19a9f712e84e8e2",
+      "design.twr": "1f01bd99fecf946cba1c5c5d4343a76aa1c13e92ca467f51e8e644b6123de0ad",
+      "design.srr": "98edad3800c9e0bb3d2820a5c5be978bfd963c4de8149ba56614ab401cca5728"
+    }
+  },
+  {
+    "lut4": 675,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 338,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.634,
+    "cumulative_negative_slack_reported": [
+      3894976.0,
+      0.0,
+      3894976.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp10b",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "b3be384d1c9dd1931d1585a53f3f88b4c2bb08c580753105ea676c4f692b9167",
+    "reports": {
+      "source.tgz": "7a20e05c689627c81b04ad8c464c59a542e951e7ef72840a7f392f21884e8c89",
+      "inputs.json": "96ff906c8293b192ac534e9e30d92d940f9c1bf23805cc656571c150d94595c0",
+      "design.mrp": "a405572a32198289b8b93fe41d5f1c9fb0c9e65b04371015fe651b0d83b44a8e",
+      "design.par": "b855e92b0a5fa22658c070e3e60eed16f58873e26f585b549bb29ba820a6da7b",
+      "design.twr": "6e585b11eed1d5cdfc95295970fdb37459e269bd955ef8f806bae0d272fa3a09",
+      "design.srr": "7f4fb436784eda87e8dfdcd3f760bb6d80e70b772aa0ff5b958be460e201b3c1"
+    }
+  },
+  {
+    "lut4": 928,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 465,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.954,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10c",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "5cbfebc435842f7720bfc32e45865fee3b7ab0621b395156f6e1eb97366fd34d",
+    "reports": {
+      "source.tgz": "7a20e05c689627c81b04ad8c464c59a542e951e7ef72840a7f392f21884e8c89",
+      "inputs.json": "57a1d66a366f76179de046da710344e5a27f6895d67c11999bb4bf7393d53318",
+      "design.mrp": "649ecd407422e269e942efae2a36b7354a40e16193bd9ac66b7f5ee84975876c",
+      "design.par": "358623d9fc06b5d24c15e1b0db30997a4d20e5d2613b692d941ac485e4320343",
+      "design.twr": "c90e59a7bb0175fd5eeb7b355fd513494fe6407f9fa52f883d1550d5a4fdcdff",
+      "design.srr": "489ba5c3f70c38372e51d169f742492c85f24843cda9152b1f083b5b5eb8b4bf"
+    }
+  },
+  {
+    "lut4": 680,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 341,
+    "slices_capacity": 640,
+    "fmax_mhz": 37.533,
+    "cumulative_negative_slack_reported": [
+      1272473.0,
+      0.0,
+      1272473.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp10d",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "c5108668504086cefb3f0c22cae330c3c441c9027cb4111ef961f89532a35ffe",
+    "reports": {
+      "source.tgz": "cf96d8ab2e254b5f1d1aa2d716b460ea9231f45dc100cde39f54d1076e7433bc",
+      "inputs.json": "91480f09ec7da34f161713e6f020e6236a12ef633b6ea725adfcf8dabbc889a5",
+      "design.mrp": "77db147aa12e77f98d654ac1bb10336a6e2d98afd77bef1629b645bc47ad6029",
+      "design.par": "1a51078208a73ec5948dced8220a7907db074953d84d038748c78b0e1f87cf4e",
+      "design.twr": "c699e9e33d7ba2733f8a990518ce87f446f601bc18dfe9204ef76a78161cfab4",
+      "design.srr": "6b94226833fedb105e4f4f0aca0ed9ffcb5892158c5968dc94c6c73a7b79b9dd"
+    }
+  },
+  {
+    "lut4": 961,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 482,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.677,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10e",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "1d442b6da8b179eb2f100976d0a24334a7cb934f848fdd618edf7d0903e2dfbc",
+    "reports": {
+      "source.tgz": "cf96d8ab2e254b5f1d1aa2d716b460ea9231f45dc100cde39f54d1076e7433bc",
+      "inputs.json": "99e54af29cbd4c6febb4edea2ac72135a97271119da747ace77787058659fbb6",
+      "design.mrp": "04033e781eb6d9dd4aaf4e36ae6de98f1ee4f8130d9cbdce8aacbadc00033cec",
+      "design.par": "cc5d8e1b4190b643262f95e363808dfa888cacab704211fd518720d8ef822ef0",
+      "design.twr": "c8158b318d8ccd4b856afd7e7c6308aed56ffa850207abc79b52b2e2abae37e5",
+      "design.srr": "109a738494d133d5c889236a034f013a28971c2139171d23e4a8793289cb6f8e"
+    }
+  },
+  {
+    "lut4": 659,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 330,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.496,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10f",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "2a395b740cda4a4c092f5002283ab20add8c3e8f23ac0b78a2076c580037c978",
+    "reports": {
+      "source.tgz": "47ba9e90f65a69c4f1667bb3977b3eacd33ab4bc73f3cdd1db62f755ac5dc0f8",
+      "inputs.json": "78d3d591024996913a29ade005f39f8d15c0a5e3c2613386e8f098fb0f03bfc2",
+      "design.mrp": "bb29db7fef61ac61c75ce44d860a07ebdb34a98073cdbf4684fd5ff73ac34e54",
+      "design.par": "69d00714d8bfe577b96f7d194a1ef2ccdd89d790dbd0f2b231b68c97f58aa58c",
+      "design.twr": "f5660d2b5c0e8f3ccbbd9f6e8eb616a9ad05283bba30e6911e96bd980b0863bf",
+      "design.srr": "8423608edafd3f3cc691a8068e3bb09de0ef50cac4f2e7897b25b1e8d9b847ec"
+    }
+  },
+  {
+    "lut4": 934,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 469,
+    "slices_capacity": 640,
+    "fmax_mhz": 29.402,
+    "cumulative_negative_slack_reported": [
+      321.0,
+      0.0,
+      321.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp10g",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "9769d94b4192f6749406dc15fb29b6ed2973bf6756765e5b7ba2f4deb9bd37a0",
+    "reports": {
+      "source.tgz": "47ba9e90f65a69c4f1667bb3977b3eacd33ab4bc73f3cdd1db62f755ac5dc0f8",
+      "inputs.json": "803b91de2c043e217951bff6e19d90eaba68ff7392945dba39e9f470cf586449",
+      "design.mrp": "f33ac36fb1b03fc11bb67d51fab9346578efd3f9d342b4380f4079e501d87d3b",
+      "design.par": "b7306a99ff6737130c69ed0cb86c415e1c790be11977834c17d232437c1d4dc2",
+      "design.twr": "01b54d5ca63e2850df8b5d64a6581b7af21c79ae3bdcc4d11cc7777e4e2fd271",
+      "design.srr": "4ff342fab37d31f26650bbbb26299e86948f2783002d853c99241501aa0a798a"
+    }
+  },
+  {
+    "lut4": 659,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 330,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.496,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10h",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "eb681857c24a9cf3ec47f6edf9a4c3128fffe9e8f5b3a6b0a31e0c0581f85214",
+    "reports": {
+      "source.tgz": "4339ac22384c3c90f1361c82a44ba0635c161fc9eaf333e9344121fc1dc8b160",
+      "inputs.json": "8fa2f5632c8d617e015ff0e6a9a936fd5523a987f636faa4782c975c4caad5fe",
+      "design.mrp": "a0faa6158ad88ee7605644b969213aec72aaac9488d1e52612e8cfe89ad8357b",
+      "design.par": "93aadf66343838cac443ba3a5997eb1ee49040c41cc2b825ca60dc3dac8f438e",
+      "design.twr": "ed198ff277ab4fbe6044ed48ba6dd709f88e924a0362066d823082879018e2c2",
+      "design.srr": "f58d255a9821e98277752cc2f67547f483d429dc983f31b3e1d4f911e36e9db8"
+    }
+  },
+  {
+    "lut4": 935,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 469,
+    "slices_capacity": 640,
+    "fmax_mhz": 29.025,
+    "cumulative_negative_slack_reported": [
+      8561.0,
+      0.0,
+      8561.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp10i",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "8745da84db6be305a0e12d3bd5133893a55d132fe403f16d7fcb9df66a18a400",
+    "reports": {
+      "source.tgz": "4339ac22384c3c90f1361c82a44ba0635c161fc9eaf333e9344121fc1dc8b160",
+      "inputs.json": "8b316df8e6d49f47be8b4cb7d7e43dffa30bc4567de21d52dac2059596a31e50",
+      "design.mrp": "782c4a52f655909c3b01d2ceceea376c017d606ffdf0bda85611b08ece5b2f1a",
+      "design.par": "35b408ced8521269e259832191cafab133e2345ebc70ae7f98e594ac5e1e4e43",
+      "design.twr": "77ca51d8468fce10cd033732a37c8775ea3cf28bd3aa6590a54c562299ba7614",
+      "design.srr": "0747f3189f205fc57e66b07b7d901af34fc43a4dc5dfe8a7c80cac5fb988d463"
+    }
+  },
+  {
+    "lut4": 659,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 330,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.496,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10j",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "1a32707cf3af478202461ade7d06ad199338fe9cd5f26aa02da5c296c4041236",
+    "reports": {
+      "source.tgz": "6bd07613a524657c71ab841aa9e947eb6be82aab22d20a8e5313540a1f2a216e",
+      "inputs.json": "4892b6798187ffd48024d7f7674ccda9167139393fb8d20b779b41bec77e762e",
+      "design.mrp": "eef7272dd502601201d2152f3a4e51701aae2f22023b51e7fb227e4b1ccbd2fa",
+      "design.par": "cecd7cc63f9b7e33304378eac975c757fdad98ea24f03786aca5b5e896b8c9ce",
+      "design.twr": "b848175c3887c3200021430df08de4e76cd7ebf1de3d958381c877cc07ef827a",
+      "design.srr": "ac9dfbfb675d18c5f9959727e4503c30fe5f735fa643fdea4e41ff014a2bf1be"
+    }
+  },
+  {
+    "lut4": 905,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 454,
+    "slices_capacity": 640,
+    "fmax_mhz": 32.047,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp10k",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "1ce6414dbb3fa21d0389cf39350627142694b1f573884b707edb0af3ca2e2e4b",
+    "reports": {
+      "source.tgz": "6bd07613a524657c71ab841aa9e947eb6be82aab22d20a8e5313540a1f2a216e",
+      "inputs.json": "04e5f7544461731b2d926da04dad771e900334cff1f654da2801d2e264a45ade",
+      "design.mrp": "8c9b9f9ba0c7262a19a8b8ec03740b117cab52ecd50274eae46397360738b6f1",
+      "design.par": "5bcd7cc8eef01bd1c0cbb4de2484f6f370ece64ac0d269a8c00c9ef00e3ecebb",
+      "design.twr": "3315e6c3813b5f6ce0807faef4333844869826c402fcbc6d7b5130e4c437f2cf",
+      "design.srr": "bc700bf1b735be5859b7dabe8af5396247cc211a0c7fe18087a2d0d5c3ff62ce"
+    }
+  },
+  {
+    "lut4": 673,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 337,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.817,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp11a",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "2f643df58a058bd877030a041e141b33226a935cbb1fd8446b81f021a879841a",
+    "reports": {
+      "source.tgz": "c7daf1e6e30d0902d3319f190e307f453ec157692563c22c7d4745b2c4696ef5",
+      "inputs.json": "7d91a417868f42d7fb37d289a75a3b2da7b1ede4ef504a77a76d05876cb72583",
+      "design.mrp": "6e6c409aa7dceb09be37ce305b7fe57054c2457f0d97614585f1f8959b1218d3",
+      "design.par": "fcf22b746dffaaf142c1a59334e944210e72a7bb3d33db150b26d93106eb29da",
+      "design.twr": "704f5ad4fe83d266632171bbb62d4d5259ba4fd218a811be527afbb9cb59f776",
+      "design.srr": "48ab08aaa95700f7a10bc394e17db155f6b6a44a55b199b0752fa5cf5372b8c3"
+    }
+  },
+  {
+    "lut4": 933,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 469,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.257,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp11b",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "c87249f2b5274d5cd5af2404a5934c74b2bd8168e25977c1c46c49fbb45730d1",
+    "reports": {
+      "source.tgz": "c7daf1e6e30d0902d3319f190e307f453ec157692563c22c7d4745b2c4696ef5",
+      "inputs.json": "391be017e9d0229a2392541847b051523f621454e8629f94fe821293754eb693",
+      "design.mrp": "daa921b71f9e78aad979e2b79d1870d33f48c64c3e1916b9ecfcb3989b980bfa",
+      "design.par": "496c4d6b58983795e4d1cff3a26b2a4f1a5706f67650ae7ad3ace4a855fb7fa4",
+      "design.twr": "ff6bc83351155e5df4dded0157c6c15f376b8f1f77e7faad9a77a7f33abb3978",
+      "design.srr": "e7d596ac985dc27f571b41484d835ea4b01766ecacf21dd791af076196eb1abb"
+    }
+  },
+  {
+    "lut4": 674,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 338,
+    "slices_capacity": 640,
+    "fmax_mhz": 33.929,
+    "cumulative_negative_slack_reported": [
+      803244.0,
+      0.0,
+      803244.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp11c",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "aa22b48e0f4dbd630c755f97205cd60d92c53443e724a7086eba8eb5cbf68fa5",
+    "reports": {
+      "source.tgz": "4528ddf365466365a57bbccadb5ce2d2ac1930f3c4db41ba073e7a316adb0139",
+      "inputs.json": "aedb1db075b66e306e3acc0cfd7be463fbd551baa93f83e45d58a1dd2878e0c0",
+      "design.mrp": "90eaa30986ef41646d6d37571a0897e733ab4dc5bea0e450c6c7d3607a0d2562",
+      "design.par": "df4a34a2823054daa8c9f3194beb6a344e40037a195cf7401c8e1899d05d8c99",
+      "design.twr": "d7ec9a00e5f5afc2da29e45a1e18438985dccfe506eec83bf219cc41c043b71f",
+      "design.srr": "9fe4af6a8b1b5baa270e38f2731e88b508fbfc84d108bbd1d121b6f8078d1136"
+    }
+  },
+  {
+    "lut4": 971,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 487,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.443,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp11d",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "9ca3e3844bf4e289702d6cfdf3631fc12d61500e8edf06beb35e48d238256359",
+    "reports": {
+      "source.tgz": "4528ddf365466365a57bbccadb5ce2d2ac1930f3c4db41ba073e7a316adb0139",
+      "inputs.json": "4231a5abbec2871275b619dbce51fb61f3c472cedec45e24fa5cad783f0f7d71",
+      "design.mrp": "7fbbeee68320b671a37756d6b6805d75468f5e07d7cfb04acd48acef4a303c33",
+      "design.par": "9a1e14d88451b3994620d7c776f73b9408d782e7caed48659dac389b70717242",
+      "design.twr": "8f1eb226b2627b03b178059b333bbb0ff1bf87927c480150b7247b56ce17f241",
+      "design.srr": "cb609764ac0bce57124fa7cc48af7beb56c362364307f0cb8192ed7df36899ef"
+    }
+  },
+  {
+    "lut4": 694,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 347,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.358,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp11e",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "4b42fdaf5293cec0c0d5815a036c5c4718c28d9c40eb0df058864eac6ff3ce62",
+    "reports": {
+      "source.tgz": "0fb2a41d06e196ec63bc2dc314f9720857dad34e6defce76c041f4cdbc70668a",
+      "inputs.json": "15e1a45c584d3965e89b543cf454dd72bf67f792be51120a3e7281517feebeaf",
+      "design.mrp": "0725dc7404da3523e4a87888b95b58f3a4e6f14ce216fa08492402a8cf40dbf3",
+      "design.par": "a9b7ffad04c6f326220b8867e54e7915622de835908e0a6715234780681f01b0",
+      "design.twr": "4765d10469e2ab3b1d4b8b24dafc3e8c31bccbd5004cd910c01812e499a0a5be",
+      "design.srr": "cf81acb6a99a4354a2e677049b079d5085010dd9e8175f080879136b070e2843"
+    }
+  },
+  {
+    "lut4": 970,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 486,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.672,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp11f",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "72947aac35c0d9802e22b5c3e6d505afca9806d2cae3ad7d7f796d8d0fbbb54f",
+    "reports": {
+      "source.tgz": "0fb2a41d06e196ec63bc2dc314f9720857dad34e6defce76c041f4cdbc70668a",
+      "inputs.json": "167963fcdd7a2084938ebd1a7030286303f68656bbfe5d5b214c98bbe0634106",
+      "design.mrp": "a4594978023ab89f7fc2f742a7f397ac746a79a86d55b375e042198881971d62",
+      "design.par": "a19f972f40c8598b5ee9105798f79066ce0b1147d1cdcf7b914945eb9335a93c",
+      "design.twr": "98a4c31099569aa0a787a35202dc72284c4d990113015b4b5f20a14066a74eb2",
+      "design.srr": "3bdfb1898dfafd7a50d5a9b94b83876434e9abad758b0aff3f0172164807aef2"
+    }
+  },
+  {
+    "lut4": 708,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 355,
+    "slices_capacity": 640,
+    "fmax_mhz": 37.012,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp12a",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "8df8838659ad018ba65e5409e60835675f61121aba69b0f598fc051ecb6e6ae9",
+    "reports": {
+      "source.tgz": "17e79b3d86174c6327dee7ac7aed0577f5f31487b26feb5423c37fb3b9bc5f8a",
+      "inputs.json": "582c851bf48810e81b56fc6bc3fa13236c54f0437548fd006878e506e0e8a954",
+      "design.mrp": "26e29651690ceee3dfb8caac01bf15f3bb12c58c52b017c2265a3d9524530d16",
+      "design.par": "608aa3edcd033cfc4c01b2f82ee0f8e48eaf6edb4565a801482035f680b1a8b2",
+      "design.twr": "1f07c9960c28ee334c5ee5e961757b6e447b3eef0ac771855aacf8388bb9d76f",
+      "design.srr": "a320a3b44c8b27ebc6e2ff50e8eda5d7b7ed00f45d9dfa98c0920e8378883150"
+    }
+  },
+  {
+    "lut4": 1081,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 542,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.65,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp12b",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "a1a7d7ca57181b016559b47231cb5af1fd2fdd2f47abd535200cbdd109daba51",
+    "reports": {
+      "source.tgz": "17e79b3d86174c6327dee7ac7aed0577f5f31487b26feb5423c37fb3b9bc5f8a",
+      "inputs.json": "e586af4259fc80c0d6fb32ce56a8b2de11c0befebcbb9bea95b7ffb7e94374e3",
+      "design.mrp": "e73d45de58a40fb7076170505a6357dc6543cb02c0f0da0c2ac26f05101788f0",
+      "design.par": "ca41f1b1bd224c4606c0487ae4cc6d7ebb23684848aea879cd5fa63d39d62949",
+      "design.twr": "29033a4a5c2eb2f81c584ecc16c2a39d8b0485a010eec43b606e9a6e82a5e818",
+      "design.srr": "9f217d0fed296a11f1c597cef13dafaac7cc63d5348d92a4d070ad0d9469e240"
+    }
+  },
+  {
+    "lut4": 708,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 355,
+    "slices_capacity": 640,
+    "fmax_mhz": 35.723,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp12c",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "7aa8190e619f0034b7d676a2a800312c67cd024d022e53a3d33ebf0005bbe700",
+    "reports": {
+      "source.tgz": "e9691ecd410d999c09e91cb9fce3f7d6962bd9cbf72c46814daf450d05aaf1e7",
+      "inputs.json": "ffee910b5302e81d4beeba4ee38e505c8418b6fcc406793ed2b6a44f3fa43844",
+      "design.mrp": "f50fd333537dc13f6e8424e0d74030007917057038655d87ffb772e1fa74cc33",
+      "design.par": "90012dbb450d424ee96d6ca72fce23206b6b97286f5a9454a849798824d5c581",
+      "design.twr": "801864e901b353ef0f39442927e2f665b9f283d578db84527712d8013c147439",
+      "design.srr": "b84157587d575ddf6bc149bfce98a484de1c2fe3cb7d648d523ff3792af2d197"
+    }
+  },
+  {
+    "lut4": 984,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 493,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.287,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp12d",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "e226025754d1e04ddc45dcfb6650fc968ab156c57a18e9f4837ffc0a9ddcaab8",
+    "reports": {
+      "source.tgz": "e9691ecd410d999c09e91cb9fce3f7d6962bd9cbf72c46814daf450d05aaf1e7",
+      "inputs.json": "e2354be1423b37df43bb4355d33565eba0210bce106ff5008982e754d9379fee",
+      "design.mrp": "63c9e571d31e37d8a77a5d84d9727f8d55a66e8648719c5dc463f01a50d3951e",
+      "design.par": "9cb3b288587ad133a43045017735218ae0afabcd263941f9255a58e3a1c39b39",
+      "design.twr": "936b19dc166d1c0582ead4c628d3bde821f736a9682a4df7c024a1ac55e34720",
+      "design.srr": "6af79dbb30913a83ad79281a87637605317f5c67becb258263c7135ad4264170"
+    }
+  },
+  {
+    "lut4": 735,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 368,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.34,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp13a",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "58a496fb10046dbd6f49c2baa61b565675e2fd33af4674202909cf660da838a3",
+    "reports": {
+      "source.tgz": "82de1f070138104615b1bc69edd9e2ae002b0be3233b3a00ef1f02ae418c4e8d",
+      "inputs.json": "650128d4cbbaf27793f8257a1825ba4892eef59a7be72b0974e998ddf95c0b28",
+      "design.mrp": "b7d224d2cda3346c221434c8f5c00b551c9c5466477b16bbc6ccfa64b940ce48",
+      "design.par": "405131b58e022fcdefa54eb42fe4e293ecf47a651f8a8cf3c9476d8fbd2d3f82",
+      "design.twr": "57d3c084dea186ad3e7db25deb7b2113e40636e64558229969bf77856f72f3a1",
+      "design.srr": "2675257b51db81d11394ff8d832c2da9004a64e08c0bf54cc78d7b3ec3cfb4d6"
+    }
+  },
+  {
+    "lut4": 999,
+    "lut4_capacity": 1280,
+    "ff": 394,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 501,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.245,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp13b",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "1d31b8aaf45772732a583f3223c7f7ebf68b2073b53404e05a513f870e018bd6",
+    "reports": {
+      "source.tgz": "82de1f070138104615b1bc69edd9e2ae002b0be3233b3a00ef1f02ae418c4e8d",
+      "inputs.json": "d2e9ee549f0b0fddc1b2b1f53ea975cb7133230db85633498e3a73b48b86a337",
+      "design.mrp": "c2cdf4cb1c605cdb04bb7c037a2b9f1fc230d612f9d9eb4c5358c567b609b8cc",
+      "design.par": "2a3b8c0f46ccb1cf6c2005d3718daf3c9e4060cd1ca3bdf156c4d7e141e864f2",
+      "design.twr": "6f6aa41b1e34ae5355857ddcc8a75465b6c40ded155e6fd944f655856c2789f8",
+      "design.srr": "25fa2f4e6e427d4800e23426d801cf9d28300ebbc4b3f7b767278faf99f2d6f2"
+    }
+  },
+  {
+    "lut4": 399,
+    "lut4_capacity": 1280,
+    "ff": 57,
+    "ff_capacity": 1346,
+    "ebr": 0,
+    "ebr_capacity": 7,
+    "slices": 200,
+    "slices_capacity": 640,
+    "fmax_mhz": 44.895,
+    "cumulative_negative_slack_reported": [
+      432083.0,
+      0.0,
+      432083.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp2",
+    "scope": "uj11_probe_datapath",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "db079aeaf5cea10d90c5fa470684ceea44a285bbe7dd7db855a971c9ac022b8e",
+    "reports": {
+      "source.tgz": "8e63165b01ce48c9d378b63a5faf2ac8d8adb5230eacb6318d87bbdade700283",
+      "inputs.json": "879b5465650665cab30240173e79beac43bc5b749ba24f7f4e9ab7beab5b2b88",
+      "design.mrp": "d2fcb0d913b5443cf656136a4d69540c95ced4833fb3541834a7413a8b083061",
+      "design.par": "d15389c9f52412bb0208365d1040f3902293ca640c5b8ebcd97f59112ac7f557",
+      "design.twr": "cdaa5d774b62538b557059ffe61ba9603203bb393f4f301658cb162e6947cffa",
+      "design.srr": "be79b8a8d0719db15052ffe23f68f17d88bb17ae9356c97310aeb7209f9439bf"
+    }
+  },
+  {
+    "lut4": 382,
+    "lut4_capacity": 1280,
+    "ff": 135,
+    "ff_capacity": 1346,
+    "ebr": 0,
+    "ebr_capacity": 7,
+    "slices": 191,
+    "slices_capacity": 640,
+    "fmax_mhz": 53.453,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp2r1",
+    "scope": "uj11_probe_datapath",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "22cd87c1f03c006a2ae123dc18a9c68f76895750dfd1f116b8e75d23f83accf5",
+    "reports": {
+      "source.tgz": "eb28935d7624250e821af6e5b4719e977c6b596c277d7f924e1f1883e9f7db0c",
+      "inputs.json": "b1d3f454067272ec3476b5a9433d4289aa1a2547002a3d6ad208ef6a4b8542ae",
+      "design.mrp": "47a23efd6c850975686136712889f96efcfd18b0fbc44378d6cdeed689ad51ad",
+      "design.par": "3f05bda9ba5df52ebb6b17c272b4912e18dcbee3f7e3ea4b6adabe7135dd41d1",
+      "design.twr": "6cf09909302540d27ffa940138a2a3f82a67677ba9a4896500b2a725214b94b8",
+      "design.srr": "573ad2a3969b27ecb4440ec3dfe4fae1b8512ccdc830f38df7b809e3e3feeee4"
+    }
+  },
+  {
+    "lut4": 661,
+    "lut4_capacity": 1280,
+    "ff": 303,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 331,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.682,
+    "cumulative_negative_slack_reported": [
+      25465400.0,
+      0.0,
+      25465400.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp3",
+    "scope": "uj11_probe_engine",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "393da452f8c5a8df75438f172e1c1f6570b011c2856d032fb86b9dec1981e0fb",
+    "reports": {
+      "source.tgz": "e39a97caf9bad4e2f17c50f0b4e2f0b79d5c0d5a2f452f2984b42f5a23a9e6dc",
+      "inputs.json": "ff760400a4d12ba2fba2f98781dc72002dcbf1b62e13f82683d9e74ad0ddc5a3",
+      "design.mrp": "1f686ad49002be1a0522953c653dec55696ba88738a81519b1b96b6d042f03e2",
+      "design.par": "469aeb89ce339b07b971ecc9235313a9cc1045bea602b632b082eefe3279befc",
+      "design.twr": "d8bc12b1eaf364b0112229b7bc0815af377b6c9655d328db76d7b0644c858a22",
+      "design.srr": "1ba1386ff25e0d41ed182c0854180afc776432270a6c959acdf68fdaa2850563"
+    }
+  },
+  {
+    "lut4": 625,
+    "lut4_capacity": 1280,
+    "ff": 303,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 313,
+    "slices_capacity": 640,
+    "fmax_mhz": 38.389,
+    "cumulative_negative_slack_reported": [
+      19305655.0,
+      0.0,
+      19305655.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp3r1",
+    "scope": "uj11_probe_engine",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "93c2985871de36d94159726f694e4e528393d20cbfbf7c386a99b96f5eacec75",
+    "reports": {
+      "source.tgz": "f812558519c88c32628ccf9abd24620553d89b90f37bec137641a3da2ef30783",
+      "inputs.json": "3a1a20036e1332990c5c4dd9edd24981db0a115758478ab5b0e949202ae054d8",
+      "design.mrp": "04c3ab0c5e1ed0cb515e4d7531481a7cd27b0c5a75a246c58e2c68293b9243ea",
+      "design.par": "5aa33e4a18bf8c5aef6d0718192ac8fc0c3a5b4749ec6606f5503fef21142fcd",
+      "design.twr": "e1db058133fc903be012f4b1de1202bcbdcc3828ce567ed61a7af6d298ee5133",
+      "design.srr": "6f26afc056a41a0c9d4c4fe8bc51b0c8e81b0d863067aa0abc1f1c2c4745f4b7"
+    }
+  },
+  {
+    "lut4": 610,
+    "lut4_capacity": 1280,
+    "ff": 303,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 305,
+    "slices_capacity": 640,
+    "fmax_mhz": 39.228,
+    "cumulative_negative_slack_reported": [
+      16024607.0,
+      0.0,
+      16024607.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp3r2",
+    "scope": "uj11_probe_engine",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "3073ca340b1491f9ad818588051472e3a2d41a567f60104db9f9a0c47e39c914",
+    "reports": {
+      "source.tgz": "b6165b1b86fa956f7be9a736a513f2007f49273f5c19d4298e102c5c653d03de",
+      "inputs.json": "bcf857444c707a53c2ceff1cf8628b1e21615523d9e33f993d2797be45d620a5",
+      "design.mrp": "883d107e430a37dd62a4b51e18d4fa92f21de39a3b5fbe2ed69d8f98156d1f20",
+      "design.par": "7727485f5430eae9285a6187187cccf130a955a3ea4c0e41ecf162b1ac999cf9",
+      "design.twr": "953854e65b0a5f881f8520e0809389b4d8e48c727461b58de6b321f0815fb51a",
+      "design.srr": "132b7c5fe88ba12cbb53d4b4a1a8e7cd2b3a423ee9a8cf407a1c97601f756979"
+    }
+  },
+  {
+    "lut4": 610,
+    "lut4_capacity": 1280,
+    "ff": 303,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 305,
+    "slices_capacity": 640,
+    "fmax_mhz": 38.037,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp3r2-35",
+    "scope": "uj11_probe_engine",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "f9bacc6b3ada5b72f660089ca1fadc169f4a4f898000b6d445ba6c0c9190f67c",
+    "reports": {
+      "source.tgz": "a05e44e35126ae98faceb5229810ba3ab0796e7e1b347804401ab8e8c89efec5",
+      "inputs.json": "94f92d7282f41bc5fd342dba6488bb5b6a26d3c24f5e5581da2f45043b007cef",
+      "design.mrp": "7367adc65becacdcf0dcf46359ece71d5fc3ca3a4f1bebb29467735f35255182",
+      "design.par": "5d29520407f76b98a44d2003d1d2fc5e1b3c39d23536e91e2192258023246dfa",
+      "design.twr": "7636419fee81f3572c023ab434cbfefbc83e98ef2cee21eb82ecc481dda637a3",
+      "design.srr": "3452e6ad8c3afb5076b4b5977e9334650ffd31254c746fd2336f924500df8d2d"
+    }
+  },
+  {
+    "lut4": 13,
+    "lut4_capacity": 1280,
+    "ff": 22,
+    "ff_capacity": 1346,
+    "ebr": 0,
+    "ebr_capacity": 7,
+    "slices": 11,
+    "slices_capacity": 640,
+    "fmax_mhz": 150.15,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp4",
+    "scope": "uj11_probe_decode",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "d2e79c663ea57ab75627f6a95ac193d526e7a43fc84db06f4c067c7ffd301f53",
+    "reports": {
+      "source.tgz": "1fe5dcc786b4429a0cb279a85255b8cea7de4a89f409184454a8f0f80aec6fb9",
+      "inputs.json": "66286526c2631c32af0264f37a0837589b3563d256630d1a18fe4d139c99a545",
+      "design.mrp": "edf63b52736cc408e5558afbc6cf8188971a927203ba6cff1f0476dc3a4d07d1",
+      "design.par": "87f2f02a91ceac66a26339d3b144f493f44e564d8c3ac7dea512a9bf8b1db2b2",
+      "design.twr": "12e260ffc52f45bf6aeacff0cc2edff7f46b68e26f15ef7b6f65b5f9a65e480b",
+      "design.srr": "dad4eb53d9a741e494071444732c94ce8255de98395ae85ff09383276c933898"
+    }
+  },
+  {
+    "lut4": 639,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 320,
+    "slices_capacity": 640,
+    "fmax_mhz": 36.642,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp5-35",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 35.0,
+    "input_revision_sha256": "b60cedb16bb50e399b85b16245ef3e65e34e0c07fd70e6b0ecba04a430dad5a6",
+    "reports": {
+      "source.tgz": "a253b072ead76cc135f2da3c9ff07eaaeccf75dc5a587de6dc34d05d270f1e89",
+      "inputs.json": "496dcdb3245764340ba5175ef51beabd790a1a6dc4a897d1ea3e66e1923b21c0",
+      "design.mrp": "870dd9c91662d19b5675d553130fab45a2ccc3a43af63f76c3e444c495282d39",
+      "design.par": "11c2a0dc1dc32d2a9ef48afb04bc5f8a676c4f8481076b75939751bad1a9bb53",
+      "design.twr": "d397318e0943ace13a495e258719442ff4e51c200105c3e282b5475bb7c9950c",
+      "design.srr": "ad47286c673d572dd7cd34fbfeea69da3fb55bc853e8d7e3d266071f2f3402fa"
+    }
+  },
+  {
+    "lut4": 639,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 320,
+    "slices_capacity": 640,
+    "fmax_mhz": 38.806,
+    "cumulative_negative_slack_reported": [
+      17086695.0,
+      0.0,
+      17086695.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp5-50",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "156c84476ba530b2720142051244d86b606d605287b67070e2dd89d7d46e7059",
+    "reports": {
+      "source.tgz": "a253b072ead76cc135f2da3c9ff07eaaeccf75dc5a587de6dc34d05d270f1e89",
+      "inputs.json": "4d2272877f2da90632353d17895de8ee4f8eba6678e4f807d90422c111ff961c",
+      "design.mrp": "4027dd6d9a048d5f8ca037cd529a6c3b0e246e6b61b60375a7b076146c94b40c",
+      "design.par": "309b7312b8928296dbc724651b6c7f3dea3c7be33bff477636db6bf668daf848",
+      "design.twr": "1b940c7a314971dc3be3d35aa0afb68d8a03454f5d1d4b4afc63d7743fc069bf",
+      "design.srr": "36dbd9f7f3f84991665004d338a2be2bd67028ac9df40489db41e60cce7f618a"
+    }
+  },
+  {
+    "lut4": 582,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 292,
+    "slices_capacity": 640,
+    "fmax_mhz": 41.195,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp5v3-40",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "849914189671d6b3bafd1f2cea8393c18a7aeba38d7b8175b9c5bfb804b4b497",
+    "reports": {
+      "source.tgz": "ea55fbe148e22d46b07ba801baeb2a28556436d749c9b5c4ce47e551ececa581",
+      "inputs.json": "d63f1bcd346ec3d0e912d1a8e3831869a0bcd800b240c0a28433f72974fb0d53",
+      "design.mrp": "98547d5cc7463afa328e58225ca357ecd99be57b4a8161df9d0a13ff41bc45bf",
+      "design.par": "3157aaadf6d70d21e857c28a1050c5ab4ba1b8e5cc7017a63e8c86f5d10769b9",
+      "design.twr": "858895d1c2a1c949caf7c784fb33d96bc32af168f4efc933574fb26e9f899e93",
+      "design.srr": "46c0be5133806784618f08447707ac84fe1fdf18a6d09270ad98be32366ba752"
+    }
+  },
+  {
+    "lut4": 582,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 292,
+    "slices_capacity": 640,
+    "fmax_mhz": 42.902,
+    "cumulative_negative_slack_reported": [
+      7454125.0,
+      0.0,
+      7454125.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp5v3-50",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 50.0,
+    "input_revision_sha256": "2bbbef62d0917f52c6e8a6cdd552c8299b6556b8c86c2bf1d6ae83eb6362343f",
+    "reports": {
+      "source.tgz": "ea55fbe148e22d46b07ba801baeb2a28556436d749c9b5c4ce47e551ececa581",
+      "inputs.json": "6e993b570ab4102284046ffcefc7719f0cfad869830f0ffd1ae6ce652aa47429",
+      "design.mrp": "0025e2fd2fe6d1267028afbeff0cdfa123fd485264ae23a8367b0a192c78a38d",
+      "design.par": "4721e01e7927823c072b66cdd899f3b14d73c2538e2939e78ca9bf15492ce836",
+      "design.twr": "524bfe148b5acab74f478ec976a1f6b035317fc67e41ab6faaa472055b48248c",
+      "design.srr": "0782167994a1b5b4e7035813d3a22e67d900bc554aa351580ae433441817712d"
+    }
+  },
+  {
+    "lut4": 739,
+    "lut4_capacity": 1280,
+    "ff": 372,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 370,
+    "slices_capacity": 640,
+    "fmax_mhz": 34.762,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp6a",
+    "scope": "uj11_probe_fram",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "cec99a4ab7c24513a6cdfb78dd00b7f177091fa355d3da3aa16da592f1691127",
+    "reports": {
+      "source.tgz": "80c5f1fc8eebff66895b7e0b88e4ab87a59cb159a5c2a10358d722306ee3c149",
+      "inputs.json": "35b5a967ced90bfe7190e44d720315ef4e3cefb6cd327189f95cd491693c6567",
+      "design.mrp": "a775e8f489a08df551ef98b1521b1a563fb307fb6aafcaba8ff6e7649f4fe985",
+      "design.par": "506e4c1b8361f798e43935d56eb9e5c251c83b03556be7c9f319e92a5a40c55a",
+      "design.twr": "f4aadeb5821e545965442ebc2b0daaaf68fcd9171663cf896856db5b9b0e640a",
+      "design.srr": "eb6972f0a164194e117d5713e440200a9b7ad9ad8c6b1e661c257b31fbef2610"
+    }
+  },
+  {
+    "lut4": 789,
+    "lut4_capacity": 1280,
+    "ff": 390,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 395,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.444,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp6b",
+    "scope": "uj11_probe_fram_seq",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "d86de2b9c41d316016375a6f36ddd7dc4d61fea1268c629df03012f4767638dd",
+    "reports": {
+      "source.tgz": "cd404c64692ccf4b19601a36808d12500cd3968defeda338eb03ac66c601d7cd",
+      "inputs.json": "f7f3581a4db0cc76995935c3c399bba6858f074895711cbb86a1e9beaec62a6f",
+      "design.mrp": "56e0bcc6cc37402bb43b4c4d535096aaa249852ea96f6d35fc576cea7a9cd7a9",
+      "design.par": "9ad3ee80b7c82e1e621abb26a0a354e64b3d8a769c89f5a889e006cdb118a463",
+      "design.twr": "432553a51349356ef40bd0d95616b0bb714cccc0ae8a8c6e3fab1cfd647a963d",
+      "design.srr": "a6baeb60420e9ed0865865891e2ab48ea45d0238c7d42feab13e88c2e554c9e8"
+    }
+  },
+  {
+    "lut4": 801,
+    "lut4_capacity": 1280,
+    "ff": 390,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 401,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.219,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp6b-final",
+    "scope": "uj11_probe_fram_seq",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "9af0a1f2637ce25c97726c79a97ad63c85cb9dd1a0acaa5c3806f8d71936291c",
+    "reports": {
+      "source.tgz": "45cf1f75dc3c855b07dfc0271854d743630e21086955f6a4af9599498b46d23a",
+      "inputs.json": "be74d1ed36e13a2621c61afe7479389b9321ca875d717c1f23aac784082ace8c",
+      "design.mrp": "a5c53e20495bf848fc82e5cd82686743d1e3266492db13c3cb0c7e96251eefb0",
+      "design.par": "ef753b75bc7efd5db9755484dc07f28b0d42ad2b3c1e6bb29a1426be0bad2135",
+      "design.twr": "b0356a81dea07eb8228c1b573ff1e8c16a7953aa13f0fa4a74ae12f6314a17d8",
+      "design.srr": "90868575bd8942e42b9995562f9bbf73efb1f8d812da0642502b67448ce77859"
+    }
+  },
+  {
+    "lut4": 824,
+    "lut4_capacity": 1280,
+    "ff": 392,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 413,
+    "slices_capacity": 640,
+    "fmax_mhz": 28.065,
+    "cumulative_negative_slack_reported": [
+      312444.0,
+      0.0,
+      312444.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp6c",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "924701480df00c99c5ff3ebbb2c18b49c72956db3754bd10ec0a575a5ef86372",
+    "reports": {
+      "source.tgz": "cd404c64692ccf4b19601a36808d12500cd3968defeda338eb03ac66c601d7cd",
+      "inputs.json": "35e10d073099c43c7f53c8eed36100970f60fd5ed7df6188d16efd9940502339",
+      "design.mrp": "322c67e7d8d4fc0810741357b3b11ca894013a55340e72b0e7645edf163d526a",
+      "design.par": "c575a42ae95519a779de53ea1ca76de2ed91e6fca2d7f7d71f4d119a7f843a17",
+      "design.twr": "e93b79efe34acbfaa61aa669438198361617b7cf8d404649e6b39d7ac042a36b",
+      "design.srr": "a23d64d799b8872c9310184499afa5f3602d201dc7afa449de3abeea2d55f504"
+    }
+  },
+  {
+    "lut4": 843,
+    "lut4_capacity": 1280,
+    "ff": 392,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 422,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.292,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp6c-final",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "021edcde85018750cb5036f1397c81f0d16d97a73f74d2e78ebd7d0f8303b86c",
+    "reports": {
+      "source.tgz": "45cf1f75dc3c855b07dfc0271854d743630e21086955f6a4af9599498b46d23a",
+      "inputs.json": "52c9d411980f14c1f8c4152772f53b62f5cfc8ac59a3cf6d773d4432fb759a1b",
+      "design.mrp": "fc7a7ab19652971c156ddac5fd825573196b49bdb5961de9b05471141e286dc1",
+      "design.par": "6b0b00190b57147e1a03026b79a298dfbf40e7b8e0be273be9372cd220baf447",
+      "design.twr": "fa1af7c74ef5808600b0ac435c8641f8da04bcc63ff0969fd41b5937a111bf5c",
+      "design.srr": "0c4a8deb13582fce4e8a5b585ceb438816a196dd4a6b7a8f7834f58fea4fac4e"
+    }
+  },
+  {
+    "lut4": 840,
+    "lut4_capacity": 1280,
+    "ff": 392,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 420,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.943,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp6c-r2",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "c208d9be0007091c67a8a8c1bb9d381e73d3e101258647c9e4455eba51b0aa73",
+    "reports": {
+      "source.tgz": "6c12442e21e44f7eb0634d6e0abcdcdf16ec1297fc4fc910e48e403c118692c1",
+      "inputs.json": "b5ac56d60496c0e8770cf84069eec4534f8e90c5a1eab59beae35085f9c22c59",
+      "design.mrp": "ece96b40d3f94ef1f1fdca370bd86c0bfef1e0967bd98da14f508308988f70ee",
+      "design.par": "fc072aa73ea2272fb0eadeaa3fdc567e596f4b21ae76f8c7d1e896f4f71c90fd",
+      "design.twr": "dbff9098cd4fea1bffe44a3e88db5b1880a379316cb8e3470943530058b15bda",
+      "design.srr": "e3c91f787c52ce14fd344f738182251d56ab19f950c5d255da805ea8d8f3c20a"
+    }
+  },
+  {
+    "lut4": 844,
+    "lut4_capacity": 1280,
+    "ff": 392,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 423,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.73,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp7a",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "0f3b55ca1d2b18331627bd8cc57a603722645fe000a34bd548ac104f24cde142",
+    "reports": {
+      "source.tgz": "82e3881a775fa85f75387a917cb995e7863b3ec2dac3b0142df937fc55ea4f26",
+      "inputs.json": "c8d5d42f5a8358370e3c2734dc608c7d8aad6626e0405c14d66d82770002d4ca",
+      "design.mrp": "34f9f5f49921d6f9c2c718b84be4a49d66fb244d0ca027840fa334717befcf93",
+      "design.par": "5dc4234578ddb864003fe4b3aecc0931cdfa2f8bc38d5a5c15cdf68cead06591",
+      "design.twr": "bb6a63552bd42fd5ba4286390e5abf51d61612b40e37cd18be03100e634e329c",
+      "design.srr": "16eca2d2eb4d478a2ea51c70e8d6e1a47f1809ba1e30a4408ec0066ee1a10a22"
+    }
+  },
+  {
+    "lut4": 583,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 292,
+    "slices_capacity": 640,
+    "fmax_mhz": 41.81,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp7b",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "f3ffde9f591fb718e50a572d9f6156c6ba6125de65f0f3cf0136a8f7ebd5a378",
+    "reports": {
+      "source.tgz": "363a573126d3549fbad6d27a68f63f402d8646b94b088b4c92a279098cf4a552",
+      "inputs.json": "2f75f6e30bc2e575ca229b0bdf1e0824592442e2955e9d76673b5206c47dfae8",
+      "design.mrp": "5d5fe0f362d208f972b7d5432edf8d13f050d8f9d19e77363a21b6b7cb400e30",
+      "design.par": "b93154f5d83dbc4e250c8988109cea40a98f3afba729157f9d3cf543fcd5bb98",
+      "design.twr": "630d1f3ae65bc49c5982fe3a61cc2f093f12771c67c4a99476fb31eed6dce01c",
+      "design.srr": "b6a0727f2c543b9b49e238c84c8a9860b4a401d90e718e9932eed5a5ca06c887"
+    }
+  },
+  {
+    "lut4": 825,
+    "lut4_capacity": 1280,
+    "ff": 392,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 414,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.581,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp7c",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "0b589506783ae40b576f59c00a70f6ff84b39ea0717764048bc61426879ccb96",
+    "reports": {
+      "source.tgz": "363a573126d3549fbad6d27a68f63f402d8646b94b088b4c92a279098cf4a552",
+      "inputs.json": "d704c2150c40ca2fdbaf6cc3144762b689ac5205218fcf8800ba289e68c8c0a8",
+      "design.mrp": "fd1b2c53c7a81a0dda20d2f3d373ae0f39a0903dc82b280516fffc11173d3f12",
+      "design.par": "6abdaa61b072380f3e06dab52c2062278f0e9829ac56a65fdb2a9ec4a3067565",
+      "design.twr": "98e0a45fafd656cc697f97bbacc5f8212e78e90142eea28edcf55656edc3730e",
+      "design.srr": "bc4ba3aeff1830836c57806ec871e0c009154f78c28e9c4a1db7649bdf5bd42b"
+    }
+  },
+  {
+    "lut4": 861,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 432,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.658,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp7d",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "f1f21bc73587c6adc90cbd88b99f3a3b503f2b07c430c0feaea8324188f46b06",
+    "reports": {
+      "source.tgz": "79f095a2fd33afba9d38a8a00cc78e12110d16fa47aa2dbc052e5ec63946c858",
+      "inputs.json": "81ef647878bc1613cf82df33f85df8897668db3fab75d053427b5b6274f82003",
+      "design.mrp": "1530fbdebf4e29d831dc2f9d6539b88096a992d6cb2dfa6df1b775c88e03c7a1",
+      "design.par": "81e42320bfed9965e2da0574cd6e3a551123860b590671ebe9840717ba902eec",
+      "design.twr": "335f31e133b89adb339d9f5d12f4db59f5a52a18551d00dbe4ed7a35ee376c7c",
+      "design.srr": "00fcd3a868e9220e3d00a7a6e1f94f08e24d9a364c0eb283b85d845283240fbc"
+    }
+  },
+  {
+    "lut4": 583,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 292,
+    "slices_capacity": 640,
+    "fmax_mhz": 41.81,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp7e",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "7ee2213cf92c1483061df49a7cf32bb678caa2eb984587308f6f727fbff8165e",
+    "reports": {
+      "source.tgz": "79f095a2fd33afba9d38a8a00cc78e12110d16fa47aa2dbc052e5ec63946c858",
+      "inputs.json": "12009dec10abf966ee6bb5df055d0f67afa45f2abafa2953ba858e6956aac057",
+      "design.mrp": "d8768b7f79dce4048ccc1842db259a5709373e1dd4dcbc6af4325462668778f0",
+      "design.par": "0abeda632dba03f0dcd4d8ebf2f583d79c0242dcd6134154dc8e8f6c498fbe45",
+      "design.twr": "87a248caead8b903a4add4f349f684c3f8426b36d307f5614c72224f5f0cb95b",
+      "design.srr": "246a1407a19d94ed861aba2e85fee8cd32cc59a63db4e8fda3871393757883e3"
+    }
+  },
+  {
+    "lut4": 600,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 300,
+    "slices_capacity": 640,
+    "fmax_mhz": 40.287,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp8a",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "943c03238971eca2e78d1d0ee5b492480d25e7abaf1588c3086750069f10cd09",
+    "reports": {
+      "source.tgz": "151666b73c6c965de94600d727aa9fd1b82d1a91d7b090a0c30875374d69eef3",
+      "inputs.json": "158c44f33b371117ea5a57547b6d5a40d730fe88ce0da6f97f4e1527551f112b",
+      "design.mrp": "33a2df6a9e5abfca49248b8933a015ce2833d7744a05a77f9bc6290023f35fb6",
+      "design.par": "02b903d892d697fa18b0366c5d11ead07ba342e2685d41cbdbe1a91b9d3b5852",
+      "design.twr": "79865125d23b76560212e2dcb5433bfffe8413c6f3f4ce0912778f4c47692a31",
+      "design.srr": "faffddd732319535f311027884bfe44cf18d5d4d57d77309ff77eac8503fa078"
+    }
+  },
+  {
+    "lut4": 850,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 426,
+    "slices_capacity": 640,
+    "fmax_mhz": 29.871,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp8b",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "b8085b387adedf8312a49f4d2e56734e2d2a06a5dd4d6b31e91d74b71a4de8af",
+    "reports": {
+      "source.tgz": "151666b73c6c965de94600d727aa9fd1b82d1a91d7b090a0c30875374d69eef3",
+      "inputs.json": "92f2db93417a98beba7a75d65e159bfdbf547842ae4ba2581159ce146d54b8fb",
+      "design.mrp": "409cfd085d20faf42259ff944cf600b4b381b58a289206bd082346bbfe6763ec",
+      "design.par": "4802379fd3f2a384578c08979090aee6995ec2562ac76a8b138016dd58f9cf84",
+      "design.twr": "9f11fb4516b266eda23232e3fbdb1dd235801a80c3e9e9921db36c0a2129adec",
+      "design.srr": "3b859350a8d143504bc3816b0e9b469c41418c9908fbb05626fc213426339e24"
+    }
+  },
+  {
+    "lut4": 600,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 301,
+    "slices_capacity": 640,
+    "fmax_mhz": 39.955,
+    "cumulative_negative_slack_reported": [
+      62.0,
+      0.0,
+      62.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp8c",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "f958462a25e295d3cffdd7274e8612723e864fbdada7238f51de996b920c5aa8",
+    "reports": {
+      "source.tgz": "2d73189e043f05537edc436f8d6b75e1130e1c388cbe324b397ce9d280fc8403",
+      "inputs.json": "d800dc7d9dd050872597c61c064fa0be493d072b8b3b46c0d5f9efdfafdc9cbc",
+      "design.mrp": "69e03a842c638239f99cb57b9dd94a1ca121e68eeddf7d5e0734611eabbb72db",
+      "design.par": "7b2644a0dc9fd442b19909216b4a5dfd1f1f7fac96fea417f255905423b965d1",
+      "design.twr": "70f0e4549fdf40e22f64f1dc187df40557a8dee2d14768149242c40e58a67cad",
+      "design.srr": "79ba1ea1d2c040d8ade96f25dbf09947abf48b92bad4d9f3547f5d32ef60e90d"
+    }
+  },
+  {
+    "lut4": 600,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 301,
+    "slices_capacity": 640,
+    "fmax_mhz": 38.724,
+    "cumulative_negative_slack_reported": [
+      366.0,
+      0.0,
+      366.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp8c-39",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 39.0,
+    "input_revision_sha256": "fe1a58be29e60cd30bb2472c640c99d4a23393c0e42ac5c37fa04793c583583d",
+    "reports": {
+      "source.tgz": "06df798f833dd5b66cddec8064c0a4b330e0c09562113029f77659dc4df24452",
+      "inputs.json": "d0bef9db9dd1520eb58c34473e624853856566762c2fee86b865a6137b9bef6d",
+      "design.mrp": "765264168f5d224f6d0f78caf4944a38464edc9531906a2793547cd4147c9c15",
+      "design.par": "aff7d660a917923ac167ddc731436172078354b4cfe0358b58cab5c5e6e14a47",
+      "design.twr": "991c204b453603c78e8605dbab3137797ba39c4913a4e51da202831ddd2e7b66",
+      "design.srr": "c0ed0c3087d203360fe7a82047d0f982af25721764b15ab99bb8522ab68bbd1a"
+    }
+  },
+  {
+    "lut4": 600,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 301,
+    "slices_capacity": 640,
+    "fmax_mhz": 39.955,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp8c-retrace39",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 39.0,
+    "input_revision_sha256": "fe1a58be29e60cd30bb2472c640c99d4a23393c0e42ac5c37fa04793c583583d",
+    "reports": {
+      "source.tgz": "2d73189e043f05537edc436f8d6b75e1130e1c388cbe324b397ce9d280fc8403",
+      "inputs.json": "2947667f8829ec30217461bf51945c59f542d7d7d74eec18f877c5a9b37ee782",
+      "design.mrp": "69e03a842c638239f99cb57b9dd94a1ca121e68eeddf7d5e0734611eabbb72db",
+      "design.par": "7b2644a0dc9fd442b19909216b4a5dfd1f1f7fac96fea417f255905423b965d1",
+      "design.twr": "ab87acccb4348f492ac6ed06024a9e31939f3191be9ac8e17b82aa26a2757c61",
+      "design.srr": "79ba1ea1d2c040d8ade96f25dbf09947abf48b92bad4d9f3547f5d32ef60e90d"
+    }
+  },
+  {
+    "lut4": 878,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 440,
+    "slices_capacity": 640,
+    "fmax_mhz": 31.54,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp8d",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "0c49d5060d1205a321754bd63b78828edcf743210f97ce9448b6bcb40a4670a2",
+    "reports": {
+      "source.tgz": "2d73189e043f05537edc436f8d6b75e1130e1c388cbe324b397ce9d280fc8403",
+      "inputs.json": "98274db2386da07be4170b6ef402ac61c68df34ba1db1ae16cbaf7dc44e38e98",
+      "design.mrp": "4e4051a348016bf5110d20aa6965eb000a072c61a98e75a80b56a7ff2b5e006c",
+      "design.par": "3bd1d0568f896a75a24ab5f19bcabafd580d37b69407e40910ad9ff7795c3746",
+      "design.twr": "d55467e999d1a568f258ae9ac318623a563010cb3cf7a8ac52844d1a871b3360",
+      "design.srr": "c27194db9516044fb7aefc55809d99b2464704444cc9519e7c65681c9117ccfe"
+    }
+  },
+  {
+    "lut4": 615,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 308,
+    "slices_capacity": 640,
+    "fmax_mhz": 38.918,
+    "cumulative_negative_slack_reported": [
+      20195.0,
+      0.0,
+      20195.0
+    ],
+    "timing_pass": false,
+    "fully_routed": true,
+    "checkpoint": "cp9a",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "4607b0f65657ca25e6a8cabe7e559c5cf2234a704f0d6a94acb62d0cec26baca",
+    "reports": {
+      "source.tgz": "f212cbe491a39af6988a59eb8e4cb5ada08a4d46abfeee86810040d840c784a2",
+      "inputs.json": "f08b42828dcfa46ee1481c7aeae1edfde163b14f13125941718ca1a1dec48227",
+      "design.mrp": "7244d1f0f71d337ebc3121bc5e9ffe3fe889318bff7863ef36565d2d80f5e00b",
+      "design.par": "bb32834bb9bb424160220c25d6f96a0925817b29b1f44762a6879c09308e113f",
+      "design.twr": "b453f2ea528c1d62437a2d3bb24c9910427c0580241613764b2774eaff2d99e6",
+      "design.srr": "7b35de30f7a1d8977e012c0e7cae12329288716e1131324ae9a6f5c258699d16"
+    }
+  },
+  {
+    "lut4": 876,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 439,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.832,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp9b",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "253a3be04ad711accc25b4ed4b24f0e497350054e7b2e488ee6a475a3108653a",
+    "reports": {
+      "source.tgz": "f212cbe491a39af6988a59eb8e4cb5ada08a4d46abfeee86810040d840c784a2",
+      "inputs.json": "b597f7832ff04f34bce5a2d115e13d9c42d12c997cc7b559ba0a01a642dcdb77",
+      "design.mrp": "d1db88a19fc20a61c7e7c5221ffabe084f15674e8c9e33c05f6371994dfaa8c2",
+      "design.par": "c734fddf7566e00c6d4942fd9d7e60f8b41608c1921df0a313c6babd303cdd7f",
+      "design.twr": "7d5fd3feef99761471833d6d8706a255d22f9abb421ca04fa9eb3b6d40e95a8a",
+      "design.srr": "27000f46aa94355c602d855009978f3f54e68a223906b291513cef1b6d15273f"
+    }
+  },
+  {
+    "lut4": 615,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 308,
+    "slices_capacity": 640,
+    "fmax_mhz": 40.925,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp9c",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "08194775e2288fd1ac8700294a270adec6ae323ea8106f851a259b031a9cc2db",
+    "reports": {
+      "source.tgz": "49df7b7c731fae9d0cbfd9652949fc3d3db279ec0147960fa59a74c02cd51974",
+      "inputs.json": "ef27c40e3dd613de8a8e0795fdbc0147e568cd8dc63a9b1b23786f3c5f00a6d7",
+      "design.mrp": "4f58f824b25a9ea12f7f788c3a1460e85cbbab5ffd6c7a671680c1e931a127b1",
+      "design.par": "a0d1b0ff03599601313b044b807432fdfafd691b97d36c129d2bb6cddf01f69c",
+      "design.twr": "0d9f961b45516f0b71d80d804c06edc642c9d446d9ea0e6fe7ff369d2bdead9f",
+      "design.srr": "62abe9caab0317e1e69d7744cd665f885ad9a04064c18e0caed9ecfc8527505b"
+    }
+  },
+  {
+    "lut4": 910,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 456,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.876,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp9d",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "8b09551a6ebe31afd14cb424db897cca903daa0a1b443e9fc85d34cbf4e227f2",
+    "reports": {
+      "source.tgz": "49df7b7c731fae9d0cbfd9652949fc3d3db279ec0147960fa59a74c02cd51974",
+      "inputs.json": "ea8b6aaf58cc9779074141b461ec0498b447cdaed138008f82d2572f95d63f0c",
+      "design.mrp": "3ce8829d12516efddc94541e5114ce6e69e41b8f39d8b1d037f6c44d86d6245c",
+      "design.par": "79f8a6361336e4c77cbf4cde2f819e057331d397c83c7ae42686fb2382e4746d",
+      "design.twr": "54ca1b81c811fec8b0df27b641ef65613f8f6294f9d4f0137ee2ec92e43c2376",
+      "design.srr": "8abeb0b7f50a9ba8a557e29082b8fdec1499dee1c98e0fe4b85da35b28eca575"
+    }
+  },
+  {
+    "lut4": 615,
+    "lut4_capacity": 1280,
+    "ff": 277,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 308,
+    "slices_capacity": 640,
+    "fmax_mhz": 40.925,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp9e",
+    "scope": "uj11_probe_core",
+    "constraint_mhz": 40.0,
+    "input_revision_sha256": "5ec807ad224eb783cd6c1cd26d23eaf58317f17d7eba23b866211e4079005b82",
+    "reports": {
+      "source.tgz": "34e236b6b3f6f317d272f4407bff1d7062ebf530139579c43bb21906fa6adae3",
+      "inputs.json": "43f48dc95e42cdc94b537f32ff41c0813cc495a89df62dc8be859a69f227b764",
+      "design.mrp": "06c91acfadfc3280e95e87735d168288146f7b801cbcb546897174b073dfcd42",
+      "design.par": "86a82464ef02fcb6570bd9aed5ffc6ed7b5d25af1c60cbb679b91403fc9cbbd7",
+      "design.twr": "f05becd484ba5cf903f672b46257690460bb972cb94a91075d0f865353c01746",
+      "design.srr": "08e05d2732e829fd0c3ccfe1263df2a565d1457034123b67a1f4a7352d81458f"
+    }
+  },
+  {
+    "lut4": 910,
+    "lut4_capacity": 1280,
+    "ff": 393,
+    "ff_capacity": 1346,
+    "ebr": 4,
+    "ebr_capacity": 7,
+    "slices": 456,
+    "slices_capacity": 640,
+    "fmax_mhz": 30.876,
+    "cumulative_negative_slack_reported": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timing_pass": true,
+    "fully_routed": true,
+    "checkpoint": "cp9f",
+    "scope": "uj11_probe_fram_pf",
+    "constraint_mhz": 29.56,
+    "input_revision_sha256": "bbce251489b2b102d06ddfb95341e9c739e0db28dc5f74080c85c507d80ec11d",
+    "reports": {
+      "source.tgz": "34e236b6b3f6f317d272f4407bff1d7062ebf530139579c43bb21906fa6adae3",
+      "inputs.json": "445625fa854313f4a99c5df56ef8914d7c2636d5065e90e4aecdc83ebca4de71",
+      "design.mrp": "60c4ca8c28d48818cde2fcce7cbdfdae3ad8cffb8a3ddffc5425c2be9eb15066",
+      "design.par": "ad7eee0c59f86831902ae301abc5cf8882a5f249d26f9bcbca65472fd4c76e37",
+      "design.twr": "aa6dc598ebf07ad21d5407f176d4546cd67f8eba75f0854193750d048250c5ca",
+      "design.srr": "1ed806873c30c9b48ce8d9bb296d2e8c333e60f747ae63dc914b637ba5811ead"
+    }
+  }
+]

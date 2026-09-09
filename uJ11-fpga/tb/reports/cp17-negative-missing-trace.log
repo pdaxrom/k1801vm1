@@ -1,0 +1,3 @@
+Archived source: cp16f; mutation: None
+FATAL: tb/tb_trace_bit.v:112: trace case16 op010001 prePSW0010 upc020 clocks2 beats1/5 flags0010/005d fault0 IRQ0/0 retires1
+       Time: 3896000  Scope: tb_trace_bit

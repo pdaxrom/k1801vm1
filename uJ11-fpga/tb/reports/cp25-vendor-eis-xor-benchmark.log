@@ -1,0 +1,40 @@
+XOR BENCH mode-1 XOR_destination_mode0: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode1: 2496 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode2: 2880 clocks / 264 instructions, 768 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode3: 3376 clocks / 264 instructions, 1016 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode4: 2880 clocks / 264 instructions, 768 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode5: 3128 clocks / 264 instructions, 1016 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode6: 2992 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+XOR BENCH mode-1 XOR_destination_mode7: 3488 clocks / 256 instructions, 1248 memory beats, 0 CS, 0 SPI clocks
+PASS XOR benchmarks mode-1: 8 workloads, warmup excluded
+tb/tb_eis_xor_bench.v:147: $finish called at 246246000 (1ps)
+XOR BENCH mode0 XOR_destination_mode0: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+XOR BENCH mode0 XOR_destination_mode1: 85672 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+XOR BENCH mode0 XOR_destination_mode2: 87736 clocks / 264 instructions, 768 memory beats, 1016 CS, 38848 SPI clocks
+XOR BENCH mode0 XOR_destination_mode3: 114272 clocks / 264 instructions, 1016 memory beats, 1264 CS, 50752 SPI clocks
+XOR BENCH mode0 XOR_destination_mode4: 87736 clocks / 264 instructions, 768 memory beats, 1016 CS, 38848 SPI clocks
+XOR BENCH mode0 XOR_destination_mode5: 114024 clocks / 264 instructions, 1016 memory beats, 1264 CS, 50752 SPI clocks
+XOR BENCH mode0 XOR_destination_mode6: 112208 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+XOR BENCH mode0 XOR_destination_mode7: 138744 clocks / 256 instructions, 1248 memory beats, 1496 CS, 61888 SPI clocks
+PASS XOR benchmarks mode0: 8 workloads, warmup excluded
+tb/tb_eis_xor_bench.v:147: $finish called at 8639106000 (1ps)
+XOR BENCH mode1 XOR_destination_mode0: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+XOR BENCH mode1 XOR_destination_mode1: 85672 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+XOR BENCH mode1 XOR_destination_mode2: 86648 clocks / 264 instructions, 768 memory beats, 1000 CS, 38336 SPI clocks
+XOR BENCH mode1 XOR_destination_mode3: 113184 clocks / 264 instructions, 1016 memory beats, 1248 CS, 50240 SPI clocks
+XOR BENCH mode1 XOR_destination_mode4: 86648 clocks / 264 instructions, 768 memory beats, 1000 CS, 38336 SPI clocks
+XOR BENCH mode1 XOR_destination_mode5: 112936 clocks / 264 instructions, 1016 memory beats, 1248 CS, 50240 SPI clocks
+XOR BENCH mode1 XOR_destination_mode6: 95344 clocks / 256 instructions, 1000 memory beats, 1000 CS, 42048 SPI clocks
+XOR BENCH mode1 XOR_destination_mode7: 121880 clocks / 256 instructions, 1248 memory beats, 1248 CS, 53952 SPI clocks
+PASS XOR benchmarks mode1: 8 workloads, warmup excluded
+tb/tb_eis_xor_bench.v:147: $finish called at 8020986000 (1ps)
+XOR BENCH mode2 XOR_destination_mode0: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+XOR BENCH mode2 XOR_destination_mode1: 85672 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+XOR BENCH mode2 XOR_destination_mode2: 86600 clocks / 264 instructions, 768 memory beats, 1000 CS, 38336 SPI clocks
+XOR BENCH mode2 XOR_destination_mode3: 113136 clocks / 264 instructions, 1016 memory beats, 1248 CS, 50240 SPI clocks
+XOR BENCH mode2 XOR_destination_mode4: 86600 clocks / 264 instructions, 768 memory beats, 1000 CS, 38336 SPI clocks
+XOR BENCH mode2 XOR_destination_mode5: 112888 clocks / 264 instructions, 1016 memory beats, 1248 CS, 50240 SPI clocks
+XOR BENCH mode2 XOR_destination_mode6: 95344 clocks / 256 instructions, 1000 memory beats, 1000 CS, 42048 SPI clocks
+XOR BENCH mode2 XOR_destination_mode7: 121880 clocks / 256 instructions, 1248 memory beats, 1248 CS, 53952 SPI clocks
+PASS XOR benchmarks mode2: 8 workloads, warmup excluded
+tb/tb_eis_xor_bench.v:147: $finish called at 8016036000 (1ps)

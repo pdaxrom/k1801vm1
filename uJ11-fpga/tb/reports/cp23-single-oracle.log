@@ -1,0 +1,2 @@
+Single DCJ11 ENABLE_MMU=0: 7080 completed cases; 24 excluded.
+Reasons (may overlap): abort=24 trap=0 I/O=0 odd=0

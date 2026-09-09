@@ -1,0 +1,62 @@
+[
+  {
+    "name": "missing-opcode",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "fifteen-iterations",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "unsigned-multiplicand",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "unsigned-register",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "lost-low-carry",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "lost-overflow-carry",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "set-carry-at-32767",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "low-word-negative",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "low-word-zero",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "odd-high-overwrites-low",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "early-register",
+    "archive": "cp25a",
+    "rejected": true
+  },
+  {
+    "name": "flags-on-failed-read",
+    "archive": "cp25a",
+    "rejected": true
+  }
+]

@@ -1,0 +1,51 @@
+{
+  "lut4": 661,
+  "lut4_capacity": 1280,
+  "ff": 303,
+  "ff_capacity": 1346,
+  "ebr": 4,
+  "ebr_capacity": 7,
+  "slices": 331,
+  "slices_capacity": 640,
+  "fmax_mhz": 36.682,
+  "cumulative_negative_slack_reported": [
+    25465400.0,
+    0.0,
+    25465400.0
+  ],
+  "timing_pass": false,
+  "fully_routed": true,
+  "inputs": {
+    "name": "cp3",
+    "top": "uj11_probe_engine",
+    "files": {
+      "microasm/uj11asm.py": "af1263fb2444e64203e72ddd3dd7edeb5fac92d136178b754519f77ea4e5ae01",
+      "microcode/generated/uj11_m0_ebr.v": "1113f2b1695a3a241132913dc6443a207db9e10be7be765ece9435df7e184211",
+      "microcode/m0.uasm": "d33180fd9e4258d12eadfe226696720e1c51491ee4f0d85fa1e22455517e25ff",
+      "rtl/uj11_alu.v": "55a2dff269d3910ac9053d2123194cf3f429085e10cf4586a0902ce191f0e82a",
+      "rtl/uj11_datapath.v": "0212c826c6a16098edce84155684ae90d02fa7cf726d56fbd98561dd43377236",
+      "rtl/uj11_engine.v": "894d0919f158bb22bee8245f311a997049ed078cc6fdaa776f1d26b4bdd6b854",
+      "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+      "rtl/uj11_microseq.v": "f1a8345ca528e81ff9a659ea6389e82cec08f0b525df406d421ec895fa9f9fc1",
+      "rtl/uj11_psw.v": "dc4f7c41bb11e132b5099f4fec6c75890d124c5f6387097f239c45367b52880b",
+      "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+      "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+      "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+      "synth/machxo2/uj11_probe_engine.v": "fbf866ef6c73a12ed7e500a35f80621b15d31c69566d27ea69da36b3c8ae3929",
+      "tools/checkpoint.py": "a7c010c4542deeca1aa956a2fe5b32260388e15461c70b2680cb0553f1999d8d",
+      "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "tools/report_synthesis.py": "1d769774887bd6bb7341ae8fa7124bd496dafcf0475860d75db94f66b894d683"
+    },
+    "input_revision_sha256": "393da452f8c5a8df75438f172e1c1f6570b011c2856d032fb86b9dec1981e0fb"
+  },
+  "scope": "uj11_probe_engine",
+  "expected_ebr": 4,
+  "constraint_mhz": 50,
+  "diamond_returncode": 0,
+  "reports": {
+    ".mrp": "1f686ad49002be1a0522953c653dec55696ba88738a81519b1b96b6d042f03e2",
+    ".par": "469aeb89ce339b07b971ecc9235313a9cc1045bea602b632b082eefe3279befc",
+    ".twr": "d8bc12b1eaf364b0112229b7bc0815af377b6c9655d328db76d7b0644c858a22",
+    ".srr": "1ba1386ff25e0d41ed182c0854180afc776432270a6c959acdf68fdaa2850563"
+  }
+}

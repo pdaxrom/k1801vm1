@@ -1,0 +1,807 @@
+{
+  "clock_hz_nominal": 29560000,
+  "fis_benchmarks": {
+    "-1": [
+      {
+        "a": "40800000",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 92664.57680250784,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 8064,
+        "fis_retire_interval": 252.0,
+        "instructions": 160,
+        "loop_cpi": 63.8,
+        "memory_beats": 576,
+        "microclocks": 10208,
+        "operation": 0,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "40c00000",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 90674.84662576688,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 8288,
+        "fis_retire_interval": 259.0,
+        "instructions": 160,
+        "loop_cpi": 65.2,
+        "memory_beats": 576,
+        "microclocks": 10432,
+        "operation": 1,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "40c00000",
+        "b": "40c00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 57286.82170542636,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 14368,
+        "fis_retire_interval": 449.0,
+        "instructions": 160,
+        "loop_cpi": 103.2,
+        "memory_beats": 576,
+        "microclocks": 16512,
+        "operation": 2,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "40800000",
+        "b": "40c00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 44384.384384384386,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 19168,
+        "fis_retire_interval": 599.0,
+        "instructions": 160,
+        "loop_cpi": 133.2,
+        "memory_beats": 576,
+        "microclocks": 21312,
+        "operation": 3,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "c0800001",
+        "b": "34800001",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 62760.08492569002,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 12928,
+        "fis_retire_interval": 404.0,
+        "instructions": 160,
+        "loop_cpi": 94.2,
+        "memory_beats": 576,
+        "microclocks": 15072,
+        "operation": 0,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "40800001",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 64541.4847161572,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 12512,
+        "fis_retire_interval": 391.0,
+        "instructions": 160,
+        "loop_cpi": 91.6,
+        "memory_beats": 576,
+        "microclocks": 14656,
+        "operation": 1,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "00800000",
+        "b": "41000000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 56846.153846153844,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 14496,
+        "fis_retire_interval": 453.0,
+        "instructions": 160,
+        "loop_cpi": 104.0,
+        "memory_beats": 576,
+        "microclocks": 16640,
+        "operation": 2,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      },
+      {
+        "a": "c0c00000",
+        "b": "40a00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 44585.218702865764,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 19072,
+        "fis_retire_interval": 596.0,
+        "instructions": 160,
+        "loop_cpi": 132.6,
+        "memory_beats": 576,
+        "microclocks": 21216,
+        "operation": 3,
+        "spi_clocks": 0,
+        "spi_transactions": 0
+      }
+    ],
+    "1": [
+      {
+        "a": "40800000",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 15815.944355270198,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 30496,
+        "fis_retire_interval": 953.0,
+        "instructions": 160,
+        "loop_cpi": 373.8,
+        "memory_beats": 576,
+        "microclocks": 59808,
+        "operation": 0,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40c00000",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 15756.929637526653,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 30720,
+        "fis_retire_interval": 960.0,
+        "instructions": 160,
+        "loop_cpi": 375.2,
+        "memory_beats": 576,
+        "microclocks": 60032,
+        "operation": 1,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40c00000",
+        "b": "40c00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14307.84123910939,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 36800,
+        "fis_retire_interval": 1150.0,
+        "instructions": 160,
+        "loop_cpi": 413.2,
+        "memory_beats": 576,
+        "microclocks": 66112,
+        "operation": 2,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40800000",
+        "b": "40c00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 13339.350180505415,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 41600,
+        "fis_retire_interval": 1300.0,
+        "instructions": 160,
+        "loop_cpi": 443.2,
+        "memory_beats": 576,
+        "microclocks": 70912,
+        "operation": 3,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "c0800001",
+        "b": "34800001",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14626.42256308758,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 35360,
+        "fis_retire_interval": 1105.0,
+        "instructions": 160,
+        "loop_cpi": 404.2,
+        "memory_beats": 576,
+        "microclocks": 64672,
+        "operation": 0,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40800001",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14721.115537848606,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 34944,
+        "fis_retire_interval": 1092.0,
+        "instructions": 160,
+        "loop_cpi": 401.6,
+        "memory_beats": 576,
+        "microclocks": 64256,
+        "operation": 1,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "00800000",
+        "b": "41000000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14280.193236714977,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 36928,
+        "fis_retire_interval": 1154.0,
+        "instructions": 160,
+        "loop_cpi": 414.0,
+        "memory_beats": 576,
+        "microclocks": 66240,
+        "operation": 2,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "c0c00000",
+        "b": "40a00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 13357.433348395843,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 41504,
+        "fis_retire_interval": 1297.0,
+        "instructions": 160,
+        "loop_cpi": 442.6,
+        "memory_beats": 576,
+        "microclocks": 70816,
+        "operation": 3,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      }
+    ],
+    "2": [
+      {
+        "a": "40800000",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 15866.881374127752,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 30304,
+        "fis_retire_interval": 947.0,
+        "instructions": 160,
+        "loop_cpi": 372.6,
+        "memory_beats": 576,
+        "microclocks": 59616,
+        "operation": 0,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40c00000",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 15807.486631016043,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 30528,
+        "fis_retire_interval": 954.0,
+        "instructions": 160,
+        "loop_cpi": 374.0,
+        "memory_beats": 576,
+        "microclocks": 59840,
+        "operation": 1,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40c00000",
+        "b": "40c00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14349.514563106795,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 36608,
+        "fis_retire_interval": 1144.0,
+        "instructions": 160,
+        "loop_cpi": 412.0,
+        "memory_beats": 576,
+        "microclocks": 65920,
+        "operation": 2,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40800000",
+        "b": "40c00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 13375.565610859729,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 41408,
+        "fis_retire_interval": 1294.0,
+        "instructions": 160,
+        "loop_cpi": 442.0,
+        "memory_beats": 576,
+        "microclocks": 70720,
+        "operation": 3,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "c0800001",
+        "b": "34800001",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14669.975186104219,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 35168,
+        "fis_retire_interval": 1099.0,
+        "instructions": 160,
+        "loop_cpi": 403.0,
+        "memory_beats": 576,
+        "microclocks": 64480,
+        "operation": 0,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "40800001",
+        "b": "40800000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14765.234765234765,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 34752,
+        "fis_retire_interval": 1086.0,
+        "instructions": 160,
+        "loop_cpi": 400.4,
+        "memory_beats": 576,
+        "microclocks": 64064,
+        "operation": 1,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "00800000",
+        "b": "41000000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 14321.70542635659,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 36736,
+        "fis_retire_interval": 1148.0,
+        "instructions": 160,
+        "loop_cpi": 412.8,
+        "memory_beats": 576,
+        "microclocks": 66048,
+        "operation": 2,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      },
+      {
+        "a": "c0c00000",
+        "b": "40a00000",
+        "calculated_fis_per_sec_including_loop_at_29_56_mhz": 13393.747168101496,
+        "fis_instructions": 32,
+        "fis_retire_clocks": 41312,
+        "fis_retire_interval": 1291.0,
+        "instructions": 160,
+        "loop_cpi": 441.4,
+        "memory_beats": 576,
+        "microclocks": 70624,
+        "operation": 3,
+        "spi_clocks": 22528,
+        "spi_transactions": 512
+      }
+    ]
+  },
+  "fis_differential": {
+    "fram": {
+      "cases": 23840,
+      "memory_beats": 201644,
+      "microclocks": 29364309,
+      "portable_vendor_identical": true
+    },
+    "ram": {
+      "cases": 23840,
+      "memory_beats": 201644,
+      "microclocks": 7773493,
+      "portable_vendor_identical": true
+    }
+  },
+  "fis_runs_each_rom_model": 24,
+  "integer_portable_cycles": {
+    "branch": {
+      "fram": {
+        "cases": 7440,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 7440,
+        "microclocks": 805504
+      },
+      "ram": {
+        "cases": 7440,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 7440,
+        "microclocks": 35464
+      }
+    },
+    "bus-fault": {
+      "fram": {
+        "cases": 32780,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 213080,
+        "microclocks": 20896206
+      },
+      "ram": {
+        "cases": 32780,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 213080,
+        "microclocks": 1179328
+      }
+    },
+    "byte": {
+      "fram": {
+        "cases": 23954,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 98606,
+        "microclocks": 9773277
+      },
+      "ram": {
+        "cases": 23954,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 98606,
+        "microclocks": 683191
+      }
+    },
+    "control": {
+      "fram": {
+        "cases": 14814,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 30956,
+        "microclocks": 3326690
+      },
+      "ram": {
+        "cases": 14814,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 30956,
+        "microclocks": 172788
+      }
+    },
+    "ea": {
+      "fram": {
+        "cases": 31671,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 137006,
+        "microclocks": 14739672
+      },
+      "ram": {
+        "cases": 31671,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 137006,
+        "microclocks": 948247
+      }
+    },
+    "eis-ash-fault": {
+      "fram": {
+        "cases": 1024,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 6280,
+        "microclocks": 640308
+      },
+      "ram": {
+        "cases": 1024,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 6280,
+        "microclocks": 34772
+      }
+    },
+    "eis-ashc-fault": {
+      "fram": {
+        "cases": 1024,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 6280,
+        "microclocks": 640924
+      },
+      "ram": {
+        "cases": 1024,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 6280,
+        "microclocks": 35388
+      }
+    },
+    "eis-div-fault": {
+      "fram": {
+        "cases": 4000,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 24544,
+        "microclocks": 2441472
+      },
+      "ram": {
+        "cases": 4000,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 24544,
+        "microclocks": 130896
+      }
+    },
+    "eis-mul-fault": {
+      "fram": {
+        "cases": 4000,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 24544,
+        "microclocks": 2441472
+      },
+      "ram": {
+        "cases": 4000,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 24544,
+        "microclocks": 130896
+      }
+    },
+    "eis-xor-fault": {
+      "fram": {
+        "cases": 5760,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 38112,
+        "microclocks": 3753440
+      },
+      "ram": {
+        "cases": 5760,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 38112,
+        "microclocks": 199520
+      }
+    },
+    "eis_ash": {
+      "fram": {
+        "cases": 26328,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 70388,
+        "microclocks": 9407067
+      },
+      "ram": {
+        "cases": 26328,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 70388,
+        "microclocks": 2051168
+      }
+    },
+    "eis_ashc": {
+      "fram": {
+        "cases": 28496,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 73060,
+        "microclocks": 10780095
+      },
+      "ram": {
+        "cases": 28496,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 73060,
+        "microclocks": 3156428
+      }
+    },
+    "eis_div": {
+      "fram": {
+        "cases": 13664,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 52456,
+        "microclocks": 7225373
+      },
+      "ram": {
+        "cases": 13664,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 52456,
+        "microclocks": 1754009
+      }
+    },
+    "eis_mul": {
+      "fram": {
+        "cases": 13110,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 50352,
+        "microclocks": 7051704
+      },
+      "ram": {
+        "cases": 13110,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 50352,
+        "microclocks": 1805651
+      }
+    },
+    "eis_xor": {
+      "fram": {
+        "cases": 11028,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 57356,
+        "microclocks": 6418544
+      },
+      "ram": {
+        "cases": 11028,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 57356,
+        "microclocks": 293814
+      }
+    },
+    "extra": {
+      "fram": {
+        "cases": 4524,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 9762,
+        "microclocks": 1161566
+      },
+      "ram": {
+        "cases": 4524,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 9762,
+        "microclocks": 58385
+      }
+    },
+    "illegal": {
+      "fram": {
+        "cases": 4096,
+        "cp26_byte_equal": false,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 20480,
+        "microclocks": 2494464
+      },
+      "ram": {
+        "cases": 4096,
+        "cp26_byte_equal": false,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 20480,
+        "microclocks": 100352
+      }
+    },
+    "irq": {
+      "fram": {
+        "cases": 6654,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 18678,
+        "microclocks": 2160254
+      },
+      "ram": {
+        "cases": 6654,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 18678,
+        "microclocks": 101315
+      }
+    },
+    "psw-transfer-fault": {
+      "fram": {
+        "cases": 1008,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 6336,
+        "microclocks": 615848
+      },
+      "ram": {
+        "cases": 1008,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 6336,
+        "microclocks": 33840
+      }
+    },
+    "psw_transfer": {
+      "fram": {
+        "cases": 12852,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 54492,
+        "microclocks": 6370712
+      },
+      "ram": {
+        "cases": 12852,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 54492,
+        "microclocks": 355470
+      }
+    },
+    "single": {
+      "fram": {
+        "cases": 7080,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 19588,
+        "microclocks": 2035650
+      },
+      "ram": {
+        "cases": 7080,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 19588,
+        "microclocks": 99242
+      }
+    },
+    "single_byte": {
+      "fram": {
+        "cases": 7104,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 19680,
+        "microclocks": 1884432
+      },
+      "ram": {
+        "cases": 7104,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 19680,
+        "microclocks": 99696
+      }
+    },
+    "system_control": {
+      "fram": {
+        "cases": 6144,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 26368,
+        "microclocks": 3055232
+      },
+      "ram": {
+        "cases": 6144,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 26368,
+        "microclocks": 137216
+      }
+    },
+    "system_flags": {
+      "fram": {
+        "cases": 21120,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 75504,
+        "microclocks": 9099624
+      },
+      "ram": {
+        "cases": 21120,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 75504,
+        "microclocks": 421120
+      }
+    },
+    "trace_bit": {
+      "fram": {
+        "cases": 11196,
+        "cp26_byte_equal": false,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 58965,
+        "microclocks": 6684208
+      },
+      "ram": {
+        "cases": 11196,
+        "cp26_byte_equal": false,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 58965,
+        "microclocks": 328315
+      }
+    },
+    "trap": {
+      "fram": {
+        "cases": 4640,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 21088,
+        "microclocks": 2523744
+      },
+      "ram": {
+        "cases": 4640,
+        "cp26_byte_equal": true,
+        "cp26_equal_after_documented_probe_update": true,
+        "memory_beats": 21088,
+        "microclocks": 101008
+      }
+    }
+  },
+  "method": "Functional RTL simulation, 1 warmup loop and 32 measured MOV/MOV/MOV/FIS/BR loops; no board measurement.",
+  "old_vendor_and_1146_benchmarks": "Historical CP26 evidence, not rerun as CP27; old datapath formally equivalent and old microcode preserved.",
+  "spi_divider": 1
+}

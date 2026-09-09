@@ -1,0 +1,605 @@
+#Build: Synplify Pro (R) V-2023.09L-2, Build 349R, Sep 17 2024
+#install: /home/sash/.local/lscc/diamond/3.14/synpbase
+#OS: Linux 
+#Hostname: sashz-ubuntu
+
+# Tue Sep  8 18:21:45 2026
+
+#Implementation: impl1
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys HDL Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Verilog Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/pmi_def.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/vlog/hypermods.v" (library __hyper__lib__)
+@I::"/tmp/uj11-cp4-20260908/rtl/uj11_decode.v" (library work)
+@I::"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v" (library work)
+@N|stack limit increased to max
+Verilog syntax check successful!
+Selecting top level module uj11_probe_decode
+@N: CG364 :"/tmp/uj11-cp4-20260908/rtl/uj11_decode.v":4:7:4:17|Synthesizing module uj11_decode in library work.
+Running optimization stage 1 on uj11_decode .......
+Finished optimization stage 1 on uj11_decode (CPU Time 0h:00m:00s, Memory Used current: 190MB peak: 190MB)
+@N: CG364 :"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v":3:7:3:23|Synthesizing module uj11_probe_decode in library work.
+Running optimization stage 1 on uj11_probe_decode .......
+Finished optimization stage 1 on uj11_probe_decode (CPU Time 0h:00m:00s, Memory Used current: 190MB peak: 190MB)
+Running optimization stage 2 on uj11_probe_decode .......
+Finished optimization stage 2 on uj11_probe_decode (CPU Time 0h:00m:00s, Memory Used current: 190MB peak: 190MB)
+Running optimization stage 2 on uj11_decode .......
+@W: CL246 :"/tmp/uj11-cp4-20260908/rtl/uj11_decode.v":4:37:4:38|Input port bits 7 to 6 of ir[15:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL246 :"/tmp/uj11-cp4-20260908/rtl/uj11_decode.v":4:37:4:38|Input port bits 2 to 0 of ir[15:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on uj11_decode (CPU Time 0h:00m:00s, Memory Used current: 190MB peak: 190MB)
+
+For a summary of runtime per design unit, please see file:
+==========================================================
+@L: /tmp/uj11-cp4-20260908/build/cp4/impl1/synwork/layer0.duruntime
+
+
+
+At c_ver Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 190MB peak: 190MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Tue Sep  8 18:21:46 2026
+
+###########################################################]
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Synopsys Netlist Linker, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+
+At syn_nfilter Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 197MB peak: 197MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Tue Sep  8 18:21:46 2026
+
+###########################################################]
+
+For a summary of runtime and memory usage for all design units, please see file:
+==========================================================
+@L: /tmp/uj11-cp4-20260908/build/cp4/impl1/synwork/cp4_impl1_comp.rt.csv
+
+@END
+
+At c_hdl Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 41MB peak: 41MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Tue Sep  8 18:21:46 2026
+
+###########################################################]
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Synopsys Netlist Linker, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+
+At syn_nfilter Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 197MB peak: 197MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Tue Sep  8 18:21:47 2026
+
+###########################################################]
+Premap Report
+
+# Tue Sep  8 18:21:47 2026
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Lattice Technology Pre-mapping, Version map202309lat, Build 191R, Built Sep 17 2024 09:08:23, @5637152
+
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 439MB peak: 439MB)
+
+
+Done reading skeleton netlist (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+@A: MF827 |No constraint file specified.
+@L: /tmp/uj11-cp4-20260908/build/cp4/impl1/cp4_impl1_scck.rpt 
+See clock summary report "/tmp/uj11-cp4-20260908/build/cp4/impl1/cp4_impl1_scck.rpt"
+@N: MF916 |Option synthesis_strategy=base is enabled. 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 458MB peak: 459MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 458MB peak: 459MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 462MB peak: 462MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 464MB peak: 464MB)
+
+NConnInternalConnection caching is on
+
+Starting HSTDM IP insertion (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Finished HSTDM IP insertion (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Started DisTri Cleanup (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Finished DisTri Cleanup (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Starting clock optimization phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+mixed edge conversion for GCC is OFF
+
+Finished clock optimization phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Starting clock optimization report phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Finished clock optimization report phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+@N: FX1184 |Applying syn_allowed_resources blockrams=7 on top level netlist uj11_probe_decode 
+
+Finished netlist restructuring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+
+Clock Summary
+******************
+
+          Start                     Requested     Requested     Clock        Clock          Clock
+Level     Clock                     Frequency     Period        Type         Group          Load 
+-------------------------------------------------------------------------------------------------
+0 -       uj11_probe_decode|clk     1.0 MHz       1000.000      inferred     (multiple)     26   
+=================================================================================================
+
+
+
+Clock Load Summary
+***********************
+
+                          Clock     Source        Clock Pin          Non-clock Pin     Non-clock Pin
+Clock                     Load      Pin           Seq Example        Seq Example       Comb Example 
+----------------------------------------------------------------------------------------------------
+uj11_probe_decode|clk     26        clk(port)     observe[9:0].C     -                 -            
+====================================================================================================
+
+@W: MT529 :"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v":8:4:8:9|Found inferred clock uj11_probe_decode|clk which controls 26 sequential elements including stimulus[15:0]. This clock has no specified timing constraint which may prevent conversion of gated or generated clocks and may adversely impact design performance. 
+
+ICG Latch Removal Summary:
+Number of ICG latches removed: 0
+Number of ICG latches not removed:	0
+
+
+@S |Clock Optimization Summary
+
+
+
+#### START OF PREMAP CLOCK OPTIMIZATION REPORT #####[
+
+1 non-gated/non-generated clock tree(s) driving 26 clock pin(s) of sequential element(s)
+0 gated/generated clock tree(s) driving 0 clock pin(s) of sequential element(s)
+0 instances converted, 0 sequential instances remain driven by gated/generated clocks
+
+=========================== Non-Gated/Non-Generated Clocks ============================
+Clock Tree ID     Driving Element     Drive Element Type     Fanout     Sample Instance
+---------------------------------------------------------------------------------------
+@KP:ckid0_0       clk                 port                   26         stimulus[15:0] 
+=======================================================================================
+
+
+##### END OF CLOCK OPTIMIZATION REPORT ######
+
+
+Summary of user generated gated clocks:
+0 user generated gated/generated clock tree(s) driving 0 clock pin(s) of sequential element(s)
+
+@N: FX1143 |Skipping assigning INTERNAL_VREF to iobanks, because the table of mapping from pin to iobank is not initialized.
+Finished Pre Mapping Phase.
+
+Starting constraint checker (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Finished constraint checker preprocessing (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Finished constraint checker (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+Pre-mapping successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 424MB peak: 512MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Tue Sep  8 18:21:47 2026
+
+###########################################################]
+Map & Optimize Report
+
+# Tue Sep  8 18:21:48 2026
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Lattice Technology Mapper, Version map202309lat, Build 191R, Built Sep 17 2024 09:08:23, @5637152
+
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 439MB peak: 439MB)
+
+@N: MF916 |Option synthesis_strategy=base is enabled. 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 452MB peak: 454MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 452MB peak: 454MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 456MB peak: 456MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 464MB peak: 464MB)
+
+
+
+Starting Optimization and Mapping (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 510MB peak: 510MB)
+
+
+Available hyper_sources - for debug and ip models
+	None Found
+
+
+Finished RTL optimizations (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+@W: BN132 :"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v":8:4:8:9|Removing instance observe[9] because it is equivalent to instance observe[3]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v":8:4:8:9|Removing instance observe[3] because it is equivalent to instance observe[2]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v":8:4:8:9|Removing instance observe[2] because it is equivalent to instance observe[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/tmp/uj11-cp4-20260908/synth/machxo2/uj11_probe_decode.v":8:4:8:9|Removing instance observe[1] because it is equivalent to instance observe[0]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+
+Starting factoring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Finished factoring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+NConnInternalConnection caching is on
+
+Finished generic timing optimizations - Pass 1 (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Starting Early Timing Optimization (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Finished Early Timing Optimization (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Finished generic timing optimizations - Pass 2 (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Finished preparing to map (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Finished technology mapping (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+Pass		 CPU time		Worst Slack		Luts / Registers
+------------------------------------------------------------
+   1		0h:00m:00s		   996.65ns		  12 /        22
+
+Finished technology timing optimizations and critical path resynthesis (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+@N: FX164 |The option to pack registers in the IOB has not been specified. Please set syn_useioff attribute.  
+
+Finished restoring hierarchy (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 511MB peak: 511MB)
+
+
+Starting CDBProcessSetClockGroups... (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Finished with CDBProcessSetClockGroups (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+
+Start Writing Netlists (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+Writing Analyst data base /tmp/uj11-cp4-20260908/build/cp4/impl1/synwork/cp4_impl1_m.srm
+
+Finished Writing Netlist Databases (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 512MB peak: 512MB)
+
+Writing EDIF Netlist and constraint files
+@N: FX1056 |Writing EDF file: /tmp/uj11-cp4-20260908/build/cp4/impl1/cp4_impl1.edi
+@N: BW106 |Synplicity Constraint File capacitance units using default value of 1pF 
+
+Finished Writing EDIF Netlist and constraint files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 519MB peak: 519MB)
+
+
+Finished Writing Netlists (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 519MB peak: 519MB)
+
+
+Start final timing analysis (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 519MB peak: 519MB)
+
+@W: MT420 |Found inferred clock uj11_probe_decode|clk with period 1000.00ns. Please declare a user-defined clock on port clk.
+
+
+##### START OF TIMING REPORT #####[
+# Timing report written on Tue Sep  8 18:21:48 2026
+#
+
+
+Top view:               uj11_probe_decode
+Requested Frequency:    1.0 MHz
+Wire load mode:         top
+Paths requested:        5
+Constraint File(s):    
+@N: MT320 |This timing report is an estimate of place and route data. For final timing results, use the FPGA vendor place and route report.
+
+@N: MT322 |Clock constraints include only register-to-register paths associated with each individual clock.
+
+
+
+Performance Summary
+*******************
+
+
+Worst slack in design: 996.016
+
+                          Requested     Estimated     Requested     Estimated                 Clock        Clock     
+Starting Clock            Frequency     Frequency     Period        Period        Slack       Type         Group     
+---------------------------------------------------------------------------------------------------------------------
+uj11_probe_decode|clk     1.0 MHz       251.0 MHz     1000.000      3.984         996.016     inferred     (multiple)
+=====================================================================================================================
+
+
+
+
+
+Clock Relationships
+*******************
+
+Clocks                                        |    rise  to  rise     |    fall  to  fall   |    rise  to  fall   |    fall  to  rise 
+--------------------------------------------------------------------------------------------------------------------------------------
+Starting               Ending                 |  constraint  slack    |  constraint  slack  |  constraint  slack  |  constraint  slack
+--------------------------------------------------------------------------------------------------------------------------------------
+uj11_probe_decode|clk  uj11_probe_decode|clk  |  1000.000    996.016  |  No paths    -      |  No paths    -      |  No paths    -    
+======================================================================================================================================
+ Note: 'No paths' indicates there are no paths in the design for that pair of clock edges.
+       'Diff grp' indicates that paths exist but the starting clock and ending clock are in different clock groups.
+
+
+
+Interface Information 
+*********************
+
+No IO constraint found
+
+
+
+====================================
+Detailed Report for Clock: uj11_probe_decode|clk
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                 Starting                                                       Arrival            
+Instance         Reference                 Type        Pin     Net              Time        Slack  
+                 Clock                                                                             
+---------------------------------------------------------------------------------------------------
+stimulus[12]     uj11_probe_decode|clk     FD1S3IX     Q       stimulus[12]     1.148       996.016
+stimulus[13]     uj11_probe_decode|clk     FD1S3IX     Q       stimulus[13]     1.148       996.016
+stimulus[14]     uj11_probe_decode|clk     FD1S3IX     Q       stimulus[14]     1.148       996.016
+stimulus[9]      uj11_probe_decode|clk     FD1S3IX     Q       stimulus[9]      1.108       996.056
+stimulus[3]      uj11_probe_decode|clk     FD1S3IX     Q       stimulus[3]      1.044       996.120
+stimulus[4]      uj11_probe_decode|clk     FD1S3IX     Q       stimulus[4]      1.044       996.120
+stimulus[5]      uj11_probe_decode|clk     FD1S3IX     Q       stimulus[5]      1.044       996.120
+stimulus[15]     uj11_probe_decode|clk     FD1S3IX     Q       stimulus[15]     1.044       996.120
+stimulus[10]     uj11_probe_decode|clk     FD1S3IX     Q       stimulus[10]     1.148       997.105
+stimulus[11]     uj11_probe_decode|clk     FD1S3IX     Q       stimulus[11]     1.148       997.105
+===================================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                 Starting                                                                 Required            
+Instance         Reference                 Type        Pin     Net                        Time         Slack  
+                 Clock                                                                                        
+--------------------------------------------------------------------------------------------------------------
+observe[0]       uj11_probe_decode|clk     FD1S3IX     D       entry[0]                   999.894      996.016
+observe[4]       uj11_probe_decode|clk     FD1S3IX     D       decode.entry_3_iv_i[4]     999.894      996.016
+observe[5]       uj11_probe_decode|clk     FD1S3IX     D       decode.entry_3_iv_i[5]     999.894      996.016
+observe[6]       uj11_probe_decode|clk     FD1S3IX     D       decode.entry_3_iv_i[6]     999.894      996.016
+observe[7]       uj11_probe_decode|clk     FD1S3IX     D       decode.supported_rr_i      999.894      997.209
+stimulus[11]     uj11_probe_decode|clk     FD1S3IX     D       stimulus[10]               999.894      998.747
+stimulus[12]     uj11_probe_decode|clk     FD1S3IX     D       stimulus[11]               999.894      998.747
+stimulus[13]     uj11_probe_decode|clk     FD1S3IX     D       stimulus[12]               999.894      998.747
+stimulus[14]     uj11_probe_decode|clk     FD1S3IX     D       stimulus[13]               999.894      998.747
+stimulus[15]     uj11_probe_decode|clk     FD1S3IX     D       stimulus[14]               999.894      998.747
+==============================================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      1000.000
+    - Setup time:                            0.106
+    + Clock delay at ending point:           0.000 (ideal)
+    = Required time:                         999.894
+
+    - Propagation time:                      3.878
+    - Clock delay at starting point:         0.000 (ideal)
+    = Slack (critical) :                     996.016
+
+    Number of logic level(s):                3
+    Starting point:                          stimulus[12] / Q
+    Ending point:                            observe[4] / D
+    The start point is clocked by            uj11_probe_decode|clk [rising] (rise=0.000 fall=500.000 period=1000.000) on pin CK
+    The end   point is clocked by            uj11_probe_decode|clk [rising] (rise=0.000 fall=500.000 period=1000.000) on pin CK
+
+Instance / Net                               Pin      Pin               Arrival     No. of    
+Name                            Type         Name     Dir     Delay     Time        Fan Out(s)
+----------------------------------------------------------------------------------------------
+stimulus[12]                    FD1S3IX      Q        Out     1.148     1.148 r     -         
+stimulus[12]                    Net          -        -       -         -           4         
+decode.un1_ir_4                 ORCALUT4     A        In      0.000     1.148 r     -         
+decode.un1_ir_4                 ORCALUT4     Z        Out     1.089     2.237 r     -         
+un1_ir_4                        Net          -        -       -         -           2         
+decode.supported_rr             ORCALUT4     B        In      0.000     2.237 r     -         
+decode.supported_rr             ORCALUT4     Z        Out     1.193     3.429 r     -         
+supported_rr                    Net          -        -       -         -           4         
+decode.un4_entry_4_RNIN3C4H     ORCALUT4     A        In      0.000     3.429 r     -         
+decode.un4_entry_4_RNIN3C4H     ORCALUT4     Z        Out     0.449     3.878 f     -         
+entry_3_iv_i[4]                 Net          -        -       -         -           1         
+observe[4]                      FD1S3IX      D        In      0.000     3.878 f     -         
+==============================================================================================
+
+
+
+##### END OF TIMING REPORT #####]
+
+Timing exceptions that could not be applied
+
+Finished final timing analysis (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 519MB peak: 519MB)
+
+
+Finished timing report (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 519MB peak: 519MB)
+
+---------------------------------------
+Resource Usage Report
+Part: lcmxo2_1200hc-4
+
+Register bits: 22 of 1280 (2%)
+PIC Latch:       0
+I/O cells:       4
+
+
+Details:
+FD1S3AX:        1
+FD1S3IX:        20
+GSR:            1
+IB:             3
+IFS1P3IX:       1
+INV:            1
+OB:             1
+ORCALUT4:       12
+PUR:            1
+VHI:            2
+VLO:            2
+Mapper successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 431MB peak: 519MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Tue Sep  8 18:21:48 2026
+
+###########################################################]

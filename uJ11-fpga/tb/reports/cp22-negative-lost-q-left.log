@@ -1,0 +1,3 @@
+Archive: cp22c; ASHC-only mutation: ('dst=RFQ_L', 'dst=RF')
+FATAL: tb/tb_trace_bit.v:123: trace case14352 op073002 R0 got0000 expected0001
+       Time: 566000  Scope: tb_trace_bit

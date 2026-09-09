@@ -1,0 +1,13 @@
+{
+  "archive": "cp25-verification-source.tgz",
+  "core_sha256": "ac50e58e585053bebd14359dc9e2084259920babae20339178f45073a9b10547",
+  "normal_semantics_bug_rejected": true,
+  "independent_rejected_cases": {
+    "zero_even": 112,
+    "negative_overflow_even": 304,
+    "odd_success_extension": 576,
+    "late_low_dividend": 128
+  },
+  "fault_postframe_register_or_psw_changes": 2368,
+  "fault_postframe_extra_bus": 0
+}

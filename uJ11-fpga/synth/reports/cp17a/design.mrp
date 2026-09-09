@@ -1,0 +1,402 @@
+
+       Lattice Mapping Report File for Design Module 'uj11_probe_core'
+
+
+Design Information
+------------------
+
+Command line:   map -a MachXO2 -p LCMXO2-1200HC -t QFN32 -s 4 -oc Commercial
+     cp17a_impl1.ngd -o cp17a_impl1_map.ncd -pr cp17a_impl1.prf -mp
+     cp17a_impl1.mrp -lpf
+     /tmp/uj11-cp17ab-20260909/build/cp17a/impl1/cp17a_impl1_synplify.lpf -lpf
+     /tmp/uj11-cp17ab-20260909/build/cp17a/clock.lpf -c 0 -pe 
+Target Vendor:  LATTICE
+Target Device:  LCMXO2-1200HCQFN32
+Target Performance:   4
+Mapper:  xo2c00,  version:  Diamond (64-bit) 3.14.0.75.2
+Mapped on:  09/09/26  08:21:36
+
+Design Summary
+--------------
+
+   Number of registers:    297 out of  1346 (22%)
+      PFU registers:          296 out of  1280 (23%)
+      PIO registers:            1 out of    66 (2%)
+   Number of SLICEs:       413 out of   640 (65%)
+      SLICEs as Logic/ROM:    389 out of   640 (61%)
+      SLICEs as RAM:           24 out of   480 (5%)
+      SLICEs as Carry:         15 out of   640 (2%)
+   Number of LUT4s:        826 out of  1280 (65%)
+      Number used as logic LUTs:        748
+      Number used as distributed RAM:    48
+      Number used as ripple logic:       30
+      Number used as shift registers:     0
+   Number of PIO sites used: 4 + 4(JTAG) out of 22 (36%)
+   Number of block RAMs:  4 out of 7 (57%)
+   Number of GSRs:        0 out of 1 (0%)
+   EFB used :        No
+   JTAG used :       No
+   Readback used :   No
+   Oscillator used : No
+   Startup used :    No
+   POR :             On
+   Bandgap :         On
+   Number of Power Controller:  0 out of 1 (0%)
+   Number of Dynamic Bank Controller (BCINRD):  0 out of 4 (0%)
+   Number of Dynamic Bank Controller (BCLVDSO):  0 out of 1 (0%)
+   Number of DCCA:  0 out of 8 (0%)
+   Number of DCMA:  0 out of 2 (0%)
+   Number of PLLs:  0 out of 1 (0%)
+   Number of DQSDLLs:  0 out of 2 (0%)
+   Number of CLKDIVC:  0 out of 4 (0%)
+   Number of ECLKSYNCA:  0 out of 4 (0%)
+   Number of ECLKBRIDGECS:  0 out of 2 (0%)
+   Notes:-
+      1. Total number of LUT4s = (Number of logic LUT4s) + 2*(Number of
+     distributed RAMs) + 2*(Number of ripple logic)
+      2. Number of logic LUT4s does not include count of distributed RAM and
+     ripple logic.
+   Number of clocks:  1
+     Net clk_c: 180 loads, 180 rising, 0 falling (Driver: PIO clk )
+   Number of Clock Enables:  14
+     Net core/engine/fault_latched5: 1 loads, 1 LSLICEs
+
+                                    Page 1
+
+
+
+
+Design:  uj11_probe_core                               Date:  09/09/26  08:21:36
+
+Design Summary (cont)
+---------------------
+     Net core/engine/fault_redirectdup_RNIH6S88: 8 loads, 0 LSLICEs
+     Net core/engine/advance: 1 loads, 1 LSLICEs
+     Net core/engine/seq/un1_upc6_1_i: 6 loads, 6 LSLICEs
+     Net core/engine/frame_active_RNI338B8: 5 loads, 5 LSLICEs
+     Net core/engine/seq/un1_upc6_i: 1 loads, 1 LSLICEs
+     Net core/engine/status/pswce[4]: 10 loads, 10 LSLICEs
+     Net core/engine/status/un1_psw14_i: 2 loads, 2 LSLICEs
+     Net core/engine/step: 1 loads, 1 LSLICEs
+     Net core/engine/dp/un1_q20_i: 11 loads, 11 LSLICEs
+     Net core/engine/frame_active_RNO: 1 loads, 1 LSLICEs
+     Net core/engine/ir6: 9 loads, 9 LSLICEs
+     Net core/engine/mdr_1_sqmuxa_idup: 4 loads, 4 LSLICEs
+     Net core/engine/mdr_1_sqmuxa_i: 4 loads, 4 LSLICEs
+   Number of LSRs:  2
+     Net reset_c: 155 loads, 154 LSLICEs
+     Net core/engine/irq_ack_1_RNI5QB69: 4 loads, 4 LSLICEs
+   Number of nets driven by tri-state buffers:  0
+   Top 10 highest fanout non-clock nets:
+     Net reset_c: 177 loads
+     Net uword[34]: 89 loads
+     Net uword[31]: 80 loads
+     Net uword[33]: 75 loads
+     Net uword[35]: 55 loads
+     Net uword[32]: 41 loads
+     Net core/engine/destination[2]: 34 loads
+     Net uword[19]: 29 loads
+     Net uword[18]: 28 loads
+     Net uword[20]: 28 loads
+
+
+
+
+   Number of warnings:  0
+   Number of errors:    0
+     
+
+Design Errors/Warnings
+----------------------
+
+   No errors or warnings present.
+
+IO (PIO) Attributes
+-------------------
+
++---------------------+-----------+-----------+------------+
+| IO Name             | Direction | Levelmode | IO         |
+|                     |           |  IO_TYPE  | Register   |
++---------------------+-----------+-----------+------------+
+| serial_out          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| clk                 | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| serial_in           | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| reset               | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+
+                                    Page 2
+
+
+
+
+Design:  uj11_probe_core                               Date:  09/09/26  08:21:36
+
+
+Removed logic
+-------------
+
+Block VCC undriven or does not drive anything - clipped.
+Block GSR_INST undriven or does not drive anything - clipped.
+Block GND undriven or does not drive anything - clipped.
+Block core/GND undriven or does not drive anything - clipped.
+Block core/VCC undriven or does not drive anything - clipped.
+Block core/decode/VCC undriven or does not drive anything - clipped.
+Block core/decode/GND undriven or does not drive anything - clipped.
+Block core/engine/VCC undriven or does not drive anything - clipped.
+Block core/engine/GND undriven or does not drive anything - clipped.
+Block core/engine/dp/VCC undriven or does not drive anything - clipped.
+Block core/engine/dp/GND undriven or does not drive anything - clipped.
+Block core/engine/dp/alu/VCC undriven or does not drive anything - clipped.
+Block core/engine/dp/rf/VCC undriven or does not drive anything - clipped.
+Block core/engine/dp/rf/GND undriven or does not drive anything - clipped.
+Block core/engine/status/GND undriven or does not drive anything - clipped.
+Block core/engine/status/VCC undriven or does not drive anything - clipped.
+Block core/engine/memory/VCC undriven or does not drive anything - clipped.
+Block core/engine/memory/GND undriven or does not drive anything - clipped.
+Signal core/engine/dp/alu/GND undriven or does not drive anything - clipped.
+Signal core/engine/seq/GND undriven or does not drive anything - clipped.
+Signal core/engine/rom/VCC undriven or does not drive anything - clipped.
+Signal core/engine/rom/GND undriven or does not drive anything - clipped.
+Signal VCC undriven or does not drive anything - clipped.
+Signal core/engine/dp/alu/un1_arithmetic_b_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal core/engine/dp/alu/N_1 undriven or does not drive anything - clipped.
+Signal core/engine/dp/alu/un1_arithmetic_b_cry_15_0_COUT undriven or does not
+     drive anything - clipped.
+Signal core/engine/seq/un1_upc_s_9_0_S1 undriven or does not drive anything -
+     clipped.
+Signal core/engine/seq/un1_upc_s_9_0_COUT undriven or does not drive anything -
+     clipped.
+Signal core/engine/seq/un1_upc_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal core/engine/seq/un1_upc_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal core/engine/seq/N_1 undriven or does not drive anything - clipped.
+Signal core/engine/rom/lane_2_DOB8 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB7 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB6 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB5 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB4 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB3 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB2 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB1 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_2_DOB0 undriven or does not drive anything -
+
+                                    Page 3
+
+
+
+
+Design:  uj11_probe_core                               Date:  09/09/26  08:21:36
+
+Removed logic (cont)
+--------------------
+     clipped.
+Signal core/engine/rom/lane_1_DOB8 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB7 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB6 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB5 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB4 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB3 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB2 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB1 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_1_DOB0 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB8 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB7 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB6 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB5 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB4 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB3 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB2 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB1 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_0_DOB0 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB8 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB7 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB6 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB5 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB4 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB3 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB2 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB1 undriven or does not drive anything -
+     clipped.
+Signal core/engine/rom/lane_3_DOB0 undriven or does not drive anything -
+     clipped.
+Block core/engine/dp/alu/GND was optimized away.
+
+                                    Page 4
+
+
+
+
+Design:  uj11_probe_core                               Date:  09/09/26  08:21:36
+
+Removed logic (cont)
+--------------------
+Block core/engine/seq/GND was optimized away.
+Block core/engine/rom/VCC was optimized away.
+Block core/engine/rom/GND was optimized away.
+
+Memory Usage
+------------
+
+/:
+    EBRs: 0
+    RAM SLICEs: 16
+    Logic SLICEs: 85
+    PFU Registers: 202
+/core/engine/dp/rf/words_1_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_1_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_1_ram_1:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_1_ram_2:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_ram_1:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/dp/rf/words_ram_2:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/core/engine/rom:
+    EBRs: 4
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+
+                                    Page 5
+
+
+
+
+Design:  uj11_probe_core                               Date:  09/09/26  08:21:36
+
+Memory Usage (cont)
+-------------------
+    PFU Registers: 0
+    -Contains EBR lane_3:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_0:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_1:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+    -Contains EBR lane_2:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,  REGMODE_A=
+         NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,  GSR= DISABLED
+
+     
+
+ASIC Components
+---------------
+
+Instance Name: core/engine/rom/lane_3
+         Type: DP8KC
+Instance Name: core/engine/rom/lane_0
+         Type: DP8KC
+Instance Name: core/engine/rom/lane_1
+         Type: DP8KC
+Instance Name: core/engine/rom/lane_2
+         Type: DP8KC
+
+Run Time and Memory Usage
+-------------------------
+
+   Total CPU Time: 0 secs  
+   Total REAL Time: 0 secs  
+   Peak Memory Usage: 157 MB
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    Page 6
+
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+     Copyright (c) 1995 AT&T Corp.   All rights reserved.
+     Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+     Copyright (c) 2001 Agere Systems   All rights reserved.
+     Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights
+     reserved.

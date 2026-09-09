@@ -1,0 +1,3 @@
+Archive: cp24a; mutations: [('microcode/m0.uasm', 'alu XOR, a=RS, pair=AD, d=MDR, b=T2, dst=RF', 'alu XOR, a=RS, pair=AD, d=MDR, b=T2, dst=RF, flags=NZV')]
+FATAL: tb/tb_bus_fault.v:86: fault case1441 op074010 beat5 got 001 5ffe:0009 want 0001 5ffe:0003 upc3e0
+       Time: 555000  Scope: tb_bus_fault

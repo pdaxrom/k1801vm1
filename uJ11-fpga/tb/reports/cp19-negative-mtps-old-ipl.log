@@ -1,0 +1,3 @@
+Archive: cp19a; mutation: ('alu OR, a=T2, b=T4, flags=LOAD\n', 'alu OR, a=T2, b=T4, flags=LOAD, seq=FETCH\n')
+FATAL: tb/tb_trace_bit.v:114: trace case2077 op106400 prePSW00e7 upc020 clocks8 beats1/5 flags0000/00e3 fault0 IRQ0/1 retires1
+       Time: 356000  Scope: tb_trace_bit

@@ -1,0 +1,4 @@
+Software traps: 3584 completed
+RTI: 1056 completed
+Trap DCJ11 kernel/T=0 ENABLE_MMU=0: 4640 completed cases; 0 excluded.
+Reasons (may overlap): abort=0 trap/vector=0 I/O=0 odd-word=0

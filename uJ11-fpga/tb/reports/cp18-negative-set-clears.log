@@ -1,0 +1,3 @@
+Archive: cp18e; mutation: ('alu OR, pair=DB, d=PSW, b=T4, flags=LOAD, seq=FETCH', 'alu BIC, pair=DB, d=PSW, b=T4, flags=LOAD, seq=FETCH')
+FATAL: tb/tb_trace_bit.v:114: trace case8704 op000261 prePSW0000 upc020 clocks4 beats1/1 flags0000/0001 fault0 IRQ0/0 retires1
+       Time: 316000  Scope: tb_trace_bit

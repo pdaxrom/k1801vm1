@@ -1,0 +1,30 @@
+cc -O2 -Wall -DENABLE_MMU=0 -I.. ../tests/core_tests.c ../core/core.c ../core/disas.c ../core/hardware.c -lm -o build/cp22-core-tests
+build/cp22-core-tests
+All core instruction tests passed
+python3 -m unittest discover -s tb -p 'test_*.py' -v
+test_dq_and_legacy_zq (test_fis.FisTests.test_dq_and_legacy_zq) ... ok
+test_format_and_dirty_zero (test_fis.FisTests.test_format_and_dirty_zero) ... ok
+test_linker_preserves_baseline (test_fis.FisTests.test_linker_preserves_baseline) ... ok
+test_operation_specific_errors (test_fis.FisTests.test_operation_specific_errors) ... ok
+test_rounding_and_exponent_limits (test_fis.FisTests.test_rounding_and_exponent_limits) ... ok
+test_actual_program (test_microasm.AssemblerTests.test_actual_program) ... ok
+test_conditional_retirement (test_microasm.AssemblerTests.test_conditional_retirement) ... ok
+test_conflicts (test_microasm.AssemblerTests.test_conflicts) ... ok
+test_control_selectors_are_aligned (test_microasm.AssemblerTests.test_control_selectors_are_aligned) ... ok
+test_fault_increment (test_microasm.AssemblerTests.test_fault_increment) ... ok
+test_invalid_physical_image (test_microasm.AssemblerTests.test_invalid_physical_image) ... ok
+test_operand_width (test_microasm.AssemblerTests.test_operand_width) ... ok
+test_page_and_immediate (test_microasm.AssemblerTests.test_page_and_immediate) ... ok
+test_peripheral_reset_jump (test_microasm.AssemblerTests.test_peripheral_reset_jump) ... ok
+test_physical_packing_roundtrip (test_microasm.AssemblerTests.test_physical_packing_roundtrip) ... ok
+test_prefetch_policy (test_microasm.AssemblerTests.test_prefetch_policy) ... ok
+test_return_trace_field (test_microasm.AssemblerTests.test_return_trace_field) ... ok
+test_reverse_operands (test_microasm.AssemblerTests.test_reverse_operands) ... ok
+test_rr_encoding (test_microasm.AssemblerTests.test_rr_encoding) ... ok
+test_stream_extension (test_microasm.AssemblerTests.test_stream_extension) ... ok
+test_wait_control (test_microasm.AssemblerTests.test_wait_control) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.114s
+
+OK

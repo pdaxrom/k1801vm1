@@ -1,0 +1,36 @@
+PASS ea differential mode-1: 31671 DCJ11 cases, 948247 clocks, 137006 exact bus beats
+tb/tb_ea.v:141: $finish called at 15500056000 (1ps)
+PASS ea differential mode2: 31671 DCJ11 cases, 14739672 clocks, 137006 exact bus beats
+tb/tb_ea.v:141: $finish called at 153414306000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_ea_faults -o build/vendor_ea_faults tb/tb_ea_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_ea_faults
+PASS EA directed: 14 cases, seven word operations demand I/O, odd source/pointer, five store errors preserve flags and memory
+tb/tb_ea_faults.v:87: $finish called at 5326000 (1ps)
+PASS single differential mode-1: 7080 DCJ11 cases, 99242 clocks, 19588 exact bus beats
+tb/tb_ea.v:141: $finish called at 2337716000 (1ps)
+PASS single differential mode2: 7080 DCJ11 cases, 2035650 clocks, 19588 exact bus beats
+tb/tb_ea.v:141: $finish called at 21701796000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_single_faults -o build/vendor_single_faults tb/tb_single_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_single_faults
+PASS single directed: 46 I/O/read-error/write-error/odd-address cases, 0..3 waits
+tb/tb_single_faults.v:91: $finish called at 15586000 (1ps)
+PASS branch differential mode-1: 7440 DCJ11 cases, 35464 clocks, 7440 exact bus beats
+tb/tb_ea.v:141: $finish called at 1768336000 (1ps)
+PASS branch differential mode2: 7440 DCJ11 cases, 805504 clocks, 7440 exact bus beats
+tb/tb_ea.v:141: $finish called at 9468736000 (1ps)
+PASS byte differential mode-1: 23954 DCJ11 cases, 683191 clocks, 98606 exact bus beats
+tb/tb_ea.v:141: $finish called at 11383266000 (1ps)
+PASS byte differential mode2: 23954 DCJ11 cases, 9773277 clocks, 98606 exact bus beats
+tb/tb_ea.v:141: $finish called at 102284126000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_byte_io -o build/vendor_byte_io tb/tb_byte_io.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_byte_io
+PASS byte I/O: 23 even/odd CSR, read/write error and odd-word pointer cases
+tb/tb_byte_io.v:69: $finish called at 8536000 (1ps)
+PASS single_byte differential mode-1: 7104 DCJ11 cases, 99696 clocks, 19680 exact bus beats
+tb/tb_ea.v:141: $finish called at 2346816000 (1ps)
+PASS single_byte differential mode2: 7104 DCJ11 cases, 1884432 clocks, 19680 exact bus beats
+tb/tb_ea.v:141: $finish called at 20194176000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -Ptb_single_faults.BYTE_VARIANT=1 -s tb_single_faults -o build/vendor_single_byte_faults tb/tb_single_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_single_byte_faults
+PASS single byte directed: 46 I/O/read-error/write-error/odd-pointer cases, 0..3 waits
+tb/tb_single_faults.v:91: $finish called at 15216000 (1ps)

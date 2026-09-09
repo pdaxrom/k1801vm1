@@ -1,0 +1,42 @@
+[
+  {
+    "name": "missing-opcode",
+    "archive": "cp23c",
+    "rejected": true
+  },
+  {
+    "name": "inclusive-or",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "wrong-source",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "lost-carry",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "set-overflow",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "early-source",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "flags-before-write",
+    "archive": "cp24a",
+    "rejected": true
+  },
+  {
+    "name": "byte-write",
+    "archive": "cp24a",
+    "rejected": true
+  }
+]

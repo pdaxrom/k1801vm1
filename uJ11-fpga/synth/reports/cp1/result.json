@@ -1,0 +1,126 @@
+{
+  "lut4": 133,
+  "lut4_capacity": 1280,
+  "ff": 62,
+  "ff_capacity": 1346,
+  "ebr": 4,
+  "ebr_capacity": 7,
+  "slices": 67,
+  "slices_capacity": 640,
+  "fmax_mhz": 54.885,
+  "cumulative_negative_slack_ns": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "timing_pass": true,
+  "fully_routed": true,
+  "reports": {
+    "synth/machxo2/impl1/uj11-seq_impl1.mrp": "19e116d7a7d0ed9d1180bab9baba5a9f6c2163cfaaedffdc44b11320aa0a1b62",
+    "synth/machxo2/impl1/uj11-seq_impl1.twr": "85a074c8d67291e61d63dfaf5f5768fdf5eca1a51469541ff26140b49a56016e",
+    "synth/machxo2/impl1/uj11-seq_impl1.par": "828962d54fbc8c62158ddfb0f0f76225452da2e086ba361c75f5c77e6fe89972"
+  },
+  "scope": "CP1 ROM + microseq + 40 stimulus FF / 1 observation FF and checksum logic",
+  "device": "LCMXO2-1200HC-4SG32C",
+  "constraint_mhz": 50,
+  "physical_timing_verified": false,
+  "inputs": {
+    "checkpoint": "cp1-format-v1",
+    "input_revision_sha256": "b7d860d0a264937e44eada8fdf14ff3d96b6573fda4628d9ceec3695e827b846",
+    "files": {
+      "Makefile": "6dcb62529117ce6f3f221d758b1bdd2a7b7f6702af7a2043c00fed075ff46d16",
+      "microasm/uj11asm.py": "af1263fb2444e64203e72ddd3dd7edeb5fac92d136178b754519f77ea4e5ae01",
+      "microcode/checkpoint_seq.uasm": "8c076cf486708863f0be00173b7fe544d3847270e4caef51df9eea8986c51cb3",
+      "microcode/generated/checkpoint_seq.mem": "032e2bbc3e07918bd9cd2a0dd72c81c96208411c3f09ed13470a871ec67988aa",
+      "microcode/generated/uj11_rom_ebr.v": "d12166c03a8cbe9114ebf59ab376c8eedc79cc4faf9167217d0bd0e2032be66c",
+      "rtl/uj11_microseq.v": "f1a8345ca528e81ff9a659ea6389e82cec08f0b525df406d421ec895fa9f9fc1",
+      "synth/machxo2/build.tcl": "ae49a393f457a1e3c7a401af47153a205c72d660c398bb9c7d8281fccdd77e6e",
+      "synth/machxo2/uj11-seq.ldf": "2aed1bbd630f1c56e226e6127c50fd7fab75dd3f3a4422f8f6e47aa839b722eb",
+      "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+      "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+      "synth/machxo2/uj11_probe_seq.v": "643dd0ce56cc3c742573b0dfd153f31908fb2cf4c8ea054de6de5d38df1318b9",
+      "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "tools/report_synthesis.py": "17dfc23056d1c492ed3601d55bdf855406e01fb6d50cb774cdfedfcab317f8dc",
+      "tools/source_manifest.py": "3ec7622e2a494af95be68d28b7fd22763e28a50e5c160bd9786de559c89fc0a1"
+    }
+  },
+  "microcode": {
+    "encoding_version": 1,
+    "highest_address": 1023,
+    "note": "Label spans are static word counts, not dynamic instruction CPI.",
+    "occupancy_percent": 4.39453125,
+    "physical_words": 1024,
+    "routines": {
+      "ALU_ENCODING": {
+        "address": 272,
+        "words_until_next_label": 3
+      },
+      "BT_SELECT": {
+        "address": 34,
+        "words_until_next_label": 1
+      },
+      "BT_TABLE": {
+        "address": 84,
+        "words_until_next_label": 4
+      },
+      "CALLSITE": {
+        "address": 18,
+        "words_until_next_label": 2
+      },
+      "MD_SELECT": {
+        "address": 32,
+        "words_until_next_label": 1
+      },
+      "MD_TABLE": {
+        "address": 72,
+        "words_until_next_label": 8
+      },
+      "MEMORY_ENCODING": {
+        "address": 96,
+        "words_until_next_label": 4
+      },
+      "MS_TABLE": {
+        "address": 64,
+        "words_until_next_label": 8
+      },
+      "OPCODE": {
+        "address": 36,
+        "words_until_next_label": 1
+      },
+      "R67_SELECT": {
+        "address": 35,
+        "words_until_next_label": 1
+      },
+      "R67_TABLE": {
+        "address": 88,
+        "words_until_next_label": 2
+      },
+      "RESET": {
+        "address": 0,
+        "words_until_next_label": 1
+      },
+      "RR_SELECT": {
+        "address": 33,
+        "words_until_next_label": 1
+      },
+      "RR_TABLE": {
+        "address": 80,
+        "words_until_next_label": 4
+      },
+      "START": {
+        "address": 16,
+        "words_until_next_label": 2
+      },
+      "SUBROUTINE": {
+        "address": 48,
+        "words_until_next_label": 1
+      },
+      "UNUSED": {
+        "address": 1023,
+        "words_until_next_label": 1
+      }
+    },
+    "used_words": 45,
+    "word_bits": 36
+  }
+}

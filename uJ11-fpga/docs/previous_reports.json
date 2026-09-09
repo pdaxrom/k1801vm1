@@ -1,0 +1,555 @@
+{
+  "reports": [
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/direct-am4-11c3e176/microcomp-am4_impl1.mrp",
+      "map_sha256": "380550b94d8c6d02d5f49f8bd6063111e6612eb1e6c17eab64b698206ea03c48",
+      "lut4": {
+        "used": 902,
+        "available": 1280
+      },
+      "registers": {
+        "used": 284,
+        "available": 1346
+      },
+      "slices": {
+        "used": 456,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/direct-am4-11c3e176/microcomp-am4_impl1.twr",
+      "trace_sha256": "d79474966c2ee8a0658a467a72c15930ce4c4671be52f5d6e2a0a5edc67f31bb",
+      "trace_reported_frequencies_mhz": [
+        31.206
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/fram-am4-331d6776/microcomp-am4_impl1.mrp",
+      "map_sha256": "825a768ec3121685867b6bb00b07e1a8cafd6692d82116ed9ae4524ab7585347",
+      "lut4": {
+        "used": 1058,
+        "available": 1280
+      },
+      "registers": {
+        "used": 393,
+        "available": 1346
+      },
+      "slices": {
+        "used": 532,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/fram-am4-331d6776/microcomp-am4_impl1.twr",
+      "trace_sha256": "30b71891229cfa93869c4584504f7dcabea8688b52c9ea39a4f8392d44fd0e42",
+      "trace_reported_frequencies_mhz": [
+        30.469
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/original-am4-db546ca5/microcomp-am4_impl1.mrp",
+      "map_sha256": "619f159335dee0ad1741feb58129d02837ec2af076292f9b8d0c2b9ed2fc3d14",
+      "lut4": {
+        "used": 903,
+        "available": 1280
+      },
+      "registers": {
+        "used": 285,
+        "available": 1346
+      },
+      "slices": {
+        "used": 456,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/original-am4-db546ca5/microcomp-am4_impl1.twr",
+      "trace_sha256": "8a58cfa218bf8358685044c6162b70e52381fe29aeff33dc56374ac4844f20a1",
+      "trace_reported_frequencies_mhz": [
+        29.574
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/rk-read-d313c9ed/microcomp-am4_impl1.mrp",
+      "map_sha256": "cc9f26df6f929c9eeb37326bc1c841648bd1386b9810ec8861d4131710d2789e",
+      "lut4": {
+        "used": 1256,
+        "available": 1280
+      },
+      "registers": {
+        "used": 483,
+        "available": 1346
+      },
+      "slices": {
+        "used": 633,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/rk-read-d313c9ed/microcomp-am4_impl1.twr",
+      "trace_sha256": "6444621da74dc330ac88d1b5c4159c52ce4f148a38bd79df3594cd43276e2c10",
+      "trace_reported_frequencies_mhz": [
+        30.854
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-258f4837/microcomp-am4_impl1.mrp",
+      "map_sha256": "74400b1719ee7cd64c53e26d3edacb92ac3e8f6ccdbbd2aae362a1ff5f21751c",
+      "lut4": {
+        "used": 1186,
+        "available": 1280
+      },
+      "registers": {
+        "used": 475,
+        "available": 1346
+      },
+      "slices": {
+        "used": 597,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-258f4837/microcomp-am4_impl1.twr",
+      "trace_sha256": "f13c2d0a88380ff279f0f044f3ad1641831be701cb7a8ac23d67ad73a8d0a916",
+      "trace_reported_frequencies_mhz": [
+        30.425
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-679293b7/microcomp-am4_impl1.mrp",
+      "map_sha256": "ece60ce60551372af6046094687763197cfc11375a98e3057064fe33f77626e7",
+      "lut4": {
+        "used": 1182,
+        "available": 1280
+      },
+      "registers": {
+        "used": 473,
+        "available": 1346
+      },
+      "slices": {
+        "used": 596,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-679293b7/microcomp-am4_impl1.twr",
+      "trace_sha256": "f21ea8df661b85cb4744ebad12e30f234a7e25bd3f79a72cc18e91458de65583",
+      "trace_reported_frequencies_mhz": [
+        30.54
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-84d70c69/microcomp-am4_impl1.mrp",
+      "map_sha256": "41b72d82196e5a76cbbd9a9b6c9bc7c5ed061d4e827179dbd57491f7959758bd",
+      "lut4": {
+        "used": 1186,
+        "available": 1280
+      },
+      "registers": {
+        "used": 475,
+        "available": 1346
+      },
+      "slices": {
+        "used": 597,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-84d70c69/microcomp-am4_impl1.twr",
+      "trace_sha256": "d88fc05137cbca3387e1d0a07aa384d2b3b10dfb9d17a11e6f19dbf81a7b5240",
+      "trace_reported_frequencies_mhz": [
+        30.425
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-93ce2d5b/microcomp-am4_impl1.mrp",
+      "map_sha256": "a0ac860cfa253d7218d3181f028b415e1a0b45c83ea07fa4c7789188a118fe68",
+      "lut4": {
+        "used": 1186,
+        "available": 1280
+      },
+      "registers": {
+        "used": 475,
+        "available": 1346
+      },
+      "slices": {
+        "used": 597,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-am4/sdboot-am4-93ce2d5b/microcomp-am4_impl1.twr",
+      "trace_sha256": "9a918669e6a454b7a97a131b34623c6d6f6520684f2d175d8667db53351d9303",
+      "trace_reported_frequencies_mhz": [
+        30.425
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-boot-trace/microcomp-boot-trace_impl1.mrp",
+      "map_sha256": "0b35e8dc6a07fd755a57985e36e7e6ee4a252bcdf007593b6f4a6e3d1cb59ec3",
+      "lut4": {
+        "used": 1095,
+        "available": 1280
+      },
+      "registers": {
+        "used": 431,
+        "available": 1346
+      },
+      "slices": {
+        "used": 548,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-boot-trace/microcomp-boot-trace_impl1.twr",
+      "trace_sha256": "a9a949fa8b73e19c92f373c30b2b0c925e52c33d905ccc9dbbd7bfec2cd9e03b",
+      "trace_reported_frequencies_mhz": [
+        37.627
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-diag/microcomp-diag_impl1.mrp",
+      "map_sha256": "030deb8ec83ed2beea25f45789819335d3bc52b89fba4be958a802ebb02c4eb6",
+      "lut4": {
+        "used": 1095,
+        "available": 1280
+      },
+      "registers": {
+        "used": 431,
+        "available": 1346
+      },
+      "slices": {
+        "used": 548,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-diag/microcomp-diag_impl1.twr",
+      "trace_sha256": "b062659ab1e0bfc023b704686b89c310cf43e798e8aa3049d758c40c95da730b",
+      "trace_reported_frequencies_mhz": [
+        37.627
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sd-nofis/microcomp-sd-nofis_impl1.mrp",
+      "map_sha256": "d79841cbe4f38d660f7e5dab2795c62d66d7dc85c172f9dc9acb99588f7a74a0",
+      "lut4": {
+        "used": 1041,
+        "available": 1280
+      },
+      "registers": {
+        "used": 423,
+        "available": 1346
+      },
+      "slices": {
+        "used": 523,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sd-nofis/microcomp-sd-nofis_impl1.twr",
+      "trace_sha256": "e4364ff995f0f42e34c0ef17974437f72b216a180f296996a01070323507e76e",
+      "trace_reported_frequencies_mhz": [
+        41.943
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sdboot/fis-recheck-4007f49/microcomp_impl1.mrp",
+      "map_sha256": "a3c557943c1dc468d1dab039adf668a77df69f0cab2c5281c7f48bb13025da7c",
+      "lut4": {
+        "used": 1095,
+        "available": 1280
+      },
+      "registers": {
+        "used": 431,
+        "available": 1346
+      },
+      "slices": {
+        "used": 548,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sdboot/fis-recheck-4007f49/microcomp_impl1.twr",
+      "trace_sha256": "573d92a77c8dcc4fb76c6a4dc00d5270ac7c91a6aa11cf48916c995241e22a79",
+      "trace_reported_frequencies_mhz": [
+        37.627
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sdboot/kdj11a-a985039/microcomp_impl1.mrp",
+      "map_sha256": "4406a1ce8af2f0b89fbf671ba23e22a728c24538d7eebd59e7629e113125ed6b",
+      "lut4": {
+        "used": 1095,
+        "available": 1280
+      },
+      "registers": {
+        "used": 431,
+        "available": 1346
+      },
+      "slices": {
+        "used": 548,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sdboot/kdj11a-a985039/microcomp_impl1.twr",
+      "trace_sha256": "f29abdc3ed5e20ae6a4aa9a600d7312943c70425cc7582858a286e497837aefc",
+      "trace_reported_frequencies_mhz": [
+        37.627
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sdboot/native-isolation-45a1b68/microcomp_impl1.mrp",
+      "map_sha256": "ca01438f56455913a919a4785acb7b87f2fe270a71c538e5feacfd8a37c06121",
+      "lut4": {
+        "used": 1095,
+        "available": 1280
+      },
+      "registers": {
+        "used": 431,
+        "available": 1346
+      },
+      "slices": {
+        "used": 548,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-sdboot/native-isolation-45a1b68/microcomp_impl1.twr",
+      "trace_sha256": "d7ee218454bc5e93eee32f88e8910f5f865d649dbf124b6f3f61765c4127639a",
+      "trace_reported_frequencies_mhz": [
+        37.627
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/microcomp-ucode_impl1.mrp",
+      "map_sha256": "305030b9a95fe286ddd640159626bf55e6319d1beb9eb199314aaffc5865eeb9",
+      "lut4": {
+        "used": 964,
+        "available": 1280
+      },
+      "registers": {
+        "used": 379,
+        "available": 1346
+      },
+      "slices": {
+        "used": 483,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/microcomp-ucode_impl1.twr",
+      "trace_sha256": "711600e2f6965a647b2feb1dd605af529b92093a2ce3b81773937026f35e48d5",
+      "trace_reported_frequencies_mhz": [
+        41.432
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage2/microcomp-ucode_impl1.mrp",
+      "map_sha256": "c547b0c23f57f183add71e4717072c19549c37f423f2f71f485feaf4e7c7a7f9",
+      "lut4": {
+        "used": 1013,
+        "available": 1280
+      },
+      "registers": {
+        "used": 385,
+        "available": 1346
+      },
+      "slices": {
+        "used": 510,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage2/microcomp-ucode_impl1.twr",
+      "trace_sha256": "641945734d7ede28d1a608ed23f4827550a1fedf162a470e61af831bf2f4a467",
+      "trace_reported_frequencies_mhz": [
+        48.195
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage3-carry/microcomp-ucode_impl1.mrp",
+      "map_sha256": "3e912c4e4a4d223fb4ceefd0f3c1410824310ee60f46dfcbe1893611dcab9d99",
+      "lut4": {
+        "used": 1016,
+        "available": 1280
+      },
+      "registers": {
+        "used": 382,
+        "available": 1346
+      },
+      "slices": {
+        "used": 513,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage3-carry/microcomp-ucode_impl1.twr",
+      "trace_sha256": "3739a278b1edd2c1e4c9dcf4bd4430f5db5b5f0b1b67867c836e8721f4cc2c85",
+      "trace_reported_frequencies_mhz": [
+        42.385
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage3-wordpc/microcomp-ucode_impl1.mrp",
+      "map_sha256": "d51722efc23f1660e2dac37d3c4ce8ed74ebeca6239cfff19a8c931d8b2f4751",
+      "lut4": {
+        "used": 959,
+        "available": 1280
+      },
+      "registers": {
+        "used": 381,
+        "available": 1346
+      },
+      "slices": {
+        "used": 482,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage3-wordpc/microcomp-ucode_impl1.twr",
+      "trace_sha256": "1d813447008f4f26922aca49d3cc92ce216a1aeb7598fab6263bebd35999a6e5",
+      "trace_reported_frequencies_mhz": [
+        45.708
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage4/microcomp-ucode_impl1.mrp",
+      "map_sha256": "980591b6c085aeda6b04fca92c6d18489dc4c74b7aa68829961936db0fd52d74",
+      "lut4": {
+        "used": 959,
+        "available": 1280
+      },
+      "registers": {
+        "used": 381,
+        "available": 1346
+      },
+      "slices": {
+        "used": 482,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-ucode/stage4/microcomp-ucode_impl1.twr",
+      "trace_sha256": "18b871a544e4b60f0df5cff6212199903dddef7d4c4de98f9f0c02757834ff98",
+      "trace_reported_frequencies_mhz": [
+        45.708
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-vliw/named-build-4bb39981/microcomp-vliw_impl1.mrp",
+      "map_sha256": "b6454fb0ca4a142ce606d0f39548f2b2e69455ee05f3704290fc123c5aff3995",
+      "lut4": {
+        "used": 1256,
+        "available": 1280
+      },
+      "registers": {
+        "used": 438,
+        "available": 1346
+      },
+      "slices": {
+        "used": 630,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-vliw/named-build-4bb39981/microcomp-vliw_impl1.twr",
+      "trace_sha256": "35cf3f168955394bb7b19d52c322de1ba681bcf4ff42a6a208bfe3afdddf33ae",
+      "trace_reported_frequencies_mhz": [
+        36.67
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-vliw/prototype-cba91f74/microcomp_impl1.mrp",
+      "map_sha256": "1ef2392dce35a6320f51a9ef2c168a9b697834729f483366fccc3fa60dc113b6",
+      "lut4": {
+        "used": 1256,
+        "available": 1280
+      },
+      "registers": {
+        "used": 438,
+        "available": 1346
+      },
+      "slices": {
+        "used": 630,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/FPGA/microcpu/boards/hc1200-microcomp/impl1-vliw/prototype-cba91f74/microcomp_impl1.twr",
+      "trace_sha256": "41f80106e2c104409861349d3a16a006eea610f09cacabfb0e9d227c5319193a",
+      "trace_reported_frequencies_mhz": [
+        36.67
+      ]
+    },
+    {
+      "map_path": "/Users/sash/Work/PROJECTS/k1801vm1/lsi11-fpga/boards/hc1200-microcomp/impl1-am4/microcomp-am4_impl1.mrp",
+      "map_sha256": "21350cd28901d092d462e87b15502ee44e0faec46b0d69417c938d5d8d0733e6",
+      "lut4": {
+        "used": 1266,
+        "available": 1280
+      },
+      "registers": {
+        "used": 470,
+        "available": 1346
+      },
+      "slices": {
+        "used": 635,
+        "available": 640
+      },
+      "ebr": {
+        "used": 7,
+        "available": 7
+      },
+      "trace_path": "/Users/sash/Work/PROJECTS/k1801vm1/lsi11-fpga/boards/hc1200-microcomp/impl1-am4/microcomp-am4_impl1.twr",
+      "trace_sha256": "1db6251ca8073f4bccba5ed7a2716c30dce9bc1f7b3824d0606acb266e81cd10",
+      "trace_reported_frequencies_mhz": [
+        32.438
+      ]
+    }
+  ],
+  "note": "Historical artifacts; source revision and build completeness not inferred from filenames."
+}

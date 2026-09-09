@@ -1,0 +1,26 @@
+{
+  "baseline": "cp26a",
+  "baseline_sha256": "490d2e7f9b3c5a2b530d35f2571cb98fe54975c1d9cd8443638e16a1855c57e6",
+  "candidate_sha256": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+  "context": "D=0 if pair=5; all other inputs and register states unconstrained",
+  "legacy_pair5_alu_addresses": [
+    600,
+    738,
+    751,
+    776,
+    780,
+    811,
+    883,
+    922
+  ],
+  "results": {
+    "positive": {
+      "returncode": 0,
+      "log_sha256": "023864d9231edfd3daca96fea71cc54cf693b6bca2441c9bf4642f43818dc114"
+    },
+    "negative": {
+      "returncode": 1,
+      "log_sha256": "fc94e71fc27d78642a2265859179655dfaff8d7969e5059c88845ad9b9021203"
+    }
+  }
+}

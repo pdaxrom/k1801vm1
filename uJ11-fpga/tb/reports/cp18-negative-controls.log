@@ -1,0 +1,4 @@
+PASS system flags negative: missing-cc; archived cp17a
+PASS system flags negative: clear-sets; archived cp18e
+PASS system flags negative: set-clears; archived cp18e
+PASS system flags negative: wrong-mfpt; archived cp18e

@@ -1,0 +1,2 @@
+PASS CP19 decoder: all 65536 checked; only MFPS and MTPS differ from archived CP18e
+build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

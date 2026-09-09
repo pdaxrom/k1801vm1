@@ -1,0 +1,2 @@
+PASS CP21 decoder: all 65536 checked; only ASH differ from archived CP20c
+build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

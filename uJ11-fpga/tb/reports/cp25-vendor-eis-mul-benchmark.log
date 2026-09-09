@@ -1,0 +1,72 @@
+MUL BENCH mode-1 MUL_source_mode0: 35232 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode1: 36720 clocks / 504 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode2: 37104 clocks / 512 instructions, 1016 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode3: 37600 clocks / 512 instructions, 1264 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode4: 37104 clocks / 512 instructions, 1016 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode5: 37352 clocks / 512 instructions, 1264 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode6: 37216 clocks / 504 instructions, 1248 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_source_mode7: 37712 clocks / 504 instructions, 1496 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_0000_times_8000: 31760 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_0001_times_7fff: 31760 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_0001_times_8000: 32504 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_0002_times_4000: 32256 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_ffff_times_8000: 40688 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_8000_times_8000: 33000 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_ffff_times_ffff: 40192 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+MUL BENCH mode-1 MUL_RR_7fff_times_7fff: 38952 clocks / 504 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+PASS MUL benchmarks mode-1: 16 workloads, warmup excluded
+tb/tb_eis_mul_bench.v:171: $finish called at 6495936000 (1ps)
+MUL BENCH mode0 MUL_source_mode0: 114192 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_source_mode1: 141720 clocks / 504 instructions, 1000 memory beats, 1000 CS, 48000 SPI clocks
+MUL BENCH mode0 MUL_source_mode2: 143784 clocks / 512 instructions, 1016 memory beats, 1016 CS, 48768 SPI clocks
+MUL BENCH mode0 MUL_source_mode3: 170320 clocks / 512 instructions, 1264 memory beats, 1264 CS, 60672 SPI clocks
+MUL BENCH mode0 MUL_source_mode4: 143784 clocks / 512 instructions, 1016 memory beats, 1016 CS, 48768 SPI clocks
+MUL BENCH mode0 MUL_source_mode5: 170072 clocks / 512 instructions, 1264 memory beats, 1264 CS, 60672 SPI clocks
+MUL BENCH mode0 MUL_source_mode6: 168256 clocks / 504 instructions, 1248 memory beats, 1248 CS, 59904 SPI clocks
+MUL BENCH mode0 MUL_source_mode7: 194792 clocks / 504 instructions, 1496 memory beats, 1496 CS, 71808 SPI clocks
+MUL BENCH mode0 MUL_RR_0000_times_8000: 110720 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_0001_times_7fff: 110720 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_0001_times_8000: 111464 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_0002_times_4000: 111216 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_ffff_times_8000: 119648 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_8000_times_8000: 111960 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_ffff_times_ffff: 119152 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+MUL BENCH mode0 MUL_RR_7fff_times_7fff: 117912 clocks / 504 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+PASS MUL benchmarks mode0: 16 workloads, warmup excluded
+tb/tb_eis_mul_bench.v:171: $finish called at 24299736000 (1ps)
+MUL BENCH mode1 MUL_source_mode0: 63600 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_source_mode1: 107992 clocks / 504 instructions, 1000 memory beats, 504 CS, 32128 SPI clocks
+MUL BENCH mode1 MUL_source_mode2: 108968 clocks / 512 instructions, 1016 memory beats, 504 CS, 32384 SPI clocks
+MUL BENCH mode1 MUL_source_mode3: 135504 clocks / 512 instructions, 1264 memory beats, 752 CS, 44288 SPI clocks
+MUL BENCH mode1 MUL_source_mode4: 108968 clocks / 512 instructions, 1016 memory beats, 504 CS, 32384 SPI clocks
+MUL BENCH mode1 MUL_source_mode5: 135256 clocks / 512 instructions, 1264 memory beats, 752 CS, 44288 SPI clocks
+MUL BENCH mode1 MUL_source_mode6: 117664 clocks / 504 instructions, 1248 memory beats, 504 CS, 36096 SPI clocks
+MUL BENCH mode1 MUL_source_mode7: 144200 clocks / 504 instructions, 1496 memory beats, 752 CS, 48000 SPI clocks
+MUL BENCH mode1 MUL_RR_0000_times_8000: 60128 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_0001_times_7fff: 60128 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_0001_times_8000: 60872 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_0002_times_4000: 60624 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_ffff_times_8000: 69056 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_8000_times_8000: 61368 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_ffff_times_ffff: 68560 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode1 MUL_RR_7fff_times_7fff: 67320 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+PASS MUL benchmarks mode1: 16 workloads, warmup excluded
+tb/tb_eis_mul_bench.v:171: $finish called at 16092816000 (1ps)
+MUL BENCH mode2 MUL_source_mode0: 52936 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_source_mode1: 106504 clocks / 504 instructions, 1000 memory beats, 504 CS, 32128 SPI clocks
+MUL BENCH mode2 MUL_source_mode2: 107432 clocks / 512 instructions, 1016 memory beats, 504 CS, 32384 SPI clocks
+MUL BENCH mode2 MUL_source_mode3: 133968 clocks / 512 instructions, 1264 memory beats, 752 CS, 44288 SPI clocks
+MUL BENCH mode2 MUL_source_mode4: 107432 clocks / 512 instructions, 1016 memory beats, 504 CS, 32384 SPI clocks
+MUL BENCH mode2 MUL_source_mode5: 133720 clocks / 512 instructions, 1264 memory beats, 752 CS, 44288 SPI clocks
+MUL BENCH mode2 MUL_source_mode6: 116176 clocks / 504 instructions, 1248 memory beats, 504 CS, 36096 SPI clocks
+MUL BENCH mode2 MUL_source_mode7: 142712 clocks / 504 instructions, 1496 memory beats, 752 CS, 48000 SPI clocks
+MUL BENCH mode2 MUL_RR_0000_times_8000: 49464 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_0001_times_7fff: 49464 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_0001_times_8000: 50208 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_0002_times_4000: 49960 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_ffff_times_8000: 58392 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_8000_times_8000: 50704 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_ffff_times_ffff: 57896 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+MUL BENCH mode2 MUL_RR_7fff_times_7fff: 56656 clocks / 504 instructions, 752 memory beats, 8 CS, 12288 SPI clocks
+PASS MUL benchmarks mode2: 16 workloads, warmup excluded
+tb/tb_eis_mul_bench.v:171: $finish called at 14893746000 (1ps)

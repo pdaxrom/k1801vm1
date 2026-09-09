@@ -1,0 +1,8 @@
+PASS eis_ashc differential mode-1: 28496 DCJ11 cases, 3156428 clocks, 73060 exact bus beats
+tb/tb_trace_bit.v:137: $finish called at 36978616000 (1ps)
+PASS eis_ashc differential mode2: 28496 DCJ11 cases, 10780095 clocks, 73060 exact bus beats
+tb/tb_trace_bit.v:137: $finish called at 113215286000 (1ps)
+PASS ASHC fault differential mode-1: 1024 DCJ11 vector-boundary cases, 35388 clocks, 6280 exact bus beats, 112 repair clocks
+tb/tb_bus_fault.v:133: $finish called at 548536000 (1ps)
+PASS ASHC fault differential mode2: 1024 DCJ11 vector-boundary cases, 640924 clocks, 6280 exact bus beats, 112 repair clocks
+tb/tb_bus_fault.v:133: $finish called at 6603896000 (1ps)

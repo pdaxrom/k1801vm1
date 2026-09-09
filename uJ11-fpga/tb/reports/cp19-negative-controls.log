@@ -1,0 +1,5 @@
+PASS PSW transfer negative: missing-mfps; archived cp18e
+PASS PSW transfer negative: mfps-zero-extends; archived cp19a
+PASS PSW transfer negative: mtps-overwrites-t; archived cp19a
+PASS PSW transfer negative: mtps-old-ipl; archived cp19a
+PASS PSW transfer negative: mfps-flags-before-write; archived cp19a

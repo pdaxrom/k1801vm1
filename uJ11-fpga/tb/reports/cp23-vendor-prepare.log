@@ -1,0 +1,75 @@
+make: Nothing to be done for `all'.
+cc -O2 -Wall -DENABLE_MMU=0 -I.. tb/reference_vectors.c ../core/core.c ../core/hardware.c -lm -o build/reference_vectors
+build/reference_vectors > build/isa_vectors.mem.tmp
+DCJ11 ENABLE_MMU=0: 12928 single-instruction reference vectors; no memory changes/traps
+mv build/isa_vectors.mem.tmp build/isa_vectors.mem
+cc -O2 -Wall -DENABLE_MMU=0 -I.. tb/ea_vectors.c ../core/core.c ../core/hardware.c -lm -o build/ea_vectors
+build/ea_vectors > build/ea-vectors.txt.tmp 2> build/ea-oracle.log
+mv build/ea-vectors.txt.tmp build/ea-vectors.txt
+cc -O2 -Wall -DENABLE_MMU=0 -I.. tb/single_vectors.c ../core/core.c ../core/hardware.c -lm -o build/single_vectors
+build/single_vectors > build/single-vectors.txt.tmp 2> build/single-oracle.log
+mv build/single-vectors.txt.tmp build/single-vectors.txt
+cc -O2 -Wall -DENABLE_MMU=0 -I.. tb/branch_vectors.c ../core/core.c ../core/hardware.c -lm -o build/branch_vectors
+build/branch_vectors > build/branch-vectors.txt.tmp 2> build/branch-oracle.log
+mv build/branch-vectors.txt.tmp build/branch-vectors.txt
+python3 tools/oracle_core.py
+Audited DCJ11 build copy: four address hooks, 0 vector hook; source unchanged
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DENABLE_MMU=0 -I.. -I../core tb/byte_vectors.c build/oracle_core.c ../core/hardware.c -lm -o build/byte_vectors
+build/byte_vectors 5 > build/byte-vectors.txt.tmp 2> build/byte-oracle.log
+mv build/byte-vectors.txt.tmp build/byte-vectors.txt
+cc -O2 -Wall -DBYTE_VARIANT=1 -DORACLE_ACCESS_AUDIT=1 -DENABLE_MMU=0 -I.. -I../core tb/single_vectors.c build/oracle_core.c ../core/hardware.c -lm -o build/single_byte_vectors
+build/single_byte_vectors > build/single_byte-vectors.txt.tmp 2> build/single_byte-oracle.log
+mv build/single_byte-vectors.txt.tmp build/single_byte-vectors.txt
+python3 tools/oracle_core.py --vectors
+Audited DCJ11 build copy: four address hooks, 1 vector hook; source unchanged
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DENABLE_MMU=0 -I.. -I../core tb/control_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/control_vectors
+build/control_vectors > build/control-vectors.txt.tmp 2> build/control-oracle.log
+mv build/control-vectors.txt.tmp build/control-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DENABLE_MMU=0 -I.. -I../core tb/extra_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/extra_vectors
+build/extra_vectors > build/extra-vectors.txt.tmp 2> build/extra-oracle.log
+mv build/extra-vectors.txt.tmp build/extra-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/trap_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/trap_vectors
+build/trap_vectors > build/trap-vectors.txt.tmp 2> build/trap-oracle.log
+mv build/trap-vectors.txt.tmp build/trap-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/irq_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/irq_vectors
+build/irq_vectors > build/irq-vectors.txt.tmp 2> build/irq-oracle.log
+mv build/irq-vectors.txt.tmp build/irq-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/illegal_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/illegal_vectors
+iverilog -g2012 -Wall -s tb_decode -Ptb_decode.EMIT_CANDIDATES=1 -o build/illegal_decode tb/tb_decode.v rtl/uj11_decode.v
+vvp build/illegal_decode
+PASS decoder: all 65536 opcodes, exactly 57456 supported encodings
+tb/tb_decode.v:69: $finish called at 65536000 (1ps)
+build/illegal_vectors > build/illegal-vectors.txt.tmp 2> build/illegal-oracle.log
+mv build/illegal-vectors.txt.tmp build/illegal-vectors.txt
+python3 tools/fault_oracle.py
+Fault audit: four address hooks, vector entry and successful frame boundary; original core unchanged
+cc -O2 -Wall -DENABLE_MMU=0 -I.. -I../core tb/bus_fault_vectors.c build/oracle_fault_core.c ../core/hardware.c -lm -o build/bus_fault_vectors
+build/bus_fault_vectors > build/bus-fault-vectors.txt.tmp 2> build/bus-fault-oracle.log
+mv build/bus-fault-vectors.txt.tmp build/bus-fault-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/trace_bit_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/trace_bit_vectors
+build/trace_bit_vectors > build/trace_bit-vectors.txt.tmp 2> build/trace_bit-oracle.log
+mv build/trace_bit-vectors.txt.tmp build/trace_bit-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/system_flags_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/system_flags_vectors
+build/system_flags_vectors > build/system_flags-vectors.txt.tmp 2> build/system_flags-oracle.log
+mv build/system_flags-vectors.txt.tmp build/system_flags-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DORACLE_PSW_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/psw_transfer_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/psw_transfer_vectors
+build/psw_transfer_vectors > build/psw_transfer-vectors.txt.tmp 2> build/psw_transfer-oracle.log
+mv build/psw_transfer-vectors.txt.tmp build/psw_transfer-vectors.txt
+cc -O2 -Wall -DENABLE_MMU=0 -I.. -I../core tb/psw_transfer_fault_vectors.c build/oracle_fault_core.c ../core/hardware.c -lm -o build/psw_transfer_fault_vectors
+build/psw_transfer_fault_vectors > build/psw-transfer-fault-vectors.txt.tmp 2> build/psw-transfer-fault-oracle.log
+mv build/psw-transfer-fault-vectors.txt.tmp build/psw-transfer-fault-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DORACLE_PSW_PROFILE=1 -DORACLE_RESET_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/system_control_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/system_control_vectors
+build/system_control_vectors > build/system_control-vectors.txt.tmp 2> build/system_control-oracle.log
+mv build/system_control-vectors.txt.tmp build/system_control-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DORACLE_PSW_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/eis_ash_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/eis_ash_vectors
+build/eis_ash_vectors > build/eis_ash-vectors.txt.tmp 2> build/eis_ash-oracle.log
+mv build/eis_ash-vectors.txt.tmp build/eis_ash-vectors.txt
+cc -O2 -Wall -DENABLE_MMU=0 -I.. -I../core tb/eis_ash_fault_vectors.c build/oracle_fault_core.c ../core/hardware.c -lm -o build/eis_ash_fault_vectors
+build/eis_ash_fault_vectors > build/eis-ash-fault-vectors.txt.tmp 2> build/eis-ash-fault-oracle.log
+mv build/eis-ash-fault-vectors.txt.tmp build/eis-ash-fault-vectors.txt
+cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DORACLE_IRQ_PROFILE=1 -DORACLE_TRACE_PROFILE=1 -DORACLE_PSW_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/eis_ashc_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/eis_ashc_vectors
+build/eis_ashc_vectors > build/eis_ashc-vectors.txt.tmp 2> build/eis_ashc-oracle.log
+mv build/eis_ashc-vectors.txt.tmp build/eis_ashc-vectors.txt
+cc -O2 -Wall -DENABLE_MMU=0 -I.. -I../core tb/eis_ashc_fault_vectors.c build/oracle_fault_core.c ../core/hardware.c -lm -o build/eis_ashc_fault_vectors
+build/eis_ashc_fault_vectors > build/eis-ashc-fault-vectors.txt.tmp 2> build/eis-ashc-fault-oracle.log
+mv build/eis-ashc-fault-vectors.txt.tmp build/eis-ashc-fault-vectors.txt

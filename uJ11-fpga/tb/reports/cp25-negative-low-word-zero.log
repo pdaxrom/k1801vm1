@@ -1,0 +1,3 @@
+Archive: cp25a; mutations: [('microcode/m0.uasm', 'alu OR, a=T4, pair=AQ, flags=NZV\n    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF, seq=PAGE, next=MUL_COMMIT', 'alu PASSB, pair=ZQ, flags=NZV\n    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF, seq=PAGE, next=MUL_COMMIT')]
+FATAL: tb/tb_trace_bit.v:121: trace case896 op070002 prePSW0000 upc020 clocks114 beats1/1 flags000d/0009 fault0 IRQ0/0 retires1
+       Time: 1416000  Scope: tb_trace_bit

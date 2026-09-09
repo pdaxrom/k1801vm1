@@ -1,0 +1,14 @@
+build/
+__pycache__/
+*.pyc
+microcode/generated/*
+!microcode/generated/.gitkeep
+synth/machxo2/impl*/
+synth/machxo2/*.log
+synth/machxo2/*.ldf
+!synth/machxo2/uj11-seq.ldf
+synth/machxo2/*.xml
+synth/machxo2/*.html
+!synth/machxo2/*.tcl
+!synth/reports/*/diamond.log
+!tb/reports/*.log

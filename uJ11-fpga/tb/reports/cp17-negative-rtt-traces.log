@@ -1,0 +1,3 @@
+Archived source: cp17a; mutation: ('(psw[4] && !ir[2])', 'psw[4]')
+FATAL: tb/tb_trace_bit.v:73: case9244 op000006 beat3 got wr0 000e:00d5 expected wrxxxx xxxx:xxxx upc3d9
+       Time: 415000  Scope: tb_trace_bit

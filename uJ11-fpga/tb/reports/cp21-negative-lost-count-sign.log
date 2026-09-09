@@ -1,0 +1,3 @@
+Archive: cp21a; mutation: ('imm=63, b=T0', 'imm=31, b=T0')
+FATAL: tb/tb_trace_bit.v:121: trace case8704 op072001 prePSW0000 upc020 clocks10 beats1/1 flags0008/0009 fault0 IRQ0/0 retires1
+       Time: 376000  Scope: tb_trace_bit

@@ -1,0 +1,3 @@
+Archive: cp23c; mutations: []
+FATAL: tb/tb_trace_bit.v:75: case192 op074001 beat1 got wr0 000a:945c expected wrxxxx xxxx:xxxx upc3d9
+       Time: 345000  Scope: tb_trace_bit

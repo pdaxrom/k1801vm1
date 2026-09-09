@@ -1,0 +1,55 @@
+python3 -m unittest discover -s tb -p 'test_*.py' -v
+test_actual_program (test_microasm.AssemblerTests.test_actual_program) ... ok
+test_conflicts (test_microasm.AssemblerTests.test_conflicts) ... ok
+test_control_selectors_are_aligned (test_microasm.AssemblerTests.test_control_selectors_are_aligned) ... ok
+test_invalid_physical_image (test_microasm.AssemblerTests.test_invalid_physical_image) ... ok
+test_page_and_immediate (test_microasm.AssemblerTests.test_page_and_immediate) ... ok
+test_physical_packing_roundtrip (test_microasm.AssemblerTests.test_physical_packing_roundtrip) ... ok
+test_prefetch_policy (test_microasm.AssemblerTests.test_prefetch_policy) ... ok
+test_rr_encoding (test_microasm.AssemblerTests.test_rr_encoding) ... ok
+test_stream_extension (test_microasm.AssemblerTests.test_stream_extension) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.006s
+
+OK
+iverilog -g2012 -Wall -s tb_alu -o build/alu tb/tb_alu.v rtl/uj11_alu.v
+vvp build/alu
+PASS ALU: 66592 independent result/NZVC checks
+tb/tb_alu.v:61: $finish called at 66592000 (1ps)
+iverilog -g2012 -Wall -s tb_datapath -o build/datapath tb/tb_datapath.v rtl/uj11_alu.v rtl/uj11_regfile.v rtl/uj11_datapath.v
+vvp build/datapath
+PASS datapath: 16 RF words, 256 dual reads, 4096 pair checks, BA SUB/BIC writeback, Q/shift/stall/reset
+tb/tb_datapath.v:65: $finish called at 4646000 (1ps)
+python3 microasm/uj11asm.py microcode/memory_test.uasm -o microcode/generated/memory_test.mem
+uJ11: 11/1024 microinstructions, 36 bits, 1.07% occupied
+iverilog -g2012 -Wall -s tb_memory_engine -o build/memory_engine tb/tb_memory_engine.v tb/uj11_ram.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/memory_engine
+PASS memory engine: microcoded word/byte READ/WRITE/MDR, 0..7 waits, exact beat/cycle counts
+tb/tb_memory_engine.v:44: $finish called at 2096000 (1ps)
+python3 microasm/uj11asm.py microcode/m0.uasm -o microcode/generated/m0.mem --list microcode/generated/m0.lst --labels microcode/generated/m0.labels.json --stats microcode/generated/m0.stats.json
+uJ11: 143/1024 microinstructions, 36 bits, 13.96% occupied
+python3 tools/make_ebr.py microcode/generated/m0.mem microcode/generated/uj11_m0_ebr.v
+iverilog -g2012 -Wall -s tb_core -o build/core tb/tb_core.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+vvp build/core
+PASS differential: 6272 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 21952 clocks
+PASS core boundaries: 16-bit PC wrap, CLR/byte/HALT rejection
+tb/tb_core.v:91: $finish called at 1349436000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_core synth/machxo2/uj11_probe_core.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.285 MB sources in 12 modules, into 0.128 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.016 s (elab=0.002, cvt=0.008, bld=0.000); cpu 0.016 s on 1 threads; allocated 12.156 MB
+python3 microasm/uj11asm.py microcode/stream_test.uasm -o microcode/generated/stream_test.mem
+uJ11: 14/1024 microinstructions, 36 bits, 1.37% occupied
+iverilog -g2012 -Wall -s tb_stream_engine -o build/stream_engine tb/tb_stream_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v rtl/uj11_rom.v
+vvp build/stream_engine
+PASS stream engine: opcode+3 extension words, one READ transaction, 226 clocks, 112 SPI clocks incl discarded lookahead
+tb/tb_stream_engine.v:53: $finish called at 9504000 (1ps)
+iverilog -g2012 -Wall -s tb_stream_hint -o build/stream_hint tb/tb_stream_hint.v rtl/uj11_stream.v
+vvp build/stream_hint
+PASS stream hint: 65536 control encodings and ALU rejection
+tb/tb_stream_hint.v:19: $finish called at 131072000 (1ps)
+iverilog -g2012 -Wall -s tb_prefetch_control -o build/prefetch_control tb/tb_prefetch_control.v rtl/uj11_prefetch_control.v
+vvp build/prefetch_control
+PASS prefetch control: pause/resume, inheritance over ALU/immediate, stalls/reset
+tb/tb_prefetch_control.v:20: $finish called at 86000 (1ps)

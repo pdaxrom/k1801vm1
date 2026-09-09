@@ -1,0 +1,282 @@
+; FIS candidate. Only T0..T7, Q, the ordinary ALU and memory port.
+; A=4(RD), B=(RD). RD is unchanged until both result writes succeed.
+; T0:Q=A, T2:T3=B; T4/T5=exponents. Mantissas have six guard bits.
+; T6 keeps original NZVC in bits 3:0 and A/B signs in bits 5/4.
+; T7 is a software loop counter; T1 is scratch (no new hardware counter).
+; Control-store placement is performed by tools/link_fis.py, not hand hex.
+
+FIS_ENTRY:
+    READ, a=RD, target=FIS_B_HIGH, prefetch=0
+FIS_B_HIGH:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF
+    alu ADD, a=RD, pair=AD, d=TWO, b=T1, dst=RF
+    READ, a=T1, target=FIS_B_LOW, prefetch=0
+FIS_B_LOW:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+    READ, a=T1, target=FIS_A_HIGH, prefetch=0
+FIS_A_HIGH:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+    READ, a=T1, target=FIS_A_LOW, prefetch=0
+FIS_A_LOW:
+    alu PASSA, pair=DA, d=MDR, dst=Q
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T1, dst=RF
+    alu AND, a=T1, pair=DA, d=PSW, b=T6, dst=RF
+    alu PASSA, a=T0, flags=NZVC
+    CJUMP, cond=NOT_N, target=FIS_SIGN_B, prefetch=0
+    alu OR, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+FIS_SIGN_B:
+    alu PASSA, a=T2, flags=NZVC
+    CJUMP, cond=NOT_N, target=FIS_EXPONENTS, prefetch=0
+    alu OR, a=T6, pair=AD, d=IMM, imm=16, b=T6, dst=RF
+FIS_EXPONENTS:
+    alu PASSA, a=T0, b=T4, dst=RF
+    alu PASSA, a=T2, b=T5, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=7, b=T7, dst=RF
+FIS_EXP_SHIFT:
+    alu LSR, a=T4, b=T4, dst=RF
+    alu LSR, a=T5, b=T5, dst=RF
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_EXP_SHIFT, prefetch=0
+    alu AND, a=T4, pair=AD, d=IMM, imm=255, b=T4, dst=RF, flags=NZVC
+    CJUMP, cond=Z, target=FIS_A_ZERO, prefetch=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=127, b=T0, dst=RF
+    alu OR, a=T0, pair=AD, d=IMM, imm=128, b=T0, dst=RF
+    JUMP, target=FIS_UNPACK_B, prefetch=0
+FIS_A_ZERO:
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+    alu BIC, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+FIS_UNPACK_B:
+    alu AND, a=T5, pair=AD, d=IMM, imm=255, b=T5, dst=RF, flags=NZVC
+    CJUMP, cond=Z, target=FIS_B_ZERO, prefetch=0
+    alu AND, a=T2, pair=AD, d=IMM, imm=127, b=T2, dst=RF
+    alu OR, a=T2, pair=AD, d=IMM, imm=128, b=T2, dst=RF
+    JUMP, target=FIS_SCALE, prefetch=0
+FIS_B_ZERO:
+    alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T3, dst=RF
+    alu BIC, a=T6, pair=AD, d=IMM, imm=16, b=T6, dst=RF
+FIS_SCALE:
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T7, dst=RF
+FIS_SCALE_LOOP:
+    alu PASSA, a=T0, b=T0, dst=RFQ_L
+    alu LSL, a=T3, b=T3, dst=RF, flags=NZVC
+    alu ROL, a=T2, b=T2, dst=RF
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_SCALE_LOOP, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=32, b=T1, dst=RF
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_MULDIV, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=16, b=T1, dst=RF
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ADD, prefetch=0
+    alu XOR, a=T6, pair=AD, d=IMM, imm=16, b=T6, dst=RF
+
+FIS_ADD:
+    alu AND, a=T6, pair=AD, d=IMM, imm=32, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ADD_SIGN_B, prefetch=0
+    alu SUB, pair=ZQ, dst=Q, flags=NZVC
+    alu SBC, pair=ZB, b=T0, dst=RF
+FIS_ADD_SIGN_B:
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ADD_SORT, prefetch=0
+    alu SUB, pair=ZB, b=T3, dst=RF, flags=NZVC
+    alu SBC, pair=ZB, b=T2, dst=RF
+FIS_ADD_SORT:
+    alu SUB, a=T4, b=T5, flags=NZVC
+    CJUMP, cond=C, target=FIS_ADD_SORTED, prefetch=0
+    alu PASSA, a=T0, b=T1, dst=RF
+    alu PASSA, a=T2, b=T0, dst=RF
+    alu PASSA, a=T1, b=T2, dst=RF
+    alu PASSB, pair=ZQ, b=T1, dst=RF
+    alu PASSA, a=T3, dst=Q
+    alu PASSA, a=T1, b=T3, dst=RF
+    alu PASSA, a=T4, b=T1, dst=RF
+    alu PASSA, a=T5, b=T4, dst=RF
+    alu PASSA, a=T1, b=T5, dst=RF
+FIS_ADD_SORTED:
+    alu SUB, a=T5, b=T4, dst=RF
+    alu PASSA, a=T4, b=T7, dst=RF
+    alu PASSA, a=T5, b=T4, dst=RF
+    alu SUB, a=T7, pair=AD, d=IMM, imm=31, flags=NZVC
+    CJUMP, cond=NOT_C, target=FIS_ADD_TINY, prefetch=0
+    alu PASSA, a=T7, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ADD_COMBINE, prefetch=0
+FIS_ALIGN_LOOP:
+    CJUMP, cond=Q0, target=FIS_ALIGN_JAM, prefetch=0
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+    JUMP, target=FIS_ALIGN_NEXT, prefetch=0
+FIS_ALIGN_JAM:
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+    alu OR, pair=DQ, d=ONE, dst=Q
+FIS_ALIGN_NEXT:
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_ALIGN_LOOP, prefetch=0
+FIS_ADD_COMBINE:
+    alu ADD, a=T3, pair=AQ, dst=Q, flags=NZVC
+    alu ADC, a=T2, b=T0, dst=RF
+    JUMP, target=FIS_ADD_ABS, prefetch=0
+FIS_ADD_TINY:
+    alu PASSA, a=T2, b=T0, dst=RF
+    alu PASSA, a=T3, dst=Q
+FIS_ADD_ABS:
+    alu BIC, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+    alu PASSA, a=T0, flags=NZVC
+    CJUMP, cond=NOT_N, target=FIS_NORMALIZE, prefetch=0
+    alu SUB, pair=ZQ, dst=Q, flags=NZVC
+    alu SBC, pair=ZB, b=T0, dst=RF
+    alu OR, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+    JUMP, target=FIS_NORMALIZE, prefetch=0
+
+FIS_MULDIV:
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC
+    CJUMP, cond=Z, target=FIS_MULDIV_DISPATCH, prefetch=0
+    alu XOR, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+FIS_MULDIV_DISPATCH:
+    alu PASSA, pair=DA, d=IMM, imm=16, b=T1, dst=RF
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_DIV, prefetch=0
+    alu PASSA, a=T4, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+    alu PASSA, a=T5, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+    alu ADD, a=T5, b=T4, dst=RF
+    alu SUB, a=T4, pair=AD, d=IMM, imm=128, b=T4, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T1, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=30, b=T7, dst=RF
+FIS_MUL_LOOP:
+    CJUMP, cond=NOT_Q0, target=FIS_MUL_SHIFT, prefetch=0
+    alu ADD, a=T3, b=T5, dst=RF, flags=NZVC
+    alu ADC, a=T2, b=T1, dst=RF
+FIS_MUL_SHIFT:
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+    alu LSR, a=T1, b=T1, dst=RF, flags=NZVC
+    alu ROR, a=T5, b=T5, dst=RF
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_MUL_LOOP, prefetch=0
+    alu PASSA, a=T1, b=T0, dst=RF
+    alu PASSA, a=T5, dst=Q
+    JUMP, target=FIS_NORMALIZE, prefetch=0
+
+FIS_DIV:
+    alu PASSA, a=T5, flags=NZVC
+    CJUMP, cond=Z, target=FIS_DIVZERO, prefetch=0
+    alu PASSA, a=T4, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+    alu SUB, a=T5, b=T4, pair=BA, dst=RF
+    alu ADD, a=T4, pair=AD, d=IMM, imm=129, b=T4, dst=RF
+    alu PASSB, pair=ZQ, b=T1, dst=RF
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=30, b=T7, dst=RF
+FIS_DIV_LOOP:
+    alu PASSA, a=T5, b=T5, dst=RFQ_L
+    alu SUB, a=T3, b=T1, pair=BA, dst=RF, flags=NZVC
+    alu SBC, a=T2, b=T0, pair=BA, dst=RF, flags=NZVC
+    CJUMP, cond=C, target=FIS_DIV_RESTORE, prefetch=0
+    alu OR, pair=DQ, d=ONE, dst=Q
+    JUMP, target=FIS_DIV_NEXT, prefetch=0
+FIS_DIV_RESTORE:
+    alu ADD, a=T3, b=T1, dst=RF, flags=NZVC
+    alu ADC, a=T2, b=T0, dst=RF
+FIS_DIV_NEXT:
+    alu LSL, a=T1, b=T1, dst=RF, flags=NZVC
+    alu ROL, a=T0, b=T0, dst=RF
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_DIV_LOOP, prefetch=0
+    alu PASSA, a=T5, b=T0, dst=RF
+
+FIS_NORMALIZE:
+    alu OR, a=T0, pair=AQ, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=128, b=T1, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T7, dst=RF
+FIS_MASK_LOOP:
+    alu LSL, a=T1, b=T1, dst=RF
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_MASK_LOOP, prefetch=0
+    alu LSL, a=T1, b=T2, dst=RF
+    alu AND, a=T0, b=T2, flags=NZVC
+    CJUMP, cond=Z, target=FIS_NORMALIZE_LOOP, prefetch=0
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+    alu ADD, a=T4, pair=AD, d=ONE, b=T4, dst=RF
+FIS_NORMALIZE_LOOP:
+    alu AND, a=T0, b=T1, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_ROUND, prefetch=0
+    alu PASSA, a=T0, b=T0, dst=RFQ_L
+    alu SUB, a=T4, pair=AD, d=ONE, b=T4, dst=RF
+    JUMP, target=FIS_NORMALIZE_LOOP, prefetch=0
+FIS_ROUND:
+    alu ADD, pair=DQ, d=IMM, imm=32, dst=Q, flags=NZVC
+    alu ADC, a=T0, pair=AD, d=ZERO, b=T0, dst=RF
+    alu AND, a=T0, b=T2, flags=NZVC
+    CJUMP, cond=Z, target=FIS_RANGE, prefetch=0
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+    alu ADD, a=T4, pair=AD, d=ONE, b=T4, dst=RF
+FIS_RANGE:
+    alu PASSA, a=T4, flags=NZVC
+    CJUMP, cond=N, target=FIS_UNDERFLOW, prefetch=0
+    CJUMP, cond=Z, target=FIS_UNDERFLOW, prefetch=0
+    alu AND, a=T4, pair=AD, d=IMM, imm=255, b=T2, dst=RF
+    alu SUB, a=T4, b=T2, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_OVERFLOW, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T7, dst=RF
+FIS_UNSCALE_LOOP:
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_UNSCALE_LOOP, prefetch=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=127, b=T0, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=7, b=T7, dst=RF
+FIS_PACK_EXP_LOOP:
+    alu LSL, a=T4, b=T4, dst=RF
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=FIS_PACK_EXP_LOOP, prefetch=0
+    alu OR, a=T4, b=T0, dst=RF
+    alu LSL, a=T0, b=T0, dst=RF
+    alu AND, a=T6, pair=AD, d=IMM, imm=32, flags=NZVC
+    CJUMP, cond=Z, target=FIS_PACK_SIGN, prefetch=0
+    alu NOTA, flags=NZVC
+FIS_PACK_SIGN:
+    alu ROR, a=T0, b=T0, dst=RF
+    JUMP, target=FIS_STORE, prefetch=0
+FIS_ZERO:
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+FIS_STORE:
+    alu PASSA, a=T0, flags=NZVC
+    alu PASSA, pair=DA, d=PSW, b=T2, dst=RF
+    alu AND, a=T6, pair=AD, d=IMM, imm=15, b=T6, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T1, dst=RF
+    alu BIC, a=T1, pair=DA, d=PSW, b=T4, dst=RF
+    alu OR, a=T6, b=T4, flags=LOAD
+    alu ADD, a=RD, pair=AD, d=IMM, imm=4, b=T1, dst=RF
+    alu PASSB, pair=ZQ, b=T3, dst=RF
+    WRITE, a=T1, b=T0, target=FIS_STORE_LOW, prefetch=0
+FIS_STORE_LOW:
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+    WRITE, a=T1, b=T3, target=FIS_COMMIT, prefetch=0
+FIS_COMMIT:
+    alu ADD, a=RD, pair=AD, d=IMM, imm=4, b=RD, dst=RF
+    alu PASSA, a=T2, flags=LOAD
+    alu PASSA, seq=FETCH
+
+FIS_UNDERFLOW:
+    alu PASSA, pair=DA, d=IMM, imm=32, b=T1, dst=RF
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=10, b=T2, dst=RF
+    JUMP, target=FIS_ERROR, prefetch=0
+FIS_OVERFLOW:
+    alu PASSA, pair=DA, d=TWO, b=T2, dst=RF
+    JUMP, target=FIS_ERROR, prefetch=0
+FIS_DIVZERO:
+    alu PASSA, pair=DA, d=IMM, imm=11, b=T2, dst=RF
+FIS_ERROR:
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T1, dst=RF
+    alu BIC, a=T1, pair=DA, d=PSW, b=T4, dst=RF
+    alu OR, a=T2, b=T4, flags=LOAD
+    alu PASSA, pair=DA, d=IMM, imm=164, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0

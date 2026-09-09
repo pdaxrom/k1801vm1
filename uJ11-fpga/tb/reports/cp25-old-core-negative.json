@@ -1,0 +1,7 @@
+{
+  "archive": "cp24-verification-source.tgz",
+  "core_sha256": "55a78453d298fb5c08bd96b11e7233a78d20e6fa24f92ad3362ce991e06a3c10",
+  "late_register_bug_rejected": true,
+  "fault_postframe_register_or_psw_changes": 2368,
+  "fault_postframe_extra_bus": 0
+}

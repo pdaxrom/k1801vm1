@@ -1,0 +1,2 @@
+FATAL: tb/tb_bus_fault_system.v:38: IRQ accepted before the expected handler instruction
+       Time: 317955000  Scope: tb_bus_fault_system

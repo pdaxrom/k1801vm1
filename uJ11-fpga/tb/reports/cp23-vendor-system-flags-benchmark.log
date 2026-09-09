@@ -1,0 +1,28 @@
+SYSTEM FLAGS BENCH mode-1 NOP_clear: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 NOP_set: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 CC_all_masks: 1040 clocks / 264 instructions, 264 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 MFPT: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 CC_branch_dependencies: 1024 clocks / 320 instructions, 320 memory beats, 0 CS, 0 SPI clocks
+PASS system flags benchmarks mode-1: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 51536000 (1ps)
+SYSTEM FLAGS BENCH mode0 NOP_clear: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM FLAGS BENCH mode0 NOP_set: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM FLAGS BENCH mode0 CC_all_masks: 28760 clocks / 264 instructions, 264 memory beats, 264 CS, 12672 SPI clocks
+SYSTEM FLAGS BENCH mode0 MFPT: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM FLAGS BENCH mode0 CC_branch_dependencies: 34624 clocks / 320 instructions, 320 memory beats, 320 CS, 15360 SPI clocks
+PASS system flags benchmarks mode0: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 1611836000 (1ps)
+SYSTEM FLAGS BENCH mode1 NOP_clear: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode1 NOP_set: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode1 CC_all_masks: 11352 clocks / 264 instructions, 264 memory beats, 8 CS, 4480 SPI clocks
+SYSTEM FLAGS BENCH mode1 MFPT: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode1 CC_branch_dependencies: 25920 clocks / 320 instructions, 320 memory beats, 192 CS, 11264 SPI clocks
+PASS system flags benchmarks mode1: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 758436000 (1ps)
+SYSTEM FLAGS BENCH mode2 NOP_clear: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode2 NOP_set: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode2 CC_all_masks: 10584 clocks / 264 instructions, 264 memory beats, 8 CS, 4480 SPI clocks
+SYSTEM FLAGS BENCH mode2 MFPT: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode2 CC_branch_dependencies: 25536 clocks / 320 instructions, 320 memory beats, 192 CS, 11264 SPI clocks
+PASS system flags benchmarks mode2: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 726366000 (1ps)

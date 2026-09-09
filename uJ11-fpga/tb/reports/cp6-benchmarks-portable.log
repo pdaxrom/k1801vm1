@@ -1,0 +1,21 @@
+FRAM MOV_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM ADD_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM CMP_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM mixed_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BR_self: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+PASS FRAM benchmarks: actual SPI controller/model, 5 x 512 retirements
+tb/tb_fram_bench.v:76: $finish called at 3082596000 (1ps)
+FRAM MOV_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM ADD_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM CMP_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM mixed_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BR_self: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+PASS FRAM benchmarks: actual SPI controller/model, 5 x 512 retirements
+tb/tb_fram_bench.v:76: $finish called at 1540356000 (1ps)
+FRAM MOV_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM ADD_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM CMP_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM mixed_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BR_self: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+PASS FRAM benchmarks: actual SPI controller/model, 5 x 512 retirements
+tb/tb_fram_bench.v:76: $finish called at 1517676000 (1ps)

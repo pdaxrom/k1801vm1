@@ -4015,6 +4015,14 @@ int __not_in_flash_func(core_step)(regs *r)
         src = (sdword)(sword)r->r[reg];
         DECODE_DST();
         src2 = (sdword)(sword)get_data_word(r, dst_type, dst_offset);
+        if (r->model == DCJ11) {
+            /* J-11 reads R after the S operand and its addressing side effects.
+             * An operand fault must not overwrite the completed trap frame. */
+            if (r->fAbort) {
+                return 0;
+            }
+            src = (sdword)(sword)r->r[reg];
+        }
         prod = src * src2;
 
         r->r[reg] = (word)(((dword)prod >> 16) & 0177777);
@@ -4041,14 +4049,23 @@ int __not_in_flash_func(core_step)(regs *r)
         dividend = (sdword)(((dword)r->r[reg] << 16) | r->r[reg | 1]);
         DECODE_DST();
         divisor = (sdword)(sword)get_data_word(r, dst_type, dst_offset);
+        if (r->model == DCJ11) {
+            /* S is fetched before R:R|1, including addressing side effects.
+             * Do not continue after the operand read completed a trap frame. */
+            if (r->fAbort) {
+                return 0;
+            }
+            dividend = (sdword)(((dword)r->r[reg] << 16) | r->r[reg | 1]);
+        }
 
         if (divisor == 0) {
             /*
-             * Divide by zero does not update registers; keep N/Z consistent
-             * with the unchanged quotient register R.
+             * Divide by zero does not update registers. Legacy models retain
+             * N/Z from R; the DCJ11 profile specifies NZVC=0111.
              */
-            set_flag_if(((sword)r->r[reg]) < 0, FLAG_N);
-            set_flag_if(r->r[reg] == 0, FLAG_Z);
+            /* SIMH's J11/11-70 profile specifies NZVC=0111 here. */
+            set_flag_if(r->model != DCJ11 && ((sword)r->r[reg]) < 0, FLAG_N);
+            set_flag_if(r->model == DCJ11 || r->r[reg] == 0, FLAG_Z);
             set_flag(FLAG_V);
             set_flag(FLAG_C);
             goto step_end;
@@ -4064,7 +4081,7 @@ int __not_in_flash_func(core_step)(regs *r)
 
         q64 = ((int64_t)dividend) / ((int64_t)divisor);
         if (q64 > 077777 || q64 < -0100000) {
-            clear_flag(FLAG_N);
+            set_flag_if(r->model == DCJ11 && q64 < 0, FLAG_N);
             clear_flag(FLAG_Z);
             set_flag(FLAG_V);
             clear_flag(FLAG_C);
@@ -4075,7 +4092,9 @@ int __not_in_flash_func(core_step)(regs *r)
         remainder = dividend - (divisor * quotient);
 
         r->r[reg] = (word)(quotient & 0177777);
-        if ((reg & 1) == 0) {
+        /* DEC requires even R. The DCJ11 software profile follows SIMH's
+         * deterministic odd-R extension: the remainder is written last. */
+        if (r->model == DCJ11 || (reg & 1) == 0) {
             r->r[reg | 1] = (word)(remainder & 0177777);
         }
 
@@ -4102,6 +4121,8 @@ int __not_in_flash_func(core_step)(regs *r)
         src16 = r->r[reg];
         DECODE_DST();
         GET_WORD(shift);
+        /* J-11 reads the count operand before the destination register. */
+        if (r->model == DCJ11) src16 = r->r[reg];
         count = shift & 077;
         sign = (src16 & SIGN) ? 1 : 0;
         src = (dword)(sdword)(sword)src16;
@@ -4150,6 +4171,9 @@ int __not_in_flash_func(core_step)(regs *r)
         src = ((dword)r->r[reg] << 16) | r->r[reg | 1];
         DECODE_DST();
         GET_WORD(shift);
+        /* Snapshot both destination words after count EA side effects. */
+        if (r->model == DCJ11)
+            src = ((dword)r->r[reg] << 16) | r->r[reg | 1];
         count = shift & 077;
         sign = (r->r[reg] & SIGN) ? 1 : 0;
 
@@ -4175,8 +4199,14 @@ int __not_in_flash_func(core_step)(regs *r)
         r->r[reg] = (word)((dst >> 16) & 0177777);
         r->r[reg | 1] = (word)(dst & 0177777);
 
-        set_flag_if(r->r[reg] & SIGN, FLAG_N);
-        set_flag_if((r->r[reg] | r->r[reg | 1]) == 0, FLAG_Z);
+        /* NZ describe the 32-bit result, including when the stores alias. */
+        if (r->model == DCJ11) {
+            set_flag_if(dst & 0x80000000u, FLAG_N);
+            set_flag_if(dst == 0, FLAG_Z);
+        } else {
+            set_flag_if(r->r[reg] & SIGN, FLAG_N);
+            set_flag_if((r->r[reg] | r->r[reg | 1]) == 0, FLAG_Z);
+        }
 
         goto step_end;
     }

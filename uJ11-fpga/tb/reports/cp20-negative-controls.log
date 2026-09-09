@@ -1,0 +1,6 @@
+PASS system control negative: missing-reset; archived cp19a
+PASS system control negative: unregistered-reset; archived cp20a
+PASS system control negative: reset-no-pulse; archived cp20c
+PASS system control negative: halt-common-trap; archived cp20c
+PASS system control negative: halt-odd-pc; archived cp20c
+PASS system control negative: halt-wrong-psw; archived cp20c

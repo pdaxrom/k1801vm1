@@ -1,0 +1,2007 @@
+{
+  "date": "2026-09-09",
+  "clock_hz_nominal": 29560000,
+  "spi_divider": 1,
+  "method": "Functional RTL simulation with portable and vendor DP8KC; no board measurement.",
+  "runs_each_rom_model": 986,
+  "cp21_benchmark_runs": 890,
+  "cp21_benchmark_runs_unchanged": 871,
+  "cp21_ash_prefetch_benchmark_changes": [
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_register_count0",
+      "before": {
+        "workload": "ASH_register_count0",
+        "instructions": 256,
+        "microclocks": 10280,
+        "memory_beats": 256,
+        "spi_transactions": 8,
+        "spi_clocks": 4352
+      },
+      "after": {
+        "workload": "ASH_register_count0",
+        "instructions": 256,
+        "microclocks": 10776,
+        "memory_beats": 256,
+        "spi_transactions": 8,
+        "spi_clocks": 4352
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_register_count1",
+      "before": {
+        "workload": "ASH_register_count1",
+        "instructions": 256,
+        "microclocks": 10280,
+        "memory_beats": 256,
+        "spi_transactions": 8,
+        "spi_clocks": 4352
+      },
+      "after": {
+        "workload": "ASH_register_count1",
+        "instructions": 256,
+        "microclocks": 10776,
+        "memory_beats": 256,
+        "spi_transactions": 8,
+        "spi_clocks": 4352
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_register_count63",
+      "before": {
+        "workload": "ASH_register_count63",
+        "instructions": 256,
+        "microclocks": 10280,
+        "memory_beats": 256,
+        "spi_transactions": 8,
+        "spi_clocks": 4352
+      },
+      "after": {
+        "workload": "ASH_register_count63",
+        "instructions": 256,
+        "microclocks": 10776,
+        "memory_beats": 256,
+        "spi_transactions": 8,
+        "spi_clocks": 4352
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count0",
+      "before": {
+        "workload": "ASH_immediate_count0",
+        "instructions": 256,
+        "microclocks": 63848,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count0",
+        "instructions": 256,
+        "microclocks": 56408,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count1",
+      "before": {
+        "workload": "ASH_immediate_count1",
+        "instructions": 256,
+        "microclocks": 66328,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count1",
+        "instructions": 256,
+        "microclocks": 58888,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count15",
+      "before": {
+        "workload": "ASH_immediate_count15",
+        "instructions": 256,
+        "microclocks": 80216,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count15",
+        "instructions": 256,
+        "microclocks": 72776,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count16",
+      "before": {
+        "workload": "ASH_immediate_count16",
+        "instructions": 256,
+        "microclocks": 81208,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count16",
+        "instructions": 256,
+        "microclocks": 73768,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count31",
+      "before": {
+        "workload": "ASH_immediate_count31",
+        "instructions": 256,
+        "microclocks": 96088,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count31",
+        "instructions": 256,
+        "microclocks": 88648,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count32",
+      "before": {
+        "workload": "ASH_immediate_count32",
+        "instructions": 256,
+        "microclocks": 88400,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count32",
+        "instructions": 256,
+        "microclocks": 80960,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count33",
+      "before": {
+        "workload": "ASH_immediate_count33",
+        "instructions": 256,
+        "microclocks": 87656,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count33",
+        "instructions": 256,
+        "microclocks": 80216,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_immediate_count63",
+      "before": {
+        "workload": "ASH_immediate_count63",
+        "instructions": 256,
+        "microclocks": 65336,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_immediate_count63",
+        "instructions": 256,
+        "microclocks": 57896,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count0",
+      "before": {
+        "workload": "ASH_memory_count0",
+        "instructions": 256,
+        "microclocks": 63848,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count0",
+        "instructions": 256,
+        "microclocks": 56160,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count1",
+      "before": {
+        "workload": "ASH_memory_count1",
+        "instructions": 256,
+        "microclocks": 66328,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count1",
+        "instructions": 256,
+        "microclocks": 58640,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count15",
+      "before": {
+        "workload": "ASH_memory_count15",
+        "instructions": 256,
+        "microclocks": 80216,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count15",
+        "instructions": 256,
+        "microclocks": 72528,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count16",
+      "before": {
+        "workload": "ASH_memory_count16",
+        "instructions": 256,
+        "microclocks": 81208,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count16",
+        "instructions": 256,
+        "microclocks": 73520,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count31",
+      "before": {
+        "workload": "ASH_memory_count31",
+        "instructions": 256,
+        "microclocks": 96088,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count31",
+        "instructions": 256,
+        "microclocks": 88400,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count32",
+      "before": {
+        "workload": "ASH_memory_count32",
+        "instructions": 256,
+        "microclocks": 88400,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count32",
+        "instructions": 256,
+        "microclocks": 80712,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count33",
+      "before": {
+        "workload": "ASH_memory_count33",
+        "instructions": 256,
+        "microclocks": 87656,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count33",
+        "instructions": 256,
+        "microclocks": 79968,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    },
+    {
+      "stem": "eis-ash-benchmarks-2",
+      "workload": "ASH_memory_count63",
+      "before": {
+        "workload": "ASH_memory_count63",
+        "instructions": 256,
+        "microclocks": 65336,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 28160
+      },
+      "after": {
+        "workload": "ASH_memory_count63",
+        "instructions": 256,
+        "microclocks": 57648,
+        "memory_beats": 504,
+        "spi_transactions": 504,
+        "spi_clocks": 24192
+      }
+    }
+  ],
+  "ash_fault_timing_changes": {
+    "ram": {
+      "changed_cases": 408,
+      "old_microclocks": 35180,
+      "microclocks": 34772,
+      "minimum_delta": -1,
+      "maximum_delta": 0,
+      "all_non_cycle_columns_unchanged": true
+    },
+    "fram": {
+      "changed_cases": 1024,
+      "old_microclocks": 651680,
+      "microclocks": 640308,
+      "minimum_delta": -34,
+      "maximum_delta": 8,
+      "all_non_cycle_columns_unchanged": true
+    }
+  },
+  "ashc": [
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count0",
+      "instructions": 256,
+      "microclocks": 5224,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 20.40625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 1448575.8039816234
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count1",
+      "instructions": 256,
+      "microclocks": 7208,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 28.15625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 1049855.7158712542
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count15",
+      "instructions": 256,
+      "microclocks": 24568,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 95.96875,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 308016.93259524583
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count16",
+      "instructions": 256,
+      "microclocks": 25808,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 100.8125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 293217.6069435834
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count31",
+      "instructions": 256,
+      "microclocks": 44408,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 173.46875,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 170405.3323725455
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count32",
+      "instructions": 256,
+      "microclocks": 45896,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 179.28125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 164880.59961652433
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count33",
+      "instructions": 256,
+      "microclocks": 44656,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 174.4375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 169458.97527767826
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_register_count63",
+      "instructions": 256,
+      "microclocks": 7456,
+      "memory_beats": 256,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 29.125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 1014935.6223175966
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count0",
+      "instructions": 256,
+      "microclocks": 6216,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 24.28125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 1217400.2574002575
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count1",
+      "instructions": 256,
+      "microclocks": 8200,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 32.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 922848.7804878049
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count15",
+      "instructions": 256,
+      "microclocks": 25560,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 99.84375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 296062.59780907666
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count16",
+      "instructions": 256,
+      "microclocks": 26800,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 104.6875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 282364.17910447763
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count31",
+      "instructions": 256,
+      "microclocks": 45400,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 177.34375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 166681.93832599118
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count32",
+      "instructions": 256,
+      "microclocks": 46888,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 183.15625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 161392.25388159018
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count33",
+      "instructions": 256,
+      "microclocks": 45648,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 178.3125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 165776.37574483
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_immediate_count63",
+      "instructions": 256,
+      "microclocks": 8448,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 33.0,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 895757.5757575758
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count0",
+      "instructions": 256,
+      "microclocks": 5968,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 23.3125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 1267989.2761394102
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count1",
+      "instructions": 256,
+      "microclocks": 7952,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 31.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 951629.7786720322
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count15",
+      "instructions": 256,
+      "microclocks": 25312,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 98.875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 298963.33754740836
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count16",
+      "instructions": 256,
+      "microclocks": 26552,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 103.71875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 285001.5064778548
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count31",
+      "instructions": 256,
+      "microclocks": 45152,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 176.375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 167597.44861800142
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count32",
+      "instructions": 256,
+      "microclocks": 46640,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 182.1875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 162250.42881646656
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count33",
+      "instructions": 256,
+      "microclocks": 45400,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 177.34375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 166681.93832599118
+    },
+    {
+      "memory_mode": -1,
+      "memory_model": "ideal_ram",
+      "workload": "ASHC_memory_count63",
+      "instructions": 256,
+      "microclocks": 8200,
+      "memory_beats": 504,
+      "spi_transactions": 0,
+      "spi_clocks": 0,
+      "microclocks_per_instruction": 32.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 922848.7804878049
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count0",
+      "instructions": 256,
+      "microclocks": 32104,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 125.40625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 235713.92972838276
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count1",
+      "instructions": 256,
+      "microclocks": 34088,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 133.15625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 221994.8368927482
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count15",
+      "instructions": 256,
+      "microclocks": 51448,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 200.96875,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 147087.54470533354
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count16",
+      "instructions": 256,
+      "microclocks": 52688,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 205.8125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 143625.8730640753
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count31",
+      "instructions": 256,
+      "microclocks": 71288,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 278.46875,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 106151.94703175851
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count32",
+      "instructions": 256,
+      "microclocks": 72776,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 284.28125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 103981.53237330988
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count33",
+      "instructions": 256,
+      "microclocks": 71536,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 279.4375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 105783.94095280698
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_register_count63",
+      "instructions": 256,
+      "microclocks": 34336,
+      "memory_beats": 256,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "microclocks_per_instruction": 134.125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 220391.4259086673
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count0",
+      "instructions": 256,
+      "microclocks": 59136,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 231.0,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 127965.36796536797
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count1",
+      "instructions": 256,
+      "microclocks": 61120,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 238.75,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123811.51832460733
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count15",
+      "instructions": 256,
+      "microclocks": 78480,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 306.5625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 96424.05708460754
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count16",
+      "instructions": 256,
+      "microclocks": 79720,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 311.40625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 94924.23482187657
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count31",
+      "instructions": 256,
+      "microclocks": 98320,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 384.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76966.639544345
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count32",
+      "instructions": 256,
+      "microclocks": 99808,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 389.875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 75819.17281179865
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count33",
+      "instructions": 256,
+      "microclocks": 98568,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 385.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76772.98920542163
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_immediate_count63",
+      "instructions": 256,
+      "microclocks": 61368,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 239.71875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123311.17194629123
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count0",
+      "instructions": 256,
+      "microclocks": 58888,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 230.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 128504.27930987638
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count1",
+      "instructions": 256,
+      "microclocks": 60872,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 237.78125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 124315.94164804836
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count15",
+      "instructions": 256,
+      "microclocks": 78232,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 305.59375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 96729.72696594744
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count16",
+      "instructions": 256,
+      "microclocks": 79472,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 310.4375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 95220.45500301993
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count31",
+      "instructions": 256,
+      "microclocks": 98072,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 383.09375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 77161.26927155559
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count32",
+      "instructions": 256,
+      "microclocks": 99560,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 388.90625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76008.03535556448
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count33",
+      "instructions": 256,
+      "microclocks": 98320,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 384.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76966.639544345
+    },
+    {
+      "memory_mode": 0,
+      "memory_model": "legacy_fram",
+      "workload": "ASHC_memory_count63",
+      "instructions": 256,
+      "microclocks": 61120,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 238.75,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123811.51832460733
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count0",
+      "instructions": 256,
+      "microclocks": 15240,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 59.53125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 496545.9317585302
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count1",
+      "instructions": 256,
+      "microclocks": 17224,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 67.28125,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 439349.74454249884
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count15",
+      "instructions": 256,
+      "microclocks": 34584,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 135.09375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 218811.01087207958
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count16",
+      "instructions": 256,
+      "microclocks": 35824,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 139.9375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 211237.15944618132
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count31",
+      "instructions": 256,
+      "microclocks": 54424,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 212.59375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 139044.53917389386
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count32",
+      "instructions": 256,
+      "microclocks": 55912,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 218.40625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 135344.112176277
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count33",
+      "instructions": 256,
+      "microclocks": 54672,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 213.5625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 138413.81328650864
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_register_count63",
+      "instructions": 256,
+      "microclocks": 17472,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 68.25,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 433113.5531135531
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count0",
+      "instructions": 256,
+      "microclocks": 59136,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 231.0,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 127965.36796536797
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count1",
+      "instructions": 256,
+      "microclocks": 61120,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 238.75,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123811.51832460733
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count15",
+      "instructions": 256,
+      "microclocks": 78480,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 306.5625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 96424.05708460754
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count16",
+      "instructions": 256,
+      "microclocks": 79720,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 311.40625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 94924.23482187657
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count31",
+      "instructions": 256,
+      "microclocks": 98320,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 384.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76966.639544345
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count32",
+      "instructions": 256,
+      "microclocks": 99808,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 389.875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 75819.17281179865
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count33",
+      "instructions": 256,
+      "microclocks": 98568,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 385.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76772.98920542163
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_immediate_count63",
+      "instructions": 256,
+      "microclocks": 61368,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 239.71875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123311.17194629123
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count0",
+      "instructions": 256,
+      "microclocks": 58888,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 230.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 128504.27930987638
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count1",
+      "instructions": 256,
+      "microclocks": 60872,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 237.78125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 124315.94164804836
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count15",
+      "instructions": 256,
+      "microclocks": 78232,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 305.59375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 96729.72696594744
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count16",
+      "instructions": 256,
+      "microclocks": 79472,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 310.4375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 95220.45500301993
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count31",
+      "instructions": 256,
+      "microclocks": 98072,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 383.09375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 77161.26927155559
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count32",
+      "instructions": 256,
+      "microclocks": 99560,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 388.90625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76008.03535556448
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count33",
+      "instructions": 256,
+      "microclocks": 98320,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 384.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76966.639544345
+    },
+    {
+      "memory_mode": 1,
+      "memory_model": "sequential_fram",
+      "workload": "ASHC_memory_count63",
+      "instructions": 256,
+      "microclocks": 61120,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 238.75,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123811.51832460733
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count0",
+      "instructions": 256,
+      "microclocks": 10776,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 42.09375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 702242.0193021529
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count1",
+      "instructions": 256,
+      "microclocks": 10776,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 42.09375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 702242.0193021529
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count15",
+      "instructions": 256,
+      "microclocks": 25408,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 99.25,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 297833.7531486146
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count16",
+      "instructions": 256,
+      "microclocks": 26648,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 104.09375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 283974.78234764334
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count31",
+      "instructions": 256,
+      "microclocks": 45248,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 176.75,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 167241.86704384725
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count32",
+      "instructions": 256,
+      "microclocks": 46736,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 182.5625,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 161917.1516603903
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count33",
+      "instructions": 256,
+      "microclocks": 45496,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 177.71875,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 166330.2268331282
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_register_count63",
+      "instructions": 256,
+      "microclocks": 10776,
+      "memory_beats": 256,
+      "spi_transactions": 8,
+      "spi_clocks": 4352,
+      "microclocks_per_instruction": 42.09375,
+      "memory_beats_per_instruction": 1.0,
+      "calculated_ips_at_29_56_mhz": 702242.0193021529
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count0",
+      "instructions": 256,
+      "microclocks": 59136,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 231.0,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 127965.36796536797
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count1",
+      "instructions": 256,
+      "microclocks": 61120,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 238.75,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123811.51832460733
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count15",
+      "instructions": 256,
+      "microclocks": 78480,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 306.5625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 96424.05708460754
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count16",
+      "instructions": 256,
+      "microclocks": 79720,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 311.40625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 94924.23482187657
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count31",
+      "instructions": 256,
+      "microclocks": 98320,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 384.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76966.639544345
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count32",
+      "instructions": 256,
+      "microclocks": 99808,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 389.875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 75819.17281179865
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count33",
+      "instructions": 256,
+      "microclocks": 98568,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 385.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76772.98920542163
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_immediate_count63",
+      "instructions": 256,
+      "microclocks": 61368,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 239.71875,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123311.17194629123
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count0",
+      "instructions": 256,
+      "microclocks": 58888,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 230.03125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 128504.27930987638
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count1",
+      "instructions": 256,
+      "microclocks": 60872,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 237.78125,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 124315.94164804836
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count15",
+      "instructions": 256,
+      "microclocks": 78232,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 305.59375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 96729.72696594744
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count16",
+      "instructions": 256,
+      "microclocks": 79472,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 310.4375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 95220.45500301993
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count31",
+      "instructions": 256,
+      "microclocks": 98072,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 383.09375,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 77161.26927155559
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count32",
+      "instructions": 256,
+      "microclocks": 99560,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 388.90625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76008.03535556448
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count33",
+      "instructions": 256,
+      "microclocks": 98320,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 384.0625,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 76966.639544345
+    },
+    {
+      "memory_mode": 2,
+      "memory_model": "prefetch_fram",
+      "workload": "ASHC_memory_count63",
+      "instructions": 256,
+      "microclocks": 61120,
+      "memory_beats": 504,
+      "spi_transactions": 504,
+      "spi_clocks": 24192,
+      "microclocks_per_instruction": 238.75,
+      "memory_beats_per_instruction": 1.96875,
+      "calculated_ips_at_29_56_mhz": 123811.51832460733
+    }
+  ],
+  "standalone_ideal_clocks_including_fetch": {
+    "0": 21,
+    "1": 29,
+    "2": 34,
+    "3": 39,
+    "4": 44,
+    "5": 49,
+    "6": 54,
+    "7": 59,
+    "8": 64,
+    "9": 69,
+    "10": 74,
+    "11": 79,
+    "12": 84,
+    "13": 89,
+    "14": 94,
+    "15": 99,
+    "16": 104,
+    "17": 109,
+    "18": 114,
+    "19": 119,
+    "20": 124,
+    "21": 129,
+    "22": 134,
+    "23": 139,
+    "24": 144,
+    "25": 149,
+    "26": 154,
+    "27": 159,
+    "28": 164,
+    "29": 169,
+    "30": 174,
+    "31": 179,
+    "32": 185,
+    "33": 180,
+    "34": 175,
+    "35": 170,
+    "36": 165,
+    "37": 160,
+    "38": 155,
+    "39": 150,
+    "40": 145,
+    "41": 140,
+    "42": 135,
+    "43": 130,
+    "44": 125,
+    "45": 120,
+    "46": 115,
+    "47": 110,
+    "48": 105,
+    "49": 100,
+    "50": 95,
+    "51": 90,
+    "52": 85,
+    "53": 80,
+    "54": 75,
+    "55": 70,
+    "56": 65,
+    "57": 60,
+    "58": 55,
+    "59": 50,
+    "60": 45,
+    "61": 40,
+    "62": 35,
+    "63": 30
+  },
+  "differential_cycles": {
+    "ea": {
+      "ram": {
+        "cases": 31671,
+        "microclocks": 948247,
+        "memory_beats": 137006,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 31671,
+        "microclocks": 14739672,
+        "memory_beats": 137006,
+        "portable_vendor_equal": true
+      }
+    },
+    "single": {
+      "ram": {
+        "cases": 7080,
+        "microclocks": 99242,
+        "memory_beats": 19588,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 7080,
+        "microclocks": 2035650,
+        "memory_beats": 19588,
+        "portable_vendor_equal": true
+      }
+    },
+    "branch": {
+      "ram": {
+        "cases": 7440,
+        "microclocks": 35464,
+        "memory_beats": 7440,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 7440,
+        "microclocks": 805504,
+        "memory_beats": 7440,
+        "portable_vendor_equal": true
+      }
+    },
+    "byte": {
+      "ram": {
+        "cases": 23954,
+        "microclocks": 683191,
+        "memory_beats": 98606,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 23954,
+        "microclocks": 9773277,
+        "memory_beats": 98606,
+        "portable_vendor_equal": true
+      }
+    },
+    "single_byte": {
+      "ram": {
+        "cases": 7104,
+        "microclocks": 99696,
+        "memory_beats": 19680,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 7104,
+        "microclocks": 1884432,
+        "memory_beats": 19680,
+        "portable_vendor_equal": true
+      }
+    },
+    "control": {
+      "ram": {
+        "cases": 14814,
+        "microclocks": 172788,
+        "memory_beats": 30956,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 14814,
+        "microclocks": 3326690,
+        "memory_beats": 30956,
+        "portable_vendor_equal": true
+      }
+    },
+    "extra": {
+      "ram": {
+        "cases": 4524,
+        "microclocks": 58385,
+        "memory_beats": 9762,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 4524,
+        "microclocks": 1161566,
+        "memory_beats": 9762,
+        "portable_vendor_equal": true
+      }
+    },
+    "trap": {
+      "ram": {
+        "cases": 4640,
+        "microclocks": 101008,
+        "memory_beats": 21088,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 4640,
+        "microclocks": 2523744,
+        "memory_beats": 21088,
+        "portable_vendor_equal": true
+      }
+    },
+    "irq": {
+      "ram": {
+        "cases": 6654,
+        "microclocks": 101315,
+        "memory_beats": 18678,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 6654,
+        "microclocks": 2160254,
+        "memory_beats": 18678,
+        "portable_vendor_equal": true
+      }
+    },
+    "illegal": {
+      "ram": {
+        "cases": 4160,
+        "microclocks": 101920,
+        "memory_beats": 20800,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 4160,
+        "microclocks": 2533440,
+        "memory_beats": 20800,
+        "portable_vendor_equal": true
+      }
+    },
+    "bus-fault": {
+      "ram": {
+        "cases": 32780,
+        "microclocks": 1179328,
+        "memory_beats": 213080,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 32780,
+        "microclocks": 20896206,
+        "memory_beats": 213080,
+        "portable_vendor_equal": true
+      }
+    },
+    "trace_bit": {
+      "ram": {
+        "cases": 11196,
+        "microclocks": 328315,
+        "memory_beats": 58965,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 11196,
+        "microclocks": 6684208,
+        "memory_beats": 58965,
+        "portable_vendor_equal": true
+      }
+    },
+    "system_flags": {
+      "ram": {
+        "cases": 21120,
+        "microclocks": 421120,
+        "memory_beats": 75504,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 21120,
+        "microclocks": 9099624,
+        "memory_beats": 75504,
+        "portable_vendor_equal": true
+      }
+    },
+    "psw_transfer": {
+      "ram": {
+        "cases": 12852,
+        "microclocks": 355470,
+        "memory_beats": 54492,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 12852,
+        "microclocks": 6370712,
+        "memory_beats": 54492,
+        "portable_vendor_equal": true
+      }
+    },
+    "psw-transfer-fault": {
+      "ram": {
+        "cases": 1008,
+        "microclocks": 33840,
+        "memory_beats": 6336,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 1008,
+        "microclocks": 615848,
+        "memory_beats": 6336,
+        "portable_vendor_equal": true
+      }
+    },
+    "system_control": {
+      "ram": {
+        "cases": 6144,
+        "microclocks": 137216,
+        "memory_beats": 26368,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 6144,
+        "microclocks": 3055232,
+        "memory_beats": 26368,
+        "portable_vendor_equal": true
+      }
+    },
+    "eis-ash-fault": {
+      "ram": {
+        "cases": 1024,
+        "microclocks": 34772,
+        "memory_beats": 6280,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 1024,
+        "microclocks": 640308,
+        "memory_beats": 6280,
+        "portable_vendor_equal": true
+      }
+    },
+    "eis_ash": {
+      "ram": {
+        "cases": 26328,
+        "microclocks": 2051168,
+        "memory_beats": 70388,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 26328,
+        "microclocks": 9407067,
+        "memory_beats": 70388,
+        "portable_vendor_equal": true
+      }
+    },
+    "eis_ashc": {
+      "ram": {
+        "cases": 28496,
+        "microclocks": 3156428,
+        "memory_beats": 73060,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 28496,
+        "microclocks": 10780095,
+        "memory_beats": 73060,
+        "portable_vendor_equal": true
+      }
+    },
+    "eis-ashc-fault": {
+      "ram": {
+        "cases": 1024,
+        "microclocks": 35388,
+        "memory_beats": 6280,
+        "portable_vendor_equal": true
+      },
+      "fram": {
+        "cases": 1024,
+        "microclocks": 640924,
+        "memory_beats": 6280,
+        "portable_vendor_equal": true
+      }
+    }
+  }
+}

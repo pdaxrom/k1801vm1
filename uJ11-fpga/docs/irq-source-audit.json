@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-09",
+  "sources": {
+    "core/core.c": {
+      "sha256": "0eb9117e7f8fe0e1e6ed77190db86b22219bcc840e90f24f06f2081f73eb1525"
+    },
+    "lsi11/dev_kw11.c": {
+      "sha256": "a934916f3236aabca693e6af2ec821ffcf4227013c8d9564b35a364f89e01bf4"
+    },
+    "lsi11/dev_dl11.c": {
+      "sha256": "1bbb98a2e0569a222547c860b94563cca3bd98c12bb86caff1737c1668fa477a"
+    },
+    "uJ11-fpga/reference/lsi11/am4_cpu11_bus.v": {
+      "sha256": "67d8607e98139c7cae95635d07c0da55fce2ec1d9a70a2da5c066a31f03530c3"
+    },
+    "uJ11-fpga/reference/lsi11/wbc_uart_xo2.v": {
+      "sha256": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b"
+    }
+  },
+  "facts": {
+    "kw11_l": {
+      "priority": 6,
+      "vector_octal": "100"
+    },
+    "kl11_rx": {
+      "priority": 4,
+      "vector_octal": "60"
+    },
+    "kl11_tx": {
+      "priority": 4,
+      "vector_octal": "64"
+    },
+    "reset_psw_octal": "340",
+    "profile": "kernel bank0, T=0, ENABLE_MMU=0"
+  }
+}

@@ -1,0 +1,34 @@
+test -f "build/vendor/DP8KC.v"
+iverilog -g2012 -DVENDOR_ROM -s tb_rom -o build/vendor_rom tb/tb_rom.v microcode/generated/uj11_rom_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_rom
+PASS ROM: all 1024 words and 1024 enable holds
+tb/tb_rom.v:29: $finish called at 20576000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_control_store -o build/vendor_store tb/tb_control_store.v rtl/uj11_microseq.v microcode/generated/uj11_rom_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_store
+PASS control store: 17 transitions, no sequencing bubbles, stalls preserve uIR alignment
+tb/tb_control_store.v:43: $finish called at 606000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_engine -o build/vendor_engine tb/tb_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_engine
+PASS engine: RF reset, fetch waits, single-cycle ADD, odd/bus/unsupported stops
+tb/tb_engine.v:73: $finish called at 756000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_memory_engine -o build/vendor_memory_engine tb/tb_memory_engine.v tb/uj11_ram.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_memory_test_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_memory_engine
+PASS memory engine: microcoded word/byte READ/WRITE/MDR, 0..7 waits, exact beat/cycle counts
+tb/tb_memory_engine.v:44: $finish called at 2096000 (1ps)
+cc -O2 -Wall -DENABLE_MMU=0 -I.. tb/reference_vectors.c ../core/core.c ../core/hardware.c -lm -o build/reference_vectors
+build/reference_vectors > build/isa_vectors.mem.tmp
+DCJ11 ENABLE_MMU=0: 12928 single-instruction reference vectors; no memory changes/traps
+mv build/isa_vectors.mem.tmp build/isa_vectors.mem
+iverilog -g2012 -DVENDOR_ROM -s tb_core -o build/vendor_core tb/tb_core.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_core
+PASS differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 45248 clocks
+PASS core boundaries: 16-bit PC wrap
+tb/tb_core.v:76: $finish called at 2779816000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_core_fram -o build/vendor_core_fram tb/tb_core_fram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_core_fram
+PASS FRAM differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 1383296 clocks
+tb/tb_core_fram.v:84: $finish called at 16160096000 (1ps)
+iverilog -g2012 -DVENDOR_ROM -s tb_stream_engine -o build/vendor_stream_engine tb/tb_stream_engine.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_fram_system.v rtl/uj11_fram_baseline.v rtl/uj11_fram_transport.v rtl/uj11_prefetch.v rtl/uj11_stream.v rtl/uj11_prefetch_control.v reference/lsi11/spi_fram_guest_ram.v reference/lsi11/spi_fram_model.v microcode/generated/uj11_stream_test_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
+vvp build/vendor_stream_engine
+PASS stream engine: opcode+3 extension words, one READ transaction, 226 clocks, 112 SPI clocks incl discarded lookahead
+tb/tb_stream_engine.v:53: $finish called at 9504000 (1ps)

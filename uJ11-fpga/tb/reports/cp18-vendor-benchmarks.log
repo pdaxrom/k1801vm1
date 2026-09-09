@@ -1,0 +1,864 @@
+iverilog -g2012 -DVENDOR_ROM -s tb_bench -o build/vendor_bench tb/tb_bench.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v" "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/GSR.v" "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/PUR.v"
+vvp build/vendor_bench
+BENCH MOV_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH MOV_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH MOV_RR_loop wait=2: 14433 clocks / 4096 instructions, 4096 memory cycles
+BENCH ADD_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH ADD_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH ADD_RR_loop wait=2: 14348 clocks / 4096 instructions, 4096 memory cycles
+BENCH CMP_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH CMP_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH CMP_RR_loop wait=2: 14452 clocks / 4096 instructions, 4096 memory cycles
+BENCH mixed_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH mixed_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH mixed_RR_loop wait=2: 14370 clocks / 4096 instructions, 4096 memory cycles
+BENCH BR_self wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BR_self wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BR_self wait=2: 14374 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIT_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIT_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIT_RR_loop wait=2: 14298 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIC_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIC_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIC_RR_loop wait=2: 14365 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIS_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIS_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIS_RR_loop wait=2: 14311 clocks / 4096 instructions, 4096 memory cycles
+BENCH SUB_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH SUB_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH SUB_RR_loop wait=2: 14365 clocks / 4096 instructions, 4096 memory cycles
+PASS benchmarks: 27 runs, 4096 measured instructions/run, warmup excluded
+tb/tb_bench.v:97: $finish called at 3564516000 (1ps)
+FRAM MOV_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM ADD_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM CMP_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM mixed_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BR_self: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BIT_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BIC_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BIS_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM SUB_RR_loop: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+PASS FRAM benchmarks: actual SPI controller/model, 9 x 512 retirements
+tb/tb_fram_bench.v:81: $finish called at 5548596000 (1ps)
+FRAM MOV_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM ADD_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM CMP_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM mixed_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BR_self: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BIT_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BIC_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BIS_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM SUB_RR_loop: 20512 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+PASS FRAM benchmarks: actual SPI controller/model, 9 x 512 retirements
+tb/tb_fram_bench.v:81: $finish called at 2464116000 (1ps)
+FRAM MOV_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM ADD_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM CMP_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM mixed_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BR_self: 54784 clocks / 512 instructions, 512 CS transactions, 24576 SCK rises
+FRAM BIT_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BIC_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM BIS_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+FRAM SUB_RR_loop: 20008 clocks / 512 instructions, 8 CS transactions, 8448 SCK rises
+PASS FRAM benchmarks: actual SPI controller/model, 9 x 512 retirements
+tb/tb_fram_bench.v:81: $finish called at 2418756000 (1ps)
+EA BENCH mode-1 MOV_mem_reg: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_reg_mem: 4232 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_mem_mem: 4728 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 ADD_mem_reg: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 ADD_reg_mem: 5224 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 CMP_mem_mem: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_immediate_reg: 4232 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_indexed_reg: 4480 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_mem_indexed: 5224 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_indexed_indexed: 5968 clocks / 256 instructions, 1248 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_autoinc_autoinc: 5472 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_stack_push: 4480 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_absolute_absolute: 6464 clocks / 256 instructions, 1248 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIT_mem_reg: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIT_reg_mem: 4480 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIT_mem_mem: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIC_mem_reg: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIC_reg_mem: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIC_mem_mem: 5472 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIS_mem_reg: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIS_reg_mem: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIS_mem_mem: 5472 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 SUB_mem_reg: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 SUB_reg_mem: 5224 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 SUB_mem_mem: 5720 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+PASS ea benchmarks mode-1: 25 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 1345506000 (1ps)
+EA BENCH mode0 MOV_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 MOV_reg_mem: 61368 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EA BENCH mode0 MOV_mem_mem: 87904 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode0 ADD_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 ADD_reg_mem: 88400 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode0 CMP_mem_mem: 83936 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode0 MOV_immediate_reg: 57152 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 MOV_indexed_reg: 83440 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode0 MOV_mem_indexed: 114440 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode0 MOV_indexed_indexed: 141224 clocks / 256 instructions, 1248 memory beats, 1496 CS, 61888 SPI clocks
+EA BENCH mode0 MOV_autoinc_autoinc: 88648 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode0 MOV_stack_push: 61616 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EA BENCH mode0 MOV_absolute_absolute: 141720 clocks / 256 instructions, 1248 memory beats, 1496 CS, 61888 SPI clocks
+EA BENCH mode0 BIT_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 BIT_reg_mem: 57400 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 BIT_mem_mem: 83936 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode0 BIC_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 BIC_reg_mem: 88152 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode0 BIC_mem_mem: 114688 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode0 BIS_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 BIS_reg_mem: 88152 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode0 BIS_mem_mem: 114688 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode0 SUB_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode0 SUB_reg_mem: 88400 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode0 SUB_mem_mem: 114936 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+PASS ea benchmarks mode0: 25 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 23631126000 (1ps)
+EA BENCH mode1 MOV_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 MOV_reg_mem: 61368 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EA BENCH mode1 MOV_mem_mem: 87904 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode1 ADD_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 ADD_reg_mem: 88400 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode1 CMP_mem_mem: 83936 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode1 MOV_immediate_reg: 23424 clocks / 256 instructions, 504 memory beats, 8 CS, 8320 SPI clocks
+EA BENCH mode1 MOV_indexed_reg: 66576 clocks / 256 instructions, 752 memory beats, 504 CS, 28160 SPI clocks
+EA BENCH mode1 MOV_mem_indexed: 114440 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode1 MOV_indexed_indexed: 124360 clocks / 256 instructions, 1248 memory beats, 1248 CS, 53952 SPI clocks
+EA BENCH mode1 MOV_autoinc_autoinc: 88648 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode1 MOV_stack_push: 61616 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EA BENCH mode1 MOV_absolute_absolute: 124856 clocks / 256 instructions, 1248 memory beats, 1248 CS, 53952 SPI clocks
+EA BENCH mode1 BIT_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 BIT_reg_mem: 57400 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 BIT_mem_mem: 83936 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode1 BIC_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 BIC_reg_mem: 88152 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode1 BIC_mem_mem: 114688 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode1 BIS_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 BIS_reg_mem: 88152 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode1 BIS_mem_mem: 114688 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode1 SUB_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode1 SUB_reg_mem: 88400 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode1 SUB_mem_mem: 114936 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+PASS ea benchmarks mode1: 25 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 22682526000 (1ps)
+EA BENCH mode2 MOV_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 MOV_reg_mem: 61368 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EA BENCH mode2 MOV_mem_mem: 87904 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode2 ADD_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 ADD_reg_mem: 88400 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode2 CMP_mem_mem: 83936 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode2 MOV_immediate_reg: 21936 clocks / 256 instructions, 504 memory beats, 8 CS, 8320 SPI clocks
+EA BENCH mode2 MOV_indexed_reg: 66576 clocks / 256 instructions, 752 memory beats, 504 CS, 28160 SPI clocks
+EA BENCH mode2 MOV_mem_indexed: 114440 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode2 MOV_indexed_indexed: 124360 clocks / 256 instructions, 1248 memory beats, 1248 CS, 53952 SPI clocks
+EA BENCH mode2 MOV_autoinc_autoinc: 88648 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode2 MOV_stack_push: 61616 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EA BENCH mode2 MOV_absolute_absolute: 124856 clocks / 256 instructions, 1248 memory beats, 1248 CS, 53952 SPI clocks
+EA BENCH mode2 BIT_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 BIT_reg_mem: 57400 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 BIT_mem_mem: 83936 clocks / 256 instructions, 752 memory beats, 752 CS, 36096 SPI clocks
+EA BENCH mode2 BIC_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 BIC_reg_mem: 88152 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode2 BIC_mem_mem: 114688 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode2 BIS_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 BIS_reg_mem: 88152 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode2 BIS_mem_mem: 114688 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode2 SUB_mem_reg: 56656 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+EA BENCH mode2 SUB_reg_mem: 88400 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EA BENCH mode2 SUB_mem_mem: 114936 clocks / 256 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+PASS ea benchmarks mode2: 25 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 22665786000 (1ps)
+CP9 BENCH mode-1 CLR_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 COM_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 INC_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 DEC_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 NEG_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ADC_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 SBC_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 TST_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ROR_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ROL_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASR_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASL_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 CLR_mem: 2496 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 COM_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 INC_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 DEC_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 NEG_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ADC_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 SBC_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 TST_mem: 2248 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ROR_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ROL_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASR_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASL_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_1_taken_forward: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_2_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_2_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_3_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_3_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_4_not_taken: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_4_taken_forward: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_5_not_taken: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_5_taken_forward: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_6_not_taken: 1256 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_6_taken_forward: 1256 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_7_not_taken: 1256 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_7_taken_forward: 1256 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_8_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_8_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_9_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_9_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_10_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_10_taken_forward: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_11_not_taken: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_11_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_12_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_12_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_13_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_13_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_14_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_14_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_15_not_taken: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_15_taken_forward: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_1_taken_self: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_2_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_3_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_4_taken_self: 1024 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_5_taken_self: 1024 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_6_taken_self: 1280 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_7_taken_self: 1280 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_8_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_9_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_10_taken_self: 1024 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_11_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_12_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_13_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_14_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 branch_15_taken_self: 768 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 countdown_MOV_16_DEC_BNE_BR: 792 clocks / 272 instructions, 280 memory beats, 0 CS, 0 SPI clocks
+PASS cp9 benchmarks mode-1: 69 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 881856000 (1ps)
+CP9 BENCH mode0 CLR_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 COM_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 INC_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 DEC_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 NEG_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ADC_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 SBC_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 TST_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ROR_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ROL_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ASR_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ASL_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 CLR_mem: 59632 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+CP9 BENCH mode0 COM_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 INC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 DEC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 NEG_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 ADC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 SBC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 TST_mem: 55168 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+CP9 BENCH mode0 ROR_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 ROL_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 ASR_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 ASL_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode0 branch_1_taken_forward: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_2_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_2_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_3_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_3_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_4_not_taken: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_4_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_5_not_taken: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_5_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_6_not_taken: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_6_taken_forward: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_7_not_taken: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_7_taken_forward: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_8_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_8_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_9_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_9_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_10_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_10_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_11_not_taken: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_11_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_12_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_12_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_13_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_13_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_14_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_14_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_15_not_taken: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_15_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_1_taken_self: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_2_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_3_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_4_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_5_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_6_taken_self: 28160 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_7_taken_self: 28160 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_8_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_9_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_10_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_11_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_12_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_13_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_14_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 branch_15_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 countdown_MOV_16_DEC_BNE_BR: 30192 clocks / 272 instructions, 280 memory beats, 280 CS, 13440 SPI clocks
+PASS cp9 benchmarks mode0: 69 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 28254186000 (1ps)
+CP9 BENCH mode1 CLR_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 COM_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 INC_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 DEC_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 NEG_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ADC_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 SBC_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 TST_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ROR_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ROL_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ASR_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ASL_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 CLR_mem: 59632 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+CP9 BENCH mode1 COM_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 INC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 DEC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 NEG_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 ADC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 SBC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 TST_mem: 55168 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+CP9 BENCH mode1 ROR_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 ROL_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 ASR_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 ASL_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode1 branch_1_taken_forward: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_2_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_2_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_3_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_3_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_4_not_taken: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_4_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_5_not_taken: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_5_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_6_not_taken: 11272 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_6_taken_forward: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_7_not_taken: 11272 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_7_taken_forward: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_8_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_8_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_9_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_9_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_10_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_10_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_11_not_taken: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_11_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_12_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_12_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_13_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_13_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_14_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_14_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_15_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 branch_15_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_1_taken_self: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_2_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_3_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_4_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_5_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_6_taken_self: 28160 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_7_taken_self: 28160 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_8_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_9_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_10_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_11_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_12_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_13_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_14_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 branch_15_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode1 countdown_MOV_16_DEC_BNE_BR: 19856 clocks / 272 instructions, 280 memory beats, 128 CS, 8576 SPI clocks
+PASS cp9 benchmarks mode1: 69 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 23205186000 (1ps)
+CP9 BENCH mode2 CLR_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 COM_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 INC_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 DEC_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 NEG_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ADC_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 SBC_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 TST_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ROR_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ROL_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ASR_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ASL_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 CLR_mem: 59632 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+CP9 BENCH mode2 COM_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 INC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 DEC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 NEG_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 ADC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 SBC_mem: 86168 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 TST_mem: 55168 clocks / 256 instructions, 504 memory beats, 504 CS, 24192 SPI clocks
+CP9 BENCH mode2 ROR_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 ROL_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 ASR_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 ASL_mem: 85920 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+CP9 BENCH mode2 branch_1_taken_forward: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_2_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_2_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_3_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_3_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_4_not_taken: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_4_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_5_not_taken: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_5_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_6_not_taken: 11272 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_6_taken_forward: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_7_not_taken: 11272 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_7_taken_forward: 28136 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_8_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_8_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_9_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_9_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_10_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_10_taken_forward: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_11_not_taken: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_11_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_12_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_12_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_13_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_13_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_14_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_14_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_15_not_taken: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 branch_15_taken_forward: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_1_taken_self: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_2_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_3_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_4_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_5_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_6_taken_self: 28160 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_7_taken_self: 28160 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_8_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_9_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_10_taken_self: 27904 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_11_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_12_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_13_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_14_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 branch_15_taken_self: 27648 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode2 countdown_MOV_16_DEC_BNE_BR: 19680 clocks / 272 instructions, 280 memory beats, 128 CS, 8576 SPI clocks
+PASS cp9 benchmarks mode2: 69 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 23169726000 (1ps)
+EA BENCH mode-1 MOV_mem_reg_byte: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_reg_mem_byte: 4232 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_mem_mem_byte: 4728 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 CMP_mem_mem_byte: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_immediate_reg_byte: 4232 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_indexed_reg_byte: 4480 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_mem_indexed_byte: 5224 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_indexed_indexed_byte: 5968 clocks / 256 instructions, 1248 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_autoinc_autoinc_byte: 5472 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_stack_push_byte: 4480 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 MOV_absolute_absolute_byte: 6464 clocks / 256 instructions, 1248 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIT_mem_reg_byte: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIT_reg_mem_byte: 4480 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIT_mem_mem_byte: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIC_mem_reg_byte: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIC_reg_mem_byte: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIC_mem_mem_byte: 5472 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIS_mem_reg_byte: 3736 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIS_reg_mem_byte: 4976 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EA BENCH mode-1 BIS_mem_mem_byte: 5472 clocks / 256 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+PASS byte benchmarks mode-1: 20 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 1078656000 (1ps)
+EA BENCH mode0 MOV_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode0 MOV_reg_mem_byte: 57152 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+EA BENCH mode0 MOV_mem_mem_byte: 79472 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode0 CMP_mem_mem_byte: 75504 clocks / 256 instructions, 752 memory beats, 752 CS, 32128 SPI clocks
+EA BENCH mode0 MOV_immediate_reg_byte: 52936 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode0 MOV_indexed_reg_byte: 79224 clocks / 256 instructions, 752 memory beats, 752 CS, 34112 SPI clocks
+EA BENCH mode0 MOV_mem_indexed_byte: 106008 clocks / 256 instructions, 1000 memory beats, 1248 CS, 46016 SPI clocks
+EA BENCH mode0 MOV_indexed_indexed_byte: 132792 clocks / 256 instructions, 1248 memory beats, 1496 CS, 57920 SPI clocks
+EA BENCH mode0 MOV_autoinc_autoinc_byte: 80216 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode0 MOV_stack_push_byte: 57400 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+EA BENCH mode0 MOV_absolute_absolute_byte: 133288 clocks / 256 instructions, 1248 memory beats, 1496 CS, 57920 SPI clocks
+EA BENCH mode0 BIT_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode0 BIT_reg_mem_byte: 53184 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode0 BIT_mem_mem_byte: 75504 clocks / 256 instructions, 752 memory beats, 752 CS, 32128 SPI clocks
+EA BENCH mode0 BIC_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode0 BIC_reg_mem_byte: 79720 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode0 BIC_mem_mem_byte: 102040 clocks / 256 instructions, 1000 memory beats, 1248 CS, 44032 SPI clocks
+EA BENCH mode0 BIS_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode0 BIS_reg_mem_byte: 79720 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode0 BIS_mem_mem_byte: 102040 clocks / 256 instructions, 1000 memory beats, 1248 CS, 44032 SPI clocks
+PASS byte benchmarks mode0: 20 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 17508246000 (1ps)
+EA BENCH mode1 MOV_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode1 MOV_reg_mem_byte: 57152 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+EA BENCH mode1 MOV_mem_mem_byte: 79472 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode1 CMP_mem_mem_byte: 75504 clocks / 256 instructions, 752 memory beats, 752 CS, 32128 SPI clocks
+EA BENCH mode1 MOV_immediate_reg_byte: 23424 clocks / 256 instructions, 504 memory beats, 8 CS, 8320 SPI clocks
+EA BENCH mode1 MOV_indexed_reg_byte: 62360 clocks / 256 instructions, 752 memory beats, 504 CS, 26176 SPI clocks
+EA BENCH mode1 MOV_mem_indexed_byte: 106008 clocks / 256 instructions, 1000 memory beats, 1248 CS, 46016 SPI clocks
+EA BENCH mode1 MOV_indexed_indexed_byte: 115928 clocks / 256 instructions, 1248 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode1 MOV_autoinc_autoinc_byte: 80216 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode1 MOV_stack_push_byte: 57400 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+EA BENCH mode1 MOV_absolute_absolute_byte: 116424 clocks / 256 instructions, 1248 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode1 BIT_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode1 BIT_reg_mem_byte: 53184 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode1 BIT_mem_mem_byte: 75504 clocks / 256 instructions, 752 memory beats, 752 CS, 32128 SPI clocks
+EA BENCH mode1 BIC_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode1 BIC_reg_mem_byte: 79720 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode1 BIC_mem_mem_byte: 102040 clocks / 256 instructions, 1000 memory beats, 1248 CS, 44032 SPI clocks
+EA BENCH mode1 BIS_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode1 BIS_reg_mem_byte: 79720 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode1 BIS_mem_mem_byte: 102040 clocks / 256 instructions, 1000 memory beats, 1248 CS, 44032 SPI clocks
+PASS byte benchmarks mode1: 20 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 16607076000 (1ps)
+EA BENCH mode2 MOV_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode2 MOV_reg_mem_byte: 57152 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+EA BENCH mode2 MOV_mem_mem_byte: 79472 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode2 CMP_mem_mem_byte: 75504 clocks / 256 instructions, 752 memory beats, 752 CS, 32128 SPI clocks
+EA BENCH mode2 MOV_immediate_reg_byte: 21936 clocks / 256 instructions, 504 memory beats, 8 CS, 8320 SPI clocks
+EA BENCH mode2 MOV_indexed_reg_byte: 62360 clocks / 256 instructions, 752 memory beats, 504 CS, 26176 SPI clocks
+EA BENCH mode2 MOV_mem_indexed_byte: 106008 clocks / 256 instructions, 1000 memory beats, 1248 CS, 46016 SPI clocks
+EA BENCH mode2 MOV_indexed_indexed_byte: 115928 clocks / 256 instructions, 1248 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode2 MOV_autoinc_autoinc_byte: 80216 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode2 MOV_stack_push_byte: 57400 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+EA BENCH mode2 MOV_absolute_absolute_byte: 116424 clocks / 256 instructions, 1248 memory beats, 1248 CS, 49984 SPI clocks
+EA BENCH mode2 BIT_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode2 BIT_reg_mem_byte: 53184 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode2 BIT_mem_mem_byte: 75504 clocks / 256 instructions, 752 memory beats, 752 CS, 32128 SPI clocks
+EA BENCH mode2 BIC_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode2 BIC_reg_mem_byte: 79720 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode2 BIC_mem_mem_byte: 102040 clocks / 256 instructions, 1000 memory beats, 1248 CS, 44032 SPI clocks
+EA BENCH mode2 BIS_mem_reg_byte: 52440 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+EA BENCH mode2 BIS_reg_mem_byte: 79720 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+EA BENCH mode2 BIS_mem_mem_byte: 102040 clocks / 256 instructions, 1000 memory beats, 1248 CS, 44032 SPI clocks
+PASS byte benchmarks mode2: 20 loops x 256 retirements, 32 warmup excluded
+tb/tb_ea_bench.v:155: $finish called at 16590336000 (1ps)
+CP9 BENCH mode-1 CLRB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 COMB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 INCB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 DECB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 NEGB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ADCB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 SBCB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 TSTB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 RORB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ROLB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASRB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASLB_reg: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 CLRB_mem: 2496 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 COMB_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 INCB_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 DECB_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 NEGB_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ADCB_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 SBCB_mem: 2992 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 TSTB_mem: 2248 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 RORB_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ROLB_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASRB_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+CP9 BENCH mode-1 ASLB_mem: 2744 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+PASS single-byte benchmarks mode-1: 24 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 449556000 (1ps)
+CP9 BENCH mode0 CLRB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 COMB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 INCB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 DECB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 NEGB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ADCB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 SBCB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 TSTB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 RORB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ROLB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ASRB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 ASLB_reg: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CP9 BENCH mode0 CLRB_mem: 55416 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+CP9 BENCH mode0 COMB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 INCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 DECB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 NEGB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 ADCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 SBCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 TSTB_mem: 50952 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+CP9 BENCH mode0 RORB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 ROLB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 ASRB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode0 ASLB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+PASS single-byte benchmarks mode0: 24 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 13630326000 (1ps)
+CP9 BENCH mode1 CLRB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 COMB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 INCB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 DECB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 NEGB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ADCB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 SBCB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 TSTB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 RORB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ROLB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ASRB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 ASLB_reg: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode1 CLRB_mem: 55416 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+CP9 BENCH mode1 COMB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 INCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 DECB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 NEGB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 ADCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 SBCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 TSTB_mem: 50952 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+CP9 BENCH mode1 RORB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 ROLB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 ASRB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode1 ASLB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+PASS single-byte benchmarks mode1: 24 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 11353686000 (1ps)
+CP9 BENCH mode2 CLRB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 COMB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 INCB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 DECB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 NEGB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ADCB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 SBCB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 TSTB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 RORB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ROLB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ASRB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 ASLB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+CP9 BENCH mode2 CLRB_mem: 55416 clocks / 256 instructions, 504 memory beats, 752 CS, 24192 SPI clocks
+CP9 BENCH mode2 COMB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 INCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 DECB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 NEGB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 ADCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 SBCB_mem: 77736 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 TSTB_mem: 50952 clocks / 256 instructions, 504 memory beats, 504 CS, 22208 SPI clocks
+CP9 BENCH mode2 RORB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 ROLB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 ASRB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+CP9 BENCH mode2 ASLB_mem: 77488 clocks / 256 instructions, 752 memory beats, 1000 CS, 34112 SPI clocks
+PASS single-byte benchmarks mode2: 24 workloads, warmup excluded
+tb/tb_cp9_bench.v:161: $finish called at 11320206000 (1ps)
+CONTROL BENCH mode-1 JMP_indirect_self: 1792 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 JMP_absolute_self: 2560 clocks / 256 instructions, 512 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 JSR_R5_RTS: 2176 clocks / 384 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 JSR_PC_absolute_RTS: 2560 clocks / 384 instructions, 768 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 nested_JSR_R5_R4: 2048 clocks / 320 instructions, 576 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 SOB_countdown_16: 2112 clocks / 576 instructions, 608 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 stack_31_push_31_pop: 8696 clocks / 504 instructions, 1000 memory beats, 0 CS, 0 SPI clocks
+CONTROL BENCH mode-1 program_sum_1_to_16: 944 clocks / 296 instructions, 328 memory beats, 0 CS, 0 SPI clocks
+PASS control benchmarks mode-1: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 243986000 (1ps)
+CONTROL BENCH mode0 JMP_indirect_self: 28672 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CONTROL BENCH mode0 JMP_absolute_self: 56320 clocks / 256 instructions, 512 memory beats, 512 CS, 24576 SPI clocks
+CONTROL BENCH mode0 JSR_R5_RTS: 71552 clocks / 384 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+CONTROL BENCH mode0 JSR_PC_absolute_RTS: 85376 clocks / 384 instructions, 768 memory beats, 896 CS, 37888 SPI clocks
+CONTROL BENCH mode0 nested_JSR_R5_R4: 64704 clocks / 320 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+CONTROL BENCH mode0 SOB_countdown_16: 65952 clocks / 576 instructions, 608 memory beats, 608 CS, 29184 SPI clocks
+CONTROL BENCH mode0 stack_31_push_31_pop: 117912 clocks / 504 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+CONTROL BENCH mode0 program_sum_1_to_16: 35520 clocks / 296 instructions, 328 memory beats, 336 CS, 15808 SPI clocks
+PASS control benchmarks mode0: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 5499706000 (1ps)
+CONTROL BENCH mode1 JMP_indirect_self: 28672 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CONTROL BENCH mode1 JMP_absolute_self: 38912 clocks / 256 instructions, 512 memory beats, 256 CS, 16384 SPI clocks
+CONTROL BENCH mode1 JSR_R5_RTS: 71552 clocks / 384 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+CONTROL BENCH mode1 JSR_PC_absolute_RTS: 76672 clocks / 384 instructions, 768 memory beats, 768 CS, 33792 SPI clocks
+CONTROL BENCH mode1 nested_JSR_R5_R4: 64704 clocks / 320 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+CONTROL BENCH mode1 SOB_countdown_16: 59424 clocks / 576 instructions, 608 memory beats, 512 CS, 26112 SPI clocks
+CONTROL BENCH mode1 stack_31_push_31_pop: 117912 clocks / 504 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+CONTROL BENCH mode1 program_sum_1_to_16: 24096 clocks / 296 instructions, 328 memory beats, 168 CS, 10432 SPI clocks
+PASS control benchmarks mode1: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 5041386000 (1ps)
+CONTROL BENCH mode2 JMP_indirect_self: 28672 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+CONTROL BENCH mode2 JMP_absolute_self: 38912 clocks / 256 instructions, 512 memory beats, 256 CS, 16384 SPI clocks
+CONTROL BENCH mode2 JSR_R5_RTS: 71552 clocks / 384 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+CONTROL BENCH mode2 JSR_PC_absolute_RTS: 76672 clocks / 384 instructions, 768 memory beats, 768 CS, 33792 SPI clocks
+CONTROL BENCH mode2 nested_JSR_R5_R4: 64704 clocks / 320 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+CONTROL BENCH mode2 SOB_countdown_16: 59232 clocks / 576 instructions, 608 memory beats, 512 CS, 26112 SPI clocks
+CONTROL BENCH mode2 stack_31_push_31_pop: 117912 clocks / 504 instructions, 1000 memory beats, 1248 CS, 49984 SPI clocks
+CONTROL BENCH mode2 program_sum_1_to_16: 23912 clocks / 296 instructions, 328 memory beats, 168 CS, 10432 SPI clocks
+PASS control benchmarks mode2: 8 workloads, warmup excluded
+tb/tb_control_bench.v:150: $finish called at 5037336000 (1ps)
+EXTRA BENCH mode-1 SWAB_reg: 4976 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+EXTRA BENCH mode-1 SWAB_mem: 6216 clocks / 256 instructions, 752 memory beats, 0 CS, 0 SPI clocks
+EXTRA BENCH mode-1 SXT_reg_positive: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+EXTRA BENCH mode-1 SXT_reg_negative: 760 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+EXTRA BENCH mode-1 SXT_mem_positive: 2744 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EXTRA BENCH mode-1 SXT_mem_negative: 2744 clocks / 256 instructions, 504 memory beats, 0 CS, 0 SPI clocks
+EXTRA BENCH mode-1 MARK_inline_pop: 2688 clocks / 256 instructions, 448 memory beats, 0 CS, 0 SPI clocks
+PASS extra benchmarks mode-1: 7 workloads, warmup excluded
+tb/tb_extra_bench.v:128: $finish called at 233406000 (1ps)
+EXTRA BENCH mode0 SWAB_reg: 31856 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+EXTRA BENCH mode0 SWAB_mem: 89392 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EXTRA BENCH mode0 SXT_reg_positive: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+EXTRA BENCH mode0 SXT_reg_negative: 27640 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+EXTRA BENCH mode0 SXT_mem_positive: 59880 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EXTRA BENCH mode0 SXT_mem_negative: 59880 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EXTRA BENCH mode0 MARK_inline_pop: 49728 clocks / 256 instructions, 448 memory beats, 448 CS, 21504 SPI clocks
+PASS extra benchmarks mode0: 7 workloads, warmup excluded
+tb/tb_extra_bench.v:128: $finish called at 3839646000 (1ps)
+EXTRA BENCH mode1 SWAB_reg: 14992 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+EXTRA BENCH mode1 SWAB_mem: 89392 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EXTRA BENCH mode1 SXT_reg_positive: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+EXTRA BENCH mode1 SXT_reg_negative: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+EXTRA BENCH mode1 SXT_mem_positive: 59880 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EXTRA BENCH mode1 SXT_mem_negative: 59880 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EXTRA BENCH mode1 MARK_inline_pop: 32320 clocks / 256 instructions, 448 memory beats, 192 CS, 13312 SPI clocks
+PASS extra benchmarks mode1: 7 workloads, warmup excluded
+tb/tb_extra_bench.v:128: $finish called at 3093686000 (1ps)
+EXTRA BENCH mode2 SWAB_reg: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+EXTRA BENCH mode2 SWAB_mem: 89392 clocks / 256 instructions, 752 memory beats, 1000 CS, 38080 SPI clocks
+EXTRA BENCH mode2 SXT_reg_positive: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+EXTRA BENCH mode2 SXT_reg_negative: 10776 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+EXTRA BENCH mode2 SXT_mem_positive: 59880 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EXTRA BENCH mode2 SXT_mem_negative: 59880 clocks / 256 instructions, 504 memory beats, 752 CS, 26176 SPI clocks
+EXTRA BENCH mode2 MARK_inline_pop: 33856 clocks / 256 instructions, 448 memory beats, 192 CS, 14336 SPI clocks
+PASS extra benchmarks mode2: 7 workloads, warmup excluded
+tb/tb_extra_bench.v:128: $finish called at 3056276000 (1ps)
+TRAP BENCH mode-1 BPT_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 IOT_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 EMT_377_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 TRAP_377_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 nested_BPT_IOT_RTI: 3328 clocks / 320 instructions, 1088 memory beats, 0 CS, 0 SPI clocks
+TRAP BENCH mode-1 MOV_SP_RTI: 3200 clocks / 256 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+PASS trap benchmarks mode-1: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 206546000 (1ps)
+TRAP BENCH mode0 BPT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 IOT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 EMT_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 TRAP_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode0 nested_BPT_IOT_RTI: 121920 clocks / 320 instructions, 1088 memory beats, 1344 CS, 54272 SPI clocks
+TRAP BENCH mode0 MOV_SP_RTI: 70400 clocks / 256 instructions, 640 memory beats, 640 CS, 30720 SPI clocks
+PASS trap benchmarks mode0: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 7139886000 (1ps)
+TRAP BENCH mode1 BPT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 IOT_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 EMT_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 TRAP_377_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+TRAP BENCH mode1 nested_BPT_IOT_RTI: 121920 clocks / 320 instructions, 1088 memory beats, 1344 CS, 54272 SPI clocks
+TRAP BENCH mode1 MOV_SP_RTI: 52992 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trap benchmarks mode1: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 6964446000 (1ps)
+TRAP BENCH mode2 BPT_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 IOT_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 EMT_377_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 TRAP_377_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+TRAP BENCH mode2 nested_BPT_IOT_RTI: 126144 clocks / 320 instructions, 1088 memory beats, 1344 CS, 56320 SPI clocks
+TRAP BENCH mode2 MOV_SP_RTI: 52224 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trap benchmarks mode2: 6 workloads, warmup excluded
+tb/tb_trap_bench.v:122: $finish called at 7169886000 (1ps)
+IRQ BENCH mode-1 SPL_levels: 2112 clocks / 288 instructions, 288 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 WAIT_IRQ_RTI: 1792 clocks / 192 instructions, 576 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 ADD_IRQ_RTI: 1792 clocks / 192 instructions, 576 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 MOV_mem_IRQ_RTI: 2624 clocks / 192 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 MOV_store_IRQ_RTI: 2752 clocks / 192 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 nested_IRQ_RTI: 3328 clocks / 256 instructions, 1024 memory beats, 0 CS, 0 SPI clocks
+PASS irq benchmarks mode-1: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 147756000 (1ps)
+IRQ BENCH mode0 SPL_levels: 32352 clocks / 288 instructions, 288 memory beats, 288 CS, 13824 SPI clocks
+IRQ BENCH mode0 WAIT_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode0 ADD_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode0 MOV_mem_IRQ_RTI: 72000 clocks / 192 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+IRQ BENCH mode0 MOV_store_IRQ_RTI: 73216 clocks / 192 instructions, 640 memory beats, 832 CS, 32256 SPI clocks
+IRQ BENCH mode0 nested_IRQ_RTI: 115200 clocks / 256 instructions, 1024 memory beats, 1280 CS, 51200 SPI clocks
+PASS irq benchmarks mode0: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 4288756000 (1ps)
+IRQ BENCH mode1 SPL_levels: 14944 clocks / 288 instructions, 288 memory beats, 32 CS, 5632 SPI clocks
+IRQ BENCH mode1 WAIT_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode1 ADD_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode1 MOV_mem_IRQ_RTI: 72000 clocks / 192 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+IRQ BENCH mode1 MOV_store_IRQ_RTI: 73216 clocks / 192 instructions, 640 memory beats, 832 CS, 32256 SPI clocks
+IRQ BENCH mode1 nested_IRQ_RTI: 115200 clocks / 256 instructions, 1024 memory beats, 1280 CS, 51200 SPI clocks
+PASS irq benchmarks mode1: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 4109236000 (1ps)
+IRQ BENCH mode2 SPL_levels: 13152 clocks / 288 instructions, 288 memory beats, 32 CS, 5632 SPI clocks
+IRQ BENCH mode2 WAIT_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode2 ADD_IRQ_RTI: 66496 clocks / 192 instructions, 576 memory beats, 704 CS, 29696 SPI clocks
+IRQ BENCH mode2 MOV_mem_IRQ_RTI: 72000 clocks / 192 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+IRQ BENCH mode2 MOV_store_IRQ_RTI: 73216 clocks / 192 instructions, 640 memory beats, 832 CS, 32256 SPI clocks
+IRQ BENCH mode2 nested_IRQ_RTI: 117248 clocks / 256 instructions, 1024 memory beats, 1280 CS, 52224 SPI clocks
+PASS irq benchmarks mode2: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 4132356000 (1ps)
+ILLEGAL BENCH mode-1 reserved_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+ILLEGAL BENCH mode-1 invalid_JMP_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+ILLEGAL BENCH mode-1 invalid_JSR_RTI: 3456 clocks / 384 instructions, 1152 memory beats, 0 CS, 0 SPI clocks
+PASS illegal benchmarks mode-1: 3 workloads, warmup excluded
+tb/tb_illegal_bench.v:110: $finish called at 105126000 (1ps)
+ILLEGAL BENCH mode0 reserved_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+ILLEGAL BENCH mode0 invalid_JMP_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+ILLEGAL BENCH mode0 invalid_JSR_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+PASS illegal benchmarks mode0: 3 workloads, warmup excluded
+tb/tb_illegal_bench.v:110: $finish called at 3893856000 (1ps)
+ILLEGAL BENCH mode1 reserved_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+ILLEGAL BENCH mode1 invalid_JMP_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+ILLEGAL BENCH mode1 invalid_JSR_RTI: 128768 clocks / 384 instructions, 1152 memory beats, 1408 CS, 57344 SPI clocks
+PASS illegal benchmarks mode1: 3 workloads, warmup excluded
+tb/tb_illegal_bench.v:110: $finish called at 3893856000 (1ps)
+ILLEGAL BENCH mode2 reserved_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+ILLEGAL BENCH mode2 invalid_JMP_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+ILLEGAL BENCH mode2 invalid_JSR_RTI: 132992 clocks / 384 instructions, 1152 memory beats, 1408 CS, 59392 SPI clocks
+PASS illegal benchmarks mode2: 3 workloads, warmup excluded
+tb/tb_illegal_bench.v:110: $finish called at 4021566000 (1ps)
+TRACE BENCH mode-1 ADD_trace_RTT: 4992 clocks / 384 instructions, 1536 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 MOV_mem_trace_RTT: 6240 clocks / 384 instructions, 1632 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 RTI_restored_T_loop: 6144 clocks / 256 instructions, 1792 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 WAIT_trace_RTT: 5088 clocks / 384 instructions, 1536 memory beats, 0 CS, 0 SPI clocks
+TRACE BENCH mode-1 MOV_SP_RTT_T0: 3200 clocks / 256 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+PASS trace benchmarks mode-1: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 260086000 (1ps)
+TRACE BENCH mode0 ADD_trace_RTT: 172800 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode0 MOV_mem_trace_RTT: 184128 clocks / 384 instructions, 1632 memory beats, 2016 CS, 81408 SPI clocks
+TRACE BENCH mode0 RTI_restored_T_loop: 203008 clocks / 256 instructions, 1792 memory beats, 2304 CS, 90112 SPI clocks
+TRACE BENCH mode0 WAIT_trace_RTT: 172896 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode0 MOV_SP_RTT_T0: 70400 clocks / 256 instructions, 640 memory beats, 640 CS, 30720 SPI clocks
+PASS trace benchmarks mode0: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 8110936000 (1ps)
+TRACE BENCH mode1 ADD_trace_RTT: 172800 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode1 MOV_mem_trace_RTT: 184128 clocks / 384 instructions, 1632 memory beats, 2016 CS, 81408 SPI clocks
+TRACE BENCH mode1 RTI_restored_T_loop: 203008 clocks / 256 instructions, 1792 memory beats, 2304 CS, 90112 SPI clocks
+TRACE BENCH mode1 WAIT_trace_RTT: 172896 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode1 MOV_SP_RTT_T0: 52992 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trace benchmarks mode1: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 7935496000 (1ps)
+TRACE BENCH mode2 ADD_trace_RTT: 175872 clocks / 384 instructions, 1536 memory beats, 1920 CS, 78336 SPI clocks
+TRACE BENCH mode2 MOV_mem_trace_RTT: 184128 clocks / 384 instructions, 1632 memory beats, 2016 CS, 81408 SPI clocks
+TRACE BENCH mode2 RTI_restored_T_loop: 203008 clocks / 256 instructions, 1792 memory beats, 2304 CS, 90112 SPI clocks
+TRACE BENCH mode2 WAIT_trace_RTT: 172896 clocks / 384 instructions, 1536 memory beats, 1920 CS, 76800 SPI clocks
+TRACE BENCH mode2 MOV_SP_RTT_T0: 52224 clocks / 256 instructions, 640 memory beats, 384 CS, 22528 SPI clocks
+PASS trace benchmarks mode2: 5 workloads, warmup excluded
+tb/tb_trace_bench.v:118: $finish called at 7959116000 (1ps)
+SYSTEM FLAGS BENCH mode-1 NOP_clear: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 NOP_set: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 CC_all_masks: 1040 clocks / 264 instructions, 264 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 MFPT: 512 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM FLAGS BENCH mode-1 CC_branch_dependencies: 1024 clocks / 320 instructions, 320 memory beats, 0 CS, 0 SPI clocks
+PASS system flags benchmarks mode-1: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 51536000 (1ps)
+SYSTEM FLAGS BENCH mode0 NOP_clear: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM FLAGS BENCH mode0 NOP_set: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM FLAGS BENCH mode0 CC_all_masks: 28760 clocks / 264 instructions, 264 memory beats, 264 CS, 12672 SPI clocks
+SYSTEM FLAGS BENCH mode0 MFPT: 27392 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM FLAGS BENCH mode0 CC_branch_dependencies: 34624 clocks / 320 instructions, 320 memory beats, 320 CS, 15360 SPI clocks
+PASS system flags benchmarks mode0: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 1611836000 (1ps)
+SYSTEM FLAGS BENCH mode1 NOP_clear: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode1 NOP_set: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode1 CC_all_masks: 11352 clocks / 264 instructions, 264 memory beats, 8 CS, 4480 SPI clocks
+SYSTEM FLAGS BENCH mode1 MFPT: 10528 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode1 CC_branch_dependencies: 25920 clocks / 320 instructions, 320 memory beats, 192 CS, 11264 SPI clocks
+PASS system flags benchmarks mode1: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 758436000 (1ps)
+SYSTEM FLAGS BENCH mode2 NOP_clear: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode2 NOP_set: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode2 CC_all_masks: 10584 clocks / 264 instructions, 264 memory beats, 8 CS, 4480 SPI clocks
+SYSTEM FLAGS BENCH mode2 MFPT: 10280 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM FLAGS BENCH mode2 CC_branch_dependencies: 25536 clocks / 320 instructions, 320 memory beats, 192 CS, 11264 SPI clocks
+PASS system flags benchmarks mode2: 5 workloads, warmup excluded
+tb/tb_system_flags_bench.v:120: $finish called at 726366000 (1ps)

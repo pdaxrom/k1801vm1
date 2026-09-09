@@ -1,0 +1,31 @@
+iverilog -g2012 -DVENDOR_ROM -s tb_bench -o build/vendor_bench tb/tb_bench.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "/private/tmp/uj11-cp26-vendor-20260909/uJ11-fpga/build/vendor/DP8KC.v" "/private/tmp/uj11-cp26-vendor-20260909/uJ11-fpga/build/vendor/GSR.v" "/private/tmp/uj11-cp26-vendor-20260909/uJ11-fpga/build/vendor/PUR.v"
+vvp build/vendor_bench
+BENCH MOV_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH MOV_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH MOV_RR_loop wait=2: 14433 clocks / 4096 instructions, 4096 memory cycles
+BENCH ADD_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH ADD_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH ADD_RR_loop wait=2: 14348 clocks / 4096 instructions, 4096 memory cycles
+BENCH CMP_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH CMP_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH CMP_RR_loop wait=2: 14452 clocks / 4096 instructions, 4096 memory cycles
+BENCH mixed_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH mixed_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH mixed_RR_loop wait=2: 14370 clocks / 4096 instructions, 4096 memory cycles
+BENCH BR_self wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BR_self wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BR_self wait=2: 14374 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIT_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIT_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIT_RR_loop wait=2: 14298 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIC_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIC_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIC_RR_loop wait=2: 14365 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIS_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIS_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH BIS_RR_loop wait=2: 14311 clocks / 4096 instructions, 4096 memory cycles
+BENCH SUB_RR_loop wait=0: 8192 clocks / 4096 instructions, 4096 memory cycles
+BENCH SUB_RR_loop wait=1: 16384 clocks / 4096 instructions, 4096 memory cycles
+BENCH SUB_RR_loop wait=2: 14365 clocks / 4096 instructions, 4096 memory cycles
+PASS benchmarks: 27 runs, 4096 measured instructions/run, warmup excluded
+tb/tb_bench.v:97: $finish called at 3564516000 (1ps)

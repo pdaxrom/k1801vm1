@@ -1,0 +1,2 @@
+PASS CP27 decoder: all 65536 checked; only FIS differ from archived CP26a
+build/cp27_tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

@@ -1,0 +1,16 @@
+SYSTEM CONTROL BENCH mode-1 RESET_stream: 1008 clocks / 256 instructions, 256 memory beats, 0 CS, 0 SPI clocks
+SYSTEM CONTROL BENCH mode-1 HALT_RTI_BR: 1408 clocks / 192 instructions, 512 memory beats, 0 CS, 0 SPI clocks
+PASS system control benchmarks mode-1: 2 workloads, warmup excluded
+tb/tb_system_control_bench.v:116: $finish called at 26096000 (1ps)
+SYSTEM CONTROL BENCH mode0 RESET_stream: 27888 clocks / 256 instructions, 256 memory beats, 256 CS, 12288 SPI clocks
+SYSTEM CONTROL BENCH mode0 HALT_RTI_BR: 57344 clocks / 192 instructions, 512 memory beats, 640 CS, 25600 SPI clocks
+PASS system control benchmarks mode0: 2 workloads, warmup excluded
+tb/tb_system_control_bench.v:116: $finish called at 896596000 (1ps)
+SYSTEM CONTROL BENCH mode1 RESET_stream: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM CONTROL BENCH mode1 HALT_RTI_BR: 57344 clocks / 192 instructions, 512 memory beats, 640 CS, 25600 SPI clocks
+PASS system control benchmarks mode1: 2 workloads, warmup excluded
+tb/tb_system_control_bench.v:116: $finish called at 706876000 (1ps)
+SYSTEM CONTROL BENCH mode2 RESET_stream: 11024 clocks / 256 instructions, 256 memory beats, 8 CS, 4352 SPI clocks
+SYSTEM CONTROL BENCH mode2 HALT_RTI_BR: 57344 clocks / 192 instructions, 512 memory beats, 640 CS, 25600 SPI clocks
+PASS system control benchmarks mode2: 2 workloads, warmup excluded
+tb/tb_system_control_bench.v:116: $finish called at 706876000 (1ps)

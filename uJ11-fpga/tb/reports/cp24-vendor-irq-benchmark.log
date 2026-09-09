@@ -1,0 +1,32 @@
+IRQ BENCH mode-1 SPL_levels: 2112 clocks / 288 instructions, 288 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 WAIT_IRQ_RTI: 1792 clocks / 192 instructions, 576 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 ADD_IRQ_RTI: 1792 clocks / 192 instructions, 576 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 MOV_mem_IRQ_RTI: 2624 clocks / 192 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 MOV_store_IRQ_RTI: 2752 clocks / 192 instructions, 640 memory beats, 0 CS, 0 SPI clocks
+IRQ BENCH mode-1 nested_IRQ_RTI: 3328 clocks / 256 instructions, 1024 memory beats, 0 CS, 0 SPI clocks
+PASS irq benchmarks mode-1: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 147756000 (1ps)
+IRQ BENCH mode0 SPL_levels: 32352 clocks / 288 instructions, 288 memory beats, 288 CS, 13824 SPI clocks
+IRQ BENCH mode0 WAIT_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode0 ADD_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode0 MOV_mem_IRQ_RTI: 72000 clocks / 192 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+IRQ BENCH mode0 MOV_store_IRQ_RTI: 73216 clocks / 192 instructions, 640 memory beats, 832 CS, 32256 SPI clocks
+IRQ BENCH mode0 nested_IRQ_RTI: 115200 clocks / 256 instructions, 1024 memory beats, 1280 CS, 51200 SPI clocks
+PASS irq benchmarks mode0: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 4288756000 (1ps)
+IRQ BENCH mode1 SPL_levels: 14944 clocks / 288 instructions, 288 memory beats, 32 CS, 5632 SPI clocks
+IRQ BENCH mode1 WAIT_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode1 ADD_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode1 MOV_mem_IRQ_RTI: 72000 clocks / 192 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+IRQ BENCH mode1 MOV_store_IRQ_RTI: 73216 clocks / 192 instructions, 640 memory beats, 832 CS, 32256 SPI clocks
+IRQ BENCH mode1 nested_IRQ_RTI: 115200 clocks / 256 instructions, 1024 memory beats, 1280 CS, 51200 SPI clocks
+PASS irq benchmarks mode1: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 4109236000 (1ps)
+IRQ BENCH mode2 SPL_levels: 13152 clocks / 288 instructions, 288 memory beats, 32 CS, 5632 SPI clocks
+IRQ BENCH mode2 WAIT_IRQ_RTI: 64448 clocks / 192 instructions, 576 memory beats, 704 CS, 28672 SPI clocks
+IRQ BENCH mode2 ADD_IRQ_RTI: 66496 clocks / 192 instructions, 576 memory beats, 704 CS, 29696 SPI clocks
+IRQ BENCH mode2 MOV_mem_IRQ_RTI: 72000 clocks / 192 instructions, 640 memory beats, 768 CS, 31744 SPI clocks
+IRQ BENCH mode2 MOV_store_IRQ_RTI: 73216 clocks / 192 instructions, 640 memory beats, 832 CS, 32256 SPI clocks
+IRQ BENCH mode2 nested_IRQ_RTI: 117248 clocks / 256 instructions, 1024 memory beats, 1280 CS, 52224 SPI clocks
+PASS irq benchmarks mode2: 6 workloads, warmup excluded
+tb/tb_irq_bench.v:133: $finish called at 4132356000 (1ps)
