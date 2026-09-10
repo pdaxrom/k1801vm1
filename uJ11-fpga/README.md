@@ -50,7 +50,12 @@ data. Текущий вариант с CP35 hook занимает **1243 LUT / 3
 там свободны 58 LUT и 26 slices. Оба полных RTL board runs сохранили все
 прежние counts и UART transcript. MMU ещё не подключён.
 [Измерения и проверки CP36](docs/area-decode.md).
-Плату в CP31–CP36 не программировали; физически остаётся CP29.
+CP37d/e проверяет чтение PAR/PDR в T6/T7 через общую ALU: **1265 LUT / 341 FF /
+7 EBR / 30.327 MHz**, 963 words, +10 clocks/memory word. Все CPU/FIS/FRAM/vendor
+и cold FB tests прошли. Это read-only cost floor без CPU CSR/translation/MMR;
+осталось 15 LUT и 5 slices. Production не меняется, XM пока не загружен.
+[Эксперимент APR lookup и ограничения](docs/mmu-apr-lookup.md).
+Плату в CP31–CP37 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,

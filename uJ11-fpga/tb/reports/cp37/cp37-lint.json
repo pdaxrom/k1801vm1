@@ -1,0 +1,20 @@
+{
+  "configurations": 2,
+  "inputs_sha256": {
+    "build/cp37-lookup/uj11_core.v": "3fa628b3ddcf833d65e74e7d27dfbbfd048cb22dbb95fdfaf56e66e287312c24",
+    "build/cp37-lookup/uj11_engine.v": "cfbcc832da7eb3c637ce64ac1fdf7920eb9f9f1dfc1339b8361a81861ce6e347",
+    "build/cp37-lookup/uj11_microseq.v": "5dadb3dc2edb0e3385c672bf7b2856eb2d9d1169e0279bb5906c57b5e1a45851",
+    "build/cp37-lookup/uj11_decode_table.v": "572d3075d91f0a1c40d4f39530358b3b27e222d1156972b239cfa73a9cb79a4e",
+    "rtl/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "rtl/experimental/uj11_mmu_entry.v": "23ae78152274f8ef84bb71527e1f5b369aedb1de547cb5d32f6752808a949884",
+    "rtl/uj11_alu.v": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "rtl/uj11_datapath.v": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+    "rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_decode.v": "eaa181630dea88ef76ba3d60dd3595d4f7b2cae622e7fa354b28b74d63c4bc78",
+    "rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "tools/check_mmu_apr_lookup_lint.py": "0d1edd599774be9ec88b4ac41d23ab2046e5b2f810f2b5503888747c89a34c77"
+  }
+}

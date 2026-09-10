@@ -1,0 +1,1066 @@
+#Build: Synplify Pro (R) V-2023.09L-2, Build 349R, Sep 17 2024
+#install: /home/sash/.local/lscc/diamond/3.14/synpbase
+#OS: Linux 
+#Hostname: sashz-ubuntu
+
+# Thu Sep 10 14:32:30 2026
+
+#Implementation: impl1
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys HDL Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Verilog Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/pmi_def.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/vlog/hypermods.v" (library __hyper__lib__)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_core.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_decode_rom.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_decode_table.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v" (library work)
+@W: CG1249 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v":117:9:117:15|Redeclaration of implicit signal running
+@W: CG1249 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v":123:9:123:15|Redeclaration of implicit signal advance
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_decode.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_datapath.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_regfile.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_alu.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_psw.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_mem.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/uj11_board.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_tick.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/microcode/generated/uj11_firmware_rom.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/experimental/uj11_mmu_entry.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_mmu_apr_ram.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v" (library work)
+@I::"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_m0_ebr.v" (library work)
+@N|stack limit increased to max
+Verilog syntax check successful!
+Selecting top level module uj11_hc1200_microcomp
+@N: CG364 :"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v":1793:7:1793:10|Synthesizing module OSCH in library work.
+Running optimization stage 1 on OSCH .......
+Finished optimization stage 1 on OSCH (CPU Time 0h:00m:00s, Memory Used current: 192MB peak: 192MB)
+@N: CG364 :"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v":1291:7:1291:11|Synthesizing module DP8KC in library work.
+Running optimization stage 1 on DP8KC .......
+Finished optimization stage 1 on DP8KC (CPU Time 0h:00m:00s, Memory Used current: 193MB peak: 193MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_mmu_apr_ram.v":5:7:5:22|Synthesizing module uj11_mmu_apr_ram in library work.
+Running optimization stage 1 on uj11_mmu_apr_ram .......
+Finished optimization stage 1 on uj11_mmu_apr_ram (CPU Time 0h:00m:00s, Memory Used current: 193MB peak: 193MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/experimental/uj11_mmu_entry.v":6:7:6:20|Synthesizing module uj11_mmu_entry in library work.
+Running optimization stage 1 on uj11_mmu_entry .......
+Finished optimization stage 1 on uj11_mmu_entry (CPU Time 0h:00m:00s, Memory Used current: 193MB peak: 193MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_alu.v":4:7:4:14|Synthesizing module uj11_alu in library work.
+Running optimization stage 1 on uj11_alu .......
+Finished optimization stage 1 on uj11_alu (CPU Time 0h:00m:00s, Memory Used current: 194MB peak: 194MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_regfile.v":4:7:4:18|Synthesizing module uj11_regfile in library work.
+Running optimization stage 1 on uj11_regfile .......
+@N: CL134 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_regfile.v":13:4:13:9|Found RAM words, depth=16, width=16
+@N: CL134 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_regfile.v":13:4:13:9|Found RAM words, depth=16, width=16
+Finished optimization stage 1 on uj11_regfile (CPU Time 0h:00m:00s, Memory Used current: 194MB peak: 194MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_datapath.v":3:7:3:19|Synthesizing module uj11_datapath in library work.
+@N: CG179 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_datapath.v":46:30:46:30|Removing redundant assignment.
+Running optimization stage 1 on uj11_datapath .......
+Finished optimization stage 1 on uj11_datapath (CPU Time 0h:00m:00s, Memory Used current: 194MB peak: 195MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_psw.v":2:7:2:14|Synthesizing module uj11_psw in library work.
+@N: CG179 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_psw.v":16:32:16:34|Removing redundant assignment.
+Running optimization stage 1 on uj11_psw .......
+Finished optimization stage 1 on uj11_psw (CPU Time 0h:00m:00s, Memory Used current: 194MB peak: 195MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_mem.v":5:7:5:14|Synthesizing module uj11_mem in library work.
+Running optimization stage 1 on uj11_mem .......
+Finished optimization stage 1 on uj11_mem (CPU Time 0h:00m:00s, Memory Used current: 194MB peak: 195MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":4:7:4:19|Synthesizing module uj11_microseq in library work.
+Running optimization stage 1 on uj11_microseq .......
+Finished optimization stage 1 on uj11_microseq (CPU Time 0h:00m:00s, Memory Used current: 196MB peak: 196MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_m0_ebr.v":3:7:3:14|Synthesizing module uj11_rom in library work.
+
+	IMAGE=224'b01100010011101010110100101101100011001000010111101100011011100000011001100110111001011010110110001101111011011110110101101110101011100000010111101101100011011110110111101101011011101010111000000101110011011010110010101101101
+   Generated name = uj11_rom_build/cp37-lookup/lookup.mem
+Running optimization stage 1 on uj11_rom_build/cp37-lookup/lookup.mem .......
+Finished optimization stage 1 on uj11_rom_build/cp37-lookup/lookup.mem (CPU Time 0h:00m:00s, Memory Used current: 196MB peak: 196MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v":4:7:4:17|Synthesizing module uj11_engine in library work.
+
+	ROM_DECODE=32'b00000000000000000000000000000001
+	IRQ_VECTOR_BITS=32'b00000000000000000000000000001111
+	UNMASKED_VECTOR=16'b1110000000000000
+   Generated name = uj11_engine_1s_15s_57344
+@W: CG390 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v":41:35:41:53|Repeat multiplier in concatenation evaluates to 0
+Running optimization stage 1 on uj11_engine_1s_15s_57344 .......
+Finished optimization stage 1 on uj11_engine_1s_15s_57344 (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_core.v":4:7:4:15|Synthesizing module uj11_core in library work.
+
+	ROM_DECODE=32'b00000000000000000000000000000001
+	ALIGNED_WORD_READS=32'b00000000000000000000000000000001
+	IRQ_VECTOR_BITS=32'b00000000000000000000000000001111
+	UNMASKED_VECTOR=16'b1110000000000000
+   Generated name = uj11_core_1s_1s_15s_57344
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_decode_table.v":4:7:4:23|Synthesizing module uj11_decode_table in library work.
+Running optimization stage 1 on uj11_decode_table .......
+Finished optimization stage 1 on uj11_decode_table (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_decode_rom.v":3:7:3:21|Synthesizing module uj11_decode_rom in library work.
+Running optimization stage 1 on uj11_decode_rom .......
+Finished optimization stage 1 on uj11_decode_rom (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+Running optimization stage 1 on uj11_core_1s_1s_15s_57344 .......
+Finished optimization stage 1 on uj11_core_1s_1s_15s_57344 (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/microcode/generated/uj11_firmware_rom.v":3:7:3:23|Synthesizing module uj11_firmware_rom in library work.
+Running optimization stage 1 on uj11_firmware_rom .......
+Finished optimization stage 1 on uj11_firmware_rom (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_tick.v":5:7:5:15|Synthesizing module uj11_tick in library work.
+
+	DIVISOR=32'b00000000000010010000010101100000
+	LAST=20'b00010101011110110000
+   Generated name = uj11_tick_591200s_87984
+Running optimization stage 1 on uj11_tick_591200s_87984 .......
+Finished optimization stage 1 on uj11_tick_591200s_87984 (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":5:7:5:21|Synthesizing module uj11_board_fram in library work.
+
+	CLK_DIV=32'b00000000000000000000000000000001
+	IDLE=4'b0000
+	WREN=4'b0001
+	GAP=4'b0010
+	CMD=4'b0011
+	BANK=4'b0100
+	HIGH=4'b0101
+	LOW=4'b0110
+	DATA_LO=4'b0111
+	DATA_HI=4'b1000
+	DONE=4'b1001
+	DIV_WIDTH=32'b00000000000000000000000000000001
+	DIV_LAST=32'b00000000000000000000000000000000
+   Generated name = uj11_board_fram_Z1
+Running optimization stage 1 on uj11_board_fram_Z1 .......
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Register bit divider[0] is always 0.
+Finished optimization stage 1 on uj11_board_fram_Z1 (CPU Time 0h:00m:00s, Memory Used current: 197MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":6:7:6:22|Synthesizing module spi_byte_service in library work.
+
+	SLOW_DIV=32'b00000000000000000000000001000100
+	FAST_DIV=32'b00000000000000000000000000000010
+	DIV_WIDTH=32'b00000000000000000000000000000111
+   Generated name = spi_byte_service_68s_2s_7s
+Running optimization stage 1 on spi_byte_service_68s_2s_7s .......
+Finished optimization stage 1 on spi_byte_service_68s_2s_7s (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":4:7:4:16|Synthesizing module uj11_panel in library work.
+Running optimization stage 1 on uj11_panel .......
+Finished optimization stage 1 on uj11_panel (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v":8:7:8:20|Synthesizing module uj11_board_bus in library work.
+
+	CLOCK_HZ=32'b00000001110000110000110011000000
+	TICK_DIVISOR=32'b00000000000010010000010101100000
+	UART_XO2=1'b1
+	FRAM_CLK_DIV=32'b00000000000000000000000000000001
+	BOOT_ROM_ENABLE=1'b1
+	SD_BOOT_ENABLE=1'b1
+	RK_SERVICE_ENABLE=1'b1
+	SD_SLOW_DIV=32'b00000000000000000000000001000100
+	SD_FAST_DIV=32'b00000000000000000000000000000010
+	KL11_BASE=16'b1111111101110000
+	LTC_CSR=16'b1111111101100110
+	PANEL_BASE=16'b1110110000000000
+	SD_BASE=16'b1111111101000000
+	BOOT_BASE=16'b0000100000000000
+	BOOT_LAST=16'b0000100111111111
+	RK_BASE=16'b1111111100100000
+	RK_LAST=16'b1111111100111110
+	RK_CS1=16'b1111111100100000
+	RK_CS2=16'b1111111100101000
+	RK_DS=16'b1111111100101010
+	SERVICE_BASE=16'b1110000000000000
+	SERVICE_RTI=16'b1110000100111110
+   Generated name = uj11_board_bus_Z2
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v":8:7:8:18|Synthesizing module wbc_uart_xo2 in library work.
+
+	REFCLK=32'b00000001110000110000110011000000
+	BIT_TICKS=32'b00000000000000000000000100000001
+	HALF_TICKS=32'b00000000000000000000000010000000
+	TIMER_WIDTH=32'b00000000000000000000000000001001
+   Generated name = wbc_uart_xo2_29560000s_257s_128s_9s
+Running optimization stage 1 on wbc_uart_xo2_29560000s_257s_128s_9s .......
+Finished optimization stage 1 on wbc_uart_xo2_29560000s_257s_128s_9s (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+Running optimization stage 1 on uj11_board_bus_Z2 .......
+Finished optimization stage 1 on uj11_board_bus_Z2 (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/uj11_board.v":4:7:4:16|Synthesizing module uj11_board in library work.
+Running optimization stage 1 on uj11_board .......
+Finished optimization stage 1 on uj11_board (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+@N: CG364 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Synthesizing module uj11_hc1200_microcomp in library work.
+Running optimization stage 1 on uj11_hc1200_microcomp .......
+Finished optimization stage 1 on uj11_hc1200_microcomp (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+Running optimization stage 2 on uj11_hc1200_microcomp .......
+Finished optimization stage 2 on uj11_hc1200_microcomp (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+Running optimization stage 2 on uj11_board .......
+Finished optimization stage 2 on uj11_board (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+Running optimization stage 2 on wbc_uart_xo2_29560000s_257s_128s_9s .......
+@W: CL246 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v":13:19:13:26|Input port bits 15 to 8 of wb_dat_i[15:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on wbc_uart_xo2_29560000s_257s_128s_9s (CPU Time 0h:00m:00s, Memory Used current: 198MB peak: 199MB)
+Running optimization stage 2 on uj11_board_bus_Z2 .......
+@N: CL201 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v":298:1:298:6|Trying to extract state machine for register boot_rom_phase.
+Extracted state machine for register boot_rom_phase
+State machine has 4 reachable states with original encodings of:
+   00
+   01
+   10
+   11
+Finished optimization stage 2 on uj11_board_bus_Z2 (CPU Time 0h:00m:00s, Memory Used current: 199MB peak: 199MB)
+Running optimization stage 2 on uj11_panel .......
+Finished optimization stage 2 on uj11_panel (CPU Time 0h:00m:00s, Memory Used current: 199MB peak: 199MB)
+Running optimization stage 2 on spi_byte_service_68s_2s_7s .......
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[8] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[9] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[10] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[11] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[12] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[13] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[14] is always 0.
+@N: CL189 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Register bit rdata[15] is always 0.
+@W: CL279 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Pruning register bits 15 to 8 of rdata[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL246 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":12:19:12:23|Input port bits 15 to 8 of wdata[15:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on spi_byte_service_68s_2s_7s (CPU Time 0h:00m:00s, Memory Used current: 199MB peak: 199MB)
+Running optimization stage 2 on uj11_board_fram_Z1 .......
+Finished optimization stage 2 on uj11_board_fram_Z1 (CPU Time 0h:00m:00s, Memory Used current: 201MB peak: 201MB)
+Running optimization stage 2 on uj11_tick_591200s_87984 .......
+Finished optimization stage 2 on uj11_tick_591200s_87984 (CPU Time 0h:00m:00s, Memory Used current: 201MB peak: 201MB)
+Running optimization stage 2 on uj11_firmware_rom .......
+Finished optimization stage 2 on uj11_firmware_rom (CPU Time 0h:00m:00s, Memory Used current: 201MB peak: 201MB)
+Running optimization stage 2 on uj11_decode_rom .......
+Finished optimization stage 2 on uj11_decode_rom (CPU Time 0h:00m:00s, Memory Used current: 201MB peak: 201MB)
+Running optimization stage 2 on uj11_decode_table .......
+Finished optimization stage 2 on uj11_decode_table (CPU Time 0h:00m:00s, Memory Used current: 201MB peak: 201MB)
+Running optimization stage 2 on uj11_core_1s_1s_15s_57344 .......
+Finished optimization stage 2 on uj11_core_1s_1s_15s_57344 (CPU Time 0h:00m:00s, Memory Used current: 201MB peak: 201MB)
+Running optimization stage 2 on uj11_engine_1s_15s_57344 .......
+@N: CL201 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v":180:4:180:9|Trying to extract state machine for register irq_active.
+Finished optimization stage 2 on uj11_engine_1s_15s_57344 (CPU Time 0h:00m:00s, Memory Used current: 204MB peak: 204MB)
+Running optimization stage 2 on uj11_rom_build/cp37-lookup/lookup.mem .......
+Finished optimization stage 2 on uj11_rom_build/cp37-lookup/lookup.mem (CPU Time 0h:00m:00s, Memory Used current: 204MB peak: 204MB)
+Running optimization stage 2 on uj11_microseq .......
+@W: CL246 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":7:22:7:26|Input port bits 30 to 21 of uword[35:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL246 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":8:22:8:23|Input port bits 15 to 12 of ir[15:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL246 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":8:22:8:23|Input port bits 8 to 6 of ir[15:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL246 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":8:22:8:23|Input port bits 2 to 0 of ir[15:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL247 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":12:21:12:30|Input port bit 3 of selected_a[3:0] is unused
+
+@W: CL247 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_microseq.v":12:21:12:30|Input port bit 0 of selected_a[3:0] is unused
+
+Finished optimization stage 2 on uj11_microseq (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_mem .......
+Finished optimization stage 2 on uj11_mem (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_psw .......
+Finished optimization stage 2 on uj11_psw (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_datapath .......
+Finished optimization stage 2 on uj11_datapath (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_regfile .......
+Finished optimization stage 2 on uj11_regfile (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_alu .......
+Finished optimization stage 2 on uj11_alu (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_mmu_entry .......
+@N: CL201 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/experimental/uj11_mmu_entry.v":22:4:22:9|Trying to extract state machine for register phase.
+Extracted state machine for register phase
+State machine has 3 reachable states with original encodings of:
+   00
+   01
+   10
+Finished optimization stage 2 on uj11_mmu_entry (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on uj11_mmu_apr_ram .......
+Finished optimization stage 2 on uj11_mmu_apr_ram (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on DP8KC .......
+Finished optimization stage 2 on DP8KC (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+Running optimization stage 2 on OSCH .......
+Finished optimization stage 2 on OSCH (CPU Time 0h:00m:00s, Memory Used current: 207MB peak: 208MB)
+
+For a summary of runtime per design unit, please see file:
+==========================================================
+@L: /tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/synwork/layer0.duruntime
+
+
+
+At c_ver Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 207MB peak: 208MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Thu Sep 10 14:32:31 2026
+
+###########################################################]
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Synopsys Netlist Linker, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+
+At syn_nfilter Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 200MB peak: 200MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Thu Sep 10 14:32:31 2026
+
+###########################################################]
+
+For a summary of runtime and memory usage for all design units, please see file:
+==========================================================
+@L: /tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/synwork/cp37e_impl1_comp.rt.csv
+
+@END
+
+At c_hdl Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 41MB peak: 41MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Thu Sep 10 14:32:31 2026
+
+###########################################################]
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Synopsys Netlist Linker, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+
+At syn_nfilter Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 201MB peak: 201MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Thu Sep 10 14:32:32 2026
+
+###########################################################]
+Premap Report
+
+# Thu Sep 10 14:32:32 2026
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Lattice Technology Pre-mapping, Version map202309lat, Build 191R, Built Sep 17 2024 09:08:23, @5637152
+
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 440MB peak: 440MB)
+
+
+Done reading skeleton netlist (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+@A: MF827 |No constraint file specified.
+@L: /tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/cp37e_impl1_scck.rpt 
+See clock summary report "/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/cp37e_impl1_scck.rpt"
+@N: MF916 |Option synthesis_strategy=base is enabled. 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 459MB peak: 459MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 459MB peak: 459MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 466MB peak: 466MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 468MB peak: 468MB)
+
+NConnInternalConnection caching is on
+@N: FX493 |Applying initial value "11" on instance reset_sync[1:0].
+@W: FX474 |User-specified initial value defined for some sequential elements which can prevent optimum synthesis results from being achieved. 
+
+Starting HSTDM IP insertion (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Finished HSTDM IP insertion (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Started DisTri Cleanup (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Finished DisTri Cleanup (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+@N: BN362 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_engine.v":180:4:180:9|Removing sequential instance retire (in view: work.uj11_engine_1s_15s_57344(verilog)) of type view:PrimLib.dff(prim) because it does not drive other instances.
+@N: BN362 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v":270:1:270:6|Removing sequential instance boot_complete (in view: work.uj11_board_bus_Z2(verilog)) of type view:PrimLib.sdffrse(prim) because it does not drive other instances.
+@N: BN362 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v":270:1:270:6|Removing sequential instance boot_release_wait (in view: work.uj11_board_bus_Z2(verilog)) of type view:PrimLib.dff(prim) because it does not drive other instances.
+Encoding state machine phase[2:0] (in view: work.uj11_mmu_entry(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   10 -> 10
+Encoding state machine boot_rom_phase[3:0] (in view: work.uj11_board_bus_Z2(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   10 -> 10
+   11 -> 11
+@N: MO225 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v":298:1:298:6|There are no possible illegal states for state machine boot_rom_phase[3:0] (in view: work.uj11_board_bus_Z2(verilog)); safe FSM implementation is not required.
+
+Starting clock optimization phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+mixed edge conversion for GCC is OFF
+@W: BZ204 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":15:31:15:40|GCC unable to propagate clocks through gate oscillator; all outputs will be treated as enables regardless of whether any inputs are clocks
+@W: BZ240 :|GCC encountered Inferred Clock constraint on net GCC considers to be data clk; this will likely lead to failure to convert
+
+Finished clock optimization phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Starting clock optimization report phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Finished clock optimization report phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+@N: FX1184 |Applying syn_allowed_resources blockrams=7 on top level netlist uj11_hc1200_microcomp 
+
+Finished netlist restructuring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+
+Clock Summary
+******************
+
+          Start                                        Requested     Requested     Clock        Clock          Clock
+Level     Clock                                        Frequency     Period        Type         Group          Load 
+--------------------------------------------------------------------------------------------------------------------
+0 -       uj11_hc1200_microcomp|clk_inferred_clock     29.6 MHz      33.829        inferred     (multiple)     384  
+====================================================================================================================
+
+
+
+Clock Load Summary
+***********************
+
+                                             Clock     Source                   Clock Pin           Non-clock Pin     Non-clock Pin
+Clock                                        Load      Pin                      Seq Example         Seq Example       Comb Example 
+-----------------------------------------------------------------------------------------------------------------------------------
+uj11_hc1200_microcomp|clk_inferred_clock     384       oscillator.OSC(OSCH)     reset_sync[0].C     -                 -            
+===================================================================================================================================
+
+@W: MT529 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37-lookup/uj11_decode_table.v":54:6:54:11|Found inferred clock uj11_hc1200_microcomp|clk_inferred_clock which controls 384 sequential elements including system.cpu.sync_decode\.decode.table_rom.lane_0. This clock has no specified timing constraint which may prevent conversion of gated or generated clocks and may adversely impact design performance. 
+
+ICG Latch Removal Summary:
+Number of ICG latches removed: 0
+Number of ICG latches not removed:	0
+
+
+@S |Clock Optimization Summary
+
+
+
+#### START OF PREMAP CLOCK OPTIMIZATION REPORT #####[
+
+0 non-gated/non-generated clock tree(s) driving 0 clock pin(s) of sequential element(s)
+1 gated/generated clock tree(s) driving 354 clock pin(s) of sequential element(s)
+0 instances converted, 354 sequential instances remain driven by gated/generated clocks
+
+======================================================= Gated/Generated Clocks ========================================================
+Clock Tree ID     Driving Element     Drive Element Type     Unconverted Fanout     Sample Instance     Explanation                    
+---------------------------------------------------------------------------------------------------------------------------------------
+@KP:ckid0_1       oscillator.OSC      OSCH                   354                    reset_sync[1]       Clock source is invalid for GCC
+=======================================================================================================================================
+
+
+##### END OF CLOCK OPTIMIZATION REPORT ######
+
+
+Summary of user generated gated clocks:
+0 user generated gated/generated clock tree(s) driving 0 clock pin(s) of sequential element(s)
+
+@N: FX1143 |Skipping assigning INTERNAL_VREF to iobanks, because the table of mapping from pin to iobank is not initialized.
+Finished Pre Mapping Phase.
+
+Starting constraint checker (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Finished constraint checker preprocessing (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+
+Finished constraint checker (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+Pre-mapping successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 428MB peak: 517MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Thu Sep 10 14:32:33 2026
+
+###########################################################]
+Map & Optimize Report
+
+# Thu Sep 10 14:32:33 2026
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.4 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512757
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Lattice Technology Mapper, Version map202309lat, Build 191R, Built Sep 17 2024 09:08:23, @5637152
+
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 440MB peak: 440MB)
+
+@N: MF916 |Option synthesis_strategy=base is enabled. 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 456MB peak: 456MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 464MB peak: 464MB)
+
+
+
+Starting Optimization and Mapping (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 514MB peak: 514MB)
+
+
+Available hyper_sources - for debug and ip models
+	None Found
+
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_bus.v":8:7:8:20|Net panel_key_rows[3] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/uj11_board.v":4:7:4:16|Net panel_keys[3] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[0] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[1] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[2] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[3] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net clk has multiple drivers .
+
+Finished RTL optimizations (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 515MB peak: 515MB)
+
+@N: FX493 |Applying initial value "1" on instance reset_sync[0].
+@W: FX474 |User-specified initial value defined for some sequential elements which can prevent optimum synthesis results from being achieved. 
+@N: FX493 |Applying initial value "1" on instance reset_sync[1].
+@N: MO231 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Found counter in view:work.uj11_board_fram_Z1(verilog) instance state[3:0] 
+@N: MF179 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":40:8:40:24|Found 7 by 7 bit equality operator ('==') divider10 (in view: work.spi_byte_service_68s_2s_7s(verilog))
+@N: MO231 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v":136:1:136:6|Found counter in view:work.wbc_uart_xo2_29560000s_257s_128s_9s(verilog) instance rx_timer[8:0] 
+@N: MO231 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v":136:1:136:6|Found counter in view:work.wbc_uart_xo2_29560000s_257s_128s_9s(verilog) instance rx_bits[3:0] 
+@N: MO231 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v":91:1:91:6|Found counter in view:work.wbc_uart_xo2_29560000s_257s_128s_9s(verilog) instance tx_bits[3:0] 
+@N: MO231 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/wbc_uart_xo2.v":91:1:91:6|Found counter in view:work.wbc_uart_xo2_29560000s_257s_128s_9s(verilog) instance tx_timer[8:0] 
+
+Starting factoring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 517MB peak: 517MB)
+
+@N: BN362 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Removing sequential instance bus.byte_sd.error (in view: work.uj11_board(verilog)) because it does not drive other instances.
+@N: BN362 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Removing sequential instance bus.guest_memory.error (in view: work.uj11_board(verilog)) because it does not drive other instances.
+
+Finished factoring (Real Time elapsed 0h:00m:01s; CPU Time elapsed 0h:00m:02s; Memory used current: 543MB peak: 543MB)
+
+NConnInternalConnection caching is on
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.N_18 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_14 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_17 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_20 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_25 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_52 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_53 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_54 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_55 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_56 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_57 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_58 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_59 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_60 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_61 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_62 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_63 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_64 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_65 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_66 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_67 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_68 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_69 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_70 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_71 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_72 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_73 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_74 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_75 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_76 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_77 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_78 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_79 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_80 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_81 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_82 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_83 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_84 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_85 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_86 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_87 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_88 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_89 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_90 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_91 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_92 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_93 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_94 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_95 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_96 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_97 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_98 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_99 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_100 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.fixed_uart\.console.N_101 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.guest_memory.N_7 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.guest_memory.N_72 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.guest_memory.N_73 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.guest_memory.N_74 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.bus.guest_memory.N_75 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.N_12 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.N_95 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.N_96 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.N_97 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.N_98 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.N_99 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.seq.N_47 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_25 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_26 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_27 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_28 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_29 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_30 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_31 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_32 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_33 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.cpu.engine.entry.N_35 has multiple drivers .
+
+Finished generic timing optimizations - Pass 1 (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 552MB peak: 552MB)
+
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[0] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[1] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net gpio_key_row[2] has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net N_135 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net N_175 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_0 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_1 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_2 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_3 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_4 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_5 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_6 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_7 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_8 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_9 has multiple drivers .
+@W: BN161 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_microcomp.v":2:7:2:27|Net system.un1_timeout_count_axb_10 has multiple drivers .
+
+Only the first 100 messages of id 'BN161' are reported. To see all messages use 'report_messages -log /tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/synlog/cp37e_impl1_fpga_mapper.srr -id BN161' in the Tcl shell. To see all messages in future runs, use the command 'message_override -limit {BN161} -count unlimited' in the Tcl shell.
+
+Starting Early Timing Optimization (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 552MB peak: 552MB)
+
+
+Finished Early Timing Optimization (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 552MB peak: 552MB)
+
+
+Finished generic timing optimizations - Pass 2 (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 552MB peak: 552MB)
+
+
+Finished preparing to map (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 552MB peak: 552MB)
+
+
+Finished technology mapping (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+Pass		 CPU time		Worst Slack		Luts / Registers
+------------------------------------------------------------
+   1		0h:00m:03s		     6.23ns		1167 /       341
+
+Finished technology timing optimizations and critical path resynthesis (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+@N: FX164 |The option to pack registers in the IOB has not been specified. Please set syn_useioff attribute.  
+@N: FO126 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_regfile.v":13:4:13:9|Generating RAM system.cpu.engine.dp.rf.words_1[15:0]
+@N: FO126 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/rtl/uj11_regfile.v":13:4:13:9|Generating RAM system.cpu.engine.dp.rf.words[15:0]
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_7_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_6_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_5_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_4_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_3_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_2_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_1_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_panel.v":12:4:12:9|Boundary register system.bus.panel_io.pins_0_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.control_1_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.control_0_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_7_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_6_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_5_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_4_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_3_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_2_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_1_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.rx_shift_0_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/reference/lsi11/spi_byte_service.v":31:1:31:6|Boundary register system.bus.byte_sd.sck.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_7_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_6_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_5_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_4_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_3_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_2_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_1_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.rx_0_.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.spi_cs_n.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/tmp/uj11-cp37.ZfE7PT/uJ11-fpga/boards/hc1200/uj11_board_fram.v":36:4:36:9|Boundary register system.bus.guest_memory.spi_mosi.fb (in view: work.uj11_hc1200_microcomp(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+
+Finished restoring hierarchy (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+
+Starting CDBProcessSetClockGroups... (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+
+Finished with CDBProcessSetClockGroups (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+
+Start Writing Netlists (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+Writing Analyst data base /tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/synwork/cp37e_impl1_m.srm
+
+Finished Writing Netlist Databases (Real Time elapsed 0h:00m:03s; CPU Time elapsed 0h:00m:03s; Memory used current: 608MB peak: 608MB)
+
+Writing EDIF Netlist and constraint files
+@N: FX1056 |Writing EDF file: /tmp/uj11-cp37.ZfE7PT/uJ11-fpga/build/cp37e/impl1/cp37e_impl1.edi
+@N: BW106 |Synplicity Constraint File capacitance units using default value of 1pF 
+
+Finished Writing EDIF Netlist and constraint files (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 615MB peak: 615MB)
+
+
+Finished Writing Netlists (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 615MB peak: 615MB)
+
+
+Start final timing analysis (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 615MB peak: 615MB)
+
+@W: MT420 |Found inferred clock uj11_hc1200_microcomp|clk_inferred_clock with period 33.83ns. Please declare a user-defined clock on net clk.
+
+
+##### START OF TIMING REPORT #####[
+# Timing report written on Thu Sep 10 14:32:37 2026
+#
+
+
+Top view:               uj11_hc1200_microcomp
+Requested Frequency:    29.6 MHz
+Wire load mode:         top
+Paths requested:        5
+Constraint File(s):    
+@N: MT320 |This timing report is an estimate of place and route data. For final timing results, use the FPGA vendor place and route report.
+
+@N: MT322 |Clock constraints include only register-to-register paths associated with each individual clock.
+
+
+
+Performance Summary
+*******************
+
+
+Worst slack in design: 8.544
+
+                                             Requested     Estimated     Requested     Estimated               Clock        Clock     
+Starting Clock                               Frequency     Frequency     Period        Period        Slack     Type         Group     
+--------------------------------------------------------------------------------------------------------------------------------------
+uj11_hc1200_microcomp|clk_inferred_clock     29.6 MHz      39.5 MHz      33.829        25.285        8.544     inferred     (multiple)
+======================================================================================================================================
+
+
+
+
+
+Clock Relationships
+*******************
+
+Clocks                                                                              |    rise  to  rise   |    fall  to  fall   |    rise  to  fall   |    fall  to  rise 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Starting                                  Ending                                    |  constraint  slack  |  constraint  slack  |  constraint  slack  |  constraint  slack
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+uj11_hc1200_microcomp|clk_inferred_clock  uj11_hc1200_microcomp|clk_inferred_clock  |  33.829      8.544  |  No paths    -      |  No paths    -      |  No paths    -    
+==========================================================================================================================================================================
+ Note: 'No paths' indicates there are no paths in the design for that pair of clock edges.
+       'Diff grp' indicates that paths exist but the starting clock and ending clock are in different clock groups.
+
+
+
+Interface Information 
+*********************
+
+No IO constraint found
+
+
+
+====================================
+Detailed Report for Clock: uj11_hc1200_microcomp|clk_inferred_clock
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                                 Starting                                                                             Arrival           
+Instance                         Reference                                    Type        Pin      Net                Time        Slack 
+                                 Clock                                                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------
+system.cpu.engine.rom.lane_3     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA4     uword[31]          3.737       8.544 
+system.cpu.engine.rom.lane_3     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA5     uword[32]          3.737       8.544 
+system.cpu.engine.rom.lane_3     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA8     uword[35]          4.677       8.837 
+system.cpu.engine.rom.lane_3     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA6     uword[33]          3.737       9.777 
+system.cpu.engine.rom.lane_3     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA7     uword[34]          3.737       9.777 
+system.cpu.engine.rom.lane_0     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA6     debug_uword[6]     4.513       10.197
+system.cpu.engine.rom.lane_0     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC       DOA3     debug_uword[3]     4.441       10.269
+system.cpu.engine.ir[11]         uj11_hc1200_microcomp|clk_inferred_clock     FD1P3IX     Q        ir[11]             1.108       11.392
+system.cpu.engine.ir[13]         uj11_hc1200_microcomp|clk_inferred_clock     FD1P3IX     Q        ir[13]             1.044       11.456
+system.cpu.engine.ir[12]         uj11_hc1200_microcomp|clk_inferred_clock     FD1P3IX     Q        ir[12]             0.972       11.528
+========================================================================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                                 Starting                                                                                   Required          
+Instance                         Reference                                    Type      Pin      Net                        Time         Slack
+                                 Clock                                                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------
+system.cpu.engine.rom.lane_0     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA4     next_address[1]            32.147       8.544
+system.cpu.engine.rom.lane_1     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA4     next_address[1]            32.147       8.544
+system.cpu.engine.rom.lane_2     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA4     next_address[1]            32.147       8.544
+system.cpu.engine.rom.lane_3     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA4     next_address[1]            32.147       8.544
+system.cpu.engine.rom.lane_0     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA7     next_address_0_iv_i[4]     32.147       9.093
+system.cpu.engine.rom.lane_0     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA8     next_address[5]            32.147       9.093
+system.cpu.engine.rom.lane_1     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA7     next_address_0_iv_i[4]     32.147       9.093
+system.cpu.engine.rom.lane_1     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA8     next_address[5]            32.147       9.093
+system.cpu.engine.rom.lane_2     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA7     next_address_0_iv_i[4]     32.147       9.093
+system.cpu.engine.rom.lane_2     uj11_hc1200_microcomp|clk_inferred_clock     DP8KC     ADA8     next_address[5]            32.147       9.093
+==============================================================================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      33.829
+    - Setup time:                            1.682
+    + Clock delay at ending point:           0.000 (ideal)
+    = Required time:                         32.147
+
+    - Propagation time:                      23.603
+    - Clock delay at starting point:         0.000 (ideal)
+    = Slack (critical) :                     8.544
+
+    Number of logic level(s):                18
+    Starting point:                          system.cpu.engine.rom.lane_3 / DOA4
+    Ending point:                            system.cpu.engine.rom.lane_0 / ADA4
+    The start point is clocked by            uj11_hc1200_microcomp|clk_inferred_clock [rising] (rise=0.000 fall=16.915 period=33.829) on pin CLKA
+    The end   point is clocked by            uj11_hc1200_microcomp|clk_inferred_clock [rising] (rise=0.000 fall=16.915 period=33.829) on pin CLKA
+
+Instance / Net                                                  Pin      Pin               Arrival      No. of    
+Name                                               Type         Name     Dir     Delay     Time         Fan Out(s)
+------------------------------------------------------------------------------------------------------------------
+system.cpu.engine.rom.lane_3                       DP8KC        DOA4     Out     3.737     3.737 r      -         
+uword[31]                                          Net          -        -       -         -            18        
+system.cpu.engine.peripheral_resetc_2              ORCALUT4     A        In      0.000     3.737 r      -         
+system.cpu.engine.peripheral_resetc_2              ORCALUT4     Z        Out     1.233     4.969 f      -         
+writing_0                                          Net          -        -       -         -            6         
+system.cpu.engine.writing                          ORCALUT4     A        In      0.000     4.969 f      -         
+system.cpu.engine.writing                          ORCALUT4     Z        Out     1.313     6.282 f      -         
+writing                                            Net          -        -       -         -            17        
+system.cpu.engine.reading_RNIVF3761                ORCALUT4     B        In      0.000     6.282 f      -         
+system.cpu.engine.reading_RNIVF3761                ORCALUT4     Z        Out     1.281     7.563 f      -         
+memory_op_fc_2                                     Net          -        -       -         -            11        
+system.cpu.engine.stopped_RNIP2TLI1                ORCALUT4     C        In      0.000     7.563 f      -         
+system.cpu.engine.stopped_RNIP2TLI1                ORCALUT4     Z        Out     1.225     8.788 f      -         
+stopped_RNIP2TLI1                                  Net          -        -       -         -            5         
+system.cpu.engine.decode_wait_RNIG9N2C4            ORCALUT4     A        In      0.000     8.788 f      -         
+system.cpu.engine.decode_wait_RNIG9N2C4            ORCALUT4     Z        Out     1.313     10.101 f     -         
+decode_wait_RNIG9N2C4                              Net          -        -       -         -            16        
+system.cpu.engine.writing_RNI1BGTJ4                ORCALUT4     A        In      0.000     10.101 f     -         
+system.cpu.engine.writing_RNI1BGTJ4                ORCALUT4     Z        Out     0.449     10.549 f     -         
+writing_RNI1BGTJ4                                  Net          -        -       -         -            19        
+system.bus.rk_service_movb_RNIJOGTO5               ORCALUT4     B        In      0.000     10.549 f     -         
+system.bus.rk_service_movb_RNIJOGTO5               ORCALUT4     Z        Out     1.277     11.826 r     -         
+rk_service_movb_RNIJOGTO5                          Net          -        -       -         -            10        
+system.bus.io_page_RNISAG4C6                       ORCALUT4     A        In      0.000     11.826 r     -         
+system.bus.io_page_RNISAG4C6                       ORCALUT4     Z        Out     1.281     13.107 f     -         
+io_page_RNISAG4C6                                  Net          -        -       -         -            11        
+system.bus.rk_fixed_selecteddupdup                 ORCALUT4     A        In      0.000     13.107 f     -         
+system.bus.rk_fixed_selecteddupdup                 ORCALUT4     Z        Out     1.273     14.380 f     -         
+rk_fixed_selecteddupdup                            Net          -        -       -         -            9         
+system.bus.rk_fixed_selecteddupdup_RNIMA4K6        ORCALUT4     A        In      0.000     14.380 f     -         
+system.bus.rk_fixed_selecteddupdup_RNIMA4K6        ORCALUT4     Z        Out     0.449     14.829 f     -         
+rk_fixed_selecteddupdup_RNIMA4K6                   Net          -        -       -         -            1         
+system.cpu.engine.un1_mem_ack_fc_fc_0dup           ORCALUT4     B        In      0.000     14.829 f     -         
+system.cpu.engine.un1_mem_ack_fc_fc_0dup           ORCALUT4     Z        Out     1.153     15.981 r     -         
+un1_mem_ack_fc_fc_0dup                             Net          -        -       -         -            3         
+system.cpu.engine.frame_active_RNITKEJ5N           ORCALUT4     A        In      0.000     15.981 r     -         
+system.cpu.engine.frame_active_RNITKEJ5N           ORCALUT4     Z        Out     1.313     17.294 r     -         
+frame_active_RNITKEJ5N                             Net          -        -       -         -            17        
+system.cpu.engine.seq.next_address_2_sqmuxa        ORCALUT4     A        In      0.000     17.294 r     -         
+system.cpu.engine.seq.next_address_2_sqmuxa        ORCALUT4     Z        Out     1.017     18.311 r     -         
+next_address_2_sqmuxa                              Net          -        -       -         -            1         
+system.cpu.engine.seq.next_address_0_iv_1_1[1]     ORCALUT4     C        In      0.000     18.311 r     -         
+system.cpu.engine.seq.next_address_0_iv_1_1[1]     ORCALUT4     Z        Out     1.017     19.328 f     -         
+next_address_0_iv_1_1[1]                           Net          -        -       -         -            1         
+system.cpu.engine.seq.next_address_0_iv_1[1]       ORCALUT4     D        In      0.000     19.328 f     -         
+system.cpu.engine.seq.next_address_0_iv_1[1]       ORCALUT4     Z        Out     1.017     20.345 r     -         
+next_address_0_iv_1[1]                             Net          -        -       -         -            1         
+system.cpu.engine.seq.next_address_0_iv_3[1]       ORCALUT4     C        In      0.000     20.345 r     -         
+system.cpu.engine.seq.next_address_0_iv_3[1]       ORCALUT4     Z        Out     1.017     21.361 r     -         
+next_address_0_iv_3[1]                             Net          -        -       -         -            1         
+system.cpu.engine.seq.next_address_0_iv_6[1]       ORCALUT4     B        In      0.000     21.361 r     -         
+system.cpu.engine.seq.next_address_0_iv_6[1]       ORCALUT4     Z        Out     1.017     22.378 r     -         
+next_address_0_iv_6[1]                             Net          -        -       -         -            1         
+system.cpu.engine.seq.next_address_0_iv[1]         ORCALUT4     A        In      0.000     22.378 r     -         
+system.cpu.engine.seq.next_address_0_iv[1]         ORCALUT4     Z        Out     1.225     23.603 r     -         
+next_address[1]                                    Net          -        -       -         -            5         
+system.cpu.engine.rom.lane_0                       DP8KC        ADA4     In      0.000     23.603 r     -         
+==================================================================================================================
+
+
+
+##### END OF TIMING REPORT #####]
+
+Timing exceptions that could not be applied
+
+Finished final timing analysis (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 615MB peak: 615MB)
+
+
+Finished timing report (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 615MB peak: 615MB)
+
+---------------------------------------
+Resource Usage Report
+Part: lcmxo2_1200hc-4
+
+Register bits: 341 of 1280 (27%)
+PIC Latch:       0
+I/O cells:       21
+Block Rams : 7 of 7 (100%)
+
+
+Details:
+BB:             4
+CCU2D:          35
+DP8KC:          7
+DPR16X4C:       4
+FD1P3AX:        19
+FD1P3BX:        10
+FD1P3DX:        58
+FD1P3IX:        157
+FD1P3JX:        15
+FD1S3AX:        4
+FD1S3BX:        3
+FD1S3DX:        7
+FD1S3IX:        57
+FD1S3JX:        2
+GSR:            1
+IB:             4
+IFS1P3BX:       1
+IFS1P3IX:       6
+INV:            5
+OB:             13
+OFS1P3IX:       1
+OFS1P3JX:       1
+ORCALUT4:       1142
+OSCH:           1
+PFUMX:          66
+PUR:            1
+SPR16X4C:       4
+VHI:            22
+VLO:            22
+Mapper successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 526MB peak: 615MB)
+
+Process took 0h:00m:04s realtime, 0h:00m:04s cputime
+# Thu Sep 10 14:32:37 2026
+
+###########################################################]

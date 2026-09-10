@@ -1,0 +1,1725 @@
+
+Loading design for application trce from file cp37e_impl1.ncd.
+Design name: uj11_hc1200_microcomp
+NCD version: 3.3
+Vendor:      LATTICE
+Device:      LCMXO2-1200HC
+Package:     QFN32
+Performance: 4
+Loading device for application trce from file 'xo2c1200.nph' in environment: /home/sash/.local/lscc/diamond/3.14/ispfpga.
+Package Status:                     Final          Version 1.44.
+Performance Hardware Data Status:   Final          Version 36.4.
+Setup and Hold Report
+
+--------------------------------------------------------------------------------
+Lattice TRACE Report - Setup, Version Diamond (64-bit) 3.14.0.75.2
+Thu Sep 10 14:32:47 2026
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Report Information
+------------------
+Command line:    trce -v 10 -c -u 0 -gt -sethld -sp 4 -sphld m -o cp37e_impl1.twr cp37e_impl1.ncd cp37e_impl1.prf 
+Design file:     cp37e_impl1.ncd
+Preference file: cp37e_impl1.prf
+Device,speed:    LCMXO2-1200HC,4
+Report level:    verbose report, limited to 10 items per preference
+--------------------------------------------------------------------------------
+
+BLOCK ASYNCPATHS
+BLOCK RESETPATHS
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Preference: FREQUENCY NET "clk" 29.560000 MHz ;
+            4096 items scored, 0 timing errors detected.
+--------------------------------------------------------------------------------
+
+
+Passed: The following path meets requirements by 0.855ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (to clk +)
+
+   Delay:              33.000ns  (40.6% logic, 59.4% route), 18 logic levels.
+
+ Constraint Details:
+
+     33.000ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_3 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 0.855ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10C.D1 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10C.D1 to      R2C10C.F1 system/cpu/engine/seq/SLICE_484
+ROUTE        10     1.016      R2C10C.F1 to      R2C11B.A0 system/cpu/engine/seq/next_address_6_sqmuxa
+CTOF_DEL    ---     0.495      R2C11B.A0 to      R2C11B.F0 system/cpu/engine/seq/SLICE_654
+ROUTE         1     0.967      R2C11B.F0 to      R2C11D.A1 system/cpu/engine/seq/link_m[7]
+CTOF_DEL    ---     0.495      R2C11D.A1 to      R2C11D.F1 system/cpu/engine/seq/SLICE_480
+ROUTE         1     0.436      R2C11D.F1 to      R2C11D.C0 system/cpu/engine/seq/next_address_1_iv_2[7]
+CTOF_DEL    ---     0.495      R2C11D.C0 to      R2C11D.F0 system/cpu/engine/seq/SLICE_480
+ROUTE         1     1.506      R2C11D.F0 to       R3C8C.C1 system/cpu/engine/seq/next_address_1_iv_4[7]
+CTOF_DEL    ---     0.495       R3C8C.C1 to       R3C8C.F1 system/cpu/engine/seq/SLICE_179
+ROUTE         5     2.319       R3C8C.F1 to *R_R6C17.ADA10 system/cpu/engine/next_address[7] (to clk)
+                  --------
+                   33.000   (40.6% logic, 59.4% route), 18 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.855ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_0(ASIC)  (to clk +)
+
+   Delay:              33.000ns  (40.6% logic, 59.4% route), 18 logic levels.
+
+ Constraint Details:
+
+     33.000ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 0.855ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10C.D1 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10C.D1 to      R2C10C.F1 system/cpu/engine/seq/SLICE_484
+ROUTE        10     1.016      R2C10C.F1 to      R2C11B.A0 system/cpu/engine/seq/next_address_6_sqmuxa
+CTOF_DEL    ---     0.495      R2C11B.A0 to      R2C11B.F0 system/cpu/engine/seq/SLICE_654
+ROUTE         1     0.967      R2C11B.F0 to      R2C11D.A1 system/cpu/engine/seq/link_m[7]
+CTOF_DEL    ---     0.495      R2C11D.A1 to      R2C11D.F1 system/cpu/engine/seq/SLICE_480
+ROUTE         1     0.436      R2C11D.F1 to      R2C11D.C0 system/cpu/engine/seq/next_address_1_iv_2[7]
+CTOF_DEL    ---     0.495      R2C11D.C0 to      R2C11D.F0 system/cpu/engine/seq/SLICE_480
+ROUTE         1     1.506      R2C11D.F0 to       R3C8C.C1 system/cpu/engine/seq/next_address_1_iv_4[7]
+CTOF_DEL    ---     0.495       R3C8C.C1 to       R3C8C.F1 system/cpu/engine/seq/SLICE_179
+ROUTE         5     2.319       R3C8C.F1 to *R_R6C20.ADA10 system/cpu/engine/next_address[7] (to clk)
+                  --------
+                   33.000   (40.6% logic, 59.4% route), 18 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C20.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.973ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_1(ASIC)  (to clk +)
+
+   Delay:              32.882ns  (40.7% logic, 59.3% route), 18 logic levels.
+
+ Constraint Details:
+
+     32.882ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_1 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 0.973ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_1:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10C.D1 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10C.D1 to      R2C10C.F1 system/cpu/engine/seq/SLICE_484
+ROUTE        10     1.016      R2C10C.F1 to      R2C11B.A0 system/cpu/engine/seq/next_address_6_sqmuxa
+CTOF_DEL    ---     0.495      R2C11B.A0 to      R2C11B.F0 system/cpu/engine/seq/SLICE_654
+ROUTE         1     0.967      R2C11B.F0 to      R2C11D.A1 system/cpu/engine/seq/link_m[7]
+CTOF_DEL    ---     0.495      R2C11D.A1 to      R2C11D.F1 system/cpu/engine/seq/SLICE_480
+ROUTE         1     0.436      R2C11D.F1 to      R2C11D.C0 system/cpu/engine/seq/next_address_1_iv_2[7]
+CTOF_DEL    ---     0.495      R2C11D.C0 to      R2C11D.F0 system/cpu/engine/seq/SLICE_480
+ROUTE         1     1.506      R2C11D.F0 to       R3C8C.C1 system/cpu/engine/seq/next_address_1_iv_4[7]
+CTOF_DEL    ---     0.495       R3C8C.C1 to       R3C8C.F1 system/cpu/engine/seq/SLICE_179
+ROUTE         5     2.201       R3C8C.F1 to EBR_R6C4.ADA10 system/cpu/engine/next_address[7] (to clk)
+                  --------
+                   32.882   (40.7% logic, 59.3% route), 18 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_1:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to  EBR_R6C4.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.066ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_0(ASIC)  (to clk +)
+
+   Delay:              32.789ns  (42.4% logic, 57.6% route), 19 logic levels.
+
+ Constraint Details:
+
+     32.789ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.066ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10D.D0 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10D.D0 to      R2C10D.F0 system/cpu/engine/seq/SLICE_485
+ROUTE         1     0.436      R2C10D.F0 to      R2C10D.C1 system/cpu/engine/seq/next_address_2_sqmuxa
+CTOF_DEL    ---     0.495      R2C10D.C1 to      R2C10D.F1 system/cpu/engine/seq/SLICE_485
+ROUTE         1     0.958      R2C10D.F1 to      R2C13B.D1 system/cpu/engine/seq/next_address_0_iv_1_1[1]
+CTOF_DEL    ---     0.495      R2C13B.D1 to      R2C13B.F1 system/cpu/engine/seq/SLICE_623
+ROUTE         1     0.315      R2C13B.F1 to      R2C13C.D1 system/cpu/engine/seq/next_address_0_iv_1[1]
+CTOF_DEL    ---     0.495      R2C13C.D1 to      R2C13C.F1 system/cpu/engine/seq/SLICE_467
+ROUTE         1     0.986      R2C13C.F1 to      R2C11A.A0 system/cpu/engine/seq/next_address_0_iv_3[1]
+CTOF_DEL    ---     0.495      R2C11A.A0 to      R2C11A.F0 system/cpu/engine/seq/SLICE_475
+ROUTE         1     1.023      R2C11A.F0 to      R4C11B.B1 system/cpu/engine/seq/next_address_0_iv_6[1]
+CTOF_DEL    ---     0.495      R4C11B.B1 to      R4C11B.F1 system/cpu/engine/seq/SLICE_176
+ROUTE         5     1.820      R4C11B.F1 to EBR_R6C20.ADA4 system/cpu/engine/next_address[1] (to clk)
+                  --------
+                   32.789   (42.4% logic, 57.6% route), 19 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C20.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.129ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_0(ASIC)  (to clk +)
+
+   Delay:              32.726ns  (40.8% logic, 59.2% route), 17 logic levels.
+
+ Constraint Details:
+
+     32.726ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.129ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.166      R4C11C.F1 to       R5C8B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOOFX_DEL  ---     0.721       R5C8B.D1 to     R5C8B.OFX0 system/cpu/engine/seq/predicates_pmux_6/SLICE_261
+ROUTE         1     0.626     R5C8B.OFX0 to       R5C8D.D0 system/cpu/engine/seq/N_71
+CTOF_DEL    ---     0.495       R5C8D.D0 to       R5C8D.F0 system/cpu/engine/seq/SLICE_482
+ROUTE         2     1.086       R5C8D.F0 to      R4C10B.C1 system/cpu/engine/seq/condition
+CTOOFX_DEL  ---     0.721      R4C10B.C1 to    R4C10B.OFX0 system/cpu/engine/seq/next_address_3_sqmuxa/SLICE_260
+ROUTE        10     1.605    R4C10B.OFX0 to       R3C7C.A1 system/cpu/engine/seq/next_address_3_sqmuxa
+CTOF_DEL    ---     0.495       R3C7C.A1 to       R3C7C.F1 system/cpu/engine/seq/SLICE_649
+ROUTE         1     1.336       R3C7C.F1 to      R3C10A.B1 system/cpu/engine/seq/un1_upc_m[5]
+CTOF_DEL    ---     0.495      R3C10A.B1 to      R3C10A.F1 system/cpu/engine/seq/SLICE_178
+ROUTE         5     2.342      R3C10A.F1 to EBR_R6C20.ADA8 system/cpu/engine/next_address[5] (to clk)
+                  --------
+                   32.726   (40.8% logic, 59.2% route), 17 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C20.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.140ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_1(ASIC)  (to clk +)
+
+   Delay:              32.715ns  (42.5% logic, 57.5% route), 19 logic levels.
+
+ Constraint Details:
+
+     32.715ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_1 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.140ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_1:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10D.D0 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10D.D0 to      R2C10D.F0 system/cpu/engine/seq/SLICE_485
+ROUTE         1     0.436      R2C10D.F0 to      R2C10D.C1 system/cpu/engine/seq/next_address_2_sqmuxa
+CTOF_DEL    ---     0.495      R2C10D.C1 to      R2C10D.F1 system/cpu/engine/seq/SLICE_485
+ROUTE         1     0.958      R2C10D.F1 to      R2C13B.D1 system/cpu/engine/seq/next_address_0_iv_1_1[1]
+CTOF_DEL    ---     0.495      R2C13B.D1 to      R2C13B.F1 system/cpu/engine/seq/SLICE_623
+ROUTE         1     0.315      R2C13B.F1 to      R2C13C.D1 system/cpu/engine/seq/next_address_0_iv_1[1]
+CTOF_DEL    ---     0.495      R2C13C.D1 to      R2C13C.F1 system/cpu/engine/seq/SLICE_467
+ROUTE         1     0.986      R2C13C.F1 to      R2C11A.A0 system/cpu/engine/seq/next_address_0_iv_3[1]
+CTOF_DEL    ---     0.495      R2C11A.A0 to      R2C11A.F0 system/cpu/engine/seq/SLICE_475
+ROUTE         1     1.023      R2C11A.F0 to      R4C11B.B1 system/cpu/engine/seq/next_address_0_iv_6[1]
+CTOF_DEL    ---     0.495      R4C11B.B1 to      R4C11B.F1 system/cpu/engine/seq/SLICE_176
+ROUTE         5     1.746      R4C11B.F1 to  EBR_R6C4.ADA4 system/cpu/engine/next_address[1] (to clk)
+                  --------
+                   32.715   (42.5% logic, 57.5% route), 19 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_1:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to  EBR_R6C4.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.147ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (to clk +)
+
+   Delay:              32.708ns  (42.5% logic, 57.5% route), 19 logic levels.
+
+ Constraint Details:
+
+     32.708ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_3 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.147ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10D.D0 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10D.D0 to      R2C10D.F0 system/cpu/engine/seq/SLICE_485
+ROUTE         1     0.436      R2C10D.F0 to      R2C10D.C1 system/cpu/engine/seq/next_address_2_sqmuxa
+CTOF_DEL    ---     0.495      R2C10D.C1 to      R2C10D.F1 system/cpu/engine/seq/SLICE_485
+ROUTE         1     0.958      R2C10D.F1 to      R2C13B.D1 system/cpu/engine/seq/next_address_0_iv_1_1[1]
+CTOF_DEL    ---     0.495      R2C13B.D1 to      R2C13B.F1 system/cpu/engine/seq/SLICE_623
+ROUTE         1     0.315      R2C13B.F1 to      R2C13C.D1 system/cpu/engine/seq/next_address_0_iv_1[1]
+CTOF_DEL    ---     0.495      R2C13C.D1 to      R2C13C.F1 system/cpu/engine/seq/SLICE_467
+ROUTE         1     0.986      R2C13C.F1 to      R2C11A.A0 system/cpu/engine/seq/next_address_0_iv_3[1]
+CTOF_DEL    ---     0.495      R2C11A.A0 to      R2C11A.F0 system/cpu/engine/seq/SLICE_475
+ROUTE         1     1.023      R2C11A.F0 to      R4C11B.B1 system/cpu/engine/seq/next_address_0_iv_6[1]
+CTOF_DEL    ---     0.495      R4C11B.B1 to      R4C11B.F1 system/cpu/engine/seq/SLICE_176
+ROUTE         5     1.739      R4C11B.F1 to EBR_R6C17.ADA4 system/cpu/engine/next_address[1] (to clk)
+                  --------
+                   32.708   (42.5% logic, 57.5% route), 19 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.256ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_0(ASIC)  (to clk +)
+
+   Delay:              32.599ns  (41.1% logic, 58.9% route), 18 logic levels.
+
+ Constraint Details:
+
+     32.599ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.256ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13A.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13A.C1 to      R5C13A.F1 system/bus/SLICE_439
+ROUTE        17     0.651      R5C13A.F1 to      R5C13A.D0 system/panel_selecteddupdup
+CTOF_DEL    ---     0.495      R5C13A.D0 to      R5C13A.F0 system/bus/SLICE_439
+ROUTE         1     0.766      R5C13A.F0 to      R5C11B.C0 system/bus/acknowledge_fc_fc_1dupdup_0
+CTOF_DEL    ---     0.495      R5C11B.C0 to      R5C11B.F0 system/SLICE_320
+ROUTE         2     0.632      R5C11B.F0 to      R4C11C.D1 system/acknowledge_fc_fc_1dupdup_2
+CTOF_DEL    ---     0.495      R4C11C.D1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10C.D1 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10C.D1 to      R2C10C.F1 system/cpu/engine/seq/SLICE_484
+ROUTE        10     1.016      R2C10C.F1 to      R2C11B.A0 system/cpu/engine/seq/next_address_6_sqmuxa
+CTOF_DEL    ---     0.495      R2C11B.A0 to      R2C11B.F0 system/cpu/engine/seq/SLICE_654
+ROUTE         1     0.967      R2C11B.F0 to      R2C11D.A1 system/cpu/engine/seq/link_m[7]
+CTOF_DEL    ---     0.495      R2C11D.A1 to      R2C11D.F1 system/cpu/engine/seq/SLICE_480
+ROUTE         1     0.436      R2C11D.F1 to      R2C11D.C0 system/cpu/engine/seq/next_address_1_iv_2[7]
+CTOF_DEL    ---     0.495      R2C11D.C0 to      R2C11D.F0 system/cpu/engine/seq/SLICE_480
+ROUTE         1     1.506      R2C11D.F0 to       R3C8C.C1 system/cpu/engine/seq/next_address_1_iv_4[7]
+CTOF_DEL    ---     0.495       R3C8C.C1 to       R3C8C.F1 system/cpu/engine/seq/SLICE_179
+ROUTE         5     2.319       R3C8C.F1 to *R_R6C20.ADA10 system/cpu/engine/next_address[7] (to clk)
+                  --------
+                   32.599   (41.1% logic, 58.9% route), 18 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C20.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.256ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (to clk +)
+
+   Delay:              32.599ns  (41.1% logic, 58.9% route), 18 logic levels.
+
+ Constraint Details:
+
+     32.599ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_3 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.256ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13A.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13A.C1 to      R5C13A.F1 system/bus/SLICE_439
+ROUTE        17     0.651      R5C13A.F1 to      R5C13A.D0 system/panel_selecteddupdup
+CTOF_DEL    ---     0.495      R5C13A.D0 to      R5C13A.F0 system/bus/SLICE_439
+ROUTE         1     0.766      R5C13A.F0 to      R5C11B.C0 system/bus/acknowledge_fc_fc_1dupdup_0
+CTOF_DEL    ---     0.495      R5C11B.C0 to      R5C11B.F0 system/SLICE_320
+ROUTE         2     0.632      R5C11B.F0 to      R4C11C.D1 system/acknowledge_fc_fc_1dupdup_2
+CTOF_DEL    ---     0.495      R4C11C.D1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.088      R4C11C.F1 to      R2C12B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOF_DEL    ---     0.495      R2C12B.D1 to      R2C12B.F1 system/cpu/engine/SLICE_462
+ROUTE        17     1.060      R2C12B.F1 to      R2C10C.D1 system/cpu/engine/frame_active_RNITKEJ5N
+CTOF_DEL    ---     0.495      R2C10C.D1 to      R2C10C.F1 system/cpu/engine/seq/SLICE_484
+ROUTE        10     1.016      R2C10C.F1 to      R2C11B.A0 system/cpu/engine/seq/next_address_6_sqmuxa
+CTOF_DEL    ---     0.495      R2C11B.A0 to      R2C11B.F0 system/cpu/engine/seq/SLICE_654
+ROUTE         1     0.967      R2C11B.F0 to      R2C11D.A1 system/cpu/engine/seq/link_m[7]
+CTOF_DEL    ---     0.495      R2C11D.A1 to      R2C11D.F1 system/cpu/engine/seq/SLICE_480
+ROUTE         1     0.436      R2C11D.F1 to      R2C11D.C0 system/cpu/engine/seq/next_address_1_iv_2[7]
+CTOF_DEL    ---     0.495      R2C11D.C0 to      R2C11D.F0 system/cpu/engine/seq/SLICE_480
+ROUTE         1     1.506      R2C11D.F0 to       R3C8C.C1 system/cpu/engine/seq/next_address_1_iv_4[7]
+CTOF_DEL    ---     0.495       R3C8C.C1 to       R3C8C.F1 system/cpu/engine/seq/SLICE_179
+ROUTE         5     2.319       R3C8C.F1 to *R_R6C17.ADA10 system/cpu/engine/next_address[7] (to clk)
+                  --------
+                   32.599   (41.1% logic, 58.9% route), 18 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 1.359ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           system/cpu/engine/rom/lane_3(ASIC)  (from clk +)
+   Destination:    DP8KC      Port           system/cpu/engine/rom/lane_0(ASIC)  (to clk +)
+
+   Delay:              32.496ns  (41.1% logic, 58.9% route), 17 logic levels.
+
+ Constraint Details:
+
+     32.496ns physical path delay system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0 meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.026ns ADDR_SET requirement (totaling 33.855ns) by 1.359ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/rom/lane_3 to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C17.CLKA to EBR_R6C17.DOA4 system/cpu/engine/rom/lane_3 (from clk)
+ROUTE        19     2.008 EBR_R6C17.DOA4 to      R5C12A.C1 system/cpu/engine/uword[31]
+CTOF_DEL    ---     0.495      R5C12A.C1 to      R5C12A.F1 system/cpu/engine/SLICE_491
+ROUTE         6     1.383      R5C12A.F1 to      R5C14C.B1 system/cpu/engine/writing_0
+CTOF_DEL    ---     0.495      R5C14C.B1 to      R5C14C.F1 system/SLICE_388
+ROUTE        17     1.040      R5C14C.F1 to      R5C15D.A1 system/writing
+CTOF_DEL    ---     0.495      R5C15D.A1 to      R5C15D.F1 system/cpu/engine/SLICE_340
+ROUTE        11     0.670      R5C15D.F1 to      R5C16A.D1 system/cpu/engine/memory_op_fc_2
+CTOF_DEL    ---     0.495      R5C16A.D1 to      R5C16A.F1 system/cpu/engine/SLICE_498
+ROUTE         5     0.651      R5C16A.F1 to      R5C16D.D1 system/stopped_RNIP2TLI1
+CTOF_DEL    ---     0.495      R5C16D.D1 to      R5C16D.F1 system/SLICE_387
+ROUTE        20     0.691      R5C16D.F1 to      R5C18D.D1 system/decode_wait_RNIG9N2C4
+CTOF_DEL    ---     0.495      R5C18D.D1 to      R5C18D.F1 system/SLICE_366
+ROUTE        19     1.538      R5C18D.F1 to      R5C14B.A1 system/writing_RNI1BGTJ4
+CTOF_DEL    ---     0.495      R5C14B.A1 to      R5C14B.F1 system/bus/SLICE_394
+ROUTE        10     0.783      R5C14B.F1 to      R5C13C.C1 system/bus/rk_service_movb_RNIJOGTO5
+CTOF_DEL    ---     0.495      R5C13C.C1 to      R5C13C.F1 system/bus/SLICE_405
+ROUTE        11     1.017      R5C13C.F1 to      R5C11C.D1 system/bus/io_page_RNISAG4C6
+CTOF_DEL    ---     0.495      R5C11C.D1 to      R5C11C.F1 system/bus/SLICE_300
+ROUTE         9     0.997      R5C11C.F1 to      R4C11C.A0 system/rk_fixed_selecteddupdup
+CTOF_DEL    ---     0.495      R4C11C.A0 to      R4C11C.F0 system/SLICE_428
+ROUTE         1     0.436      R4C11C.F0 to      R4C11C.C1 system/rk_fixed_selecteddupdup_RNIMA4K6
+CTOF_DEL    ---     0.495      R4C11C.C1 to      R4C11C.F1 system/SLICE_428
+ROUTE         3     1.166      R4C11C.F1 to       R5C8B.D1 system/cpu/engine/un1_mem_ack_fc_fc_0dup
+CTOOFX_DEL  ---     0.721       R5C8B.D1 to     R5C8B.OFX0 system/cpu/engine/seq/predicates_pmux_6/SLICE_261
+ROUTE         1     0.626     R5C8B.OFX0 to       R5C8D.D0 system/cpu/engine/seq/N_71
+CTOF_DEL    ---     0.495       R5C8D.D0 to       R5C8D.F0 system/cpu/engine/seq/SLICE_482
+ROUTE         2     1.086       R5C8D.F0 to      R4C10B.C1 system/cpu/engine/seq/condition
+CTOOFX_DEL  ---     0.721      R4C10B.C1 to    R4C10B.OFX0 system/cpu/engine/seq/next_address_3_sqmuxa/SLICE_260
+ROUTE        10     1.480    R4C10B.OFX0 to       R3C8D.D1 system/cpu/engine/seq/next_address_3_sqmuxa
+CTOF_DEL    ---     0.495       R3C8D.D1 to       R3C8D.F1 system/cpu/engine/seq/SLICE_237
+ROUTE         1     1.004       R3C8D.F1 to       R3C8B.B1 system/cpu/engine/seq/un1_upc_m[9]
+CTOF_DEL    ---     0.495       R3C8B.B1 to       R3C8B.F1 system/cpu/engine/seq/SLICE_180
+ROUTE         5     2.569       R3C8B.F1 to *R_R6C20.ADA12 system/cpu/engine/next_address[9] (to clk)
+                  --------
+                   32.496   (41.1% logic, 58.9% route), 17 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/rom/lane_3:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C17.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/rom/lane_0:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     3.714        OSC.OSC to EBR_R6C20.CLKA clk
+                  --------
+                    3.714   (0.0% logic, 100.0% route), 0 logic levels.
+
+Report:   30.327MHz is the maximum frequency for this preference.
+
+
+================================================================================
+Preference: Unconstrained: CLOCK_DOMAIN
+            0 unconstrained paths found
+--------------------------------------------------------------------------------
+
+
+================================================================================
+Preference: Unconstrained: INPUT_SETUP
+            8 unconstrained paths found
+--------------------------------------------------------------------------------
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "res" CLKNET "clk" 
+
+Report:    5.074ns delay res to SLICE_393 (4.341ns delay and 0.733ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI res
+ROUTE         1     3.209        4.PADDI to     R7C14B.LSR res_c (to clk)
+                  --------
+                    4.341   (26.1% logic, 73.9% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "gpio_key_row[0]" CLKNET "clk" 
+
+Report:    2.292ns delay gpio_key_row[0] to gpio_key_row[0]_MGIOL (1.697ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         29.PAD to       29.PADDI gpio_key_row[0]
+ROUTE         1     0.565       29.PADDI to    IOL_T11D.DI gpio_key_row_in[0] (to clk)
+                  --------
+                    1.697   (66.7% logic, 33.3% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "gpio_key_row[1]" CLKNET "clk" 
+
+Report:    2.292ns delay gpio_key_row[1] to gpio_key_row[1]_MGIOL (1.697ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         30.PAD to       30.PADDI gpio_key_row[1]
+ROUTE         1     0.565       30.PADDI to    IOL_T11C.DI gpio_key_row_in[1] (to clk)
+                  --------
+                    1.697   (66.7% logic, 33.3% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "gpio_key_row[2]" CLKNET "clk" 
+
+Report:    2.292ns delay gpio_key_row[2] to gpio_key_row[2]_MGIOL (1.697ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         32.PAD to       32.PADDI gpio_key_row[2]
+ROUTE         1     0.565       32.PADDI to    IOL_T10D.DI gpio_key_row_in[2] (to clk)
+                  --------
+                    1.697   (66.7% logic, 33.3% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "gpio_key_row[3]" CLKNET "clk" 
+
+Report:    2.292ns delay gpio_key_row[3] to gpio_key_row[3]_MGIOL (1.697ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          1.PAD to        1.PADDI gpio_key_row[3]
+ROUTE         1     0.565        1.PADDI to    IOL_T10C.DI gpio_key_row_in[3] (to clk)
+                  --------
+                    1.697   (66.7% logic, 33.3% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "rx" CLKNET "clk" 
+
+Report:    2.292ns delay rx to rx_MGIOL (1.697ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         25.PAD to       25.PADDI rx
+ROUTE         1     0.565       25.PADDI to    IOL_T15D.DI rx_c (to clk)
+                  --------
+                    1.697   (66.7% logic, 33.3% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "sd_miso" CLKNET "clk" 
+
+Report:    2.292ns delay sd_miso to sd_miso_MGIOL (1.697ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         28.PAD to       28.PADDI sd_miso
+ROUTE         1     0.565       28.PADDI to    IOL_T12C.DI sd_miso_c (to clk)
+                  --------
+                    1.697   (66.7% logic, 33.3% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "gpio_miso" CLKNET "clk" 
+
+Report:    2.111ns delay gpio_miso to gpio_miso_MGIOL (1.516ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         10.PAD to       10.PADDI gpio_miso
+ROUTE         1     0.384       10.PADDI to     IOL_B6D.DI gpio_miso_c (to clk)
+                  --------
+                    1.516   (74.7% logic, 25.3% route), 1 logic levels.
+
+
+================================================================================
+Preference: Unconstrained: CLOCK_TO_OUT
+            18 unconstrained paths found
+--------------------------------------------------------------------------------
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_key_row[3]" CLKNET "clk" 
+
+Report:    8.134ns delay system/SLICE_144 to gpio_key_row[3]
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C16D.CLK to      R7C16D.Q0 system/SLICE_144 (from clk)
+ROUTE         3     3.502      R7C16D.Q0 to        1.PADDT system/bus/host_miso_oe
+TDTS_DEL    ---     4.180        1.PADDT to          1.PAD gpio_key_row[3]
+                  --------
+                    8.134   (56.9% logic, 43.1% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "tx" CLKNET "clk" 
+
+Report:    6.815ns delay system/bus/fixed_uart.console/SLICE_105 to tx
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R3C20D.CLK to      R3C20D.Q0 system/bus/fixed_uart.console/SLICE_105 (from clk)
+ROUTE        20     1.551      R3C20D.Q0 to      R4C19D.D1 system/bus/fixed_uart.console/tx_busy
+CTOF_DEL    ---     0.495      R4C19D.D1 to      R4C19D.F1 system/bus/fixed_uart.console/SLICE_118
+ROUTE         1     1.520      R4C19D.F1 to       23.PADDO tx_c
+DOPAD_DEL   ---     2.797       23.PADDO to         23.PAD tx
+                  --------
+                    6.815   (54.9% logic, 45.1% route), 3 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "sd_sck" CLKNET "clk" 
+
+Report:    6.592ns delay system/bus/byte_sd/SLICE_69 to sd_sck
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C21C.CLK to      R7C21C.Q0 system/bus/byte_sd/SLICE_69 (from clk)
+ROUTE         9     3.343      R7C21C.Q0 to       27.PADDO sd_sck_c
+DOPAD_DEL   ---     2.797       27.PADDO to         27.PAD sd_sck
+                  --------
+                    6.592   (49.3% logic, 50.7% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_rs" CLKNET "clk" 
+
+Report:    6.459ns delay system/SLICE_65 to gpio_rs
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C18C.CLK to      R7C18C.Q0 system/SLICE_65 (from clk)
+ROUTE         3     3.210      R7C18C.Q0 to       11.PADDO gpio_rs_c
+DOPAD_DEL   ---     2.797       11.PADDO to         11.PAD gpio_rs
+                  --------
+                    6.459   (50.3% logic, 49.7% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_clk" CLKNET "clk" 
+
+Report:    6.335ns delay system/SLICE_61 to gpio_clk
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C19A.CLK to      R7C19A.Q0 system/SLICE_61 (from clk)
+ROUTE         3     3.086      R7C19A.Q0 to       12.PADDO gpio_clk_c
+DOPAD_DEL   ---     2.797       12.PADDO to         12.PAD gpio_clk
+                  --------
+                    6.335   (51.3% logic, 48.7% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "sd_mosi" CLKNET "clk" 
+
+Report:    6.321ns delay system/bus/byte_sd/SLICE_76 to sd_mosi
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C20D.CLK to      R8C20D.Q0 system/bus/byte_sd/SLICE_76 (from clk)
+ROUTE        23     1.237      R8C20D.Q0 to      R5C19A.D1 system/bus/byte_sd/busy
+CTOF_DEL    ---     0.495      R5C19A.D1 to      R5C19A.F1 system/SLICE_64
+ROUTE         1     1.340      R5C19A.F1 to       21.PADDO sd_mosi_c
+DOPAD_DEL   ---     2.797       21.PADDO to         21.PAD sd_mosi
+                  --------
+                    6.321   (59.2% logic, 40.8% route), 3 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "tx" CLKNET "clk" 
+
+Report:    6.228ns delay system/bus/fixed_uart.console/SLICE_114 to tx
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R4C20A.CLK to      R4C20A.Q0 system/bus/fixed_uart.console/SLICE_114 (from clk)
+ROUTE         1     0.964      R4C20A.Q0 to      R4C19D.A1 system/bus/fixed_uart.console/tx_shift[0]
+CTOF_DEL    ---     0.495      R4C19D.A1 to      R4C19D.F1 system/bus/fixed_uart.console/SLICE_118
+ROUTE         1     1.520      R4C19D.F1 to       23.PADDO tx_c
+DOPAD_DEL   ---     2.797       23.PADDO to         23.PAD tx
+                  --------
+                    6.228   (60.1% logic, 39.9% route), 3 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "sd_mosi" CLKNET "clk" 
+
+Report:    6.051ns delay system/bus/byte_sd/SLICE_86 to sd_mosi
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R5C19D.CLK to      R5C19D.Q1 system/bus/byte_sd/SLICE_86 (from clk)
+ROUTE         1     0.967      R5C19D.Q1 to      R5C19A.A1 system/bus/byte_sd/tx_shift[7]
+CTOF_DEL    ---     0.495      R5C19A.A1 to      R5C19A.F1 system/SLICE_64
+ROUTE         1     1.340      R5C19A.F1 to       21.PADDO sd_mosi_c
+DOPAD_DEL   ---     2.797       21.PADDO to         21.PAD sd_mosi
+                  --------
+                    6.051   (61.9% logic, 38.1% route), 3 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "tx" CLKNET "clk" 
+
+Report:    6.015ns delay system/bus/fixed_uart.console/SLICE_355 to tx
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R3C19B.CLK to      R3C19B.Q0 system/bus/fixed_uart.console/SLICE_355 (from clk)
+ROUTE         2     0.751      R3C19B.Q0 to      R4C19D.C1 system/bus/fixed_uart.console/tx_break
+CTOF_DEL    ---     0.495      R4C19D.C1 to      R4C19D.F1 system/bus/fixed_uart.console/SLICE_118
+ROUTE         1     1.520      R4C19D.F1 to       23.PADDO tx_c
+DOPAD_DEL   ---     2.797       23.PADDO to         23.PAD tx
+                  --------
+                    6.015   (62.2% logic, 37.8% route), 3 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_msck" CLKNET "clk" 
+
+Report:    5.923ns delay system/bus/guest_memory/SLICE_63 to gpio_msck
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452    R10C20A.CLK to     R10C20A.Q0 system/bus/guest_memory/SLICE_63 (from clk)
+ROUTE         4     2.674     R10C20A.Q0 to        9.PADDO gpio_msck_c
+DOPAD_DEL   ---     2.797        9.PADDO to          9.PAD gpio_msck
+                  --------
+                    5.923   (54.9% logic, 45.1% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "sd_cs_n" CLKNET "clk" 
+
+Report:    5.885ns delay system/SLICE_68 to sd_cs_n
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C10A.CLK to      R8C10A.Q0 system/SLICE_68 (from clk)
+ROUTE         2     2.636      R8C10A.Q0 to        5.PADDO sd_cs_n_c
+DOPAD_DEL   ---     2.797        5.PADDO to          5.PAD sd_cs_n
+                  --------
+                    5.885   (55.2% logic, 44.8% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_blank" CLKNET "clk" 
+
+Report:    5.853ns delay system/SLICE_59 to gpio_blank
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C10B.CLK to      R7C10B.Q0 system/SLICE_59 (from clk)
+ROUTE         3     2.604      R7C10B.Q0 to       13.PADDO gpio_blank_c
+DOPAD_DEL   ---     2.797       13.PADDO to         13.PAD gpio_blank
+                  --------
+                    5.853   (55.5% logic, 44.5% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_key_row[3]" CLKNET "clk" 
+
+Report:    5.698ns delay system/SLICE_66 to gpio_key_row[3]
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C15A.CLK to      R7C15A.Q0 system/SLICE_66 (from clk)
+ROUTE         3     2.449      R7C15A.Q0 to        1.PADDO host_miso
+DOPAD_DEL   ---     2.797        1.PADDO to          1.PAD gpio_key_row[3]
+                  --------
+                    5.698   (57.0% logic, 43.0% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_din" CLKNET "clk" 
+
+Report:    5.647ns delay system/SLICE_62 to gpio_din
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C16D.CLK to      R8C16D.Q0 system/SLICE_62 (from clk)
+ROUTE         3     2.398      R8C16D.Q0 to       16.PADDO gpio_din_c
+DOPAD_DEL   ---     2.797       16.PADDO to         16.PAD gpio_din
+                  --------
+                    5.647   (57.5% logic, 42.5% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_ce" CLKNET "clk" 
+
+Report:    4.906ns delay system/SLICE_60 to gpio_ce
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R9C11D.CLK to      R9C11D.Q0 system/SLICE_60 (from clk)
+ROUTE         3     1.657      R9C11D.Q0 to       14.PADDO gpio_ce_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD gpio_ce
+                  --------
+                    4.906   (66.2% logic, 33.8% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_reg_latch" CLKNET "clk" 
+
+Report:    4.482ns delay system/SLICE_64 to gpio_reg_latch
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R5C19A.CLK to      R5C19A.Q0 system/SLICE_64 (from clk)
+ROUTE         3     1.233      R5C19A.Q0 to       20.PADDO gpio_reg_latch_c
+DOPAD_DEL   ---     2.797       20.PADDO to         20.PAD gpio_reg_latch
+                  --------
+                    4.482   (72.5% logic, 27.5% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_mcs" CLKNET "clk" 
+
+Report:    3.407ns delay gpio_mcs_MGIOL to gpio_mcs
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2OUT_DEL   ---     0.567    IOL_B4C.CLK to  IOL_B4C.IOLDO gpio_mcs_MGIOL (from clk)
+ROUTE         1     0.043  IOL_B4C.IOLDO to        8.IOLDO gpio_mcs_c
+OP0PAD_DEL  ---     2.797        8.IOLDO to          8.PAD gpio_mcs
+                  --------
+                    3.407   (98.7% logic, 1.3% route), 2 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "gpio_mosi" CLKNET "clk" 
+
+Report:    3.407ns delay gpio_mosi_MGIOL to gpio_mosi
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2OUT_DEL   ---     0.567   IOL_B20D.CLK to IOL_B20D.IOLDO gpio_mosi_MGIOL (from clk)
+ROUTE         1     0.043 IOL_B20D.IOLDO to       17.IOLDO gpio_mosi_c
+OP0PAD_DEL  ---     2.797       17.IOLDO to         17.PAD gpio_mosi
+                  --------
+                    3.407   (98.7% logic, 1.3% route), 2 logic levels.
+
+
+================================================================================
+Preference: Unconstrained: MAXDELAY
+            0 unconstrained paths found
+--------------------------------------------------------------------------------
+
+Report Summary
+--------------
+----------------------------------------------------------------------------
+Preference                              |   Constraint|       Actual|Levels
+----------------------------------------------------------------------------
+                                        |             |             |
+FREQUENCY NET "clk" 29.560000 MHz ;     |   29.560 MHz|   30.327 MHz|  18  
+                                        |             |             |
+----------------------------------------------------------------------------
+
+
+All preferences were met.
+
+
+Clock Domains Analysis
+------------------------
+
+Found 1 clocks:
+
+Clock Domain: clk   Source: oscillator.OSC   Loads: 250
+   Covered under: FREQUENCY NET "clk" 29.560000 MHz ;
+
+
+--------------------------------------------------------------------------------
+                Connections not covered by the preferences
+--------------------------------------------------------------------------------
+
+     Delay                        Element                 Net
+
+    0.565ns pio_key_row[0].PADDI to _key_row[0]_MGIOL.DI gpio_key_row_in[0]
+    0.565ns        sd_miso.PADDI to     sd_miso_MGIOL.DI sd_miso_c
+    0.565ns             rx.PADDI to          rx_MGIOL.DI rx_c
+    0.565ns pio_key_row[1].PADDI to _key_row[1]_MGIOL.DI gpio_key_row_in[1]
+    0.565ns pio_key_row[2].PADDI to _key_row[2]_MGIOL.DI gpio_key_row_in[2]
+    0.565ns pio_key_row[3].PADDI to _key_row[3]_MGIOL.DI gpio_key_row_in[3]
+    0.384ns      gpio_miso.PADDI to   gpio_miso_MGIOL.DI gpio_miso_c
+    3.209ns            res.PADDI to        SLICE_393.LSR res_c
+
+--------------------------------------------------------------------------------
+
+
+Timing summary (Setup):
+---------------
+
+Timing errors: 0  Score: 0
+Cumulative negative slack: 0
+
+Constraints cover 2606976 paths, 1 nets, and 5587 connections (99.86% coverage)
+
+--------------------------------------------------------------------------------
+Lattice TRACE Report - Hold, Version Diamond (64-bit) 3.14.0.75.2
+Thu Sep 10 14:32:47 2026
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Report Information
+------------------
+Command line:    trce -v 10 -c -u 0 -gt -sethld -sp 4 -sphld m -o cp37e_impl1.twr cp37e_impl1.ncd cp37e_impl1.prf 
+Design file:     cp37e_impl1.ncd
+Preference file: cp37e_impl1.prf
+Device,speed:    LCMXO2-1200HC,m
+Report level:    verbose report, limited to 10 items per preference
+--------------------------------------------------------------------------------
+
+BLOCK ASYNCPATHS
+BLOCK RESETPATHS
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Preference: FREQUENCY NET "clk" 29.560000 MHz ;
+            4096 items scored, 0 timing errors detected.
+--------------------------------------------------------------------------------
+
+
+Passed: The following path meets requirements by 0.292ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         Sync_RAM   Q              system/cpu/engine/dp/rf/words_ram_2/RAM1  (from clk +)
+   Destination:    FF         Data in        system/cpu/engine/mmu_page[1]  (to clk +)
+
+   Delay:               0.279ns  (98.9% logic, 1.1% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.279ns physical path delay system/cpu/engine/SLICE_43 to system/cpu/engine/SLICE_43 meets
+     -0.013ns DIN_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.013ns) by 0.292ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/SLICE_43 to system/cpu/engine/SLICE_43:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+CLKTOF_DEL  ---     0.276      R5C9B.WCK to       R5C9B.F0 system/cpu/engine/SLICE_43 (from clk)
+ROUTE         9     0.003       R5C9B.F0 to      R5C9B.DI0 system/address[14] (to clk)
+                  --------
+                    0.279   (98.9% logic, 1.1% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/SLICE_43:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R5C9B.WCK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/SLICE_43:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R5C9B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.292ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         Sync_RAM   Q              system/cpu/engine/dp/rf/words_ram/RAM0  (from clk +)
+   Destination:    FF         Data in        system/bus/boot_release_armed  (to clk +)
+
+   Delay:               0.279ns  (98.9% logic, 1.1% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.279ns physical path delay system/SLICE_39 to system/SLICE_39 meets
+     -0.013ns DIN_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.013ns) by 0.292ns
+
+ Physical Path Details:
+
+      Data path system/SLICE_39 to system/SLICE_39:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+CLKTOF_DEL  ---     0.276      R2C9A.WCK to       R2C9A.F1 system/SLICE_39 (from clk)
+ROUTE        43     0.003       R2C9A.F1 to      R2C9A.DI1 system/address[1] (to clk)
+                  --------
+                    0.279   (98.9% logic, 1.1% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/SLICE_39:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R2C9A.WCK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/SLICE_39:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R2C9A.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.292ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         Sync_RAM   Q              system/cpu/engine/dp/rf/words_ram_2/RAM0  (from clk +)
+   Destination:    FF         Data in        system/cpu/engine/mmu_page[0]  (to clk +)
+
+   Delay:               0.279ns  (98.9% logic, 1.1% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.279ns physical path delay system/cpu/engine/SLICE_42 to system/cpu/engine/SLICE_42 meets
+     -0.013ns DIN_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.013ns) by 0.292ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/SLICE_42 to system/cpu/engine/SLICE_42:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+CLKTOF_DEL  ---     0.276      R5C9A.WCK to       R5C9A.F1 system/cpu/engine/SLICE_42 (from clk)
+ROUTE        11     0.003       R5C9A.F1 to      R5C9A.DI1 system/address[13] (to clk)
+                  --------
+                    0.279   (98.9% logic, 1.1% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/SLICE_42:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R5C9A.WCK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/SLICE_42:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R5C9A.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.293ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         Sync_RAM   Q              system/cpu/engine/dp/rf/words_ram_2/RAM1  (from clk +)
+   Destination:    FF         Data in        system/cpu/engine/mmu_page[2]  (to clk +)
+
+   Delay:               0.280ns  (98.6% logic, 1.4% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.280ns physical path delay system/cpu/engine/SLICE_43 to system/cpu/engine/SLICE_43 meets
+     -0.013ns DIN_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.013ns) by 0.293ns
+
+ Physical Path Details:
+
+      Data path system/cpu/engine/SLICE_43 to system/cpu/engine/SLICE_43:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+CLKTOF_DEL  ---     0.276      R5C9B.WCK to       R5C9B.F1 system/cpu/engine/SLICE_43 (from clk)
+ROUTE         9     0.004       R5C9B.F1 to      R5C9B.DI1 system/address[15] (to clk)
+                  --------
+                    0.280   (98.6% logic, 1.4% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/cpu/engine/SLICE_43:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R5C9B.WCK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/cpu/engine/SLICE_43:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to      R5C9B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.304ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              reset_sync[1]  (from clk +)
+   Destination:    FF         Data in        reset_sync[0]  (to clk +)
+
+   Delay:               0.285ns  (46.7% logic, 53.3% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.285ns physical path delay SLICE_393 to SLICE_393 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.304ns
+
+ Physical Path Details:
+
+      Data path SLICE_393 to SLICE_393:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C14B.CLK to      R7C14B.Q1 SLICE_393 (from clk)
+ROUTE         1     0.152      R7C14B.Q1 to      R7C14B.M0 reset_sync[1] (to clk)
+                  --------
+                    0.285   (46.7% logic, 53.3% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to SLICE_393:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R7C14B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to SLICE_393:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R7C14B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.304ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              system/bus/fixed_uart.console/cts_sync[0]  (from clk +)
+   Destination:    FF         Data in        system/bus/fixed_uart.console/cts_sync[1]  (to clk +)
+
+   Delay:               0.285ns  (46.7% logic, 53.3% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.285ns physical path delay system/bus/fixed_uart.console/SLICE_87 to system/bus/fixed_uart.console/SLICE_87 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.304ns
+
+ Physical Path Details:
+
+      Data path system/bus/fixed_uart.console/SLICE_87 to system/bus/fixed_uart.console/SLICE_87:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R3C20B.CLK to      R3C20B.Q0 system/bus/fixed_uart.console/SLICE_87 (from clk)
+ROUTE         1     0.152      R3C20B.Q0 to      R3C20B.M1 system/bus/fixed_uart.console/cts_sync[0] (to clk)
+                  --------
+                    0.285   (46.7% logic, 53.3% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/bus/fixed_uart.console/SLICE_87:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R3C20B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/bus/fixed_uart.console/SLICE_87:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R3C20B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              system/bus/byte_sd/rx_shift[1]  (from clk +)
+   Destination:    FF         Data in        system/bus/byte_sd/rx_shift[2]  (to clk +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay system/bus/SLICE_319 to system/bus/SLICE_319 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path system/bus/SLICE_319 to system/bus/SLICE_319:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R5C15A.CLK to      R5C15A.Q0 system/bus/SLICE_319 (from clk)
+ROUTE         2     0.154      R5C15A.Q0 to      R5C15A.M1 system/bus/byte_sd/rx_shift[1] (to clk)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/bus/SLICE_319:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R5C15A.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/bus/SLICE_319:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R5C15A.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              system/bus/fixed_uart.console/rx_shift[5]  (from clk +)
+   Destination:    FF         Data in        system/bus/fixed_uart.console/rx_shift[4]  (to clk +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay system/bus/fixed_uart.console/SLICE_358 to system/bus/fixed_uart.console/SLICE_358 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path system/bus/fixed_uart.console/SLICE_358 to system/bus/fixed_uart.console/SLICE_358:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R3C21B.CLK to      R3C21B.Q1 system/bus/fixed_uart.console/SLICE_358 (from clk)
+ROUTE         2     0.154      R3C21B.Q1 to      R3C21B.M0 system/bus/fixed_uart.console/rx_shift[5] (to clk)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/bus/fixed_uart.console/SLICE_358:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R3C21B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/bus/fixed_uart.console/SLICE_358:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R3C21B.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              system/bus/guest_memory/rx[3]  (from clk +)
+   Destination:    FF         Data in        system/bus/guest_memory/rx[4]  (to clk +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay system/bus/guest_memory/SLICE_297 to system/bus/guest_memory/SLICE_297 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path system/bus/guest_memory/SLICE_297 to system/bus/guest_memory/SLICE_297:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133    R10C20C.CLK to     R10C20C.Q0 system/bus/guest_memory/SLICE_297 (from clk)
+ROUTE         3     0.154     R10C20C.Q0 to     R10C20C.M1 system/bus/guest_memory/rx[3] (to clk)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/bus/guest_memory/SLICE_297:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to    R10C20C.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/bus/guest_memory/SLICE_297:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to    R10C20C.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              system/bus/byte_sd/rx_shift[5]  (from clk +)
+   Destination:    FF         Data in        system/bus/byte_sd/rx_shift[6]  (to clk +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay system/bus/SLICE_349 to system/bus/SLICE_349 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path system/bus/SLICE_349 to system/bus/SLICE_349:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R9C19A.CLK to      R9C19A.Q0 system/bus/SLICE_349 (from clk)
+ROUTE         2     0.154      R9C19A.Q0 to      R9C19A.M1 system/bus/byte_sd/rdata_8[5] (to clk)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path oscillator to system/bus/SLICE_349:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R9C19A.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path oscillator to system/bus/SLICE_349:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE       250     1.216        OSC.OSC to     R9C19A.CLK clk
+                  --------
+                    1.216   (0.0% logic, 100.0% route), 0 logic levels.
+
+Report Summary
+--------------
+----------------------------------------------------------------------------
+Preference(MIN Delays)                  |   Constraint|       Actual|Levels
+----------------------------------------------------------------------------
+                                        |             |             |
+FREQUENCY NET "clk" 29.560000 MHz ;     |     0.000 ns|     0.292 ns|   1  
+                                        |             |             |
+----------------------------------------------------------------------------
+
+
+All preferences were met.
+
+
+Clock Domains Analysis
+------------------------
+
+Found 1 clocks:
+
+Clock Domain: clk   Source: oscillator.OSC   Loads: 250
+   Covered under: FREQUENCY NET "clk" 29.560000 MHz ;
+
+
+--------------------------------------------------------------------------------
+                Connections not covered by the preferences
+--------------------------------------------------------------------------------
+
+     Delay                        Element                 Net
+
+    0.177ns pio_key_row[0].PADDI to _key_row[0]_MGIOL.DI gpio_key_row_in[0]
+    0.177ns        sd_miso.PADDI to     sd_miso_MGIOL.DI sd_miso_c
+    0.177ns             rx.PADDI to          rx_MGIOL.DI rx_c
+    0.177ns pio_key_row[1].PADDI to _key_row[1]_MGIOL.DI gpio_key_row_in[1]
+    0.177ns pio_key_row[2].PADDI to _key_row[2]_MGIOL.DI gpio_key_row_in[2]
+    0.177ns pio_key_row[3].PADDI to _key_row[3]_MGIOL.DI gpio_key_row_in[3]
+    0.127ns      gpio_miso.PADDI to   gpio_miso_MGIOL.DI gpio_miso_c
+    1.030ns            res.PADDI to        SLICE_393.LSR res_c
+
+--------------------------------------------------------------------------------
+
+
+Timing summary (Hold):
+---------------
+
+Timing errors: 0  Score: 0
+Cumulative negative slack: 0
+
+Constraints cover 2606976 paths, 1 nets, and 5587 connections (99.86% coverage)
+
+
+
+Timing summary (Setup and Hold):
+---------------
+
+Timing errors: 0 (setup), 0 (hold)
+Score: 0 (setup), 0 (hold)
+Cumulative negative slack: 0 (0+0)
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+

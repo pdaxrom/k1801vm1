@@ -1,0 +1,3 @@
+PASS APR reset: 9 helper positions, including held read/save/return
+FATAL: tb/tb_mmu_apr_lookup.v:117: routine changed state while held case1
+       Time: 3116000  Scope: tb_mmu_apr_lookup

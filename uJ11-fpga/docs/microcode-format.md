@@ -1,5 +1,9 @@
 # 36-bit microinstruction, encoding version 12
 
+CP37 добавляет экспериментальный backend APR_READ/D=APR только в build-копии.
+Production v12 и 954 words сохранены; MMU translation ещё не подключена.
+[Кодирование, измерения и границы lookup gate](mmu-apr-lookup.md).
+
 ## CP31: возврат к v12
 
 FP11 отложен. Удалены 33 FP words и reset hook, control bit1 снова не занят;

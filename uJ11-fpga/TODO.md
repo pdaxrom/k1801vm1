@@ -70,8 +70,13 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Полный MMU fit ещё не доказан. [Отчёт CP36](docs/area-decode.md).
 - [x] CP36: уменьшить opcode index и исключить operand byte mux из входа
   opcode ROM; все opcode/hold, byte lanes, FIS/FRAM и оба cold FB runs прошли.
-- [ ] Измерить APR lookup и подачу PAR/PDR в context routine с общей ALU;
-  сохранить guest context и запрет внешнего обращения до результата проверки.
+- [x] CP37: измерить read-only APR lookup и подачу PAR/PDR в context routine
+  через общую ALU, сохранить guest context и блокировку внешнего запроса.
+  CP37d/e: 1265 LUT / 341 FF / 7 EBR / 30.327 MHz; +10 clocks/memory word.
+  CPU/FIS/FRAM/vendor/cold FB прошли. Это cost floor без CSR/translation:
+  осталось 15 LUT / 5 slices / 0 EBR. [Отчёт](docs/mmu-apr-lookup.md).
+- [ ] Следующий gate: сократить общую площадь до подключения APR CSR/write
+  arbitration, MMR и translation. Размещение CP37d/e не считать fit полной MMU.
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

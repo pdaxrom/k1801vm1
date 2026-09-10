@@ -1,5 +1,20 @@
 # Implementation status, 2026-09-10
 
+## CP37 — чтение PAR/PDR через общую ALU
+
+Experimental CP37d/e: **1265 LUT / 341 FF / 7 EBR / 635 slices / 30.327 MHz**,
+MAP/PAR/TRACE PASS при 29.56 MHz. Три первых варианта превысили HC1200:
+1296/1300/1286 LUT. Убраны лишние EBR waits, D-input оформлен отдельным
+masked OR. Helper 9 words, 963/1024×36, +10 clocks/memory word без hold.
+Осталось 15 LUT / 5 slices / 0 EBR — полноценная MMU ещё не помещена.
+
+69632 CPU cases, все 88 memory words/8 APR pages, 781100 PAR/PDR reads;
+reset в девяти позициях, six negative controls, FIS на RAM/FRAM/vendor EBR
+и cold RT-11FB + DIR прошли. Последний run: 412130048 clocks, UART совпал
+с CP36. APR writes/CPU CSR, translation/MMR/PA22/abort/high DMA исключены
+из этого read-only gate; XM не загружен. Production CP36f и плата CP29a
+сохранены. [Контракт и измерения](mmu-apr-lookup.md), [manifest](verification-cp37.json).
+
 ## CP36 — площадь opcode path и word bus
 
 Production теперь **CP36f: 1222 LUT / 326 FF / 6 EBR / 614 slices /

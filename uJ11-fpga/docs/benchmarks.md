@@ -1,5 +1,24 @@
 # Benchmarks: CP36 и предыдущие этапы
 
+## CP37 — latency APR lookup и cold RT-11FB
+
+Вариант d выполняет 9 helper words и входной redirect: **10 extra clocks
+на FETCH/READ/WRITE без hold**. EBR выдаёт данные на APR_READ edge;
+следующая ALU-микрокоманда сохраняет их, отдельного wait не требуется.
+Icarus без hold: 19710 extra clocks / 1971 entries. Полный CPU miter:
+5512747 extra = 10×390550 + 1607247 held edges.
+
+Cold FB + DIR с полной периферией: **412130048 clocks** против 406268404
+у CP36g с context hook и 354938300 у production CP36f. 3987390 retirements,
+5222610 read / 424452 write beats, 3397976 FRAM transactions, 300 RK commands,
+663 timer edges, 3270 UART bytes, 162 SD reads / 6 writes. UART совпал;
+таймерная работа меняется с длительностью, поэтому это не чистый CPI lookup.
+
+Fit CP37d/e: 1265 LUT / 341 FF / 7 EBR / 30.327 MHz. Это simulation workload
+и TRACE, не измерение на физической плате. CPU CSR/translation/MMR/high DMA
+не включены; результат не является benchmark MMU или RT-11XM.
+[Контракт и исходные отчёты](mmu-apr-lookup.md).
+
 ## CP36 — прежние cycles при меньшей площади
 
 Production: 1222 LUT / 326 FF / 6 EBR / 31.116 MHz, −30 LUT от CP31c.

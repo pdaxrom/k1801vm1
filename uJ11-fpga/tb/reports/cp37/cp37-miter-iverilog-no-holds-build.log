@@ -1,0 +1,2 @@
+build/cp37-lookup/uj11_engine.v:93: warning: implicit definition of wire 'running'.
+build/cp37-lookup/uj11_engine.v:94: warning: implicit definition of wire 'advance'.

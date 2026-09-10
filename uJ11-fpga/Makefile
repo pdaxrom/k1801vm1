@@ -1342,3 +1342,18 @@ test-decode-cpu: decode-compact decode-word-bus
 	$(PYTHON) tools/check_decode_cpu.py --simulator iverilog --cases 1024 --negative-lanes
 test-decode-board: board
 	$(PYTHON) tools/run_board.py --tag cp36
+
+# CP37d remains experimental: read-only APR lookup, no CPU CSR/translation.
+.PHONY: mmu-apr-lookup test-mmu-apr-lookup test-mmu-apr-lookup-fis test-mmu-apr-lookup-board
+mmu-apr-lookup: board
+	$(PYTHON) tools/build_mmu_apr_lookup.py --page --scheduled --masked-d
+test-mmu-apr-lookup: mmu-apr-lookup
+	$(PYTHON) tools/check_mmu_apr_lookup_lint.py
+	$(PYTHON) tools/run_mmu_apr_lookup.py
+	$(PYTHON) tools/run_mmu_apr_lookup.py --simulator iverilog --cases 1024
+	$(PYTHON) tools/run_mmu_apr_lookup.py --simulator iverilog --cases 1024 --no-holds
+	$(PYTHON) tools/check_mmu_apr_lookup_negative.py
+test-mmu-apr-lookup-fis: mmu-apr-lookup build/fis-vectors.txt
+	$(PYTHON) tools/check_mmu_apr_lookup_fis.py
+test-mmu-apr-lookup-board: mmu-apr-lookup
+	$(PYTHON) tools/run_mmu_apr_lookup_board.py

@@ -1,0 +1,2 @@
+PASS FIS memory_mode=-1: 645 exact state/PSW/bus/memory cases, 83 injected faults
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp37-fis/tb_fis.v:153: $finish called at 2926146000 (1ps)

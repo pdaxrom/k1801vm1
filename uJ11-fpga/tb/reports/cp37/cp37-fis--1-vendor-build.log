@@ -1,0 +1,13 @@
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp37-fis/tb_fis.v:28: warning: implicit definition of wire 'entry_hold'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp37-fis/engine.v:93: warning: implicit definition of wire 'running'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp37-fis/engine.v:94: warning: implicit definition of wire 'advance'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:264: warning: implicit definition of wire 'DIA_1'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:273: warning: implicit definition of wire 'DIB_1'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:540: warning: implicit definition of wire 'SR1'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:541: warning: implicit definition of wire 'RSTA_node1'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:542: warning: implicit definition of wire 'RSTB_node1'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:584: warning: implicit definition of wire 'RSTA_node_sync'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:585: warning: implicit definition of wire 'RSTB_node_sync'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:587: warning: implicit definition of wire 'SR_pur'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:588: warning: implicit definition of wire 'RSTA_nogsr1'.
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v:589: warning: implicit definition of wire 'RSTB_nogsr1'.

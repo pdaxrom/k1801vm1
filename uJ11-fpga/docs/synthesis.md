@@ -1,5 +1,24 @@
 # Synthesis checkpoints
 
+## CP37 — APR lookup в служебный микрокод
+
+Полный board с прежней периферией; read-only APR cost floor без CPU CSR,
+write arbitration, translation и MMR. Production остаётся CP36f.
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP37a](../synth/reports/cp37a/result.json) | Saved A4 + ready/wait | 1296 | 343 | 7 | 650 | — | 963 |
+| [CP37b](../synth/reports/cp37b/result.json) | Saved page3 + ready/wait | 1300 | 342 | 7 | 654 | — | 963 |
+| [CP37c](../synth/reports/cp37c/result.json) | Page3 + scheduled EBR read | 1286 | 341 | 7 | 647 | — | 963 |
+| [CP37d](../synth/reports/cp37d/result.json) | То же + masked D merge | 1265 | 341 | 7 | 635 | 30.327 | 963 |
+| [CP37e](../synth/reports/cp37e/result.json) | Финальные исходники, подтверждение d | 1265 | 341 | 7 | 635 | 30.327 | 963 |
+
+A–C: MAP overflow, Fmax не получен. D/E: MAP/PAR/TRACE PASS при 29.56 MHz,
+HC1200-4SG32C, Diamond 3.14. Относительно CP36g: +22 LUT / +3 FF / +1 EBR;
+остаток 15 LUT / 5 slices / 0 EBR. Это не fit полной MMU. D critical path:
+33.000 ns, 18 levels, slack 0.855 ns; external pin delays не заданы.
+[Причины роста, оптимизации и verification](mmu-apr-lookup.md).
+
 ## CP36 — opcode index и aligned-word bus
 
 Все варианты — полный HC1200 board с прежней периферией и FIS.
