@@ -1,5 +1,19 @@
 # Synthesis checkpoints
 
+## CP42 — формирование D-input
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP42a](../synth/reports/cp42a/result.json) | Tree D-input, APR | 1253 | 344 | 7 | 629 | 31.554 | 963 |
+| [CP42b](../synth/reports/cp42b/result.json) | Separate high byte, APR | 1248 | 344 | 7 | 625 | 30.896 | 963 |
+| [CP42c](../synth/reports/cp42c/result.json) | Separate high byte, production | 1160 | 326 | 6 | 585 | 31.022 | 954 |
+| [CP42d](../synth/reports/cp42d/result.json) | Final APR generator, strict lint | 1248 | 344 | 7 | 625 | 30.896 | 963 |
+
+Все gates MAP/PAR/TRACE PASS при 29.56 MHz. Выбран D: −10 LUT от CP40i,
+32 LUT / 15 slices / 0 EBR свободно. C отклонён: native CP40h меньше на 1 LUT.
+Существующий APR masked OR сохранён; новых FF/EBR/слов/тактов нет.
+[Изменение, проверки и ограничения](area-d-input-cp42.md).
+
 ## CP41 — альтернативы микросеквенсора отклонены
 
 | Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words | Gate |

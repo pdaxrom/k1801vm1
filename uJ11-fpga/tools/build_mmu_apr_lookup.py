@@ -23,7 +23,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--page', action='store_true', help='retain VA page3 instead of RF A4 + read mux')
     parser.add_argument('--scheduled', action='store_true', help='use the ALU save word as EBR latency slot')
-    parser.add_argument('--masked-d', action='store_true', help='merge APR data after the native D-input selector')
+    parser.add_argument('--masked-d', action='store_true', help='CP42 split D-input and merge APR data after the selector')
     args = parser.parse_args()
     build_mmu_entry.main()
     out = ROOT/'build/cp37-lookup'
@@ -87,6 +87,26 @@ def main():
         engine = change(engine, '.hold_routine(mmu_hold || apr_stall)', '.hold_routine(mmu_hold)')
     if args.masked_d:
         engine = change(engine, "3'd0: d = mmu_active ? apr_data : 16'b0;", "3'd0: d = 0;")
+        # CP42: high byte has only MDR, PSW and the displacement sign.
+        # Keep this change local to the experimental APR engine: the full
+        # production gate did not save LUT. The native engine remains intact.
+        start = engine.index('    always @* begin\n        case (uword[12:10])')
+        end = engine.index('    uj11_datapath dp(', start)
+        engine = engine[:start]+'''    wire [2:0] d_select=uword[12:10];
+    wire d_byte_step=byte_instruction && a<4'd6;
+    wire [1:0] d_small={d_select[1] && (!d_select[0] || !d_byte_step),
+                        d_select[0] && (!d_select[1] || d_byte_step)};
+    wire [7:0] d_disp_low={ir[6] && !ir[14],ir[5:0],1'b0};
+    always @* begin
+        d[7:0]=d_select[2] ?
+            (d_select[1] ? (d_select[0] ? psw[7:0] : uword[7:0]) :
+                           (d_select[0] ? d_disp_low : mdr[7:0])) : {6'b0,d_small};
+        // Only MDR, PSW and the replicated displacement sign reach the high byte.
+        d[15:8]=(mdr[15:8] & {8{d_select==3'd4}}) |
+                (psw[15:8] & {8{d_select==3'd7}}) |
+                {8{d_select==3'd5 && ir[7] && !ir[14]}};
+    end
+'''+engine[end:]
         engine = change(engine, '    uj11_datapath dp(', '''    wire [15:0] lookup_d = d | (apr_data & {16{mmu_active && uword[12:10]==0}});
     uj11_datapath dp(''')
         engine = change(engine, '.destination(destination),.d(d),', '.destination(destination),.d(lookup_d),')

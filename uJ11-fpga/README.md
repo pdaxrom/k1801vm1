@@ -5,15 +5,15 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP40: −29 LUT в production и −10 LUT с APR, без новых тактов.**
-Production — **1159 LUT / 326 FF / 6 EBR / 31.470 MHz**. С CPU APR CSR
-и lookup — **1258 LUT / 344 FF / 7 EBR / 30.254 MHz**, свободны 22 LUT
-и 9 slices. Translation/MMR и RT-11XM ещё впереди.
-[Измерения и проверки](docs/area-datapath.md).
+**CP42: ещё −10 LUT в экспериментальной APR-сборке, без новых тактов.**
+CPU APR CSR + lookup — **1248 LUT / 344 FF / 7 EBR / 30.896 MHz**,
+свободны 32 LUT и 15 slices. Production CP40h остаётся **1159 LUT /
+326 FF / 6 EBR / 31.470 MHz**. Перестроен только D-input APR engine;
+formal/CPU/FIS/vendor и cold RT-11FB + DIR прошли, counts прежние.
+Translation/MMR и RT-11XM ещё впереди. [Измерения CP42](docs/area-d-input-cp42.md).
 
-CP41 проверил четыре альтернативы микросеквенсора: выигрыша нет, все
-отклонены. Контрольный синтез повторил CP40i; рабочая сборка не изменилась.
-[Измерения CP41](docs/area-sequencer-cp41.md).
+CP41 отклонил четыре альтернативы микросеквенсора; его RTL сохранён.
+[CP41](docs/area-sequencer-cp41.md), [production CP40](docs/area-datapath.md).
 
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30

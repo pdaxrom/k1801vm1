@@ -1,15 +1,15 @@
-# MMU / 128 КиБ FRAM — CP31–CP41
+# MMU / 128 КиБ FRAM — CP31–CP42
 
-CP40 уменьшил board с CPU APR CSR и shared EBR lookup до **1258 LUT /
-344 FF / 7 EBR / 631 slices / 30.254 MHz**. Свободны только 22 LUT и
-9 slices. Следующий gate — сокращение общей LUT cost перед translation/MMR;
+CP42 уменьшил board с CPU APR CSR и shared EBR lookup до **1248 LUT /
+344 FF / 7 EBR / 625 slices / 30.896 MHz**. Свободны 32 LUT и 15 slices;
 полная MMU ещё не помещена. Production CP40h без MMU занимает 1159 LUT,
 плата остаётся CP29a. [Контракт APR](mmu-apr-csr.md),
-[измерения CP40](area-datapath.md).
+[измерения CP42](area-d-input-cp42.md).
 
-CP41 не увеличил запас: четыре альтернативы микросеквенсора отклонены.
-Контрольный полный синтез повторил CP40i. Следующий area probe — формирование
-D-input engine и APR; MMU fit по-прежнему не доказан. [CP41](area-sequencer-cp41.md).
+Перестройка D-input принята только для APR. CP41 не дал экономии в
+микросеквенсоре. Следующие gates должны измерить оставшуюся стоимость
+relocation/MMR/PA22 в полном board; текущий запас не доказывает fit.
+Native RTL, firmware и микрокод в CP42 не изменены, cold FB counts прежние.
 
 CP37 добавляет экспериментальный backend APR_READ/D=APR только в build-копии.
 Production v12 и 954 words сохранены; MMU translation ещё не подключена.

@@ -1,4 +1,15 @@
-# Benchmarks: CP41 и предыдущие этапы
+# Benchmarks: CP42 и предыдущие этапы
+
+## CP42 — −10 LUT с APR, прежние clocks
+
+APR CP42d: 1248 LUT / 344 FF / 7 EBR / 30.896 MHz. Production CP40h не изменён.
+Cold APR RT-11FB + DIR: 412130048 clocks, 3987390 retirements, 5222610 reads /
+424452 writes, 3397976 FRAM transactions, 300 RK commands, 663 timer edges,
+3270 UART bytes, 162 SD reads / 6 overlay writes. Counts и UART точно
+совпали с CP40, как и FIS cycle CSV для RAM/FRAM/vendor. CPU CSR по-прежнему
+221988 clocks для 432 readbacks / 720 beats. Lookup overhead — 10 clocks
+на memory word без hold. Новых production/hardware/XM benchmarks нет.
+[Отчёт](area-d-input-cp42.md).
 
 ## CP41 — изменений производительности нет
 

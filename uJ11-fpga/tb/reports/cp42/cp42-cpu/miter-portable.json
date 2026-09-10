@@ -1,0 +1,7 @@
+{
+  "inputs_sha256": {
+    "tools/check_mmu_apr_csr_miter.py": "b97188ab3a0bcb1892598d2b0df5627694d19089057a270a43f3f411f103ee7a",
+    "tools/check_d_input_cp42_cpu.py": "8bbadb2fba5b519d73d5b9c35522d7e40fa8675093cc30c1a90dbe23183f5095",
+    "build/cp42-cpu/miter-portable.py": "5a8e63d86c1c18d2a3a05867612835abfc94f0a84bd628157916461002070443"
+  }
+}

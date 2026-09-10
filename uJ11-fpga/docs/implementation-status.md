@@ -1,5 +1,18 @@
 # Implementation status, 2026-09-10
 
+## CP42 — D-input только в APR-сборке
+
+Финальный CP42d: **1248 LUT / 344 FF / 7 EBR / 625 slices / 30.896 MHz**,
+−10 LUT от CP40i, MAP/PAR/TRACE PASS при 29.56 MHz. Свободны 32 LUT / 15 slices.
+Native production CP40h сохранён: тот же вариант без APR дал +1 LUT.
+Рабочий экспериментальный генератор изменяет только D-cone; state, native RTL,
+microcode 954/963 words, память и периферия прежние. Новых тактов нет.
+
+SAT/four-state/lint, 69632 CPU cases, CSR portable/vendor, FIS RAM/FRAM/vendor
+и cold FB + DIR прошли. Cycle CSV, board counts и UART совпали с CP40.
+FPGA CP29a; translation/MMR/high DMA/XM ещё впереди.
+[Отчёт](area-d-input-cp42.md), [manifest](verification-cp42.json).
+
 ## CP41 — отрицательный результат area-эксперимента
 
 Четыре эквивалентные перестройки микросеквенсора отклонены: A/B/D не прошли

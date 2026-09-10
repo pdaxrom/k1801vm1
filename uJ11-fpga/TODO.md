@@ -85,7 +85,7 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Portable/vendor CPU/bus/port, whole-opcode miter и cold FB counts PASS.
   [Отчёт](docs/mmu-apr-csr.md). Production остаётся CP38f, FPGA CP29a.
 - [ ] Следующий gate: сократить общую LUT cost перед relocation/MMR.
-  После CP40 с APR остаётся 22 LUT / 9 slices / 0 EBR; полной MMU ещё нет.
+  После CP42 с APR остаётся 32 LUT / 15 slices / 0 EBR; полной MMU ещё нет.
 - [x] CP40: перестроить operand/writeback mux и ALU result selection.
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
   7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба
@@ -93,7 +93,12 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
 - [x] CP41: проверить masked/encoded mux микросеквенсора. Четыре варианта
   отклонены по площади/частоте; formal/simulation/lint PASS. Контроль CP40i
   повторил 1258 LUT / 344 FF / 7 EBR / 30.254 MHz. Экономии нет.
-  [Отчёт](docs/area-sequencer-cp41.md). Следующий area probe — D-input engine/APR.
+  [Отчёт](docs/area-sequencer-cp41.md). D-input engine/APR проверен в CP42.
+- [x] CP42: выделить high byte D-input в экспериментальном APR engine.
+  APR 1248 LUT / 344 FF / 7 EBR / 30.896 MHz, −10 LUT, без новых тактов.
+  Production-вариант дал +1 LUT и отклонён; native CP40h сохранён.
+  Formal/four-state/CPU/CSR/FIS/vendor и cold FB прошли, counts/CSV/UART
+  совпали с CP40. [Отчёт](docs/area-d-input-cp42.md).
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
