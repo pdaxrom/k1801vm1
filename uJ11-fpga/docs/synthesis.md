@@ -1,5 +1,24 @@
 # Synthesis checkpoints
 
+## CP38 — отдельный выбор firmware/FRAM в read mux
+
+| Revision | Features | APR | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| [CP38a](../synth/reports/cp38a/result.json) | Prefix + narrow local ROM | Да | 1312 | 341 | 7 | 661 | — | 963 |
+| [CP38b](../synth/reports/cp38b/result.json) | То же + memory mux | Да | 1247 | 342 | 7 | 627 | 31.258 | 963 |
+| [CP38c](../synth/reports/cp38c/result.json) | Prefix + priority mux | Да | 1281 | 341 | 7 | 642 | — | 963 |
+| [CP38d](../synth/reports/cp38d/result.json) | Исходный decoder + memory mux | Да | 1228 | 341 | 7 | 619 | 32.470 | 963 |
+| [CP38e](../synth/reports/cp38e/result.json) | То же без APR | Нет | 1188 | 326 | 6 | 597 | 30.943 | 954 |
+| [CP38f](../synth/reports/cp38f/result.json) | Финальный production | Нет | 1188 | 326 | 6 | 597 | 30.943 | 954 |
+| [CP38g](../synth/reports/cp38g/result.json) | Финальный RTL + APR | Да | 1228 | 341 | 7 | 619 | 32.470 | 963 |
+
+Full HC1200-4SG32C, Diamond 3.14, constraint 29.56 MHz. A/C: MAP overflow,
+Fmax не получен. B/D/E/F/G: MAP/PAR/TRACE PASS. В production сэкономлено
+34 LUT, с APR 37 LUT, новых state bits/тактов нет. Остаток 92 LUT / 43 slices /
+1 EBR или 52 LUT / 21 slices / 0 EBR с read-only APR. CSR/translation/MMR
+и high DMA не включены, полной MMU fit пока нет.
+[Анализ и verification](area-board-read.md).
+
 ## CP37 — APR lookup в служебный микрокод
 
 Полный board с прежней периферией; read-only APR cost floor без CPU CSR,

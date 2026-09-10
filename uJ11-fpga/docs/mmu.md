@@ -1,5 +1,10 @@
 # MMU / 128 КиБ FRAM — CP31–CP36
 
+После CP38 read-only APR board занимает 1228 LUT / 341 FF / 7 EBR /
+32.470 MHz; свободны 52 LUT и 21 slice. Следующий gate — CPU APR CSR и
+арбитраж доступа к EBR; CSR/MMR/translation пока не подключены.
+[Точные измерения и проверка bus behavior](area-board-read.md).
+
 CP37 добавляет экспериментальный backend APR_READ/D=APR только в build-копии.
 Production v12 и 954 words сохранены; MMU translation ещё не подключена.
 [Кодирование, измерения и границы lookup gate](mmu-apr-lookup.md).

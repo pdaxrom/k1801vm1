@@ -1,0 +1,32 @@
+{
+  "variant": "split-base",
+  "tests": [
+    {
+      "tag": "cp38-bus-portable",
+      "pass_line": "PASS board bus: 30 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI",
+      "vendor": false
+    },
+    {
+      "tag": "cp38-bus-vendor",
+      "pass_line": "PASS board bus: 30 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI",
+      "vendor": true
+    }
+  ],
+  "inputs_sha256": {
+    "tb/tb_board_bus.v": "4148cacd6258bec7df11407388077147763a3deb286688334a03505edcb2f172",
+    "boards/hc1200/uj11_board.v": "ca5615c36f44e41ef7bd3b0fafd8de903f5366ca772a99610e6d917de86cfc6f",
+    "build/cp38-bus/split-base/uj11_board_bus.v": "67946c0e500f4b37d579d62e41823d24c47ba8dc0e45e19b235143451ba7c633",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tools/check_board_decode_units.py": "afbd2a076d13d6ebb8ea39d72fe51190b013702a2f5558df4d298b4114e2b5b7",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/DP8KC.v": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/GSR.v": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/vendor/PUR.v": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4"
+  }
+}

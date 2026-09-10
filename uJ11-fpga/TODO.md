@@ -75,8 +75,13 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   CP37d/e: 1265 LUT / 341 FF / 7 EBR / 30.327 MHz; +10 clocks/memory word.
   CPU/FIS/FRAM/vendor/cold FB прошли. Это cost floor без CSR/translation:
   осталось 15 LUT / 5 slices / 0 EBR. [Отчёт](docs/mmu-apr-lookup.md).
-- [ ] Следующий gate: сократить общую площадь до подключения APR CSR/write
-  arbitration, MMR и translation. Размещение CP37d/e не считать fit полной MMU.
+- [x] CP38: сократить read mux полного board с исходными decoders. Production
+  1188 LUT / 326 FF / 6 EBR / 30.943 MHz; с APR 1228 LUT / 341 FF / 7 EBR /
+  32.470 MHz. Сэкономлено 34/37 LUT, formal и paired cold FB counts PASS.
+  [Измерения](docs/area-board-read.md).
+- [ ] Следующий gate: CPU APR CSR/write arbitration с общим EBR lookup.
+  Сначала проверить интерфейс и стоимость в новом full-board synthesis:
+  осталось 52 LUT / 21 slices / 0 EBR, полный MMU ещё не измерен.
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

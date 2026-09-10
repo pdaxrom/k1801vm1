@@ -1,5 +1,19 @@
 # Benchmarks: CP36 и предыдущие этапы
 
+## CP38 — прежние clocks при меньшей площади
+
+Production CP38f: 1188 LUT / 326 FF / 6 EBR / 30.943 MHz; APR CP38g:
+1228 LUT / 341 FF / 7 EBR / 32.470 MHz. Read mux не добавляет тактов.
+Оба cold RT-11FB + DIR runs сохранили все прежние counters и UART:
+production 354938300 clocks / 3984366 retirements, APR 412130048 clocks /
+3987390 retirements. Соответственно 3390712 / 3397976 FRAM transactions,
+576 / 663 timer edges; в обоих 300 RK commands, 3270 UART bytes и
+162 SD reads / 6 writes. Сохранён прежний overhead APR: +10 clocks/memory word.
+
+Это simulation workload и отдельный TRACE, не hardware throughput.
+CPU CSR/translation/MMR/high DMA и RT-11XM пока не проверяются.
+[Полные counts и сравнение вариантов](area-board-read.md).
+
 ## CP37 — latency APR lookup и cold RT-11FB
 
 Вариант d выполняет 9 helper words и входной redirect: **10 extra clocks

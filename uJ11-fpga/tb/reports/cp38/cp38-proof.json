@@ -1,0 +1,50 @@
+{
+  "method": "Extracted real combinational cones; all address/data/state/enable inputs unconstrained; Yosys equiv_simple",
+  "tests": [
+    {
+      "variant": "prefix",
+      "defect": "none",
+      "returncode": 0,
+      "tag": "cp38-proof-prefix-none"
+    },
+    {
+      "variant": "prefix",
+      "defect": "uart_alias",
+      "returncode": 1,
+      "tag": "cp38-proof-prefix-uart_alias"
+    },
+    {
+      "variant": "prefix",
+      "defect": "rom_alias",
+      "returncode": 1,
+      "tag": "cp38-proof-prefix-rom_alias"
+    },
+    {
+      "variant": "split",
+      "defect": "none",
+      "returncode": 0,
+      "tag": "cp38-proof-split-none"
+    },
+    {
+      "variant": "split-base",
+      "defect": "none",
+      "returncode": 0,
+      "tag": "cp38-proof-split-base-none"
+    },
+    {
+      "variant": "priority",
+      "defect": "none",
+      "returncode": 0,
+      "tag": "cp38-proof-priority-none"
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp38-bus/baseline/uj11_board_bus.v": "b058dffb6026d699c5143df0e99b8a986ce79fde40521ed59af8c577d374dade",
+    "tools/check_board_decode.py": "e1c310273e30e049ce2da6a6ca5669f10f647fc1423f1e3dbeaada9642137e79",
+    "build/cp38-bus/inputs.json": "33b73cf864ff6e5c465d2c2f42496cea5288a1335bdb1d8e634e2ea6c3f4780d",
+    "build/cp38-bus/prefix/uj11_board_bus.v": "c5c869bf93895bfbac342d5dfdf2730d0e47c11791145d83f5205f93b4bc42db",
+    "build/cp38-bus/split/uj11_board_bus.v": "565c9d47524f0058efb2a7bc8e0af6888d933c57d293b52493c414d24eda2e89",
+    "build/cp38-bus/split-base/uj11_board_bus.v": "67946c0e500f4b37d579d62e41823d24c47ba8dc0e45e19b235143451ba7c633",
+    "build/cp38-bus/priority/uj11_board_bus.v": "eb9fb4b10beccdd229e011be961c50d14ac01a3b841810ddf82057e3adb843a6"
+  }
+}

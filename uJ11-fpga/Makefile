@@ -1357,3 +1357,14 @@ test-mmu-apr-lookup-fis: mmu-apr-lookup build/fis-vectors.txt
 	$(PYTHON) tools/check_mmu_apr_lookup_fis.py
 test-mmu-apr-lookup-board: mmu-apr-lookup
 	$(PYTHON) tools/run_mmu_apr_lookup_board.py
+
+# CP38: exact board read-mux optimization, including its APR configuration.
+.PHONY: board-bus-area test-board-bus-area test-board-bus-area-rt11
+board-bus-area: mmu-apr-lookup
+	$(PYTHON) tools/build_board_decode.py
+test-board-bus-area: board-bus-area
+	$(PYTHON) tools/check_board_decode.py --yosys $(YOSYS)
+	$(PYTHON) tools/check_board_decode_units.py
+test-board-bus-area-rt11: board-bus-area
+	$(PYTHON) tools/run_board_decode.py --tag cp38-production
+	$(PYTHON) tools/run_board_decode.py --apr --tag cp38-apr

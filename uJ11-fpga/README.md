@@ -5,7 +5,7 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP36: полный board уменьшен на 30 LUT без изменения числа тактов.**
+**CP38: ещё −34 LUT в production и −37 LUT с APR lookup, без новых тактов.**
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
@@ -16,7 +16,8 @@ FP11 отложен и удалён из рабочей сборки в CP31.
 | CP29a, физически прошит | 1239 | 326 | 6 | 30.609 MHz | PASS |
 | CP31a, FP11 полностью удалён | 1224 | 326 | 6 | 31.074 MHz | PASS |
 | CP31c, RK CSR перенесены из FRAM в firmware EBR | 1252 | 326 | 6 | 30.917 MHz | PASS |
-| CP36f, текущая рабочая сборка, opcode index + word bus | 1222 | 326 | 6 | 31.116 MHz | PASS |
+| CP36f, opcode index + word bus | 1222 | 326 | 6 | 31.116 MHz | PASS |
+| CP38f, текущая рабочая сборка, memory read mux | 1188 | 326 | 6 | 30.943 MHz | PASS |
 
 Текущий production CPU **ещё без MMU**, интерфейс 16 bits. Верхние 64 КиБ
 FRAM освобождены от служебных RK-регистров, но пока недоступны CPU.
@@ -45,7 +46,7 @@ CP35 сохраняет PSW и CALL link при служебном входе н
 Прошли CPU miter, FIS/RAM/SPI FRAM/vendor ROM и cold RT-11FB + DIR.
 [Контракт, измерения и проверки CP35](docs/mmu-entry.md).
 CP36 упрощает opcode index и ставит byte-lane mux после ответвления opcode
-data. Текущий вариант с CP35 hook занимает **1243 LUT / 338 FF / 6 EBR /
+data. Вариант CP36 с CP35 hook занимает **1243 LUT / 338 FF / 6 EBR /
 31.107 MHz**, свободны **37 LUT и 14 slices**. В production hook пока не включён:
 там свободны 58 LUT и 26 slices. Оба полных RTL board runs сохранили все
 прежние counts и UART transcript. MMU ещё не подключён.
@@ -55,7 +56,12 @@ CP37d/e проверяет чтение PAR/PDR в T6/T7 через общую A
 и cold FB tests прошли. Это read-only cost floor без CPU CSR/translation/MMR;
 осталось 15 LUT и 5 slices. Production не меняется, XM пока не загружен.
 [Эксперимент APR lookup и ограничения](docs/mmu-apr-lookup.md).
-Плату в CP31–CP37 не программировали; физически остаётся CP29.
+CP38 выбирает firmware/FRAM отдельно от малых устройств. С APR lookup теперь
+**1228 LUT / 341 FF / 7 EBR / 32.470 MHz**, свободны **52 LUT / 21 slices**.
+Production занимает 1188 LUT, свободны 92 LUT / 43 slices / 1 EBR.
+Decoder, CPU и ROM images прежние; formal и оба полных FB runs прошли.
+[Изменение read mux, реальные fits и проверки](docs/area-board-read.md).
+Плату в CP31–CP38 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,

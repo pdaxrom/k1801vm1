@@ -1,5 +1,20 @@
 # Implementation status, 2026-09-10
 
+## CP38 — площадь board read mux
+
+Production теперь **CP38f: 1188 LUT / 326 FF / 6 EBR / 597 slices /
+30.943 MHz** (−34 LUT от CP36f). С APR lookup **CP38g: 1228 LUT /
+341 FF / 7 EBR / 619 slices / 32.470 MHz** (−37 LUT от CP37e).
+Оба MAP/PAR/TRACE PASS при 29.56 MHz. Свободны 92/52 LUT и 43/21 slices.
+
+В рабочем RTL изменён только read mux: firmware/FRAM выбираются отдельно
+от малых устройств. Decoder, state/ACK, периферия, CPU и ROM images прежние.
+Четыре варианта прошли formal equivalence (38 outputs), два внесённых
+дефекта обнаружены. Portable/vendor board bus tests и оба cold RT-11FB
+runs сохранили счётчики и UART побайтно. FPGA остаётся CP29a; APR CSR,
+translation/MMR/PA22/high DMA и RT-11XM ещё впереди.
+[Измерения и контракт](area-board-read.md), [manifest](verification-cp38.json).
+
 ## CP37 — чтение PAR/PDR через общую ALU
 
 Experimental CP37d/e: **1265 LUT / 341 FF / 7 EBR / 635 slices / 30.327 MHz**,
