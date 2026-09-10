@@ -5,13 +5,23 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP44: CPU relocation 18/22 bits проверен, но не поместился в HC1200.**
+CPU записывает/читает весь верхний банк FRAM, portable/vendor/C tests и
+cold RT-11FB + DIR прошли. Лучший из пяти gates: **1351 LUT / 359 FF /
+7 EBR / 676 slices**, MAP FAIL; Fmax отсутствует. Это kernel unified PAR
+prototype без PDR protection/MMR1/2/abort/restart, в production не принят.
+До предела устройства нужно убрать минимум 71 LUT / 36 slices, затем
+получить резерв на оставшуюся MMU. RT-11XM ещё не запущена.
+[Результаты и ограничения CP44](docs/relocation-cp44.md).
+
 **CP43: MMR3 CSR добавлен к экспериментальной APR-сборке.**
 Финальный CP43d — **1258 LUT / 351 FF / 7 EBR / 30.866 MHz**, свободны
 22 LUT и 10 slices. Это +10 LUT / +7 FF к CP42, без новых microinstructions.
 Word/byte, RESET, odd-address trap и isolation от RK DMA проверены;
 CPU/vendor, C differential и cold FB + DIR прошли; counts прежние. [Измерения CP43](docs/mmr3-cp43.md).
 Production CP40h остаётся **1159 LUT / 326 FF / 6 EBR / 31.470 MHz**.
-MMR0/1/2, CPU translation и RT-11XM ещё впереди.
+В принятой CP43-сборке CPU translation отсутствует; CP44 остаётся отдельным
+не поместившимся экспериментом. MMR1/2, protection/restart и RT-11XM впереди.
 
 CP41 отклонил четыре альтернативы микросеквенсора; его RTL сохранён.
 [CP41](docs/area-sequencer-cp41.md), [production CP40](docs/area-datapath.md).

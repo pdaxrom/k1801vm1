@@ -1,0 +1,2 @@
+PASS CP44 relocation C oracle: 262144 addresses, 196608 stalled lookup edges; all PAR16 in 16/18/22 modes, PA22/RAM/IO/NXM, held CSR changes, reset
+tb/tb_relocate_oracle_cp44.v:60: $finish called at 16384090000 (1ps)

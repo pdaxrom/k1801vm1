@@ -1,4 +1,23 @@
-# Benchmarks: CP43 и предыдущие этапы
+# Benchmarks: CP44 и предыдущие этапы
+
+## CP44 — relocation clocks, без аппаратного Fmax
+
+Полный CPU + SPI FRAM test: 4096 words × 8 upper-bank pages × 18/22 modes.
+Direct: 67468380 clocks; microcoded: 76319820 clocks. У обоих 590096 PAR
+reads и 8 control beats; разница = 15 clocks × 590096. Overhead mapped beat
+без external holds — +2 / +17 clocks. Vendor subset (4 words/page/mode):
+97692 / 110412 clocks, 848 PAR reads. Это directed workload, не typical ISA CPI.
+
+Cold FB + DIR, direct prototype: 415159611 clocks / 4311823 retirements,
+5675704 reads / 489280 writes, 3980328 FRAM transactions, 300 RK commands,
+576 timer edges, 3270 UART bytes, 162 SD reads / 6 overlay writes. UART
+совпал с CP43. Здесь уже 526239 mapped beats, 65664 upper-FRAM beats и
+4 MMR0 writes, поэтому прежние CP43 counts не являются speedup baseline.
+MMU-enabled private ROM/DMA beats — 0; этот сценарий ещё не проверен.
+
+Лучший gate — 1351 LUT / 359 FF / 7 EBR / 676 slices, MAP FAIL.
+Fmax, instructions/sec на HC1200 и RT-11XM results отсутствуют. Production
+CP40h и плата CP29a прежние. [Полный отчёт](relocation-cp44.md).
 
 ## CP43 — MMR3 CSR, прежний cold FB workload
 

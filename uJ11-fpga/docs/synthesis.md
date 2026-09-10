@@ -1,5 +1,21 @@
 # Synthesis checkpoints
 
+## CP44 — relocation + PA22, все полные board gates отклонены
+
+| Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP44a](../synth/reports/cp44a/result.json) | Общая ALU, 16 helper words | 1394 | 373 | 7 | 699 | — | 970 | MAP FAIL |
+| [CP44b](../synth/reports/cp44b/result.json) | Direct PAR bridge | 1351 | 359 | 7 | 676 | — | 954 | MAP FAIL |
+| [CP44c](../synth/reports/cp44c/result.json) | Registered RAM/I/O regions | 1368 | 356 | 7 | 685 | — | 954 | MAP FAIL |
+| [CP44d](../synth/reports/cp44d/result.json) | Вернуться к полному PA22 bus | 1351 | 359 | 7 | 676 | — | 954 | MAP FAIL |
+| [CP44e](../synth/reports/cp44e/result.json) | Финальный MMR0 strict-lint input handling | 1351 | 359 | 7 | 676 | — | 954 | MAP FAIL |
+
+Diamond 3.14, LCMXO2-1200HC-4SG32C, 29.56 MHz constraint. PAR/TRACE не
+запускались после отказа MAP, Fmax неизвестен. В E ещё нет PDR protection,
+MMR1/2, hardware fault metadata и restart, но уже превышены 1280 LUT /
+640 slices на 71/36. Ни один вариант не принят. Native production CP40h и
+APR CP43d имеют прежние input hashes. [Сравнение архитектур и тесты](relocation-cp44.md).
+
 ## CP43 — MMR3 CSR, полный APR board
 
 | Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |

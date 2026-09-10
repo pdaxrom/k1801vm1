@@ -1,0 +1,16 @@
+{
+  "scope": "Direct kernel-unified PAR bridge, no PDR/W/abort/restart",
+  "microcode_words": 954,
+  "classified": false,
+  "inputs_sha256": {
+    "tools/build_direct_relocate_cp44.py": "92a3ae9bf89f3d2b23a5f2eb4bff402b67d2bac36350bd24dbafb009ad9dbd36",
+    "rtl/experimental/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "build/cp44-relocate/inputs.json": "f70961f8ed83d21cab57d8f13e945eeae9dd2d5e5bfd8b1ad66f575afa3670eb",
+    "build/cp44-relocate/uj11_board.v": "03ac9e6207d3e780d85a28106d3471f458a42d087699a210b2749507531059b1",
+    "build/cp44-relocate/uj11_board_bus.v": "328575b6ec72dde01cdb1d10f2c250b6b79f7dabbf744e6c1f1c2847db0d23d0"
+  },
+  "outputs_sha256": {
+    "build/cp44-direct/uj11_board.v": "e676319301843088ea067bd27493022bb584e1235fa3f00935be436660050cad",
+    "build/cp44-direct/uj11_board_bus.v": "328575b6ec72dde01cdb1d10f2c250b6b79f7dabbf744e6c1f1c2847db0d23d0"
+  }
+}

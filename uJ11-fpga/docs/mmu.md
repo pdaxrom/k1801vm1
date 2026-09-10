@@ -1,4 +1,18 @@
-# MMU / 128 КиБ FRAM — CP31–CP43
+# MMU / 128 КиБ FRAM — CP31–CP44
+
+**CP44 проверил CPU relocation и доступ ко всему верхнему банку FRAM,
+но полный HC1200 board не поместился.** Kernel unified PAR, MMR0 software
+controls, MMR3<4>, PA22/NXM: CPU/vendor/C/bus и cold FB + DIR PASS.
+Лучший gate — 1351 LUT / 359 FF / 7 EBR / 676 slices, MAP FAIL, Fmax нет.
+Microcoded relocation дороже: 1394 LUT и +17 clocks/mapped beat против
+1351 LUT и +2 у direct bridge. Ни один CP44 вариант не принят; production
+CP40h и принятый APR CP43d прежние. [Подробный отчёт](relocation-cp44.md).
+
+Следующий gate — уменьшение площади полного bus/decode/control. До самой
+границы устройства не хватает 71 LUT / 36 slices, а protection/restart
+ещё не добавлены. MMR1/2, PDR checks/W, abort250/fault metadata, modes/I-D,
+high RK DMA и RT-11XM остаются открытыми; ранняя загрузка XM не считается
+заменой этим проверкам. Ниже сохранена история отдельных checkpoints.
 
 CP43 добавляет **MMR3 CSR storage/reset** к экспериментальному APR board:
 **1258 LUT / 351 FF / 7 EBR / 630 slices / 30.866 MHz**, свободны 22 LUT /

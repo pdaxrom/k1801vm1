@@ -84,8 +84,9 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Full board 1268 LUT / 344 FF / 7 EBR / 31.075 MHz, microstore 963 words.
   Portable/vendor CPU/bus/port, whole-opcode miter и cold FB counts PASS.
   [Отчёт](docs/mmu-apr-csr.md). Production остаётся CP38f, FPGA CP29a.
-- [ ] Следующий gate: сократить общую LUT cost перед relocation/MMR.
-  После CP42 с APR остаётся 32 LUT / 15 slices / 0 EBR; полной MMU ещё нет.
+- [ ] Следующий gate после CP44: сократить площадь полного board/bus/control.
+  Лучший relocation prototype требует 1351 LUT / 676 slices — на 71/36
+  больше HC1200, ещё без protection/restart. Все пять CP44 gates отклонены.
 - [x] CP40: перестроить operand/writeback mux и ALU result selection.
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
   7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба
@@ -103,12 +104,20 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   7 EBR / 630 slices / 30.866 MHz, 963 words. Свободны 22 LUT / 10 slices.
   CPU/vendor, C differential, canonical decode и RK DMA isolation проверены.
   Только хранение bits; [CPU translation ещё не подключена](docs/mmr3-cp43.md).
-- [ ] MMR0/1/2 и подключение MMR3 controls, автоматический выбор APR/W updates, physical I/O page
-  и NXM без alias верхней памяти в полном CPU/bus.
-- [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
+- [x] CP44: проверить kernel unified CPU relocation 18/22, MMR0 software
+  controls/MMR3<4>, PA22/NXM, оба банка SPI FRAM, byte/odd/mapped-stack/
+  instruction-stream, C oracles и vendor EBR. Cold FB + DIR проходит,
+  использует верхнюю FRAM, UART прежний. [Отчёт](docs/relocation-cp44.md).
+  Это отдельный не поместившийся прототип, production CP40h сохранён.
+- [ ] Получить fit с резервом для полного MMU, затем принять CPU relocation.
+- [ ] MMR0 hardware fault/page metadata, MMR1/2, оставшиеся MMR3 controls,
+  PDR protection/automatic W, MMU abort250 и freeze/restart в полном CPU/bus.
 - [ ] Разделить отображение гостя, RK firmware assist и физический DMA;
   реализовать старшие разряды RK DMA по документации контроллера.
-- [ ] Проверить все 128 КиБ через CPU, SD/RK transfers выше 64 КиБ и MMU-off boot.
+- [x] CP44: все слова верхних 64 КиБ через CPU в 18/22 modes, snapshot
+  нижнего банка неизменён; mapped FB startup и cold boot + DIR проверены.
+- [ ] Проверить активный RK transfer при MMU-on и SD/RK transfers выше 64 КиБ;
+  CP44 cold FB не выполнял private ROM/DMA обращений при включённой MMU.
 - [ ] Processor modes / SP switching / I-D spaces добавлять отдельными
   измеряемыми checkpoints; не заявлять полный J-11 MMU до их проверки.
 - [ ] Differential tests, RT-11XM из `../lsi11/disks/rt11v5.3/system.dsk`: XM banner,

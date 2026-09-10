@@ -1,0 +1,32 @@
+; CP44 kernel-unified relocation only. No PDR check/abort/restart.
+; T5 saves PSW, T6 holds PAR/block sum, T7 forms VA[12:6]. Q/MDR stay live.
+.org $1cd
+MMU_ENTRY:
+    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF
+    APR_READ, kind=PAR, target=RELOC_PAR
+.org $1dd
+RELOC_PAR:
+    alu PASSA, pair=DA, d=APR, b=T6, dst=RF
+    alu PASSA, a=SAVED, b=T7, dst=RF
+    alu LSR, a=T7, b=T7, dst=RF, seq=PAGE, next=RELOC_SHIFT2
+.org $10e
+RELOC_SHIFT2:
+    alu LSR, a=T7, b=T7, dst=RF
+    alu LSR, a=T7, b=T7, dst=RF, seq=PAGE, next=RELOC_SHIFT4
+.org $116
+RELOC_SHIFT4:
+    alu LSR, a=T7, b=T7, dst=RF
+    alu LSR, a=T7, b=T7, dst=RF, seq=PAGE, next=RELOC_SHIFT6
+.org $11e
+RELOC_SHIFT6:
+    alu LSR, a=T7, b=T7, dst=RF
+    JUMP, target=RELOC_ADD, prefetch=0
+.org $32d
+RELOC_ADD:
+    alu AND, a=T7, pair=AD, d=IMM, imm=127, b=T7, dst=RF
+    alu ADD, a=T7, b=T6, dst=RF
+    JUMP, target=RELOC_RESTORE, prefetch=0
+.org $221
+RELOC_RESTORE:
+    alu PASSA, a=T5, flags=LOAD
+    MMU_RETURN

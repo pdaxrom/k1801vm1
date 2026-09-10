@@ -1,5 +1,21 @@
 # Implementation status, 2026-09-10
 
+## CP44 — CPU relocation прототип, area gate не пройден
+
+Kernel unified PAR relocation 18/22 bits, MMR0 software controls, MMR3<4>,
+PA22 decode/NXM и доступ CPU ко всему верхнему банку FRAM проверены.
+Полные portable CPU sweeps, vendor subset, C oracles, mapped stack/byte/odd/
+instruction-stream tests, bus sweep и cold RT-11FB + DIR прошли.
+FB использует mapped memory и upper FRAM, UART совпал с CP43.
+
+Лучший из пяти gates — 1351 LUT / 359 FF / 7 EBR / 676 slices, MAP FAIL.
+Fmax нет, **CP44 не принят**, native production CP40h, APR CP43d и плата
+CP29a неизменны. Microcoded/direct варианты — 970/954 words, +17/+2 clocks
+на mapped beat. Следующий gate — снижение общей площади полного board.
+PDR protection/W, hardware MMR0 fault metadata, MMR1/2, abort250/restart,
+modes/I-D, active-MMU RK test/high DMA и RT-11XM ещё впереди.
+[Отчёт](relocation-cp44.md), [manifest](verification-cp44.json).
+
 ## CP43 — MMR3 CSR в отдельном APR board
 
 Финальный CP43d: **1258 LUT / 351 FF / 7 EBR / 630 slices / 30.866 MHz**.
