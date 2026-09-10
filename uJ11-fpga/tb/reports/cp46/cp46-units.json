@@ -1,0 +1,28 @@
+{
+  "oracle_pass_line": "PASS CP44 relocation C oracle: 262144 addresses, 196608 stalled lookup edges; all PAR16 in 16/18/22 modes, PA22/RAM/IO/NXM, held CSR changes, reset",
+  "frozen_corpus": true,
+  "four_state": {
+    "variant": "classified",
+    "cases": 131072,
+    "returncode": 0,
+    "tag": "cp46-four-state-classified"
+  },
+  "inputs_sha256": {
+    "tools/check_control_cp46_units.py": "05b472e7e54bd035a8ee9fd891b3217fcb6004695fcab254cf0ef119b9ae511e",
+    "tools/check_bus_cp45.py": "da443eb7b12ed5476de4d8622c4328de54e544c0824d51c88487c08b3f88598a",
+    "build/cp46-control/inputs.json": "adda4bb47c8e7fc96209c57a9df63edf76ba0ba13e44d03b30191b744d6b465f",
+    "build/cp46-proof.json": "3e89c97e6c2513cd171e8abc105ffc08c96fa37aa1a8c589c74eef40cdfdf133",
+    "tb/reports/cp44/cp44-units.json": "403ced5d180afd54b3b0076c74b1fa0b0244bd230e5519651980a38aab24994d",
+    "tb/tb_relocate_oracle_cp44.v": "5b6a4f711b2fb34fb27d8477c16e48343249c2bd8a554cddf33f46afad6dc0c1",
+    "build/cp46-control/combined/uj11_mmu_relocate.v": "164b51b36a8a7b7dfa9d941ae233b0b332c8e5e895c03bf541bc5aaaeb51b143",
+    "build/cp44-relocate-oracle.txt": "6c6ca64c0ecd48155ba5aede14ade7457c5394e629da2bf5f6880691619063d2",
+    "build/cp46-proof/bus-gold.v": "4c0559840f5cc2591255c4ba17b6e1e95d0ee5987350739c7dfcbec61053a4c1",
+    "build/cp46-proof/bus-none.v": "0bad9c138cd8d62b691367001e64d3c5d32da985433eda490147a9b5864b69c9",
+    "rtl/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "build/cp46-four-state/apr.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "build/cp46-four-state/classified-none.v": "0bad9c138cd8d62b691367001e64d3c5d32da985433eda490147a9b5864b69c9",
+    "build/cp46-four-state/driver.py": "862d04f60bd580965828f52ef3aa0a5ef3add4e76767be3ed5ff69af19cb770a",
+    "build/cp46-four-state/four_state.v": "75e6b9c95c08a8424b50ed4063c40a1d0816cec40378ac0db970713a28e503fc",
+    "build/cp46-four-state/gold.v": "4c0559840f5cc2591255c4ba17b6e1e95d0ee5987350739c7dfcbec61053a4c1"
+  }
+}

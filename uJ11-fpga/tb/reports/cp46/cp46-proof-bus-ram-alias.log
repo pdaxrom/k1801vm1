@@ -1,0 +1,319 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `bus-ram-alias.ys' --
+
+1. Executing Verilog-2005 frontend: bus-gold.v
+Parsing SystemVerilog input from `bus-gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: bus-ram-alias.v
+Parsing SystemVerilog input from `bus-ram-alias.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/rtl/uj11_mmu_apr_decode.v
+Parsing SystemVerilog input from `/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/rtl/uj11_mmu_apr_decode.v' to AST representation.
+Generating RTLIL representation for module `\uj11_mmu_apr_decode'.
+Successfully finished Verilog frontend.
+
+4. Executing PROC pass (convert processes to netlists).
+
+4.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 1 switch rules as full_case in process $proc$bus-ram-alias.v:107$280 in module gate.
+Marked 1 switch rules as full_case in process $proc$bus-gold.v:107$115 in module gold.
+Removed a total of 0 dead cases.
+
+4.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 2 assignments to connections.
+
+4.4. Executing PROC_INIT pass (extract init attributes).
+
+4.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~2 debug messages>
+
+4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$bus-ram-alias.v:107$280'.
+     1/1: $1\gate_local_rdata[15:0]
+Creating decoders for process `\gold.$proc$bus-gold.v:107$115'.
+     1/1: $1\gold_local_rdata[15:0]
+
+4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\gate.\gate_local_rdata' from process `\gate.$proc$bus-ram-alias.v:107$280'.
+No latch inferred for signal `\gold.\gold_local_rdata' from process `\gold.$proc$bus-gold.v:107$115'.
+
+4.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\gate.$proc$bus-ram-alias.v:107$280'.
+Removing empty process `gate.$proc$bus-ram-alias.v:107$280'.
+Found and cleaned up 1 empty switch in `\gold.$proc$bus-gold.v:107$115'.
+Removing empty process `gold.$proc$bus-gold.v:107$115'.
+Cleaned up 2 empty switches.
+
+4.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module uj11_mmu_apr_decode.
+Optimizing module gate.
+<suppressed ~8 debug messages>
+Optimizing module gold.
+<suppressed ~11 debug messages>
+
+5. Executing FLATTEN pass (flatten design).
+<suppressed ~2 debug messages>
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \uj11_mmu_apr_decode..
+Finding unused cells or wires in module \gate..
+Finding unused cells or wires in module \gold..
+Removed 2 unused cells and 110 unused wires.
+<suppressed ~11 debug messages>
+
+7. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: apr_entry_gold ({ \address_gold [11] \apr_entry_gold [4] \address_gold [4:1] }), apr_entry_gate ({ \address_gate [11] \apr_entry_gate [4] \address_gate [4:1] }) -> apr_entry
+Presumably equivalent wires: apr_pdr_gold (\apr_pdr_gold), apr_pdr_gate (\apr_pdr_gate) -> apr_pdr
+Presumably equivalent wires: apr_request_gold (\apr_request_gold), apr_request_gate (\apr_request_gate) -> apr_request
+Presumably equivalent wires: release_probe_gold (\release_probe_gold), release_probe_gate (\release_probe_gate) -> release_probe
+Presumably equivalent wires: selections_gold ({ \gold_local_boot_selected_gold \gold_boot_program_selected_gold \gold_boot_selected_gold \gold_io_page_gold \gold_service_dma_selected_gold \gold_service_program_selected_gold \gold_program_selected_gold \gold_cpu_io_page_gold \gold_uart_selected_gold \gold_ltc_selected_gold \gold_panel_selected_gold \gold_maint_selected_gold \gold_sd_selected_gold \gold_rk_selected_gold \gold_rk_cs1_selected_gold \gold_rk_cs2_selected_gold \gold_rk_ds_selected_gold \gold_rk_fixed_selected_gold \gold_rk_store_selected_gold \gold_fram_selected_gold \gold_fram_selected_gold \gold_firmware_selected_gold \gold_apr_selected_gold \gold_mmr0_selected_gold \gold_mmr3_selected_gold \gold_mmu_bypass_gold }), selections_gate ({ \gate_local_boot_selected_gate \gate_boot_program_selected_gate \gate_boot_selected_gate \gate_io_page_gate \gate_service_dma_selected_gate \gate_service_program_selected_gate \gate_program_selected_gate \gate_cpu_io_page_gate \gate_uart_selected_gate \gate_ltc_selected_gate \gate_panel_selected_gate \gate_maint_selected_gate \gate_sd_selected_gate \gate_rk_selected_gate \gate_rk_cs1_selected_gate \gate_rk_cs2_selected_gate \gate_rk_ds_selected_gate \gate_rk_fixed_selected_gate \gate_rk_store_selected_gate \gate_fram_selected_gate \gate_fram_selected_gate \gate_firmware_selected_gate \gate_apr_selected_gate \gate_mmr0_selected_gate \gate_mmr3_selected_gate \gate_mmu_bypass_gate }) -> selections
+Presumably equivalent wires: rdata_gold (\rdata_gold), rdata_gate (\rdata_gate) -> rdata
+Presumably equivalent wires: rk_immediate_done_gold (\rk_immediate_done_gold), rk_immediate_done_gate (\rk_immediate_done_gate) -> rk_immediate_done
+Presumably equivalent wires: rk_cs1_initialized_gold (\rk_cs1_initialized_gold), rk_cs1_initialized_gate (\rk_cs1_initialized_gate) -> rk_cs1_initialized
+Presumably equivalent wires: rk_write_command_gold (\rk_write_command_gold), rk_write_command_gate (\rk_write_command_gate) -> rk_write_command
+Presumably equivalent wires: rk_service_movb_gold (\rk_service_movb_gold), rk_service_movb_gate (\rk_service_movb_gate) -> rk_service_movb
+Presumably equivalent wires: rk_service_active_gold (\rk_service_active_gold), rk_service_active_gate (\rk_service_active_gate) -> rk_service_active
+Presumably equivalent wires: boot_release_armed_gold (\boot_release_armed_gold), boot_release_armed_gate (\boot_release_armed_gate) -> boot_release_armed
+Presumably equivalent wires: boot_overlay_active_gold (\boot_overlay_active_gold), boot_overlay_active_gate (\boot_overlay_active_gate) -> boot_overlay_active
+Presumably equivalent wires: RK_SERVICE_ENABLE_gold (\RK_SERVICE_ENABLE_gold), RK_SERVICE_ENABLE_gate (\RK_SERVICE_ENABLE_gate) -> RK_SERVICE_ENABLE
+Presumably equivalent wires: SD_BOOT_ENABLE_gold (\SD_BOOT_ENABLE_gold), SD_BOOT_ENABLE_gate (\SD_BOOT_ENABLE_gate) -> SD_BOOT_ENABLE
+Presumably equivalent wires: BOOT_ROM_ENABLE_gold (\BOOT_ROM_ENABLE_gold), BOOT_ROM_ENABLE_gate (\BOOT_ROM_ENABLE_gate) -> BOOT_ROM_ENABLE
+Presumably equivalent wires: request_gold (\request_gold), request_gate (\request_gate) -> request
+Presumably equivalent wires: instruction_fetch_gold (\instruction_fetch_gold), instruction_fetch_gate (\instruction_fetch_gate) -> instruction_fetch
+Presumably equivalent wires: memory_writing_gold (\memory_writing_gold), memory_writing_gate (\memory_writing_gate) -> memory_writing
+Presumably equivalent wires: write_gold (\write_gold), write_gate (\write_gate) -> write
+Presumably equivalent wires: mmr3_value_gold (\mmr3_value_gold), mmr3_value_gate (\mmr3_value_gate) -> mmr3_value
+Presumably equivalent wires: mmr0_value_gold (\mmr0_value_gold), mmr0_value_gate (\mmr0_value_gate) -> mmr0_value
+Presumably equivalent wires: apr_data_gold (\apr_data_gold), apr_data_gate (\apr_data_gate) -> apr_data
+Presumably equivalent wires: fram_rdata_gold (\fram_rdata_gold), fram_rdata_gate (\fram_rdata_gate) -> fram_rdata
+Presumably equivalent wires: boot_program_word_gold (\boot_program_word_gold), boot_program_word_gate (\boot_program_word_gate) -> boot_program_word
+Presumably equivalent wires: sd_rdata_gold (\sd_rdata_gold), sd_rdata_gate (\sd_rdata_gate) -> sd_rdata
+Presumably equivalent wires: panel_rdata_gold (\panel_rdata_gold), panel_rdata_gate (\panel_rdata_gate) -> panel_rdata
+Presumably equivalent wires: ltc_rdata_gold (\ltc_rdata_gold), ltc_rdata_gate (\ltc_rdata_gate) -> ltc_rdata
+Presumably equivalent wires: uart_rdata_gold (\uart_rdata_gold), uart_rdata_gate (\uart_rdata_gate) -> uart_rdata
+Presumably equivalent wires: virtual_address_gold (\virtual_address_gold), virtual_address_gate (\virtual_address_gate) -> virtual_address
+Presumably equivalent wires: address_gold (\address_gold), address_gate (\address_gate) -> address
+Changing input S of cell $ternary$bus-ram-alias.v:146$323_gate ($mux): \gate_apr_selected_gate -> \selections [3]
+Changing input S of cell $ternary$bus-ram-alias.v:146$322_gate ($mux): \gate_firmware_selected_gate -> \selections [4]
+Changing input S of cell $ternary$bus-ram-alias.v:147$321_gate ($mux): \gate_fram_selected_gate -> \selections [6]
+Changing input B of cell $and$bus-ram-alias.v:145$319_gate ($and): { \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate \gate_local_boot_selected_gate } -> { \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] }
+Changing input B of cell $and$bus-ram-alias.v:144$318_gate ($and): { \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate \gate_cpu_io_page_gate } -> { \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] }
+Changing input B of cell $logic_or$bus-ram-alias.v:106$279_gate ($logic_or): \gate_rk_store_selected_gate -> \selections [7]
+Changing input A of cell $logic_or$bus-ram-alias.v:106$279_gate ($logic_or): \gate_program_selected_gate -> \selections [19]
+Changing input B of cell $logic_or$bus-ram-alias.v:103$278_gate ($logic_or): \gate_service_dma_selected_gate -> \selections [21]
+Changing input A of cell $logic_not$bus-ram-alias.v:103$276_gate ($logic_not): \gate_boot_selected_gate -> \selections [23]
+Changing input A of cell $logic_and$bus-ram-alias.v:102$275_gate ($logic_and): \gate_rk_selected_gate -> \selections [12]
+Changing input A of cell $logic_not$bus-ram-alias.v:102$274_gate ($logic_not): \gate_rk_fixed_selected_gate -> \selections [8]
+Changing input A of cell $logic_or$bus-ram-alias.v:99$273_gate ($logic_or): \gate_rk_ds_selected_gate -> \selections [9]
+Changing input A of cell $logic_and$bus-ram-alias.v:100$269_gate ($logic_and): \gate_rk_cs1_selected_gate -> \selections [11]
+Changing input A of cell $logic_and$bus-ram-alias.v:98$267_gate ($logic_and): \gate_rk_selected_gate -> \selections [12]
+Changing input A of cell $logic_and$bus-ram-alias.v:97$265_gate ($logic_and): \gate_rk_selected_gate -> \selections [12]
+Changing input A of cell $logic_and$bus-ram-alias.v:96$263_gate ($logic_and): \gate_rk_selected_gate -> \selections [12]
+Changing input A of cell $logic_and$bus-ram-alias.v:94$259_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:92$256_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:91$255_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:88$253_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:87$251_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:85$249_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:77$247_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:68$225_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input B of cell $logic_and$bus-ram-alias.v:65$223_gate ($logic_and): \gate_apr_selected_gate -> \selections [3]
+Changing input A of cell $logic_and$bus-ram-alias.v:64$222_gate ($logic_and): \gate_cpu_io_page_gate -> \selections [18]
+Changing input A of cell $logic_and$bus-ram-alias.v:58$221_gate ($logic_and): \gate_io_page_gate -> \selections [22]
+Changing input A of cell $logic_not$bus-ram-alias.v:58$220_gate ($logic_not): \gate_service_dma_selected_gate -> \selections [21]
+Changing input B of cell $logic_or$bus-ram-alias.v:54$219_gate ($logic_or): \gate_service_program_selected_gate -> \selections [20]
+Changing input A of cell $logic_or$bus-ram-alias.v:54$219_gate ($logic_or): \gate_boot_program_selected_gate -> \selections [24]
+Changing input A of cell $logic_not$bus-ram-alias.v:52$213_gate ($logic_not): \gate_service_dma_selected_gate -> \selections [21]
+Changing input B of cell $logic_and$bus-ram-alias.v:51$212_gate ($logic_and): \gate_io_page_gate -> \selections [22]
+Changing input B of cell $logic_and$bus-ram-alias.v:47$202_gate ($logic_and): \gate_io_page_gate -> \selections [22]
+Changing input B of cell $logic_or$bus-ram-alias.v:37$199_gate ($logic_or): \gate_boot_program_selected_gate -> \selections [24]
+Changing input A of cell $logic_or$bus-ram-alias.v:37$199_gate ($logic_or): \gate_local_boot_selected_gate -> \selections [25]
+Changing input S of cell $ternary$bus-gold.v:146$158_gold ($mux): \gold_apr_selected_gold -> \selections [3]
+Changing input S of cell $ternary$bus-gold.v:146$157_gold ($mux): \gold_firmware_selected_gold -> \selections [4]
+Changing input S of cell $ternary$bus-gold.v:147$156_gold ($mux): \gold_fram_selected_gold -> \selections [6]
+Changing input B of cell $and$bus-gold.v:145$154_gold ($and): { \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold \gold_local_boot_selected_gold } -> { \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] \selections [25] }
+Changing input B of cell $and$bus-gold.v:144$153_gold ($and): { \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold \gold_cpu_io_page_gold } -> { \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] \selections [18] }
+Changing input B of cell $logic_or$bus-gold.v:106$114_gold ($logic_or): \gold_rk_store_selected_gold -> \selections [7]
+Changing input A of cell $logic_or$bus-gold.v:106$114_gold ($logic_or): \gold_program_selected_gold -> \selections [19]
+Changing input B of cell $logic_or$bus-gold.v:103$113_gold ($logic_or): \gold_service_dma_selected_gold -> \selections [21]
+Changing input A of cell $logic_not$bus-gold.v:103$111_gold ($logic_not): \gold_boot_selected_gold -> \selections [23]
+Changing input A of cell $logic_and$bus-gold.v:102$109_gold ($logic_and): \gold_rk_selected_gold -> \selections [12]
+Changing input A of cell $logic_not$bus-gold.v:102$108_gold ($logic_not): \gold_rk_fixed_selected_gold -> \selections [8]
+Changing input A of cell $logic_or$bus-gold.v:99$107_gold ($logic_or): \gold_rk_ds_selected_gold -> \selections [9]
+Changing input A of cell $logic_and$bus-gold.v:100$103_gold ($logic_and): \gold_rk_cs1_selected_gold -> \selections [11]
+Changing input A of cell $logic_and$bus-gold.v:98$101_gold ($logic_and): \gold_rk_selected_gold -> \selections [12]
+Changing input A of cell $logic_and$bus-gold.v:97$99_gold ($logic_and): \gold_rk_selected_gold -> \selections [12]
+Changing input A of cell $logic_and$bus-gold.v:96$97_gold ($logic_and): \gold_rk_selected_gold -> \selections [12]
+Changing input A of cell $logic_and$bus-gold.v:94$93_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:92$90_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:91$89_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:88$87_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:87$85_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:85$83_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:77$81_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:68$59_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input B of cell $logic_and$bus-gold.v:65$57_gold ($logic_and): \gold_apr_selected_gold -> \selections [3]
+Changing input A of cell $logic_and$bus-gold.v:64$56_gold ($logic_and): \gold_cpu_io_page_gold -> \selections [18]
+Changing input A of cell $logic_and$bus-gold.v:58$55_gold ($logic_and): \gold_io_page_gold -> \selections [22]
+Changing input A of cell $logic_not$bus-gold.v:58$54_gold ($logic_not): \gold_service_dma_selected_gold -> \selections [21]
+Changing input B of cell $logic_or$bus-gold.v:54$53_gold ($logic_or): \gold_service_program_selected_gold -> \selections [20]
+Changing input A of cell $logic_or$bus-gold.v:54$53_gold ($logic_or): \gold_boot_program_selected_gold -> \selections [24]
+Changing input A of cell $logic_not$bus-gold.v:52$47_gold ($logic_not): \gold_service_dma_selected_gold -> \selections [21]
+Changing input B of cell $logic_and$bus-gold.v:51$46_gold ($logic_and): \gold_io_page_gold -> \selections [22]
+Changing input B of cell $logic_and$bus-gold.v:47$36_gold ($logic_and): \gold_io_page_gold -> \selections [22]
+Changing input B of cell $logic_or$bus-gold.v:37$32_gold ($logic_or): \gold_boot_program_selected_gold -> \selections [24]
+Changing input A of cell $logic_or$bus-gold.v:37$32_gold ($logic_or): \gold_local_boot_selected_gold -> \selections [25]
+
+8. Executing HIERARCHY pass (managing design hierarchy).
+
+8.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+8.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\uj11_mmu_apr_decode'.
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removed 3 unused modules.
+
+9. Executing EQUIV_SIMPLE pass.
+Found 51 unproven $equiv cells (6 groups) in equiv:
+ Grouping SAT models for \rdata:
+  Trying to prove $equiv for \rdata [0]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [1]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [2]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [3]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [4]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [5]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [6]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [7]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [8]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [9]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [10]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [11]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [12]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [13]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [14]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [15]:ezsat
+ success!
+ Grouping SAT models for \selections:
+  Trying to prove $equiv for \selections [0]:ezsat
+ success!
+  Trying to prove $equiv for \selections [1]:ezsat
+ success!
+  Trying to prove $equiv for \selections [2]:ezsat
+ success!
+  Trying to prove $equiv for \selections [3]:ezsat
+ success!
+  Trying to prove $equiv for \selections [4]:ezsat
+ success!
+  Trying to prove $equiv for \selections [5]:ezsat
+ failed.
+  Trying to prove $equiv for \selections [6]:ezsat
+ failed.
+  Trying to prove $equiv for \selections [7]:ezsat
+ success!
+  Trying to prove $equiv for \selections [8]:ezsat
+ success!
+  Trying to prove $equiv for \selections [9]:ezsat
+ success!
+  Trying to prove $equiv for \selections [10]:ezsat
+ success!
+  Trying to prove $equiv for \selections [11]:ezsat
+ success!
+  Trying to prove $equiv for \selections [12]:ezsat
+ success!
+  Trying to prove $equiv for \selections [13]:ezsat
+ success!
+  Trying to prove $equiv for \selections [14]:ezsat
+ success!
+  Trying to prove $equiv for \selections [15]:ezsat
+ success!
+  Trying to prove $equiv for \selections [16]:ezsat
+ success!
+  Trying to prove $equiv for \selections [17]:ezsat
+ success!
+  Trying to prove $equiv for \selections [18]:ezsat
+ success!
+  Trying to prove $equiv for \selections [19]:ezsat
+ success!
+  Trying to prove $equiv for \selections [20]:ezsat
+ success!
+  Trying to prove $equiv for \selections [21]:ezsat
+ success!
+  Trying to prove $equiv for \selections [22]:ezsat
+ success!
+  Trying to prove $equiv for \selections [23]:ezsat
+ success!
+  Trying to prove $equiv for \selections [24]:ezsat
+ failed.
+  Trying to prove $equiv for \selections [25]:ezsat
+ failed.
+  Trying to prove $equiv for \release_probe:ezsat
+ failed.
+  Trying to prove $equiv for \apr_request:ezsat
+ success!
+  Trying to prove $equiv for \apr_pdr:ezsat
+ success!
+ Grouping SAT models for \apr_entry:
+  Trying to prove $equiv for \apr_entry [0]:ezsat
+ success!
+  Trying to prove $equiv for \apr_entry [1]:ezsat
+ success!
+  Trying to prove $equiv for \apr_entry [2]:ezsat
+ success!
+  Trying to prove $equiv for \apr_entry [3]:ezsat
+ success!
+  Trying to prove $equiv for \apr_entry [4]:ezsat
+ success!
+  Trying to prove $equiv for \apr_entry [5]:ezsat
+ success!
+Proved 46 previously unproven $equiv cells.
+
+10. Executing EQUIV_STATUS pass.
+ERROR: Found 5 unproven $equiv cells in 'equiv_status -assert'.
+Found 51 $equiv cells in equiv:
+  Of those cells 46 are proven and 5 are unproven.
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$391: \selections_gold [25] \selections_gate [25]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$390: \selections_gold [24] \selections_gate [24]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$372: \selections_gold [6] \selections_gate [6]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$371: \selections_gold [5] \selections_gate [5]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$365: \release_probe_gold \release_probe_gate
+Found a total of 5 unproven $equiv cells.

@@ -1,0 +1,34 @@
+{
+  "inputs_sha256": {
+    "build/cp46-combined-bus/tb_board_bus.v": "c33bfb4a86bb1228deb6e3cb3f49ca7084e3b3e6ed0aba1c2ed929aee6d9795c",
+    "build/cp46-control/combined/uj11_board.v": "b7036ab82acd7bed76dfab504156f82f39c3837651c8d03f7e492ad269b7caa9",
+    "build/cp46-control/combined/uj11_board_bus.v": "8b6b12fb872eb1977b161cef7d2c045411b2ba81e304c799b08a680c1e797b52",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+    "rtl/experimental/uj11_mmr0_control.v": "ded03572442e7d8d94ad8fd850ccc61030a690fb54e12e63e2c64fe91efdb2cc",
+    "rtl/experimental/uj11_mmr3.v": "51c6a565e77dffc6f20ab4048dd28321168144b53440481ed65a4b2e7849c96c",
+    "build/cp46-control/combined/uj11_mmu_apr_shared.v": "58e9481989de4d60dce1dc22ce9b7a85f4241ce19b4359d5bf34d763214a0662",
+    "rtl/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "rtl/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tools/check_relocate_bus_cp44.py": "5e4adbc6fa69d8c09bf8148a2cbbf1c62ef5c39b0547f80bcf4cd3df9d0bc9d8",
+    "tb/tb_board_bus.v": "4148cacd6258bec7df11407388077147763a3deb286688334a03505edcb2f172",
+    "tools/build_direct_relocate_cp44.py": "92a3ae9bf89f3d2b23a5f2eb4bff402b67d2bac36350bd24dbafb009ad9dbd36",
+    "build/cp44-direct/inputs.json": "6625c0c6fd45c7a3269de3d2c1268e1f40e9415f2c25c84b24e91354e0439d53",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "tools/check_control_cp46_system.py": "dc8e4c3ae82e619f92730d094f9ef6d83b90f68453b688327eb338e2a473140f",
+    "tools/build_control_cp46.py": "85ae8e8c1fe5a7a177cfd4ae8f7fa3b38441991d71cb5d56d613640db90cf96f",
+    "build/cp46-control/inputs.json": "adda4bb47c8e7fc96209c57a9df63edf76ba0ba13e44d03b30191b744d6b465f",
+    "build/cp46-combined-bus-driver.py": "95a16163ce78c9b36971b83816f9416e5ffaf8f9cafbd4a22e4fddd671549536"
+  },
+  "pass_lines": [
+    "PASS board bus: 32 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI",
+    "PASS CP44 PA/bypass: 6291456 combinations; full PA22/NXM/CSR decode and 32 private service states over every VA"
+  ],
+  "cp46_variant": "combined",
+  "cp46_suite": "bus"
+}

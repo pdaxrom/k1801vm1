@@ -1,5 +1,21 @@
 # Synthesis checkpoints
 
+## CP46 — control/physical-region варианты отклонены
+
+| Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP46a](../synth/reports/cp46a/result.json) | PA17 + RAM/I/O qualifiers | 1316 | 356 | 7 | 659 | — | 954 | MAP FAIL |
+| [CP46b](../synth/reports/cp46b/result.json) | Phase bit equations | 1315 | 359 | 7 | 661 | — | 954 | MAP FAIL |
+| [CP46c](../synth/reports/cp46c/result.json) | APR qualified address/WE | 1317 | 359 | 7 | 661 | — | 954 | MAP FAIL |
+| [CP46d](../synth/reports/cp46d/result.json) | A+B+C | 1317 | 356 | 7 | 659 | — | 954 | MAP FAIL |
+| [CP46e](../synth/reports/cp46e/result.json) | Контроль: исходный CP45k | 1302 | 359 | 7 | 652 | — | 954 | MAP FAIL |
+
+LCMXO2-1200HC-4SG32C, Diamond 3.14.0.75.2, 29.56 MHz constraint.
+Все четыре увеличивают площадь относительно CP45k (1302/359/7/652),
+поэтому отклонены. Контроль E повторил CP45k. PAR/TRACE/Fmax нет. Formal и integration проходят,
+clocks/UART прежние. Production CP40h/APR CP43d/плата CP29a сохранены.
+[Детали и structural EDIF audit](area-control-cp46.md).
+
 ## CP45 — physical bus decode/read mux, −49 LUT от CP44
 
 | Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |

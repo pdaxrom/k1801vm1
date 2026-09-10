@@ -1,0 +1,93 @@
+{
+  "edif_sha256": "a2b8f7930e5f54bb5c3da6689216ac34c71573bbea277eb565873a56edaa64cd",
+  "cells": 54,
+  "nets": 3453,
+  "bidirectional_nets": 8,
+  "multiple_drivers": [],
+  "floating": [],
+  "proven_unused_carry_inputs": [
+    "work/uj11_alu/N_1",
+    "work/uj11_microseq/N_1",
+    "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+    "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+    "work/spi_byte_service_68s_2s_7s/N_1",
+    "work/uj11_mmu_relocate/N_1",
+    "work/uj11_board/N_1"
+  ],
+  "negative_controls": [
+    {
+      "mutation": "second-driver",
+      "detected": "multiple_drivers",
+      "result": {
+        "edif_sha256": "af9c840573fd41e536bd9325e5829474fd551175e0b936f1b82685b27373fb4c",
+        "cells": 54,
+        "nets": 3453,
+        "bidirectional_nets": 8,
+        "multiple_drivers": [
+          {
+            "net": "work/uj11_regfile/lane_rdata_14",
+            "drivers": [
+              "boundary.lane_rdata",
+              "boundary.shifted"
+            ]
+          }
+        ],
+        "floating": [],
+        "proven_unused_carry_inputs": [
+          "work/uj11_alu/N_1",
+          "work/uj11_microseq/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+          "work/spi_byte_service_68s_2s_7s/N_1",
+          "work/uj11_mmu_relocate/N_1",
+          "work/uj11_board/N_1"
+        ]
+      }
+    },
+    {
+      "mutation": "open-input",
+      "detected": "floating",
+      "result": {
+        "edif_sha256": "34162b4fa697883845317a9ecd508cc74df4bb66d6e2dc9984aca4c163d8a984",
+        "cells": 54,
+        "nets": 3453,
+        "bidirectional_nets": 8,
+        "multiple_drivers": [],
+        "floating": [
+          "work/uj11_regfile/lane_rdata_14"
+        ],
+        "proven_unused_carry_inputs": [
+          "work/uj11_alu/N_1",
+          "work/uj11_microseq/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+          "work/spi_byte_service_68s_2s_7s/N_1",
+          "work/uj11_mmu_relocate/N_1",
+          "work/uj11_board/N_1"
+        ]
+      }
+    },
+    {
+      "mutation": "observable-cin",
+      "detected": "floating",
+      "result": {
+        "edif_sha256": "05cbbf9ab58aa75ea81e533f449b051d9a5115da4a82ec10b29343314f8475f9",
+        "cells": 54,
+        "nets": 3453,
+        "bidirectional_nets": 8,
+        "multiple_drivers": [],
+        "floating": [
+          "work/uj11_alu/N_1"
+        ],
+        "proven_unused_carry_inputs": [
+          "work/uj11_microseq/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+          "work/spi_byte_service_68s_2s_7s/N_1",
+          "work/uj11_mmu_relocate/N_1",
+          "work/uj11_board/N_1"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "variants": {
+    "baseline": [
+      false,
+      false,
+      false
+    ],
+    "classified": [
+      true,
+      false,
+      false
+    ],
+    "phase": [
+      false,
+      true,
+      false
+    ],
+    "apr": [
+      false,
+      false,
+      true
+    ],
+    "combined": [
+      true,
+      true,
+      true
+    ]
+  },
+  "inputs_sha256": {
+    "build/cp44-direct/uj11_board.v": "e676319301843088ea067bd27493022bb584e1235fa3f00935be436660050cad",
+    "build/cp45-bus/narrow-rom/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "rtl/experimental/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "build/cp39-csr/uj11_mmu_apr_shared.v": "4b86fd1b0d692cfac6f8a46aaa5e740d7a2c72a9ac2277be5147b66b75017b52",
+    "tools/build_control_cp46.py": "85ae8e8c1fe5a7a177cfd4ae8f7fa3b38441991d71cb5d56d613640db90cf96f",
+    "tools/build_bus_cp45.py": "64b501f232fb3b95f5a89d63b28c5c0885b3e3b67668fb4bb9514b9ad8be1b9e",
+    "tools/build_mmu_entry.py": "b99b5d0c80461886bee57f110f86a5fc49afec4b1a0ac18270399ef51fe07437",
+    "synth/reports/cp45k/inputs.json": "fa35b69c36570048c5c4ad0211d396f2c89be77e601446da588555512096bb0b"
+  },
+  "outputs_sha256": {
+    "build/cp46-control/baseline/uj11_board.v": "e676319301843088ea067bd27493022bb584e1235fa3f00935be436660050cad",
+    "build/cp46-control/baseline/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "build/cp46-control/baseline/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "build/cp46-control/baseline/uj11_mmu_apr_shared.v": "4b86fd1b0d692cfac6f8a46aaa5e740d7a2c72a9ac2277be5147b66b75017b52",
+    "build/cp46-control/classified/uj11_board.v": "b7036ab82acd7bed76dfab504156f82f39c3837651c8d03f7e492ad269b7caa9",
+    "build/cp46-control/classified/uj11_board_bus.v": "8b6b12fb872eb1977b161cef7d2c045411b2ba81e304c799b08a680c1e797b52",
+    "build/cp46-control/classified/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "build/cp46-control/classified/uj11_mmu_apr_shared.v": "4b86fd1b0d692cfac6f8a46aaa5e740d7a2c72a9ac2277be5147b66b75017b52",
+    "build/cp46-control/phase/uj11_board.v": "e676319301843088ea067bd27493022bb584e1235fa3f00935be436660050cad",
+    "build/cp46-control/phase/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "build/cp46-control/phase/uj11_mmu_relocate.v": "164b51b36a8a7b7dfa9d941ae233b0b332c8e5e895c03bf541bc5aaaeb51b143",
+    "build/cp46-control/phase/uj11_mmu_apr_shared.v": "4b86fd1b0d692cfac6f8a46aaa5e740d7a2c72a9ac2277be5147b66b75017b52",
+    "build/cp46-control/apr/uj11_board.v": "e676319301843088ea067bd27493022bb584e1235fa3f00935be436660050cad",
+    "build/cp46-control/apr/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "build/cp46-control/apr/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "build/cp46-control/apr/uj11_mmu_apr_shared.v": "58e9481989de4d60dce1dc22ce9b7a85f4241ce19b4359d5bf34d763214a0662",
+    "build/cp46-control/combined/uj11_board.v": "b7036ab82acd7bed76dfab504156f82f39c3837651c8d03f7e492ad269b7caa9",
+    "build/cp46-control/combined/uj11_board_bus.v": "8b6b12fb872eb1977b161cef7d2c045411b2ba81e304c799b08a680c1e797b52",
+    "build/cp46-control/combined/uj11_mmu_relocate.v": "164b51b36a8a7b7dfa9d941ae233b0b332c8e5e895c03bf541bc5aaaeb51b143",
+    "build/cp46-control/combined/uj11_mmu_apr_shared.v": "58e9481989de4d60dce1dc22ce9b7a85f4241ce19b4359d5bf34d763214a0662"
+  }
+}

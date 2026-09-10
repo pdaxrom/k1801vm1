@@ -1,0 +1,72 @@
+{
+  "tests": [
+    {
+      "kind": "bridge",
+      "defect": "none",
+      "tag": "cp46-proof-bridge-none",
+      "returncode": 0
+    },
+    {
+      "kind": "bridge",
+      "defect": "bad-phase",
+      "tag": "cp46-proof-bridge-bad-phase",
+      "returncode": 1
+    },
+    {
+      "kind": "apr",
+      "defect": "none",
+      "tag": "cp46-proof-apr-none",
+      "returncode": 0
+    },
+    {
+      "kind": "apr",
+      "defect": "write-on-lookup",
+      "tag": "cp46-proof-apr-write-on-lookup",
+      "returncode": 1
+    },
+    {
+      "kind": "bus",
+      "defect": "none",
+      "tag": "cp46-proof-bus-none",
+      "returncode": 0
+    },
+    {
+      "kind": "bus",
+      "defect": "ram-alias",
+      "tag": "cp46-proof-bus-ram-alias",
+      "returncode": 1
+    }
+  ],
+  "inputs_sha256": {
+    "tools/check_control_cp46.py": "23ce56b4a8257eb337851b6e8de02a0f1c2bb40012d4c98dd93cf942bfb00af7",
+    "tools/check_bus_cp45.py": "da443eb7b12ed5476de4d8622c4328de54e544c0824d51c88487c08b3f88598a",
+    "tools/check_board_decode.py": "e1c310273e30e049ce2da6a6ca5669f10f647fc1423f1e3dbeaada9642137e79",
+    "tools/build_control_cp46.py": "85ae8e8c1fe5a7a177cfd4ae8f7fa3b38441991d71cb5d56d613640db90cf96f",
+    "build/cp46-control/inputs.json": "adda4bb47c8e7fc96209c57a9df63edf76ba0ba13e44d03b30191b744d6b465f",
+    "rtl/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "build/cp46-control/baseline/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "build/cp46-control/phase/uj11_mmu_relocate.v": "164b51b36a8a7b7dfa9d941ae233b0b332c8e5e895c03bf541bc5aaaeb51b143",
+    "build/cp46-control/baseline/uj11_mmu_apr_shared.v": "4b86fd1b0d692cfac6f8a46aaa5e740d7a2c72a9ac2277be5147b66b75017b52",
+    "build/cp46-control/apr/uj11_mmu_apr_shared.v": "58e9481989de4d60dce1dc22ce9b7a85f4241ce19b4359d5bf34d763214a0662",
+    "build/cp46-control/baseline/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "build/cp46-control/classified/uj11_board_bus.v": "8b6b12fb872eb1977b161cef7d2c045411b2ba81e304c799b08a680c1e797b52",
+    "build/cp46-proof/apr-gate.v": "e9321b7a0fad5c8272976ac6991c7ec699f9b5a274549be17e3ac3d662dd617e",
+    "build/cp46-proof/apr-gold.v": "b57a777bbf02a08790e0874748f8a4827c02c5677d07f553642dd745ebd076dc",
+    "build/cp46-proof/apr-none.v": "e9321b7a0fad5c8272976ac6991c7ec699f9b5a274549be17e3ac3d662dd617e",
+    "build/cp46-proof/apr-none.ys": "cda5a8c7dc7509341a0284a24fc70a4b7ba88996a3d3a27e53d13bb7d96d938a",
+    "build/cp46-proof/apr-write-on-lookup.v": "38074b12ba46409dae8e21a05e4a4565f876387fa6c840960a33252e8c422c63",
+    "build/cp46-proof/apr-write-on-lookup.ys": "d3c81e6de2ee426db1890610ae042ae9c531470ccf90cfde01a03314db0544bd",
+    "build/cp46-proof/bridge-bad-phase.v": "2e188254e78355c98ea9cbbc7aa531d66a3604864ed24cbe724ab8bab4a04cd4",
+    "build/cp46-proof/bridge-bad-phase.ys": "6438c3b53719967e3fc23cd1b153e896705458132085e6ae5f2a23284dbbcc4f",
+    "build/cp46-proof/bridge-gate.v": "5d7888fca333edbd259e7c8438126524c747de01038eb5b23f0e3bf8ec64655a",
+    "build/cp46-proof/bridge-gold.v": "cc665a4124a7930fad48050a879a5ed324a83c21d926e04da30948f6af6e407e",
+    "build/cp46-proof/bridge-none.v": "5d7888fca333edbd259e7c8438126524c747de01038eb5b23f0e3bf8ec64655a",
+    "build/cp46-proof/bridge-none.ys": "b048de95e09765ea26514e019d5d77198eb4be85eb74d5567d599b63cd1e8aaa",
+    "build/cp46-proof/bus-gate.v": "0bad9c138cd8d62b691367001e64d3c5d32da985433eda490147a9b5864b69c9",
+    "build/cp46-proof/bus-gold.v": "4c0559840f5cc2591255c4ba17b6e1e95d0ee5987350739c7dfcbec61053a4c1",
+    "build/cp46-proof/bus-none.v": "0bad9c138cd8d62b691367001e64d3c5d32da985433eda490147a9b5864b69c9",
+    "build/cp46-proof/bus-none.ys": "35002c3804c8db554f5ceabef8f463510cd1f3a64408d201c24985b94e43f7c6",
+    "build/cp46-proof/bus-ram-alias.v": "326879787f974e18092a2eee24f243de02432982880deb59b769b3b3349acc03",
+    "build/cp46-proof/bus-ram-alias.ys": "cd6c28aa9349f22a05067e37356705f89f4995cc6672f729cfbdab39d0e9e797"
+  }
+}

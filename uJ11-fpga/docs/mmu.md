@@ -1,11 +1,17 @@
-# MMU / 128 КиБ FRAM — CP31–CP45
+# MMU / 128 КиБ FRAM — CP31–CP46
+
+**CP46 проверил и отклонил четыре control/region альтернативы:**
+1315–1317 LUT, все MAP FAIL. Formal/C/APR/vendor/CPU/FRAM/cold FB проверки
+прошли, но площадь выросла. CP45k остаётся лучшей основой; следующий
+area experiment — byte/state mux SPI FRAM transport.
+[Отчёт CP46](area-control-cp46.md).
 
 **CP45 уменьшил relocation board до 1302 LUT / 359 FF / 7 EBR /
 652 slices.** Это −49 LUT / −24 slices от CP44; CPU/FRAM/vendor и cold FB
 сохранили прежние clocks/UART. Bus factoring/prefix/local ROM проверены
 binary и X/Z equivalence. Все gates ещё MAP FAIL, Fmax нет, в production
 вариант не принят. До границы HC1200 не хватает 22 LUT / 12 slices;
-следующий gate — control/handshake/physical request path.
+этот control/handshake gate затем проверен в CP46 и отклонён.
 [Отчёт CP45](area-bus-cp45.md).
 
 Protection/W, MMR1/2, hardware fault metadata и restart ещё не подключены,

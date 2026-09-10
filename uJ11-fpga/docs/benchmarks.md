@@ -1,4 +1,14 @@
-# Benchmarks: CP45 и предыдущие этапы
+# Benchmarks: CP46 и предыдущие этапы
+
+## CP46 — clocks сохранены, площадь выросла
+
+Четыре control/region варианта: 1315–1317 LUT, все MAP FAIL; Fmax нет.
+Не приняты, лучший prototype CP45k сохранён. Комбинированный вариант
+повторил 67468380 clocks / 590096 PAR reads полного upper-FRAM CPU sweep,
+97692 / 848 vendor subset и все cold FB + DIR counts/UART CP45.
+APR portable/vendor: по 1144373 commands и 2288746 coherent lookup reads.
+Новых тактов нет, hardware speedup не заявляется. RT-11XM ещё не запускалась.
+[Измерения и границы проверки](area-control-cp46.md).
 
 ## CP45 — −49 LUT, прежние clocks
 

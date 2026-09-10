@@ -5,6 +5,13 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP46: четыре control/PA22 варианта проверены и отклонены по площади.**
+1315–1317 LUT против 1302 у CP45k; все MAP FAIL. Functional/formal,
+APR vendor, весь верхний банк FRAM и cold RT-11FB + DIR прошли, counts/UART
+прежние. Финальные EDIF CP45/CP46 проверены на конфликтующие направленные
+драйверы. Лучшей основой остаётся CP45; RT-11XM ещё не запускалась.
+[Результаты CP46](docs/area-control-cp46.md).
+
 **CP45: площадь relocation board уменьшена на 49 LUT.**
 Финальный повтор: **1302 LUT / 359 FF / 7 EBR / 652 slices**, MAP FAIL.
 До границы HC1200 остаются 22 LUT / 12 slices, затем нужен резерв на

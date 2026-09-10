@@ -1,0 +1,411 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `apr-write-on-lookup.ys' --
+
+1. Executing Verilog-2005 frontend: apr-gold.v
+Parsing SystemVerilog input from `apr-gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: apr-write-on-lookup.v
+Parsing SystemVerilog input from `apr-write-on-lookup.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/rtl/uj11_mmu_apr_decode.v
+Parsing SystemVerilog input from `/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/rtl/uj11_mmu_apr_decode.v' to AST representation.
+Generating RTLIL representation for module `\uj11_mmu_apr_decode'.
+Successfully finished Verilog frontend.
+
+4. Executing PROC pass (convert processes to netlists).
+
+4.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 3 switch rules as full_case in process $proc$apr-write-on-lookup.v:45$97 in module gate.
+Marked 3 switch rules as full_case in process $proc$apr-gold.v:45$47 in module gold.
+Removed a total of 0 dead cases.
+
+4.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+4.4. Executing PROC_INIT pass (extract init attributes).
+
+4.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~10 debug messages>
+
+4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$apr-write-on-lookup.v:45$97'.
+     1/2: $0\ready[0:0]
+     2/2: $0\phase[1:0]
+Creating decoders for process `\gold.$proc$apr-gold.v:45$47'.
+     1/2: $0\ready[0:0]
+     2/2: $0\phase[1:0]
+
+4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+4.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gate.\ready' using process `\gate.$proc$apr-write-on-lookup.v:45$97'.
+  created $dff cell `$procdff$156' with positive edge clock.
+Creating register for signal `\gate.\phase' using process `\gate.$proc$apr-write-on-lookup.v:45$97'.
+  created $dff cell `$procdff$157' with positive edge clock.
+Creating register for signal `\gold.\ready' using process `\gold.$proc$apr-gold.v:45$47'.
+  created $dff cell `$procdff$158' with positive edge clock.
+Creating register for signal `\gold.\phase' using process `\gold.$proc$apr-gold.v:45$47'.
+  created $dff cell `$procdff$159' with positive edge clock.
+
+4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 5 empty switches in `\gate.$proc$apr-write-on-lookup.v:45$97'.
+Removing empty process `gate.$proc$apr-write-on-lookup.v:45$97'.
+Found and cleaned up 5 empty switches in `\gold.$proc$apr-gold.v:45$47'.
+Removing empty process `gold.$proc$apr-gold.v:45$47'.
+Cleaned up 10 empty switches.
+
+4.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module uj11_mmu_apr_decode.
+Optimizing module gate.
+<suppressed ~4 debug messages>
+Optimizing module gold.
+<suppressed ~4 debug messages>
+
+5. Executing FLATTEN pass (flatten design).
+
+6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \uj11_mmu_apr_decode..
+Finding unused cells or wires in module \gate..
+Finding unused cells or wires in module \gold..
+Removed 2 unused cells and 57 unused wires.
+<suppressed ~5 debug messages>
+
+7. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: low_data_gold (\low_data_gold), low_data_gate (\low_data_gate) -> low_data
+Presumably equivalent wires: controls_gold (\controls_gold), controls_gate (\controls_gate) -> controls
+Presumably equivalent wires: lanes_gold (\lanes_gold), lanes_gate (\lanes_gate) -> lanes
+Presumably equivalent wires: address_gold ({ \entry_gold \address_gold [0] }), address_gate ({ \entry_gate \address_gate [0] }) -> address
+Presumably equivalent wires: memory_enable_gold (\memory_enable_gold), memory_enable_gate (\memory_enable_gate) -> memory_enable
+Presumably equivalent wires: par_write_gold (\par_write_gold), par_write_gate (\par_write_gate) -> par_write
+Presumably equivalent wires: modify_gold (\modify_gold), modify_gate (\modify_gate) -> modify
+Presumably equivalent wires: csr_write_gold (\csr_write_gold), csr_write_gate (\csr_write_gate) -> csr_write
+Presumably equivalent wires: phase_gold (\phase_gold), phase_gate (\phase_gate) -> phase
+Presumably equivalent wires: ram_probe_gold ({ \gold_probe_en_gold \ram_probe_gold [24:0] }), ram_probe_gate ({ \gate_probe_en_gate \ram_probe_gate [24:0] }) -> ram_probe
+Presumably equivalent wires: busy_gold (\busy_gold), busy_gate (\busy_gate) -> busy
+Presumably equivalent wires: ready_gold (\ready_gold), ready_gate (\ready_gate) -> ready
+Presumably equivalent wires: read_data_gold (\read_data_gold), read_data_gate (\read_data_gate) -> read_data
+Presumably equivalent wires: write_data_gold (\write_data_gold), write_data_gate (\write_data_gate) -> write_data
+Presumably equivalent wires: byte_enable_gold (\byte_enable_gold), byte_enable_gate (\byte_enable_gate) -> byte_enable
+Presumably equivalent wires: mark_written_gold (\mark_written_gold), mark_written_gate (\mark_written_gate) -> mark_written
+Presumably equivalent wires: writing_gold (\writing_gold), writing_gate (\writing_gate) -> writing
+Presumably equivalent wires: pdr_select_gold (\pdr_select_gold), pdr_select_gate (\pdr_select_gate) -> pdr_select
+Presumably equivalent wires: entry_gold (\entry_gold), entry_gate (\entry_gate) -> entry
+Presumably equivalent wires: lookup_grant_gold (\lookup_grant_gold), lookup_grant_gate (\lookup_grant_gate) -> lookup_grant
+Presumably equivalent wires: lookup_address_gold (\lookup_address_gold), lookup_address_gate (\lookup_address_gate) -> lookup_address
+Presumably equivalent wires: lookup_request_gold (\lookup_request_gold), lookup_request_gate (\lookup_request_gate) -> lookup_request
+Presumably equivalent wires: request_gold (\request_gold), request_gate (\request_gate) -> request
+Presumably equivalent wires: reset_gold (\reset_gold), reset_gate (\reset_gate) -> reset
+Presumably equivalent wires: clk_gold (\clk_gold), clk_gate (\clk_gate) -> clk
+Changing input A of cell $procmux$127_CMP0_gate ($logic_not): \phase_gate -> \phase
+Changing input A of cell $procmux$125_gate ($mux): \phase_gate -> \phase
+Changing input A of cell $procmux$124_CMP0_gate ($eq): \phase_gate -> \phase
+Changing input S of cell $procmux$122_gate ($mux): \par_write_gate -> \par_write
+Changing input A of cell $procmux$120_CMP0_gate ($eq): \phase_gate -> \phase
+Changing input A of cell $procmux$118_gate ($pmux): \phase_gate -> \phase
+Changing input A of cell $procmux$119_CMP0_gate ($eq): \phase_gate -> \phase
+Changing input B of cell $procmux$116_gate ($mux): \phase_gate -> \phase
+Changing input A of cell $procmux$112_CMP0_gate ($eq): \phase_gate -> \phase
+Changing input S of cell $procmux$110_gate ($mux): \par_write_gate -> \par_write
+Changing input A of cell $procmux$108_CMP0_gate ($eq): \phase_gate -> \phase
+Changing input A of cell $ne$apr-write-on-lookup.v:44$96_gate ($reduce_bool): \phase_gate -> \phase
+Changing input S of cell $ternary$apr-write-on-lookup.v:39$95_gate ($mux): \gate_probe_en_gate -> \ram_probe [25]
+Changing input S of cell $ternary$apr-write-on-lookup.v:40$94_gate ($mux): \gate_probe_en_gate -> \ram_probe [25]
+Changing input A of cell $logic_and$apr-write-on-lookup.v:41$92_gate ($logic_and): \gate_probe_en_gate -> \ram_probe [25]
+Changing input B of cell $ternary$apr-write-on-lookup.v:42$91_gate ($mux): \low_data_gate -> \low_data
+Changing input A of cell $logic_and$apr-write-on-lookup.v:42$90_gate ($logic_and): \gate_probe_en_gate -> \ram_probe [25]
+Changing input B of cell $or$apr-write-on-lookup.v:37$89_gate ($or): { \lookup_grant_gate \lookup_grant_gate } -> { \lookup_grant \lookup_grant }
+Changing input A of cell $or$apr-write-on-lookup.v:37$89_gate ($or): \lanes_gate -> \lanes
+Changing input B of cell $and$apr-write-on-lookup.v:36$87_gate ($and): { \memory_enable_gate \memory_enable_gate \memory_enable_gate \memory_enable_gate \memory_enable_gate \memory_enable_gate \memory_enable_gate } -> { \memory_enable \memory_enable \memory_enable \memory_enable \memory_enable \memory_enable \memory_enable }
+Changing input A of cell $and$apr-write-on-lookup.v:36$87_gate ($and): { \entry_gate \address_gate [0] } -> { \entry_gate \address [0] }
+Changing input B of cell $and$apr-write-on-lookup.v:36$86_gate ($and): { \lookup_grant_gate \lookup_grant_gate \lookup_grant_gate \lookup_grant_gate \lookup_grant_gate \lookup_grant_gate \lookup_grant_gate } -> { \lookup_grant \lookup_grant \lookup_grant \lookup_grant \lookup_grant \lookup_grant \lookup_grant }
+Changing input B of cell $logic_or$apr-write-on-lookup.v:35$85_gate ($logic_or): \lookup_grant_gate -> \lookup_grant
+Changing input A of cell $logic_or$apr-write-on-lookup.v:35$85_gate ($logic_or): \memory_enable_gate -> \memory_enable
+Changing input A of cell $logic_not$apr-write-on-lookup.v:34$81_gate ($logic_not): \busy_gate -> \busy
+Changing input S of cell $ternary$apr-write-on-lookup.v:32$78_gate ($mux): \phase_gate [0] -> \phase [0]
+Changing input B of cell $ternary$apr-write-on-lookup.v:32$78_gate ($mux): { 1'0 $logic_and$apr-write-on-lookup.v:33$77_Y_gate 2'00 \controls_gate 1'0 } -> { 1'0 $logic_and$apr-write-on-lookup.v:33$77_Y_gate 2'00 \controls 1'0 }
+Changing input A of cell $logic_not$apr-write-on-lookup.v:33$76_gate ($logic_not): \csr_write_gate -> \csr_write
+Changing input A of cell $logic_and$apr-write-on-lookup.v:30$73_gate ($logic_and): \csr_write_gate -> \csr_write
+Changing input A of cell $logic_or$apr-write-on-lookup.v:28$71_gate ($logic_or): \phase_gate [1] -> \phase [1]
+Changing input A of cell $logic_and$apr-write-on-lookup.v:28$69_gate ($logic_and): \phase_gate [0] -> \phase [0]
+Changing input A of cell $logic_and$apr-write-on-lookup.v:29$67_gate ($logic_and): \phase_gate [1] -> \phase [1]
+Changing input B of cell $logic_and$apr-write-on-lookup.v:29$66_gate ($logic_and): \modify_gate -> \modify
+Changing input A of cell $logic_and$apr-write-on-lookup.v:29$66_gate ($logic_and): \phase_gate [0] -> \phase [0]
+Changing input A of cell $logic_or$apr-write-on-lookup.v:26$64_gate ($logic_or): \modify_gate -> \modify
+Changing input A of cell $logic_not$apr-write-on-lookup.v:26$63_gate ($logic_not): \phase_gate [1] -> \phase [1]
+Changing input A of cell $eq$apr-write-on-lookup.v:23$60_gate ($eq): \phase_gate -> \phase
+Changing input B of cell $logic_and$apr-write-on-lookup.v:23$58_gate ($logic_and): \modify_gate -> \modify
+Changing input A of cell $eq$apr-write-on-lookup.v:23$57_gate ($eq): \phase_gate -> \phase
+Changing input A of cell $eq$apr-write-on-lookup.v:22$55_gate ($logic_not): \phase_gate -> \phase
+Changing input A of cell $logic_and$apr-write-on-lookup.v:21$53_gate ($logic_and): \csr_write_gate -> \csr_write
+Changing input A of cell $logic_or$apr-write-on-lookup.v:20$51_gate ($logic_or): \csr_write_gate -> \csr_write
+Changing input A of cell $procmux$152_CMP0_gold ($logic_not): \phase_gold -> \phase
+Changing input A of cell $procmux$150_gold ($mux): \phase_gold -> \phase
+Changing input A of cell $procmux$149_CMP0_gold ($eq): \phase_gold -> \phase
+Changing input S of cell $procmux$147_gold ($mux): \par_write_gold -> \par_write
+Changing input A of cell $procmux$145_CMP0_gold ($eq): \phase_gold -> \phase
+Changing input A of cell $procmux$143_gold ($pmux): \phase_gold -> \phase
+Changing input A of cell $procmux$144_CMP0_gold ($eq): \phase_gold -> \phase
+Changing input B of cell $procmux$141_gold ($mux): \phase_gold -> \phase
+Changing input A of cell $procmux$137_CMP0_gold ($eq): \phase_gold -> \phase
+Changing input S of cell $procmux$135_gold ($mux): \par_write_gold -> \par_write
+Changing input A of cell $procmux$133_CMP0_gold ($eq): \phase_gold -> \phase
+Changing input A of cell $ne$apr-gold.v:44$46_gold ($reduce_bool): \phase_gold -> \phase
+Changing input S of cell $ternary$apr-gold.v:39$45_gold ($mux): \gold_probe_en_gold -> \ram_probe [25]
+Changing input S of cell $ternary$apr-gold.v:40$44_gold ($mux): \gold_probe_en_gold -> \ram_probe [25]
+Changing input A of cell $logic_and$apr-gold.v:41$42_gold ($logic_and): \gold_probe_en_gold -> \ram_probe [25]
+Changing input B of cell $ternary$apr-gold.v:42$41_gold ($mux): \low_data_gold -> \low_data
+Changing input A of cell $logic_and$apr-gold.v:42$40_gold ($logic_and): \gold_probe_en_gold -> \ram_probe [25]
+Changing input S of cell $ternary$apr-gold.v:37$39_gold ($mux): \lookup_grant_gold -> \lookup_grant
+Changing input A of cell $ternary$apr-gold.v:37$39_gold ($mux): \lanes_gold -> \lanes
+Changing input S of cell $ternary$apr-gold.v:36$38_gold ($mux): \lookup_grant_gold -> \lookup_grant
+Changing input A of cell $ternary$apr-gold.v:36$38_gold ($mux): { \entry_gold \address_gold [0] } -> { \entry_gold \address [0] }
+Changing input B of cell $logic_or$apr-gold.v:35$37_gold ($logic_or): \lookup_grant_gold -> \lookup_grant
+Changing input A of cell $logic_or$apr-gold.v:35$37_gold ($logic_or): \memory_enable_gold -> \memory_enable
+Changing input A of cell $logic_not$apr-gold.v:34$33_gold ($logic_not): \busy_gold -> \busy
+Changing input S of cell $ternary$apr-gold.v:32$30_gold ($mux): \phase_gold [0] -> \phase [0]
+Changing input B of cell $ternary$apr-gold.v:32$30_gold ($mux): { 1'0 $logic_and$apr-gold.v:33$29_Y_gold 2'00 \controls_gold 1'0 } -> { 1'0 $logic_and$apr-gold.v:33$29_Y_gold 2'00 \controls 1'0 }
+Changing input A of cell $logic_not$apr-gold.v:33$28_gold ($logic_not): \csr_write_gold -> \csr_write
+Changing input A of cell $logic_and$apr-gold.v:30$25_gold ($logic_and): \csr_write_gold -> \csr_write
+Changing input A of cell $logic_or$apr-gold.v:28$23_gold ($logic_or): \phase_gold [1] -> \phase [1]
+Changing input A of cell $logic_and$apr-gold.v:28$21_gold ($logic_and): \phase_gold [0] -> \phase [0]
+Changing input A of cell $logic_and$apr-gold.v:29$19_gold ($logic_and): \phase_gold [1] -> \phase [1]
+Changing input B of cell $logic_and$apr-gold.v:29$18_gold ($logic_and): \modify_gold -> \modify
+Changing input A of cell $logic_and$apr-gold.v:29$18_gold ($logic_and): \phase_gold [0] -> \phase [0]
+Changing input A of cell $logic_or$apr-gold.v:26$16_gold ($logic_or): \modify_gold -> \modify
+Changing input A of cell $logic_not$apr-gold.v:26$15_gold ($logic_not): \phase_gold [1] -> \phase [1]
+Changing input A of cell $eq$apr-gold.v:23$12_gold ($eq): \phase_gold -> \phase
+Changing input B of cell $logic_and$apr-gold.v:23$10_gold ($logic_and): \modify_gold -> \modify
+Changing input A of cell $eq$apr-gold.v:23$9_gold ($eq): \phase_gold -> \phase
+Changing input A of cell $eq$apr-gold.v:22$7_gold ($logic_not): \phase_gold -> \phase
+Changing input A of cell $logic_and$apr-gold.v:21$5_gold ($logic_and): \csr_write_gold -> \csr_write
+Changing input A of cell $logic_or$apr-gold.v:20$3_gold ($logic_or): \csr_write_gold -> \csr_write
+
+8. Executing HIERARCHY pass (managing design hierarchy).
+
+8.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+8.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\uj11_mmu_apr_decode'.
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removed 3 unused modules.
+
+9. Executing EQUIV_SIMPLE pass.
+Found 55 unproven $equiv cells (13 groups) in equiv:
+  Trying to prove $equiv for \lookup_grant:ezsat
+ success!
+  Trying to prove $equiv for \ready:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \busy:ezsat
+ success!
+ Grouping SAT models for \ram_probe:
+  Trying to prove $equiv for \ram_probe [0]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [1]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [2]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [3]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [4]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [5]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [6]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [7]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [8]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [9]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [10]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [11]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [12]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [13]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [14]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [15]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [16]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [17]:ezsat
+ezsat
+ failed.
+  Trying to prove $equiv for \ram_probe [18]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [19]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [20]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [21]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [22]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [23]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [24]:ezsat
+ success!
+  Trying to prove $equiv for \ram_probe [25]:ezsat
+ success!
+ Grouping SAT models for \phase:
+  Trying to prove $equiv for \phase [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \phase [1]:ezsat
+ success!
+  Trying to prove $equiv for \csr_write:ezsat
+ success!
+  Trying to prove $equiv for \modify:ezsat
+ success!
+  Trying to prove $equiv for \par_write:ezsat
+ success!
+  Trying to prove $equiv for \memory_enable:ezsat
+ success!
+ Grouping SAT models for \address:
+  Trying to prove $equiv for \address [0]:ezsat
+ success!
+  Trying to prove $equiv for \address [1]:ezsat
+ success!
+  Trying to prove $equiv for \address [2]:ezsat
+ success!
+  Trying to prove $equiv for \address [3]:ezsat
+ success!
+  Trying to prove $equiv for \address [4]:ezsat
+ success!
+  Trying to prove $equiv for \address [5]:ezsat
+ success!
+  Trying to prove $equiv for \address [6]:ezsat
+ success!
+ Grouping SAT models for \lanes:
+  Trying to prove $equiv for \lanes [0]:ezsat
+ success!
+  Trying to prove $equiv for \lanes [1]:ezsat
+ success!
+ Grouping SAT models for \controls:
+  Trying to prove $equiv for \controls [0]:ezsat
+ success!
+  Trying to prove $equiv for \controls [1]:ezsat
+ success!
+  Trying to prove $equiv for \controls [2]:ezsat
+ success!
+ Grouping SAT models for \low_data:
+  Trying to prove $equiv for \low_data [0]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [1]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [2]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [3]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [4]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [5]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [6]:ezsat
+ success!
+  Trying to prove $equiv for \low_data [7]:ezsat
+ success!
+Proved 37 previously unproven $equiv cells.
+
+10. Executing EQUIV_INDUCT pass.
+Found 18 unproven $equiv cells in module equiv:
+  Proving existence of base case for step 1. (3875 clauses over 1512 variables)
+  Proving induction step 1. (7809 clauses over 3044 variables)
+  Proof for induction step failed. Extending to next time step.
+  Proving existence of base case for step 2. (7810 clauses over 3044 variables)
+  Proving induction step 2. (11744 clauses over 4576 variables)
+  Proof for induction step failed. Extending to next time step.
+  Proving existence of base case for step 3. (11745 clauses over 4576 variables)
+  Proving induction step 3. (15679 clauses over 6108 variables)
+  Proof for induction step failed. Extending to next time step.
+  Proving existence of base case for step 4. (15680 clauses over 6108 variables)
+  Proving induction step 4. (19614 clauses over 7640 variables)
+  Proof for induction step failed. Trying to prove individual $equiv from workset.
+  Trying to prove $equiv for \ram_probe [0]: failed.
+  Trying to prove $equiv for \ram_probe [1]: failed.
+  Trying to prove $equiv for \ram_probe [2]: failed.
+  Trying to prove $equiv for \ram_probe [3]: failed.
+  Trying to prove $equiv for \ram_probe [4]: failed.
+  Trying to prove $equiv for \ram_probe [5]: failed.
+  Trying to prove $equiv for \ram_probe [6]: failed.
+  Trying to prove $equiv for \ram_probe [7]: failed.
+  Trying to prove $equiv for \ram_probe [8]: failed.
+  Trying to prove $equiv for \ram_probe [9]: failed.
+  Trying to prove $equiv for \ram_probe [10]: failed.
+  Trying to prove $equiv for \ram_probe [11]: failed.
+  Trying to prove $equiv for \ram_probe [12]: failed.
+  Trying to prove $equiv for \ram_probe [13]: failed.
+  Trying to prove $equiv for \ram_probe [14]: failed.
+  Trying to prove $equiv for \ram_probe [15]: failed.
+  Trying to prove $equiv for \ram_probe [16]: failed.
+  Trying to prove $equiv for \ram_probe [17]: failed.
+Proved 0 previously unproven $equiv cells.
+
+11. Executing EQUIV_STATUS pass.
+Found 55 $equiv cells in equiv:
+  Of those cells 37 are proven and 18 are unproven.
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$203: \ram_probe_gold [17] \ram_probe_gate [17]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$202: \ram_probe_gold [16] \ram_probe_gate [16]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$201: \ram_probe_gold [15] \ram_probe_gate [15]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$200: \ram_probe_gold [14] \ram_probe_gate [14]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$199: \ram_probe_gold [13] \ram_probe_gate [13]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$198: \ram_probe_gold [12] \ram_probe_gate [12]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$197: \ram_probe_gold [11] \ram_probe_gate [11]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$196: \ram_probe_gold [10] \ram_probe_gate [10]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$195: \ram_probe_gold [9] \ram_probe_gate [9]
+ERROR: Found 18 unproven $equiv cells in 'equiv_status -assert'.
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$194: \ram_probe_gold [8] \ram_probe_gate [8]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$193: \ram_probe_gold [7] \ram_probe_gate [7]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$192: \ram_probe_gold [6] \ram_probe_gate [6]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$191: \ram_probe_gold [5] \ram_probe_gate [5]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$190: \ram_probe_gold [4] \ram_probe_gate [4]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$189: \ram_probe_gold [3] \ram_probe_gate [3]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$188: \ram_probe_gold [2] \ram_probe_gate [2]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$187: \ram_probe_gold [1] \ram_probe_gate [1]
+  Unproven $equiv $auto$equiv_make.cc:258:find_same_wires$186: \ram_probe_gold [0] \ram_probe_gate [0]
+Found a total of 18 unproven $equiv cells.

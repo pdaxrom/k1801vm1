@@ -1,5 +1,19 @@
 # Implementation status, 2026-09-10
 
+## CP46 — control/region альтернативы отклонены
+
+PA17 + RAM/I/O qualifiers, уравнения phase bits, APR RAM address/WE и их
+сочетание дали 1315–1317 LUT против 1302 у CP45k. Все gates — MAP FAIL;
+Fmax нет, изменений в production нет. Formal/mutations, X/Z data, C oracle,
+APR portable/vendor, весь upper FRAM, edge cases и cold FB + DIR проходят
+с прежними clocks/UART. Final EDIF audit CP45k/CP46d не нашёл конфликтующих
+направленных drivers; INOUT и masked CIN разобраны отдельно.
+
+Лучший relocation prototype остаётся CP45k: 1302 LUT / 359 FF / 7 EBR /
+652 slices. Следующий area experiment — SPI FRAM transport byte/state mux.
+Protection/restart, active-MMU RK/high DMA и RT-11XM ещё не проверены/не готовы.
+[Отчёт](area-control-cp46.md), [manifest](verification-cp46.json).
+
 ## CP45 — physical bus уменьшен, fit ещё не пройден
 
 Финальный CP45k: **1302 LUT / 359 FF / 7 EBR / 652 slices**, −49 LUT /
