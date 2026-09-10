@@ -1,4 +1,24 @@
-# Benchmarks: CP27 и предыдущие этапы
+# Benchmarks: CP35 и предыдущие этапы
+
+## CP35 — стоимость context hook и cold RT-11FB
+
+В CPU miter дополнительное время точно равно `9 × entries + held edges`:
+4759934 clocks = 9×390550+1244984. Helper упражняет сохранение PSW,
+не выполняет MMU translation; это не итоговый CPI MMU. Сравниваемый
+исходный CPU останавливает clock только на private edges кандидата.
+
+Полный board CP35e с постоянно включённым hook и hold=0 прошёл cold
+RT-11FB + DIR за **406268404 clocks**, против **354938300** у CP31c
+(+14.46%). Получены 3986525 retirements, 5221066 read / 424227 write beats,
+3395982 FRAM transactions, 300 RK commands, 654 timer edges,
+3270 UART wire bytes, 162 SD reads / 6 writes. Таймер добавляет работу
+при увеличении длительности, поэтому разность clock counts не следует
+делить на исходное число memory accesses как стоимость одной routine.
+
+Fit: 1273 LUT / 338 FF / 6 EBR / 30.498 MHz при 29.56 MHz PASS.
+Это simulation workload и TRACE placement, не измерение физической платы.
+Исходный образ неизменён; XM и high-memory CPU/DMA отсутствуют.
+[Контракт, исходные логи и ограничения](mmu-entry.md).
 
 ## CP34 — сравнение площади ALU, без нового CPU benchmark
 

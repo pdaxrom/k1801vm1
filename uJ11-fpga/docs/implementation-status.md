@@ -1,5 +1,28 @@
 # Implementation status, 2026-09-10
 
+## CP35 — microcode context entry/return
+
+Проверен служебный вход перед всеми 88 memory words, отдельный saved uPC
+и возврат без порчи PSW/MDR/IR/Q, живых temporaries и занятого EA CALL link.
+Контроллер — 12 FF; helper — 9 слов, 8 исполняются, +9 clocks/entry без hold.
+Экспериментальная сборка 963/1024×36, production остаётся 954/1024×36.
+
+CPU probe 690→732 LUT; masked-OR вариант 814 LUT отвергнут. Полный board
+с enable=1 / hold=0: **1273 LUT / 338 FF / 6 EBR / 638 slices / 30.498 MHz**,
+MAP/PAR/TRACE PASS при 29.56 MHz. Осталось 7 LUT и 2 slices: до подключения
+APR/translation/MMR требуется экономия общей логики.
+
+Прошли 69632 CPU miter cases, все 88 memory words, 390550 entry/return,
+1244984 held edges; дополнительно 1024 four-state cases. Пять внесённых
+дефектов обнаружены. FIS: 23840 cases на RAM и столько же на SPI FRAM,
+645 на vendor DP8KC. Cold RT-11FB + DIR: 406268404 clocks, 3270 UART wire
+bytes, 162 SD reads / 6 writes, исходный образ не изменён.
+
+MMU пока не подключён: нет lookup/translation, MMR, PA22 CPU bus,
+MMU abort/restart или high-memory RK DMA. RT-11XM не загружен.
+Production inputs совпадают с CP31c, FPGA остаётся CP29a.
+[Контракт и измерения](mmu-entry.md), [manifest](verification-cp35.json).
+
 ## CP34 — разделение ALU и время жизни T5–T7
 
 Три изолированных HC1200 datapath probes прошли MAP/PAR/TRACE:

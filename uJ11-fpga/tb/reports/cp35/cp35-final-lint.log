@@ -1,0 +1,10 @@
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.051 MB sources in 3 modules, into 0.018 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.005 s (elab=0.000, cvt=0.002, bld=0.000); cpu 0.005 s on 1 threads; allocated 9.938 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.437 MB sources in 15 modules, into 0.252 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.024 s (elab=0.004, cvt=0.013, bld=0.000); cpu 0.024 s on 1 threads; allocated 13.906 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.487 MB sources in 16 modules, into 0.264 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.025 s (elab=0.003, cvt=0.013, bld=0.000); cpu 0.025 s on 1 threads; allocated 14.016 MB
+PASS strict lint: entry, baseline core, selected candidate core

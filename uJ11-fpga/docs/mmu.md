@@ -237,10 +237,12 @@ odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и по�
 
 ## Следующие gates и обязательный RT-11XM
 
-1. PAR16/PDR storage и physical CSR decode измерены в CP33. Теперь исследовать
-   microcode entry/return с T5–T7 и общей ALU: CP34 показал лишь 5 LUT экономии
-   от hardware relocation sharing и отверг полное arithmetic sharing.
-   Сохранить PSW/MDR/Q, занятый CALL link и однократность memory request.
+1. PAR16/PDR storage и physical CSR decode измерены в CP33. CP34 показал лишь
+   5 LUT экономии от hardware relocation sharing и отверг полное sharing.
+   [CP35](mmu-entry.md) проверил entry/return с T5–T7, сохранением PSW/MDR/Q,
+   занятого CALL link и однократностью memory request: 9 слов, +9 clocks/entry.
+   Полный fixed-on board занимает 1273 LUT / 638 slices, свободно только
+   7 LUT / 2 slices. Сократить общую логику перед подключением MMU.
    Измерить общую экономию LUT перед интеграцией translator и APR; одного свободного
    EBR достаточно для таблиц, но LUT budget полной MMU не подтверждён. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять

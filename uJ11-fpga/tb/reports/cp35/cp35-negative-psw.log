@@ -1,0 +1,2 @@
+FATAL: tb/tb_mmu_entry_core.v:95: PSW restore mismatch case2 got2444 expected244e
+       Time: 1036000  Scope: tb_mmu_entry_core

@@ -1,0 +1,2 @@
+build/cp35/uj11_engine.v:82: warning: implicit definition of wire 'running'.
+build/cp35/uj11_engine.v:83: warning: implicit definition of wire 'advance'.

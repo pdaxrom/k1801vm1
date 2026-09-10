@@ -61,10 +61,13 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   relocation-only экономит 5 LUT в datapath probe, в production не перенесён.
 - [x] CP34: проверить время жизни T5–T7 на всех 88 memory words;
   static analysis, CPU/FIS/EIS poisoning и отрицательные контроли.
-- [ ] Измерить MMU microcode entry/return с T5–T7: сохранить PSW/MDR/Q,
-  не перезаписать занятый EA CALL link, уложиться в оставшиеся 70 слов.
+- [x] CP35: измерить microcode entry/return с T5–T7; PSW/MDR/Q и занятый
+  EA CALL link сохранены. 9 слов, 12 FF, +9 clocks/memory word без hold.
+  CPU miter, FIS/FRAM/vendor ROM и cold RT-11FB + DIR прошли.
 - [ ] Сократить общую LUT cost перед подключением CP32/CP33 и MMR.
-  Изолированные fits не доказывают full-board fit.
+  CP35e fixed-on hook: 1273 LUT / 338 FF / 6 EBR / 638 slices / 30.498 MHz;
+  осталось 7 LUT / 2 slices. Это ещё не MMU и не новый production baseline.
+  Masked-OR redirect отвергнут; [отчёт CP35](docs/mmu-entry.md).
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

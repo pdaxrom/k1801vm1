@@ -1,5 +1,28 @@
 # Synthesis checkpoints
 
+## CP35 — вход в микрокод перед memory word
+
+| Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP35a](../synth/reports/cp35a/result.json) | Entry controller probe | 23 | 42 | 0 | 22 | 150.150 | — |
+| [CP35b](../synth/reports/cp35b/result.json) | Baseline CPU, ROM decoder | 690 | 303 | 5 | 346 | 34.136 | 954 |
+| [CP35c](../synth/reports/cp35c/result.json) | CPU + context hook, selected experiment | 732 | 315 | 5 | 366 | 35.854 | 963 |
+| [CP35d](../synth/reports/cp35d/result.json) | Masked-OR redirect, rejected | 814 | 315 | 5 | 408 | 33.686 | 963 |
+| [CP35e](../synth/reports/cp35e/result.json) | Full board, hook enable=1 / hold=0 | 1273 | 338 | 6 | 638 | 30.498 | 963 |
+
+Diamond 3.14 / HC1200-4SG32C, constraint 29.56 MHz, все MAP/PAR/TRACE PASS.
+Controller probe содержит 30 measurement FF и 12 FF context state;
+CPU probes b/c/d — одинаковые 208 measurement FF. Полный board e сохраняет
+всю периферию CP31c и добавляет 21 LUT / 12 FF / 10 slices. Свободны
+только 7 LUT / 2 slices / 1 EBR. Runtime enable/hold, APR, translation,
+MMR и abort/restart ещё не подключены; для них требуется новый area gate.
+
+Masked-OR вариант d увеличил sequencer ORCALUT4 121→194 и общий mapped
+LUT4 732→814. Вернули c, исходники d доступны в его archive. Production
+inputs неизменны и соответствуют CP31c: 1252 LUT / 326 FF / 6 EBR /
+30.917 MHz. Плата не программировалась. [Анализ и verification](mmu-entry.md),
+[source/report hashes](verification-cp35.json).
+
 ## CP34 — изолированное разделение datapath с MMU arithmetic
 
 | Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |

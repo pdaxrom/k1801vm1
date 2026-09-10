@@ -1,0 +1,245 @@
+----------------------------------------------------------------------
+Report for cell uj11_probe_entry_baseline.verilog
+
+Register bits: 303 of 1280 (24%)
+PIC Latch:       0
+I/O cells:       4
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       15       100.0
+                              DP8KC        5       100.0
+                           DPR16X4C        4       100.0
+                            FD1P3IX       88       100.0
+                            FD1P3JX        3       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX      209       100.0
+                                GSR        1       100.0
+                                 IB        3       100.0
+                           IFS1P3IX        1       100.0
+                                INV        1       100.0
+                                 OB        1       100.0
+                           ORCALUT4      611       100.0
+                              PFUMX       48       100.0
+                                PUR        1       100.0
+                           SPR16X4C        4       100.0
+                                VHI       13       100.0
+                                VLO       13       100.0
+SUB MODULES 
+                           uj11_alu        1       100.0
+                 uj11_core_1s_8s_0s        1       100.0
+                      uj11_datapath        1       100.0
+                    uj11_decode_rom        1       100.0
+                  uj11_decode_table        1       100.0
+                uj11_engine_1s_8s_0        1       100.0
+                           uj11_mem        1       100.0
+                      uj11_microseq        1       100.0
+              uj11_probe_entry_core        1       100.0
+                           uj11_psw        1       100.0
+                       uj11_regfile        1       100.0
+          uj11_rom_microcode/generated/m0.mem        1       100.0
+                            
+                         TOTAL          1035           
+----------------------------------------------------------------------
+Report for cell uj11_probe_entry_core.netlist
+     Instance path:  probe
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       15       100.0
+                              DP8KC        5       100.0
+                           DPR16X4C        4       100.0
+                            FD1P3IX       88       100.0
+                            FD1P3JX        3       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX      209       100.0
+                                INV        1       100.0
+                           ORCALUT4      611       100.0
+                              PFUMX       48       100.0
+                           SPR16X4C        4       100.0
+                                VHI       12        92.3
+                                VLO       12        92.3
+SUB MODULES 
+                           uj11_alu        1       100.0
+                 uj11_core_1s_8s_0s        1       100.0
+                      uj11_datapath        1       100.0
+                    uj11_decode_rom        1       100.0
+                  uj11_decode_table        1       100.0
+                uj11_engine_1s_8s_0        1       100.0
+                           uj11_mem        1       100.0
+                      uj11_microseq        1       100.0
+                           uj11_psw        1       100.0
+                       uj11_regfile        1       100.0
+          uj11_rom_microcode/generated/m0.mem        1       100.0
+                            
+                         TOTAL          1025           
+----------------------------------------------------------------------
+Report for cell uj11_core_1s_8s_0s.netlist
+     Instance path:  probe.core
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       15       100.0
+                              DP8KC        5       100.0
+                           DPR16X4C        4       100.0
+                            FD1P3IX       88       100.0
+                            FD1P3JX        3       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX        3         1.4
+                                INV        1       100.0
+                           ORCALUT4      552        90.3
+                              PFUMX       48       100.0
+                           SPR16X4C        4       100.0
+                                VHI       11        84.6
+                                VLO       11        84.6
+SUB MODULES 
+                           uj11_alu        1       100.0
+                      uj11_datapath        1       100.0
+                    uj11_decode_rom        1       100.0
+                  uj11_decode_table        1       100.0
+                uj11_engine_1s_8s_0        1       100.0
+                           uj11_mem        1       100.0
+                      uj11_microseq        1       100.0
+                           uj11_psw        1       100.0
+                       uj11_regfile        1       100.0
+          uj11_rom_microcode/generated/m0.mem        1       100.0
+                            
+                         TOTAL           757           
+----------------------------------------------------------------------
+Report for cell uj11_engine_1s_8s_0.netlist
+     Instance path:  probe.core.engine
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       15       100.0
+                              DP8KC        4        80.0
+                           DPR16X4C        4       100.0
+                            FD1P3IX       88       100.0
+                            FD1P3JX        3       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX        3         1.4
+                                INV        1       100.0
+                           ORCALUT4      527        86.3
+                              PFUMX       40        83.3
+                           SPR16X4C        4       100.0
+                                VHI        8        61.5
+                                VLO        8        61.5
+SUB MODULES 
+                           uj11_alu        1       100.0
+                      uj11_datapath        1       100.0
+                           uj11_mem        1       100.0
+                      uj11_microseq        1       100.0
+                           uj11_psw        1       100.0
+                       uj11_regfile        1       100.0
+          uj11_rom_microcode/generated/m0.mem        1       100.0
+                            
+                         TOTAL           714           
+----------------------------------------------------------------------
+Report for cell uj11_rom_microcode/generated/m0.mem.netlist
+     Instance path:  probe.core.engine.rom
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        4        80.0
+                           ORCALUT4        3         0.5
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL             9           
+----------------------------------------------------------------------
+Report for cell uj11_microseq.netlist
+     Instance path:  probe.core.engine.seq
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        6        40.0
+                            FD1P3IX       21        23.9
+                                INV        1       100.0
+                           ORCALUT4      105        17.2
+                              PFUMX        4         8.3
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL           139           
+----------------------------------------------------------------------
+Report for cell uj11_mem.netlist
+     Instance path:  probe.core.engine.memory
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           ORCALUT4        4         0.7
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL             6           
+----------------------------------------------------------------------
+Report for cell uj11_psw.netlist
+     Instance path:  probe.core.engine.status
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX       13        14.8
+                            FD1P3JX        3       100.0
+                           ORCALUT4        7         1.1
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL            25           
+----------------------------------------------------------------------
+Report for cell uj11_datapath.netlist
+     Instance path:  probe.core.engine.dp
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        9        60.0
+                           DPR16X4C        4       100.0
+                            FD1P3IX       16        18.2
+                           ORCALUT4      274        44.8
+                              PFUMX       28        58.3
+                           SPR16X4C        4       100.0
+                                VHI        3        23.1
+                                VLO        3        23.1
+SUB MODULES 
+                           uj11_alu        1       100.0
+                       uj11_regfile        1       100.0
+                            
+                         TOTAL           343           
+----------------------------------------------------------------------
+Report for cell uj11_regfile.netlist
+     Instance path:  probe.core.engine.dp.rf
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           DPR16X4C        4       100.0
+                           ORCALUT4        2         0.3
+                           SPR16X4C        4       100.0
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL            12           
+----------------------------------------------------------------------
+Report for cell uj11_alu.netlist
+     Instance path:  probe.core.engine.dp.alu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        9        60.0
+                           ORCALUT4      102        16.7
+                              PFUMX       17        35.4
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL           130           
+----------------------------------------------------------------------
+Report for cell uj11_decode_rom.netlist
+     Instance path:  probe.core.sync_decode.decode
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1        20.0
+                           ORCALUT4       25         4.1
+                              PFUMX        8        16.7
+                                VHI        2        15.4
+                                VLO        2        15.4
+SUB MODULES 
+                  uj11_decode_table        1       100.0
+                            
+                         TOTAL            39           
+----------------------------------------------------------------------
+Report for cell uj11_decode_table.netlist
+     Instance path:  probe.core.sync_decode.decode.table_rom
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1        20.0
+                                VHI        1         7.7
+                                VLO        1         7.7
+                            
+                         TOTAL             3           

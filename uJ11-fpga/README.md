@@ -5,7 +5,7 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP34: измерено разделение ALU с MMU; проверены свободные T5–T7 на границах памяти.**
+**CP35: проверен и измерен служебный вход в микрокод перед обращением к памяти.**
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
@@ -38,7 +38,14 @@ CP33c добавляет отдельный APR store и CSR decode: **40 LUT / 
 это проверено анализом путей и подменой регистров в CPU oracle tests.
 Прошли 272917 cases с подменой T5–T7, покрыты все 88 memory uPC.
 [Измерения, проверки и следующий эксперимент](docs/mmu-sharing.md).
-Плату в CP31–CP34 не программировали; физически остаётся CP29.
+CP35 сохраняет PSW и CALL link при служебном входе на всех 88 memory words.
+Экспериментальный полный board с постоянно включённым hook:
+**1273 LUT / 338 FF / 6 EBR / 30.498 MHz**, 963 microinstructions.
+Прошли CPU miter, FIS/RAM/SPI FRAM/vendor ROM и cold RT-11FB + DIR.
+Свободны только **7 LUT и 2 slices**; перед подключением APR/translation/MMR
+нужно сократить площадь. Production не меняется, MMU ещё не подключён.
+[Контракт, измерения и проверки CP35](docs/mmu-entry.md).
+Плату в CP31–CP35 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,

@@ -1,0 +1,2 @@
+PASS MMU entry: 210246 cycles, all 1024 return PCs, 11551 entries / 10729 returns; hold, resume, reset, disabled
+tb/tb_mmu_entry.v:65: $finish called at 2102460000 (1ps)

@@ -1310,3 +1310,19 @@ test-mmu-dp-negative: | build
 test-mmu-scratch: microcode-m0 build/isa_vectors.mem build/ea-vectors.txt build/irq-vectors.txt build/trace_bit-vectors.txt build/bus-fault-vectors.txt build/fis-vectors.txt build/eis_ash-vectors.txt build/eis-ash-fault-vectors.txt build/eis_ashc-vectors.txt build/eis-ashc-fault-vectors.txt build/eis_xor-vectors.txt build/eis-xor-fault-vectors.txt build/eis_mul-vectors.txt build/eis-mul-fault-vectors.txt build/eis_div-vectors.txt build/eis-div-fault-vectors.txt build/single-vectors.txt build/control-vectors.txt build/extra-vectors.txt build/psw_transfer-vectors.txt build/system_control-vectors.txt
 	$(PYTHON) tools/check_mmu_scratch.py
 	$(PYTHON) tools/check_mmu_scratch_coverage.py
+
+# CP35: experimental build-only memory context hook; production stays CP31c.
+.PHONY: mmu-entry test-mmu-entry test-mmu-entry-fis test-mmu-entry-board
+mmu-entry: board | build
+	$(PYTHON) tools/build_mmu_entry.py
+test-mmu-entry: mmu-entry
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_entry -o build/cp35-entry tb/tb_mmu_entry.v rtl/experimental/uj11_mmu_entry.v
+	$(VVP) build/cp35-entry > build/cp35-entry.log
+	$(PYTHON) tools/check_mmu_entry_lint.py
+	$(PYTHON) tools/run_mmu_entry.py
+	$(PYTHON) tools/run_mmu_entry.py --simulator iverilog --cases 1024
+	$(PYTHON) tools/check_mmu_entry_negative.py
+test-mmu-entry-fis: mmu-entry build/fis-vectors.txt
+	$(PYTHON) tools/check_mmu_entry_fis.py
+test-mmu-entry-board: mmu-entry
+	$(PYTHON) tools/run_mmu_entry_board.py

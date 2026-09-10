@@ -140,6 +140,19 @@ for suffix,kind in [('a','dedicated'),('b','shared'),('c','relocation')]:
         'rtl/uj11_alu.v','rtl/uj11_regfile.v','rtl/uj11_datapath.v',
         'rtl/experimental/uj11_datapath_borrow.v','synth/machxo2/uj11_mmu_dp_compare.v',
         'synth/machxo2/uj11_probe_mmu_dp.v','synth/machxo2/uj11_probe_mmu_dp_'+kind+'.v'])
+CONFIGS['cp35a']=('uj11_probe_mmu_entry',0,[
+    'rtl/experimental/uj11_mmu_entry.v','synth/machxo2/uj11_probe_mmu_entry.v'])
+CONFIGS['cp35b']=('uj11_probe_entry_baseline',5,[
+    'build/cp35/baseline/uj11_core.v' if source=='rtl/uj11_core.v' else source
+    for source in CONFIGS['cp5'][2][:-1]]+[
+    'rtl/uj11_decode_rom.v','build/cp35/uj11_decode_table.v',
+    'synth/machxo2/uj11_probe_entry_core.v','synth/machxo2/uj11_probe_entry_baseline.v'])
+CONFIGS['cp35c']=('uj11_probe_entry_candidate',5,[
+    'build/cp35/'+source.rsplit('/',1)[-1] if source in (
+        'build/cp35/baseline/uj11_core.v','rtl/uj11_engine.v','rtl/uj11_microseq.v','microcode/generated/uj11_m0_ebr.v') else source
+    for source in CONFIGS['cp35b'][2][:-1]]+[
+    'rtl/experimental/uj11_mmu_entry.v','synth/machxo2/uj11_probe_entry_candidate.v'])
+CONFIGS['cp35d']=CONFIGS['cp35c']
 
 
 def main():
@@ -190,6 +203,14 @@ exit 0
                               (['microcode/m0.uasm','microcode/fis.uasm','microasm/uj11asm.py',
                                 'tools/link_fis.py','tools/make_ebr.py']
                                if 'microcode/generated/uj11_m0_ebr.v' in sources else [])))
+    if name in ('cp35b','cp35c','cp35d'):
+        inputs=sorted(set(inputs+[
+            'rtl/uj11_core.v','rtl/uj11_engine.v','rtl/uj11_microseq.v',
+            'tools/build_mmu_entry.py','tools/make_ebr.py','tools/link_fis.py',
+            'microasm/uj11asm.py','microasm/uj11entryasm.py','microcode/mmu_entry.uasm',
+            'microcode/m0.uasm','microcode/fis.uasm','microcode/generated/full.uasm',
+            'microcode/generated/uj11_decode_table.v','tools/build_decode_rom.py',
+            'build/cp35/entry.mem','build/cp35/entry.lst','build/cp35/entry.stats.json']))
     hashes={n:hashlib.sha256((root/n).read_bytes()).hexdigest() for n in inputs}
     hashes['generated:clock.lpf']=hashlib.sha256(clock_lpf.encode()).hexdigest()
     manifest={'name':name,'top':top,'files':hashes,
