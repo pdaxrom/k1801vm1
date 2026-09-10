@@ -1,0 +1,13 @@
+{
+  "baseline_sha256": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+  "outputs_sha256": {
+    "build/cp40-alu/baseline/uj11_alu.v": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+    "build/cp40-alu/balanced/uj11_alu.v": "5ab80d37168d9ee4e77793686d6d2dad15b6dba0c1f3940717a9b55f548b1a9a",
+    "build/cp40-alu/priority/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4"
+  },
+  "inputs_sha256": {
+    "tools/build_alu_mux.py": "fe2947428b4d69b4e6436a56e1bc4c456d2d26a27fde462308e54a209143fab9",
+    "synth/reports/cp39d/source.tgz": "3d3d59515d6f27f227157de69e748a6714eeb67df5643be7a8f8014f12e9af9c",
+    "synth/reports/cp39d/inputs.json": "f117d209612307d773e5dd168e87ad89a66532e7309c6527c53ec19210bddf25"
+  }
+}

@@ -12,7 +12,6 @@ module uj11_alu (
     wire arithmetic=(operation[3:1]==1 || operation[3:1]==2);
     wire left=(operation==11 || operation==14);
     wire right=(operation==12 || operation==13 || operation==15);
-    wire logic_op=!arithmetic && !left && !right;
     function [3:0] boolean_truth;
         input [3:0] op;
         begin case(op)
@@ -39,8 +38,8 @@ module uj11_alu (
     wire right_sign=(operation==13 && a[15]) || (operation==15 && carry);
     wire right_byte=(operation==13 && a[7]) || (operation==15 && carry);
     wire [15:0] right_value={right_sign,a[15:9],byte_mode?right_byte:a[8],a[7:1]};
-    assign result=(sum[15:0]&{16{arithmetic}})|(logic_value&{16{logic_op}})|
-                  (left_value&{16{left}})|(right_value&{16{right}});
+    assign result=arithmetic ? sum[15:0] : left ? left_value :
+                  right ? right_value : logic_value;
     wire sa=byte_mode?a[7]:a[15];
     wire sb=byte_mode?arithmetic_b[7]:arithmetic_b[15];
     wire ss=byte_mode?sum[7]:sum[15];

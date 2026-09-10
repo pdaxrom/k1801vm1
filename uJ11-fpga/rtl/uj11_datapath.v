@@ -12,25 +12,29 @@ module uj11_datapath (
     output wire rf_write,
     output wire [15:0] writeback
 );
-    // Decode once, then parallel masked buses. Avoid cascaded priority muxes.
-    wire [15:0] lhs = (read_a & {16{pair==0 || pair==1 || pair==2}}) |
-                      (d & {16{pair==3 || pair==5 || pair==6}}) |
-                      (read_b & {16{pair==7}});
-    wire [15:0] rhs = (read_b & {16{pair==0 || pair==3 || pair==4}}) |
-                      (q & {16{pair==1 || pair==5}}) |
-                      (d & {16{pair==2}}) | (read_a & {16{pair==6 || pair==7}});
+    wire [1:0] lhs_select = {
+        pair[2] && (pair[1]==pair[0]),
+        (pair[1] && pair[0]) || (pair[2] && (pair[1] || pair[0]))};
+    wire [1:0] rhs_select = {
+        pair[1] && (pair[2] || !pair[0]),
+        (pair[0] && !pair[1]) || (pair[2] && pair[1])};
+    // LHS 00=A,01=D,10=0,11=B; RHS 00=B,01=Q,10=D,11=A.
+    wire [15:0] lhs = lhs_select[1] ? (lhs_select[0] ? read_b : 16'b0) :
+                                    (lhs_select[0] ? d : read_a);
+    wire [15:0] rhs = rhs_select[1] ? (rhs_select[0] ? read_a : d) :
+                                    (rhs_select[0] ? q : read_b);
     uj11_alu alu(.a(lhs),.b(rhs),.operation(operation),.carry(carry),.byte_mode(byte_mode),
                  .result(result),.nzvc(nzvc));
     // Operand write preserves the upper byte; MOVB sign-extends it. The full
     // merged value also feeds PC redirect/debug, so no separate RF byte port.
     wire keep_high = byte_mode && destination==3'd5;
     wire sign_high = byte_mode && destination==3'd6;
-    wire [15:0] ordinary_writeback = {
-        (read_b[15:8] & {8{keep_high}}) | ({8{result[7]}} & {8{sign_high}}) |
-        (result[15:8] & {8{!keep_high && !sign_high}}), result[7:0]};
-    assign writeback = ({result[14:0],q[15]} & {16{destination==3'd3}}) |
-                      ({result[15],result[15:1]} & {16{destination==3'd4}}) |
-                      (ordinary_writeback & {16{destination!=3'd3 && destination!=3'd4}});
+    // Resolve long shifts first. Byte merge only applies to destinations
+    // 5/6, so these selects are disjoint without an extra ordinary-data mask.
+    wire [15:0] shifted = destination==3'd3 ? {result[14:0],q[15]} :
+                          destination==3'd4 ? {result[15],result[15:1]} : result;
+    assign writeback = {keep_high ? read_b[15:8] :
+                        sign_high ? {8{result[7]}} : shifted[15:8], shifted[7:0]};
     assign rf_write = enable && !reset &&
                       (destination==3'd1 || destination==3'd3 || destination==3'd4 ||
                        destination==3'd5 || destination==3'd6);

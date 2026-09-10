@@ -1,5 +1,18 @@
 # Implementation status, 2026-09-10
 
+## CP40 — площадь datapath/ALU
+
+Production CP40h: **1159 LUT / 326 FF / 6 EBR / 584 slices / 31.470 MHz**,
+−29 LUT от CP38f. APR CP40i: **1258 LUT / 344 FF / 7 EBR / 631 slices /
+30.254 MHz**, −10 LUT от CP39d. Оба MAP/PAR/TRACE PASS при 29.56 MHz;
+остаток 121/22 LUT и 56/9 slices. Полный MMU fit ещё не доказан.
+
+Изменены только выбор операндов/данных writeback и результата ALU.
+Микрокод, state, RF/Q, flags logic и периферия прежние. Formal, four-state,
+CPU miter, FIS/RAM/FRAM/vendor и CPU APR CSR tests прошли; оба cold FB runs
+сохранили clocks и UART. FPGA CP29a, translation/MMR/high DMA/XM ещё впереди.
+[Контракт и все девять fits](area-datapath.md), [manifest](verification-cp40.json).
+
 ## CP39 — CPU APR CSR и общий EBR
 
 Experimental CP39d: **1268 LUT / 344 FF / 7 EBR / 635 slices / 31.075 MHz**,

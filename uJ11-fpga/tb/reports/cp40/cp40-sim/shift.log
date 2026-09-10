@@ -1,0 +1,2 @@
+PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset
+tb/tb_datapath_mux.v:50: $finish called at 532514000 (1ps)

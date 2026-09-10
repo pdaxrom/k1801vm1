@@ -1,0 +1,7 @@
+{
+  "inputs_sha256": {
+    "tools/check_mmu_apr_csr_miter.py": "b97188ab3a0bcb1892598d2b0df5627694d19089057a270a43f3f411f103ee7a",
+    "tools/check_datapath_mux_cpu.py": "dd1fcc021193598c4a6b3bace71c228be7755fffa71cd2b63789701cef281802",
+    "build/cp40-cpu/miter-portable.py": "47418b954bc7e6e66c13008cb2fb5618bdbf2717f03c50535aa7ce7d4e3797e5"
+  }
+}

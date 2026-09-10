@@ -1,10 +1,11 @@
-# MMU / 128 КиБ FRAM — CP31–CP39
+# MMU / 128 КиБ FRAM — CP31–CP40
 
-После CP39 CPU APR CSR и shared EBR lookup работают в экспериментальном
-board: **1268 LUT / 344 FF / 7 EBR / 635 slices / 31.075 MHz**.
-Свободны только 12 LUT и 5 slices. Следующий gate — сокращение общей LUT
-cost перед translation/MMR; полная MMU ещё не помещена. Production остаётся
-CP38f без MMU, плата CP29a. [Контракт и измерения CP39](mmu-apr-csr.md).
+CP40 уменьшил board с CPU APR CSR и shared EBR lookup до **1258 LUT /
+344 FF / 7 EBR / 631 slices / 30.254 MHz**. Свободны только 22 LUT и
+9 slices. Следующий gate — сокращение общей LUT cost перед translation/MMR;
+полная MMU ещё не помещена. Production CP40h без MMU занимает 1159 LUT,
+плата остаётся CP29a. [Контракт APR](mmu-apr-csr.md),
+[измерения CP40](area-datapath.md).
 
 CP37 добавляет экспериментальный backend APR_READ/D=APR только в build-копии.
 Production v12 и 954 words сохранены; MMU translation ещё не подключена.
@@ -259,8 +260,8 @@ odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и по�
    [CP35](mmu-entry.md) проверил entry/return с T5–T7, сохранением PSW/MDR/Q,
    занятого CALL link и однократностью memory request: 9 слов, +9 clocks/entry.
    CP37–CP39 подключили lookup и CPU APR CSR с одним EBR; CP38 сократил
-   board read mux. CP39d занимает 1268 LUT / 635 slices, свободны 12 LUT /
-   5 slices / 0 EBR. Следующий gate — сокращение общей логики перед
+   board read mux, CP40 — datapath/ALU mux. CP40i занимает 1258 LUT /
+   631 slices, свободны 22 LUT / 9 slices / 0 EBR. Следующий gate — сокращение общей логики перед
    microcoded translation/MMR. Таблицы уже используют седьмой EBR;
    LUT budget полной MMU не подтверждён. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять

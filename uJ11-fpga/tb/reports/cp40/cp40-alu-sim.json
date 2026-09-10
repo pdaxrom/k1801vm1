@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "variant": "both-balanced",
+      "pass_line": "PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset"
+    },
+    {
+      "variant": "baseline-balanced",
+      "pass_line": "PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset"
+    },
+    {
+      "variant": "both-priority",
+      "pass_line": "PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset"
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp40-alu-sim/uj11_alu_reference.v": "ace9795c3dd51642e2eb502c0f1605a10e4b7496bde3e7b92ecab505e25d00df",
+    "build/cp40-alu-sim/uj11_datapath_reference.v": "cbc3b2db48122ec9fb96b77eb190c5472b667d3cb02b1fb1b036d8fa55110677",
+    "build/cp40-alu/balanced/uj11_alu.v": "5ab80d37168d9ee4e77793686d6d2dad15b6dba0c1f3940717a9b55f548b1a9a",
+    "build/cp40-alu/baseline/uj11_alu.v": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+    "build/cp40-alu/priority/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "build/cp40-mux/baseline/uj11_datapath.v": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+    "build/cp40-mux/both/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "tb/tb_datapath_mux.v": "598a08600594f8dbb38aa3e5b18bc9e789d31e4cd195df63a52ef156cdda8f7b",
+    "tools/check_alu_mux_sim.py": "86da50f9847781de98752c417922cda68a12c5b399fe8a9302e8b968cc4cb4b7"
+  }
+}

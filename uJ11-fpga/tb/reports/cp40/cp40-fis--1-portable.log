@@ -1,0 +1,5 @@
+PASS FIS memory_mode=-1: 23840 exact state/PSW/bus/memory cases, 3072 injected faults
+- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp40-fis/tb_fis.v:159: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 108ms; walltime 7.446 s; speed 14.509 ms/s
+- Verilator: cpu 7.422 s on 1 threads; allocated 2 MB

@@ -85,7 +85,11 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Portable/vendor CPU/bus/port, whole-opcode miter и cold FB counts PASS.
   [Отчёт](docs/mmu-apr-csr.md). Production остаётся CP38f, FPGA CP29a.
 - [ ] Следующий gate: сократить общую LUT cost перед relocation/MMR.
-  CP39 оставляет только 12 LUT / 5 slices / 0 EBR; полная MMU ещё не помещена.
+  После CP40 с APR остаётся 22 LUT / 9 slices / 0 EBR; полной MMU ещё нет.
+- [x] CP40: перестроить operand/writeback mux и ALU result selection.
+  Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
+  7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба
+  cold FB runs прошли, clocks прежние. [Отчёт](docs/area-datapath.md).
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

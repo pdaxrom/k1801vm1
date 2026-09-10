@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "variant": "shift",
+      "pass_line": "PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset"
+    },
+    {
+      "variant": "pair",
+      "pass_line": "PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset"
+    },
+    {
+      "variant": "both",
+      "pass_line": "PASS four-state datapath: 266257 cycles, all controls, unknown RF/PASS init, RF/Q/hold/reset"
+    }
+  ],
+  "inputs_sha256": {
+    "tb/tb_datapath_mux.v": "598a08600594f8dbb38aa3e5b18bc9e789d31e4cd195df63a52ef156cdda8f7b",
+    "build/cp40-alu/baseline/uj11_alu.v": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "build/cp40-sim/uj11_datapath_reference.v": "445e92a30d11711fa11b2db3b346ff03321e88a08131811d997dc8b793ecc8d8",
+    "tools/check_datapath_mux_sim.py": "b2a38683bc1e4af52f36d0c38cb6e387fb52e66e5a87e771d1e4bf31bf2def0b",
+    "build/cp40-mux/baseline/uj11_datapath.v": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+    "build/cp40-mux/shift/uj11_datapath.v": "d472af1a9f635b444f751363bc7b83707dcf252609b90c59cabf49163f946ea2",
+    "build/cp40-mux/pair/uj11_datapath.v": "9a523e3fad206e9912579e3c29a65248ce9f47cba74febbbb22a53def46fbee8",
+    "build/cp40-mux/both/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68"
+  }
+}

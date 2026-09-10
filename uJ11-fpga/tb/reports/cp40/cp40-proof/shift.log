@@ -1,0 +1,2453 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.68 (git sha1 38e001a6f, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `proof.ys' --
+
+1. Executing Verilog-2005 frontend: alu.v
+Parsing SystemVerilog input from `alu.v' to AST representation.
+Generating RTLIL representation for module `\uj11_alu'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: regfile.v
+Parsing SystemVerilog input from `regfile.v' to AST representation.
+Generating RTLIL representation for module `\uj11_regfile'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: gold.v
+Parsing SystemVerilog input from `gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: gate.v
+Parsing SystemVerilog input from `gate.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+5. Executing PROC pass (convert processes to netlists).
+
+5.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 2 switch rules as full_case in process $proc$gate.v:39$261 in module gate.
+Marked 2 switch rules as full_case in process $proc$gold.v:39$203 in module gold.
+Marked 1 switch rules as full_case in process $proc$regfile.v:13$127 in module uj11_regfile.
+Marked 1 switch rules as full_case in process $proc$alu.v:29$71 in module uj11_alu.
+Removed a total of 0 dead cases.
+
+5.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 6 assignments to connections.
+
+5.4. Executing PROC_INIT pass (extract init attributes).
+
+5.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~8 debug messages>
+
+5.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$gate.v:39$261'.
+     1/1: $0\q[15:0]
+Creating decoders for process `\gold.$proc$gold.v:39$203'.
+     1/1: $0\q[15:0]
+Creating decoders for process `\uj11_regfile.$proc$regfile.v:13$127'.
+     1/3: $1$memwr$\words$regfile.v:14$124_EN[15:0]$133
+     2/3: $1$memwr$\words$regfile.v:14$124_DATA[15:0]$132
+     3/3: $1$memwr$\words$regfile.v:14$124_ADDR[3:0]$131
+Creating decoders for process `\uj11_alu.$proc$alu.v:29$71'.
+     1/1: $1\boolean_truth$func$alu.v:29$2.$result[3:0]$75
+
+5.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\uj11_alu.\boolean_truth$func$alu.v:29$1.$result' from process `\uj11_alu.$proc$alu.v:29$71'.
+
+5.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gate.\q' using process `\gate.$proc$gate.v:39$261'.
+  created $dff cell `$procdff$300' with positive edge clock.
+Creating register for signal `\gold.\q' using process `\gold.$proc$gold.v:39$203'.
+  created $dff cell `$procdff$301' with positive edge clock.
+Creating register for signal `\uj11_regfile.$memwr$\words$regfile.v:14$124_ADDR' using process `\uj11_regfile.$proc$regfile.v:13$127'.
+  created $dff cell `$procdff$302' with positive edge clock.
+Creating register for signal `\uj11_regfile.$memwr$\words$regfile.v:14$124_DATA' using process `\uj11_regfile.$proc$regfile.v:13$127'.
+  created $dff cell `$procdff$303' with positive edge clock.
+Creating register for signal `\uj11_regfile.$memwr$\words$regfile.v:14$124_EN' using process `\uj11_regfile.$proc$regfile.v:13$127'.
+  created $dff cell `$procdff$304' with positive edge clock.
+
+5.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 3 empty switches in `\gate.$proc$gate.v:39$261'.
+Removing empty process `gate.$proc$gate.v:39$261'.
+Found and cleaned up 3 empty switches in `\gold.$proc$gold.v:39$203'.
+Removing empty process `gold.$proc$gold.v:39$203'.
+Found and cleaned up 1 empty switch in `\uj11_regfile.$proc$regfile.v:13$127'.
+Removing empty process `uj11_regfile.$proc$regfile.v:13$127'.
+Found and cleaned up 1 empty switch in `\uj11_alu.$proc$alu.v:29$71'.
+Removing empty process `uj11_alu.$proc$alu.v:29$71'.
+Cleaned up 8 empty switches.
+
+5.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gate.
+<suppressed ~2 debug messages>
+Optimizing module gold.
+<suppressed ~2 debug messages>
+Optimizing module uj11_regfile.
+Optimizing module uj11_alu.
+<suppressed ~3 debug messages>
+
+6. Executing MEMORY pass.
+
+6.1. Executing OPT_MEM pass (optimize memories).
+Performed a total of 0 transformations.
+
+6.2. Executing OPT_MEM_PRIORITY pass (removing unnecessary memory write priority relations).
+Performed a total of 0 transformations.
+
+6.3. Executing OPT_MEM_FEEDBACK pass (finding memory read-to-write feedback paths).
+  Analyzing uj11_regfile.words write port 0.
+
+6.4. Executing MEMORY_BMUX2ROM pass (converting muxes to ROMs).
+
+6.5. Executing MEMORY_DFF pass (merging $dff cells to $memrd).
+Checking read port `\words'[0] in module `\uj11_regfile': no output FF found.
+Checking read port `\words'[1] in module `\uj11_regfile': no output FF found.
+Checking read port address `\words'[0] in module `\uj11_regfile': no address FF found.
+Checking read port address `\words'[1] in module `\uj11_regfile': no address FF found.
+
+6.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gate..
+Finding unused cells or wires in module \gold..
+Finding unused cells or wires in module \uj11_regfile..
+Finding unused cells or wires in module \uj11_alu..
+Removed 3 unused cells and 77 unused wires.
+<suppressed ~7 debug messages>
+
+6.7. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+Consolidating read ports of memory uj11_regfile.words by address:
+
+6.8. Executing OPT_MEM_WIDEN pass (optimize memories where all ports are wide).
+Performed a total of 0 transformations.
+
+6.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gate..
+Finding unused cells or wires in module \gold..
+Finding unused cells or wires in module \uj11_regfile..
+Finding unused cells or wires in module \uj11_alu..
+
+6.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+6.11. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+Mapping memory \words in module \uj11_regfile:
+  created 16 $dff cells and 0 static cells of width 16.
+  read interface: 0 $dff and 30 $mux cells.
+  write interface: 256 write mux blocks.
+
+7. Executing FLATTEN pass (flatten design).
+<suppressed ~4 debug messages>
+
+8. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gate..
+Finding unused cells or wires in module \gold..
+Finding unused cells or wires in module \uj11_regfile..
+Finding unused cells or wires in module \uj11_alu..
+Removed 0 unused cells and 144 unused wires.
+<suppressed ~3 debug messages>
+
+9. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: rf.words[10]_gold (\rf.words[10]_gold), rf.words[10]_gate (\rf.words[10]_gate) -> rf.words[10]
+Presumably equivalent wires: rf.words[13]_gold (\rf.words[13]_gold), rf.words[13]_gate (\rf.words[13]_gate) -> rf.words[13]
+Presumably equivalent wires: rf.words[9]_gold (\rf.words[9]_gold), rf.words[9]_gate (\rf.words[9]_gate) -> rf.words[9]
+Presumably equivalent wires: rf.words[11]_gold (\rf.words[11]_gold), rf.words[11]_gate (\rf.words[11]_gate) -> rf.words[11]
+Presumably equivalent wires: rf.words[8]_gold (\rf.words[8]_gold), rf.words[8]_gate (\rf.words[8]_gate) -> rf.words[8]
+Presumably equivalent wires: rf.words[14]_gold (\rf.words[14]_gold), rf.words[14]_gate (\rf.words[14]_gate) -> rf.words[14]
+Presumably equivalent wires: rf.words[7]_gold (\rf.words[7]_gold), rf.words[7]_gate (\rf.words[7]_gate) -> rf.words[7]
+Presumably equivalent wires: rf.words[12]_gold (\rf.words[12]_gold), rf.words[12]_gate (\rf.words[12]_gate) -> rf.words[12]
+Presumably equivalent wires: rf.words[6]_gold (\rf.words[6]_gold), rf.words[6]_gate (\rf.words[6]_gate) -> rf.words[6]
+Presumably equivalent wires: rf.words[15]_gold (\rf.words[15]_gold), rf.words[15]_gate (\rf.words[15]_gate) -> rf.words[15]
+Presumably equivalent wires: rf.words[5]_gold (\rf.words[5]_gold), rf.words[5]_gate (\rf.words[5]_gate) -> rf.words[5]
+Presumably equivalent wires: rf.words[4]_gold (\rf.words[4]_gold), rf.words[4]_gate (\rf.words[4]_gate) -> rf.words[4]
+Presumably equivalent wires: rf.words[3]_gold (\rf.words[3]_gold), rf.words[3]_gate (\rf.words[3]_gate) -> rf.words[3]
+Presumably equivalent wires: rf.words[2]_gold (\rf.words[2]_gold), rf.words[2]_gate (\rf.words[2]_gate) -> rf.words[2]
+Presumably equivalent wires: rf.words[1]_gold (\rf.words[1]_gold), rf.words[1]_gate (\rf.words[1]_gate) -> rf.words[1]
+Presumably equivalent wires: rf.words[0]_gold (\rf.words[0]_gold), rf.words[0]_gate (\rf.words[0]_gate) -> rf.words[0]
+Presumably equivalent wires: rf.read_b_gold (\read_b_gold), rf.read_b_gate (\read_b_gate) -> rf.read_b
+Presumably equivalent wires: rf.read_a_gold (\read_a_gold), rf.read_a_gate (\read_a_gate) -> rf.read_a
+Presumably equivalent wires: rf.write_data_gold (\writeback_gold), rf.write_data_gate ({ \writeback_gate [15:8] \shifted_gate [7:0] }) -> rf.write_data
+Presumably equivalent wires: rf.b_gold (\b_gold), rf.b_gate (\b_gate) -> rf.b
+Presumably equivalent wires: rf.a_gold (\a_gold), rf.a_gate (\a_gate) -> rf.a
+Presumably equivalent wires: rf.write_enable_gold (\rf_write_gold), rf.write_enable_gate (\rf_write_gate) -> rf.write_enable
+Presumably equivalent wires: rf.clk_gold (\clk_gold), rf.clk_gate (\clk_gate) -> rf.clk
+Presumably equivalent wires: alu.a_gold (\alu.a_gold), alu.a_gate (\alu.a_gate) -> alu.a
+Presumably equivalent wires: alu.b_gold (\alu.b_gold), alu.b_gate (\alu.b_gate) -> alu.b
+Presumably equivalent wires: alu.operation_gold (\operation_gold), alu.operation_gate (\operation_gate) -> alu.operation
+Presumably equivalent wires: alu.carry_gold (\carry_gold), alu.carry_gate (\carry_gate) -> alu.carry
+Presumably equivalent wires: alu.byte_mode_gold (\byte_mode_gold), alu.byte_mode_gate (\byte_mode_gate) -> alu.byte_mode
+Presumably equivalent wires: alu.result_gold (\result_gold), alu.result_gate (\result_gate) -> alu.result
+Presumably equivalent wires: alu.nzvc_gold ({ \alu.n_gold \alu.nzvc_gold [2] \alu.v_gold \alu.c_gold }), alu.nzvc_gate ({ \alu.n_gate \alu.nzvc_gate [2] \alu.v_gate \alu.c_gate }) -> alu.nzvc
+Presumably equivalent wires: alu.subtract_gold (\operation_gold [2]), alu.subtract_gate (\operation_gate [2]) -> alu.subtract
+Presumably equivalent wires: alu.carry_in_gold (\alu.carry_in_gold), alu.carry_in_gate (\alu.carry_in_gate) -> alu.carry_in
+Presumably equivalent wires: alu.arithmetic_b_gold (\alu.arithmetic_b_gold), alu.arithmetic_b_gate (\alu.arithmetic_b_gate) -> alu.arithmetic_b
+Presumably equivalent wires: alu.sum_gold (\alu.sum_gold), alu.sum_gate (\alu.sum_gate) -> alu.sum
+Presumably equivalent wires: alu.carry8_gold (\alu.carry8_gold), alu.carry8_gate (\alu.carry8_gate) -> alu.carry8
+Presumably equivalent wires: alu.arithmetic_gold (\alu.arithmetic_gold), alu.arithmetic_gate (\alu.arithmetic_gate) -> alu.arithmetic
+Presumably equivalent wires: alu.left_gold (\alu.left_gold), alu.left_gate (\alu.left_gate) -> alu.left
+Presumably equivalent wires: alu.right_gold (\alu.right_gold), alu.right_gate (\alu.right_gate) -> alu.right
+Presumably equivalent wires: alu.logic_op_gold (\alu.logic_op_gold), alu.logic_op_gate (\alu.logic_op_gate) -> alu.logic_op
+Presumably equivalent wires: alu.truth_gold (\alu.truth_gold), alu.truth_gate (\alu.truth_gate) -> alu.truth
+Presumably equivalent wires: alu.logic_value_gold (\alu.logic_value_gold), alu.logic_value_gate (\alu.logic_value_gate) -> alu.logic_value
+Presumably equivalent wires: alu.left_value_gold ({ \alu.a_gold [14:0] \alu.left_value_gold [0] }), alu.left_value_gate ({ \alu.a_gate [14:0] \alu.left_value_gate [0] }) -> alu.left_value
+Presumably equivalent wires: alu.right_sign_gold (\alu.right_sign_gold), alu.right_sign_gate (\alu.right_sign_gate) -> alu.right_sign
+Presumably equivalent wires: alu.right_byte_gold (\alu.right_byte_gold), alu.right_byte_gate (\alu.right_byte_gate) -> alu.right_byte
+Presumably equivalent wires: alu.right_value_gold ({ \alu.right_sign_gold \alu.a_gold [15:9] \alu.right_value_gold [7] \alu.a_gold [7:1] }), alu.right_value_gate ({ \alu.right_sign_gate \alu.a_gate [15:9] \alu.right_value_gate [7] \alu.a_gate [7:1] }) -> alu.right_value
+Presumably equivalent wires: alu.sa_gold (\alu.sa_gold), alu.sa_gate (\alu.sa_gate) -> alu.sa
+Presumably equivalent wires: alu.sb_gold (\alu.sb_gold), alu.sb_gate (\alu.sb_gate) -> alu.sb
+Presumably equivalent wires: alu.ss_gold (\alu.ss_gold), alu.ss_gate (\alu.ss_gate) -> alu.ss
+Presumably equivalent wires: alu.n_gold (\alu.n_gold), alu.n_gate (\alu.n_gate) -> alu.n
+Presumably equivalent wires: alu.c_gold (\alu.c_gold), alu.c_gate (\alu.c_gate) -> alu.c
+Presumably equivalent wires: alu.v_gold (\alu.v_gold), alu.v_gate (\alu.v_gate) -> alu.v
+Presumably equivalent wires: alu.boolean_truth$func$alu.v:29$2.op_gold (4'x), alu.boolean_truth$func$alu.v:29$2.op_gate (4'x) -> alu.boolean_truth$func$alu.v:29$2.op
+Presumably equivalent wires: sign_high_gold (\sign_high_gold), sign_high_gate (\sign_high_gate) -> sign_high
+Presumably equivalent wires: keep_high_gold (\keep_high_gold), keep_high_gate (\keep_high_gate) -> keep_high
+Presumably equivalent wires: rhs_gold (\alu.b_gold), rhs_gate (\alu.b_gate) -> rhs
+Presumably equivalent wires: lhs_gold (\alu.a_gold), lhs_gate (\alu.a_gate) -> lhs
+Presumably equivalent wires: writeback_gold (\writeback_gold), writeback_gate ({ \writeback_gate [15:8] \shifted_gate [7:0] }) -> writeback
+Presumably equivalent wires: rf_write_gold (\rf_write_gold), rf_write_gate (\rf_write_gate) -> rf_write
+Presumably equivalent wires: nzvc_gold ({ \alu.n_gold \alu.nzvc_gold [2] \alu.v_gold \alu.c_gold }), nzvc_gate ({ \alu.n_gate \alu.nzvc_gate [2] \alu.v_gate \alu.c_gate }) -> nzvc
+Presumably equivalent wires: q_gold (\q_gold), q_gate (\q_gate) -> q
+Presumably equivalent wires: result_gold (\result_gold), result_gate (\result_gate) -> result
+Presumably equivalent wires: read_b_gold (\read_b_gold), read_b_gate (\read_b_gate) -> read_b
+Presumably equivalent wires: read_a_gold (\read_a_gold), read_a_gate (\read_a_gate) -> read_a
+Presumably equivalent wires: byte_mode_gold (\byte_mode_gold), byte_mode_gate (\byte_mode_gate) -> byte_mode
+Presumably equivalent wires: carry_gold (\carry_gold), carry_gate (\carry_gate) -> carry
+Presumably equivalent wires: d_gold (\d_gold), d_gate (\d_gate) -> d
+Presumably equivalent wires: destination_gold (\destination_gold), destination_gate (\destination_gate) -> destination
+Presumably equivalent wires: pair_gold (\pair_gold), pair_gate (\pair_gate) -> pair
+Presumably equivalent wires: operation_gold (\operation_gold), operation_gate (\operation_gate) -> operation
+Presumably equivalent wires: b_gold (\b_gold), b_gate (\b_gate) -> b
+Presumably equivalent wires: a_gold (\a_gold), a_gate (\a_gate) -> a
+Presumably equivalent wires: enable_gold (\enable_gold), enable_gate (\enable_gate) -> enable
+Presumably equivalent wires: reset_gold (\reset_gold), reset_gate (\reset_gate) -> reset
+Presumably equivalent wires: clk_gold (\clk_gold), clk_gate (\clk_gate) -> clk
+Changing input S of cell $flatten\rf.$procmux$289_gate ($mux): \rf_write_gate -> \rf_write
+Changing input S of cell $flatten\rf.$procmux$283_gate ($mux): \rf_write_gate -> \rf_write
+Changing input S of cell $flatten\rf.$procmux$286_gate ($mux): \rf_write_gate -> \rf_write
+Changing input B of cell $flatten\rf.$procmux$286_gate ($mux): { \writeback_gate [15:8] \shifted_gate [7:0] } -> \writeback
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][0]$363_gate ($mux): \rf.words[1]_gate -> \rf.words[1]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][0]$363_gate ($mux): \rf.words[0]_gate -> \rf.words[0]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][1]$366_gate ($mux): \rf.words[3]_gate -> \rf.words[3]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][1]$366_gate ($mux): \rf.words[2]_gate -> \rf.words[2]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][2]$369_gate ($mux): \rf.words[5]_gate -> \rf.words[5]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][2]$369_gate ($mux): \rf.words[4]_gate -> \rf.words[4]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][3]$372_gate ($mux): \rf.words[7]_gate -> \rf.words[7]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][3]$372_gate ($mux): \rf.words[6]_gate -> \rf.words[6]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][4]$375_gate ($mux): \rf.words[9]_gate -> \rf.words[9]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][4]$375_gate ($mux): \rf.words[8]_gate -> \rf.words[8]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][5]$378_gate ($mux): \rf.words[11]_gate -> \rf.words[11]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][5]$378_gate ($mux): \rf.words[10]_gate -> \rf.words[10]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][6]$381_gate ($mux): \rf.words[13]_gate -> \rf.words[13]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][6]$381_gate ($mux): \rf.words[12]_gate -> \rf.words[12]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][7]$384_gate ($mux): \rf.words[15]_gate -> \rf.words[15]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][7]$384_gate ($mux): \rf.words[14]_gate -> \rf.words[14]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][0]$408_gate ($mux): \rf.words[1]_gate -> \rf.words[1]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][0]$408_gate ($mux): \rf.words[0]_gate -> \rf.words[0]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][1]$411_gate ($mux): \rf.words[3]_gate -> \rf.words[3]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][1]$411_gate ($mux): \rf.words[2]_gate -> \rf.words[2]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][2]$414_gate ($mux): \rf.words[5]_gate -> \rf.words[5]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][2]$414_gate ($mux): \rf.words[4]_gate -> \rf.words[4]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][3]$417_gate ($mux): \rf.words[7]_gate -> \rf.words[7]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][3]$417_gate ($mux): \rf.words[6]_gate -> \rf.words[6]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][4]$420_gate ($mux): \rf.words[9]_gate -> \rf.words[9]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][4]$420_gate ($mux): \rf.words[8]_gate -> \rf.words[8]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][5]$423_gate ($mux): \rf.words[11]_gate -> \rf.words[11]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][5]$423_gate ($mux): \rf.words[10]_gate -> \rf.words[10]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][6]$426_gate ($mux): \rf.words[13]_gate -> \rf.words[13]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][6]$426_gate ($mux): \rf.words[12]_gate -> \rf.words[12]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][7]$429_gate ($mux): \rf.words[15]_gate -> \rf.words[15]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][7]$429_gate ($mux): \rf.words[14]_gate -> \rf.words[14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][0]$448_gate ($mux): \rf.words[0]_gate [0] -> \rf.words[0] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][1]$452_gate ($mux): \rf.words[0]_gate [1] -> \rf.words[0] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][2]$456_gate ($mux): \rf.words[0]_gate [2] -> \rf.words[0] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][3]$460_gate ($mux): \rf.words[0]_gate [3] -> \rf.words[0] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][4]$464_gate ($mux): \rf.words[0]_gate [4] -> \rf.words[0] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][5]$468_gate ($mux): \rf.words[0]_gate [5] -> \rf.words[0] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][6]$472_gate ($mux): \rf.words[0]_gate [6] -> \rf.words[0] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][7]$476_gate ($mux): \rf.words[0]_gate [7] -> \rf.words[0] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][8]$480_gate ($mux): \rf.words[0]_gate [8] -> \rf.words[0] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][9]$484_gate ($mux): \rf.words[0]_gate [9] -> \rf.words[0] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][10]$488_gate ($mux): \rf.words[0]_gate [10] -> \rf.words[0] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][11]$492_gate ($mux): \rf.words[0]_gate [11] -> \rf.words[0] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][12]$496_gate ($mux): \rf.words[0]_gate [12] -> \rf.words[0] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][13]$500_gate ($mux): \rf.words[0]_gate [13] -> \rf.words[0] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][14]$504_gate ($mux): \rf.words[0]_gate [14] -> \rf.words[0] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][15]$508_gate ($mux): \rf.words[0]_gate [15] -> \rf.words[0] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][0]$518_gate ($mux): \rf.words[1]_gate [0] -> \rf.words[1] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][1]$522_gate ($mux): \rf.words[1]_gate [1] -> \rf.words[1] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][2]$526_gate ($mux): \rf.words[1]_gate [2] -> \rf.words[1] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][3]$530_gate ($mux): \rf.words[1]_gate [3] -> \rf.words[1] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][4]$534_gate ($mux): \rf.words[1]_gate [4] -> \rf.words[1] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][5]$538_gate ($mux): \rf.words[1]_gate [5] -> \rf.words[1] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][6]$542_gate ($mux): \rf.words[1]_gate [6] -> \rf.words[1] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][7]$546_gate ($mux): \rf.words[1]_gate [7] -> \rf.words[1] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][8]$550_gate ($mux): \rf.words[1]_gate [8] -> \rf.words[1] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][9]$554_gate ($mux): \rf.words[1]_gate [9] -> \rf.words[1] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][10]$558_gate ($mux): \rf.words[1]_gate [10] -> \rf.words[1] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][11]$562_gate ($mux): \rf.words[1]_gate [11] -> \rf.words[1] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][12]$566_gate ($mux): \rf.words[1]_gate [12] -> \rf.words[1] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][13]$570_gate ($mux): \rf.words[1]_gate [13] -> \rf.words[1] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][14]$574_gate ($mux): \rf.words[1]_gate [14] -> \rf.words[1] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][15]$578_gate ($mux): \rf.words[1]_gate [15] -> \rf.words[1] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][0]$588_gate ($mux): \rf.words[2]_gate [0] -> \rf.words[2] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][1]$592_gate ($mux): \rf.words[2]_gate [1] -> \rf.words[2] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][2]$596_gate ($mux): \rf.words[2]_gate [2] -> \rf.words[2] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][3]$600_gate ($mux): \rf.words[2]_gate [3] -> \rf.words[2] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][4]$604_gate ($mux): \rf.words[2]_gate [4] -> \rf.words[2] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][5]$608_gate ($mux): \rf.words[2]_gate [5] -> \rf.words[2] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][6]$612_gate ($mux): \rf.words[2]_gate [6] -> \rf.words[2] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][7]$616_gate ($mux): \rf.words[2]_gate [7] -> \rf.words[2] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][8]$620_gate ($mux): \rf.words[2]_gate [8] -> \rf.words[2] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][9]$624_gate ($mux): \rf.words[2]_gate [9] -> \rf.words[2] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][10]$628_gate ($mux): \rf.words[2]_gate [10] -> \rf.words[2] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][11]$632_gate ($mux): \rf.words[2]_gate [11] -> \rf.words[2] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][12]$636_gate ($mux): \rf.words[2]_gate [12] -> \rf.words[2] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][13]$640_gate ($mux): \rf.words[2]_gate [13] -> \rf.words[2] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][14]$644_gate ($mux): \rf.words[2]_gate [14] -> \rf.words[2] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][15]$648_gate ($mux): \rf.words[2]_gate [15] -> \rf.words[2] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][0]$656_gate ($mux): \rf.words[3]_gate [0] -> \rf.words[3] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][1]$660_gate ($mux): \rf.words[3]_gate [1] -> \rf.words[3] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][2]$664_gate ($mux): \rf.words[3]_gate [2] -> \rf.words[3] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][3]$668_gate ($mux): \rf.words[3]_gate [3] -> \rf.words[3] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][4]$672_gate ($mux): \rf.words[3]_gate [4] -> \rf.words[3] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][5]$676_gate ($mux): \rf.words[3]_gate [5] -> \rf.words[3] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][6]$680_gate ($mux): \rf.words[3]_gate [6] -> \rf.words[3] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][7]$684_gate ($mux): \rf.words[3]_gate [7] -> \rf.words[3] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][8]$688_gate ($mux): \rf.words[3]_gate [8] -> \rf.words[3] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][9]$692_gate ($mux): \rf.words[3]_gate [9] -> \rf.words[3] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][10]$696_gate ($mux): \rf.words[3]_gate [10] -> \rf.words[3] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][11]$700_gate ($mux): \rf.words[3]_gate [11] -> \rf.words[3] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][12]$704_gate ($mux): \rf.words[3]_gate [12] -> \rf.words[3] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][13]$708_gate ($mux): \rf.words[3]_gate [13] -> \rf.words[3] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][14]$712_gate ($mux): \rf.words[3]_gate [14] -> \rf.words[3] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][15]$716_gate ($mux): \rf.words[3]_gate [15] -> \rf.words[3] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][0]$726_gate ($mux): \rf.words[4]_gate [0] -> \rf.words[4] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][1]$730_gate ($mux): \rf.words[4]_gate [1] -> \rf.words[4] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][2]$734_gate ($mux): \rf.words[4]_gate [2] -> \rf.words[4] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][3]$738_gate ($mux): \rf.words[4]_gate [3] -> \rf.words[4] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][4]$742_gate ($mux): \rf.words[4]_gate [4] -> \rf.words[4] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][5]$746_gate ($mux): \rf.words[4]_gate [5] -> \rf.words[4] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][6]$750_gate ($mux): \rf.words[4]_gate [6] -> \rf.words[4] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][7]$754_gate ($mux): \rf.words[4]_gate [7] -> \rf.words[4] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][8]$758_gate ($mux): \rf.words[4]_gate [8] -> \rf.words[4] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][9]$762_gate ($mux): \rf.words[4]_gate [9] -> \rf.words[4] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][10]$766_gate ($mux): \rf.words[4]_gate [10] -> \rf.words[4] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][11]$770_gate ($mux): \rf.words[4]_gate [11] -> \rf.words[4] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][12]$774_gate ($mux): \rf.words[4]_gate [12] -> \rf.words[4] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][13]$778_gate ($mux): \rf.words[4]_gate [13] -> \rf.words[4] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][14]$782_gate ($mux): \rf.words[4]_gate [14] -> \rf.words[4] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][15]$786_gate ($mux): \rf.words[4]_gate [15] -> \rf.words[4] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][0]$792_gate ($mux): \rf.words[5]_gate [0] -> \rf.words[5] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][1]$796_gate ($mux): \rf.words[5]_gate [1] -> \rf.words[5] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][2]$800_gate ($mux): \rf.words[5]_gate [2] -> \rf.words[5] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][3]$804_gate ($mux): \rf.words[5]_gate [3] -> \rf.words[5] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][4]$808_gate ($mux): \rf.words[5]_gate [4] -> \rf.words[5] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][5]$812_gate ($mux): \rf.words[5]_gate [5] -> \rf.words[5] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][6]$816_gate ($mux): \rf.words[5]_gate [6] -> \rf.words[5] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][7]$820_gate ($mux): \rf.words[5]_gate [7] -> \rf.words[5] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][8]$824_gate ($mux): \rf.words[5]_gate [8] -> \rf.words[5] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][9]$828_gate ($mux): \rf.words[5]_gate [9] -> \rf.words[5] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][10]$832_gate ($mux): \rf.words[5]_gate [10] -> \rf.words[5] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][11]$836_gate ($mux): \rf.words[5]_gate [11] -> \rf.words[5] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][12]$840_gate ($mux): \rf.words[5]_gate [12] -> \rf.words[5] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][13]$844_gate ($mux): \rf.words[5]_gate [13] -> \rf.words[5] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][14]$848_gate ($mux): \rf.words[5]_gate [14] -> \rf.words[5] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][15]$852_gate ($mux): \rf.words[5]_gate [15] -> \rf.words[5] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][0]$858_gate ($mux): \rf.words[6]_gate [0] -> \rf.words[6] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][1]$862_gate ($mux): \rf.words[6]_gate [1] -> \rf.words[6] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][2]$866_gate ($mux): \rf.words[6]_gate [2] -> \rf.words[6] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][3]$870_gate ($mux): \rf.words[6]_gate [3] -> \rf.words[6] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][4]$874_gate ($mux): \rf.words[6]_gate [4] -> \rf.words[6] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][5]$878_gate ($mux): \rf.words[6]_gate [5] -> \rf.words[6] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][6]$882_gate ($mux): \rf.words[6]_gate [6] -> \rf.words[6] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][7]$886_gate ($mux): \rf.words[6]_gate [7] -> \rf.words[6] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][8]$890_gate ($mux): \rf.words[6]_gate [8] -> \rf.words[6] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][9]$894_gate ($mux): \rf.words[6]_gate [9] -> \rf.words[6] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][10]$898_gate ($mux): \rf.words[6]_gate [10] -> \rf.words[6] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][11]$902_gate ($mux): \rf.words[6]_gate [11] -> \rf.words[6] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][12]$906_gate ($mux): \rf.words[6]_gate [12] -> \rf.words[6] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][13]$910_gate ($mux): \rf.words[6]_gate [13] -> \rf.words[6] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][14]$914_gate ($mux): \rf.words[6]_gate [14] -> \rf.words[6] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][15]$918_gate ($mux): \rf.words[6]_gate [15] -> \rf.words[6] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][0]$924_gate ($mux): \rf.words[7]_gate [0] -> \rf.words[7] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][1]$928_gate ($mux): \rf.words[7]_gate [1] -> \rf.words[7] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][2]$932_gate ($mux): \rf.words[7]_gate [2] -> \rf.words[7] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][3]$936_gate ($mux): \rf.words[7]_gate [3] -> \rf.words[7] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][4]$940_gate ($mux): \rf.words[7]_gate [4] -> \rf.words[7] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][5]$944_gate ($mux): \rf.words[7]_gate [5] -> \rf.words[7] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][6]$948_gate ($mux): \rf.words[7]_gate [6] -> \rf.words[7] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][7]$952_gate ($mux): \rf.words[7]_gate [7] -> \rf.words[7] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][8]$956_gate ($mux): \rf.words[7]_gate [8] -> \rf.words[7] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][9]$960_gate ($mux): \rf.words[7]_gate [9] -> \rf.words[7] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][10]$964_gate ($mux): \rf.words[7]_gate [10] -> \rf.words[7] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][11]$968_gate ($mux): \rf.words[7]_gate [11] -> \rf.words[7] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][12]$972_gate ($mux): \rf.words[7]_gate [12] -> \rf.words[7] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][13]$976_gate ($mux): \rf.words[7]_gate [13] -> \rf.words[7] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][14]$980_gate ($mux): \rf.words[7]_gate [14] -> \rf.words[7] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][15]$984_gate ($mux): \rf.words[7]_gate [15] -> \rf.words[7] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][0]$994_gate ($mux): \rf.words[8]_gate [0] -> \rf.words[8] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][1]$998_gate ($mux): \rf.words[8]_gate [1] -> \rf.words[8] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][2]$1002_gate ($mux): \rf.words[8]_gate [2] -> \rf.words[8] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][3]$1006_gate ($mux): \rf.words[8]_gate [3] -> \rf.words[8] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][4]$1010_gate ($mux): \rf.words[8]_gate [4] -> \rf.words[8] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][5]$1014_gate ($mux): \rf.words[8]_gate [5] -> \rf.words[8] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][6]$1018_gate ($mux): \rf.words[8]_gate [6] -> \rf.words[8] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][7]$1022_gate ($mux): \rf.words[8]_gate [7] -> \rf.words[8] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][8]$1026_gate ($mux): \rf.words[8]_gate [8] -> \rf.words[8] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][9]$1030_gate ($mux): \rf.words[8]_gate [9] -> \rf.words[8] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][10]$1034_gate ($mux): \rf.words[8]_gate [10] -> \rf.words[8] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][11]$1038_gate ($mux): \rf.words[8]_gate [11] -> \rf.words[8] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][12]$1042_gate ($mux): \rf.words[8]_gate [12] -> \rf.words[8] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][13]$1046_gate ($mux): \rf.words[8]_gate [13] -> \rf.words[8] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][14]$1050_gate ($mux): \rf.words[8]_gate [14] -> \rf.words[8] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][15]$1054_gate ($mux): \rf.words[8]_gate [15] -> \rf.words[8] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][0]$1060_gate ($mux): \rf.words[9]_gate [0] -> \rf.words[9] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][1]$1064_gate ($mux): \rf.words[9]_gate [1] -> \rf.words[9] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][2]$1068_gate ($mux): \rf.words[9]_gate [2] -> \rf.words[9] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][3]$1072_gate ($mux): \rf.words[9]_gate [3] -> \rf.words[9] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][4]$1076_gate ($mux): \rf.words[9]_gate [4] -> \rf.words[9] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][5]$1080_gate ($mux): \rf.words[9]_gate [5] -> \rf.words[9] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][6]$1084_gate ($mux): \rf.words[9]_gate [6] -> \rf.words[9] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][7]$1088_gate ($mux): \rf.words[9]_gate [7] -> \rf.words[9] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][8]$1092_gate ($mux): \rf.words[9]_gate [8] -> \rf.words[9] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][9]$1096_gate ($mux): \rf.words[9]_gate [9] -> \rf.words[9] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][10]$1100_gate ($mux): \rf.words[9]_gate [10] -> \rf.words[9] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][11]$1104_gate ($mux): \rf.words[9]_gate [11] -> \rf.words[9] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][12]$1108_gate ($mux): \rf.words[9]_gate [12] -> \rf.words[9] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][13]$1112_gate ($mux): \rf.words[9]_gate [13] -> \rf.words[9] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][14]$1116_gate ($mux): \rf.words[9]_gate [14] -> \rf.words[9] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][15]$1120_gate ($mux): \rf.words[9]_gate [15] -> \rf.words[9] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][0]$1126_gate ($mux): \rf.words[10]_gate [0] -> \rf.words[10] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][1]$1130_gate ($mux): \rf.words[10]_gate [1] -> \rf.words[10] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][2]$1134_gate ($mux): \rf.words[10]_gate [2] -> \rf.words[10] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][3]$1138_gate ($mux): \rf.words[10]_gate [3] -> \rf.words[10] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][4]$1142_gate ($mux): \rf.words[10]_gate [4] -> \rf.words[10] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][5]$1146_gate ($mux): \rf.words[10]_gate [5] -> \rf.words[10] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][6]$1150_gate ($mux): \rf.words[10]_gate [6] -> \rf.words[10] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][7]$1154_gate ($mux): \rf.words[10]_gate [7] -> \rf.words[10] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][8]$1158_gate ($mux): \rf.words[10]_gate [8] -> \rf.words[10] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][9]$1162_gate ($mux): \rf.words[10]_gate [9] -> \rf.words[10] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][10]$1166_gate ($mux): \rf.words[10]_gate [10] -> \rf.words[10] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][11]$1170_gate ($mux): \rf.words[10]_gate [11] -> \rf.words[10] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][12]$1174_gate ($mux): \rf.words[10]_gate [12] -> \rf.words[10] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][13]$1178_gate ($mux): \rf.words[10]_gate [13] -> \rf.words[10] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][14]$1182_gate ($mux): \rf.words[10]_gate [14] -> \rf.words[10] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][15]$1186_gate ($mux): \rf.words[10]_gate [15] -> \rf.words[10] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][0]$1192_gate ($mux): \rf.words[11]_gate [0] -> \rf.words[11] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][1]$1196_gate ($mux): \rf.words[11]_gate [1] -> \rf.words[11] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][2]$1200_gate ($mux): \rf.words[11]_gate [2] -> \rf.words[11] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][3]$1204_gate ($mux): \rf.words[11]_gate [3] -> \rf.words[11] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][4]$1208_gate ($mux): \rf.words[11]_gate [4] -> \rf.words[11] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][5]$1212_gate ($mux): \rf.words[11]_gate [5] -> \rf.words[11] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][6]$1216_gate ($mux): \rf.words[11]_gate [6] -> \rf.words[11] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][7]$1220_gate ($mux): \rf.words[11]_gate [7] -> \rf.words[11] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][8]$1224_gate ($mux): \rf.words[11]_gate [8] -> \rf.words[11] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][9]$1228_gate ($mux): \rf.words[11]_gate [9] -> \rf.words[11] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][10]$1232_gate ($mux): \rf.words[11]_gate [10] -> \rf.words[11] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][11]$1236_gate ($mux): \rf.words[11]_gate [11] -> \rf.words[11] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][12]$1240_gate ($mux): \rf.words[11]_gate [12] -> \rf.words[11] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][13]$1244_gate ($mux): \rf.words[11]_gate [13] -> \rf.words[11] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][14]$1248_gate ($mux): \rf.words[11]_gate [14] -> \rf.words[11] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][15]$1252_gate ($mux): \rf.words[11]_gate [15] -> \rf.words[11] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][0]$1260_gate ($mux): \rf.words[12]_gate [0] -> \rf.words[12] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][1]$1264_gate ($mux): \rf.words[12]_gate [1] -> \rf.words[12] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][2]$1268_gate ($mux): \rf.words[12]_gate [2] -> \rf.words[12] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][3]$1272_gate ($mux): \rf.words[12]_gate [3] -> \rf.words[12] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][4]$1276_gate ($mux): \rf.words[12]_gate [4] -> \rf.words[12] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][5]$1280_gate ($mux): \rf.words[12]_gate [5] -> \rf.words[12] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][6]$1284_gate ($mux): \rf.words[12]_gate [6] -> \rf.words[12] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][7]$1288_gate ($mux): \rf.words[12]_gate [7] -> \rf.words[12] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][8]$1292_gate ($mux): \rf.words[12]_gate [8] -> \rf.words[12] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][9]$1296_gate ($mux): \rf.words[12]_gate [9] -> \rf.words[12] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][10]$1300_gate ($mux): \rf.words[12]_gate [10] -> \rf.words[12] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][11]$1304_gate ($mux): \rf.words[12]_gate [11] -> \rf.words[12] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][12]$1308_gate ($mux): \rf.words[12]_gate [12] -> \rf.words[12] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][13]$1312_gate ($mux): \rf.words[12]_gate [13] -> \rf.words[12] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][14]$1316_gate ($mux): \rf.words[12]_gate [14] -> \rf.words[12] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][15]$1320_gate ($mux): \rf.words[12]_gate [15] -> \rf.words[12] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][0]$1326_gate ($mux): \rf.words[13]_gate [0] -> \rf.words[13] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][1]$1330_gate ($mux): \rf.words[13]_gate [1] -> \rf.words[13] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][2]$1334_gate ($mux): \rf.words[13]_gate [2] -> \rf.words[13] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][3]$1338_gate ($mux): \rf.words[13]_gate [3] -> \rf.words[13] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][4]$1342_gate ($mux): \rf.words[13]_gate [4] -> \rf.words[13] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][5]$1346_gate ($mux): \rf.words[13]_gate [5] -> \rf.words[13] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][6]$1350_gate ($mux): \rf.words[13]_gate [6] -> \rf.words[13] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][7]$1354_gate ($mux): \rf.words[13]_gate [7] -> \rf.words[13] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][8]$1358_gate ($mux): \rf.words[13]_gate [8] -> \rf.words[13] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][9]$1362_gate ($mux): \rf.words[13]_gate [9] -> \rf.words[13] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][10]$1366_gate ($mux): \rf.words[13]_gate [10] -> \rf.words[13] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][11]$1370_gate ($mux): \rf.words[13]_gate [11] -> \rf.words[13] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][12]$1374_gate ($mux): \rf.words[13]_gate [12] -> \rf.words[13] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][13]$1378_gate ($mux): \rf.words[13]_gate [13] -> \rf.words[13] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][14]$1382_gate ($mux): \rf.words[13]_gate [14] -> \rf.words[13] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][15]$1386_gate ($mux): \rf.words[13]_gate [15] -> \rf.words[13] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][0]$1392_gate ($mux): \rf.words[14]_gate [0] -> \rf.words[14] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][1]$1396_gate ($mux): \rf.words[14]_gate [1] -> \rf.words[14] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][2]$1400_gate ($mux): \rf.words[14]_gate [2] -> \rf.words[14] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][3]$1404_gate ($mux): \rf.words[14]_gate [3] -> \rf.words[14] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][4]$1408_gate ($mux): \rf.words[14]_gate [4] -> \rf.words[14] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][5]$1412_gate ($mux): \rf.words[14]_gate [5] -> \rf.words[14] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][6]$1416_gate ($mux): \rf.words[14]_gate [6] -> \rf.words[14] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][7]$1420_gate ($mux): \rf.words[14]_gate [7] -> \rf.words[14] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][8]$1424_gate ($mux): \rf.words[14]_gate [8] -> \rf.words[14] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][9]$1428_gate ($mux): \rf.words[14]_gate [9] -> \rf.words[14] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][10]$1432_gate ($mux): \rf.words[14]_gate [10] -> \rf.words[14] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][11]$1436_gate ($mux): \rf.words[14]_gate [11] -> \rf.words[14] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][12]$1440_gate ($mux): \rf.words[14]_gate [12] -> \rf.words[14] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][13]$1444_gate ($mux): \rf.words[14]_gate [13] -> \rf.words[14] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][14]$1448_gate ($mux): \rf.words[14]_gate [14] -> \rf.words[14] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][15]$1452_gate ($mux): \rf.words[14]_gate [15] -> \rf.words[14] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][0]$1458_gate ($mux): \rf.words[15]_gate [0] -> \rf.words[15] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][1]$1462_gate ($mux): \rf.words[15]_gate [1] -> \rf.words[15] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][2]$1466_gate ($mux): \rf.words[15]_gate [2] -> \rf.words[15] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][3]$1470_gate ($mux): \rf.words[15]_gate [3] -> \rf.words[15] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][4]$1474_gate ($mux): \rf.words[15]_gate [4] -> \rf.words[15] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][5]$1478_gate ($mux): \rf.words[15]_gate [5] -> \rf.words[15] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][6]$1482_gate ($mux): \rf.words[15]_gate [6] -> \rf.words[15] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][7]$1486_gate ($mux): \rf.words[15]_gate [7] -> \rf.words[15] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][8]$1490_gate ($mux): \rf.words[15]_gate [8] -> \rf.words[15] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][9]$1494_gate ($mux): \rf.words[15]_gate [9] -> \rf.words[15] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][10]$1498_gate ($mux): \rf.words[15]_gate [10] -> \rf.words[15] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][11]$1502_gate ($mux): \rf.words[15]_gate [11] -> \rf.words[15] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][12]$1506_gate ($mux): \rf.words[15]_gate [12] -> \rf.words[15] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][13]$1510_gate ($mux): \rf.words[15]_gate [13] -> \rf.words[15] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][14]$1514_gate ($mux): \rf.words[15]_gate [14] -> \rf.words[15] [14]
+Changing input A of cell $flatten\alu.$xor$alu.v:9$5_gate ($xor): \alu.b_gate -> \alu.b
+Changing input B of cell $flatten\alu.$add$alu.v:10$6_gate ($add): { 1'0 \alu.arithmetic_b_gate } -> { 1'0 \alu.arithmetic_b }
+Changing input A of cell $flatten\alu.$add$alu.v:10$6_gate ($add): { 1'0 \alu.a_gate } -> { 1'0 \alu.a }
+Changing input B of cell $flatten\alu.$add$alu.v:10$7_gate ($add): { 16'0000000000000000 \alu.carry_in_gate } -> { 16'0000000000000000 \alu.carry_in }
+Changing input B of cell $flatten\alu.$xor$alu.v:11$8_gate ($xor): \alu.a_gate [8] -> \alu.a [8]
+Changing input A of cell $flatten\alu.$xor$alu.v:11$8_gate ($xor): \alu.sum_gate [8] -> \alu.sum [8]
+Changing input B of cell $flatten\alu.$xor$alu.v:11$9_gate ($xor): \alu.arithmetic_b_gate [8] -> \alu.arithmetic_b [8]
+Changing input A of cell $flatten\alu.$logic_not$alu.v:15$21_gate ($logic_not): \alu.arithmetic_gate -> \alu.arithmetic
+Changing input A of cell $flatten\alu.$logic_not$alu.v:15$22_gate ($logic_not): \alu.left_gate -> \alu.left
+Changing input A of cell $flatten\alu.$logic_not$alu.v:15$24_gate ($logic_not): \alu.right_gate -> \alu.right
+Changing input B of cell $flatten\alu.$logic_and$alu.v:39$29_gate ($logic_and): \alu.a_gate [15] -> \alu.a [15]
+Changing input B of cell $flatten\alu.$logic_and$alu.v:40$34_gate ($logic_and): \alu.a_gate [7] -> \alu.a [7]
+Changing input B of cell $flatten\alu.$ternary$alu.v:41$38_gate ($mux): \alu.right_byte_gate -> \alu.right_byte
+Changing input A of cell $flatten\alu.$ternary$alu.v:41$38_gate ($mux): \alu.a_gate [8] -> \alu.a [8]
+Changing input B of cell $flatten\alu.$and$alu.v:42$39_gate ($and): { \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate \alu.arithmetic_gate } -> { \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic }
+Changing input A of cell $flatten\alu.$and$alu.v:42$39_gate ($and): \alu.sum_gate [15:0] -> \alu.sum [15:0]
+Changing input B of cell $flatten\alu.$and$alu.v:42$40_gate ($and): { \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate \alu.logic_op_gate } -> { \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op }
+Changing input A of cell $flatten\alu.$and$alu.v:42$40_gate ($and): \alu.logic_value_gate -> \alu.logic_value
+Changing input B of cell $flatten\alu.$and$alu.v:43$42_gate ($and): { \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate \alu.left_gate } -> { \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left }
+Changing input A of cell $flatten\alu.$and$alu.v:43$42_gate ($and): { \alu.a_gate [14:0] \alu.left_value_gate [0] } -> { \alu.a [14:0] \alu.left_value [0] }
+Changing input B of cell $flatten\alu.$and$alu.v:43$44_gate ($and): { \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate \alu.right_gate } -> { \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right }
+Changing input A of cell $flatten\alu.$and$alu.v:43$44_gate ($and): { \alu.right_sign_gate \alu.a_gate [15:9] \alu.right_value_gate [7] \alu.a_gate [7:1] } -> { \alu.right_sign \alu.a [15:9] \alu.right_value [7] \alu.a [7:1] }
+Changing input B of cell $flatten\alu.$ternary$alu.v:44$46_gate ($mux): \alu.a_gate [7] -> \alu.a [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:44$46_gate ($mux): \alu.a_gate [15] -> \alu.a [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:45$47_gate ($mux): \alu.arithmetic_b_gate [7] -> \alu.arithmetic_b [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:45$47_gate ($mux): \alu.arithmetic_b_gate [15] -> \alu.arithmetic_b [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:46$48_gate ($mux): \alu.sum_gate [7] -> \alu.sum [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:46$48_gate ($mux): \alu.sum_gate [15] -> \alu.sum [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:47$49_gate ($mux): \result_gate [7] -> \result [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:47$49_gate ($mux): \result_gate [15] -> \result [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:48$50_gate ($mux): \alu.carry8_gate -> \alu.carry8
+Changing input A of cell $flatten\alu.$ternary$alu.v:48$50_gate ($mux): \alu.sum_gate [16] -> \alu.sum [16]
+Changing input A of cell $flatten\alu.$logic_and$alu.v:48$52_gate ($logic_and): \alu.arithmetic_gate -> \alu.arithmetic
+Changing input B of cell $flatten\alu.$logic_and$alu.v:49$53_gate ($logic_and): \alu.sa_gate -> \alu.sa
+Changing input A of cell $flatten\alu.$logic_and$alu.v:49$53_gate ($logic_and): \alu.left_gate -> \alu.left
+Changing input B of cell $flatten\alu.$logic_and$alu.v:49$55_gate ($logic_and): \alu.a_gate [0] -> \alu.a [0]
+Changing input A of cell $flatten\alu.$logic_and$alu.v:49$55_gate ($logic_and): \alu.right_gate -> \alu.right
+Changing input B of cell $flatten\alu.$logic_or$alu.v:50$59_gate ($logic_or): \alu.right_gate -> \alu.right
+Changing input A of cell $flatten\alu.$logic_or$alu.v:50$59_gate ($logic_or): \alu.left_gate -> \alu.left
+Changing input B of cell $flatten\alu.$xor$alu.v:50$60_gate ($xor): \alu.c_gate -> \nzvc [0]
+Changing input A of cell $flatten\alu.$xor$alu.v:50$60_gate ($xor): \alu.n_gate -> \nzvc [3]
+Changing input B of cell $flatten\alu.$xor$alu.v:50$61_gate ($xor): \alu.sb_gate -> \alu.sb
+Changing input A of cell $flatten\alu.$xor$alu.v:50$61_gate ($xor): \alu.sa_gate -> \alu.sa
+Changing input A of cell $flatten\alu.$logic_and$alu.v:50$63_gate ($logic_and): \alu.arithmetic_gate -> \alu.arithmetic
+Changing input B of cell $flatten\alu.$xor$alu.v:50$64_gate ($xor): \alu.ss_gate -> \alu.ss
+Changing input A of cell $flatten\alu.$xor$alu.v:50$64_gate ($xor): \alu.sa_gate -> \alu.sa
+Changing input A of cell $flatten\alu.$eq$alu.v:51$67_gate ($logic_not): \result_gate [7:0] -> \result [7:0]
+Changing input A of cell $flatten\alu.$eq$alu.v:51$68_gate ($logic_not): \result_gate [15:8] -> \result [15:8]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$76_gate ($mux): \alu.b_gate [0] -> \alu.b [0]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$76_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$76_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$77_gate ($mux): \alu.b_gate [0] -> \alu.b [0]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$77_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$77_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$78_gate ($mux): \alu.a_gate [0] -> \alu.a [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$79_gate ($mux): \alu.b_gate [1] -> \alu.b [1]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$79_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$79_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$80_gate ($mux): \alu.b_gate [1] -> \alu.b [1]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$80_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$80_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$81_gate ($mux): \alu.a_gate [1] -> \alu.a [1]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$82_gate ($mux): \alu.b_gate [2] -> \alu.b [2]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$82_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$82_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$83_gate ($mux): \alu.b_gate [2] -> \alu.b [2]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$83_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$83_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$84_gate ($mux): \alu.a_gate [2] -> \alu.a [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$85_gate ($mux): \alu.b_gate [3] -> \alu.b [3]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$85_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$85_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$86_gate ($mux): \alu.b_gate [3] -> \alu.b [3]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$86_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$86_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$87_gate ($mux): \alu.a_gate [3] -> \alu.a [3]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$88_gate ($mux): \alu.b_gate [4] -> \alu.b [4]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$88_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$88_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$89_gate ($mux): \alu.b_gate [4] -> \alu.b [4]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$89_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$89_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$90_gate ($mux): \alu.a_gate [4] -> \alu.a [4]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$91_gate ($mux): \alu.b_gate [5] -> \alu.b [5]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$91_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$91_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$92_gate ($mux): \alu.b_gate [5] -> \alu.b [5]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$92_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$92_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$93_gate ($mux): \alu.a_gate [5] -> \alu.a [5]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$94_gate ($mux): \alu.b_gate [6] -> \alu.b [6]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$94_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$94_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$95_gate ($mux): \alu.b_gate [6] -> \alu.b [6]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$95_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$95_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$96_gate ($mux): \alu.a_gate [6] -> \alu.a [6]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$97_gate ($mux): \alu.b_gate [7] -> \alu.b [7]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$97_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$97_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$98_gate ($mux): \alu.b_gate [7] -> \alu.b [7]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$98_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$98_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$99_gate ($mux): \alu.a_gate [7] -> \alu.a [7]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$100_gate ($mux): \alu.b_gate [8] -> \alu.b [8]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$100_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$100_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$101_gate ($mux): \alu.b_gate [8] -> \alu.b [8]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$101_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$101_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$102_gate ($mux): \alu.a_gate [8] -> \alu.a [8]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$103_gate ($mux): \alu.b_gate [9] -> \alu.b [9]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$103_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$103_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$104_gate ($mux): \alu.b_gate [9] -> \alu.b [9]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$104_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$104_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$105_gate ($mux): \alu.a_gate [9] -> \alu.a [9]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$106_gate ($mux): \alu.b_gate [10] -> \alu.b [10]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$106_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$106_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$107_gate ($mux): \alu.b_gate [10] -> \alu.b [10]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$107_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$107_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$108_gate ($mux): \alu.a_gate [10] -> \alu.a [10]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$109_gate ($mux): \alu.b_gate [11] -> \alu.b [11]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$109_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$109_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$110_gate ($mux): \alu.b_gate [11] -> \alu.b [11]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$110_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$110_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$111_gate ($mux): \alu.a_gate [11] -> \alu.a [11]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$112_gate ($mux): \alu.b_gate [12] -> \alu.b [12]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$112_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$112_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$113_gate ($mux): \alu.b_gate [12] -> \alu.b [12]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$113_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$113_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$114_gate ($mux): \alu.a_gate [12] -> \alu.a [12]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$115_gate ($mux): \alu.b_gate [13] -> \alu.b [13]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$115_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$115_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$116_gate ($mux): \alu.b_gate [13] -> \alu.b [13]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$116_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$116_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$117_gate ($mux): \alu.a_gate [13] -> \alu.a [13]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$118_gate ($mux): \alu.b_gate [14] -> \alu.b [14]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$118_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$118_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$119_gate ($mux): \alu.b_gate [14] -> \alu.b [14]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$119_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$119_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$120_gate ($mux): \alu.a_gate [14] -> \alu.a [14]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$121_gate ($mux): \alu.b_gate [15] -> \alu.b [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$121_gate ($mux): \alu.truth_gate [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$121_gate ($mux): \alu.truth_gate [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$122_gate ($mux): \alu.b_gate [15] -> \alu.b [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$122_gate ($mux): \alu.truth_gate [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$122_gate ($mux): \alu.truth_gate [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$123_gate ($mux): \alu.a_gate [15] -> \alu.a [15]
+Changing input A of cell $procmux$267_gate ($mux): \q_gate -> \q
+Changing input B of cell $procmux$263_gate ($pmux): { \result_gate \q_gate [14:0] 1'0 \result_gate [0] \q_gate [15:1] } -> { \result \q [14:0] 1'0 \result [0] \q [15:1] }
+Changing input A of cell $procmux$263_gate ($pmux): \q_gate -> \q
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][15]$1518_gate ($mux): \rf.words[15]_gate [15] -> \rf.words[15] [15]
+Changing input S of cell $ternary$gate.v:32$248_gate ($mux): \keep_high_gate -> \keep_high
+Changing input B of cell $ternary$gate.v:32$248_gate ($mux): \read_b_gate [15:8] -> \read_b [15:8]
+Changing input S of cell $ternary$gate.v:33$247_gate ($mux): \sign_high_gate -> \sign_high
+Changing input B of cell $ternary$gate.v:33$247_gate ($mux): { \result_gate [7] \result_gate [7] \result_gate [7] \result_gate [7] \result_gate [7] \result_gate [7] \result_gate [7] \result_gate [7] } -> { \result [7] \result [7] \result [7] \result [7] \result [7] \result [7] \result [7] \result [7] }
+Changing input B of cell $ternary$gate.v:30$246_gate ($mux): { \result_gate [14:0] \q_gate [15] } -> { \result [14:0] \q [15] }
+Changing input B of cell $ternary$gate.v:31$245_gate ($mux): { \result_gate [15] \result_gate [15:1] } -> { \result [15] \result [15:1] }
+Changing input A of cell $ternary$gate.v:31$245_gate ($mux): \result_gate -> \result
+Changing input A of cell $and$gate.v:21$237_gate ($and): \read_a_gate -> \read_a
+Changing input A of cell $and$gate.v:20$229_gate ($and): \q_gate -> \q
+Changing input A of cell $and$gate.v:19$225_gate ($and): \read_b_gate -> \read_b
+Changing input A of cell $and$gate.v:18$218_gate ($and): \read_b_gate -> \read_b
+Changing input A of cell $and$gate.v:16$209_gate ($and): \read_a_gate -> \read_a
+Changing input S of cell $flatten\rf.$procmux$289_gold ($mux): \rf_write_gold -> \rf_write
+Changing input S of cell $flatten\rf.$procmux$283_gold ($mux): \rf_write_gold -> \rf_write
+Changing input S of cell $flatten\rf.$procmux$286_gold ($mux): \rf_write_gold -> \rf_write
+Changing input B of cell $flatten\rf.$procmux$286_gold ($mux): \writeback_gold -> \writeback
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][0]$363_gold ($mux): \rf.words[1]_gold -> \rf.words[1]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][0]$363_gold ($mux): \rf.words[0]_gold -> \rf.words[0]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][1]$366_gold ($mux): \rf.words[3]_gold -> \rf.words[3]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][1]$366_gold ($mux): \rf.words[2]_gold -> \rf.words[2]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][2]$369_gold ($mux): \rf.words[5]_gold -> \rf.words[5]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][2]$369_gold ($mux): \rf.words[4]_gold -> \rf.words[4]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][3]$372_gold ($mux): \rf.words[7]_gold -> \rf.words[7]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][3]$372_gold ($mux): \rf.words[6]_gold -> \rf.words[6]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][4]$375_gold ($mux): \rf.words[9]_gold -> \rf.words[9]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][4]$375_gold ($mux): \rf.words[8]_gold -> \rf.words[8]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][5]$378_gold ($mux): \rf.words[11]_gold -> \rf.words[11]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][5]$378_gold ($mux): \rf.words[10]_gold -> \rf.words[10]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][6]$381_gold ($mux): \rf.words[13]_gold -> \rf.words[13]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][6]$381_gold ($mux): \rf.words[12]_gold -> \rf.words[12]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[0][3][7]$384_gold ($mux): \rf.words[15]_gold -> \rf.words[15]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[0][3][7]$384_gold ($mux): \rf.words[14]_gold -> \rf.words[14]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][0]$408_gold ($mux): \rf.words[1]_gold -> \rf.words[1]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][0]$408_gold ($mux): \rf.words[0]_gold -> \rf.words[0]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][1]$411_gold ($mux): \rf.words[3]_gold -> \rf.words[3]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][1]$411_gold ($mux): \rf.words[2]_gold -> \rf.words[2]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][2]$414_gold ($mux): \rf.words[5]_gold -> \rf.words[5]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][2]$414_gold ($mux): \rf.words[4]_gold -> \rf.words[4]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][3]$417_gold ($mux): \rf.words[7]_gold -> \rf.words[7]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][3]$417_gold ($mux): \rf.words[6]_gold -> \rf.words[6]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][4]$420_gold ($mux): \rf.words[9]_gold -> \rf.words[9]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][4]$420_gold ($mux): \rf.words[8]_gold -> \rf.words[8]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][5]$423_gold ($mux): \rf.words[11]_gold -> \rf.words[11]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][5]$423_gold ($mux): \rf.words[10]_gold -> \rf.words[10]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][6]$426_gold ($mux): \rf.words[13]_gold -> \rf.words[13]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][6]$426_gold ($mux): \rf.words[12]_gold -> \rf.words[12]
+Changing input B of cell $flatten\rf.$memory\words$rdmux[1][3][7]$429_gold ($mux): \rf.words[15]_gold -> \rf.words[15]
+Changing input A of cell $flatten\rf.$memory\words$rdmux[1][3][7]$429_gold ($mux): \rf.words[14]_gold -> \rf.words[14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][0]$448_gold ($mux): \rf.words[0]_gold [0] -> \rf.words[0] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][1]$452_gold ($mux): \rf.words[0]_gold [1] -> \rf.words[0] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][2]$456_gold ($mux): \rf.words[0]_gold [2] -> \rf.words[0] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][3]$460_gold ($mux): \rf.words[0]_gold [3] -> \rf.words[0] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][4]$464_gold ($mux): \rf.words[0]_gold [4] -> \rf.words[0] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][5]$468_gold ($mux): \rf.words[0]_gold [5] -> \rf.words[0] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][6]$472_gold ($mux): \rf.words[0]_gold [6] -> \rf.words[0] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][7]$476_gold ($mux): \rf.words[0]_gold [7] -> \rf.words[0] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][8]$480_gold ($mux): \rf.words[0]_gold [8] -> \rf.words[0] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][9]$484_gold ($mux): \rf.words[0]_gold [9] -> \rf.words[0] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][10]$488_gold ($mux): \rf.words[0]_gold [10] -> \rf.words[0] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][11]$492_gold ($mux): \rf.words[0]_gold [11] -> \rf.words[0] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][12]$496_gold ($mux): \rf.words[0]_gold [12] -> \rf.words[0] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][13]$500_gold ($mux): \rf.words[0]_gold [13] -> \rf.words[0] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][14]$504_gold ($mux): \rf.words[0]_gold [14] -> \rf.words[0] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[0][0][15]$508_gold ($mux): \rf.words[0]_gold [15] -> \rf.words[0] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][0]$518_gold ($mux): \rf.words[1]_gold [0] -> \rf.words[1] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][1]$522_gold ($mux): \rf.words[1]_gold [1] -> \rf.words[1] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][2]$526_gold ($mux): \rf.words[1]_gold [2] -> \rf.words[1] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][3]$530_gold ($mux): \rf.words[1]_gold [3] -> \rf.words[1] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][4]$534_gold ($mux): \rf.words[1]_gold [4] -> \rf.words[1] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][5]$538_gold ($mux): \rf.words[1]_gold [5] -> \rf.words[1] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][6]$542_gold ($mux): \rf.words[1]_gold [6] -> \rf.words[1] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][7]$546_gold ($mux): \rf.words[1]_gold [7] -> \rf.words[1] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][8]$550_gold ($mux): \rf.words[1]_gold [8] -> \rf.words[1] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][9]$554_gold ($mux): \rf.words[1]_gold [9] -> \rf.words[1] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][10]$558_gold ($mux): \rf.words[1]_gold [10] -> \rf.words[1] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][11]$562_gold ($mux): \rf.words[1]_gold [11] -> \rf.words[1] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][12]$566_gold ($mux): \rf.words[1]_gold [12] -> \rf.words[1] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][13]$570_gold ($mux): \rf.words[1]_gold [13] -> \rf.words[1] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][14]$574_gold ($mux): \rf.words[1]_gold [14] -> \rf.words[1] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[1][0][15]$578_gold ($mux): \rf.words[1]_gold [15] -> \rf.words[1] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][0]$588_gold ($mux): \rf.words[2]_gold [0] -> \rf.words[2] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][1]$592_gold ($mux): \rf.words[2]_gold [1] -> \rf.words[2] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][2]$596_gold ($mux): \rf.words[2]_gold [2] -> \rf.words[2] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][3]$600_gold ($mux): \rf.words[2]_gold [3] -> \rf.words[2] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][4]$604_gold ($mux): \rf.words[2]_gold [4] -> \rf.words[2] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][5]$608_gold ($mux): \rf.words[2]_gold [5] -> \rf.words[2] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][6]$612_gold ($mux): \rf.words[2]_gold [6] -> \rf.words[2] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][7]$616_gold ($mux): \rf.words[2]_gold [7] -> \rf.words[2] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][8]$620_gold ($mux): \rf.words[2]_gold [8] -> \rf.words[2] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][9]$624_gold ($mux): \rf.words[2]_gold [9] -> \rf.words[2] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][10]$628_gold ($mux): \rf.words[2]_gold [10] -> \rf.words[2] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][11]$632_gold ($mux): \rf.words[2]_gold [11] -> \rf.words[2] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][12]$636_gold ($mux): \rf.words[2]_gold [12] -> \rf.words[2] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][13]$640_gold ($mux): \rf.words[2]_gold [13] -> \rf.words[2] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][14]$644_gold ($mux): \rf.words[2]_gold [14] -> \rf.words[2] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[2][0][15]$648_gold ($mux): \rf.words[2]_gold [15] -> \rf.words[2] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][0]$656_gold ($mux): \rf.words[3]_gold [0] -> \rf.words[3] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][1]$660_gold ($mux): \rf.words[3]_gold [1] -> \rf.words[3] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][2]$664_gold ($mux): \rf.words[3]_gold [2] -> \rf.words[3] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][3]$668_gold ($mux): \rf.words[3]_gold [3] -> \rf.words[3] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][4]$672_gold ($mux): \rf.words[3]_gold [4] -> \rf.words[3] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][5]$676_gold ($mux): \rf.words[3]_gold [5] -> \rf.words[3] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][6]$680_gold ($mux): \rf.words[3]_gold [6] -> \rf.words[3] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][7]$684_gold ($mux): \rf.words[3]_gold [7] -> \rf.words[3] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][8]$688_gold ($mux): \rf.words[3]_gold [8] -> \rf.words[3] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][9]$692_gold ($mux): \rf.words[3]_gold [9] -> \rf.words[3] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][10]$696_gold ($mux): \rf.words[3]_gold [10] -> \rf.words[3] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][11]$700_gold ($mux): \rf.words[3]_gold [11] -> \rf.words[3] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][12]$704_gold ($mux): \rf.words[3]_gold [12] -> \rf.words[3] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][13]$708_gold ($mux): \rf.words[3]_gold [13] -> \rf.words[3] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][14]$712_gold ($mux): \rf.words[3]_gold [14] -> \rf.words[3] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[3][0][15]$716_gold ($mux): \rf.words[3]_gold [15] -> \rf.words[3] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][0]$726_gold ($mux): \rf.words[4]_gold [0] -> \rf.words[4] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][1]$730_gold ($mux): \rf.words[4]_gold [1] -> \rf.words[4] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][2]$734_gold ($mux): \rf.words[4]_gold [2] -> \rf.words[4] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][3]$738_gold ($mux): \rf.words[4]_gold [3] -> \rf.words[4] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][4]$742_gold ($mux): \rf.words[4]_gold [4] -> \rf.words[4] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][5]$746_gold ($mux): \rf.words[4]_gold [5] -> \rf.words[4] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][6]$750_gold ($mux): \rf.words[4]_gold [6] -> \rf.words[4] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][7]$754_gold ($mux): \rf.words[4]_gold [7] -> \rf.words[4] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][8]$758_gold ($mux): \rf.words[4]_gold [8] -> \rf.words[4] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][9]$762_gold ($mux): \rf.words[4]_gold [9] -> \rf.words[4] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][10]$766_gold ($mux): \rf.words[4]_gold [10] -> \rf.words[4] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][11]$770_gold ($mux): \rf.words[4]_gold [11] -> \rf.words[4] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][12]$774_gold ($mux): \rf.words[4]_gold [12] -> \rf.words[4] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][13]$778_gold ($mux): \rf.words[4]_gold [13] -> \rf.words[4] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][14]$782_gold ($mux): \rf.words[4]_gold [14] -> \rf.words[4] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[4][0][15]$786_gold ($mux): \rf.words[4]_gold [15] -> \rf.words[4] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][0]$792_gold ($mux): \rf.words[5]_gold [0] -> \rf.words[5] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][1]$796_gold ($mux): \rf.words[5]_gold [1] -> \rf.words[5] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][2]$800_gold ($mux): \rf.words[5]_gold [2] -> \rf.words[5] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][3]$804_gold ($mux): \rf.words[5]_gold [3] -> \rf.words[5] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][4]$808_gold ($mux): \rf.words[5]_gold [4] -> \rf.words[5] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][5]$812_gold ($mux): \rf.words[5]_gold [5] -> \rf.words[5] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][6]$816_gold ($mux): \rf.words[5]_gold [6] -> \rf.words[5] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][7]$820_gold ($mux): \rf.words[5]_gold [7] -> \rf.words[5] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][8]$824_gold ($mux): \rf.words[5]_gold [8] -> \rf.words[5] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][9]$828_gold ($mux): \rf.words[5]_gold [9] -> \rf.words[5] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][10]$832_gold ($mux): \rf.words[5]_gold [10] -> \rf.words[5] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][11]$836_gold ($mux): \rf.words[5]_gold [11] -> \rf.words[5] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][12]$840_gold ($mux): \rf.words[5]_gold [12] -> \rf.words[5] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][13]$844_gold ($mux): \rf.words[5]_gold [13] -> \rf.words[5] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][14]$848_gold ($mux): \rf.words[5]_gold [14] -> \rf.words[5] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[5][0][15]$852_gold ($mux): \rf.words[5]_gold [15] -> \rf.words[5] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][0]$858_gold ($mux): \rf.words[6]_gold [0] -> \rf.words[6] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][1]$862_gold ($mux): \rf.words[6]_gold [1] -> \rf.words[6] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][2]$866_gold ($mux): \rf.words[6]_gold [2] -> \rf.words[6] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][3]$870_gold ($mux): \rf.words[6]_gold [3] -> \rf.words[6] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][4]$874_gold ($mux): \rf.words[6]_gold [4] -> \rf.words[6] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][5]$878_gold ($mux): \rf.words[6]_gold [5] -> \rf.words[6] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][6]$882_gold ($mux): \rf.words[6]_gold [6] -> \rf.words[6] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][7]$886_gold ($mux): \rf.words[6]_gold [7] -> \rf.words[6] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][8]$890_gold ($mux): \rf.words[6]_gold [8] -> \rf.words[6] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][9]$894_gold ($mux): \rf.words[6]_gold [9] -> \rf.words[6] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][10]$898_gold ($mux): \rf.words[6]_gold [10] -> \rf.words[6] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][11]$902_gold ($mux): \rf.words[6]_gold [11] -> \rf.words[6] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][12]$906_gold ($mux): \rf.words[6]_gold [12] -> \rf.words[6] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][13]$910_gold ($mux): \rf.words[6]_gold [13] -> \rf.words[6] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][14]$914_gold ($mux): \rf.words[6]_gold [14] -> \rf.words[6] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[6][0][15]$918_gold ($mux): \rf.words[6]_gold [15] -> \rf.words[6] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][0]$924_gold ($mux): \rf.words[7]_gold [0] -> \rf.words[7] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][1]$928_gold ($mux): \rf.words[7]_gold [1] -> \rf.words[7] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][2]$932_gold ($mux): \rf.words[7]_gold [2] -> \rf.words[7] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][3]$936_gold ($mux): \rf.words[7]_gold [3] -> \rf.words[7] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][4]$940_gold ($mux): \rf.words[7]_gold [4] -> \rf.words[7] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][5]$944_gold ($mux): \rf.words[7]_gold [5] -> \rf.words[7] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][6]$948_gold ($mux): \rf.words[7]_gold [6] -> \rf.words[7] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][7]$952_gold ($mux): \rf.words[7]_gold [7] -> \rf.words[7] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][8]$956_gold ($mux): \rf.words[7]_gold [8] -> \rf.words[7] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][9]$960_gold ($mux): \rf.words[7]_gold [9] -> \rf.words[7] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][10]$964_gold ($mux): \rf.words[7]_gold [10] -> \rf.words[7] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][11]$968_gold ($mux): \rf.words[7]_gold [11] -> \rf.words[7] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][12]$972_gold ($mux): \rf.words[7]_gold [12] -> \rf.words[7] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][13]$976_gold ($mux): \rf.words[7]_gold [13] -> \rf.words[7] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][14]$980_gold ($mux): \rf.words[7]_gold [14] -> \rf.words[7] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[7][0][15]$984_gold ($mux): \rf.words[7]_gold [15] -> \rf.words[7] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][0]$994_gold ($mux): \rf.words[8]_gold [0] -> \rf.words[8] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][1]$998_gold ($mux): \rf.words[8]_gold [1] -> \rf.words[8] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][2]$1002_gold ($mux): \rf.words[8]_gold [2] -> \rf.words[8] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][3]$1006_gold ($mux): \rf.words[8]_gold [3] -> \rf.words[8] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][4]$1010_gold ($mux): \rf.words[8]_gold [4] -> \rf.words[8] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][5]$1014_gold ($mux): \rf.words[8]_gold [5] -> \rf.words[8] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][6]$1018_gold ($mux): \rf.words[8]_gold [6] -> \rf.words[8] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][7]$1022_gold ($mux): \rf.words[8]_gold [7] -> \rf.words[8] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][8]$1026_gold ($mux): \rf.words[8]_gold [8] -> \rf.words[8] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][9]$1030_gold ($mux): \rf.words[8]_gold [9] -> \rf.words[8] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][10]$1034_gold ($mux): \rf.words[8]_gold [10] -> \rf.words[8] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][11]$1038_gold ($mux): \rf.words[8]_gold [11] -> \rf.words[8] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][12]$1042_gold ($mux): \rf.words[8]_gold [12] -> \rf.words[8] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][13]$1046_gold ($mux): \rf.words[8]_gold [13] -> \rf.words[8] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][14]$1050_gold ($mux): \rf.words[8]_gold [14] -> \rf.words[8] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[8][0][15]$1054_gold ($mux): \rf.words[8]_gold [15] -> \rf.words[8] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][0]$1060_gold ($mux): \rf.words[9]_gold [0] -> \rf.words[9] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][1]$1064_gold ($mux): \rf.words[9]_gold [1] -> \rf.words[9] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][2]$1068_gold ($mux): \rf.words[9]_gold [2] -> \rf.words[9] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][3]$1072_gold ($mux): \rf.words[9]_gold [3] -> \rf.words[9] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][4]$1076_gold ($mux): \rf.words[9]_gold [4] -> \rf.words[9] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][5]$1080_gold ($mux): \rf.words[9]_gold [5] -> \rf.words[9] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][6]$1084_gold ($mux): \rf.words[9]_gold [6] -> \rf.words[9] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][7]$1088_gold ($mux): \rf.words[9]_gold [7] -> \rf.words[9] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][8]$1092_gold ($mux): \rf.words[9]_gold [8] -> \rf.words[9] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][9]$1096_gold ($mux): \rf.words[9]_gold [9] -> \rf.words[9] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][10]$1100_gold ($mux): \rf.words[9]_gold [10] -> \rf.words[9] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][11]$1104_gold ($mux): \rf.words[9]_gold [11] -> \rf.words[9] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][12]$1108_gold ($mux): \rf.words[9]_gold [12] -> \rf.words[9] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][13]$1112_gold ($mux): \rf.words[9]_gold [13] -> \rf.words[9] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][14]$1116_gold ($mux): \rf.words[9]_gold [14] -> \rf.words[9] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[9][0][15]$1120_gold ($mux): \rf.words[9]_gold [15] -> \rf.words[9] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][0]$1126_gold ($mux): \rf.words[10]_gold [0] -> \rf.words[10] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][1]$1130_gold ($mux): \rf.words[10]_gold [1] -> \rf.words[10] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][2]$1134_gold ($mux): \rf.words[10]_gold [2] -> \rf.words[10] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][3]$1138_gold ($mux): \rf.words[10]_gold [3] -> \rf.words[10] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][4]$1142_gold ($mux): \rf.words[10]_gold [4] -> \rf.words[10] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][5]$1146_gold ($mux): \rf.words[10]_gold [5] -> \rf.words[10] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][6]$1150_gold ($mux): \rf.words[10]_gold [6] -> \rf.words[10] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][7]$1154_gold ($mux): \rf.words[10]_gold [7] -> \rf.words[10] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][8]$1158_gold ($mux): \rf.words[10]_gold [8] -> \rf.words[10] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][9]$1162_gold ($mux): \rf.words[10]_gold [9] -> \rf.words[10] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][10]$1166_gold ($mux): \rf.words[10]_gold [10] -> \rf.words[10] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][11]$1170_gold ($mux): \rf.words[10]_gold [11] -> \rf.words[10] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][12]$1174_gold ($mux): \rf.words[10]_gold [12] -> \rf.words[10] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][13]$1178_gold ($mux): \rf.words[10]_gold [13] -> \rf.words[10] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][14]$1182_gold ($mux): \rf.words[10]_gold [14] -> \rf.words[10] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[10][0][15]$1186_gold ($mux): \rf.words[10]_gold [15] -> \rf.words[10] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][0]$1192_gold ($mux): \rf.words[11]_gold [0] -> \rf.words[11] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][1]$1196_gold ($mux): \rf.words[11]_gold [1] -> \rf.words[11] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][2]$1200_gold ($mux): \rf.words[11]_gold [2] -> \rf.words[11] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][3]$1204_gold ($mux): \rf.words[11]_gold [3] -> \rf.words[11] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][4]$1208_gold ($mux): \rf.words[11]_gold [4] -> \rf.words[11] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][5]$1212_gold ($mux): \rf.words[11]_gold [5] -> \rf.words[11] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][6]$1216_gold ($mux): \rf.words[11]_gold [6] -> \rf.words[11] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][7]$1220_gold ($mux): \rf.words[11]_gold [7] -> \rf.words[11] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][8]$1224_gold ($mux): \rf.words[11]_gold [8] -> \rf.words[11] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][9]$1228_gold ($mux): \rf.words[11]_gold [9] -> \rf.words[11] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][10]$1232_gold ($mux): \rf.words[11]_gold [10] -> \rf.words[11] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][11]$1236_gold ($mux): \rf.words[11]_gold [11] -> \rf.words[11] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][12]$1240_gold ($mux): \rf.words[11]_gold [12] -> \rf.words[11] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][13]$1244_gold ($mux): \rf.words[11]_gold [13] -> \rf.words[11] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][14]$1248_gold ($mux): \rf.words[11]_gold [14] -> \rf.words[11] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[11][0][15]$1252_gold ($mux): \rf.words[11]_gold [15] -> \rf.words[11] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][0]$1260_gold ($mux): \rf.words[12]_gold [0] -> \rf.words[12] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][1]$1264_gold ($mux): \rf.words[12]_gold [1] -> \rf.words[12] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][2]$1268_gold ($mux): \rf.words[12]_gold [2] -> \rf.words[12] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][3]$1272_gold ($mux): \rf.words[12]_gold [3] -> \rf.words[12] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][4]$1276_gold ($mux): \rf.words[12]_gold [4] -> \rf.words[12] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][5]$1280_gold ($mux): \rf.words[12]_gold [5] -> \rf.words[12] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][6]$1284_gold ($mux): \rf.words[12]_gold [6] -> \rf.words[12] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][7]$1288_gold ($mux): \rf.words[12]_gold [7] -> \rf.words[12] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][8]$1292_gold ($mux): \rf.words[12]_gold [8] -> \rf.words[12] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][9]$1296_gold ($mux): \rf.words[12]_gold [9] -> \rf.words[12] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][10]$1300_gold ($mux): \rf.words[12]_gold [10] -> \rf.words[12] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][11]$1304_gold ($mux): \rf.words[12]_gold [11] -> \rf.words[12] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][12]$1308_gold ($mux): \rf.words[12]_gold [12] -> \rf.words[12] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][13]$1312_gold ($mux): \rf.words[12]_gold [13] -> \rf.words[12] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][14]$1316_gold ($mux): \rf.words[12]_gold [14] -> \rf.words[12] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[12][0][15]$1320_gold ($mux): \rf.words[12]_gold [15] -> \rf.words[12] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][0]$1326_gold ($mux): \rf.words[13]_gold [0] -> \rf.words[13] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][1]$1330_gold ($mux): \rf.words[13]_gold [1] -> \rf.words[13] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][2]$1334_gold ($mux): \rf.words[13]_gold [2] -> \rf.words[13] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][3]$1338_gold ($mux): \rf.words[13]_gold [3] -> \rf.words[13] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][4]$1342_gold ($mux): \rf.words[13]_gold [4] -> \rf.words[13] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][5]$1346_gold ($mux): \rf.words[13]_gold [5] -> \rf.words[13] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][6]$1350_gold ($mux): \rf.words[13]_gold [6] -> \rf.words[13] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][7]$1354_gold ($mux): \rf.words[13]_gold [7] -> \rf.words[13] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][8]$1358_gold ($mux): \rf.words[13]_gold [8] -> \rf.words[13] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][9]$1362_gold ($mux): \rf.words[13]_gold [9] -> \rf.words[13] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][10]$1366_gold ($mux): \rf.words[13]_gold [10] -> \rf.words[13] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][11]$1370_gold ($mux): \rf.words[13]_gold [11] -> \rf.words[13] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][12]$1374_gold ($mux): \rf.words[13]_gold [12] -> \rf.words[13] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][13]$1378_gold ($mux): \rf.words[13]_gold [13] -> \rf.words[13] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][14]$1382_gold ($mux): \rf.words[13]_gold [14] -> \rf.words[13] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[13][0][15]$1386_gold ($mux): \rf.words[13]_gold [15] -> \rf.words[13] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][0]$1392_gold ($mux): \rf.words[14]_gold [0] -> \rf.words[14] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][1]$1396_gold ($mux): \rf.words[14]_gold [1] -> \rf.words[14] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][2]$1400_gold ($mux): \rf.words[14]_gold [2] -> \rf.words[14] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][3]$1404_gold ($mux): \rf.words[14]_gold [3] -> \rf.words[14] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][4]$1408_gold ($mux): \rf.words[14]_gold [4] -> \rf.words[14] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][5]$1412_gold ($mux): \rf.words[14]_gold [5] -> \rf.words[14] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][6]$1416_gold ($mux): \rf.words[14]_gold [6] -> \rf.words[14] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][7]$1420_gold ($mux): \rf.words[14]_gold [7] -> \rf.words[14] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][8]$1424_gold ($mux): \rf.words[14]_gold [8] -> \rf.words[14] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][9]$1428_gold ($mux): \rf.words[14]_gold [9] -> \rf.words[14] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][10]$1432_gold ($mux): \rf.words[14]_gold [10] -> \rf.words[14] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][11]$1436_gold ($mux): \rf.words[14]_gold [11] -> \rf.words[14] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][12]$1440_gold ($mux): \rf.words[14]_gold [12] -> \rf.words[14] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][13]$1444_gold ($mux): \rf.words[14]_gold [13] -> \rf.words[14] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][14]$1448_gold ($mux): \rf.words[14]_gold [14] -> \rf.words[14] [14]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[14][0][15]$1452_gold ($mux): \rf.words[14]_gold [15] -> \rf.words[14] [15]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][0]$1458_gold ($mux): \rf.words[15]_gold [0] -> \rf.words[15] [0]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][1]$1462_gold ($mux): \rf.words[15]_gold [1] -> \rf.words[15] [1]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][2]$1466_gold ($mux): \rf.words[15]_gold [2] -> \rf.words[15] [2]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][3]$1470_gold ($mux): \rf.words[15]_gold [3] -> \rf.words[15] [3]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][4]$1474_gold ($mux): \rf.words[15]_gold [4] -> \rf.words[15] [4]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][5]$1478_gold ($mux): \rf.words[15]_gold [5] -> \rf.words[15] [5]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][6]$1482_gold ($mux): \rf.words[15]_gold [6] -> \rf.words[15] [6]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][7]$1486_gold ($mux): \rf.words[15]_gold [7] -> \rf.words[15] [7]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][8]$1490_gold ($mux): \rf.words[15]_gold [8] -> \rf.words[15] [8]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][9]$1494_gold ($mux): \rf.words[15]_gold [9] -> \rf.words[15] [9]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][10]$1498_gold ($mux): \rf.words[15]_gold [10] -> \rf.words[15] [10]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][11]$1502_gold ($mux): \rf.words[15]_gold [11] -> \rf.words[15] [11]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][12]$1506_gold ($mux): \rf.words[15]_gold [12] -> \rf.words[15] [12]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][13]$1510_gold ($mux): \rf.words[15]_gold [13] -> \rf.words[15] [13]
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][14]$1514_gold ($mux): \rf.words[15]_gold [14] -> \rf.words[15] [14]
+Changing input A of cell $flatten\alu.$xor$alu.v:9$5_gold ($xor): \alu.b_gold -> \alu.b
+Changing input B of cell $flatten\alu.$add$alu.v:10$6_gold ($add): { 1'0 \alu.arithmetic_b_gold } -> { 1'0 \alu.arithmetic_b }
+Changing input A of cell $flatten\alu.$add$alu.v:10$6_gold ($add): { 1'0 \alu.a_gold } -> { 1'0 \alu.a }
+Changing input B of cell $flatten\alu.$add$alu.v:10$7_gold ($add): { 16'0000000000000000 \alu.carry_in_gold } -> { 16'0000000000000000 \alu.carry_in }
+Changing input B of cell $flatten\alu.$xor$alu.v:11$8_gold ($xor): \alu.a_gold [8] -> \alu.a [8]
+Changing input A of cell $flatten\alu.$xor$alu.v:11$8_gold ($xor): \alu.sum_gold [8] -> \alu.sum [8]
+Changing input B of cell $flatten\alu.$xor$alu.v:11$9_gold ($xor): \alu.arithmetic_b_gold [8] -> \alu.arithmetic_b [8]
+Changing input A of cell $flatten\alu.$logic_not$alu.v:15$21_gold ($logic_not): \alu.arithmetic_gold -> \alu.arithmetic
+Changing input A of cell $flatten\alu.$logic_not$alu.v:15$22_gold ($logic_not): \alu.left_gold -> \alu.left
+Changing input A of cell $flatten\alu.$logic_not$alu.v:15$24_gold ($logic_not): \alu.right_gold -> \alu.right
+Changing input B of cell $flatten\alu.$logic_and$alu.v:39$29_gold ($logic_and): \alu.a_gold [15] -> \alu.a [15]
+Changing input B of cell $flatten\alu.$logic_and$alu.v:40$34_gold ($logic_and): \alu.a_gold [7] -> \alu.a [7]
+Changing input B of cell $flatten\alu.$ternary$alu.v:41$38_gold ($mux): \alu.right_byte_gold -> \alu.right_byte
+Changing input A of cell $flatten\alu.$ternary$alu.v:41$38_gold ($mux): \alu.a_gold [8] -> \alu.a [8]
+Changing input B of cell $flatten\alu.$and$alu.v:42$39_gold ($and): { \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold \alu.arithmetic_gold } -> { \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic \alu.arithmetic }
+Changing input A of cell $flatten\alu.$and$alu.v:42$39_gold ($and): \alu.sum_gold [15:0] -> \alu.sum [15:0]
+Changing input B of cell $flatten\alu.$and$alu.v:42$40_gold ($and): { \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold \alu.logic_op_gold } -> { \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op \alu.logic_op }
+Changing input A of cell $flatten\alu.$and$alu.v:42$40_gold ($and): \alu.logic_value_gold -> \alu.logic_value
+Changing input B of cell $flatten\alu.$and$alu.v:43$42_gold ($and): { \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold \alu.left_gold } -> { \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left \alu.left }
+Changing input A of cell $flatten\alu.$and$alu.v:43$42_gold ($and): { \alu.a_gold [14:0] \alu.left_value_gold [0] } -> { \alu.a [14:0] \alu.left_value [0] }
+Changing input B of cell $flatten\alu.$and$alu.v:43$44_gold ($and): { \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold \alu.right_gold } -> { \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right \alu.right }
+Changing input A of cell $flatten\alu.$and$alu.v:43$44_gold ($and): { \alu.right_sign_gold \alu.a_gold [15:9] \alu.right_value_gold [7] \alu.a_gold [7:1] } -> { \alu.right_sign \alu.a [15:9] \alu.right_value [7] \alu.a [7:1] }
+Changing input B of cell $flatten\alu.$ternary$alu.v:44$46_gold ($mux): \alu.a_gold [7] -> \alu.a [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:44$46_gold ($mux): \alu.a_gold [15] -> \alu.a [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:45$47_gold ($mux): \alu.arithmetic_b_gold [7] -> \alu.arithmetic_b [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:45$47_gold ($mux): \alu.arithmetic_b_gold [15] -> \alu.arithmetic_b [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:46$48_gold ($mux): \alu.sum_gold [7] -> \alu.sum [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:46$48_gold ($mux): \alu.sum_gold [15] -> \alu.sum [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:47$49_gold ($mux): \result_gold [7] -> \result [7]
+Changing input A of cell $flatten\alu.$ternary$alu.v:47$49_gold ($mux): \result_gold [15] -> \result [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:48$50_gold ($mux): \alu.carry8_gold -> \alu.carry8
+Changing input A of cell $flatten\alu.$ternary$alu.v:48$50_gold ($mux): \alu.sum_gold [16] -> \alu.sum [16]
+Changing input A of cell $flatten\alu.$logic_and$alu.v:48$52_gold ($logic_and): \alu.arithmetic_gold -> \alu.arithmetic
+Changing input B of cell $flatten\alu.$logic_and$alu.v:49$53_gold ($logic_and): \alu.sa_gold -> \alu.sa
+Changing input A of cell $flatten\alu.$logic_and$alu.v:49$53_gold ($logic_and): \alu.left_gold -> \alu.left
+Changing input B of cell $flatten\alu.$logic_and$alu.v:49$55_gold ($logic_and): \alu.a_gold [0] -> \alu.a [0]
+Changing input A of cell $flatten\alu.$logic_and$alu.v:49$55_gold ($logic_and): \alu.right_gold -> \alu.right
+Changing input B of cell $flatten\alu.$logic_or$alu.v:50$59_gold ($logic_or): \alu.right_gold -> \alu.right
+Changing input A of cell $flatten\alu.$logic_or$alu.v:50$59_gold ($logic_or): \alu.left_gold -> \alu.left
+Changing input B of cell $flatten\alu.$xor$alu.v:50$60_gold ($xor): \alu.c_gold -> \nzvc [0]
+Changing input A of cell $flatten\alu.$xor$alu.v:50$60_gold ($xor): \alu.n_gold -> \nzvc [3]
+Changing input B of cell $flatten\alu.$xor$alu.v:50$61_gold ($xor): \alu.sb_gold -> \alu.sb
+Changing input A of cell $flatten\alu.$xor$alu.v:50$61_gold ($xor): \alu.sa_gold -> \alu.sa
+Changing input A of cell $flatten\alu.$logic_and$alu.v:50$63_gold ($logic_and): \alu.arithmetic_gold -> \alu.arithmetic
+Changing input B of cell $flatten\alu.$xor$alu.v:50$64_gold ($xor): \alu.ss_gold -> \alu.ss
+Changing input A of cell $flatten\alu.$xor$alu.v:50$64_gold ($xor): \alu.sa_gold -> \alu.sa
+Changing input A of cell $flatten\alu.$eq$alu.v:51$67_gold ($logic_not): \result_gold [7:0] -> \result [7:0]
+Changing input A of cell $flatten\alu.$eq$alu.v:51$68_gold ($logic_not): \result_gold [15:8] -> \result [15:8]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$76_gold ($mux): \alu.b_gold [0] -> \alu.b [0]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$76_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$76_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$77_gold ($mux): \alu.b_gold [0] -> \alu.b [0]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$77_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$77_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$78_gold ($mux): \alu.a_gold [0] -> \alu.a [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$79_gold ($mux): \alu.b_gold [1] -> \alu.b [1]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$79_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$79_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$80_gold ($mux): \alu.b_gold [1] -> \alu.b [1]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$80_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$80_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$81_gold ($mux): \alu.a_gold [1] -> \alu.a [1]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$82_gold ($mux): \alu.b_gold [2] -> \alu.b [2]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$82_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$82_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$83_gold ($mux): \alu.b_gold [2] -> \alu.b [2]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$83_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$83_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$84_gold ($mux): \alu.a_gold [2] -> \alu.a [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$85_gold ($mux): \alu.b_gold [3] -> \alu.b [3]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$85_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$85_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$86_gold ($mux): \alu.b_gold [3] -> \alu.b [3]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$86_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$86_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$87_gold ($mux): \alu.a_gold [3] -> \alu.a [3]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$88_gold ($mux): \alu.b_gold [4] -> \alu.b [4]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$88_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$88_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$89_gold ($mux): \alu.b_gold [4] -> \alu.b [4]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$89_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$89_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$90_gold ($mux): \alu.a_gold [4] -> \alu.a [4]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$91_gold ($mux): \alu.b_gold [5] -> \alu.b [5]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$91_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$91_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$92_gold ($mux): \alu.b_gold [5] -> \alu.b [5]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$92_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$92_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$93_gold ($mux): \alu.a_gold [5] -> \alu.a [5]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$94_gold ($mux): \alu.b_gold [6] -> \alu.b [6]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$94_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$94_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$95_gold ($mux): \alu.b_gold [6] -> \alu.b [6]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$95_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$95_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$96_gold ($mux): \alu.a_gold [6] -> \alu.a [6]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$97_gold ($mux): \alu.b_gold [7] -> \alu.b [7]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$97_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$97_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$98_gold ($mux): \alu.b_gold [7] -> \alu.b [7]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$98_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$98_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$99_gold ($mux): \alu.a_gold [7] -> \alu.a [7]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$100_gold ($mux): \alu.b_gold [8] -> \alu.b [8]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$100_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$100_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$101_gold ($mux): \alu.b_gold [8] -> \alu.b [8]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$101_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$101_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$102_gold ($mux): \alu.a_gold [8] -> \alu.a [8]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$103_gold ($mux): \alu.b_gold [9] -> \alu.b [9]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$103_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$103_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$104_gold ($mux): \alu.b_gold [9] -> \alu.b [9]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$104_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$104_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$105_gold ($mux): \alu.a_gold [9] -> \alu.a [9]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$106_gold ($mux): \alu.b_gold [10] -> \alu.b [10]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$106_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$106_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$107_gold ($mux): \alu.b_gold [10] -> \alu.b [10]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$107_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$107_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$108_gold ($mux): \alu.a_gold [10] -> \alu.a [10]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$109_gold ($mux): \alu.b_gold [11] -> \alu.b [11]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$109_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$109_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$110_gold ($mux): \alu.b_gold [11] -> \alu.b [11]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$110_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$110_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$111_gold ($mux): \alu.a_gold [11] -> \alu.a [11]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$112_gold ($mux): \alu.b_gold [12] -> \alu.b [12]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$112_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$112_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$113_gold ($mux): \alu.b_gold [12] -> \alu.b [12]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$113_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$113_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$114_gold ($mux): \alu.a_gold [12] -> \alu.a [12]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$115_gold ($mux): \alu.b_gold [13] -> \alu.b [13]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$115_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$115_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$116_gold ($mux): \alu.b_gold [13] -> \alu.b [13]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$116_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$116_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$117_gold ($mux): \alu.a_gold [13] -> \alu.a [13]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$118_gold ($mux): \alu.b_gold [14] -> \alu.b [14]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$118_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$118_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$119_gold ($mux): \alu.b_gold [14] -> \alu.b [14]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$119_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$119_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$120_gold ($mux): \alu.a_gold [14] -> \alu.a [14]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$121_gold ($mux): \alu.b_gold [15] -> \alu.b [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$121_gold ($mux): \alu.truth_gold [3] -> \alu.truth [3]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$121_gold ($mux): \alu.truth_gold [2] -> \alu.truth [2]
+Changing input S of cell $flatten\alu.$ternary$alu.v:36$122_gold ($mux): \alu.b_gold [15] -> \alu.b [15]
+Changing input B of cell $flatten\alu.$ternary$alu.v:36$122_gold ($mux): \alu.truth_gold [1] -> \alu.truth [1]
+Changing input A of cell $flatten\alu.$ternary$alu.v:36$122_gold ($mux): \alu.truth_gold [0] -> \alu.truth [0]
+Changing input S of cell $flatten\alu.$ternary$alu.v:35$123_gold ($mux): \alu.a_gold [15] -> \alu.a [15]
+Changing input A of cell $procmux$277_gold ($mux): \q_gold -> \q
+Changing input B of cell $procmux$273_gold ($pmux): { \result_gold \q_gold [14:0] 1'0 \result_gold [0] \q_gold [15:1] } -> { \result \q [14:0] 1'0 \result [0] \q [15:1] }
+Changing input A of cell $procmux$273_gold ($pmux): \q_gold -> \q
+Changing input A of cell $flatten\rf.$memory\words$wrmux[15][0][15]$1518_gold ($mux): \rf.words[15]_gold [15] -> \rf.words[15] [15]
+Changing input A of cell $and$gold.v:33$189_gold ($and): { \ordinary_writeback_gold [15:8] \result_gold [7:0] } -> { \ordinary_writeback_gold [15:8] \result [7:0] }
+Changing input A of cell $and$gold.v:32$184_gold ($and): { \result_gold [15] \result_gold [15:1] } -> { \result [15] \result [15:1] }
+Changing input A of cell $and$gold.v:31$182_gold ($and): { \result_gold [14:0] \q_gold [15] } -> { \result [14:0] \q [15] }
+Changing input A of cell $and$gold.v:30$179_gold ($and): \result_gold [15:8] -> \result [15:8]
+Changing input A of cell $logic_not$gold.v:30$177_gold ($logic_not): \sign_high_gold -> \sign_high
+Changing input A of cell $logic_not$gold.v:30$176_gold ($logic_not): \keep_high_gold -> \keep_high
+Changing input B of cell $and$gold.v:29$174_gold ($and): { \sign_high_gold \sign_high_gold \sign_high_gold \sign_high_gold \sign_high_gold \sign_high_gold \sign_high_gold \sign_high_gold } -> { \sign_high \sign_high \sign_high \sign_high \sign_high \sign_high \sign_high \sign_high }
+Changing input A of cell $and$gold.v:29$174_gold ($and): { \result_gold [7] \result_gold [7] \result_gold [7] \result_gold [7] \result_gold [7] \result_gold [7] \result_gold [7] \result_gold [7] } -> { \result [7] \result [7] \result [7] \result [7] \result [7] \result [7] \result [7] \result [7] }
+Changing input B of cell $and$gold.v:29$173_gold ($and): { \keep_high_gold \keep_high_gold \keep_high_gold \keep_high_gold \keep_high_gold \keep_high_gold \keep_high_gold \keep_high_gold } -> { \keep_high \keep_high \keep_high \keep_high \keep_high \keep_high \keep_high \keep_high }
+Changing input A of cell $and$gold.v:29$173_gold ($and): \read_b_gold [15:8] -> \read_b [15:8]
+Changing input A of cell $and$gold.v:21$167_gold ($and): \read_a_gold -> \read_a
+Changing input A of cell $and$gold.v:20$159_gold ($and): \q_gold -> \q
+Changing input A of cell $and$gold.v:19$155_gold ($and): \read_b_gold -> \read_b
+Changing input A of cell $and$gold.v:18$148_gold ($and): \read_b_gold -> \read_b
+Changing input A of cell $and$gold.v:16$139_gold ($and): \read_a_gold -> \read_a
+Presumably equivalent cells: rf_gold rf_gate ($scopeinfo) -> rf
+Presumably equivalent cells: alu_gold alu_gate ($scopeinfo) -> alu
+
+10. Executing HIERARCHY pass (managing design hierarchy).
+
+10.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+10.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removing unused module `\uj11_regfile'.
+Removing unused module `\uj11_alu'.
+Removed 4 unused modules.
+
+11. Executing EQUIV_SIMPLE pass.
+Found 595 unproven $equiv cells (63 groups) in equiv:
+ Grouping SAT models for \result:
+  Trying to prove $equiv for \result [0]:ezsat
+ success!
+  Trying to prove $equiv for \result [1]:ezsat
+ success!
+  Trying to prove $equiv for \result [2]:ezsat
+ success!
+  Trying to prove $equiv for \result [3]:ezsat
+ success!
+  Trying to prove $equiv for \result [4]:ezsat
+ success!
+  Trying to prove $equiv for \result [5]:ezsat
+ success!
+  Trying to prove $equiv for \result [6]:ezsat
+ success!
+  Trying to prove $equiv for \result [7]:ezsat
+ success!
+  Trying to prove $equiv for \result [8]:ezsat
+ success!
+  Trying to prove $equiv for \result [9]:ezsat
+ success!
+  Trying to prove $equiv for \result [10]:ezsat
+ success!
+  Trying to prove $equiv for \result [11]:ezsat
+ success!
+  Trying to prove $equiv for \result [12]:ezsat
+ success!
+  Trying to prove $equiv for \result [13]:ezsat
+ success!
+  Trying to prove $equiv for \result [14]:ezsat
+ success!
+  Trying to prove $equiv for \result [15]:ezsat
+ success!
+ Grouping SAT models for \nzvc:
+  Trying to prove $equiv for \nzvc [0]:ezsat
+ success!
+  Trying to prove $equiv for \nzvc [1]:ezsat
+ success!
+  Trying to prove $equiv for \nzvc [2]:ezsat
+ success!
+  Trying to prove $equiv for \nzvc [3]:ezsat
+ success!
+ Grouping SAT models for \alu.boolean_truth$func$alu.v:29$2.op:
+  Trying to prove $equiv for \alu.boolean_truth$func$alu.v:29$2.op [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.boolean_truth$func$alu.v:29$2.op [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.boolean_truth$func$alu.v:29$2.op [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.boolean_truth$func$alu.v:29$2.op [3]:ezsat
+ success!
+ Grouping SAT models for \read_a:
+  Trying to prove $equiv for \read_a [0]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [1]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [2]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [3]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [4]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [5]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [6]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [7]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [8]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [9]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [10]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [11]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [12]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [13]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [14]:ezsat
+ success!
+  Trying to prove $equiv for \read_a [15]:ezsat
+ success!
+ Grouping SAT models for \read_b:
+  Trying to prove $equiv for \read_b [0]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [1]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [2]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [3]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [4]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [5]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [6]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [7]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [8]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [9]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [10]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [11]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [12]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [13]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [14]:ezsat
+ success!
+  Trying to prove $equiv for \read_b [15]:ezsat
+ success!
+ Grouping SAT models for \q:
+  Trying to prove $equiv for \q [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \q [1]:ezsat
+ success!
+  Trying to prove $equiv for \q [2]:ezsat
+ success!
+  Trying to prove $equiv for \q [3]:ezsat
+ success!
+  Trying to prove $equiv for \q [4]:ezsat
+ success!
+  Trying to prove $equiv for \q [5]:ezsat
+ success!
+  Trying to prove $equiv for \q [6]:ezsat
+ success!
+  Trying to prove $equiv for \q [7]:ezsat
+ success!
+  Trying to prove $equiv for \q [8]:ezsat
+ success!
+  Trying to prove $equiv for \q [9]:ezsat
+ success!
+  Trying to prove $equiv for \q [10]:ezsat
+ success!
+  Trying to prove $equiv for \q [11]:ezsat
+ success!
+  Trying to prove $equiv for \q [12]:ezsat
+ success!
+  Trying to prove $equiv for \q [13]:ezsat
+ success!
+  Trying to prove $equiv for \q [14]:ezsat
+ success!
+  Trying to prove $equiv for \q [15]:ezsat
+ success!
+  Trying to prove $equiv for \rf_write:ezsat
+ success!
+ Grouping SAT models for \writeback:
+  Trying to prove $equiv for \writeback [0]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [1]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [2]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [3]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [4]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [5]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [6]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [7]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [8]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [9]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [10]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [11]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [12]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [13]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [14]:ezsat
+ success!
+  Trying to prove $equiv for \writeback [15]:ezsat
+ success!
+ Grouping SAT models for \lhs:
+  Trying to prove $equiv for \lhs [0]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [1]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [2]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [3]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [4]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [5]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [6]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [7]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [8]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [9]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [10]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [11]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [12]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [13]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [14]:ezsat
+ success!
+  Trying to prove $equiv for \lhs [15]:ezsat
+ success!
+ Grouping SAT models for \rhs:
+  Trying to prove $equiv for \rhs [0]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [1]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [2]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [3]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [4]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [5]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [6]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [7]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [8]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [9]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [10]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [11]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [12]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [13]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [14]:ezsat
+ success!
+  Trying to prove $equiv for \rhs [15]:ezsat
+ success!
+  Trying to prove $equiv for \keep_high:ezsat
+ success!
+  Trying to prove $equiv for \sign_high:ezsat
+ success!
+  Trying to prove $equiv for \alu.v:ezsat
+ success!
+  Trying to prove $equiv for \alu.c:ezsat
+ success!
+  Trying to prove $equiv for \alu.n:ezsat
+ success!
+  Trying to prove $equiv for \alu.ss:ezsat
+ success!
+  Trying to prove $equiv for \alu.sb:ezsat
+ success!
+  Trying to prove $equiv for \alu.sa:ezsat
+ success!
+ Grouping SAT models for \alu.right_value:
+  Trying to prove $equiv for \alu.right_value [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_value [15]:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_byte:ezsat
+ success!
+  Trying to prove $equiv for \alu.right_sign:ezsat
+ success!
+ Grouping SAT models for \alu.left_value:
+  Trying to prove $equiv for \alu.left_value [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.left_value [15]:ezsat
+ success!
+ Grouping SAT models for \alu.logic_value:
+  Trying to prove $equiv for \alu.logic_value [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_value [15]:ezsat
+ success!
+ Grouping SAT models for \alu.truth:
+  Trying to prove $equiv for \alu.truth [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.truth [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.truth [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.truth [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.logic_op:ezsat
+ success!
+  Trying to prove $equiv for \alu.right:ezsat
+ success!
+  Trying to prove $equiv for \alu.left:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic:ezsat
+ success!
+  Trying to prove $equiv for \alu.carry8:ezsat
+ success!
+ Grouping SAT models for \alu.sum:
+  Trying to prove $equiv for \alu.sum [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [15]:ezsat
+ success!
+  Trying to prove $equiv for \alu.sum [16]:ezsat
+ success!
+ Grouping SAT models for \alu.arithmetic_b:
+  Trying to prove $equiv for \alu.arithmetic_b [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.arithmetic_b [15]:ezsat
+ success!
+  Trying to prove $equiv for \alu.carry_in:ezsat
+ success!
+  Trying to prove $equiv for \alu.subtract:ezsat
+ success!
+ Grouping SAT models for \alu.nzvc:
+  Trying to prove $equiv for \alu.nzvc [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.nzvc [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.nzvc [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.nzvc [3]:ezsat
+ success!
+ Grouping SAT models for \alu.result:
+  Trying to prove $equiv for \alu.result [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.result [15]:ezsat
+ success!
+  Trying to prove $equiv for \alu.byte_mode:ezsat
+ success!
+  Trying to prove $equiv for \alu.carry:ezsat
+ success!
+ Grouping SAT models for \alu.operation:
+  Trying to prove $equiv for \alu.operation [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.operation [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.operation [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.operation [3]:ezsat
+ success!
+ Grouping SAT models for \alu.b:
+  Trying to prove $equiv for \alu.b [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.b [15]:ezsat
+ success!
+ Grouping SAT models for \alu.a:
+  Trying to prove $equiv for \alu.a [0]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [1]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [2]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [3]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [4]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [5]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [6]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [7]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [8]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [9]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [10]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [11]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [12]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [13]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [14]:ezsat
+ success!
+  Trying to prove $equiv for \alu.a [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[15]:
+  Trying to prove $equiv for \rf.words[15] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[15] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[14]:
+  Trying to prove $equiv for \rf.words[14] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[14] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[13]:
+  Trying to prove $equiv for \rf.words[13] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[13] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[12]:
+  Trying to prove $equiv for \rf.words[12] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[12] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[11]:
+  Trying to prove $equiv for \rf.words[11] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[11] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[10]:
+  Trying to prove $equiv for \rf.words[10] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[10] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[9]:
+  Trying to prove $equiv for \rf.words[9] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[9] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[8]:
+  Trying to prove $equiv for \rf.words[8] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[8] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[7]:
+  Trying to prove $equiv for \rf.words[7] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[7] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[6]:
+  Trying to prove $equiv for \rf.words[6] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[6] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[5]:
+  Trying to prove $equiv for \rf.words[5] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[5] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[4]:
+  Trying to prove $equiv for \rf.words[4] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[4] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[3]:
+  Trying to prove $equiv for \rf.words[3] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[3] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[2]:
+  Trying to prove $equiv for \rf.words[2] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[2] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[1]:
+  Trying to prove $equiv for \rf.words[1] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[1] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.words[0]:
+  Trying to prove $equiv for \rf.words[0] [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.words[0] [15]:ezsat
+ success!
+ Grouping SAT models for \rf.read_b:
+  Trying to prove $equiv for \rf.read_b [0]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_b [15]:ezsat
+ success!
+ Grouping SAT models for \rf.read_a:
+  Trying to prove $equiv for \rf.read_a [0]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.read_a [15]:ezsat
+ success!
+ Grouping SAT models for \rf.write_data:
+  Trying to prove $equiv for \rf.write_data [0]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [4]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [5]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [6]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [7]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [8]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [9]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [10]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [11]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [12]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [13]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [14]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_data [15]:ezsat
+ success!
+ Grouping SAT models for \rf.b:
+  Trying to prove $equiv for \rf.b [0]:ezsat
+ success!
+  Trying to prove $equiv for \rf.b [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.b [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.b [3]:ezsat
+ success!
+ Grouping SAT models for \rf.a:
+  Trying to prove $equiv for \rf.a [0]:ezsat
+ success!
+  Trying to prove $equiv for \rf.a [1]:ezsat
+ success!
+  Trying to prove $equiv for \rf.a [2]:ezsat
+ success!
+  Trying to prove $equiv for \rf.a [3]:ezsat
+ success!
+  Trying to prove $equiv for \rf.write_enable:ezsat
+ success!
+  Trying to prove $equiv for \rf.clk:ezsat
+ success!
+Proved 595 previously unproven $equiv cells.
+
+12. Executing EQUIV_INDUCT pass.
+No selected unproven $equiv cells found in equiv.
+Proved 0 previously unproven $equiv cells.
+
+13. Executing EQUIV_STATUS pass.
+Found 595 $equiv cells in equiv:
+  Of those cells 595 are proven and 0 are unproven.
+  Equivalence successfully proven!
+
+End of script. Logfile hash: 9c22837a4c, time: 2.04s, user: 2.04s, system: 0.00s
+Yosys 0.68 (git sha1 38e001a6f, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 97% 1x equiv_simple (1 sec), 0% 3x opt_clean (0 sec), ...

@@ -1,5 +1,25 @@
 # Synthesis checkpoints
 
+## CP40 — operand/writeback mux и ALU result selection
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP40a](../synth/reports/cp40a/result.json) | Shift/byte merge, APR | 1280 | 344 | 7 | 643 | — | 963 |
+| [CP40b](../synth/reports/cp40b/result.json) | Operand pair, APR | 1265 | 344 | 7 | 634 | 30.837 | 963 |
+| [CP40c](../synth/reports/cp40c/result.json) | Оба, APR | 1261 | 344 | 7 | 632 | 30.195 | 963 |
+| [CP40d](../synth/reports/cp40d/result.json) | Оба + balanced ALU mux | 1282 | 344 | 7 | 643 | — | 963 |
+| [CP40e](../synth/reports/cp40e/result.json) | Только balanced ALU mux | 1278 | 344 | 7 | 642 | — | 963 |
+| [CP40f](../synth/reports/cp40f/result.json) | Оба + priority ALU mux | 1258 | 344 | 7 | 631 | 30.254 | 963 |
+| [CP40g](../synth/reports/cp40g/result.json) | Только priority ALU mux | 1293 | 345 | 7 | 650 | — | 963 |
+| [CP40h](../synth/reports/cp40h/result.json) | Финальный production | 1159 | 326 | 6 | 584 | 31.470 | 954 |
+| [CP40i](../synth/reports/cp40i/result.json) | Финальный APR | 1258 | 344 | 7 | 631 | 30.254 | 963 |
+
+Full HC1200-4SG32C, Diamond 3.14, 29.56 MHz. A/D/E/G превысили slices на
+MAP, Fmax нет; остальные gates PASS. H: −29 LUT от CP38f, I: −10 от CP39d,
+без новых FF/EBR/тактов. Остаток 121 LUT / 56 slices / 1 EBR в production,
+22 LUT / 9 slices / 0 EBR с APR; полной MMU ещё нет.
+[Изменения, сравнение и verification](area-datapath.md).
+
 ## CP39 — CPU APR CSR с shared EBR lookup
 
 | Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |

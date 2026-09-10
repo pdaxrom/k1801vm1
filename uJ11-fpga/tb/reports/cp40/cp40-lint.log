@@ -1,0 +1,13 @@
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.354 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.032 s (elab=0.003, cvt=0.017, bld=0.000); cpu 0.032 s on 1 threads; allocated 15.078 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.288 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.029 s (elab=0.004, cvt=0.015, bld=0.000); cpu 0.029 s on 1 threads; allocated 14.562 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.164 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.017 s (elab=0.002, cvt=0.007, bld=0.000); cpu 0.017 s on 1 threads; allocated 12.891 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.089 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.014 s (elab=0.002, cvt=0.005, bld=0.000); cpu 0.014 s on 1 threads; allocated 12.516 MB
+PASS CP40 strict lint: two core configurations, datapath, ALU

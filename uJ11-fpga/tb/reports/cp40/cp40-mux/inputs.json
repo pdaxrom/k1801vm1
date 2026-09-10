@@ -1,0 +1,15 @@
+{
+  "scope": "Unrestricted equivalence candidates: datapath input and RF writeback muxes",
+  "baseline_sha256": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+  "outputs_sha256": {
+    "build/cp40-mux/baseline/uj11_datapath.v": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+    "build/cp40-mux/shift/uj11_datapath.v": "d472af1a9f635b444f751363bc7b83707dcf252609b90c59cabf49163f946ea2",
+    "build/cp40-mux/pair/uj11_datapath.v": "9a523e3fad206e9912579e3c29a65248ce9f47cba74febbbb22a53def46fbee8",
+    "build/cp40-mux/both/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68"
+  },
+  "inputs_sha256": {
+    "tools/build_datapath_mux.py": "36f820a480207fd3fa8cfb3b9ff222f4fd284dac07ecf783ecbda0387c3a95b5",
+    "synth/reports/cp39d/source.tgz": "3d3d59515d6f27f227157de69e748a6714eeb67df5643be7a8f8014f12e9af9c",
+    "synth/reports/cp39d/inputs.json": "f117d209612307d773e5dd168e87ad89a66532e7309c6527c53ec19210bddf25"
+  }
+}

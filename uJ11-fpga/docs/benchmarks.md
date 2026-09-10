@@ -1,4 +1,17 @@
-# Benchmarks: CP39 и предыдущие этапы
+# Benchmarks: CP40 и предыдущие этапы
+
+## CP40 — прежние такты при меньшей площади
+
+Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
+7 EBR / 30.254 MHz. Экономия 29/10 LUT, новых тактов нет. Cold FB + DIR
+сохранил все прежние counts и UART: 354938300 clocks / 3984366 retirements
+в production и 412130048 clocks / 3987390 retirements с APR. В обоих
+300 RK commands, 3270 UART bytes, 162 SD reads / 6 writes.
+
+CPU APR workload сохраняет 221988 clocks для 432 readbacks / 720 CSR beats;
+helper по-прежнему добавляет 10 clocks/memory word. FIS exact corpus прошёл
+на RAM/FRAM/vendor. Это simulation и TRACE; hardware MMU и RT-11XM ещё не
+измерены. [Все fits и проверки CP40](area-datapath.md).
 
 ## CP39 — CSR без дополнительных lookup clocks
 
