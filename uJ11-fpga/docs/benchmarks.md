@@ -1,4 +1,17 @@
-# Benchmarks: CP35 и предыдущие этапы
+# Benchmarks: CP36 и предыдущие этапы
+
+## CP36 — прежние cycles при меньшей площади
+
+Production: 1222 LUT / 326 FF / 6 EBR / 31.116 MHz, −30 LUT от CP31c.
+С context hook: 1243 LUT / 338 FF / 6 EBR / 31.107 MHz, −30 LUT от CP35e.
+Новый opcode index и перенос byte mux не добавляют clock/EBR/FF.
+Рабочая частота прежняя, 29.56 MHz; рост TRACE Fmax не объявляется speedup.
+
+Все счётчики двух cold RT-11FB + DIR runs побайтно/численно совпали со
+своими baselines: **354938300 clocks** без hook, **406268404** с ним.
+В обоих 3270 UART bytes и 162 SD reads / 6 writes. CPU miter также сохранил
+normal/entry/hold counts CP35 для 69632 случаев. FIS/FRAM/vendor проверки прошли.
+Новый benchmark MMU/XM отсутствует. [Полные counts и границы](area-decode.md).
 
 ## CP35 — стоимость context hook и cold RT-11FB
 

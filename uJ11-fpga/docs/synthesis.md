@@ -1,5 +1,30 @@
 # Synthesis checkpoints
 
+## CP36 — opcode index и aligned-word bus
+
+Все варианты — полный HC1200 board с прежней периферией и FIS.
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP36a](../synth/reports/cp36a/result.json) | Masked index planes | 1252 | 326 | 6 | 628 | 30.712 | 954 |
+| [CP36b](../synth/reports/cp36b/result.json) | Побитовый index | 1219 | 326 | 6 | 613 | 29.990 | 954 |
+| [CP36c](../synth/reports/cp36c/result.json) | Побитовый index + CP35 hook | 1267 | 338 | 6 | 636 | 31.308 | 963 |
+| [CP36d](../synth/reports/cp36d/result.json) | Побитовый index + aligned-word input | 1222 | 326 | 6 | 614 | 31.116 | 954 |
+| [CP36e](../synth/reports/cp36e/result.json) | То же + CP35 hook | 1243 | 338 | 6 | 626 | 31.107 | 963 |
+| [CP36f](../synth/reports/cp36f/result.json) | Финальный production RTL | 1222 | 326 | 6 | 614 | 31.116 | 954 |
+| [CP36g](../synth/reports/cp36g/result.json) | Финальный RTL + CP35 hook | 1243 | 338 | 6 | 626 | 31.107 | 963 |
+
+Diamond 3.14 / HC1200-4SG32C, 29.56 MHz, все MAP/PAR/TRACE PASS.
+Относительно CP31c и CP35e сэкономлено по 30 LUT. Вариант d на 3 LUT
+больше b без hook, но на 24 LUT меньше c при включённом hook; выбран d.
+Final f/g подтверждают fit после переноса в рабочие RTL. Нет новых FF,
+EBR, стадий или тактов. У g flag в raw metadata отражал build override,
+а не фактический включённый word-bus mode; [пояснение](../synth/reports/cp36g/metadata-notes.md).
+
+Запас production — 58 LUT / 26 slices / 1 EBR; с hook — 37 / 14 / 1.
+Полный MMU ещё не измерен. FPGA не программировалась.
+[Архитектура и verification](area-decode.md), [hashes](verification-cp36.json).
+
 ## CP35 — вход в микрокод перед memory word
 
 | Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |

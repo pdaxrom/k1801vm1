@@ -65,9 +65,13 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   EA CALL link сохранены. 9 слов, 12 FF, +9 clocks/memory word без hold.
   CPU miter, FIS/FRAM/vendor ROM и cold RT-11FB + DIR прошли.
 - [ ] Сократить общую LUT cost перед подключением CP32/CP33 и MMR.
-  CP35e fixed-on hook: 1273 LUT / 338 FF / 6 EBR / 638 slices / 30.498 MHz;
-  осталось 7 LUT / 2 slices. Это ещё не MMU и не новый production baseline.
-  Masked-OR redirect отвергнут; [отчёт CP35](docs/mmu-entry.md).
+  CP36 освободил 30 LUT: production 1222 / 326 FF / 6 EBR / 31.116 MHz;
+  с context hook 1243 / 338 FF / 6 EBR / 31.107 MHz, свободно 37 LUT / 14 slices.
+  Полный MMU fit ещё не доказан. [Отчёт CP36](docs/area-decode.md).
+- [x] CP36: уменьшить opcode index и исключить operand byte mux из входа
+  opcode ROM; все opcode/hold, byte lanes, FIS/FRAM и оба cold FB runs прошли.
+- [ ] Измерить APR lookup и подачу PAR/PDR в context routine с общей ALU;
+  сохранить guest context и запрет внешнего обращения до результата проверки.
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

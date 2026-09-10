@@ -20,7 +20,7 @@ module uj11_board #(
     wire [15:0] address, data, rdata, lane_data, lane_rdata;
     wire [1:0] lanes=byte_access ? (address[0] ? 2'b10 : 2'b01) : 2'b11;
     assign lane_data=byte_access && address[0] ? {data[7:0],8'b0} : data;
-    assign rdata=byte_access ? (address[0] ? {8'b0,lane_rdata[15:8]} : {8'b0,lane_rdata[7:0]}) : lane_rdata;
+    assign rdata=lane_rdata; // operand byte lanes are aligned inside the CPU
     wire [35:0] uword;
     wire opcode_fetch=uword[35] && uword[34:31]==4'd2;
     wire peripheral_reset, irq_ack, device_irq, event_irq;
@@ -51,7 +51,7 @@ module uj11_board #(
             else if(!timeout) timeout_count<=timeout_count+1'b1;
         end
     end
-    uj11_core #(.ROM_DECODE(1),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
+    uj11_core #(.ROM_DECODE(1),.ALIGNED_WORD_READS(1),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
         .clk(clk),.reset(reset),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector[15:1]),
         .irq_ack(irq_ack),.waiting(),.peripheral_reset(peripheral_reset),
         .mem_addr(address),.mem_write_data(data),.mem_request(request),.mem_read(),

@@ -5,7 +5,7 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP35: проверен и измерен служебный вход в микрокод перед обращением к памяти.**
+**CP36: полный board уменьшен на 30 LUT без изменения числа тактов.**
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
@@ -16,6 +16,7 @@ FP11 отложен и удалён из рабочей сборки в CP31.
 | CP29a, физически прошит | 1239 | 326 | 6 | 30.609 MHz | PASS |
 | CP31a, FP11 полностью удалён | 1224 | 326 | 6 | 31.074 MHz | PASS |
 | CP31c, RK CSR перенесены из FRAM в firmware EBR | 1252 | 326 | 6 | 30.917 MHz | PASS |
+| CP36f, текущая рабочая сборка, opcode index + word bus | 1222 | 326 | 6 | 31.116 MHz | PASS |
 
 Текущий production CPU **ещё без MMU**, интерфейс 16 bits. Верхние 64 КиБ
 FRAM освобождены от служебных RK-регистров, но пока недоступны CPU.
@@ -39,13 +40,17 @@ CP33c добавляет отдельный APR store и CSR decode: **40 LUT / 
 Прошли 272917 cases с подменой T5–T7, покрыты все 88 memory uPC.
 [Измерения, проверки и следующий эксперимент](docs/mmu-sharing.md).
 CP35 сохраняет PSW и CALL link при служебном входе на всех 88 memory words.
-Экспериментальный полный board с постоянно включённым hook:
+Исходный CP35 full board с постоянно включённым hook:
 **1273 LUT / 338 FF / 6 EBR / 30.498 MHz**, 963 microinstructions.
 Прошли CPU miter, FIS/RAM/SPI FRAM/vendor ROM и cold RT-11FB + DIR.
-Свободны только **7 LUT и 2 slices**; перед подключением APR/translation/MMR
-нужно сократить площадь. Production не меняется, MMU ещё не подключён.
 [Контракт, измерения и проверки CP35](docs/mmu-entry.md).
-Плату в CP31–CP35 не программировали; физически остаётся CP29.
+CP36 упрощает opcode index и ставит byte-lane mux после ответвления opcode
+data. Текущий вариант с CP35 hook занимает **1243 LUT / 338 FF / 6 EBR /
+31.107 MHz**, свободны **37 LUT и 14 slices**. В production hook пока не включён:
+там свободны 58 LUT и 26 slices. Оба полных RTL board runs сохранили все
+прежние counts и UART transcript. MMU ещё не подключён.
+[Измерения и проверки CP36](docs/area-decode.md).
+Плату в CP31–CP36 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
@@ -53,7 +58,7 @@ HALT restart, peripheral RESET, ASH/ASHC/XOR/MUL/DIV и FIS. Один kernel reg
 CM=PM=RS=0, NZVC/IPL/T. Память — **MR45V100A SPI FRAM**. Для DIV DEC требует
 even R; odd R — документированное расширение. Banking и native ODT отсутствуют.
 
-Реальная RT-11, RGB/HDSP/keyboard/HG проверены в CP29. Текущий CP31c
+Реальная RT-11, RGB/HDSP/keyboard/HG проверены в CP29. Текущий CP36f
 прошёл cold RT-11FB + DIR в RTL simulation: 354938300 clocks, 3270 UART wire
 bytes, 162 SD reads / 6 writes. Это регрессия без MMU, не проверка XM.
 Для MMU обязателен пользовательский образ `../lsi11/disks/rt11v5.3/system.dsk`
@@ -66,7 +71,7 @@ make test-fis test-fis-negative
 make vendor-fis                  # unmodified Lattice ROM, four simulation shards
 make board                      # firmware + synchronous dispatch ROM
 make verify-cp28 YOSYS=/path/to/yosys # historical CP28 integration gate
-make synthesis-board BOARD_CHECKPOINT=cp28n # fresh Linux/Diamond implementation
+make synthesis-board BOARD_CHECKPOINT=cp36n # fresh Linux/Diamond implementation
 make test-reference-core         # existing C core regression
 make benchmark-fis               # 8 workloads x3 memory modes
 make test-mmu18                   # isolated translation/PDR probe, not integrated MMU
@@ -78,6 +83,8 @@ make vendor-mmu-apr LATTICE_SIM_DIR=build/vendor
 make test-mmu-dp-sharing MMU_DP_CANDIDATE=1 # full ALU sharing, isolated probe
 make test-mmu-dp-sharing MMU_DP_CANDIDATE=2 # relocation only; run sequentially
 make test-mmu-dp-negative test-mmu-scratch
+make test-decode-compact test-decode-cpu # CP36 index / aligned-word interface
+make test-decode-board                  # current production cold RT-11FB
 ```
 
 Нужны Python 3, Icarus Verilog, Verilator, C compiler и Lattice simulation
@@ -89,15 +96,17 @@ path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` мо�
 переопределить; локальные vendor tests используют `LATTICE_SIM_DIR=build/vendor`.
 Каждый synthesis gate требует свежего implementation directory.
 
-Следующий gate — измерить MMU microcode entry/return с T5–T7, сохранением
-PSW/MDR/Q и занятого EA CALL link; затем MMR, abort/restart и физические RK DMA.
-Таблицы PAR/PDR помещаются в один EBR; полный MMU fit
-пока не доказан: у CP31c осталось
-28 LUT / 12 slices / 1 EBR. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
+Entry/return с T5–T7 и сохранением PSW/MDR/Q/CALL link проверен.
+Следующие gates — стоимость APR lookup и microcoded translation, затем
+MMR, abort/restart и физические RK DMA, с дальнейшим сокращением общей логики.
+Один EBR остаётся свободным; полный MMU fit пока не доказан: с context hook
+свободно 37 LUT / 14 slices. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
 
+* [CP36: opcode index и word bus, −30 LUT](docs/area-decode.md)
+* [CP35: microcode context entry/return](docs/mmu-entry.md)
 * [CP34: разделение ALU и scratch lifetime](docs/mmu-sharing.md)
 * [CP33: PAR/PDR в EBR и CSR decode](docs/mmu-apr.md)
-* [CP31–CP34: MMU и использование всей FRAM](docs/mmu.md)
+* [CP31–CP36: MMU и использование всей FRAM](docs/mmu.md)
 * [CP30: отложенный эксперимент FP11(A)](docs/fp11a.md)
 * [CP27: FIS, exact reference и измерения](docs/fis.md)
 * [HC1200: интеграция периферии и RT-11](docs/hc1200-integration.md)

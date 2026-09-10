@@ -1,5 +1,27 @@
 # Implementation status, 2026-09-10
 
+## CP36 — площадь opcode path и word bus
+
+Production теперь **CP36f: 1222 LUT / 326 FF / 6 EBR / 614 slices /
+31.116 MHz**, −30 LUT от CP31c. Свободны 58 LUT и 26 slices.
+CP36g с experimental context hook: **1243 LUT / 338 FF / 6 EBR /
+626 slices / 31.107 MHz**, −30 LUT от CP35e; свободны 37 LUT и 14 slices.
+Оба MAP/PAR/TRACE PASS при 29.56 MHz, плата остаётся CP29a.
+
+Изменены только opcode index и положение operand byte-lane mux. Board
+передаёт aligned word в CPU, opcode ROM читает его напрямую; engine
+получает прежние right-justified byte operands. Default core interface
+сохранён параметром ALIGNED_WORD_READS=0. ROM images, ISA, RF/ALU/Q,
+engine/sequencer, firmware и peripheral RTL не меняются.
+
+Для двух index-форм прошли все 65536 opcode/hold на portable/vendor EBR.
+CPU miter: 69632 cases, все 88 memory words, 1024 дополнительных Icarus cases;
+перестановка byte lanes обнаружена. FIS с context hook прошёл на RAM,
+SPI FRAM и vendor ROM. Два cold RT-11FB runs сохранили counts и UART:
+354938300 clocks без hook, 406268404 с hook. MMU translation/MMR/PA22 CPU bus
+и extended RK DMA ещё не подключены; RT-11XM не загружен.
+[Измерения и contract](area-decode.md), [manifest](verification-cp36.json).
+
 ## CP35 — microcode context entry/return
 
 Проверен служебный вход перед всеми 88 memory words, отдельный saved uPC

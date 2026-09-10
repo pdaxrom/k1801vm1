@@ -1326,3 +1326,19 @@ test-mmu-entry-fis: mmu-entry build/fis-vectors.txt
 	$(PYTHON) tools/check_mmu_entry_fis.py
 test-mmu-entry-board: mmu-entry
 	$(PYTHON) tools/run_mmu_entry_board.py
+
+# CP36: compact opcode index and aligned-word board interface.
+.PHONY: decode-compact decode-word-bus test-decode-compact test-decode-cpu test-decode-board
+decode-compact: board
+	$(PYTHON) tools/build_decode_compact.py
+decode-word-bus: mmu-entry
+	$(PYTHON) tools/build_decode_word_bus.py
+test-decode-compact: decode-compact
+	$(PYTHON) tools/check_decode_compact.py
+test-decode-cpu: decode-compact decode-word-bus
+	$(PYTHON) tools/check_decode_lint.py
+	$(PYTHON) tools/check_decode_cpu.py
+	$(PYTHON) tools/check_decode_cpu.py --simulator iverilog --cases 1024
+	$(PYTHON) tools/check_decode_cpu.py --simulator iverilog --cases 1024 --negative-lanes
+test-decode-board: board
+	$(PYTHON) tools/run_board.py --tag cp36

@@ -1,8 +1,8 @@
-# MMU / 128 КиБ FRAM — CP31 / CP32 / CP33 / CP34
+# MMU / 128 КиБ FRAM — CP31–CP36
 
 Решение пользователя от 2026-09-10: отложить FP11, оставить FIS и начать MMU.
 Первоначальное ограничение «без MMU» относится к полученному baseline v1.
-**В CP34 MMU ещё не подключён к CPU.** Ниже разделены рабочая сборка,
+**В CP36 MMU ещё не подключён к CPU.** Ниже разделены рабочая сборка,
 изолированный проверенный datapath и дальнейшая интеграция.
 
 CP33 добавляет PAR/PDR store в одном EBR, W set/clear и canonical CSR decode.
@@ -15,6 +15,13 @@ CP34 исследует общую ALU: полное разделение уве
 В production это не перенесено. Анализ текущего microcode и CPU tests с
 подменой регистров подтверждают, что T5–T7 свободны на границах памяти.
 [Измерения, scratch contract и следующий эксперимент](mmu-sharing.md).
+
+CP35 проверил microcode entry/return с сохранением PSW и CALL link.
+CP36 сократил площадь opcode path: текущий production CP36f занимает
+**1222 LUT / 326 FF / 6 EBR / 31.116 MHz**. С CP35 hook — **1243 LUT /
+338 FF / 6 EBR / 31.107 MHz**, свободны 37 LUT и 14 slices. Полный MMU
+ещё требует area gates; оба cold RT-11FB runs сохранили прежние counts.
+[Измерения и contract CP36](area-decode.md).
 
 ## Целевой профиль: 18- и 22-битная адресация
 
@@ -241,8 +248,9 @@ odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и по�
    5 LUT экономии от hardware relocation sharing и отверг полное sharing.
    [CP35](mmu-entry.md) проверил entry/return с T5–T7, сохранением PSW/MDR/Q,
    занятого CALL link и однократностью memory request: 9 слов, +9 clocks/entry.
-   Полный fixed-on board занимает 1273 LUT / 638 slices, свободно только
-   7 LUT / 2 slices. Сократить общую логику перед подключением MMU.
+   CP36 сократил полный fixed-on board до 1243 LUT / 626 slices,
+   свободно 37 LUT / 14 slices. Следующий gate — стоимость APR lookup
+   и microcoded translation с дальнейшим сокращением общей логики.
    Измерить общую экономию LUT перед интеграцией translator и APR; одного свободного
    EBR достаточно для таблиц, но LUT budget полной MMU не подтверждён. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять

@@ -1,0 +1,2 @@
+PASS synchronous decode: all 65536 opcodes and 65536 enable holds match CP27
+tb/tb_decode_rom.v:24: $finish called at 1310736000 (1ps)

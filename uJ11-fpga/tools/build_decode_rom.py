@@ -24,7 +24,7 @@ endmodule
             index=(0x100 | ((opcode>>15)<<7) | (((opcode>>6)&63)<<1) | memory_mode) if opcode>>8 else (0x300 | (opcode&255))
         elif group==7:
             index=0x200 | (((opcode>>9)&7)<<3) | (int(bool(opcode&0o700))<<2) | (((opcode>>5)&1)<<1) | memory_mode
-        elif group==15:index=0x240
+        # Reserved group15 uses otherwise unused double-operand rows.
         else:index=(group<<4) | (int(bool(opcode&0o7000))<<3) | (memory_mode<<2)
         assert index not in seen or seen[index]==entry,(oct(opcode),index,entry,seen.get(index))
         seen[index]=entry;words[index]=entry
