@@ -5,18 +5,19 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP47: три варианта SPI FRAM прошли локальные проверки.**
-Byte mux и совмещение RX/high-rdata проверены formal, X/Z/reset/128 КиБ
-scoreboard, CPU/vendor/bus и cold RT-11FB + DIR. Counts и UART прежние.
-Synthesis пока не выполнен: ожидается разрешение передачи семи файлов CP47
-на сервер. Экономия LUT/FF/Fmax не заявляется, рабочая основа — CP45k.
+**CP47: совмещение FRAM RX/high-rdata сэкономило 5 LUT и 8 FF.**
+Лучший prototype CP47c: **1297 LUT / 351 FF / 7 EBR / 650 slices**.
+Все четыре full-board gates завершились MAP FAIL: до вместимости HC1200
+ещё 17 LUT / 10 slices; Fmax отсутствует. Byte mux и combined отклонены
+по площади. Formal, X/Z/reset/128 КиБ scoreboard, CPU/vendor/bus и cold
+RT-11FB + DIR прошли; counts и UART прежние. Production и плата не менялись.
 [Контракт данных и результаты CP47](docs/area-fram-cp47.md).
 
 **CP46: четыре control/PA22 варианта проверены и отклонены по площади.**
 1315–1317 LUT против 1302 у CP45k; все MAP FAIL. Functional/formal,
 APR vendor, весь верхний банк FRAM и cold RT-11FB + DIR прошли, counts/UART
 прежние. Финальные EDIF CP45/CP46 проверены на конфликтующие направленные
-драйверы. Лучшей основой остаётся CP45; RT-11XM ещё не запускалась.
+драйверы. В CP47 основа CP45 улучшена; RT-11XM ещё не запускалась.
 [Результаты CP46](docs/area-control-cp46.md).
 
 **CP45: площадь relocation board уменьшена на 49 LUT.**

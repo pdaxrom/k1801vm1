@@ -1,17 +1,22 @@
 # Implementation status, 2026-09-10
 
-## CP47 — локальная проверка FRAM, area gate ожидается
+## CP47 — shared FRAM RX сэкономил 5 LUT / 8 FF, fit ещё не достигнут
 
 Три кандидата byte-mux/shared-rx/combined прошли 6 positive formal runs,
 18 unit/miter tests, две намеренные ошибки обнаружены proof и simulation.
-Combined также проходит весь upper FRAM через CPU, vendor/edges/full bus
+Shared-rx и combined также проходят весь upper FRAM через CPU, vendor/edges/full bus
 и cold RT-11FB + DIR с прежними counts/UART. High rdata в shared RX временно
 служит shift register; данные валидны на ready и в idle.
 
-Передача семи файлов CP47 отклонена автоматической проверкой; подтверждение
-запрошено. Synthesis ещё не выполнен, LUT/FF/EBR/Fmax кандидатов неизвестны.
-В рабочую сборку изменения не приняты; baseline CP45k/production CP40h/
-APR CP43d/плата CP29a прежние. [Отчёт](area-fram-cp47.md),
+Полный synthesis: baseline 1302 LUT, byte-mux 1326, shared-rx 1297,
+combined 1317. Лучший CP47c сохранён как экспериментальная основа:
+351 FF / 7 EBR / 650 slices, превышение 17 LUT / 10 slices. Все четыре
+MAP FAIL, PAR/TRACE/Fmax отсутствуют. Final EDIF: 3504 nets, конфликтующих
+направленных драйверов и необъяснённых floating inputs нет; три намеренных
+дефекта обнаружены. Это структурный аудит, не проверка routed timing.
+В production изменения не приняты; CP45k/production CP40h/APR CP43d/плата
+CP29a прежние. MMU protection/restart отсутствуют, XM не проверена.
+[Отчёт](area-fram-cp47.md),
 [manifest](verification-cp47.json).
 
 ## CP46 — control/region альтернативы отклонены

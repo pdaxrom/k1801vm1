@@ -1,13 +1,25 @@
 # Synthesis checkpoints
 
-## CP47 — подготовлен, synthesis ещё не выполнен
+## CP47 — shared FRAM RX: −5 LUT / −8 FF, все gates ещё MAP FAIL
 
-Изолированные варианты SPI FRAM `baseline`, `byte-mux`, `shared-rx`,
-`combined` и full-board driver готовы. Локальные formal/CPU/FRAM/cold FB
-тесты прошли. Передача семи новых файлов ожидает отдельного разрешения
-после отказа автоматической проверки. **Новых LUT/FF/EBR/Fmax нет.**
-CP45k остаётся 1302 LUT / 359 FF / 7 EBR / 652 slices, MAP FAIL;
-переносить эти числа на CP47 нельзя. [Контракт и evidence](area-fram-cp47.md).
+| Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP47a](../synth/reports/cp47a/result.json) | Baseline CP45 narrow-rom | 1302 | 359 | 7 | 652 | — | 954 | MAP FAIL |
+| [CP47b](../synth/reports/cp47b/result.json) | FRAM byte mux | 1326 | 359 | 7 | 665 | — | 954 | MAP FAIL |
+| [CP47c](../synth/reports/cp47c/result.json) | FRAM shared RX/high-rdata | 1297 | 351 | 7 | 650 | — | 954 | MAP FAIL |
+| [CP47d](../synth/reports/cp47d/result.json) | Combined | 1317 | 351 | 7 | 660 | — | 954 | MAP FAIL |
+
+Diamond 3.14.0.75.2 / LCMXO2-1200HC-4SG32C, full board, constraint 29.56 MHz.
+CP47a воспроизвёл CP45k. CP47c сохранён как лучший area prototype:
+−5 LUT / −8 FF / −2 slices; превышение вместимости **17 LUT / 10 slices**.
+CP47b/d отклонены по площади. PAR/TRACE не выполнялись после MAP FAIL,
+Fmax неизвестен; заданная constraint не является измеренной частотой.
+Source/report hashes всех четырёх gates проверены. Тот же shared-rx RTL
+прошёл CPU/vendor/edges/bus/cold FB, clocks и UART прежние. Final EDIF
+аудит CP47c: 3504 nets, 0 конфликтующих направленных драйверов,
+0 необъяснённых floating inputs, 7 доказанно неиспользуемых CIN;
+три отрицательных контроля обнаружены. Production CP40h/APR CP43d и
+плата CP29a не менялись. [Контракт и evidence](area-fram-cp47.md).
 
 ## CP46 — control/physical-region варианты отклонены
 

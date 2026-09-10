@@ -1,15 +1,15 @@
 # MMU / 128 КиБ FRAM — CP31–CP47
 
-**CP47 локально проверил FRAM byte-mux и shared RX.** Formal, CPU/vendor,
-весь upper bank и cold FB + DIR проходят с прежними clocks/UART.
-Synthesis ожидает разрешения передачи новых файлов на сервер; resource
-экономия пока не измерена. CP45k остаётся лучшей измеренной основой,
-функциональность MMU не расширена. [Отчёт CP47](area-fram-cp47.md).
+**CP47c — лучшая измеренная основа relocation: 1297 LUT / 351 FF / 7 EBR.**
+Shared FRAM RX сэкономил 5 LUT / 8 FF / 2 slices относительно CP45k,
+но 650 slices и 1297 LUT всё ещё превышают HC1200 на 10 slices / 17 LUT.
+Все четыре gates — MAP FAIL, Fmax отсутствует. Formal, CPU/vendor, весь
+upper bank и cold FB + DIR проходят с прежними clocks/UART. Функциональность
+MMU не расширена; RT-11XM не проверена. [Отчёт CP47](area-fram-cp47.md).
 
 **CP46 проверил и отклонил четыре control/region альтернативы:**
 1315–1317 LUT, все MAP FAIL. Formal/C/APR/vendor/CPU/FRAM/cold FB проверки
-прошли, но площадь выросла. CP45k остаётся лучшей основой; следующий
-area experiment — byte/state mux SPI FRAM transport.
+прошли, но площадь выросла. CP45k сохранён как контроль для CP47.
 [Отчёт CP46](area-control-cp46.md).
 
 **CP45 уменьшил relocation board до 1302 LUT / 359 FF / 7 EBR /

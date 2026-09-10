@@ -1,15 +1,15 @@
-# CP47 — SPI FRAM: локальная проверка, synthesis ожидается
+# CP47 — SPI FRAM: −5 LUT / −8 FF, HC1200 ещё переполнен
 
-**Три кандидата прошли локальные проверки; resource gate пока не выполнен.**
-Измеренных LUT/FF/EBR/Fmax для CP47 нет. Автоматическая проверка отклонила
-передачу новых исходников на сервер; запрос на семь файлов CP47 отправлен,
-подтверждение ещё не получено. Подготовлены изолированное окружение и
-synthesis driver. FPGA не программировалась.
+**Лучший вариант CP47c `shared-rx`: 1297 LUT / 351 FF / 7 EBR / 650 slices.**
+Совмещение FRAM RX с верхним байтом результата уменьшило полную сборку
+на **5 LUT / 8 FF / 2 slices** относительно CP45k. Все четыре synthesis
+gates завершились MAP FAIL: лучший вариант превышает HC1200 на **17 LUT /
+10 slices**. PAR/TRACE/Fmax отсутствуют. FPGA не программировалась.
 
-Рабочая основа остаётся CP45k: **1302 LUT / 359 FF / 7 EBR / 652 slices**,
-MAP FAIL, превышение HC1200 на 22 LUT / 12 slices. Production CP40h,
-принятый APR experiment CP43d и физическая плата CP29a не менялись.
-Нельзя считать устранённые RTL-регистры измеренной экономией FF или LUT.
+CP47c сохранён как лучшая экспериментальная основа для следующих area
+checkpoints. CP45k остаётся неизменным контролем: **1302 LUT / 359 FF /
+7 EBR / 652 slices**. Production CP40h, принятый APR experiment CP43d и
+физическая плата CP29a не менялись. Запаса под protection/restart ещё нет.
 
 ## Кандидаты
 
@@ -21,10 +21,10 @@ Native CPU, ALU, MMU bridge/APR, firmware, остальные устройств
 
 | Вариант | Изменение | Статус |
 |---|---|---|
-| `baseline` | Исходный board FRAM transport | Контроль для будущего synthesis |
-| `byte-mux` | Два последовательных выбора word/byte вместо четырёх отдельных payload cases | Formal + simulation PASS |
-| `shared-rx` | Приёмный shift register совмещён с верхним байтом `rdata` | Formal + simulation PASS по описанному контракту |
-| `combined` | Оба преобразования | Также CPU/vendor/bus/cold FB PASS |
+| `baseline` | Исходный board FRAM transport | Контроль CP47a воспроизвёл площадь CP45k |
+| `byte-mux` | Два последовательных выбора word/byte вместо четырёх отдельных payload cases | Formal + simulation PASS, отклонён по площади |
+| `shared-rx` | Приёмный shift register совмещён с верхним байтом `rdata` | Лучший area prototype; formal/CPU/vendor/bus/cold FB PASS по контракту ниже |
+| `combined` | Оба преобразования | Formal/CPU/vendor/bus/cold FB PASS, отклонён по площади |
 
 В HIGH=5, LOW=6, DATA_LO=7, DATA_HI=8 слово выбирается через
 `state[0] ~^ state[1]`, байт — через `state[1]`. Это используется только
@@ -37,6 +37,32 @@ Native CPU, ALU, MMU bridge/APR, firmware, остальные устройств
 Состояния, счётчики, reset, WREN/CS/SCK/MOSI, `ready/error/busy` и задержки
 не изменяются. Bank input по-прежнему передаёт физический FRAM A16;
 классификация полного PA22 выполняется upstream, до сужения адреса.
+
+## Измерения полной сборки
+
+Diamond **3.14.0.75.2**, **LCMXO2-1200HC-4SG32C**, constraint 29.56 MHz;
+внешние pin delays не заданы. Native CPU, вся board-периферия и partial
+relocation включены. В каждом варианте microstore — **954 words**.
+
+| Gate | Вариант | LUT4 | FF | EBR | Slices | Fmax | Результат |
+|---|---|---:|---:|---:|---:|---:|---|
+| [CP47a](../synth/reports/cp47a/result.json) | baseline | 1302 | 359 | 7 | 652 | — | MAP FAIL |
+| [CP47b](../synth/reports/cp47b/result.json) | byte-mux | 1326 | 359 | 7 | 665 | — | MAP FAIL |
+| [CP47c](../synth/reports/cp47c/result.json) | shared-rx | 1297 | 351 | 7 | 650 | — | MAP FAIL |
+| [CP47d](../synth/reports/cp47d/result.json) | combined | 1317 | 351 | 7 | 660 | — | MAP FAIL |
+
+Контроль CP47a совпал с CP45k по LUT/FF/EBR/slices. Два последовательных
+mux ухудшили mapping: +24 LUT отдельно и +20 LUT относительно shared-rx
+в combined. Поэтому byte-mux не переносится в выбранный prototype.
+Сохранены raw reports, input manifests и source snapshots четырёх gates;
+hash каждого входного файла проверен относительно текущих исходников.
+
+В иерархическом Synplify netlist FRAM число `ORCALUT4` изменилось
+82 → 91 → 73 → 80 для a/b/c/d, `PFUMX` — 9 → 0 → 9 → 1.
+Это не независимые MAP LUT costs: полная сборка включает packing и
+оптимизацию между блоками. Выбор основан на полной таблице выше.
+Заданная частота не является измеренным Fmax, а уменьшение LUT само по
+себе не доказывает улучшения critical path.
 
 ## Контракт результата
 
@@ -96,7 +122,8 @@ MISO и payload при известных control/address. Памятный scor
 
 ## Полный CPU и board
 
-Комбинированный вариант прошёл:
+Каждый из вариантов **shared-rx и combined** прошёл следующие проверки
+с теми же исходниками, которые использованы в CP47c/d synthesis:
 
 | Проверка | Результат |
 |---|---|
@@ -126,28 +153,49 @@ modes/I-D/CSM/MAP и high DMA. FP11 отложен, FIS сохранён.
 
 ## Продолжение
 
-После разрешения передачи выполнить полный HC1200 synthesis для baseline,
-`byte-mux`, `shared-rx`, `combined` и сохранить raw reports/source snapshots.
-Только измерения LUT/FF/EBR/Fmax определят, принимается ли какой-либо вариант.
-Предельное попадание в 1280 LUT всё равно не заменяет резерв для оставшейся
-MMU и обвязки. Не прошивать плату по одним simulation results.
+Следующий ограниченный area experiment строить от CP47c `shared-rx`,
+сохраняя CP45k как контроль. Сначала убрать превышение **17 LUT / 10 slices**,
+затем получить запас для PDR protection и abort/restart. Предельное
+попадание в 1280 LUT само по себе не решает задачу полной MMU.
+До успешного fit нет образа для аппаратной проверки этой конфигурации.
+
+## Структурная проверка final EDIF
+
+Финальный CP47c EDIF содержит **54 cells / 3504 nets**, включая четыре
+двунаправленные сети. `tools/check_edif_drivers_cp46.py` проверил
+направления портов и драйверы: **0 конфликтующих направленных драйверов**,
+**0 необъяснённых floating inputs**. Семь неподключённых `CCU2D.CIN`
+доказанно не влияют на наблюдаемые outputs по INIT0, реальным constant
+connections и vendor-модели; CIN не подменяется нулём.
+
+Три изменённых EDIF с second driver, open input и observable CIN отвергнуты.
+Исходный EDIF, mutations и audit JSON сохранены в
+[архиве CP47](../tb/reports/cp47/). Это структурный аудит: он не доказывает
+электрическое отсутствие конфликтов INOUT, полную netlist equivalence или
+routed timing. Raw Synplify warnings сохранены без подавления; отображение
+BN161 в логе ограничено первыми 100 сообщениями и не задаёт их общее число.
+
+## Воспроизведение
 
 ```sh
 python3 tools/build_fram_cp47.py
 python3 tools/check_fram_cp47.py
 python3 tools/check_fram_cp47_units.py
 python3 tools/check_fram_cp47_negative.py
-python3 tools/check_fram_cp47_system.py --variant combined --suite cpu
-python3 tools/check_fram_cp47_system.py --variant combined --suite cpu --vendor --words 4
-python3 tools/check_fram_cp47_system.py --variant combined --suite cpu --edges
-python3 tools/check_fram_cp47_system.py --variant combined --suite cpu --vendor --edges
-python3 tools/check_fram_cp47_system.py --variant combined --suite bus
-python3 tools/check_fram_cp47_system.py --variant combined --suite board
+python3 tools/check_fram_cp47_system.py --variant shared-rx --suite cpu
+python3 tools/check_fram_cp47_system.py --variant shared-rx --suite cpu --vendor --words 4
+python3 tools/check_fram_cp47_system.py --variant shared-rx --suite cpu --edges
+python3 tools/check_fram_cp47_system.py --variant shared-rx --suite cpu --vendor --edges
+python3 tools/check_fram_cp47_system.py --variant shared-rx --suite bus
+python3 tools/check_fram_cp47_system.py --variant shared-rx --suite board
 ```
 
-Подготовленный `tools/checkpoint_fram_cp47.py` требует нового имени gate
-и `--variant`; старые gates не перезаписывать. Build inputs CP44/CP45 и
-обычные vendor models нужны как prerequisites. `tools/record_cp47.py`
-фиксирует только текущее локальное состояние и намеренно требует обновления
-после появления synthesis reports. [Manifest](verification-cp47.json),
+Для combined повторить шесть system-команд с `--variant combined`.
+`tools/checkpoint_fram_cp47.py` требует нового имени gate и `--variant`;
+старые gates не перезаписывать. Build inputs CP44/CP45 и обычные vendor
+models нужны как prerequisites. `tools/record_cp47.py` проверяет hashes
+всех четырёх synthesis gates, formal/unit/system logs, оба cold FB runs,
+EDIF и negative controls перед формированием единого manifest. Reporter
+также проверяет неизменность прежнего hardware и backing disk images.
+[Manifest](verification-cp47.json),
 [архив тестов](../tb/reports/cp47/).
