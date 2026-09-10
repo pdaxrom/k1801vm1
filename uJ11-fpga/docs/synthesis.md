@@ -1,5 +1,26 @@
 # Synthesis checkpoints
 
+## CP45 — physical bus decode/read mux, −49 LUT от CP44
+
+| Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP45a](../synth/reports/cp45a/result.json) | I/O read factoring | 1339 | 360 | 7 | 672 | — | 954 | MAP FAIL |
+| [CP45b](../synth/reports/cp45b/result.json) | Parallel memory read | 1365 | 359 | 7 | 686 | — | 954 | MAP FAIL |
+| [CP45c](../synth/reports/cp45c/result.json) | Prefix only | 1362 | 359 | 7 | 683 | — | 954 | MAP FAIL |
+| [CP45d](../synth/reports/cp45d/result.json) | Factoring + prefix | 1320 | 359 | 7 | 662 | — | 954 | MAP FAIL |
+| [CP45e](../synth/reports/cp45e/result.json) | D + paired EBR read | 1350 | 359 | 7 | 677 | — | 954 | MAP FAIL |
+| [CP45f](../synth/reports/cp45f/result.json) | D + I/O/local mux | 1372 | 360 | 7 | 688 | — | 954 | MAP FAIL |
+| [CP45g](../synth/reports/cp45g/result.json) | D + narrow bootstrap ROM | 1302 | 359 | 7 | 652 | — | 954 | MAP FAIL |
+| [CP45h](../synth/reports/cp45h/result.json) | G + FRAM/firmware/APR | 1357 | 359 | 7 | 680 | — | 954 | MAP FAIL |
+| [CP45i](../synth/reports/cp45i/result.json) | G + firmware/APR/FRAM | 1330 | 359 | 7 | 666 | — | 954 | MAP FAIL |
+| [CP45j](../synth/reports/cp45j/result.json) | G + firmware/FRAM/APR | 1338 | 359 | 7 | 670 | — | 954 | MAP FAIL |
+| [CP45k](../synth/reports/cp45k/result.json) | G, финальные input hashes | 1302 | 359 | 7 | 652 | — | 954 | MAP FAIL |
+
+K повторяет G: −49 LUT / −24 slices от CP44e, FF/EBR прежние. До границы
+HC1200 не хватает 22 LUT / 12 slices, ещё без protection/restart. Все gates
+остановились на MAP, PAR/TRACE/Fmax отсутствуют. Production CP40h и APR
+CP43d прежние. [Эквивалентность, регрессии и детали](area-bus-cp45.md).
+
 ## CP44 — relocation + PA22, все полные board gates отклонены
 
 | Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |

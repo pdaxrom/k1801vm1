@@ -5,6 +5,14 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP45: площадь relocation board уменьшена на 49 LUT.**
+Финальный повтор: **1302 LUT / 359 FF / 7 EBR / 652 slices**, MAP FAIL.
+До границы HC1200 остаются 22 LUT / 12 slices, затем нужен резерв на
+protection/restart. Изменены только bus decode/read mux; CPU/FRAM/vendor
+и cold RT-11FB + DIR сохранили все clocks и UART. Выбранная форма прошла
+binary и X/Z equivalence. В production не принята, Fmax/XM ещё нет.
+[Измерения и проверки CP45](docs/area-bus-cp45.md).
+
 **CP44: CPU relocation 18/22 bits проверен, но не поместился в HC1200.**
 CPU записывает/читает весь верхний банк FRAM, portable/vendor/C tests и
 cold RT-11FB + DIR прошли. Лучший из пяти gates: **1351 LUT / 359 FF /

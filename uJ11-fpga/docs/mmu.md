@@ -1,4 +1,16 @@
-# MMU / 128 КиБ FRAM — CP31–CP44
+# MMU / 128 КиБ FRAM — CP31–CP45
+
+**CP45 уменьшил relocation board до 1302 LUT / 359 FF / 7 EBR /
+652 slices.** Это −49 LUT / −24 slices от CP44; CPU/FRAM/vendor и cold FB
+сохранили прежние clocks/UART. Bus factoring/prefix/local ROM проверены
+binary и X/Z equivalence. Все gates ещё MAP FAIL, Fmax нет, в production
+вариант не принят. До границы HC1200 не хватает 22 LUT / 12 slices;
+следующий gate — control/handshake/physical request path.
+[Отчёт CP45](area-bus-cp45.md).
+
+Protection/W, MMR1/2, hardware fault metadata и restart ещё не подключены,
+modes/I-D/high DMA/RT-11XM остаются открытыми. Production CP40h, APR CP43d
+и FPGA CP29a сохранены. Ниже — история измеренных этапов.
 
 **CP44 проверил CPU relocation и доступ ко всему верхнему банку FRAM,
 но полный HC1200 board не поместился.** Kernel unified PAR, MMR0 software

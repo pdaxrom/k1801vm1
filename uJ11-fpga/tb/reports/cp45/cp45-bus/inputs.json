@@ -1,0 +1,34 @@
+{
+  "variants": [
+    "baseline",
+    "factored",
+    "parallel",
+    "prefix",
+    "factored-prefix",
+    "paired",
+    "io-mux",
+    "narrow-rom",
+    "ram-first",
+    "firmware-first",
+    "firmware-ram"
+  ],
+  "inputs_sha256": {
+    "tools/build_bus_cp45.py": "64b501f232fb3b95f5a89d63b28c5c0885b3e3b67668fb4bb9514b9ad8be1b9e",
+    "tools/build_mmu_entry.py": "b99b5d0c80461886bee57f110f86a5fc49afec4b1a0ac18270399ef51fe07437",
+    "build/cp44-direct/uj11_board_bus.v": "328575b6ec72dde01cdb1d10f2c250b6b79f7dabbf744e6c1f1c2847db0d23d0",
+    "synth/reports/cp44e/inputs.json": "76062b8135ece669253537f92b94685c5220ce63c3a8deed327ab180361d3ed4"
+  },
+  "outputs_sha256": {
+    "build/cp45-bus/baseline/uj11_board_bus.v": "328575b6ec72dde01cdb1d10f2c250b6b79f7dabbf744e6c1f1c2847db0d23d0",
+    "build/cp45-bus/factored/uj11_board_bus.v": "f738b105fca62d1445850abbefa155f08366da1ead03d6589f9126b9592f55dc",
+    "build/cp45-bus/parallel/uj11_board_bus.v": "71efe393dc4614d97fbd26f4cb476985dd3a3bd66f1448dab45f98ad69f8a8f9",
+    "build/cp45-bus/prefix/uj11_board_bus.v": "49429cf79461defcb67753fb183307c6e0efaa91533b10b587b5ffd39777a1fa",
+    "build/cp45-bus/factored-prefix/uj11_board_bus.v": "27fa7ca63476a1b107b77688bc4a7d09cdc93f3830864cc93c0476961260605d",
+    "build/cp45-bus/paired/uj11_board_bus.v": "19867a6ddb20d6519cacd81c0d5f629779239007925e33d816880abf31bf9502",
+    "build/cp45-bus/io-mux/uj11_board_bus.v": "cba249988c20a314c0df4d466e8221a138a6fb7705d4b6357b53974af4d382fe",
+    "build/cp45-bus/narrow-rom/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "build/cp45-bus/ram-first/uj11_board_bus.v": "a12346e12125c672e3983621ccf1edc63e2d1d98996c71381c98fb4a9e8f4822",
+    "build/cp45-bus/firmware-first/uj11_board_bus.v": "8ec452261ff0863b1b49d8e3e9d531895dc696e7c9684de4286a55a1ded021ca",
+    "build/cp45-bus/firmware-ram/uj11_board_bus.v": "5478c1676c9de584ae3a20dcd95ee3d07e6b144f5fe3e6213f2ac0a029ea6ef6"
+  }
+}

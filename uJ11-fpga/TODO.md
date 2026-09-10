@@ -84,9 +84,9 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Full board 1268 LUT / 344 FF / 7 EBR / 31.075 MHz, microstore 963 words.
   Portable/vendor CPU/bus/port, whole-opcode miter и cold FB counts PASS.
   [Отчёт](docs/mmu-apr-csr.md). Production остаётся CP38f, FPGA CP29a.
-- [ ] Следующий gate после CP44: сократить площадь полного board/bus/control.
-  Лучший relocation prototype требует 1351 LUT / 676 slices — на 71/36
-  больше HC1200, ещё без protection/restart. Все пять CP44 gates отклонены.
+- [ ] Следующий gate после CP45: сократить control/handshake/physical request
+  path между CPU, APR EBR и FRAM. Лучший relocation prototype требует
+  1302 LUT / 652 slices — на 22/12 больше HC1200, ещё без protection/restart.
 - [x] CP40: перестроить operand/writeback mux и ALU result selection.
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
   7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба
@@ -109,6 +109,11 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   instruction-stream, C oracles и vendor EBR. Cold FB + DIR проходит,
   использует верхнюю FRAM, UART прежний. [Отчёт](docs/relocation-cp44.md).
   Это отдельный не поместившийся прототип, production CP40h сохранён.
+- [x] CP45: bus I/O read factoring, exact prefix и narrow bootstrap ROM.
+  1302 LUT / 359 FF / 7 EBR / 652 slices, −49 LUT / −24 slices от CP44.
+  Одиннадцать synthesis gates, binary/four-state и CPU/FRAM/vendor/bus/
+  cold FB tests; все clocks и UART прежние. [Отчёт](docs/area-bus-cp45.md).
+  MAP FAIL, в production не принят; FPGA CP29a не программировалась.
 - [ ] Получить fit с резервом для полного MMU, затем принять CPU relocation.
 - [ ] MMR0 hardware fault/page metadata, MMR1/2, оставшиеся MMR3 controls,
   PDR protection/automatic W, MMU abort250 и freeze/restart в полном CPU/bus.

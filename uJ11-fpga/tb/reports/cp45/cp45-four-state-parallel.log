@@ -1,0 +1,2 @@
+FATAL: four_state.v:56: four-state mismatch PA3fe007 controls1e96 got1385c0010xxxx expected1385c0010zzzz
+       Time: 32776000  Scope: tb

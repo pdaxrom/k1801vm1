@@ -1,5 +1,20 @@
 # Implementation status, 2026-09-10
 
+## CP45 — physical bus уменьшен, fit ещё не пройден
+
+Финальный CP45k: **1302 LUT / 359 FF / 7 EBR / 652 slices**, −49 LUT /
+−24 slices от CP44e. Все 11 full-board gates не проходят MAP по ресурсам,
+Fmax нет. До границы устройства остаются 22 LUT / 12 slices без резерва
+на protection/restart. Рабочие production CP40h/APR CP43d и плата CP29a прежние.
+
+Выбранный `narrow-rom`: общий I/O read qualifier, exact prefix decode и
+узкий local bootstrap ROM. Native CPU, MMU bridge, APR storage, firmware,
+954 microinstructions, ACK/state/peripherals не менялись. Binary/XZ proof,
+CPU/FRAM/vendor/bus и cold FB + DIR прошли; все counts и UART совпали с CP44.
+Следующий gate — control/handshake/physical request path; ограничения
+MMU и отсутствие RT-11XM result сохраняются.
+[Отчёт](area-bus-cp45.md), [manifest](verification-cp45.json).
+
 ## CP44 — CPU relocation прототип, area gate не пройден
 
 Kernel unified PAR relocation 18/22 bits, MMR0 software controls, MMR3<4>,

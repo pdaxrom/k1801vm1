@@ -1,4 +1,18 @@
-# Benchmarks: CP44 и предыдущие этапы
+# Benchmarks: CP45 и предыдущие этапы
+
+## CP45 — −49 LUT, прежние clocks
+
+Relocation board: 1302 LUT / 359 FF / 7 EBR / 652 slices, MAP FAIL, Fmax нет.
+Изменены bus decode/read mux, новых тактов нет. Полный upper-FRAM CPU sweep
+сохранил 67468380 clocks / 590096 PAR reads; vendor subset — 97692 / 848.
+Cold FB + DIR сохранил **все** CP44 counts: 415159611 clocks, 4311823
+retirements, 5675704 reads / 489280 writes, 3980328 FRAM transactions,
+300 RK commands, 576 timer edges, 3270 UART bytes, 162 SD reads / 6 writes.
+Mapped/high-FRAM beats 526239/65664, MMR0 writes 4; UART byte-identical.
+
+CPU/vendor edge tests, full bus, binary и four-state проверки выбранного
+варианта прошли. Hardware instructions/sec и RT-11XM пока не измерены.
+[Отчёт CP45](area-bus-cp45.md).
 
 ## CP44 — relocation clocks, без аппаратного Fmax
 

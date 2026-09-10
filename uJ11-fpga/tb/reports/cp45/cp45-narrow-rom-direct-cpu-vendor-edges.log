@@ -1,0 +1,3 @@
+PASS CP44 CPU edges: 18-bit wrap, 22-bit NXM, canonical I/O, MOVB sign/lane, odd read/write vector4 and high mapped trap stack
+PASS CP44 mapped instruction stream: high-bank opcode/immediate fetch after MMR0 enable
+tb/tb_relocate_edges_cp44.v:112: $finish called at 282430000 (1ps)
