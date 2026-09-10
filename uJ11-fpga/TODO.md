@@ -50,8 +50,11 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
 - [x] Подтвердить новый full-board baseline synthesis и регрессией RT-11FB.
 - [x] Измерить отдельно 18-bit relocation и проверки PDR по документации DEC.
 - [x] Перенести RK CSR state из первых 32 байтов верхнего банка FRAM в EBR (CP31c).
-- [ ] Расширить translator до 18/22 bits: MMR3<4>, PAR16, PA22; проверить
-  переключение режимов, MMU-off, high PAR bits, wrap, I/O mapping и NXM.
+- [x] Расширить отдельный translator до 18/22 bits: вход выбора MMR3<4>,
+  PAR16, PA22; проверить переключение, MMU-off, high PAR bits, wrap,
+  I/O mapping и NXM. CP32b: 70 LUT / 80 probe FF / 0 EBR / 93.362 MHz.
+- [x] CP32: сравнить translator с C MMU и проверить все 128 КиБ через
+  модель SPI FRAM и board transport. Это ещё не CPU/MMR/SD integration.
 - [ ] PAR/PDR в EBR, MMR0/1/2/3, physical I/O page и NXM без alias верхней памяти.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
 - [ ] Разделить отображение гостя, RK firmware assist и физический DMA;

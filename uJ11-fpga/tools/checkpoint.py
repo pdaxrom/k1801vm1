@@ -127,6 +127,9 @@ CONFIGS['cp27b']=CONFIGS['cp14c']
 CONFIGS['cp31b']=('uj11_probe_mmu18',0,[
     'rtl/uj11_mmu_translate18.v','synth/machxo2/uj11_probe_mmu18.v'])
 CONFIGS['cp31d']=CONFIGS['cp31b']
+CONFIGS['cp32a']=('uj11_probe_mmu',0,[
+    'rtl/uj11_mmu_translate.v','synth/machxo2/uj11_probe_mmu.v'])
+CONFIGS['cp32b']=CONFIGS['cp32a']
 
 
 def main():

@@ -1241,3 +1241,25 @@ test-mmu18: | build
 	$(IVERILOG) -g2012 -Wall -s tb_mmu18 -o build/mmu18 tb/tb_mmu18.v rtl/uj11_mmu_translate18.v
 	$(VVP) build/mmu18
 	$(VERILATOR) --lint-only --Wall --top-module uj11_probe_mmu18 synth/machxo2/uj11_probe_mmu18.v rtl/uj11_mmu_translate18.v
+
+.PHONY: test-mmu-translate
+test-mmu-translate: | build
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_translate -Ptb_mmu_translate.FULL=0 -o build/mmu_translate tb/tb_mmu_translate.v rtl/uj11_mmu_translate.v rtl/uj11_mmu_translate18.v
+	$(VVP) build/mmu_translate
+	$(VERILATOR) --lint-only --Wall --top-module uj11_probe_mmu synth/machxo2/uj11_probe_mmu.v rtl/uj11_mmu_translate.v
+	$(VERILATOR) --binary --timing -j 4 --top-module tb_mmu_translate --Mdir build/obj-mmu-translate tb/tb_mmu_translate.v rtl/uj11_mmu_translate.v rtl/uj11_mmu_translate18.v
+	build/obj-mmu-translate/Vtb_mmu_translate
+
+.PHONY: test-mmu-oracle
+build/reference_mmu_translate: tb/reference_mmu_translate.c ../core/core.c ../core/core.h ../core/pdp11_fp.c ../core/hardware.c ../core/hardware.h | build
+	$(CC) -O2 -Wall -DENABLE_MMU=1 -I.. tb/reference_mmu_translate.c ../core/hardware.c -lm -o $@
+build/mmu-oracle.txt: build/reference_mmu_translate
+	$< > $@.tmp
+	mv $@.tmp $@
+test-mmu-oracle: build/mmu-oracle.txt
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_oracle -o build/mmu_oracle tb/tb_mmu_oracle.v rtl/uj11_mmu_translate.v
+	$(VVP) build/mmu_oracle
+
+.PHONY: test-mmu-fram
+test-mmu-fram: | build
+	$(PYTHON) tools/run_mmu_fram.py

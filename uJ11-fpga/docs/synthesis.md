@@ -1,5 +1,31 @@
 # Synthesis checkpoints
 
+## CP32 — общий translator 18/22 bits, PAR16 / PA22
+
+| Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP32a](../synth/reports/cp32a/result.json) | Isolated translation/PDR probe, nested PA mux | 72 | 80 | 0 | 42 | 74.102 | — |
+| [CP32b](../synth/reports/cp32b/result.json) | Factored width/enable, address classes before PA mux | 70 | 80 | 0 | 41 | 93.362 | — |
+
+Diamond 3.14, LCMXO2-1200HC-4SG32C, 29.56 MHz constraint; оба полных
+MAP/PAR/TRACE PASS, fully routed. В обоих стендах одинаковые 52 stimulus
+и 28 observation FF; сам translator не содержит FF/EBR. Его частота не
+является Fmax CPU с MMU. CP32a — архивный вариант, CP32b — текущий RTL.
+
+Стоимость исследована по `design.areasrr`: внутри translator в обоих
+вариантах 14 CCU2D; CP32a — 31 ORCALUT4 / 4 PFUMX, CP32b — 33 ORCALUT4 /
+2 PFUMX. Суммарные mapped LUT probe **72 → 70**, critical path улучшен
+после устранения вложенного выбора ширины PA. Эти primitive counts не
+следует складывать напрямую с LUT4 из MAP или ресурсами отдельного board fit.
+
+Все production HDL/firmware/microcode/build inputs совпадают с CP31c:
+**1252 LUT / 326 FF / 6 EBR / 30.917 MHz**, 954 microinstructions.
+PAR/PDR storage, MMR, CPU MMU и DMA здесь не добавлены. Свободно всего
+28 LUT / 12 slices / 1 EBR; общий MMU fit остаётся недоказанным.
+Следующий gate — EBR таблицы и стоимость доступа к ним, с исследованием
+экономии общей логики перед интеграцией. [Контракт и тесты](mmu.md),
+[source/report/test hashes](verification-cp32.json).
+
 ## CP31 — FP11 удалён; RK storage / MMU datapath
 
 | Revision | Scope | LUT4 | FF | EBR | Slices | TRACE MHz | Words |

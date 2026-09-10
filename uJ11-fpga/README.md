@@ -5,7 +5,8 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP31: FP11 отложен и удалён из рабочей сборки; начат этап MMU.**
+**CP32: проверен отдельный translator 18/22 bits и доступ ко всей SPI FRAM.**
+FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
 70 слов. ODT также остаётся в [TODO](TODO.md).
@@ -18,12 +19,14 @@
 
 Текущий production CPU **ещё без MMU**, интерфейс 16 bits. Верхние 64 КиБ
 FRAM освобождены от служебных RK-регистров, но пока недоступны CPU.
-Отдельный проверенный 18-bit translation/PDR block не включён в board top.
-Целевой MMU поддерживает **18 и 22 bits** через MMR3<4>, с PAR16 и PA22;
-128 КиБ установленной FRAM не ограничивают адресное пространство MMU.
-22-bit translation пока не реализована; CP31 был первым измерительным этапом.
+Отдельный translator/PDR checker поддерживает **18 и 22 bits**, PAR16 и
+canonical PA22; он ещё не включён в board top. Вход `map22` соответствует
+MMR3<4>, сами MMR и таблицы пока отсутствуют. CP32b: **70 LUT / 80 измерительных
+FF / 0 EBR / 93.362 MHz**. Это показатели probe, не полного CPU с MMU.
+Прошли 36144800 проверок, 262144 сравнений с C MMU и полный проход по
+128 КиБ через реальный RTL SPI transport с моделью FRAM.
 [MMU: документация, измерения, план интеграции и RT-11XM](docs/mmu.md).
-Плату в CP31 не программировали; физически остаётся CP29.
+Плату в CP31/CP32 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
@@ -48,6 +51,9 @@ make synthesis-board BOARD_CHECKPOINT=cp28n # fresh Linux/Diamond implementation
 make test-reference-core         # existing C core regression
 make benchmark-fis               # 8 workloads x3 memory modes
 make test-mmu18                   # isolated translation/PDR probe, not integrated MMU
+make test-mmu-translate           # 18/22-bit PA/PDR, exhaustive + four-state
+make test-mmu-oracle              # existing C MMU, ENABLE_MMU=1
+make test-mmu-fram                # translator + SPI transport, complete 128 KiB model
 ```
 
 Нужны Python 3, Icarus Verilog, Verilator, C compiler и Lattice simulation
@@ -63,7 +69,7 @@ path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` мо�
 и физическими RK DMA. Полный MMU fit пока не доказан: у CP31c осталось
 28 LUT / 12 slices / 1 EBR. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
 
-* [CP31: MMU и использование всей FRAM](docs/mmu.md)
+* [CP31/CP32: MMU и использование всей FRAM](docs/mmu.md)
 * [CP30: отложенный эксперимент FP11(A)](docs/fp11a.md)
 * [CP27: FIS, exact reference и измерения](docs/fis.md)
 * [HC1200: интеграция периферии и RT-11](docs/hc1200-integration.md)

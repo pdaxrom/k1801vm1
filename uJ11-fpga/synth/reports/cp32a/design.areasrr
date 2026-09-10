@@ -1,0 +1,35 @@
+----------------------------------------------------------------------
+Report for cell uj11_probe_mmu.verilog
+
+Register bits: 80 of 1280 (6%)
+PIC Latch:       0
+I/O cells:       4
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       14       100.0
+                            FD1S3IX       79       100.0
+                                GSR        1       100.0
+                                 IB        3       100.0
+                           IFS1P3IX        1       100.0
+                                 OB        1       100.0
+                           ORCALUT4       44       100.0
+                              PFUMX        4       100.0
+                                PUR        1       100.0
+                                VHI        2       100.0
+                                VLO        2       100.0
+SUB MODULES 
+                 uj11_mmu_translate        1       100.0
+                            
+                         TOTAL           153           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_translate.netlist
+     Instance path:  mmu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       14       100.0
+                           ORCALUT4       31        70.5
+                              PFUMX        4       100.0
+                                VHI        1        50.0
+                                VLO        1        50.0
+                            
+                         TOTAL            51           

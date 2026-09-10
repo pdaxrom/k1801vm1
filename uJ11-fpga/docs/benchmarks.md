@@ -1,5 +1,16 @@
 # Benchmarks: CP27 и предыдущие этапы
 
+## CP32 — translation / SPI verification, без нового CPU benchmark
+
+Translator 18/22 bits не включён в production CPU. Изолированный probe:
+70 LUT, 80 измерительных FF, 0 EBR, 93.362 MHz. Этот Fmax не является
+частотой исполнения PDP-11 с MMU. Full SPI test: 196634 beats,
+24774246 clocks; сюда входят намеренные held requests, паузы и проверки
+ошибок, поэтому это счётчики verification harness, не CPU CPI/throughput.
+Проверено содержимое всех 128 КиБ FRAM model. CPU microclocks/instruction,
+SD/RK DMA выше 64 КиБ и RT-11XM с MMU пока не измерены.
+[Проверки и ограничения CP32](mmu.md), [manifest](verification-cp32.json).
+
 ## CP31 — FIS-only / подготовка MMU
 
 FP11 удалён; FIS и integer microcode побайтно совпадают с CP29.

@@ -1,8 +1,8 @@
-# MMU / 128 КиБ FRAM — CP31
+# MMU / 128 КиБ FRAM — CP31 / CP32
 
 Решение пользователя от 2026-09-10: отложить FP11, оставить FIS и начать MMU.
 Первоначальное ограничение «без MMU» относится к полученному baseline v1.
-**В CP31 MMU ещё не подключён к CPU.** Ниже разделены рабочая сборка,
+**В CP32 MMU ещё не подключён к CPU.** Ниже разделены рабочая сборка,
 изолированный проверенный datapath и дальнейшая интеграция.
 
 ## Целевой профиль: 18- и 22-битная адресация
@@ -28,18 +28,19 @@ J-11**, независимо от того, что на плате устано�
 `00760000..00777777` сам по себе I/O page не является.
 Canonical адрес MMR3 — `17772516` (VA `172516` при обычном отображении I/O).
 
-Board decoder проверяет все 22 бита до обращения к FRAM: RAM существует
+При интеграции board decoder должен проверять все 22 бита до обращения к FRAM: RAM существует
 только в `00000000..00377777`; в I/O page выполняется decode устройств;
 остальное — NXM. Только после выбора RAM контроллер использует PA[16:0].
 Усечение PA до 17 бит до decode запрещено: оно создало бы alias RAM и скрыло
 обращение к неустановленной памяти. Поддержка 22 bits не означает наличие
 4 МиБ RAM на этой плате и не обещает такой объём RT-11XM.
 
-Следующий translation checkpoint расширяет PAR/PA и добавляет выбор 18/22.
-Обязательны проверки переключения MMR3<4>, игнорирования этого бита при
-MMR0<0>=0, старших PAR bits, wrap на 18/22 bits, обеих I/O-page mappings,
-границы 128 КиБ и NXM без alias. Стоимость измеряется до подключения к CPU.
-Текущий `uj11_mmu_translate18.v` этих новых возможностей **ещё не содержит**.
+CP32 реализует этот контракт в `rtl/uj11_mmu_translate.v` с PAR16, PA22
+и входами `enabled`/`map22`, соответствующими MMR0<0>/MMR3<4>.
+Сами MMR и их CSR ещё не реализованы. Проверены переключение этих входов,
+игнорирование `map22` при отключённом MMU, старшие PAR bits, wrap на 18/22 bits,
+обе I/O-page mappings, граница 128 КиБ и NXM без alias. Старый
+`uj11_mmu_translate18.v` сохранён как независимый miter для 18-bit случаев.
 
 ## Рабочая сборка
 
@@ -69,7 +70,7 @@ CSR reads во время RK service не меняют признак MOVB DMA. 
 что guest уже может использовать верхние 64 КиБ. SPI transport умеет оба
 банка; стандартный board request пока передаёт bank=0.
 
-## DEC contract первого datapath
+## DEC contract первого datapath (CP31)
 
 Первоисточник — [DEC DCJ11 User's Guide, EK-DCJ11-UG-PRE, Oct 1983](https://www.bitsavers.org/pdf/dec/pdp11/1173/EK-DCJ11-UG-PRE_J11ug_Oct83.pdf),
 §4.5.1–4.5.2, 4.7.1–4.7.4, 4.9. Для поиска использована
@@ -158,10 +159,75 @@ CP31c оставляет **28 LUT / 12 slices / 1 EBR**. Даже размеще
 Результаты и hashes: [verification-cp31.json](verification-cp31.json).
 Плата не перепрошивалась; hardware baseline остаётся CP29a.
 
+## CP32 — общий translation datapath и SPI FRAM
+
+`rtl/uj11_mmu_translate.v` принимает выбранные PAR16/PDR16 и VA16.
+Один 16-битный block adder выполняет relocation для обеих разрядностей;
+его low 12 bits дают wrap на 18 bits. Общий 8-битный length subtractor
+сохранён из CP31d. PDR rights/error contract прежний. Функциональные
+регистры и таблицы сюда не добавлены; `map22` — вход, а не MMR3 CSR.
+
+Canonical PA22 формируется до передачи в физический bus. RAM/I/O/NXM
+классифицируются по block sum, не по усечённым FRAM pin bits. Например,
+PAR=`007600`, VA offset=0 даёт I/O `17760000` при 18 bits и NXM `00760000`
+при 22 bits. В 22-bit mapping для того же I/O адреса нужен PAR=`177600`.
+Все адреса в этом примере восьмеричные.
+
+| Checkpoint / isolated probe | LUT4 | FF | EBR | Slices | TRACE MHz |
+|---|---:|---:|---:|---:|---:|
+| [CP32a](../synth/reports/cp32a/result.json): nested PA mux | 72 | 80 | 0 | 42 | 74.102 |
+| [CP32b](../synth/reports/cp32b/result.json): общий width/enable, ранняя классификация | 70 | 80 | 0 | 41 | 93.362 |
+
+Оба MAP/PAR/TRACE gates PASS при constraint 29.56 MHz на HC1200.
+Все **80 FF — стенд измерения** (52 stimulus + 28 observation).
+CP32b сохраняет 14 CCU2D внутри translator, но сокращает PFUMX с 4 до 2;
+LUT4 всего probe уменьшаются на 2. Это результат после synthesis/PAR,
+не оценка стоимости добавления в CPU. Production inputs совпадают с CP31c,
+его полный board fit не менялся: 1252 LUT / 326 FF / 6 EBR / 30.917 MHz.
+
+Проверки текущего CP32b:
+
+* **36144800 checks** в Verilator; дополнительный Icarus four-state проход
+  **3114656 checks**. Все PAR16 × 128 block offsets × low offset 0/63 × оба
+  включённых режима; все PDR16 patterns на границе и вокруг неё; все VA
+  при выключенном MMU. Отдельно все 128 КиБ отображаются через одно окно
+  ровно по одному разу в каждом режиме. 100000 последовательных изменений
+  входов проверяют отсутствие старого PA/rights. Старый CP31 служит miter
+  всех 18-bit случаев после нормализации его локального I/O адреса.
+* **262144 differential cases** с существующим `../core/core.c`,
+  `translate_va_ex`, `ENABLE_MMU=1`, модель DCJ11: 151902 успешных трансляции,
+  110242 faults. Сравниваются success/fault и успешный PA; эталон C возвращает
+  один fault, поэтому одновременные MMR0 error bits проверяет отдельный
+  DEC-based тест. C локальный PA16/18 нормализуется только для I/O page.
+  Выбранные PAR/PDR подаются прямо в RTL: это не проверка аппаратных
+  tables, processor modes или separate I/D.
+* **196634 beats / 24774246 clocks**: новый translator соединён с настоящим
+  `boards/hc1200/uj11_board_fram.v` и моделью SPI FRAM. Записаны все 65536
+  физических слов, каждое прочитано в обоих режимах; всё содержимое 128 КиБ
+  сравнено с независимым byte array. Виртуальная I/O page отображается
+  в RAM; проверяются byte/word, граница банков, последний байт, odd word,
+  held request, NXM, PDR abort и I/O inhibit без побочных SPI transactions.
+  Короткий four-state вариант — 413 beats / 50400 clocks. Здесь нет CPU,
+  RK DMA или MMU CSR; testbench напрямую задаёт PAR/PDR.
+* Strict `--Wall` lint translator/probe прошёл. В SPI Verilator test только
+  width warnings импортированной модели отключены в локальной frozen copy;
+  новые RTL/TB используют обычные fatal warnings. Исходная модель не изменена.
+
+Команды: `make test-mmu-translate test-mmu-oracle test-mmu-fram`.
+`python3 tools/record_cp32.py --run` запускает их с hashes до/после,
+проверяет source snapshots и raw reports, архивирует журналы и сжатый C corpus.
+Артефакты: [verification-cp32.json](verification-cp32.json),
+[журналы и corpus](../tb/reports/cp32), [synthesis](synthesis.md).
+
+MMU abort suppress проверен на границе translator→SPI, но аппаратные
+MMR0/1/2/3, PAR/PDR store, PDR.W, vector250, restart/freeze и приоритет
+odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и полный MMU fit
+не измерены. Физическая плата остаётся CP29a; прошивки в CP32 не было.
+
 ## Следующие gates и обязательный RT-11XM
 
-1. Расширить translation probe до 18/22 bits и измерить его стоимость.
-   Измерить PAR16/PDR storage и CSR access в EBR. Начать с kernel unified
+1. Измерить PAR16/PDR storage и CSR access в EBR; исследовать общую
+   экономию LUT перед интеграцией уже проверенного translator. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять
    такой subset полным J-11 MMU. Не размещать эти таблицы в guest FRAM.
 2. MMR0/1/2/3, выбор 18/22 через MMR3<4>, PDR.W, freeze и restart metadata; запрет внешнего запроса при

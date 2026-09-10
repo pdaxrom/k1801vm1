@@ -1,0 +1,8 @@
+mkdir -p build
+cc -O2 -Wall -DENABLE_MMU=1 -I.. tb/reference_mmu_translate.c ../core/hardware.c -lm -o build/reference_mmu_translate
+build/reference_mmu_translate > build/mmu-oracle.txt.tmp
+mv build/mmu-oracle.txt.tmp build/mmu-oracle.txt
+iverilog -g2012 -Wall -s tb_mmu_oracle -o build/mmu_oracle tb/tb_mmu_oracle.v rtl/uj11_mmu_translate.v
+vvp build/mmu_oracle
+PASS MMU C oracle: 262144 cases, 151902 translated / 110242 faults; existing core, local I/O canonicalized
+tb/tb_mmu_oracle.v:30: $finish called at 262144000 (1ps)

@@ -1,0 +1,19 @@
+{
+  "Makefile": "06bee223411a27a8a3b06cfd7554002fffe407736b36ea7ac0cd5bc4533ea8ad",
+  "rtl/uj11_mmu_translate.v": "6d90669abbdfce80d70fb9f07e418df4e8800852fe7c260c59e6d5fad439f057",
+  "rtl/uj11_mmu_translate18.v": "6d31282f49fba07a67a872044a722ac520db058daa00ffe18a6f0b1931251638",
+  "synth/machxo2/uj11_probe_mmu.v": "f10361258637085715d4cd137907e53397c441cf6eec5750ed22c1345cc56f5f",
+  "tb/tb_mmu_translate.v": "4a4ee038cabcbc93cd341b219bcf8e48c7bcb2b06f6ad8b5d1e1df21660d37d1",
+  "tb/tb_mmu_oracle.v": "b266df95b8c9d8cd7359eea2bafb2449602effb6e9fd2f4c9e895b61a043f483",
+  "tb/reference_mmu_translate.c": "e8d82eaad46d668e42d221492163ad05b394f6306d3c1540786ce41e00f0a811",
+  "tb/tb_mmu_fram.v": "7e96c209dbf20499192bf5a9d9913c2f645ed7ef0f6a7354f95877af11a42456",
+  "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+  "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+  "tools/run_mmu_fram.py": "945952b7a9e98f677dee87ca08bf7f4b8805cdaedcde9d29fa2a36a057e43945",
+  "tools/record_cp32.py": "f37da767edd79d219c365da09450ddc67b3f9d8223e0e4135e447b9bcf6d28ab",
+  "../core/core.c": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+  "../core/core.h": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+  "../core/pdp11_fp.c": "ad5ef37ef0ee8fa9221632ad903224599759cf95a4bcbe4f5dfd77e0870f2220",
+  "../core/hardware.c": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+  "../core/hardware.h": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057"
+}

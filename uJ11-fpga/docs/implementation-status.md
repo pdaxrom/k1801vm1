@@ -1,5 +1,21 @@
 # Implementation status, 2026-09-10
 
+## CP32 — translator 18/22 bits, PAR16, PA22 и SPI FRAM
+
+Изолированный translator/PDR checker реализован для MMU-off, 18-bit и
+22-bit mapping. CP32b: **70 LUT / 80 probe FF / 0 EBR / 41 slices /
+93.362 MHz**, MAP/PAR/TRACE PASS. Сам translator комбинационный;
+все FF принадлежат измерительному стенду. Прошли 36144800 exhaustive checks,
+3114656 four-state checks, 262144 сравнений с существующим C MMU и
+196634 запроса через модель SPI FRAM с проверкой всех 128 КиБ.
+
+MMU **пока не подключён к CPU**. PAR/PDR store, MMR CSR, W-bit, abort/restart,
+processor modes/SP/I-D и extended RK DMA остаются следующими gates.
+MMR3<4> пока подаётся как вход `map22`, а не читается из аппаратного MMR.
+Full-board inputs побайтно совпадают с CP31c; новых результатов CPU CPI/Fmax
+с MMU нет. RT-11XM из пользовательского образа ещё не загружен на RTL.
+[Контракт, измерения и проверки](mmu.md), [manifest](verification-cp32.json).
+
 ## CP31 — FIS, FP11 удалён; первый MMU checkpoint
 
 FP11 и ODT отложены. FP RTL/dispatch/state/microcode/build options удалены;
@@ -8,15 +24,15 @@ firmware EBR, верхний банк FRAM больше не занят пери
 top CP31c: **1252 LUT / 326 FF / 6 EBR / 628 slices / 30.917 MHz**, PASS.
 Cold RT-11FB + DIR, FIS и portable/vendor storage checks прошли.
 
-MMU пока **не подключён к CPU**. Изолированный 18-bit translator/PDR checker
+На этом checkpoint MMU **не подключён к CPU**. Изолированный 18-bit translator/PDR checker
 прошёл 1769472 проверки; отсутствуют PAR/PDR storage, MMR registers,
 MMU abort/restart и physical DMA extension. Пользовательский образ XM найден:
 `../lsi11/disks/rt11v5.3/system.dsk`. Его загрузка и работа >64 КиБ ещё
 не проверены. [Измерения, критерии готовности и дальнейшие gates](mmu.md).
 
 Целевой профиль включает **18/22-bit mapping через MMR3<4>**, PAR16 и PA22.
-Текущий 18-bit probe — промежуточный результат; 22-bit translation ещё не
-реализована. MMU-off и оба включённых режима требуют отдельных проверок.
+18-bit probe CP31 — промежуточный результат; CP32 выше расширяет его
+до 18/22 bits и добавляет отдельные проверки обоих режимов и MMU-off.
 
 CP30 FP control/state сохранён в истории (`d59f19c`), полный FP11 не был
 реализован. Плата остаётся CP29.

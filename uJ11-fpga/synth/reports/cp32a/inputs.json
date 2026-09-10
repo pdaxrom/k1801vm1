@@ -1,0 +1,14 @@
+{
+  "name": "cp32a",
+  "top": "uj11_probe_mmu",
+  "files": {
+    "rtl/uj11_mmu_translate.v": "6a5a7f9e2f2843644c3e3cbbd4a37ba220548aff4af89d8a1873ab6cc15ff4f6",
+    "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+    "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+    "synth/machxo2/uj11_probe_mmu.v": "f10361258637085715d4cd137907e53397c441cf6eec5750ed22c1345cc56f5f",
+    "tools/checkpoint.py": "027a23a64f5384c26cc862ead4c3498e87ee40be69b43c534a1bab347e9eaf39",
+    "tools/report_synthesis.py": "1d769774887bd6bb7341ae8fa7124bd496dafcf0475860d75db94f66b894d683",
+    "generated:clock.lpf": "a703fe5af4c50f3c2fa30f0eb295f16d7ca35952060c5215da2c77137366bd17"
+  },
+  "input_revision_sha256": "423b9139e029cc8a997f254185adadf4cf71b891d8278da3b644ed7f27467be3"
+}
