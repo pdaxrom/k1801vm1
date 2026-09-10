@@ -42,11 +42,17 @@ RTL доступа к FP state, opcode dispatch, reset hook и 33 microinstructi
 Текущий рабочий CPU пока имеет 16-битный физический интерфейс.
 План и границы checkpoints: [MMU](docs/mmu.md).
 
+Целевой MMU поддерживает **18 и 22 bits**, переключаемые MMR3<4>;
+VA16, PAR16, единый PA22. Размер установленной FRAM не ограничивает
+архитектурную разрядность MMU. CP31 с 18 bits — только промежуточный probe.
+
 - [x] Удалить FP11 из активных RTL/microcode/build targets, сохранить FIS.
 - [x] Подтвердить новый full-board baseline synthesis и регрессией RT-11FB.
 - [x] Измерить отдельно 18-bit relocation и проверки PDR по документации DEC.
 - [x] Перенести RK CSR state из первых 32 байтов верхнего банка FRAM в EBR (CP31c).
-- [ ] PAR/PDR в EBR, MMR0/1/2, physical I/O page и NXM без alias верхней памяти.
+- [ ] Расширить translator до 18/22 bits: MMR3<4>, PAR16, PA22; проверить
+  переключение режимов, MMU-off, high PAR bits, wrap, I/O mapping и NXM.
+- [ ] PAR/PDR в EBR, MMR0/1/2/3, physical I/O page и NXM без alias верхней памяти.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
 - [ ] Разделить отображение гостя, RK firmware assist и физический DMA;
   реализовать старшие разряды RK DMA по документации контроллера.
