@@ -2,7 +2,7 @@
 // CP28 complete board system. A single legacy FRAM transport owns the pins.
 // No prefetch in this initial full-peripheral resource baseline; no MMU.
 module uj11_board #(
-    parameter integer CLOCK_HZ=29560000, TICK_DIVISOR=591200, FP11_CONTROL=0,
+    parameter integer CLOCK_HZ=29560000, TICK_DIVISOR=591200,
     parameter integer SD_SLOW_DIV=68, SD_FAST_DIV=2
 ) (
     input wire clk, reset, uart_rx,
@@ -51,7 +51,7 @@ module uj11_board #(
             else if(!timeout) timeout_count<=timeout_count+1'b1;
         end
     end
-    uj11_core #(.ROM_DECODE(1),.FP11_CONTROL(FP11_CONTROL),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
+    uj11_core #(.ROM_DECODE(1),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
         .clk(clk),.reset(reset),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector[15:1]),
         .irq_ack(irq_ack),.waiting(),.peripheral_reset(peripheral_reset),
         .mem_addr(address),.mem_write_data(data),.mem_request(request),.mem_read(),
@@ -61,7 +61,9 @@ module uj11_board #(
     wire rom_enable;
     wire [8:0] rom_address;
     wire [15:0] rom_data;
-    uj11_firmware_rom firmware(.clk(clk),.enable(rom_enable),.address(rom_address),.data(rom_data));
+    wire [1:0] rom_write;
+    uj11_firmware_rom firmware(.clk(clk),.enable(rom_enable),.address(rom_address),.data(rom_data),
+        .write_enable(rom_write),.write_data(lane_data));
     uj11_board_bus #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(TICK_DIVISOR),.FRAM_CLK_DIV(1),
         .SD_BOOT_ENABLE(1),.RK_SERVICE_ENABLE(1),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV)) bus(
         .clk(clk),.rst(reset),.peripheral_reset(peripheral_reset),.request(bus_request),.write(writing),
@@ -73,5 +75,5 @@ module uj11_board #(
         .panel_blank(panel_blank),.panel_reg_latch(panel_latch),.host_miso(host_miso),.host_miso_oe(host_miso_oe),
         .spi_cs_n(fram_cs_n),.spi_sck(fram_sck),.spi_mosi(fram_mosi),.spi_miso(fram_miso),
         .sd_cs_n(sd_cs_n),.sd_sck(sd_sck),.sd_mosi(sd_mosi),.sd_miso(sd_miso),
-        .boot_rom_ena(rom_enable),.boot_rom_addr(rom_address),.boot_rom_data(rom_data),.boot_complete(boot_complete));
+        .boot_rom_ena(rom_enable),.boot_rom_addr(rom_address),.boot_rom_write(rom_write),.boot_rom_data(rom_data),.boot_complete(boot_complete));
 endmodule

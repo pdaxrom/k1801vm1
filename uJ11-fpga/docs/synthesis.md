@@ -1,5 +1,23 @@
 # Synthesis checkpoints
 
+## CP31 — FP11 удалён; RK storage / MMU datapath
+
+| Revision | Scope | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP31a](../synth/reports/cp31a/result.json) | Full board, FIS, FP11 удалён | 1224 | 326 | 6 | 614 | 31.074 | 954 |
+| [CP31b](../synth/reports/cp31b/result.json) | Isolated MMU18 translate/PDR probe | 55 | 70 | 0 | 35 | 110.742 | — |
+| [CP31c](../synth/reports/cp31c/result.json) | Full board, RK CSR в firmware EBR | 1252 | 326 | 6 | 628 | 30.917 | 954 |
+| [CP31d](../synth/reports/cp31d/result.json) | MMU18, общий length subtractor | 48 | 70 | 0 | 35 | 111.136 | — |
+
+Все gates 29.56 MHz PASS, fully routed. CP31c — текущий production source;
+MMU не подключён к CPU. Probe включает 70 измерительных FF, в самом
+translation RTL FF/EBR нет. Его Fmax не является частотой CPU с MMU.
+Удаление FP11 освобождает 33 слова и 6 LUT относительно default-off CP30e;
+число microstore EBR остаётся прежним. RK state освобождает верхний банк FRAM
+без нового EBR. Цена full-board варианта +28 LUT; исследованная разбивка и
+ограничения fit — в [MMU / CP31](mmu.md). Исторические snapshots CP30 сохранены.
+На физической плате остаётся CP29a.
+
 ## CP30 — FP11 control/state, полный HC1200 top
 
 Первое FP-подмножество измерено до расширения арифметики:

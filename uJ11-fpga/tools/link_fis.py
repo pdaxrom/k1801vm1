@@ -109,16 +109,6 @@ def main():
     args = p.parse_args()
     source, placed, report = link(args.base.read_text(), args.extension.read_text())
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    fp_source=(ROOT/'microcode/fp11_control.uasm').read_text()
-    before=assemble(source)
-    source+='\n'+fp_source
-    after=assemble(source)
-    assert all(after[0][int(line.split()[0],16)]==before[0][int(line.split()[0],16)] for line in before[1].splitlines())
-    assert all(after[2][k]==v for k,v in before[2].items())
-    report['fp_control_words']=after[3]['used_words']-before[3]['used_words']
-    report['fis_total_words']=before[3]['used_words']
-    report['used_words']=after[3]['used_words']
-    report['free_words']=1024-after[3]['used_words']
     args.output.write_text(source)
     args.output.with_suffix('.placed.uasm').write_text(placed)
     args.output.with_suffix('.placement.json').write_text(json.dumps(report, indent=2)+'\n')

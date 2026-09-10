@@ -57,7 +57,7 @@ test-datapath: | build
 
 microcode-m0: $(GEN)/m0.mem $(GEN)/uj11_m0_ebr.v
 
-$(GEN)/m0.mem: microcode/m0.uasm microcode/fis.uasm microcode/fp11_control.uasm tools/link_fis.py microasm/uj11asm.py
+$(GEN)/m0.mem: microcode/m0.uasm microcode/fis.uasm tools/link_fis.py microasm/uj11asm.py
 	$(PYTHON) tools/link_fis.py --output $(GEN)/full.uasm
 	$(PYTHON) microasm/uj11asm.py $(GEN)/full.uasm -o $@ --list $(GEN)/m0.lst --labels $(GEN)/m0.labels.json --stats $(GEN)/m0.stats.json
 
@@ -1231,16 +1231,13 @@ test-board-panel: board
 export-board:
 	$(PYTHON) tools/export_board.py $(BOARD_CHECKPOINT)
 
-# CP30: experimental FP11 control subset; board default remains disabled.
-.PHONY: test-fp-control vendor-fp-control test-board-selectors
-build/reference_fp_control: tb/reference_fp_control.c ../core/core.c ../core/pdp11_fp.c ../core/core.h ../core/hardware.c ../core/hardware.h | build
-	$(CC) -O2 -Wall -DENABLE_MMU=0 -I.. tb/reference_fp_control.c ../core/core.c ../core/hardware.c -lm -o $@
-build/fp-control-vectors.mem: build/reference_fp_control
-	$< > $@.tmp
-	mv $@.tmp $@
-test-fp-control: microcode-m0 board-decode build/fp-control-vectors.mem
-	$(PYTHON) tools/run_fp_control.py
-vendor-fp-control: microcode-m0 board-decode build/fp-control-vectors.mem
-	$(PYTHON) tools/run_fp_control.py --vendor
+.PHONY: test-board-selectors
 test-board-selectors: board
 	PYTHONPATH=tools $(PYTHON) -c "from check_board_units import run; from board_common import BOARD; run('tb_board_bus','cp30-board-selector',BOARD+['reference/lsi11/spi_fram_model.v'],['-Ptb_board_bus.CHECK_SELECTORS=1'])"
+
+# CP31: isolated 18-bit translation/permission checkpoint, not in board sources.
+.PHONY: test-mmu18
+test-mmu18: | build
+	$(IVERILOG) -g2012 -Wall -s tb_mmu18 -o build/mmu18 tb/tb_mmu18.v rtl/uj11_mmu_translate18.v
+	$(VVP) build/mmu18
+	$(VERILATOR) --lint-only --Wall --top-module uj11_probe_mmu18 synth/machxo2/uj11_probe_mmu18.v rtl/uj11_mmu_translate18.v

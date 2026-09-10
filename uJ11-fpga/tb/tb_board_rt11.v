@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // Cold board boot: no register writes or injected CPU state. SD image is read-only.
-module tb_board_rt11 #(parameter integer FP11_CONTROL=0);
+module tb_board_rt11;
     reg clk=0, reset=1, rx=1;
     wire tx,fc,fs,fm,fi,sc,ss,sm,si,boot_complete,stopped;
     integer clocks=0,rk_commands=0,timer_edges=0,stage=0,prompt_count=0;
@@ -39,7 +39,7 @@ module tb_board_rt11 #(parameter integer FP11_CONTROL=0);
         end
     end
     always #5 clk=~clk;
-    uj11_board #(.FP11_CONTROL(FP11_CONTROL)) dut(.clk(clk),.reset(reset),.uart_rx(rx),.uart_tx(tx),.panel_keys(4'b0),
+    uj11_board dut(.clk(clk),.reset(reset),.uart_rx(rx),.uart_tx(tx),.panel_keys(4'b0),
         .panel_din(),.panel_ce(),.panel_clk(),.panel_rs(),.panel_blank(),.panel_latch(),
         .host_miso(),.host_miso_oe(),.fram_cs_n(fc),.fram_sck(fs),.fram_mosi(fm),.fram_miso(fi),
         .sd_cs_n(sc),.sd_sck(ss),.sd_mosi(sm),.sd_miso(si),.boot_complete(boot_complete),.stopped(stopped));

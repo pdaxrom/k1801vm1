@@ -6,8 +6,7 @@ module tb_decode_rom;
     integer i;
     always #5 clk=~clk;
     always @(posedge clk)if(enable)ir<=incoming;
-    uj11_decode_rom dut(.clk(clk),.enable(enable),.incoming(incoming),.entry(actual),
-        .fp_enable(1'b0),.fp_write(1'b0),.fp_address(5'b0),.fp_wdata(16'b0),.fp_rdata());
+    uj11_decode_rom dut(clk,enable,incoming,actual);
     uj11_decode_gold gold(ir,expected);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1)); PUR PUR_INST(.PUR(1'b1));

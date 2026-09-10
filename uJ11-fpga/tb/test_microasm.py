@@ -122,7 +122,7 @@ class AssemblerTests(unittest.TestCase):
         self.assertEqual(edges,other)
         image,_,_,stats=asm.assemble((ROOT/'microcode/m0.uasm').read_text())
         self.assertEqual(stats['used_words'],700)
-        self.assertEqual(stats['encoding_version'],13)
+        self.assertEqual(stats['encoding_version'],12)
         self.assertEqual(image[0x118]>>4&1,1) # EA entry suppresses speculation
         self.assertEqual(image[0x288]>>4&1,0) # register destination resumes it
 

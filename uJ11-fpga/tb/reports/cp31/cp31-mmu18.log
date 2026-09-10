@@ -1,0 +1,8 @@
+iverilog -g2012 -Wall -s tb_mmu18 -o build/mmu18 tb/tb_mmu18.v rtl/uj11_mmu_translate18.v
+vvp build/mmu18
+PASS MMU18: 1769472 checks; all PAR/block offsets; all PDR patterns; disabled I/O; 128 KiB bijection; NXM no alias
+tb/tb_mmu18.v:97: $finish called at 1769472000 (1ps)
+verilator --lint-only --Wall --top-module uj11_probe_mmu18 synth/machxo2/uj11_probe_mmu18.v rtl/uj11_mmu_translate18.v
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.051 MB sources in 3 modules, into 0.021 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.005 s (elab=0.000, cvt=0.002, bld=0.000); cpu 0.005 s on 1 threads; allocated 10.125 MB

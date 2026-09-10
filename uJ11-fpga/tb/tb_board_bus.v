@@ -4,6 +4,7 @@ module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
     reg [1:0] lanes=3;reg [15:0] address=0,data=0;
     wire [15:0] value,vector,rom_data;wire [2:0] priority_level;
     wire ack,irq,event_irq,sc,ss,sm,fc,fs,fm,fi,rom_enable;
+    wire [1:0] rom_write;
     wire [8:0] rom_address;wire [5:0] panel;wire host,host_enable,tx;
     reg [15:0] answer;reg [15:0] firmware[0:511];
     integer clocks=0,sd_edges=0,ticks=0,checks=0,guard,previous_edges,i,movb_address=-1;
@@ -23,9 +24,12 @@ module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
         .panel_rs(panel[3]),.panel_blank(panel[4]),.panel_reg_latch(panel[5]),
         .host_miso(host),.host_miso_oe(host_enable),.spi_cs_n(fc),.spi_sck(fs),.spi_mosi(fm),.spi_miso(fi),
         .sd_cs_n(sc),.sd_sck(ss),.sd_mosi(sm),.sd_miso(1'b1),
-        .boot_rom_ena(rom_enable),.boot_rom_addr(rom_address),.boot_rom_data(rom_data),.boot_complete());
-    uj11_firmware_rom rom(clk,rom_enable,rom_address,rom_data);
+        .boot_rom_ena(rom_enable),.boot_rom_addr(rom_address),.boot_rom_write(rom_write),.boot_rom_data(rom_data),.boot_complete());
+    uj11_firmware_rom rom(clk,rom_enable,rom_address,rom_data,rom_write,data);
     spi_fram_model memory(fc,fs,fm,fi);
+`ifdef UJ11_VENDOR_ROM
+    GSR GSR_INST(.GSR(1'b1)); PUR PUR_INST(.PUR(1'b1));
+`endif
     task beat(input bit wr,input [1:0] mask,input [15:0] addr,datum,input bit opcode);
         begin
             @(negedge clk);request=1;writing=wr;lanes=mask;address=addr;data=datum;fetch=opcode;guard=0;
@@ -69,8 +73,8 @@ module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
         beat(0,1,16'o177500,0,0);if(sd_edges!=previous_edges+8 || answer[7:0]!=255)$fatal(1,"SD read not exactly eight clocks");
         beat(1,3,16'o177442,16'h1234,0);
         beat(1,2,16'o177443,16'hab00,0);
-        beat(0,3,16'o177442,0,0);if(answer!=16'hab34)$fatal(1,"RK bank byte write");
-        if(memory.memory[65538]!=8'h34 || memory.memory[65539]!=8'hab || memory.memory[2]!=0)$fatal(1,"RK private FRAM bank");
+        beat(0,3,16'o177442,0,0);if(answer!=16'hab34)$fatal(1,"RK EBR byte write");
+        for(i=0;i<131072;i=i+1)if(memory.memory[i]!=0)$fatal(1,"RK CSR corrupted guest FRAM %o",i);
         beat(1,3,16'o177440,16'o101,0);
         if(!irq || vector!=16'o210 || priority_level!=5)$fatal(1,"RK immediate IRQ");
         accept_irq();if(irq)$fatal(1,"RK IRQ acknowledge");
@@ -79,10 +83,12 @@ module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
         accept_irq();if(!dut.rk_service_active)$fatal(1,"private service entry");
         beat(0,3,16'o160000,0,0);if(answer!=16'o160004)$fatal(1,"service vector ROM");
         beat(0,3,movb_address[15:0],0,1);if(!dut.rk_service_movb)$fatal(1,"service MOVB phase");
+        beat(0,3,16'o177442,0,0);
+        if(answer!=16'hab34 || !dut.rk_service_movb)$fatal(1,"RK CSR read corrupted service copy phase");
         beat(1,1,16'o177566,16'h0041,0);
         if(memory.memory[16'o177566]!=8'h41 || !dut.fixed_uart.console.tx_ready)$fatal(1,"DMA hit UART instead of physical FRAM");
         beat(0,3,16'o160476,0,1);if(dut.rk_service_active)$fatal(1,"RTI overlay release");
-        $display("PASS board bus: %0d beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK bank/vector/DMA/RTI",checks);
+        $display("PASS board bus: %0d beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI",checks);
         if(CHECK_SELECTORS!=0)begin
             // Freeze sequential devices; exhaust the combinational decode over
             // all addresses and all relevant overlay/RK/direction states.
@@ -96,7 +102,7 @@ module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
                     address=probe[15:0];#1;
                     selections={dut.uart_selected,dut.maint_selected,dut.ltc_selected,
                         dut.panel_selected,dut.sd_selected,dut.rk_fixed_selected,
-                        dut.local_boot_selected,dut.program_selected,dut.fram_selected};
+                        dut.local_boot_selected,dut.firmware_selected,dut.fram_selected};
                     selection_count=$countones(selections);
                     if(selection_count>1)$fatal(1,"overlapping selectors scenario %0d addr %o: %b",scenario,address,selections);
                     priority_value=dut.uart_selected ? dut.uart_rdata :
@@ -104,7 +110,7 @@ module tb_board_bus #(parameter integer CHECK_SELECTORS=0);
                         dut.panel_selected ? dut.panel_rdata : dut.sd_selected ? dut.sd_rdata :
                         dut.rk_fixed_selected ? (dut.rk_ds_selected ? 16'o100701 : 16'o200) :
                         dut.local_boot_selected ? dut.local_rdata :
-                        dut.program_selected ? dut.boot_program_word : dut.fram_rdata;
+                        dut.firmware_selected ? dut.boot_program_word : dut.fram_rdata;
                     if(selection_count==1 && value!==priority_value)
                         $fatal(1,"read mux changed scenario %0d addr %o",scenario,address);
                     selector_checks=selector_checks+1;

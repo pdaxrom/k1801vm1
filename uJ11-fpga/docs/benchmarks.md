@@ -1,5 +1,15 @@
 # Benchmarks: CP27 и предыдущие этапы
 
+## CP31 — FIS-only / подготовка MMU
+
+FP11 удалён; FIS и integer microcode побайтно совпадают с CP29.
+После переноса RK CSR в firmware EBR cold RT-11FB + DIR прошёл за
+354938300 clocks (CP31a до переноса: 355132188), 3270 UART wire bytes,
+162 SD reads / 6 writes. Число retirements изменилось из-за polling/IRQ;
+это системный workload с UART pacing, не изолированный memory benchmark.
+MMU probe ещё не включён в CPU; CPI с MMU и RT-11XM **не измерены**.
+[Отчёты и границы сравнения](mmu.md).
+
 ## CP30 — первый FP control subset
 
 При sync decode и RAM без ожиданий: LDFPS/STFPS Rn — 6 microclocks,

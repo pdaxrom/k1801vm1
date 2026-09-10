@@ -1,14 +1,21 @@
 # Implementation status, 2026-09-10
 
-## CP30 — FP11(A) начат, полная ISA ещё не реализована
+## CP31 — FIS, FP11 удалён; первый MMU checkpoint
 
-ODT отложен в [TODO](../TODO.md). Есть семь микрокодных FP control commands
-(21 encoding): CFCC, SETF/I/D/L, LDFPS/STFPS Rn. FP state использует свободные
-ячейки EBR decoder, основной RF16×16 сохранён. 987/1024×36 v13.
-Экспериментальный полный top: 1265 LUT4/327 FF/6 EBR, TRACE 31.284 MHz,
-29.56 MHz PASS. Default `FP11_CONTROL=0`; плату не перепрошивали.
-[Источники, результаты проверок и оставшаяся работа](fp11a.md).
+FP11 и ODT отложены. FP RTL/dispatch/state/microcode/build options удалены;
+954/1024×36 v12, 70 слов свободно. RK CSR теперь в 16 свободных словах
+firmware EBR, верхний банк FRAM больше не занят периферией. Полный HC1200
+top CP31c: **1252 LUT / 326 FF / 6 EBR / 628 slices / 30.917 MHz**, PASS.
+Cold RT-11FB + DIR, FIS и portable/vendor storage checks прошли.
 
+MMU пока **не подключён к CPU**. Изолированный 18-bit translator/PDR checker
+прошёл 1769472 проверки; отсутствуют PAR/PDR storage, MMR registers,
+MMU abort/restart и physical DMA extension. Пользовательский образ XM найден:
+`../lsi11/disks/rt11v5.3/system.dsk`. Его загрузка и работа >64 КиБ ещё
+не проверены. [Измерения, критерии готовности и дальнейшие gates](mmu.md).
+
+CP30 FP control/state сохранён в истории (`d59f19c`), полный FP11 не был
+реализован. Плата остаётся CP29.
 
 ## CP29 — physical HC1200 bring-up
 

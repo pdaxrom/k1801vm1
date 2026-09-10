@@ -1,5 +1,10 @@
 # FRAM and the existing HC1200 peripherals
 
+> CP31: RK CSR перенесены из верхнего банка FRAM в свободные слова firmware EBR.
+> Все 128 КиБ свободны от служебного state; CPU доступ к верхнему банку требует
+> следующего MMU gate. Ниже — исторический аудит. [Текущий контракт](mmu.md).
+
+
 Audit: 2026-09-08. Source paths below are relative to sibling `lsi11-fpga`;
 SHA-256 values identify the inspected working files in `fram-source-audit.json`.
 That working tree contains ongoing changes; this experiment does not modify it.

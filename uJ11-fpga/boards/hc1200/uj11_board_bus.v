@@ -52,6 +52,7 @@ module uj11_board_bus #(
 	input  wire        sd_miso,
 	output wire        boot_rom_ena,
 	output wire [8:0]  boot_rom_addr,
+	output wire [1:0]  boot_rom_write,
 	input  wire [15:0] boot_rom_data,
 	output reg         boot_complete,
 	output wire        host_miso,
@@ -137,10 +138,11 @@ module uj11_board_bus #(
 	wire rk_fixed_selected = rk_ds_selected ||
 		(rk_cs1_selected && !write &&
 		 (!rk_cs1_initialized || rk_immediate_done));
-	wire rk_fram_selected = rk_selected && !rk_fixed_selected;
+	wire rk_store_selected = rk_selected && !rk_fixed_selected;
 	wire guest_fram_selected = (!io_page && !boot_selected) ||
 		service_dma_selected;
-	wire fram_selected = guest_fram_selected || rk_fram_selected;
+	wire fram_selected = guest_fram_selected;
+	wire firmware_selected = program_selected || rk_store_selected;
 	wire uart_strobe = request && uart_selected;
 	wire sd_strobe = request && sd_selected;
 	wire [15:0] uart_rdata;
@@ -156,10 +158,8 @@ module uj11_board_bus #(
 	assign tx_irq_ack = vic_ack && !rx_irq && tx_irq;
 	wire fram_request = request && fram_selected;
 	wire fram_byte_access = write && byte_select != 2'b11;
-	// Reads return an aligned word; writes retain the byte address in both banks.
-	wire [15:0] fram_address = {
-		rk_fram_selected ? 11'b0 : address[15:5], address[4:1],
-		write && address[0]};
+	// Reads return an aligned word; writes retain the byte address.
+	wire [15:0] fram_address = {address[15:1],write && address[0]};
 	wire [15:0] fram_wdata = byte_select == 2'b10 ?
 		{8'b0, wdata[15:8]} : wdata;
 	wire [15:0] fram_rdata;
@@ -180,7 +180,7 @@ module uj11_board_bus #(
 	uj11_board_fram #(.CLK_DIV(FRAM_CLK_DIV)) guest_memory (
 		.clk(clk), .rst(rst || peripheral_reset),
 		.req(fram_request), .write(write),
-		.byte_access(fram_byte_access), .bank(rk_fram_selected),
+		.byte_access(fram_byte_access), .bank(1'b0),
 		.address(fram_address), .wdata(fram_wdata),
 		.rdata(fram_rdata), .ready(fram_ready), .error(fram_error),
 		.busy(fram_busy), .spi_cs_n(spi_cs_n), .spi_sck(spi_sck),
@@ -249,7 +249,7 @@ module uj11_board_bus #(
 		(sd_rdata & {16{sd_selected}}) |
 		((rk_ds_selected ? 16'o100701 : 16'o000200) & {16{rk_fixed_selected}}) |
 		(local_rdata & {16{local_boot_selected}}) |
-		(boot_program_word & {16{program_selected}}) |
+		(boot_program_word & {16{firmware_selected}}) |
 		(fram_rdata & {16{fram_selected}});
 	assign acknowledge = uart_ack || (request && ltc_selected) ||
 		(request && maint_selected) ||
@@ -290,15 +290,17 @@ module uj11_board_bus #(
 	end
 
 	// A complete PDP-11 word comes from one synchronous firmware EBR.
-	// Address bit8 selects bootstrap versus private RK service.
-	assign boot_rom_addr = {service_program_selected, word_address[8:1]};
-	assign boot_rom_ena = boot_rom_phase == 1;
+	// Words 0f0..0ff are writable RK storage, outside both firmware images.
+	assign boot_rom_addr = rk_store_selected ? {5'b01111,word_address[4:1]} :
+		{service_program_selected,word_address[8:1]};
+	assign boot_rom_write = {2{rk_store_selected && write}} & byte_select;
+	assign boot_rom_ena = boot_rom_phase == 1 && !rst && !peripheral_reset;
 	always @(posedge clk) begin
 		if (rst || peripheral_reset) begin
 			boot_rom_phase <= 0;
 			boot_program_ack <= 0;
 		end else case (boot_rom_phase)
-			0: if (request && program_selected) boot_rom_phase <= 1;
+			0: if (request && firmware_selected) boot_rom_phase <= 1;
 			1: boot_rom_phase <= 2;
 			2: begin
 				boot_program_ack <= 1;
@@ -311,7 +313,7 @@ module uj11_board_bus #(
 		endcase
 	end
 
-	// Writable RK words live in the otherwise unused second FRAM bank.  Before
+	// Writable RK words share unused firmware EBR cells. Before
 	// the first CS1 write (and after controller clear), CS1 reads as DONE.  The
 	// only persistent RTL state is command/interrupt sequencing.
 	always @(posedge clk) begin
@@ -340,7 +342,7 @@ module uj11_board_bus #(
 				end
 			end
 
-			if (fram_ready && rk_cs1_selected && write && byte_select[0]) begin
+			if (boot_rom_phase == 2 && rk_cs1_selected && write && byte_select[0]) begin
 				rk_cs1_initialized <= 1;
 				rk_interrupt_enable <= wdata[6];
 				rk_immediate_done <= 0;
@@ -364,7 +366,7 @@ module uj11_board_bus #(
 				end
 			end
 
-			if (fram_ready && rk_cs2_selected && write && byte_select[0] &&
+			if (boot_rom_phase == 2 && rk_cs2_selected && write && byte_select[0] &&
 				wdata[5]) begin
 				rk_cs1_initialized <= 0;
 				rk_interrupt_enable <= 0;
@@ -375,10 +377,10 @@ module uj11_board_bus #(
 				rk_write_command <= 0;
 			end
 
-			if (rk_service_active && boot_program_ack && request)
+			if (rk_service_active && program_selected && boot_program_ack && request)
 				rk_service_movb <= boot_program_word[15:12] == 4'h9;
 
-			if (rk_service_active && boot_program_ack && request &&
+			if (rk_service_active && program_selected && boot_program_ack && request &&
 				word_address == SERVICE_RTI)
 				rk_service_release <= 1;
 			if (rk_service_release && !request) begin

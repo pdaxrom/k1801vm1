@@ -1,16 +1,11 @@
 # 36-bit microinstruction, encoding version 12
 
-## CP30: v13, private FP state
+## CP31: возврат к v12
 
-Добавлен control bit 1: `READ/WRITE, private=1, prefetch=0` для внутреннего
-FP state и `JUMP, target=FETCH, fp_init=1` в конце reset microprogram.
-Второй контекст пишет нулевой FPS через уже очищенный R0 без нового такта.
-953 старых слова неизменны; у reset JUMP изменён только bit 1. Все прежние
-метки сохранены, добавлены 33 слова, всего 987/1024×36. ALU format прежний.
-Private access несовместим с byte/stream/fault_inc/prefetch. Доступ к FP
-состоянию не создаёт физических memory cycles и не является MMU.
-[Полный контракт и проверенный subset](fp11a.md).
-
+FP11 отложен. Удалены 33 FP words и reset hook, control bit1 снова не занят;
+assembler отклоняет `private` и `fp_init`. Полный FIS image **954/1024×36**
+побайтно совпадает с CP29. Версия v13 и её контексты остаются историческим
+[экспериментом CP30](fp11a.md), в текущую сборку не входят.
 
 **CP27 вводит v12:** pair5 теперь **DQ**, D / Q. Прежнее имя `ZQ` остаётся
 alias только при `d=ZERO`; assembler отклоняет сочетание ZQ с ненулевым D.

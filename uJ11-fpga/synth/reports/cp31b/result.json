@@ -1,0 +1,43 @@
+{
+  "lut4": 55,
+  "lut4_capacity": 1280,
+  "ff": 70,
+  "ff_capacity": 1346,
+  "ebr": 0,
+  "ebr_capacity": 7,
+  "slices": 35,
+  "slices_capacity": 640,
+  "fmax_mhz": 110.742,
+  "cumulative_negative_slack_reported": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "timing_pass": true,
+  "fully_routed": true,
+  "inputs": {
+    "name": "cp31b",
+    "top": "uj11_probe_mmu18",
+    "files": {
+      "rtl/uj11_mmu_translate18.v": "a01681da419b6fcd48b52a5c7c879d939c9e9596c4624cbd44e9678721199c46",
+      "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+      "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+      "synth/machxo2/uj11_probe_mmu18.v": "8fc60ca49d37747ff42bd8a2cda914527cea5aa3eef5b58b414f7ddd1fea6057",
+      "tools/checkpoint.py": "92d87ac3694e6ecbde3b65327983b61771891cb4151fae7c3d7604e7ee4d696f",
+      "tools/report_synthesis.py": "1d769774887bd6bb7341ae8fa7124bd496dafcf0475860d75db94f66b894d683",
+      "generated:clock.lpf": "a703fe5af4c50f3c2fa30f0eb295f16d7ca35952060c5215da2c77137366bd17"
+    },
+    "input_revision_sha256": "951625048f418ccb2e7a3b16522a26bf33e344011689b0e2391b6e60b1100f91"
+  },
+  "scope": "uj11_probe_mmu18",
+  "device": "LCMXO2-1200HC-4SG32C",
+  "expected_ebr": 0,
+  "constraint_mhz": 29.56,
+  "diamond_returncode": 0,
+  "reports": {
+    ".mrp": "f9cd02b6434aebe5ceeb149f523b387a986fd2367c7a8b6193de544af235c118",
+    ".par": "056e1dd35dafaa9b8fbfa421476f9e9321a48c9b018c0ce47ede4444d90b52cb",
+    ".twr": "30f3eebabbc230a4362f18772be3ce8e04bb319d8ec6ad80ccdf780eedb6322a",
+    ".srr": "973563be148f999b3c43dd46b66456c92cfb8b2ad40859d813087082181337c6"
+  }
+}

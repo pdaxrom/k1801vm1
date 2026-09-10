@@ -2,10 +2,8 @@
 // Compress only opcode bits irrelevant to dispatch. Every instruction selects
 // its exact entry in one EBR; low-byte system opcodes have their own 256 rows.
 // All 65536 opcodes are collision-checked by the generator and vendor miter.
-module uj11_decode_rom #(parameter integer FP11_CONTROL=0)(input wire clk, enable,
-    input wire [15:0] incoming, output wire [9:0] entry,
-    input wire fp_enable, fp_write, input wire [4:0] fp_address,
-    input wire [15:0] fp_wdata, output wire [15:0] fp_rdata);
+module uj11_decode_rom(input wire clk, enable,
+    input wire [15:0] incoming, output wire [9:0] entry);
     function [9:0] opcode_index;
         input [15:0] op;
         reg memory_mode;
@@ -15,17 +13,12 @@ module uj11_decode_rom #(parameter integer FP11_CONTROL=0)(input wire clk, enabl
                 0,8: opcode_index=(|op[15:8]) ?
                     {2'b01,op[15],op[11:6],memory_mode} : {2'b11,op[7:0]};
                 7:opcode_index={4'b1000,op[11:9],(|op[8:6]),op[5],memory_mode};
-                15:begin
-                    opcode_index=10'h27f;
-                    if(FP11_CONTROL!=0 && !(|op[11:8]) && !(|op[5:4]))
-                        opcode_index={4'b1001,op[7:6],op[3:0]};
-                end
+                15:opcode_index=10'h240;
                 default:opcode_index={2'b00,op[15:12],(|op[11:9]),memory_mode,2'b0};
             endcase
         end
     endfunction
     wire [9:0] index=opcode_index(incoming);
-    uj11_decode_table table_rom(.clk(clk),.enable(enable),.address(index),.data(entry[8:0]),
-        .fp_enable(fp_enable),.fp_write(fp_write),.fp_address(fp_address),.fp_wdata(fp_wdata),.fp_rdata(fp_rdata));
+    uj11_decode_table table_rom(.clk(clk),.enable(enable),.address(index),.data(entry[8:0]));
     assign entry[9]=0;
 endmodule

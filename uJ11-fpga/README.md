@@ -3,23 +3,24 @@
 **CP29 hardware:** HC1200 FLASH programmed and verified; real RT-11 boot/DIR, user-confirmed RGB/HDSP/keyboard operation and a verified HG read/write round-trip. [Bring-up record](docs/board-bringup-cp29.md).
 
 Специализированный микрокодный PDP-11/J-11 integer engine для
-**Lattice LCMXO2-1200HC**, строго **без MMU**, адрес 16 bits.
+**Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP30: начат FP11(A).** Реализованы CFCC, SETF/SETI/SETD/SETL и
-LDFPS/STFPS R0…R7 — семь мнемоник, 21 encoding. Это микрокод uJ11;
-постоянное FP-состояние занимает свободные ячейки уже используемого EBR
-декодера. Основной RF16×16 сохранён. Полного FP11 и F/D arithmetic ещё нет.
+**CP31: FP11 отложен и удалён из рабочей сборки; начат этап MMU.**
+Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
+сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
+70 слов. ODT также остаётся в [TODO](TODO.md).
 
 | Полный HC1200 top | LUT4 | FF | EBR | TRACE Fmax | 29.56 MHz |
 |---|---:|---:|---:|---:|---|
 | CP29a, физически прошит | 1239 | 326 | 6 | 30.609 MHz | PASS |
-| CP30d, FP control включён | 1265 | 327 | 6 | 31.284 MHz | PASS |
-| CP30e, тот же RTL, FP выключен | 1230 | 326 | 6 | 30.116 MHz | PASS |
+| CP31a, FP11 полностью удалён | 1224 | 326 | 6 | 31.074 MHz | PASS |
+| CP31c, RK CSR перенесены из FRAM в firmware EBR | 1252 | 326 | 6 | 30.917 MHz | PASS |
 
-Microstore **987/1024×36 v13**, свободно 37 слов. У FP-enabled top осталось
-15 LUT / 5 slices / 1 EBR: fit полной FP11 ISA не доказан. Default
-`FP11_CONTROL=0`; опция включается явно для текущего checkpoint. ODT отложен
-в [TODO](TODO.md). FPGA в CP30 не программировалась; на плате остаётся CP29.
+Текущий production CPU **ещё без MMU**, интерфейс 16 bits. Верхние 64 КиБ
+FRAM освобождены от служебных RK-регистров, но пока недоступны CPU.
+Отдельный проверенный 18-bit translation/PDR block не включён в board top.
+[MMU: документация, измерения, план интеграции и RT-11XM](docs/mmu.md).
+Плату в CP31 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
@@ -27,10 +28,11 @@ HALT restart, peripheral RESET, ASH/ASHC/XOR/MUL/DIV и FIS. Один kernel reg
 CM=PM=RS=0, NZVC/IPL/T. Память — **MR45V100A SPI FRAM**. Для DIV DEC требует
 even R; odd R — документированное расширение. Banking и native ODT отсутствуют.
 
-Реальная RT-11, RGB/HDSP/keyboard/HG проверены в CP29. CP30 с включённым FP
-прошёл cold RT-11 + DIR в симуляции (355134893 clocks, 3270 UART wire bytes).
-[FP11: источники, проверки, synthesis и ограничения](docs/fp11a.md),
-[предыдущая интеграция периферии](docs/hc1200-integration.md).
+Реальная RT-11, RGB/HDSP/keyboard/HG проверены в CP29. Текущий CP31c
+прошёл cold RT-11FB + DIR в RTL simulation: 354938300 clocks, 3270 UART wire
+bytes, 162 SD reads / 6 writes. Это регрессия без MMU, не проверка XM.
+Для MMU обязателен пользовательский образ `../lsi11/disks/rt11v5.3/system.dsk`
+с RT11XM.SYS; загрузка XM и проверка верхних 64 КиБ ещё впереди.
 
 ```
 make all                         # ROM, listing, labels, occupancy, DP8KC lanes
@@ -42,7 +44,7 @@ make verify-cp28 YOSYS=/path/to/yosys # historical CP28 integration gate
 make synthesis-board BOARD_CHECKPOINT=cp28n # fresh Linux/Diamond implementation
 make test-reference-core         # existing C core regression
 make benchmark-fis               # 8 workloads x3 memory modes
-make test-fp-control vendor-fp-control # experimental FP controls + shared state
+make test-mmu18                   # isolated translation/PDR probe, not integrated MMU
 ```
 
 Нужны Python 3, Icarus Verilog, Verilator, C compiler и Lattice simulation
@@ -54,11 +56,12 @@ path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` мо�
 переопределить; локальные vendor tests используют `LATTICE_SIM_DIR=build/vendor`.
 Каждый synthesis gate требует свежего implementation directory.
 
-Следующий этап FP11 — запас площади/control store, затем addressing modes,
-AC transfers и F/D arithmetic. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
-MMU в эти этапы не входит; ресурсы под него не резервируются.
+Следующий gate — площадь таблиц PAR/PDR и интеграция MMU с abort/restart
+и физическими RK DMA. Полный MMU fit пока не доказан: у CP31c осталось
+28 LUT / 12 slices / 1 EBR. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
 
-* [CP30: FP11(A), первое подмножество и измерения](docs/fp11a.md)
+* [CP31: MMU и использование всей FRAM](docs/mmu.md)
+* [CP30: отложенный эксперимент FP11(A)](docs/fp11a.md)
 * [CP27: FIS, exact reference и измерения](docs/fis.md)
 * [HC1200: интеграция периферии и RT-11](docs/hc1200-integration.md)
 * [CP26: DIV, документы, проверки и измерения](docs/eis-div.md)
