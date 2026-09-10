@@ -10,6 +10,11 @@ Production — **1159 LUT / 326 FF / 6 EBR / 31.470 MHz**. С CPU APR CSR
 и lookup — **1258 LUT / 344 FF / 7 EBR / 30.254 MHz**, свободны 22 LUT
 и 9 slices. Translation/MMR и RT-11XM ещё впереди.
 [Измерения и проверки](docs/area-datapath.md).
+
+CP41 проверил четыре альтернативы микросеквенсора: выигрыша нет, все
+отклонены. Контрольный синтез повторил CP40i; рабочая сборка не изменилась.
+[Измерения CP41](docs/area-sequencer-cp41.md).
+
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно

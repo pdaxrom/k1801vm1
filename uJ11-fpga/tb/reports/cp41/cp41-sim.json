@@ -1,0 +1,67 @@
+{
+  "tests": [
+    {
+      "tag": "flat-production",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "flat-apr",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "merged-production",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "merged-apr",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "encoded-production",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "encoded-apr",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "folded-production",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    },
+    {
+      "tag": "folded-apr",
+      "pass_line": "PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations",
+      "log_sha256": "185d6b159a3369518617effc8c1a17398b2d78c63c598728f77d8dc08b3b2ddd",
+      "lint_returncode": 0
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp41-seq/baseline/uj11_microseq.v": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+    "build/cp41-seq/baseline/uj11_microseq_apr.v": "5dadb3dc2edb0e3385c672bf7b2856eb2d9d1169e0279bb5906c57b5e1a45851",
+    "build/cp41-seq/encoded/uj11_microseq.v": "1ede11c655eec3efc93478958e160fc07f78c885a17bae4babc16daf56b2d2da",
+    "build/cp41-seq/encoded/uj11_microseq_apr.v": "ba506473178bf88ea85b919578b7df416d9d55c8e65fb0a01136b9246e577985",
+    "build/cp41-seq/flat/uj11_microseq.v": "3fc53fa7b96ec9221e550a48a622c7260b9d6378d43e04709e95134f694262d5",
+    "build/cp41-seq/flat/uj11_microseq_apr.v": "d7e1cd886a29b855562a9d8797ca4550c0b0b9d3c289e48ea2d082eb5816c969",
+    "build/cp41-seq/folded/uj11_microseq.v": "768ebed0e9f860cd1bbb150ebfda08d108689ca29a62aa1d807337183894ad43",
+    "build/cp41-seq/folded/uj11_microseq_apr.v": "b254f09fe558c6cade9875ccb6dcb20449296bb2b766a0049110603fce1c478b",
+    "build/cp41-seq/inputs.json": "df9e134ae19113614f1b8f885f821960439ece69430ed50b93d0e778e275ec17",
+    "build/cp41-seq/merged/uj11_microseq.v": "d87019d8ee027b453f152d7e9524ffe90a9771342c8071a04835cd6832a03891",
+    "build/cp41-seq/merged/uj11_microseq_apr.v": "c2208135d9e7aa9c7d6ad3904eb2a85bf6ceb3afe2a4e98816c35e5dae71bfa0",
+    "tb/tb_seq_mux.v": "aca6c19dbecbfbaa2ee28b0701fcce73bf71e097f78e50c97f58b0f71f13151f",
+    "tools/check_seq_mux_sim.py": "a669c0763898f85ec2d8b6f499578cadde871beaf957369ee35909f388041d87"
+  }
+}

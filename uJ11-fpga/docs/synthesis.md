@@ -1,5 +1,20 @@
 # Synthesis checkpoints
 
+## CP41 — альтернативы микросеквенсора отклонены
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP41a](../synth/reports/cp41a/result.json) | Masked next-address sources, APR | 1322 | 344 | 7 | 663 | — | 963 | MAP FAIL |
+| [CP41b](../synth/reports/cp41b/result.json) | Shared masked fault/target, APR | 1306 | 344 | 7 | 655 | — | 963 | MAP FAIL |
+| [CP41c](../synth/reports/cp41c/result.json) | Three-bit address selector, APR | 1267 | 344 | 7 | 635 | 29.387 | 963 | Timing FAIL |
+| [CP41d](../synth/reports/cp41d/result.json) | Selector with fault sources, APR | 1278 | 344 | 7 | 641 | — | 963 | MAP FAIL |
+| [CP41e](../synth/reports/cp41e/result.json) | Unchanged CP40 control, APR | 1258 | 344 | 7 | 631 | 30.254 | 963 | PASS |
+
+Полный HC1200, 29.56 MHz. Ни один вариант не принят; контроль точно повторил
+CP40i. LUT/state/microcode рабочей сборки прежние. В D недостаточно slices
+даже при 1278 LUT; C разведен, но не проходит частоту платы.
+[Измерения и verification](area-sequencer-cp41.md).
+
 ## CP40 — operand/writeback mux и ALU result selection
 
 | Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |

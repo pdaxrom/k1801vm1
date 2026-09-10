@@ -1,0 +1,2 @@
+PASS CP41 sequencer: 131072 cycles, 262145 comparisons, all control/command/low-word combinations
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tb/tb_seq_mux.v:54: $finish called at 262146000 (1ps)

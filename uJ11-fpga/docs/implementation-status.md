@@ -1,5 +1,15 @@
 # Implementation status, 2026-09-10
 
+## CP41 — отрицательный результат area-эксперимента
+
+Четыре эквивалентные перестройки микросеквенсора отклонены: A/B/D не прошли
+MAP по slices, C занял 1267 LUT и не прошёл 29.56 MHz (TRACE 29.387).
+Неизменённый CP40 повторно дал 1258 LUT / 344 FF / 7 EBR / 30.254 MHz с APR.
+Новых свободных ресурсов нет; все рабочие RTL, firmware и microcode прежние.
+Восемь formal/simulation/lint проверок прошли, три внесённых дефекта обнаружены.
+CPU/FIS/FB не перезапускались: их полные CP40 input hashes сохранены.
+[Отчёт](area-sequencer-cp41.md), [manifest](verification-cp41.json).
+
 ## CP40 — площадь datapath/ALU
 
 Production CP40h: **1159 LUT / 326 FF / 6 EBR / 584 slices / 31.470 MHz**,

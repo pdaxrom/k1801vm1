@@ -90,6 +90,10 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
   7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба
   cold FB runs прошли, clocks прежние. [Отчёт](docs/area-datapath.md).
+- [x] CP41: проверить masked/encoded mux микросеквенсора. Четыре варианта
+  отклонены по площади/частоте; formal/simulation/lint PASS. Контроль CP40i
+  повторил 1258 LUT / 344 FF / 7 EBR / 30.254 MHz. Экономии нет.
+  [Отчёт](docs/area-sequencer-cp41.md). Следующий area probe — D-input engine/APR.
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
