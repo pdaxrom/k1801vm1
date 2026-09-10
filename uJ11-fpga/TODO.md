@@ -79,9 +79,13 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   1188 LUT / 326 FF / 6 EBR / 30.943 MHz; с APR 1228 LUT / 341 FF / 7 EBR /
   32.470 MHz. Сэкономлено 34/37 LUT, formal и paired cold FB counts PASS.
   [Измерения](docs/area-board-read.md).
-- [ ] Следующий gate: CPU APR CSR/write arbitration с общим EBR lookup.
-  Сначала проверить интерфейс и стоимость в новом full-board synthesis:
-  осталось 52 LUT / 21 slices / 0 EBR, полный MMU ещё не измерен.
+- [x] CP39: CPU APR CSR/write arbitration с общим EBR lookup; word/byte,
+  paired W clear, odd vector4, reset persistence и physical RK DMA exclusion.
+  Full board 1268 LUT / 344 FF / 7 EBR / 31.075 MHz, microstore 963 words.
+  Portable/vendor CPU/bus/port, whole-opcode miter и cold FB counts PASS.
+  [Отчёт](docs/mmu-apr-csr.md). Production остаётся CP38f, FPGA CP29a.
+- [ ] Следующий gate: сократить общую LUT cost перед relocation/MMR.
+  CP39 оставляет только 12 LUT / 5 slices / 0 EBR; полная MMU ещё не помещена.
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

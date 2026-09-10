@@ -1,9 +1,10 @@
-# MMU / 128 КиБ FRAM — CP31–CP36
+# MMU / 128 КиБ FRAM — CP31–CP39
 
-После CP38 read-only APR board занимает 1228 LUT / 341 FF / 7 EBR /
-32.470 MHz; свободны 52 LUT и 21 slice. Следующий gate — CPU APR CSR и
-арбитраж доступа к EBR; CSR/MMR/translation пока не подключены.
-[Точные измерения и проверка bus behavior](area-board-read.md).
+После CP39 CPU APR CSR и shared EBR lookup работают в экспериментальном
+board: **1268 LUT / 344 FF / 7 EBR / 635 slices / 31.075 MHz**.
+Свободны только 12 LUT и 5 slices. Следующий gate — сокращение общей LUT
+cost перед translation/MMR; полная MMU ещё не помещена. Production остаётся
+CP38f без MMU, плата CP29a. [Контракт и измерения CP39](mmu-apr-csr.md).
 
 CP37 добавляет экспериментальный backend APR_READ/D=APR только в build-копии.
 Production v12 и 954 words сохранены; MMU translation ещё не подключена.
@@ -257,11 +258,11 @@ odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и по�
    5 LUT экономии от hardware relocation sharing и отверг полное sharing.
    [CP35](mmu-entry.md) проверил entry/return с T5–T7, сохранением PSW/MDR/Q,
    занятого CALL link и однократностью memory request: 9 слов, +9 clocks/entry.
-   CP36 сократил полный fixed-on board до 1243 LUT / 626 slices,
-   свободно 37 LUT / 14 slices. Следующий gate — стоимость APR lookup
-   и microcoded translation с дальнейшим сокращением общей логики.
-   Измерить общую экономию LUT перед интеграцией translator и APR; одного свободного
-   EBR достаточно для таблиц, но LUT budget полной MMU не подтверждён. Начать с kernel unified
+   CP37–CP39 подключили lookup и CPU APR CSR с одним EBR; CP38 сократил
+   board read mux. CP39d занимает 1268 LUT / 635 slices, свободны 12 LUT /
+   5 slices / 0 EBR. Следующий gate — сокращение общей логики перед
+   microcoded translation/MMR. Таблицы уже используют седьмой EBR;
+   LUT budget полной MMU не подтверждён. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять
    такой subset полным J-11 MMU. Не размещать эти таблицы в guest FRAM.
 2. MMR0/1/2/3, выбор 18/22 через MMR3<4>, PDR.W, freeze и restart metadata; запрет внешнего запроса при

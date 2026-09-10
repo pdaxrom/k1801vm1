@@ -1,4 +1,17 @@
-# Benchmarks: CP36 и предыдущие этапы
+# Benchmarks: CP39 и предыдущие этапы
+
+## CP39 — CSR без дополнительных lookup clocks
+
+Experimental board: 1268 LUT / 344 FF / 7 EBR / 31.075 MHz. Прежний helper:
++10 clocks/memory word. CSR controller read/PDR write — 2 clocks, PAR write
+с paired W clear — 3 clocks; CPU turnaround/release в эти latency не входят.
+Directed CPU/SPI FRAM program: 432 readbacks, 720 CSR beats, 4902 lookup reads,
+221988 clocks на portable и vendor EBR. Это тест CSR, а не типичный ISA CPI.
+
+Cold RT-11FB + DIR сохранил CP38g counts и UART: 412130048 clocks,
+3987390 retirements, 3397976 FRAM transactions, 300 RK commands, 663 timer
+edges, 3270 UART bytes, 162 SD reads / 6 writes. Полная MMU/RT-11XM и
+hardware throughput пока не измерены. [Evidence CP39](mmu-apr-csr.md).
 
 ## CP38 — прежние clocks при меньшей площади
 

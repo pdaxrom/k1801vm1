@@ -1,0 +1,10 @@
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.371 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.032 s (elab=0.004, cvt=0.018, bld=0.000); cpu 0.032 s on 1 threads; allocated 15.234 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.304 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.029 s (elab=0.004, cvt=0.016, bld=0.000); cpu 0.029 s on 1 threads; allocated 14.484 MB
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 0.584 MB sources in 17 modules, into 0.044 MB in 3 C++ files needing 0.000 MB
+- Verilator: Walltime 0.012 s (elab=0.002, cvt=0.004, bld=0.000); cpu 0.012 s on 1 threads; allocated 12.438 MB
+PASS strict CP39 lint: default/aligned ROM-decode core and shared APR port

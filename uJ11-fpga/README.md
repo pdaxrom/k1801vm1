@@ -5,7 +5,10 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP38: ещё −34 LUT в production и −37 LUT с APR lookup, без новых тактов.**
+**CP39: CPU читает/записывает PAR/PDR через общий с lookup EBR; полный
+эксперимент — 1268 LUT / 344 FF / 7 EBR / 31.075 MHz.** Свободны только
+12 LUT и 5 slices; translation/MMR и RT-11XM ещё впереди.
+[Проверки и ограничения](docs/mmu-apr-csr.md). Production остаётся CP38f.
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
@@ -61,7 +64,11 @@ CP38 выбирает firmware/FRAM отдельно от малых устро�
 Production занимает 1188 LUT, свободны 92 LUT / 43 slices / 1 EBR.
 Decoder, CPU и ROM images прежние; formal и оба полных FB runs прошли.
 [Изменение read mux, реальные fits и проверки](docs/area-board-read.md).
-Плату в CP31–CP38 не программировали; физически остаётся CP29.
+CP39 добавляет CPU CSR с приоритетом physical RK DMA: все 96 PAR/PDR words,
+byte lanes, paired W clear и shared-port ownership проверены на portable/vendor
+EBR. 69632-case CPU miter и cold FB + DIR прошли; FB counters и UART прежние.
+Microstore эксперимента — 963 слова. [Измеренный gate CP39](docs/mmu-apr-csr.md).
+Плату в CP31–CP39 не программировали; физически остаётся CP29a.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
@@ -108,10 +115,12 @@ path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` мо�
 Каждый synthesis gate требует свежего implementation directory.
 
 Entry/return с T5–T7 и сохранением PSW/MDR/Q/CALL link проверен.
-Следующие gates — стоимость APR lookup и microcoded translation, затем
-MMR, abort/restart и физические RK DMA, с дальнейшим сокращением общей логики.
-Один EBR остаётся свободным; полный MMU fit пока не доказан: с context hook
-свободно 37 LUT / 14 slices. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
+APR lookup и CPU CSR проверены в experimental build. Следующий gate —
+сокращение общей LUT cost перед microcoded translation и MMR, затем
+abort/restart и старшие physical RK DMA addresses.
+В production свободны 92 LUT / 43 slices / 1 EBR; в CP39 с APR — только
+12 LUT / 5 slices / 0 EBR. Полный MMU fit пока не доказан.
+Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
 
 * [CP36: opcode index и word bus, −30 LUT](docs/area-decode.md)
 * [CP35: microcode context entry/return](docs/mmu-entry.md)

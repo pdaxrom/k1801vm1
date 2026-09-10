@@ -1,5 +1,19 @@
 # Implementation status, 2026-09-10
 
+## CP39 — CPU APR CSR и общий EBR
+
+Experimental CP39d: **1268 LUT / 344 FF / 7 EBR / 635 slices / 31.075 MHz**,
+MAP/PAR/TRACE PASS при 29.56 MHz. Все 96 CSR доступны CPU через MOV/MOVB;
+lookup использует тот же EBR, byte writes очищают парный W, physical RK DMA
+не перехватывается CSR. От CP38g +40 LUT / +3 FF, 963 слова микрокода прежние.
+Осталось **12 LUT / 5 slices / 0 EBR**: полный MMU fit ещё не доказан.
+
+Portable/vendor shared-port/CPU/bus tests, 69632-case CPU miter, strict lint,
+четыре отрицательных контроля и cold RT-11FB + DIR прошли. FB counts и UART
+совпали с CP38g. Production CP38f и плата CP29a сохранены. Translation/MMR,
+automatic W, abort250/restart, CPU PA22/high DMA и RT-11XM ещё впереди.
+[Контракт и измерения](mmu-apr-csr.md), [manifest](verification-cp39.json).
+
 ## CP38 — площадь board read mux
 
 Production теперь **CP38f: 1188 LUT / 326 FF / 6 EBR / 597 slices /

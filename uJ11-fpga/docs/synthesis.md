@@ -1,5 +1,20 @@
 # Synthesis checkpoints
 
+## CP39 — CPU APR CSR с shared EBR lookup
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP39a](../synth/reports/cp39a/result.json) | APR в small masked OR | 1292 | 344 | 7 | 647 | — | 963 |
+| [CP39b](../synth/reports/cp39b/result.json) | APR перед memory mux | 1268 | 344 | 7 | 635 | 31.075 | 963 |
+| [CP39c](../synth/reports/cp39c/result.json) | APR после memory mux | 1327 | 344 | 7 | 666 | — | 963 |
+| [CP39d](../synth/reports/cp39d/result.json) | Финальный b, явные объявления портов | 1268 | 344 | 7 | 635 | 31.075 | 963 |
+
+Full HC1200-4SG32C, Diamond 3.14, 29.56 MHz. A/C: MAP overflow, Fmax нет.
+B/D: MAP/PAR/TRACE PASS. От CP38g добавлено 40 LUT / 3 FF / 0 EBR;
+свободны лишь 12 LUT / 5 slices / 0 EBR. Translation/MMR/abort/PA22/high DMA
+не включены. Production CP38f не меняется; сначала нужен дополнительный
+запас LUT для полного MMU. [Контракт, причины и проверки](mmu-apr-csr.md).
+
 ## CP38 — отдельный выбор firmware/FRAM в read mux
 
 | Revision | Features | APR | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
