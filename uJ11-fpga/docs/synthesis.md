@@ -1,5 +1,21 @@
 # Synthesis checkpoints
 
+## CP48 — FRAM state recoding отклонён
+
+| Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP48a](../synth/reports/cp48a/result.json) | Baseline CP47c | 1297 | 351 | 7 | 650 | — | 954 | MAP FAIL |
+| [CP48b](../synth/reports/cp48b/result.json) | Explicit successors | 1319 | 357 | 7 | 661 | — | 954 | MAP FAIL |
+| [CP48c](../synth/reports/cp48c/result.json) | One-hot shift | 1313 | 357 | 7 | 658 | — | 954 | MAP FAIL |
+
+Diamond 3.14.0.75.2 / LCMXO2-1200HC-4SG32C, full board, 29.56 MHz constraint.
+CP48a повторил CP47c; B/C больше на 22/16 LUT и шесть FF. Synplify извлёк
+FSM и перекодировал state в one-hot вместо прежнего счётчика. Не приняты.
+PAR/TRACE/Fmax отсутствуют. Exact-source reports, formal/unit/CPU/bus,
+cold FB successors и final EDIF audit сохранены. Лучший baseline CP47c
+по-прежнему превышает HC1200 на 17 LUT / 10 slices.
+[Разбор и границы проверки](area-fram-state-cp48.md).
+
 ## CP47 — shared FRAM RX: −5 LUT / −8 FF, все gates ещё MAP FAIL
 
 | Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |

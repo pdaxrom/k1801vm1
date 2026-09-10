@@ -1,4 +1,16 @@
-# Benchmarks: CP47 и предыдущие этапы
+# Benchmarks: CP48 и предыдущие этапы
+
+## CP48 — clocks прежние, площадь выросла
+
+Successors и onehot прошли полный upper-FRAM CPU sweep: каждый
+67468380 clocks / 590096 PAR reads; vendor subset — 97692 / 848.
+Successors cold RT-11FB + DIR: 415159611 clocks, все counts/UART прежние.
+Onehot cold boot не повторялся после отрицательного area gate; CPU/vendor/
+edges/bus проверены. 12 unit runs: 365414 потактных сравнений, 1536 reset
+offsets, 12288 memory transactions с проверкой всех 128 КиБ.
+1319/1313 LUT вместо 1297, оба варианта отклонены. MAP FAIL, Fmax и
+аппаратные instructions/sec отсутствуют. RT-11XM не запускалась.
+[Отчёт CP48](area-fram-state-cp48.md).
 
 ## CP47 — simulation counts прежние; нового Fmax нет
 

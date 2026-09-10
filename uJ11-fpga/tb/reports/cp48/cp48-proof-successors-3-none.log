@@ -1,0 +1,596 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `cp48-proof-successors-3-none.ys' --
+
+1. Executing Verilog-2005 frontend: cp48-proof-successors-3-none-gold.v
+Parsing SystemVerilog input from `cp48-proof-successors-3-none-gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: cp48-proof-successors-3-none-gate.v
+Parsing SystemVerilog input from `cp48-proof-successors-3-none-gate.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: cp48-proof-successors-3-none-miter.v
+Parsing SystemVerilog input from `cp48-proof-successors-3-none-miter.v' to AST representation.
+Generating RTLIL representation for module `\miter'.
+Successfully finished Verilog frontend.
+
+4. Executing PREP pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \gate
+Used module:     \gold
+
+4.1.2. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \gate
+Used module:     \gold
+Removed 0 unused modules.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 8 switch rules as full_case in process $proc$cp48-proof-successors-3-none-gate.v:55$27 in module gate.
+Marked 1 switch rules as full_case in process $proc$cp48-proof-successors-3-none-gate.v:45$25 in module gate.
+Marked 1 switch rules as full_case in process $proc$cp48-proof-successors-3-none-gate.v:29$23 in module gate.
+Marked 7 switch rules as full_case in process $proc$cp48-proof-successors-3-none-gold.v:55$5 in module gold.
+Marked 1 switch rules as full_case in process $proc$cp48-proof-successors-3-none-gold.v:45$3 in module gold.
+Marked 1 switch rules as full_case in process $proc$cp48-proof-successors-3-none-gold.v:29$1 in module gold.
+Removed a total of 0 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 4 redundant assignments.
+Promoted 4 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 2 switches.
+<suppressed ~25 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+     1/13: $0\rdata[15:0] [15:8]
+     2/13: $0\rdata[15:0] [7:0]
+     3/13: $0\ready[0:0]
+     4/13: $0\divider[1:0]
+     5/13: $0\bit_count[2:0]
+     6/13: $0\tx[6:0]
+     7/13: $0\seen[0:0]
+     8/13: $0\active[0:0]
+     9/13: $0\state[3:0]
+    10/13: $0\spi_mosi[0:0]
+    11/13: $0\spi_sck[0:0]
+    12/13: $0\spi_cs_n[0:0]
+    13/13: $0\error[0:0]
+Creating decoders for process `\gate.$proc$cp48-proof-successors-3-none-gate.v:45$25'.
+     1/1: $1\next_byte[7:0]
+Creating decoders for process `\gate.$proc$cp48-proof-successors-3-none-gate.v:29$23'.
+     1/1: $1\canonical_state[3:0]
+Creating decoders for process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+     1/13: $0\rdata[15:0] [15:8]
+     2/13: $0\rdata[15:0] [7:0]
+     3/13: $0\ready[0:0]
+     4/13: $0\divider[1:0]
+     5/13: $0\bit_count[2:0]
+     6/13: $0\tx[6:0]
+     7/13: $0\seen[0:0]
+     8/13: $0\active[0:0]
+     9/13: $0\state[3:0]
+    10/13: $0\spi_mosi[0:0]
+    11/13: $0\spi_sck[0:0]
+    12/13: $0\spi_cs_n[0:0]
+    13/13: $0\error[0:0]
+Creating decoders for process `\gold.$proc$cp48-proof-successors-3-none-gold.v:45$3'.
+     1/1: $1\next_byte[7:0]
+Creating decoders for process `\gold.$proc$cp48-proof-successors-3-none-gold.v:29$1'.
+     1/1: $1\canonical_state[3:0]
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\gate.\next_byte' from process `\gate.$proc$cp48-proof-successors-3-none-gate.v:45$25'.
+No latch inferred for signal `\gate.\canonical_state' from process `\gate.$proc$cp48-proof-successors-3-none-gate.v:29$23'.
+No latch inferred for signal `\gold.\next_byte' from process `\gold.$proc$cp48-proof-successors-3-none-gold.v:45$3'.
+No latch inferred for signal `\gold.\canonical_state' from process `\gold.$proc$cp48-proof-successors-3-none-gold.v:29$1'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gate.\rdata' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$544' with positive edge clock.
+Creating register for signal `\gate.\ready' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$545' with positive edge clock.
+Creating register for signal `\gate.\error' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$546' with positive edge clock.
+Creating register for signal `\gate.\spi_cs_n' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$547' with positive edge clock.
+Creating register for signal `\gate.\spi_sck' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$548' with positive edge clock.
+Creating register for signal `\gate.\spi_mosi' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$549' with positive edge clock.
+Creating register for signal `\gate.\state' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$550' with positive edge clock.
+Creating register for signal `\gate.\active' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$551' with positive edge clock.
+Creating register for signal `\gate.\seen' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$552' with positive edge clock.
+Creating register for signal `\gate.\tx' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$553' with positive edge clock.
+Creating register for signal `\gate.\bit_count' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$554' with positive edge clock.
+Creating register for signal `\gate.\divider' using process `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+  created $dff cell `$procdff$555' with positive edge clock.
+Creating register for signal `\gold.\rdata' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$556' with positive edge clock.
+Creating register for signal `\gold.\ready' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$557' with positive edge clock.
+Creating register for signal `\gold.\error' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$558' with positive edge clock.
+Creating register for signal `\gold.\spi_cs_n' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$559' with positive edge clock.
+Creating register for signal `\gold.\spi_sck' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$560' with positive edge clock.
+Creating register for signal `\gold.\spi_mosi' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$561' with positive edge clock.
+Creating register for signal `\gold.\state' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$562' with positive edge clock.
+Creating register for signal `\gold.\active' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$563' with positive edge clock.
+Creating register for signal `\gold.\seen' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$564' with positive edge clock.
+Creating register for signal `\gold.\tx' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$565' with positive edge clock.
+Creating register for signal `\gold.\bit_count' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$566' with positive edge clock.
+Creating register for signal `\gold.\divider' using process `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+  created $dff cell `$procdff$567' with positive edge clock.
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 12 empty switches in `\gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+Removing empty process `gate.$proc$cp48-proof-successors-3-none-gate.v:55$27'.
+Found and cleaned up 1 empty switch in `\gate.$proc$cp48-proof-successors-3-none-gate.v:45$25'.
+Removing empty process `gate.$proc$cp48-proof-successors-3-none-gate.v:45$25'.
+Found and cleaned up 1 empty switch in `\gate.$proc$cp48-proof-successors-3-none-gate.v:29$23'.
+Removing empty process `gate.$proc$cp48-proof-successors-3-none-gate.v:29$23'.
+Found and cleaned up 11 empty switches in `\gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+Removing empty process `gold.$proc$cp48-proof-successors-3-none-gold.v:55$5'.
+Found and cleaned up 1 empty switch in `\gold.$proc$cp48-proof-successors-3-none-gold.v:45$3'.
+Removing empty process `gold.$proc$cp48-proof-successors-3-none-gold.v:45$3'.
+Found and cleaned up 1 empty switch in `\gold.$proc$cp48-proof-successors-3-none-gold.v:29$1'.
+Removing empty process `gold.$proc$cp48-proof-successors-3-none-gold.v:29$1'.
+Cleaned up 27 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+Optimizing module gate.
+<suppressed ~19 debug messages>
+Optimizing module gold.
+<suppressed ~19 debug messages>
+
+4.3. Executing FLATTEN pass (flatten design).
+Deleting now unused module gate.
+Deleting now unused module gold.
+<suppressed ~2 debug messages>
+
+4.4. Executing FUTURE pass.
+
+4.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 4 unused cells and 166 unused wires.
+<suppressed ~5 debug messages>
+
+4.7. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+4.8. Executing OPT pass (performing simple optimizations).
+
+4.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 296 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 236 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 235 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~183 debug messages>
+Removed a total of 61 cells.
+
+4.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port A of cell $flatten\dut_gate.$procmux$198: \dut_gate.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gate.$procmux$196: \dut_gate.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gate.$procmux$193: \dut_gate.active -> 1'1
+      Replacing known input bits on port B of cell $flatten\dut_gate.$procmux$186: { \dut_gate.active \dut_gate.active \dut_gate.active } -> 3'000
+      Replacing known input bits on port A of cell $flatten\dut_gold.$procmux$442: \dut_gold.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gold.$procmux$440: \dut_gold.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gold.$procmux$437: \dut_gold.active -> 1'1
+      Replacing known input bits on port B of cell $flatten\dut_gold.$procmux$430: { \dut_gold.active \dut_gold.active \dut_gold.active } -> 3'000
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~189 debug messages>
+
+4.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$186: $auto$opt_reduce.cc:137:opt_pmux$571
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$240: $auto$opt_reduce.cc:137:opt_pmux$573
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$260: $auto$opt_reduce.cc:137:opt_pmux$575
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$273: $auto$opt_reduce.cc:137:opt_pmux$577
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$117: $auto$opt_reduce.cc:137:opt_pmux$579
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$361: $auto$opt_reduce.cc:137:opt_pmux$581
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$375: $auto$opt_reduce.cc:137:opt_pmux$583
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$395: $auto$opt_reduce.cc:137:opt_pmux$585
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$131: $auto$opt_reduce.cc:137:opt_pmux$587
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$430: $auto$opt_reduce.cc:137:opt_pmux$589
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$475: $auto$opt_reduce.cc:137:opt_pmux$591
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$151: $auto$opt_reduce.cc:137:opt_pmux$593
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$495: $auto$opt_reduce.cc:137:opt_pmux$595
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$508: $auto$opt_reduce.cc:137:opt_pmux$597
+  Optimizing cells in module \miter.
+Performed a total of 14 changes.
+
+4.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 249 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 235 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 233 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~48 debug messages>
+Removed a total of 16 cells.
+
+4.8.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 77 unused wires.
+<suppressed ~1 debug messages>
+
+4.8.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.8.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~199 debug messages>
+
+4.8.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+4.8.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 233 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+4.8.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.8.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.14. Finished fast OPT passes. (There is nothing left to do.)
+
+4.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 28 address bits (of 32) from memory init port miter.$flatten\dut_gate.$auto$mem.cc:351:emit$60 ($flatten\dut_gate.$auto$proc_rom.cc:155:do_switch$58).
+Removed top 28 address bits (of 32) from memory init port miter.$flatten\dut_gold.$auto$mem.cc:351:emit$64 ($flatten\dut_gold.$auto$proc_rom.cc:155:do_switch$62).
+Removed top 3 bits (of 4) from port B of cell miter.$eq$cp48-proof-successors-3-none-miter.v:19$42 ($eq).
+Removed top 30 bits (of 32) from port B of cell miter.$ge$cp48-proof-successors-3-none-miter.v:19$43 ($ge).
+Removed top 28 bits (of 32) from port B of cell miter.$le$cp48-proof-successors-3-none-miter.v:19$44 ($le).
+Removed top 28 bits (of 32) from port B of cell miter.$le$cp48-proof-successors-3-none-miter.v:20$52 ($le).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$542_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$541_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$540_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$539_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$538_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$363_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$eq$cp48-proof-successors-3-none-gold.v:70$11 ($eq).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$226_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$225_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$224_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$223_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$222_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$119_CMP0 ($eq).
+Removed top 2 bits (of 4) from mux cell miter.$flatten\dut_gate.$ternary$cp48-proof-successors-3-none-gate.v:97$41 ($mux).
+Removed top 3 bits (of 4) from mux cell miter.$flatten\dut_gate.$ternary$cp48-proof-successors-3-none-gate.v:82$34 ($mux).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$eq$cp48-proof-successors-3-none-gate.v:70$33 ($eq).
+Removed top 2 bits (of 4) from wire miter.$flatten\dut_gate.$ternary$cp48-proof-successors-3-none-gate.v:97$41_Y.
+Removed top 3 bits (of 4) from wire miter.$flatten\dut_gate.$ternary$cp48-proof-successors-3-none-gate.v:82$34_Y.
+Removed top 18 bits (of 32) from wire miter.gate_controls.
+Removed top 18 bits (of 32) from wire miter.gold_controls.
+
+4.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~1 debug messages>
+
+4.11. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.12. Executing OPT pass (performing simple optimizations).
+
+4.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 231 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+4.12.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.12.4. Finished fast OPT passes.
+
+4.13. Executing SORT pass.
+
+4.14. Printing statistics.
+
+=== miter ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      265 wires
+      936 wire bits
+       70 public wires
+      384 public wire bits
+       10 ports
+       40 port bits
+      231 cells
+        5   $add
+       24   $dff
+       26   $eq
+        1   $ge
+        2   $le
+        9   $logic_and
+        9   $logic_not
+        2   $logic_or
+        2   $mem_v2
+      136   $mux
+        7   $pmux
+        2   $reduce_bool
+        4   $reduce_or
+        2   $scopeinfo
+
+4.15. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+5. Executing MEMORY_MAP pass (converting memories to logic and flip-flops).
+Mapping memory $flatten\dut_gate.$auto$proc_rom.cc:155:do_switch$58 in module \miter:
+  created 16 $dff cells and 0 static cells of width 4.
+  read interface: 0 $dff and 15 $mux cells.
+  write interface: 0 write mux blocks.
+Mapping memory $flatten\dut_gold.$auto$proc_rom.cc:155:do_switch$62 in module \miter:
+  created 16 $dff cells and 0 static cells of width 4.
+  read interface: 0 $dff and 15 $mux cells.
+  write interface: 0 write mux blocks.
+
+6. Executing OPT pass (performing simple optimizations).
+
+6.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+<suppressed ~8 debug messages>
+
+6.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 251 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+6.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~223 debug messages>
+
+6.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+6.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 251 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+6.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $flatten\dut_gold.$procdff$567 ($dff) from module miter (D = $flatten\dut_gold.$procmux$369_Y, Q = \dut_gold.divider, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$692 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$369_Y, Q = \dut_gold.divider).
+Adding SRST signal on $flatten\dut_gold.$procdff$566 ($dff) from module miter (D = $flatten\dut_gold.$procmux$389_Y, Q = \dut_gold.bit_count, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$696 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$389_Y, Q = \dut_gold.bit_count).
+Adding SRST signal on $flatten\dut_gold.$procdff$565 ($dff) from module miter (D = $flatten\dut_gold.$procmux$409_Y, Q = \dut_gold.tx, rval = 7'0000000).
+Adding EN signal on $auto$ff.cc:337:slice$708 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$409_Y, Q = \dut_gold.tx).
+Adding SRST signal on $flatten\dut_gold.$procdff$564 ($dff) from module miter (D = $flatten\dut_gold.$procmux$424_Y, Q = \dut_gold.seen, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$563 ($dff) from module miter (D = $flatten\dut_gold.$procmux$444_Y, Q = \dut_gold.active, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$562 ($dff) from module miter (D = $flatten\dut_gold.$procmux$469_Y, Q = \dut_gold.state, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$722 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$469_Y, Q = \dut_gold.state).
+Adding SRST signal on $flatten\dut_gold.$procdff$561 ($dff) from module miter (D = $flatten\dut_gold.$procmux$489_Y, Q = \dut_gold.spi_mosi, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$738 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$489_Y, Q = \dut_gold.spi_mosi).
+Adding SRST signal on $flatten\dut_gold.$procdff$560 ($dff) from module miter (D = $flatten\dut_gold.$procmux$502_Y, Q = \dut_gold.spi_sck, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$750 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$502_Y, Q = \dut_gold.spi_sck).
+Adding SRST signal on $flatten\dut_gold.$procdff$559 ($dff) from module miter (D = $flatten\dut_gold.$procmux$513_Y, Q = \dut_gold.spi_cs_n, rval = 1'1).
+Adding EN signal on $auto$ff.cc:337:slice$758 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$508_Y, Q = \dut_gold.spi_cs_n).
+Adding SRST signal on $flatten\dut_gold.$procdff$558 ($dff) from module miter (D = $flatten\dut_gold.$procmux$351_Y, Q = \dut_gold.error, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$557 ($dff) from module miter (D = $flatten\dut_gold.$procmux$346_Y, Q = \dut_gold.ready, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$556 ($dff) from module miter (D = { $flatten\dut_gold.$procmux$323_Y $flatten\dut_gold.$procmux$340_Y }, Q = \dut_gold.rdata, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$768 ($sdff) from module miter (D = \dut_gold.rdata [15:8], Q = \dut_gold.rdata [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$768 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$319_Y, Q = \dut_gold.rdata [15:8]).
+Adding SRST signal on $flatten\dut_gate.$procdff$555 ($dff) from module miter (D = $flatten\dut_gate.$procmux$125_Y, Q = \dut_gate.divider, rval = 2'00).
+Adding EN signal on $auto$ff.cc:337:slice$781 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$125_Y, Q = \dut_gate.divider).
+Adding SRST signal on $flatten\dut_gate.$procdff$554 ($dff) from module miter (D = $flatten\dut_gate.$procmux$145_Y, Q = \dut_gate.bit_count, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$785 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$145_Y, Q = \dut_gate.bit_count).
+Adding SRST signal on $flatten\dut_gate.$procdff$553 ($dff) from module miter (D = $flatten\dut_gate.$procmux$165_Y, Q = \dut_gate.tx, rval = 7'0000000).
+Adding EN signal on $auto$ff.cc:337:slice$797 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$165_Y, Q = \dut_gate.tx).
+Adding SRST signal on $flatten\dut_gate.$procdff$552 ($dff) from module miter (D = $flatten\dut_gate.$procmux$180_Y, Q = \dut_gate.seen, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$551 ($dff) from module miter (D = $flatten\dut_gate.$procmux$200_Y, Q = \dut_gate.active, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$550 ($dff) from module miter (D = $flatten\dut_gate.$procmux$234_Y, Q = \dut_gate.state, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$811 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$234_Y, Q = \dut_gate.state).
+Adding SRST signal on $flatten\dut_gate.$procdff$549 ($dff) from module miter (D = $flatten\dut_gate.$procmux$254_Y, Q = \dut_gate.spi_mosi, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$827 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$254_Y, Q = \dut_gate.spi_mosi).
+Adding SRST signal on $flatten\dut_gate.$procdff$548 ($dff) from module miter (D = $flatten\dut_gate.$procmux$267_Y, Q = \dut_gate.spi_sck, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$839 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$267_Y, Q = \dut_gate.spi_sck).
+Adding SRST signal on $flatten\dut_gate.$procdff$547 ($dff) from module miter (D = $flatten\dut_gate.$procmux$278_Y, Q = \dut_gate.spi_cs_n, rval = 1'1).
+Adding EN signal on $auto$ff.cc:337:slice$847 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$273_Y, Q = \dut_gate.spi_cs_n).
+Adding SRST signal on $flatten\dut_gate.$procdff$546 ($dff) from module miter (D = $flatten\dut_gate.$procmux$107_Y, Q = \dut_gate.error, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$545 ($dff) from module miter (D = $flatten\dut_gate.$procmux$102_Y, Q = \dut_gate.ready, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$544 ($dff) from module miter (D = { $flatten\dut_gate.$procmux$79_Y $flatten\dut_gate.$procmux$96_Y }, Q = \dut_gate.rdata, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$857 ($sdff) from module miter (D = \dut_gate.rdata [15:8], Q = \dut_gate.rdata [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$857 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$75_Y, Q = \dut_gate.rdata [15:8]).
+
+6.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 48 unused cells and 86 unused wires.
+<suppressed ~49 debug messages>
+
+6.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+<suppressed ~2 debug messages>
+
+6.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~163 debug messages>
+
+6.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+6.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 273 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 247 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 243 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~90 debug messages>
+Removed a total of 30 cells.
+
+6.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 30 unused wires.
+<suppressed ~1 debug messages>
+
+6.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+6.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+6.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~166 debug messages>
+
+6.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+6.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 243 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+6.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+6.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+6.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+6.23. Finished fast OPT passes. (There is nothing left to do.)
+
+7. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up time step 1:
+Import set-constraint for this timestep: \rst = 1'1
+Final constraint equation: \rst = 1'1
+Imported 243 cells to SAT database.
+Final init constraint equation: { \dut_gate.rdata [7:0] \dut_gold.divider \dut_gold.bit_count \dut_gold.tx \dut_gold.seen \dut_gold.active \dut_gold.state \dut_gold.spi_mosi \dut_gold.spi_sck \dut_gold.spi_cs_n \dut_gold.error \dut_gold.ready \dut_gold.rdata \dut_gate.divider \dut_gate.bit_count \dut_gate.tx \dut_gate.seen \dut_gate.active \dut_gate.state \dut_gate.spi_mosi \dut_gate.spi_sck \dut_gate.spi_cs_n \dut_gate.error \dut_gate.ready \dut_gate.rdata [15:8] } = 78'000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Setting up time step 2:
+Final constraint equation: { } = { }
+Imported 243 cells to SAT database.
+
+Setting up time step 1:
+Final constraint equation: { } = { }
+Imported 243 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+** Trying induction with length 1 **
+
+Setting up time step 3:
+Final constraint equation: { } = { }
+Imported 243 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 1] Solving problem with 11828 variables and 32096 clauses..
+Base case for induction length 1 proven.
+
+Setting up time step 2:
+Final constraint equation: { } = { }
+Imported 243 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 1] Solving problem with 7601 variables and 20466 clauses..
+Induction step proven: SUCCESS!
+
+                  /$$$$$$      /$$$$$$$$     /$$$$$$$    
+                 /$$__  $$    | $$_____/    | $$__  $$   
+                | $$  \ $$    | $$          | $$  \ $$   
+                | $$  | $$    | $$$$$       | $$  | $$   
+                | $$  | $$    | $$__/       | $$  | $$   
+                | $$/$$ $$    | $$          | $$  | $$   
+                |  $$$$$$/ /$$| $$$$$$$$ /$$| $$$$$$$//$$
+                 \____ $$$|__/|________/|__/|_______/|__/
+                       \__/                              
+
+End of script. Logfile hash: 21f3e334b7, time: 0.10s, user: 0.10s, system: 0.00s
+Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 50% 1x sat (0 sec), 9% 10x opt_expr (0 sec), ...

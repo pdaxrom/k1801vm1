@@ -1,4 +1,18 @@
-# Implementation status, 2026-09-10
+# Implementation status, 2026-09-11
+
+## CP48 — state encoding FRAM не уменьшил площадь
+
+Контроль 1297 LUT / 351 FF / 7 EBR / 650 slices воспроизвёл CP47c.
+Successors: 1319 / 357 / 7 / 661; onehot: 1313 / 357 / 7 / 658.
+Оба отклонены, все три gates MAP FAIL, Fmax нет. Synplify распознал FSM
+и применил one-hot recoding; итоговая схема больше исходного счётчика.
+Четыре formal proofs, 12 unit runs, обе намеренные ошибки обнаружены;
+CPU/vendor/edges/bus обоих вариантов и cold FB successors прошли.
+Final EDIF A/B/C: 3504/3483/3498 nets, направленных конфликтов или
+необъяснённых floating inputs нет. Основа CP47c, production/APR и плата
+сохранены. До вместимости ещё 17 LUT / 10 slices, MMU protection/restart
+отсутствуют, XM не проверена. [Отчёт](area-fram-state-cp48.md),
+[manifest](verification-cp48.json).
 
 ## CP47 — shared FRAM RX сэкономил 5 LUT / 8 FF, fit ещё не достигнут
 

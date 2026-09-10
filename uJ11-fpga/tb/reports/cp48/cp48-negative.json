@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "tag": "cp48-negative-skip-low",
+      "defect": "skip-low",
+      "returncode": 1,
+      "detected": "SPI/handshake mismatch"
+    },
+    {
+      "tag": "cp48-negative-skip-state",
+      "defect": "skip-state",
+      "returncode": 1,
+      "detected": "SPI/handshake mismatch"
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp48-negative/skip-low.v": "8f532f96f126f9016c10246f37b49d932f2f2f4d86d7123e22e3c33bbccd82c5",
+    "build/cp48-negative/skip-state.v": "4321a09e00b75bd3aa25328263fbea5c50a446c8c2f0b3fdd0caffac30d7c8de",
+    "build/cp48-negative/uj11_fram_gold.v": "e09263191edc6a06ec869449df3782bac8c34dcaac3e1d9e82278e0bb7123a15",
+    "build/cp48-state/baseline/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp48-state/inputs.json": "9ea3ef81e7498fc3dc0b610732fa8e246bc4fd2a59668f9db9c9171b096dc012",
+    "build/cp48-state/onehot/uj11_board_fram.v": "9a1c8dfe84a9c7ae5c2fb07724b81db9ee2e7f9c7ea8a674b80edc0c63ef8913",
+    "build/cp48-state/successors/uj11_board_fram.v": "c486e149b9810177b2c012a71aa7a240463d6b573b224a6d1afa633bfbe52d20",
+    "tb/tb_fram_miter_cp47.v": "4cd64a4b9786f542f4b2067221f95812c973b2f3d3751afb132e4803d391815b",
+    "tools/build_fram_state_cp48.py": "a6038413b2262f26def180a2f471450a3a51f355657f38af28e5283edc47e3b7",
+    "tools/check_fram_state_cp48_negative.py": "56739686e75a7db5db8cc552d7d196dbce9b13d2fc5b4642ce1b736635e596d2"
+  }
+}

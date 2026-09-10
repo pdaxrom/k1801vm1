@@ -1,0 +1,100 @@
+{
+  "tests": [
+    {
+      "tag": "cp48-successors-miter-1",
+      "variant": "successors",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp48-successors-memory-1",
+      "variant": "successors",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp48-successors-miter-2",
+      "variant": "successors",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp48-successors-memory-2",
+      "variant": "successors",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp48-successors-miter-3",
+      "variant": "successors",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp48-successors-memory-3",
+      "variant": "successors",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    },
+    {
+      "tag": "cp48-onehot-miter-1",
+      "variant": "onehot",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp48-onehot-memory-1",
+      "variant": "onehot",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp48-onehot-miter-2",
+      "variant": "onehot",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp48-onehot-memory-2",
+      "variant": "onehot",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp48-onehot-miter-3",
+      "variant": "onehot",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp48-onehot-memory-3",
+      "variant": "onehot",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp48-state/baseline/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp48-state/inputs.json": "9ea3ef81e7498fc3dc0b610732fa8e246bc4fd2a59668f9db9c9171b096dc012",
+    "build/cp48-state/onehot/uj11_board_fram.v": "9a1c8dfe84a9c7ae5c2fb07724b81db9ee2e7f9c7ea8a674b80edc0c63ef8913",
+    "build/cp48-state/successors/uj11_board_fram.v": "c486e149b9810177b2c012a71aa7a240463d6b573b224a6d1afa633bfbe52d20",
+    "build/cp48-tests/uj11_fram_gold.v": "e09263191edc6a06ec869449df3782bac8c34dcaac3e1d9e82278e0bb7123a15",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tb/tb_board_fram.v": "a768f7976f568bec9b8a2b7cf2cc4cd2b5aa906348b850c8ab9f94359a4d700a",
+    "tb/tb_fram_miter_cp47.v": "4cd64a4b9786f542f4b2067221f95812c973b2f3d3751afb132e4803d391815b",
+    "tools/build_fram_state_cp48.py": "a6038413b2262f26def180a2f471450a3a51f355657f38af28e5283edc47e3b7",
+    "tools/check_fram_state_cp48_units.py": "718da13f6bb4ae5f0a7d8b4b945a8c70a049af266ebbf7391dbcd4f616fe4541"
+  }
+}

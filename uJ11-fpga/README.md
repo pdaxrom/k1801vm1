@@ -5,6 +5,12 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP48: явные переходы FRAM и one-hot проверены и отклонены по площади.**
+1319/1313 LUT против 1297 у CP47c; все gates MAP FAIL. Synplify перекодировал
+state в one-hot, FF выросли на шесть. Formal, SPI/FRAM, CPU/vendor/bus прошли;
+RT-11FB + DIR для successors сохранила counts/UART. Основа — CP47c,
+превышение по-прежнему 17 LUT / 10 slices. [Отчёт CP48](docs/area-fram-state-cp48.md).
+
 **CP47: совмещение FRAM RX/high-rdata сэкономило 5 LUT и 8 FF.**
 Лучший prototype CP47c: **1297 LUT / 351 FF / 7 EBR / 650 slices**.
 Все четыре full-board gates завершились MAP FAIL: до вместимости HC1200

@@ -1,0 +1,34 @@
+{
+  "inputs_sha256": {
+    "build/cp48-successors-bus/tb_board_bus.v": "fd3db316b1934deab4dca4057d65ded644c2ab86c358a7bdad1f49aaea1423c8",
+    "build/cp44-direct/uj11_board.v": "e676319301843088ea067bd27493022bb584e1235fa3f00935be436660050cad",
+    "build/cp45-bus/narrow-rom/uj11_board_bus.v": "c672518d72530744f9eb12bfd90cd0e350273688c7df239cf222715ec0e2b7fe",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "build/cp48-state/successors/uj11_board_fram.v": "c486e149b9810177b2c012a71aa7a240463d6b573b224a6d1afa633bfbe52d20",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+    "rtl/experimental/uj11_mmr0_control.v": "ded03572442e7d8d94ad8fd850ccc61030a690fb54e12e63e2c64fe91efdb2cc",
+    "rtl/experimental/uj11_mmr3.v": "51c6a565e77dffc6f20ab4048dd28321168144b53440481ed65a4b2e7849c96c",
+    "build/cp39-csr/uj11_mmu_apr_shared.v": "4b86fd1b0d692cfac6f8a46aaa5e740d7a2c72a9ac2277be5147b66b75017b52",
+    "rtl/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "rtl/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tools/check_relocate_bus_cp44.py": "5e4adbc6fa69d8c09bf8148a2cbbf1c62ef5c39b0547f80bcf4cd3df9d0bc9d8",
+    "tb/tb_board_bus.v": "4148cacd6258bec7df11407388077147763a3deb286688334a03505edcb2f172",
+    "tools/build_direct_relocate_cp44.py": "92a3ae9bf89f3d2b23a5f2eb4bff402b67d2bac36350bd24dbafb009ad9dbd36",
+    "build/cp44-direct/inputs.json": "6625c0c6fd45c7a3269de3d2c1268e1f40e9415f2c25c84b24e91354e0439d53",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "tools/check_fram_state_cp48_system.py": "1820870c08f7a8ecbea5b0655868b1d399ea1324aa7a8f47136aed3b201451d6",
+    "tools/build_fram_state_cp48.py": "a6038413b2262f26def180a2f471450a3a51f355657f38af28e5283edc47e3b7",
+    "build/cp48-state/inputs.json": "9ea3ef81e7498fc3dc0b610732fa8e246bc4fd2a59668f9db9c9171b096dc012",
+    "build/cp48-successors-bus-driver.py": "129dc0373d436f79abcd0f4e9ec882d0835c2a0369a5b4a8c300424d08f1bb64"
+  },
+  "pass_lines": [
+    "PASS board bus: 32 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI",
+    "PASS CP44 PA/bypass: 6291456 combinations; full PA22/NXM/CSR decode and 32 private service states over every VA"
+  ],
+  "cp48_variant": "successors",
+  "cp48_suite": "bus"
+}

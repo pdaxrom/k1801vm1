@@ -1,4 +1,10 @@
-# MMU / 128 КиБ FRAM — CP31–CP47
+# MMU / 128 КиБ FRAM — CP31–CP48
+
+**CP48 не уменьшил площадь:** explicit successors / one-hot FRAM дали
+1319/1313 LUT, оба отклонены. Formal, CPU/vendor/bus и cold FB successors
+прошли; функциональность MMU прежняя. CP47c остаётся лучшей измеренной
+основой, до вместимости ещё 17 LUT / 10 slices и затем нужен запас для
+protection/restart. [Отчёт CP48](area-fram-state-cp48.md).
 
 **CP47c — лучшая измеренная основа relocation: 1297 LUT / 351 FF / 7 EBR.**
 Shared FRAM RX сэкономил 5 LUT / 8 FF / 2 slices относительно CP45k,

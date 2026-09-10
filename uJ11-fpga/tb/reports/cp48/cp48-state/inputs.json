@@ -1,0 +1,19 @@
+{
+  "variants": [
+    "baseline",
+    "successors",
+    "onehot"
+  ],
+  "inputs_sha256": {
+    "build/cp47-fram/shared-rx/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "tools/build_fram_state_cp48.py": "a6038413b2262f26def180a2f471450a3a51f355657f38af28e5283edc47e3b7",
+    "tools/build_fram_cp47.py": "07c5c0bbe0b0d6b33424a08bf75306395a71d23a0cde694feaf1fe66e4a25ded",
+    "build/cp47-fram/inputs.json": "a62d9b078f241c78251a0bbee4a538420576fb2e823a556be9f262e99d61b60c",
+    "synth/reports/cp47c/inputs.json": "02a0788696220bf0b477d3131017523819407424a5d971fe0952de750fda5e82"
+  },
+  "outputs_sha256": {
+    "build/cp48-state/baseline/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp48-state/successors/uj11_board_fram.v": "c486e149b9810177b2c012a71aa7a240463d6b573b224a6d1afa633bfbe52d20",
+    "build/cp48-state/onehot/uj11_board_fram.v": "9a1c8dfe84a9c7ae5c2fb07724b81db9ee2e7f9c7ea8a674b80edc0c63ef8913"
+  }
+}
