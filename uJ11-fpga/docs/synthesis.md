@@ -1,5 +1,26 @@
 # Synthesis checkpoints
 
+## CP33 — APR storage в EBR и canonical physical CSR decode
+
+| Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP33a](../synth/reports/cp33a/result.json) | Isolated APR store/access | 31 | 49 | 1 | 24 | 112.994 | — |
+| [CP33b](../synth/reports/cp33b/result.json) | APR + canonical CSR decode | 41 | 65 | 1 | 32 | 106.963 | — |
+| [CP33c](../synth/reports/cp33c/result.json) | State-bit address/WE selects | 40 | 65 | 1 | 32 | 96.862 | — |
+
+Diamond 3.14 / HC1200-4SG32C, 29.56 MHz constraint, все MAP/PAR/TRACE PASS.
+В a — 46 measurement FF, b/c — 62; у APR controller только три FF.
+64 пары хранятся в одном EBR, через CSR доступны 48. Основной RF16×16 и
+microstore не расширены. Вариант c экономит один LUT при ухудшении Fmax,
+но остаётся выше 50 MHz для этого отдельного блока; выбран по приоритету площади.
+Эти данные не являются Fmax/area полного CPU с MMU.
+
+Все production inputs совпадают с CP31c: **1252 LUT / 326 FF / 6 EBR /
+30.917 MHz**, 954 microinstructions. Свободные 28 LUT и один EBR не
+доказывают fit CP32 + CP33 + MMR/abort logic; нужна измеренная экономия
+общей логики перед полной интеграцией. [Контракт и исследования CP33](mmu-apr.md),
+[hashes и validation](verification-cp33.json).
+
 ## CP32 — общий translator 18/22 bits, PAR16 / PA22
 
 | Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |

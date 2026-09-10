@@ -1,5 +1,14 @@
 # Benchmarks: CP27 и предыдущие этапы
 
+## CP33 — latency доступа к APR, без нового CPU benchmark
+
+Изолированный APR controller возвращает ACK read/PDR-write/mark-W за
+2 clocks, PAR-write с очисткой W — за 3 clocks; request release не включён.
+CSR probe CP33c: 40 LUT / 65 FF / 1 EBR / 96.862 MHz, из FF только 3
+относятся к controller. В serial translation test PAR/PDR сохраняются
+testbench latches; синтезированной CPU MMU pipeline ещё нет. CPU CPI с MMU,
+RK DMA >64 КиБ и RT-11XM benchmarks не измерены. [Контракт CP33](mmu-apr.md).
+
 ## CP32 — translation / SPI verification, без нового CPU benchmark
 
 Translator 18/22 bits не включён в production CPU. Изолированный probe:

@@ -1,0 +1,1812 @@
+
+Loading design for application trce from file cp33a_impl1.ncd.
+Design name: uj11_probe_apr
+NCD version: 3.3
+Vendor:      LATTICE
+Device:      LCMXO2-1200HC
+Package:     QFN32
+Performance: 4
+Loading device for application trce from file 'xo2c1200.nph' in environment: /home/sash/.local/lscc/diamond/3.14/ispfpga.
+Package Status:                     Final          Version 1.44.
+Performance Hardware Data Status:   Final          Version 36.4.
+Setup and Hold Report
+
+--------------------------------------------------------------------------------
+Lattice TRACE Report - Setup, Version Diamond (64-bit) 3.14.0.75.2
+Thu Sep 10 10:17:39 2026
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Report Information
+------------------
+Command line:    trce -v 10 -c -u 0 -gt -sethld -sp 4 -sphld m -o cp33a_impl1.twr cp33a_impl1.ncd cp33a_impl1.prf 
+Design file:     cp33a_impl1.ncd
+Preference file: cp33a_impl1.prf
+Device,speed:    LCMXO2-1200HC,4
+Report level:    verbose report, limited to 10 items per preference
+--------------------------------------------------------------------------------
+
+BLOCK ASYNCPATHS
+BLOCK RESETPATHS
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Preference: FREQUENCY PORT "clk" 29.560000 MHz ;
+            189 items scored, 0 timing errors detected.
+--------------------------------------------------------------------------------
+
+
+Passed: The following path meets requirements by 24.979ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    DP8KC      Port           apr/ram/memory(ASIC)  (to clk_c +)
+
+   Delay:               8.901ns  (61.5% logic, 38.5% route), 2 logic levels.
+
+ Constraint Details:
+
+      8.901ns physical path delay apr/ram/memory to apr/ram/memory meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.051ns DATA_SET requirement (totaling 33.880ns) by 24.979ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C10.CLKA to EBR_R6C10.DOA2 apr/ram/memory (from clk_c)
+ROUTE         2     1.856 EBR_R6C10.DOA2 to      R7C13D.A0 data[2]
+CTOF_DEL    ---     0.495      R7C13D.A0 to      R7C13D.F0 SLICE_23
+ROUTE         1     1.571      R7C13D.F0 to EBR_R6C10.DIA2 apr/low_data[2] (to clk_c)
+                  --------
+                    8.901   (61.5% logic, 38.5% route), 2 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 25.202ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    DP8KC      Port           apr/ram/memory(ASIC)  (to clk_c +)
+
+   Delay:               8.678ns  (63.1% logic, 36.9% route), 2 logic levels.
+
+ Constraint Details:
+
+      8.678ns physical path delay apr/ram/memory to apr/ram/memory meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.051ns DATA_SET requirement (totaling 33.880ns) by 25.202ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C10.CLKA to EBR_R6C10.DOA3 apr/ram/memory (from clk_c)
+ROUTE         2     2.043 EBR_R6C10.DOA3 to      R8C12B.C0 data[3]
+CTOF_DEL    ---     0.495      R8C12B.C0 to      R8C12B.F0 SLICE_34
+ROUTE         1     1.161      R8C12B.F0 to EBR_R6C10.DIA3 apr/low_data[3] (to clk_c)
+                  --------
+                    8.678   (63.1% logic, 36.9% route), 2 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 25.316ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    DP8KC      Port           apr/ram/memory(ASIC)  (to clk_c +)
+
+   Delay:               8.564ns  (63.9% logic, 36.1% route), 2 logic levels.
+
+ Constraint Details:
+
+      8.564ns physical path delay apr/ram/memory to apr/ram/memory meets
+     33.829ns delay constraint less
+      0.000ns skew and
+     -0.051ns DATA_SET requirement (totaling 33.880ns) by 25.316ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C10.CLKA to EBR_R6C10.DOA1 apr/ram/memory (from clk_c)
+ROUTE         2     1.767 EBR_R6C10.DOA1 to      R8C12B.D1 data[1]
+CTOF_DEL    ---     0.495      R8C12B.D1 to      R8C12B.F1 SLICE_34
+ROUTE         1     1.323      R8C12B.F1 to EBR_R6C10.DIA1 apr/low_data[1] (to clk_c)
+                  --------
+                    8.564   (63.9% logic, 36.1% route), 2 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 25.428ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[4]  (to clk_c +)
+
+   Delay:               7.880ns  (63.2% logic, 36.8% route), 1 logic levels.
+
+ Constraint Details:
+
+      7.880ns physical path delay apr/ram/memory to SLICE_25 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 25.428ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_25:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C10.CLKA to EBR_R6C10.DOA2 apr/ram/memory (from clk_c)
+ROUTE         2     2.901 EBR_R6C10.DOA2 to      R8C12D.M1 data[2] (to clk_c)
+                  --------
+                    7.880   (63.2% logic, 36.8% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_25:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R8C12D.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 26.068ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[5]  (to clk_c +)
+
+   Delay:               7.240ns  (68.8% logic, 31.2% route), 1 logic levels.
+
+ Constraint Details:
+
+      7.240ns physical path delay apr/ram/memory to SLICE_34 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 26.068ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_34:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C10.CLKA to EBR_R6C10.DOA3 apr/ram/memory (from clk_c)
+ROUTE         2     2.261 EBR_R6C10.DOA3 to      R8C12B.M0 data[3] (to clk_c)
+                  --------
+                    7.240   (68.8% logic, 31.2% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_34:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R8C12B.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 26.207ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[17]  (to clk_c +)
+
+   Delay:               7.101ns  (73.6% logic, 26.4% route), 1 logic levels.
+
+ Constraint Details:
+
+      7.101ns physical path delay apr/ram/memory to SLICE_26 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 26.207ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_26:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     5.224 EBR_R6C10.CLKB to EBR_R6C10.DOB7 apr/ram/memory (from clk_c)
+ROUTE         1     1.877 EBR_R6C10.DOB7 to      R7C11B.M0 data[15] (to clk_c)
+                  --------
+                    7.101   (73.6% logic, 26.4% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKB clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_26:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R7C11B.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 26.343ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[11]  (to clk_c +)
+
+   Delay:               6.965ns  (75.0% logic, 25.0% route), 1 logic levels.
+
+ Constraint Details:
+
+      6.965ns physical path delay apr/ram/memory to SLICE_35 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 26.343ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_35:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     5.224 EBR_R6C10.CLKB to EBR_R6C10.DOB1 apr/ram/memory (from clk_c)
+ROUTE         1     1.741 EBR_R6C10.DOB1 to      R8C12C.M1 data[9] (to clk_c)
+                  --------
+                    6.965   (75.0% logic, 25.0% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKB clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_35:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R8C12C.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 26.387ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[13]  (to clk_c +)
+
+   Delay:               6.921ns  (75.5% logic, 24.5% route), 1 logic levels.
+
+ Constraint Details:
+
+      6.921ns physical path delay apr/ram/memory to SLICE_27 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 26.387ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_27:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     5.224 EBR_R6C10.CLKB to EBR_R6C10.DOB3 apr/ram/memory (from clk_c)
+ROUTE         1     1.697 EBR_R6C10.DOB3 to      R8C11D.M1 data[11] (to clk_c)
+                  --------
+                    6.921   (75.5% logic, 24.5% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKB clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_27:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R8C11D.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 26.390ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[10]  (to clk_c +)
+
+   Delay:               6.918ns  (75.5% logic, 24.5% route), 1 logic levels.
+
+ Constraint Details:
+
+      6.918ns physical path delay apr/ram/memory to SLICE_35 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 26.390ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_35:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     5.224 EBR_R6C10.CLKB to EBR_R6C10.DOB0 apr/ram/memory (from clk_c)
+ROUTE         1     1.694 EBR_R6C10.DOB0 to      R8C12C.M0 data[8] (to clk_c)
+                  --------
+                    6.918   (75.5% logic, 24.5% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKB clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_35:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R8C12C.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 26.452ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         DP8KC      Port           apr/ram/memory(ASIC)  (from clk_c +)
+   Destination:    FF         Data in        observe[6]  (to clk_c +)
+
+   Delay:               6.856ns  (72.6% logic, 27.4% route), 1 logic levels.
+
+ Constraint Details:
+
+      6.856ns physical path delay apr/ram/memory to SLICE_34 meets
+     33.829ns delay constraint less
+      0.173ns skew and
+      0.348ns M_SET requirement (totaling 33.308ns) by 26.452ns
+
+ Physical Path Details:
+
+      Data path apr/ram/memory to SLICE_34:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+C2Q_DEL     ---     4.979 EBR_R6C10.CLKA to EBR_R6C10.DOA4 apr/ram/memory (from clk_c)
+ROUTE         1     1.877 EBR_R6C10.DOA4 to      R8C12B.M1 data[4] (to clk_c)
+                  --------
+                    6.856   (72.6% logic, 27.4% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.351       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    2.351   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_34:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     2.178       13.PADDI to     R8C12B.CLK clk_c
+                  --------
+                    2.178   (0.0% logic, 100.0% route), 0 logic levels.
+
+Report:  112.994MHz is the maximum frequency for this preference.
+
+
+================================================================================
+Preference: Unconstrained: CLOCK_DOMAIN
+            0 unconstrained paths found
+--------------------------------------------------------------------------------
+
+
+================================================================================
+Preference: Unconstrained: INPUT_SETUP
+            31 unconstrained paths found
+--------------------------------------------------------------------------------
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    7.056ns delay reset to apr/ram/memory (6.830ns delay and 0.226ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     3.387        4.PADDI to      R7C12D.D0 reset_c
+CTOF_DEL    ---     0.495      R7C12D.D0 to      R7C12D.F0 SLICE_29
+ROUTE         4     1.816      R7C12D.F0 to  EBR_R6C10.CEA apr/memory_enable (to clk_c)
+                  --------
+                    6.830   (23.8% logic, 76.2% route), 2 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    6.736ns delay reset to apr/ram/memory (6.815ns delay and -0.079ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     3.387        4.PADDI to      R7C12D.D0 reset_c
+CTOF_DEL    ---     0.495      R7C12D.D0 to      R7C12D.F0 SLICE_29
+ROUTE         4     1.801      R7C12D.F0 to EBR_R6C10.OCEA apr/memory_enable (to clk_c)
+                  --------
+                    6.815   (23.9% logic, 76.1% route), 2 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    6.712ns delay reset to apr/ram/memory (6.830ns delay and -0.118ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     3.387        4.PADDI to      R7C12D.D0 reset_c
+CTOF_DEL    ---     0.495      R7C12D.D0 to      R7C12D.F0 SLICE_29
+ROUTE         4     1.816      R7C12D.F0 to EBR_R6C10.OCEB apr/memory_enable (to clk_c)
+                  --------
+                    6.830   (23.8% logic, 76.2% route), 2 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    6.631ns delay reset to apr/ram/memory (6.381ns delay and 0.250ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     3.387        4.PADDI to      R7C12D.D0 reset_c
+CTOF_DEL    ---     0.495      R7C12D.D0 to      R7C12D.F0 SLICE_29
+ROUTE         4     1.367      R7C12D.F0 to  EBR_R6C10.CEB apr/memory_enable (to clk_c)
+                  --------
+                    6.381   (25.5% logic, 74.5% route), 2 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    5.514ns delay reset to apr/SLICE_0 (5.348ns delay and 0.166ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     3.721        4.PADDI to      R7C11A.A0 reset_c
+CTOF_DEL    ---     0.495      R7C11A.A0 to      R7C11A.F0 apr/SLICE_0
+ROUTE         1     0.000      R7C11A.F0 to     R7C11A.DI0 apr/phase_nss[0] (to clk_c)
+                  --------
+                    5.348   (30.4% logic, 69.6% route), 2 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    5.180ns delay reset to apr/SLICE_0 (5.014ns delay and 0.166ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     3.387        4.PADDI to      R7C11A.D1 reset_c
+CTOF_DEL    ---     0.495      R7C11A.D1 to      R7C11A.F1 apr/SLICE_0
+ROUTE         1     0.000      R7C11A.F1 to     R7C11A.DI1 apr/phase_nss[1] (to clk_c)
+                  --------
+                    5.014   (32.4% logic, 67.6% route), 2 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_1 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C11C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_10 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C11C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_12 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C13D.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_13 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C13B.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_14 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C13C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_15 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C13A.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_20 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C10C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_23 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C13D.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_24 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C12A.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_25 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C12D.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_26 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C11B.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_27 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C11D.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_28 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C12A.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_29 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C12D.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_30 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C12C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_31 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C11B.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_32 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C12B.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_33 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R7C11D.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_34 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C12B.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_35 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C12C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_53 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R8C11A.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_54 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R5C12B.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.857ns delay reset to SLICE_55 (3.583ns delay and 0.274ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.451        4.PADDI to     R5C12C.LSR reset_c (to clk_c)
+                  --------
+                    3.583   (31.6% logic, 68.4% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "reset" CLKPORT "clk" 
+
+Report:    3.805ns delay reset to serial_in_MGIOL (3.722ns delay and 0.083ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132          4.PAD to        4.PADDI reset
+ROUTE        27     2.590        4.PADDI to    IOL_B9B.LSR reset_c (to clk_c)
+                  --------
+                    3.722   (30.4% logic, 69.6% route), 1 logic levels.
+
+Unconstrained Preference:
+   INPUT_SETUP PORT "serial_in" CLKPORT "clk" 
+
+Report:    2.111ns delay serial_in to serial_in_MGIOL (1.516ns delay and 0.595ns setup)
+
+   Name    Fanout   Delay (ns)          Site               Resource
+PADI_DEL    ---     1.132         12.PAD to       12.PADDI serial_in
+ROUTE         1     0.384       12.PADDI to     IOL_B9B.DI serial_in_c (to clk_c)
+                  --------
+                    1.516   (74.7% logic, 25.3% route), 1 logic levels.
+
+
+================================================================================
+Preference: Unconstrained: CLOCK_TO_OUT
+            18 unconstrained paths found
+--------------------------------------------------------------------------------
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    8.260ns delay SLICE_1 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C11C.CLK to      R8C11C.Q0 SLICE_1 (from clk_c)
+ROUTE         1     1.004      R8C11C.Q0 to      R8C11B.B1 observe[0]
+CTOF_DEL    ---     0.495      R8C11B.B1 to      R8C11B.F1 SLICE_31
+ROUTE         1     0.436      R8C11B.F1 to      R8C11B.C0 serial_out_9
+CTOF_DEL    ---     0.495      R8C11B.C0 to      R8C11B.F0 SLICE_31
+ROUTE         1     0.747      R8C11B.F0 to      R8C11D.C1 serial_out_13
+CTOF_DEL    ---     0.495      R8C11D.C1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    8.260   (57.3% logic, 42.7% route), 5 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    8.223ns delay SLICE_1 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C11C.CLK to      R8C11C.Q1 SLICE_1 (from clk_c)
+ROUTE         1     0.967      R8C11C.Q1 to      R8C11B.A1 observe[1]
+CTOF_DEL    ---     0.495      R8C11B.A1 to      R8C11B.F1 SLICE_31
+ROUTE         1     0.436      R8C11B.F1 to      R8C11B.C0 serial_out_9
+CTOF_DEL    ---     0.495      R8C11B.C0 to      R8C11B.F0 SLICE_31
+ROUTE         1     0.747      R8C11B.F0 to      R8C11D.C1 serial_out_13
+CTOF_DEL    ---     0.495      R8C11D.C1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    8.223   (57.6% logic, 42.4% route), 5 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    8.022ns delay SLICE_26 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C11B.CLK to      R7C11B.Q1 SLICE_26 (from clk_c)
+ROUTE         1     0.766      R7C11B.Q1 to      R8C11B.C1 observe[2]
+CTOF_DEL    ---     0.495      R8C11B.C1 to      R8C11B.F1 SLICE_31
+ROUTE         1     0.436      R8C11B.F1 to      R8C11B.C0 serial_out_9
+CTOF_DEL    ---     0.495      R8C11B.C0 to      R8C11B.F0 SLICE_31
+ROUTE         1     0.747      R8C11B.F0 to      R8C11D.C1 serial_out_13
+CTOF_DEL    ---     0.495      R8C11D.C1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    8.022   (59.0% logic, 41.0% route), 5 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.901ns delay SLICE_25 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C12D.CLK to      R8C12D.Q0 SLICE_25 (from clk_c)
+ROUTE         1     0.645      R8C12D.Q0 to      R8C11B.D1 observe[3]
+CTOF_DEL    ---     0.495      R8C11B.D1 to      R8C11B.F1 SLICE_31
+ROUTE         1     0.436      R8C11B.F1 to      R8C11B.C0 serial_out_9
+CTOF_DEL    ---     0.495      R8C11B.C0 to      R8C11B.F0 SLICE_31
+ROUTE         1     0.747      R8C11B.F0 to      R8C11D.C1 serial_out_13
+CTOF_DEL    ---     0.495      R8C11D.C1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.901   (59.9% logic, 40.1% route), 5 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.794ns delay SLICE_24 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C12A.CLK to      R7C12A.Q1 SLICE_24 (from clk_c)
+ROUTE         1     1.469      R7C12A.Q1 to      R8C11B.D0 observe[16]
+CTOF_DEL    ---     0.495      R8C11B.D0 to      R8C11B.F0 SLICE_31
+ROUTE         1     0.747      R8C11B.F0 to      R8C11D.C1 serial_out_13
+CTOF_DEL    ---     0.495      R8C11D.C1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.794   (54.4% logic, 45.6% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.708ns delay SLICE_26 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C11B.CLK to      R7C11B.Q0 SLICE_26 (from clk_c)
+ROUTE         1     1.383      R7C11B.Q0 to      R8C11B.A0 observe[17]
+CTOF_DEL    ---     0.495      R8C11B.A0 to      R8C11B.F0 SLICE_31
+ROUTE         1     0.747      R8C11B.F0 to      R8C11D.C1 serial_out_13
+CTOF_DEL    ---     0.495      R8C11D.C1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.708   (55.0% logic, 45.0% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.586ns delay SLICE_31 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C11B.CLK to      R8C11B.Q0 SLICE_31 (from clk_c)
+ROUTE         1     1.004      R8C11B.Q0 to      R8C11D.B0 observe[14]
+CTOF_DEL    ---     0.495      R8C11D.B0 to      R8C11D.F0 SLICE_27
+ROUTE         1     1.004      R8C11D.F0 to      R8C11D.B1 serial_out_12
+CTOF_DEL    ---     0.495      R8C11D.B1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.586   (55.9% logic, 44.1% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.549ns delay SLICE_31 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C11B.CLK to      R8C11B.Q1 SLICE_31 (from clk_c)
+ROUTE         1     0.967      R8C11B.Q1 to      R8C11D.A0 observe[15]
+CTOF_DEL    ---     0.495      R8C11D.A0 to      R8C11D.F0 SLICE_27
+ROUTE         1     1.004      R8C11D.F0 to      R8C11D.B1 serial_out_12
+CTOF_DEL    ---     0.495      R8C11D.B1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.549   (56.2% logic, 43.8% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.546ns delay SLICE_25 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C12D.CLK to      R8C12D.Q1 SLICE_25 (from clk_c)
+ROUTE         1     1.004      R8C12D.Q1 to      R8C12C.B1 observe[4]
+CTOF_DEL    ---     0.495      R8C12C.B1 to      R8C12C.F1 SLICE_35
+ROUTE         1     0.964      R8C12C.F1 to      R8C11D.A1 serial_out_10
+CTOF_DEL    ---     0.495      R8C11D.A1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.546   (56.2% logic, 43.8% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.509ns delay SLICE_34 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C12B.CLK to      R8C12B.Q0 SLICE_34 (from clk_c)
+ROUTE         1     0.967      R8C12B.Q0 to      R8C12C.A1 observe[5]
+CTOF_DEL    ---     0.495      R8C12C.A1 to      R8C12C.F1 SLICE_35
+ROUTE         1     0.964      R8C12C.F1 to      R8C11D.A1 serial_out_10
+CTOF_DEL    ---     0.495      R8C11D.A1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.509   (56.5% logic, 43.5% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.479ns delay SLICE_30 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C12C.CLK to      R7C12C.Q1 SLICE_30 (from clk_c)
+ROUTE         1     1.278      R7C12C.Q1 to      R8C12C.C0 observe[8]
+CTOF_DEL    ---     0.495      R8C12C.C0 to      R8C12C.F0 SLICE_35
+ROUTE         1     0.623      R8C12C.F0 to      R8C11D.D1 serial_out_11
+CTOF_DEL    ---     0.495      R8C11D.D1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.479   (56.7% logic, 43.3% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.329ns delay SLICE_27 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C11D.CLK to      R8C11D.Q0 SLICE_27 (from clk_c)
+ROUTE         1     0.747      R8C11D.Q0 to      R8C11D.C0 observe[12]
+CTOF_DEL    ---     0.495      R8C11D.C0 to      R8C11D.F0 SLICE_27
+ROUTE         1     1.004      R8C11D.F0 to      R8C11D.B1 serial_out_12
+CTOF_DEL    ---     0.495      R8C11D.B1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.329   (57.8% logic, 42.2% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.308ns delay SLICE_30 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C12C.CLK to      R7C12C.Q0 SLICE_30 (from clk_c)
+ROUTE         1     0.766      R7C12C.Q0 to      R8C12C.C1 observe[7]
+CTOF_DEL    ---     0.495      R8C12C.C1 to      R8C12C.F1 SLICE_35
+ROUTE         1     0.964      R8C12C.F1 to      R8C11D.A1 serial_out_10
+CTOF_DEL    ---     0.495      R8C11D.A1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.308   (58.0% logic, 42.0% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.208ns delay SLICE_27 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C11D.CLK to      R8C11D.Q1 SLICE_27 (from clk_c)
+ROUTE         1     0.626      R8C11D.Q1 to      R8C11D.D0 observe[13]
+CTOF_DEL    ---     0.495      R8C11D.D0 to      R8C11D.F0 SLICE_27
+ROUTE         1     1.004      R8C11D.F0 to      R8C11D.B1 serial_out_12
+CTOF_DEL    ---     0.495      R8C11D.B1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.208   (58.8% logic, 41.2% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.205ns delay SLICE_35 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C12C.CLK to      R8C12C.Q1 SLICE_35 (from clk_c)
+ROUTE         1     1.004      R8C12C.Q1 to      R8C12C.B0 observe[11]
+CTOF_DEL    ---     0.495      R8C12C.B0 to      R8C12C.F0 SLICE_35
+ROUTE         1     0.623      R8C12C.F0 to      R8C11D.D1 serial_out_11
+CTOF_DEL    ---     0.495      R8C11D.D1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.205   (58.8% logic, 41.2% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    7.168ns delay SLICE_34 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C12B.CLK to      R8C12B.Q1 SLICE_34 (from clk_c)
+ROUTE         1     0.626      R8C12B.Q1 to      R8C12C.D1 observe[6]
+CTOF_DEL    ---     0.495      R8C12C.D1 to      R8C12C.F1 SLICE_35
+ROUTE         1     0.964      R8C12C.F1 to      R8C11D.A1 serial_out_10
+CTOF_DEL    ---     0.495      R8C11D.A1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    7.168   (59.1% logic, 40.9% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    6.857ns delay SLICE_35 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R8C12C.CLK to      R8C12C.Q0 SLICE_35 (from clk_c)
+ROUTE         1     0.656      R8C12C.Q0 to      R8C12C.A0 observe[10]
+CTOF_DEL    ---     0.495      R8C12C.A0 to      R8C12C.F0 SLICE_35
+ROUTE         1     0.623      R8C12C.F0 to      R8C11D.D1 serial_out_11
+CTOF_DEL    ---     0.495      R8C11D.D1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    6.857   (61.8% logic, 38.2% route), 4 logic levels.
+
+Unconstrained Preference:
+   CLOCK_TO_OUT PORT "serial_out" CLKPORT "clk" 
+
+Report:    6.846ns delay SLICE_29 to serial_out
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.452     R7C12D.CLK to      R7C12D.Q0 SLICE_29 (from clk_c)
+ROUTE         1     0.645      R7C12D.Q0 to      R8C12C.D0 observe[9]
+CTOF_DEL    ---     0.495      R8C12C.D0 to      R8C12C.F0 SLICE_35
+ROUTE         1     0.623      R8C12C.F0 to      R8C11D.D1 serial_out_11
+CTOF_DEL    ---     0.495      R8C11D.D1 to      R8C11D.F1 SLICE_27
+ROUTE         1     1.339      R8C11D.F1 to       14.PADDO serial_out_c
+DOPAD_DEL   ---     2.797       14.PADDO to         14.PAD serial_out
+                  --------
+                    6.846   (61.9% logic, 38.1% route), 4 logic levels.
+
+
+================================================================================
+Preference: Unconstrained: MAXDELAY
+            0 unconstrained paths found
+--------------------------------------------------------------------------------
+
+Report Summary
+--------------
+----------------------------------------------------------------------------
+Preference                              |   Constraint|       Actual|Levels
+----------------------------------------------------------------------------
+                                        |             |             |
+FREQUENCY PORT "clk" 29.560000 MHz ;    |   29.560 MHz|  112.994 MHz|   2  
+                                        |             |             |
+----------------------------------------------------------------------------
+
+
+All preferences were met.
+
+
+Clock Domains Analysis
+------------------------
+
+Found 1 clocks:
+
+Clock Domain: clk_c   Source: clk.PAD   Loads: 27
+   Covered under: FREQUENCY PORT "clk" 29.560000 MHz ;
+
+
+--------------------------------------------------------------------------------
+                Connections not covered by the preferences
+--------------------------------------------------------------------------------
+
+     Delay                        Element                 Net
+
+    1.339ns          SLICE_27.F1 to     serial_out.PADDO serial_out_c
+    3.721ns          reset.PADDI to       apr/SLICE_0.A0 reset_c
+    3.387ns          reset.PADDI to       apr/SLICE_0.D1 reset_c
+    2.451ns          reset.PADDI to          SLICE_1.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_10.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_12.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_13.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_14.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_15.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_20.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_23.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_24.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_25.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_26.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_27.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_28.LSR reset_c
+    3.387ns          reset.PADDI to          SLICE_29.D0 reset_c
+    2.451ns          reset.PADDI to         SLICE_29.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_30.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_31.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_32.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_33.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_34.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_35.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_53.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_54.LSR reset_c
+    2.451ns          reset.PADDI to         SLICE_55.LSR reset_c
+    2.590ns          reset.PADDI to  serial_in_MGIOL.LSR reset_c
+    1.383ns          SLICE_26.Q0 to          SLICE_31.A0 observe[17]
+    0.384ns      serial_in.PADDI to   serial_in_MGIOL.DI serial_in_c
+    0.747ns          SLICE_27.Q0 to          SLICE_27.C0 observe[12]
+    0.626ns          SLICE_27.Q1 to          SLICE_27.D0 observe[13]
+    1.004ns          SLICE_31.Q0 to          SLICE_27.B0 observe[14]
+    0.967ns          SLICE_31.Q1 to          SLICE_27.A0 observe[15]
+    1.004ns          SLICE_27.F0 to          SLICE_27.B1 serial_out_12
+    1.004ns           SLICE_1.Q0 to          SLICE_31.B1 observe[0]
+    0.967ns           SLICE_1.Q1 to          SLICE_31.A1 observe[1]
+    0.766ns          SLICE_26.Q1 to          SLICE_31.C1 observe[2]
+    0.645ns          SLICE_25.Q0 to          SLICE_31.D1 observe[3]
+    1.004ns          SLICE_25.Q1 to          SLICE_35.B1 observe[4]
+    0.967ns          SLICE_34.Q0 to          SLICE_35.A1 observe[5]
+    0.626ns          SLICE_34.Q1 to          SLICE_35.D1 observe[6]
+    0.766ns          SLICE_30.Q0 to          SLICE_35.C1 observe[7]
+    1.278ns          SLICE_30.Q1 to          SLICE_35.C0 observe[8]
+    0.645ns          SLICE_29.Q0 to          SLICE_35.D0 observe[9]
+    0.656ns          SLICE_35.Q0 to          SLICE_35.A0 observe[10]
+    1.004ns          SLICE_35.Q1 to          SLICE_35.B0 observe[11]
+    1.469ns          SLICE_24.Q1 to          SLICE_31.D0 observe[16]
+    0.964ns          SLICE_35.F1 to          SLICE_27.A1 serial_out_10
+    0.623ns          SLICE_35.F0 to          SLICE_27.D1 serial_out_11
+    0.747ns          SLICE_31.F0 to          SLICE_27.C1 serial_out_13
+    0.436ns          SLICE_31.F1 to          SLICE_31.C0 serial_out_9
+
+--------------------------------------------------------------------------------
+
+
+Timing summary (Setup):
+---------------
+
+Timing errors: 0  Score: 0
+Cumulative negative slack: 0
+
+Constraints cover 189 paths, 1 nets, and 190 connections (78.51% coverage)
+
+--------------------------------------------------------------------------------
+Lattice TRACE Report - Hold, Version Diamond (64-bit) 3.14.0.75.2
+Thu Sep 10 10:17:39 2026
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Report Information
+------------------
+Command line:    trce -v 10 -c -u 0 -gt -sethld -sp 4 -sphld m -o cp33a_impl1.twr cp33a_impl1.ncd cp33a_impl1.prf 
+Design file:     cp33a_impl1.ncd
+Preference file: cp33a_impl1.prf
+Device,speed:    LCMXO2-1200HC,m
+Report level:    verbose report, limited to 10 items per preference
+--------------------------------------------------------------------------------
+
+BLOCK ASYNCPATHS
+BLOCK RESETPATHS
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Preference: FREQUENCY PORT "clk" 29.560000 MHz ;
+            189 items scored, 0 timing errors detected.
+--------------------------------------------------------------------------------
+
+
+Passed: The following path meets requirements by 0.200ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[21]  (from clk_c +)
+   Destination:    DP8KC      Port           apr/ram/memory(ASIC)  (to clk_c +)
+
+   Delay:               0.307ns  (43.3% logic, 56.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.307ns physical path delay SLICE_54 to apr/ram/memory meets
+      0.052ns ADDR_HLD and
+      0.000ns delay constraint less
+     -0.055ns skew requirement (totaling 0.107ns) by 0.200ns
+
+ Physical Path Details:
+
+      Data path SLICE_54 to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R5C12B.CLK to      R5C12B.Q1 SLICE_54 (from clk_c)
+ROUTE         3     0.174      R5C12B.Q1 to EBR_R6C10.ADA5 stimulus[21] (to clk_c)
+                  --------
+                    0.307   (43.3% logic, 56.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_54:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R5C12B.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.820       13.PADDI to EBR_R6C10.CLKA clk_c
+                  --------
+                    0.820   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.214ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[15]  (from clk_c +)
+   Destination:    DP8KC      Port           apr/ram/memory(ASIC)  (to clk_c +)
+
+   Delay:               0.343ns  (38.8% logic, 61.2% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.343ns physical path delay SLICE_32 to apr/ram/memory meets
+      0.074ns DATA_HLD and
+      0.000ns delay constraint less
+     -0.055ns skew requirement (totaling 0.129ns) by 0.214ns
+
+ Physical Path Details:
+
+      Data path SLICE_32 to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C12B.CLK to      R7C12B.Q0 SLICE_32 (from clk_c)
+ROUTE         2     0.210      R7C12B.Q0 to EBR_R6C10.DIB7 stimulus[15] (to clk_c)
+                  --------
+                    0.343   (38.8% logic, 61.2% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_32:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C12B.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.820       13.PADDI to EBR_R6C10.CLKB clk_c
+                  --------
+                    0.820   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.281ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[9]  (from clk_c +)
+   Destination:    DP8KC      Port           apr/ram/memory(ASIC)  (to clk_c +)
+
+   Delay:               0.410ns  (32.4% logic, 67.6% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.410ns physical path delay SLICE_15 to apr/ram/memory meets
+      0.074ns DATA_HLD and
+      0.000ns delay constraint less
+     -0.055ns skew requirement (totaling 0.129ns) by 0.281ns
+
+ Physical Path Details:
+
+      Data path SLICE_15 to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C13A.CLK to      R7C13A.Q0 SLICE_15 (from clk_c)
+ROUTE         2     0.277      R7C13A.Q0 to EBR_R6C10.DIB1 stimulus[9] (to clk_c)
+                  --------
+                    0.410   (32.4% logic, 67.6% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_15:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13A.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to apr/ram/memory:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.820       13.PADDI to EBR_R6C10.CLKB clk_c
+                  --------
+                    0.820   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              apr/ready  (from clk_c +)
+   Destination:    FF         Data in        observe[1]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_10 to SLICE_1 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_10 to SLICE_1:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C11C.CLK to      R7C11C.Q0 SLICE_10 (from clk_c)
+ROUTE         1     0.154      R7C11C.Q0 to      R8C11C.M1 ready (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_10:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C11C.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_1:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R8C11C.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[2]  (from clk_c +)
+   Destination:    FF         Data in        stimulus[3]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_12 to SLICE_12 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_12 to SLICE_12:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R8C13D.CLK to      R8C13D.Q1 SLICE_12 (from clk_c)
+ROUTE         2     0.154      R8C13D.Q1 to      R8C13D.M0 stimulus[2] (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_12:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R8C13D.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_12:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R8C13D.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[4]  (from clk_c +)
+   Destination:    FF         Data in        stimulus[5]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_13 to SLICE_13 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_13 to SLICE_13:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C13B.CLK to      R7C13B.Q1 SLICE_13 (from clk_c)
+ROUTE         2     0.154      R7C13B.Q1 to      R7C13B.M0 stimulus[4] (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_13:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13B.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_13:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13B.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[5]  (from clk_c +)
+   Destination:    FF         Data in        stimulus[6]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_13 to SLICE_14 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_13 to SLICE_14:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C13B.CLK to      R7C13B.Q0 SLICE_13 (from clk_c)
+ROUTE         2     0.154      R7C13B.Q0 to      R7C13C.M1 stimulus[5] (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_13:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13B.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_14:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13C.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[6]  (from clk_c +)
+   Destination:    FF         Data in        stimulus[7]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_14 to SLICE_14 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_14 to SLICE_14:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C13C.CLK to      R7C13C.Q1 SLICE_14 (from clk_c)
+ROUTE         2     0.154      R7C13C.Q1 to      R7C13C.M0 stimulus[6] (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_14:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13C.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_14:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13C.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[7]  (from clk_c +)
+   Destination:    FF         Data in        stimulus[8]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_14 to SLICE_15 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_14 to SLICE_15:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C13C.CLK to      R7C13C.Q0 SLICE_14 (from clk_c)
+ROUTE         2     0.154      R7C13C.Q0 to      R7C13A.M1 stimulus[7] (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_14:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13C.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_15:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13A.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+
+Passed: The following path meets requirements by 0.306ns
+
+ Logical Details:  Cell type  Pin type       Cell/ASIC name  (clock net +/-)
+
+   Source:         FF         Q              stimulus[8]  (from clk_c +)
+   Destination:    FF         Data in        stimulus[9]  (to clk_c +)
+
+   Delay:               0.287ns  (46.3% logic, 53.7% route), 1 logic levels.
+
+ Constraint Details:
+
+      0.287ns physical path delay SLICE_15 to SLICE_15 meets
+     -0.019ns M_HLD and
+      0.000ns delay constraint less
+      0.000ns skew requirement (totaling -0.019ns) by 0.306ns
+
+ Physical Path Details:
+
+      Data path SLICE_15 to SLICE_15:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+REG_DEL     ---     0.133     R7C13A.CLK to      R7C13A.Q1 SLICE_15 (from clk_c)
+ROUTE         2     0.154      R7C13A.Q1 to      R7C13A.M0 stimulus[8] (to clk_c)
+                  --------
+                    0.287   (46.3% logic, 53.7% route), 1 logic levels.
+
+ Clock Skew Details: 
+
+      Source Clock Path clk to SLICE_15:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13A.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+      Destination Clock Path clk to SLICE_15:
+
+   Name    Fanout   Delay (ns)          Site               Resource
+ROUTE        27     0.765       13.PADDI to     R7C13A.CLK clk_c
+                  --------
+                    0.765   (0.0% logic, 100.0% route), 0 logic levels.
+
+Report Summary
+--------------
+----------------------------------------------------------------------------
+Preference(MIN Delays)                  |   Constraint|       Actual|Levels
+----------------------------------------------------------------------------
+                                        |             |             |
+FREQUENCY PORT "clk" 29.560000 MHz ;    |            -|            -|   1  
+                                        |             |             |
+----------------------------------------------------------------------------
+
+
+All preferences were met.
+
+
+Clock Domains Analysis
+------------------------
+
+Found 1 clocks:
+
+Clock Domain: clk_c   Source: clk.PAD   Loads: 27
+   Covered under: FREQUENCY PORT "clk" 29.560000 MHz ;
+
+
+--------------------------------------------------------------------------------
+                Connections not covered by the preferences
+--------------------------------------------------------------------------------
+
+     Delay                        Element                 Net
+
+    0.424ns          SLICE_27.F1 to     serial_out.PADDO serial_out_c
+    1.224ns          reset.PADDI to       apr/SLICE_0.A0 reset_c
+    1.112ns          reset.PADDI to       apr/SLICE_0.D1 reset_c
+    0.812ns          reset.PADDI to          SLICE_1.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_10.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_12.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_13.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_14.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_15.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_20.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_23.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_24.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_25.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_26.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_27.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_28.LSR reset_c
+    1.112ns          reset.PADDI to          SLICE_29.D0 reset_c
+    0.812ns          reset.PADDI to         SLICE_29.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_30.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_31.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_32.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_33.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_34.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_35.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_53.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_54.LSR reset_c
+    0.812ns          reset.PADDI to         SLICE_55.LSR reset_c
+    0.856ns          reset.PADDI to  serial_in_MGIOL.LSR reset_c
+    0.477ns          SLICE_26.Q0 to          SLICE_31.A0 observe[17]
+    0.127ns      serial_in.PADDI to   serial_in_MGIOL.DI serial_in_c
+    0.254ns          SLICE_27.Q0 to          SLICE_27.C0 observe[12]
+    0.201ns          SLICE_27.Q1 to          SLICE_27.D0 observe[13]
+    0.324ns          SLICE_31.Q0 to          SLICE_27.B0 observe[14]
+    0.319ns          SLICE_31.Q1 to          SLICE_27.A0 observe[15]
+    0.324ns          SLICE_27.F0 to          SLICE_27.B1 serial_out_12
+    0.324ns           SLICE_1.Q0 to          SLICE_31.B1 observe[0]
+    0.319ns           SLICE_1.Q1 to          SLICE_31.A1 observe[1]
+    0.258ns          SLICE_26.Q1 to          SLICE_31.C1 observe[2]
+    0.204ns          SLICE_25.Q0 to          SLICE_31.D1 observe[3]
+    0.324ns          SLICE_25.Q1 to          SLICE_35.B1 observe[4]
+    0.319ns          SLICE_34.Q0 to          SLICE_35.A1 observe[5]
+    0.201ns          SLICE_34.Q1 to          SLICE_35.D1 observe[6]
+    0.258ns          SLICE_30.Q0 to          SLICE_35.C1 observe[7]
+    0.421ns          SLICE_30.Q1 to          SLICE_35.C0 observe[8]
+    0.204ns          SLICE_29.Q0 to          SLICE_35.D0 observe[9]
+    0.221ns          SLICE_35.Q0 to          SLICE_35.A0 observe[10]
+    0.324ns          SLICE_35.Q1 to          SLICE_35.B0 observe[11]
+    0.511ns          SLICE_24.Q1 to          SLICE_31.D0 observe[16]
+    0.318ns          SLICE_35.F1 to          SLICE_27.A1 serial_out_10
+    0.200ns          SLICE_35.F0 to          SLICE_27.D1 serial_out_11
+    0.254ns          SLICE_31.F0 to          SLICE_27.C1 serial_out_13
+    0.156ns          SLICE_31.F1 to          SLICE_31.C0 serial_out_9
+
+--------------------------------------------------------------------------------
+
+
+Timing summary (Hold):
+---------------
+
+Timing errors: 0  Score: 0
+Cumulative negative slack: 0
+
+Constraints cover 189 paths, 1 nets, and 190 connections (78.51% coverage)
+
+
+
+Timing summary (Setup and Hold):
+---------------
+
+Timing errors: 0 (setup), 0 (hold)
+Score: 0 (setup), 0 (hold)
+Cumulative negative slack: 0 (0+0)
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+

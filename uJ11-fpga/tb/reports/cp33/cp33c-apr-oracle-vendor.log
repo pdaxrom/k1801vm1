@@ -1,0 +1,2 @@
+PASS APR C oracle: 65536 cases / 196608 CSR commands, 4149 translated / 61387 faults; byte/W/readback + serial PAR/PDR lookup
+tb/tb_mmu_apr_oracle.v:70: $finish called at 6022097000 (1ps)

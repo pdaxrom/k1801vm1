@@ -1,0 +1,16 @@
+{
+  "name": "cp33b",
+  "top": "uj11_probe_apr_csr",
+  "files": {
+    "rtl/uj11_mmu_apr.v": "4d1316a22e4387c9672f74379964248b0357190a81ee68049e529d0515ec3e9b",
+    "rtl/uj11_mmu_apr_decode.v": "4a0d4ea86f703138bc6910f1bf2624b126de35ec518243d8e0076ea3fecbae4f",
+    "rtl/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "synth/machxo2/uj11.lpf": "28b53a43311cec496b44f402bb2619e998867df9095ef2428eb65e4b469a9043",
+    "synth/machxo2/uj11.sty": "0188e726d991724adeb3ecdde6ce82204be51b44eb6b7defe800017f1ea5aa0b",
+    "synth/machxo2/uj11_probe_apr_csr.v": "1ca3ef342852816b6f02af8fd03a44cdbf0fa7ff2d7282cf07aaebae7ef83038",
+    "tools/checkpoint.py": "130ad64f75be47f1c62ca03982784aa65e144de7215ef24787426c917260d185",
+    "tools/report_synthesis.py": "1d769774887bd6bb7341ae8fa7124bd496dafcf0475860d75db94f66b894d683",
+    "generated:clock.lpf": "a703fe5af4c50f3c2fa30f0eb295f16d7ca35952060c5215da2c77137366bd17"
+  },
+  "input_revision_sha256": "b7e80a794289b92338b7e3f15ffc469435b3f253646a5e5d6830d0d876b10783"
+}

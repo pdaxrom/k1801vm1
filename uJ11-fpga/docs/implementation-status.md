@@ -1,5 +1,20 @@
 # Implementation status, 2026-09-10
 
+## CP33 — EBR PAR/PDR и physical CSR decode
+
+Проверены store PAR16/PDR16, все byte masks, парный W clear, explicit W set,
+reserved bits, held/idle/reset. Один EBR, 64 storage pairs, из них 48
+доступны через K/S/U I/D CSR. Processor modes и автоматический выбор APR
+по PSW пока не реализованы. CP33c probe: **40 LUT / 65 FF / 1 EBR /
+32 slices / 96.862 MHz**, PASS; 62 FF измерительные, 3 — контроллер.
+1144373 команды на каждом portable/vendor варианте, decode всех 4194304
+PA22 bytes и 65536 C cases с serial lookup + translation прошли.
+
+Production остаётся CP31c без MMU, microstore 954/1024×36 v12. MMR0/1/2/3,
+W timing при faults, CPU abort/restart и high-memory RK DMA ещё отсутствуют;
+RT-11XM не загружен с MMU. Для полного fit нужна экономия LUT, не только
+свободный EBR. [Подробности](mmu-apr.md), [manifest](verification-cp33.json).
+
 ## CP32 — translator 18/22 bits, PAR16, PA22 и SPI FRAM
 
 Изолированный translator/PDR checker реализован для MMU-off, 18-bit и

@@ -1263,3 +1263,32 @@ test-mmu-oracle: build/mmu-oracle.txt
 .PHONY: test-mmu-fram
 test-mmu-fram: | build
 	$(PYTHON) tools/run_mmu_fram.py
+
+.PHONY: test-mmu-apr
+test-mmu-apr: | build
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_apr -o build/mmu_apr tb/tb_mmu_apr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v
+	$(VVP) build/mmu_apr
+	$(VERILATOR) --lint-only --Wall --top-module uj11_probe_apr synth/machxo2/uj11_probe_apr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v
+
+.PHONY: test-mmu-apr-decode
+test-mmu-apr-decode: | build
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_apr_decode -o build/mmu_apr_decode tb/tb_mmu_apr_decode.v rtl/uj11_mmu_apr_decode.v
+	$(VVP) build/mmu_apr_decode
+	$(VERILATOR) --lint-only --Wall --top-module uj11_probe_apr_csr synth/machxo2/uj11_probe_apr_csr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v rtl/uj11_mmu_apr_decode.v
+
+build/reference_mmu_apr: tb/reference_mmu_apr.c ../core/core.c ../core/core.h ../core/pdp11_fp.c ../core/hardware.c ../core/hardware.h | build
+	$(CC) -O2 -Wall -DENABLE_MMU=1 -I.. tb/reference_mmu_apr.c ../core/hardware.c -lm -o $@
+build/mmu-apr-oracle.txt: build/reference_mmu_apr
+	$< > $@.tmp
+	mv $@.tmp $@
+.PHONY: test-mmu-apr-oracle
+test-mmu-apr-oracle: build/mmu-apr-oracle.txt
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_apr_oracle -o build/mmu_apr_oracle tb/tb_mmu_apr_oracle.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v rtl/uj11_mmu_apr_decode.v rtl/uj11_mmu_translate.v
+	$(VVP) build/mmu_apr_oracle
+
+.PHONY: vendor-mmu-apr
+vendor-mmu-apr: build/mmu-apr-oracle.txt
+	$(IVERILOG) -g2012 -DUJ11_VENDOR_ROM -s tb_mmu_apr -o build/mmu_apr_vendor tb/tb_mmu_apr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v "$(LATTICE_SIM_DIR)/DP8KC.v" "$(LATTICE_SIM_DIR)/GSR.v" "$(LATTICE_SIM_DIR)/PUR.v"
+	$(VVP) build/mmu_apr_vendor
+	$(IVERILOG) -g2012 -DUJ11_VENDOR_ROM -s tb_mmu_apr_oracle -o build/mmu_apr_oracle_vendor tb/tb_mmu_apr_oracle.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v rtl/uj11_mmu_apr_decode.v rtl/uj11_mmu_translate.v "$(LATTICE_SIM_DIR)/DP8KC.v" "$(LATTICE_SIM_DIR)/GSR.v" "$(LATTICE_SIM_DIR)/PUR.v"
+	$(VVP) build/mmu_apr_oracle_vendor

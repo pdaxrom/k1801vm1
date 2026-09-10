@@ -55,7 +55,12 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   I/O mapping и NXM. CP32b: 70 LUT / 80 probe FF / 0 EBR / 93.362 MHz.
 - [x] CP32: сравнить translator с C MMU и проверить все 128 КиБ через
   модель SPI FRAM и board transport. Это ещё не CPU/MMR/SD integration.
-- [ ] PAR/PDR в EBR, MMR0/1/2/3, physical I/O page и NXM без alias верхней памяти.
+- [x] CP33: изолированный PAR/PDR store в одном EBR, byte writes и W
+  set/clear; decode всех 96 CSR без aliases. Portable/vendor/C oracle PASS.
+- [ ] Сократить общую LUT cost перед подключением CP32/CP33; исследовать
+  разделение ALU/microsequencer. Изолированные fits не доказывают full-board fit.
+- [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
+  и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
 - [ ] Разделить отображение гостя, RK firmware assist и физический DMA;
   реализовать старшие разряды RK DMA по документации контроллера.

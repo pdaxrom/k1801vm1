@@ -1,0 +1,50 @@
+----------------------------------------------------------------------
+Report for cell uj11_probe_apr.verilog
+
+Register bits: 49 of 1280 (4%)
+PIC Latch:       0
+I/O cells:       4
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX       46       100.0
+                                GSR        1       100.0
+                                 IB        3       100.0
+                           IFS1P3IX        1       100.0
+                                 OB        1       100.0
+                           ORCALUT4       30       100.0
+                                PUR        1       100.0
+                                VHI        3       100.0
+                                VLO        3       100.0
+SUB MODULES 
+                       uj11_mmu_apr        1       100.0
+                   uj11_mmu_apr_ram        1       100.0
+                            
+                         TOTAL            94           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr.netlist
+     Instance path:  apr
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX        1         2.2
+                           ORCALUT4       24        80.0
+                                VHI        2        66.7
+                                VLO        2        66.7
+SUB MODULES 
+                   uj11_mmu_apr_ram        1       100.0
+                            
+                         TOTAL            33           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr_ram.netlist
+     Instance path:  apr.ram
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1       100.0
+                           ORCALUT4        4        13.3
+                                VHI        1        33.3
+                                VLO        1        33.3
+                            
+                         TOTAL             7           

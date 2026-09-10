@@ -1,0 +1,62 @@
+----------------------------------------------------------------------
+Report for cell uj11_probe_apr_csr.verilog
+
+Register bits: 65 of 1280 (5%)
+PIC Latch:       0
+I/O cells:       4
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX       62       100.0
+                                GSR        1       100.0
+                                 IB        3       100.0
+                           IFS1P3IX        1       100.0
+                                INV        1       100.0
+                                 OB        1       100.0
+                           ORCALUT4       39       100.0
+                                PUR        1       100.0
+                                VHI        4       100.0
+                                VLO        4       100.0
+SUB MODULES 
+                       uj11_mmu_apr        1       100.0
+                uj11_mmu_apr_decode        1       100.0
+                   uj11_mmu_apr_ram        1       100.0
+                            
+                         TOTAL           123           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr.netlist
+     Instance path:  apr
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1       100.0
+                            FD1S3AX        2       100.0
+                            FD1S3IX        1         1.6
+                           ORCALUT4       25        64.1
+                                VHI        2        50.0
+                                VLO        2        50.0
+SUB MODULES 
+                   uj11_mmu_apr_ram        1       100.0
+                            
+                         TOTAL            34           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr_ram.netlist
+     Instance path:  apr.ram
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1       100.0
+                           ORCALUT4        4        10.3
+                                VHI        1        25.0
+                                VLO        1        25.0
+                            
+                         TOTAL             7           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr_decode.netlist
+     Instance path:  decode
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           ORCALUT4        8        20.5
+                                VHI        1        25.0
+                                VLO        1        25.0
+                            
+                         TOTAL            10           

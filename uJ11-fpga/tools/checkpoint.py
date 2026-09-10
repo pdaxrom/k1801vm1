@@ -130,6 +130,11 @@ CONFIGS['cp31d']=CONFIGS['cp31b']
 CONFIGS['cp32a']=('uj11_probe_mmu',0,[
     'rtl/uj11_mmu_translate.v','synth/machxo2/uj11_probe_mmu.v'])
 CONFIGS['cp32b']=CONFIGS['cp32a']
+CONFIGS['cp33a']=('uj11_probe_apr',1,[
+    'rtl/uj11_mmu_apr.v','rtl/uj11_mmu_apr_ram.v','synth/machxo2/uj11_probe_apr.v'])
+CONFIGS['cp33b']=('uj11_probe_apr_csr',1,CONFIGS['cp33a'][2][:-1]+[
+    'rtl/uj11_mmu_apr_decode.v','synth/machxo2/uj11_probe_apr_csr.v'])
+CONFIGS['cp33c']=CONFIGS['cp33b']
 
 
 def main():
@@ -178,7 +183,8 @@ exit 0
     inputs=sorted(set(sources+['synth/machxo2/uj11.lpf','synth/machxo2/uj11.sty',
                                'tools/checkpoint.py','tools/report_synthesis.py']+
                               (['microcode/m0.uasm','microcode/fis.uasm','microasm/uj11asm.py',
-                                'tools/link_fis.py','tools/make_ebr.py'] if ebr else [])))
+                                'tools/link_fis.py','tools/make_ebr.py']
+                               if 'microcode/generated/uj11_m0_ebr.v' in sources else [])))
     hashes={n:hashlib.sha256((root/n).read_bytes()).hexdigest() for n in inputs}
     hashes['generated:clock.lpf']=hashlib.sha256(clock_lpf.encode()).hexdigest()
     manifest={'name':name,'top':top,'files':hashes,

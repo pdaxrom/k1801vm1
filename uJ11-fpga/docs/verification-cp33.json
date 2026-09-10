@@ -1,0 +1,194 @@
+{
+  "checkpoint": "CP33: isolated EBR APR storage, physical CSR decode and serial translation test",
+  "date": "2026-09-10",
+  "synthesis": {
+    "cp33a": {
+      "lut4": 31,
+      "ff": 49,
+      "ebr": 1,
+      "slices": 24,
+      "fmax_mhz": 112.994,
+      "timing_pass": true
+    },
+    "cp33b": {
+      "lut4": 41,
+      "ff": 65,
+      "ebr": 1,
+      "slices": 32,
+      "fmax_mhz": 106.963,
+      "timing_pass": true
+    },
+    "cp33c": {
+      "lut4": 40,
+      "ff": 65,
+      "ebr": 1,
+      "slices": 32,
+      "fmax_mhz": 96.862,
+      "timing_pass": true
+    }
+  },
+  "production_cp31c": {
+    "lut4": 1252,
+    "ff": 326,
+    "ebr": 6,
+    "slices": 628,
+    "fmax_mhz": 30.917,
+    "timing_pass": true
+  },
+  "production_inputs_unchanged": true,
+  "production_has_mmu": false,
+  "board_programmed": false,
+  "physical_board_revision": "CP29a",
+  "fp11_removed": true,
+  "fis_retained": true,
+  "microcode_words": 954,
+  "microcode_free": 70,
+  "store": {
+    "physical_pairs": 64,
+    "architectural_pairs": 48,
+    "word_width": 16,
+    "ebrs": 1,
+    "active_state_ff": 3,
+    "main_rf_unchanged": true,
+    "paired_w_clear": true,
+    "software_w_set": false,
+    "powerup": "FPGA configuration zero init; not a claimed DEC powerup value",
+    "reset": "abort uncommitted phases; preserve stored data and already committed writes"
+  },
+  "measured_latency_clocks": {
+    "read": 2,
+    "pdr_write": 2,
+    "mark_written": 2,
+    "par_write": 3,
+    "includes_request_release": false,
+    "cpu_cpi_measured": false
+  },
+  "tests": {
+    "apr_commands_per_variant": 1144373,
+    "unit_variants": [
+      "cp33a portable",
+      "cp33a vendor",
+      "cp33c portable",
+      "cp33c vendor"
+    ],
+    "decode_addresses": 4194304,
+    "decode_hits": 192,
+    "c_oracle_cases_per_variant": 65536,
+    "c_oracle_commands_per_variant": 196608,
+    "c_oracle_successes": 4149,
+    "c_oracle_faults": 61387,
+    "c_oracle_variants": [
+      "portable",
+      "vendor"
+    ],
+    "strict_final_lint": true,
+    "vendor_models_modified": false
+  },
+  "oracle": {
+    "source": "../core/core.c",
+    "model": "DCJ11",
+    "enable_mmu": 1,
+    "helpers": [
+      "mmu_io_write_word",
+      "mmu_io_write_byte",
+      "mmu_io_read_word",
+      "mmu_note_write_pdrw",
+      "translate_va_ex"
+    ],
+    "compared": "PAR/PDR readback, lane writes, explicit W actions, successful PA and read-fault acceptance",
+    "corpus_sha256": "88d15a73264a88a1c6e2c31f7da52962777fcf6bd1d99a30f7cc2f5a08701cab"
+  },
+  "rt11_xm": {
+    "path": "lsi11/disks/rt11v5.3/system.dsk",
+    "sha256": "9350c62f50e2713f56904b7222f2d829f6bf020cd67e28562e3252a48b6993dd",
+    "image_modified": false,
+    "boot_tested": false,
+    "reason": "No CPU/MMR/abort-restart or extended RK DMA integration"
+  },
+  "manual": {
+    "path": "../doc/EK-DCJ11-UG-PRE_J11ug_Oct83.pdf",
+    "sha256": "479e33a206ddf713793acc016a935e0ef6ab0473d2dc4c5930d7dc1c10080acd",
+    "sections": [
+      "4.5.1",
+      "4.5.2",
+      "4.9"
+    ]
+  },
+  "sources_sha256": {
+    "Makefile": "97aa1792da8142d167e7d0225b42e42177d35f9e1009bd2503cdce2bc888a277",
+    "rtl/uj11_mmu_apr.v": "2ccaf20cda19d0393e4c7e720716517402fb87e2e90c648d8c0aeb8c2a9d534d",
+    "rtl/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "rtl/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "rtl/uj11_mmu_translate.v": "6d90669abbdfce80d70fb9f07e418df4e8800852fe7c260c59e6d5fad439f057",
+    "tb/tb_mmu_apr.v": "6c57f44e0ad909c216be25cce0d97be2a179a167585ab1976b62d0e45667304b",
+    "tb/tb_mmu_apr_decode.v": "b8fc0fac392c617f4b559feb0af8e9e8bc1c38fbcd9a11bb9ca5615f01a5be5b",
+    "tb/tb_mmu_apr_oracle.v": "d9742d57d5578b2b61e3120144c7df240fc0bb30e4d578235a1093b738f216b2",
+    "tb/reference_mmu_apr.c": "9d0f2b8ad996a2dd33b8ba27ffdfc6f706a1e8e0a4eda6e6951d1cf5884106d7",
+    "tools/record_cp33.py": "4e0649335d729d4acc9fe4cf59f5efd7f74eaa1304a3e4abcc715bc26432487c",
+    "../core/core.c": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+    "../core/core.h": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+    "../core/pdp11_fp.c": "ad5ef37ef0ee8fa9221632ad903224599759cf95a4bcbe4f5dfd77e0870f2220",
+    "../core/hardware.c": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+    "../core/hardware.h": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057"
+  },
+  "vendor_sha256": {
+    "DP8KC.v": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+    "GSR.v": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+    "PUR.v": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4"
+  },
+  "archived_tests_sha256": {
+    "tb/reports/cp33/cp33-decode.log": "fd2de36713d6238c4f3d394d937f48af907d30167bcfdbdc866110f33a7f915b",
+    "tb/reports/cp33/cp33a-apr-vendor.log": "9b66f2ab84ab7a2c9d46fbb743245bb276f6eac116cbbb7b86917886a9d1b547",
+    "tb/reports/cp33/cp33a-apr.log": "641773ffef08990d638cadfc815da8c8fd9510fe2a43c77db82bba0ac198965f",
+    "tb/reports/cp33/cp33c-apr-oracle-vendor.log": "c83392cdce07eccd180b4b30f03d6292a5f7bdec0f163c0a8bf3f70fda65f71a",
+    "tb/reports/cp33/cp33c-apr-oracle.log": "1799d160c8b7b9596b43d7a6c219144ac7540ef3839d189f78de7e54e00fdb7d",
+    "tb/reports/cp33/cp33c-apr-vendor.log": "9b66f2ab84ab7a2c9d46fbb743245bb276f6eac116cbbb7b86917886a9d1b547",
+    "tb/reports/cp33/cp33c-apr.log": "eb253587446c1780992b80d9afc57611940cd508898813a268285bdd9f0624b7",
+    "tb/reports/cp33/cp33c-lint.log": "8dfb8369beedf1020ad4fb78554283bb534fbdc71fb6dc50e4be594879263214",
+    "tb/reports/cp33/mmu-apr-oracle.txt.gz": "c58f3afcc7211a8e1c588721bfc35d58d50552fd79eb0dd999fb86cbbd35e5fd"
+  },
+  "archived_synthesis_sha256": {
+    "synth/reports/cp33a/build.tcl": "d459dcd2ce02c1227de55604de50dc39c6bff9bdb85ae3f8cbfc9527415e0c65",
+    "synth/reports/cp33a/clock.lpf": "a703fe5af4c50f3c2fa30f0eb295f16d7ca35952060c5215da2c77137366bd17",
+    "synth/reports/cp33a/design.areasrr": "2865411cc89857cc1e0aebababe295c0208e24fcd41af31188860e6f9a640deb",
+    "synth/reports/cp33a/design.mrp": "3e9b6b7c4f726b81c0c365594a5ab4a476baac434a8b52cb11fa9bd6a6ffd65d",
+    "synth/reports/cp33a/design.par": "ffa883c8c43a3d657cf2363526b4daafe885ebfcd8510afa8ec8f06b4f9d29e5",
+    "synth/reports/cp33a/design.srr": "2d072b0b2fde335b8c4f01514c594dcd81200380411c8b55ac857d089a92d5c7",
+    "synth/reports/cp33a/design.twr": "434be3d755ae020546bde13dd843595ca62b0e02457dd127b4ff9f1469c77287",
+    "synth/reports/cp33a/diamond.log": "531a3f60456f25f13a8f73d9b18e6a783886c093ce432faa0075fbe77f74874c",
+    "synth/reports/cp33a/inputs.json": "25e52f0c6b8d6393bf4fbb710f268970ef2947aade5cb3a473b4e44a49e265f8",
+    "synth/reports/cp33a/result.json": "d54e4b25a79fb2a4e2056e97929222b56edace6304edf057d6666e2346a002bb",
+    "synth/reports/cp33a/source.tgz": "1aedb60ace17d473ecccde9db29b4aabd8b601931264d082b684e1329a256798",
+    "synth/reports/cp33b/build.tcl": "5697ce3de566d896d875a59a362407cc2b6b93cdbcddbb0a19b91f05e9debcdc",
+    "synth/reports/cp33b/clock.lpf": "a703fe5af4c50f3c2fa30f0eb295f16d7ca35952060c5215da2c77137366bd17",
+    "synth/reports/cp33b/design.areasrr": "7e9fd8c4c8e4cb8e561bbc5c78a77b97e98b3c8e21828fcc449c47d180c5ddf7",
+    "synth/reports/cp33b/design.mrp": "42219eaef627e214ca4007a7508a4dab6f197bc2dd706baff29abd428334e00e",
+    "synth/reports/cp33b/design.par": "a127699ad2b1f57614a3e6264df9cb9b0b09721be19d22a737f3272a9fa7037c",
+    "synth/reports/cp33b/design.srr": "22f4456f241ca9acc1d48e29b8d1f5728f8a63a55d9d8c6979fbb3c112121415",
+    "synth/reports/cp33b/design.twr": "69d377289a1150300486316c2d7bf27cc1ff0017f1a90411a07ad2d3e246c467",
+    "synth/reports/cp33b/diamond.log": "23b0ccc24e776cfc74c2b0f5fd0dcda08f55e0f6eb5a814da1bad952cdb71ee7",
+    "synth/reports/cp33b/inputs.json": "e1add242dbf32854da3f74caf12beb4787da5b14b89817588952a771a00b09bd",
+    "synth/reports/cp33b/result.json": "b8c7d95165240bbd8eae258ebfdcaaa1322cf7c7dcd076e454f4e104643b99fa",
+    "synth/reports/cp33b/source.tgz": "f7a3ee510b2e523c4c028104efc1d362e7401e42588f60350320e86b48e7db99",
+    "synth/reports/cp33c/build.tcl": "87aca74e259c1d69308a69256456db6d8a2133aec161eb833b950299f11db432",
+    "synth/reports/cp33c/clock.lpf": "a703fe5af4c50f3c2fa30f0eb295f16d7ca35952060c5215da2c77137366bd17",
+    "synth/reports/cp33c/design.areasrr": "8656158c710ed5d15c705b5eac18443f95934d9ec9b014fd0ba1972fb5cb64a9",
+    "synth/reports/cp33c/design.mrp": "d442c1a5dfe0d72108a391d6246375393aef9c73bf430e912e678aa009953c71",
+    "synth/reports/cp33c/design.par": "28413ec97fb8d9be0f8821911b41afa6b92f7c637e2de38fa7c2e55d73d073db",
+    "synth/reports/cp33c/design.srr": "ba71cfd60b925adf5f10de0d3916093198adf495d29cd64241cb506202223b56",
+    "synth/reports/cp33c/design.twr": "8ae6b3e013faa4606e7cb566be0a6ec5e3dec29670b4d64f5c68e348fcc5720b",
+    "synth/reports/cp33c/diamond.log": "805c7041ad4c4c6abf8c6e1448de6f252af6f6e6da2bb0f8d59e37fa22dc0643",
+    "synth/reports/cp33c/inputs.json": "b543c0c02613668e0dd7b43c9825e4d70c8d27913c02ea48400effec6a2b8f1f",
+    "synth/reports/cp33c/result.json": "b7d4b7ea3bf06f40748f7cfce49e7cdc17c3dc533e22374a50b7926640503a5a",
+    "synth/reports/cp33c/source.tgz": "9d423908b9ec9553ce21e784a6a56900469bee722dbbb683e95a64079f4bc607"
+  },
+  "limits": [
+    "Probe counts include stimulus/checksum FF and logic; not integrated MMU fit or CPU Fmax.",
+    "CSR index covers K/S/U I/D tables; processor modes, SP banks and automatic selection not implemented.",
+    "mark_written is an explicit command; automatic W timing/abort policy is not implemented.",
+    "Serial translation test uses testbench PAR/PDR latches, not a synthesized CPU MMU pipeline.",
+    "CSR privilege, odd-word priority, MMR0/1/2/3, abort/restart and physical DMA remain unimplemented.",
+    "Production still CP31c: 28 LUT / 12 slices / 1 EBR free; additional logic needs measured area reduction.",
+    "No RT-11XM or FPGA programming in CP33."
+  ]
+}
