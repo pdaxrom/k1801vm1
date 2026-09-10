@@ -1,4 +1,14 @@
-# Benchmarks: CP46 и предыдущие этапы
+# Benchmarks: CP47 и предыдущие этапы
+
+## CP47 — simulation counts прежние; нового Fmax нет
+
+Combined FRAM прошёл полный upper-bank CPU sweep: 67468380 clocks /
+590096 PAR reads, vendor subset — 97692 / 848. Cold RT-11FB + DIR сохранил
+415159611 clocks и все CP45 counts/UART. Три варианта, CLK_DIV=1/2/3:
+548121 потактное сравнение SPI/ACK/data, 2304 reset offsets, 18432 memory
+transactions со scoreboard всех 128 КиБ. LUT/Fmax/аппаратные instructions/sec
+не измерены: remote synthesis ожидает разрешения передачи CP47.
+RT-11XM ещё не запускалась. [Отчёт](area-fram-cp47.md).
 
 ## CP46 — clocks сохранены, площадь выросла
 

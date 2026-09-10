@@ -1,0 +1,143 @@
+{
+  "tests": [
+    {
+      "tag": "cp47-byte-mux-miter-1",
+      "variant": "byte-mux",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-byte-mux-memory-1",
+      "variant": "byte-mux",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp47-byte-mux-miter-2",
+      "variant": "byte-mux",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-byte-mux-memory-2",
+      "variant": "byte-mux",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp47-byte-mux-miter-3",
+      "variant": "byte-mux",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-byte-mux-memory-3",
+      "variant": "byte-mux",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    },
+    {
+      "tag": "cp47-shared-rx-miter-1",
+      "variant": "shared-rx",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-shared-rx-memory-1",
+      "variant": "shared-rx",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp47-shared-rx-miter-2",
+      "variant": "shared-rx",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-shared-rx-memory-2",
+      "variant": "shared-rx",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp47-shared-rx-miter-3",
+      "variant": "shared-rx",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-shared-rx-memory-3",
+      "variant": "shared-rx",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    },
+    {
+      "tag": "cp47-combined-miter-1",
+      "variant": "combined",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-combined-memory-1",
+      "variant": "combined",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp47-combined-miter-2",
+      "variant": "combined",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-combined-memory-2",
+      "variant": "combined",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp47-combined-miter-3",
+      "variant": "combined",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp47-combined-memory-3",
+      "variant": "combined",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    }
+  ],
+  "inputs_sha256": {
+    "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "build/cp47-fram/byte-mux/uj11_board_fram.v": "478c65f92f38458fc43f5c6ed8a36643aa5578794eba5768aa724847a27b1f89",
+    "build/cp47-fram/combined/uj11_board_fram.v": "486418ab3344c7e6defae4c7a6710ea8548a72e687a2cd051d0c48ae60d82a70",
+    "build/cp47-fram/inputs.json": "a62d9b078f241c78251a0bbee4a538420576fb2e823a556be9f262e99d61b60c",
+    "build/cp47-fram/shared-rx/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp47-tests/uj11_fram_gold.v": "06b117b6b79347db087e94f9fba7a23dd404d9c83373745d82a7990f969bb394",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tb/tb_board_fram.v": "a768f7976f568bec9b8a2b7cf2cc4cd2b5aa906348b850c8ab9f94359a4d700a",
+    "tb/tb_fram_miter_cp47.v": "4cd64a4b9786f542f4b2067221f95812c973b2f3d3751afb132e4803d391815b",
+    "tools/build_fram_cp47.py": "07c5c0bbe0b0d6b33424a08bf75306395a71d23a0cde694feaf1fe66e4a25ded",
+    "tools/check_fram_cp47_units.py": "8e2f1e517165e47aa2db89c4fd4fd3c1150d28deeb8428a3f98ef259d0a761e9"
+  }
+}

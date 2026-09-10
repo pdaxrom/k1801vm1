@@ -1,5 +1,19 @@
 # Implementation status, 2026-09-10
 
+## CP47 — локальная проверка FRAM, area gate ожидается
+
+Три кандидата byte-mux/shared-rx/combined прошли 6 positive formal runs,
+18 unit/miter tests, две намеренные ошибки обнаружены proof и simulation.
+Combined также проходит весь upper FRAM через CPU, vendor/edges/full bus
+и cold RT-11FB + DIR с прежними counts/UART. High rdata в shared RX временно
+служит shift register; данные валидны на ready и в idle.
+
+Передача семи файлов CP47 отклонена автоматической проверкой; подтверждение
+запрошено. Synthesis ещё не выполнен, LUT/FF/EBR/Fmax кандидатов неизвестны.
+В рабочую сборку изменения не приняты; baseline CP45k/production CP40h/
+APR CP43d/плата CP29a прежние. [Отчёт](area-fram-cp47.md),
+[manifest](verification-cp47.json).
+
 ## CP46 — control/region альтернативы отклонены
 
 PA17 + RAM/I/O qualifiers, уравнения phase bits, APR RAM address/WE и их

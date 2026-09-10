@@ -5,6 +5,13 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP47: три варианта SPI FRAM прошли локальные проверки.**
+Byte mux и совмещение RX/high-rdata проверены formal, X/Z/reset/128 КиБ
+scoreboard, CPU/vendor/bus и cold RT-11FB + DIR. Counts и UART прежние.
+Synthesis пока не выполнен: ожидается разрешение передачи семи файлов CP47
+на сервер. Экономия LUT/FF/Fmax не заявляется, рабочая основа — CP45k.
+[Контракт данных и результаты CP47](docs/area-fram-cp47.md).
+
 **CP46: четыре control/PA22 варианта проверены и отклонены по площади.**
 1315–1317 LUT против 1302 у CP45k; все MAP FAIL. Functional/formal,
 APR vendor, весь верхний банк FRAM и cold RT-11FB + DIR прошли, counts/UART

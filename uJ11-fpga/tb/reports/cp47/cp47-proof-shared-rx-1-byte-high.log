@@ -1,0 +1,2135 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `cp47-proof-shared-rx-1-byte-high.ys' --
+
+1. Executing Verilog-2005 frontend: cp47-proof-shared-rx-1-byte-high-gold.v
+Parsing SystemVerilog input from `cp47-proof-shared-rx-1-byte-high-gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: cp47-proof-shared-rx-1-byte-high-gate.v
+Parsing SystemVerilog input from `cp47-proof-shared-rx-1-byte-high-gate.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: cp47-proof-shared-rx-1-byte-high-miter.v
+Parsing SystemVerilog input from `cp47-proof-shared-rx-1-byte-high-miter.v' to AST representation.
+Generating RTLIL representation for module `\miter'.
+Successfully finished Verilog frontend.
+
+4. Executing PREP pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \gate
+Used module:     \gold
+
+4.1.2. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \gate
+Used module:     \gold
+Removed 0 unused modules.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 7 switch rules as full_case in process $proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28 in module gate.
+Marked 1 switch rules as full_case in process $proc$cp47-proof-shared-rx-1-byte-high-gate.v:35$26 in module gate.
+Marked 7 switch rules as full_case in process $proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5 in module gold.
+Marked 1 switch rules as full_case in process $proc$cp47-proof-shared-rx-1-byte-high-gold.v:33$3 in module gold.
+Removed a total of 0 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 4 redundant assignments.
+Promoted 2 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~25 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+     1/13: $0\rdata[15:0] [15:8]
+     2/13: $0\rdata[15:0] [7:0]
+     3/13: $0\ready[0:0]
+     4/13: $0\divider[0:0]
+     5/13: $0\bit_count[2:0]
+     6/13: $0\tx[6:0]
+     7/13: $0\seen[0:0]
+     8/13: $0\active[0:0]
+     9/13: $0\state[3:0]
+    10/13: $0\spi_mosi[0:0]
+    11/13: $0\spi_sck[0:0]
+    12/13: $0\spi_cs_n[0:0]
+    13/13: $0\error[0:0]
+Creating decoders for process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:35$26'.
+     1/1: $1\next_byte[7:0]
+Creating decoders for process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+     1/14: $0\rdata[15:0] [15:8]
+     2/14: $0\rdata[15:0] [7:0]
+     3/14: $0\ready[0:0]
+     4/14: $0\divider[0:0]
+     5/14: $0\bit_count[2:0]
+     6/14: $0\rx[7:0]
+     7/14: $0\tx[6:0]
+     8/14: $0\seen[0:0]
+     9/14: $0\active[0:0]
+    10/14: $0\state[3:0]
+    11/14: $0\spi_mosi[0:0]
+    12/14: $0\spi_sck[0:0]
+    13/14: $0\spi_cs_n[0:0]
+    14/14: $0\error[0:0]
+Creating decoders for process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:33$3'.
+     1/1: $1\next_byte[7:0]
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\gate.\next_byte' from process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:35$26'.
+No latch inferred for signal `\gold.\next_byte' from process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:33$3'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gate.\rdata' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$559' with positive edge clock.
+Creating register for signal `\gate.\ready' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$560' with positive edge clock.
+Creating register for signal `\gate.\error' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$561' with positive edge clock.
+Creating register for signal `\gate.\spi_cs_n' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$562' with positive edge clock.
+Creating register for signal `\gate.\spi_sck' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$563' with positive edge clock.
+Creating register for signal `\gate.\spi_mosi' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$564' with positive edge clock.
+Creating register for signal `\gate.\state' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$565' with positive edge clock.
+Creating register for signal `\gate.\active' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$566' with positive edge clock.
+Creating register for signal `\gate.\seen' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$567' with positive edge clock.
+Creating register for signal `\gate.\tx' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$568' with positive edge clock.
+Creating register for signal `\gate.\bit_count' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$569' with positive edge clock.
+Creating register for signal `\gate.\divider' using process `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+  created $dff cell `$procdff$570' with positive edge clock.
+Creating register for signal `\gold.\rdata' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$571' with positive edge clock.
+Creating register for signal `\gold.\ready' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$572' with positive edge clock.
+Creating register for signal `\gold.\error' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$573' with positive edge clock.
+Creating register for signal `\gold.\spi_cs_n' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$574' with positive edge clock.
+Creating register for signal `\gold.\spi_sck' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$575' with positive edge clock.
+Creating register for signal `\gold.\spi_mosi' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$576' with positive edge clock.
+Creating register for signal `\gold.\state' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$577' with positive edge clock.
+Creating register for signal `\gold.\active' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$578' with positive edge clock.
+Creating register for signal `\gold.\seen' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$579' with positive edge clock.
+Creating register for signal `\gold.\tx' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$580' with positive edge clock.
+Creating register for signal `\gold.\rx' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$581' with positive edge clock.
+Creating register for signal `\gold.\bit_count' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$582' with positive edge clock.
+Creating register for signal `\gold.\divider' using process `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+  created $dff cell `$procdff$583' with positive edge clock.
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 11 empty switches in `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+Removing empty process `gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:45$28'.
+Found and cleaned up 1 empty switch in `\gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:35$26'.
+Removing empty process `gate.$proc$cp47-proof-shared-rx-1-byte-high-gate.v:35$26'.
+Found and cleaned up 12 empty switches in `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+Removing empty process `gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:43$5'.
+Found and cleaned up 1 empty switch in `\gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:33$3'.
+Removing empty process `gold.$proc$cp47-proof-shared-rx-1-byte-high-gold.v:33$3'.
+Cleaned up 25 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+<suppressed ~1 debug messages>
+Optimizing module gate.
+<suppressed ~29 debug messages>
+Optimizing module gold.
+<suppressed ~31 debug messages>
+
+4.3. Executing FLATTEN pass (flatten design).
+Deleting now unused module gate.
+Deleting now unused module gold.
+<suppressed ~2 debug messages>
+
+4.4. Executing FUTURE pass.
+
+4.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 7 unused cells and 173 unused wires.
+<suppressed ~10 debug messages>
+
+4.7. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+4.8. Executing OPT pass (performing simple optimizations).
+
+4.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 309 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 251 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 250 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~177 debug messages>
+Removed a total of 59 cells.
+
+4.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+      Replacing known input bits on port B of cell $flatten\dut_gate.$procmux$210: \dut_gate.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gate.$procmux$208: \dut_gate.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gate.$procmux$205: \dut_gate.active -> 1'1
+      Replacing known input bits on port B of cell $flatten\dut_gate.$procmux$198: { \dut_gate.active \dut_gate.active \dut_gate.active } -> 3'000
+      Replacing known input bits on port B of cell $flatten\dut_gold.$procmux$458: \dut_gold.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gold.$procmux$456: \dut_gold.active -> 1'1
+      Replacing known input bits on port A of cell $flatten\dut_gold.$procmux$453: \dut_gold.active -> 1'1
+      Replacing known input bits on port B of cell $flatten\dut_gold.$procmux$446: { \dut_gold.active \dut_gold.active \dut_gold.active } -> 3'000
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~194 debug messages>
+
+4.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$198: $auto$opt_reduce.cc:137:opt_pmux$587
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$243: $auto$opt_reduce.cc:137:opt_pmux$589
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$263: $auto$opt_reduce.cc:137:opt_pmux$591
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$276: $auto$opt_reduce.cc:137:opt_pmux$593
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$365: $auto$opt_reduce.cc:137:opt_pmux$595
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$379: $auto$opt_reduce.cc:137:opt_pmux$597
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$129: $auto$opt_reduce.cc:137:opt_pmux$599
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$411: $auto$opt_reduce.cc:137:opt_pmux$601
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$446: $auto$opt_reduce.cc:137:opt_pmux$603
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$143: $auto$opt_reduce.cc:137:opt_pmux$605
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$491: $auto$opt_reduce.cc:137:opt_pmux$607
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$511: $auto$opt_reduce.cc:137:opt_pmux$609
+    New ctrl vector for $pmux cell $flatten\dut_gold.$procmux$524: $auto$opt_reduce.cc:137:opt_pmux$611
+    New ctrl vector for $pmux cell $flatten\dut_gate.$procmux$163: $auto$opt_reduce.cc:137:opt_pmux$613
+  Optimizing cells in module \miter.
+Performed a total of 14 changes.
+
+4.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 264 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 250 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 248 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~48 debug messages>
+Removed a total of 16 cells.
+
+4.8.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 75 unused wires.
+<suppressed ~1 debug messages>
+
+4.8.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.8.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~204 debug messages>
+
+4.8.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+4.8.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 248 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+4.8.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.8.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.8.14. Finished fast OPT passes. (There is nothing left to do.)
+
+4.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 30 bits (of 32) from port B of cell miter.$ge$cp47-proof-shared-rx-1-byte-high-miter.v:28$49 ($ge).
+Removed top 28 bits (of 32) from port B of cell miter.$le$cp47-proof-shared-rx-1-byte-high-miter.v:28$50 ($le).
+Removed top 28 bits (of 32) from port B of cell miter.$le$cp47-proof-shared-rx-1-byte-high-miter.v:32$56 ($le).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$558_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$557_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$556_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$555_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$554_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gold.$procmux$367_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gold.$eq$cp47-proof-shared-rx-1-byte-high-gold.v:58$11 ($eq).
+Removed top 1 bits (of 4) from port A of cell miter.$flatten\dut_gold.$add$cp47-proof-shared-rx-1-byte-high-gold.v:30$1 ($add).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\dut_gold.$add$cp47-proof-shared-rx-1-byte-high-gold.v:30$1 ($add).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$310_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$309_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$308_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$307_CMP0 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$306_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\dut_gate.$procmux$131_CMP0 ($eq).
+Removed top 2 bits (of 4) from mux cell miter.$flatten\dut_gate.$ternary$cp47-proof-shared-rx-1-byte-high-gate.v:76$45 ($mux).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\dut_gate.$eq$cp47-proof-shared-rx-1-byte-high-gate.v:60$34 ($eq).
+Removed top 2 bits (of 4) from wire miter.$flatten\dut_gate.$ternary$cp47-proof-shared-rx-1-byte-high-gate.v:76$45_Y.
+Removed top 15 bits (of 32) from wire miter.gate_control.
+Removed top 15 bits (of 32) from wire miter.gold_control.
+
+4.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+4.11. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.12. Executing OPT pass (performing simple optimizations).
+
+4.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+4.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 248 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+4.12.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+4.12.4. Finished fast OPT passes.
+
+4.13. Executing SORT pass.
+
+4.14. Printing statistics.
+
+=== miter ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      293 wires
+     1049 wire bits
+       82 public wires
+      439 public wire bits
+       10 ports
+       40 port bits
+      248 cells
+        7   $add
+        2   $and
+       25   $dff
+       25   $eq
+        1   $ge
+        2   $le
+       14   $logic_and
+       10   $logic_not
+        4   $logic_or
+      141   $mux
+        1   $ne
+        6   $pmux
+        2   $reduce_bool
+        4   $reduce_or
+        2   $scopeinfo
+        1   $shr
+        1   $sub
+
+4.15. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 248 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~204 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 248 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $flatten\dut_gold.$procdff$583 ($dff) from module miter (D = $flatten\dut_gold.$procmux$373_Y, Q = \dut_gold.divider, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$617 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$373_Y, Q = \dut_gold.divider).
+Adding SRST signal on $flatten\dut_gold.$procdff$582 ($dff) from module miter (D = $flatten\dut_gold.$procmux$393_Y, Q = \dut_gold.bit_count, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$621 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$393_Y, Q = \dut_gold.bit_count).
+Adding SRST signal on $flatten\dut_gold.$procdff$581 ($dff) from module miter (D = $flatten\dut_gold.$procmux$405_Y, Q = \dut_gold.rx, rval = 8'00000000).
+Adding EN signal on $auto$ff.cc:337:slice$633 ($sdff) from module miter (D = { \dut_gold.rx [6:0] \spi_miso }, Q = \dut_gold.rx).
+Adding SRST signal on $flatten\dut_gold.$procdff$580 ($dff) from module miter (D = $flatten\dut_gold.$procmux$425_Y, Q = \dut_gold.tx, rval = 7'0000000).
+Adding EN signal on $auto$ff.cc:337:slice$641 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$425_Y, Q = \dut_gold.tx).
+Adding SRST signal on $flatten\dut_gold.$procdff$579 ($dff) from module miter (D = $flatten\dut_gold.$procmux$440_Y, Q = \dut_gold.seen, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$578 ($dff) from module miter (D = $flatten\dut_gold.$procmux$460_Y, Q = \dut_gold.active, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$577 ($dff) from module miter (D = $flatten\dut_gold.$procmux$485_Y, Q = \dut_gold.state, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$655 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$485_Y, Q = \dut_gold.state).
+Adding SRST signal on $flatten\dut_gold.$procdff$576 ($dff) from module miter (D = $flatten\dut_gold.$procmux$505_Y, Q = \dut_gold.spi_mosi, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$671 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$505_Y, Q = \dut_gold.spi_mosi).
+Adding SRST signal on $flatten\dut_gold.$procdff$575 ($dff) from module miter (D = $flatten\dut_gold.$procmux$518_Y, Q = \dut_gold.spi_sck, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$683 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$518_Y, Q = \dut_gold.spi_sck).
+Adding SRST signal on $flatten\dut_gold.$procdff$574 ($dff) from module miter (D = $flatten\dut_gold.$procmux$529_Y, Q = \dut_gold.spi_cs_n, rval = 1'1).
+Adding EN signal on $auto$ff.cc:337:slice$691 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$524_Y, Q = \dut_gold.spi_cs_n).
+Adding SRST signal on $flatten\dut_gold.$procdff$573 ($dff) from module miter (D = $flatten\dut_gold.$procmux$355_Y, Q = \dut_gold.error, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$572 ($dff) from module miter (D = $flatten\dut_gold.$procmux$350_Y, Q = \dut_gold.ready, rval = 1'0).
+Adding SRST signal on $flatten\dut_gold.$procdff$571 ($dff) from module miter (D = { $flatten\dut_gold.$procmux$327_Y $flatten\dut_gold.$procmux$344_Y }, Q = \dut_gold.rdata, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$701 ($sdff) from module miter (D = \dut_gold.rx, Q = \dut_gold.rdata [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$701 ($sdff) from module miter (D = $flatten\dut_gold.$procmux$318_Y, Q = \dut_gold.rdata [15:8]).
+Adding SRST signal on $flatten\dut_gate.$procdff$570 ($dff) from module miter (D = $flatten\dut_gate.$procmux$137_Y, Q = \dut_gate.divider, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$716 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$137_Y, Q = \dut_gate.divider).
+Adding SRST signal on $flatten\dut_gate.$procdff$569 ($dff) from module miter (D = $flatten\dut_gate.$procmux$157_Y, Q = \dut_gate.bit_count, rval = 3'000).
+Adding EN signal on $auto$ff.cc:337:slice$720 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$157_Y, Q = \dut_gate.bit_count).
+Adding SRST signal on $flatten\dut_gate.$procdff$568 ($dff) from module miter (D = $flatten\dut_gate.$procmux$177_Y, Q = \dut_gate.tx, rval = 7'0000000).
+Adding EN signal on $auto$ff.cc:337:slice$732 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$177_Y, Q = \dut_gate.tx).
+Adding SRST signal on $flatten\dut_gate.$procdff$567 ($dff) from module miter (D = $flatten\dut_gate.$procmux$192_Y, Q = \dut_gate.seen, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$566 ($dff) from module miter (D = $flatten\dut_gate.$procmux$212_Y, Q = \dut_gate.active, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$565 ($dff) from module miter (D = $flatten\dut_gate.$procmux$237_Y, Q = \dut_gate.state, rval = 4'0000).
+Adding EN signal on $auto$ff.cc:337:slice$746 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$237_Y, Q = \dut_gate.state).
+Adding SRST signal on $flatten\dut_gate.$procdff$564 ($dff) from module miter (D = $flatten\dut_gate.$procmux$257_Y, Q = \dut_gate.spi_mosi, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$762 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$257_Y, Q = \dut_gate.spi_mosi).
+Adding SRST signal on $flatten\dut_gate.$procdff$563 ($dff) from module miter (D = $flatten\dut_gate.$procmux$270_Y, Q = \dut_gate.spi_sck, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$774 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$270_Y, Q = \dut_gate.spi_sck).
+Adding SRST signal on $flatten\dut_gate.$procdff$562 ($dff) from module miter (D = $flatten\dut_gate.$procmux$281_Y, Q = \dut_gate.spi_cs_n, rval = 1'1).
+Adding EN signal on $auto$ff.cc:337:slice$782 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$276_Y, Q = \dut_gate.spi_cs_n).
+Adding SRST signal on $flatten\dut_gate.$procdff$561 ($dff) from module miter (D = $flatten\dut_gate.$procmux$119_Y, Q = \dut_gate.error, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$560 ($dff) from module miter (D = $flatten\dut_gate.$procmux$114_Y, Q = \dut_gate.ready, rval = 1'0).
+Adding SRST signal on $flatten\dut_gate.$procdff$559 ($dff) from module miter (D = { $flatten\dut_gate.$procmux$91_Y $flatten\dut_gate.$procmux$108_Y }, Q = \dut_gate.rdata, rval = 16'0000000000000000).
+Adding EN signal on $auto$ff.cc:337:slice$792 ($sdff) from module miter (D = \dut_gate.rdata [15:8], Q = \dut_gate.rdata [7:0]).
+Adding EN signal on $auto$ff.cc:337:slice$792 ($sdff) from module miter (D = $flatten\dut_gate.$procmux$87_Y, Q = \dut_gate.rdata [15:8]).
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 54 unused cells and 52 unused wires.
+<suppressed ~55 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+<suppressed ~4 debug messages>
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~137 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 270 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 242 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 238 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~96 debug messages>
+Removed a total of 32 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 32 unused wires.
+<suppressed ~1 debug messages>
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~138 debug messages>
+
+5.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+5.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 238 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+5.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+5.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.23. Finished fast OPT passes. (There is nothing left to do.)
+
+6. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up time step 1:
+Import set-constraint for this timestep: \rst = 1'1
+Final constraint equation: \rst = 1'1
+Imported 238 cells to SAT database.
+Final init constraint equation: { \dut_gate.rdata [7:0] \dut_gold.divider \dut_gold.bit_count \dut_gold.rx \dut_gold.tx \dut_gold.seen \dut_gold.active \dut_gold.state \dut_gold.spi_mosi \dut_gold.spi_sck \dut_gold.spi_cs_n \dut_gold.error \dut_gold.ready \dut_gold.rdata \dut_gate.divider \dut_gate.bit_count \dut_gate.tx \dut_gate.seen \dut_gate.active \dut_gate.state \dut_gate.spi_mosi \dut_gate.spi_sck \dut_gate.spi_cs_n \dut_gate.error \dut_gate.ready \dut_gate.rdata [15:8] } = 84'000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+Setting up time step 2:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+
+Setting up time step 1:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+** Trying induction with length 1 **
+
+Setting up time step 3:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 1] Solving problem with 11049 variables and 30032 clauses..
+Base case for induction length 1 proven.
+
+Setting up time step 2:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 1] Solving problem with 7057 variables and 19010 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   7         7                 111
+  init \dut_gate.divider                     0         0                   0
+  init \dut_gate.error                       0         0                   0
+  init \dut_gate.rdata [15:8]              127        7f            01111111
+  init \dut_gate.rdata [7:0]               167        a7            10100111
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        0         0                   0
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    1         1                   1
+  init \dut_gate.spi_sck                     1         1                   1
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                        127        7f             1111111
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   7         7                 111
+  init \dut_gold.divider                     0         0                   0
+  init \dut_gold.error                       0         0                   0
+  init \dut_gold.rdata                   15783      3da7    0011110110100111
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                        127        7f            01111111
+  init \dut_gold.seen                        0         0                   0
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    1         1                   1
+  init \dut_gold.spi_sck                     1         1                   1
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                        127        7f             1111111
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             1         1                   1
+     1 \wdata                            65290      ff0a    1111111100001010
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                              0         0    0000000000000000
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   0         0                   0
+     2 \req                                  0         0                   0
+     2 \rst                                  1         1                   1
+     2 \spi_miso                             0         0                   0
+     2 \wdata                                0         0    0000000000000000
+     2 \write                                0         0                   0
+
+** Trying induction with length 2 **
+
+Setting up time step 4:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 2] Solving problem with 15157 variables and 41403 clauses..
+Base case for induction length 2 proven.
+
+Setting up time step 3:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 2] Solving problem with 11418 variables and 31223 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   7         7                 111
+  init \dut_gate.divider                     0         0                   0
+  init \dut_gate.error                       0         0                   0
+  init \dut_gate.rdata [15:8]               39        27            00100111
+  init \dut_gate.rdata [7:0]                 0         0            00000000
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        0         0                   0
+  init \dut_gate.spi_cs_n                    1         1                   1
+  init \dut_gate.spi_mosi                    1         1                   1
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          0         0             0000000
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   7         7                 111
+  init \dut_gold.divider                     0         0                   0
+  init \dut_gold.error                       0         0                   0
+  init \dut_gold.rdata                   20224      4f00    0100111100000000
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                         39        27            00100111
+  init \dut_gold.seen                        0         0                   0
+  init \dut_gold.spi_cs_n                    1         1                   1
+  init \dut_gold.spi_mosi                    1         1                   1
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          0         0             0000000
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          0         0                   0
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             1         1                   1
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          1         1                   1
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  0         0                   0
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             0         0                   0
+     2 \wdata                            20738      5102    0101000100000010
+     2 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                              0         0    0000000000000000
+     3 \bank                                 0         0                   0
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   0         0                   0
+     3 \req                                  0         0                   0
+     3 \rst                                  1         1                   1
+     3 \spi_miso                             0         0                   0
+     3 \wdata                                0         0    0000000000000000
+     3 \write                                1         1                   1
+
+** Trying induction with length 3 **
+
+Setting up time step 5:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 3] Solving problem with 19518 variables and 53616 clauses..
+Base case for induction length 3 proven.
+
+Setting up time step 4:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 3] Solving problem with 16032 variables and 44278 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   7         7                 111
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       0         0                   0
+  init \dut_gate.rdata [15:8]               63        3f            00111111
+  init \dut_gate.rdata [7:0]                 0         0            00000000
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                        126        7e             1111110
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   7         7                 111
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       0         0                   0
+  init \dut_gold.rdata                   32512      7f00    0111111100000000
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                         63        3f            00111111
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                        126        7e             1111110
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  0         0                   0
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             1         1                   1
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57510      e0a6    1110000010100110
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          65169      fe91    1111111010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          1         1                   1
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             1         1                   1
+     3 \wdata                            16896      4200    0100001000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                              0         0    0000000000000000
+     4 \bank                                 0         0                   0
+     4 \byte_access                          0         0                   0
+     4 \clk                                  0         0                   0
+     4 \ok                                   0         0                   0
+     4 \req                                  0         0                   0
+     4 \rst                                  1         1                   1
+     4 \spi_miso                             0         0                   0
+     4 \wdata                                0         0    0000000000000000
+     4 \write                                1         1                   1
+
+** Trying induction with length 4 **
+
+Setting up time step 6:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 4] Solving problem with 24132 variables and 66671 clauses..
+Base case for induction length 4 proven.
+
+Setting up time step 5:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 4] Solving problem with 20899 variables and 58175 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   6         6                 110
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       0         0                   0
+  init \dut_gate.rdata [15:8]                5         5            00000101
+  init \dut_gate.rdata [7:0]               137        89            10001001
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    1         1                   1
+  init \dut_gate.spi_sck                     1         1                   1
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                         21        15             0010101
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   6         6                 110
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       0         0                   0
+  init \dut_gold.rdata                    3721       e89    0000111010001001
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                          5         5            00000101
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    1         1                   1
+  init \dut_gold.spi_sck                     1         1                   1
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                         21        15             0010101
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             1         1                   1
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57510      e0a6    1110000010100110
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             0         0                   0
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          65168      fe90    1111111010010000
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             1         1                   1
+     3 \wdata                            16896      4200    0100001000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                           8450      2102    0010000100000010
+     4 \bank                                 1         1                   1
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             0         0                   0
+     4 \wdata                              256       100    0000000100000000
+     4 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                              0         0    0000000000000000
+     5 \bank                                 0         0                   0
+     5 \byte_access                          0         0                   0
+     5 \clk                                  0         0                   0
+     5 \ok                                   0         0                   0
+     5 \req                                  0         0                   0
+     5 \rst                                  1         1                   1
+     5 \spi_miso                             0         0                   0
+     5 \wdata                                0         0    0000000000000000
+     5 \write                                1         1                   1
+
+** Trying induction with length 5 **
+
+Setting up time step 7:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 5] Solving problem with 28999 variables and 80568 clauses..
+Base case for induction length 5 proven.
+
+Setting up time step 6:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 5] Solving problem with 26019 variables and 72914 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   6         6                 110
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       0         0                   0
+  init \dut_gate.rdata [15:8]               88        58            01011000
+  init \dut_gate.rdata [7:0]                 0         0            00000000
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    1         1                   1
+  init \dut_gate.spi_mosi                    1         1                   1
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          0         0             0000000
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   6         6                 110
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       0         0                   0
+  init \dut_gold.rdata                   41472      a200    1010001000000000
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                         24        18            00011000
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    1         1                   1
+  init \dut_gold.spi_mosi                    1         1                   1
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          0         0             0000000
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57510      e0a6    1110000010100110
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60560      ec90    1110110010010000
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             0         0                   0
+     3 \wdata                            16384      4000    0100000000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                           8451      2103    0010000100000011
+     4 \bank                                 1         1                   1
+     4 \byte_access                          0         0                   0
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                              256       100    0000000100000000
+     4 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  1         1                   1
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             1         1                   1
+     5 \wdata                            16390      4006    0100000000000110
+     5 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          0         0                   0
+     6 \clk                                  0         0                   0
+     6 \ok                                   0         0                   0
+     6 \req                                  0         0                   0
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+
+** Trying induction with length 6 **
+
+Setting up time step 8:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 6] Solving problem with 34119 variables and 95307 clauses..
+Base case for induction length 6 proven.
+
+Setting up time step 7:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 6] Solving problem with 31392 variables and 88495 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   5         5                 101
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]              216        d8            11011000
+  init \dut_gate.rdata [7:0]                 4         4            00000100
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    1         1                   1
+  init \dut_gate.spi_sck                     1         1                   1
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                         31        1f             0011111
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   5         5                 101
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   28676      7004    0111000000000100
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                         24        18            00011000
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    1         1                   1
+  init \dut_gold.spi_sck                     1         1                   1
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                         31        1f             0011111
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          0         0                   0
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2562       a02    0000101000000010
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57510      e0a6    1110000010100110
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20742      5106    0101000100000110
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60560      ec90    1110110010010000
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             1         1                   1
+     3 \wdata                            16386      4002    0100000000000010
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                           8451      2103    0010000100000011
+     4 \bank                                 1         1                   1
+     4 \byte_access                          0         0                   0
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                              262       106    0000000100000110
+     4 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  1         1                   1
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             1         1                   1
+     5 \wdata                            16386      4002    0100000000000010
+     5 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          1         1                   1
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  0         0                   0
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                2         2    0000000000000010
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                              0         0    0000000000000000
+     7 \bank                                 0         0                   0
+     7 \byte_access                          0         0                   0
+     7 \clk                                  0         0                   0
+     7 \ok                                   0         0                   0
+     7 \req                                  0         0                   0
+     7 \rst                                  1         1                   1
+     7 \spi_miso                             0         0                   0
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+
+** Trying induction with length 7 **
+
+Setting up time step 9:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 7] Solving problem with 39492 variables and 110888 clauses..
+Base case for induction length 7 proven.
+
+Setting up time step 8:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 7] Solving problem with 37018 variables and 104918 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   5         5                 101
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]              127        7f            01111111
+  init \dut_gate.rdata [7:0]                92        5c            01011100
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          0         0             0000000
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   5         5                 101
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   31580      7b5c    0111101101011100
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                        127        7f            01111111
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          0         0             0000000
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  0         0                   0
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60561      ec91    1110110010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  0         0                   0
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             0         0                   0
+     3 \wdata                            16384      4000    0100000000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                           8451      2103    0010000100000011
+     4 \bank                                 1         1                   1
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                                0         0    0000000000000000
+     4 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  0         0                   0
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             1         1                   1
+     5 \wdata                            20480      5000    0101000000000000
+     5 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          0         0                   0
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  1         1                   1
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             1         1                   1
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                          10372      2884    0010100010000100
+     7 \bank                                 1         1                   1
+     7 \byte_access                          1         1                   1
+     7 \clk                                  0         0                   0
+     7 \ok                                   1         1                   1
+     7 \req                                  0         0                   0
+     7 \rst                                  0         0                   0
+     7 \spi_miso                             1         1                   1
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     8 \address                              0         0    0000000000000000
+     8 \bank                                 0         0                   0
+     8 \byte_access                          0         0                   0
+     8 \clk                                  0         0                   0
+     8 \ok                                   0         0                   0
+     8 \req                                  0         0                   0
+     8 \rst                                  0         0                   0
+     8 \spi_miso                             0         0                   0
+     8 \wdata                                0         0    0000000000000000
+     8 \write                                1         1                   1
+
+** Trying induction with length 8 **
+
+Setting up time step 10:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 8] Solving problem with 45118 variables and 127311 clauses..
+Base case for induction length 8 proven.
+
+Setting up time step 9:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 8] Solving problem with 42897 variables and 122183 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   4         4                 100
+  init \dut_gate.divider                     0         0                   0
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]               15         f            00001111
+  init \dut_gate.rdata [7:0]               192        c0            11000000
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          0         0             0000000
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   4         4                 100
+  init \dut_gold.divider                     0         0                   0
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   29632      73c0    0111001111000000
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                         15         f            00001111
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          0         0             0000000
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  0         0                   0
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60561      ec91    1110110010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  0         0                   0
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             1         1                   1
+     3 \wdata                            32318      7e3e    0111111000111110
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                            259       103    0000000100000011
+     4 \bank                                 0         0                   0
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  0         0                   0
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                             8448      2100    0010000100000000
+     4 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  0         0                   0
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             0         0                   0
+     5 \wdata                            32382      7e7e    0111111001111110
+     5 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          1         1                   1
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  0         0                   0
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                          10372      2884    0010100010000100
+     7 \bank                                 0         0                   0
+     7 \byte_access                          0         0                   0
+     7 \clk                                  0         0                   0
+     7 \ok                                   1         1                   1
+     7 \req                                  0         0                   0
+     7 \rst                                  0         0                   0
+     7 \spi_miso                             1         1                   1
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     8 \address                          64960      fdc0    1111110111000000
+     8 \bank                                 1         1                   1
+     8 \byte_access                          1         1                   1
+     8 \clk                                  0         0                   0
+     8 \ok                                   1         1                   1
+     8 \req                                  1         1                   1
+     8 \rst                                  0         0                   0
+     8 \spi_miso                             0         0                   0
+     8 \wdata                                0         0    0000000000000000
+     8 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     9 \address                              1         1    0000000000000001
+     9 \bank                                 0         0                   0
+     9 \byte_access                          0         0                   0
+     9 \clk                                  0         0                   0
+     9 \ok                                   0         0                   0
+     9 \req                                  0         0                   0
+     9 \rst                                  0         0                   0
+     9 \spi_miso                             0         0                   0
+     9 \wdata                                0         0    0000000000000000
+     9 \write                                1         1                   1
+
+** Trying induction with length 9 **
+
+Setting up time step 11:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 9] Solving problem with 50997 variables and 144576 clauses..
+Base case for induction length 9 proven.
+
+Setting up time step 10:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 9] Solving problem with 49029 variables and 140290 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   3         3                 011
+  init \dut_gate.divider                     0         0                   0
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]               11         b            00001011
+  init \dut_gate.rdata [7:0]                26        1a            00011010
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    1         1                   1
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     1         1                   1
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          0         0             0000000
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   3         3                 011
+  init \dut_gold.divider                     0         0                   0
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   48410      bd1a    1011110100011010
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                        251        fb            11111011
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    1         1                   1
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     1         1                   1
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          0         0             0000000
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60561      ec91    1110110010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             1         1                   1
+     3 \wdata                            32256      7e00    0111111000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                            259       103    0000000100000011
+     4 \bank                                 0         0                   0
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                             8448      2100    0010000100000000
+     4 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  1         1                   1
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             0         0                   0
+     5 \wdata                            32256      7e00    0111111000000000
+     5 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          0         0                   0
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  1         1                   1
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                           2948       b84    0000101110000100
+     7 \bank                                 0         0                   0
+     7 \byte_access                          0         0                   0
+     7 \clk                                  0         0                   0
+     7 \ok                                   1         1                   1
+     7 \req                                  0         0                   0
+     7 \rst                                  0         0                   0
+     7 \spi_miso                             0         0                   0
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     8 \address                          64960      fdc0    1111110111000000
+     8 \bank                                 1         1                   1
+     8 \byte_access                          0         0                   0
+     8 \clk                                  0         0                   0
+     8 \ok                                   1         1                   1
+     8 \req                                  0         0                   0
+     8 \rst                                  0         0                   0
+     8 \spi_miso                             1         1                   1
+     8 \wdata                                2         2    0000000000000010
+     8 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     9 \address                          21632      5480    0101010010000000
+     9 \bank                                 0         0                   0
+     9 \byte_access                          1         1                   1
+     9 \clk                                  0         0                   0
+     9 \ok                                   1         1                   1
+     9 \req                                  1         1                   1
+     9 \rst                                  0         0                   0
+     9 \spi_miso                             1         1                   1
+     9 \wdata                            16386      4002    0100000000000010
+     9 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+    10 \address                              0         0    0000000000000000
+    10 \bank                                 0         0                   0
+    10 \byte_access                          1         1                   1
+    10 \clk                                  0         0                   0
+    10 \ok                                   0         0                   0
+    10 \req                                  0         0                   0
+    10 \rst                                  0         0                   0
+    10 \spi_miso                             0         0                   0
+    10 \wdata                                0         0    0000000000000000
+    10 \write                                1         1                   1
+
+** Trying induction with length 10 **
+
+Setting up time step 12:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 10] Solving problem with 57129 variables and 162683 clauses..
+Base case for induction length 10 proven.
+
+Setting up time step 11:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 10] Solving problem with 55414 variables and 159239 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   3         3                 011
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]               22        16            00010110
+  init \dut_gate.rdata [7:0]               148        94            10010100
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    1         1                   1
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     1         1                   1
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          0         0             0000000
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   3         3                 011
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   29076      7194    0111000110010100
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                        246        f6            11110110
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    1         1                   1
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     1         1                   1
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          0         0             0000000
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60561      ec91    1110110010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             0         0                   0
+     3 \wdata                            32256      7e00    0111111000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                            259       103    0000000100000011
+     4 \bank                                 0         0                   0
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                             8448      2100    0010000100000000
+     4 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  1         1                   1
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             1         1                   1
+     5 \wdata                            32256      7e00    0111111000000000
+     5 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          1         1                   1
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  1         1                   1
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                           2948       b84    0000101110000100
+     7 \bank                                 0         0                   0
+     7 \byte_access                          0         0                   0
+     7 \clk                                  0         0                   0
+     7 \ok                                   1         1                   1
+     7 \req                                  1         1                   1
+     7 \rst                                  0         0                   0
+     7 \spi_miso                             0         0                   0
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     8 \address                          64960      fdc0    1111110111000000
+     8 \bank                                 1         1                   1
+     8 \byte_access                          0         0                   0
+     8 \clk                                  0         0                   0
+     8 \ok                                   1         1                   1
+     8 \req                                  1         1                   1
+     8 \rst                                  0         0                   0
+     8 \spi_miso                             0         0                   0
+     8 \wdata                            14592      3900    0011100100000000
+     8 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     9 \address                          21632      5480    0101010010000000
+     9 \bank                                 0         0                   0
+     9 \byte_access                          0         0                   0
+     9 \clk                                  0         0                   0
+     9 \ok                                   1         1                   1
+     9 \req                                  1         1                   1
+     9 \rst                                  0         0                   0
+     9 \spi_miso                             1         1                   1
+     9 \wdata                            16384      4000    0100000000000000
+     9 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+    10 \address                          53433      d0b9    1101000010111001
+    10 \bank                                 1         1                   1
+    10 \byte_access                          1         1                   1
+    10 \clk                                  0         0                   0
+    10 \ok                                   1         1                   1
+    10 \req                                  1         1                   1
+    10 \rst                                  0         0                   0
+    10 \spi_miso                             1         1                   1
+    10 \wdata                             2560       a00    0000101000000000
+    10 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+    11 \address                              0         0    0000000000000000
+    11 \bank                                 0         0                   0
+    11 \byte_access                          1         1                   1
+    11 \clk                                  0         0                   0
+    11 \ok                                   0         0                   0
+    11 \req                                  0         0                   0
+    11 \rst                                  1         1                   1
+    11 \spi_miso                             0         0                   0
+    11 \wdata                                0         0    0000000000000000
+    11 \write                                1         1                   1
+
+** Trying induction with length 11 **
+
+Setting up time step 13:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 11] Solving problem with 63514 variables and 181632 clauses..
+Base case for induction length 11 proven.
+
+Setting up time step 12:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 11] Solving problem with 62052 variables and 179030 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   3         3                 011
+  init \dut_gate.divider                     1         1                   1
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]               30        1e            00011110
+  init \dut_gate.rdata [7:0]                96        60            01100000
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    1         1                   1
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          2         2             0000010
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   3         3                 011
+  init \dut_gold.divider                     1         1                   1
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   52064      cb60    1100101101100000
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                        254        fe            11111110
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    1         1                   1
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          2         2             0000010
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          1         1                   1
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             0         0                   0
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          0         0                   0
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             0         0                   0
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60561      ec91    1110110010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             0         0                   0
+     3 \wdata                            32256      7e00    0111111000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                            259       103    0000000100000011
+     4 \bank                                 0         0                   0
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             1         1                   1
+     4 \wdata                             8448      2100    0010000100000000
+     4 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  1         1                   1
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             1         1                   1
+     5 \wdata                            32256      7e00    0111111000000000
+     5 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          1         1                   1
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  1         1                   1
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                           2948       b84    0000101110000100
+     7 \bank                                 0         0                   0
+     7 \byte_access                          0         0                   0
+     7 \clk                                  0         0                   0
+     7 \ok                                   1         1                   1
+     7 \req                                  1         1                   1
+     7 \rst                                  0         0                   0
+     7 \spi_miso                             0         0                   0
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     8 \address                          64960      fdc0    1111110111000000
+     8 \bank                                 1         1                   1
+     8 \byte_access                          0         0                   0
+     8 \clk                                  0         0                   0
+     8 \ok                                   1         1                   1
+     8 \req                                  1         1                   1
+     8 \rst                                  0         0                   0
+     8 \spi_miso                             1         1                   1
+     8 \wdata                            14594      3902    0011100100000010
+     8 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     9 \address                          21632      5480    0101010010000000
+     9 \bank                                 0         0                   0
+     9 \byte_access                          0         0                   0
+     9 \clk                                  0         0                   0
+     9 \ok                                   1         1                   1
+     9 \req                                  0         0                   0
+     9 \rst                                  0         0                   0
+     9 \spi_miso                             1         1                   1
+     9 \wdata                            16386      4002    0100000000000010
+     9 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+    10 \address                          53432      d0b8    1101000010111000
+    10 \bank                                 1         1                   1
+    10 \byte_access                          0         0                   0
+    10 \clk                                  0         0                   0
+    10 \ok                                   1         1                   1
+    10 \req                                  1         1                   1
+    10 \rst                                  0         0                   0
+    10 \spi_miso                             1         1                   1
+    10 \wdata                             2562       a02    0000101000000010
+    10 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+    11 \address                          11811      2e23    0010111000100011
+    11 \bank                                 1         1                   1
+    11 \byte_access                          1         1                   1
+    11 \clk                                  0         0                   0
+    11 \ok                                   1         1                   1
+    11 \req                                  0         0                   0
+    11 \rst                                  0         0                   0
+    11 \spi_miso                             0         0                   0
+    11 \wdata                            11776      2e00    0010111000000000
+    11 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+    12 \address                              1         1    0000000000000001
+    12 \bank                                 0         0                   0
+    12 \byte_access                          0         0                   0
+    12 \clk                                  0         0                   0
+    12 \ok                                   0         0                   0
+    12 \req                                  0         0                   0
+    12 \rst                                  1         1                   1
+    12 \spi_miso                             0         0                   0
+    12 \wdata                                0         0    0000000000000000
+    12 \write                                0         0                   0
+
+** Trying induction with length 12 **
+
+Setting up time step 14:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[base case 12] Solving problem with 70152 variables and 201423 clauses..
+Base case for induction length 12 proven.
+
+Setting up time step 13:
+Final constraint equation: { } = { }
+Imported 238 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+[induction step 12] Solving problem with 68943 variables and 199663 clauses..
+Induction step failed. Incrementing induction length.
+
+  Time Signal Name                         Dec       Hex                 Bin
+  ---- --------------------------- ----------- --------- -------------------
+  init \dut_gate.active                      1         1                   1
+  init \dut_gate.bit_count                   2         2                 010
+  init \dut_gate.divider                     0         0                   0
+  init \dut_gate.error                       1         1                   1
+  init \dut_gate.rdata [15:8]              113        71            01110001
+  init \dut_gate.rdata [7:0]                16        10            00010000
+  init \dut_gate.ready                       0         0                   0
+  init \dut_gate.seen                        1         1                   1
+  init \dut_gate.spi_cs_n                    0         0                   0
+  init \dut_gate.spi_mosi                    0         0                   0
+  init \dut_gate.spi_sck                     0         0                   0
+  init \dut_gate.state                       7         7                0111
+  init \dut_gate.tx                          2         2             0000010
+  init \dut_gold.active                      1         1                   1
+  init \dut_gold.bit_count                   2         2                 010
+  init \dut_gold.divider                     0         0                   0
+  init \dut_gold.error                       1         1                   1
+  init \dut_gold.rdata                   24336      5f10    0101111100010000
+  init \dut_gold.ready                       0         0                   0
+  init \dut_gold.rx                        249        f9            11111001
+  init \dut_gold.seen                        1         1                   1
+  init \dut_gold.spi_cs_n                    0         0                   0
+  init \dut_gold.spi_mosi                    0         0                   0
+  init \dut_gold.spi_sck                     0         0                   0
+  init \dut_gold.state                       7         7                0111
+  init \dut_gold.tx                          2         2             0000010
+  ---- --------------------------- ----------- --------- -------------------
+     1 \address                          63996      f9fc    1111100111111100
+     1 \bank                                 0         0                   0
+     1 \byte_access                          0         0                   0
+     1 \clk                                  0         0                   0
+     1 \ok                                   1         1                   1
+     1 \req                                  1         1                   1
+     1 \rst                                  0         0                   0
+     1 \spi_miso                             1         1                   1
+     1 \wdata                             2560       a00    0000101000000000
+     1 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     2 \address                          57511      e0a7    1110000010100111
+     2 \bank                                 0         0                   0
+     2 \byte_access                          1         1                   1
+     2 \clk                                  0         0                   0
+     2 \ok                                   1         1                   1
+     2 \req                                  1         1                   1
+     2 \rst                                  0         0                   0
+     2 \spi_miso                             1         1                   1
+     2 \wdata                            20736      5100    0101000100000000
+     2 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     3 \address                          60561      ec91    1110110010010001
+     3 \bank                                 1         1                   1
+     3 \byte_access                          0         0                   0
+     3 \clk                                  0         0                   0
+     3 \ok                                   1         1                   1
+     3 \req                                  1         1                   1
+     3 \rst                                  0         0                   0
+     3 \spi_miso                             1         1                   1
+     3 \wdata                            32256      7e00    0111111000000000
+     3 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     4 \address                            259       103    0000000100000011
+     4 \bank                                 0         0                   0
+     4 \byte_access                          1         1                   1
+     4 \clk                                  0         0                   0
+     4 \ok                                   1         1                   1
+     4 \req                                  1         1                   1
+     4 \rst                                  0         0                   0
+     4 \spi_miso                             0         0                   0
+     4 \wdata                             8448      2100    0010000100000000
+     4 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     5 \address                          46343      b507    1011010100000111
+     5 \bank                                 0         0                   0
+     5 \byte_access                          1         1                   1
+     5 \clk                                  0         0                   0
+     5 \ok                                   1         1                   1
+     5 \req                                  1         1                   1
+     5 \rst                                  0         0                   0
+     5 \spi_miso                             1         1                   1
+     5 \wdata                            32256      7e00    0111111000000000
+     5 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     6 \address                              0         0    0000000000000000
+     6 \bank                                 0         0                   0
+     6 \byte_access                          1         1                   1
+     6 \clk                                  0         0                   0
+     6 \ok                                   1         1                   1
+     6 \req                                  1         1                   1
+     6 \rst                                  0         0                   0
+     6 \spi_miso                             0         0                   0
+     6 \wdata                                0         0    0000000000000000
+     6 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     7 \address                           2948       b84    0000101110000100
+     7 \bank                                 0         0                   0
+     7 \byte_access                          0         0                   0
+     7 \clk                                  0         0                   0
+     7 \ok                                   1         1                   1
+     7 \req                                  1         1                   1
+     7 \rst                                  0         0                   0
+     7 \spi_miso                             1         1                   1
+     7 \wdata                                0         0    0000000000000000
+     7 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+     8 \address                          64960      fdc0    1111110111000000
+     8 \bank                                 1         1                   1
+     8 \byte_access                          0         0                   0
+     8 \clk                                  0         0                   0
+     8 \ok                                   1         1                   1
+     8 \req                                  1         1                   1
+     8 \rst                                  0         0                   0
+     8 \spi_miso                             1         1                   1
+     8 \wdata                            14592      3900    0011100100000000
+     8 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+     9 \address                          21632      5480    0101010010000000
+     9 \bank                                 0         0                   0
+     9 \byte_access                          0         0                   0
+     9 \clk                                  0         0                   0
+     9 \ok                                   1         1                   1
+     9 \req                                  1         1                   1
+     9 \rst                                  0         0                   0
+     9 \spi_miso                             1         1                   1
+     9 \wdata                            16384      4000    0100000000000000
+     9 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+    10 \address                          53425      d0b1    1101000010110001
+    10 \bank                                 1         1                   1
+    10 \byte_access                          1         1                   1
+    10 \clk                                  0         0                   0
+    10 \ok                                   1         1                   1
+    10 \req                                  1         1                   1
+    10 \rst                                  0         0                   0
+    10 \spi_miso                             0         0                   0
+    10 \wdata                             2593       a21    0000101000100001
+    10 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+    11 \address                          11810      2e22    0010111000100010
+    11 \bank                                 1         1                   1
+    11 \byte_access                          0         0                   0
+    11 \clk                                  0         0                   0
+    11 \ok                                   1         1                   1
+    11 \req                                  1         1                   1
+    11 \rst                                  0         0                   0
+    11 \spi_miso                             1         1                   1
+    11 \wdata                            11780      2e04    0010111000000100
+    11 \write                                1         1                   1
+  ---- --------------------------- ----------- --------- -------------------
+    12 \address                          64646      fc86    1111110010000110
+    12 \bank                                 0         0                   0
+    12 \byte_access                          1         1                   1
+    12 \clk                                  0         0                   0
+    12 \ok                                   1         1                   1
+    12 \req                                  0         0                   0
+    12 \rst                                  0         0                   0
+    12 \spi_miso                             0         0                   0
+    12 \wdata                                0         0    0000000000000000
+    12 \write                                0         0                   0
+  ---- --------------------------- ----------- --------- -------------------
+    13 \address                              1         1    0000000000000001
+    13 \bank                                 0         0                   0
+    13 \byte_access                          0         0                   0
+    13 \clk                                  0         0                   0
+    13 \ok                                   0         0                   0
+    13 \req                                  0         0                   0
+ERROR: Called with -verify and proof did fail!
+    13 \rst                                  1         1                   1
+    13 \spi_miso                             0         0                   0
+    13 \wdata                                0         0    0000000000000000
+    13 \write                                1         1                   1
+
+Reached maximum number of time steps -> proof failed.
+
+   ______                   ___       ___       _ _            _ _ 
+  (_____ \                 / __)     / __)     (_) |          | | |
+   _____) )___ ___   ___ _| |__    _| |__ _____ _| | _____  __| | |
+  |  ____/ ___) _ \ / _ (_   __)  (_   __|____ | | || ___ |/ _  |_|
+  | |   | |  | |_| | |_| || |       | |  / ___ | | || ____( (_| |_ 
+  |_|   |_|   \___/ \___/ |_|       |_|  \_____|_|\_)_____)\____|_|
+
+

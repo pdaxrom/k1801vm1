@@ -1,0 +1,106 @@
+{
+  "tests": [
+    {
+      "variant": "byte-mux",
+      "divider": 1,
+      "qualified_data": false,
+      "defect": "none",
+      "tag": "cp47-proof-byte-mux-1-none",
+      "returncode": 0
+    },
+    {
+      "variant": "byte-mux",
+      "divider": 1,
+      "qualified_data": false,
+      "defect": "bank-alias",
+      "tag": "cp47-proof-byte-mux-1-bank-alias",
+      "returncode": 1
+    },
+    {
+      "variant": "byte-mux",
+      "divider": 3,
+      "qualified_data": false,
+      "defect": "none",
+      "tag": "cp47-proof-byte-mux-3-none",
+      "returncode": 0
+    },
+    {
+      "variant": "shared-rx",
+      "divider": 1,
+      "qualified_data": true,
+      "defect": "none",
+      "tag": "cp47-proof-shared-rx-1-none",
+      "returncode": 0
+    },
+    {
+      "variant": "shared-rx",
+      "divider": 1,
+      "qualified_data": true,
+      "defect": "byte-high",
+      "tag": "cp47-proof-shared-rx-1-byte-high",
+      "returncode": 1
+    },
+    {
+      "variant": "shared-rx",
+      "divider": 3,
+      "qualified_data": true,
+      "defect": "none",
+      "tag": "cp47-proof-shared-rx-3-none",
+      "returncode": 0
+    },
+    {
+      "variant": "combined",
+      "divider": 1,
+      "qualified_data": true,
+      "defect": "none",
+      "tag": "cp47-proof-combined-1-none",
+      "returncode": 0
+    },
+    {
+      "variant": "combined",
+      "divider": 3,
+      "qualified_data": true,
+      "defect": "none",
+      "tag": "cp47-proof-combined-3-none",
+      "returncode": 0
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp47-fram/baseline/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "build/cp47-fram/byte-mux/uj11_board_fram.v": "478c65f92f38458fc43f5c6ed8a36643aa5578794eba5768aa724847a27b1f89",
+    "build/cp47-fram/combined/uj11_board_fram.v": "486418ab3344c7e6defae4c7a6710ea8548a72e687a2cd051d0c48ae60d82a70",
+    "build/cp47-fram/inputs.json": "a62d9b078f241c78251a0bbee4a538420576fb2e823a556be9f262e99d61b60c",
+    "build/cp47-fram/shared-rx/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp47-proof/cp47-proof-byte-mux-1-bank-alias-gate.v": "e15624626d188298d9c2163821e0eb031efc713ff4e30ef1040a374ac01abfa4",
+    "build/cp47-proof/cp47-proof-byte-mux-1-bank-alias-gold.v": "ebcaa1f46ad588bac873c6c0ded27087b64b8c3c778f96b83a902a2fa9e1a2d4",
+    "build/cp47-proof/cp47-proof-byte-mux-1-bank-alias.ys": "31e7b628b3f71a89a2922fc5480b51b8681458c645f302fc65e8ca2cdbfac252",
+    "build/cp47-proof/cp47-proof-byte-mux-1-none-gate.v": "25f9707f9c9aee1f9dd624345e40714e2b1c0de37d61ade592d0e2a27e9a1426",
+    "build/cp47-proof/cp47-proof-byte-mux-1-none-gold.v": "ebcaa1f46ad588bac873c6c0ded27087b64b8c3c778f96b83a902a2fa9e1a2d4",
+    "build/cp47-proof/cp47-proof-byte-mux-1-none.ys": "2d45644ec3e1ccaecbb7e34af166fb6f6d22c158be019861cef4245a471b667e",
+    "build/cp47-proof/cp47-proof-byte-mux-3-none-gate.v": "37dd1c0fb3289a96c9bd5227920d095271ffc375ef111d92ec487cb2746b8baa",
+    "build/cp47-proof/cp47-proof-byte-mux-3-none-gold.v": "9640b05228f3cab9514992c8c3334208910fb14c7e0efb52f98c577de67f0ea4",
+    "build/cp47-proof/cp47-proof-byte-mux-3-none.ys": "52a664fceb443ec85bde31f1e772312973149677f99a08d4df2815093ccf124c",
+    "build/cp47-proof/cp47-proof-combined-1-none-gate.v": "242ecdc957ddcaa08c135952353a0414264d016681043fbb99790f165af4fa4d",
+    "build/cp47-proof/cp47-proof-combined-1-none-gold.v": "4886a105bc0d8ec0da743a1d9f2c6531c7967b6ba74d82434393fd21b4224736",
+    "build/cp47-proof/cp47-proof-combined-1-none-miter.v": "e87c1c838983ca0728c93830ea4e568f6f061803bb9e9d2ab1190d2e0a0f014a",
+    "build/cp47-proof/cp47-proof-combined-1-none.ys": "e2d97c27e3d287f919072a8ed62f870403146cbb9e3d62e384f9a7ae2b7b4a19",
+    "build/cp47-proof/cp47-proof-combined-3-none-gate.v": "5852aa9fb438d7c59a752bf6c9e02db8ad1675c8cbed3f17b6fa98f07ef0f34e",
+    "build/cp47-proof/cp47-proof-combined-3-none-gold.v": "3b58a44115d28ed8a1b12e8d13a2ce0a4dd7d84feb2510c6aafad08d88e67c2b",
+    "build/cp47-proof/cp47-proof-combined-3-none-miter.v": "e87c1c838983ca0728c93830ea4e568f6f061803bb9e9d2ab1190d2e0a0f014a",
+    "build/cp47-proof/cp47-proof-combined-3-none.ys": "fab8b590695ba9a7cfa3f8cbdadd691ef50efe2fe31e93e1a5cc09ed5c825fb2",
+    "build/cp47-proof/cp47-proof-shared-rx-1-byte-high-gate.v": "de9c7dc4c2988c6e4f18237725fab63f8377cec7ba64d4ae02bbb768b2db014d",
+    "build/cp47-proof/cp47-proof-shared-rx-1-byte-high-gold.v": "4886a105bc0d8ec0da743a1d9f2c6531c7967b6ba74d82434393fd21b4224736",
+    "build/cp47-proof/cp47-proof-shared-rx-1-byte-high-miter.v": "e87c1c838983ca0728c93830ea4e568f6f061803bb9e9d2ab1190d2e0a0f014a",
+    "build/cp47-proof/cp47-proof-shared-rx-1-byte-high.ys": "cba82525c522084e8231f8ed6ebdf13c1bef5adda816b948178962f5a5e5cbe3",
+    "build/cp47-proof/cp47-proof-shared-rx-1-none-gate.v": "d6c343a5972a838e3ee0f55fda27fdc28507faae3129e743659f95c4afc3df47",
+    "build/cp47-proof/cp47-proof-shared-rx-1-none-gold.v": "4886a105bc0d8ec0da743a1d9f2c6531c7967b6ba74d82434393fd21b4224736",
+    "build/cp47-proof/cp47-proof-shared-rx-1-none-miter.v": "e87c1c838983ca0728c93830ea4e568f6f061803bb9e9d2ab1190d2e0a0f014a",
+    "build/cp47-proof/cp47-proof-shared-rx-1-none.ys": "6eb9427ba1c53f4b76a8cf1ff9aa28fcd1bee09ee50a396be825ef52f8ffed11",
+    "build/cp47-proof/cp47-proof-shared-rx-3-none-gate.v": "0822920013517554eef6201ad5b8c02dca0213365961dd2235f964bfa67ad377",
+    "build/cp47-proof/cp47-proof-shared-rx-3-none-gold.v": "3b58a44115d28ed8a1b12e8d13a2ce0a4dd7d84feb2510c6aafad08d88e67c2b",
+    "build/cp47-proof/cp47-proof-shared-rx-3-none-miter.v": "e87c1c838983ca0728c93830ea4e568f6f061803bb9e9d2ab1190d2e0a0f014a",
+    "build/cp47-proof/cp47-proof-shared-rx-3-none.ys": "d9fcaf593b2ceaac8ff449a3a62ed2ea9631a82fb011572e5c7d45af8f8b2669",
+    "tools/build_fram_cp47.py": "07c5c0bbe0b0d6b33424a08bf75306395a71d23a0cde694feaf1fe66e4a25ded",
+    "tools/check_fram_cp47.py": "fb9eb92954372fbee88f80ade2f1e9201942572061f6ccfa72901e1519757e5a"
+  }
+}

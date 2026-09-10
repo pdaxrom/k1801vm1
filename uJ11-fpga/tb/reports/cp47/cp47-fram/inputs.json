@@ -1,0 +1,21 @@
+{
+  "variants": [
+    "baseline",
+    "byte-mux",
+    "shared-rx",
+    "combined"
+  ],
+  "inputs_sha256": {
+    "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "tools/build_fram_cp47.py": "07c5c0bbe0b0d6b33424a08bf75306395a71d23a0cde694feaf1fe66e4a25ded",
+    "tools/build_bus_cp45.py": "64b501f232fb3b95f5a89d63b28c5c0885b3e3b67668fb4bb9514b9ad8be1b9e",
+    "tools/build_mmu_entry.py": "b99b5d0c80461886bee57f110f86a5fc49afec4b1a0ac18270399ef51fe07437",
+    "synth/reports/cp45k/inputs.json": "fa35b69c36570048c5c4ad0211d396f2c89be77e601446da588555512096bb0b"
+  },
+  "outputs_sha256": {
+    "build/cp47-fram/baseline/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
+    "build/cp47-fram/byte-mux/uj11_board_fram.v": "478c65f92f38458fc43f5c6ed8a36643aa5578794eba5768aa724847a27b1f89",
+    "build/cp47-fram/shared-rx/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp47-fram/combined/uj11_board_fram.v": "486418ab3344c7e6defae4c7a6710ea8548a72e687a2cd051d0c48ae60d82a70"
+  }
+}

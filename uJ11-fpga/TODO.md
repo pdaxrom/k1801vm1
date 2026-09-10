@@ -84,10 +84,12 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Full board 1268 LUT / 344 FF / 7 EBR / 31.075 MHz, microstore 963 words.
   Portable/vendor CPU/bus/port, whole-opcode miter и cold FB counts PASS.
   [Отчёт](docs/mmu-apr-csr.md). Production остаётся CP38f, FPGA CP29a.
-- [ ] Следующий gate после CP46: SPI FRAM transport byte/state mux на основе
-  CP45k. Проверить SPI/WREN/CS, banks/lanes, held request и прежние clocks,
-  затем полный synthesis. Лучший relocation prototype всё ещё требует
-  1302 LUT / 652 slices — на 22/12 больше HC1200, без protection/restart.
+- [x] CP47 local: SPI FRAM byte mux / shared RX на основе CP45k; formal,
+  SPI/WREN/CS, banks/lanes, X/Z, reset, held request, CPU/vendor/bus и cold FB
+  прошли с прежними clocks/UART. [Контракт rdata](docs/area-fram-cp47.md).
+- [ ] CP47 area gate: после разрешения передачи семи файлов запустить полный
+  HC1200 synthesis baseline/byte-mux/shared-rx/combined. Новых resource цифр
+  пока нет; CP45k остаётся 1302 LUT / 652 slices, ещё без protection/restart.
 - [x] CP40: перестроить operand/writeback mux и ALU result selection.
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
   7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба

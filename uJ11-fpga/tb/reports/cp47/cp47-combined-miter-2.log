@@ -1,0 +1,2 @@
+PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data
+tb/tb_fram_miter_cp47.v:67: $finish called at 554417000 (1ps)

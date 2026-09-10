@@ -1,5 +1,14 @@
 # Synthesis checkpoints
 
+## CP47 — подготовлен, synthesis ещё не выполнен
+
+Изолированные варианты SPI FRAM `baseline`, `byte-mux`, `shared-rx`,
+`combined` и full-board driver готовы. Локальные formal/CPU/FRAM/cold FB
+тесты прошли. Передача семи новых файлов ожидает отдельного разрешения
+после отказа автоматической проверки. **Новых LUT/FF/EBR/Fmax нет.**
+CP45k остаётся 1302 LUT / 359 FF / 7 EBR / 652 slices, MAP FAIL;
+переносить эти числа на CP47 нельзя. [Контракт и evidence](area-fram-cp47.md).
+
 ## CP46 — control/physical-region варианты отклонены
 
 | Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |

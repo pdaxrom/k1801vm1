@@ -1,4 +1,10 @@
-# MMU / 128 КиБ FRAM — CP31–CP46
+# MMU / 128 КиБ FRAM — CP31–CP47
+
+**CP47 локально проверил FRAM byte-mux и shared RX.** Formal, CPU/vendor,
+весь upper bank и cold FB + DIR проходят с прежними clocks/UART.
+Synthesis ожидает разрешения передачи новых файлов на сервер; resource
+экономия пока не измерена. CP45k остаётся лучшей измеренной основой,
+функциональность MMU не расширена. [Отчёт CP47](area-fram-cp47.md).
 
 **CP46 проверил и отклонил четыре control/region альтернативы:**
 1315–1317 LUT, все MAP FAIL. Formal/C/APR/vendor/CPU/FRAM/cold FB проверки
