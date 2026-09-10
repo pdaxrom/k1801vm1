@@ -1,0 +1,3 @@
+[2795000] %Fatal: cp34-scratch-tb_fis.v:89: Assertion failed in tb_fis: FIS case0 op075000 beat5 upc047 got wr1 err0 1004:dead expected 0001 1004:0000
+%Error: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp34-scratch-tb_fis.v:89: Verilog $stop
+Aborting...

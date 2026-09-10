@@ -57,8 +57,14 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   модель SPI FRAM и board transport. Это ещё не CPU/MMR/SD integration.
 - [x] CP33: изолированный PAR/PDR store в одном EBR, byte writes и W
   set/clear; decode всех 96 CSR без aliases. Portable/vendor/C oracle PASS.
-- [ ] Сократить общую LUT cost перед подключением CP32/CP33; исследовать
-  разделение ALU/microsequencer. Изолированные fits не доказывают full-board fit.
+- [x] CP34: измерить разделение ALU. Полное sharing дороже на 16 LUT;
+  relocation-only экономит 5 LUT в datapath probe, в production не перенесён.
+- [x] CP34: проверить время жизни T5–T7 на всех 88 memory words;
+  static analysis, CPU/FIS/EIS poisoning и отрицательные контроли.
+- [ ] Измерить MMU microcode entry/return с T5–T7: сохранить PSW/MDR/Q,
+  не перезаписать занятый EA CALL link, уложиться в оставшиеся 70 слов.
+- [ ] Сократить общую LUT cost перед подключением CP32/CP33 и MMR.
+  Изолированные fits не доказывают full-board fit.
 - [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.

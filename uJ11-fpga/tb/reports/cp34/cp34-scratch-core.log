@@ -1,0 +1,5 @@
+PASS differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 58176 clocks
+PASS core boundaries: 16-bit PC wrap
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp34-scratch-tb_core.v:76: $finish called at 2909106000 (1ps)
+SCRATCH poison_events=45250 live_mutation=0
+SCRATCH upc=00000020

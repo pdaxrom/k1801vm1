@@ -1,5 +1,26 @@
 # Implementation status, 2026-09-10
 
+## CP34 — разделение ALU и время жизни T5–T7
+
+Три изолированных HC1200 datapath probes прошли MAP/PAR/TRACE:
+dedicated arithmetic — 471 LUT / 173 FF / 0 EBR / 42.535 MHz;
+full sharing — 487 / 173 / 0 / 39.156 MHz, отвергнут;
+relocation-only — 466 / 173 / 0 / 41.315 MHz, только эксперимент.
+157 FF относятся к стенду, 16 — Q. В production ничего не перенесено.
+
+Оба кандидата прошли по 16977381 comparison cycles и 265701 four-state
+cycles; четыре намеренные ошибки обнаружены. Анализ текущего ROM показывает
+T5–T7 свободными на всех 88 memory words. Проверка CPU подменяет эти
+регистры во время memory cycles и сохраняет исходные architectural/bus
+ожидания; дополнительная порча T0 проверяет чувствительность FIS oracle.
+Прошли 21 suite / 272917 cases / 3311955 подмен; покрыты все 88 memory uPC.
+
+Полный board остаётся CP31c: 1252 LUT, 6 EBR, 954 microinstructions,
+MMU к CPU не подключён. Следующий эксперимент — MMU entry/return с T5–T7,
+сохранением остальных данных и измерением стоимости sequencer/context.
+RT-11XM не загружен; FPGA остаётся CP29a. [Подробности](mmu-sharing.md),
+[manifest](verification-cp34.json).
+
 ## CP33 — EBR PAR/PDR и physical CSR decode
 
 Проверены store PAR16/PDR16, все byte masks, парный W clear, explicit W set,

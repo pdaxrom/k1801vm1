@@ -1,5 +1,24 @@
 # Synthesis checkpoints
 
+## CP34 — изолированное разделение datapath с MMU arithmetic
+
+| Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP34a](../synth/reports/cp34a/result.json) | RF/Q/ALU + dedicated relocation/length | 471 | 173 | 0 | 236 | 42.535 | — |
+| [CP34b](../synth/reports/cp34b/result.json) | RF/Q/ALU + shared relocation/length | 487 | 173 | 0 | 244 | 39.156 | — |
+| [CP34c](../synth/reports/cp34c/result.json) | RF/Q/ALU + shared relocation only | 466 | 173 | 0 | 233 | 41.315 | — |
+
+Diamond 3.14 / HC1200-4SG32C, constraint 29.56 MHz, все MAP/PAR/TRACE PASS.
+157 FF — stimulus/observation, 16 — Q. RF16×16 остаётся distributed RAM.
+Полное sharing отвергнуто: удаление carry chains перекрывается ростом
+operand/control mux. Relocation-only экономит 5 LUT, но не доказывает
+fit интегрированного MMU; в production оно не перенесено.
+
+Production inputs по-прежнему совпадают с CP31c, 1252 LUT / 326 FF /
+6 EBR / 628 slices / 30.917 MHz, microstore 954 слов. Результаты этого
+probe не являются Fmax CPU с MMU. [Анализ и проверки](mmu-sharing.md),
+[source/report hashes](verification-cp34.json).
+
 ## CP33 — APR storage в EBR и canonical physical CSR decode
 
 | Revision | Features / scope | LUT4 | FF | EBR | Slices | TRACE MHz | Microcode words |

@@ -1,14 +1,20 @@
-# MMU / 128 КиБ FRAM — CP31 / CP32 / CP33
+# MMU / 128 КиБ FRAM — CP31 / CP32 / CP33 / CP34
 
 Решение пользователя от 2026-09-10: отложить FP11, оставить FIS и начать MMU.
 Первоначальное ограничение «без MMU» относится к полученному baseline v1.
-**В CP33 MMU ещё не подключён к CPU.** Ниже разделены рабочая сборка,
+**В CP34 MMU ещё не подключён к CPU.** Ниже разделены рабочая сборка,
 изолированный проверенный datapath и дальнейшая интеграция.
 
 CP33 добавляет PAR/PDR store в одном EBR, W set/clear и canonical CSR decode.
 Текущий isolated probe: **40 LUT / 65 FF (62 измерительных) / 1 EBR /
 96.862 MHz**. Portable/vendor tests и CSR + translation differential прошли.
 [Контракт, latency, resource evidence и границы CP33](mmu-apr.md).
+
+CP34 исследует общую ALU: полное разделение увеличило datapath probe
+471 → 487 LUT; разделение только relocation дало 466 LUT / 41.315 MHz.
+В production это не перенесено. Анализ текущего microcode и CPU tests с
+подменой регистров подтверждают, что T5–T7 свободны на границах памяти.
+[Измерения, scratch contract и следующий эксперимент](mmu-sharing.md).
 
 ## Целевой профиль: 18- и 22-битная адресация
 
@@ -232,7 +238,10 @@ odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и по�
 ## Следующие gates и обязательный RT-11XM
 
 1. PAR16/PDR storage и physical CSR decode измерены в CP33. Теперь исследовать
-   общую экономию LUT перед интеграцией translator и APR; одного свободного
+   microcode entry/return с T5–T7 и общей ALU: CP34 показал лишь 5 LUT экономии
+   от hardware relocation sharing и отверг полное arithmetic sharing.
+   Сохранить PSW/MDR/Q, занятый CALL link и однократность memory request.
+   Измерить общую экономию LUT перед интеграцией translator и APR; одного свободного
    EBR достаточно для таблиц, но LUT budget полной MMU не подтверждён. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять
    такой subset полным J-11 MMU. Не размещать эти таблицы в guest FRAM.

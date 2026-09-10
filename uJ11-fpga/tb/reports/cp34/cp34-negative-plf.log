@@ -1,0 +1,2 @@
+FATAL: tb/tb_mmu_dp_compare.v:32: MMU datapath pre-edge mismatch check535 borrow1 length1 apr0101 op8 pair0 dst0
+       Time: 5351000  Scope: tb_mmu_dp_compare.cycle

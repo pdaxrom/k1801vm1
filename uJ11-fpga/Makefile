@@ -1292,3 +1292,21 @@ vendor-mmu-apr: build/mmu-apr-oracle.txt
 	$(VVP) build/mmu_apr_vendor
 	$(IVERILOG) -g2012 -DUJ11_VENDOR_ROM -s tb_mmu_apr_oracle -o build/mmu_apr_oracle_vendor tb/tb_mmu_apr_oracle.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v rtl/uj11_mmu_apr_decode.v rtl/uj11_mmu_translate.v "$(LATTICE_SIM_DIR)/DP8KC.v" "$(LATTICE_SIM_DIR)/GSR.v" "$(LATTICE_SIM_DIR)/PUR.v"
 	$(VVP) build/mmu_apr_oracle_vendor
+
+MMU_DP_COMPARE = rtl/uj11_alu.v rtl/uj11_regfile.v rtl/uj11_datapath.v rtl/experimental/uj11_datapath_borrow.v synth/machxo2/uj11_mmu_dp_compare.v
+MMU_DP_CANDIDATE ?= 1
+.PHONY: test-mmu-dp-sharing
+test-mmu-dp-sharing: | build
+	$(IVERILOG) -g2012 -Wall -s tb_mmu_dp_compare -Ptb_mmu_dp_compare.FULL=0 -Ptb_mmu_dp_compare.CANDIDATE=$(MMU_DP_CANDIDATE) -o build/mmu_dp_compare tb/tb_mmu_dp_compare.v $(MMU_DP_COMPARE)
+	$(VVP) build/mmu_dp_compare
+	$(VERILATOR) --lint-only --Wall --top-module uj11_probe_mmu_dp_shared synth/machxo2/uj11_probe_mmu_dp_shared.v synth/machxo2/uj11_probe_mmu_dp.v $(MMU_DP_COMPARE)
+	$(VERILATOR) --binary --timing -j 4 --top-module tb_mmu_dp_compare -GCANDIDATE=$(MMU_DP_CANDIDATE) --Mdir build/obj-mmu-dp-compare tb/tb_mmu_dp_compare.v $(MMU_DP_COMPARE)
+	build/obj-mmu-dp-compare/Vtb_mmu_dp_compare
+
+.PHONY: test-mmu-dp-negative test-mmu-scratch
+test-mmu-dp-negative: | build
+	$(PYTHON) tools/check_mmu_dp_negative.py
+
+test-mmu-scratch: microcode-m0 build/isa_vectors.mem build/ea-vectors.txt build/irq-vectors.txt build/trace_bit-vectors.txt build/bus-fault-vectors.txt build/fis-vectors.txt build/eis_ash-vectors.txt build/eis-ash-fault-vectors.txt build/eis_ashc-vectors.txt build/eis-ashc-fault-vectors.txt build/eis_xor-vectors.txt build/eis-xor-fault-vectors.txt build/eis_mul-vectors.txt build/eis-mul-fault-vectors.txt build/eis_div-vectors.txt build/eis-div-fault-vectors.txt build/single-vectors.txt build/control-vectors.txt build/extra-vectors.txt build/psw_transfer-vectors.txt build/system_control-vectors.txt
+	$(PYTHON) tools/check_mmu_scratch.py
+	$(PYTHON) tools/check_mmu_scratch_coverage.py

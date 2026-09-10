@@ -1,0 +1,20 @@
+PASS eis_ash differential mode-1: 26328 DCJ11 cases, 2077496 clocks, 70388 exact bus beats
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp34-scratch-tb_trace_bit.v:137: $finish called at 25777376000 (1ps)
+SCRATCH poison_events=213000 live_mutation=0
+SCRATCH upc=00000020
+SCRATCH upc=00000219
+SCRATCH upc=0000021a
+SCRATCH upc=0000021b
+SCRATCH upc=0000021c
+SCRATCH upc=0000021d
+SCRATCH upc=0000021e
+SCRATCH upc=0000021f
+SCRATCH upc=000002a8
+SCRATCH upc=000002b5
+SCRATCH upc=000002b8
+SCRATCH upc=000002c0
+SCRATCH upc=000002c3
+SCRATCH upc=000003d9
+SCRATCH upc=000003dc
+SCRATCH upc=000003e0
+SCRATCH upc=000003e2

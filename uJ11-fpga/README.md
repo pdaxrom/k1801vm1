@@ -5,7 +5,7 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP33: PAR/PDR в одном EBR и canonical CSR decode проверены отдельно от CPU.**
+**CP34: измерено разделение ALU с MMU; проверены свободные T5–T7 на границах памяти.**
 FP11 отложен и удалён из рабочей сборки в CP31.
 Удалены FP RTL/state, decode, microcode и build options. Реализация CP30
 сохранена в коммите `d59f19c`. Microstore снова **954/1024×36 v12**, свободно
@@ -31,7 +31,14 @@ CP33c добавляет отдельный APR store и CSR decode: **40 LUT / 
 65536 C differential cases с чтением PAR/PDR перед трансляцией.
 [Контракт и ограничения APR](docs/mmu-apr.md).
 [MMU: документация, измерения, план интеграции и RT-11XM](docs/mmu.md).
-Плату в CP31–CP33 не программировали; физически остаётся CP29.
+В CP34 полное разделение ALU оказалось дороже: 487 против 471 LUT.
+Разделение только PAR add даёт 466 LUT / 173 FF / 0 EBR / 41.315 MHz
+в отдельном datapath probe, экономия всего 5 LUT. В production оно не перенесено.
+Текущий микрокод позволяет использовать T5–T7 на всех 88 memory words;
+это проверено анализом путей и подменой регистров в CPU oracle tests.
+Прошли 272917 cases с подменой T5–T7, покрыты все 88 memory uPC.
+[Измерения, проверки и следующий эксперимент](docs/mmu-sharing.md).
+Плату в CP31–CP34 не программировали; физически остаётся CP29.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
@@ -61,6 +68,9 @@ make test-mmu-oracle              # existing C MMU, ENABLE_MMU=1
 make test-mmu-fram                # translator + SPI transport, complete 128 KiB model
 make test-mmu-apr test-mmu-apr-decode test-mmu-apr-oracle
 make vendor-mmu-apr LATTICE_SIM_DIR=build/vendor
+make test-mmu-dp-sharing MMU_DP_CANDIDATE=1 # full ALU sharing, isolated probe
+make test-mmu-dp-sharing MMU_DP_CANDIDATE=2 # relocation only; run sequentially
+make test-mmu-dp-negative test-mmu-scratch
 ```
 
 Нужны Python 3, Icarus Verilog, Verilator, C compiler и Lattice simulation
@@ -72,13 +82,15 @@ path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` мо�
 переопределить; локальные vendor tests используют `LATTICE_SIM_DIR=build/vendor`.
 Каждый synthesis gate требует свежего implementation directory.
 
-Следующий gate — экономия общей LUT logic, MMR и интеграция MMU с abort/restart
-и физическими RK DMA. Таблицы PAR/PDR помещаются в один EBR; полный MMU fit
+Следующий gate — измерить MMU microcode entry/return с T5–T7, сохранением
+PSW/MDR/Q и занятого EA CALL link; затем MMR, abort/restart и физические RK DMA.
+Таблицы PAR/PDR помещаются в один EBR; полный MMU fit
 пока не доказан: у CP31c осталось
 28 LUT / 12 slices / 1 EBR. Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.
 
+* [CP34: разделение ALU и scratch lifetime](docs/mmu-sharing.md)
 * [CP33: PAR/PDR в EBR и CSR decode](docs/mmu-apr.md)
-* [CP31–CP33: MMU и использование всей FRAM](docs/mmu.md)
+* [CP31–CP34: MMU и использование всей FRAM](docs/mmu.md)
 * [CP30: отложенный эксперимент FP11(A)](docs/fp11a.md)
 * [CP27: FIS, exact reference и измерения](docs/fis.md)
 * [HC1200: интеграция периферии и RT-11](docs/hc1200-integration.md)

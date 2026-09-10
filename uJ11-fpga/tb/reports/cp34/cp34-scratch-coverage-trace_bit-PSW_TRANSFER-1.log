@@ -1,0 +1,15 @@
+PASS psw_transfer differential mode-1: 12852 DCJ11 cases, 368322 clocks, 54492 exact bus beats
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp34-scratch-tb_trace_bit.v:137: $finish called at 6125196000 (1ps)
+SCRATCH poison_events=165046 live_mutation=0
+SCRATCH upc=00000020
+SCRATCH upc=000001ab
+SCRATCH upc=000002a8
+SCRATCH upc=000002b5
+SCRATCH upc=000002b8
+SCRATCH upc=000002c0
+SCRATCH upc=000002c3
+SCRATCH upc=00000310
+SCRATCH upc=000003d9
+SCRATCH upc=000003dc
+SCRATCH upc=000003e0
+SCRATCH upc=000003e2

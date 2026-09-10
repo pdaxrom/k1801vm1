@@ -1,0 +1,6 @@
+PASS single differential mode-1: 7080 DCJ11 cases, 106322 clocks, 19588 exact bus beats; poison events=56050
+PASS control differential mode-1: 14814 DCJ11 cases, 187602 clocks, 30956 exact bus beats; poison events=92200
+PASS extra differential mode-1: 4524 DCJ11 cases, 62909 clocks, 9762 exact bus beats; poison events=28927
+PASS psw_transfer differential mode-1: 12852 DCJ11 cases, 368322 clocks, 54492 exact bus beats; poison events=165046
+PASS system_control differential mode-1: 6144 DCJ11 cases, 143360 clocks, 26368 exact bus beats; poison events=72448
+PASS scratch memory-word coverage: 88/88 including primary suites

@@ -135,6 +135,11 @@ CONFIGS['cp33a']=('uj11_probe_apr',1,[
 CONFIGS['cp33b']=('uj11_probe_apr_csr',1,CONFIGS['cp33a'][2][:-1]+[
     'rtl/uj11_mmu_apr_decode.v','synth/machxo2/uj11_probe_apr_csr.v'])
 CONFIGS['cp33c']=CONFIGS['cp33b']
+for suffix,kind in [('a','dedicated'),('b','shared'),('c','relocation')]:
+    CONFIGS['cp34'+suffix]=('uj11_probe_mmu_dp_'+kind,0,[
+        'rtl/uj11_alu.v','rtl/uj11_regfile.v','rtl/uj11_datapath.v',
+        'rtl/experimental/uj11_datapath_borrow.v','synth/machxo2/uj11_mmu_dp_compare.v',
+        'synth/machxo2/uj11_probe_mmu_dp.v','synth/machxo2/uj11_probe_mmu_dp_'+kind+'.v'])
 
 
 def main():

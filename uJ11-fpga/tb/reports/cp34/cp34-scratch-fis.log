@@ -1,0 +1,17 @@
+PASS FIS memory_mode=-1: 23840 exact state/PSW/bus/memory cases, 3072 injected faults
+- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp34-scratch-tb_fis.v:150: Verilog $finish
+SCRATCH poison_events=524280 live_mutation=0
+SCRATCH upc=011
+SCRATCH upc=020
+SCRATCH upc=047
+SCRATCH upc=097
+SCRATCH upc=153
+SCRATCH upc=163
+SCRATCH upc=1a7
+SCRATCH upc=3d9
+SCRATCH upc=3dc
+SCRATCH upc=3e0
+SCRATCH upc=3e2
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 82ms; walltime 7.180 s; speed 11.458 ms/s
+- Verilator: cpu 7.179 s on 1 threads; allocated 2 MB

@@ -1,0 +1,18 @@
+PASS MMU scratch audit: 88 memory words; universally dead=['T5', 'T6', 'T7']; direct/dispatch mutations detected
+PASS differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 58176 clocks; PASS core boundaries: 16-bit PC wrap; poison events=45250
+PASS ea differential mode-1: 31671 DCJ11 cases, 979918 clocks, 137006 exact bus beats; poison events=374177
+PASS irq differential mode-1: 6654 DCJ11 cases, 107969 clocks, 18678 exact bus beats; poison events=56027
+PASS trace_bit differential mode-1: 11196 DCJ11 cases, 339511 clocks, 58965 exact bus beats; poison events=160195
+PASS bus fault differential mode-1: 32780 DCJ11 vector-boundary cases, 1212100 clocks, 213080 exact bus beats, 3536 repair clocks; poison events=570012
+PASS eis_ash differential mode-1: 26328 DCJ11 cases, 2077496 clocks, 70388 exact bus beats; poison events=213000
+PASS ASH fault differential mode-1: 1024 DCJ11 vector-boundary cases, 35796 clocks, 6280 exact bus beats, 112 repair clocks; poison events=16996
+PASS eis_ashc differential mode-1: 28496 DCJ11 cases, 3184924 clocks, 73060 exact bus beats; poison events=221944
+PASS ASHC fault differential mode-1: 1024 DCJ11 vector-boundary cases, 36412 clocks, 6280 exact bus beats, 112 repair clocks; poison events=16996
+PASS eis_xor differential mode-1: 11028 DCJ11 cases, 304842 clocks, 57356 exact bus beats; poison events=162662
+PASS XOR fault differential mode-1: 5760 DCJ11 vector-boundary cases, 205280 clocks, 38112 exact bus beats, 448 repair clocks; poison events=103040
+PASS eis_mul differential mode-1: 13110 DCJ11 cases, 1818761 clocks, 50352 exact bus beats; poison events=146937
+PASS MUL fault differential mode-1: 4000 DCJ11 vector-boundary cases, 134896 clocks, 24544 exact bus beats, 448 repair clocks; poison events=66352
+PASS eis_div differential mode-1: 13664 DCJ11 cases, 1767673 clocks, 52456 exact bus beats; poison events=153064
+PASS DIV fault differential mode-1: 4000 DCJ11 vector-boundary cases, 134896 clocks, 24544 exact bus beats, 448 repair clocks; poison events=66352
+PASS FIS memory_mode=-1: 23840 exact state/PSW/bus/memory cases, 3072 injected faults; poison events=524280
+PASS scratch preservation: 16 suites; 84/88 memory words exercised; live T0 mutation rejected

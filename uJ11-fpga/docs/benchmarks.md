@@ -1,5 +1,14 @@
 # Benchmarks: CP27 и предыдущие этапы
 
+## CP34 — сравнение площади ALU, без нового CPU benchmark
+
+Разделение relocation с ALU даёт в одинаковом datapath probe 466 вместо
+471 LUT и 41.315 вместо 42.535 MHz. Полное разделение relocation/length
+требует 487 LUT, 39.156 MHz и отвергнуто. Probe включает измерительные
+FF, не содержит CPU MMU sequencer и не даёт CPI/throughput с MMU.
+Счётчики циклов при подмене T5–T7 относятся к regression fixtures,
+а не к реализованной MMU routine. [Измерения и границы](mmu-sharing.md).
+
 ## CP33 — latency доступа к APR, без нового CPU benchmark
 
 Изолированный APR controller возвращает ACK read/PDR-write/mark-W за

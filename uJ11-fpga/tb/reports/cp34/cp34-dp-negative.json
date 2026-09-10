@@ -1,0 +1,43 @@
+{
+  "scope": "Build-only CP34 fault-injection controls, CANDIDATE=1 FULL=0",
+  "inputs_sha256": {
+    "tb/tb_mmu_dp_compare.v": "928ee354424826a7d61b3710b6f829378944c37359975a241fa3ba06239eea82",
+    "rtl/uj11_alu.v": "9cba797859b7b35f29778a833c767ab402f73dc9293a9dbaadf1a4bd5909b978",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "rtl/uj11_datapath.v": "5f2828577906ac8486ac8dc5f6310cf9e8fe65e37c64cb2d74301f0943a6f090",
+    "rtl/experimental/uj11_datapath_borrow.v": "1472f3d9a679e608e780c5ab04974872e3c9762cba9162504698d758a0d8f5be",
+    "synth/machxo2/uj11_mmu_dp_compare.v": "fb9fbc4d9c6435aeba2d7a5cc159e0271e7a1c457eebc5859c4b02063993d8a3",
+    "tools/check_mmu_dp_negative.py": "e9f9280157611da749b8431ddd7711cf439f3f2828e9ab0fe53d48ce9cb573e2"
+  },
+  "production_inputs_unchanged": true,
+  "tests": [
+    {
+      "mutation": "rf-hold",
+      "rejected": true,
+      "returncode": 1,
+      "mutated_source_sha256": "98bb2662e8360f0d7bbdabdeb8bb2e1ac92315e032ebbf652ecf1e1eec3eeafe",
+      "failure": "FATAL: tb/tb_mmu_dp_compare.v:32: MMU datapath pre-edge mismatch check23 borrow1 length0 apr0202 op0 pair0 dst1\n       Time: 231000  Scope: tb_mmu_dp_compare.cycle"
+    },
+    {
+      "mutation": "q-hold",
+      "rejected": true,
+      "returncode": 1,
+      "mutated_source_sha256": "85a5211aafa9bb0dc09220ca03e88e2b4a8c6e6e4e246a6466bc7ca67a561ee5",
+      "failure": "FATAL: tb/tb_mmu_dp_compare.v:36: MMU datapath post-edge mismatch check27\n       Time: 276000  Scope: tb_mmu_dp_compare.cycle"
+    },
+    {
+      "mutation": "plf",
+      "rejected": true,
+      "returncode": 1,
+      "mutated_source_sha256": "10e670b41a47da6d4e234d5dc29d94be34c415d6ab59470a37328e9263eb19e4",
+      "failure": "FATAL: tb/tb_mmu_dp_compare.v:32: MMU datapath pre-edge mismatch check535 borrow1 length1 apr0101 op8 pair0 dst0\n       Time: 5351000  Scope: tb_mmu_dp_compare.cycle"
+    },
+    {
+      "mutation": "va-block",
+      "rejected": true,
+      "returncode": 1,
+      "mutated_source_sha256": "c063ca5f631117b324d11151109bde32fadaf0c3323dfc4f09b66655dbfff46a",
+      "failure": "FATAL: tb/tb_mmu_dp_compare.v:32: MMU datapath pre-edge mismatch check532 borrow1 length0 apr0000 op0 pair0 dst0\n       Time: 5321000  Scope: tb_mmu_dp_compare.cycle"
+    }
+  ]
+}
