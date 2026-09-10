@@ -1,0 +1,2 @@
+reference/lsi11/wbc_uart_xo2.v:8: warning: timescale for wbc_uart_xo2 inherited from another file.
+reference/lsi11/spi_byte_service.v:1: ...: The inherited timescale is here.

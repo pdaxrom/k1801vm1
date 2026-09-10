@@ -1,5 +1,17 @@
 # Implementation status, 2026-09-10
 
+## CP43 — MMR3 CSR в отдельном APR board
+
+Финальный CP43d: **1258 LUT / 351 FF / 7 EBR / 630 slices / 30.866 MHz**.
+Canonical VA172516, six-bit storage, word/byte writes, RESET; CPU portable/
+vendor, exhaustive board decode/DMA и 262160 C differential commands прошли.
+APR CPU tests и cold RT-11FB + DIR сохраняют прежние counts и UART.
+Microcode 963 words, native production
+CP40h и физическая плата CP29a прежние. Свободны 22 LUT / 10 slices / 0 EBR.
+MMR3 bits пока только хранятся: MMR0/1/2, relocation, modes/I-D/CSM/MAP,
+PDR checks/W/abort/restart, CPU PA22, high DMA и RT-11XM ещё не реализованы.
+[Отчёт](mmr3-cp43.md), [manifest](verification-cp43.json).
+
 ## CP42 — D-input только в APR-сборке
 
 Финальный CP42d: **1248 LUT / 344 FF / 7 EBR / 625 slices / 30.896 MHz**,

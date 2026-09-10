@@ -1,0 +1,3 @@
+PASS CPU CSR: 432 readbacks, 720 beats, 4902 lookup reads, 221988 clocks; 48 pairs, MOV/MOVB, lanes/sign extension
+PASS CPU CSR odd/reset: vector4, no write, APR preserved
+tb/tb_mmu_apr_csr_cpu.v:99: $finish called at 2241370000 (1ps)

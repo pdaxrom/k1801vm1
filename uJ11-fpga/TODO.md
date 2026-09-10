@@ -99,7 +99,11 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
   Production-вариант дал +1 LUT и отклонён; native CP40h сохранён.
   Formal/four-state/CPU/CSR/FIS/vendor и cold FB прошли, counts/CSV/UART
   совпали с CP40. [Отчёт](docs/area-d-input-cp42.md).
-- [ ] MMR0/1/2/3, автоматический выбор APR/W updates, physical I/O page
+- [x] CP43: MMR3 CSR/reset в отдельной APR-сборке, 1258 LUT / 351 FF /
+  7 EBR / 630 slices / 30.866 MHz, 963 words. Свободны 22 LUT / 10 slices.
+  CPU/vendor, C differential, canonical decode и RK DMA isolation проверены.
+  Только хранение bits; [CPU translation ещё не подключена](docs/mmr3-cp43.md).
+- [ ] MMR0/1/2 и подключение MMR3 controls, автоматический выбор APR/W updates, physical I/O page
   и NXM без alias верхней памяти в полном CPU/bus.
 - [ ] Подключить translation к CPU; MMU abort 250, freeze/restart, odd faults.
 - [ ] Разделить отображение гостя, RK firmware assist и физический DMA;

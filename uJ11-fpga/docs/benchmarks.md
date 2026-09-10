@@ -1,4 +1,19 @@
-# Benchmarks: CP42 и предыдущие этапы
+# Benchmarks: CP43 и предыдущие этапы
+
+## CP43 — MMR3 CSR, прежний cold FB workload
+
+APR + MMR3 CP43d: 1258 LUT / 351 FF / 7 EBR / 30.866 MHz; microcode 963 words.
+Cold RT-11FB + DIR: 412130048 clocks, 3987390 retirements, 5222610 reads /
+424452 writes, 3397976 FRAM transactions, 300 RK commands, 663 timer edges,
+3270 UART bytes, 162 SD reads / 6 overlay writes. Counts и UART совпали с CP42.
+
+Новый MMR3 directed CPU test: 324 readbacks / 516 CSR beats / 3508 APR lookup
+reads / 157988 clocks на portable/vendor. Immediate ACK B даёт 157472 clocks,
+но занимает 1271 LUT против 1258 у выбранного D. D добавляет один такт на
+MMR3 beat; helper по-прежнему +10 clocks/memory word без hold. Прежний APR
+CPU test сохраняет 432 readbacks / 720 beats / 221988 clocks. Full FIS corpus
+не перезапускался: CPU/datapath/microcode прежние. Production и hardware/XM
+benchmarks не изменены. [Границы результата](mmr3-cp43.md).
 
 ## CP42 — −10 LUT с APR, прежние clocks
 

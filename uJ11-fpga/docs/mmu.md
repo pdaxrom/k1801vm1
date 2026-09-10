@@ -1,4 +1,10 @@
-# MMU / 128 КиБ FRAM — CP31–CP42
+# MMU / 128 КиБ FRAM — CP31–CP43
+
+CP43 добавляет **MMR3 CSR storage/reset** к экспериментальному APR board:
+**1258 LUT / 351 FF / 7 EBR / 630 slices / 30.866 MHz**, свободны 22 LUT /
+10 slices / 0 EBR. Microcode 963 words и native production CP40h прежние.
+CPU translation ещё нет; MMR3 bits пока только сохраняются и читаются.
+[Контракт и проверки CP43](mmr3-cp43.md).
 
 CP42 уменьшил board с CPU APR CSR и shared EBR lookup до **1248 LUT /
 344 FF / 7 EBR / 625 slices / 30.896 MHz**. Свободны 32 LUT и 15 slices;
@@ -70,7 +76,7 @@ Canonical адрес MMR3 — `17772516` (VA `172516` при обычном от
 
 CP32 реализует этот контракт в `rtl/uj11_mmu_translate.v` с PAR16, PA22
 и входами `enabled`/`map22`, соответствующими MMR0<0>/MMR3<4>.
-Сами MMR и их CSR ещё не реализованы. Проверены переключение этих входов,
+В CP32 CSR не было; CP43 добавил отдельный MMR3, пока не связанный с translator. Проверены переключение этих входов,
 игнорирование `map22` при отключённом MMU, старшие PAR bits, wrap на 18/22 bits,
 обе I/O-page mappings, граница 128 КиБ и NXM без alias. Старый
 `uj11_mmu_translate18.v` сохранён как независимый miter для 18-bit случаев.
@@ -265,12 +271,13 @@ odd/MMU faults ещё не реализованы. CPU MMU CPI, RT-11XM и по�
    занятого CALL link и однократностью memory request: 9 слов, +9 clocks/entry.
    CP37–CP39 подключили lookup и CPU APR CSR с одним EBR; CP38 сократил
    board read mux, CP40 — datapath/ALU mux. CP40i занимает 1258 LUT /
-   631 slices, свободны 22 LUT / 9 slices / 0 EBR. Следующий gate — сокращение общей логики перед
+   631 slices. После CP42 и добавления MMR3 в CP43d — 1258 LUT / 630 slices,
+   свободны 22 LUT / 10 slices / 0 EBR. Следующий gate — сокращение общей логики перед
    microcoded translation/MMR. Таблицы уже используют седьмой EBR;
    LUT budget полной MMU не подтверждён. Начать с kernel unified
    mapping, затем modes/SP switching и I/D отдельными gates. Не объявлять
    такой subset полным J-11 MMU. Не размещать эти таблицы в guest FRAM.
-2. MMR0/1/2/3, выбор 18/22 через MMR3<4>, PDR.W, freeze и restart metadata; запрет внешнего запроса при
+2. MMR3 CSR storage/reset проверены CP43; остаются MMR0/1/2 и подключение выбора 18/22 через MMR3<4>, PDR.W, freeze и restart metadata; запрет внешнего запроса при
    abort, vector250, kernel virtual vector/stack cycles. Проверить одновременные
    memory/MMU faults и изменения регистров addressing modes.
 3. Physical bus22, полный NXM/I/O decode до выделения PA[16:0] для FRAM.

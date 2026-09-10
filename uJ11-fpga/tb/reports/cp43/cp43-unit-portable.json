@@ -1,0 +1,18 @@
+{
+  "suite": "unit",
+  "vendor": false,
+  "inputs_sha256": {
+    "build/cp39-csr/inputs.json": "b573c5743027e212db042270be20eb309504fb472335452a7cc2fbcde715195b",
+    "build/cp39-csr/lookup.mem": "74abe97cd167efd41c1ac2fed21960e2dd9c7057e7b391a9e9f4b87e9965d1a2",
+    "build/cp43-mmr3/inputs.json": "04f62546ff4a33da62077a5f5720b1cabbe414060e8b27bf159ec260ec9c2cb5",
+    "microcode/generated/decode.mem": "48e876bce8b0700ebd1a112c2f92e590ac5a9fb8b065fb4650d94434540718c8",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "rtl/experimental/uj11_mmr3.v": "51c6a565e77dffc6f20ab4048dd28321168144b53440481ed65a4b2e7849c96c",
+    "tb/tb_mmr3_cp43.v": "da128ea9e93b8afd5dad3e06ef812b3112f06a46436e67b5406e9840b873f332",
+    "tools/build_mmr3_cp43.py": "df4ac7c2ebd5958f5466cb67caa5d0fe212e2c89a04fa919cd71ffac501aeb5c",
+    "tools/check_mmr3_cp43.py": "3ad402250a08afc33056d5afc5b978e18db51676fc21d8f02b9e850a37d2dbcf"
+  },
+  "pass_lines": [
+    "PASS MMR3 unit: 1030 checked edges; all values/read-write/lane/hold/reset"
+  ]
+}

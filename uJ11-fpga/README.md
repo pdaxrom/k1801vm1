@@ -5,12 +5,13 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP42: ещё −10 LUT в экспериментальной APR-сборке, без новых тактов.**
-CPU APR CSR + lookup — **1248 LUT / 344 FF / 7 EBR / 30.896 MHz**,
-свободны 32 LUT и 15 slices. Production CP40h остаётся **1159 LUT /
-326 FF / 6 EBR / 31.470 MHz**. Перестроен только D-input APR engine;
-formal/CPU/FIS/vendor и cold RT-11FB + DIR прошли, counts прежние.
-Translation/MMR и RT-11XM ещё впереди. [Измерения CP42](docs/area-d-input-cp42.md).
+**CP43: MMR3 CSR добавлен к экспериментальной APR-сборке.**
+Финальный CP43d — **1258 LUT / 351 FF / 7 EBR / 30.866 MHz**, свободны
+22 LUT и 10 slices. Это +10 LUT / +7 FF к CP42, без новых microinstructions.
+Word/byte, RESET, odd-address trap и isolation от RK DMA проверены;
+CPU/vendor, C differential и cold FB + DIR прошли; counts прежние. [Измерения CP43](docs/mmr3-cp43.md).
+Production CP40h остаётся **1159 LUT / 326 FF / 6 EBR / 31.470 MHz**.
+MMR0/1/2, CPU translation и RT-11XM ещё впереди.
 
 CP41 отклонил четыре альтернативы микросеквенсора; его RTL сохранён.
 [CP41](docs/area-sequencer-cp41.md), [production CP40](docs/area-datapath.md).
@@ -33,7 +34,7 @@ FP11 отложен и удалён из рабочей сборки в CP31.
 FRAM освобождены от служебных RK-регистров, но пока недоступны CPU.
 Отдельный translator/PDR checker поддерживает **18 и 22 bits**, PAR16 и
 canonical PA22; он ещё не включён в board top. Вход `map22` соответствует
-MMR3<4>, сами MMR пока отсутствуют. CP32b: **70 LUT / 80 измерительных
+MMR3<4>; CP43 добавляет CSR storage в отдельной сборке, пока без связи с translator. CP32b: **70 LUT / 80 измерительных
 FF / 0 EBR / 93.362 MHz**. Это показатели probe, не полного CPU с MMU.
 Прошли 36144800 проверок, 262144 сравнений с C MMU и полный проход по
 128 КиБ через реальный RTL SPI transport с моделью FRAM.
@@ -79,7 +80,7 @@ CP40 изменяет только operand/writeback mux и ALU result selection
 сборка занимает 1159 LUT, с APR — 1258 LUT; новые FF/EBR/такты не добавлены.
 Formal, four-state, CPU/FIS/vendor и оба FB runs прошли.
 [Все варианты и границы CP40](docs/area-datapath.md).
-Плату в CP31–CP40 не программировали; физически остаётся CP29a.
+Плату в CP31–CP43 не программировали; физически остаётся CP29a.
 
 Работают word/byte integer ISA, все addressing modes, branches, JMP/JSR/RTS/SOB,
 SWAB/SXT/MARK, traps/RTI/RTT, trace, IRQ/WAIT/SPL, CC/NOP/MFPT, MFPS/MTPS,
@@ -87,9 +88,10 @@ HALT restart, peripheral RESET, ASH/ASHC/XOR/MUL/DIV и FIS. Один kernel reg
 CM=PM=RS=0, NZVC/IPL/T. Память — **MR45V100A SPI FRAM**. Для DIV DEC требует
 even R; odd R — документированное расширение. Banking и native ODT отсутствуют.
 
-Реальная RT-11, RGB/HDSP/keyboard/HG проверены в CP29. Текущий CP36f
-прошёл cold RT-11FB + DIR в RTL simulation: 354938300 clocks, 3270 UART wire
-bytes, 162 SD reads / 6 writes. Это регрессия без MMU, не проверка XM.
+Реальная RT-11, RGB/HDSP/keyboard/HG проверены в CP29. Production CP40h
+прошёл cold RT-11FB + DIR за 354938300 clocks; экспериментальный CP43d
+с APR/MMR3 — за 412130048 clocks. В обоих 3270 UART wire bytes и 162 SD
+reads / 6 overlay writes. Это регрессии без CPU translation, не проверка XM.
 Для MMU обязателен пользовательский образ `../lsi11/disks/rt11v5.3/system.dsk`
 с RT11XM.SYS; загрузка XM и проверка верхних 64 КиБ ещё впереди.
 

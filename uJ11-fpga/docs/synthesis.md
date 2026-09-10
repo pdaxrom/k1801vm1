@@ -1,5 +1,19 @@
 # Synthesis checkpoints
 
+## CP43 — MMR3 CSR, полный APR board
+
+| Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| [CP43a](../synth/reports/cp43a/result.json) | Pulse ACK + seen | 1269 | 352 | 7 | 636 | 30.901 | 963 |
+| [CP43b](../synth/reports/cp43b/result.json) | Immediate ACK | 1271 | 350 | 7 | 637 | 30.958 | 963 |
+| [CP43c](../synth/reports/cp43c/result.json) | Immediate ACK, shared MMR3/MAINT read | 1269 | 350 | 7 | 639 | 29.583 | 963 |
+| [CP43d](../synth/reports/cp43d/result.json) | Held registered ACK, выбран | 1258 | 351 | 7 | 630 | 30.866 | 963 |
+
+MAP/PAR/TRACE всех gates PASS при 29.56 MHz; native production CP40h прежний.
+D добавляет 10 LUT / 7 FF к CP42d, свободны 22 LUT / 10 slices / 0 EBR.
+Сохраняются шесть MMR3 bits; CPU translation/MMR0/1/2 ещё не подключены.
+[Контракт CSR, verification и ограничения](mmr3-cp43.md).
+
 ## CP42 — формирование D-input
 
 | Revision | Features | LUT4 | FF | EBR | Slices | TRACE MHz | Words |
