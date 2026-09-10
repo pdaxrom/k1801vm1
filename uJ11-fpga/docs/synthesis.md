@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP49 — подготовлен, synthesis ещё не выполнен
+
+Четыре варианта full board: baseline CP47c, explicit successors с
+syn_encoding=original, split-low byte skip, bit equations. Локальные
+formal/unit/CPU/vendor/bus и cold FB split-low прошли. Передача семи файлов
+ожидает отдельного подтверждения после отказа автоматической проверки.
+LUT/FF/EBR/Fmax новых вариантов не измерены. CP47c остаётся
+1297 LUT / 351 FF / 7 EBR / 650 slices, MAP FAIL; его числа не относятся
+к новым вариантам. [Методика](area-fram-binary-cp49.md).
+
 ## CP48 — FRAM state recoding отклонён
 
 | Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |

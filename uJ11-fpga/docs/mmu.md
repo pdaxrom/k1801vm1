@@ -1,4 +1,10 @@
-# MMU / 128 КиБ FRAM — CP31–CP48
+# MMU / 128 КиБ FRAM — CP31–CP49
+
+**CP49 локально проверил двоичные FRAM-варианты** с сохранением state
+encoding и LSB byte skip. CPU/vendor/FRAM/bus/cold FB counts прежние.
+Synthesis ожидает подтверждения передачи файлов; экономия не измерена.
+CP47c остаётся лучшей основой. Возможности MMU не расширены, XM не проверена.
+[Отчёт CP49](area-fram-binary-cp49.md).
 
 **CP48 не уменьшил площадь:** explicit successors / one-hot FRAM дали
 1319/1313 LUT, оба отклонены. Formal, CPU/vendor/bus и cold FB successors

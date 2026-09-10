@@ -1,4 +1,14 @@
-# Benchmarks: CP48 и предыдущие этапы
+# Benchmarks: CP49 и предыдущие этапы
+
+## CP49 — локальные counts прежние, synthesis ожидается
+
+Каждый из original/split-low/equations: CPU upper-bank sweep 67468380 clocks /
+590096 PAR reads, vendor subset 97692 / 848. Cold FB + DIR для split-low —
+415159611 clocks, counts/UART совпали с CP47c. 18 unit runs: 548121 cycle
+comparisons, 2304 reset offsets, 18432 memory transactions, все 128 КиБ.
+LUT/Fmax/аппаратные instructions/sec новых вариантов не измерены: передача
+CP49 на synthesis-сервер ожидает подтверждения. RT-11XM не запускалась.
+[Отчёт](area-fram-binary-cp49.md).
 
 ## CP48 — clocks прежние, площадь выросла
 

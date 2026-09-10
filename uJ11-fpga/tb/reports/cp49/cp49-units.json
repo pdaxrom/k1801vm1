@@ -1,0 +1,143 @@
+{
+  "tests": [
+    {
+      "tag": "cp49-original-miter-1",
+      "variant": "original",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-original-memory-1",
+      "variant": "original",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp49-original-miter-2",
+      "variant": "original",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-original-memory-2",
+      "variant": "original",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp49-original-miter-3",
+      "variant": "original",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-original-memory-3",
+      "variant": "original",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    },
+    {
+      "tag": "cp49-split-low-miter-1",
+      "variant": "split-low",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-split-low-memory-1",
+      "variant": "split-low",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp49-split-low-miter-2",
+      "variant": "split-low",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-split-low-memory-2",
+      "variant": "split-low",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp49-split-low-miter-3",
+      "variant": "split-low",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-split-low-memory-3",
+      "variant": "split-low",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    },
+    {
+      "tag": "cp49-equations-miter-1",
+      "variant": "equations",
+      "divider": 1,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider1 128 beats 128 reset offsets 20561 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-equations-memory-1",
+      "variant": "equations",
+      "divider": 1,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+    },
+    {
+      "tag": "cp49-equations-miter-2",
+      "variant": "equations",
+      "divider": 2,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider2 128 beats 256 reset offsets 55441 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-equations-memory-2",
+      "variant": "equations",
+      "divider": 2,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider2"
+    },
+    {
+      "tag": "cp49-equations-miter-3",
+      "variant": "equations",
+      "divider": 3,
+      "suite": "miter",
+      "pass_line": "PASS CP47 FRAM miter: divider3 128 beats 384 reset offsets 106705 clock comparisons, SPI/ACK and valid X/Z data"
+    },
+    {
+      "tag": "cp49-equations-memory-3",
+      "variant": "equations",
+      "divider": 3,
+      "suite": "memory",
+      "pass_line": "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp49-binary/baseline/uj11_board_fram.v": "5defda4a639eb02f8d794ae76850f655a4f9f6731ef66bab43a65b13a0d87636",
+    "build/cp49-binary/equations/uj11_board_fram.v": "8b7373b2e03cd8fc95336585909d84e7c6daf2b8c520c5ea86830e6be39c758c",
+    "build/cp49-binary/inputs.json": "de34338afa50eb0dfb5d666d20273d6f55f287b812c11f84ab4e75ce3a668a45",
+    "build/cp49-binary/original/uj11_board_fram.v": "b6b028a807ec35639ffcbe79dcaa6d3567098c826969706c45344d0786a8b34a",
+    "build/cp49-binary/split-low/uj11_board_fram.v": "cb0cc710fe0ed8305159eaf02e8e1164b6910b8c1727afbc4feaa2a0eaed8e57",
+    "build/cp49-tests/uj11_fram_gold.v": "e09263191edc6a06ec869449df3782bac8c34dcaac3e1d9e82278e0bb7123a15",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tb/tb_board_fram.v": "a768f7976f568bec9b8a2b7cf2cc4cd2b5aa906348b850c8ab9f94359a4d700a",
+    "tb/tb_fram_miter_cp47.v": "4cd64a4b9786f542f4b2067221f95812c973b2f3d3751afb132e4803d391815b",
+    "tools/build_fram_binary_cp49.py": "7b78952a49303cb0d52958a79c104a62b400e9694128b0bb95cc008f67f47898",
+    "tools/check_fram_binary_cp49_units.py": "dfcbd4dcf7f5a7ac436f9aea07ca6a74070c2be59008f2092de290a8c416eed4"
+  }
+}

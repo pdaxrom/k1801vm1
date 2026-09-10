@@ -5,6 +5,13 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP49: три двоичных FRAM-варианта прошли локальные проверки.**
+Документированный `syn_encoding="original"`, LSB byte skip и bit equations
+проверены formal/unit/CPU/vendor/bus; cold RT-11FB + DIR для split-low
+сохранила counts/UART. Synthesis ожидает подтверждения передачи семи файлов
+на сервер. Новых resource/Fmax цифр нет; основа — CP47c.
+[Методика и результаты CP49](docs/area-fram-binary-cp49.md).
+
 **CP48: явные переходы FRAM и one-hot проверены и отклонены по площади.**
 1319/1313 LUT против 1297 у CP47c; все gates MAP FAIL. Synplify перекодировал
 state в one-hot, FF выросли на шесть. Formal, SPI/FRAM, CPU/vendor/bus прошли;

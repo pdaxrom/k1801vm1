@@ -1,5 +1,17 @@
 # Implementation status, 2026-09-11
 
+## CP49 — двоичные FRAM-варианты проверены локально, synthesis ожидается
+
+Original encoding, split-low и bit equations прошли шесть SAT proofs,
+18 unit runs, три ошибочных перехода обнаружены proof и simulation.
+CPU/vendor/edges/bus каждого варианта и cold FB split-low прошли;
+counts/UART прежние. Атрибут syn_encoding проверен по установленному
+Synplify Attribute Reference, September 2024, pp. 67–70.
+Передача семи CP49 файлов отклонена автоматической проверкой, отдельное
+подтверждение запрошено. Synthesis не запускался, новых ресурсов/Fmax нет.
+CP47c/production/APR/FPGA сохранены; MMU/XM scope прежний.
+[Отчёт](area-fram-binary-cp49.md), [manifest](verification-cp49.json).
+
 ## CP48 — state encoding FRAM не уменьшил площадь
 
 Контроль 1297 LUT / 351 FF / 7 EBR / 650 slices воспроизвёл CP47c.
