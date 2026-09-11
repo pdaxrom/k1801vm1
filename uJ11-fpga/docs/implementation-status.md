@@ -1,14 +1,17 @@
 # Implementation status, 2026-09-11
 
-## CP54 — два комбинационных варианта decode/ACK
+## CP54 — decode/ACK, выбран CP54b после synthesis
 
 Вынесен независимый от адреса RK DMA operand; второй вариант также
 объединяет быстрые ACK перед общей I/O qualification. Два SAT proofs
 всех 39 output bits, три negative controls, 524288 X/Z-data cases,
 86 board beats и 36 portable/vendor workloads PASS. Оба новых cold FB+DIR
 PASS, по 288686609 clocks, все counters/raw UART совпали с CP53a.
-Synthesis ещё не запущен, передача требует подтверждения
-после auto-review rejection. Default/MMU/плата прежние. [CP54](ack-cp54.md).
+Оба full-board synthesis PASS: A — 1192/341/6/31,524 MHz,
+B — **1185/341/6/32,273 MHz**. Выбран B, −10 LUT от CP53a; свободны
+95 LUT/45 slices/1 EBR, slack 2,843 ns при 29,56 MHz. Source/report hashes
+и конечные EDIF проверены. Default/MMU/плата прежние; до <=1100 LUT
+ещё нужна оптимизация. [CP54](ack-cp54.md).
 
 ## CP53 — cursor mapping, synthesis и выбранный board PASS
 

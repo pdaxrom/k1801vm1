@@ -38,9 +38,9 @@ RK service state, write/read и instruction-fetch; адрес в него не �
 сохраняются как прежде, включая их error gating. Неподдерживаемый I/O
 по-прежнему не отвечает, physical RK DMA имеет приоритет над CSR.
 
-Оба преобразования комбинационные: **ноль новых FF**, никакой регистрации
-ACK, паузы или дополнительного такта памяти. Это число добавленных RTL
-state bits; реальное число FF после synthesis пока не измерено.
+Оба преобразования комбинационные: никакой регистрации ACK, паузы или
+дополнительного такта памяти. Реальный synthesis подтвердил прежнее число
+FF — **341**, включая 333 PFU и 8 PIO registers.
 
 ## Проверки
 
@@ -81,20 +81,67 @@ SHA256 `e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553`.
 
 ## Synthesis
 
-**Новых LUT/FF/EBR/Fmax пока нет.** Контроль CP53a — 1195 LUT / 341 FF /
-6 EBR / 602 slices / 31,338 MHz. Оба gate подготовлены для полного
-HC1200 computer, LCMXO2-1200HC-4SG32C, 29,56 MHz, microstore 954 слова.
+После явного разрешения пользователя пакет **9 файлов, 71944 байта**
+передан на `sash@192.168.1.108:/tmp/uj11-cp54-20260911`. Неизменённые
+исходники скопированы из CP53 на сервере после проверки SHA256; все manifests
+до и после сборок точно совпали с согласованными и протестированными RTL.
 
-Автоматическая проверка отклонила передачу CP54: прежнее согласие сочтено
-ограниченным пакетом CP53. Запрошено подтверждение **9 файлов, 71944 байта**
-(RTL, scripts, manifests; `/tmp/cp54-files.txt`) на
-`sash@192.168.1.108:/tmp/uj11-cp54-20260911`, затем два synthesis.
-Передача не состоялась. Нужные неизменённые CP53 inputs уже есть на сервере;
-перед копированием и после synthesis проверяются все source hashes.
-Дисковые образы и `microasm11` в пакет не входят.
+Оба полных HC1200 gates **MAP/PAR/TRACE PASS**, полностью разведены.
+Diamond 3.14.0.75.2 / Synplify V-2023.09L-2, LCMXO2-1200HC-4SG32C,
+constraint 29,56 MHz, полный CPU/FIS/FRAM/KL11/KW11/panel/HG/SD/RK,
+firmware/OSCH/reset/pins. Microstore — **954/1024 слова**.
 
-До реальных ресурсов победитель не выбирается и default не меняется.
-Внутренний TRACE Fmax не заменяет проверку внешних pin delays и платы.
+| Gate | LUT4 | FF | EBR | Slices | Fmax, MHz | Slack, ns |
+|---|---:|---:|---:|---:|---:|---:|
+| CP52a, default | 1159 | 326 | 6 | 584 | 31,470 | 2,053 |
+| CP53a, прежний sequential candidate | 1195 | 341 | 6 | 602 | 31,338 | 1,919 |
+| CP54a, dma | 1192 | 341 | 6 | 600 | 31,524 | 2,107 |
+| **CP54b, dma-ack** | **1185** | **341** | **6** | **595** | **32,273** | **2,843** |
+
+**Выбран CP54b** для дальнейшей оптимизации sequential FRAM board:
+относительно CP53a **−10 LUT / −7 slices / +0,935 MHz**, FF/EBR и все
+execution counters прежние. CP54a тоже улучшил mapping, но уступает B
+по площади и timing. От первого sequential CP52b суммарно сэкономлено
+13 LUT; ускорение R,R 2,671× и cold FB+DIR 1,229× против default сохранено.
+
+Остаются **95 LUT / 45 slices / 1 EBR**, свободных PIO sites нет.
+Цена ускорения против default — **+26 LUT / +15 FF**. Цель <=1100 LUT
+пока не достигнута; default остаётся CP52a, кандидат B сохранён отдельно.
+Физическая плата остаётся CP29a; новая прошивка в этом checkpoint не делалась.
+
+### Mapping и критический путь
+
+MAP раскладывает CP53a как 1067 logic + 48 distributed RAM + 80 carry LUT;
+CP54a — 1064/48/80, CP54b — **1057/48/80**. Уменьшилась логическая часть,
+состав памяти и carry не изменился. В конечном FRAM netlist обоих вариантов
+по-прежнему пять CCU2D для сравнения cursor.
+
+Иерархические Synplify counts нельзя выдавать за независимую цену модулей:
+при одинаковом FRAM RTL его ORCALUT4 counts составляют 107 у CP53a,
+132 у CP54a и 109 у CP54b; глобальная оптимизация перераспределяет логику.
+Решение принято по конечному MAP всего компьютера, а не сумме таких counts.
+
+В CP54b худший путь теперь проходит через **address[0] → qualification
+request/write → service_dma_operand → ACK → bus-fault/fault_redirect →
+microsequencer**, от EBR lane 2 к EBR lane 3. **31,012 ns, 17 уровней,
+58,4% routing**, slack 2,843 ns. Прежний I/O-prefix путь больше не худший,
+но зависимость от младшего адресного бита и проверки нечётного слова остаётся.
+Число logic levels самого худшего пути не сократилось; это другой путь.
+В CP54a: 31,748 ns, 16 уровней, 61,3% routing, destination decode-ROM.
+
+Проверены **2983/3059 сети EDIF**, сильных multiple drivers нет; INOUT nets
+фиксируются отдельно, это не проверка физического contention на выводах.
+Набор кодов и число выведенных Synplify warnings совпали с CP53a, включая
+100 BN161. MAP сохранил три прежних предупреждения — JTAG/GPIO,
+configuration ports и local timer reset — при нуле ошибок. Raw warnings
+сохранены. OSCH/inferred-clock сообщения Synplify не подменяют итоговый
+TRACE, который использует явный LPF 29,56 MHz. Внешние pin delays всё ещё
+не заданы; Fmax относится к внутреннему timing, не к измерению платы.
+
+[Проверенные измерения и hashes](synthesis-cp54.json), source snapshots,
+MAP/PAR/TRACE и сжатые EDIF — `synth/reports/cp54a/b`. Локальные tests
+завершены до synthesis; повторные cold/vendor прогоны не запускались,
+поскольку доказано точное совпадение всех соответствующих HDL inputs.
 
 ## Воспроизведение
 
@@ -107,11 +154,14 @@ python3 tools/run_ack_cp54.py --vendor dma-ack
 python3 tools/run_board.py --tag cp54-dma --ack-cp54 dma
 python3 tools/run_board.py --tag cp54-dma-ack --ack-cp54 dma-ack
 python3 tools/record_ack_cp54.py
-python3 tools/checkpoint_board.py cp54a --ack-cp54 dma --prepare-only
-python3 tools/checkpoint_board.py cp54b --ack-cp54 dma-ack --prepare-only
+python3 tools/checkpoint_board.py cp54a --ack-cp54 dma
+python3 tools/checkpoint_board.py cp54b --ack-cp54 dma-ack
+python3 tools/archive_synthesis.py cp54a cp54b
+python3 tools/record_synthesis_cp54.py
 ```
 
-Для synthesis требуется Diamond на сервере; `--prepare-only` убирается
-после разрешённой передачи. Архив исходников/результатов локальных tests:
+Выше перечислены выполненные команды; повторный synthesis требует свежих
+имён gates, исходники и EDIF для аудита восстанавливаются из архивов.
+`--prepare-only` создаёт проект без запуска Diamond. Архив локальных tests:
 `tb/reports/cp54`. Профиль `--ack-cp54` взаимоисключающий с MMU и другими
 experimental board flags.

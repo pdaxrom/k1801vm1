@@ -1,18 +1,23 @@
 # Synthesis checkpoints
 
-## CP54 — I/O qualification и ACK, gates подготовлены
+## CP54 — I/O qualification и ACK, оба gates PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
 |---|---|---:|---:|---:|---:|---:|---|
-| CP54a | DMA operand до декодирования адреса | — | — | — | — | 954 | Prepared; transfer ожидает подтверждения |
-| CP54b | То же + общий gate быстрых ACK | — | — | — | — | 954 | Prepared; transfer ожидает подтверждения |
+| CP54a | DMA operand до декодирования адреса | 1192 | 341 | 6 | 31,524 | 954 | 600 slices; MAP/PAR/TRACE PASS |
+| CP54b | То же + общий gate быстрых ACK | 1185 | 341 | 6 | 32,273 | 954 | 595 slices; MAP/PAR/TRACE PASS |
 
 Основа — frozen CP53a: 1195/341/6/31,338 MHz, путь address→ACK→uPC.
 Оба варианта комбинационные, formal/decode/side effects и 36 portable/vendor
-workloads PASS; два новых cold FB+DIR сохранили counters/raw UART CP53.
-Новые ресурсы ещё не измерены,
-автопроверка отклонила новый пакет CP54 до отдельного разрешения.
-[Описание](ack-cp54.md).
+workloads PASS; два cold FB+DIR сохранили counters/raw UART CP53. Все
+синтезированные HDL совпали с проверенными; повторять tests не потребовалось.
+Выбран B: **−10 LUT / −7 slices / +0,935 MHz** от CP53a, остаются
+**95 LUT / 45 slices / 1 EBR**, slack **2,843 ns** при 29,56 MHz.
+Худший путь теперь включает address[0]→request/write→DMA operand→ACK→seq,
+31,012 ns, 17 levels, 58,4% routing. Все EDIF прошли strong-driver audit;
+предупреждения прежних классов сохранены в raw reports. Внешние pin delays
+не заданы. Default — CP52a до дальнейшего сокращения площади, плата CP29a.
+[Описание](ack-cp54.md), [измерения](synthesis-cp54.json).
 
 ## CP53 — три cursor gates PASS, выбран CP53a
 

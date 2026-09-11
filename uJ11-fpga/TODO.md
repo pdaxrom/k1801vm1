@@ -7,8 +7,8 @@
   86 side-effect beats и 36 portable/vendor workloads PASS.
 - [x] CP54: оба новых cold FB+DIR PASS, по 288686609 clocks;
   counters/raw UART совпали с CP53a, исходники и logs заархивированы.
-- [ ] CP54a/b: выполнить два full synthesis после подтверждения передачи
-  9 файлов/71944 bytes; сравнить с CP53a, выбрать по реальным LUT/FF/Fmax.
+- [x] CP54a/b: оба full synthesis PASS; выбран CP54b — 1185 LUT / 341 FF /
+  6 EBR / 32,273 MHz, −10 LUT от CP53a. Все HDL/test/report hashes проверены.
   [CP54](docs/ack-cp54.md).
 
 - [x] CP51: проверить MAP/TRACE и распределение ресурсов CP40h, связать
@@ -21,8 +21,8 @@
 - [x] CP52a/b: полный Diamond gate. Baseline 1159/326/6/31,470 MHz;
   sequential 1198/341/6/30,044 MHz. Оба routed/timing PASS.
 - [ ] Уменьшить площадь sequential FRAM board до включения в default:
-  после CP53a остаются 85 LUT, slack 1,919 ns; цель <=1100 LUT не достигнута.
-  Следующий кандидат — board decode/ACK с прежними ROM/CSR/RK priorities.
+  после CP54b остаются 95 LUT, slack 2,843 ns; цель <=1100 LUT не достигнута.
+  На этой основе отдельно измерить native FRAM shared RX/read-data storage.
 - [x] CP53: EDIF уточнил 8 CCU2D для инкремента и 5 для сравнения;
   конечные netlists не содержат сетей с двумя сильными драйверами.
 - [x] CP53: подготовить increment/compare/both, доказать equivalence,
@@ -34,8 +34,9 @@
   buffer: CP52 ещё не выполняет speculative reads.
 - [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode
   преобразований; экономию MMU-сборок не переносить без измерения.
-- [ ] Исследовать address→ACK→uPC critical path (31,936 ns у CP53a), сравнивать
-  Fmax и добавленные memory clocks. Сохранить цель <=1100 LUT.
+- [ ] Продолжить исследование address→ACK→uPC critical path: у CP54b
+  31,012 ns, путь включает address[0]→request/write→DMA operand→ACK→seq.
+  Сравнивать Fmax и memory clocks, сохранять odd-word faults и цель <=1100 LUT.
 
 ## CP50: рабочая сборка без MMU
 

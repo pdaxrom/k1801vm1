@@ -5,11 +5,12 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP54: два варианта I/O/DMA decode и ACK прошли локальные проверки.**
-Formal/negative controls, FRAM/CSR side effects и 36 portable/vendor
-workloads, два новых cold RT-11FB + DIR сохранили counters/raw UART CP53a.
-Новых LUT/Fmax пока нет: передача
-пакета для двух полных synthesis ожидает отдельного подтверждения.
+**CP54: оба full-board synthesis PASS; выбран CP54b.**
+**1185 LUT / 341 FF / 6 EBR / 32,273 MHz**, −10 LUT от CP53a.
+Остаются **95 LUT / 45 slices / 1 EBR**, slack 2,843 ns при 29,56 MHz.
+Formal/negative controls, FRAM/CSR, 36 portable/vendor workloads и оба
+cold RT-11FB + DIR сохранили counters/raw UART CP53a. Кандидат B сохранён
+для дальнейшей оптимизации до цели <=1100 LUT; default и плата прежние.
 [Участок критического пути и проверки](docs/ack-cp54.md).
 
 **CP53: три full-board synthesis завершены.** Лучший по площади CP53a:

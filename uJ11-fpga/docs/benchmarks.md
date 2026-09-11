@@ -5,8 +5,12 @@
 Два варианта, по девять portable и девять vendor EBR workloads каждый.
 Все **36 измерений** точно сохранили raw counters CP53a: R,R 40,0625 CPI,
 остальные workloads без изменений. Оба новых cold FB+DIR PASS, каждый
-288686609 clocks; все counters и raw UART точно совпали с CP53a. Новые
-ресурсы/Fmax ещё не измерены. [CP54](ack-cp54.md), [проверки](verification-cp54.json).
+288686609 clocks; все counters и raw UART точно совпали с CP53a.
+Полный synthesis выбранного CP54b: **1185 LUT / 341 FF / 6 EBR /
+32,273 MHz**, −10 LUT от CP53a при той же производительности на 29,56 MHz.
+Ускорение относительно native default остаётся 2,671× на R,R и 1,229×
+на cold FB+DIR. [CP54](ack-cp54.md), [проверки](verification-cp54.json),
+[synthesis](synthesis-cp54.json).
 
 ## CP53 — три cursor-варианта сохранили все counters CP52
 
