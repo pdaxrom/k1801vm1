@@ -1,5 +1,15 @@
 # Implementation status, 2026-09-11
 
+## CP54 — два комбинационных варианта decode/ACK
+
+Вынесен независимый от адреса RK DMA operand; второй вариант также
+объединяет быстрые ACK перед общей I/O qualification. Два SAT proofs
+всех 39 output bits, три negative controls, 524288 X/Z-data cases,
+86 board beats и 36 portable/vendor workloads PASS. Оба новых cold FB+DIR
+PASS, по 288686609 clocks, все counters/raw UART совпали с CP53a.
+Synthesis ещё не запущен, передача требует подтверждения
+после auto-review rejection. Default/MMU/плата прежние. [CP54](ack-cp54.md).
+
 ## CP53 — cursor mapping, synthesis и выбранный board PASS
 
 Подготовлены три варианта CP52b: XOR/AND increment, grouped comparator,

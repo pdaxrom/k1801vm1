@@ -2,6 +2,15 @@
 
 ## Текущий приоритет: оптимизация MMU-less CPU и полного board
 
+- [x] CP54: вынести DMA operand из адресного пути и проверить общий gate
+  быстрых ACK. Два SAT proofs, три negative controls, 524288 X/Z-data cases,
+  86 side-effect beats и 36 portable/vendor workloads PASS.
+- [x] CP54: оба новых cold FB+DIR PASS, по 288686609 clocks;
+  counters/raw UART совпали с CP53a, исходники и logs заархивированы.
+- [ ] CP54a/b: выполнить два full synthesis после подтверждения передачи
+  9 файлов/71944 bytes; сравнить с CP53a, выбрать по реальным LUT/FF/Fmax.
+  [CP54](docs/ack-cp54.md).
+
 - [x] CP51: проверить MAP/TRACE и распределение ресурсов CP40h, связать
   их с текущим default RTL CP50. Свободны 121 LUT / 56 slices / 1 EBR.
 - [x] CP51: измерить девять warm workloads на полном native board;

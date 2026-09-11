@@ -1,4 +1,12 @@
-# Benchmarks: CP53 и предыдущие этапы
+# Benchmarks: CP54 и предыдущие этапы
+
+## CP54 — I/O/DMA decode и ACK
+
+Два варианта, по девять portable и девять vendor EBR workloads каждый.
+Все **36 измерений** точно сохранили raw counters CP53a: R,R 40,0625 CPI,
+остальные workloads без изменений. Оба новых cold FB+DIR PASS, каждый
+288686609 clocks; все counters и raw UART точно совпали с CP53a. Новые
+ресурсы/Fmax ещё не измерены. [CP54](ack-cp54.md), [проверки](verification-cp54.json).
 
 ## CP53 — три cursor-варианта сохранили все counters CP52
 

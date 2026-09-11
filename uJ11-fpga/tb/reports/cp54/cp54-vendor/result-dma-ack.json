@@ -1,0 +1,183 @@
+{
+  "variants": [
+    {
+      "variant": "dma-ack",
+      "vendor": true,
+      "runs": [
+        {
+          "tag": "bench",
+          "pass_lines": [
+            "PASS CP54 dma-ack MOV_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks",
+            "PASS CP54 dma-ack ADD_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks",
+            "PASS CP54 dma-ack CMP_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks",
+            "PASS CP54 dma-ack mixed_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks",
+            "PASS CP54 dma-ack MOV_mem_reg: 56876 clocks / 256 instructions, 508 beats, 24384 SCK, 52324 busy clocks",
+            "PASS CP54 dma-ack MOV_reg_mem: 61916 clocks / 256 instructions, 508 beats, 26400 SCK, 56860 busy clocks",
+            "PASS CP54 dma-ack MOV_mem_mem: 88628 clocks / 256 instructions, 760 beats, 38496 SCK, 82816 busy clocks",
+            "PASS CP54 dma-ack BR_self: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks",
+            "PASS CP54 dma-ack stack_push_pop: 59812 clocks / 256 instructions, 508 beats, 25408 SCK, 54628 busy clocks"
+          ],
+          "sources_sha256": {
+            "build/cp54-vendor/dma-ack/tb_bench.v": "20621cd4f0148ab6d17d282a5727ed0c1a6aa43ca0b7045d0636940859b0c7e2",
+            "rtl/uj11_core.v": "a7f492e043ed72a5ba9e8434979eba51d82d1739066114412f547ae5b8b05169",
+            "rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+            "microcode/generated/uj11_decode_table.v": "b7ab68e2f91b1f33721ac4067416eccfa7ea394cf7a973c3db6ab358fcef14ea",
+            "rtl/uj11_engine.v": "5f991b318e0d24010fd6d3cb4dd347214b68bc7b047df711be22d4396d33d31b",
+            "rtl/uj11_decode.v": "eaa181630dea88ef76ba3d60dd3595d4f7b2cae622e7fa354b28b74d63c4bc78",
+            "rtl/uj11_microseq.v": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+            "rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+            "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+            "rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+            "rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+            "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+            "boards/hc1200/uj11_board.v": "015d9b9eef29986e316f2f89228df664c79a9a1b43b9a34d4b4dc841fc88560c",
+            "build/cp54-ack/dma-ack/uj11_board_bus.v": "e71e57092734a9863bab0e80ff398836bd09f7cfee8e14b93afc016ba215c094",
+            "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+            "build/cp54-ack/baseline/uj11_board_fram.v": "de21898d452b2c4086e5843b6d094e26ccf7e6f0b4823269f6b6858cf3632546",
+            "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+            "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+            "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+            "microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+            "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+            "microcode/generated/uj11_m0_ebr.v": "f29be4de8f97bd9eaddc053cb7ea59789bd6044436d03b4b0c5b959d4caf002a",
+            "build/vendor/DP8KC.v": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+            "build/vendor/GSR.v": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+            "build/vendor/PUR.v": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4"
+          }
+        }
+      ],
+      "workloads": [
+        {
+          "workload": "MOV_RR",
+          "instructions": 256,
+          "microclocks": 10256,
+          "memory_beats": 256,
+          "opcode_fetches": 256,
+          "writes": 0,
+          "request_clocks": 9744,
+          "fram_busy_clocks": 9232,
+          "spi_transactions": 4,
+          "spi_clocks": 4224
+        },
+        {
+          "workload": "ADD_RR",
+          "instructions": 256,
+          "microclocks": 10256,
+          "memory_beats": 256,
+          "opcode_fetches": 256,
+          "writes": 0,
+          "request_clocks": 9744,
+          "fram_busy_clocks": 9232,
+          "spi_transactions": 4,
+          "spi_clocks": 4224
+        },
+        {
+          "workload": "CMP_RR",
+          "instructions": 256,
+          "microclocks": 10256,
+          "memory_beats": 256,
+          "opcode_fetches": 256,
+          "writes": 0,
+          "request_clocks": 9744,
+          "fram_busy_clocks": 9232,
+          "spi_transactions": 4,
+          "spi_clocks": 4224
+        },
+        {
+          "workload": "mixed_RR",
+          "instructions": 256,
+          "microclocks": 10256,
+          "memory_beats": 256,
+          "opcode_fetches": 256,
+          "writes": 0,
+          "request_clocks": 9744,
+          "fram_busy_clocks": 9232,
+          "spi_transactions": 4,
+          "spi_clocks": 4224
+        },
+        {
+          "workload": "MOV_mem_reg",
+          "instructions": 256,
+          "microclocks": 56876,
+          "memory_beats": 508,
+          "opcode_fetches": 256,
+          "writes": 0,
+          "request_clocks": 53340,
+          "fram_busy_clocks": 52324,
+          "spi_transactions": 508,
+          "spi_clocks": 24384
+        },
+        {
+          "workload": "MOV_reg_mem",
+          "instructions": 256,
+          "microclocks": 61916,
+          "memory_beats": 508,
+          "opcode_fetches": 256,
+          "writes": 252,
+          "request_clocks": 57876,
+          "fram_busy_clocks": 56860,
+          "spi_transactions": 760,
+          "spi_clocks": 26400
+        },
+        {
+          "workload": "MOV_mem_mem",
+          "instructions": 256,
+          "microclocks": 88628,
+          "memory_beats": 760,
+          "opcode_fetches": 256,
+          "writes": 252,
+          "request_clocks": 84336,
+          "fram_busy_clocks": 82816,
+          "spi_transactions": 1012,
+          "spi_clocks": 38496
+        },
+        {
+          "workload": "BR_self",
+          "instructions": 256,
+          "microclocks": 27392,
+          "memory_beats": 256,
+          "opcode_fetches": 256,
+          "writes": 0,
+          "request_clocks": 26880,
+          "fram_busy_clocks": 26368,
+          "spi_transactions": 256,
+          "spi_clocks": 12288
+        },
+        {
+          "workload": "stack_push_pop",
+          "instructions": 256,
+          "microclocks": 59812,
+          "memory_beats": 508,
+          "opcode_fetches": 256,
+          "writes": 128,
+          "request_clocks": 55644,
+          "fram_busy_clocks": 54628,
+          "spi_transactions": 636,
+          "spi_clocks": 25408
+        }
+      ],
+      "cp53_counters_identical": true
+    }
+  ],
+  "inputs_sha256": {
+    "tools/run_ack_cp54.py": "07d22893dc16360a934d64429c504e5fe5f36106548e7e198cbba5e6d98774e5",
+    "tools/run_fram_cp52.py": "2d0c99e4c2a464a3d12337359938d7f8d13bff68e66c0f99e8f446c71b23e818",
+    "tools/build_ack_cp54.py": "6bd87c7e73660365859345e8db4459b0b214a206cc45157210b3c2c845bab8b7",
+    "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+    "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+    "tb/tb_board_bus.v": "4148cacd6258bec7df11407388077147763a3deb286688334a03505edcb2f172",
+    "tb/bus_fram_cp52_checks.vh": "f5d6db65e31f2c7476c2c03c794ed8b8067d760d00803c483885f310c287b965",
+    "tb/tb_board_bench_cp51.v": "15621545e07e8e2e5e6178b5735047b92fb375d4b73bb27f63442911a5821d91",
+    "microcode/generated/m0.mem": "8fe41c7261559bb197feed0688bedb55de7bbb1eeab3d93a644c59c281df1f0c",
+    "microcode/generated/decode.mem": "48e876bce8b0700ebd1a112c2f92e590ac5a9fb8b065fb4650d94434540718c8",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "build/cp54-ack/inputs.json": "734ce45cd23a82019b6ded00365a2d6d3e753638e29402e8f6a452f00abf556c",
+    "docs/synthesis-cp53.json": "a342c093ddeb32da6009e90c999ae7c04fa54ed4637f684b067737cc1f564c19"
+  },
+  "logs_sha256": {
+    "build/cp54-vendor/dma-ack/bench-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp54-vendor/dma-ack/bench.log": "d86c825cd755eb52bc72d569bde992f0e625f0d98eb23350e0deb822e4d77eb4",
+    "build/cp54-vendor/dma/bench-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp54-vendor/dma/bench.log": "fb7bdddbcca1ab46a5c8710a490865f84a31751dd06097247328cd6515da6d5f"
+  }
+}

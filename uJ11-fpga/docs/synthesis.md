@@ -1,5 +1,19 @@
 # Synthesis checkpoints
 
+## CP54 — I/O qualification и ACK, gates подготовлены
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP54a | DMA operand до декодирования адреса | — | — | — | — | 954 | Prepared; transfer ожидает подтверждения |
+| CP54b | То же + общий gate быстрых ACK | — | — | — | — | 954 | Prepared; transfer ожидает подтверждения |
+
+Основа — frozen CP53a: 1195/341/6/31,338 MHz, путь address→ACK→uPC.
+Оба варианта комбинационные, formal/decode/side effects и 36 portable/vendor
+workloads PASS; два новых cold FB+DIR сохранили counters/raw UART CP53.
+Новые ресурсы ещё не измерены,
+автопроверка отклонила новый пакет CP54 до отдельного разрешения.
+[Описание](ack-cp54.md).
+
 ## CP53 — три cursor gates PASS, выбран CP53a
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
