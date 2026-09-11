@@ -1,0 +1,19 @@
+{
+  "reference": "cp54b",
+  "mmu": false,
+  "cpu_mhz": 29.56,
+  "spi_mhz": 29.56,
+  "sampling": "MISO on CPU posedge, before forwarded SCK falls; MOSI on CPU posedge; SCK rises on CPU negedge.",
+  "inputs": {
+    "tools/build_spi_cp56.py": "51ff67d1cdcf0f7d739da862d52d40033d36e004fd495afe8e894de61b026ed0",
+    "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+    "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+    "synth/reports/cp54b/inputs.json": "4ccd4eae2ccb98d7cc24fb0e5579cc3442683e2811c17783fd0c85fae1474175",
+    "synth/reports/cp54b/source.tgz": "8383bdd445202d0365e054f30ae257d6fb3ff47b070bdab9333702d966a54f82"
+  },
+  "outputs": {
+    "build/cp56-spi/baseline/uj11_board_bus.v": "e71e57092734a9863bab0e80ff398836bd09f7cfee8e14b93afc016ba215c094",
+    "build/cp56-spi/baseline/uj11_board_fram.v": "de21898d452b2c4086e5843b6d094e26ccf7e6f0b4823269f6b6858cf3632546",
+    "build/cp56-spi/fast/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976"
+  }
+}

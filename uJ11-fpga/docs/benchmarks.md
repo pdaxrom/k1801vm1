@@ -1,4 +1,14 @@
-# Benchmarks: CP55 и предыдущие этапы
+# Benchmarks: CP56 и предыдущие этапы
+
+## CP56 — FRAM SCK 14,78 → 29,56 MHz, simulation
+
+CPU остаётся на 29,56 MHz. Девять portable и девять vendor workloads
+совпали; memory/SPI operation counts те же. R,R **40,0625 → 23,5625 CPI**
+(**1,700×**); memory workloads **1,743–1,768×**; stack **1,739×**;
+BR self **1,814×**. Cold RT-11FB + DIR: **288686609 → 173379163 clocks**
+(**1,665×**), каталог совпал. Это локальные измерения, нового physical
+Fmax и результатов платы пока нет. [Таблица CP56](spi-cp56.md),
+[проверки](verification-cp56.json).
 
 ## CP55 — native shared FRAM receive/result
 

@@ -1,0 +1,2 @@
+PASS CP56 ODDRXE portable/vendor: 3066 half-cycle and reset observations
+tb/tb_oddrxe_cp56.v:22: $finish called at 40770000 (1ps)

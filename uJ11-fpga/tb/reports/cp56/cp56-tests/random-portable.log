@@ -1,0 +1,2 @@
+PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1
+build/cp56-tests/tb_random_portable.v:46: $finish called at 1187250000 (1ps)

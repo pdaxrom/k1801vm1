@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP56 — SCK 29,56 MHz, gate подготовлен
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP56a, pending | Frozen CP54b + ODDRXE FRAM SCK=CPU | — | — | — | — | 954 | Локальные проверки PASS; экспорт отклонён approval review |
+
+Новых ресурсных цифр пока нет. Нужно измерить полный HC1200 и отдельно
+внешнее timing FRAM. Локальная модель с предполагаемыми pin delays
+не заменяет MAP/PAR/TRACE. [Подготовленный gate CP56](spi-cp56.md).
+
 **Аппаратная установка CP54b:** JED экспортирован из существующей проверенной
 разводки и записан во FLASH с Verify PASS. RT-11FB загрузилась до prompt.
 Повторного MAP/PAR нет; параметры CP54b ниже относятся к тому же gate.

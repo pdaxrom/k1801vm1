@@ -19,9 +19,10 @@ def main():
     p.add_argument('--cursor-cp53',choices=['increment','compare','both'],help='CP53 native cursor mapping experiment')
     p.add_argument('--ack-cp54',choices=['dma','dma-ack'],help='CP54 native I/O qualification and ACK experiment')
     p.add_argument('--rx-cp55',action='store_true',help='CP55 native shared FRAM receive/result storage')
+    p.add_argument('--spi-cp56',action='store_true',help='CP56 native 29.56 MHz SPI via ODDRXE')
     p.add_argument('--prepare-only',action='store_true',help='Write exact synthesis project and input manifest without running Diamond')
     args=p.parse_args()
-    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55))<=1, 'Choose one native candidate or the retained MMU profile'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56))<=1, 'Choose one native candidate or the retained MMU profile'
     assert re.fullmatch(r'cp[0-9]+[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
@@ -39,6 +40,9 @@ def main():
         core,board=adapt(args.ack_cp54)
     if args.rx_cp55:
         from build_rx_cp55 import adapt
+        core,board=adapt()
+    if args.spi_cp56:
+        from build_spi_cp56 import adapt
         core,board=adapt()
     sources=core+board+['boards/hc1200/uj11_microcomp.v','microcode/generated/uj11_m0_ebr.v']
     if args.mmu:sources+=MMU
@@ -85,13 +89,16 @@ exit 0
     if args.rx_cp55:
         inputs+=['tools/build_rx_cp55.py','tools/build_fram_cp52.py','build/cp55-rx/inputs.json',
                  'synth/reports/cp54b/inputs.json','synth/reports/cp54b/source.tgz']
+    if args.spi_cp56:
+        inputs+=['tools/build_spi_cp56.py','tools/build_fram_cp52.py','build/cp56-spi/inputs.json',
+                 'synth/reports/cp54b/inputs.json','synth/reports/cp54b/source.tgz']
     hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in sorted(inputs)}
     hashes['generated:clock.lpf']=hashlib.sha256(lpf.encode()).hexdigest()
-    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,defines=['UJ11_MMU'] if args.mmu else [],
+    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,defines=['UJ11_MMU'] if args.mmu else [],
                   input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if args.prepare_only:
-        print(f'Prepared {args.name}: {len(hashes)} inputs; MMU={args.mmu}, sequential FRAM={args.fram_cp52}, cursor={args.cursor_cp53}, ACK={args.ack_cp54}, RX={args.rx_cp55}')
+        print(f'Prepared {args.name}: {len(hashes)} inputs; MMU={args.mmu}, sequential FRAM={args.fram_cp52}, cursor={args.cursor_cp53}, ACK={args.ack_cp54}, RX={args.rx_cp55}, SPI={args.spi_cp56}')
         return
     diamond=os.environ.get('DIAMOND_HOME',str(__import__('pathlib').Path.home()/'.local/lscc/diamond/3.14'))+'/bin/lin64/diamondc'
     with (out/'diamond.log').open('w') as log:
@@ -102,7 +109,7 @@ exit 0
     report=dict(inputs=manifest,scope='Full board: core/FIS + SPI FRAM + KL11/KW11/panel/SD/RK + bootstrap + OSCH/reset/pins; prefetch disabled',
                 device='LCMXO2-1200HC-4SG32C',constraint_mhz=29.56,expected_ebr=7 if args.mmu else 6,diamond_returncode=rc,
                 mmu=args.mmu,microcode_words=json.loads((ROOT/'microcode/generated/m0.stats.json').read_text())['used_words'],
-                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,
+                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,
                 external_pin_delays_constrained=False)
     try:
         report.update(extract(prefix.with_suffix('.mrp').read_text(),prefix.with_suffix('.twr').read_text(),prefix.with_suffix('.par').read_text()))

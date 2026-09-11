@@ -1,0 +1,2 @@
+PASS CP52 FRAM: 327 checked beats; sequential/redirect/byte/odd/write/bank/reset/hold/CS timing, divider1
+build/cp56-tests/tb_protocol_portable.v:120: $finish called at 517582000 (1ps)
