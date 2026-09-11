@@ -1,6 +1,6 @@
 # Implementation status, 2026-09-11
 
-## CP52 — native sequential FRAM candidate, локальные проверки PASS
+## CP52 — native sequential FRAM candidate, simulation и synthesis PASS
 
 Новый 15-bit cursor позволяет продолжать demand READ без повторной команды
 и адреса. Board decoder исключает ROM/CSR/private RK DMA; записи, byte/odd,
@@ -8,8 +8,11 @@ bank boundary и reset проверены. Полный board с portable/vendor
 R,R **40,0625 CPI (2,671×)**. Cold RT-11FB + DIR **288686609 clocks (1,229×)**;
 каждый FRAM beat проверен по модели, UART wire/SD writeback/IRQ прошли.
 Baseline с исправленным SL-prompt testbench повторил 354938300 clocks.
-Сохранены source snapshots и logs. CP52a/b synthesis подготовлен; новый
-LUT/FF/EBR/Fmax отсутствует. Default, MMU-ветвь и плата остаются прежними.
+Сохранены source snapshots и logs. CP52a — 1159 LUT / 326 FF / 6 EBR /
+31,470 MHz; CP52b — 1198 / 341 / 6 / 30,044 MHz, оба routed/timing PASS.
+Цена ускорения +39 LUT/+15 FF; у candidate остаются 82 LUT и slack 0,544 ns.
+Он сохранён отдельно до уменьшения площади; default, MMU-ветвь и плата
+остаются прежними. Измеренный default baseline теперь CP52a.
 [Детали CP52](fram-sequential-cp52.md).
 
 ## CP51 — ресурсный и performance baseline MMU-less board
@@ -35,7 +38,7 @@ MMU-ветвь и физическая плата не менялись; нов�
 FRAM, native bus и CPU relocation/edges на portable/vendor прошли.
 Default cold RT-11FB + DIR повторил CP40h: 354938300 clocks, прежние counts
 и UART. В default elaborated hierarchy нет MMU-модулей.
-Новый synthesis CP50 ожидает разрешения передачи исходников.
+Default профиль позднее заново синтезирован как CP52a; MMU gate не повторялся.
 [Профили и проверки](build-profiles-cp50.md).
 
 Ниже — история checkpoints; их будущие MMU-планы теперь отложены.

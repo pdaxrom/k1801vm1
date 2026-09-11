@@ -9,8 +9,11 @@
 - [x] CP52: отдельный sequential FRAM READ candidate; полная периферия,
   overlays/RK, cursor/write/reset tests, portable/vendor benchmarks и cold FB+DIR.
   R,R ускорен в 2,671×, полный cold сценарий — в 1,229×. [CP52](docs/fram-sequential-cp52.md).
-- [ ] CP52a/b: измерить полный HC1200 native baseline и sequential candidate
-  на Diamond, затем решить о принятии по LUT/FF/EBR/Fmax. Default пока CP40h.
+- [x] CP52a/b: полный Diamond gate. Baseline 1159/326/6/31,470 MHz;
+  sequential 1198/341/6/30,044 MHz. Оба routed/timing PASS.
+- [ ] Уменьшить площадь CP52b до включения в default: остаются 82 LUT,
+  slack 0,544 ns; цель <=1100 LUT пока не достигнута. В FRAM появились
+  13 CCU2D: исследовать цену инкремента/сравнения cursor, затем board decode/ACK.
 - [ ] После первого resource gate отдельно оценить малый instruction-stream
   buffer: CP52 ещё не выполняет speculative reads.
 - [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode
@@ -26,7 +29,8 @@ HC1200. Сохранить прототип под `UJ11_MMU`, default `MMU=0`.
 - [x] Разделить MMU-less CP40h и эксперимент CP47c через compile-time guards.
 - [x] Исключить MMU sources из default сборки; сохранить FIS и общий microcode.
 - [x] Проверить обе ветви против архивов, FRAM/bus и CPU portable/vendor.
-- [ ] Новый full-board synthesis CP50 после разрешения передачи исходников.
+- [x] Новый full-board synthesis default профиля выполнен как CP52a,
+  1159 LUT / 326 FF / 6 EBR / 31,470 MHz. MMU gate повторять не требуется.
 
 [Профили и ограничения](docs/build-profiles-cp50.md).
 

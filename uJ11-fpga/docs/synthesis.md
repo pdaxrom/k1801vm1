@@ -1,19 +1,31 @@
 # Synthesis checkpoints
 
-## CP52 — native sequential FRAM, synthesis подготовлен
+## CP52 — native sequential FRAM, оба full-board gates PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
 |---|---|---:|---:|---:|---:|---:|---|
 | CP40h, архив | Full MMU-less board | 1159 | 326 | 6 | 31,470 | 954 | Измеренный reference |
-| CP52a | Новый default native gate | — | — | — | — | 954 | Prepared, ещё не запущен |
-| CP52b | Demand sequential FRAM READ | — | — | — | — | 954 | Prepared, ещё не запущен |
+| CP52a | Новый default native gate | 1159 | 326 | 6 | 31,470 | 954 | 584 slices; MAP/PAR/TRACE PASS |
+| CP52b | Demand sequential FRAM READ | 1198 | 341 | 6 | 30,044 | 954 | 603 slices; MAP/PAR/TRACE PASS |
 
 Все локальные CP52 simulation gates прошли: R,R ускорен в 2,671×, cold
-RT-11FB + DIR — в 1,229×. Новую площадь и Fmax ещё нельзя оценить по этим
-тестам. CP52 не включён в default; CPU/FIS/microcode и MMU-ветвь сохранены.
-[Описание и воспроизведение](fram-sequential-cp52.md).
+RT-11FB + DIR — в 1,229×. Цена ускорения: **+39 LUT / +15 FF / 0 EBR**;
+LUT logic +13, carry +26, distributed RAM без изменений. Остаток 82 LUT /
+37 slices / 1 EBR, pins заняты. Slack уменьшился с 2,053 до **0,544 ns**.
+CP52b critical path: EBR→RF/address→board decode/ACK→step/irq_ack→UART RX
+IRQ FF, 32,830 ns, 19 levels, 57,7% routing. Это внутренний TRACE;
+external pin delays не заданы, плата не прошивалась.
 
-## CP50 — два compile-time профиля, новый synthesis ожидается
+CP52b сохранён как измеренный performance candidate; до включения в default
+нужно уменьшить площадь/улучшить timing margin. CPU/FIS/microcode и MMU-ветвь
+сохранены. Raw reports и проверенные source archives: `synth/reports/cp52a/b`.
+[Описание и воспроизведение](fram-sequential-cp52.md), [audit](synthesis-cp52.json).
+
+## CP50 — два compile-time профиля
+
+Обновление CP52: default профиль заново синтезирован как CP52a, полностью
+повторены показатели CP40h. Отложенная передача CP50 больше не нужна;
+MMU-эксперименты остаются остановленными. Ниже сохранена история CP50.
 
 По решению пользователя MMU на HC1200 отложен. Default не определяет
 `UJ11_MMU`, эксперимент включается явно. Сравнение после препроцессора

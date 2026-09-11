@@ -92,12 +92,13 @@ FIS/EIS не переписывались; совпадение всех CPU/ALU
 
 ## Ресурсы и отложенная работа
 
-Последние реальные измерения: **CP40h 1159 LUT / 326 FF / 6 EBR /
-584 slices / 31.470 MHz**; **CP47c 1297 / 351 / 7 / 650**, MAP FAIL, Fmax нет.
-Новые результаты CP50 пока отсутствуют. Архив для двух synthesis gates
-содержит 43 файла, 248286 байт; список `/tmp/cp50-files.txt`. Передача на
-`sash@192.168.1.108:/tmp/uj11-cp50.7DpErp` отклонена автоматической проверкой
-и ожидает явного разрешения. Диски, ключи и `microasm11` в payload не входят.
+Default профиль заново измерен в **CP52a: 1159 LUT / 326 FF / 6 EBR /
+584 slices / 31.470 MHz**, полностью повторив CP40h. Сохранённый MMU —
+**CP47c 1297 / 351 / 7 / 650**, MAP FAIL, Fmax нет; его synthesis не повторялся.
+Отложенная передача CP50 больше не нужна. Пользователь разрешил отдельный
+пакет CP52: baseline и sequential FRAM candidate, оба gates выполнены.
+CP52b 1198/341/6/30,044 MHz сохраняется отдельно до уменьшения площади;
+default выбор не изменён. [Результаты CP52](fram-sequential-cp52.md).
 
 CP47c — kernel unified PAR relocation, а не законченный J-11 MMU. Нет
 PDR protection/length/W, MMR1/2, hardware fault metadata, abort250/restart,

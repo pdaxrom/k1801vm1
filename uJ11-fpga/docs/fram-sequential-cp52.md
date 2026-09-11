@@ -2,7 +2,8 @@
 
 Эксперимент хранится отдельно, `make board` продолжает собирать CP50/CP40h.
 CPU, microcode, FIS, периферия и сохранённая MMU-ветвь не изменены. Плата
-остаётся CP29a. Принятие CP52 зависит от нового full-board MAP/PAR/TRACE.
+остаётся CP29a. Оба новых full-board MAP/PAR/TRACE прошли, но CP52b
+сохранён отдельно до уменьшения площади и улучшения timing margin.
 
 ## Протокол и реализация
 
@@ -96,13 +97,44 @@ Register loop: 10256 clocks вместо 27392; 4224 SCK вместо 12288;
 
 ## Ресурсный gate
 
-Подготовлены CP52a — исходный native board и CP52b — последовательный READ.
+Выполнены CP52a — исходный native board и CP52b — последовательный READ.
 Target LCMXO2-1200HC-4SG32C, 29,56 MHz, полный CPU/FIS/FRAM/KL11/KW11/
 panel/HG/SD/RK/firmware/OSCH/pins. Microcode: прежние 954/1024×36.
-Архивный CP40h: **1159 LUT, 326 FF, 6 EBR, 31,470 MHz**. Свободны
-121 LUT и один EBR. **LUT/FF/EBR/Fmax нового варианта пока не измерены**;
-15 новых RTL bits нельзя подменять результатом MAP. Внешние pin delays
-по-прежнему не заданы, TRACE не подтверждает board-level timing.
+
+| Full-board gate | LUT4 | FF | EBR | Slices | Fmax MHz | Setup slack ns |
+|---|---:|---:|---:|---:|---:|---:|
+| CP52a, baseline | 1159 | 326 | 6 | 584 | 31,470 | 2,053 |
+| CP52b, sequential READ | 1198 | 341 | 6 | 603 | 30,044 | 0,544 |
+| Изменение | +39 | +15 | 0 | +19 | −1,426 | −1,509 |
+
+Оба gates полностью routed, timing PASS на 29,56 MHz. CP52a повторил все
+показатели CP40h. У CP52b остаются **82/1280 LUT, 37/640 slices, 1/7 EBR**;
+PIO sites заняты. FF: 333 PFU + 8 PIO вместо 317 + 9; поэтому прирост
+total FF +15 не означает одинакового распределения регистров по site types.
+
+MAP: logic LUT 1041→1054, carry LUT 70→96, distributed RAM остаётся 48.
+В иерархии FRAM Synplify: ORCALUT4 84→95, PFUMX 8→9, CCU2D 0→13.
+Эти primitive counts не складываются с MAP LUT4 и не являются отдельными
+независимыми оценками модулей. Увеличение carry usage указывает на стоимость
+формирования/сравнения cursor; разделить вклад инкремента и comparator
+нужно отдельным experiment, по этому отчёту они не разделены.
+
+Новый critical path: microstore lane2 → dynamic RF selector/read → address →
+service/board decode → ACK → CPU step/IRQ acknowledge → UART RX IRQ FF.
+Delay 32,830 ns, 19 logic levels, 57,7% routing. Сам cursor отсутствует
+в этом худшем пути, поэтому уменьшение Fmax нельзя приписать только ему.
+Внешние pin delays по-прежнему не заданы; TRACE не подтверждает board-level timing.
+
+**Решение:** сохранить CP52b как измеренный performance candidate. До
+включения в default уменьшить площадь и восстановить запас timing; цель
+<=1100 LUT пока не достигнута. Следующий локальный эксперимент — уменьшение
+стоимости cursor, затем native read/decode/ACK. Microcode и FIS сохранены,
+дополнительный EBR не занят, MMU не развивался.
+
+Проверенные raw reports и source archives находятся в `synth/reports/cp52a`
+и `synth/reports/cp52b`; [машинный audit](synthesis-cp52.json) связывает
+их с проверенными в simulation исходниками. `tools/record_synthesis_cp52.py`
+проверяет все source/report hashes и неизменность native baseline.
 
 Воспроизведение локальных проверок:
 
@@ -115,7 +147,7 @@ python3 tools/record_cp52.py
 
 Vendor модели должны находиться в `build/vendor`; RT-11 image остаётся
 read-only backing, SD writes идут только в RAM overlay модели.
-Сборка на сервере с Diamond после разрешённой передачи конкретных исходников:
+Выполненные команды на сервере с Diamond после разрешённой передачи исходников:
 
 ```sh
 python3 tools/checkpoint_board.py cp52a
@@ -123,5 +155,6 @@ python3 tools/checkpoint_board.py cp52b --fram-cp52
 ```
 
 `--prepare-only` формирует проект и input manifest без запуска Diamond.
-`--fram-cp52` несовместим с `--mmu`. До получения gate ресурсов эксперимент
-не включается в default и не экспортируется для программирования платы.
+`--fram-cp52` несовместим с `--mmu`. При повторении нужны свободные checkpoint
+имена, существующие reports не перезаписываются. Эксперимент не включён
+в default и не экспортирован для программирования платы.

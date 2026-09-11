@@ -17,8 +17,11 @@ SL упорядочивает лишний CR при redraw иначе. Обе r
 Ошибка прежнего testbench: промежуточный SL prompt мог быть принят за
 конец DIR до вывода `Files`. Исправлена проверка завершения, baseline
 повторил прежнее число clocks точно. Каждый candidate FRAM beat проверен
-по содержимому модели. Физическая плата не измерялась, новые area/Fmax
-ожидают synthesis. [CP52](fram-sequential-cp52.md), [source-linked counters](verification-cp52.json).
+по содержимому модели. Full-board synthesis CP52b: **1198 LUT / 341 FF /
+6 EBR / 30,044 MHz**, +39 LUT/+15 FF от CP52a. Timing PASS при 29,56 MHz,
+но slack только 0,544 ns. Физическая плата не измерялась; default прежний.
+[CP52](fram-sequential-cp52.md), [simulation counters](verification-cp52.json),
+[synthesis audit](synthesis-cp52.json).
 
 ## CP51 — warm MMU-less full-board baseline
 
