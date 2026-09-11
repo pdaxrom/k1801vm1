@@ -6,8 +6,13 @@
   их с текущим default RTL CP50. Свободны 121 LUT / 56 slices / 1 EBR.
 - [x] CP51: измерить девять warm workloads на полном native board;
   R,R = 107 clocks/instruction, FRAM busy 96,26%. [Аудит](docs/resources-cp51.md).
-- [ ] Первый performance gate: sequential FRAM READ / малый instruction-stream
-  buffer с полной периферией, overlays, RK operands и invalidation tests.
+- [x] CP52: отдельный sequential FRAM READ candidate; полная периферия,
+  overlays/RK, cursor/write/reset tests, portable/vendor benchmarks и cold FB+DIR.
+  R,R ускорен в 2,671×, полный cold сценарий — в 1,229×. [CP52](docs/fram-sequential-cp52.md).
+- [ ] CP52a/b: измерить полный HC1200 native baseline и sequential candidate
+  на Diamond, затем решить о принятии по LUT/FF/EBR/Fmax. Default пока CP40h.
+- [ ] После первого resource gate отдельно оценить малый instruction-stream
+  buffer: CP52 ещё не выполняет speculative reads.
 - [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode
   преобразований; экономию MMU-сборок не переносить без измерения.
 - [ ] Исследовать address→ACK→uPC critical path (31,802 ns), сравнивать

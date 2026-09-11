@@ -91,7 +91,11 @@ module tb_board_rt11;
             if({window[31:0],dut.data[7:0]}=="Files")directory_seen<=1;
             if(banner && previous_char==10 && dut.data[7:0]==".")begin
                 prompt_count<=prompt_count+1;
-                if(stage==1)begin
+                // SET SL ON can redraw an intermediate prompt while accepting
+                // DIR. Its position relative to the UART task's final delay
+                // depends on CPU speed; only a prompt after Files completes
+                // the command. Missing output still fails the global watchdog.
+                if(stage==1 && directory_seen)begin
                     if(!directory_seen || timer_edges==0 || !dut.bus.timer_ie || rk_commands<2 || !boot_complete)
                         $fatal(1,"RT-11 DIR incomplete/timer missing: directory%0d edges%0d IE%0d",directory_seen,timer_edges,dut.bus.timer_ie);
                     finish_pending<=1;stage=2;

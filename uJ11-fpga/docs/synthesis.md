@@ -1,5 +1,18 @@
 # Synthesis checkpoints
 
+## CP52 — native sequential FRAM, synthesis подготовлен
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP40h, архив | Full MMU-less board | 1159 | 326 | 6 | 31,470 | 954 | Измеренный reference |
+| CP52a | Новый default native gate | — | — | — | — | 954 | Prepared, ещё не запущен |
+| CP52b | Demand sequential FRAM READ | — | — | — | — | 954 | Prepared, ещё не запущен |
+
+Все локальные CP52 simulation gates прошли: R,R ускорен в 2,671×, cold
+RT-11FB + DIR — в 1,229×. Новую площадь и Fmax ещё нельзя оценить по этим
+тестам. CP52 не включён в default; CPU/FIS/microcode и MMU-ветвь сохранены.
+[Описание и воспроизведение](fram-sequential-cp52.md).
+
 ## CP50 — два compile-time профиля, новый synthesis ожидается
 
 По решению пользователя MMU на HC1200 отложен. Default не определяет

@@ -1,5 +1,17 @@
 # Implementation status, 2026-09-11
 
+## CP52 — native sequential FRAM candidate, локальные проверки PASS
+
+Новый 15-bit cursor позволяет продолжать demand READ без повторной команды
+и адреса. Board decoder исключает ROM/CSR/private RK DMA; записи, byte/odd,
+bank boundary и reset проверены. Полный board с portable/vendor EBR:
+R,R **40,0625 CPI (2,671×)**. Cold RT-11FB + DIR **288686609 clocks (1,229×)**;
+каждый FRAM beat проверен по модели, UART wire/SD writeback/IRQ прошли.
+Baseline с исправленным SL-prompt testbench повторил 354938300 clocks.
+Сохранены source snapshots и logs. CP52a/b synthesis подготовлен; новый
+LUT/FF/EBR/Fmax отсутствует. Default, MMU-ветвь и плата остаются прежними.
+[Детали CP52](fram-sequential-cp52.md).
+
 ## CP51 — ресурсный и performance baseline MMU-less board
 
 Проверены архивные CP40h source/MAP/TRACE hashes и неизменность текущего

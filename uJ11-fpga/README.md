@@ -5,6 +5,12 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP52: sequential FRAM READ проверен в симуляции полного компьютера.**
+Регистровые loops: **107 → 40,0625 clocks/instruction (2,671×)**;
+холодный RT-11FB + DIR: **354938300 → 288686609 clocks (1,229×)**.
+Эксперимент отдельный, default RTL и плата не менялись. Новые LUT/FF/EBR/Fmax
+ожидают полного synthesis. [Протокол, проверки и результаты](docs/fram-sequential-cp52.md).
+
 **CP51: аудит ресурсов и новые benchmarks MMU-less board.** По измерению
 CP40h свободны **121 LUT / 56 slices / 1 EBR**; все PIO sites заняты.
 70 свободных microinstructions разбиты на 46 участков, максимум 3 слова.

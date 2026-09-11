@@ -1,4 +1,24 @@
-# Benchmarks: CP51 и предыдущие этапы
+# Benchmarks: CP52 и предыдущие этапы
+
+## CP52 — full native board с demand sequential FRAM READ
+
+Portable и Lattice EBR models: одинаковые девять workloads. MOV/ADD/CMP
+R,R и mixed ALU: **40,0625 CPI вместо 107 (2,671×)**. На 256 инструкций
+4224 SCK вместо 12288; memory workloads, stack и BR self пока без ускорения.
+
+Новый cold RT-11FB + DIR с UART wire scoreboard прошёл для baseline
+и candidate: **354938300 / 288686609 clocks**, ускорение **1,229×**,
+на **18,67%** меньше тактов. По 300 RK commands, 162 SD reads / 6 writes,
+3270 UART bytes. У candidate 467 timer edges вместо 576; поэтому retired
+instructions и bus beats закономерно отличаются — это timed OS workload,
+а не фиксированный поток retirements. Текст одинаков после исключения CR;
+SL упорядочивает лишний CR при redraw иначе. Обе raw UART записи сохранены.
+
+Ошибка прежнего testbench: промежуточный SL prompt мог быть принят за
+конец DIR до вывода `Files`. Исправлена проверка завершения, baseline
+повторил прежнее число clocks точно. Каждый candidate FRAM beat проверен
+по содержимому модели. Физическая плата не измерялась, новые area/Fmax
+ожидают synthesis. [CP52](fram-sequential-cp52.md), [source-linked counters](verification-cp52.json).
 
 ## CP51 — warm MMU-less full-board baseline
 
