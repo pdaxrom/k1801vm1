@@ -1,5 +1,16 @@
 # Implementation status, 2026-09-11
 
+## Текущая плата — CP54b
+
+По запросу пользователя JED выбранного CP54b экспортирован из проверенной
+разводки и записан во FLASH HC1200: Erase/Program/Verify PASS. На UART
+появились RT-11FB V05.03 и prompt, picocom восстановлен. Штатная частота
+29,56 MHz; архивный Fmax 32,273 MHz. Default RTL пока CP52a.
+Программы и периферию на новой прошивке проверит пользователь.
+[JED, hashes и журнал](board-bringup-cp54b.md).
+
+Ниже — результаты checkpoints до этой аппаратной установки.
+
 ## CP55 — native shared RX, проверки и synthesis PASS
 
 На frozen CP54b приёмный shift register совмещён с `rdata[15:8]`:

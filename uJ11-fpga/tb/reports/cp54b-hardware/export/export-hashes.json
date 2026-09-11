@@ -1,0 +1,14 @@
+{
+  "build/cp54b/export.tcl": "e74f8abb87bfdf21ce7c4a2f6a6d205e88c94c5fd289e2588ee5a058eb6e04c4",
+  "build/cp54b/export.log": "99a20b133137948e9b92d7a2cfc0367e99f4b3539d1d915bce8027b5bd1a746a",
+  "build/cp54b/jed.json": "fccc1ec0954854f021bf80970d8c8a100a3baceef86ff62d620c833909a27ec2",
+  "build/cp54b/program.xcf": "967f092f78350c7f3254b906090bebc99b5960164815a693fc4a9df9446bf05f",
+  "build/cp54b/verify-id.xcf": "cdf0db5ded5a8434c7ebe3b5afd80d1bf1f97096efad31712d5d03db47461e59",
+  "build/cp54b/verify-id.log": "e95d72d30593323819702e10217835ea23140a863d70be1ad5d54e9b7cdc6496",
+  "build/cp54b/impl1/cp54b_impl1.jed": "cf2be5959dc63f3a53284fa04e9de499574f4787a5c9183c3df9f7305b646069",
+  "build/cp54b/impl1/cp54b_impl1.ncd": "139bac492c0699ebe28bae886b00e5182854aeb44944775ccc285458dd6fa41b",
+  "build/cp54b/impl1/cp54b_impl1.prf": "b5921385689a586b74a539f58b1a32c53ea1d333c63f1aab124ff1c7a5dc9346",
+  "tools/export_board.py": "f448954b5caa655dbb62003dfd0b39a16b2f6e33f3e9c2e92704231a69681ed9",
+  "tools/make_programmer_xcf.py": "7a430b0d39ce5cdd21dc798ea47828468db464e303e2385231b32d8534355b6a",
+  "tools/hardware_uart.py": "c8a26928d57ff86492312b756174980f5cd64ee0fb7e20e3c59da6ca310e1bc9"
+}

@@ -2,6 +2,12 @@
 
 ## Текущий приоритет: оптимизация MMU-less CPU и полного board
 
+- [x] По запросу пользователя установить выбранный CP54b на HC1200:
+  JED экспортирован, FLASH Erase/Program/Verify PASS, RT-11FB prompt получен,
+  picocom восстановлен. [Журнал и точный JED](docs/board-bringup-cp54b.md).
+- [ ] Получить результаты пользовательской проверки CP54b: программы,
+  RGB/HDSP, keyboard и HG (JTAG_EN в GPIO, scanner и HG по очереди).
+
 - [x] CP55: shared RX на frozen CP54b; formal/negative/X/Z/reset/128 КиБ
   FRAM, portable/vendor board и cold FB+DIR PASS, counters/raw UART прежние.
 - [x] CP55a: разрешённая передача и полный synthesis выполнены.
@@ -78,7 +84,7 @@ HC1200. Сохранить прототип под `UJ11_MMU`, default `MMU=0`.
 - [ ] Проверить ROM, UART, сохранность FRAM/регистров и повторную загрузку RT-11;
   выполнить полный HC1200 synthesis/PAR/TRACE до программирования платы.
 
-На физической плате остаётся CP29: 1239 LUT4, 326 FF и 6/7 EBR.
+На физической плате установлен CP54b: 1185 LUT4, 341 FF и 6/7 EBR.
 Свободный EBR не резервируется под ODT.
 
 ## Отложено: FP11(A)

@@ -1,6 +1,10 @@
 # uJ11 FPGA
 
-**CP29 hardware:** HC1200 FLASH programmed and verified; real RT-11 boot/DIR, user-confirmed RGB/HDSP/keyboard operation and a verified HG read/write round-trip. [Bring-up record](docs/board-bringup-cp29.md).
+**На плате CP54b:** FLASH Erase/Program/Verify прошли, RT-11FB V05.03
+загрузилась до приглашения монитора. Picocom возобновлён; пользовательская
+проверка программ и периферии ожидается. [Журнал установки и JED](docs/board-bringup-cp54b.md).
+Предыдущие проверки RGB/HDSP/keyboard/HG относятся к
+[CP29a](docs/board-bringup-cp29.md).
 
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
@@ -9,7 +13,7 @@
 1185 LUT / 341 FF / 6 EBR, Fmax **32,273 MHz**, запас **2,843 ns** при
 штатных 29,56 MHz. Профиль — `--ack-cp54 dma-ack`. Свободны 95 LUT /
 45 slices / 1 EBR; до <=1100 LUT нужно убрать 85 LUT. CP55 сохранён
-как эксперимент; default CP52a и прошивка CP29a пока прежние.
+как эксперимент; default сборки пока CP52a, на плату установлен явный профиль CP54b.
 
 **CP55: shared FRAM RX, полный synthesis PASS.**
 **1182 LUT / 333 FF / 6 EBR / 30,827 MHz** — на 3 LUT и 8 FF меньше CP54b,
@@ -69,7 +73,7 @@ make board MMU=1                    # сохранить эксперимент,
 Без MMU CPU адресует нижнее 16-битное пространство; верхние 64 КиБ FRAM
 не отображаются. Новое измерение default логики — **CP52a: 1159 LUT /
 326 FF / 6 EBR / 31.470 MHz**; полностью повторены ресурсы и Fmax CP40h.
-Физическая плата остаётся CP29a.
+Текущая физическая плата — CP54b; установленный JED и журнал приведены выше.
 
 ## История экспериментов до решения CP50
 

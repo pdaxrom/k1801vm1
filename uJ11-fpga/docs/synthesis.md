@@ -1,5 +1,10 @@
 # Synthesis checkpoints
 
+**Аппаратная установка CP54b:** JED экспортирован из существующей проверенной
+разводки и записан во FLASH с Verify PASS. RT-11FB загрузилась до prompt.
+Повторного MAP/PAR нет; параметры CP54b ниже относятся к тому же gate.
+[Установленная прошивка и журнал](board-bringup-cp54b.md).
+
 ## CP55 — shared RX на native CP54b, полный gate PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
