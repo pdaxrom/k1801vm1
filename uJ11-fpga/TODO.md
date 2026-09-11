@@ -4,8 +4,9 @@
 
 - [x] CP55: shared RX на frozen CP54b; formal/negative/X/Z/reset/128 КиБ
   FRAM, portable/vendor board и cold FB+DIR PASS, counters/raw UART прежние.
-- [ ] CP55a: выполнить один full synthesis после подтверждения передачи
-  7 файлов/48012 bytes; измерить реальную площадь/timing против CP54b.
+- [x] CP55a: разрешённая передача и полный synthesis выполнены.
+  1182 LUT / 333 FF / 6 EBR / 30,827 MHz; от CP54b −3 LUT/−8 FF,
+  но −1,446 MHz Fmax. Сохранить CP55a для площади, CP54b — для timing.
   [CP55](docs/rx-cp55.md).
 
 - [x] CP54: вынести DMA operand из адресного пути и проверить общий gate
@@ -27,8 +28,8 @@
 - [x] CP52a/b: полный Diamond gate. Baseline 1159/326/6/31,470 MHz;
   sequential 1198/341/6/30,044 MHz. Оба routed/timing PASS.
 - [ ] Уменьшить площадь sequential FRAM board до включения в default:
-  после CP54b остаются 95 LUT, slack 2,843 ns; цель <=1100 LUT не достигнута.
-  Native shared RX/read-data storage подготовлен как CP55, измерение ожидается.
+  после CP55a остаются 98 LUT, slack 1,390 ns; до <=1100 LUT ещё 82 LUT.
+  Default CP52a пока занимает 1159 LUT; MMU и FP11 остаются отложенными.
 - [x] CP53: EDIF уточнил 8 CCU2D для инкремента и 5 для сравнения;
   конечные netlists не содержат сетей с двумя сильными драйверами.
 - [x] CP53: подготовить increment/compare/both, доказать equivalence,
@@ -38,11 +39,15 @@
   [CP53](docs/cursor-cp53.md).
 - [ ] После первого resource gate отдельно оценить малый instruction-stream
   buffer: CP52 ещё не выполняет speculative reads.
-- [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode
-  преобразований; экономию MMU-сборок не переносить без измерения.
-- [ ] Продолжить исследование address→ACK→uPC critical path: у CP54b
-  31,012 ns, путь включает address[0]→request/write→DMA operand→ACK→seq.
+- [x] Измерить native-board shared RX: CP55a дал −3 LUT/−8 FF.
+- [ ] Исследовать локальные read-data/decode преобразования полного native
+  board с последующим MAP/PAR/TRACE; отдельные hierarchical counts не суммировать.
+- [ ] Продолжить исследование address→ACK→uPC critical path: у CP55a
+  32,465 ns, путь включает address[0]→request/write→DMA operand→ACK→seq.
   Сравнивать Fmax и memory clocks, сохранять odd-word faults и цель <=1100 LUT.
+- [ ] До аппаратной проверки CP55 задать external FRAM pin timing:
+  RX bit 0 теперь в PFU result вместо отдельного PIO register; внутренний
+  TRACE Fmax не доказывает запас на MISO.
 
 ## CP50: рабочая сборка без MMU
 

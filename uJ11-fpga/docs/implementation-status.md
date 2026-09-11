@@ -1,13 +1,17 @@
 # Implementation status, 2026-09-11
 
-## CP55 — native shared RX, локальные проверки PASS
+## CP55 — native shared RX, проверки и synthesis PASS
 
 На frozen CP54b приёмный shift register совмещён с `rdata[15:8]`:
 busy high data меняются, valid data/SPI/ACK сохраняются. Два induction
 proofs, formal и executable mutations, X/Z/reset/128 КиБ FRAM, девять
 portable и девять vendor workloads, новый cold FB+DIR PASS. Все counters
-и raw UART совпали с CP54b. Один полный synthesis подготовлен, transfer
-ожидает подтверждения; новых ресурсов/Fmax нет. [CP55](rx-cp55.md).
+и raw UART совпали с CP54b. Полный MAP/PAR/TRACE: **1182 LUT / 333 FF /
+6 EBR / 593 slices / 30,827 MHz**. От CP54b **−3 LUT / −8 FF**, но
+Fmax ниже на 1,446 MHz; slack 1,390 ns при 29,56 MHz. Свободны 98 LUT /
+47 slices / 1 EBR, до <=1100 ещё 82 LUT. CP55a сохранён для сокращения
+площади, CP54b — с лучшим timing. Source/report hashes и EDIF проверены.
+Default CP52a, MMU-ветвь и плата CP29a прежние. [CP55](rx-cp55.md).
 
 ## CP54 — decode/ACK, выбран CP54b после synthesis
 

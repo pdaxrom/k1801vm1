@@ -1,16 +1,28 @@
 # Synthesis checkpoints
 
-## CP55 — shared RX на native CP54b, gate подготовлен
+## CP55 — shared RX на native CP54b, полный gate PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
 |---|---|---:|---:|---:|---:|---:|---|
-| CP55a | FRAM receive совмещён с high result | — | — | — | — | 954 | Prepared; transfer ожидает подтверждения |
+| CP55a | FRAM receive совмещён с high result | 1182 | 333 | 6 | 30,827 | 954 | 593 slices; MAP/PAR/TRACE PASS |
 
-Контроль CP54b — 1185/341/6/32,273 MHz. Удалены восемь RTL state bits,
-но итоговые LUT/FF ещё не измерены. SPI/handshake и valid data доказаны,
-unit/memory/portable/vendor/cold FB PASS; counters/raw UART CP54b сохранены.
-Автопроверка отклонила новый пакет до отдельного разрешения. Default и плата
-прежние. [Описание](rx-cp55.md), [verification](verification-cp55.json).
+От CP54b: **−3 LUT / −8 FF / −2 slices / −1,446 MHz**. Свободны
+**98 LUT / 47 slices / 1 EBR**, PIO sites заняты.
+MAP: 1054 logic + 48 RAM + 80 carry LUT; FF: 326 PFU + 7 PIO.
+EDIF подтвердил удаление RX state;
+2980 сетей проверены, сильных multiple drivers нет. Warnings прежние.
+
+Худший путь address[0]→request/write→DMA operand→ACK→fault/uPC:
+**32,465 ns, 17 levels, 60,3% route**, slack **1,390 ns** при 29,56 MHz.
+Pin delays не заданы; Fmax не подтверждает физический FRAM input timing,
+особенно после удаления отдельного PIO RX bit 0. Все source/report hashes
+и совпадение синтезированных HDL с formal/unit/portable/vendor/cold FB
+проверены. CP54b counters/raw UART сохранены.
+
+CP55a выбран для дальнейшего сокращения площади, CP54b — сохранённый
+вариант с большим timing margin. До <=1100 LUT ещё 82 LUT; default CP52a
+и плата CP29a прежние. [Описание](rx-cp55.md),
+[verification](verification-cp55.json), [измерения и архивы](synthesis-cp55.json).
 
 ## CP54 — I/O qualification и ACK, оба gates PASS
 

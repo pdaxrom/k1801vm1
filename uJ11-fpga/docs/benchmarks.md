@@ -5,8 +5,14 @@
 Девять portable и девять vendor full-board workloads: все counters CP54b
 сохранены, R,R **40,0625 CPI**. Новый cold RT-11FB + DIR — **288686609
 clocks**, те же 300 RK/467 timer/3270 UART/162 SD reads/6 writes; counters
-и raw UART точно совпали. Эффект на LUT/FF/Fmax ещё не измерен.
-[Контракт и проверки](rx-cp55.md), [manifest](verification-cp55.json).
+и raw UART точно совпали. Полный synthesis: **1182 LUT / 333 FF / 6 EBR /
+30,827 MHz**. От CP54b −3 LUT/−8 FF, но −1,446 MHz Fmax. На штатных
+29,56 MHz производительность прежняя: R,R около **737847 instructions/s**,
+в 2,671× быстрее default; cold FB+DIR — в 1,229×. Это расчёт по simulation
+cycles и номинальной частоте, нового измерения платы нет. Запас внутреннего
+timing 1,390 ns; внешние pin delays не заданы.
+[Контракт и проверки](rx-cp55.md), [manifest](verification-cp55.json),
+[измерения](synthesis-cp55.json).
 
 ## CP54 — I/O/DMA decode и ACK
 

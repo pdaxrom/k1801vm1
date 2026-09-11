@@ -1,10 +1,11 @@
 # CP55 — shared RX на полном MMU-less board CP54b
 
 Удалён отдельный 8-bit receive shift register FRAM: его работу во время
-SPI transfer выполняет `rdata[15:8]`. Это **−8 RTL state bits**, но итоговые
-LUT/FF/Fmax пока не измерены. Источник — точные FRAM и board-bus файлы из
-проверенного `synth/reports/cp54b/source.tgz`; CP54b занимает **1185 LUT /
-341 FF / 6 EBR / 595 slices / 32,273 MHz**.
+SPI transfer выполняет `rdata[15:8]`. Полный **CP55a MAP/PAR/TRACE PASS**:
+**1182 LUT / 333 FF / 6 EBR / 593 slices / 30,827 MHz**. Относительно
+CP54b сэкономлены **3 LUT и 8 FF**, но Fmax ниже на **1,446 MHz**.
+Источник — точные FRAM и board-bus файлы из проверенного
+`synth/reports/cp54b/source.tgz`.
 
 Принцип уже проверялся в [CP47](area-fram-cp47.md), где shared RX дал
 −5 LUT/−8 FF на другой, переполненной MMU-сборке. Эти цифры не переносятся
@@ -72,23 +73,71 @@ R,R workloads остаются **40,0625 CPI**, memory/stack/BR — без из�
 запускался: ни ISA/datapath, ни valid memory data contract не изменились.
 
 [Manifest и hashes](verification-cp55.json), raw logs и source snapshot —
-`tb/reports/cp55`. Default остаётся CP52a, лучший измеренный sequential
-candidate — CP54b; физическая плата CP29a.
+`tb/reports/cp55`. Это сохранённый отчёт локальной фазы до synthesis;
+финальные измерения находятся в [synthesis-cp55.json](synthesis-cp55.json).
 
 ## Synthesis
 
-Подготовлен **один полный gate CP55a** для LCMXO2-1200HC-4SG32C, 29,56 MHz,
-с CPU/FIS/FRAM/KL11/KW11/panel/HG/SD/RK/firmware/OSCH/reset/pins.
-Новые LUT/FF/EBR/Fmax пока отсутствуют: эффект отдельно взятого удаления
-RX register нельзя объявлять экономией полной сборки без MAP/PAR/TRACE.
+После явного разрешения пользователя **7 файлов, 48012 байт** переданы на
+`sash@192.168.1.108:/tmp/uj11-cp55-20260911`. Остальные 37 inputs скопированы
+из CP54 после проверки hashes. Архив передачи — 13946 байт, SHA256
+`147439cab6e799453452259765a59a91dcad3582ea681ce0e7994e01264010ad`.
+Согласованный manifest, исходники до/после сборки и все соответствующие
+HDL локальных tests точно совпали. Дисковые образы и `microasm11` не передавались.
 
-Автопроверка отклонила transfer CP55, посчитав прежнее согласие ограниченным
-CP54. Запрошено отдельное подтверждение: **7 файлов, 48012 байт**
-(RTL, scripts, manifests; `/tmp/cp55-files.txt`) на
-`sash@192.168.1.108:/tmp/uj11-cp55-20260911`, затем один full synthesis.
-Передача не состоялась. Остальные проверенные inputs уже находятся на
-сервере в CP54 и копируются только после проверки hashes. Дисковые образы
-и `microasm11` в пакет не входят. До измерения ресурсов кандидат не принят.
+Выполнен **один полный gate CP55a** для LCMXO2-1200HC-4SG32C, 29,56 MHz,
+с CPU/FIS/FRAM/KL11/KW11/panel/HG/SD/RK/firmware/OSCH/reset/pins.
+Diamond 3.14.0.75.2 / Synplify V-2023.09L-2; полностью разведён,
+MAP/PAR/TRACE PASS, microcode **954/1024×36**.
+
+| Gate | LUT4 | FF | EBR | Slices | Fmax, MHz | Slack, ns |
+|---|---:|---:|---:|---:|---:|---:|
+| CP52a, default | 1159 | 326 | 6 | 584 | 31,470 | 2,053 |
+| CP54b, больший запас timing | 1185 | 341 | 6 | 595 | 32,273 | 2,843 |
+| **CP55a, меньшая площадь** | **1182** | **333** | **6** | **593** | **30,827** | **1,390** |
+
+CP55a сохранён как исходная точка для дальнейшего уменьшения площади:
+при штатных 29,56 MHz число тактов не изменилось, constraint выполнен.
+CP54b сохранён как вариант с лучшим timing. Новый вариант уступает ему
+по Fmax; это компромисс, а не улучшение всех характеристик. Суммарно от
+первого sequential CP52b сэкономлены 16 LUT / 8 FF / 10 slices.
+
+Остаются **98 LUT / 47 slices / 1 EBR**, свободных PIO sites нет. Цена
+sequential READ относительно default — **23 LUT / 7 FF / 9 slices**.
+До цели <=1100 LUT нужно убрать ещё **82 LUT**. Default остаётся CP52a;
+физическая плата CP29a. В этом checkpoint плату не прошивали.
+
+### Mapping и критический путь
+
+MAP: **1054 logic + 48 distributed RAM + 80 carry LUT**. У CP54b было
+1057/48/80. PFU FF уменьшились с 333 до 326, PIO FF — с 8 до 7.
+EDIF подтверждает удаление ровно семи `rx[7:1]` PFU-регистров и одного
+`rx[0]` PIO-регистра; новых последовательных ячеек нет. FRAM сохраняет
+пять CCU2D для сравнения cursor. Проверены **2980 сетей EDIF**, несколько
+сильных драйверов на одной сети не обнаружены. INOUT nets записаны отдельно;
+это не проверка физического contention.
+
+Synplify hierarchical ORCALUT4 у FRAM: 109 → 98, у engine: 526 → 540
+при неизменённом CPU RTL. Глобальное преобразование и packing перераспределяют
+логику; эти counts не заменяют конечную экономию **3 LUT всего компьютера**.
+
+Худший путь: EBR lane 2 → dynamic RF → **address[0] → request/write →
+service_dma_operand → cpu_io_page/ACK → bus fault/fault_redirect →
+microsequencer → EBR lane 2**. Задержка **32,465 ns**, 17 уровней,
+60,3% routing, slack **1,390 ns**. Класс пути не изменился; меньшая площадь
+FRAM не сократила этот путь. Один PAR run не отделяет вклад mapping от
+placement/routing; seed sweep не выполнялся.
+
+Коды и число выведенных Synplify warnings совпали с CP54b. BN161 ограничен
+100 сообщениями, это не полный счётчик случаев. MAP сохранил три прежних
+предупреждения: JTAG/GPIO, configuration ports и local timer reset; ошибок
+нет. Raw reports, source snapshot и сжатый EDIF — `synth/reports/cp55a`.
+
+Внешние pin delays не заданы: **Fmax относится только к внутреннему timing**.
+Первый бит MISO теперь захватывается существующим PFU result-регистром,
+а не отдельным PIO RX-регистром. Физический запас FRAM input timing этим
+gate не измерен. Локальные tests завершены до synthesis; после совпадения
+source hashes повторные cold/vendor прогоны не требовались.
 
 ## Воспроизведение
 
@@ -98,9 +147,13 @@ python3 tools/check_rx_cp55.py
 python3 tools/run_rx_cp55.py
 python3 tools/run_board.py --tag cp55-final --rx-cp55
 python3 tools/record_rx_cp55.py
-python3 tools/checkpoint_board.py cp55a --rx-cp55 --prepare-only
+python3 tools/checkpoint_board.py cp55a --rx-cp55
+python3 tools/archive_synthesis.py cp55a
+python3 tools/record_synthesis_cp55.py
 ```
 
-Synthesis требует Diamond на сервере; `--prepare-only` убирается после
-разрешённой передачи. Повторные gates требуют новых имён. `--rx-cp55`
-взаимоисключающий с MMU и другими experimental board profiles.
+Synthesis требует Diamond на сервере; `--prepare-only` создаёт проект без
+запуска Diamond. Выше перечислены выполненные команды, повторные gates
+требуют новых имён. Для повторного аудита EDIF восстанавливается из
+`synth/reports/cp55a/design.edi.gz` в `build/cp55-netlist/cp55a_impl1.edi`.
+`--rx-cp55` взаимоисключающий с MMU и другими experimental board profiles.
