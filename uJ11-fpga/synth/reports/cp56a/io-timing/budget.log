@@ -1,0 +1,102 @@
+trce:  version Diamond (64-bit) 3.14.0.75.2
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Loading design for application trce from file /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1.ncd.
+Design name: uj11_hc1200_microcomp
+NCD version: 3.3
+Vendor:      LATTICE
+Device:      LCMXO2-1200HC
+Package:     QFN32
+Performance: 4
+Loading device for application trce from file 'xo2c1200.nph' in environment: /home/sash/.local/lscc/diamond/3.14/ispfpga.
+Package Status:                     Final          Version 1.44.
+Performance Hardware Data Status:   Final          Version 36.4.
+Setup and Hold Report
+
+--------------------------------------------------------------------------------
+Lattice TRACE Report - Setup, Version Diamond (64-bit) 3.14.0.75.2
+Fri Sep 11 17:01:39 2026
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Report Information
+------------------
+Command line:    trce -v 100 -c -u 0 -sethld -sp 4 -sphld m -o /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56-timing/budget.twr /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1.ncd /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56-timing/budget.prf 
+Design file:     cp56a_impl1.ncd
+Preference file: budget.prf
+Device,speed:    LCMXO2-1200HC,4
+Report level:    verbose report, limited to 100 items per preference
+--------------------------------------------------------------------------------
+
+BLOCK ASYNCPATHS
+BLOCK RESETPATHS
+--------------------------------------------------------------------------------
+
+
+
+Timing summary (Setup):
+---------------
+
+Timing errors: 0  Score: 0
+Cumulative negative slack: 0
+
+Constraints cover 2076311 paths, 1 nets, and 5197 connections (99.87% coverage)
+
+--------------------------------------------------------------------------------
+Lattice TRACE Report - Hold, Version Diamond (64-bit) 3.14.0.75.2
+Fri Sep 11 17:01:39 2026
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Report Information
+------------------
+Command line:    trce -v 100 -c -u 0 -sethld -sp 4 -sphld m -o /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56-timing/budget.twr /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1.ncd /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56-timing/budget.prf 
+Design file:     cp56a_impl1.ncd
+Preference file: budget.prf
+Device,speed:    LCMXO2-1200HC,m
+Report level:    verbose report, limited to 100 items per preference
+--------------------------------------------------------------------------------
+
+BLOCK ASYNCPATHS
+BLOCK RESETPATHS
+--------------------------------------------------------------------------------
+
+
+
+Timing summary (Hold):
+---------------
+
+Timing errors: 0  Score: 0
+Cumulative negative slack: 0
+
+Constraints cover 2076311 paths, 1 nets, and 5197 connections (99.87% coverage)
+
+
+
+Timing summary (Setup and Hold):
+---------------
+
+Timing errors: 0 (setup), 0 (hold)
+Score: 0 (setup), 0 (hold)
+Cumulative negative slack: 0 (0+0)
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
+Total CPU Time: 0 secs 
+Total REAL Time: 0 secs 
+Peak Memory Usage: 131 MB
+

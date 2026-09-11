@@ -1,14 +1,19 @@
 # Synthesis checkpoints
 
-## CP56 — SCK 29,56 MHz, gate подготовлен
+## CP56 — SCK 29,56 MHz, полный gate PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
 |---|---|---:|---:|---:|---:|---:|---|
-| CP56a, pending | Frozen CP54b + ODDRXE FRAM SCK=CPU | — | — | — | — | 954 | Локальные проверки PASS; экспорт отклонён approval review |
+| CP56a | Frozen CP54b + ODDRXE FRAM SCK=CPU | 1184 | 339 | 6 | 31,996 | 954 | 595 slices; MAP/PAR/TRACE PASS |
 
-Новых ресурсных цифр пока нет. Нужно измерить полный HC1200 и отдельно
-внешнее timing FRAM. Локальная модель с предполагаемыми pin delays
-не заменяет MAP/PAR/TRACE. [Подготовленный gate CP56](spi-cp56.md).
+От CP54b **−1 LUT / −2 FF / −0,277 MHz**; штатная CPU 29,56 MHz.
+Свободны 96 LUT / 45 slices / 1 EBR. Дополнительный TRACE той же разводки
+при 31,824 MHz с FRAM input/output budgets прошёл: MISO setup/hold
+**7,512/1,080 ns**, internal setup slack **0,169 ns** на этом краю.
+Расчёт с OSCH +5,5%, скважностью 43/57 и 2% period jitter оставляет
+**0,147 ns** SCK pulse-width margin. PCB budgets и форма SCK не измерены;
+CP56a остаётся экспериментом, плата CP54b прежняя.
+[CP56](spi-cp56.md), [измерения и hashes](synthesis-cp56.json).
 
 **Аппаратная установка CP54b:** JED экспортирован из существующей проверенной
 разводки и записан во FLASH с Verify PASS. RT-11FB загрузилась до prompt.

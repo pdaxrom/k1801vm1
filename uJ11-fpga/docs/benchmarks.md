@@ -6,9 +6,11 @@ CPU остаётся на 29,56 MHz. Девять portable и девять vendo
 совпали; memory/SPI operation counts те же. R,R **40,0625 → 23,5625 CPI**
 (**1,700×**); memory workloads **1,743–1,768×**; stack **1,739×**;
 BR self **1,814×**. Cold RT-11FB + DIR: **288686609 → 173379163 clocks**
-(**1,665×**), каталог совпал. Это локальные измерения, нового physical
-Fmax и результатов платы пока нет. [Таблица CP56](spi-cp56.md),
-[проверки](verification-cp56.json).
+(**1,665×**), каталог совпал. Реальный MAP/PAR: **1184 LUT / 339 FF /
+6 EBR / 31,996 MHz**. Скорость программы пока измерена в simulation;
+CP56 на плату не установлен из-за малого консервативного запаса SCK
+pulse width. [Таблица CP56](spi-cp56.md), [synthesis](synthesis-cp56.json),
+[локальные проверки](verification-cp56.json).
 
 ## CP55 — native shared FRAM receive/result
 

@@ -1,0 +1,29 @@
+ldbanno: version Diamond (64-bit) 3.14.0.75.2
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+
+Writing a Verilog netlist using the orca library type based on the /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1 design file.
+
+NCD performance grade changed to Min.
+
+Loading design for application ldbanno from file /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1.ncd.
+Design name: uj11_hc1200_microcomp
+NCD version: 3.3
+Vendor:      LATTICE
+Device:      LCMXO2-1200HC
+Package:     QFN32
+Performance: M
+Loading device for application ldbanno from file 'xo2c1200.nph' in environment: /home/sash/.local/lscc/diamond/3.14/ispfpga.
+Package Status:                     Final          Version 1.44.
+Performance Hardware Data Status:   Final          Version 36.4.
+Converting design /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1.ncd into .ldb format.
+Loading preferences from /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56a/impl1/cp56a_impl1.prf.
+Writing Verilog netlist to file /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56-timing/fast.vo
+Writing SDF timing to file /tmp/uj11-cp56-20260911/uJ11-fpga/build/cp56-timing/fast.sdf
+INFO - ldbanno: ldbanno finished with 0 posted error messages.
+Total CPU Time: 0 secs 
+Total REAL Time: 0 secs 
+Peak Memory Usage: 147 MB

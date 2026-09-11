@@ -1,0 +1,648 @@
+{
+  "checkpoint": "CP56 full native board synthesis and bounded FRAM timing audit",
+  "date": "2026-09-11",
+  "measurements": {
+    "cp56a": {
+      "lut4": 1184,
+      "ff": 339,
+      "ebr": 6,
+      "slices": 595,
+      "fmax_mhz": 31.996,
+      "timing_pass": true,
+      "remaining_lut4": 96,
+      "remaining_slices": 45,
+      "remaining_ebr": 1,
+      "fully_routed": true,
+      "pins_free": 0,
+      "lut_categories": {
+        "logic": 1056,
+        "distributed_ram": 48,
+        "carry": 80
+      },
+      "pfu_ff": 331,
+      "pio_ff": 8,
+      "oddr": 1,
+      "critical_path": {
+        "delay_ns": 31.28,
+        "logic_percent": 40.4,
+        "route_percent": 59.6,
+        "levels": 16,
+        "slack_ns": 2.575,
+        "source": "system/cpu/engine/rom/lane_3(ASIC)",
+        "destination": "system/cpu/engine/rom/lane_2(ASIC)"
+      },
+      "synplify_warning_counts": {
+        "BN161": 100,
+        "BZ204": 1,
+        "BZ240": 1,
+        "CG390": 1,
+        "CL246": 6,
+        "CL247": 2,
+        "CL279": 1,
+        "FX474": 2,
+        "MT246": 1,
+        "MT420": 1,
+        "MT529": 1
+      },
+      "added_warning": "MT246: Synplify has no user timing model for ODDRXE; physical Diamond MAP/TRACE supplies the MachXO2 I/O timing model.",
+      "map_warning_count": 3,
+      "edif_audit": {
+        "edif_sha256": "9e9bfb50c3f404a78ddf1ce14f16625570b5db1e64756e3150801769c99b4b9b",
+        "nets_checked": 2998,
+        "strong_multiple_driver_nets": [],
+        "bidirectional_nets": [
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_0",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_0.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_1",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_1.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_2",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_2.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_3",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_3.B",
+              "inout.gpio_key_row"
+            ]
+          }
+        ],
+        "fram_nets_checked": 243,
+        "fram_ccu2d": [
+          "un1_address_2_0_I_45_0",
+          "un1_address_2_0_I_33_0",
+          "un1_address_2_0_I_21_0",
+          "un1_address_2_0_I_9_0",
+          "un1_address_2_0_I_1_0"
+        ],
+        "scope": "Each EDIF cell net; direction-defined strong drivers; bidirectional nets recorded separately, not a physical contention proof"
+      },
+      "oddr_instances": [
+        "uj11_board_fram_Z1/clock_output"
+      ],
+      "removed_regular_sequential_cells": {
+        "uj11_board_fram_Z1/spi_sck": "FD1S3IX",
+        "uj11_board_fram_Z1/rx_7": "FD1P3IX",
+        "uj11_board_fram_Z1/rdata_0": "FD1P3IX",
+        "uj11_hc1200_microcomp/system_bus_guest_memory_rxio_0": "IFS1P3IX"
+      },
+      "added_regular_sequential_cells": {
+        "uj11_board_fram_Z1/rx_0": "FD1P3IX",
+        "uj11_hc1200_microcomp/system_bus_guest_memory_rdataio_0": "IFS1P3IX"
+      }
+    }
+  },
+  "previous_candidate": {
+    "lut4": 1185,
+    "ff": 341,
+    "ebr": 6,
+    "slices": 595,
+    "fmax_mhz": 32.273,
+    "timing_pass": true
+  },
+  "production_baseline": {
+    "lut4": 1159,
+    "ff": 326,
+    "ebr": 6,
+    "slices": 584,
+    "fmax_mhz": 31.47,
+    "timing_pass": true
+  },
+  "selected_candidate": "cp54b",
+  "retained_speed_experiment": "cp56a",
+  "physical_board": "CP54b",
+  "board_programmed": false,
+  "production_changed": false,
+  "mmu_changed": false,
+  "microcode_words": 954,
+  "delta_from_cp54b": {
+    "lut4": -1,
+    "ff": -2,
+    "ebr": 0,
+    "slices": 0,
+    "fmax_mhz": -0.277
+  },
+  "verified_against_simulation": true,
+  "cold_rt11": {
+    "clocks": 173379163,
+    "rk_commands": 300,
+    "timer_edges": 278,
+    "uart_bytes": 3270,
+    "sd_reads": 162,
+    "sd_writes": 6,
+    "retired": 3971490,
+    "reads": 5192659,
+    "writes": 419984,
+    "fram_transactions": 2409454,
+    "image_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+    "speedup": 1.665059422394374,
+    "directory_identical": true,
+    "raw_uart_identical": false,
+    "probe_faults_identical": 26
+  },
+  "workloads": [
+    {
+      "workload": "MOV_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625,
+      "speedup": 1.70026525198939,
+      "nominal_instructions_per_second": 1254535.8090185677
+    },
+    {
+      "workload": "ADD_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625,
+      "speedup": 1.70026525198939,
+      "nominal_instructions_per_second": 1254535.8090185677
+    },
+    {
+      "workload": "CMP_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625,
+      "speedup": 1.70026525198939,
+      "nominal_instructions_per_second": 1254535.8090185677
+    },
+    {
+      "workload": "mixed_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625,
+      "speedup": 1.70026525198939,
+      "nominal_instructions_per_second": 1254535.8090185677
+    },
+    {
+      "workload": "MOV_mem_reg",
+      "instructions": 256,
+      "microclocks": 32492,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 28956,
+      "fram_busy_clocks": 27940,
+      "spi_transactions": 508,
+      "spi_clocks": 24384,
+      "cpi": 126.921875,
+      "speedup": 1.7504616520989782,
+      "nominal_instructions_per_second": 232899.17518158315
+    },
+    {
+      "workload": "MOV_reg_mem",
+      "instructions": 256,
+      "microclocks": 35516,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 252,
+      "request_clocks": 31476,
+      "fram_busy_clocks": 30460,
+      "spi_transactions": 760,
+      "spi_clocks": 26400,
+      "cpi": 138.734375,
+      "speedup": 1.743326951233247,
+      "nominal_instructions_per_second": 213069.03930622817
+    },
+    {
+      "workload": "MOV_mem_mem",
+      "instructions": 256,
+      "microclocks": 50132,
+      "memory_beats": 760,
+      "opcode_fetches": 256,
+      "writes": 252,
+      "request_clocks": 45840,
+      "fram_busy_clocks": 44320,
+      "spi_transactions": 1012,
+      "spi_clocks": 38496,
+      "cpi": 195.828125,
+      "speedup": 1.7678927631054018,
+      "nominal_instructions_per_second": 150948.69544402778
+    },
+    {
+      "workload": "BR_self",
+      "instructions": 256,
+      "microclocks": 15104,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 14592,
+      "fram_busy_clocks": 14080,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "cpi": 59.0,
+      "speedup": 1.8135593220338984,
+      "nominal_instructions_per_second": 501016.9491525424
+    },
+    {
+      "workload": "stack_push_pop",
+      "instructions": 256,
+      "microclocks": 34404,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 128,
+      "request_clocks": 30236,
+      "fram_busy_clocks": 29220,
+      "spi_transactions": 636,
+      "spi_clocks": 25408,
+      "cpi": 134.390625,
+      "speedup": 1.7385187768864085,
+      "nominal_instructions_per_second": 219955.8190908034
+    }
+  ],
+  "approved_transfer": {
+    "destination": "sash@192.168.1.108:/tmp/uj11-cp56-20260911",
+    "file_count": 7,
+    "source_bytes": 51074,
+    "archive": "/tmp/uj11-cp56-delta.tgz",
+    "archive_bytes": 14584,
+    "archive_sha256": "dbe8582f6fca92fe43e9ed4c7532d9cc254b45314de3ad9293ddc2df78d70bd6",
+    "listing": "/tmp/cp56-files.txt"
+  },
+  "transfer_completed": true,
+  "source_inputs_verified_before_and_after": true,
+  "original_gate_external_pin_delays_constrained": false,
+  "additional_trace": {
+    "trace_budget_pass": true,
+    "trace": {
+      "frequency": [
+        {
+          "items": 4096,
+          "errors": 0,
+          "worst_slack_ns": 0.169
+        },
+        {
+          "items": 4096,
+          "errors": 0,
+          "worst_slack_ns": 0.291
+        }
+      ],
+      "gpio_miso": [
+        {
+          "items": 3,
+          "errors": 0,
+          "worst_slack_ns": 7.512
+        },
+        {
+          "items": 3,
+          "errors": 0,
+          "worst_slack_ns": 1.08
+        }
+      ],
+      "gpio_msck": [
+        {
+          "items": 1,
+          "errors": 0,
+          "worst_slack_ns": 0.202
+        },
+        {
+          "items": 1,
+          "errors": 0,
+          "worst_slack_ns": 0.019
+        }
+      ],
+      "gpio_mosi": [
+        {
+          "items": 1,
+          "errors": 0,
+          "worst_slack_ns": 6.817
+        },
+        {
+          "items": 1,
+          "errors": 0,
+          "worst_slack_ns": 6.102
+        }
+      ],
+      "gpio_mcs": [
+        {
+          "items": 1,
+          "errors": 0,
+          "worst_slack_ns": 0.604
+        },
+        {
+          "items": 1,
+          "errors": 0,
+          "worst_slack_ns": 1.374
+        }
+      ]
+    },
+    "oscillator_nominal_mhz": 29.56,
+    "commercial_frequency_factor": 1.055,
+    "conservative_period_jitter_fraction": 0.02,
+    "min_duty": 0.43,
+    "shortest_modeled_pulse_ns": 13.147009215732801,
+    "min_fram_pulse_ns": 13,
+    "pulse_margin_ns": 0.14700921573280112,
+    "sdf_equal_rise_fall_paths": {
+      "slow": {
+        "arcs": [
+          {
+            "instance": "gpio_msck_I",
+            "arc": [
+              "IOPATH",
+              "IOLDO",
+              "gpio_msck",
+              [
+                "2611:2704:2797"
+              ],
+              [
+                "2611:2704:2797"
+              ]
+            ]
+          },
+          {
+            "instance": "gpio_msck_MGIOL",
+            "arc": [
+              "IOPATH",
+              "CLK",
+              "IOLDO",
+              [
+                "1172:1208:1244"
+              ],
+              [
+                "1172:1208:1244"
+              ]
+            ]
+          }
+        ],
+        "interconnect": [
+          "(INTERCONNECT oscillator/OSC gpio_msck_MGIOL/CLK (3182:3448:3714)(3182:3448:3714))",
+          "(INTERCONNECT gpio_msck_MGIOL/IOLDO gpio_msck_I/IOLDO (30:36:43)(30:36:43))"
+        ]
+      },
+      "fast": {
+        "arcs": [
+          {
+            "instance": "gpio_msck_I",
+            "arc": [
+              "IOPATH",
+              "IOLDO",
+              "gpio_msck",
+              [
+                "953:956:959"
+              ],
+              [
+                "953:956:959"
+              ]
+            ]
+          },
+          {
+            "instance": "gpio_msck_MGIOL",
+            "arc": [
+              "IOPATH",
+              "CLK",
+              "IOLDO",
+              [
+                "220:336:452"
+              ],
+              [
+                "220:336:452"
+              ]
+            ]
+          }
+        ],
+        "interconnect": [
+          "(INTERCONNECT oscillator/OSC gpio_msck_MGIOL/CLK (1037:1153:1270)(1037:1153:1270))",
+          "(INTERCONNECT gpio_msck_MGIOL/IOLDO gpio_msck_I/IOLDO (9:10:12)(9:10:12))"
+        ]
+      }
+    },
+    "sdf_simulation_performed": false,
+    "pin_model_tests": [
+      {
+        "tag": "slow-high",
+        "pass_lines": [
+          "PASS CP56 timed SPI: 950 beats, 560 reset offsets; CPU high=13.14701 low=18.27755 ns SCK/MOSI/CS=7.8/7.1/8.3 ns MISO=13.0+2.0 ns"
+        ],
+        "sources_sha256": {
+          "build/cp56-clock-tests/tb_clock.v": "24a3433321f91b44140e6b7aa87d55126f1ddededbf87dda206263f8bb5363d5",
+          "build/cp56-spi/fast/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+          "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+          "tb/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d"
+        }
+      },
+      {
+        "tag": "slow-low",
+        "pass_lines": [
+          "PASS CP56 timed SPI: 950 beats, 560 reset offsets; CPU high=18.27755 low=13.14701 ns SCK/MOSI/CS=7.8/7.1/8.3 ns MISO=13.0+2.0 ns"
+        ],
+        "sources_sha256": {
+          "build/cp56-clock-tests/tb_clock.v": "24a3433321f91b44140e6b7aa87d55126f1ddededbf87dda206263f8bb5363d5",
+          "build/cp56-spi/fast/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+          "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+          "tb/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d"
+        }
+      },
+      {
+        "tag": "fast-high",
+        "pass_lines": [
+          "PASS CP56 timed SPI: 950 beats, 560 reset offsets; CPU high=13.14701 low=18.27755 ns SCK/MOSI/CS=2.2/2.2/2.5 ns MISO=13.0+2.0 ns"
+        ],
+        "sources_sha256": {
+          "build/cp56-clock-tests/tb_clock.v": "24a3433321f91b44140e6b7aa87d55126f1ddededbf87dda206263f8bb5363d5",
+          "build/cp56-spi/fast/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+          "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+          "tb/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d"
+        }
+      },
+      {
+        "tag": "fast-low",
+        "pass_lines": [
+          "PASS CP56 timed SPI: 950 beats, 560 reset offsets; CPU high=18.27755 low=13.14701 ns SCK/MOSI/CS=2.2/2.2/2.5 ns MISO=13.0+2.0 ns"
+        ],
+        "sources_sha256": {
+          "build/cp56-clock-tests/tb_clock.v": "24a3433321f91b44140e6b7aa87d55126f1ddededbf87dda206263f8bb5363d5",
+          "build/cp56-spi/fast/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+          "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+          "tb/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d"
+        }
+      }
+    ],
+    "pulse_distortion_negative_control": {
+      "extra_rise_delay_ns": 0.2,
+      "returncode": 1,
+      "detected": "SCK high timing"
+    },
+    "assumptions": [
+      "External SCK+MISO flight time <=2 ns for MISO setup; >=0 ns for hold.",
+      "Board MOSI/CS to SCK skew <=2 ns.",
+      "Exported SDF models equal rise/fall delays; no analog PCB pulse distortion is included.",
+      "No hardware scope measurements. Only 0.147 ns modeled pulse-width margin remains at the conservative oscillator corner."
+    ],
+    "physical_pin_timing_signoff": false,
+    "board_programmed": false,
+    "inputs_sha256": {
+      "tools/check_timing_cp56.py": "cb1187feceb08e2b93af59fa3f4f27db803557d6b259637c1bb498fb9ac7bfaf",
+      "tools/run_fram_cp52.py": "2d0c99e4c2a464a3d12337359938d7f8d13bff68e66c0f99e8f446c71b23e818",
+      "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+      "tools/audit_edif_cp53.py": "6af8252701ab81792fae57e849432e14f45248358981acf3eda3e0114517d455",
+      "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+      "tb/tb_spi_cp56.v": "2051f501de9164024bd3d2acf2d76b5fba89134ead9e5e0fa2a2ff6716dfce25",
+      "build/cp56-timing/fast-sdf.log": "4a6ea3e948ddd23f1c4dde52eb4666e0f7133b7976cca8e06cdb871f3b76ad38",
+      "build/cp56-timing/relative.log": "dfd9c5533d91ae7f6241f1babb65fe2e41a4ef709ee4a2170c9a490ca3efa7ac",
+      "build/cp56-timing/slow-sdf.log": "28303b8788caa9a105fc68ead423e006ff625cf4c27bb2367035f923e7cfe1bb",
+      "build/cp56-timing/relative.twr": "cbfd9e6a748f8ae874e4ffdb54c170d819d21919bdc6e29a678f3f796cccbaa5",
+      "build/cp56-timing/relative.sh": "1790701dd99f07cd844dc70e724ad2e20e64d6d92efc9651cbabd326776ab394",
+      "build/cp56-timing/budget.log": "28083e96417dbe7f54b5afa9c9a7495f1bdefdbf284fcc55336895df70b2e3b0",
+      "build/cp56-timing/slow.sdf": "6a6b240de02d03187d4e4dddf99dc144c326716f21bde1cbf06a00ca3b136bb4",
+      "build/cp56-timing/budget.twr": "8f779d19060cec1b5823921271d4ecdbf659c16a3818d8453811eb1501d06779",
+      "build/cp56-timing/probe.sh": "d0a3f2d8668e15430dd4a16bc95bf436f4669da1f60e5123d317b21fa38ce133",
+      "build/cp56-timing/probe.twr": "4f14f42679862b5e21bd5b89142fea7c06d8c7939424623946af192a36124267",
+      "build/cp56-timing/fast-sdf.sh": "4fe1851d4d3461cb99306c3892e0ca3569cb9bbff7dc7547a9d1e83ea559e451",
+      "build/cp56-timing/probe.log": "f66dd65b1ef1723edc003961b5d1746ffc51e74c9fb6d5501622b1b2171d2375",
+      "build/cp56-timing/fast.vo": "ba96ae788447dbb90c4fdc22dfd3a8ca0a9fe01abd23480c0e7ad62fbe71181f",
+      "build/cp56-timing/slow-sdf.sh": "e255239de05788c14df5783975f12b250061181a843608586a63993b55d23f42",
+      "build/cp56-timing/relative.prf": "7fd84e297e71d5b06d25bdad13fe96e83c31883d1b74adb2cbf75f6674c378b2",
+      "build/cp56-timing/slow.vo": "a43492674f9f72bb02a728a20b9f50f0e50c08304bc1290f1e89cfd34e0d61aa",
+      "build/cp56-timing/fast.sdf": "17a2cebc7e85fd00d5311d380083df6ea60f4c09612fee315d7f2855f6570456",
+      "build/cp56-timing/budget.prf": "c1ffc50d8bea096c91028e244787e04681fda29023981fd405bac3c40e46091d",
+      "build/cp56-timing/probe.prf": "eaa452bc68f0ed6816cde27dc0500294014f2c306bbd5dca263704042a1077f8",
+      "build/cp56-timing/routed-inputs.json": "3c3b5e0f70dec04b937c47534488e0116ee014709e056276745fb41894d6188c",
+      "build/cp56-timing/budget.sh": "69e732131d05627ea8e289d8aa8dde4e5af6b8ee0024151e26ba2727280a4b21",
+      "build/cp56-timing/routed.prf": "81306c3e38b687c22999176ba92c72b623725a07a2b1007eaee928645d9e8487",
+      "build/cp56-clock-tests/tb_clock.v": "24a3433321f91b44140e6b7aa87d55126f1ddededbf87dda206263f8bb5363d5",
+      "build/cp56-clock-tests/tb_narrow.v": "a209ef6f65d61d7a0c48bff48693418ec5497878b37722ca7cdbd2336624dd51",
+      "build/cp56-spi/fast/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+      "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+      "tb/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d"
+    },
+    "logs_sha256": {
+      "build/cp56-clock-tests/fast-high.log": "0cbc83d8f9270394b9102b715cb92b0d30fb8ac9805fe3d9e1332cd206a2296c",
+      "build/cp56-clock-tests/narrow-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build/cp56-clock-tests/slow-high.log": "b602baadaa42d206d18d84e142d6c5e0ede7196440a7449501e5631f27b42b75",
+      "build/cp56-clock-tests/fast-low.log": "8d7a949bdbe32c019f7ddeea6595b5c7f9f1135551c2181b19588b8175045e27",
+      "build/cp56-clock-tests/slow-low.log": "2e7f60235bfc3d96ee7e01d7b8b9fa8a7513ed136bc11e9f7d204baac704270d",
+      "build/cp56-clock-tests/fast-high-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build/cp56-clock-tests/slow-high-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build/cp56-clock-tests/fast-low-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build/cp56-clock-tests/slow-low-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build/cp56-clock-tests/narrow.log": "377aa81b6df94da5d2b8380eda0c8c079914ed83755836f69b3d6861aef0bcfe"
+    }
+  },
+  "decision": "Retain CP56a as a verified speed experiment. Internal and bounded I/O TRACE pass; only 0.147 ns modeled SCK pulse-width margin remains at the conservative oscillator corner. Keep installed CP54b until external clock waveform is validated or margin is increased.",
+  "limits": [
+    "One complete MAP/PAR run; extra TRACE/SDF exports reuse the same immutable routed NCD.",
+    "No SDF-annotated full-board simulation or scope measurements; exported models are symmetric for SCK rising/falling delays.",
+    "The 2 ns PCB flight/skew budgets are explicit assumptions, not measured board values.",
+    "The input zero-delay/wrong-sign preliminary probes intentionally fail hold and are retained as diagnostic evidence.",
+    "CP56 local verification JSON is the historical pre-synthesis snapshot; this report records the completed gate."
+  ],
+  "sources_sha256": {
+    "tools/record_synthesis_cp56.py": "600432891653425c0cc9c97e43f0618742a43ea40b4e0a94e827e7df12df57bf",
+    "tools/check_timing_cp56.py": "cb1187feceb08e2b93af59fa3f4f27db803557d6b259637c1bb498fb9ac7bfaf",
+    "tools/record_cp33.py": "4e0649335d729d4acc9fe4cf59f5efd7f74eaa1304a3e4abcc715bc26432487c",
+    "tools/record_synthesis_cp55.py": "f624d02895c17c032da71d2b141022decff2904096ba9c2ec3aef6e83a6cea93",
+    "tools/audit_edif_cp53.py": "6af8252701ab81792fae57e849432e14f45248358981acf3eda3e0114517d455",
+    "docs/verification-cp56.json": "1dd1e4c394bcba0e6bf59c9698a82a074a223309ea8e85e323e1f1292900fad1",
+    "build/cp56-clock-tests/result.json": "6bd4724a8ed079fadc0b248601deeb6cb62ce8bd929791b9db9658572b2c8b39"
+  },
+  "archives_sha256": {
+    "synth/reports/cp56a/build.tcl": "ead04438010eb1a24b054914d14e955f4af7f28d18ec8b8ca119d63c54c165ef",
+    "synth/reports/cp56a/clock.lpf": "93caa8d288480930b9ccbf435e7bef4539a99611ca55769e6b640c013fa52b3a",
+    "synth/reports/cp56a/design.areasrr": "637c551ef437c1425d8272d5d81b20683a576d808b2deca7ae0300b2d15b1780",
+    "synth/reports/cp56a/design.edi.gz": "d1cb19323f7c20467f75140432f5db721450a00b3dfcf9be0e657ce7afd48222",
+    "synth/reports/cp56a/design.mrp": "adf44a000844b356562c46d77a9f4b49b995b3c9546c0cf1ccf6f50f2ffdc7f2",
+    "synth/reports/cp56a/design.par": "377d47de66b8ca34945343df8199751db79fd8fe0fbc0cb7d5e22950589a7e94",
+    "synth/reports/cp56a/design.srr": "1facef12c492c7295efe6148f74e65f819c72beb092eb0238bcc1fb5fed1430c",
+    "synth/reports/cp56a/design.twr": "80127b6e140afe4f4138630677f7f0e1065432ca1ce1d9798c29efae3b901512",
+    "synth/reports/cp56a/diamond.log": "4b927f5b719dc283a6799d2ebdd2e778f0ad297c252ab9750af69e31b0dc9660",
+    "synth/reports/cp56a/inputs.json": "0f448e0acf084a522864411ce1c011ee97fb233beeb0be005a55d8a954b0602a",
+    "synth/reports/cp56a/io-timing/budget.log": "28083e96417dbe7f54b5afa9c9a7495f1bdefdbf284fcc55336895df70b2e3b0",
+    "synth/reports/cp56a/io-timing/budget.prf": "c1ffc50d8bea096c91028e244787e04681fda29023981fd405bac3c40e46091d",
+    "synth/reports/cp56a/io-timing/budget.sh": "69e732131d05627ea8e289d8aa8dde4e5af6b8ee0024151e26ba2727280a4b21",
+    "synth/reports/cp56a/io-timing/budget.twr.gz": "7c5b84a246e03ece4dac92c5498b48c8aa66670a6b960f9df2564b5612c0e81f",
+    "synth/reports/cp56a/io-timing/fast-sdf.log": "4a6ea3e948ddd23f1c4dde52eb4666e0f7133b7976cca8e06cdb871f3b76ad38",
+    "synth/reports/cp56a/io-timing/fast-sdf.sh": "4fe1851d4d3461cb99306c3892e0ca3569cb9bbff7dc7547a9d1e83ea559e451",
+    "synth/reports/cp56a/io-timing/fast.sdf.gz": "3f24bca312fe2a3cae61c4cbb78e809800e7dc3711d16f7e0da2cdd33e5de725",
+    "synth/reports/cp56a/io-timing/fast.vo.gz": "b16f41453123e24908ba325a44e0a1e0af5f0055d9d806b34e05a5614be91707",
+    "synth/reports/cp56a/io-timing/probe.log": "f66dd65b1ef1723edc003961b5d1746ffc51e74c9fb6d5501622b1b2171d2375",
+    "synth/reports/cp56a/io-timing/probe.prf": "eaa452bc68f0ed6816cde27dc0500294014f2c306bbd5dca263704042a1077f8",
+    "synth/reports/cp56a/io-timing/probe.sh": "d0a3f2d8668e15430dd4a16bc95bf436f4669da1f60e5123d317b21fa38ce133",
+    "synth/reports/cp56a/io-timing/probe.twr.gz": "50976e89282c2ed61c7034ce91add54035b612fca12dd48dd9a12c758bb07936",
+    "synth/reports/cp56a/io-timing/relative.log": "dfd9c5533d91ae7f6241f1babb65fe2e41a4ef709ee4a2170c9a490ca3efa7ac",
+    "synth/reports/cp56a/io-timing/relative.prf": "7fd84e297e71d5b06d25bdad13fe96e83c31883d1b74adb2cbf75f6674c378b2",
+    "synth/reports/cp56a/io-timing/relative.sh": "1790701dd99f07cd844dc70e724ad2e20e64d6d92efc9651cbabd326776ab394",
+    "synth/reports/cp56a/io-timing/relative.twr.gz": "e48971b23a5313c5e2f1cfa0ad07dfddf50f25aec3e1b9251d8a49c712c5ccd7",
+    "synth/reports/cp56a/io-timing/routed-inputs.json": "3c3b5e0f70dec04b937c47534488e0116ee014709e056276745fb41894d6188c",
+    "synth/reports/cp56a/io-timing/routed.prf": "81306c3e38b687c22999176ba92c72b623725a07a2b1007eaee928645d9e8487",
+    "synth/reports/cp56a/io-timing/slow-sdf.log": "28303b8788caa9a105fc68ead423e006ff625cf4c27bb2367035f923e7cfe1bb",
+    "synth/reports/cp56a/io-timing/slow-sdf.sh": "e255239de05788c14df5783975f12b250061181a843608586a63993b55d23f42",
+    "synth/reports/cp56a/io-timing/slow.sdf.gz": "9ae3ea32da9e2f9d21ea4e6555f112c386495544ec5a5a449f678b6f1f45aaa3",
+    "synth/reports/cp56a/io-timing/slow.vo.gz": "c037e98a61df0a1d93f88dfa64b270a3310fb8175b649a5efcfccb7ffdf7317d",
+    "synth/reports/cp56a/result.json": "023272bca8dd5c6f2229e5a915e36ce2127505fec99bfce07b224b2d6cbb29b3",
+    "synth/reports/cp56a/source.tgz": "b95178e2415bb34925cc0e478c6599375f722ffffa23910bdf69132e2bd246ac",
+    "tb/reports/cp56-clock/fast-high-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp56-clock/fast-high.log": "0cbc83d8f9270394b9102b715cb92b0d30fb8ac9805fe3d9e1332cd206a2296c",
+    "tb/reports/cp56-clock/fast-low-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp56-clock/fast-low.log": "8d7a949bdbe32c019f7ddeea6595b5c7f9f1135551c2181b19588b8175045e27",
+    "tb/reports/cp56-clock/narrow-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp56-clock/narrow.log": "377aa81b6df94da5d2b8380eda0c8c079914ed83755836f69b3d6861aef0bcfe",
+    "tb/reports/cp56-clock/result.json": "6bd4724a8ed079fadc0b248601deeb6cb62ce8bd929791b9db9658572b2c8b39",
+    "tb/reports/cp56-clock/slow-high-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp56-clock/slow-high.log": "b602baadaa42d206d18d84e142d6c5e0ede7196440a7449501e5631f27b42b75",
+    "tb/reports/cp56-clock/slow-low-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp56-clock/slow-low.log": "2e7f60235bfc3d96ee7e01d7b8b9fa8a7513ed136bc11e9f7d204baac704270d",
+    "tb/reports/cp56-clock/tb_clock.v": "24a3433321f91b44140e6b7aa87d55126f1ddededbf87dda206263f8bb5363d5",
+    "tb/reports/cp56-clock/tb_narrow.v": "a209ef6f65d61d7a0c48bff48693418ec5497878b37722ca7cdbd2336624dd51"
+  }
+}

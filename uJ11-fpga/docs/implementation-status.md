@@ -1,14 +1,18 @@
 # Implementation status, 2026-09-11
 
-## CP56 — ускорение SPI FRAM, локальные проверки PASS
+## CP56 — ускорение SPI FRAM, проверки и synthesis PASS
 
 На frozen CP54b реализован SCK 29,56 MHz через ODDRXE, CPU 29,56 MHz.
 4096 random и 654 directed операций, 7600 beats с задержками/4480 reset
 позиций, 9 portable + 9 vendor workloads и cold RT-11FB + DIR прошли.
 R,R: 40,0625 → **23,5625 CPI**. Cold: 288686609 → **173379163 clocks**.
-Synthesis и внешнее input/output timing ещё не выполнены: автоматический
-approval review заблокировал новый экспорт CP56. Плата CP54b и default
-CP52a сохранены. [CP56](spi-cp56.md), [manifest](verification-cp56.json).
+Полный HC1200 gate: **1184 LUT / 339 FF / 6 EBR / 31,996 MHz**.
+Дополнительный FRAM TRACE с PCB budgets и четыре clock-corner tests
+(ещё 3800 beats / 2240 reset offsets) прошли. Уточнённый OSCH envelope
++5,5%, 43/57 и 2% jitter оставляет **0,147 ns** запаса длительности SCK;
+physical pulse-width signoff ожидает измерения или увеличения запаса.
+CP56a — эксперимент; плата CP54b и default CP52a сохранены.
+[CP56](spi-cp56.md), [synthesis](synthesis-cp56.json).
 
 ## Текущая плата — CP54b
 

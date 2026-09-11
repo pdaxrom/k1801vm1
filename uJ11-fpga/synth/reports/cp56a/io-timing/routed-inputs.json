@@ -1,0 +1,11 @@
+{
+  "files_sha256": {
+    "build/cp56a/impl1/cp56a_impl1.ncd": "f80318d98a0f3ff42b6bfcb6150e7c0972d21cb0ff7d66a41a939174bdab652e",
+    "build/cp56a/impl1/cp56a_impl1.prf": "81306c3e38b687c22999176ba92c72b623725a07a2b1007eaee928645d9e8487",
+    "build/cp56a/impl1/cp56a_impl1.edi": "9e9bfb50c3f404a78ddf1ce14f16625570b5db1e64756e3150801769c99b4b9b"
+  },
+  "approved_source_manifest_sha256": "e2dc2d533d4a96acdc6f5fc3e7c44a47a89d6e533f717b509cf3d37f3d898367",
+  "synthesis_input_revision": "4cd485b0a38c6b83fea748333b0284a4725f5067e91c2188b3f28349dd27ae69",
+  "analysis_only": true,
+  "post_analysis_source_hashes_verified": true
+}

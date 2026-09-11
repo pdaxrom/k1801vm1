@@ -2,6 +2,19 @@
 
 ## Текущий приоритет: оптимизация MMU-less CPU и полного board
 
+- [x] CP56: удвоить SPI FRAM до номинальных 29,56 MHz через ODDRXE;
+  local/vendor/FRAM/cold FB PASS, R,R **1,70×**, cold FB+DIR **1,665×**.
+- [x] CP56a: согласованная передача, полный HC1200 MAP/PAR/TRACE PASS:
+  **1184 LUT / 339 FF / 6 EBR / 31,996 MHz**, от CP54b −1 LUT/−2 FF.
+- [x] CP56: проверить routed FRAM input/output setup/hold и OSCH envelope;
+  bounded TRACE PASS, но SCK pulse-width margin только **0,147 ns** при
+  +5,5%, 43/57 duty и 2% period jitter. Negative +0,2 ns distortion пойман.
+- [ ] Перед установкой CP56 увеличить запас короткого SCK либо измерить
+  его на плате и явно ограничить рабочие условия. Рассмотреть clock
+  с контролируемой скважностью; простого сравнения 29,56 <34 MHz недостаточно.
+  PCB flight/skew budgets пока предположены; CP54b остаётся установленной.
+  [CP56 и точные timing constraints](docs/spi-cp56.md).
+
 - [x] По запросу пользователя установить выбранный CP54b на HC1200:
   JED экспортирован, FLASH Erase/Program/Verify PASS, RT-11FB prompt получен,
   picocom восстановлен. [Журнал и точный JED](docs/board-bringup-cp54b.md).
