@@ -2,6 +2,12 @@
 
 ## Текущий приоритет: оптимизация MMU-less CPU и полного board
 
+- [x] CP55: shared RX на frozen CP54b; formal/negative/X/Z/reset/128 КиБ
+  FRAM, portable/vendor board и cold FB+DIR PASS, counters/raw UART прежние.
+- [ ] CP55a: выполнить один full synthesis после подтверждения передачи
+  7 файлов/48012 bytes; измерить реальную площадь/timing против CP54b.
+  [CP55](docs/rx-cp55.md).
+
 - [x] CP54: вынести DMA operand из адресного пути и проверить общий gate
   быстрых ACK. Два SAT proofs, три negative controls, 524288 X/Z-data cases,
   86 side-effect beats и 36 portable/vendor workloads PASS.
@@ -22,7 +28,7 @@
   sequential 1198/341/6/30,044 MHz. Оба routed/timing PASS.
 - [ ] Уменьшить площадь sequential FRAM board до включения в default:
   после CP54b остаются 95 LUT, slack 2,843 ns; цель <=1100 LUT не достигнута.
-  На этой основе отдельно измерить native FRAM shared RX/read-data storage.
+  Native shared RX/read-data storage подготовлен как CP55, измерение ожидается.
 - [x] CP53: EDIF уточнил 8 CCU2D для инкремента и 5 для сравнения;
   конечные netlists не содержат сетей с двумя сильными драйверами.
 - [x] CP53: подготовить increment/compare/both, доказать equivalence,

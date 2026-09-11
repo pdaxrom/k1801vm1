@@ -1,4 +1,12 @@
-# Benchmarks: CP54 и предыдущие этапы
+# Benchmarks: CP55 и предыдущие этапы
+
+## CP55 — native shared FRAM receive/result
+
+Девять portable и девять vendor full-board workloads: все counters CP54b
+сохранены, R,R **40,0625 CPI**. Новый cold RT-11FB + DIR — **288686609
+clocks**, те же 300 RK/467 timer/3270 UART/162 SD reads/6 writes; counters
+и raw UART точно совпали. Эффект на LUT/FF/Fmax ещё не измерен.
+[Контракт и проверки](rx-cp55.md), [manifest](verification-cp55.json).
 
 ## CP54 — I/O/DMA decode и ACK
 

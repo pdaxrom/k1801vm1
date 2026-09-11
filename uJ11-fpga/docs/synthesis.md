@@ -1,5 +1,17 @@
 # Synthesis checkpoints
 
+## CP55 — shared RX на native CP54b, gate подготовлен
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP55a | FRAM receive совмещён с high result | — | — | — | — | 954 | Prepared; transfer ожидает подтверждения |
+
+Контроль CP54b — 1185/341/6/32,273 MHz. Удалены восемь RTL state bits,
+но итоговые LUT/FF ещё не измерены. SPI/handshake и valid data доказаны,
+unit/memory/portable/vendor/cold FB PASS; counters/raw UART CP54b сохранены.
+Автопроверка отклонила новый пакет до отдельного разрешения. Default и плата
+прежние. [Описание](rx-cp55.md), [verification](verification-cp55.json).
+
 ## CP54 — I/O qualification и ACK, оба gates PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

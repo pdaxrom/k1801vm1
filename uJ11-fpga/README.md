@@ -5,6 +5,13 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP55: shared FRAM RX прошёл локальные проверки.** Отдельный 8-bit RX
+совмещён с high result; SPI/ACK и данные на ready сохранены. Formal,
+negative/X/Z/reset/128 КиБ tests, portable/vendor board и новый cold
+RT-11FB + DIR прошли с прежними counters/raw UART. Реальные LUT/FF/Fmax
+ещё не измерены: пакет для одного synthesis ожидает подтверждения передачи.
+[Контракт и проверки](docs/rx-cp55.md).
+
 **CP54: оба full-board synthesis PASS; выбран CP54b.**
 **1185 LUT / 341 FF / 6 EBR / 32,273 MHz**, −10 LUT от CP53a.
 Остаются **95 LUT / 45 slices / 1 EBR**, slack 2,843 ns при 29,56 MHz.

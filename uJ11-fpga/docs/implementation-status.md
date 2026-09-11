@@ -1,5 +1,14 @@
 # Implementation status, 2026-09-11
 
+## CP55 — native shared RX, локальные проверки PASS
+
+На frozen CP54b приёмный shift register совмещён с `rdata[15:8]`:
+busy high data меняются, valid data/SPI/ACK сохраняются. Два induction
+proofs, formal и executable mutations, X/Z/reset/128 КиБ FRAM, девять
+portable и девять vendor workloads, новый cold FB+DIR PASS. Все counters
+и raw UART совпали с CP54b. Один полный synthesis подготовлен, transfer
+ожидает подтверждения; новых ресурсов/Fmax нет. [CP55](rx-cp55.md).
+
 ## CP54 — decode/ACK, выбран CP54b после synthesis
 
 Вынесен независимый от адреса RK DMA operand; второй вариант также

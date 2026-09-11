@@ -1,0 +1,9 @@
+{
+  "destination": "sash@192.168.1.108:/tmp/uj11-cp55-20260911",
+  "file_count": 7,
+  "source_bytes": 48012,
+  "archive": "/tmp/uj11-cp55-delta.tgz",
+  "archive_bytes": 13946,
+  "archive_sha256": "147439cab6e799453452259765a59a91dcad3582ea681ce0e7994e01264010ad",
+  "listing": "/tmp/cp55-files.txt"
+}
