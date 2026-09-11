@@ -14,6 +14,13 @@
 - [ ] Уменьшить площадь CP52b до включения в default: остаются 82 LUT,
   slack 0,544 ns; цель <=1100 LUT пока не достигнута. В FRAM появились
   13 CCU2D: исследовать цену инкремента/сравнения cursor, затем board decode/ACK.
+- [x] CP53: EDIF уточнил 8 CCU2D для инкремента и 5 для сравнения;
+  конечные netlists не содержат сетей с двумя сильными драйверами.
+- [x] CP53: подготовить increment/compare/both, доказать equivalence,
+  проверить FRAM/overlays и сохранить все benchmark counters CP52.
+- [ ] CP53a/b/c: выполнить synthesis после подтверждения передачи нового
+  пакета; выбрать вариант по реальным LUT/FF/Fmax, затем cold FB/vendor tests.
+  [CP53](docs/cursor-cp53.md).
 - [ ] После первого resource gate отдельно оценить малый instruction-stream
   buffer: CP52 ещё не выполняет speculative reads.
 - [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode

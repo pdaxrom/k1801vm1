@@ -1,0 +1,3 @@
+PASS CP52 board: sequential opcode/extension/byte, boot/vector/CSR boundaries, RK physical read and overlay release, peripheral reset
+PASS board bus: 43 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI
+build/cp53-tests/compare/tb_board_bus.v:163: $finish called at 21080000 (1ps)

@@ -1,0 +1,134 @@
+{
+  "cp52a": {
+    "edif_sha256": "096b7779d939916d74578150cea5f0cea6269ef6cabbb167dd942647c82d1ced",
+    "nets_checked": 2982,
+    "strong_multiple_driver_nets": [],
+    "bidirectional_nets": [
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_0",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_0.B",
+          "inout.gpio_key_row"
+        ]
+      },
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_1",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_1.B",
+          "inout.gpio_key_row"
+        ]
+      },
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_2",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_2.B",
+          "inout.gpio_key_row"
+        ]
+      },
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_3",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_3.B",
+          "inout.gpio_key_row"
+        ]
+      }
+    ],
+    "fram_nets_checked": 183,
+    "fram_ccu2d": [],
+    "scope": "Each EDIF cell net; direction-defined strong drivers; bidirectional nets recorded separately, not a physical contention proof"
+  },
+  "cp52b": {
+    "edif_sha256": "6374120a4f152aed6d7f6c2c2c526947e604cf6930e33557abb12be1914bbe48",
+    "nets_checked": 3004,
+    "strong_multiple_driver_nets": [],
+    "bidirectional_nets": [
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_0",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_0.B",
+          "inout.gpio_key_row"
+        ]
+      },
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_1",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_1.B",
+          "inout.gpio_key_row"
+        ]
+      },
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_2",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_2.B",
+          "inout.gpio_key_row"
+        ]
+      },
+      {
+        "cell": [
+          "work",
+          "uj11_hc1200_microcomp"
+        ],
+        "net": "gpio_key_row_3",
+        "drivers": [],
+        "inouts": [
+          "gpio_key_row_pad_3.B",
+          "inout.gpio_key_row"
+        ]
+      }
+    ],
+    "fram_nets_checked": 250,
+    "fram_ccu2d": [
+      "un1_address_2_0_I_45_0",
+      "un1_address_2_0_I_33_0",
+      "un1_address_2_0_I_21_0",
+      "un1_address_2_0_I_9_0",
+      "un1_address_2_0_I_1_0",
+      "un2_next_word_cry_13_0",
+      "un2_next_word_cry_11_0",
+      "un2_next_word_cry_9_0",
+      "un2_next_word_cry_7_0",
+      "un2_next_word_cry_5_0",
+      "un2_next_word_cry_3_0",
+      "un2_next_word_cry_1_0",
+      "un2_next_word_cry_0_0"
+    ],
+    "scope": "Each EDIF cell net; direction-defined strong drivers; bidirectional nets recorded separately, not a physical contention proof"
+  },
+  "negative_driver_control_rejected": true,
+  "script_sha256": "6af8252701ab81792fae57e849432e14f45248358981acf3eda3e0114517d455"
+}

@@ -1,4 +1,14 @@
-# Benchmarks: CP52 и предыдущие этапы
+# Benchmarks: CP53 и предыдущие этапы
+
+## CP53 — три cursor-варианта сохранили все counters CP52
+
+По девять full-board workloads для increment/compare/both. Для каждого
+побитно сравнены все числовые counters: clocks, retired instruction count,
+bus beats, opcode reads, writes, request/busy clocks, CS и SCK. Все совпали
+с CP52, включая **40,0625 CPI** для MOV/ADD/CMP R,R. Это новые portable
+прогоны; новый cold RT-11/vendor gate выбранного варианта следует после
+synthesis. Area/Fmax ещё не измерены. [CP53](cursor-cp53.md),
+[проверенные исходники и logs](verification-cp53.json).
 
 ## CP52 — full native board с demand sequential FRAM READ
 

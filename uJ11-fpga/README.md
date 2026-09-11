@@ -5,6 +5,12 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP53: подготовлены три эквивалентных варианта FRAM cursor.** Раздельно
+изменены инкремент, сравнение и оба вместе. SAT, FRAM/board tests и 27
+benchmarks прошли; все counters CP52 сохранены. Новые LUT/Fmax пока
+не измерены: передача пакета для synthesis ожидает отдельного подтверждения.
+[Исследование и проверки](docs/cursor-cp53.md).
+
 **CP52: sequential FRAM READ прошёл simulation и полный synthesis.**
 Регистровые loops: **107 → 40,0625 clocks/instruction (2,671×)**;
 холодный RT-11FB + DIR: **354938300 → 288686609 clocks (1,229×)**.

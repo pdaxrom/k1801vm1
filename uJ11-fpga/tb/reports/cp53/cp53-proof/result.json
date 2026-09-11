@@ -1,0 +1,113 @@
+{
+  "method": "Yosys unrestricted sequential equivalence, matched full state and outputs",
+  "assumptions": "None on inputs, state equality invariant; no req/address stability restriction",
+  "runs": [
+    {
+      "variant": "increment",
+      "divider": 1,
+      "negative": false,
+      "returncode": 0,
+      "log": "build/cp53-proof/increment-1-ok/proof.log",
+      "log_sha256": "29a9ce700cd5217374b715a1cfbf19dc0b124e1e2f4500ac4b8ff821b5d6e3ea"
+    },
+    {
+      "variant": "increment",
+      "divider": 1,
+      "negative": true,
+      "returncode": 1,
+      "log": "build/cp53-proof/increment-1-bad-carry/proof.log",
+      "log_sha256": "2760ba85aba212e4e4cee92a3f8c378badf6c1cf46f98dce9db3720128f9e55e"
+    },
+    {
+      "variant": "increment",
+      "divider": 3,
+      "negative": false,
+      "returncode": 0,
+      "log": "build/cp53-proof/increment-3-ok/proof.log",
+      "log_sha256": "6a62d6d38a1f27f042bf8747332484a3afd7af5ab9f84753bad572d25078d20a"
+    },
+    {
+      "variant": "compare",
+      "divider": 1,
+      "negative": false,
+      "returncode": 0,
+      "log": "build/cp53-proof/compare-1-ok/proof.log",
+      "log_sha256": "3aea4f3d2721d95fd04d7de091f47a2d68db94444b5b79bf7acf42eb4f8257d3"
+    },
+    {
+      "variant": "compare",
+      "divider": 1,
+      "negative": true,
+      "returncode": 1,
+      "log": "build/cp53-proof/compare-1-bad-carry/proof.log",
+      "log_sha256": "ebec223d4d56eb449fffef6353ae34cc1e2e82ac945776b8946b981c5c84595d"
+    },
+    {
+      "variant": "compare",
+      "divider": 3,
+      "negative": false,
+      "returncode": 0,
+      "log": "build/cp53-proof/compare-3-ok/proof.log",
+      "log_sha256": "ce906531d34ee6ae71b7c1f81a4363dfeaf3e4c0e0ef4609b87c9d6779acb1bb"
+    },
+    {
+      "variant": "both",
+      "divider": 1,
+      "negative": false,
+      "returncode": 0,
+      "log": "build/cp53-proof/both-1-ok/proof.log",
+      "log_sha256": "7b0d79164c8c761cdc1d1a1bf3f5c700f64a9bbbcb65a1a4069a5d47e0ecc3b7"
+    },
+    {
+      "variant": "both",
+      "divider": 1,
+      "negative": true,
+      "returncode": 1,
+      "log": "build/cp53-proof/both-1-bad-carry/proof.log",
+      "log_sha256": "327600d91ecc378a2b17bd95a6490f25f517a3517a27208d9a78022e445c4261"
+    },
+    {
+      "variant": "both",
+      "divider": 3,
+      "negative": false,
+      "returncode": 0,
+      "log": "build/cp53-proof/both-3-ok/proof.log",
+      "log_sha256": "eaf47d6fda604a0b3b840f97a1cd90588eda59de7b7ca5b578defaaaa83bfc13"
+    }
+  ],
+  "inputs_sha256": {
+    "build/cp53-cursor/baseline/uj11_board_fram.v": "0d6480a5570b64e3e9f6208b741aceb541bf23820940a6c6153b34e4bb4149e3",
+    "build/cp53-cursor/both/uj11_board_fram.v": "aca37e3f9370b0e0c67b18bd791c505b4cf7f99237fbd3eddb44027fe59e87d0",
+    "build/cp53-cursor/compare/uj11_board_fram.v": "b2b36e2b8f64c22f1a6caad4988eb835b379adbabd6fed74edf4d203d0115fe9",
+    "build/cp53-cursor/increment/uj11_board_fram.v": "de21898d452b2c4086e5843b6d094e26ccf7e6f0b4823269f6b6858cf3632546",
+    "build/cp53-cursor/inputs.json": "8af804f063d000a9284bdd38e0d2e047743ad28bd936bcd57eceb72e8a6006db",
+    "build/cp53-proof/both-1-bad-carry/gate.v": "7a8f306936a12c11290d211b258a6de0a458eccacb03cbfedf9213cd44f0183d",
+    "build/cp53-proof/both-1-bad-carry/gold.v": "e57dc2f1dab4ba690949377af8a78e5ed1f01e5dfbb91b33221c89ac28005a1f",
+    "build/cp53-proof/both-1-bad-carry/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/both-1-ok/gate.v": "e4ee2f183e3f36d609bacff3fd8c5eb3a57005f8563a588773322064c5fbac92",
+    "build/cp53-proof/both-1-ok/gold.v": "e57dc2f1dab4ba690949377af8a78e5ed1f01e5dfbb91b33221c89ac28005a1f",
+    "build/cp53-proof/both-1-ok/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/both-3-ok/gate.v": "c5e5aa786c8ee7d244a435863631ad3edbd597f05c355cbdf4f99dc1ea2ecf82",
+    "build/cp53-proof/both-3-ok/gold.v": "1265953043aedca792a60755576f46e939056aa350fd042f29e266aefad6cd10",
+    "build/cp53-proof/both-3-ok/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/compare-1-bad-carry/gate.v": "9480b1bf33423cf455ff17e103a4db88edc291badc4fc576971ea586b0928fec",
+    "build/cp53-proof/compare-1-bad-carry/gold.v": "e57dc2f1dab4ba690949377af8a78e5ed1f01e5dfbb91b33221c89ac28005a1f",
+    "build/cp53-proof/compare-1-bad-carry/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/compare-1-ok/gate.v": "4c6d8292c630ffd7aab08f41558f6264119cc2825fc194322caf3de93e5c5d05",
+    "build/cp53-proof/compare-1-ok/gold.v": "e57dc2f1dab4ba690949377af8a78e5ed1f01e5dfbb91b33221c89ac28005a1f",
+    "build/cp53-proof/compare-1-ok/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/compare-3-ok/gate.v": "899e39563e361e05aee38cb97d731943d4c7e28165d72dcc0c28ecbba128142f",
+    "build/cp53-proof/compare-3-ok/gold.v": "1265953043aedca792a60755576f46e939056aa350fd042f29e266aefad6cd10",
+    "build/cp53-proof/compare-3-ok/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/increment-1-bad-carry/gate.v": "1a3ac8293ece01798a3dc96c0eb120c84dc26c6c99725aadc3aa50c594854c5b",
+    "build/cp53-proof/increment-1-bad-carry/gold.v": "e57dc2f1dab4ba690949377af8a78e5ed1f01e5dfbb91b33221c89ac28005a1f",
+    "build/cp53-proof/increment-1-bad-carry/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/increment-1-ok/gate.v": "9c5b10a33e8ea2c93c45592231ab168c38981bc4e7e68e8d057d798e2e3d6fc7",
+    "build/cp53-proof/increment-1-ok/gold.v": "e57dc2f1dab4ba690949377af8a78e5ed1f01e5dfbb91b33221c89ac28005a1f",
+    "build/cp53-proof/increment-1-ok/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "build/cp53-proof/increment-3-ok/gate.v": "8de07256d24f306fbaa60c2c8d72494dd3ceb35a7fbae813c9bdde1350ad0e15",
+    "build/cp53-proof/increment-3-ok/gold.v": "1265953043aedca792a60755576f46e939056aa350fd042f29e266aefad6cd10",
+    "build/cp53-proof/increment-3-ok/proof.ys": "460dce23c5b539ba3ff3aa94896343351b5f9a3be997b93ec1b63b852ca9208b",
+    "tools/check_cursor_cp53.py": "4d20ffc710533f76b7d578366d59706a2d7c90c55c426d33feed159ec2bc5c1a"
+  }
+}

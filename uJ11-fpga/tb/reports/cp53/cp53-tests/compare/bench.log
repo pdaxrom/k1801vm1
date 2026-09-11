@@ -1,0 +1,13 @@
+PASS CP53 compare MOV_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks
+PASS CP53 compare ADD_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks
+PASS CP53 compare CMP_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks
+PASS CP53 compare mixed_RR: 10256 clocks / 256 instructions, 256 beats, 4224 SCK, 9232 busy clocks
+PASS CP53 compare MOV_mem_reg: 56876 clocks / 256 instructions, 508 beats, 24384 SCK, 52324 busy clocks
+PASS CP53 compare MOV_reg_mem: 61916 clocks / 256 instructions, 508 beats, 26400 SCK, 56860 busy clocks
+PASS CP53 compare MOV_mem_mem: 88628 clocks / 256 instructions, 760 beats, 38496 SCK, 82816 busy clocks
+PASS CP53 compare BR_self: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks
+PASS CP53 compare stack_push_pop: 59812 clocks / 256 instructions, 508 beats, 25408 SCK, 54628 busy clocks
+- build/cp53-tests/compare/tb_bench.v:124: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 4ms; walltime 0.314 s; speed 13.535 ms/s
+- Verilator: cpu 0.313 s on 1 threads; allocated 2 MB

@@ -1,0 +1,666 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `proof.ys' --
+
+1. Executing Verilog-2005 frontend: gold.v
+Parsing SystemVerilog input from `gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: gate.v
+Parsing SystemVerilog input from `gate.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+3. Executing PROC pass (convert processes to netlists).
+
+3.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+3.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 7 switch rules as full_case in process $proc$gate.v:65$65 in module gate.
+Marked 1 switch rules as full_case in process $proc$gate.v:55$63 in module gate.
+Marked 7 switch rules as full_case in process $proc$gold.v:51$21 in module gold.
+Marked 1 switch rules as full_case in process $proc$gold.v:41$19 in module gold.
+Removed a total of 0 dead cases.
+
+3.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 4 redundant assignments.
+Promoted 2 assignments to connections.
+
+3.4. Executing PROC_INIT pass (extract init attributes).
+
+3.5. Executing PROC_ARST pass (detect async resets in processes).
+
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~28 debug messages>
+
+3.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$gate.v:65$65'.
+     1/15: $0\rdata[15:0] [15:8]
+     2/15: $0\rdata[15:0] [7:0]
+     3/15: $0\ready[0:0]
+     4/15: $0\divider[0:0]
+     5/15: $0\bit_count[2:0]
+     6/15: $0\rx[7:0]
+     7/15: $0\tx[6:0]
+     8/15: $0\next_word[14:0]
+     9/15: $0\seen[0:0]
+    10/15: $0\active[0:0]
+    11/15: $0\state[3:0]
+    12/15: $0\spi_mosi[0:0]
+    13/15: $0\spi_sck[0:0]
+    14/15: $0\spi_cs_n[0:0]
+    15/15: $0\error[0:0]
+Creating decoders for process `\gate.$proc$gate.v:55$63'.
+     1/1: $1\next_byte[7:0]
+Creating decoders for process `\gold.$proc$gold.v:51$21'.
+     1/15: $0\rdata[15:0] [15:8]
+     2/15: $0\rdata[15:0] [7:0]
+     3/15: $0\ready[0:0]
+     4/15: $0\divider[0:0]
+     5/15: $0\bit_count[2:0]
+     6/15: $0\rx[7:0]
+     7/15: $0\tx[6:0]
+     8/15: $0\next_word[14:0]
+     9/15: $0\seen[0:0]
+    10/15: $0\active[0:0]
+    11/15: $0\state[3:0]
+    12/15: $0\spi_mosi[0:0]
+    13/15: $0\spi_sck[0:0]
+    14/15: $0\spi_cs_n[0:0]
+    15/15: $0\error[0:0]
+Creating decoders for process `\gold.$proc$gold.v:41$19'.
+     1/1: $1\next_byte[7:0]
+
+3.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\gate.\next_byte' from process `\gate.$proc$gate.v:55$63'.
+No latch inferred for signal `\gold.\next_byte' from process `\gold.$proc$gold.v:41$19'.
+
+3.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gate.\rdata' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$642' with positive edge clock.
+Creating register for signal `\gate.\ready' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$643' with positive edge clock.
+Creating register for signal `\gate.\error' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$644' with positive edge clock.
+Creating register for signal `\gate.\spi_cs_n' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$645' with positive edge clock.
+Creating register for signal `\gate.\spi_sck' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$646' with positive edge clock.
+Creating register for signal `\gate.\spi_mosi' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$647' with positive edge clock.
+Creating register for signal `\gate.\state' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$648' with positive edge clock.
+Creating register for signal `\gate.\active' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$649' with positive edge clock.
+Creating register for signal `\gate.\seen' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$650' with positive edge clock.
+Creating register for signal `\gate.\next_word' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$651' with positive edge clock.
+Creating register for signal `\gate.\tx' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$652' with positive edge clock.
+Creating register for signal `\gate.\rx' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$653' with positive edge clock.
+Creating register for signal `\gate.\bit_count' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$654' with positive edge clock.
+Creating register for signal `\gate.\divider' using process `\gate.$proc$gate.v:65$65'.
+  created $dff cell `$procdff$655' with positive edge clock.
+Creating register for signal `\gold.\rdata' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$656' with positive edge clock.
+Creating register for signal `\gold.\ready' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$657' with positive edge clock.
+Creating register for signal `\gold.\error' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$658' with positive edge clock.
+Creating register for signal `\gold.\spi_cs_n' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$659' with positive edge clock.
+Creating register for signal `\gold.\spi_sck' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$660' with positive edge clock.
+Creating register for signal `\gold.\spi_mosi' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$661' with positive edge clock.
+Creating register for signal `\gold.\state' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$662' with positive edge clock.
+Creating register for signal `\gold.\active' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$663' with positive edge clock.
+Creating register for signal `\gold.\seen' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$664' with positive edge clock.
+Creating register for signal `\gold.\next_word' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$665' with positive edge clock.
+Creating register for signal `\gold.\tx' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$666' with positive edge clock.
+Creating register for signal `\gold.\rx' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$667' with positive edge clock.
+Creating register for signal `\gold.\bit_count' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$668' with positive edge clock.
+Creating register for signal `\gold.\divider' using process `\gold.$proc$gold.v:51$21'.
+  created $dff cell `$procdff$669' with positive edge clock.
+
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+3.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 13 empty switches in `\gate.$proc$gate.v:65$65'.
+Removing empty process `gate.$proc$gate.v:65$65'.
+Found and cleaned up 1 empty switch in `\gate.$proc$gate.v:55$63'.
+Removing empty process `gate.$proc$gate.v:55$63'.
+Found and cleaned up 13 empty switches in `\gold.$proc$gold.v:51$21'.
+Removing empty process `gold.$proc$gold.v:51$21'.
+Found and cleaned up 1 empty switch in `\gold.$proc$gold.v:41$19'.
+Removing empty process `gold.$proc$gold.v:41$19'.
+Cleaned up 28 empty switches.
+
+3.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module gate.
+<suppressed ~32 debug messages>
+Optimizing module gold.
+<suppressed ~31 debug messages>
+
+4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \gate..
+Finding unused cells or wires in module \gold..
+Removed 6 unused cells and 207 unused wires.
+<suppressed ~8 debug messages>
+
+5. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: next_byte_gold (\next_byte_gold), next_byte_gate (\next_byte_gate) -> next_byte
+Presumably equivalent wires: divider_gold (\divider_gold), divider_gate (\divider_gate) -> divider
+Presumably equivalent wires: bit_count_gold (\bit_count_gold), bit_count_gate (\bit_count_gate) -> bit_count
+Presumably equivalent wires: rx_gold (\rx_gold), rx_gate (\rx_gate) -> rx
+Presumably equivalent wires: tx_gold (\tx_gold), tx_gate (\tx_gate) -> tx
+Presumably equivalent wires: resume_read_gold (\resume_read_gold), resume_read_gate (\resume_read_gate) -> resume_read
+Presumably equivalent wires: retain_gold (\retain_gold), retain_gate (\retain_gate) -> retain
+Presumably equivalent wires: next_word_gold (\next_word_gold), next_word_gate (\next_word_gate) -> next_word
+Presumably equivalent wires: seen_gold (\seen_gold), seen_gate (\seen_gate) -> seen
+Presumably equivalent wires: active_gold (\active_gold), active_gate (\active_gate) -> active
+Presumably equivalent wires: state_gold (\state_gold), state_gate (\state_gate) -> state
+Presumably equivalent wires: spi_miso_gold (\spi_miso_gold), spi_miso_gate (\spi_miso_gate) -> spi_miso
+Presumably equivalent wires: spi_mosi_gold (\spi_mosi_gold), spi_mosi_gate (\spi_mosi_gate) -> spi_mosi
+Presumably equivalent wires: spi_sck_gold (\spi_sck_gold), spi_sck_gate (\spi_sck_gate) -> spi_sck
+Presumably equivalent wires: spi_cs_n_gold (\spi_cs_n_gold), spi_cs_n_gate (\spi_cs_n_gate) -> spi_cs_n
+Presumably equivalent wires: busy_gold (\busy_gold), busy_gate (\busy_gate) -> busy
+Presumably equivalent wires: error_gold (\error_gold), error_gate (\error_gate) -> error
+Presumably equivalent wires: ready_gold (\ready_gold), ready_gate (\ready_gate) -> ready
+Presumably equivalent wires: rdata_gold (\rdata_gold), rdata_gate (\rdata_gate) -> rdata
+Presumably equivalent wires: wdata_gold (\wdata_gold), wdata_gate (\wdata_gate) -> wdata
+Presumably equivalent wires: address_gold (\address_gold), address_gate (\address_gate) -> address
+Presumably equivalent wires: close_read_gold (\close_read_gold), close_read_gate (\close_read_gate) -> close_read
+Presumably equivalent wires: keep_read_gold (\keep_read_gold), keep_read_gate (\keep_read_gate) -> keep_read
+Presumably equivalent wires: bank_gold (\bank_gold), bank_gate (\bank_gate) -> bank
+Presumably equivalent wires: byte_access_gold (\byte_access_gold), byte_access_gate (\byte_access_gate) -> byte_access
+Presumably equivalent wires: write_gold (\write_gold), write_gate (\write_gate) -> write
+Presumably equivalent wires: req_gold (\req_gold), req_gate (\req_gate) -> req
+Presumably equivalent wires: rst_gold (\rst_gold), rst_gate (\rst_gate) -> rst
+Presumably equivalent wires: clk_gold (\clk_gold), clk_gate (\clk_gate) -> clk
+Changing input A of cell $procmux$380_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$379_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$378_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$377_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$376_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$375_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$374_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$367_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$365_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input S of cell $procmux$351_gate ($mux): \active_gate -> \active
+Changing input B of cell $procmux$351_gate ($mux): \spi_cs_n_gate -> \spi_cs_n
+Changing input A of cell $procmux$349_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$345_gate ($mux): \spi_cs_n_gate -> \spi_cs_n
+Changing input A of cell $procmux$344_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$343_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$336_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$334_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$334_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$331_CMP0_gate ($eq): \state_gate -> \state
+Changing input B of cell $procmux$329_gate ($pmux): { \spi_sck_gate \spi_sck_gate } -> { \spi_sck \spi_sck }
+Changing input A of cell $procmux$330_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$323_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$321_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$321_gate ($mux): \spi_mosi_gate -> \spi_mosi
+Changing input S of cell $procmux$319_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$319_gate ($mux): \spi_mosi_gate -> \spi_mosi
+Changing input B of cell $procmux$316_gate ($mux): \spi_mosi_gate -> \spi_mosi
+Changing input A of cell $procmux$316_gate ($mux): \tx_gate [6] -> \tx [6]
+Changing input A of cell $procmux$312_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$311_CMP0_gate ($eq): \state_gate -> \state
+Changing input B of cell $procmux$309_gate ($pmux): { \spi_mosi_gate \spi_mosi_gate \spi_mosi_gate } -> { \spi_mosi \spi_mosi \spi_mosi }
+Changing input A of cell $procmux$309_gate ($pmux): \next_byte_gate [7] -> \next_byte [7]
+Changing input A of cell $procmux$310_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$303_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$301_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$301_gate ($mux): \state_gate -> \state
+Changing input S of cell $procmux$299_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$299_gate ($mux): \state_gate -> \state
+Changing input A of cell $procmux$296_gate ($mux): \state_gate -> \state
+Changing input A of cell $procmux$292_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$290_gate ($mux): \state_gate -> \state
+Changing input B of cell $procmux$288_gate ($mux): \state_gate -> \state
+Changing input A of cell $procmux$286_CMP0_gate ($eq): \state_gate -> \state
+Changing input A of cell $procmux$284_gate ($pmux): \state_gate -> \state
+Changing input A of cell $procmux$285_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$278_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$276_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$276_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$274_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$274_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$271_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$267_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$266_CMP0_gate ($eq): \state_gate -> \state
+Changing input B of cell $procmux$264_gate ($pmux): { \active_gate \active_gate \active_gate } -> { \active \active \active }
+Changing input A of cell $procmux$265_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$258_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$256_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input B of cell $procmux$248_gate ($mux): \seen_gate -> \seen
+Changing input S of cell $procmux$243_gate ($mux): \active_gate -> \active
+Changing input B of cell $procmux$243_gate ($mux): \next_word_gate -> \next_word
+Changing input A of cell $procmux$240_gate ($mux): \next_word_gate -> \next_word
+Changing input A of cell $procmux$241_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$234_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$232_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$232_gate ($mux): \tx_gate -> \tx
+Changing input S of cell $procmux$230_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$230_gate ($mux): \tx_gate -> \tx
+Changing input B of cell $procmux$227_gate ($mux): \tx_gate -> \tx
+Changing input A of cell $procmux$227_gate ($mux): { \tx_gate [5:0] 1'0 } -> { \tx [5:0] 1'0 }
+Changing input A of cell $procmux$223_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$222_CMP0_gate ($eq): \state_gate -> \state
+Changing input B of cell $procmux$220_gate ($pmux): { \tx_gate \tx_gate \tx_gate } -> { \tx \tx \tx }
+Changing input A of cell $procmux$220_gate ($pmux): \next_byte_gate [6:0] -> \next_byte [6:0]
+Changing input A of cell $procmux$221_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$214_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$214_gate ($mux): \rx_gate -> \rx
+Changing input S of cell $procmux$212_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$212_gate ($mux): \rx_gate -> \rx
+Changing input S of cell $procmux$210_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input B of cell $procmux$210_gate ($mux): \rx_gate -> \rx
+Changing input A of cell $procmux$210_gate ($mux): { \rx_gate [6:0] \spi_miso_gate } -> { \rx [6:0] \spi_miso_gate }
+Changing input S of cell $procmux$202_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$200_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$200_gate ($mux): \bit_count_gate -> \bit_count
+Changing input S of cell $procmux$198_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$198_gate ($mux): \bit_count_gate -> \bit_count
+Changing input B of cell $procmux$195_gate ($mux): \bit_count_gate -> \bit_count
+Changing input A of cell $procmux$191_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$190_CMP0_gate ($eq): \state_gate -> \state
+Changing input B of cell $procmux$188_gate ($pmux): { \bit_count_gate \bit_count_gate \bit_count_gate } -> { \bit_count \bit_count \bit_count }
+Changing input A of cell $procmux$189_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$182_gate ($mux): \active_gate -> \active
+Changing input S of cell $procmux$180_gate ($mux): \divider_gate -> \divider
+Changing input A of cell $procmux$177_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$176_CMP0_gate ($eq): \state_gate -> \state
+Changing input B of cell $procmux$174_gate ($pmux): { \divider_gate \divider_gate \divider_gate } -> { \divider \divider \divider }
+Changing input A of cell $procmux$175_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$168_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$166_CMP0_gate ($logic_not): \state_gate -> \state
+Changing input A of cell $procmux$160_CMP0_gate ($eq): \state_gate -> \state
+Changing input S of cell $procmux$153_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$153_gate ($mux): \rdata_gate [7:0] -> \rdata [7:0]
+Changing input S of cell $procmux$151_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$151_gate ($mux): \rdata_gate [7:0] -> \rdata [7:0]
+Changing input S of cell $procmux$149_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$149_gate ($mux): \rdata_gate [7:0] -> \rdata [7:0]
+Changing input A of cell $procmux$146_gate ($mux): \rdata_gate [7:0] -> \rdata [7:0]
+Changing input B of cell $procmux$144_gate ($mux): \rx_gate -> \rx
+Changing input A of cell $procmux$144_gate ($mux): \rdata_gate [7:0] -> \rdata [7:0]
+Changing input S of cell $procmux$136_gate ($mux): \active_gate -> \active
+Changing input A of cell $procmux$136_gate ($mux): \rdata_gate [15:8] -> \rdata [15:8]
+Changing input S of cell $procmux$134_gate ($mux): \divider_gate -> \divider
+Changing input B of cell $procmux$134_gate ($mux): \rdata_gate [15:8] -> \rdata [15:8]
+Changing input S of cell $procmux$132_gate ($mux): \spi_sck_gate -> \spi_sck
+Changing input A of cell $procmux$132_gate ($mux): \rdata_gate [15:8] -> \rdata [15:8]
+Changing input A of cell $procmux$129_gate ($mux): \rdata_gate [15:8] -> \rdata [15:8]
+Changing input B of cell $procmux$127_gate ($mux): \rx_gate -> \rx
+Changing input A of cell $procmux$125_gate ($mux): \rdata_gate [15:8] -> \rdata [15:8]
+Changing input A of cell $procmux$123_gate ($mux): \rdata_gate [15:8] -> \rdata [15:8]
+Changing input B of cell $eq$gate.v:40$119_gate ($eq): \next_word_gate [14:12] -> \next_word [14:12]
+Changing input B of cell $eq$gate.v:40$118_gate ($eq): \next_word_gate [11:9] -> \next_word [11:9]
+Changing input B of cell $eq$gate.v:40$117_gate ($eq): \next_word_gate [8:6] -> \next_word [8:6]
+Changing input B of cell $eq$gate.v:40$116_gate ($eq): \next_word_gate [5:3] -> \next_word [5:3]
+Changing input B of cell $eq$gate.v:40$115_gate ($eq): \next_word_gate [2:0] -> \next_word [2:0]
+Changing input A of cell $logic_not$gate.v:117$86_gate ($logic_not): \retain_gate -> \retain
+Changing input S of cell $ternary$gate.v:112$84_gate ($mux): \resume_read_gate -> \resume_read
+Changing input A of cell $logic_not$gate.v:110$81_gate ($logic_not): \resume_read_gate -> \resume_read
+Changing input A of cell $logic_not$gate.v:106$79_gate ($logic_not): \seen_gate -> \seen
+Changing input A of cell $add$gate.v:101$78_gate ($add): \divider_gate -> \divider
+Changing input A of cell $add$gate.v:98$77_gate ($add): \bit_count_gate -> \bit_count
+Changing input A of cell $add$gate.v:96$75_gate ($add): \state_gate -> \state
+Changing input A of cell $eq$gate.v:96$73_gate ($eq): \state_gate -> \state
+Changing input A of cell $eq$gate.v:94$72_gate ($eq): \state_gate -> \state
+Changing input A of cell $eq$gate.v:88$71_gate ($eq): \state_gate -> \state
+Changing input A of cell $eq$gate.v:86$70_gate ($eq): \bit_count_gate -> \bit_count
+Changing input A of cell $logic_not$gate.v:80$68_gate ($logic_not): \spi_sck_gate -> \spi_sck
+Changing input A of cell $ne$gate.v:54$62_gate ($reduce_bool): \state_gate -> \state
+Changing input A of cell $logic_and$gate.v:42$59_gate ($logic_and): \retain_gate -> \retain
+Changing input A of cell $logic_not$gate.v:42$58_gate ($logic_not): \spi_cs_n_gate -> \spi_cs_n
+Changing input A of cell $procmux$641_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$640_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$639_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$638_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$637_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$636_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$635_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$628_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$626_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input S of cell $procmux$612_gold ($mux): \active_gold -> \active
+Changing input B of cell $procmux$612_gold ($mux): \spi_cs_n_gold -> \spi_cs_n
+Changing input A of cell $procmux$610_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$606_gold ($mux): \spi_cs_n_gold -> \spi_cs_n
+Changing input A of cell $procmux$605_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$604_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$597_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$595_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$595_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$592_CMP0_gold ($eq): \state_gold -> \state
+Changing input B of cell $procmux$590_gold ($pmux): { \spi_sck_gold \spi_sck_gold } -> { \spi_sck \spi_sck }
+Changing input A of cell $procmux$591_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$584_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$582_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$582_gold ($mux): \spi_mosi_gold -> \spi_mosi
+Changing input S of cell $procmux$580_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$580_gold ($mux): \spi_mosi_gold -> \spi_mosi
+Changing input B of cell $procmux$577_gold ($mux): \spi_mosi_gold -> \spi_mosi
+Changing input A of cell $procmux$577_gold ($mux): \tx_gold [6] -> \tx [6]
+Changing input A of cell $procmux$573_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$572_CMP0_gold ($eq): \state_gold -> \state
+Changing input B of cell $procmux$570_gold ($pmux): { \spi_mosi_gold \spi_mosi_gold \spi_mosi_gold } -> { \spi_mosi \spi_mosi \spi_mosi }
+Changing input A of cell $procmux$570_gold ($pmux): \next_byte_gold [7] -> \next_byte [7]
+Changing input A of cell $procmux$571_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$564_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$562_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$562_gold ($mux): \state_gold -> \state
+Changing input S of cell $procmux$560_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$560_gold ($mux): \state_gold -> \state
+Changing input A of cell $procmux$557_gold ($mux): \state_gold -> \state
+Changing input A of cell $procmux$553_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$551_gold ($mux): \state_gold -> \state
+Changing input B of cell $procmux$549_gold ($mux): \state_gold -> \state
+Changing input A of cell $procmux$547_CMP0_gold ($eq): \state_gold -> \state
+Changing input A of cell $procmux$545_gold ($pmux): \state_gold -> \state
+Changing input A of cell $procmux$546_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$539_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$537_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$537_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$535_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$535_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$532_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$528_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$527_CMP0_gold ($eq): \state_gold -> \state
+Changing input B of cell $procmux$525_gold ($pmux): { \active_gold \active_gold \active_gold } -> { \active \active \active }
+Changing input A of cell $procmux$526_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$519_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$517_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input B of cell $procmux$509_gold ($mux): \seen_gold -> \seen
+Changing input S of cell $procmux$504_gold ($mux): \active_gold -> \active
+Changing input B of cell $procmux$504_gold ($mux): \next_word_gold -> \next_word
+Changing input A of cell $procmux$501_gold ($mux): \next_word_gold -> \next_word
+Changing input A of cell $procmux$502_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$495_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$493_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$493_gold ($mux): \tx_gold -> \tx
+Changing input S of cell $procmux$491_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$491_gold ($mux): \tx_gold -> \tx
+Changing input B of cell $procmux$488_gold ($mux): \tx_gold -> \tx
+Changing input A of cell $procmux$488_gold ($mux): { \tx_gold [5:0] 1'0 } -> { \tx [5:0] 1'0 }
+Changing input A of cell $procmux$484_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$483_CMP0_gold ($eq): \state_gold -> \state
+Changing input B of cell $procmux$481_gold ($pmux): { \tx_gold \tx_gold \tx_gold } -> { \tx \tx \tx }
+Changing input A of cell $procmux$481_gold ($pmux): \next_byte_gold [6:0] -> \next_byte [6:0]
+Changing input A of cell $procmux$482_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$475_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$475_gold ($mux): \rx_gold -> \rx
+Changing input S of cell $procmux$473_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$473_gold ($mux): \rx_gold -> \rx
+Changing input S of cell $procmux$471_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input B of cell $procmux$471_gold ($mux): \rx_gold -> \rx
+Changing input A of cell $procmux$471_gold ($mux): { \rx_gold [6:0] \spi_miso_gold } -> { \rx [6:0] \spi_miso_gold }
+Changing input S of cell $procmux$463_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$461_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$461_gold ($mux): \bit_count_gold -> \bit_count
+Changing input S of cell $procmux$459_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$459_gold ($mux): \bit_count_gold -> \bit_count
+Changing input B of cell $procmux$456_gold ($mux): \bit_count_gold -> \bit_count
+Changing input A of cell $procmux$452_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$451_CMP0_gold ($eq): \state_gold -> \state
+Changing input B of cell $procmux$449_gold ($pmux): { \bit_count_gold \bit_count_gold \bit_count_gold } -> { \bit_count \bit_count \bit_count }
+Changing input A of cell $procmux$450_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$443_gold ($mux): \active_gold -> \active
+Changing input S of cell $procmux$441_gold ($mux): \divider_gold -> \divider
+Changing input A of cell $procmux$438_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$437_CMP0_gold ($eq): \state_gold -> \state
+Changing input B of cell $procmux$435_gold ($pmux): { \divider_gold \divider_gold \divider_gold } -> { \divider \divider \divider }
+Changing input A of cell $procmux$436_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$429_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$427_CMP0_gold ($logic_not): \state_gold -> \state
+Changing input A of cell $procmux$421_CMP0_gold ($eq): \state_gold -> \state
+Changing input S of cell $procmux$414_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$414_gold ($mux): \rdata_gold [7:0] -> \rdata [7:0]
+Changing input S of cell $procmux$412_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$412_gold ($mux): \rdata_gold [7:0] -> \rdata [7:0]
+Changing input S of cell $procmux$410_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$410_gold ($mux): \rdata_gold [7:0] -> \rdata [7:0]
+Changing input A of cell $procmux$407_gold ($mux): \rdata_gold [7:0] -> \rdata [7:0]
+Changing input B of cell $procmux$405_gold ($mux): \rx_gold -> \rx
+Changing input A of cell $procmux$405_gold ($mux): \rdata_gold [7:0] -> \rdata [7:0]
+Changing input S of cell $procmux$397_gold ($mux): \active_gold -> \active
+Changing input A of cell $procmux$397_gold ($mux): \rdata_gold [15:8] -> \rdata [15:8]
+Changing input S of cell $procmux$395_gold ($mux): \divider_gold -> \divider
+Changing input B of cell $procmux$395_gold ($mux): \rdata_gold [15:8] -> \rdata [15:8]
+Changing input S of cell $procmux$393_gold ($mux): \spi_sck_gold -> \spi_sck
+Changing input A of cell $procmux$393_gold ($mux): \rdata_gold [15:8] -> \rdata [15:8]
+Changing input A of cell $procmux$390_gold ($mux): \rdata_gold [15:8] -> \rdata [15:8]
+Changing input B of cell $procmux$388_gold ($mux): \rx_gold -> \rx
+Changing input A of cell $procmux$386_gold ($mux): \rdata_gold [15:8] -> \rdata [15:8]
+Changing input A of cell $procmux$384_gold ($mux): \rdata_gold [15:8] -> \rdata [15:8]
+Changing input A of cell $logic_not$gold.v:103$42_gold ($logic_not): \retain_gold -> \retain
+Changing input S of cell $ternary$gold.v:98$40_gold ($mux): \resume_read_gold -> \resume_read
+Changing input A of cell $logic_not$gold.v:96$37_gold ($logic_not): \resume_read_gold -> \resume_read
+Changing input A of cell $logic_not$gold.v:92$35_gold ($logic_not): \seen_gold -> \seen
+Changing input A of cell $add$gold.v:87$34_gold ($add): \divider_gold -> \divider
+Changing input A of cell $add$gold.v:84$33_gold ($add): \bit_count_gold -> \bit_count
+Changing input A of cell $add$gold.v:82$31_gold ($add): \state_gold -> \state
+Changing input A of cell $eq$gold.v:82$29_gold ($eq): \state_gold -> \state
+Changing input A of cell $eq$gold.v:80$28_gold ($eq): \state_gold -> \state
+Changing input A of cell $eq$gold.v:74$27_gold ($eq): \state_gold -> \state
+Changing input A of cell $eq$gold.v:72$26_gold ($eq): \bit_count_gold -> \bit_count
+Changing input A of cell $logic_not$gold.v:66$24_gold ($logic_not): \spi_sck_gold -> \spi_sck
+Changing input A of cell $ne$gold.v:40$18_gold ($reduce_bool): \state_gold -> \state
+Changing input B of cell $eq$gold.v:28$16_gold ($eq): \next_word_gold -> \next_word
+Changing input A of cell $logic_and$gold.v:28$15_gold ($logic_and): \retain_gold -> \retain
+Changing input A of cell $logic_not$gold.v:28$14_gold ($logic_not): \spi_cs_n_gold -> \spi_cs_n
+
+6. Executing HIERARCHY pass (managing design hierarchy).
+
+6.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+6.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removed 2 unused modules.
+
+7. Executing EQUIV_SIMPLE pass.
+Found 72 unproven $equiv cells (18 groups) in equiv:
+ Grouping SAT models for \rdata:
+  Trying to prove $equiv for \rdata [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rdata [1]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [2]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [3]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [4]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [5]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [6]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [7]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [8]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [9]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [10]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [11]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [12]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [13]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [14]:ezsat
+ success!
+  Trying to prove $equiv for \rdata [15]:ezsat
+ success!
+  Trying to prove $equiv for \ready:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \error:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \busy:ezsat
+ success!
+  Trying to prove $equiv for \spi_cs_n:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \spi_sck:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \spi_mosi:ezsat
+ezsat
+ success!
+ Grouping SAT models for \state:
+  Trying to prove $equiv for \state [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \state [1]:ezsat
+ success!
+  Trying to prove $equiv for \state [2]:ezsat
+ success!
+  Trying to prove $equiv for \state [3]:ezsat
+ success!
+  Trying to prove $equiv for \active:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \seen:ezsat
+ezsat
+ success!
+ Grouping SAT models for \next_word:
+  Trying to prove $equiv for \next_word [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \next_word [1]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [2]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [3]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [4]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [5]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [6]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [7]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [8]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [9]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [10]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [11]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [12]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [13]:ezsat
+ success!
+  Trying to prove $equiv for \next_word [14]:ezsat
+ success!
+  Trying to prove $equiv for \retain:ezsat
+ success!
+  Trying to prove $equiv for \resume_read:ezsat
+ success!
+ Grouping SAT models for \tx:
+  Trying to prove $equiv for \tx [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \tx [1]:ezsat
+ success!
+  Trying to prove $equiv for \tx [2]:ezsat
+ success!
+  Trying to prove $equiv for \tx [3]:ezsat
+ success!
+  Trying to prove $equiv for \tx [4]:ezsat
+ success!
+  Trying to prove $equiv for \tx [5]:ezsat
+ success!
+  Trying to prove $equiv for \tx [6]:ezsat
+ success!
+ Grouping SAT models for \rx:
+  Trying to prove $equiv for \rx [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \rx [1]:ezsat
+ success!
+  Trying to prove $equiv for \rx [2]:ezsat
+ success!
+  Trying to prove $equiv for \rx [3]:ezsat
+ success!
+  Trying to prove $equiv for \rx [4]:ezsat
+ success!
+  Trying to prove $equiv for \rx [5]:ezsat
+ success!
+  Trying to prove $equiv for \rx [6]:ezsat
+ success!
+  Trying to prove $equiv for \rx [7]:ezsat
+ success!
+ Grouping SAT models for \bit_count:
+  Trying to prove $equiv for \bit_count [0]:ezsat
+ezsat
+ success!
+  Trying to prove $equiv for \bit_count [1]:ezsat
+ success!
+  Trying to prove $equiv for \bit_count [2]:ezsat
+ success!
+  Trying to prove $equiv for \divider:ezsat
+ezsat
+ success!
+ Grouping SAT models for \next_byte:
+  Trying to prove $equiv for \next_byte [0]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [1]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [2]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [3]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [4]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [5]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [6]:ezsat
+ success!
+  Trying to prove $equiv for \next_byte [7]:ezsat
+ success!
+Proved 72 previously unproven $equiv cells.
+
+8. Executing EQUIV_INDUCT pass.
+No selected unproven $equiv cells found in equiv.
+Proved 0 previously unproven $equiv cells.
+
+9. Executing EQUIV_STATUS pass.
+Found 72 $equiv cells in equiv:
+  Of those cells 72 are proven and 0 are unproven.
+  Equivalence successfully proven!
+
+End of script. Logfile hash: e5165de634, time: 0.05s, user: 0.05s, system: 0.00s
+Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+Time spent: 64% 1x equiv_simple (0 sec), 14% 3x read_verilog (0 sec), ...

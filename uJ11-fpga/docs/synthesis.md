@@ -1,5 +1,21 @@
 # Synthesis checkpoints
 
+## CP53 — LUT-варианты cursor, новые gates ожидают передачи
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP53a | XOR/AND increment | — | — | — | — | 954 | Prepared, ещё не запущен |
+| CP53b | Grouped equality + syn_keep | — | — | — | — | 954 | Prepared, ещё не запущен |
+| CP53c | Оба изменения | — | — | — | — | 954 | Prepared, ещё не запущен |
+
+Все три RTL эквивалентны CP52b по two-state sequential SAT; FRAM/board
+tests и все 27 warm workloads прошли без изменения counters. Новый LUT
+cost нельзя вывести из числа операторов RTL. Сравнение с CP52b уточнено
+через mapped EDIF: 8 CCU2D increment + 5 comparator. Strong-driver audit
+CP52a/b не нашёл сетей с двумя сильными драйверами по направлениям портов.
+Автопроверка отклонила новый CP53 payload; подтверждение запрошено.
+[Подробности](cursor-cp53.md).
+
 ## CP52 — native sequential FRAM, оба full-board gates PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

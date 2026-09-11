@@ -16,9 +16,10 @@ def main():
     p.add_argument('name')
     p.add_argument('--mmu',action='store_true',help='Retained CP47c prototype; known not to fit HC1200')
     p.add_argument('--fram-cp52',action='store_true',help='Experimental native demand sequential FRAM READ')
+    p.add_argument('--cursor-cp53',choices=['increment','compare','both'],help='CP53 native cursor mapping experiment')
     p.add_argument('--prepare-only',action='store_true',help='Write exact synthesis project and input manifest without running Diamond')
     args=p.parse_args()
-    assert not (args.mmu and args.fram_cp52), 'CP52 is native-only'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53))<=1, 'Choose one native candidate or the retained MMU profile'
     assert re.fullmatch(r'cp[0-9]+[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
@@ -28,6 +29,9 @@ def main():
     if args.fram_cp52:
         from build_fram_cp52 import adapt
         core,board=adapt()
+    if args.cursor_cp53:
+        from build_cursor_cp53 import adapt
+        core,board=adapt(args.cursor_cp53)
     sources=core+board+['boards/hc1200/uj11_microcomp.v','microcode/generated/uj11_m0_ebr.v']
     if args.mmu:sources+=MMU
     proj=ET.Element('BaliProject',version='3.2',title=args.name,device='LCMXO2-1200HC-4SG32C',default_implementation='impl1')
@@ -64,13 +68,16 @@ exit 0
     if args.fram_cp52:
         inputs+=['tools/build_fram_cp52.py','build/cp52-fram/inputs.json',
                  'boards/hc1200/uj11_board_bus.v','boards/hc1200/uj11_board_fram.v']
+    if args.cursor_cp53:
+        inputs+=['tools/build_cursor_cp53.py','tools/build_fram_cp52.py','build/cp53-cursor/inputs.json',
+                 'synth/reports/cp52b/inputs.json','synth/reports/cp52b/source.tgz']
     hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in sorted(inputs)}
     hashes['generated:clock.lpf']=hashlib.sha256(lpf.encode()).hexdigest()
-    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,defines=['UJ11_MMU'] if args.mmu else [],
+    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,defines=['UJ11_MMU'] if args.mmu else [],
                   input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if args.prepare_only:
-        print(f'Prepared {args.name}: {len(hashes)} inputs; MMU={args.mmu}, sequential FRAM={args.fram_cp52}')
+        print(f'Prepared {args.name}: {len(hashes)} inputs; MMU={args.mmu}, sequential FRAM={args.fram_cp52}, cursor={args.cursor_cp53}')
         return
     diamond=os.environ.get('DIAMOND_HOME',str(__import__('pathlib').Path.home()/'.local/lscc/diamond/3.14'))+'/bin/lin64/diamondc'
     with (out/'diamond.log').open('w') as log:
@@ -81,7 +88,7 @@ exit 0
     report=dict(inputs=manifest,scope='Full board: core/FIS + SPI FRAM + KL11/KW11/panel/SD/RK + bootstrap + OSCH/reset/pins; prefetch disabled',
                 device='LCMXO2-1200HC-4SG32C',constraint_mhz=29.56,expected_ebr=7 if args.mmu else 6,diamond_returncode=rc,
                 mmu=args.mmu,microcode_words=json.loads((ROOT/'microcode/generated/m0.stats.json').read_text())['used_words'],
-                fram_cp52=args.fram_cp52,
+                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,
                 external_pin_delays_constrained=False)
     try:
         report.update(extract(prefix.with_suffix('.mrp').read_text(),prefix.with_suffix('.twr').read_text(),prefix.with_suffix('.par').read_text()))
