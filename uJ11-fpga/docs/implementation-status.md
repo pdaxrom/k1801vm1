@@ -9,8 +9,10 @@ portable и девять vendor workloads, новый cold FB+DIR PASS. Все c
 и raw UART совпали с CP54b. Полный MAP/PAR/TRACE: **1182 LUT / 333 FF /
 6 EBR / 593 slices / 30,827 MHz**. От CP54b **−3 LUT / −8 FF**, но
 Fmax ниже на 1,446 MHz; slack 1,390 ns при 29,56 MHz. Свободны 98 LUT /
-47 slices / 1 EBR, до <=1100 ещё 82 LUT. CP55a сохранён для сокращения
-площади, CP54b — с лучшим timing. Source/report hashes и EDIF проверены.
+47 slices / 1 EBR, до <=1100 ещё 82 LUT для CP55a. После сравнения пользователь
+выбрал **CP54b основой дальнейшей работы**: 1185 LUT / 341 FF / 6 EBR /
+32,273 MHz, slack 2,843 ns; до <=1100 ещё 85 LUT. CP55a остаётся экспериментом.
+Source/report hashes и EDIF проверены.
 Default CP52a, MMU-ветвь и плата CP29a прежние. [CP55](rx-cp55.md).
 
 ## CP54 — decode/ACK, выбран CP54b после synthesis

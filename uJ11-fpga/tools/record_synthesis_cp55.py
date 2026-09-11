@@ -116,10 +116,11 @@ def main():
     report = dict(checkpoint='CP55 full native board synthesis completed', date='2026-09-11',
         device='LCMXO2-1200HC-4SG32C', clock_constraint_mhz=29.56, external_pin_delays_constrained=False,
         measurements={'cp55a': measured}, previous_candidate=previous, production_baseline=baseline,
-        selected_area_candidate='cp55a', retained_timing_alternative='cp54b', production_gate='cp52a',
+        selected_candidate='cp54b', retained_area_experiment='cp55a', production_gate='cp52a',
         production_changed=False, mmu_changed=False, physical_board='CP29a', board_programmed=False,
-        microcode_words=954, lut_reduction_needed_for_1100=measured['lut4']-1100,
-        decision='Keep CP55a as the smaller sequential FRAM candidate at 29.56 MHz; retain CP54b for its better timing margin. Default remains CP52a pending further area reduction.',
+        microcode_words=954, selected_candidate_lut_reduction_needed_for_1100=previous['lut4']-1100,
+        decision='Use CP54b for further optimization, as requested by the user after comparing CP55: its 32.273 MHz Fmax and 2.843 ns slack are preferred to saving 3 LUT and 8 FF. Retain CP55a as an experiment; do not carry shared RX into the next candidate. Default remains CP52a pending further area reduction.',
+        decision_source='User selection after CP55 synthesis comparison, 2026-09-11',
         delta_from_cp54b={k: round(measured[k]-previous[k], 3) for k in keys},
         delta_from_default={k: round(measured[k]-baseline[k], 3) for k in keys},
         verified_against_simulation=True, validation_manifest_sha256=digest(ROOT/'docs/verification-cp55.json'),
@@ -138,7 +139,7 @@ def main():
     (ROOT/'docs/synthesis-cp55.json').write_text(json.dumps(report, indent=2)+'\n')
     print(json.dumps(dict(measurement={k: measured[k] for k in keys},
         slack_ns=measured['critical_path']['slack_ns'], delta=report['delta_from_cp54b'],
-        area_candidate='cp55a', timing_alternative='cp54b', production_changed=False), indent=2))
+        selected_candidate='cp54b', retained_experiment='cp55a', production_changed=False), indent=2))
 
 
 if __name__ == '__main__':

@@ -5,13 +5,19 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**Текущая основа оптимизации — CP54b**, по решению пользователя после CP55:
+1185 LUT / 341 FF / 6 EBR, Fmax **32,273 MHz**, запас **2,843 ns** при
+штатных 29,56 MHz. Профиль — `--ack-cp54 dma-ack`. Свободны 95 LUT /
+45 slices / 1 EBR; до <=1100 LUT нужно убрать 85 LUT. CP55 сохранён
+как эксперимент; default CP52a и прошивка CP29a пока прежние.
+
 **CP55: shared FRAM RX, полный synthesis PASS.**
 **1182 LUT / 333 FF / 6 EBR / 30,827 MHz** — на 3 LUT и 8 FF меньше CP54b,
 но Fmax ниже на 1,446 MHz. Свободны **98 LUT / 47 slices / 1 EBR**;
 slack 1,390 ns при 29,56 MHz. Formal, negative/X/Z/reset/128 КиБ tests,
 portable/vendor board и cold RT-11FB + DIR сохранили counters/raw UART.
-CP55a — кандидат для сокращения площади, CP54b сохранён с лучшим timing.
-До <=1100 LUT нужно убрать 82 LUT; default CP52a и плата CP29a прежние.
+По решению пользователя shared RX из CP55a не принимается в основу:
+экономия 3 LUT не оправдывает уменьшение запаса timing относительно CP54b.
 [Контракт, измерения и ограничения](docs/rx-cp55.md).
 
 **CP54: оба full-board synthesis PASS; выбран CP54b.**

@@ -19,9 +19,11 @@ Pin delays не заданы; Fmax не подтверждает физичес�
 и совпадение синтезированных HDL с formal/unit/portable/vendor/cold FB
 проверены. CP54b counters/raw UART сохранены.
 
-CP55a выбран для дальнейшего сокращения площади, CP54b — сохранённый
-вариант с большим timing margin. До <=1100 LUT ещё 82 LUT; default CP52a
-и плата CP29a прежние. [Описание](rx-cp55.md),
+После сравнения пользователь выбрал **CP54b для дальнейшей оптимизации**:
+1185 LUT / 341 FF / 6 EBR / 32,273 MHz, slack 2,843 ns. Экономия 3 LUT
+у CP55a не оправдывает потерю timing margin; CP55a остаётся экспериментом.
+Для выбранного CP54b до <=1100 LUT ещё 85 LUT; default CP52a и плата CP29a
+прежние. [Описание](rx-cp55.md),
 [verification](verification-cp55.json), [измерения и архивы](synthesis-cp55.json).
 
 ## CP54 — I/O qualification и ACK, оба gates PASS

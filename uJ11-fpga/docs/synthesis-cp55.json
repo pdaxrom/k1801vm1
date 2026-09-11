@@ -540,16 +540,17 @@
     "fmax_mhz": 31.47,
     "timing_pass": true
   },
-  "selected_area_candidate": "cp55a",
-  "retained_timing_alternative": "cp54b",
+  "selected_candidate": "cp54b",
+  "retained_area_experiment": "cp55a",
   "production_gate": "cp52a",
   "production_changed": false,
   "mmu_changed": false,
   "physical_board": "CP29a",
   "board_programmed": false,
   "microcode_words": 954,
-  "lut_reduction_needed_for_1100": 82,
-  "decision": "Keep CP55a as the smaller sequential FRAM candidate at 29.56 MHz; retain CP54b for its better timing margin. Default remains CP52a pending further area reduction.",
+  "selected_candidate_lut_reduction_needed_for_1100": 85,
+  "decision": "Use CP54b for further optimization, as requested by the user after comparing CP55: its 32.273 MHz Fmax and 2.843 ns slack are preferred to saving 3 LUT and 8 FF. Retain CP55a as an experiment; do not carry shared RX into the next candidate. Default remains CP52a pending further area reduction.",
+  "decision_source": "User selection after CP55 synthesis comparison, 2026-09-11",
   "delta_from_cp54b": {
     "lut4": -3,
     "ff": -8,
@@ -597,7 +598,7 @@
     "All simulation counts are unchanged at the nominal 29.56 MHz; the lower Fmax reduces timing margin, not those measured cycle counts."
   ],
   "sources_sha256": {
-    "tools/record_synthesis_cp55.py": "05558b2c0903af4f81b6ebc5bd83a94fa03f563c7cfbf459850fd8a19f4bc90a",
+    "tools/record_synthesis_cp55.py": "f624d02895c17c032da71d2b141022decff2904096ba9c2ec3aef6e83a6cea93",
     "tools/record_cp33.py": "4e0649335d729d4acc9fe4cf59f5efd7f74eaa1304a3e4abcc715bc26432487c",
     "tools/audit_edif_cp53.py": "6af8252701ab81792fae57e849432e14f45248358981acf3eda3e0114517d455",
     "docs/verification-cp55.json": "d66e1a6eadbfb21a0ac636b6aadbb955a25693294cec83d42dbdc34c5c3bd99d",
