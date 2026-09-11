@@ -22,8 +22,8 @@ MMU-ветвь не изменены. Плата остаётся CP29a.
 Применимость к MachXO2 и типу Net проверена в установленном **Synplify Pro
 for Lattice Attribute Reference, September 2024**, раздел `syn_keep`,
 стр. 125–130. Директива сохраняет границы nets при оптимизации; временный
-keep buffer не должен входить в конечный netlist. Итоговую LUT-реализацию
-всё равно требуется подтвердить synthesis. `syn_use_carry_chain` также
+keep buffer не должен входить в конечный netlist. Итоговая LUT-реализация
+проверена synthesis ниже. `syn_use_carry_chain` также
 изучен по стр. 264–268, но глобальные ограничения carry не применялись:
 они затронули бы CPU ALU и периферию за пределами данного эксперимента.
 
@@ -64,24 +64,87 @@ nets выделены отдельно; это структурный netlist ch
   на 256 инструкций, BR self 107 CPI, memory workloads без изменений.
 
 [Manifest и доказательства](verification-cp53.json), raw logs/source snapshot —
-`tb/reports/cp53`. CPU/FIS/firmware не менялись; полные cold RT-11 и vendor
-EBR проверки нового выбранного варианта выполняются после resource gate.
-Прежний CP52 cold результат не объявляется новым прогоном CP53.
+`tb/reports/cp53`. Этот архив фиксирует проверки до synthesis; новый
+resource gate и последующие проверки выбранного варианта записаны отдельно
+в [synthesis-cp53.json](synthesis-cp53.json) и `tb/reports/cp53-final`.
 
 ## Synthesis
 
-На этом этапе **новых LUT/FF/EBR/Fmax ещё нет**. Для сравнения используются
-измеренные CP52a (1159/326/6/31,470 MHz) и CP52b (1198/341/6/30,044 MHz).
-Все три новых проекта подготовлены для LCMXO2-1200HC-4SG32C, 29,56 MHz,
-с полным CPU/FIS/FRAM/KL11/KW11/panel/HG/SD/RK/firmware/OSCH/pins.
+После явного разрешения пользователя переданы 11 файлов, 66157 байт,
+на `sash@192.168.1.108:/tmp/uj11-cp53-20260911`. Остальные исходники
+скопированы из проверенного CP52 archive на сервере. Все SHA256 до и после
+сборок совпали с согласованными manifests и локально протестированным RTL.
 
-Автоматическая проверка отклонила передачу нового CP53 payload, сочтя
-согласие CP52 ограниченным его файлами и путём. Запрошено отдельное
-подтверждение: **11 файлов, 66157 байт**, список `/tmp/cp53-files.txt`,
-сервер `sash@192.168.1.108`, каталог `/tmp/uj11-cp53-20260911`.
-Payload содержит только изменённые RTL/build files и manifests; остальные
-проверенные CP52 inputs уже находятся на сервере. Никаких дисковых образов,
-ключей, `microasm11` и новой MMU-функциональности.
+Diamond 3.14.0.75.2 / Synplify V-2023.09L-2, LCMXO2-1200HC-4SG32C,
+полный CPU/FIS/FRAM/KL11/KW11/panel/HG/SD/RK/firmware/OSCH/pins,
+constraint 29,56 MHz. **Все три MAP/PAR/TRACE PASS**, полностью разведены.
+
+| Gate | LUT4 | FF | EBR | Slices | Fmax, MHz | Slack, ns |
+|---|---:|---:|---:|---:|---:|---:|
+| CP52a, native baseline | 1159 | 326 | 6 | 584 | 31,470 | 2,053 |
+| CP52b, sequential baseline | 1198 | 341 | 6 | 603 | 30,044 | 0,544 |
+| CP53a, increment | **1195** | 341 | 6 | 602 | **31,338** | **1,919** |
+| CP53b, compare | 1204 | 341 | 6 | 606 | 30,865 | 1,430 |
+| CP53c, both | 1208 | 341 | 6 | 608 | 31,788 | 2,371 |
+
+**CP53a выбран для дальнейшей оптимизации sequential FRAM:** −3 LUT,
+−1 slice, +1,294 MHz относительно CP52b при тех же clocks/instruction.
+CP53b/c дороже на 6/10 LUT, поэтому не выбраны. Даже полный отказ от
+carry в cursor не гарантирует меньшую площадь всего компьютера.
+
+У CP53a остаются **85 LUT / 38 slices / 1 EBR**, свободных PIO sites нет.
+Цена ускорения против native baseline — +36 LUT/+15 FF. Цель <=1100 LUT
+пока не достигнута, поэтому default остаётся CP52a; CPU/FIS/microcode,
+MMU-ветвь и физическая плата CP29a сохранены. Microstore — 954/1024 слова.
+
+### Что подтвердили netlist и TRACE
+
+| FRAM mapping | ORCALUT4 | PFUMX | CCU2D |
+|---|---:|---:|---:|
+| CP52b | 95 | 9 | 13 |
+| CP53a | 107 | 9 | 5 |
+| CP53b | 104 | 9 | 8 |
+| CP53c | 118 | 9 | 0 |
+
+Это counts ячеек Synplify внутри FRAM; они не складываются напрямую
+в итоговый MAP LUT4. В CP53a удалены восемь CCU2D инкремента, пять
+ячеек сравнения сохранены. В B удалена цепь сравнения, в C — обе цепи.
+Проверены 3025/3059/3073 сети конечных EDIF: сильных multiple drivers нет.
+EDIF сохранены в `synth/reports/cp53*/design.edi.gz`.
+
+Предупреждения не скрыты: набор кодов и число сообщений Synplify совпали
+с CP52a/b (в том числе 100 выведенных BN161). MAP: три предупреждения,
+ноль ошибок; остаются прежние сообщения о JTAG/GPIO, отключённых
+configuration ports и local timer reset. Synplify также сообщает об
+OSCH/inferred clock; итоговый TRACE использует явный LPF 29,56 MHz.
+Внешние pin delays не заданы, поэтому внутренний Fmax не является
+подтверждением timing SPI на физической плате.
+
+Худший путь CP53a: EBR lane 2 → dynamic RF/address → board decode/ACK →
+bus-fault predicate → microsequencer → EBR lane 1. **31,936 ns, 17 уровней,
+58,9% routing**, slack 1,919 ns. Cursor в этот путь не входит; рост Fmax
+нельзя приписать только сокращению задержки инкремента. Следующее
+исследование — стоимость и глубина board decode/ACK, с сохранением
+ROM/CSR/RK priority и отсутствием дополнительных memory clocks.
+
+### Проверки выбранного CP53a после synthesis
+
+- Девять новых full-board workloads с неизменёнными моделями Lattice
+  DP8KC/GSR/PUR в Icarus. Все counters точно совпали с portable CP53a.
+- Новый cold RT-11FB + DIR в Verilator: **288686609 clocks**, 300 RK
+  commands, 467 timer edges, 3270 UART wire bytes, 162 SD reads/6 writes.
+  Retired 3979364, reads 5207588, writes 422214, FRAM transactions 2422032.
+  Каждый принятый FRAM beat проверен по модели памяти; UART wire,
+  SD writeback и IRQ assertions прошли.
+- Все cold counters и **raw UART bytes** точно совпали с CP52b.
+  Против обычного native baseline сохранено ускорение 1,229×; reg-reg
+  loops — 40,0625 CPI вместо 107 (2,671×).
+- Backing image `lsi11-fpga/images/rt11v503.dsk`, 27540480 bytes,
+  SHA256 `e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553`
+  не изменён. Это MMU-less RT-11FB; RT-11XM здесь не проверялся.
+
+Архивы новых tests, исходников и manifests: `tb/reports/cp53-final`.
+Raw synthesis reports и frozen sources: `synth/reports/cp53a/b/c`.
 
 Воспроизведение локальных проверок:
 
@@ -94,12 +157,15 @@ python3 tools/record_cursor_cp53.py
 ```
 
 EDIF для audit находится в test-sources snapshot (`build/cp53-netlist`).
-Для synthesis после разрешённой передачи:
+Для повторного synthesis нужны свежие имена gates; выполненные команды:
 
 ```sh
 python3 tools/checkpoint_board.py cp53a --cursor-cp53 increment
 python3 tools/checkpoint_board.py cp53b --cursor-cp53 compare
 python3 tools/checkpoint_board.py cp53c --cursor-cp53 both
+python3 tools/run_cursor_vendor_cp53.py increment
+python3 tools/run_board.py --tag cp53-final --cursor-cp53 increment
+python3 tools/record_synthesis_cp53.py
 ```
 
 До запуска Diamond доступен `--prepare-only`. Варианты несовместимы с

@@ -5,10 +5,12 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP53: подготовлены три эквивалентных варианта FRAM cursor.** Раздельно
-изменены инкремент, сравнение и оба вместе. SAT, FRAM/board tests и 27
-benchmarks прошли; все counters CP52 сохранены. Новые LUT/Fmax пока
-не измерены: передача пакета для synthesis ожидает отдельного подтверждения.
+**CP53: три full-board synthesis завершены.** Лучший по площади CP53a:
+**1195 LUT / 341 FF / 6 EBR / 31,338 MHz**; −3 LUT относительно CP52b.
+Свободны 85 LUT / 38 slices / 1 EBR, timing slack 1,919 ns при 29,56 MHz.
+SAT, FRAM/board, vendor EBR и новый cold RT-11FB + DIR прошли;
+все counters и UART совпали с CP52. Цель <=1100 LUT ещё не достигнута;
+CP53a сохранён для дальнейшей оптимизации, default и плата прежние.
 [Исследование и проверки](docs/cursor-cp53.md).
 
 **CP52: sequential FRAM READ прошёл simulation и полный synthesis.**

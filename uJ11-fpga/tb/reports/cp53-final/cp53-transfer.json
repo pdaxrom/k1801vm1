@@ -1,0 +1,9 @@
+{
+  "destination": "sash@192.168.1.108:/tmp/uj11-cp53-20260911",
+  "file_count": 11,
+  "source_bytes": 66157,
+  "archive": "/tmp/uj11-cp53-delta.tgz",
+  "archive_bytes": 14583,
+  "archive_sha256": "f3e20805c41887cfa092d23ec7ba17300c550646bd64b081c2c359cd52531eb0",
+  "listing": "/tmp/cp53-files.txt"
+}

@@ -5,10 +5,14 @@
 По девять full-board workloads для increment/compare/both. Для каждого
 побитно сравнены все числовые counters: clocks, retired instruction count,
 bus beats, opcode reads, writes, request/busy clocks, CS и SCK. Все совпали
-с CP52, включая **40,0625 CPI** для MOV/ADD/CMP R,R. Это новые portable
-прогоны; новый cold RT-11/vendor gate выбранного варианта следует после
-synthesis. Area/Fmax ещё не измерены. [CP53](cursor-cp53.md),
-[проверенные исходники и logs](verification-cp53.json).
+с CP52, включая **40,0625 CPI** для MOV/ADD/CMP R,R. После трёх полных
+synthesis выбран CP53a: **1195 LUT / 341 FF / 6 EBR / 31,338 MHz**.
+Новые девять vendor EBR workloads сохранили все portable counters.
+Новый cold RT-11FB + DIR: **288686609 clocks**, 300 RK, 467 timer edges,
+3270 UART bytes, 162 SD reads/6 writes. Все counters и raw UART точно
+совпали с CP52. Ускорение против native baseline остаётся **1,229×**;
+площадь −3 LUT от CP52b. Default и плата прежние. [CP53](cursor-cp53.md),
+[ранние проверки](verification-cp53.json), [финальный gate](synthesis-cp53.json).
 
 ## CP52 — full native board с demand sequential FRAM READ
 

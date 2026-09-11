@@ -17,8 +17,9 @@ def main():
     p.add_argument('--vendor',action='store_true')
     p.add_argument('--mmu',action='store_true',help='Enable the retained, incomplete CP47c MMU prototype')
     p.add_argument('--fram-cp52',action='store_true',help='Experimental native sequential FRAM READ')
+    p.add_argument('--cursor-cp53',choices=['increment','compare','both'],help='Equivalent native FRAM cursor mapping')
     args=p.parse_args()
-    assert not (args.mmu and args.fram_cp52), 'CP52 is native-only'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53))<=1, 'Choose one board profile'
     assert re.fullmatch(r'[a-z0-9-]+',args.tag)
     assert args.image.exists()
     sources=CORE+BOARD+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
@@ -26,13 +27,17 @@ def main():
         from build_fram_cp52 import adapt
         core,board=adapt()
         sources=core+board+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
+    if args.cursor_cp53:
+        from build_cursor_cp53 import adapt
+        core,board=adapt(args.cursor_cp53)
+        sources=core+board+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
     if args.mmu:sources+=MMU
     if args.vendor:
         sources.remove('rtl/uj11_rom.v')
         vendor=Path(os.environ.get('LATTICE_SIM_DIR',ROOT/'build/vendor'))
         sources+=['microcode/generated/uj11_m0_ebr.v']+[str(vendor/(n+'.v')) for n in ('DP8KC','GSR','PUR')]
     testbench='tb/tb_board_rt11.v'
-    if args.fram_cp52:
+    if args.fram_cp52 or args.cursor_cp53:
         from build_fram_cp52 import replace_once
         testbench=f'build/{args.tag}-tb_board_rt11.v'
         (ROOT/testbench).write_text(replace_once((ROOT/'tb/tb_board_rt11.v').read_text(),
@@ -42,9 +47,13 @@ def main():
     if args.fram_cp52:
         for n in ['tb/board_fram_scoreboard.vh','tools/build_fram_cp52.py','build/cp52-fram/inputs.json']:
             source_hashes[n]=hashlib.sha256((ROOT/n).read_bytes()).hexdigest()
+    if args.cursor_cp53:
+        for n in ['tb/board_fram_scoreboard.vh','tools/build_fram_cp52.py','tools/build_cursor_cp53.py',
+                  'build/cp53-cursor/inputs.json','synth/reports/cp52b/inputs.json','synth/reports/cp52b/source.tgz']:
+            source_hashes[n]=hashlib.sha256((ROOT/n).read_bytes()).hexdigest()
     image_hash=hashlib.sha256(args.image.read_bytes()).hexdigest()
     manifest=dict(files=source_hashes,image_sha256=image_hash,image_bytes=args.image.stat().st_size,
-                  mmu=args.mmu,fram_cp52=args.fram_cp52,defines=profile_flags(args.mmu),
+                  mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,defines=profile_flags(args.mmu),
                   mode=('vendor DP8KC' if args.vendor else 'portable')+' Verilator; cold CPU reset; actual UART wire scoreboard; SD read-only backing + RAM overlay')
     (ROOT/f'build/{args.tag}-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     # Freeze the imported models; scope their established implicit-width

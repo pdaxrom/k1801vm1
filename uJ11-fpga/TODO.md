@@ -11,21 +11,21 @@
   R,R ускорен в 2,671×, полный cold сценарий — в 1,229×. [CP52](docs/fram-sequential-cp52.md).
 - [x] CP52a/b: полный Diamond gate. Baseline 1159/326/6/31,470 MHz;
   sequential 1198/341/6/30,044 MHz. Оба routed/timing PASS.
-- [ ] Уменьшить площадь CP52b до включения в default: остаются 82 LUT,
-  slack 0,544 ns; цель <=1100 LUT пока не достигнута. В FRAM появились
-  13 CCU2D: исследовать цену инкремента/сравнения cursor, затем board decode/ACK.
+- [ ] Уменьшить площадь sequential FRAM board до включения в default:
+  после CP53a остаются 85 LUT, slack 1,919 ns; цель <=1100 LUT не достигнута.
+  Следующий кандидат — board decode/ACK с прежними ROM/CSR/RK priorities.
 - [x] CP53: EDIF уточнил 8 CCU2D для инкремента и 5 для сравнения;
   конечные netlists не содержат сетей с двумя сильными драйверами.
 - [x] CP53: подготовить increment/compare/both, доказать equivalence,
   проверить FRAM/overlays и сохранить все benchmark counters CP52.
-- [ ] CP53a/b/c: выполнить synthesis после подтверждения передачи нового
-  пакета; выбрать вариант по реальным LUT/FF/Fmax, затем cold FB/vendor tests.
+- [x] CP53a/b/c: full synthesis PASS; 1195/1204/1208 LUT. Выбран CP53a,
+  −3 LUT от CP52b; новые cold FB/vendor tests сохранили counters/raw UART.
   [CP53](docs/cursor-cp53.md).
 - [ ] После первого resource gate отдельно оценить малый instruction-stream
   buffer: CP52 ещё не выполняет speculative reads.
 - [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode
   преобразований; экономию MMU-сборок не переносить без измерения.
-- [ ] Исследовать address→ACK→uPC critical path (31,802 ns), сравнивать
+- [ ] Исследовать address→ACK→uPC critical path (31,936 ns у CP53a), сравнивать
   Fmax и добавленные memory clocks. Сохранить цель <=1100 LUT.
 
 ## CP50: рабочая сборка без MMU

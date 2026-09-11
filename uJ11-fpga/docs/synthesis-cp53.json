@@ -1,0 +1,599 @@
+{
+  "checkpoint": "CP53 full-board synthesis and selected CP53a validation",
+  "date": "2026-09-11",
+  "device": "LCMXO2-1200HC-4SG32C",
+  "clock_constraint_mhz": 29.56,
+  "external_pin_delays_constrained": false,
+  "measurements": {
+    "cp53a": {
+      "lut4": 1195,
+      "ff": 341,
+      "ebr": 6,
+      "slices": 602,
+      "fmax_mhz": 31.338,
+      "timing_pass": true,
+      "remaining_lut4": 85,
+      "remaining_slices": 38,
+      "remaining_ebr": 1,
+      "fully_routed": true,
+      "lut_categories": {
+        "logic": 1067,
+        "distributed_ram": 48,
+        "carry": 80
+      },
+      "pins_free": 0,
+      "critical_path": {
+        "delay_ns": 31.936,
+        "logic_percent": 41.1,
+        "route_percent": 58.9,
+        "levels": 17,
+        "slack_ns": 1.919,
+        "source": "system/cpu/engine/rom/lane_2(ASIC)",
+        "destination": "system/cpu/engine/rom/lane_1(ASIC)"
+      },
+      "fram_synplify_primitives": {
+        "ORCALUT4": 107,
+        "PFUMX": 9,
+        "CCU2D": 5
+      },
+      "synplify_warning_counts": {
+        "BN161": 100,
+        "BZ204": 1,
+        "BZ240": 1,
+        "CG390": 1,
+        "CL246": 6,
+        "CL247": 2,
+        "CL279": 1,
+        "FX474": 2,
+        "MT420": 1,
+        "MT529": 1
+      },
+      "map_warning_count": 3,
+      "edif_audit": {
+        "edif_sha256": "0608e4dcc19ddce1acd3bf68d2b98d795859e55c548b010380495f07fbe254a5",
+        "nets_checked": 3025,
+        "strong_multiple_driver_nets": [],
+        "bidirectional_nets": [
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_0",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_0.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_1",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_1.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_2",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_2.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_3",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_3.B",
+              "inout.gpio_key_row"
+            ]
+          }
+        ],
+        "fram_nets_checked": 245,
+        "fram_ccu2d": [
+          "un1_address_2_0_I_45_0",
+          "un1_address_2_0_I_33_0",
+          "un1_address_2_0_I_21_0",
+          "un1_address_2_0_I_9_0",
+          "un1_address_2_0_I_1_0"
+        ],
+        "scope": "Each EDIF cell net; direction-defined strong drivers; bidirectional nets recorded separately, not a physical contention proof"
+      }
+    },
+    "cp53b": {
+      "lut4": 1204,
+      "ff": 341,
+      "ebr": 6,
+      "slices": 606,
+      "fmax_mhz": 30.865,
+      "timing_pass": true,
+      "remaining_lut4": 76,
+      "remaining_slices": 34,
+      "remaining_ebr": 1,
+      "fully_routed": true,
+      "lut_categories": {
+        "logic": 1070,
+        "distributed_ram": 48,
+        "carry": 86
+      },
+      "pins_free": 0,
+      "critical_path": {
+        "delay_ns": 32.425,
+        "logic_percent": 42.0,
+        "route_percent": 58.0,
+        "levels": 18,
+        "slack_ns": 1.43,
+        "source": "system/cpu/engine/rom/lane_2(ASIC)",
+        "destination": "system/cpu/engine/rom/lane_3(ASIC)"
+      },
+      "fram_synplify_primitives": {
+        "ORCALUT4": 104,
+        "PFUMX": 9,
+        "CCU2D": 8
+      },
+      "synplify_warning_counts": {
+        "BN161": 100,
+        "BZ204": 1,
+        "BZ240": 1,
+        "CG390": 1,
+        "CL246": 6,
+        "CL247": 2,
+        "CL279": 1,
+        "FX474": 2,
+        "MT420": 1,
+        "MT529": 1
+      },
+      "map_warning_count": 3,
+      "edif_audit": {
+        "edif_sha256": "a209b2d24d3350b6e40bb8774ac623c5f8fd8a35e478b5c723da089d078b0ddd",
+        "nets_checked": 3059,
+        "strong_multiple_driver_nets": [],
+        "bidirectional_nets": [
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_0",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_0.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_1",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_1.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_2",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_2.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_3",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_3.B",
+              "inout.gpio_key_row"
+            ]
+          }
+        ],
+        "fram_nets_checked": 244,
+        "fram_ccu2d": [
+          "un2_next_word_cry_13_0",
+          "un2_next_word_cry_11_0",
+          "un2_next_word_cry_9_0",
+          "un2_next_word_cry_7_0",
+          "un2_next_word_cry_5_0",
+          "un2_next_word_cry_3_0",
+          "un2_next_word_cry_1_0",
+          "un2_next_word_cry_0_0"
+        ],
+        "scope": "Each EDIF cell net; direction-defined strong drivers; bidirectional nets recorded separately, not a physical contention proof"
+      }
+    },
+    "cp53c": {
+      "lut4": 1208,
+      "ff": 341,
+      "ebr": 6,
+      "slices": 608,
+      "fmax_mhz": 31.788,
+      "timing_pass": true,
+      "remaining_lut4": 72,
+      "remaining_slices": 32,
+      "remaining_ebr": 1,
+      "fully_routed": true,
+      "lut_categories": {
+        "logic": 1090,
+        "distributed_ram": 48,
+        "carry": 70
+      },
+      "pins_free": 0,
+      "critical_path": {
+        "delay_ns": 31.484,
+        "logic_percent": 42.5,
+        "route_percent": 57.5,
+        "levels": 18,
+        "slack_ns": 2.371,
+        "source": "system/cpu/engine/rom/lane_2(ASIC)",
+        "destination": "system/cpu/engine/rom/lane_2(ASIC)"
+      },
+      "fram_synplify_primitives": {
+        "ORCALUT4": 118,
+        "PFUMX": 9,
+        "CCU2D": 0
+      },
+      "synplify_warning_counts": {
+        "BN161": 100,
+        "BZ204": 1,
+        "BZ240": 1,
+        "CG390": 1,
+        "CL246": 6,
+        "CL247": 2,
+        "CL279": 1,
+        "FX474": 2,
+        "MT420": 1,
+        "MT529": 1
+      },
+      "map_warning_count": 3,
+      "edif_audit": {
+        "edif_sha256": "a78fc87959ef7d548d27b50eba782bc58ee1677aed1d751c92d6348ac5f65945",
+        "nets_checked": 3073,
+        "strong_multiple_driver_nets": [],
+        "bidirectional_nets": [
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_0",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_0.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_1",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_1.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_2",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_2.B",
+              "inout.gpio_key_row"
+            ]
+          },
+          {
+            "cell": [
+              "work",
+              "uj11_hc1200_microcomp"
+            ],
+            "net": "gpio_key_row_3",
+            "drivers": [],
+            "inouts": [
+              "gpio_key_row_pad_3.B",
+              "inout.gpio_key_row"
+            ]
+          }
+        ],
+        "fram_nets_checked": 237,
+        "fram_ccu2d": [],
+        "scope": "Each EDIF cell net; direction-defined strong drivers; bidirectional nets recorded separately, not a physical contention proof"
+      }
+    }
+  },
+  "baseline": {
+    "lut4": 1159,
+    "ff": 326,
+    "ebr": 6,
+    "slices": 584,
+    "fmax_mhz": 31.47,
+    "timing_pass": true
+  },
+  "previous_candidate": {
+    "lut4": 1198,
+    "ff": 341,
+    "ebr": 6,
+    "slices": 603,
+    "fmax_mhz": 30.044,
+    "timing_pass": true
+  },
+  "selected_candidate": "cp53a",
+  "production_gate": "cp52a",
+  "production_changed": false,
+  "mmu_changed": false,
+  "physical_board": "CP29a",
+  "microcode_words": 954,
+  "decision": "Use CP53a for further sequential FRAM optimization; default remains CP52a until area headroom improves.",
+  "delta_from_cp52b": {
+    "lut4": -3,
+    "ff": 0,
+    "ebr": 0,
+    "slices": -1,
+    "fmax_mhz": 1.294
+  },
+  "vendor_workloads": [
+    {
+      "workload": "MOV_RR",
+      "instructions": 256,
+      "microclocks": 10256,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 9744,
+      "fram_busy_clocks": 9232,
+      "spi_transactions": 4,
+      "spi_clocks": 4224
+    },
+    {
+      "workload": "ADD_RR",
+      "instructions": 256,
+      "microclocks": 10256,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 9744,
+      "fram_busy_clocks": 9232,
+      "spi_transactions": 4,
+      "spi_clocks": 4224
+    },
+    {
+      "workload": "CMP_RR",
+      "instructions": 256,
+      "microclocks": 10256,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 9744,
+      "fram_busy_clocks": 9232,
+      "spi_transactions": 4,
+      "spi_clocks": 4224
+    },
+    {
+      "workload": "mixed_RR",
+      "instructions": 256,
+      "microclocks": 10256,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 9744,
+      "fram_busy_clocks": 9232,
+      "spi_transactions": 4,
+      "spi_clocks": 4224
+    },
+    {
+      "workload": "MOV_mem_reg",
+      "instructions": 256,
+      "microclocks": 56876,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 53340,
+      "fram_busy_clocks": 52324,
+      "spi_transactions": 508,
+      "spi_clocks": 24384
+    },
+    {
+      "workload": "MOV_reg_mem",
+      "instructions": 256,
+      "microclocks": 61916,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 252,
+      "request_clocks": 57876,
+      "fram_busy_clocks": 56860,
+      "spi_transactions": 760,
+      "spi_clocks": 26400
+    },
+    {
+      "workload": "MOV_mem_mem",
+      "instructions": 256,
+      "microclocks": 88628,
+      "memory_beats": 760,
+      "opcode_fetches": 256,
+      "writes": 252,
+      "request_clocks": 84336,
+      "fram_busy_clocks": 82816,
+      "spi_transactions": 1012,
+      "spi_clocks": 38496
+    },
+    {
+      "workload": "BR_self",
+      "instructions": 256,
+      "microclocks": 27392,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 26880,
+      "fram_busy_clocks": 26368,
+      "spi_transactions": 256,
+      "spi_clocks": 12288
+    },
+    {
+      "workload": "stack_push_pop",
+      "instructions": 256,
+      "microclocks": 59812,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 128,
+      "request_clocks": 55644,
+      "fram_busy_clocks": 54628,
+      "spi_transactions": 636,
+      "spi_clocks": 25408
+    }
+  ],
+  "vendor_counters_identical_to_portable": true,
+  "cold_rt11": {
+    "clocks": 288686609,
+    "rk_commands": 300,
+    "timer_edges": 467,
+    "uart_bytes": 3270,
+    "sd_reads": 162,
+    "sd_writes": 6,
+    "retired": 3979364,
+    "reads": 5207588,
+    "writes": 422214,
+    "fram_transactions": 2422032,
+    "image_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553"
+  },
+  "cold_counters_and_raw_uart_identical_to_cp52": true,
+  "cold_speedup_from_native": 1.2294934677763318,
+  "sources_sha256": {
+    "tools/run_cursor_vendor_cp53.py": "dffa58dce1fd13c9585ebef5111b452b68869a0b4f070748f71dfdf03d77d7b3",
+    "tools/run_fram_cp52.py": "2d0c99e4c2a464a3d12337359938d7f8d13bff68e66c0f99e8f446c71b23e818",
+    "tools/build_cursor_cp53.py": "0296c24f955df55abae87c4539b3ad37807e7a91162edd8f7c2e70094744faef",
+    "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+    "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+    "tb/tb_board_bench_cp51.v": "15621545e07e8e2e5e6178b5735047b92fb375d4b73bb27f63442911a5821d91",
+    "tb/reports/cp53/cp53-tests/result.json": "cab2e7d16f683c1932396619b8a2d4082a888b8e2e7d4649154db7d510f0c371",
+    "build/cp53-cursor/inputs.json": "8af804f063d000a9284bdd38e0d2e047743ad28bd936bcd57eceb72e8a6006db",
+    "build/cp53-vendor/increment/tb_bench.v": "cb96c76bd7c6ee9d527ed472c76873c4b484664b003807fd91d2df7553741bc1",
+    "rtl/uj11_core.v": "a7f492e043ed72a5ba9e8434979eba51d82d1739066114412f547ae5b8b05169",
+    "rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "microcode/generated/uj11_decode_table.v": "b7ab68e2f91b1f33721ac4067416eccfa7ea394cf7a973c3db6ab358fcef14ea",
+    "rtl/uj11_engine.v": "5f991b318e0d24010fd6d3cb4dd347214b68bc7b047df711be22d4396d33d31b",
+    "rtl/uj11_decode.v": "eaa181630dea88ef76ba3d60dd3595d4f7b2cae622e7fa354b28b74d63c4bc78",
+    "rtl/uj11_microseq.v": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+    "rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "boards/hc1200/uj11_board.v": "015d9b9eef29986e316f2f89228df664c79a9a1b43b9a34d4b4dc841fc88560c",
+    "build/cp53-cursor/baseline/uj11_board_bus.v": "2d06dd80bbef0b001aad6ccebd11a261ae0cf8489a0ba8a5e6679fbead71768e",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "build/cp53-cursor/increment/uj11_board_fram.v": "de21898d452b2c4086e5843b6d094e26ccf7e6f0b4823269f6b6858cf3632546",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+    "microcode/generated/uj11_m0_ebr.v": "f29be4de8f97bd9eaddc053cb7ea59789bd6044436d03b4b0c5b959d4caf002a",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "build/vendor/DP8KC.v": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+    "build/vendor/GSR.v": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+    "build/vendor/PUR.v": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "reference/lsi11/spi_sd_model_cp28.v": "e159dd7c1f6545a69d4e61e6688c3f16ac2762c693447b92c1642d20721bb7ad",
+    "build/cp53-final-tb_board_rt11.v": "a1a6df73d9e41d8029f783927833eab6550ba2ab88600f90d5960ed099712638",
+    "tb/tb_board_rt11.v": "37acf8d387104c7e23a359eda1f0bb9f7bb8727cc1789f46bca938bb527efbb8",
+    "tools/run_board.py": "34d2a0b52db286f614b472070970ee0d6b22a2497c49385145c1a9a07d189204",
+    "microcode/generated/m0.mem": "8fe41c7261559bb197feed0688bedb55de7bbb1eeab3d93a644c59c281df1f0c",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "microcode/generated/decode.mem": "48e876bce8b0700ebd1a112c2f92e590ac5a9fb8b065fb4650d94434540718c8",
+    "tb/board_fram_scoreboard.vh": "75166e7e179911f58f052d3e8b3977601d09188213fc6bdea29e47cd9229164c",
+    "synth/reports/cp52b/inputs.json": "1e25cf975d5ad33a02eaffd6ac2b74cc1c6f92ec6818f5fca7d177a6990dbd6a",
+    "synth/reports/cp52b/source.tgz": "71142277fb955d7fb062c15f332295739f66374d836fc639964d66815afcdddf",
+    "build/cp53-final-board-inputs.json": "dd301fa9e0b7152dce63fb5e331bfc2f8e4e9ca79f22aeccc12756b2ec12fbe7",
+    "build/cp53-final-board-build.log": "f21c039b551635f24221cb418abd2a0859b95bf982bb388c32ed1b0c6de49eac",
+    "build/cp53-final-board-rt11.log": "9b6c183d455fa3b4f3ce978b0e234bf270dfd1fab09c97ae09245207960ed392",
+    "build/cp53-final-uart.txt": "b556b8500cda95b6676d7450e7627edc3e81d1052745b3c62928bd8562311963",
+    "build/cp53-vendor/increment/result.json": "0a154f58b11483d179174532abb7339638204ed5702dfa78657a379a11258968",
+    "build/cp53-vendor/increment/bench.json": "c6f2e72ce33e72cdfa435bbf5cc8b28838013cd7ff791b8b34a89ffbe5adea36",
+    "build/cp53-vendor/increment/bench.log": "f91a2a5b61814ea35d6872fd2755c51e9ae0dfa459466cbe1ae474a4a534a6fc",
+    "build/cp53-vendor/increment/bench-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp53-transfer.json": "b8853fc1faa418c39974163e0fcf779fd9fc5a3c8d488269ac986412891b63f5",
+    "build/cp53-transfer-manifest.json": "d81ab78c69bd86d22019b0f865ba9c97479feee6befa964903f18c78bd2e6c1d",
+    "tools/record_synthesis_cp53.py": "6214d8ac5a9b8cfbabb2d44bfae77d22e97961cd4ca7756537c4b1c2cfa7585f",
+    "tools/audit_edif_cp53.py": "6af8252701ab81792fae57e849432e14f45248358981acf3eda3e0114517d455",
+    "tools/record_cp33.py": "4e0649335d729d4acc9fe4cf59f5efd7f74eaa1304a3e4abcc715bc26432487c",
+    "docs/verification-cp53.json": "ed0765a7a323dd22b23c85b95b9394a5a419b95e678bb8efec9e758b643413ae",
+    "docs/verification-cp52.json": "7a183dea65de43806f46ba70dec70bf3494f15bcbbce872fe191adbf88d6456e"
+  },
+  "archives_sha256": {
+    "tb/reports/cp53-final/cp53-final-board-build.log": "f21c039b551635f24221cb418abd2a0859b95bf982bb388c32ed1b0c6de49eac",
+    "tb/reports/cp53-final/cp53-final-board-inputs.json": "dd301fa9e0b7152dce63fb5e331bfc2f8e4e9ca79f22aeccc12756b2ec12fbe7",
+    "tb/reports/cp53-final/cp53-final-board-rt11.log": "9b6c183d455fa3b4f3ce978b0e234bf270dfd1fab09c97ae09245207960ed392",
+    "tb/reports/cp53-final/cp53-final-uart.txt": "b556b8500cda95b6676d7450e7627edc3e81d1052745b3c62928bd8562311963",
+    "tb/reports/cp53-final/cp53-transfer-manifest.json": "d81ab78c69bd86d22019b0f865ba9c97479feee6befa964903f18c78bd2e6c1d",
+    "tb/reports/cp53-final/cp53-transfer.json": "b8853fc1faa418c39974163e0fcf779fd9fc5a3c8d488269ac986412891b63f5",
+    "tb/reports/cp53-final/cp53-vendor/increment/bench-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp53-final/cp53-vendor/increment/bench.json": "c6f2e72ce33e72cdfa435bbf5cc8b28838013cd7ff791b8b34a89ffbe5adea36",
+    "tb/reports/cp53-final/cp53-vendor/increment/bench.log": "f91a2a5b61814ea35d6872fd2755c51e9ae0dfa459466cbe1ae474a4a534a6fc",
+    "tb/reports/cp53-final/cp53-vendor/increment/result.json": "0a154f58b11483d179174532abb7339638204ed5702dfa78657a379a11258968",
+    "tb/reports/cp53-final/test-sources.tgz": "ad60c49c856bd4cd8a5b964eb13914cee9af75a1bc864a3969907f19cad79462",
+    "synth/reports/cp53a/build.tcl": "70a9ae2959d096a920aad5c2aea0e5aa5487907ff9d9dddd7a3affba6e088e83",
+    "synth/reports/cp53a/clock.lpf": "93caa8d288480930b9ccbf435e7bef4539a99611ca55769e6b640c013fa52b3a",
+    "synth/reports/cp53a/design.areasrr": "00ec84a3051314869c0d93dfe5b6715b483225a560b921301cb19408956361fc",
+    "synth/reports/cp53a/design.edi.gz": "c036f6d15d72f92050edfbb865ea9b2662b2623327f5ec6071572be59125ffc0",
+    "synth/reports/cp53a/design.mrp": "ca7d180699cb677ac717dafe19c730bf5cf981f97efc0bdfe09e74010f364c44",
+    "synth/reports/cp53a/design.par": "4932ffa6e16b39cff15d71480cd55a5dbeecaa2a85cfdb7ffe8b7f7a578c74bc",
+    "synth/reports/cp53a/design.srr": "34e1127af20e30e7d10e5f0d0a89c90a08686a9d1481f634ee9fcc228e639c1b",
+    "synth/reports/cp53a/design.twr": "70a775c59095c72a0debe5e913971dde886530fd310e1e3acb4341b82738ffd1",
+    "synth/reports/cp53a/diamond.log": "e68241ea75dd12b1a02eb43db0e987e38f4e17d4e77a3732763505eb01c405af",
+    "synth/reports/cp53a/inputs.json": "5379fa8a833e7ea8729344f1b2b428ecfed860d8dabb387b55600c08d37e8ef8",
+    "synth/reports/cp53a/result.json": "0bca1b73ed61bb110d562ed0e0d6d9fa73c3f32d3f5f3e4e33b4a8d5a99d8013",
+    "synth/reports/cp53a/source.tgz": "c0a0fac16da3dcec1d4904e2c55978d11d1b1d3e91e7462a5065e52ab2a7bd58",
+    "synth/reports/cp53b/build.tcl": "bb390a8bd369399289367c537219fdb54ab497b8805f3c0da05ce9a8d90672d2",
+    "synth/reports/cp53b/clock.lpf": "93caa8d288480930b9ccbf435e7bef4539a99611ca55769e6b640c013fa52b3a",
+    "synth/reports/cp53b/design.areasrr": "e9d252006a74eacd62b6bb127d0b94fd761169a57b1f22a33632a517e0c1cdb0",
+    "synth/reports/cp53b/design.edi.gz": "7fbd9110508c454e9ff0b80d8bdd536ab485f7003d9b4c9c074ee2c1fb6f8214",
+    "synth/reports/cp53b/design.mrp": "172176f33f8b0f5ebac8b11e26222d4e4163dec092be6b4f4e9cd2ec93159e3d",
+    "synth/reports/cp53b/design.par": "c7a334239e199aecacdd33ccc3f32a2d40f8d2d7b5f537a298263e7f9489841c",
+    "synth/reports/cp53b/design.srr": "79112566038b4e5069b9c3e1f31f1cbf70226fdf24bd972045c671590733adaf",
+    "synth/reports/cp53b/design.twr": "e904a1bd3d1e084c084a0d69c3a9acd697090e703fe12f13b80f45887023547a",
+    "synth/reports/cp53b/diamond.log": "1fd7c1f19f095601b40b9172f4f70383b19b887dc8df7116a25f35d6d6c63683",
+    "synth/reports/cp53b/inputs.json": "4da3c7733753bae5bd363675c01ed0cba11be65cf46debf013b57a53dcad12a2",
+    "synth/reports/cp53b/result.json": "c67482020c1cb21c251b0fd6e1df8222d98b223899e9b0a3679a683af5ae444e",
+    "synth/reports/cp53b/source.tgz": "032ead397942c4009ab2c3a3bcaa03024028aa2854625e91cbde5486ff8b4f21",
+    "synth/reports/cp53c/build.tcl": "895825256af83d885490931344450bf2a566f15980860e6d893cdac120ad8b6c",
+    "synth/reports/cp53c/clock.lpf": "93caa8d288480930b9ccbf435e7bef4539a99611ca55769e6b640c013fa52b3a",
+    "synth/reports/cp53c/design.areasrr": "0b02f8cfd7b990414605b25afbd33380f49bee20a23c150b8deab11008529797",
+    "synth/reports/cp53c/design.edi.gz": "76a4ffa5980a5557356a21e6f109a704241378a5e83fbeceb67223f3497d167e",
+    "synth/reports/cp53c/design.mrp": "f13fb55e89fbbd606a7c400fb6a1d34fc1440d0722d69435c3b4a6faab27e200",
+    "synth/reports/cp53c/design.par": "dc6758d02f8293dab013fa16949bb8fd768aaa4ab091f7ec7c194fd5270bba21",
+    "synth/reports/cp53c/design.srr": "5c2a8a9546f85c467ff5da502aab16a4d70c1ece9fd5cbafe46a5d1a79cc293f",
+    "synth/reports/cp53c/design.twr": "eb22f3530d2e1782e814c3c812ec043864a01e5d1158c8a065b4c4df4e8b4a2d",
+    "synth/reports/cp53c/diamond.log": "f95ea8513545e4000143edc5253826410e480a08b37d11b9bfa3acdbe2df692f",
+    "synth/reports/cp53c/inputs.json": "2fcacec416e73c0c4939bca7892c58ab08239511d4adbae9d783a48c3e410260",
+    "synth/reports/cp53c/result.json": "467c4a539c6a0793947541c8e457add03cec0e53a1e2ee68fe976c4a10d9322b",
+    "synth/reports/cp53c/source.tgz": "c9d96007537d902d1b3ed0061ea8ca6aa1e551bc0e902b6687d76a513083944f"
+  }
+}

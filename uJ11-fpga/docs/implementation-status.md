@@ -1,15 +1,18 @@
 # Implementation status, 2026-09-11
 
-## CP53 — cursor mapping, локальные проверки PASS
+## CP53 — cursor mapping, synthesis и выбранный board PASS
 
 Подготовлены три варианта CP52b: XOR/AND increment, grouped comparator,
 оба вместе. Шесть положительных SAT proofs и три negative controls,
 12288 random/1962 directed FRAM операций, 129 board beats, 27 full-board
 workloads; все benchmark counters совпали с CP52. Mapped EDIF CP52b
 подтвердил 8+5 CCU2D; проверка конечных сетей не нашла multiple strong drivers.
-Новых ресурсов пока нет: CP53a/b/c synthesis подготовлен, передача нового
-пакета ожидает подтверждения после auto-review rejection. Default RTL,
-MMU-ветвь и плата не менялись. [CP53](cursor-cp53.md).
+CP53a/b/c: **1195/1204/1208 LUT**, по 341 FF и 6 EBR,
+Fmax 31,338/30,865/31,788 MHz, все routed/timing PASS. Выбран A:
+−3 LUT от CP52b, свободны 85 LUT/38 slices/1 EBR, slack 1,919 ns.
+Девять новых vendor EBR workloads и cold FB+DIR прошли; counters/raw UART
+точно совпали с CP52. Default RTL, MMU-ветвь и плата не менялись;
+цель <=1100 LUT ещё требует оптимизации. [CP53](cursor-cp53.md).
 
 ## CP52 — native sequential FRAM candidate, simulation и synthesis PASS
 

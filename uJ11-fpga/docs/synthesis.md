@@ -1,20 +1,27 @@
 # Synthesis checkpoints
 
-## CP53 — LUT-варианты cursor, новые gates ожидают передачи
+## CP53 — три cursor gates PASS, выбран CP53a
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
 |---|---|---:|---:|---:|---:|---:|---|
-| CP53a | XOR/AND increment | — | — | — | — | 954 | Prepared, ещё не запущен |
-| CP53b | Grouped equality + syn_keep | — | — | — | — | 954 | Prepared, ещё не запущен |
-| CP53c | Оба изменения | — | — | — | — | 954 | Prepared, ещё не запущен |
+| CP53a | XOR/AND increment | 1195 | 341 | 6 | 31,338 | 954 | 602 slices; MAP/PAR/TRACE PASS |
+| CP53b | Grouped equality + syn_keep | 1204 | 341 | 6 | 30,865 | 954 | 606 slices; MAP/PAR/TRACE PASS |
+| CP53c | Оба изменения | 1208 | 341 | 6 | 31,788 | 954 | 608 slices; MAP/PAR/TRACE PASS |
 
 Все три RTL эквивалентны CP52b по two-state sequential SAT; FRAM/board
-tests и все 27 warm workloads прошли без изменения counters. Новый LUT
-cost нельзя вывести из числа операторов RTL. Сравнение с CP52b уточнено
-через mapped EDIF: 8 CCU2D increment + 5 comparator. Strong-driver audit
-CP52a/b не нашёл сетей с двумя сильными драйверами по направлениям портов.
-Автопроверка отклонила новый CP53 payload; подтверждение запрошено.
-[Подробности](cursor-cp53.md).
+tests и все 27 warm workloads прошли без изменения counters. CP53a удаляет
+8 CCU2D инкремента, сохраняет 5 comparator; итог −3 LUT/−1 slice/+1,294 MHz
+от CP52b. B/C увеличивают LUT на 6/10. Новые vendor EBR workloads и cold
+RT-11FB + DIR выбранного A точно повторили CP52 counters/raw UART.
+
+Остаются **85 LUT / 38 slices / 1 EBR**, slack **1,919 ns** при 29,56 MHz.
+Critical path EBR→RF/address→board decode/ACK→predicate/seq→EBR,
+31,936 ns, 17 levels, 58,9% routing. Все конечные EDIF проверены:
+multiple strong drivers нет; прежние Synplify/MAP warnings сохранены.
+External pin delays не заданы. Default остаётся CP52a до дальнейшего
+уменьшения площади; физическая плата CP29a. Подтверждённый пакет передан,
+все source/report hashes проверены. [Подробности](cursor-cp53.md),
+[измерения и архивы](synthesis-cp53.json).
 
 ## CP52 — native sequential FRAM, оба full-board gates PASS
 
