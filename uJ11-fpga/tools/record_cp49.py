@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Archive CP49 local checks while explicit source-transfer approval is pending."""
+"""Bind CP49 measurements to passing RTL checks; retain the smaller CP47c."""
+import gzip
 import json
 import re
 import shutil
@@ -8,13 +9,40 @@ from board_common import ROOT
 from record_cp33 import digest, synthesis
 from record_cp36 import board_counts
 from record_cp37 import checked, failed_fit
+from check_edif_drivers_cp46 import audit, parse, children, child, ident
+
+
+def state_registers(edif):
+    registers={}
+    for lib in children(parse(edif.read_text()),'library'):
+        for cell in children(lib,'cell'):
+            if 'uj11_board_fram' not in ident(cell[1]):continue
+            for content in children(child(cell,'view'),'contents'):
+                for instance in children(content,'instance'):
+                    ref=ident(child(child(instance,'viewRef'),'cellRef')[1])
+                    if ref.startswith('FD') and 'state' in str(instance[1]):
+                        registers[ident(instance[1])]=ref
+    return registers
 
 
 def main():
-    assert not list((ROOT/'synth/reports').glob('cp49*')), 'update evidence for actual synthesis before recording local-only CP49'
-    fits={}
+    fits={f'cp49{x}':failed_fit(f'cp49{x}') for x in 'abcd'}
+    assert [(r['lut4'],r['ff'],r['ebr'],r['slices']) for r in fits.values()]==[
+        (1297,351,7,650),(1325,351,7,664),(1335,351,7,669),(1310,363,7,657)]
+    assert fits['cp49a']==failed_fit('cp47c')
     sources={'tools/record_cp49.py','tools/record_cp33.py','tools/record_cp36.py',
-             'tools/record_cp37.py','tools/checkpoint_fram_binary_cp49.py'}
+             'tools/record_cp37.py','tools/checkpoint_fram_binary_cp49.py',
+             'tools/check_edif_drivers_cp46.py','build/vendor/CCU2D.v'}
+    for name in fits:
+        result=json.loads((ROOT/f'synth/reports/{name}/result.json').read_text())
+        assert result['microcode_words']==954 and result['device']=='LCMXO2-1200HC-4SG32C'
+        for path,h in result['inputs']['files'].items():
+            if not path.startswith('generated:'):
+                assert digest(ROOT/path)==h,(name,path,'synthesis input changed')
+                sources.add(path)
+    original_srr=(ROOT/'synth/reports/cp49b/design.srr').read_text()
+    encoding=re.search(r'Encoding state machine state\[.*?original code -> new code\n((?:   [01]+ -> [01]+\n)+)',original_srr,re.S)[1]
+    assert re.findall(r'([01]+) -> ([01]+)',encoding)==[(f'{i:04b}',f'{i:04b}') for i in range(10)]
     for name in ('cp40h','cp43d','cp45k','cp47c'):
         old=json.loads((ROOT/f'synth/reports/{name}/inputs.json').read_text())['files']
         for path,h in old.items():
@@ -73,6 +101,17 @@ def main():
     xm_sha='9350c62f50e2713f56904b7222f2d829f6bf020cd67e28562e3252a48b6993dd'
     assert digest(xm)==xm_sha and xm.stat().st_size==27540480
     out=ROOT/'tb/reports/cp49';out.mkdir(parents=True,exist_ok=True)
+    netlists={};state_flops={}
+    for name in fits:
+        result=json.loads((ROOT/f'build/{name}-drivers.json').read_text())
+        edif=ROOT/f'build/{name}_impl1.edi'
+        assert audit(edif)==result and not result['multiple_drivers'] and not result['floating']
+        assert len(result['proven_unused_carry_inputs'])==7
+        netlists[name]=result;logs.append(name+'-drivers.json')
+        state_flops[name]=state_registers(edif)
+        expected=16 if name=='cp49d' else 4
+        assert set(state_flops[name])=={f'state_{i}' for i in range(expected)}
+        (out/(name+'.edi.gz')).write_bytes(gzip.compress(edif.read_bytes(),mtime=0))
     for path in logs:
         dest=out/path;dest.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(ROOT/'build'/path,dest)
@@ -80,9 +119,11 @@ def main():
         for path in sorted(sources):
             if path.startswith(('/', 'build/vendor/', 'synth/reports/', 'tb/reports/')):continue
             archive.add(ROOT/path,arcname='reference-repository/'+path[3:] if path.startswith('../') else path)
-    report=dict(checkpoint='CP49: binary FRAM state locally verified; synthesis pending',date='2026-09-11',
-        synthesis=fits,synthesis_complete=False,synthesis_pending_reason='Explicit approval for CP49 payload transfer has been requested after automatic review rejection; not received.',
-        adopted=False,retained_candidate='cp47c',retained_resources=failed_fit('cp47c'),candidate_resources=None,candidate_fmax_mhz=None,
+    report=dict(checkpoint='CP49: FRAM binary/LSB alternatives rejected for area; retain CP47c',date='2026-09-11',
+        synthesis=fits,synthesis_complete=True,synthesis_pending_reason=None,all_synthesis_inputs_match_current=True,
+        adopted=False,retained_candidate='cp47c',retained_resources=failed_fit('cp47c'),candidate_fmax_mhz=None,
+        control_cp49a_matches_cp47c=True,original_encoding_verified=True,state_registers=state_flops,netlists=netlists,
+        deltas=dict(original=dict(lut4=28,ff=0,slices=14),split_low=dict(lut4=38,ff=0,slices=19),equations=dict(lut4=13,ff=12,slices=7)),
         over_capacity_retained=dict(lut4=17,slices=10),
         production_cp40h=synthesis('cp40h'),accepted_apr_cp43d=synthesis('cp43d'),
         baseline_hardware_unchanged=True,microcode_words=954,native_cpu_and_mmu_unchanged=True,
@@ -95,8 +136,10 @@ def main():
         sources_sha256={p:digest(ROOT/p) for p in sorted(sources)},
         archived_tests_sha256={str(p.relative_to(ROOT)):digest(p) for p in sorted(out.rglob('*')) if p.is_file()},
         archived_synthesis_sha256={str(p.relative_to(ROOT)):digest(p) for name in fits for p in sorted((ROOT/'synth/reports'/name).iterdir())},
-        limits=['CP49 synthesis has not run; no measured candidate LUT/FF/EBR/Fmax.',
+        limits=['All four full-board MAP gates exceed HC1200 capacity; PAR/TRACE/Fmax are unavailable.',
                 'No variant adopted: CP47c and production/APR/physical board remain unchanged.',
+                'Original codes verified in SRR and four state FFs in final EDIF; equations mapped to sixteen one-hot FFs.',
+                'Final EDIF audit checks directional drivers and masked CIN, not INOUT electrical contention or routed timing.',
                 'Sequential induction starts with reset; all later inputs, including reset, are unconstrained two-state values.',
                 'Canonical-state and active-only-in-serial-state invariants are proved jointly, not assumed.',
                 'Four-state simulation has known control/address and X/Z payload/MISO, not analog SPI timing.',
@@ -104,7 +147,7 @@ def main():
                 'No new MMU functionality: kernel unified PAR only, no PDR protection/W, MMR1/2 or abort/restart.',
                 'RT-11XM and active-MMU private RK/high DMA remain untested.'])
     (ROOT/'docs/verification-cp49.json').write_text(json.dumps(report,indent=2)+'\n')
-    print('PASS CP49 local evidence: formal/unit/CPU/bus/cold FB; synthesis explicitly pending')
+    print('PASS CP49 measured evidence: four exact-source gates, encoding/final EDIF audit, formal/unit/CPU/bus/cold FB; retain CP47c')
 
 
 if __name__=='__main__':main()

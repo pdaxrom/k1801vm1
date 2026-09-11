@@ -1,0 +1,17 @@
+{
+  "edif_sha256": "3f72f13abe8d142b0f5013d5ba87e20077781408b3260bc1953e29343a8c8e49",
+  "cells": 54,
+  "nets": 3504,
+  "bidirectional_nets": 4,
+  "multiple_drivers": [],
+  "floating": [],
+  "proven_unused_carry_inputs": [
+    "work/uj11_alu/N_1",
+    "work/uj11_microseq/N_1",
+    "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+    "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+    "work/spi_byte_service_68s_2s_7s/N_1",
+    "work/uj11_mmu_relocate/N_10",
+    "work/uj11_board/N_1"
+  ]
+}

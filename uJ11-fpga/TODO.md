@@ -93,13 +93,15 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
 - [x] CP48: измерить explicit successors и one-hot FRAM на основе CP47c.
   1319/1313 LUT, +6 FF; отклонены. Formal/unit/CPU/vendor/bus и cold FB
   (successors) прошли. [Причина роста](docs/area-fram-state-cp48.md).
-- [x] CP49 local: проверить syn_encoding=original по руководству Synplify,
+- [x] CP49 verification: проверить syn_encoding=original по руководству Synplify,
   подготовить explicit/original, split-low и bit equations. Formal/unit/
   CPU/vendor/bus и cold FB split-low прошли. [Отчёт](docs/area-fram-binary-cp49.md).
-- [ ] CP49 area gate: после подтверждения передачи семи файлов измерить
-  baseline/original/split-low/equations и фактическое state encoding в SRR.
-  Новых LUT/FF/Fmax пока нет. Убрать превышение 17 LUT / 10 slices
-  и получить запас под protection/restart. Все CP47/CP48 gates — MAP FAIL,
+- [x] CP49 area gate: четыре полных HC1200 synthesis, actual state encoding
+  проверен по SRR/EDIF. Original/split-low/equations: 1325/1335/1310 LUT,
+  все хуже CP47c, не приняты. Final EDIF audit прошёл для A–D.
+- [ ] Следующий area checkpoint по полной board логике: убрать превышение
+  17 LUT / 10 slices и получить запас под protection/restart. Проверенные
+  CP48/CP49 state-преобразования не повторять. Все CP47–CP49 gates — MAP FAIL,
   Fmax не получен; до fit и завершения MMU RT-11XM остаётся непроверенной.
 - [x] CP40: перестроить operand/writeback mux и ALU result selection.
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /

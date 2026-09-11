@@ -1,9 +1,10 @@
 # CP49 — двоичное кодирование и LSB byte skip FRAM
 
-**Локальные проверки завершены; synthesis ещё не выполнен.** Отправка
-семи файлов CP49 на сервер отклонена автоматической проверкой: отдельное
-подтверждение CP49 payload запрошено, но ещё не получено. Новых измерений
-LUT/FF/EBR/Fmax нет; лучшая измеренная основа остаётся CP47c.
+**Все три альтернативы отклонены по площади: 1325 / 1335 / 1310 LUT.**
+Контроль CP49a воспроизвёл CP47c: **1297 LUT / 351 FF / 7 EBR / 650 slices**.
+Все четыре MAP gates не помещаются в HC1200; PAR/TRACE/Fmax отсутствуют.
+Лучшей экспериментальной основой остаётся CP47c, превышение — **17 LUT /
+10 slices**, ещё без резерва для protection/restart MMU.
 
 Цель: отделить стоимость логики переходов от автоматического one-hot
 recoding, который увеличил площадь в [CP48](area-fram-state-cp48.md).
@@ -26,9 +27,10 @@ analysis остаётся включённым. Атрибут действуе�
 reg [3:0] state /* synthesis syn_encoding="original" */;
 ```
 
-Поэтому presence атрибута в RTL недостаточно: после synthesis нужно
-проверить в SRR извлечение автомата и таблицу фактического кодирования.
-Нельзя по числу объявленных RTL bits заключать, сколько FF получилось.
+Применение атрибута проверено по SRR: все десять кодов `0000..1001`
+сопоставлены самим себе. Final EDIF содержит четыре state FF. Заголовок
+FSM в SRR обозначен как `state[9:0]`, поэтому вывод сделан по таблице
+перекодирования и реальным FF, а не по этому заголовку или объявлению RTL.
 
 ## Сравниваемые варианты
 
@@ -55,7 +57,56 @@ data lanes, CS/SCK/MOSI, ACK/error/busy и число тактов. High rdata �
 не перезаписываются. Не добавляются состояния CPU/MMU, новые инструкции
 или изменения периферии. FIS сохраняется, FP11 остаётся отложенным.
 
-## Проверки до resource gate
+## Полный HC1200 synthesis
+
+Diamond **3.14.0.75.2**, Synplify **V-2023.09L-2**, target
+**LCMXO2-1200HC-4SG32C**, constraint **29.56 MHz**. Прежние board pins и
+strategy, external pin delays не заданы. Включён полный board с partial
+relocation, всей периферией и **954 microcode words**.
+
+| Gate | Вариант | LUT4 | FF | EBR | Slices | Fmax | Words | Результат |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP49a](../synth/reports/cp49a/result.json) | baseline CP47c | 1297 | 351 | 7 | 650 | — | 954 | MAP FAIL |
+| [CP49b](../synth/reports/cp49b/result.json) | original | 1325 | 351 | 7 | 664 | — | 954 | MAP FAIL |
+| [CP49c](../synth/reports/cp49c/result.json) | split-low | 1335 | 351 | 7 | 669 | — | 954 | MAP FAIL |
+| [CP49d](../synth/reports/cp49d/result.json) | equations | 1310 | 363 | 7 | 657 | — | 954 | MAP FAIL |
+
+Raw reports, input manifests и source snapshots четырёх gates сохранены.
+Каждый synthesis input hash сверен с текущим файлом и ранее проверенными
+RTL. Локальные тесты повторно не запускались: их входы не изменились.
+Частота constraint не является измеренным Fmax. Ни один вариант не принят;
+CP47c, production CP40h, APR CP43d и физическая плата CP29a сохранены.
+
+### Кодирование и причина отказа
+
+В baseline Synplify распознаёт четырёхбитный счётчик. `original` сохраняет
+четырёхбитные исходные коды и общее число FF, однако требует **+28 LUT /
+14 slices**. То есть отказ CP48 нельзя объяснять только one-hot recoding:
+явная таблица с двоичным кодированием также не уменьшила полную схему.
+
+`split-low` имеет четыре state FF, но полная сборка выросла на **38 LUT /
+19 slices**. `equations` инструмент распознал как FSM с шестнадцатью
+кодами и перекодировал их в 16-битный one-hot, что подтверждено SRR и
+шестнадцатью state FF в final EDIF. Итог **+13 LUT / +12 FF / +7 slices**.
+Перечень extractor-а из 16 кодов не означает достижимость их всех после
+reset: RTL proof по-прежнему доказывает инвариант десяти legal states.
+
+Вложенные Synplify primitive counts показывают влияние изменения на mapping
+полной схемы, а не только FRAM:
+
+| Иерархия / primitive | A | B | C | D |
+|---|---:|---:|---:|---:|
+| FRAM ORCALUT4 | 73 | 73 | 72 | 91 |
+| FRAM PFUMX | 9 | 8 | 10 | 0 |
+| Board bus ORCALUT4, включая дочерние блоки | 505 | 540 | 556 | 544 |
+| CPU ORCALUT4, включая дочерние блоки | 589 | 579 | 574 | 564 |
+
+Исходники CPU и остальной board логики не менялись, но их mapped cones
+изменились. Эти counts не являются независимыми MAP LUT costs и не
+складываются как стоимость изолированных модулей. По одному почти
+неизменному FRAM cell нельзя заключать, что полный board стал меньше.
+
+## RTL verification
 
 - Шесть успешных SAT temporal-induction proofs: три варианта × CLK_DIV=1/3.
   После первого reset все входы, включая последующий reset, произвольны.
@@ -69,10 +120,9 @@ data lanes, CS/SCK/MOSI, ACK/error/busy и число тактов. High rdata �
   сравнивает все 128 КиБ, обе banks, byte/word/odd и held request.
 - Strict Verilator lint всех трёх generated RTL без предупреждений.
 
-Все эти результаты — RTL verification; экономия LUT/FF, fit и Fmax
-устанавливаются отдельно полным HC1200 synthesis. Имеющийся CP47c занимает
-1297 LUT / 351 FF / 7 EBR / 650 slices и не помещается. Цифры CP47c нельзя
-переносить на новые варианты до измерения.
+Это RTL verification при двухзначных formal inputs и четырёхзначной
+симуляции payload/MISO. Проверки не моделируют analog SPI timing и
+не заменяют PAR/TRACE или аппаратную проверку.
 
 ## Полный CPU и board
 
@@ -105,12 +155,29 @@ modes/I-D/CSM/MAP. Оба backing disk images, включая
 `../lsi11/disks/rt11v5.3/system.dsk`, проверены по SHA256 и не изменены.
 Production CP40h, принятый APR CP43d и физическая плата CP29a прежние.
 
+## Final EDIF audit
+
+Проверены **3504 / 3502 / 3454 / 3369 nets** в A/B/C/D. Конфликтующих
+направленных драйверов и необъяснённых floating inputs нет; в каждом
+netlist семь CIN доказанно не влияют на наблюдаемые outputs через
+INIT0, реальные constant connections и прежнюю vendor CCU2D модель.
+CIN не подменяется нулём. Actual state FF counts — **4 / 4 / 4 / 16**.
+Raw EDIF сохранены с audit JSON и source/report hashes.
+
+Это структурный аудит, не проверка электрических конфликтов INOUT,
+полная gate-level equivalence или routed timing. Прежний checker не
+изменялся; его negative controls уже проверены в CP46/CP47. Raw warnings
+сохранены без подавления; SRR ограничивает вывод BN161 первыми 100
+сообщениями, что не задаёт их общее число.
+
 ## Следующий шаг и воспроизведение
 
-После подтверждения передачи выполнить четыре full-board HC1200 gates:
-baseline, original, split-low, equations. Проверить фактическое кодирование
-state в SRR, LUT/FF/EBR/slices, затем PAR/TRACE при успешном MAP. Даже
-попадание в чип не заменяет резерв для protection/restart MMU.
+Сохранить CP47c. CP48/CP49 закрывают проверенные варианты state recoding,
+explicit successors и LSB byte skip: ни один не дал выигрыша. Следующую
+гипотезу по площади выбирать по полной board логике и проверять на ней;
+не переносить проигравший вариант только из-за меньшего RTL-выражения.
+Превышение остаётся 17 LUT / 10 slices, затем нужен запас для protection/
+restart MMU. Аппаратная проверка этой конфигурации невозможна до fit.
 
 ```sh
 python3 tools/build_fram_binary_cp49.py
@@ -129,6 +196,8 @@ python3 tools/check_fram_binary_cp49_system.py --variant split-low --suite board
 Нужны CP44/CP45/CP47/CP48 build inputs, обычные tools и vendor models.
 Linux/Diamond driver `checkpoint_fram_binary_cp49.py` требует новое
 уникальное имя gate и `--variant`; старые gates не перезаписывать.
-`record_cp49.py` пока архивирует локальную проверку и требует обновления,
-если появились synthesis reports. [Manifest](verification-cp49.json),
+`record_cp49.py` проверяет четыре synthesis archives, соответствие текущих
+inputs, таблицу original encoding, actual state FF, final EDIF audit и
+прежние formal/unit/system logs перед формированием общего manifest.
+[Manifest](verification-cp49.json),
 [архив тестов](../tb/reports/cp49/).

@@ -5,11 +5,12 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
-**CP49: три двоичных FRAM-варианта прошли локальные проверки.**
-Документированный `syn_encoding="original"`, LSB byte skip и bit equations
-проверены formal/unit/CPU/vendor/bus; cold RT-11FB + DIR для split-low
-сохранила counts/UART. Synthesis ожидает подтверждения передачи семи файлов
-на сервер. Новых resource/Fmax цифр нет; основа — CP47c.
+**CP49: три FRAM-варианта измерены и отклонены по площади.**
+Original encoding / LSB byte skip / bit equations дали **1325 / 1335 /
+1310 LUT**, контроль — 1297. Все MAP FAIL, Fmax нет. Original encoding
+подтверждён по SRR/EDIF; bit equations перекодированы в 16-bit one-hot.
+Formal/unit/CPU/vendor/bus и cold FB split-low прошли, counts/UART прежние.
+Основа — CP47c: **1297 LUT / 351 FF / 7 EBR**, превышение 17 LUT / 10 slices.
 [Методика и результаты CP49](docs/area-fram-binary-cp49.md).
 
 **CP48: явные переходы FRAM и one-hot проверены и отклонены по площади.**

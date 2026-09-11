@@ -1,14 +1,23 @@
 # Synthesis checkpoints
 
-## CP49 — подготовлен, synthesis ещё не выполнен
+## CP49 — binary/LSB FRAM-варианты отклонены
 
-Четыре варианта full board: baseline CP47c, explicit successors с
-syn_encoding=original, split-low byte skip, bit equations. Локальные
-formal/unit/CPU/vendor/bus и cold FB split-low прошли. Передача семи файлов
-ожидает отдельного подтверждения после отказа автоматической проверки.
-LUT/FF/EBR/Fmax новых вариантов не измерены. CP47c остаётся
-1297 LUT / 351 FF / 7 EBR / 650 slices, MAP FAIL; его числа не относятся
-к новым вариантам. [Методика](area-fram-binary-cp49.md).
+| Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| [CP49a](../synth/reports/cp49a/result.json) | Baseline CP47c | 1297 | 351 | 7 | 650 | — | 954 | MAP FAIL |
+| [CP49b](../synth/reports/cp49b/result.json) | Original encoding | 1325 | 351 | 7 | 664 | — | 954 | MAP FAIL |
+| [CP49c](../synth/reports/cp49c/result.json) | Split-low byte skip | 1335 | 351 | 7 | 669 | — | 954 | MAP FAIL |
+| [CP49d](../synth/reports/cp49d/result.json) | Bit equations | 1310 | 363 | 7 | 657 | — | 954 | MAP FAIL |
+
+Diamond 3.14.0.75.2 / LCMXO2-1200HC-4SG32C, full board, 29.56 MHz constraint.
+Контроль повторил CP47c. B/C/D больше на 28/38/13 LUT; не приняты.
+SRR и actual EDIF FF подтверждают original encoding в B, 16-bit one-hot
+в D. PAR/TRACE/Fmax отсутствуют. Source/report hashes всех gates совпали;
+formal/unit/CPU/vendor/bus и cold FB split-low прежних inputs прошли.
+Final EDIF всех четырёх вариантов проверены на направленные конфликты
+драйверов и необъяснённые floating inputs — не обнаружены.
+CP47c остаётся лучшей основой, превышение 17 LUT / 10 slices.
+[Разбор mapping и границы проверки](area-fram-binary-cp49.md).
 
 ## CP48 — FRAM state recoding отклонён
 
