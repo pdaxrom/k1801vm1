@@ -9,17 +9,22 @@
 - [x] CP56: проверить routed FRAM input/output setup/hold и OSCH envelope;
   bounded TRACE PASS, но SCK pulse-width margin только **0,147 ns** при
   +5,5%, 43/57 duty и 2% period jitter. Negative +0,2 ns distortion пойман.
-- [ ] Перед установкой CP56 увеличить запас короткого SCK либо измерить
-  его на плате и явно ограничить рабочие условия. Рассмотреть clock
+- [x] По явному запросу пользователя установить CP56a для проверки на HC1200:
+  FLASH Erase/Program/Verify PASS, RT-11FB V05.03 и prompt получены;
+  picocom восстановлен. [JED и журнал](docs/board-bringup-cp56a.md).
+- [ ] Получить результаты пользовательской проверки CP56a: программы,
+  RGB/HDSP, keyboard и HG (JTAG_EN в GPIO, scanner и HG по очереди).
+- [ ] Измерить короткий SCK на плате и явно ограничить рабочие условия
+  либо увеличить запас. Рассмотреть clock
   с контролируемой скважностью; простого сравнения 29,56 <34 MHz недостаточно.
-  PCB flight/skew budgets пока предположены; CP54b остаётся установленной.
+  PCB flight/skew budgets пока предположены; CP56a установлен для проверки.
   [CP56 и точные timing constraints](docs/spi-cp56.md).
 
 - [x] По запросу пользователя установить выбранный CP54b на HC1200:
   JED экспортирован, FLASH Erase/Program/Verify PASS, RT-11FB prompt получен,
   picocom восстановлен. [Журнал и точный JED](docs/board-bringup-cp54b.md).
-- [ ] Получить результаты пользовательской проверки CP54b: программы,
-  RGB/HDSP, keyboard и HG (JTAG_EN в GPIO, scanner и HG по очереди).
+  CP54b заменён на CP56a до получения отдельного отчёта по периферии;
+  его JED сохранён для возврата.
 
 - [x] CP55: shared RX на frozen CP54b; formal/negative/X/Z/reset/128 КиБ
   FRAM, portable/vendor board и cold FB+DIR PASS, counters/raw UART прежние.
@@ -97,7 +102,7 @@ HC1200. Сохранить прототип под `UJ11_MMU`, default `MMU=0`.
 - [ ] Проверить ROM, UART, сохранность FRAM/регистров и повторную загрузку RT-11;
   выполнить полный HC1200 synthesis/PAR/TRACE до программирования платы.
 
-На физической плате установлен CP54b: 1185 LUT4, 341 FF и 6/7 EBR.
+На физической плате установлен CP56a: 1184 LUT4, 339 FF и 6/7 EBR.
 Свободный EBR не резервируется под ODT.
 
 ## Отложено: FP11(A)

@@ -1,0 +1,13 @@
+{
+  "protected": {
+    "build/cp56a/impl1/cp56a_impl1.ncd": "f80318d98a0f3ff42b6bfcb6150e7c0972d21cb0ff7d66a41a939174bdab652e",
+    "build/cp56a/impl1/cp56a_impl1.prf": "81306c3e38b687c22999176ba92c72b623725a07a2b1007eaee928645d9e8487",
+    "build/cp56a/impl1/cp56a_impl1.edi": "9e9bfb50c3f404a78ddf1ce14f16625570b5db1e64756e3150801769c99b4b9b"
+  },
+  "post_export_verified": true,
+  "tools_sha256": {
+    "export_board.py": "f448954b5caa655dbb62003dfd0b39a16b2f6e33f3e9c2e92704231a69681ed9",
+    "make_programmer_xcf.py": "7a430b0d39ce5cdd21dc798ea47828468db464e303e2385231b32d8534355b6a",
+    "hardware_uart.py": "c8a26928d57ff86492312b756174980f5cd64ee0fb7e20e3c59da6ca310e1bc9"
+  }
+}

@@ -11,17 +11,19 @@ R,R: 40,0625 → **23,5625 CPI**. Cold: 288686609 → **173379163 clocks**.
 (ещё 3800 beats / 2240 reset offsets) прошли. Уточнённый OSCH envelope
 +5,5%, 43/57 и 2% jitter оставляет **0,147 ns** запаса длительности SCK;
 physical pulse-width signoff ожидает измерения или увеличения запаса.
-CP56a — эксперимент; плата CP54b и default CP52a сохранены.
+CP56a установлен для аппаратной проверки по запросу пользователя;
+default сборки остаётся CP52a.
 [CP56](spi-cp56.md), [synthesis](synthesis-cp56.json).
 
-## Текущая плата — CP54b
+## Текущая плата — CP56a
 
-По запросу пользователя JED выбранного CP54b экспортирован из проверенной
+По запросу пользователя JED CP56a экспортирован из проверенной
 разводки и записан во FLASH HC1200: Erase/Program/Verify PASS. На UART
 появились RT-11FB V05.03 и prompt, picocom восстановлен. Штатная частота
-29,56 MHz; архивный Fmax 32,273 MHz. Default RTL пока CP52a.
+CPU и FRAM SCK 29,56 MHz; архивный Fmax 31,996 MHz. Default RTL пока CP52a.
 Программы и периферию на новой прошивке проверит пользователь.
-[JED, hashes и журнал](board-bringup-cp54b.md).
+[JED, hashes и журнал](board-bringup-cp56a.md). Предыдущая установленная
+прошивка [CP54b](board-bringup-cp54b.md) сохранена для возврата.
 
 Ниже — результаты checkpoints до этой аппаратной установки.
 

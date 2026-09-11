@@ -12,13 +12,15 @@
 **7,512/1,080 ns**, internal setup slack **0,169 ns** на этом краю.
 Расчёт с OSCH +5,5%, скважностью 43/57 и 2% period jitter оставляет
 **0,147 ns** SCK pulse-width margin. PCB budgets и форма SCK не измерены;
-CP56a остаётся экспериментом, плата CP54b прежняя.
+CP56a установлен на плату для аппаратной проверки: FLASH Erase/Program/Verify
+PASS, RT-11FB V05.03 загрузилась до prompt. Экспорт из этого же routed gate,
+повторного MAP/PAR нет. [JED и журнал](board-bringup-cp56a.md).
 [CP56](spi-cp56.md), [измерения и hashes](synthesis-cp56.json).
 
-**Аппаратная установка CP54b:** JED экспортирован из существующей проверенной
+**Предыдущая аппаратная установка CP54b:** JED экспортирован из существующей проверенной
 разводки и записан во FLASH с Verify PASS. RT-11FB загрузилась до prompt.
 Повторного MAP/PAR нет; параметры CP54b ниже относятся к тому же gate.
-[Установленная прошивка и журнал](board-bringup-cp54b.md).
+[Предыдущая прошивка и журнал](board-bringup-cp54b.md).
 
 ## CP55 — shared RX на native CP54b, полный gate PASS
 
