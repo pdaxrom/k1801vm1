@@ -1,4 +1,15 @@
-# Benchmarks: CP49 и предыдущие этапы
+# Benchmarks: CP50 и предыдущие этапы
+
+## CP50 — MMU-less профиль сохранён без изменения clocks
+
+Default cold RT-11FB + DIR повторил CP40h: **354938300 clocks**, 3984366
+retirements, 5217011 reads, 423616 writes, 3390712 FRAM transactions;
+300 RK commands, 576 timer edges, 3270 UART bytes, 162 SD reads / 6 writes
+в RAM overlay. UART совпал побайтно, исходный диск не изменён.
+MMU-ветвь CPU проверена на 32 words/page/mode (558684 clocks) и vendor
+subset 4 words/page/mode (97692 clocks). Это regression, не новая ISA
+оптимизация. Новые Fmax и instructions/sec CP50 не измерены.
+[Профили сборки](build-profiles-cp50.md), [manifest](verification-cp50.json).
 
 ## CP49 — counts прежние, площадь выросла
 

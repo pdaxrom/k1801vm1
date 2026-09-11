@@ -1,5 +1,19 @@
 # Implementation status, 2026-09-11
 
+## CP50 — MMU-less по умолчанию
+
+Решение от 2026-09-11: прекратить дальнейшее уменьшение площади ради MMU.
+Рабочая ветвь без `UJ11_MMU` сохраняет CP40h; явный `MMU=1` сохраняет
+незавершённый CP47c. Новых функций MMU нет, RT-11XM не проверена.
+96 сравнений после препроцессора с архивами подтвердили обе ветви;
+FRAM, native bus и CPU relocation/edges на portable/vendor прошли.
+Default cold RT-11FB + DIR повторил CP40h: 354938300 clocks, прежние counts
+и UART. В default elaborated hierarchy нет MMU-модулей.
+Новый synthesis CP50 ожидает разрешения передачи исходников.
+[Профили и проверки](build-profiles-cp50.md).
+
+Ниже — история checkpoints; их будущие MMU-планы теперь отложены.
+
 ## CP49 — binary/LSB FRAM-варианты отклонены по площади
 
 Original encoding, split-low и bit equations прошли шесть SAT proofs,

@@ -1,3 +1,4 @@
+// UJ11_MMU is opt-in: undefined = CP40h, defined = experimental CP47c.
 `timescale 1ns/1ps
 // Board-only held-request transport, SPI mode 0. Address/data/control must
 // remain stable through ready; the uJ11 engine provides that contract.
@@ -18,7 +19,13 @@ module uj11_board_fram #(parameter integer CLK_DIV=1)(
     reg [3:0] state;
     reg active,seen;
     reg [6:0] tx;
+`ifdef UJ11_MMU
+    // rdata is valid at ready and stable while idle. During a transfer,
+    // its high byte is the serial receive shift register (no separate rx FFs).
+    wire [7:0] rx=rdata[15:8];
+`else
     reg [7:0] rx;
+`endif
     reg [2:0] bit_count;
     reg [DIV_WIDTH-1:0] divider;
     reg [7:0] next_byte;
@@ -37,7 +44,11 @@ module uj11_board_fram #(parameter integer CLK_DIV=1)(
         if(rst)begin
             state<=IDLE;active<=0;seen<=0;rdata<=0;ready<=0;error<=0;
             spi_cs_n<=1;spi_sck<=0;spi_mosi<=0;
+`ifdef UJ11_MMU
+            tx<=0;bit_count<=0;divider<=0;
+`else
             tx<=0;rx<=0;bit_count<=0;divider<=0;
+`endif
         end else begin
             ready<=0;error<=0;
             if(!req)seen<=0;
@@ -45,14 +56,21 @@ module uj11_board_fram #(parameter integer CLK_DIV=1)(
                 if(divider==DIV_LAST[DIV_WIDTH-1:0])begin
                     divider<=0;
                     spi_sck<=!spi_sck;
+`ifdef UJ11_MMU
+                    if(!spi_sck)rdata[15:8]<={rx[6:0],spi_miso};
+`else
                     if(!spi_sck)rx<={rx[6:0],spi_miso};
+`endif
                     else if(bit_count==7)begin
                         active<=0;
                         if(state==DATA_LO)begin
                             rdata[7:0]<=rx;
                             if(byte_access)rdata[15:8]<=0;
                         end
+`ifdef UJ11_MMU
+`else
                         if(state==DATA_HI)rdata[15:8]<=rx;
+`endif
                         state<=(state==DATA_LO && byte_access)?DONE:state+1'b1;
                     end else begin
                         bit_count<=bit_count+1'b1;

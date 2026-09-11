@@ -1,5 +1,22 @@
 # Synthesis checkpoints
 
+## CP50 — два compile-time профиля, новый synthesis ожидается
+
+По решению пользователя MMU на HC1200 отложен. Default не определяет
+`UJ11_MMU`, эксперимент включается явно. Сравнение после препроцессора
+подтвердило совпадение логики с сохранёнными gates:
+
+| Профиль | Исторический gate | LUT | FF | EBR | Slices | Fmax, MHz | Words |
+|---|---|---:|---:|---:|---:|---:|---:|
+| MMU-less, default | CP40h | 1159 | 326 | 6 | 584 | 31.470 | 954 |
+| MMU, незавершённый | CP47c | 1297 | 351 | 7 | 650 | — | 954 |
+
+Это **не новые измерения CP50**. Передача 43 source/build files (248286 bytes)
+на `sash@192.168.1.108:/tmp/uj11-cp50.7DpErp` отклонена автоматической
+проверкой разрешений; до явного согласия transfer/synthesis не выполняются.
+Подготовлены независимые gates CP50a (default) и CP50b (`--mmu`), прежние
+reports не перезаписываются. [Описание CP50](build-profiles-cp50.md).
+
 ## CP49 — binary/LSB FRAM-варианты отклонены
 
 | Revision | Features | LUT4 | FF | EBR | Slices | Fmax | Words | Gate |

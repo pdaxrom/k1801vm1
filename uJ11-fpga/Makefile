@@ -1205,8 +1205,18 @@ test: test-fis
 
 # CP28 full physical HC1200 board, firmware assembled by the existing microasm11.
 .PHONY: board board-firmware board-decode test-board-units test-board-isa test-board-rt11 synthesis-board verify-cp28
-BOARD_CHECKPOINT ?= cp29a
+MMU ?= 0
+ifneq ($(MMU),0)
+ifneq ($(MMU),1)
+$(error MMU must be 0 or 1)
+endif
+endif
+BOARD_MMU_FLAG = $(if $(filter 1,$(MMU)),--mmu,)
+BOARD_PROFILE = $(if $(filter 1,$(MMU)),mmu,mmuless)
+BOARD_CHECKPOINT ?= cp50a
+BOARD_TAG ?= cp50-$(BOARD_PROFILE)
 board: microcode-m0 board-firmware board-decode
+	$(PYTHON) tools/build_board_profile.py $(BOARD_MMU_FLAG)
 board-firmware: | build
 	$(PYTHON) tools/build_firmware.py
 board-decode: | build
@@ -1217,9 +1227,13 @@ test-board-isa: board build/isa_vectors.mem build/ea-vectors.txt build/irq-vecto
 	$(PYTHON) tools/check_sync_decode.py
 	$(PYTHON) tools/check_sync_decode.py --suite fis
 test-board-rt11: board
-	$(PYTHON) tools/run_board.py
+	$(PYTHON) tools/run_board.py --tag $(BOARD_TAG) $(BOARD_MMU_FLAG)
 synthesis-board: board
-	$(PYTHON) tools/checkpoint_board.py $(BOARD_CHECKPOINT)
+	$(PYTHON) tools/checkpoint_board.py $(BOARD_CHECKPOINT) $(BOARD_MMU_FLAG)
+
+.PHONY: test-board-profiles
+test-board-profiles: board
+	$(PYTHON) tools/check_board_profiles.py
 verify-cp28:
 	$(PYTHON) tools/verify_cp28.py --yosys $(YOSYS)
 

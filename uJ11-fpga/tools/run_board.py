@@ -7,7 +7,7 @@ import os
 import re
 from pathlib import Path
 import subprocess
-from board_common import ROOT, CORE, BOARD
+from board_common import ROOT, CORE, BOARD, MMU, profile_flags
 
 
 def main():
@@ -15,10 +15,12 @@ def main():
     p.add_argument('--image',type=Path,default=ROOT/'../lsi11-fpga/images/rt11v503.dsk')
     p.add_argument('--tag',default='cp28')
     p.add_argument('--vendor',action='store_true')
+    p.add_argument('--mmu',action='store_true',help='Enable the retained, incomplete CP47c MMU prototype')
     args=p.parse_args()
     assert re.fullmatch(r'[a-z0-9-]+',args.tag)
     assert args.image.exists()
     sources=CORE+BOARD+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
+    if args.mmu:sources+=MMU
     if args.vendor:
         sources.remove('rtl/uj11_rom.v')
         vendor=Path(os.environ.get('LATTICE_SIM_DIR',ROOT/'build/vendor'))
@@ -27,6 +29,7 @@ def main():
                    sources+['tb/tb_board_rt11.v','tools/run_board.py','tools/board_common.py','microcode/generated/m0.mem','microcode/generated/firmware.mem','microcode/generated/decode.mem']}
     image_hash=hashlib.sha256(args.image.read_bytes()).hexdigest()
     manifest=dict(files=source_hashes,image_sha256=image_hash,image_bytes=args.image.stat().st_size,
+                  mmu=args.mmu,defines=profile_flags(args.mmu),
                   mode=('vendor DP8KC' if args.vendor else 'portable')+' Verilator; cold CPU reset; actual UART wire scoreboard; SD read-only backing + RAM overlay')
     (ROOT/f'build/{args.tag}-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     # Freeze the imported models; scope their established implicit-width
@@ -51,6 +54,7 @@ def main():
                  '--Mdir',f'build/obj-{args.tag}-board-rt11','tb/tb_board_rt11.v']+sources
         executable=[f'build/obj-{args.tag}-board-rt11/Vtb_board_rt11']
     with (ROOT/f'build/{args.tag}-board-build.log').open('w') as log:
+        command+=profile_flags(args.mmu)
         subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     with (ROOT/f'build/{args.tag}-board-rt11.log').open('w') as log:
         subprocess.run(executable+[f'+SD_IMAGE={args.image.resolve()}',

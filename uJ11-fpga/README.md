@@ -5,6 +5,31 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP50: рабочая конфигурация HC1200 — MMU-less.** По решению пользователя
+от 2026-09-11 дальнейший поиск места под MMU остановлен. В board RTL сохранены
+обе ветви `ifdef UJ11_MMU / else / endif`: по умолчанию CP40h (VA=PA, 16 бит),
+по явному `MMU=1` — незавершённый CP47c (18/22-bit relocation). MMU-файлы
+вообще не входят в default source list; ядро, FIS и 954 слова микрокода общие.
+[Сборка, проверки и границы CP50](docs/build-profiles-cp50.md).
+
+```sh
+make board                         # MMU=0 по умолчанию
+make test-board-profiles            # обе ветви + frozen-source comparisons
+make test-board-rt11                # MMU-less cold RT-11FB + DIR
+make synthesis-board BOARD_CHECKPOINT=cp50a  # новый Linux/Diamond gate
+make board MMU=1                    # сохранить эксперимент, не прошивать HC1200
+```
+
+Без MMU CPU адресует нижнее 16-битное пространство; верхние 64 КиБ FRAM
+не отображаются. Последнее измерение этой логики — **CP40h: 1159 LUT /
+326 FF / 6 EBR / 31.470 MHz**. Это историческое измерение; новый synthesis
+CP50 ещё не выполнен. Физическая плата остаётся CP29a.
+
+## История экспериментов до решения CP50
+
+Указанные ниже «следующие этапы» относятся к планам соответствующих
+checkpoints; дальнейшая разработка MMU на HC1200 теперь отложена.
+
 **CP49: три FRAM-варианта измерены и отклонены по площади.**
 Original encoding / LSB byte skip / bit equations дали **1325 / 1335 /
 1310 LUT**, контроль — 1297. Все MAP FAIL, Fmax нет. Original encoding
@@ -77,7 +102,7 @@ FP11 отложен и удалён из рабочей сборки в CP31.
 | CP38f, memory read mux | 1188 | 326 | 6 | 30.943 MHz | PASS |
 | CP40h, текущая рабочая сборка, datapath/ALU mux | 1159 | 326 | 6 | 31.470 MHz | PASS |
 
-Текущий production CPU **ещё без MMU**, интерфейс 16 bits. Верхние 64 КиБ
+Рабочий production CPU **без MMU**, интерфейс 16 bits. Верхние 64 КиБ
 FRAM освобождены от служебных RK-регистров, но пока недоступны CPU.
 Отдельный translator/PDR checker поддерживает **18 и 22 bits**, PAR16 и
 canonical PA22; он ещё не включён в board top. Вход `map22` соответствует
@@ -149,7 +174,7 @@ make test-fis test-fis-negative
 make vendor-fis                  # unmodified Lattice ROM, four simulation shards
 make board                      # firmware + synchronous dispatch ROM
 make verify-cp28 YOSYS=/path/to/yosys # historical CP28 integration gate
-make synthesis-board BOARD_CHECKPOINT=cp36n # fresh Linux/Diamond implementation
+make synthesis-board BOARD_CHECKPOINT=cp50a # fresh Linux/Diamond implementation
 make test-reference-core         # existing C core regression
 make benchmark-fis               # 8 workloads x3 memory modes
 make test-mmu18                   # isolated translation/PDR probe, not integrated MMU
@@ -175,9 +200,8 @@ path `$HOME/.local/lscc/diamond/3.14`. `DIAMOND_HOME` и `LATTICE_SIM_DIR` мо�
 Каждый synthesis gate требует свежего implementation directory.
 
 Entry/return с T5–T7 и сохранением PSW/MDR/Q/CALL link проверен.
-APR lookup и CPU CSR проверены в experimental build. Следующий gate —
-сокращение общей LUT cost перед microcoded translation и MMR, затем
-abort/restart и старшие physical RK DMA addresses.
+APR lookup и CPU CSR проверены в experimental build. MMU, abort/restart
+и старшие physical RK DMA addresses отложены решением CP50.
 В production свободны 121 LUT / 56 slices / 1 EBR; в CP40 с APR — только
 22 LUT / 9 slices / 0 EBR. Полный MMU fit пока не доказан.
 Желаемые <=1100 LUT и 50 MHz ещё не достигнуты.

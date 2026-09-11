@@ -1,9 +1,21 @@
 # uJ11 TODO
 
+## CP50: рабочая сборка без MMU
+
+Решение пользователя от 2026-09-11: прекратить поиск ресурсов под MMU на
+HC1200. Сохранить прототип под `UJ11_MMU`, default `MMU=0`.
+
+- [x] Разделить MMU-less CP40h и эксперимент CP47c через compile-time guards.
+- [x] Исключить MMU sources из default сборки; сохранить FIS и общий microcode.
+- [x] Проверить обе ветви против архивов, FRAM/bus и CPU portable/vendor.
+- [ ] Новый full-board synthesis CP50 после разрешения передачи исходников.
+
+[Профили и ограничения](docs/build-profiles-cp50.md).
+
 ## Отложено: минимальный ODT
 
-По решению пользователя от 2026-09-10 ODT отложен; текущий приоритет — MMU
-и использование всех 128 КиБ FRAM. Для floating point остаётся FIS.
+По решению пользователя от 2026-09-10 ODT отложен. Решение CP50 возвращает рабочий профиль без MMU.
+Для floating point остаётся FIS.
 
 - [ ] Сделать монитор на PDP-11 assembly в отдельном firmware ROM; исходный
   бюджет — один EBR, 512×16 бит. Фактический размер подтвердить сборкой.
@@ -33,12 +45,13 @@ RTL доступа к FP state, opcode dispatch, reset hook и 33 microinstructi
 Исторический CP30: семь управляющих команд, FP-enabled full top 1265 LUT / 327 FF /
 6 EBR, 31.284 MHz; всего 987/1024 microinstructions. Полный FP11 ещё
 не реализован. Возвращаться к addressing modes, transfers и арифметике
-после MMU и нового измерения оставшихся ресурсов.
+только по отдельному решению и после нового измерения ресурсов.
 
-## Текущий приоритет: MMU / 128 КиБ FRAM
+## Отложено: MMU / 128 КиБ FRAM — сохранённая работа CP31–CP49
 
-Новое решение пользователя от 2026-09-10 открывает следующий этап с MMU;
-первоначальный запрет относился к уже полученному baseline без MMU.
+Решение от 2026-09-10 открыло эксперимент с MMU; решение CP50 от
+2026-09-11 останавливает его на HC1200. Невыполненные пункты ниже —
+отложенная работа, не текущий план. Измерения, RTL, microcode и тесты сохранены.
 Текущий рабочий CPU пока имеет 16-битный физический интерфейс.
 План и границы checkpoints: [MMU](docs/mmu.md).
 
@@ -99,10 +112,9 @@ VA16, PAR16, единый PA22. Размер установленной FRAM н�
 - [x] CP49 area gate: четыре полных HC1200 synthesis, actual state encoding
   проверен по SRR/EDIF. Original/split-low/equations: 1325/1335/1310 LUT,
   все хуже CP47c, не приняты. Final EDIF audit прошёл для A–D.
-- [ ] Следующий area checkpoint по полной board логике: убрать превышение
-  17 LUT / 10 slices и получить запас под protection/restart. Проверенные
-  CP48/CP49 state-преобразования не повторять. Все CP47–CP49 gates — MAP FAIL,
-  Fmax не получен; до fit и завершения MMU RT-11XM остаётся непроверенной.
+- [x] CP50: остановить дальнейшие area checkpoints для MMU на HC1200.
+  CP47c сохранён под `UJ11_MMU`: 1297 LUT / 351 FF / 7 EBR / 650 slices.
+  Все CP47–CP49 gates — MAP FAIL; Fmax и проверка RT-11XM отсутствуют.
 - [x] CP40: перестроить operand/writeback mux и ALU result selection.
   Production 1159 LUT / 326 FF / 6 EBR / 31.470 MHz; APR 1258 LUT / 344 FF /
   7 EBR / 30.254 MHz, экономия 29/10 LUT. Formal/four-state/CPU/FIS и оба

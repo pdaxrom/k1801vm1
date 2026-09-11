@@ -1,0 +1,262 @@
+{
+  "checkpoint": "CP50: MMU-less default; CP47c retained under UJ11_MMU",
+  "date": "2026-09-11",
+  "mmu_development_deferred": true,
+  "default_mmu": false,
+  "profiles": {
+    "mmuless": {
+      "elaborated_mmu_modules": [],
+      "simulation_list": "rtl/uj11_core.v\nrtl/uj11_decode_rom.v\nmicrocode/generated/uj11_decode_table.v\nrtl/uj11_engine.v\nrtl/uj11_decode.v\nrtl/uj11_microseq.v\nrtl/uj11_datapath.v\nrtl/uj11_regfile.v\nrtl/uj11_alu.v\nrtl/uj11_psw.v\nrtl/uj11_mem.v\nboards/hc1200/uj11_board.v\nboards/hc1200/uj11_board_bus.v\nboards/hc1200/uj11_panel.v\nboards/hc1200/uj11_board_fram.v\nboards/hc1200/uj11_tick.v\nreference/lsi11/spi_byte_service.v\nreference/lsi11/wbc_uart_xo2.v\nmicrocode/generated/uj11_firmware_rom.v\nrtl/uj11_rom.v\n",
+      "synthesis_list": "+define+SYNTHESIS\nrtl/uj11_core.v\nrtl/uj11_decode_rom.v\nmicrocode/generated/uj11_decode_table.v\nrtl/uj11_engine.v\nrtl/uj11_decode.v\nrtl/uj11_microseq.v\nrtl/uj11_datapath.v\nrtl/uj11_regfile.v\nrtl/uj11_alu.v\nrtl/uj11_psw.v\nrtl/uj11_mem.v\nboards/hc1200/uj11_board.v\nboards/hc1200/uj11_board_bus.v\nboards/hc1200/uj11_panel.v\nboards/hc1200/uj11_board_fram.v\nboards/hc1200/uj11_tick.v\nreference/lsi11/spi_byte_service.v\nreference/lsi11/wbc_uart_xo2.v\nmicrocode/generated/uj11_firmware_rom.v\nboards/hc1200/uj11_microcomp.v\nmicrocode/generated/uj11_m0_ebr.v\n"
+    },
+    "mmu": {
+      "elaborated_mmu_modules": [
+        "uj11_mmr0_control",
+        "uj11_mmr3",
+        "uj11_mmu_apr_decode",
+        "uj11_mmu_apr_ram",
+        "uj11_mmu_apr_shared",
+        "uj11_mmu_relocate"
+      ],
+      "simulation_list": "+define+UJ11_MMU\nrtl/uj11_core.v\nrtl/uj11_decode_rom.v\nmicrocode/generated/uj11_decode_table.v\nrtl/uj11_engine.v\nrtl/uj11_decode.v\nrtl/uj11_microseq.v\nrtl/uj11_datapath.v\nrtl/uj11_regfile.v\nrtl/uj11_alu.v\nrtl/uj11_psw.v\nrtl/uj11_mem.v\nboards/hc1200/uj11_board.v\nboards/hc1200/uj11_board_bus.v\nboards/hc1200/uj11_panel.v\nboards/hc1200/uj11_board_fram.v\nboards/hc1200/uj11_tick.v\nreference/lsi11/spi_byte_service.v\nreference/lsi11/wbc_uart_xo2.v\nmicrocode/generated/uj11_firmware_rom.v\nrtl/experimental/uj11_mmu_relocate.v\nrtl/uj11_mmu_apr_ram.v\nrtl/uj11_mmu_apr_decode.v\nrtl/experimental/uj11_mmu_apr_shared.v\nrtl/experimental/uj11_mmr0_control.v\nrtl/experimental/uj11_mmr3.v\nrtl/uj11_rom.v\n",
+      "synthesis_list": "+define+UJ11_MMU\n+define+SYNTHESIS\nrtl/uj11_core.v\nrtl/uj11_decode_rom.v\nmicrocode/generated/uj11_decode_table.v\nrtl/uj11_engine.v\nrtl/uj11_decode.v\nrtl/uj11_microseq.v\nrtl/uj11_datapath.v\nrtl/uj11_regfile.v\nrtl/uj11_alu.v\nrtl/uj11_psw.v\nrtl/uj11_mem.v\nboards/hc1200/uj11_board.v\nboards/hc1200/uj11_board_bus.v\nboards/hc1200/uj11_panel.v\nboards/hc1200/uj11_board_fram.v\nboards/hc1200/uj11_tick.v\nreference/lsi11/spi_byte_service.v\nreference/lsi11/wbc_uart_xo2.v\nmicrocode/generated/uj11_firmware_rom.v\nrtl/experimental/uj11_mmu_relocate.v\nrtl/uj11_mmu_apr_ram.v\nrtl/uj11_mmu_apr_decode.v\nrtl/experimental/uj11_mmu_apr_shared.v\nrtl/experimental/uj11_mmr0_control.v\nrtl/experimental/uj11_mmr3.v\nboards/hc1200/uj11_microcomp.v\nmicrocode/generated/uj11_m0_ebr.v\n"
+    }
+  },
+  "source_comparisons": 96,
+  "unit_runs": [
+    {
+      "tag": "mmuless-bus",
+      "flags": [
+        "-Ptb_board_bus.CHECK_SELECTORS=1"
+      ],
+      "pass_lines": [
+        "PASS board bus: 30 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI",
+        "PASS board selector/mux equivalence: 16777216 combinations, all 16-bit addresses and overlay/RK states"
+      ]
+    },
+    {
+      "tag": "fram-0-1",
+      "flags": [
+        "-Ptb_board_fram.CLK_DIV=1"
+      ],
+      "pass_lines": [
+        "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+      ]
+    },
+    {
+      "tag": "fram-0-3",
+      "flags": [
+        "-Ptb_board_fram.CLK_DIV=3"
+      ],
+      "pass_lines": [
+        "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+      ]
+    },
+    {
+      "tag": "fram-1-1",
+      "flags": [
+        "-DUJ11_MMU",
+        "-Ptb_board_fram.CLK_DIV=1"
+      ],
+      "pass_lines": [
+        "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider1"
+      ]
+    },
+    {
+      "tag": "fram-1-3",
+      "flags": [
+        "-DUJ11_MMU",
+        "-Ptb_board_fram.CLK_DIV=3"
+      ],
+      "pass_lines": [
+        "PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3"
+      ]
+    },
+    {
+      "tag": "mmu-0-0",
+      "flags": [
+        "-DUJ11_MMU",
+        "-GWORDS=32"
+      ],
+      "pass_lines": [
+        "PASS CP44 CPU relocation: 32 words x 8 pages x 2 address modes, upper FRAM write/read, low bank intact; 558684 clocks 8 control beats 4880 PAR reads",
+        "PASS CP44 enable lifetime: unmapped enable with non-I/O KIPAR7, mapped disable via alternate I/O, stable physical requests"
+      ]
+    },
+    {
+      "tag": "mmu-0-1",
+      "flags": [
+        "-DUJ11_MMU"
+      ],
+      "pass_lines": [
+        "PASS CP44 CPU edges: 18-bit wrap, 22-bit NXM, canonical I/O, MOVB sign/lane, odd read/write vector4 and high mapped trap stack",
+        "PASS CP44 mapped instruction stream: high-bank opcode/immediate fetch after MMR0 enable"
+      ]
+    },
+    {
+      "tag": "mmu-1-0",
+      "flags": [
+        "-DUJ11_MMU",
+        "-DUJ11_VENDOR_ROM",
+        "-Ptb_relocate_cpu_cp44.WORDS=4"
+      ],
+      "pass_lines": [
+        "PASS CP44 CPU relocation: 4 words x 8 pages x 2 address modes, upper FRAM write/read, low bank intact; 97692 clocks 8 control beats 848 PAR reads",
+        "PASS CP44 enable lifetime: unmapped enable with non-I/O KIPAR7, mapped disable via alternate I/O, stable physical requests"
+      ]
+    },
+    {
+      "tag": "mmu-1-1",
+      "flags": [
+        "-DUJ11_MMU",
+        "-DUJ11_VENDOR_ROM"
+      ],
+      "pass_lines": [
+        "PASS CP44 CPU edges: 18-bit wrap, 22-bit NXM, canonical I/O, MOVB sign/lane, odd read/write vector4 and high mapped trap stack",
+        "PASS CP44 mapped instruction stream: high-bank opcode/immediate fetch after MMR0 enable"
+      ]
+    }
+  ],
+  "default_cold_fb": {
+    "clocks": 354938300,
+    "rk_commands": 300,
+    "timer_edges": 576,
+    "uart_wire_bytes": 3270,
+    "sd_reads": 162,
+    "sd_writes": 6,
+    "retirements": 3984366,
+    "read_beats": 5217011,
+    "write_beats": 423616,
+    "fram_transactions": 3390712
+  },
+  "uart_sha256": "ed90841f47c780605a610dc3a4ca61dd31389ff4ecbc230911083dc8692f587f",
+  "microcode_words": 954,
+  "historical_mmuless_cp40h": {
+    "lut4": 1159,
+    "ff": 326,
+    "ebr": 6,
+    "slices": 584,
+    "fmax_mhz": 31.47,
+    "timing_pass": true
+  },
+  "historical_mmu_cp47c": {
+    "lut4": 1297,
+    "ff": 351,
+    "ebr": 7,
+    "slices": 650,
+    "timing_pass": false,
+    "fully_routed": false
+  },
+  "synthesis_complete": false,
+  "synthesis_pending_reason": "Automatic approval review rejected CP50 source transfer; explicit payload approval pending.",
+  "board_programmed": false,
+  "physical_board": "CP29a",
+  "mmu_complete": false,
+  "rt11_xm_tested": false,
+  "sources_sha256": {
+    "boards/hc1200/uj11_board.v": "015d9b9eef29986e316f2f89228df664c79a9a1b43b9a34d4b4dc841fc88560c",
+    "boards/hc1200/uj11_board_bus.v": "d0a5498d08765cb801f97dfcc787e042cad05a4fbf5f30289e824fe2a4492a66",
+    "boards/hc1200/uj11_board_fram.v": "edb1887d99da65610d2a2ae462a94d18d8c48813c00493918b9269529fe1a046",
+    "boards/hc1200/uj11_microcomp.v": "5fef46b357a1d24667b44db088abbcd093a4645627a565c58901f7a3782e9059",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "build/vendor/DP8KC.v": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+    "build/vendor/GSR.v": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+    "build/vendor/PUR.v": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4",
+    "microcode/generated/decode.mem": "48e876bce8b0700ebd1a112c2f92e590ac5a9fb8b065fb4650d94434540718c8",
+    "microcode/generated/firmware.mem": "a457ae35753f89ef5c8b165b6f31a4e99a32ca65bc97cc3fa7d43fd634e420d1",
+    "microcode/generated/m0.mem": "8fe41c7261559bb197feed0688bedb55de7bbb1eeab3d93a644c59c281df1f0c",
+    "microcode/generated/uj11_decode_table.v": "b7ab68e2f91b1f33721ac4067416eccfa7ea394cf7a973c3db6ab358fcef14ea",
+    "microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+    "microcode/generated/uj11_m0_ebr.v": "f29be4de8f97bd9eaddc053cb7ea59789bd6044436d03b4b0c5b959d4caf002a",
+    "reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "rtl/experimental/uj11_mmr0_control.v": "ded03572442e7d8d94ad8fd850ccc61030a690fb54e12e63e2c64fe91efdb2cc",
+    "rtl/experimental/uj11_mmr3.v": "51c6a565e77dffc6f20ab4048dd28321168144b53440481ed65a4b2e7849c96c",
+    "rtl/experimental/uj11_mmu_apr_shared.v": "19cc3797d95fadd039d3eb7ec5378d35832391249c84d50721314144c99552d6",
+    "rtl/experimental/uj11_mmu_relocate.v": "8bd550a930c074618d3a2bd62f977ddbf6b6e1c1aa5bbe03ad44d01f3f0148e5",
+    "rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "rtl/uj11_core.v": "a7f492e043ed72a5ba9e8434979eba51d82d1739066114412f547ae5b8b05169",
+    "rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "rtl/uj11_decode.v": "eaa181630dea88ef76ba3d60dd3595d4f7b2cae622e7fa354b28b74d63c4bc78",
+    "rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "rtl/uj11_engine.v": "5f991b318e0d24010fd6d3cb4dd347214b68bc7b047df711be22d4396d33d31b",
+    "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_microseq.v": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+    "rtl/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "rtl/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "tb/tb_board_bus.v": "4148cacd6258bec7df11407388077147763a3deb286688334a03505edcb2f172",
+    "tb/tb_board_fram.v": "a768f7976f568bec9b8a2b7cf2cc4cd2b5aa906348b850c8ab9f94359a4d700a",
+    "tb/tb_relocate_cpu_cp44.v": "769e93fb62a1be27beed82e79cbc3b63366dc5919ed2d93a9af1a1efb6442702",
+    "tb/tb_relocate_edges_cp44.v": "9f691e2eb7109079c3492b7a1104024ffcf0e0a21540389c895f5fb3e2cb6812",
+    "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+    "tools/check_board_profiles.py": "a76630ee0b6b72958f79ef608400a58eb79703e5a8cc9bd8df7630e8dfb7b062",
+    "reference/lsi11/spi_sd_model_cp28.v": "e159dd7c1f6545a69d4e61e6688c3f16ac2762c693447b92c1642d20721bb7ad",
+    "tb/tb_board_rt11.v": "d4040a6f7a86256a8972b00077068e185d7983001b296c7714f8df8d54336867",
+    "tools/run_board.py": "468f6df5f42d07552b8583502af682c0b8c6dbba100576d86bbda22964c7e9e5",
+    "build/cp50-profiles/fram-0-1-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/fram-0-1.log": "8e00bb03ab0f44998301c00f3f5372e1f5a34bd95966208a49387b0ac8a4e1c1",
+    "build/cp50-profiles/fram-0-3-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/fram-0-3.log": "22d979afd640fd11a5fa19f803d253c27a37bcbe92c65ef646526d97f7d29280",
+    "build/cp50-profiles/fram-1-1-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/fram-1-1.log": "8e00bb03ab0f44998301c00f3f5372e1f5a34bd95966208a49387b0ac8a4e1c1",
+    "build/cp50-profiles/fram-1-3-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/fram-1-3.log": "22d979afd640fd11a5fa19f803d253c27a37bcbe92c65ef646526d97f7d29280",
+    "build/cp50-profiles/mmu-0-0-build.log": "00fe04e9086c95957d932292148e3e07827d9910b9b9fbe38ce77852342c9fa2",
+    "build/cp50-profiles/mmu-0-0.log": "fc4a514b5b7646417f0b092c72cefa738a6a3933f6a9dc6b119967016f1c5bbf",
+    "build/cp50-profiles/mmu-0-1-build.log": "783953f492d79315c583b2403063b5fc245bb7b6bb2ea6743f9a10248782eda7",
+    "build/cp50-profiles/mmu-0-1.log": "8d0fc36a097925c4c58a2a1e5915d7cf44a3ecebb0557f1bad4c635dcd304d10",
+    "build/cp50-profiles/mmu-1-0-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/mmu-1-0.log": "db0115e04d251d887ff6a5011874ca515e59abe8574c12273a222273cb3ed91a",
+    "build/cp50-profiles/mmu-1-1-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/mmu-1-1.log": "dcb0a7d401b339626c683d49ee4a96f87fdd1d111fb9872d23a0c8021a4c76a3",
+    "build/cp50-profiles/mmuless-bus-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/cp50-profiles/mmuless-bus.log": "5c518753a539a53e89b59a0749f21f84508d329e4248305a32e87e23344a41a0",
+    "microcode/generated/m0.stats.json": "b6f5ca5648d515deeef8395523e41d575a702e927836e78600a98499247cdafd",
+    "tools/build_board_profile.py": "c6daface03fca540444763b60f2bf80c1ae5dd27aaf90dc30d0b580cad344fc6",
+    "Makefile": "34c4ab91743329479e132eaef28f955b3e50ae6be97efb595d2bb3e29098f17e",
+    "tools/record_cp50.py": "25a36ce2271e18b7cc7ece318af36d019718d21d201ff480733232281e6ce64a",
+    "tools/record_cp33.py": "4e0649335d729d4acc9fe4cf59f5efd7f74eaa1304a3e4abcc715bc26432487c",
+    "tools/record_cp36.py": "c6a24774dfdfa463aedec35ea6c312e1dfdb391e4b00c7e75c54fc39b9ed6f27",
+    "tools/record_cp37.py": "329cfc6f95e0de37147f3520d01ffac013c8c69316f97c87131dd9c95d69d057",
+    "tools/checkpoint_board.py": "e0db99b0858c81e1554434353ebae3fefab42484244e31a15047f46582ff5030",
+    "tools/archive_synthesis.py": "2e8e2a7ea7c11e7e9d1ed59702e6936bba16bb6ed153f7b1f36c353eb7ef0aae"
+  },
+  "archived_tests_sha256": {
+    "tb/reports/cp50/board-mmu/inputs.json": "c9fbf3aecbd076c9167c56cdb641bf59f18c4a5b5be1dec9c169607d9e3241bc",
+    "tb/reports/cp50/board-mmu/simulation.f": "7ca0742b8c5489a37eb5e92bcba661b4b80d67bec213ef269b4f63555910b582",
+    "tb/reports/cp50/board-mmu/synthesis.f": "9977296812f3aab779a1a4bb6d56404c4ed18fb538e6f5c146faa184452dd9e0",
+    "tb/reports/cp50/board-mmuless/inputs.json": "11959f274930a8efc502d900127b67cfe7c596122df777b8f787f1383eb3a072",
+    "tb/reports/cp50/board-mmuless/simulation.f": "d995f8c1ee99bd30941055f23c8f5a34bcdfc04638b279b2149f76e1076945b6",
+    "tb/reports/cp50/board-mmuless/synthesis.f": "43c8d277c9f9567058501bff48b26fdeb01fd344e076aacca7b7798d59c523fa",
+    "tb/reports/cp50/cp50-invalid-option.log": "fb2083755a7053bc3a176dbc755857e4fcd28ef3f27772ed64d6a817b00f2676",
+    "tb/reports/cp50/cp50-mmuless-board-build.log": "f14bf31eeed357e9d94f15b17ecec5524a5e33f9abf587abe0084bbb0f2f0bc7",
+    "tb/reports/cp50/cp50-mmuless-board-inputs.json": "782888a11af0fcfdf2bffe99e0cea69d7070bb7ab197b013bc3bc7f839d93fd2",
+    "tb/reports/cp50/cp50-mmuless-board-rt11.log": "19cb6eec6cf1d1151b68d2bdaa84562bd350f5c3bfcd0f16f96c4ee97faa84c8",
+    "tb/reports/cp50/cp50-mmuless-uart.txt": "ed90841f47c780605a610dc3a4ca61dd31389ff4ecbc230911083dc8692f587f",
+    "tb/reports/cp50/cp50-profiles/fram-0-1-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/fram-0-1.log": "8e00bb03ab0f44998301c00f3f5372e1f5a34bd95966208a49387b0ac8a4e1c1",
+    "tb/reports/cp50/cp50-profiles/fram-0-3-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/fram-0-3.log": "22d979afd640fd11a5fa19f803d253c27a37bcbe92c65ef646526d97f7d29280",
+    "tb/reports/cp50/cp50-profiles/fram-1-1-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/fram-1-1.log": "8e00bb03ab0f44998301c00f3f5372e1f5a34bd95966208a49387b0ac8a4e1c1",
+    "tb/reports/cp50/cp50-profiles/fram-1-3-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/fram-1-3.log": "22d979afd640fd11a5fa19f803d253c27a37bcbe92c65ef646526d97f7d29280",
+    "tb/reports/cp50/cp50-profiles/mmu-0-0-build.log": "00fe04e9086c95957d932292148e3e07827d9910b9b9fbe38ce77852342c9fa2",
+    "tb/reports/cp50/cp50-profiles/mmu-0-0.log": "fc4a514b5b7646417f0b092c72cefa738a6a3933f6a9dc6b119967016f1c5bbf",
+    "tb/reports/cp50/cp50-profiles/mmu-0-1-build.log": "783953f492d79315c583b2403063b5fc245bb7b6bb2ea6743f9a10248782eda7",
+    "tb/reports/cp50/cp50-profiles/mmu-0-1.log": "8d0fc36a097925c4c58a2a1e5915d7cf44a3ecebb0557f1bad4c635dcd304d10",
+    "tb/reports/cp50/cp50-profiles/mmu-1-0-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/mmu-1-0.log": "db0115e04d251d887ff6a5011874ca515e59abe8574c12273a222273cb3ed91a",
+    "tb/reports/cp50/cp50-profiles/mmu-1-1-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/mmu-1-1.log": "dcb0a7d401b339626c683d49ee4a96f87fdd1d111fb9872d23a0c8021a4c76a3",
+    "tb/reports/cp50/cp50-profiles/mmuless-bus-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tb/reports/cp50/cp50-profiles/mmuless-bus.log": "5c518753a539a53e89b59a0749f21f84508d329e4248305a32e87e23344a41a0",
+    "tb/reports/cp50/cp50-profiles/verified.json": "3d2f86c2aa9b00b42758842f3d67e198ca46d70b43e15f96cd6b0d0c7d9caa65",
+    "tb/reports/cp50/test-sources.tgz": "2e1a32372cc76a1108e1a3ac011646c4764daf25393e20ffe5fc4b7ad01e228a"
+  }
+}
