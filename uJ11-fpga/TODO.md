@@ -1,5 +1,18 @@
 # uJ11 TODO
 
+## Текущий приоритет: оптимизация MMU-less CPU и полного board
+
+- [x] CP51: проверить MAP/TRACE и распределение ресурсов CP40h, связать
+  их с текущим default RTL CP50. Свободны 121 LUT / 56 slices / 1 EBR.
+- [x] CP51: измерить девять warm workloads на полном native board;
+  R,R = 107 clocks/instruction, FRAM busy 96,26%. [Аудит](docs/resources-cp51.md).
+- [ ] Первый performance gate: sequential FRAM READ / малый instruction-stream
+  buffer с полной периферией, overlays, RK operands и invalidation tests.
+- [ ] Отдельно измерить native-board площадь shared RX и локальных read/decode
+  преобразований; экономию MMU-сборок не переносить без измерения.
+- [ ] Исследовать address→ACK→uPC critical path (31,802 ns), сравнивать
+  Fmax и добавленные memory clocks. Сохранить цель <=1100 LUT.
+
 ## CP50: рабочая сборка без MMU
 
 Решение пользователя от 2026-09-11: прекратить поиск ресурсов под MMU на

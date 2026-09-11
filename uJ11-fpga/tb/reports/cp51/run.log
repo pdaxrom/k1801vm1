@@ -1,0 +1,13 @@
+PASS CP51 MOV_RR: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks
+PASS CP51 ADD_RR: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks
+PASS CP51 CMP_RR: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks
+PASS CP51 mixed_RR: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks
+PASS CP51 MOV_mem_reg: 56876 clocks / 256 instructions, 508 beats, 24384 SCK, 52324 busy clocks
+PASS CP51 MOV_reg_mem: 61916 clocks / 256 instructions, 508 beats, 26400 SCK, 56860 busy clocks
+PASS CP51 MOV_mem_mem: 88628 clocks / 256 instructions, 760 beats, 38496 SCK, 82816 busy clocks
+PASS CP51 BR_self: 27392 clocks / 256 instructions, 256 beats, 12288 SCK, 26368 busy clocks
+PASS CP51 stack_push_pop: 59812 clocks / 256 instructions, 508 beats, 25408 SCK, 54628 busy clocks
+- tb/tb_board_bench_cp51.v:124: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 5ms; walltime 0.355 s; speed 14.562 ms/s
+- Verilator: cpu 0.355 s on 1 threads; allocated 2 MB

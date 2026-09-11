@@ -1,5 +1,19 @@
 # Implementation status, 2026-09-11
 
+## CP51 — ресурсный и performance baseline MMU-less board
+
+Проверены архивные CP40h source/MAP/TRACE hashes и неизменность текущего
+native RTL после CP50. Свободны 121 LUT / 56 slices / 1 EBR; pins заняты,
+FF не являются главным ограничением. Critical path 31,802 ns проходит
+через RF/address, board decode/ACK и microsequencer. Microstore имеет
+70 свободных слов в 46 участках, максимум 3 подряд.
+
+Девять новых полных board microbenchmarks прошли; register CPI 107,
+FRAM busy 96,26%. Первый performance кандидат — sequential instruction
+stream на FRAM, с отдельным полным resource/correctness gate. RTL,
+MMU-ветвь и физическая плата не менялись; новой площади/Fmax нет.
+[Подробный аудит](resources-cp51.md).
+
 ## CP50 — MMU-less по умолчанию
 
 Решение от 2026-09-11: прекратить дальнейшее уменьшение площади ради MMU.

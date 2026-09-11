@@ -1,4 +1,25 @@
-# Benchmarks: CP50 и предыдущие этапы
+# Benchmarks: CP51 и предыдущие этапы
+
+## CP51 — warm MMU-less full-board baseline
+
+Девять workloads по 256 retirements после guest setup и 64 warm instructions.
+Применены текущие CPU, board decoder, периферия и реальный RTL SPI transport;
+fixture отключает bootstrap overlay и загружает программу в FRAM model.
+Это не cold RT-11 или аппаратное измерение. Stream проверяется на каждом retire.
+
+| Workload | Clocks/instruction | FRAM busy |
+|---|---:|---:|
+| MOV/ADD/CMP R,R, mixed register ALU, BR self | 107,000 | 96,26% |
+| MOV memory→register | 222,172 | 92,00% |
+| MOV register→memory | 241,859 | 91,83% |
+| MOV memory→memory | 346,203 | 93,44% |
+| Stack push/pop | 233,641 | 91,33% |
+
+Loops включают один BR на 64 инструкции, кроме BR self. Чистый register
+stream: 48 SCK/instruction, 103 transport-busy clocks, расчётные
+276262 instructions/sec при nominal 29,56 MHz. Выигрыш ещё не заявляется:
+это исходная точка для оптимизации SPI instruction stream.
+[Методика и ресурсы](resources-cp51.md), [точные counters](resources-cp51.json).
 
 ## CP50 — MMU-less профиль сохранён без изменения clocks
 

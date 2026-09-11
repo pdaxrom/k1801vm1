@@ -5,6 +5,13 @@
 Специализированный микрокодный PDP-11/J-11 integer engine для
 **Lattice LCMXO2-1200HC**, с FIS и 128 КиБ SPI FRAM.
 
+**CP51: аудит ресурсов и новые benchmarks MMU-less board.** По измерению
+CP40h свободны **121 LUT / 56 slices / 1 EBR**; все PIO sites заняты.
+70 свободных microinstructions разбиты на 46 участков, максимум 3 слова.
+Новые полные board loops: MOV/ADD/CMP R,R — **107 clocks/instruction**,
+FRAM busy 96,26%; скорость прежде всего ограничена SPI memory.
+Новая оптимизация RTL ещё не принята. [Ресурсы и направления](docs/resources-cp51.md).
+
 **CP50: рабочая конфигурация HC1200 — MMU-less.** По решению пользователя
 от 2026-09-11 дальнейший поиск места под MMU остановлен. В board RTL сохранены
 обе ветви `ifdef UJ11_MMU / else / endif`: по умолчанию CP40h (VA=PA, 16 бит),
