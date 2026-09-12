@@ -28,6 +28,19 @@ def extract(map_text, timing_text, par_text):
     return result
 
 
+def check_clock(result, timing_text, requested_mhz):
+    """A passing nominal OSCH TRACE must not satisfy a faster requested gate."""
+    clocks=sorted({float(x) for x in re.findall(r'Preference:\s+FREQUENCY NET "clk"\s+([\d.]+) MHz',timing_text)})
+    matched=len(clocks)==1 and abs(clocks[0]-requested_mhz)<0.001
+    result.update(applied_clock_mhz=clocks[0] if len(clocks)==1 else None,
+                  requested_clock_mhz=requested_mhz,constraint_matched=matched,
+                  trace_timing_pass=result['timing_pass'])
+    result['timing_pass']=matched and result['timing_pass'] and result['fmax_mhz']+0.001>=requested_mhz
+    if not matched:result['timing_failure']='TRACE clock preference differs from the requested gate'
+    elif not result['timing_pass']:result['timing_failure']='Requested clock timing failed'
+    return result
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('map', type=Path)

@@ -1,0 +1,9 @@
+# CP56-derived FRAM budgets, reused on each new routed design.
+# OSCH nominal 29.56 MHz; internal STA >=31.824 MHz includes +5.5% and 2% jitter.
+# PCB round trip <=2 ns, MOSI/CS versus SCK skew <=2 ns: assumptions, not measurements.
+# Short SCK phase at 43/57 duty and full 2% period jitter is 13.147 ns.
+# This is setup/hold timing; physical SCK pulse-width signoff is separate.
+INPUT_SETUP PORT "gpio_miso" INPUT_DELAY 23 NS HOLD -2.2 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "gpio_msck" MAX 8 NS MIN 2.2 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "gpio_mosi" MAX 6.14 NS MIN -6.14 NS CLKNET "clk" CLKOUT PORT "gpio_msck";
+CLOCK_TO_OUT PORT "gpio_mcs" MAX 1.14 NS MIN -1.14 NS CLKNET "clk" CLKOUT PORT "gpio_msck";

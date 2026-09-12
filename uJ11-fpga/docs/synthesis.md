@@ -1,5 +1,30 @@
 # Synthesis checkpoints
 
+## CP59 — internal OSCH envelope и FRAM setup/hold, выбран CP59d
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP59a | Удалена связь текущего bus_fault с CJUMP | 1239 | 342 | 6 | 31,370 | 1002 | 623 slices; requested gate FAIL: MAP подменил 31,824 на 29,56 MHz |
+| CP59b | Тот же RTL, PRF clock исправлен после MAP | 1239 | 342 | 6 | 32,165 | 1002 | 623 slices; internal PASS, внешний CS setup −1,475 ns |
+| CP59c | FRAM budgets включены до PAR | 1239 | 342 | 6 | 31,892 | 1002 | 623 slices; внешний CS setup −0,703 ns |
+| CP59d | CS output FF в PIO, внутренняя обратная связь сохранена | 1239 | 343 | 6 | 32,531 | 1002 | 624 slices; internal и FRAM setup/hold PASS при 31,824 MHz, выбран |
+
+От CP58a **−7 LUT / +1 FF / −3 slices / +1,788 MHz**. Свободны
+**41 LUT / 16 slices / 1 EBR / 22 слова**, PIO нет. MAP: 1111 logic +
+48 RF RAM + 80 carry LUT, 334 PFU + 9 PIO FF. Critical EBR→RF→I/O ACK→
+fault redirect→EBR: **30,766 ns / 17 levels / 58,1% routing**,
+internal setup slack **0,683 ns**, hold **0,293 ns** при 31,824 MHz.
+
+FIS, CPU, board, benchmarks, formal и cold RT-11FB проходят на точных
+исходниках CP59d. Final EDIF: 3091 nets, 0 conflicts/unexplained floating,
+3 negative controls; входы двух CS FF совпадают, нового такта нет.
+Частота OSCH/SCK остаётся 29,56 MHz. External FRAM PASS предполагает
+PCB round trip/skew ≤2 ns; physical SCK pulse-width signoff ещё открыт,
+расчётный запас 0,147 ns. Этот gate не покрывает все прочие I/O.
+Default CP52a и плата CP56a прежние.
+[Разбор и воспроизведение](timing-cp59.md), [измерения и hashes](synthesis-cp59.json),
+[raw CP59d](../synth/reports/cp59d/), [verification](verification-cp59.json).
+
 ## CP58 — STEP и SEL004, выбран CP58a
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

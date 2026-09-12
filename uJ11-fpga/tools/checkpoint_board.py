@@ -8,7 +8,7 @@ import re
 import subprocess
 import xml.etree.ElementTree as ET
 from board_common import ROOT, CORE, BOARD, MMU
-from report_synthesis import extract
+from report_synthesis import extract, check_clock
 
 
 def main():
@@ -23,8 +23,13 @@ def main():
     p.add_argument('--prepare-only',action='store_true',help='Write exact synthesis project and input manifest without running Diamond')
     p.add_argument('--service-cp57',action='store_true',help='CP57 opt-in service FRAM bank, frozen CP56 base')
     p.add_argument('--service-cp58',action='store_true',help='CP58 HALT fault recovery and STEP, frozen CP57e base')
+    p.add_argument('--timing-cp59',action='store_true',help='CP59 remove unobservable current bus-error predicate')
+    p.add_argument('--clock-mhz',type=float,default=29.56,help='STA/PAR clock constraint; does not change the OSCH nominal frequency')
+    p.add_argument('--fram-timing',action='store_true',help='Apply documented CP56 external FRAM budgets to placement/routing and TRACE')
     args=p.parse_args()
-    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57,args.service_cp58))<=1, 'Choose one native candidate or the retained MMU profile'
+    assert 1 <= args.clock_mhz <= 100
+    assert not args.fram_timing or args.clock_mhz>=31.824, 'FRAM budgets require the conservative internal clock gate'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57,args.service_cp58,args.timing_cp59))<=1, 'Choose one native candidate or the retained MMU profile'
     assert re.fullmatch(r'cp[0-9]+[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
@@ -46,15 +51,18 @@ def main():
     if args.spi_cp56:
         from build_spi_cp56 import adapt
         core,board=adapt()
-    if args.service_cp57 or args.service_cp58:
-        if args.service_cp58:
+    if args.service_cp57 or args.service_cp58 or args.timing_cp59:
+        if args.timing_cp59:
+            from build_timing_cp59 import adapt
+        elif args.service_cp58:
             from build_service_cp58 import adapt
         else:
             from build_service_cp57 import adapt
         core,board=adapt()
-    service_path='build/cp58-service' if args.service_cp58 else 'build/cp57-service'
+    service_path='build/cp59-service' if args.timing_cp59 else 'build/cp58-service' if args.service_cp58 else 'build/cp57-service'
     sources=core+board+['boards/hc1200/uj11_microcomp.v','microcode/generated/uj11_m0_ebr.v']
-    if args.service_cp57 or args.service_cp58:
+    if args.timing_cp59:sources[-2]=service_path+'/src/boards/hc1200/uj11_microcomp.v'
+    if args.service_cp57 or args.service_cp58 or args.timing_cp59:
         sources[-1]=service_path+'/uj11_m0_ebr.v'
     if args.mmu:sources+=MMU
     proj=ET.Element('BaliProject',version='3.2',title=args.name,device='LCMXO2-1200HC-4SG32C',default_implementation='impl1')
@@ -64,12 +72,33 @@ def main():
     for source in sources:
         node=ET.SubElement(impl,'Source',name=str(ROOT/source),type='Verilog',type_short='Verilog')
         ET.SubElement(node,'Options')
+    # MAP insists OSCH FREQUENCY equals NOM_FREQ. Apply a tighter *timing*
+    # constraint to the mapped PRF afterwards; do not reconfigure OSCH.
     lpf=(ROOT/'boards/hc1200/pins.lpf').read_text()+'\nFREQUENCY NET "clk" 29.56 MHz ;\n'
     (out/'clock.lpf').write_text(lpf)
     node=ET.SubElement(impl,'Source',name=str(out/'clock.lpf'),type='Logic Preference',type_short='LPF')
     ET.SubElement(node,'Options')
     ET.SubElement(proj,'Strategy',name='Strategy1',file=str(ROOT/'synth/machxo2/uj11-board.sty'))
     ET.ElementTree(proj).write(out/f'{args.name}.ldf',encoding='utf-8',xml_declaration=True)
+    post_map=''
+    if args.clock_mhz!=29.56 or args.fram_timing:
+        external=''
+        if args.fram_timing:
+            external=f'''set fd [open "{ROOT/'synth/machxo2/fram-timing.lpf'}" r]
+append pref_data "\\n" [read $fd]
+close $fd
+'''
+        post_map=f'''set pref_path "impl1/{args.name}_impl1.prf"
+set fd [open $pref_path r]
+set pref_data [read $fd]
+close $fd
+file copy -force $pref_path mapped-original.prf
+if {{[regsub -all {{FREQUENCY NET "clk" [0-9.]+ MHz ;}} $pref_data {{FREQUENCY NET "clk" {args.clock_mhz:.6f} MHz ;}} pref_data] != 1}} {{error "Expected exactly one mapped OSCH frequency"}}
+{external}
+set fd [open $pref_path w]
+puts -nonewline $fd $pref_data
+close $fd
+'''
     (out/'build.tcl').write_text(f'''cd [file dirname [file normalize [info script]]]
 if {{[catch {{
 prj_project open {args.name}.ldf
@@ -77,6 +106,7 @@ prj_project open {args.name}.ldf
 prj_run Synthesis -impl impl1
 prj_run Translate -impl impl1
 prj_run Map -impl impl1
+{post_map}
 prj_run PAR -impl impl1
 prj_run PAR -impl impl1 -task PARTrace
 prj_project close
@@ -88,6 +118,7 @@ exit 0
                    'firmware/sd_boot.asm','firmware/rk_service.asm',
                    'microcode/m0.uasm','microcode/fis.uasm','microasm/uj11asm.py','tools/link_fis.py',
                    'microcode/generated/m0.stats.json']
+    if args.fram_timing:inputs+=['synth/machxo2/fram-timing.lpf']
     if args.fram_cp52:
         inputs+=['tools/build_fram_cp52.py','build/cp52-fram/inputs.json',
                  'boards/hc1200/uj11_board_bus.v','boards/hc1200/uj11_board_fram.v']
@@ -103,12 +134,13 @@ exit 0
     if args.spi_cp56:
         inputs+=['tools/build_spi_cp56.py','tools/build_fram_cp52.py','build/cp56-spi/inputs.json',
                  'synth/reports/cp54b/inputs.json','synth/reports/cp54b/source.tgz']
-    if args.service_cp57 or args.service_cp58:
+    if args.service_cp57 or args.service_cp58 or args.timing_cp59:
         record=json.loads((ROOT/service_path/'inputs.json').read_text())
         inputs+=list(record['inputs'])+list(record['outputs'])+[service_path+'/inputs.json']
     hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in sorted(inputs)}
     hashes['generated:clock.lpf']=hashlib.sha256(lpf.encode()).hexdigest()
-    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,defines=['UJ11_MMU'] if args.mmu else [],
+    hashes['generated:build.tcl']=hashlib.sha256((out/'build.tcl').read_bytes()).hexdigest()
+    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,timing_cp59=args.timing_cp59,defines=['UJ11_MMU'] if args.mmu else [],
                   input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if args.prepare_only:
@@ -121,12 +153,13 @@ exit 0
                           stdout=log,stderr=subprocess.STDOUT).returncode
     prefix=out/'impl1'/f'{args.name}_impl1'
     report=dict(inputs=manifest,scope='Full board: core/FIS + SPI FRAM + KL11/KW11/panel/SD/RK + bootstrap + OSCH/reset/pins; prefetch disabled',
-                device='LCMXO2-1200HC-4SG32C',constraint_mhz=29.56,expected_ebr=7 if args.mmu else 6,diamond_returncode=rc,
-                mmu=args.mmu,microcode_words=json.loads((ROOT/(service_path+'/m0.stats.json' if (args.service_cp57 or args.service_cp58) else 'microcode/generated/m0.stats.json')).read_text())['used_words'],
-                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,
-                external_pin_delays_constrained=False)
+                device='LCMXO2-1200HC-4SG32C',constraint_mhz=args.clock_mhz,expected_ebr=7 if args.mmu else 6,diamond_returncode=rc,
+                mmu=args.mmu,microcode_words=json.loads((ROOT/(service_path+'/m0.stats.json' if (args.service_cp57 or args.service_cp58 or args.timing_cp59) else 'microcode/generated/m0.stats.json')).read_text())['used_words'],
+                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,timing_cp59=args.timing_cp59,
+                external_pin_delays_constrained=args.fram_timing)
     try:
-        report.update(extract(prefix.with_suffix('.mrp').read_text(),prefix.with_suffix('.twr').read_text(),prefix.with_suffix('.par').read_text()))
+        timing_text=prefix.with_suffix('.twr').read_text()
+        report.update(check_clock(extract(prefix.with_suffix('.mrp').read_text(),timing_text,prefix.with_suffix('.par').read_text()),timing_text,args.clock_mhz))
     except (OSError,ValueError) as error:
         report.update(timing_pass=False,fully_routed=False,incomplete_reason=str(error))
         if prefix.with_suffix('.mrp').exists():

@@ -1,5 +1,23 @@
 # Implementation status, 2026-09-12
 
+## CP59d — timing исправлен, семантика CP58a сохранена
+
+**1239 LUT / 343 FF / 6 EBR / 624 slices / Fmax 32,531 MHz**, 1002 слова.
+Internal 31,824 MHz и внешние FRAM setup/hold прошли. Доказана ненаблюдаемость
+текущего bus_error в CJUMP; настоящий fault redirect/repair сохранён.
+CS output FF продублирован в PIO с теми же входами и без дополнительного такта.
+
+91 CPU × 3, 12 board × 2, 23840 FIS portable + 645 vendor, девять
+benchmarks × 2, formal с двумя negative controls, EDIF с тремя — PASS.
+Cold RT-11FB + DIR: 173379163 clocks, UART совпадает с CP56.
+Свободны 41 LUT / 16 slices / 1 EBR / 22 слова. Запас остаётся мал;
+полные ODT/FP11 и RT-11 loader пока не реализованы.
+PCB budgets и физическая ширина SCK требуют аппаратной проверки.
+CP59d opt-in; default CP52a и плата CP56a прежние.
+[Подробности](timing-cp59.md), [verification](verification-cp59.json).
+
+Ниже — история checkpoints.
+
 ## CP58 — STEP/SEL004, выбран CP58a после полного synthesis
 
 91 CPU cases × 3 режима ROM/декодера, 12 full-board service cases × 2,

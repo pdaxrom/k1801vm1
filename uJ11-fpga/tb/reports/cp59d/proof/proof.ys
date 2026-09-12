@@ -1,0 +1,6 @@
+read_verilog -sv gold.v gate.v memory.v miter.v
+prep -top miter -flatten
+async2sync
+dffunmap
+opt
+sat -verify -prove ok 1 -set-init-zero -set-at 1 reset 1 -seq 2 -tempinduct -maxsteps 6 -show-inputs

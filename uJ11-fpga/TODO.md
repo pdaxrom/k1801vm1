@@ -10,6 +10,9 @@ J-11. [Организация](docs/service-bank-proposal.md), [реализов
 CP57e: 1260 LUT / 342 FF / 6 EBR / 31,982 MHz; на плате остаётся CP56a.
 Выбран следующий профиль CP58a: 1246 LUT / 342 FF / 6 EBR / 30,743 MHz,
 1002 слова; обычные STEP/SEL004 paths проверены. CP58b отклонён по площади.
+Следующий выбранный профиль CP59d: **1239 LUT / 343 FF / 6 EBR /
+32,531 MHz**, internal и FRAM setup/hold PASS при проверочных31,824 MHz.
+Плата остаётся CP56a. [Timing CP59](docs/timing-cp59.md).
 
 - [x] Проверить документацию ВМ2/J-11 и текущие FRAM/HALT/FP11 пути.
 - [x] Подробно разобрать [HALT ВМ2](docs/vm2-halt-reference.md): CPC/CPSW,
@@ -23,12 +26,14 @@ CP57e: 1260 LUT / 342 FF / 6 EBR / 31,982 MHz; на плате остаётся 
   [Контракт и ограничения](docs/service-bank-cp58.md).
 - [x] CP58: полный HC1200 synthesis/MAP/PAR/TRACE и final EDIF audit.
   [Два измеренных варианта](docs/synthesis-cp58.json), выбран CP58a.
-- [ ] До установки CP58 закрыть timing с допуском OSCH и внешние FRAM pins:
-  Fmax 30,743 MHz ниже 29,56 × 1,055 = 31,1858 MHz; nominal gate недостаточен.
+- [x] CP59d: закрыть internal timing с допуском OSCH/period jitter и
+  FRAM setup/hold с заданными PCB budgets: gate31,824 MHz PASS.
+  Physical SCK pulse width и PCB delays остаются аппаратной проверкой ниже.
 - [ ] Завершить HALT семантику ВМ2: copy H/P tracking, вложенные входы,
   SEL174/274 для ошибок незавершённого входа, внешний HALT для пультового STEP.
 - [ ] Сократить footprint служебного профиля перед новыми аппаратными функциями:
-  в CP58a свободны 34 LUT / 13 slices / 22 microinstructions.
+  CP59d освободил 7 LUT, остаются 41 LUT / 16 slices / 22 microinstructions;
+  до исходной цели ≤1100 LUT нужно ещё убрать 139 LUT.
 - [x] Перенести служебные команды ВМ2 с фиксированными R0/R5 и HALT-only
   aliases; successful paths/USER checks и обычный SEL004 fault path проверены.
 - [x] Ввести FP11 dispatch и отсутствие эмулятора; тестовый handler CP57,
@@ -44,7 +49,7 @@ CP57e: 1260 LUT / 342 FF / 6 EBR / 31,982 MHz; на плате остаётся 
 - [x] Проверить bank/CS isolation, I/O, прежний RK/cold FB, терминальные
   service faults/IRQ/trace контракта CP57; получить full HC1200 synthesis.
 - [ ] Проверить полный RT-11 loader → установленный ODT/FP11 на реальной плате;
-  получить внешний FRAM timing audit для новой разводки до её установки.
+  CP59d прошёл bounded external FRAM timing; подтвердить PCB/SCK на плате.
 - [ ] После успешного gate реализовать ODT в верхней FRAM, загружаемый из
   RT-11; прежний вариант полного ODT в EBR заменён этим решением.
 - [ ] Сделать два интерфейса общего ODT: UART и HDSP/20-key пульт.

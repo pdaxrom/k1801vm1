@@ -1,0 +1,21 @@
+{
+  "portable_cases": 23840,
+  "vendor_cases": 645,
+  "vendor_stride": 37,
+  "inputs": {
+    "tools/check_service_cp59_fis.py": "6c321c1d6da60f3c8e805c19324ba14c3eaa20c252bdd161d2b0f320d2badbb0",
+    "tools/run_fis_tests.py": "6b2ce65c5d49f90e3134a7e85486707e8799a3679fc35b2b28a21c4609c4aa37",
+    "build/fis-vectors.txt": "88c6c562cd65e2584aac79d1dfa31128f787ce9d33556da2e31a6e557d2466a6",
+    "build/cp59-service/fis-vendor-vectors.txt": "0ac4ddb94e9c5583dd03d1bff2c4df53a0d01363216b2458ba17b1a1803543c8",
+    "tb/tb_fis.v": "ec0432b8999a2557d19cc4c91adc8523a96f4aac83e9c2ee31b5dec70464a4e5",
+    "build/cp59-service/inputs.json": "02befd8e0d312feeaa7ba53299a656e4aed1f3b651ab918a8b34428d002de640",
+    "build/cp59-service/core-with-decode.v": "257ec3b83fdd6c464a4ebb65b6ddcda0f23061bc6a3e6e6a775a2c2672fdda0f",
+    "build/cp59-service/tb_fis.v": "fad91e4045e73eac7b70483f2a0182b6fbf39d0b14e0dc618000f5de1fe94ad3"
+  },
+  "outputs": {
+    "build/cp59-fis-portable.log": "69e7408aeb6ea88c1cacbbf2d39dd5aca8275b6665072d91e2725e724cd1ca24",
+    "build/cp59-fis-portable.csv": "0504fdab08ab016d68619a433520cf1b4dc685303630558363fb736a521f6d91",
+    "build/cp59-fis-vendor.log": "b4d572aa984ad3283c3e278bb0a7c0cae18b292bf24add563b96e6033fdf3685",
+    "build/cp59-fis-vendor.csv": "66e5fc246d0e60e7885bcd6d06fb4aff24f62782bce756a2659d8a386f62d65b"
+  }
+}

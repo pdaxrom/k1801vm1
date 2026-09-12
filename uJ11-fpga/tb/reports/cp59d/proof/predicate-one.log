@@ -1,0 +1,607 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.69 (git sha1 9f75ca1f9, Release, Clang /workspace/YoWASP/yosys/wasi-sdk-33.0-x86_64-linux/share/cmake/../..//bin/clang++ 22.1.0)
+
+-- Executing script file `proof.ys' --
+
+1. Executing Verilog-2005 frontend: gold.v
+Parsing SystemVerilog input from `gold.v' to AST representation.
+Generating RTLIL representation for module `\gold'.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: gate.v
+Parsing SystemVerilog input from `gate.v' to AST representation.
+Generating RTLIL representation for module `\gate'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: memory.v
+Parsing SystemVerilog input from `memory.v' to AST representation.
+Generating RTLIL representation for module `\uj11_mem'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: miter.v
+Parsing SystemVerilog input from `miter.v' to AST representation.
+Generating RTLIL representation for module `\miter'.
+Successfully finished Verilog frontend.
+
+5. Executing PREP pass.
+
+5.1. Executing HIERARCHY pass (managing design hierarchy).
+
+5.1.1. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \gate
+Used module:     \gold
+Used module:     \uj11_mem
+
+5.1.2. Analyzing design hierarchy..
+Top module:  \miter
+Used module:     \gate
+Used module:     \gold
+Used module:     \uj11_mem
+Removed 0 unused modules.
+
+5.2. Executing PROC pass (convert processes to netlists).
+
+5.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 3 switch rules as full_case in process $proc$gate.v:69$72 in module gate.
+Removed 1 dead cases from process $proc$gate.v:41$64 in module gate.
+Marked 9 switch rules as full_case in process $proc$gate.v:41$64 in module gate.
+Marked 3 switch rules as full_case in process $proc$gold.v:69$33 in module gold.
+Removed 1 dead cases from process $proc$gold.v:41$25 in module gold.
+Marked 9 switch rules as full_case in process $proc$gold.v:41$25 in module gold.
+Removed a total of 2 dead cases.
+
+5.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 2 assignments to connections.
+
+5.2.4. Executing PROC_INIT pass (extract init attributes).
+
+5.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~28 debug messages>
+
+5.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\gate.$proc$gate.v:69$72'.
+     1/3: $0\link_valid[0:0]
+     2/3: $0\link[9:0]
+     3/3: $0\upc[9:0]
+Creating decoders for process `\gate.$proc$gate.v:41$64'.
+     1/9: $9\next_address[9:0]
+     2/9: $8\next_address[9:0]
+     3/9: $7\next_address[9:0]
+     4/9: $6\next_address[9:0]
+     5/9: $5\next_address[9:0]
+     6/9: $4\next_address[9:0]
+     7/9: $3\next_address[9:0]
+     8/9: $2\next_address[9:0]
+     9/9: $1\next_address[9:0]
+Creating decoders for process `\gold.$proc$gold.v:69$33'.
+     1/3: $0\link_valid[0:0]
+     2/3: $0\link[9:0]
+     3/3: $0\upc[9:0]
+Creating decoders for process `\gold.$proc$gold.v:41$25'.
+     1/9: $9\next_address[9:0]
+     2/9: $8\next_address[9:0]
+     3/9: $7\next_address[9:0]
+     4/9: $6\next_address[9:0]
+     5/9: $5\next_address[9:0]
+     6/9: $4\next_address[9:0]
+     7/9: $3\next_address[9:0]
+     8/9: $2\next_address[9:0]
+     9/9: $1\next_address[9:0]
+
+5.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\gate.\next_address' from process `\gate.$proc$gate.v:41$64'.
+No latch inferred for signal `\gold.\next_address' from process `\gold.$proc$gold.v:41$25'.
+
+5.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\gate.\upc' using process `\gate.$proc$gate.v:69$72'.
+  created $dff cell `$procdff$294' with positive edge clock.
+Creating register for signal `\gate.\link' using process `\gate.$proc$gate.v:69$72'.
+  created $dff cell `$procdff$295' with positive edge clock.
+Creating register for signal `\gate.\link_valid' using process `\gate.$proc$gate.v:69$72'.
+  created $dff cell `$procdff$296' with positive edge clock.
+Creating register for signal `\gold.\upc' using process `\gold.$proc$gold.v:69$33'.
+  created $dff cell `$procdff$297' with positive edge clock.
+Creating register for signal `\gold.\link' using process `\gold.$proc$gold.v:69$33'.
+  created $dff cell `$procdff$298' with positive edge clock.
+Creating register for signal `\gold.\link_valid' using process `\gold.$proc$gold.v:69$33'.
+  created $dff cell `$procdff$299' with positive edge clock.
+
+5.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 5 empty switches in `\gate.$proc$gate.v:69$72'.
+Removing empty process `gate.$proc$gate.v:69$72'.
+Found and cleaned up 9 empty switches in `\gate.$proc$gate.v:41$64'.
+Removing empty process `gate.$proc$gate.v:41$64'.
+Found and cleaned up 5 empty switches in `\gold.$proc$gold.v:69$33'.
+Removing empty process `gold.$proc$gold.v:69$33'.
+Found and cleaned up 9 empty switches in `\gold.$proc$gold.v:41$25'.
+Removing empty process `gold.$proc$gold.v:41$25'.
+Cleaned up 28 empty switches.
+
+5.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+<suppressed ~1 debug messages>
+Optimizing module uj11_mem.
+<suppressed ~1 debug messages>
+Optimizing module gate.
+<suppressed ~4 debug messages>
+Optimizing module gold.
+<suppressed ~4 debug messages>
+
+5.3. Executing FLATTEN pass (flatten design).
+Deleting now unused module uj11_mem.
+Deleting now unused module gate.
+Deleting now unused module gold.
+<suppressed ~3 debug messages>
+
+5.4. Executing FUTURE pass.
+
+5.5. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 12 unused cells and 113 unused wires.
+<suppressed ~23 debug messages>
+
+5.7. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+5.8. Executing OPT pass (performing simple optimizations).
+
+5.8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 186 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 157 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 149 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 147 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 146 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 145 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 144 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 143 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~129 debug messages>
+Removed a total of 43 cells.
+
+5.8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $flatten\gate_inst.$procmux$161.
+    dead port 2/2 on $mux $flatten\gate_inst.$procmux$172.
+    dead port 2/2 on $mux $flatten\gate_inst.$procmux$174.
+    dead port 2/2 on $mux $flatten\gate_inst.$procmux$186.
+    dead port 2/2 on $mux $flatten\gate_inst.$procmux$188.
+    dead port 2/2 on $mux $flatten\gate_inst.$procmux$199.
+    dead port 1/2 on $mux $flatten\gold_inst.$procmux$251.
+    dead port 2/2 on $mux $flatten\gold_inst.$procmux$262.
+    dead port 2/2 on $mux $flatten\gold_inst.$procmux$264.
+    dead port 2/2 on $mux $flatten\gold_inst.$procmux$276.
+    dead port 2/2 on $mux $flatten\gold_inst.$procmux$278.
+    dead port 2/2 on $mux $flatten\gold_inst.$procmux$289.
+Removed 12 multiplexer ports.
+<suppressed ~90 debug messages>
+
+5.8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+5.8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 131 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 129 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 128 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~9 debug messages>
+Removed a total of 3 cells.
+
+5.8.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 54 unused wires.
+<suppressed ~1 debug messages>
+
+5.8.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.8.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.8.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~77 debug messages>
+
+5.8.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+5.8.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 128 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+5.8.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+5.8.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.8.14. Finished fast OPT passes. (There is nothing left to do.)
+
+5.9. Executing WREDUCE pass (reducing word size of cells).
+Removed top 2 bits (of 3) from port A of cell miter.$flatten\gold_inst.$and$gold.v:40$23 ($and).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\gold_inst.$eq$gold.v:37$9 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\gold_inst.$eq$gold.v:36$7 ($eq).
+Removed top 9 bits (of 10) from port B of cell miter.$flatten\gold_inst.$add$gold.v:23$3 ($add).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\gate_inst.$procmux$195_CMP1 ($eq).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\gate_inst.$procmux$195_CMP0 ($eq).
+Removed top 3 bits (of 4) from port B of cell miter.$flatten\gate_inst.$procmux$187_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell miter.$flatten\gate_inst.$procmux$158_CMP0 ($eq).
+Removed top 2 bits (of 4) from port B of cell miter.$flatten\gate_inst.$eq$gate.v:80$77 ($eq).
+Removed top 1 bits (of 3) from port A of cell miter.$flatten\gate_inst.$and$gate.v:39$57 ($and).
+Removed top 1 bits (of 3) from port A of cell miter.$flatten\gate_inst.$and$gate.v:38$54 ($and).
+Removed top 1 bits (of 4) from port B of cell miter.$flatten\gate_inst.$eq$gate.v:38$53 ($eq).
+Removed top 9 bits (of 10) from port B of cell miter.$flatten\gate_inst.$add$gate.v:23$42 ($add).
+Removed top 4 bits (of 10) from mux cell miter.$flatten\gate_inst.$ternary$gate.v:19$40 ($mux).
+Removed top 4 bits (of 10) from wire miter.$flatten\gate_inst.$ternary$gate.v:19$40_Y.
+
+5.10. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+5.11. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+5.12. Executing OPT pass (performing simple optimizations).
+
+5.12.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+5.12.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 128 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+5.12.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+5.12.4. Finished fast OPT passes.
+
+5.13. Executing SORT pass.
+
+5.14. Printing statistics.
+
+=== miter ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      218 wires
+     1118 wire bits
+      118 public wires
+      673 public wire bits
+       26 ports
+      130 port bits
+      128 cells
+        2   $add
+        6   $and
+        6   $dff
+       18   $eq
+       15   $logic_and
+       10   $logic_not
+        4   $logic_or
+       48   $mux
+        1   $not
+        5   $or
+        4   $pmux
+        1   $reduce_bool
+        1   $reduce_or
+        3   $scopeinfo
+        2   $shiftx
+        2   $xor
+
+5.15. Executing CHECK pass (checking for obvious problems).
+Checking module miter...
+Found and reported 0 problems.
+
+6. Executing ASYNC2SYNC pass.
+
+7. Executing DFFUNMAP pass (unmap clock enable and synchronous reset from FFs).
+
+8. Executing OPT pass (performing simple optimizations).
+
+8.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+8.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 128 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+8.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~77 debug messages>
+
+8.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+8.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 128 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+8.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding SRST signal on $flatten\gold_inst.$procdff$299 ($dff) from module miter (D = $flatten\gold_inst.$procmux$212_Y, Q = \gold_inst.link_valid, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$304 ($sdff) from module miter (D = $flatten\gold_inst.$procmux$210_Y, Q = \gold_inst.link_valid).
+Adding SRST signal on $flatten\gold_inst.$procdff$298 ($dff) from module miter (D = $flatten\gold_inst.$procmux$223_Y, Q = \gold_inst.link, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$310 ($sdff) from module miter (D = \gold_inst.sequential, Q = \gold_inst.link).
+Adding SRST signal on $flatten\gold_inst.$procdff$297 ($dff) from module miter (D = $flatten\gold_inst.$procmux$228_Y, Q = \gold_inst.upc, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$316 ($sdff) from module miter (D = \gold_inst.next_address, Q = \gold_inst.upc).
+Adding SRST signal on $flatten\gate_inst.$procdff$296 ($dff) from module miter (D = $flatten\gate_inst.$procmux$122_Y, Q = \gate_inst.link_valid, rval = 1'0).
+Adding EN signal on $auto$ff.cc:337:slice$318 ($sdff) from module miter (D = $flatten\gate_inst.$procmux$120_Y, Q = \gate_inst.link_valid).
+Adding SRST signal on $flatten\gate_inst.$procdff$295 ($dff) from module miter (D = $flatten\gate_inst.$procmux$133_Y, Q = \gate_inst.link, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$324 ($sdff) from module miter (D = \gate_inst.sequential, Q = \gate_inst.link).
+Adding SRST signal on $flatten\gate_inst.$procdff$294 ($dff) from module miter (D = $flatten\gate_inst.$procmux$138_Y, Q = \gate_inst.upc, rval = 10'0000000000).
+Adding EN signal on $auto$ff.cc:337:slice$330 ($sdff) from module miter (D = \gate_inst.next_address, Q = \gate_inst.upc).
+
+8.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 16 unused cells and 16 unused wires.
+<suppressed ~17 debug messages>
+
+8.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+<suppressed ~2 debug messages>
+
+8.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~57 debug messages>
+
+8.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+8.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 120 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Computing hashes of 118 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+<suppressed ~6 debug messages>
+Removed a total of 2 cells.
+
+8.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+Removed 0 unused cells and 2 unused wires.
+<suppressed ~1 debug messages>
+
+8.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+8.16. Rerunning OPT passes. (Maybe there is more to do..)
+
+8.17. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \miter..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~59 debug messages>
+
+8.18. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \miter.
+Performed a total of 0 changes.
+
+8.19. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\miter'.
+Computing hashes of 118 cells of `\miter'.
+Finding duplicate cells in `\miter'.
+Removed a total of 0 cells.
+
+8.20. Executing OPT_DFF pass (perform DFF optimizations).
+
+8.21. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \miter..
+
+8.22. Executing OPT_EXPR pass (perform const folding).
+Optimizing module miter.
+
+8.23. Finished fast OPT passes. (There is nothing left to do.)
+
+9. Executing SAT pass (solving SAT problems in the circuit).
+Using SAT solver `minisat`.
+
+Setting up time step 1:
+Import set-constraint for this timestep: \reset = 1'1
+Final constraint equation: \reset = 1'1
+Imported 118 cells to SAT database.
+Final init constraint equation: { \gold_inst.link_valid \gold_inst.link \gold_inst.upc \gate_inst.link_valid \gate_inst.link \gate_inst.upc } = 42'000000000000000000000000000000000000000000
+
+Setting up time step 2:
+Final constraint equation: { } = { }
+Imported 118 cells to SAT database.
+
+Setting up time step 1:
+Final constraint equation: { } = { }
+Imported 118 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+
+** Trying induction with length 1 **
+
+Setting up time step 3:
+Final constraint equation: { } = { }
+Imported 118 cells to SAT database.
+Import proof-constraint: \ok = 1'1
+Final proof equation: \ok = 1'1
+Import show expression: \a_one
+Import show expression: \address_odd
+Import show expression: \byte_instruction
+Import show expression: \clk
+Import show expression: \decode_wait
+Import show expression: \dispatch_address
+Import show expression: \effective_ack
+Import show expression: \enable
+Import show expression: \fault_redirect
+Import show expression: \fault_repair
+Import show expression: \fault_target
+Import show expression: \ir
+Import show expression: \irq_pending
+Import show expression: \loop_zero
+Import show expression: \mem_error
+Import show expression: \nzvc
+Import show expression: \q0
+Import show expression: \read_a
+Import show expression: \read_b
+Import show expression: \reset
+Import show expression: \selected_a
+Import show expression: \step_return
+Import show expression: \stopped
+Import show expression: \trace_pending
+Import show expression: \uword
+
+[base case 1] Solving problem with 10587 variables and 28118 clauses..
+SAT temporal induction proof finished - model found for base case: FAIL!
+
+   ______                   ___       ___       _ _            _ _ 
+  (_____ \                 / __)     / __)     (_) |          | | |
+   _____) )___ ___   ___ _| |__    _| |__ _____ _| | _____  __| | |
+  |  ____/ ___) _ \ / _ (_   __)  (_   __|____ | | || ___ |/ _  |_|
+  | |   | |  | |_| | |_| || |       | |  / ___ | | || ____( (_| |_ 
+  |_|   |_|   \___/ \___/ |_|       |_|  \_____|_|\_)_____)\____|_|
+
+
+  Time Signal Name                        Dec       Hex                                     Bin
+  ---- -------------------------- ----------- --------- ---------------------------------------
+  init \gate_inst.link                      0         0                              0000000000
+  init \gate_inst.link_valid                0         0                                       0
+  init \gate_inst.upc                       0         0                              0000000000
+  init \gold_inst.link                      0         0                              0000000000
+  init \gold_inst.link_valid                0         0                                       0
+  init \gold_inst.upc                       0         0                              0000000000
+  ---- -------------------------- ----------- --------- ---------------------------------------
+     1 \a_one                               1         1                                       1
+     1 \address_odd                         0         0                                       0
+     1 \byte_instruction                    0         0                                       0
+     1 \clk                                 0         0                                       0
+     1 \decode_wait                         0         0                                       0
+     1 \dispatch_address                    0         0                              0000000000
+     1 \effective_ack                       0         0                                       0
+     1 \enable                              0         0                                       0
+     1 \fault_redirect                      1         1                                       1
+     1 \fault_repair                        0         0                                       0
+     1 \fault_target                        0         0                              0000000000
+     1 \ir                                 16        10                        0000000000010000
+     1 \irq_pending                         0         0                                       0
+     1 \loop_zero                           0         0                                       0
+     1 \mem_error                           0         0                                       0
+     1 \nzvc                                0         0                                    0000
+     1 \q0                                  0         0                                       0
+     1 \read_a                              0         0                        0000000000000000
+     1 \read_b                              0         0                        0000000000000000
+     1 \reset                               1         1                                       1
+     1 \selected_a                          6         6                                    0110
+     1 \step_return                         0         0                                       0
+     1 \stopped                             0         0                                       0
+     1 \trace_pending                       0         0                                       0
+     1 \uword                              --        --    011000000000000000000000010100000000
+  ---- -------------------------- ----------- --------- ---------------------------------------
+     2 \a_one                               1         1                                       1
+     2 \address_odd                         0         0                                       0
+     2 \byte_instruction                    0         0                                       0
+     2 \clk                                 0         0                                       0
+     2 \decode_wait                         0         0                                       0
+     2 \dispatch_address                    0         0                              0000000000
+     2 \effective_ack                       0         0                                       0
+     2 \enable                              1         1                                       1
+     2 \fault_redirect                      0         0                                       0
+     2 \fault_repair                        0         0                                       0
+     2 \fault_target                      876       36c                              1101101100
+     2 \ir                                512       200                        0000001000000000
+     2 \irq_pending                         1         1                                       1
+     2 \loop_zero                           0         0                                       0
+     2 \mem_error                           0         0                                       0
+     2 \nzvc                                0         0                                    0000
+     2 \q0                                  0         0                                       0
+     2 \read_a                              0         0                        0000000000000000
+     2 \read_b                              0         0                        0000000000000000
+     2 \reset                               0         0                                       0
+     2 \selected_a                          6         6                                    0110
+     2 \step_return                         0         0                                       0
+     2 \stopped                             0         0                                       0
+     2 \trace_pending                       0         0                                       0
+     2 \uword                              --        --    100010000000000000000001101110011111
+  ---- -------------------------- ----------- --------- ---------------------------------------
+     3 \a_one                               1         1                                       1
+     3 \address_odd                         0         0                                       0
+     3 \byte_instruction                    0         0                                       0
+     3 \clk                                 0         0                                       0
+     3 \decode_wait                         0         0                                       0
+     3 \dispatch_address                    0         0                              0000000000
+     3 \effective_ack                       0         0                                       0
+     3 \enable                              0         0                                       0
+     3 \fault_redirect                      1         1                                       1
+     3 \fault_repair                        0         0                                       0
+     3 \fault_target                        0         0                              0000000000
+     3 \ir                                  0         0                        0000000000000000
+     3 \irq_pending                         0         0                                       0
+     3 \loop_zero                           0         0                                       0
+     3 \mem_error                           0         0                                       0
+     3 \nzvc                                1         1                                    0001
+     3 \q0                                  0         0                                       0
+     3 \read_a                              0         0                        0000000000000000
+     3 \read_b                              0         0                        0000000000000000
+     3 \reset                               1         1                                       1
+     3 \selected_a                          6         6                                    0110
+     3 \step_return                         0         0                                       0
+ERROR: Called with -verify and proof did fail!
+     3 \stopped                             0         0                                       0
+     3 \trace_pending                       0         0                                       0
+     3 \uword                              --        --    010110000000000111110010011110000000
+

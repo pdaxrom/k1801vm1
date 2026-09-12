@@ -1,4 +1,18 @@
-# Benchmarks: CP58 и предыдущие этапы
+# Benchmarks: CP59 и предыдущие этапы
+
+## CP59d — улучшен timing без изменения количества тактов
+
+Все девять portable/vendor full-board workloads совпали с CP56 по каждому
+счётчику. R,R — **23,5625 CPI**, около **1,255 млн instructions/s** при
+прежних номинальных 29,56 MHz. Служебный вход 258 clocks, START 120,
+STEP 119 до запроса следующего opcode. Cold RT-11FB + DIR —
+**173379163 clocks**, те же 3270 UART bytes.
+
+HC1200: **1239 LUT / 343 FF / 6 EBR / Fmax 32,531 MHz**.
+Пройден gate 31,824 MHz с FRAM budgets, но рабочая частота не повышалась;
+это сохранение производительности и увеличение запаса timing.
+[Сырые счётчики](../tb/reports/cp59d/bench-results.json),
+[измерения и ограничения](timing-cp59.md).
 
 ## CP58a — STEP/SEL004, без изменения гостевых счётчиков
 
