@@ -1,15 +1,35 @@
 # Synthesis checkpoints
 
-## CP58 — STEP и SEL004, gate подготовлен, измерений пока нет
+## CP58 — STEP и SEL004, выбран CP58a
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
 |---|---|---:|---:|---:|---:|---:|---|
-| CP58a | CP57e + STEP и ограниченный HALT fault recovery | — | — | — | — | 1002 | Synthesis не запущен; ожидается согласие на передачу после auto-review |
+| CP58a | CP57e + STEP и ограниченный HALT fault recovery | 1246 | 342 | 6 | 30,743 | 1002 | 627 slices; полный MAP/PAR/TRACE PASS, выбран |
+| CP58b | SEL004 через LSL(TWO)+PAGE за одно слово | 1258 | 342 | 6 | 30,626 | 1001 | 632 slices; полный PASS, отклонён: +12 LUT и −0,117 MHz |
 
-CPU/vendor, SPI FRAM, FIS, benchmarks и cold RT-11FB проверены локально.
-Это не подтверждает fit: исходный CP57e оставлял 20 LUT / 5 slices.
-Новые RTL и ROM изолированы в `build/cp58-service`; default и плата прежние.
-[Описание CP58](service-bank-cp58.md).
+CP58a относительно CP57e: **−14 LUT / 0 FF / 0 EBR / −1,239 MHz**.
+Свободны **34 LUT / 13 slices / 1 EBR / 22 слова микрокода**, свободных PIO нет.
+MAP: 1118 logic + 48 distributed RAM + 80 carry LUT; 334 PFU + 8 PIO FF.
+Худший путь EBR → RF address → I/O ACK → sequencer → EBR:
+**32,554 ns**, 17 уровней, 59,7% routing, slack **1,301 ns**.
+Это nominal 29,56 MHz gate: допуск OSCH +5,5% даёт 31,1858 MHz, выше
+полученного Fmax; worst-clock и внешние FRAM pins до установки ещё нужны.
+
+CPU/vendor, SPI FRAM, FIS, benchmarks и cold RT-11FB прошли на точных
+исходниках выбранного CP58a. Netlist: 3175 nets, 0 strong-driver conflicts,
+0 unexplained floating; 7 CIN доказанно не наблюдаются, три negative controls.
+Для CP58b отдельно прошли 91 CPU case × 3 и 12 board cases × 2; EDIF audit
+3139 nets без конфликтов, также с тремя negative controls. После сравнения
+восстановлены точные исходники CP58a; его ROM и test hashes проверены.
+
+Сборки изолированы в `build/cp58-service`; default и плата прежние.
+[Первичные отчёты A](../synth/reports/cp58a/), [B](../synth/reports/cp58b/),
+[машинные измерения](synthesis-cp58.json), [описание CP58](service-bank-cp58.md).
+
+Пользователь разрешил передачу исходников uJ11 и последующих исправлений
+на `sash@192.168.1.108` для synthesis без повторных вопросов. Используются
+отдельные каталоги `/tmp/uj11-*`; дисковые образы, ключи и `microasm11`
+в эти передачи не входят.
 
 ## CP57 — служебный банк без MMU, выбран эксперимент CP57e
 

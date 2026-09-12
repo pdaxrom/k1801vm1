@@ -8,6 +8,8 @@ FIS остаётся в микрокоде; PSW/IPL J-11 сохраняются,
 Это расширение uJ11 без MMU, не стандартное пространство
 J-11. [Организация](docs/service-bank-proposal.md), [реализованный CP57e](docs/service-bank-cp57.md).
 CP57e: 1260 LUT / 342 FF / 6 EBR / 31,982 MHz; на плате остаётся CP56a.
+Выбран следующий профиль CP58a: 1246 LUT / 342 FF / 6 EBR / 30,743 MHz,
+1002 слова; обычные STEP/SEL004 paths проверены. CP58b отклонён по площади.
 
 - [x] Проверить документацию ВМ2/J-11 и текущие FRAM/HALT/FP11 пути.
 - [x] Подробно разобрать [HALT ВМ2](docs/vm2-halt-reference.md): CPC/CPSW,
@@ -19,14 +21,16 @@ CP57e: 1260 LUT / 342 FF / 6 EBR / 31,982 MHz; на плате остаётся 
 - [x] CP58: STEP с пропуском одной проверки IRQ/T, SEL004 для обычных
   service faults и точный MFUS/MTUS fault delta; CPU/vendor/FRAM/RT-11 tests.
   [Контракт и ограничения](docs/service-bank-cp58.md).
-- [ ] CP58: получить полный HC1200 synthesis/MAP/PAR/TRACE; передача
-  подготовленных исходников ожидает отдельного разрешения после auto-review.
+- [x] CP58: полный HC1200 synthesis/MAP/PAR/TRACE и final EDIF audit.
+  [Два измеренных варианта](docs/synthesis-cp58.json), выбран CP58a.
+- [ ] До установки CP58 закрыть timing с допуском OSCH и внешние FRAM pins:
+  Fmax 30,743 MHz ниже 29,56 × 1,055 = 31,1858 MHz; nominal gate недостаточен.
 - [ ] Завершить HALT семантику ВМ2: copy H/P tracking, вложенные входы,
   SEL174/274 для ошибок незавершённого входа, внешний HALT для пультового STEP.
-- [ ] Сократить footprint CP57 перед новыми аппаратными функциями:
-  сейчас свободны только 20 LUT / 5 slices / 24 microinstructions.
-- [ ] Перенести служебные команды ВМ2 с фиксированными R0/R5 и HALT-only
-  aliases; successful paths/USER checks уже PASS, точный fault path ещё нужен.
+- [ ] Сократить footprint служебного профиля перед новыми аппаратными функциями:
+  в CP58a свободны 34 LUT / 13 slices / 22 microinstructions.
+- [x] Перенести служебные команды ВМ2 с фиксированными R0/R5 и HALT-only
+  aliases; successful paths/USER checks и обычный SEL004 fault path проверены.
 - [x] Ввести FP11 dispatch и отсутствие эмулятора; тестовый handler CP57,
   FIS сохраняет текущий результат и CPI (исходный FIS вход не меняется).
 - [x] Измерить отдельный минимальный профиль service bank поверх CP56a:

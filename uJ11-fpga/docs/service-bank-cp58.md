@@ -83,10 +83,40 @@ STEP использует ту же routine восстановления, что
   и vendor вариантах; R,R — 23,5625 microclocks/instruction.
 - Cold RT-11FB + DIR: 173379163 clocks, UART byte-for-byte совпадает с CP56.
 
-Полный HC1200 synthesis подготовлен, но ещё не запускался: автоматическая
-проверка отклонила передачу нового CP58 payload на сервер, ожидается отдельное
-согласие пользователя. Новые LUT/FF/EBR/Fmax **не измерены**. Из 1002 слов
-нельзя сделать вывод о fit: CP57e оставлял только 20 LUT и 5 slices.
+## Измеренный synthesis
+
+Полный компьютер, LCMXO2-1200HC-4SG32C, Diamond 3.14, constraint 29,56 MHz:
+
+| Вариант | LUT | FF | EBR | Slices | Fmax MHz | Microcode |
+|---|---:|---:|---:|---:|---:|---:|
+| CP57e, исходный | 1260 | 342 | 6 | 635 | 31,982 | 1000 |
+| **CP58a, выбран** | **1246** | **342** | **6** | **627** | **30,743** | **1002** |
+| CP58b, одно слово SEL004 | 1258 | 342 | 6 | 632 | 30,626 | 1001 |
+
+Оба CP58 прошли MAP/PAR/TRACE, ни один блок периферии не отключался.
+В CP58b `LSL(TWO)` формирует 004 и через PAGE сразу переходит к чтению
+вектора; адрес S_FAULT=0x0C5 вместо 0x2B6 в CP58a. На реальном mapping
+это дало +12 LUT и меньшую частоту, поэтому выбран исходный CP58a.
+Измерения не подтверждают, что меньшее число слов/меняющихся адресных битов
+автоматически уменьшает площадь после синтеза.
+
+В CP58a свободны **34 LUT, 13 slices, 1 EBR и 22 слова**; PIO заняты.
+Худший путь: EBR → RF address → I/O ACK → sequencer → EBR,
+32,554 ns / 17 уровней / 59,7% routing, slack 1,301 ns. Снижение LUT
+относится к mapping полного компьютера; это не экономия только микросеквенсора.
+Final EDIF: 3175 nets, 0 конфликтов strong drivers, 0 необъяснённых floating;
+7 carry inputs доказанно не наблюдаются, три negative controls обнаружены.
+CP58b отдельно прошёл те же 91 CPU × 3 и 12 board × 2, его EDIF также чист.
+
+**Timing пока закрыт только на номинальные 29,56 MHz.** Уже с допуском OSCH
++5,5% получается 31,1858 MHz, выше Fmax CP58a. В CP56 для дополнительно
+учтённого period jitter 2% применялся gate 31,824 MHz. Перед установкой CP58
+нужны улучшение critical path либо обоснованная меньшая частота и новая
+проверка внешних FRAM pins; результаты CP56 к новой разводке не переносятся.
+Текущий checkpoint не прошивался; на плате CP56a.
+
+[Первичные отчёты A](../synth/reports/cp58a/), [B](../synth/reports/cp58b/),
+[synthesis manifest](synthesis-cp58.json), [verification manifest](verification-cp58.json).
 
 ## Воспроизведение
 
@@ -99,7 +129,11 @@ python3 tools/check_service_cp58_fis.py
 python3 tools/benchmark_service_cp58.py
 python3 tools/run_board.py --service-cp58 --tag cp58a-cold
 python3 tools/checkpoint_board.py cp58a --service-cp58
+python3 tools/archive_synthesis.py cp58a
 ```
 
 Diamond gate требует Linux/лицензию и свежую директорию implementation.
 Передающие команды не включают дисковые образы или `microasm11`.
+CP58b воспроизводится из его `source.tgz`, поскольку рабочий builder после
+сравнения восстановлен в точное состояние CP58a. Действует разрешение
+пользователя на дальнейшие synthesis-передачи uJ11 без повторных вопросов.

@@ -1,7 +1,7 @@
 {
   "checkpoint": "CP58a",
   "reference": "CP57e",
-  "synthesis": "not run; upload awaiting user approval after auto-review rejection",
+  "synthesis": "full HC1200 MAP/PAR/TRACE PASS at nominal 29.56 MHz",
   "prepared_input_revision_sha256": "1758381cb3df8f5b4c11b621cc461bc7aa9d7fcb23537b54a2630ca78167aabc",
   "microcode_words": 1002,
   "cpu_scenarios": 91,
@@ -139,6 +139,8 @@
     "step": 119
   },
   "installed": false,
+  "edif_nets": 3175,
+  "edif_negative_controls": 3,
   "files": {
     "tb/reports/cp58a/bench-portable.json": "8adc3323ca6ca97944a3f2335b355e83504d0acad78ef04726d81ad8124e5d85",
     "tb/reports/cp58a/bench-portable.log": "39d2647fdd9069fd599ba364d0b21cc09f88945bad894b1edf0f2459a80f8440",
@@ -156,6 +158,7 @@
     "tb/reports/cp58a/cp58a-cold-board-inputs.json": "b557c3005fe5707b5b4ed5fd4b7abe07907f8dd09b0bf0d4b676dac392112dd3",
     "tb/reports/cp58a/cp58a-cold-board-rt11.log": "57793368cc410487562d7dbbe1758100391e5d667d164759dd769bba994c8cc7",
     "tb/reports/cp58a/cp58a-cold-uart.txt": "4a180086ca32f4a656e29a4513e8236d600646f322feb3a44a20480a69d51787",
+    "tb/reports/cp58a/edif-audit.json": "dcad2f237fde59e994213f3ab832f1107715170b863c36d25a5a18c83d2c1bdb",
     "tb/reports/cp58a/fis-inputs.json": "fbac614ef1c2c22a18d7360bf6a50105a43282242d5c308d0e92db532ebcf816",
     "tb/reports/cp58a/inputs.json": "ebfb3464d87231b259ce71a77626577a35d54ddfc776aac08446546730108617",
     "tb/reports/cp58a/prepared-synthesis-inputs.json": "66c9bff3df0e6d51d4f9250896b26e1969005a99fa85d5f5928524db70e3958e",
@@ -165,6 +168,18 @@
     "tb/reports/cp58a/test-0.log": "962d5b00711c5e809dacdbeb738436ed8d8cf5cff8b3ec2b3c635f287ad9f46b",
     "tb/reports/cp58a/test-1.log": "ef6fb5f8862bcfefce9c3ddc0101e1489b333b62959f6b8f887fc207362089d3",
     "tb/reports/cp58a/test-results.json": "91132670e2e5a55329fc5d7a8c26a0e6a8e6671ac20f2203bea488c33f7cce83",
-    "tb/reports/cp58a/test-vendor.log": "ef6fb5f8862bcfefce9c3ddc0101e1489b333b62959f6b8f887fc207362089d3"
+    "tb/reports/cp58a/test-vendor.log": "ef6fb5f8862bcfefce9c3ddc0101e1489b333b62959f6b8f887fc207362089d3",
+    "tb/reports/cp58b/board-portable-inputs.json": "f5485b5bcaeeb8338a7fb4da6ca2be810533b3e3bf4b69dd12fd0521890968d7",
+    "tb/reports/cp58b/board-portable.log": "2426546eea9d2a27c17f2c938d91d52cf528b67095d25bf5d47d43e5250b5da9",
+    "tb/reports/cp58b/board-vendor-inputs.json": "4d9481d28794687434822c245d1557e44205de6e116e53a1590ff6fcd67c30c0",
+    "tb/reports/cp58b/board-vendor.log": "2426546eea9d2a27c17f2c938d91d52cf528b67095d25bf5d47d43e5250b5da9",
+    "tb/reports/cp58b/edif-b-audit.json": "8101766d66923fd1234409ab6eaa950e1f8d681339496b588bdc40b41a69c3c4",
+    "tb/reports/cp58b/inputs.json": "2e1b8e2f20abca1e49ab9fe1b3382b38b54dfb8a3bd40471b1a4fc48c06e9b2c",
+    "tb/reports/cp58b/service_cp58_board_cases.vh": "5dafffe6e145b1b5845fb88087e70b72c05c75a4b015efd89f2e91027d190146",
+    "tb/reports/cp58b/service_cp58_cases.vh": "23fbd5c9304b4a8c4fc76b020ef1408397dfabd967efd1a4e02ef2e57468d715",
+    "tb/reports/cp58b/test-0.log": "b1dd3bfa827ddb113c5aa1547f6e4ed422db0c1a035118f82f6b6656d4c786f3",
+    "tb/reports/cp58b/test-1.log": "34e54c0388edfc70485e5c58cf20dfd7956ed016ec02c215604797da13031301",
+    "tb/reports/cp58b/test-results.json": "2f3f101ca3d7d6d4c89567becc20ea9ae29600044a2da466a981088d23d27845",
+    "tb/reports/cp58b/test-vendor.log": "34e54c0388edfc70485e5c58cf20dfd7956ed016ec02c215604797da13031301"
   }
 }

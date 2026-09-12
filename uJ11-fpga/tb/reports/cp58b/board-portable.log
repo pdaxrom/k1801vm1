@@ -1,0 +1,14 @@
+board case1 11006 clocks; entry258 return120
+board case4 2644 clocks; entry-1 return-1
+board case5 596 clocks; entry-1 return-1
+board case33 477 clocks; entry-1 return-1
+board case34 3919 clocks; entry258 return120
+board case36 3807 clocks; entry258 return380
+board case37 1344 clocks; entry258 return-1
+board case38 1344 clocks; entry258 return-1
+board case42 8235 clocks; entry258 return120
+board case43 3418 clocks; entry258 return-1
+board case82 1567 clocks; entry258 return119
+board case40 8217 clocks; entry258 return120
+PASS CP58 full board: 12 service scenarios, actual SPI FRAM and I/O
+tb/tb_service_board_cp58.v:58: $finish called at 1586032000 (1ps)

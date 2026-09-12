@@ -6,7 +6,8 @@
 R,R — **23,5625 CPI**, cold RT-11FB+DIR — **173379163 clocks**, UART совпадает.
 Служебный вход — 258 clocks, START — 120, STEP — 119 до запроса следующей
 opcode fetch на полном SPI FRAM bus (завершение fetch в интервал не входит).
-Это simulation. CP58 Fmax и fit ещё не измерены; плата остаётся CP56a.
+Simulation и full-board Diamond: выбран CP58a, 1246 LUT / 342 FF / 6 EBR /
+Fmax 30,743 MHz при nominal gate 29,56 MHz. Плата остаётся CP56a.
 [Сырые счётчики](../tb/reports/cp58a/bench-results.json),
 [контракт и ограничения](service-bank-cp58.md).
 

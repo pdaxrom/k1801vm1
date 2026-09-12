@@ -1,6 +1,6 @@
 # Implementation status, 2026-09-12
 
-## CP58 — STEP/SEL004, локальные проверки завершены, synthesis ожидает передачи
+## CP58 — STEP/SEL004, выбран CP58a после полного synthesis
 
 91 CPU cases × 3 режима ROM/декодера, 12 full-board service cases × 2,
 23840 FIS portable + 645 vendor и девять benchmarks × 2 проходят.
@@ -9,8 +9,12 @@ STEP пропускает одну проверку IRQ/T; MFUS/MTUS при ош
 R5 delta и используют SEL004 без перезаписи CPC/CPSW. Ошибка незавершённого
 входа/вектора пока терминальна; SEL174/274 и внешний HALT ещё не реализованы.
 
-1002 microinstructions. Новых LUT/FF/EBR/Fmax нет: auto-review отклонила
-передачу CP58, запрошено отдельное согласие. CP58 остаётся opt-in;
+1002 microinstructions, **1246 LUT / 342 FF / 6 EBR / 30,743 MHz**,
+627 slices. Свободны 34 LUT / 13 slices / 1 EBR / 22 слова. Полный
+MAP/PAR/TRACE PASS на номинальных 29,56 MHz; final EDIF: 3175 nets,
+нет конфликтующих драйверов/необъяснённых floating nets, три negative controls.
+CP58b (одно слово SEL004) дал 1258 LUT / 30,626 MHz и отклонён.
+До прошивки остаются OSCH tolerance и external pin timing. CP58 opt-in;
 плата CP56a и default CP52a прежние. [Контракт](service-bank-cp58.md),
 [проверки](verification-cp58.json).
 
