@@ -98,5 +98,11 @@
     "sd_files_verified": true
   },
   "software_activation_message": "!UJON-I-CP64 DEBUG ENABLED; SHORT RESET ENTERS ODT",
-  "physical_button_entry_verified": false
+  "physical_button_entry_verified": true,
+  "physical_button_entry_verification": {
+    "date": "2026-09-13",
+    "source": "user confirmation after UJLOAD/ODT/UJON reactivation and requested short RESET",
+    "jtag_pins": "user reported JTAG had remained connected to keyboard pins; disconnected for operation",
+    "per_key_label_mapping_verified": false
+  }
 }
