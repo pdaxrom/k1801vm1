@@ -1,0 +1,23 @@
+
+PDP-11 simulator V3.12-3
+
+RT-11FB (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.R MACRO
+*UJON,UJON=UJON
+*^C
+
+.R LINK
+*UJON,UJON=UJON
+*^C
+
+.
+Simulation stopped, PC: 143000 (BEQ 143020)
+sim> quit
+Goodbye

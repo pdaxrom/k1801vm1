@@ -1,0 +1,62 @@
+{
+  "checkpoint": "CP65",
+  "module": {
+    "kind": 1,
+    "base": 4096,
+    "payload_bytes": 9118,
+    "memory_bytes": 9902,
+    "entry": 4096,
+    "fault": 5938,
+    "checksum": 32019,
+    "file_blocks": 19,
+    "sha256": "38c422ec519bb98f6eecb250480155df7edf0239c84f43027adbd1fb8e4ed740"
+  },
+  "free_slot_bytes": 2386,
+  "hardware": {
+    "unchanged_from": "CP63b",
+    "lut": 1230,
+    "ff": 381,
+    "ebr": 6,
+    "fmax_mhz": 32.246,
+    "microinstructions": 1005,
+    "new_synthesis": false
+  },
+  "core": [
+    {
+      "mode": "sync",
+      "checks": 187,
+      "commands": 175,
+      "clocks": 5474306
+    }
+  ],
+  "panel_passed": true,
+  "rt11": {
+    "checks": 281,
+    "clocks": 450709966,
+    "uart_bytes": 2133,
+    "hdsp_frames": 58,
+    "asserted_rx_overruns": 0
+  },
+  "programmed": false,
+  "archive_sha256": "abd6096972f667b989ef345e2c6f87c9076816e5dbfee43db6821a3a9b76d3c0",
+  "source_archive_sha256": "18824a3c700e8463a03759f690a62c877d07dca6151c6678dd2bb7d9592e14ae",
+  "limits": [
+    "STEP OVER is a bounded CP63 STEP loop: ordinary IRQ/trace is deferred; WAIT/HALT stops it.",
+    "PREV uses 32 known viewed boundaries, never guesses before the first retained entry.",
+    "No USER RAM breakpoint patches, RAW HALT/I-O view, or held-key repeat.",
+    "Physical CP65 software deployment is separate; UART wire input remains paced at about 1.77 ms."
+  ],
+  "panel": {
+    "checks": 2679,
+    "clocks": 101603196,
+    "windows": 85
+  },
+  "auto_scroll_timing": {
+    "initial_clocks": 30924216,
+    "interior_clocks": 5580491,
+    "nominal_cpu_mhz": 29.56,
+    "initial_ms": 1046.1507442489851,
+    "interior_ms": 188.78521650879566,
+    "source": "full RTL FRAM simulation, not a physical stopwatch measurement"
+  }
+}

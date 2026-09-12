@@ -15,10 +15,11 @@ from rt11_build import build
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def run(odt,out):
+def run(odt,out,cp65=False):
     out.mkdir(parents=True,exist_ok=True);assert not (out/'test.dsk').exists(),'fresh run directory required'
     result=json.loads((odt/'result.json').read_text());sym=result['symbols']
-    asm=out/'guest';build([ROOT/'demos/rt11/service/cp64/UJTEST.MAC'],asm,ROOT/'../lsi11-fpga/images/rt11v503.dsk')
+    revision='cp65' if cp65 else 'cp64'
+    asm=out/'guest';build([ROOT/'demos/rt11/service'/revision/'UJTEST.MAC'],asm,ROOT/'../lsi11-fpga/images/rt11v503.dsk')
     listing=(asm/'UJTEST.LST').read_text(errors='replace')
     guest={n:int(v,8)+0o1000 for n,v in re.findall(r'\b([A-Z][A-Z0-9]{0,5})\s+([0-7]{6})R',listing)}
     base=ROOT/'../lsi11-fpga/images/rt11v503.dsk';basehash=sha(base)
@@ -36,12 +37,14 @@ def run(odt,out):
     assert len(font)==320
     (out/'font.hex').write_text(''.join(f'{n:02x}\n' for n in font))
     core,board=adapt()
-    tb=(ROOT/'tb/tb_odt_rt11.v').read_text()
+    tb_path=ROOT/('tb/tb_odt_cp65_rt11.v' if cp65 else 'tb/tb_odt_rt11.v')
+    tb=tb_path.read_text()
     test=out/'tb.v';test.write_text(tb.replace('    integer clocks=',f'    initial $readmemh("{out}/font.hex",font);\n    integer clocks='))
-    (out/'odt_symbols.vh').write_text(''.join(f"localparam integer O_{n}={v};\n" for n,v in sym.items() if n in ('REGS','SCREEN','RESULT','VIEW','SCROLL','KLAST','PNEN','PANEDIT','MAIN','STKTOP'))+''.join(f'localparam integer G_{n}={guest[n]};\n' for n in ('LOOP','DONE')))
+    guest_names=('LOOP','DONE','OVCALL','OVDONE','OLDSP') if cp65 else ('LOOP','DONE')
+    (out/'odt_symbols.vh').write_text(''.join(f"localparam integer O_{n}={v};\n" for n,v in sym.items() if n in ('REGS','SCREEN','RESULT','VIEW','SCROLL','KLAST','PNEN','PANEDIT','MAIN','STKTOP','DCUR'))+''.join(f'localparam integer G_{n}={guest[n]};\n' for n in guest_names))
     sources=[str(test)]+core+board+['rtl/uj11_rom.v','tb/models/ODDRXE.v',
                                  'reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
-    manifest={str(p.relative_to(ROOT)):sha(p) for p in paths+[ROOT/'tb/tb_odt_rt11.v',Path(__file__)]}
+    manifest={str(p.relative_to(ROOT)):sha(p) for p in paths+[tb_path,Path(__file__)]}
     manifest.update({p:sha(ROOT/p) for p in core+board})
     (out/'inputs.json').write_text(json.dumps(dict(files=manifest,odt=result,guest=guest,image_sha256=imagehash),indent=2)+'\n')
     for i,name in enumerate(sources):
@@ -57,4 +60,5 @@ def run(odt,out):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--odt',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
-    a=p.parse_args();run(a.odt.resolve(),a.out.resolve())
+    p.add_argument('--cp65',action='store_true',help='CP65 automatic panel navigation and native STEP OVER fixture')
+    a=p.parse_args();run(a.odt.resolve(),a.out.resolve(),cp65=a.cp65)

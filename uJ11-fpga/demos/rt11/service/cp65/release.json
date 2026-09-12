@@ -1,0 +1,34 @@
+{
+  "requires_fpga": "CP63b --debug-cp63",
+  "loader": "unchanged CP62 UJLOAD ABI2",
+  "module": {
+    "kind": 1,
+    "base": 4096,
+    "payload_bytes": 9118,
+    "memory_bytes": 9902,
+    "entry": 4096,
+    "fault": 5938,
+    "checksum": 32019,
+    "file_blocks": 19,
+    "sha256": "38c422ec519bb98f6eecb250480155df7edf0239c84f43027adbd1fb8e4ed740"
+  },
+  "files": {
+    "ODT.BIN": "38c422ec519bb98f6eecb250480155df7edf0239c84f43027adbd1fb8e4ed740",
+    "UJON.SAV": "e00a1022a0e5babb92050c28ebca62fdda93fbf407490d4bc6cdf63487350cbf"
+  },
+  "source_sha256": {
+    "firmware/odt/ODT.MAC": "b0890097f021421ab767b839373e56be7d489c4461e3d901b994acf8ff79c27c",
+    "firmware/odt/DISASM.MAC": "567b63babe626cd23c15c953864dcfc874e0b1f61c6db254ff9a6a43367f083a",
+    "firmware/odt/PANEL.MAC": "dc493a2346438c145a002d6de611f1cde2f8642cdd1856474dd52a308932b767",
+    "firmware/odt/NAV.MAC": "cb4a3dcd9a56bf2a3e1d07cc3e9363fc01360dd98a45766f9ad363b62133aa9c",
+    "firmware/odt/OVER.MAC": "de4b896059a81766d7c75da8f13211e10bac71681ed04d7d6c3168974f385ac6",
+    "firmware/odt/DATA.MAC": "2f57f3471e8a2be7854ddac35e50840d8c2fbd99d1a93f13eb48af40b62cb878",
+    "demos/rt11/panel/PNLDRV.MAC": "13af32da914fcf248ad62573c4588b1e87d66756af7cdb029afe19c7bf4fc0cb",
+    "firmware/odt/PNKEY.MAC": "fb1abc5d41c02f59273acb4785159ab7192e5c0867e7bf2115dea200fc852a7c",
+    "demos/rt11/service/cp64/UJON.MAC.in": "7b665596a624fe82b338e574a14c3819819b206c9b0346b77275497d3931249b",
+    "demos/rt11/service/cp62/UJLOAD.MAC": "f0062e9a60cc552bae2c7703d3329c08c397ff5632935b9f53710bcecf8c9968",
+    "tools/build_odt_cp64.py": "3cced64a4beae1471f406c4174d92f4af3c1d7d7dea6fe0435010c4338217c3f"
+  },
+  "assembly_sha256": "63157fe59470aed2a179eb71f3389c6137dce659baca39d81e18ca85f9f3d563",
+  "activation_sha256": "1044faf4c572d2afd67bf8b294e6425ac288ebd7dae9cad8322912705ee1010e"
+}

@@ -1,0 +1,14 @@
+{
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+  "source_sha256": {
+    "demos/rt11/service/cp65/UJTEST.MAC": "f35bd10a862cb101f5fd748bdd01322991dc5f0b226fc618a6b0767f722792a4"
+  },
+  "outputs": {
+    "UJTEST.SAV": "f3f535ce06743532b0efea63a1acefad1ca5977c85bb77eae91ce50b85644a4f",
+    "UJTEST.OBJ": "356c71c8183ccf14f9c8ac51be1b83b8eabc154a031e165ccb60a01220282894",
+    "UJTEST.LST": "427de728997d4e2f95567e5060db021e51beca28af4516f0d54de3eebb98cd57",
+    "UJTEST.MAP": "7345f798c64c252f63bf52b763999b5fa522558e8f6f87c557fb0f37fa5fa590"
+  },
+  "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+}

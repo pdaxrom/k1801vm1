@@ -14,10 +14,11 @@ from check_odt_cp64 import check
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def archive(odt,rt11,cores,panel,patch=False):
+def archive(odt,rt11,cores,panel,patch=False,cp65=False):
     hardware=check(odt)
     module=json.loads((odt/'result.json').read_text())
-    revision='cp64a' if patch else 'cp64'
+    assert not (patch and cp65)
+    revision='cp65' if cp65 else ('cp64a' if patch else 'cp64')
     target=ROOT/'tb/reports'/revision;target.mkdir(parents=True,exist_ok=True)
     source=set(module['sources'])
     source.update(hardware['hardware_source_sha256'])
@@ -29,7 +30,7 @@ def archive(odt,rt11,cores,panel,patch=False):
     counters=[]
     # A software-only patch still requires the full RT-11 test and the exact
     # CP63b hardware check; do not claim repeated logic/vendor tests for it.
-    expected_modes={'sync'} if patch else {'logic','sync','vendor'}
+    expected_modes={'sync'} if patch or cp65 else {'logic','sync','vendor'}
     assert len(cores)==len(expected_modes)
     for directory in cores+[panel]:
         record=json.loads((directory/'result.json').read_text());assert record['passed']
@@ -73,7 +74,8 @@ def archive(odt,rt11,cores,panel,patch=False):
                 copy(p,folder+'/'+p.name)
     for f in ('ODT.BIN','payload.bin','UJMON.MAC','UJON.MAC','result.json','checks.json'):
         copy(odt/f,'module/'+f);source.add(str((odt/f).relative_to(ROOT)))
-    m=re.search(r'PASS CP64 RT11 \+ panel: (\d+) checks, (\d+) clocks, (\d+) UART bytes, (\d+) HDSP frames',(rt11/'simulation.log').read_text());assert m
+    rt11_tag='CP65' if cp65 else 'CP64'
+    m=re.search(r'PASS '+rt11_tag+r' RT11 \+ panel: (\d+) checks, (\d+) clocks, (\d+) UART bytes, (\d+) HDSP frames',(rt11/'simulation.log').read_text());assert m
     counts=dict(checks=int(m[1]),clocks=int(m[2]),uart_bytes=int(m[3]),hdsp_frames=int(m[4]),asserted_rx_overruns=0)
     release=ROOT/'demos/rt11/service'/revision;release.mkdir(parents=True,exist_ok=True)
     for src,name in ((odt/'ODT.BIN','ODT.BIN'),(odt/'activation/UJON.SAV','UJON.SAV')):
@@ -98,7 +100,7 @@ def archive(odt,rt11,cores,panel,patch=False):
     artifacts['source.tgz']=sha(target/'source.tgz')
     record=dict(passed=True,source_files=source_hashes,artifacts=artifacts,core=counters,rt11=counts)
     (target/'archive.json').write_text(json.dumps(record,indent=2)+'\n')
-    summary=dict(checkpoint='CP64a' if patch else 'CP64',module=module['format'],free_slot_bytes=hardware['free_slot_bytes'],
+    summary=dict(checkpoint='CP65' if cp65 else ('CP64a' if patch else 'CP64'),module=module['format'],free_slot_bytes=hardware['free_slot_bytes'],
         hardware=dict(unchanged_from='CP63b',lut=1230,ff=381,ebr=6,fmax_mhz=32.246,microinstructions=1005,new_synthesis=False),
         core=counters,panel_passed=True,rt11=counts,programmed=False,
         archive_sha256=sha(target/'archive.json'),source_archive_sha256=artifacts['source.tgz'],
@@ -106,7 +108,15 @@ def archive(odt,rt11,cores,panel,patch=False):
                 'No full HG exchange; see board-bringup-cp64.md for physical validation separate from this simulation archive.',
                 'UART wire input paced at about 1.77 ms; arbitrary continuous paste is not qualified.'])
     panel_record=json.loads((panel/'result.json').read_text())
-    summary['panel']={k:panel_record[k] for k in ('checks','clocks') if k in panel_record}
+    summary['panel']={k:panel_record[k] for k in ('checks','clocks','windows') if k in panel_record}
+    if cp65:
+        timing=re.search(r'CP65 AUTO timing at nominal 29.56 MHz: initial (\d+) clocks, interior (\d+) clocks',(rt11/'simulation.log').read_text());assert timing
+        summary['auto_scroll_timing']=dict(initial_clocks=int(timing[1]),interior_clocks=int(timing[2]),nominal_cpu_mhz=29.56,
+                                           initial_ms=int(timing[1])/29560,interior_ms=int(timing[2])/29560,source='full RTL FRAM simulation, not a physical stopwatch measurement')
+        summary['limits']=['STEP OVER is a bounded CP63 STEP loop: ordinary IRQ/trace is deferred; WAIT/HALT stops it.',
+                           'PREV uses 32 known viewed boundaries, never guesses before the first retained entry.',
+                           'No USER RAM breakpoint patches, RAW HALT/I-O view, or held-key repeat.',
+                           'Physical CP65 software deployment is separate; UART wire input remains paced at about 1.77 ms.']
     (ROOT/'docs'/('verification-'+revision+'.json')).write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps(dict(source_files=len(source),artifacts=len(artifacts),core=counters,rt11=counts),indent=2))
 
@@ -115,4 +125,5 @@ if __name__=='__main__':
     for name in ('odt','rt11','panel'):p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--core',type=Path,nargs='+',required=True)
     p.add_argument('--patch',action='store_true',help='archive software-only CP64a separately; sync core, panel and full RT-11 required')
-    a=p.parse_args();archive(a.odt.resolve(),a.rt11.resolve(),[p.resolve() for p in a.core],a.panel.resolve(),patch=a.patch)
+    p.add_argument('--cp65',action='store_true',help='archive CP65 panel/navigation/STEP OVER; unchanged hardware, sync core and full RT-11 required')
+    a=p.parse_args();archive(a.odt.resolve(),a.rt11.resolve(),[p.resolve() for p in a.core],a.panel.resolve(),patch=a.patch,cp65=a.cp65)

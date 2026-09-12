@@ -44,7 +44,7 @@ def tables():
 
 def build(out):
     out.mkdir(parents=True,exist_ok=True)
-    files=[ROOT/'firmware/odt'/n for n in ('ODT.MAC','DISASM.MAC','PANEL.MAC','DATA.MAC')]
+    files=[ROOT/'firmware/odt'/n for n in ('ODT.MAC','DISASM.MAC','PANEL.MAC','NAV.MAC','OVER.MAC','DATA.MAC')]
     driver=ROOT/'demos/rt11/panel/PNLDRV.MAC'
     pnl=driver.read_text()
     pnl=pnl[pnl.index('PANEL\t='):pnl.rindex('\t.END')]
@@ -54,8 +54,8 @@ def build(out):
     scanner=ROOT/'firmware/odt/PNKEY.MAC'
     pnl=pnl[:pnl.index('PNKEY:')]+scanner.read_text()+pnl[pnl.index('SHBYTE:'):]
     code,data=pnl.split('SHADOW:',1)
-    text=''.join(p.read_text() for p in files[:3])+code+tables()+'IMMEND:\nSHADOW:'+data
-    text+=files[3].read_text().replace('IMMEND:','')
+    text=''.join(p.read_text() for p in files[:-1])+code+tables()+'IMMEND:\nSHADOW:'+data
+    text+=files[-1].read_text().replace('IMMEND:','')
     files.extend((driver,scanner))
     src=out/'UJMON.MAC';src.write_text(text)
     asm=out/'asm'
