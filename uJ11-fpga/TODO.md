@@ -16,8 +16,13 @@ CP57e: 1260 LUT / 342 FF / 6 EBR / 31,982 MHz; на плате остаётся 
   save не включать в выбранный механизм.
 - [x] Определить минимальный HALT ABI CP57: CPSW16, один frozen context,
   отдельный режим, START и правила отложенных IRQ/trace.
-- [ ] Завершить HALT семантику ВМ2: STEP, copy H/P tracking и SEL004 errors;
-  проверить MFUS postincrement при неудаче, вложенные/system faults.
+- [x] CP58: STEP с пропуском одной проверки IRQ/T, SEL004 для обычных
+  service faults и точный MFUS/MTUS fault delta; CPU/vendor/FRAM/RT-11 tests.
+  [Контракт и ограничения](docs/service-bank-cp58.md).
+- [ ] CP58: получить полный HC1200 synthesis/MAP/PAR/TRACE; передача
+  подготовленных исходников ожидает отдельного разрешения после auto-review.
+- [ ] Завершить HALT семантику ВМ2: copy H/P tracking, вложенные входы,
+  SEL174/274 для ошибок незавершённого входа, внешний HALT для пультового STEP.
 - [ ] Сократить footprint CP57 перед новыми аппаратными функциями:
   сейчас свободны только 20 LUT / 5 slices / 24 microinstructions.
 - [ ] Перенести служебные команды ВМ2 с фиксированными R0/R5 и HALT-only

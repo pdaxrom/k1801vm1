@@ -1,0 +1,5 @@
+; HALT fault vector SEL004, base zero. CPC/CPSW stay frozen in upper FRAM.
+; MFUS's fault_inc repair has already incremented R5, leaving R0 untouched.
+S_FAULT:
+    alu PASSA, pair=DA, d=IMM, imm=4, b=T4, dst=RF
+    JUMP, target=S_VECTOR_READ, prefetch=0

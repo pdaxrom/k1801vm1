@@ -1,5 +1,16 @@
 # Synthesis checkpoints
 
+## CP58 — STEP и SEL004, gate подготовлен, измерений пока нет
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP58a | CP57e + STEP и ограниченный HALT fault recovery | — | — | — | — | 1002 | Synthesis не запущен; ожидается согласие на передачу после auto-review |
+
+CPU/vendor, SPI FRAM, FIS, benchmarks и cold RT-11FB проверены локально.
+Это не подтверждает fit: исходный CP57e оставлял 20 LUT / 5 slices.
+Новые RTL и ROM изолированы в `build/cp58-service`; default и плата прежние.
+[Описание CP58](service-bank-cp58.md).
+
 ## CP57 — служебный банк без MMU, выбран эксперимент CP57e
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

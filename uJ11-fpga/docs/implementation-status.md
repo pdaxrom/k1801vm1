@@ -1,5 +1,19 @@
 # Implementation status, 2026-09-12
 
+## CP58 — STEP/SEL004, локальные проверки завершены, synthesis ожидает передачи
+
+91 CPU cases × 3 режима ROM/декодера, 12 full-board service cases × 2,
+23840 FIS portable + 645 vendor и девять benchmarks × 2 проходят.
+Cold RT-11FB + DIR: 173379163 clocks, UART совпадает с CP56.
+STEP пропускает одну проверку IRQ/T; MFUS/MTUS при ошибке имеют точный
+R5 delta и используют SEL004 без перезаписи CPC/CPSW. Ошибка незавершённого
+входа/вектора пока терминальна; SEL174/274 и внешний HALT ещё не реализованы.
+
+1002 microinstructions. Новых LUT/FF/EBR/Fmax нет: auto-review отклонила
+передачу CP58, запрошено отдельное согласие. CP58 остаётся opt-in;
+плата CP56a и default CP52a прежние. [Контракт](service-bank-cp58.md),
+[проверки](verification-cp58.json).
+
 ## CP57 — минимальный служебный банк, отдельный профиль
 
 CP57e прошёл полный HC1200 MAP/PAR/TRACE: **1260 LUT / 342 FF / 6 EBR /

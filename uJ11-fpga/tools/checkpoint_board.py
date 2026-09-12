@@ -22,8 +22,9 @@ def main():
     p.add_argument('--spi-cp56',action='store_true',help='CP56 native 29.56 MHz SPI via ODDRXE')
     p.add_argument('--prepare-only',action='store_true',help='Write exact synthesis project and input manifest without running Diamond')
     p.add_argument('--service-cp57',action='store_true',help='CP57 opt-in service FRAM bank, frozen CP56 base')
+    p.add_argument('--service-cp58',action='store_true',help='CP58 HALT fault recovery and STEP, frozen CP57e base')
     args=p.parse_args()
-    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57))<=1, 'Choose one native candidate or the retained MMU profile'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57,args.service_cp58))<=1, 'Choose one native candidate or the retained MMU profile'
     assert re.fullmatch(r'cp[0-9]+[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
@@ -45,12 +46,16 @@ def main():
     if args.spi_cp56:
         from build_spi_cp56 import adapt
         core,board=adapt()
-    if args.service_cp57:
-        from build_service_cp57 import adapt
+    if args.service_cp57 or args.service_cp58:
+        if args.service_cp58:
+            from build_service_cp58 import adapt
+        else:
+            from build_service_cp57 import adapt
         core,board=adapt()
+    service_path='build/cp58-service' if args.service_cp58 else 'build/cp57-service'
     sources=core+board+['boards/hc1200/uj11_microcomp.v','microcode/generated/uj11_m0_ebr.v']
-    if args.service_cp57:
-        sources[-1]='build/cp57-service/uj11_m0_ebr.v'
+    if args.service_cp57 or args.service_cp58:
+        sources[-1]=service_path+'/uj11_m0_ebr.v'
     if args.mmu:sources+=MMU
     proj=ET.Element('BaliProject',version='3.2',title=args.name,device='LCMXO2-1200HC-4SG32C',default_implementation='impl1')
     ET.SubElement(proj,'Options')
@@ -98,12 +103,12 @@ exit 0
     if args.spi_cp56:
         inputs+=['tools/build_spi_cp56.py','tools/build_fram_cp52.py','build/cp56-spi/inputs.json',
                  'synth/reports/cp54b/inputs.json','synth/reports/cp54b/source.tgz']
-    if args.service_cp57:
-        record=json.loads((ROOT/'build/cp57-service/inputs.json').read_text())
-        inputs+=list(record['inputs'])+list(record['outputs'])+['build/cp57-service/inputs.json']
+    if args.service_cp57 or args.service_cp58:
+        record=json.loads((ROOT/service_path/'inputs.json').read_text())
+        inputs+=list(record['inputs'])+list(record['outputs'])+[service_path+'/inputs.json']
     hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in sorted(inputs)}
     hashes['generated:clock.lpf']=hashlib.sha256(lpf.encode()).hexdigest()
-    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,defines=['UJ11_MMU'] if args.mmu else [],
+    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,defines=['UJ11_MMU'] if args.mmu else [],
                   input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if args.prepare_only:
@@ -117,8 +122,8 @@ exit 0
     prefix=out/'impl1'/f'{args.name}_impl1'
     report=dict(inputs=manifest,scope='Full board: core/FIS + SPI FRAM + KL11/KW11/panel/SD/RK + bootstrap + OSCH/reset/pins; prefetch disabled',
                 device='LCMXO2-1200HC-4SG32C',constraint_mhz=29.56,expected_ebr=7 if args.mmu else 6,diamond_returncode=rc,
-                mmu=args.mmu,microcode_words=json.loads((ROOT/('build/cp57-service/m0.stats.json' if args.service_cp57 else 'microcode/generated/m0.stats.json')).read_text())['used_words'],
-                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,
+                mmu=args.mmu,microcode_words=json.loads((ROOT/(service_path+'/m0.stats.json' if (args.service_cp57 or args.service_cp58) else 'microcode/generated/m0.stats.json')).read_text())['used_words'],
+                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,
                 external_pin_delays_constrained=False)
     try:
         report.update(extract(prefix.with_suffix('.mrp').read_text(),prefix.with_suffix('.twr').read_text(),prefix.with_suffix('.par').read_text()))

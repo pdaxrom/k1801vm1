@@ -1,4 +1,14 @@
-# Benchmarks: CP57 и предыдущие этапы
+# Benchmarks: CP58 и предыдущие этапы
+
+## CP58a — STEP/SEL004, без изменения гостевых счётчиков
+
+Девять full-board portable/vendor workloads сохранили все счётчики CP56:
+R,R — **23,5625 CPI**, cold RT-11FB+DIR — **173379163 clocks**, UART совпадает.
+Служебный вход — 258 clocks, START — 120, STEP — 119 до запроса следующей
+opcode fetch на полном SPI FRAM bus (завершение fetch в интервал не входит).
+Это simulation. CP58 Fmax и fit ещё не измерены; плата остаётся CP56a.
+[Сырые счётчики](../tb/reports/cp58a/bench-results.json),
+[контракт и ограничения](service-bank-cp58.md).
 
 ## CP57e — служебный банк, обычный guest code не замедлился
 
