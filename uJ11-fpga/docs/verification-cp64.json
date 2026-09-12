@@ -1,0 +1,60 @@
+{
+  "checkpoint": "CP64",
+  "module": {
+    "kind": 1,
+    "base": 4096,
+    "payload_bytes": 7626,
+    "memory_bytes": 8410,
+    "entry": 4096,
+    "fault": 5848,
+    "checksum": 64918,
+    "file_blocks": 16,
+    "sha256": "a13e1374f0a282af6b12514637577dbcac19c51c37d330ffaaa5f91de4854d65"
+  },
+  "free_slot_bytes": 3878,
+  "hardware": {
+    "unchanged_from": "CP63b",
+    "lut": 1230,
+    "ff": 381,
+    "ebr": 6,
+    "fmax_mhz": 32.246,
+    "microinstructions": 1005,
+    "new_synthesis": false
+  },
+  "core": [
+    {
+      "mode": "sync",
+      "checks": 187,
+      "commands": 175,
+      "clocks": 5255740
+    },
+    {
+      "mode": "logic",
+      "checks": 187,
+      "commands": 175,
+      "clocks": 4781172
+    },
+    {
+      "mode": "vendor",
+      "checks": 187,
+      "commands": 175,
+      "clocks": 5255740
+    }
+  ],
+  "panel_passed": true,
+  "rt11": {
+    "checks": 83,
+    "clocks": 331098776,
+    "uart_bytes": 1531,
+    "hdsp_frames": 58,
+    "asserted_rx_overruns": 0
+  },
+  "programmed": false,
+  "archive_sha256": "80f028c9414286992ac01e20a7a71aed6353d3d32935f5599ba799dc77734266",
+  "source_archive_sha256": "a096f9fcce4b04d99b385b0b4b4178c19a5c514569f550d1421337852f16787a",
+  "limits": [
+    "No breakpoints/STEP OVER, RAW HALT/I-O view, disassembly history or held-key repeat.",
+    "No full HG exchange or physical board/key-label validation.",
+    "UART wire input paced at about 1.77 ms; arbitrary continuous paste is not qualified."
+  ]
+}

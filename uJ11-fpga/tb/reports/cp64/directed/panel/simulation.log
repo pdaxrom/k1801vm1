@@ -1,0 +1,27 @@
+PANEL progress1000000 key-1 last177777 cand177777 cnt000000 PC023454 outputsfe rows0
+KEY start 16 cycles1869044 last177777
+PANEL progress2000000 key-1 last000020 cand000020 cnt000002 PC014700 outputs86 rows0
+KEY done 16 cycles2098701 last177777
+KEY start 19 cycles2098701 last177777
+KEY done 19 cycles2473619 last177777
+KEY start 18 cycles2473619 last177777
+KEY done 18 cycles2848458 last177777
+KEY start 19 cycles2848458 last177777
+PANEL progress3000000 key-1 last000023 cand000023 cnt000002 PC023444 outputs86 rows0
+KEY done 19 cycles3066453 last177777
+KEY start 7 cycles3066453 last177777
+KEY done 7 cycles3295310 last177777
+KEY start 19 cycles3295310 last177777
+KEY done 19 cycles3830593 last177777
+PANEL progress4000000 key-1 last177777 cand177777 cnt000002 PC023456 outputs86 rows0
+KEY start 18 cycles4083297 last177777
+KEY done 18 cycles4308260 last177777
+KEY start 17 cycles4308260 last177777
+KEY done 17 cycles4523177 last177777
+PASS CP64 electrical panel: 5 checks 4523177 clocks
+- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp64-panel/odt_cases.vh:4047: Verilog $finish
+PASS CP64 monitor: 5 checks 6 commands 4523177 clocks
+- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp64-panel/tb.v:127: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 45ms; walltime 1.920 s; speed 23.556 ms/s
+- Verilator: cpu 1.915 s on 1 threads; allocated 2 MB

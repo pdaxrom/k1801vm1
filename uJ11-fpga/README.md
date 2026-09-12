@@ -1,5 +1,23 @@
 # uJ11 FPGA
 
+**CP64: ODT загружается из RT-11 и работает через UART и пульт.**
+Готовы регистры/PSW, память word/byte, STEP/CONTINUE, программный дизассемблер,
+OCT/HEX и прокрутка HDSP. Команды пульта и результаты автоматически
+дублируются на UART. `ODT.BIN` устанавливается прежним UJLOAD ABI2;
+`UJON.SAV` проверяет сборку и включает отдельный debug-вектор CP63.
+
+Занято **8410 из 12288 байт HALT FRAM**. Аппаратные исходники побайтно равны
+измеренному CP63b: **1230 LUT / 381 FF / 6 EBR / 32,246 MHz**, 1005 uwords.
+187 CPU checks × 3 ROM/decode режима и полный RT-11/FRAM/SD/UART/HDSP прогон
+PASS: **83 checks, 331098776 clocks, 58 display frames**, RX overrun=0
+при проверенном интервале ввода около 1,77 ms. Плата ещё CP56a; прошивки не было.
+
+[Готовые файлы и установка](demos/rt11/service/cp64/README.md),
+[команды и ограничения](docs/odt-cp64.md), [verification](docs/verification-cp64.json).
+Breakpoints, STEP OVER, RAW HALT/I/O view и полноценный HG-сеанс остаются в TODO.
+
+Ниже — история предыдущих checkpoints.
+
 **CP63: аппаратная основа ODT — кнопка RESET, внешний HALT и одиночный шаг.**
 Короткое нажатие запрашивает остановку, длинное (около 2 s) вызывает reset.
 STEP возвращает в HALT после команды; сохраняются WAIT и отложенный trace.

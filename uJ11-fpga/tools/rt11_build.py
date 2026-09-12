@@ -86,7 +86,7 @@ def build(sources, out, base):
                 name = src.stem
                 c.send(f'R MACRO\r'); c.expect(rb'\*')
                 c.send(f'{name},{name}={name}\r'); text = c.expect(rb'\*')
-                assert b'Errors detected' not in text and b'Error' not in text, text
+                assert b'Errors detected' not in text and b'Error' not in text and b'?MACRO' not in text, text
                 c.send('\x03'); c.expect(rb'\r\n\.')
                 c.send('R LINK\r'); c.expect(rb'\*')
                 c.send(f'{name},{name}={name}\r'); text = c.expect(rb'\*')

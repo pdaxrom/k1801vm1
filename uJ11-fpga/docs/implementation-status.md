@@ -1,5 +1,27 @@
 # Implementation status, 2026-09-12
 
+## CP64 — загружаемый UART/HDSP ODT
+
+Production `ODT.BIN` и проверяющий активатор `UJON.SAV`, ABI2 loader не изменён.
+R0–R7/PSW, USER RAM word/byte с readback, START/STEP/WAIT, disassembler integer/
+EIS/FIS/SPL, меню и ввод 20-key панели, 16-character window с прокруткой.
+Все действия пульта доступны через UART и зеркалируются туда целиком.
+Отмена очищает незавершённый ввод; overflow отбрасывается до нового CR.
+
+**7626-byte payload, 8410-byte allocation, 3878 байт свободны в ODT slot.**
+RTL/ROM/microstore точно равны CP63b по SHA, поэтому LUT/FF/EBR/Fmax прежние.
+187 checks × logic/sync/Lattice ROM, быстрый electrical-panel test и полный
+cold RT-11 → UJLOAD → UJON → stop/step/edit/panel/continue → re-enable/cold boot:
+**83 checks, 331098776 clocks, 1531 UART bytes, 58 HDSP frames — PASS.**
+Проверены останов внутри RK/SD с отложенным входом, ошибка активации испорченного
+кода, arbitrary R4, odd SP под IPL7, UART/panel input ownership и glyph bitstream.
+
+Не прошивалось на плату (CP56a), default остаётся CP52a. Отдельно впереди:
+проверка RESET circuit/кодов клавиш на плате, breakpoints/STEP OVER, RAW HALT/I/O,
+автоповтор, история disassembly и полный HG-сеанс. Полный FP11 отсутствует.
+[Контракт и воспроизведение](odt-cp64.md), [verification](verification-cp64.json).
+
+
 ## CP63 — кнопка и аппаратный debug-вход
 
 Профиль `--debug-cp63` реализует независимый short/long RESET controller,

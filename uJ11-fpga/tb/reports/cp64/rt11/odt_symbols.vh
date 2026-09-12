@@ -1,0 +1,11 @@
+localparam integer O_KLAST=11594;
+localparam integer O_MAIN=4442;
+localparam integer O_PNEN=11592;
+localparam integer O_REGS=11630;
+localparam integer O_RESULT=11866;
+localparam integer O_STKTOP=12506;
+localparam integer O_VIEW=11608;
+localparam integer O_SCREEN=11722;
+localparam integer O_SCROLL=11616;
+localparam integer G_LOOP=550;
+localparam integer G_DONE=574;

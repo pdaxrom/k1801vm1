@@ -1,5 +1,14 @@
 # Synthesis checkpoints
 
+## CP64 — программный ODT, без нового синтеза
+
+ODT размещён в загружаемой HALT FRAM: 7626 байт payload, 8410 байт со стеком
+и буферами. `check_odt_cp64.py` доказал точное совпадение аппаратных выходов
+с исходниками измеренного CP63b. Поэтому сохраняется **1230 LUT / 381 FF /
+6 EBR / 32,246 MHz / 1005 uwords**; это перенос прежнего результата, не новый
+synthesis measurement. Новых FPGA ROM words/EBR нет; свободны прежние 50 LUT,
+22 slices и 1 EBR. [Программный этап и проверки](odt-cp64.md).
+
 ## CP63b — RESET button, external HALT и STEP
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | uwords | Notes |
