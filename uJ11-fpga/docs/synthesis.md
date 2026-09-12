@@ -1,5 +1,22 @@
 # Synthesis checkpoints
 
+## CP62a — файловая служба из HALT FRAM
+
+Полный LCMXO2-1200HC-4SG32C MAP/PAR/TRACE с gate 31,824 MHz и FRAM
+constraints: **1229 LUT / 343 FF / 6 EBR / 616 slices / Fmax 32,087 MHz**.
+Занято 1002 microinstructions; свободны 51 LUT / 24 slices / 1 EBR / 22 слова.
+От CP61g ресурсы и timing не изменились. Побайтно равны 19 RTL-файлов,
+микрокод и decode; изменены только 31 слово содержимого firmware ROM.
+456-байтный HALT helper загружается из UJLOAD.SAV в FRAM и не входит в EBR.
+Номинальные CPU/SCK 29,56 MHz; default CP52a и установленный CP56a прежние.
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | uwords | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP62a | HALT resident execute + ABI2 UJLOAD | 1229 | 343 | 6 | 32,087 | 1002 | 31,824 MHz / FRAM PASS; no flash |
+
+[Исходные отчёты](../synth/reports/cp62a/), [ABI2](vector-loader-cp62.md).
+
+
 ## CP61 — холодный HALT-пуск, выбран CP61g
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

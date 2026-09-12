@@ -1,0 +1,13 @@
+{
+  "assembler_sha256": "730dac955482a1c4e4e758aebd299eff3d47d9cc4e7b6ae860ea6ce15dbdbefe",
+  "files": {
+    "firmware/cp62/resident.asm": "376db26e816863566245bc68326cf245ee14b32efcb6d2c6057acc5945df4890",
+    "firmware/cp62/resident.bin": "735395c77efb33f9ed18a5d806c41870e603ebc5f35ec01f25e8a822f293a62d",
+    "firmware/cp62/resident.lst": "05f1a355b28f469015e000cb22d4301cab41c8961767c48d109457e11316413b",
+    "firmware/cp62/resident.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "firmware/cp62/start.asm": "da4b7ebe7975c82c8761b0e57c7a6d05503ae36a60ea5ae01fe2f4239eecbbf2",
+    "firmware/cp62/start.bin": "c182a2b4c5189e11e7db1d4025639bafe8ace1be25ca027e5495bfe13cb7bd35",
+    "firmware/cp62/start.lst": "9eaee12b242b7c12749293bbd69442f033b5b3dcd6d3a52f3921d10191823e52",
+    "firmware/cp62/start.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

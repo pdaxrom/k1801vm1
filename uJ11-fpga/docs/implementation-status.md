@@ -1,5 +1,33 @@
 # Implementation status, 2026-09-12
 
+## CP62 — файловый загрузчик через постоянный HALT-вектор
+
+Завершён UJLOAD ABI2: USER файловые вызовы RT-11, загрузка HALT helper
+в FRAM и обращения через vector 170. Первые 4 КиБ верхнего банка системные,
+ODT получает 12 КиБ, FP11 — 48 КиБ, включая physical I/O backing для данных.
+Return ABI модулей — JMP @166. Полных ODT и FP11 файлов пока нет.
+
+Реальный synthesis **CP62a: 1229 LUT / 343 FF / 6 EBR / 32,087 MHz**,
+1002 microinstructions; gate 31,824 MHz/FRAM PASS. Ни одна аппаратная
+функция не добавлена: изменились только 31 слово firmware ROM. Helper
+456 байт находится в UJLOAD.SAV (4096 байт), не в EBR. Плата не прошивалась.
+
+Финальный full RTL прогон: **42 cases + CTRL/C + cold reboot PASS**,
+971335085 clocks, 16863737 retired, 3713 UART wire bytes. Сравниваются
+все 65536 байт верхнего банка, кроме аппаратного CPC/CPSW. Проверены
+file/range/checksum/padding, SD failure, write protection, поздняя порча,
+возврат HALT/FP11/SEL004, сохранение другого модуля, повторная установка.
+После cold reset RT-11 возвращается, слоты сохраняются, ready=0.
+17 boot cases + 17 helper cases × portable/vendor также PASS.
+
+Первый вариант с 32 словами не прошёл CTRL/C. При пределе 8 слов
+максимальный copy занимает 19571 clocks (~0,662 ms); полный тест прочитал
+оба CTRL/C без RX overwrite и сохранил другой модуль. Непрерывный UART
+поток всё ещё требует отдельного измерения. 6 ABI2 host tests и 4 clock
+checks PASS. [Описание и воспроизведение](vector-loader-cp62.md),
+[точные источники и логи](../tb/reports/cp62/).
+
+
 ## CP61 — начальный HALT-пуск и bootstrap из USER FRAM
 
 ROM сначала копирует SD bootstrap и resident в HALT RAM. Далее код в HALT

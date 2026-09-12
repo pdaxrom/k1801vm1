@@ -1,5 +1,24 @@
 # uJ11 FPGA
 
+**CP62: UJLOAD переведён на HALT-вектор и ABI2.**
+Файлы читает RT-11; установка, readback, обнуление и проверка верхней FRAM
+выполняются загружаемым HALT helper. Его 456 байт входят в UJLOAD.SAV,
+а не в FPGA EBR. Холодный пуск ROM → HALT RAM → USER RAM сохранён.
+
+**CP62a: 1229 LUT / 343 FF / 6 EBR / Fmax 32,087 МГц**, 1002 uwords;
+31,824 МГц / FRAM gate PASS. Аппаратная логика и микрокод равны CP61g.
+Полный RTL: 42 файловых сценария, CTRL/C и cold reboot PASS;
+17 boot + 17 helper cases на каждой из двух ROM-моделей PASS.
+32-word вариант отклонён из-за CTRL/C; финальный предел — 8 слов.
+Плата остаётся CP56a, default CP52a. Полные ODT/FP11 пока не написаны.
+
+[Готовый UJLOAD ABI2](demos/rt11/service/cp62/README.md),
+[контракт и проверки](docs/vector-loader-cp62.md),
+[verification](docs/verification-cp62.json), [synthesis](docs/synthesis-cp62.json).
+
+Ниже — история предыдущих checkpoints.
+
+
 **CP61: начальный пуск ROM → HALT RAM → USER RAM работает.**
 ROM устанавливает bootstrap и резидентный код в HALT FRAM обычными MOV.
 Код в HALT вызывает через вектор процедуру MTUS/MFUS, переносит bootstrap

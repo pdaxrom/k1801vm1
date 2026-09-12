@@ -1,0 +1,9 @@
+{
+  "assembler_sha256": "730dac955482a1c4e4e758aebd299eff3d47d9cc4e7b6ae860ea6ce15dbdbefe",
+  "files": {
+    "firmware/cp62/loader.asm": "133d538d6dbb8061c120b317f782484b66df4da7382df68d0e31318401f49111",
+    "firmware/cp62/loader.bin": "b1e8a0887ef99a2d4506125ab880507cd28464407a779e1ed27c6d1bbbb959ea",
+    "firmware/cp62/loader.lst": "36d4f948e3274c38567928b1309fd86b29665bae583d69fda5db0aecdd5ef992",
+    "firmware/cp62/loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

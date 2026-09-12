@@ -1,4 +1,31 @@
-# Benchmarks: CP61 и предыдущие этапы
+# Benchmarks: CP62 и предыдущие этапы
+
+## CP62 — загрузочный вход и файловая служба
+
+Cold ROM→HALT→USER: **222421 clocks ≈7,524 ms** при 29,56 MHz,
+на 1491 clocks меньше CP61 после замены SUB #2,R5 на TST -(R5).
+Прежний копирующий вызов: 2862 clocks/word, 34930 clocks/64 words.
+
+Дополнительный HALT helper, ENTER→LEAVE (реальные SPI FRAM):
+
+| Операция | Words | Microclocks | ms при 29,56 MHz |
+|---|---:|---:|---:|
+| Read status | — | 4287 | 0,145 |
+| Raw write + readback | 1 | 5593 | 0,189 |
+| Raw checksum | 8 | 11511 | 0,389 |
+| Zero + readback | 8 | 15951 | 0,540 |
+| USER→raw HALT copy + readback | 8 | 19571 | 0,662 |
+
+Это разные процедуры с разными проверками; helper поддерживает физическую
+память под I/O page и работает через USER descriptor. IRQ отложены до
+START. Первый вариант с 32 словами не прошёл CTRL/C при замене модуля.
+Предел ABI2 уменьшен до 8 слов; непрерывный приём UART не гарантируется.
+Полные UART burst/queue measurements остаются в TODO. Полный файловый прогон:
+971335085 clocks / 16863737 retired / 3713 UART bytes; 42 cases, CTRL/C
+и cold reboot PASS. Это интеграционный сценарий, а не чистый ISA benchmark. При обычном вводе
+команд проверяется реальный UART waveform. CPU-loop benchmarks здесь
+заново не запускались; аппаратная логика CPU и microstore равны CP61g.
+
 
 ## CP61 — начальное копирование и векторный сервис
 

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "cases": 42,
+  "ctrl_c": true,
+  "cold_reboot": true,
+  "guest_context": true,
+  "uut": "full CP62 recovery RTL, real SPI FRAM/SD and RT-11FB V05.03; actual UART input/output",
+  "files": {
+    "inputs.json": "d5a63efbd6952a1a3c279dea982de23d78564c6ac588784912e33c4401be11c4",
+    "simulation.log": "3784392ad47f4e3523a578a048a5921b391e72a44f7ff6917b335403de7f9bf6",
+    "uart.txt": "2551a3b9b331d5a98bf3c362acabc40d0e8d25eec4954ec82d03ac655ef2f44b",
+    "build.log": "6b67ad88b6eebdf0eea859cd43fe6211d78afe6f89d0ecbcaa7df1fbc2e3223f"
+  }
+}
