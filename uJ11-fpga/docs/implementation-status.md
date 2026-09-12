@@ -1,5 +1,29 @@
 # Implementation status, 2026-09-12
 
+## CP60 — RT-11 loader и исправление RK recovery
+
+Готов `UJLOAD.SAV`: оригинальные MACRO/LINK V5.03, 0 ошибок, 7 блоков.
+Формат ABI1 проверяет границы, entry/fault, размер файла, checksum и padding;
+перенос и BSS проверяются чтением, ready выставляется последним.
+42 полных RTL-сценария, CTRL/C и cold reset PASS; обычный DCJ11 в SIMH
+корректно отвергается. Проверенные ODT/FP11 файлы — тестовые обработчики,
+полные монитор и эмулятор пока не реализованы.
+
+Исправлены RECALIBRATE/DI, CCLR без лишнего IRQ и освобождение SD после
+ошибки. Настоящий DM.SYS выполняет восемь повторов и возвращает ошибку
+загрузчику; дальнейшая загрузка работает. 28 CSR beats × 2 модели и
+negative control, 12 прежних service cases × 2, девять benchmarks × 2 PASS.
+CPU/FIS и 1002 слова микрокода не изменены.
+
+Полный **CP60b: 1251 LUT / 343 FF / 6 EBR / 629 slices / 32,807 MHz**.
+Gate 31,824 MHz с FRAM constraints PASS. Осталось 29 LUT / 11 slices /
+1 EBR / 22 microinstructions; CPU/SCK номинально 29,56 MHz.
+Профиль `--rk-cp60`, default CP52a и установленный CP56a прежние.
+[Загрузчик](service-loader-cp60.md), [RK recovery](rk-recovery-cp60.md),
+[verification](verification-cp60.json).
+
+Ниже — история checkpoints.
+
 ## CP59d — timing исправлен, семантика CP58a сохранена
 
 **1239 LUT / 343 FF / 6 EBR / 624 slices / Fmax 32,531 MHz**, 1002 слова.

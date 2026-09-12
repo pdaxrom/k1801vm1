@@ -1,0 +1,119 @@
+{
+  "edif": {
+    "edif_sha256": "fd064f19fdf45a5c745d8e141e4564ac3cd2f9b8eb7c871af21c796719bdfb25",
+    "cells": 49,
+    "nets": 3146,
+    "bidirectional_nets": 36,
+    "multiple_drivers": [],
+    "floating": [],
+    "proven_unused_carry_inputs": [
+      "work/uj11_alu/N_1",
+      "work/uj11_microseq/N_2",
+      "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+      "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+      "work/spi_byte_service_68s_2s_7s/N_2",
+      "work/uj11_board_fram_Z2/N_4",
+      "work/uj11_board/N_1"
+    ]
+  },
+  "cs_duplicate": {
+    "internal_cell": "FD1P3JX",
+    "output_cell": "OFS1P3JX",
+    "identical_inputs": [
+      [
+        "D",
+        "D"
+      ],
+      [
+        "CK",
+        "SCLK"
+      ],
+      [
+        "SP",
+        "SP"
+      ],
+      [
+        "PD",
+        "PD"
+      ]
+    ],
+    "output_drives_pad": true,
+    "extra_pipeline_stage": false
+  },
+  "negative_controls": [
+    {
+      "mutation": "second-driver",
+      "detected": "multiple_drivers",
+      "result": {
+        "edif_sha256": "9175eaa9fed9c619586e60a23e759137425578cc46f4eab5ebeed4203bb88004",
+        "cells": 49,
+        "nets": 3146,
+        "bidirectional_nets": 36,
+        "multiple_drivers": [
+          {
+            "net": "work/uj11_regfile/byte_access",
+            "drivers": [
+              "boundary.byte_access",
+              "boundary.shifted"
+            ]
+          }
+        ],
+        "floating": [],
+        "proven_unused_carry_inputs": [
+          "work/uj11_alu/N_1",
+          "work/uj11_microseq/N_2",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+          "work/spi_byte_service_68s_2s_7s/N_2",
+          "work/uj11_board_fram_Z2/N_4",
+          "work/uj11_board/N_1"
+        ]
+      }
+    },
+    {
+      "mutation": "open-input",
+      "detected": "floating",
+      "result": {
+        "edif_sha256": "56101c15586ce24b28ffcdf3b4ed9eb2c9c3bc0af1ec26941f5e9112232b0f58",
+        "cells": 49,
+        "nets": 3146,
+        "bidirectional_nets": 36,
+        "multiple_drivers": [],
+        "floating": [
+          "work/uj11_regfile/byte_access"
+        ],
+        "proven_unused_carry_inputs": [
+          "work/uj11_alu/N_1",
+          "work/uj11_microseq/N_2",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+          "work/spi_byte_service_68s_2s_7s/N_2",
+          "work/uj11_board_fram_Z2/N_4",
+          "work/uj11_board/N_1"
+        ]
+      }
+    },
+    {
+      "mutation": "observable-cin",
+      "detected": "floating",
+      "result": {
+        "edif_sha256": "a082f819ccd9b05235aadc37dca2843d2d438f26d2dc99d486f6c9bc6705f8e6",
+        "cells": 49,
+        "nets": 3146,
+        "bidirectional_nets": 36,
+        "multiple_drivers": [],
+        "floating": [
+          "work/uj11_alu/N_1"
+        ],
+        "proven_unused_carry_inputs": [
+          "work/uj11_microseq/N_2",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_1",
+          "work/wbc_uart_xo2_29560000s_257s_128s_9s/N_2",
+          "work/spi_byte_service_68s_2s_7s/N_2",
+          "work/uj11_board_fram_Z2/N_4",
+          "work/uj11_board/N_1"
+        ]
+      }
+    }
+  ]
+}

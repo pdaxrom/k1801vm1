@@ -1,0 +1,35 @@
+{
+  "checkpoint": "CP60",
+  "selected": "cp60b",
+  "baseline": "cp59d",
+  "measured": {
+    "cp60a": {
+      "lut4": 1256,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 630,
+      "fmax_mhz": 31.347,
+      "microcode_words": 1002,
+      "fully_routed": true,
+      "timing_pass": false,
+      "applied_clock_mhz": 31.824,
+      "constraint_matched": true,
+      "input_revision_sha256": "d3a26b7812b6e898275782dd4ace0d021f7916cba20169c0a60cbe3b3d29469b"
+    },
+    "cp60b": {
+      "lut4": 1251,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 629,
+      "fmax_mhz": 32.807,
+      "microcode_words": 1002,
+      "fully_routed": true,
+      "timing_pass": true,
+      "applied_clock_mhz": 31.824,
+      "constraint_matched": true,
+      "input_revision_sha256": "c313c8d76fd5ad31d80ea53548acc6fa295ce9ebccb073d4db1625410fcb7619"
+    }
+  },
+  "board_installed": "cp56a",
+  "nominal_clock_mhz": 29.56
+}

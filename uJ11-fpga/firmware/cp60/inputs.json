@@ -1,0 +1,9 @@
+{
+  "assembler_sha256": "730dac955482a1c4e4e758aebd299eff3d47d9cc4e7b6ae860ea6ce15dbdbefe",
+  "files": {
+    "firmware/cp60/rk_service.asm": "559863c1a2b78529f2036b0b58c871d5318c6ce4225a71c9a8ec722abbf2617a",
+    "firmware/cp60/rk_service.bin": "036ea6e0089d92e2bb832dd366cfcbffeb0eade33dce41b6cd2e638c096bc370",
+    "firmware/cp60/rk_service.lst": "6d289a196f1830c4ded20cc3bfc0c78cabb13d454a953d3bb6b4e680b04c89d3",
+    "firmware/cp60/rk_service.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

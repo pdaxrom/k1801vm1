@@ -1,8 +1,13 @@
 # HC1200 panel and HG programs for uJ11
 
-These are byte-for-byte copies of the existing lsi11-fpga applications, with
+The `panel/` and `hostdisk/` files are byte-for-byte copies of the existing lsi11-fpga applications, with
 source hashes in `inputs.json`. They use the same CSR 166000/166001 and require
 no display framebuffer, keyboard scanner or HG packet engine in the FPGA.
+
+The separate [service/UJLOAD.SAV](service/README.md) is the CP60 RT-11 loader
+for upper-FRAM modules. It is built from its own source, has a separate
+manifest, and requires the CP58/CP59 service interface. The four-program
+panel/HG disk builder keeps its existing program selection.
 
 - `RUN DSPDEM`: two HCMS-3917 displays (16 characters).
 - `RUN RGBDEM`: display messages and all eight RGB states.

@@ -1,5 +1,19 @@
 # Synthesis checkpoints
 
+## CP60 — RT-11 loader и исправление RK recovery, выбран CP60b
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP60a | RECALIBRATE через firmware, SD error cleanup | 1256 | 343 | 6 | 31,347 | 1002 | 630 slices; нет CCLR fix; timing FAIL |
+| CP60b | Дополнительно CCLR без ложного IRQ | 1251 | 343 | 6 | 32,807 | 1002 | 629 slices; full MAP/PAR/TRACE, 31,824 MHz и FRAM PASS |
+
+От CP59d +12 LUT / 0 FF / 0 EBR. Остаются 29 LUT / 11 slices / 1 EBR,
+до ≤1100 LUT ещё 151 LUT. UJLOAD и будущие ODT/FP11 не занимают FPGA ROM;
+дисковая firmware выросла на 28 байт в прежнем EBR. CPU/FIS без изменений.
+Штатная частота прежняя; физическая PCB/SCK проверка ещё нужна.
+[Контракт и проверки](rk-recovery-cp60.md), [цифры](synthesis-cp60.json),
+[raw reports](../synth/reports/cp60b/), [verification](verification-cp60.json).
+
 ## CP59 — internal OSCH envelope и FRAM setup/hold, выбран CP59d
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

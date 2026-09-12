@@ -1,4 +1,22 @@
-# Benchmarks: CP59 и предыдущие этапы
+# Benchmarks: CP60 и предыдущие этапы
+
+## CP60b — CPU counters сохранены, проверен файловый загрузчик
+
+Девять portable/vendor workloads побайтно совпадают по счётчикам с CP56/59.
+MOV/ADD/CMP R,R: **6032 clocks / 256 instructions = 23,5625 CPI**,
+около 1,255 млн instructions/s при штатных 29,56 MHz.
+HALT entry — 258 clocks, START — 120, STEP — 119, как в CP59.
+
+Полный интеграционный прогон UJLOAD: **503715001 clocks**, 12537161 retired
+instructions, 110722 upper-FRAM writes, 3713 UART bytes. Он включает
+42 команды, UART input pacing, ошибки, повторы DM.SYS, CTRL/C и два cold
+boots; это счётчик проверки, не чистая скорость копирования firmware.
+RK READ/WRITE теперь выполняет три дополнительные инструкции при входе
+в private service; CPU loops без дисковых операций не замедлились.
+
+Измеренный HC1200: **1251 LUT / 343 FF / 6 EBR / Fmax 32,807 MHz**.
+[Сырые benchmark counters](../tb/reports/cp60/board/bench-results.json),
+[полный UART и simulation log](../tb/reports/cp60/), [RK recovery](rk-recovery-cp60.md).
 
 ## CP59d — улучшен timing без изменения количества тактов
 

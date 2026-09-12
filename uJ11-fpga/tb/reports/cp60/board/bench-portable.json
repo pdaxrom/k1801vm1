@@ -1,0 +1,11 @@
+[
+{"workload":"MOV_RR","instructions":256,"microclocks":6032,"memory_beats":256,"opcode_fetches":256,"writes":0,"request_clocks":5520,"fram_busy_clocks":5008,"spi_transactions":4,"spi_clocks":4224},
+{"workload":"ADD_RR","instructions":256,"microclocks":6032,"memory_beats":256,"opcode_fetches":256,"writes":0,"request_clocks":5520,"fram_busy_clocks":5008,"spi_transactions":4,"spi_clocks":4224},
+{"workload":"CMP_RR","instructions":256,"microclocks":6032,"memory_beats":256,"opcode_fetches":256,"writes":0,"request_clocks":5520,"fram_busy_clocks":5008,"spi_transactions":4,"spi_clocks":4224},
+{"workload":"mixed_RR","instructions":256,"microclocks":6032,"memory_beats":256,"opcode_fetches":256,"writes":0,"request_clocks":5520,"fram_busy_clocks":5008,"spi_transactions":4,"spi_clocks":4224},
+{"workload":"MOV_mem_reg","instructions":256,"microclocks":32492,"memory_beats":508,"opcode_fetches":256,"writes":0,"request_clocks":28956,"fram_busy_clocks":27940,"spi_transactions":508,"spi_clocks":24384},
+{"workload":"MOV_reg_mem","instructions":256,"microclocks":35516,"memory_beats":508,"opcode_fetches":256,"writes":252,"request_clocks":31476,"fram_busy_clocks":30460,"spi_transactions":760,"spi_clocks":26400},
+{"workload":"MOV_mem_mem","instructions":256,"microclocks":50132,"memory_beats":760,"opcode_fetches":256,"writes":252,"request_clocks":45840,"fram_busy_clocks":44320,"spi_transactions":1012,"spi_clocks":38496},
+{"workload":"BR_self","instructions":256,"microclocks":15104,"memory_beats":256,"opcode_fetches":256,"writes":0,"request_clocks":14592,"fram_busy_clocks":14080,"spi_transactions":256,"spi_clocks":12288},
+{"workload":"stack_push_pop","instructions":256,"microclocks":34404,"memory_beats":508,"opcode_fetches":256,"writes":128,"request_clocks":30236,"fram_busy_clocks":29220,"spi_transactions":636,"spi_clocks":25408} 
+]

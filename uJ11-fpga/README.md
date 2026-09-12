@@ -1,5 +1,20 @@
 # uJ11 FPGA
 
+**CP60: готов RT-11 загрузчик UJLOAD; исправлен аварийный путь RK611.**
+Файлы служб загружаются в верхнюю FRAM через ОС, с проверками заголовка,
+checksum/readback и установкой ready последним. Полный RTL-прогон:
+42 сценария, CTRL/C, cold reset и входы HALT/FP11/SEL004/START — PASS.
+Полные ODT и FP11 ещё предстоит написать; FIS остаётся в микрокоде.
+
+Выбран **CP60b: 1251 LUT / 343 FF / 6 EBR / Fmax 32,807 МГц**,
+1002 слова микрокода. Полный gate 31,824 МГц с FRAM constraints проходит;
+номинальные CPU/SCK — 29,56 МГц. Свободны 29 LUT / 11 slices / 1 EBR.
+Профиль `--rk-cp60`; на плате остаётся CP56a, default сборки — CP52a.
+[Готовый UJLOAD](demos/rt11/service/README.md), [загрузка и проверки](docs/service-loader-cp60.md),
+[ошибки RK и реальные измерения](docs/rk-recovery-cp60.md).
+
+Ниже — история checkpoints.
+
 **CP59d: timing служебного банка исправлен, полный HC1200 gate прошёл.**
 **1239 LUT / 343 FF / 6 EBR / Fmax 32,531 МГц**, 1002 слова микрокода.
 Internal и FRAM setup/hold проходят при проверочных **31,824 МГц**;

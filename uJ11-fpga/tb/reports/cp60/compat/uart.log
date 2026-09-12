@@ -1,0 +1,24 @@
+
+PDP-11 simulator V3.12-3
+
+RT-11FB (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.RUN UJLOAD
+?UJLOAD-E-Service instructions unavailable
+
+.DIR UJLOAD.SAV
+ 
+UJLOAD.SAV     7    -BAD-        
+ 1 Files, 7 Blocks
+ 51361 Free blocks
+
+.
+Simulation stopped, PC: 142770 (MOV -(R4),R5)
+sim> quit
+Goodbye

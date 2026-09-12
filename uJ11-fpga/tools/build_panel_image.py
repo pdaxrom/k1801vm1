@@ -15,7 +15,8 @@ def main():
     before=hashlib.sha256(base.read_bytes()).hexdigest()
     out.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(base,out)
     tool=ROOT/'../lsi11/rt11tool'
-    programs=sorted(list((ROOT/'demos/rt11').rglob('*.SAV'))+list((ROOT/'demos/rt11').rglob('*.SYS')))
+    programs=sorted(list((ROOT/'demos/rt11/panel').glob('*.SAV'))+
+                    list((ROOT/'demos/rt11/hostdisk').glob('*.SYS')))
     assert len(programs)==4
     with tempfile.TemporaryDirectory(prefix='uj11-image-') as d:
         for program in programs:
