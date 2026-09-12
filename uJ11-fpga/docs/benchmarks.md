@@ -1,4 +1,25 @@
-# Benchmarks: CP60 и предыдущие этапы
+# Benchmarks: CP61 и предыдущие этапы
+
+## CP61 — начальное копирование и векторный сервис
+
+Начальная цепочка ROM→HALT RAM→USER RAM до START: **223912 clocks**,
+около **7,575 ms** при 29,56 MHz. Bootstrap 426 байт переносится в оба
+банка с readback; resident 164 байта остаётся в HALT.
+
+USER→HALT вызов, включая validation/readback и ENTER→LEAVE:
+**2862 clocks/1 word**, **34930 clocks/64 words**. Максимальный блок
+удерживает IRQ около **1,182 ms**; перенос из RT-11 через вектор работает,
+но устойчивость непрерывного UART потока требует отдельной проверки.
+
+CP61e: два RT-11 cold boot, восемь вызовов из HBTEST, DIR:
+294800833 clocks, 8289104 retired, 3534 UART wire bytes.
+Финальный CP61g: cold boot, отказ старого UJLOAD, четыре HALT вызова и
+DIR HBTEST.SAV: 104427836 clocks, 3758733 retired, 310 UART wire bytes.
+Это разные интеграционные сценарии, напрямую сравнивать их clocks нельзя.
+Прежние CPU-loop benchmarks на этом checkpoint отдельно не повторялись.
+
+**HC1200: 1229 LUT / 343 FF / 6 EBR / Fmax 32,087 MHz**, 1002 uwords.
+[Контракт измерений](halt-boot-cp61.md), [сырые проверки](../tb/reports/cp61/).
 
 ## CP60b — CPU counters сохранены, проверен файловый загрузчик
 

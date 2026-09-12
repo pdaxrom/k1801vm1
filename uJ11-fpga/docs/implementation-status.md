@@ -1,5 +1,25 @@
 # Implementation status, 2026-09-12
 
+## CP61 — начальный HALT-пуск и bootstrap из USER FRAM
+
+ROM сначала копирует SD bootstrap и resident в HALT RAM. Далее код в HALT
+вызывает через `000160` подпрограмму MTUS/MFUS, проверяет копию в USER RAM
+и выполняет START на `004000`. Старые USER ROM overlays убраны.
+28-byte первый вариант заменён окончательной ROM-процедурой 50 байт;
+resident 164 байта, всё помещается в прежний firmware EBR.
+
+Выбран **CP61g: 1229 LUT / 343 FF / 6 EBR / 616 slices / 32,087 MHz**;
+1002 microinstructions, 31,824 MHz internal/FRAM PASS. На 22 LUT меньше CP60b.
+17 cold/copy cases × 2 ROM-модели и два RT-11 cold boot с вызовами из SAV
+прошли на CP61e. Для финального CP61g: исчерпывающий dispatch proof,
+побайтное равенство остального RTL/ROM, отдельный RT-11/HBTEST/DIR прогон,
+отказ старого UJLOAD до записи HALT RAM, RK CSR и final EDIF audit — PASS.
+
+CP61 меняет размещение resident: UJLOAD ABI1 ещё не перенесён на новый
+векторный протокол, полные ODT/FP11 пока отсутствуют. Установочные команды
+доступны только в HALT. Плата CP56a, default CP52a; CP61 не прошивался.
+[Подробности и воспроизведение](halt-boot-cp61.md), [verification](verification-cp61.json).
+
 ## CP60 — RT-11 loader и исправление RK recovery
 
 Готов `UJLOAD.SAV`: оригинальные MACRO/LINK V5.03, 0 ошибок, 7 блоков.

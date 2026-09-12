@@ -1,0 +1,68 @@
+{
+  "selected": "cp61g",
+  "cold_chain": "ROM -> HALT FRAM -> USER FRAM -> RT-11",
+  "boot_e_directed": {
+    "cases_per_rom": 17,
+    "rom_models": [
+      "portable",
+      "Lattice DP8KC/ODDRXE"
+    ]
+  },
+  "boot_e_rt11": {
+    "passed": true,
+    "cold_boots": 2,
+    "copy_calls": 8,
+    "bytes_per_run": 512,
+    "resident_repaired": true,
+    "stored_data_survives_reset": true,
+    "actual_uart_waveform": true,
+    "files": {
+      "inputs.json": "4d1c1884106c18e2029570b64a02cb773a5e11c102b3900a0c39954cf1dc77c4",
+      "build.log": "6c77aba7bb617371b839036c4e13c41100f91ce96dd92087b7c17854e8c5e441",
+      "simulation.log": "3bf44a5b1a8fd444cc4653ea664ed5898f8bedeb461c784614271070b9c57ed2",
+      "uart.txt": "a51510dddb401cedf38c8e147bf976d0e4ca4abd20d9321686825f591eda18ce"
+    }
+  },
+  "final_guard_proof": {
+    "combinations": 524288,
+    "negative_control": true
+  },
+  "final_rt11": {
+    "passed": true,
+    "cold_boots": 1,
+    "copy_calls": 4,
+    "bytes_per_run": 512,
+    "resident_repaired": false,
+    "stored_data_survives_reset": false,
+    "legacy_loader_rejected": true,
+    "actual_uart_waveform": true,
+    "files": {
+      "inputs.json": "0d332c9dd9df1db4a79443d77520a7bb6d31baf359a1da36ceb008f26bc5e522",
+      "build.log": "8476085c2c5b5a1b45fbaca2721bfa4ee9f390159eab06fa0eab53fcfbfd0130",
+      "simulation.log": "b0ff0c32023b36099b6548b31b5d024ead7e402f39f38f8a9004758b3dc6a063",
+      "uart.txt": "f8469fb8288d0a926484d9750e0349ed4cd6f71bfb024aa4c2aa05e734aaeffa"
+    }
+  },
+  "final_edif": {
+    "nets": 3111,
+    "unexplained_floating": 0,
+    "multiple_drivers": 0,
+    "negative_controls": 3
+  },
+  "rk_csr_beats_per_rom": 28,
+  "rk_negative_control": true,
+  "microcode_words": 1002,
+  "boot_microclocks": 223912,
+  "copy_enter_to_leave_clocks": {
+    "one_word": 2862,
+    "words64": 34930
+  },
+  "abi1_loader_migrated": false,
+  "full_odt": false,
+  "full_fp11": false,
+  "board_flashed": false,
+  "archive_sha256": {
+    "tb/reports/cp61/final-g/source.tgz": "b8ea585ed33d2f02f18541cb29ca174a7e63d512f738aab8f494855a3bff43ee",
+    "tb/reports/cp61/boot-e/source.tgz": "7d9be15c5be43999e686f14c5c3bd9dd66eee71584e8c8a26374d27a590cb978"
+  }
+}

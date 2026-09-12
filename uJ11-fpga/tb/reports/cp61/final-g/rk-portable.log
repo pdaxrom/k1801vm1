@@ -1,0 +1,2 @@
+PASS CP60 RK recovery: 28 CSR beats; RECAL/READ/WRITE, CERR, CCLR/SCLR, exact IRQ completion
+tb/tb_rk_recovery_cp60.v:84: $finish called at 2560000 (1ps)

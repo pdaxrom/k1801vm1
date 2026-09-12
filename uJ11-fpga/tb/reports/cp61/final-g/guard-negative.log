@@ -1,0 +1,2 @@
+FATAL: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp61-boot/guard-negative.v:66: guest installation opcode escaped 000040
+       Time: 33000000000000  Scope: test

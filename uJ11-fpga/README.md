@@ -1,5 +1,21 @@
 # uJ11 FPGA
 
+**CP61: начальный пуск ROM → HALT RAM → USER RAM работает.**
+ROM устанавливает bootstrap и резидентный код в HALT FRAM обычными MOV.
+Код в HALT вызывает через вектор процедуру MTUS/MFUS, переносит bootstrap
+в USER FRAM с readback и запускает его командой START. RT-11 исполняет
+bootstrap из ОЗУ. Проверены cold reset, копирование из `.SAV`, UART и DIR.
+
+Выбран **CP61g: 1229 LUT / 343 FF / 6 EBR / Fmax 32,087 МГц**,
+1002 слова микрокода. Gate 31,824 МГц с FRAM constraints PASS.
+Свободны 51 LUT / 24 slices / 1 EBR. Профиль `--boot-cp61`, плата и default
+прежние. Старый UJLOAD ABI1 корректно отвергает CP61 до записи в память;
+его перевод на векторный файловый протокол — следующий этап.
+[Последовательность и ограничения](docs/halt-boot-cp61.md),
+[synthesis](docs/synthesis-cp61.json), [verification](docs/verification-cp61.json).
+
+Ниже — история предыдущих checkpoints.
+
 **CP60: готов RT-11 загрузчик UJLOAD; исправлен аварийный путь RK611.**
 Файлы служб загружаются в верхнюю FRAM через ОС, с проверками заголовка,
 checksum/readback и установкой ready последним. Полный RTL-прогон:

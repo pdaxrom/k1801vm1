@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "combinations": 524288,
+  "negative_control_rejected": true,
+  "identical_rtl_and_rom": [
+    "build/cp61-boot/src/rtl/uj11_core.v",
+    "build/cp61-boot/src/rtl/uj11_decode_rom.v",
+    "build/cp61-boot/src/microcode/generated/uj11_decode_table.v",
+    "build/cp61-boot/src/rtl/uj11_decode.v",
+    "build/cp61-boot/src/rtl/uj11_microseq.v",
+    "build/cp61-boot/src/rtl/uj11_datapath.v",
+    "build/cp61-boot/src/rtl/uj11_regfile.v",
+    "build/cp61-boot/src/rtl/uj11_alu.v",
+    "build/cp61-boot/src/rtl/uj11_psw.v",
+    "build/cp61-boot/src/rtl/uj11_mem.v",
+    "build/cp61-boot/src/boards/hc1200/uj11_board.v",
+    "build/cp61-boot/src/boards/hc1200/uj11_board_bus.v",
+    "build/cp61-boot/src/boards/hc1200/uj11_panel.v",
+    "build/cp61-boot/src/boards/hc1200/uj11_board_fram.v",
+    "build/cp61-boot/src/boards/hc1200/uj11_tick.v",
+    "build/cp61-boot/src/reference/lsi11/spi_byte_service.v",
+    "build/cp61-boot/src/reference/lsi11/wbc_uart_xo2.v",
+    "build/cp61-boot/src/microcode/generated/uj11_firmware_rom.v",
+    "build/cp61-boot/m0.mem",
+    "build/cp61-boot/decode.mem",
+    "build/cp61-boot/firmware.mem",
+    "build/cp61-boot/uj11_m0_ebr.v"
+  ],
+  "only_changed_guest_opcodes_octal": [
+    "000040",
+    "000041",
+    "000042",
+    "000043"
+  ],
+  "files": {
+    "build/cp61-boot/guard.v": "f7e57143ebe219093e6fc1841860c552a091fa6b826607632eca6bf45ee2dabf",
+    "build/cp61-boot/guard.log": "955122485dcaae62bad4bdb3f289824cbf77b13782edf28ba4283b82f80d8d87",
+    "build/cp61-boot/guard-negative.v": "fad129de6f4924e04ac2ab59811cbe368bdd3eb9f2bfe3cb299f65f5d76b3b9f",
+    "build/cp61-boot/guard-negative.log": "13eb39a0570dad0395c8fa8154087ca5c5e511a062859d979c5543ed14995253",
+    "tools/check_boot_guard_cp61.py": "7b6330bc89326a83e1d73952e1c771688d3d72a02748f56059f231e9a122cb6f",
+    "build/cp61-boot/inputs.json": "5bba3870f06841e19a2f1d16acf5609cc98d2155de882d5ffabefa80243351a2",
+    "synth/reports/cp61e/inputs.json": "b99adb414999593deb448ed86e8c72a450597e9cc9ac5d50d1f9ac5d26bf3655",
+    "synth/reports/cp61e/source.tgz": "dac54d1610f529e689906ef404b67b47eb45897e18f2ddfad7899585ea077929"
+  }
+}

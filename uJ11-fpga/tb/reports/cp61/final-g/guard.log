@@ -1,0 +1,2 @@
+PASS CP61 dispatch: 524288 opcode/mode/ready combinations
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp61-boot/guard.v:70: $finish called at 524288000000000000 (1ps)

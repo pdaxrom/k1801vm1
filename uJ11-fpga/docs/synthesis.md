@@ -1,5 +1,26 @@
 # Synthesis checkpoints
 
+## CP61 — холодный HALT-пуск, выбран CP61g
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP61a | Начальный вектор, расширенный ROM | 1293 | 343 | 6 | — | 1002 | MAP: не помещается |
+| CP61b | Prefix decoder | 1284 | 343 | 6 | — | 1002 | MAP: не помещается |
+| CP61c | Постоянный initial vector | 1266 | 343 | 6 | 31,624 | 1002 | Timing FAIL |
+| CP61d | ROM→HALT→USER, обе копии bootstrap | 1283 | 343 | 6 | — | 1002 | MAP: не помещается |
+| CP61e | Удалены прежние USER ROM overlays | 1227 | 343 | 6 | 32,125 | 1002 | 616 slices; 31,824 MHz/FRAM PASS |
+| CP61f | Установочные инструкции только HALT | 1229 | 343 | 6 | 32,087 | 1002 | PASS; эквивалентное уточнение для lint в CP61g |
+| CP61g | Финальное reduction expression | 1229 | 343 | 6 | 32,087 | 1002 | Выбран; MAP/PAR/TRACE и strict lint PASS |
+
+От CP60b −22 LUT / −13 slices / 0 FF / 0 EBR. Остаток 51 LUT / 24 slices /
+1 EBR / 22 microinstructions. ROM-процедура и resident заняли прежние пустые
+214 байт; 4 байта firmware EBR свободны. Clock/SCK номинально 29,56 MHz.
+Final EDIF: 3111 nets, нет multiple drivers/unexplained floating, 7 CIN
+доказаны ненаблюдаемыми, три negative controls; CS IOFF без нового такта.
+PCB/SCK физические измерения остаются открыты. Плата и default прежние.
+[Архитектура](halt-boot-cp61.md), [цифры](synthesis-cp61.json),
+[raw CP61g](../synth/reports/cp61g/), [verification](verification-cp61.json).
+
 ## CP60 — RT-11 loader и исправление RK recovery, выбран CP60b
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

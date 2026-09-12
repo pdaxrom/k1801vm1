@@ -1,0 +1,88 @@
+{
+  "checkpoint": "CP61",
+  "selected": "cp61g",
+  "baseline": "cp60b",
+  "measurements": {
+    "cp61a": {
+      "lut4": 1293,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 649,
+      "fmax_mhz": null,
+      "timing_pass": false,
+      "fully_routed": false,
+      "microcode_words": 1002
+    },
+    "cp61b": {
+      "lut4": 1284,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 645,
+      "fmax_mhz": null,
+      "timing_pass": false,
+      "fully_routed": false,
+      "microcode_words": 1002
+    },
+    "cp61c": {
+      "lut4": 1266,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 636,
+      "fmax_mhz": 31.624,
+      "timing_pass": false,
+      "fully_routed": true,
+      "microcode_words": 1002
+    },
+    "cp61d": {
+      "lut4": 1283,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 643,
+      "fmax_mhz": null,
+      "timing_pass": false,
+      "fully_routed": false,
+      "microcode_words": 1002
+    },
+    "cp61e": {
+      "lut4": 1227,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 616,
+      "fmax_mhz": 32.125,
+      "timing_pass": true,
+      "fully_routed": true,
+      "microcode_words": 1002
+    },
+    "cp61f": {
+      "lut4": 1229,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 616,
+      "fmax_mhz": 32.087,
+      "timing_pass": true,
+      "fully_routed": true,
+      "microcode_words": 1002
+    },
+    "cp61g": {
+      "lut4": 1229,
+      "ff": 343,
+      "ebr": 6,
+      "slices": 616,
+      "fmax_mhz": 32.087,
+      "timing_pass": true,
+      "fully_routed": true,
+      "microcode_words": 1002
+    }
+  },
+  "remaining": {
+    "lut4": 51,
+    "slices": 24,
+    "ebr": 1,
+    "microcode_words": 22
+  },
+  "nominal_clock_mhz": 29.56,
+  "verification_clock_mhz": 31.824,
+  "board_installed": "cp56a",
+  "default_profile": "cp52a",
+  "flashed": false
+}
