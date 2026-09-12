@@ -1,0 +1,15 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-12T19:48:54Z",
+  "commands": [
+    "COPY HG:UJLOAD.SAV DK:UJLOAD.SAV",
+    "COPY HG:ODT.BIN DK:ODT.BIN",
+    "COPY HG:UJON.SAV DK:UJON.SAV",
+    "COPY DK:UJLOAD.SAV HG:LDCHK.SAV",
+    "COPY DK:ODT.BIN HG:ODCHK.BIN",
+    "COPY DK:UJON.SAV HG:ONCHK.SAV"
+  ],
+  "uart_bytes": 234,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-12T19:57:03Z"
+}

@@ -2,6 +2,11 @@
 
 ## План ODT от 2026-09-12
 
+- [x] CP64 hardware: прошить точную CP63b, проверить FLASH Verify, RT-11FB
+  boot и DIR. [Журнал установки](docs/board-bringup-cp64.md).
+- [x] Через HG установить UJLOAD/ODT/UJON на SD, проверить SHA256 обратных
+  копий, загрузить ODT в HALT FRAM и включить debug через UJON.
+
 [Подробный план отладчика](docs/odt-debugger-plan.md).
 
 - [x] CP63: RTL кнопки RESET — короткое отпускание запрашивает ODT, удержание

@@ -16,7 +16,11 @@ def main():
     assert result['diamond_returncode']==0 and result['fully_routed'] and result['timing_pass']
     prefix=out/'impl1'/(a.checkpoint+'_impl1')
     for name,want in result['inputs']['files'].items():
-        path=out/'clock.lpf' if name=='generated:clock.lpf' else ROOT/name
+        if name.startswith('generated:'):
+            generated=name.removeprefix('generated:')
+            assert generated in ('clock.lpf','build.tcl'),name
+            path=out/generated
+        else:path=ROOT/name
         assert hashlib.sha256(path.read_bytes()).hexdigest()==want, str(path)
     for suffix,want in result['reports'].items():
         assert hashlib.sha256(prefix.with_suffix(suffix).read_bytes()).hexdigest()==want,suffix

@@ -10,7 +10,11 @@ OCT/HEX и прокрутка HDSP. Команды пульта и резуль�
 измеренному CP63b: **1230 LUT / 381 FF / 6 EBR / 32,246 MHz**, 1005 uwords.
 187 CPU checks × 3 ROM/decode режима и полный RT-11/FRAM/SD/UART/HDSP прогон
 PASS: **83 checks, 331098776 clocks, 58 display frames**, RX overrun=0
-при проверенном интервале ввода около 1,77 ms. Плата ещё CP56a; прошивки не было.
+при проверенном интервале ввода около 1,77 ms.
+
+**CP63b прошита на плату:** FLASH Verify, загрузка RT-11FB и DIR прошли.
+ODT загружен с SD в HALT FRAM, UJON включил debug; файлы проверены readback.
+[Аппаратная установка CP64 и её текущее состояние](docs/board-bringup-cp64.md).
 
 [Готовые файлы и установка](demos/rt11/service/cp64/README.md),
 [команды и ограничения](docs/odt-cp64.md), [verification](docs/verification-cp64.json).

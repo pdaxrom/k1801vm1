@@ -1,0 +1,34 @@
+{
+  "files": {
+    "hardware-1/programmer-stdout.log": "81fdcd703b93d1758249f6343d1f34f5dfc87412c161e482b32756381ace9cae",
+    "hardware-1/uart.bin": "97e8ae46a6142759eef485bc603dc5c20bc2d038ae1df239882c9281b75a1386",
+    "hardware-1/session.json": "08c9e512e0c2671d7d4d9747e9fb1a18bf80411dce2fe3cc62b27fff701c1d31",
+    "hardware-1/programmer-old.log": "c3ed251e7a9d526f252ba651e39f2b09830d8bc42a0e0240f211bf0d17645d61",
+    "hardware-1/programmer.log": "70416f2a351670b232f47a310b6c8fad737725e079102e534fd094efb6d91352",
+    "export.log": "cc51fdfe02e73333856fb696a8760dc2598d7cc28b8a30f485866d37bebfd610",
+    "export.tcl": "09f404ab4b937b9bc6c807165880184cb22a16fc9ef6f84879dad302e509839d",
+    "jed.json": "74430d97846ed3c9a1c7e96ec167801163533a18b62de42ffa88061ddcbdd957",
+    "export-hashes.json": "35da38a00109c42b89378cf3ea5f9bcd68e8bb4f5fe3965af076e446e22baa33",
+    "pre-export-hashes.json": "f8604a15b0d93ce4ccb9e1bc3ab90eead5d35377724e146d98b4e8da20563a81",
+    "program.xcf": "a7898034e7991ece8230e835fcf9802826feafa642d50e209371c0474d4eeaf1",
+    "verify-id.xcf": "0ac91b0b1474bafa822861538cc178550273ad85edb991633c08f7c34d68f2d2",
+    "verify-id.log": "42c4ef6c908560d2333cc9eb21d1016bcb0cdddea6af0d7851c153c0582f564a",
+    "verify-id-stdout.log": "1c1569223be869e2d7e3b1cd67de02431174174f2d3a322ee0bedf9190be0f18",
+    "impl1/cp63b_impl1.jed": "06b5c627287bb484cea49f6221126282dae791a546b8c02ab0efa6be1a2a0673"
+  },
+  "picocom_pid": 135981,
+  "picocom_state": "S",
+  "uart": {
+    "port": "/dev/ttyUSB1",
+    "started_utc": "2026-09-12T19:45:17Z",
+    "commands": [
+      "DIR"
+    ],
+    "programmer_exit_code": 0,
+    "uart_bytes": 3882,
+    "rt11_banner_seen": true,
+    "finished_utc": "2026-09-12T19:46:24Z"
+  },
+  "programmed_and_verified": true,
+  "dir_pass": true
+}

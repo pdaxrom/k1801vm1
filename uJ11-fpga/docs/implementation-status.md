@@ -1,5 +1,10 @@
 # Implementation status, 2026-09-12
 
+**Аппаратная установка:** CP63b записана и проверена во FLASH; RT-11FB и DIR
+работают на плате. Установка ODT и аппаратные проверки отражаются в
+[отдельном журнале](board-bringup-cp64.md). Ниже — результаты checkpoints
+на момент их фиксации.
+
 ## CP64 — загружаемый UART/HDSP ODT
 
 Production `ODT.BIN` и проверяющий активатор `UJON.SAV`, ABI2 loader не изменён.
