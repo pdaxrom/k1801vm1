@@ -14,11 +14,16 @@ PAIRS['DQ'] = PAIRS['ZQ']  # v12: D+Q; legacy ZQ explicitly requires D=ZERO.
 DESTS = {s: i for i, s in enumerate('NONE RF Q RFQ_L RFQ_R OPERAND MOV'.split())}
 FLAGS = {s: i for i, s in enumerate('KEEP NZV NZVC LOAD'.split())}
 DINPUT = {s: i for i, s in enumerate('ZERO ONE TWO STEP MDR DISP IMM PSW'.split())}
+DINPUT['STATUS'] = DINPUT['ZERO']  # CP57: low bit 7, outside PAGE/IMM.
 SEQS = {'NEXT': 0, 'PAGE': 1, 'FETCH': 2, 'FETCH_A1': 3}
 CONDS = {s: i for i, s in enumerate('ALWAYS C V Z N Q0 LOOPZ ERROR'.split())}
 CONDS.update({'NOT_' + k: v + 8 for k, v in list(CONDS.items())})
 REGS = {**{f'R{i}': i for i in range(8)}, **{f'T{i}': 8+i for i in range(8)},
         'RS': 16, 'RD': 17, 'RS1': 18, 'RD1': 19}
+# CP57 opt-in engine interprets these otherwise zero context fields. Existing
+# images remain bit-identical. No MMU or address translation is involved.
+SPACES = {'ACTIVE': 0, 'GUEST': 1, 'UPPER': 2, 'LOWER': 3}
+SERVICES = {'NONE': 0, 'ENTER': 1, 'LEAVE': 2, 'CONFIG': 3}
 FETCH_ADDRESS = 0x020
 STOP_ADDRESS = 0x3ff
 STOP_WORD = (1 << 35) | (COMMANDS['STOP'] << 31)
@@ -80,7 +85,7 @@ def encode(line, addr, labels):
         f = fields(args, {'a','b','pair','dst','flags','d','seq','next','imm','trace'})
         seq = enum(f.get('seq', 'NEXT'), SEQS)
         din = enum(f.get('d', 'ZERO'), DINPUT)
-        if f.get('pair', 'AB').upper() == 'ZQ' and din != DINPUT['ZERO']:
+        if f.get('pair', 'AB').upper() == 'ZQ' and f.get('d','ZERO').upper() != 'ZERO':
             raise AssemblyError('ZQ requires d=ZERO; use DQ for a D/Q operation')
         low = 0
         if seq == SEQS['PAGE']:
@@ -103,6 +108,10 @@ def encode(line, addr, labels):
             low = bounded(number(f['imm'], labels), 8, 'imm')
         elif 'imm' in f:
             raise AssemblyError('imm requires d=IMM')
+        if f.get('d','ZERO').upper() == 'STATUS':
+            if seq not in (SEQS['NEXT'],SEQS['FETCH']) or 'trace' in f:
+                raise AssemblyError('STATUS conflicts with PAGE, FETCH_A1 and trace')
+            low = 128
         if 'trace' in f:
             enum(f['trace'], {'RETURN': 1})
             if seq != SEQS['FETCH'] or din == DINPUT['IMM'] or f.get('flags','KEEP').upper() != 'KEEP':
@@ -126,9 +135,9 @@ def encode(line, addr, labels):
         if cmd == 'CJUMP':
             allowed.add('cond')
         if cmd == 'JUMP':
-            allowed.add('init')
+            allowed.update({'init', 'service', 'a'})
         if cmd in {'READ','WRITE'}:
-            allowed.update({'a','b','byte'})
+            allowed.update({'a','b','byte','space'})
         if cmd == 'READ':
             allowed.update({'stream','fault_inc'})
         if cmd == 'OR_R67':
@@ -141,6 +150,12 @@ def encode(line, addr, labels):
         byte_fixed = 0 if byte_auto else bounded(number(f.get('byte','0')), 1, 'byte')
         stream = bounded(number(f.get('stream','0')), 1, 'stream')
         fault_inc = bounded(number(f.get('fault_inc','0')), 1, 'fault_inc')
+        space = enum(f.get('space', 'ACTIVE'), SPACES)
+        service = enum(f.get('service', 'NONE'), SERVICES)
+        if space and (stream or byte_fixed or byte_auto):
+            raise AssemblyError('special space requires a word, non-stream access')
+        if service and (init or bounded(number(f.get('prefetch','1')),1,'prefetch')):
+            raise AssemblyError('service requires init=0 and prefetch=0')
         if stream and (f.get('a','R0').upper() not in {'R7','RS','RD'} or byte_fixed):
             raise AssemblyError('stream READ requires a=R7/RS/RD and byte=0/IR')
         if 'target' in allowed and 'target' not in f:
@@ -164,7 +179,8 @@ def encode(line, addr, labels):
                 enum(f.get('a', a_default), REGS) << 26 |
                 enum(f.get('b', b_default), REGS) << 21 |
                 byte_fixed << 6 | int(byte_auto) << 3 | stream << 5 | fault_inc << 2 |
-                (1-bounded(number(f.get('prefetch','1')),1,'prefetch')) << 4 | init)
+                (1-bounded(number(f.get('prefetch','1')),1,'prefetch')) << 4 | init |
+                space << 7 | service << 1)
         if cmd == 'FETCH':
             # command 2 == ALU ADD; target/condition are unused by FETCH.
             # Reuse those bits as ordinary AD, RF, KEEP, TWO datapath fields.

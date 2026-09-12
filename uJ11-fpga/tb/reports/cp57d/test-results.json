@@ -1,0 +1,83 @@
+{
+  "scenarios_per_mode": 39,
+  "modes": [
+    "logic decode + portable ROM",
+    "sync decode + portable ROM",
+    "vendor DP8KC"
+  ],
+  "files": {
+    "build/cp57-service/test-0.log": "775f402dfb8115ecd7ead75547e05960915c147387dad825b20812af7d3f3566",
+    "build/cp57-service/test-1.log": "acd79c1ed1a8b852dbff507727c3c07f0ae3edb156b0f19e4242b8fa07bdc4d8",
+    "build/cp57-service/test-vendor.log": "acd79c1ed1a8b852dbff507727c3c07f0ae3edb156b0f19e4242b8fa07bdc4d8",
+    "build/cp57-service/service_cp57_cases.vh": "3abab00f128221327a136c948cbeba20849acf1cb0e70b289ef5bcc0df44dd9f",
+    "tools/run_service_cp57.py": "6e3a63f7a4cf17c89ded8a284181cc685ecdd4bfd043cda566321aa1d52bc0fe",
+    "tb/tb_service_cp57.v": "0b5bfebaf55bcc1cf24a0210310760193660d9b9353d0ccc244fecf8ccf12c5c"
+  },
+  "profile": {
+    "reference": "cp56a",
+    "mmu": false,
+    "baseline_words": 954,
+    "source_words": 47,
+    "bridge_words": 0,
+    "used_words": 1001,
+    "free_words": 23,
+    "entries": {
+      "S_FP": 45,
+      "S_ODT": 83,
+      "S_START": 270,
+      "S_RCPC": 278,
+      "S_RCPS": 286,
+      "S_WCPC": 294,
+      "S_WCPS": 302,
+      "S_UPPER_READ": 87,
+      "S_UPPER_WRITE": 107,
+      "S_CONFIG": 111,
+      "S_STATUS": 161,
+      "S_LOWER_READ": 165,
+      "S_LOWER_WRITE": 169,
+      "S_MFUS": 173,
+      "S_MTUS": 310,
+      "S_RSEL": 177
+    },
+    "inputs": {
+      "tools/build_service_cp57.py": "31467eb32efc96530a3e675032427c469265ec7e59824aaade2d7bfb450a5c7b",
+      "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+      "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+      "tools/link_fis.py": "fcf7b576c7e122b9d95811a7c9bb7d6c9c781ff14a4c8f8768f5fd927158c59d",
+      "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "microasm/uj11asm.py": "070187fdd08f90c69dd9cafca83a7ff3b99d1d21473befdfb865493a6f8f831d",
+      "microcode/service_cp57.uasm": "c7b287478f62fcdeee8c11665899be40796c724f10d0ccc625e166a12d9a5ee4",
+      "experimental/cp57/engine-state.vh": "743156e951dbf027a58e8066eeb095745679a544261bf9a5954939725cad1ce2",
+      "synth/reports/cp56a/inputs.json": "0f448e0acf084a522864411ce1c011ee97fb233beeb0be005a55d8a954b0602a",
+      "synth/reports/cp56a/source.tgz": "b95178e2415bb34925cc0e478c6599375f722ffffa23910bdf69132e2bd246ac"
+    },
+    "outputs": {
+      "build/cp57-service/src/rtl/uj11_core.v": "43b480568b1de59ea905bff114eff7717f37c94594eeab3567f3ab2a432244c8",
+      "build/cp57-service/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+      "build/cp57-service/src/microcode/generated/uj11_decode_table.v": "4be03e739c0b3a23721d52abd5d7b0ffb6bd80d695a7dcd0be9a1a33386f8c78",
+      "build/cp57-service/src/rtl/uj11_engine.v": "2807bdfc386dc3b5b90ce5263dd712f8a0d689227f9611945da50118d4a8c53b",
+      "build/cp57-service/src/rtl/uj11_decode.v": "21318f556c397acd39a94284a322839b12be5e6032d433b174e44f4e07ab9daa",
+      "build/cp57-service/src/rtl/uj11_microseq.v": "c718df708acd48e542e8b874e5b563139bd38547d41de63753a970fbcbed008f",
+      "build/cp57-service/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+      "build/cp57-service/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+      "build/cp57-service/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+      "build/cp57-service/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+      "build/cp57-service/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+      "build/cp57-service/src/boards/hc1200/uj11_board.v": "3a390e512f9421414d2bd554a57da18c6588ba55ccbce8f91b87fd67ba5aba15",
+      "build/cp57-service/src/boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+      "build/cp57-service/src/boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+      "build/cp57-service/src/reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+      "build/cp57-service/src/reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+      "build/cp57-service/src/microcode/generated/uj11_firmware_rom.v": "f6545b526765822677ab8e0bc403f7e2b660f3d6f42862b3634e54163ec8bdb2",
+      "build/cp57-service/src/boards/hc1200/uj11_board_bus.v": "982fdbe1375e6a83d3ce7d15b2d0799b5f7d6ab8d8037391c7e6912dd018f777",
+      "build/cp57-service/src/boards/hc1200/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+      "build/cp57-service/service.uasm": "44c4fbd077e87e4eb6112a9799b96612eae7a701a4d3764e987bd3dd1642d4a6",
+      "build/cp57-service/m0.mem": "942a643ec72104205e6bcce8ae351abc24b24d03aa0e36c80f56e2258a311197",
+      "build/cp57-service/m0.lst": "e1a652d21e9542da8223747e91dcecc4a3c294e3871f285f1bcd950e35c94330",
+      "build/cp57-service/m0.labels.json": "05dcc704868ec0c7a3dbe64868b449388eaec7b9293708a3dc6aa56cb845e189",
+      "build/cp57-service/m0.stats.json": "2fc76b3e8f8f45d0cffff6aea8e6168edb9e02a9850e50dee80aa8a525bfd0e6",
+      "build/cp57-service/uj11_m0_ebr.v": "61bd3badcabcf4e43213d9ad0133d63c31365ae652cd8434523dc53a7770ed7e",
+      "build/cp57-service/decode.mem": "ba13a4dc36748eeed8ef3c0521e4073b74564aa7232bbfb5c5eaffd427602870"
+    }
+  }
+}

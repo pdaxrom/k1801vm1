@@ -1,0 +1,229 @@
+{
+  "checkpoint": "CP57e",
+  "input_revision_sha256": "108630f4d5b1950d2868079ff3f1dd82c550cf4019a94a3a6ade300a6d8c1d9f",
+  "cpu_scenarios": 44,
+  "cpu_modes": 3,
+  "board_scenarios": 10,
+  "board_modes": 2,
+  "workloads": [
+    {
+      "workload": "MOV_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625
+    },
+    {
+      "workload": "ADD_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625
+    },
+    {
+      "workload": "CMP_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625
+    },
+    {
+      "workload": "mixed_RR",
+      "instructions": 256,
+      "microclocks": 6032,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 5520,
+      "fram_busy_clocks": 5008,
+      "spi_transactions": 4,
+      "spi_clocks": 4224,
+      "cpi": 23.5625
+    },
+    {
+      "workload": "MOV_mem_reg",
+      "instructions": 256,
+      "microclocks": 32492,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 28956,
+      "fram_busy_clocks": 27940,
+      "spi_transactions": 508,
+      "spi_clocks": 24384,
+      "cpi": 126.921875
+    },
+    {
+      "workload": "MOV_reg_mem",
+      "instructions": 256,
+      "microclocks": 35516,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 252,
+      "request_clocks": 31476,
+      "fram_busy_clocks": 30460,
+      "spi_transactions": 760,
+      "spi_clocks": 26400,
+      "cpi": 138.734375
+    },
+    {
+      "workload": "MOV_mem_mem",
+      "instructions": 256,
+      "microclocks": 50132,
+      "memory_beats": 760,
+      "opcode_fetches": 256,
+      "writes": 252,
+      "request_clocks": 45840,
+      "fram_busy_clocks": 44320,
+      "spi_transactions": 1012,
+      "spi_clocks": 38496,
+      "cpi": 195.828125
+    },
+    {
+      "workload": "BR_self",
+      "instructions": 256,
+      "microclocks": 15104,
+      "memory_beats": 256,
+      "opcode_fetches": 256,
+      "writes": 0,
+      "request_clocks": 14592,
+      "fram_busy_clocks": 14080,
+      "spi_transactions": 256,
+      "spi_clocks": 12288,
+      "cpi": 59.0
+    },
+    {
+      "workload": "stack_push_pop",
+      "instructions": 256,
+      "microclocks": 34404,
+      "memory_beats": 508,
+      "opcode_fetches": 256,
+      "writes": 128,
+      "request_clocks": 30236,
+      "fram_busy_clocks": 29220,
+      "spi_transactions": 636,
+      "spi_clocks": 25408,
+      "cpi": 134.390625
+    }
+  ],
+  "fis_portable": 23840,
+  "fis_vendor": 645,
+  "fis_vendor_stride": 37,
+  "prior_cp57d_fis_full_portable_and_vendor": 23840,
+  "cold": {
+    "clocks": 173379163,
+    "uart_bytes": 3270,
+    "uart_sha256": "4a180086ca32f4a656e29a4513e8236d600646f322feb3a44a20480a69d51787",
+    "identical_to_cp56": true
+  },
+  "service_timing": [
+    {
+      "case": 1,
+      "clocks": 11006,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": 120
+    },
+    {
+      "case": 4,
+      "clocks": 2644,
+      "entry_to_first_opcode_request": -1,
+      "start_to_guest_opcode_request": -1
+    },
+    {
+      "case": 5,
+      "clocks": 596,
+      "entry_to_first_opcode_request": -1,
+      "start_to_guest_opcode_request": -1
+    },
+    {
+      "case": 33,
+      "clocks": 477,
+      "entry_to_first_opcode_request": -1,
+      "start_to_guest_opcode_request": -1
+    },
+    {
+      "case": 34,
+      "clocks": 3919,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": 120
+    },
+    {
+      "case": 36,
+      "clocks": 3807,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": 380
+    },
+    {
+      "case": 37,
+      "clocks": 1344,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": -1
+    },
+    {
+      "case": 38,
+      "clocks": 1344,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": -1
+    },
+    {
+      "case": 42,
+      "clocks": 8235,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": 120
+    },
+    {
+      "case": 40,
+      "clocks": 8217,
+      "entry_to_first_opcode_request": 258,
+      "start_to_guest_opcode_request": 120
+    }
+  ],
+  "edif_nets": 3180,
+  "edif_negative_controls": 3,
+  "files": {
+    "tb/reports/cp57e/bench-portable.json": "8adc3323ca6ca97944a3f2335b355e83504d0acad78ef04726d81ad8124e5d85",
+    "tb/reports/cp57e/bench-portable.log": "3104027ac5db3ba858ce843f681166a7be4eed51f94c7c34d3b7451678ecf06f",
+    "tb/reports/cp57e/bench-results.json": "2a38901e309c4258a7434c97be622d9425e6e237a076693a05a169a1bf2b1b4b",
+    "tb/reports/cp57e/bench-vendor.json": "8adc3323ca6ca97944a3f2335b355e83504d0acad78ef04726d81ad8124e5d85",
+    "tb/reports/cp57e/bench-vendor.log": "b5ae5de6aac4761d370ad8deb12690c266243f36b53742292fcc368a85391e1e",
+    "tb/reports/cp57e/board-portable-inputs.json": "f212b14a455608c8366c25c388a46e9ca11074e04aca87bf568f24781dc1a81a",
+    "tb/reports/cp57e/board-portable.log": "8ecb34a36d6aa66e06c336972085850829eaabfaedb3d7b5e16d953a8f15fa24",
+    "tb/reports/cp57e/board-vendor-inputs.json": "332d86b9f4477d952300b465fe0ba60b244d1e05ddaa6d94041394378199cbda",
+    "tb/reports/cp57e/board-vendor.log": "8ecb34a36d6aa66e06c336972085850829eaabfaedb3d7b5e16d953a8f15fa24",
+    "tb/reports/cp57e/cp57-fis-portable.csv.gz": "26e74e51d5e558eb3f258b0b06e13358bd8f7bf05f941224c6f6c53e36b01214",
+    "tb/reports/cp57e/cp57-fis-portable.log": "7eb028ddf792017f8dbe29f4995675200d02af01591d6e1010e1c81eccb7d153",
+    "tb/reports/cp57e/cp57-fis-vendor.csv.gz": "39fdf00f2f1f2cbfec0af1837f8b339ad36e175903d4a9e698b65506026bef83",
+    "tb/reports/cp57e/cp57-fis-vendor.log": "78789f89ed23ffe5ada492a4fa13718ac38e512a76e7c0ef02f6b7b6257165fb",
+    "tb/reports/cp57e/cp57e-cold-board-inputs.json": "e32ca3ea9a08313a9975653f4c6ea434492c1a7ac7de7c1c9b0c2cbd486c3b3a",
+    "tb/reports/cp57e/cp57e-cold-board-rt11.log": "ec84e33a518b72f2edae496b612d8a2cd97cfb6b8328e1d836050feada7fc97f",
+    "tb/reports/cp57e/cp57e-cold-uart.txt": "4a180086ca32f4a656e29a4513e8236d600646f322feb3a44a20480a69d51787",
+    "tb/reports/cp57e/edif-audit.json": "739983be1bc6510f5469fb62491cedef59892b16c7293819d22a442f9adbb7d9",
+    "tb/reports/cp57e/fis-inputs.json": "d246c463c15196b478ad64d4e53f64b6f9d6b5412b0495b169b67d2fbb984746",
+    "tb/reports/cp57e/fixtures.tgz": "6fef4b942c2934d72bfa1f54b566ff2ba3d2688bc4b846fc542449ed5e8d1578",
+    "tb/reports/cp57e/inputs.json": "840ca8cdc1d5c39616046fd812f8373fb4e1ebf94a15ebe0b87dc7846f97d232",
+    "tb/reports/cp57e/service_cp57_board_cases.vh": "bf0ce0a3582d750613fc70db76856e4b7aac85417b85f616b1cb6911f20dbade",
+    "tb/reports/cp57e/service_cp57_cases.vh": "62ac10648753b5bf789d3f2cb95a3857e13743423c6ece6b8351dc3847dfa006",
+    "tb/reports/cp57e/test-0.log": "bfa8ebf0e9a14764cd4af43f10606dd4abedccda37e5c22ff248f61805c73c7e",
+    "tb/reports/cp57e/test-1.log": "a7a9d77e0ee3ff898ba2e435c1635fd1d8a84b5d20007a2344535efffac4ecea",
+    "tb/reports/cp57e/test-results.json": "4eb9d001a8fd0319a797555429c281868beb9c3a0a856d39767466473004e4d1",
+    "tb/reports/cp57e/test-vendor.log": "a7a9d77e0ee3ff898ba2e435c1635fd1d8a84b5d20007a2344535efffac4ecea"
+  }
+}

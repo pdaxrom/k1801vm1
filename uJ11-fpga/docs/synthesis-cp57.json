@@ -1,0 +1,84 @@
+{
+  "checkpoint": "CP57 service bank, full HC1200 board",
+  "measurements": {
+    "cp57a": {
+      "lut4": 1303,
+      "ff": 374,
+      "ebr": 6,
+      "slices": 653,
+      "fmax_mhz": null,
+      "microcode_words": 990,
+      "fully_routed": false,
+      "timing_pass": false,
+      "input_revision_sha256": "f7761acfec11516422cbd89bc36d93610198f8b37aee6eac7745d4399f9692aa"
+    },
+    "cp57b": {
+      "lut4": 1293,
+      "ff": 374,
+      "ebr": 6,
+      "slices": 650,
+      "fmax_mhz": null,
+      "microcode_words": 993,
+      "fully_routed": false,
+      "timing_pass": false,
+      "input_revision_sha256": "d9f9597759978edd55b66dc0eeaef264f8c23517623c21df9d3b33598545cdb9"
+    },
+    "cp57c": {
+      "lut4": 1297,
+      "ff": 342,
+      "ebr": 6,
+      "slices": 653,
+      "fmax_mhz": null,
+      "microcode_words": 993,
+      "fully_routed": false,
+      "timing_pass": false,
+      "input_revision_sha256": "9361a4681709b9efcf72e6b1af67758305ccde3a8105fb124ea6ac0f3cfbdfce"
+    },
+    "cp57d": {
+      "lut4": 1261,
+      "ff": 342,
+      "ebr": 6,
+      "slices": 634,
+      "fmax_mhz": 30.938,
+      "microcode_words": 1001,
+      "fully_routed": true,
+      "timing_pass": true,
+      "input_revision_sha256": "43155a5eaac5d5e09594a6e7d740bed286108a49904d27c451510e3e2279abb4"
+    },
+    "cp57e": {
+      "lut4": 1260,
+      "ff": 342,
+      "ebr": 6,
+      "slices": 635,
+      "fmax_mhz": 31.982,
+      "microcode_words": 1000,
+      "fully_routed": true,
+      "timing_pass": true,
+      "input_revision_sha256": "108630f4d5b1950d2868079ff3f1dd82c550cf4019a94a3a6ade300a6d8c1d9f"
+    }
+  },
+  "selected": "cp57e",
+  "remaining": {
+    "lut4": 20,
+    "slices": 5,
+    "ebr": 1,
+    "pio": 0,
+    "microcode_words": 24
+  },
+  "delta_from_cp56a": {
+    "lut4": 76,
+    "ff": 3,
+    "ebr": 0,
+    "fmax_mhz": -0.014,
+    "microcode_words": 46
+  },
+  "critical_path": {
+    "delay_ns": 31.294,
+    "slack_ns": 2.561,
+    "levels": 15,
+    "route_percent": 61.9
+  },
+  "installed": false,
+  "default_changed": false,
+  "external_pin_timing_closed": false
+}

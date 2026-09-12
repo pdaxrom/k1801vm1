@@ -1,5 +1,37 @@
 # Synthesis checkpoints
 
+## CP57 — служебный банк без MMU, выбран эксперимент CP57e
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP57a | CPC/CPSW FF, аппаратный capture | 1303 | 374 | 6 | — | 990 | MAP overflow, Fmax отсутствует |
+| CP57b | Capture через microcode, opcode qualification через IR | 1293 | 374 | 6 | — | 993 | MAP overflow |
+| CP57c | Контекст FRAM, аппаратный выбор его адресов | 1297 | 342 | 6 | — | 993 | MAP overflow |
+| CP57d | Адреса контекста формирует ALU/T5 | 1261 | 342 | 6 | 30,938 | 1001 | 634 slices; полный MAP/PAR/TRACE PASS |
+| CP57e | STATUS через малый вход ALU, CONFIG control word | 1260 | 342 | 6 | 31,982 | 1000 | 635 slices; полный MAP/PAR/TRACE PASS |
+
+Измерялся весь компьютер: FIS, FRAM, UART/timer, HDSP/RGB/keyboard/HG,
+SD/RK, bootstrap, OSCH и реальные pin constraints. Ни одно устройство
+ради fit не отключалось. От CP56a **+76 LUT / +3 FF / +0 EBR / −0,014 MHz**.
+Два слова CPC/CPSW находятся в верхней FRAM, основной RF остаётся 16×16.
+
+Свободны **20 LUT, 5 slices, 1 EBR и 24 слова microstore**, PIO свободных
+нет. Это proof-of-fit с малым запасом, default/установленная CP56a не меняются.
+До первоначального ориентира 1100 LUT ещё 160 LUT. Следующие аппаратные
+расширения требуют новой оценки площади; полный ODT/FP11 предназначен FRAM.
+
+CP57e MAP: 1132 logic + 48 RF RAM + 80 carry LUT; 334 PFU + 8 PIO FF.
+Худший путь EBR→sequencer→EBR: **31,294 ns / 15 levels / 61,9% route**,
+slack **2,561 ns** при 29,56 MHz. TRACE проверил внутренний clock;
+нового signoff внешних FRAM pin delays/OSCH duty/jitter для этой разводки нет.
+
+Промежуточные Synplify BN161 не приняты на веру: итоговый EDIF проверен,
+**3180 сетей, 0 конфликтующих strong drivers, 0 необъяснённых floating nets**.
+Неиспользование 7 carry-inputs доказано; три повреждения netlist обнаружены
+negative controls. Предупреждения JTAG/GPIO и OSCH относятся к прежней обвязке.
+[Первичные отчёты и frozen sources](../synth/reports/cp57e/),
+[все измерения](synthesis-cp57.json), [ABI и пределы](service-bank-cp57.md).
+
 ## CP56 — SCK 29,56 MHz, полный gate PASS
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | Microcode words | Notes |

@@ -1,0 +1,12 @@
+PASS FIS memory_mode=-1: 162 exact state/PSW/bus/memory cases, 0 injected faults
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp57-service/tb_fis.v:150: $finish called at 606836000 (1ps)
+
+PASS FIS memory_mode=-1: 162 exact state/PSW/bus/memory cases, 0 injected faults
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp57-service/tb_fis.v:150: $finish called at 642976000 (1ps)
+
+PASS FIS memory_mode=-1: 162 exact state/PSW/bus/memory cases, 0 injected faults
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp57-service/tb_fis.v:150: $finish called at 582306000 (1ps)
+
+PASS FIS memory_mode=-1: 159 exact state/PSW/bus/memory cases, 83 injected faults
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp57-service/tb_fis.v:150: $finish called at 395566000 (1ps)
+PASS FIS aggregate: 645 exact state/PSW/bus/memory cases; 4 independent shards

@@ -1,4 +1,24 @@
-# Implementation status, 2026-09-11
+# Implementation status, 2026-09-12
+
+## CP57 — минимальный служебный банк, отдельный профиль
+
+CP57e прошёл полный HC1200 MAP/PAR/TRACE: **1260 LUT / 342 FF / 6 EBR /
+31,982 MHz**, 1000 microinstructions. Входы HALT/FP11, frozen CPC/CPSW
+в верхней FRAM, START, HALT-only aliases и установочный доступ из обычного
+режима проверены. PSW16, FIS и общий I/O сохранены; MMU отсутствует.
+
+44 CPU cases × 3 ROM/decode modes; 10 full-board service cases × portable/
+vendor; 23840 exact FIS portable + 645 vendor; на CP57d полный набор 23840
+пройден в обоих симуляторах. Девять workloads × 2 сохранили все counters CP56.
+Cold RT-11FB + DIR: 173379163 clocks, те же 3270 raw UART bytes.
+18 microassembler + 5 FIS/linker unit tests PASS. EDIF: 3180 nets без
+конфликтующих драйверов и необъяснённых floating nets.
+
+Пока нет STEP/SEL004 fault completion, непрерывного H/P copy tracking,
+RT-11 `.SAV` loader, полных ODT/FP11 и аппаратной проверки этого профиля.
+Свободны 20 LUT/5 slices: ресурсный запас мал. На плате по-прежнему CP56a,
+default по-прежнему CP52a. [Контракт CP57](service-bank-cp57.md),
+[verification manifest](verification-cp57.json).
 
 ## CP56 — ускорение SPI FRAM, проверки и synthesis PASS
 

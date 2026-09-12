@@ -216,5 +216,38 @@ class AssemblerTests(unittest.TestCase):
                     'TRAP, target=0, init=1', 'alu PASSA, init=1']:
             with self.assertRaises(asm.AssemblyError): asm.encode(bad, 0, {})
 
+    def test_cp57_status_input(self):
+        base, _ = asm.encode('alu PASSA, pair=DA, d=ZERO, b=R0, dst=RF, seq=FETCH',0,{})
+        word, _ = asm.encode('alu PASSA, pair=DA, d=STATUS, b=R0, dst=RF, seq=FETCH',0,{})
+        self.assertEqual(word ^ base, 128)
+        for bad in ['alu PASSA, d=STATUS, seq=PAGE, next=0',
+                    'alu PASSA, d=STATUS, seq=FETCH_A1',
+                    'alu PASSA, d=STATUS, imm=1',
+                    'alu PASSA, d=STATUS, seq=FETCH, trace=RETURN',
+                    'alu ADD, pair=ZQ, d=STATUS']:
+            with self.assertRaises(asm.AssemblyError): asm.encode(bad, 0, {})
+
+    def test_cp57_context_fields(self):
+        for command in ('READ', 'WRITE'):
+            base, edges = asm.encode(f'{command}, a=R7, b=R0, target=$120, prefetch=0', 0, {})
+            for name, value in asm.SPACES.items():
+                word, actual = asm.encode(f'{command}, a=R7, b=R0, target=$120, space={name}, prefetch=0', 0, {})
+                self.assertEqual(word ^ base, value << 7)
+                self.assertEqual(actual, edges)
+        base, _ = asm.encode('JUMP, a=R7, target=0, prefetch=0', 0, {})
+        for name, value in asm.SERVICES.items():
+            word, _ = asm.encode(f'JUMP, a=R7, target=0, service={name}, prefetch=0', 0, {})
+            self.assertEqual(word ^ base, value << 1)
+        for bad in ['CJUMP, cond=C, target=0, space=UPPER',
+                    'READ, target=0, space=UPPER, byte=IR',
+                    'READ, a=R7, target=0, space=UPPER, stream=1',
+                    'READ, target=0, space=STATUS',
+                    'READ, a=R7, target=0, space=STATUS, fault_inc=1',
+                    'READ, target=0, space=CPC',
+                    'JUMP, service=ENTER, target=0',
+                    'JUMP, service=LEAVE, target=0, prefetch=0, init=1',
+                    'TRAP, service=ENTER, target=0, prefetch=0']:
+            with self.assertRaises(asm.AssemblyError): asm.encode(bad, 0, {})
+
 if __name__ == '__main__':
     unittest.main()

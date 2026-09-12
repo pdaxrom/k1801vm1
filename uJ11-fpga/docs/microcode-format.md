@@ -4,6 +4,23 @@ CP37 добавляет экспериментальный backend APR_READ/D=AP
 Production v12 и 954 words сохранены; MMU translation ещё не подключена.
 [Кодирование, измерения и границы lookup gate](mmu-apr-lookup.md).
 
+## CP57 opt-in extension к v12
+
+Default 954 слова сохраняются бит-в-бит. В `--service-cp57` два ранее
+нулевых бита READ/WRITE `[8:7]` задают пространство: ACTIVE=0, GUEST=1,
+UPPER=2, LOWER=3. Последние два — физическая RAM без I/O/ROM overlays.
+Assembler запрещает special space с byte или stream. Контекст CPC/CPSW
+читается обычными UPPER microinstructions, адрес формируется через ALU/T5.
+
+JUMP `[2:1]`: NONE=0, ENTER=1, LEAVE=2, CONFIG=3. Требуются `prefetch=0`
+и `init=0`; CONFIG получает ready[1:0] с A-порта RF. Формат INIT периферии
+в бите 0 не изменён. Поля защищены от overlap с другими control classes.
+
+ALU `d=STATUS` использует D=ZERO encoding и low bit7=1; допустимы NEXT/FETCH,
+запрещены PAGE/FETCH_A1/IMM/trace. Значение: `{8'b0,!fp_ready,5'b0,ready[1:0]}`.
+Обычный ZERO остаётся нулём, включая PAGE с установленным bit7 адреса.
+Внутреннего 16-bit memory-response mux/ACK для STATUS нет. [ABI CP57](service-bank-cp57.md).
+
 ## CP31: возврат к v12
 
 FP11 отложен. Удалены 33 FP words и reset hook, control bit1 снова не занят;

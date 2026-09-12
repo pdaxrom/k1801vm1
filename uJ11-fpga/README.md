@@ -1,5 +1,15 @@
 # uJ11 FPGA
 
+**CP57e: первый служебный банк FRAM без MMU, отдельный профиль.**
+Полный HC1200: **1260 LUT / 342 FF / 6 EBR / Fmax 31,982 MHz**,
+1000/1024 слов микрокода. Тестовая firmware загружается инструкциями CPU
+в верхнюю FRAM; работают FP11/HALT entry, START и межбанковый доступ.
+Обычная ISA/FIS, benchmarks и cold RT-11FB сохранили результаты CP56.
+Запас всего **20 LUT / 5 slices**; это экспериментальный checkpoint,
+не новая установленная прошивка. Полные FP11/ODT, RT-11 `.SAV` loader,
+STEP и точный HALT fault path ВМ2 ещё впереди.
+[ABI, результаты и ограничения CP57](docs/service-bank-cp57.md).
+
 **CP56: ускоренный SPI FRAM, полный synthesis PASS.**
 **1184 LUT / 339 FF / 6 EBR / 31,996 MHz**. SCK 14,78 → 29,56 MHz
 при прежней CPU 29,56 MHz; R,R workloads быстрее в **1,70×**, cold

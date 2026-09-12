@@ -21,8 +21,9 @@ def main():
     p.add_argument('--ack-cp54',choices=['dma','dma-ack'],help='Equivalent native I/O qualification and ACK')
     p.add_argument('--rx-cp55',action='store_true',help='Native shared FRAM receive/result storage')
     p.add_argument('--spi-cp56',action='store_true',help='Native 29.56 MHz SPI with ODDRXE')
+    p.add_argument('--service-cp57',action='store_true',help='CP57 opt-in service FRAM bank, frozen CP56 base')
     args=p.parse_args()
-    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56))<=1, 'Choose one board profile'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57))<=1, 'Choose one board profile'
     assert re.fullmatch(r'[a-z0-9-]+',args.tag)
     assert args.image.exists()
     sources=CORE+BOARD+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
@@ -47,14 +48,20 @@ def main():
         core,board=adapt()
         sources=core+board+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
         if not args.vendor:sources+=['tb/models/ODDRXE.v']
+    if args.service_cp57:
+        from build_service_cp57 import adapt
+        core,board=adapt()
+        sources=core+board+['rtl/uj11_rom.v','reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
+        if not args.vendor:sources+=['tb/models/ODDRXE.v']
     if args.mmu:sources+=MMU
     if args.vendor:
         sources.remove('rtl/uj11_rom.v')
         vendor=Path(os.environ.get('LATTICE_SIM_DIR',ROOT/'build/vendor'))
         sources+=['microcode/generated/uj11_m0_ebr.v']+[str(vendor/(n+'.v')) for n in ('DP8KC','GSR','PUR')]
-        if args.spi_cp56:sources+=[str(vendor/'ODDRXE.v')]
+        if args.spi_cp56 or args.service_cp57:sources+=[str(vendor/'ODDRXE.v')]
+        if args.service_cp57:sources[sources.index('microcode/generated/uj11_m0_ebr.v')]='build/cp57-service/uj11_m0_ebr.v'
     testbench='tb/tb_board_rt11.v'
-    if args.fram_cp52 or args.cursor_cp53 or args.ack_cp54 or args.rx_cp55 or args.spi_cp56:
+    if args.fram_cp52 or args.cursor_cp53 or args.ack_cp54 or args.rx_cp55 or args.spi_cp56 or args.service_cp57:
         from build_fram_cp52 import replace_once
         testbench=f'build/{args.tag}-tb_board_rt11.v'
         (ROOT/testbench).write_text(replace_once((ROOT/'tb/tb_board_rt11.v').read_text(),
@@ -80,16 +87,20 @@ def main():
         for n in ['tb/board_fram_scoreboard.vh','tools/build_fram_cp52.py','tools/build_spi_cp56.py',
                   'build/cp56-spi/inputs.json','synth/reports/cp54b/inputs.json','synth/reports/cp54b/source.tgz']:
             source_hashes[n]=hashlib.sha256((ROOT/n).read_bytes()).hexdigest()
+    if args.service_cp57:
+        record=json.loads((ROOT/'build/cp57-service/inputs.json').read_text())
+        for n in list(record['inputs'])+list(record['outputs'])+['build/cp57-service/inputs.json','tb/board_fram_scoreboard.vh']:
+            source_hashes[n]=hashlib.sha256((ROOT/n).read_bytes()).hexdigest()
     image_hash=hashlib.sha256(args.image.read_bytes()).hexdigest()
     manifest=dict(files=source_hashes,image_sha256=image_hash,image_bytes=args.image.stat().st_size,
-                  mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,defines=profile_flags(args.mmu),
+                  mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,defines=profile_flags(args.mmu),
                   mode=('vendor DP8KC' if args.vendor else 'portable')+' Verilator; cold CPU reset; actual UART wire scoreboard; SD read-only backing + RAM overlay')
     (ROOT/f'build/{args.tag}-board-inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     # Freeze the imported models; scope their established implicit-width
     # conventions to those files only. New board/core RTL keeps fatal warnings.
     copies=ROOT/f'build/{args.tag}-board-reference'; copies.mkdir(exist_ok=True)
     for i, name in enumerate(sources):
-        if name.startswith('reference/'):
+        if name.startswith('reference/') or '/reference/' in name:
             data=(ROOT/name).read_text()
             path=copies/Path(name).name
             path.write_text('/* verilator lint_off WIDTH */\n'+data+'\n/* verilator lint_on WIDTH */\n')

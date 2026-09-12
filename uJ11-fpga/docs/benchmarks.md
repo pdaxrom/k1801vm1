@@ -1,4 +1,24 @@
-# Benchmarks: CP56 и предыдущие этапы
+# Benchmarks: CP57 и предыдущие этапы
+
+## CP57e — служебный банк, обычный guest code не замедлился
+
+Все девять portable/vendor full-board workloads совпали по **каждому** счётчику
+с CP56. MOV/ADD/CMP/mixed R,R: **6032 clocks / 256 instructions = 23,5625 CPI**
+(около 1,255 млн instructions/s при номинальных 29,56 MHz). Memory/SPI beats
+и cold RT-11FB+DIR также прежние: **173379163 clocks**, 3270 UART bytes,
+побайтное совпадение с CP56.
+
+На полном bus с SPI FRAM измерены служебные переходы: **258 clocks** от
+commit ENTER до первого запроса opcode handler; **120 clocks** от первой
+микрокоманды START до запроса следующего guest opcode без pending IRQ/trace.
+Эти интервалы не включают завершение самих opcode fetch и исполнение handler.
+Контекст читается/пишется в верхней FRAM; это цена редких служебных входов,
+не дополнительная задержка каждой гостевой инструкции. При возвращении с T
+testbench получил 380 clocks: интервал включает построение trace frame.
+
+Полный synthesis: 1260 LUT/342 FF/6 EBR/Fmax31,982 MHz. Эти результаты —
+simulation и Diamond, CP57 на плату не прошивался. [Исходные счётчики](../tb/reports/cp57e/bench-results.json),
+[проверки и определения интервалов](verification-cp57.json).
 
 ## CP56 — FRAM SCK 14,78 → 29,56 MHz, simulation
 
@@ -8,8 +28,8 @@ CPU остаётся на 29,56 MHz. Девять portable и девять vendo
 BR self **1,814×**. Cold RT-11FB + DIR: **288686609 → 173379163 clocks**
 (**1,665×**), каталог совпал. Реальный MAP/PAR: **1184 LUT / 339 FF /
 6 EBR / 31,996 MHz**. Скорость программы пока измерена в simulation;
-CP56 на плату не установлен из-за малого консервативного запаса SCK
-pulse width. [Таблица CP56](spi-cp56.md), [synthesis](synthesis-cp56.json),
+CP56a установлен по запросу пользователя; отдельного аппаратного измерения
+этих workloads пока нет. [Таблица CP56](spi-cp56.md), [synthesis](synthesis-cp56.json),
 [локальные проверки](verification-cp56.json).
 
 ## CP55 — native shared FRAM receive/result
