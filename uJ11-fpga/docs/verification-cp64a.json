@@ -1,0 +1,52 @@
+{
+  "checkpoint": "CP64a",
+  "module": {
+    "kind": 1,
+    "base": 4096,
+    "payload_bytes": 7632,
+    "memory_bytes": 8416,
+    "entry": 4096,
+    "fault": 5848,
+    "checksum": 39996,
+    "file_blocks": 16,
+    "sha256": "9434519a0fd955a84245c3bc447a59aa4bf38e4115b203a54a54e45646766df4"
+  },
+  "free_slot_bytes": 3872,
+  "hardware": {
+    "unchanged_from": "CP63b",
+    "lut": 1230,
+    "ff": 381,
+    "ebr": 6,
+    "fmax_mhz": 32.246,
+    "microinstructions": 1005,
+    "new_synthesis": false
+  },
+  "core": [
+    {
+      "mode": "sync",
+      "checks": 187,
+      "commands": 175,
+      "clocks": 5255740
+    }
+  ],
+  "panel_passed": true,
+  "rt11": {
+    "checks": 83,
+    "clocks": 331142525,
+    "uart_bytes": 1531,
+    "hdsp_frames": 58,
+    "asserted_rx_overruns": 0
+  },
+  "programmed": false,
+  "archive_sha256": "cd2bcd4f05b346ce7c7e0cf92f5ba8692beb8671230f979219af15b137ffcb90",
+  "source_archive_sha256": "da530b0ea5622c40ca4f6cd2f50b2bbc367f3935ae4665cad13d740c61fdecf6",
+  "limits": [
+    "No breakpoints/STEP OVER, RAW HALT/I-O view, disassembly history or held-key repeat.",
+    "No full HG exchange; see board-bringup-cp64.md for physical validation separate from this simulation archive.",
+    "UART wire input paced at about 1.77 ms; arbitrary continuous paste is not qualified."
+  ],
+  "panel": {
+    "checks": 3051,
+    "clocks": 25966766
+  }
+}

@@ -123,10 +123,14 @@ PMENU:	JSR PC,BEGIN
 	JMP PROMPT
 PSCROL:	TST R0
 	BMI 1$
-	MOV #RESULT+16.,R1
-	ADD SCROLL,R1
-	TSTB (R1)
+; A short new result may leave old bytes beyond its terminator. Check every
+; byte through the proposed window end, never probe beyond an earlier NUL.
+	MOV #RESULT,R1
+	MOV SCROLL,R2
+	ADD #17.,R2
+3$:	TSTB (R1)+
 	BEQ 2$
+	SOB R2,3$
 	INC SCROLL
 	BR 2$
 1$:	TST SCROLL

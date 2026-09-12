@@ -14,10 +14,11 @@ from check_odt_cp64 import check
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def archive(odt,rt11,cores,panel):
+def archive(odt,rt11,cores,panel,patch=False):
     hardware=check(odt)
     module=json.loads((odt/'result.json').read_text())
-    target=ROOT/'tb/reports/cp64';target.mkdir(parents=True,exist_ok=True)
+    revision='cp64a' if patch else 'cp64'
+    target=ROOT/'tb/reports'/revision;target.mkdir(parents=True,exist_ok=True)
     source=set(module['sources'])
     source.update(hardware['hardware_source_sha256'])
     source={p for p in source if not p.startswith('generated:')}
@@ -26,7 +27,10 @@ def archive(odt,rt11,cores,panel):
         p=target/dest;p.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(src,p)
         assert sha(src)==sha(p);artifacts[dest]=sha(p)
     counters=[]
-    assert len(cores)==3
+    # A software-only patch still requires the full RT-11 test and the exact
+    # CP63b hardware check; do not claim repeated logic/vendor tests for it.
+    expected_modes={'sync'} if patch else {'logic','sync','vendor'}
+    assert len(cores)==len(expected_modes)
     for directory in cores+[panel]:
         record=json.loads((directory/'result.json').read_text());assert record['passed']
         for p,h in record['files'].items():assert sha(ROOT/p)==h,p
@@ -39,7 +43,7 @@ def archive(odt,rt11,cores,panel):
             m=re.search(r'PASS CP64 monitor: (\d+) checks (\d+) commands (\d+) clocks',(directory/'simulation.log').read_text())
             assert m
             counters.append(dict(mode=name,checks=int(m[1]),commands=int(m[2]),clocks=int(m[3])))
-    assert {r['mode'] for r in counters}=={'logic','sync','vendor'}
+    assert {r['mode'] for r in counters}==expected_modes
     passed=json.loads((rt11/'result.json').read_text());assert passed['passed']
     for p,h in passed['files'].items():assert sha(rt11/p)==h,p
     full=json.loads((rt11/'inputs.json').read_text())
@@ -71,7 +75,7 @@ def archive(odt,rt11,cores,panel):
         copy(odt/f,'module/'+f);source.add(str((odt/f).relative_to(ROOT)))
     m=re.search(r'PASS CP64 RT11 \+ panel: (\d+) checks, (\d+) clocks, (\d+) UART bytes, (\d+) HDSP frames',(rt11/'simulation.log').read_text());assert m
     counts=dict(checks=int(m[1]),clocks=int(m[2]),uart_bytes=int(m[3]),hdsp_frames=int(m[4]),asserted_rx_overruns=0)
-    release=ROOT/'demos/rt11/service/cp64'
+    release=ROOT/'demos/rt11/service'/revision;release.mkdir(parents=True,exist_ok=True)
     for src,name in ((odt/'ODT.BIN','ODT.BIN'),(odt/'activation/UJON.SAV','UJON.SAV')):
         shutil.copyfile(src,release/name);assert sha(src)==sha(release/name)
     delivery=dict(requires_fpga='CP63b --debug-cp63',loader='unchanged CP62 UJLOAD ABI2',
@@ -94,18 +98,21 @@ def archive(odt,rt11,cores,panel):
     artifacts['source.tgz']=sha(target/'source.tgz')
     record=dict(passed=True,source_files=source_hashes,artifacts=artifacts,core=counters,rt11=counts)
     (target/'archive.json').write_text(json.dumps(record,indent=2)+'\n')
-    summary=dict(checkpoint='CP64',module=module['format'],free_slot_bytes=hardware['free_slot_bytes'],
+    summary=dict(checkpoint='CP64a' if patch else 'CP64',module=module['format'],free_slot_bytes=hardware['free_slot_bytes'],
         hardware=dict(unchanged_from='CP63b',lut=1230,ff=381,ebr=6,fmax_mhz=32.246,microinstructions=1005,new_synthesis=False),
         core=counters,panel_passed=True,rt11=counts,programmed=False,
         archive_sha256=sha(target/'archive.json'),source_archive_sha256=artifacts['source.tgz'],
         limits=['No breakpoints/STEP OVER, RAW HALT/I-O view, disassembly history or held-key repeat.',
-                'No full HG exchange or physical board/key-label validation.',
+                'No full HG exchange; see board-bringup-cp64.md for physical validation separate from this simulation archive.',
                 'UART wire input paced at about 1.77 ms; arbitrary continuous paste is not qualified.'])
-    (ROOT/'docs/verification-cp64.json').write_text(json.dumps(summary,indent=2)+'\n')
+    panel_record=json.loads((panel/'result.json').read_text())
+    summary['panel']={k:panel_record[k] for k in ('checks','clocks') if k in panel_record}
+    (ROOT/'docs'/('verification-'+revision+'.json')).write_text(json.dumps(summary,indent=2)+'\n')
     print(json.dumps(dict(source_files=len(source),artifacts=len(artifacts),core=counters,rt11=counts),indent=2))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('odt','rt11','panel'):p.add_argument('--'+name,type=Path,required=True)
-    p.add_argument('--core',type=Path,nargs=3,required=True)
-    a=p.parse_args();archive(a.odt.resolve(),a.rt11.resolve(),[p.resolve() for p in a.core],a.panel.resolve())
+    p.add_argument('--core',type=Path,nargs='+',required=True)
+    p.add_argument('--patch',action='store_true',help='archive software-only CP64a separately; sync core, panel and full RT-11 required')
+    a=p.parse_args();archive(a.odt.resolve(),a.rt11.resolve(),[p.resolve() for p in a.core],a.panel.resolve(),patch=a.patch)

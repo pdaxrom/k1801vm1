@@ -104,5 +104,11 @@
     "source": "user confirmation after UJLOAD/ODT/UJON reactivation and requested short RESET",
     "jtag_pins": "user reported JTAG had remained connected to keyboard pins; disconnected for operation",
     "per_key_label_mapping_verified": false
+  },
+  "physical_panel_scroll_verification": {
+    "date": "2026-09-13",
+    "passed": true,
+    "source": "user explicitly confirmed PREV/NEXT scrolling works after disconnecting JTAG from the shared pins",
+    "firmware_changed": false
   }
 }
