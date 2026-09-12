@@ -1,5 +1,24 @@
 # Synthesis checkpoints
 
+## CP63b — RESET button, external HALT и STEP
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | uwords | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP63a | Independent button timer, debug vector, STEP/WAIT/trace | 1230 | 381 | 6 | 32,246 | 1005 | Full MAP/PAR/TRACE 31,824 MHz + FRAM PASS |
+| CP63b | Explicit hold-counter comparison width | 1230 | 381 | 6 | 32,246 | 1005 | Выбран; тот же результат, strict button lint PASS |
+
+От CP62a: +1 LUT / +38 FF / 0 EBR / +2 slices / +3 uwords.
+Свободны 50 LUT / 22 slices / 1 EBR / 19 uwords. Полная перепаковка
+Synplify не позволяет считать разность LUT отдельной стоимостью debug-блока.
+Номинальные CPU/SCK прежние, 29,56 MHz. Новых firmware ROM words нет.
+Внешний запрос и STEP идут по HALT-вектору 110/112, загрузчик — по прежнему 170.
+Профиль `--debug-cp63` opt-in; плата CP56a, default CP52a.
+
+[Контракт, directed tests и ограничения](debug-cp63.md),
+[первичные отчёты CP63b](../synth/reports/cp63b/), [сводка](synthesis-cp63.json).
+Все 42 RT-11/UJLOAD cases, CTRL/C и cold reboot PASS; counts и UART
+побайтно совпали с CP62. [Verification](verification-cp63.json).
+
 ## CP62a — файловая служба из HALT FRAM
 
 Полный LCMXO2-1200HC-4SG32C MAP/PAR/TRACE с gate 31,824 MHz и FRAM

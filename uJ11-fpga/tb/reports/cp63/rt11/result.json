@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "cases": 42,
+  "ctrl_c": true,
+  "cold_reboot": true,
+  "guest_context": true,
+  "uut": "CP63 debug-capable RTL, real SPI FRAM/SD and RT-11FB V05.03; actual UART input/output",
+  "files": {
+    "inputs.json": "6f88bdbf022ebb79cb26a331fa273fac825211cbafd3d7a9d2da07fdf1569f32",
+    "simulation.log": "f892c896750f76a2eb38e8633036b80bba5507724c95851bf81b54390cfa71b6",
+    "uart.txt": "2551a3b9b331d5a98bf3c362acabc40d0e8d25eec4954ec82d03ac655ef2f44b",
+    "build.log": "e28cbb696ba4b39f6acf978421ba099be1119d9570ec4836487162ca91d6e6b2"
+  }
+}

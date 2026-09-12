@@ -1,0 +1,18 @@
+PASS CP63 button: 28 checks HOLD=10
+tb/tb_button_cp63.v:37: $finish called at 11120000 (1ps)
+
+PASS CP63 button: 28 checks HOLD=100
+tb/tb_button_cp63.v:37: $finish called at 17420000 (1ps)
+
+PASS CP63 button: 28 checks HOLD=128
+tb/tb_button_cp63.v:37: $finish called at 19380000 (1ps)
+
+PASS CP63 CPU: 19 cases 169 checks ROM_DECODE=0
+tb/tb_debug_cp63.v:93: $finish called at 275230000 (1ps)
+
+PASS CP63 CPU: 19 cases 169 checks ROM_DECODE=1
+tb/tb_debug_cp63.v:93: $finish called at 288250000 (1ps)
+
+PASS CP63 CPU: 19 cases 169 checks ROM_DECODE=1
+tb/tb_debug_cp63.v:93: $finish called at 288250000 (1ps)
+

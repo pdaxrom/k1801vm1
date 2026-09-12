@@ -1,5 +1,32 @@
 # Implementation status, 2026-09-12
 
+## CP63 — кнопка и аппаратный debug-вход
+
+Профиль `--debug-cp63` реализует независимый short/long RESET controller,
+внешний HALT по вектору 110/112, STEP с повторным входом, сохранение WAIT
+и deferred trace. CONFIG bit2 явно включает расширение после установки
+обработчика; прежний UJLOAD его не включает, native HALT по 170 сохранён.
+
+Выбран **CP63b: 1230 LUT / 381 FF / 6 EBR / 618 slices / 32,246 MHz**,
+1005 microinstructions; gate 31,824 MHz + FRAM PASS. Старые 1002 microinstructions,
+opcode decoder и firmware ROM побайтно сохранены. Новых EBR нет.
+
+19 CPU cases × 3 ROM/decode режима, 28 button checks × HOLD10/100/128,
+два actual SPI FRAM cold/upload/button/step/reset прогона и четыре behavioral
+negative controls PASS. Final EDIF: 3088 nets, без конфликтов/необъяснённых
+floating; core lint без новых diagnostics, button strict lint PASS.
+Полный RT-11/UJLOAD regression: 42 cases, CTRL/C, cold reboot PASS.
+971335085 clocks, 16863737 retired, 232675 upper writes и 3713 UART bytes
+совпадают с CP62. [Архив точных исходников и результатов](../tb/reports/cp63/),
+[verification](verification-cp63.json), [synthesis](synthesis-cp63.json).
+
+Это основа для отладчика; штатные UART/HDSP UI, disassembly и breakpoints
+ещё не реализованы. Активация debug-вектора в установщике и STEP-выход монитора
+требуют следующего программного этапа. Проверка электрической цепи RESET
+и активного отладчика с RK/SD/HG на плате остаются отдельными проверками.
+Плата не прошивалась: CP56a, default CP52a.
+[Контракт CP63](debug-cp63.md), [полный план отладчика](odt-debugger-plan.md).
+
 ## CP62 — файловый загрузчик через постоянный HALT-вектор
 
 Завершён UJLOAD ABI2: USER файловые вызовы RT-11, загрузка HALT helper

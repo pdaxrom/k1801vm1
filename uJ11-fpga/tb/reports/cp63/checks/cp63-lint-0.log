@@ -1,0 +1,59 @@
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:32:22: Parameter is not used: 'S_START'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   32 |     localparam [9:0] S_START=10'h10e;
+      |                      ^~~~~~~
+                      ... For warning description see https://verilator.org/warn/UNUSEDPARAM?v=5.050
+                      ... Use "/* verilator lint_off UNUSEDPARAM */" and lint_on around source to disable this message.
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:33:22: Parameter is not used: 'S_RCPC'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   33 |     localparam [9:0] S_RCPC=10'h116;
+      |                      ^~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:34:22: Parameter is not used: 'S_RCPS'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   34 |     localparam [9:0] S_RCPS=10'h11e;
+      |                      ^~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:35:22: Parameter is not used: 'S_WCPC'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   35 |     localparam [9:0] S_WCPC=10'h126;
+      |                      ^~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:36:22: Parameter is not used: 'S_WCPS'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   36 |     localparam [9:0] S_WCPS=10'h12e;
+      |                      ^~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:37:22: Parameter is not used: 'S_UPPER_READ'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   37 |     localparam [9:0] S_UPPER_READ=10'h057;
+      |                      ^~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:38:22: Parameter is not used: 'S_UPPER_WRITE'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   38 |     localparam [9:0] S_UPPER_WRITE=10'h06b;
+      |                      ^~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:39:22: Parameter is not used: 'S_CONFIG'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   39 |     localparam [9:0] S_CONFIG=10'h06f;
+      |                      ^~~~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:40:22: Parameter is not used: 'S_STATUS'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   40 |     localparam [9:0] S_STATUS=10'h0a1;
+      |                      ^~~~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:41:22: Parameter is not used: 'S_LOWER_READ'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   41 |     localparam [9:0] S_LOWER_READ=10'h0a5;
+      |                      ^~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:42:22: Parameter is not used: 'S_LOWER_WRITE'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   42 |     localparam [9:0] S_LOWER_WRITE=10'h0a9;
+      |                      ^~~~~~~~~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:43:22: Parameter is not used: 'S_MFUS'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   43 |     localparam [9:0] S_MFUS=10'h0ad;
+      |                      ^~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:44:22: Parameter is not used: 'S_MTUS'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   44 |     localparam [9:0] S_MTUS=10'h136;
+      |                      ^~~~~~
+%Warning-UNUSEDPARAM: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/src/rtl/uj11_engine.v:45:22: Parameter is not used: 'S_RSEL'
+                                                                                                               : ... note: In instance 'uj11_core.engine'
+   45 |     localparam [9:0] S_RSEL=10'h13e;
+      |                      ^~~~~~
+%Error: Exiting due to 14 warning(s)

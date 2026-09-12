@@ -1,0 +1,530 @@
+{
+  "files": {
+    "build/cp63a-rt11/tb.v": "48645aaa4e7ddd89c04be66003ea4035c8513b738373938e8d742d46e5ec09eb",
+    "build/cp63-debug/src/rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+    "build/cp63-debug/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "build/cp63-debug/src/microcode/generated/uj11_decode_table.v": "2f2e53dc1c3a8bb32be5a7e69bd21e91701b35b09e3684d2a3b59807fe9285ad",
+    "build/cp63-debug/src/rtl/uj11_engine.v": "7ef906a1a16c1609e6cc8aba8b300bd7a799abdcc209ad4c3339445219e352e2",
+    "build/cp63-debug/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+    "build/cp63-debug/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+    "build/cp63-debug/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "build/cp63-debug/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "build/cp63-debug/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "build/cp63-debug/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "build/cp63-debug/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "build/cp63-debug/src/boards/hc1200/uj11_board.v": "4e14fc70064411ca6b29f4661be943f00d6593233559f8e615cd14640c5a7d77",
+    "build/cp63-debug/src/boards/hc1200/uj11_board_bus.v": "28e78e91233736db1900e9e3501667d7de03dc3489eced584ee3dbe1629d3266",
+    "build/cp63-debug/src/boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "build/cp63-debug/src/boards/hc1200/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+    "build/cp63-debug/src/boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "build/cp63-debug/src/reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "build/cp63-debug/src/reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "build/cp63-debug/src/microcode/generated/uj11_firmware_rom.v": "91f07013b043cd4894b11c8eb601fa93608024e63765507f779fc3cf3fd1b16c",
+    "build/cp63-debug/src/boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "tb/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d",
+    "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "reference/lsi11/spi_sd_model_cp28.v": "e159dd7c1f6545a69d4e61e6688c3f16ac2762c693447b92c1642d20721bb7ad",
+    "tools/run_loader_cp62.py": "44f123e7b1583009e33cd034bab6b1dd8762c5541c0c67e203d27deab6873311",
+    "tools/loader_fixtures_cp62.py": "e6846fabf0b1fbce37ea22781b060920979cb8578bde0da7c75ba9c610aaf3c3",
+    "tools/service_image_cp62.py": "b49870b1e3a3a5dcd57bcbc9d19e8740239d0338dedafd4e26f2a10db0b02d20",
+    "tools/build_vector_loader_cp62.py": "8a909f51d47fb794d08e5eeb1b003afcba594c36c635f4552f3816e4e2e2e01d",
+    "build/cp63-debug/inputs.json": "dc7bff7c5c4953f6801c5ff5b3b1dc18074688e3a45ca8222647a42e4a456115",
+    "build/cp63-debug/m0.mem": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97",
+    "build/cp63-debug/decode.mem": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5",
+    "build/cp63-debug/firmware.mem": "a579098425afc4cfb7b969cbd58e32fb7a421f59c57ed89274d37020468da13c",
+    "build/cp62-loader/loader_cases.vh": "0ad862f4bcf3ccce00ce1de1f8236b38de4163ac9334d75584cec0160df00d79",
+    "tools/build_debug_cp63.py": "4025940e9267aa3114c9d6533b97d15c9acf9591bfc728d0ac03cef95a5a2e47",
+    "boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+    "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+    "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+    "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+    "microasm/uj11asm.py": "f2d0eeb31678ad39edb771e17459c76a2c2c1ad6defdb2b68fbcfc3b7ab43104",
+    "synth/reports/cp62a/inputs.json": "e9ecd253d35c284bd22fdd9004ab436105fe82945ec121127343cc52ec18060d",
+    "synth/reports/cp62a/source.tgz": "20e17f53388b5c6b59aeeedf47297ef78ba60592b1db40b536f76e6d9f3c116d",
+    "tb/tb_vector_loader_rt11.v": "753c62cd0b033ed83e6ed746d0857d4d9c55890cc384a15172b3115992ff2bda",
+    "build/cp62-loader/expected-7.hex": "f44b729d137b87567d25245c30d2740c4a355ae5d50f60a093af042e6c5cf8ae",
+    "build/cp62-loader/expected-17.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-16.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-6.hex": "f912aa3e3ebc39d96957ba49367e7bc2b50b34f892657033cf937168ce53c97d",
+    "build/cp62-loader/expected-4.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-14.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-28.hex": "55adaedce968bab8bac33432548a7212b1e5c5c73e9227aa986614cc820cee2a",
+    "build/cp62-loader/expected-29.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-15.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-5.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-1.hex": "80506170d548e6a8189b6f1d8d54c1de4c90e60b618d4866767671d27ee507fc",
+    "build/cp62-loader/expected-39.hex": "209fe43d1558c8fd96899b47ed5a7815a54460d347628daaf37b019959ad39c0",
+    "build/cp62-loader/expected-11.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-10.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-38.hex": "d7ed1cf54affc09e4e5ba5d44316957ba987aafafc57b417580e7c4402108e07",
+    "build/cp62-loader/expected-2.hex": "80506170d548e6a8189b6f1d8d54c1de4c90e60b618d4866767671d27ee507fc",
+    "build/cp62-loader/expected-12.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-13.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-3.hex": "010459dcc8f911a0ef8c3d9bdeaf46a3b7c6f5d4c0027dcaea893e2669dbb9d8",
+    "build/cp62-loader/expected-36.hex": "92b3479d64cc7a37e9ecb4b08f73ee7b91449c3805c0f5bc43f54873bd95c2b3",
+    "build/cp62-loader/expected-22.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-23.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-37.hex": "92b3479d64cc7a37e9ecb4b08f73ee7b91449c3805c0f5bc43f54873bd95c2b3",
+    "build/cp62-loader/expected-21.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-35.hex": "d7882acc3cc252c39240a6cb161a901a031593803e0e8422c881434ac0b663d2",
+    "build/cp62-loader/expected-34.hex": "cbf60f7a4deb412c1e92e3e2eee358730cba0b436179677bbd1804d55c10eb74",
+    "build/cp62-loader/expected-20.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-8.hex": "f44b729d137b87567d25245c30d2740c4a355ae5d50f60a093af042e6c5cf8ae",
+    "build/cp62-loader/expected-18.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-24.hex": "ad7525b9f428351d0710e601f4995882e1deb0b041ec874afc35208c1735c491",
+    "build/cp62-loader/expected-30.hex": "55adaedce968bab8bac33432548a7212b1e5c5c73e9227aa986614cc820cee2a",
+    "build/cp62-loader/expected-31.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-25.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-19.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-9.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-33.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-27.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-26.hex": "55adaedce968bab8bac33432548a7212b1e5c5c73e9227aa986614cc820cee2a",
+    "build/cp62-loader/expected-32.hex": "7e8dafae4d0afbb276863b17fffd85aae36bdc789a77cbc6ccf56e3e16788f16",
+    "build/cp62-loader/expected-41.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-loader/expected-40.hex": "209fe43d1558c8fd96899b47ed5a7815a54460d347628daaf37b019959ad39c0",
+    "build/cp62-loader/expected-42.hex": "cdd2b12857f268a080ecd736e7710cc4861b757a6329544a45a7f88432d8cb99",
+    "build/cp62-asm-e/UJLOAD.SAV": "106d2459e5f87cea70c03f1672c4f322f84bd071750e27df154ec22544dd64b6",
+    "build/cp62-asm-e/UJCHEK.SAV": "7cb322f736a81b5de612399fa9c3ab6ef750ca992d3a87336f789943e2660991",
+    "build/cp62-loader/ODT.BIN": "e03ac2323d3072c10b356d0734eedb5c5c497ce88f4e108cac4301ee9cb62f3e",
+    "build/cp62-loader/FP11.BIN": "c5e0ffff03155868ccf55a019fb6b0ab5d06afc7ee947bca105f6f353d2d13dd",
+    "build/cp62-loader/ODTFLT.BIN": "7a69670adef115184e8589a91d42f88b12832dbc271272cebdf2807f696bd515",
+    "build/cp62-loader/BIGFP.BIN": "95fb7d8cab64eda6835329a37ad23f5ce0f5149c233686f889e4192c5cbce049",
+    "build/cp62-loader/HDBAD.BIN": "4470a6993ca3df5c4549f37b1c5d4a8e1014e97daa05915e69bcc36d294d5e7d",
+    "build/cp62-loader/HDABI.BIN": "4b8d8134944669dfe3ca97f29b2750add521f951373aa6a58a053357c2c1f907",
+    "build/cp62-loader/HDTYPE.BIN": "104a49a73a680617744ea24cdbefd309ec8098e48f941c80299bd292c10fcb5f",
+    "build/cp62-loader/HDADDR.BIN": "7754dcf7b9d27ca0e268ba030b57c9b36c63f9e468b1c0ab46ca723904b5f746",
+    "build/cp62-loader/HDODD.BIN": "cdc416cffa3ae17c7d2828cb25914620ae8374d49a3158273b01d71eae683f30",
+    "build/cp62-loader/HDSIZE.BIN": "aa09edf4f25872d0c8368fda6830c65cbd679c3f6ce6ac9faca91b88ae2ba12b",
+    "build/cp62-loader/HDENT.BIN": "4119b59349bce0cda3a304f44795c3641917bf7d3d7fb9d8e94a20233f45f857",
+    "build/cp62-loader/HDRSV.BIN": "6d03853d628b5743585a3d8eafda6a0e3d1c0cffd9f897258f430bc2aa64d8bc",
+    "build/cp62-loader/HDSUM.BIN": "d1f2e21630fe035cfa0262f3547a84a353a608fec3fa976f499f36d245630b76",
+    "build/cp62-loader/HDPAD.BIN": "ebf3ea3a4a6b6a9b9db04e220c5b7278b59c13dc53c0f823b69d80e189e5bd5f",
+    "build/cp62-loader/SHORT.BIN": "b7c962c1d9a0a1ec430046f216aac446eb261a1dbfd12398effaf08a807ee4fe",
+    "build/cp62-loader/EXTRA.BIN": "149ea2deb9bd6da900b9971e96f69419d5f7988b067deafaafb08b6bab29115a",
+    "build/cp62-loader/CKBAD.BIN": "085a4a5a6b8e31c601291028f1174bf6eec07e715720cb412b203795f0c15811",
+    "build/cp62-loader/PADBAD.BIN": "3ac0e782ea1892bb696f57798ebeab163dc6edab79c029394335d17cf5746e03",
+    "build/cp62-loader/WRFAIL.BIN": "2d25d587cf14c05e58c1112a8faf779a23951fa2bf40709e3ec2ed7849ea2d40",
+    "tools/build_loader_cp62.py": "5ade1e29023b1cffa1a82a4aa2e5c0d8903989c95b3817c782b9537c5aa0e930",
+    "build/cp62-loader/cold.hex": "02d80e3964e58a750236e760d5ec7228b7db96200f76a5270ca60e4a8089e73b",
+    "firmware/cp62/resident.bin": "735395c77efb33f9ed18a5d806c41870e603ebc5f35ec01f25e8a822f293a62d",
+    "firmware/cp62/resident.asm": "376db26e816863566245bc68326cf245ee14b32efcb6d2c6057acc5945df4890",
+    "firmware/cp62/start.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "firmware/cp62/loader.bin": "b1e8a0887ef99a2d4506125ab880507cd28464407a779e1ed27c6d1bbbb959ea",
+    "firmware/cp62/loader.asm": "133d538d6dbb8061c120b317f782484b66df4da7382df68d0e31318401f49111",
+    "firmware/cp62/start.lst": "9eaee12b242b7c12749293bbd69442f033b5b3dcd6d3a52f3921d10191823e52",
+    "firmware/cp62/resident.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "firmware/cp62/loader.lst": "36d4f948e3274c38567928b1309fd86b29665bae583d69fda5db0aecdd5ef992",
+    "firmware/cp62/loader-inputs.json": "5874ac717a8089a7a0e791218609ba62c2d1009eb4853b943e783afce3bf36a4",
+    "firmware/cp62/inputs.json": "097ca372bd11446588c671ec3aa5bcb38d25734259ced518508ba64efdfb200d",
+    "firmware/cp62/start.asm": "da4b7ebe7975c82c8761b0e57c7a6d05503ae36a60ea5ae01fe2f4239eecbbf2",
+    "firmware/cp62/start.bin": "c182a2b4c5189e11e7db1d4025639bafe8ace1be25ca027e5495bfe13cb7bd35",
+    "firmware/cp62/loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "firmware/cp62/resident.lst": "05f1a355b28f469015e000cb22d4301cab41c8961767c48d109457e11316413b"
+  },
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "image_sha256": "094e2e62a9d9203811aeb3999d03d0145fb3f04edb2e79715a13817fcf917f88",
+  "baseline": "cp62a",
+  "rtl_changed": true,
+  "legacy_button_pulses": true,
+  "profile": {
+    "reference": "cp62a",
+    "mmu": false,
+    "used_words": 1005,
+    "debug_entry": 193,
+    "inputs": {
+      "tools/build_debug_cp63.py": "4025940e9267aa3114c9d6533b97d15c9acf9591bfc728d0ac03cef95a5a2e47",
+      "boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+      "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+      "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+      "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "microasm/uj11asm.py": "f2d0eeb31678ad39edb771e17459c76a2c2c1ad6defdb2b68fbcfc3b7ab43104",
+      "synth/reports/cp62a/inputs.json": "e9ecd253d35c284bd22fdd9004ab436105fe82945ec121127343cc52ec18060d",
+      "synth/reports/cp62a/source.tgz": "20e17f53388b5c6b59aeeedf47297ef78ba60592b1db40b536f76e6d9f3c116d"
+    },
+    "outputs": {
+      "build/cp63-debug/service.uasm": "2dd63dc064350fc95dc80fb7e7bde3dd87de5a1b9370207e046f2f0a272cf299",
+      "build/cp63-debug/m0.mem": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97",
+      "build/cp63-debug/m0.lst": "04a03869cff6d23ab2e27b9cf8aa34e59db431920320faf5b73cc96faaf2bf4c",
+      "build/cp63-debug/m0.labels.json": "92315db841ff4328aa501dec4270b09ef5712688ac2b11a30af2adacec609f82",
+      "build/cp63-debug/m0.stats.json": "e3140cdf5a2ff6e58398927618dd24c2960169853173bfefd7d5aa7bd844ab6e",
+      "build/cp63-debug/uj11_m0_ebr.v": "b4a8489c815fed2f14d2b65d7962b11a10ce393aeffce958efed8d8773f28f4b",
+      "build/cp63-debug/decode.mem": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5",
+      "build/cp63-debug/firmware.mem": "a579098425afc4cfb7b969cbd58e32fb7a421f59c57ed89274d37020468da13c",
+      "build/cp63-debug/src/rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+      "build/cp63-debug/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+      "build/cp63-debug/src/microcode/generated/uj11_decode_table.v": "2f2e53dc1c3a8bb32be5a7e69bd21e91701b35b09e3684d2a3b59807fe9285ad",
+      "build/cp63-debug/src/rtl/uj11_engine.v": "7ef906a1a16c1609e6cc8aba8b300bd7a799abdcc209ad4c3339445219e352e2",
+      "build/cp63-debug/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+      "build/cp63-debug/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+      "build/cp63-debug/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+      "build/cp63-debug/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+      "build/cp63-debug/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+      "build/cp63-debug/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+      "build/cp63-debug/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+      "build/cp63-debug/src/boards/hc1200/uj11_board.v": "4e14fc70064411ca6b29f4661be943f00d6593233559f8e615cd14640c5a7d77",
+      "build/cp63-debug/src/boards/hc1200/uj11_board_bus.v": "28e78e91233736db1900e9e3501667d7de03dc3489eced584ee3dbe1629d3266",
+      "build/cp63-debug/src/boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+      "build/cp63-debug/src/boards/hc1200/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+      "build/cp63-debug/src/boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+      "build/cp63-debug/src/reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+      "build/cp63-debug/src/reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+      "build/cp63-debug/src/microcode/generated/uj11_firmware_rom.v": "91f07013b043cd4894b11c8eb601fa93608024e63765507f779fc3cf3fd1b16c",
+      "build/cp63-debug/src/boards/hc1200/uj11_microcomp.v": "f11be1d5444d1fddae7307cbbe93dbe8ed0617133d23b06ecde32740db566204",
+      "build/cp63-debug/src/boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0"
+    }
+  },
+  "cases": [
+    {
+      "case": 1,
+      "command": "STATUS",
+      "ready": 0,
+      "injection": 0
+    },
+    {
+      "case": 2,
+      "command": "NOSUCH",
+      "ready": 0,
+      "injection": 0
+    },
+    {
+      "case": 3,
+      "command": "ODT",
+      "ready": 1,
+      "injection": 0
+    },
+    {
+      "case": 4,
+      "command": "FP11",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 5,
+      "command": "STATUS",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 6,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 5
+    },
+    {
+      "case": 7,
+      "command": "OFFODT",
+      "ready": 2,
+      "injection": 0
+    },
+    {
+      "case": 8,
+      "command": "OFFFP",
+      "ready": 0,
+      "injection": 0
+    },
+    {
+      "case": 9,
+      "command": "ODT",
+      "ready": 1,
+      "injection": 0
+    },
+    {
+      "case": 10,
+      "command": "FP11",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 11,
+      "command": "HDBAD",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 12,
+      "command": "HDABI",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 13,
+      "command": "HDTYPE",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 14,
+      "command": "HDADDR",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 15,
+      "command": "HDODD",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 16,
+      "command": "HDSIZE",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 17,
+      "command": "HDENT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 18,
+      "command": "HDRSV",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 19,
+      "command": "HDSUM",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 20,
+      "command": "HDPAD",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 21,
+      "command": "SHORT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 22,
+      "command": "EXTRA",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 23,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 24,
+      "command": "CKBAD",
+      "ready": 2,
+      "injection": 0
+    },
+    {
+      "case": 25,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 26,
+      "command": "PADBAD",
+      "ready": 2,
+      "injection": 0
+    },
+    {
+      "case": 27,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 28,
+      "command": "ODT",
+      "ready": 2,
+      "injection": 1
+    },
+    {
+      "case": 29,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 30,
+      "command": "WRFAIL",
+      "ready": 2,
+      "injection": 2
+    },
+    {
+      "case": 31,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 32,
+      "command": "ODT",
+      "ready": 2,
+      "injection": 3
+    },
+    {
+      "case": 33,
+      "command": "ODT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 34,
+      "command": "ODTFLT",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 35,
+      "command": "@UJCHEK",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 36,
+      "command": "OFFODT",
+      "ready": 2,
+      "injection": 0
+    },
+    {
+      "case": 37,
+      "command": "OFFFP",
+      "ready": 0,
+      "injection": 0
+    },
+    {
+      "case": 38,
+      "command": "ODT",
+      "ready": 1,
+      "injection": 0
+    },
+    {
+      "case": 39,
+      "command": "BIGFP",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 40,
+      "command": "STATUS",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 41,
+      "command": "FP11",
+      "ready": 3,
+      "injection": 0
+    },
+    {
+      "case": 42,
+      "command": "STATUS",
+      "ready": 3,
+      "injection": 0
+    }
+  ],
+  "symbols": {
+    "ABFAIL": 1790,
+    "COPY": 928,
+    "HEADER": 2598,
+    "OTHER": 1986,
+    "UNSUP": 2108,
+    "ABIERR": 2249,
+    "COUNT": 1992,
+    "HELPER": 3622,
+    "UPLOAD": 1434,
+    "API": 1372,
+    "CURSOR": 1994,
+    "KIND": 1976,
+    "PROMPT": 2023,
+    "USAGE": 2032,
+    "APIERR": 1430,
+    "DESC": 1480,
+    "LEFT": 1990,
+    "PUBWRP": 1130,
+    "VALID": 1490,
+    "AREA": 1964,
+    "LINE": 2516,
+    "PUTCHK": 1230,
+    "VECT": 1984,
+    "BADHDR": 1780,
+    "ERRFLG": 1488,
+    "LOAD": 708,
+    "QUIT": 2018,
+    "VERERR": 2359,
+    "BASE": 1978,
+    "EXIT": 1906,
+    "MAXMEM": 1980,
+    "RDFAIL": 1796,
+    "VERIFY": 1066,
+    "BLOCK": 1988,
+    "FAIL": 1812,
+    "RDWORD": 1344,
+    "VRFAIL": 1802,
+    "BLOCKI": 1298,
+    "NAME50": 616,
+    "READER": 2337,
+    "WRAP": 1982,
+    "BUFFER": 3110,
+    "FLEN": 1974,
+    "NOHELP": 596,
+    "SETST": 1358,
+    "WRDATA": 1928,
+    "CHKCOM": 1264,
+    "FPOFF": 2012,
+    "NXTBLK": 860,
+    "SPEC": 1956,
+    "WRMSG": 2302,
+    "CHKERR": 2407,
+    "FPOK": 2481,
+    "ODTOFF": 2005,
+    "STACMD": 1998,
+    "WRWORD": 1350,
+    "CKFAIL": 1808,
+    "GETST": 1366,
+    "ODTOK": 2461,
+    "START": 512,
+    "XCOUNT": 1342,
+    "OFF": 1832,
+    "STAT": 2502,
+    "ZERO": 1054,
+    "CMDS": 1938,
+    "OFFFP": 1828,
+    "STATUS": 1858,
+    "ZERODN": 1130,
+    "COMMIT": 1172,
+    "HDFAIL": 1784,
+    "OFFODT": 1822,
+    "STREQ": 604,
+    "COMMON": 1908,
+    "HDRERR": 2186,
+    "OPNERR": 2144,
+    "TOTAL": 1996
+  },
+  "build": {
+    "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+    "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+    "source_sha256": {
+      "demos/rt11/service/cp62/UJLOAD.MAC": "f0062e9a60cc552bae2c7703d3329c08c397ff5632935b9f53710bcecf8c9968",
+      "demos/rt11/service/cp62/UJCHEK.MAC": "37915b939adca6492806d22fa6bab4e7bb2d6f23a925d666e497613f3da21da7"
+    },
+    "outputs": {
+      "UJLOAD.SAV": "106d2459e5f87cea70c03f1672c4f322f84bd071750e27df154ec22544dd64b6",
+      "UJLOAD.OBJ": "41c8809026ba2ed8a25d0ff693984cddf291f771b11975a2390f6bd322933c07",
+      "UJLOAD.LST": "09a78b9736d396c3d34e09f3fa2fbb6c5b7a42940c1513ce7bf0393527813dbf",
+      "UJLOAD.MAP": "036c9c05a74acf524131108c7785ba4694c766d58fed8a71e729e44c9f4167d1",
+      "UJCHEK.SAV": "7cb322f736a81b5de612399fa9c3ab6ef750ca992d3a87336f789943e2660991",
+      "UJCHEK.OBJ": "8754476a226de3ada2a417bb3559901ee6b9817a6e768b46fe697f26c502b82c",
+      "UJCHEK.LST": "ecab94b9413d672640ad85c56d15f77e49948ea438e0f8e3b8cbf59ab5dfa4f3",
+      "UJCHEK.MAP": "3e1d87430c7b79ab66db2b4914db9d7bb361a21540111f6f56b5e67917472df3"
+    },
+    "driver_sha256": "420b9155dc90e9ee1838345b4397cbebe3f8da9fc09384cbf4cef1e3909bb6e6"
+  },
+  "error_lba": 2280
+}

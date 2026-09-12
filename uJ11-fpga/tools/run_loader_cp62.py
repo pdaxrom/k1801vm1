@@ -20,8 +20,9 @@ def main():
     parser.add_argument('--asm-dir',required=True,type=Path)
     parser.add_argument('--tag',required=True)
     parser.add_argument('--ctrl-only',action='store_true')
+    parser.add_argument('--debug-cp63',action='store_true',help='Regression on CP63 debug-capable RTL, unchanged ABI2 loader')
     args=parser.parse_args()
-    assert re.fullmatch('cp62[a-z][a-z0-9-]*',args.tag)
+    assert re.fullmatch(('cp63' if args.debug_cp63 else 'cp62')+'[a-z][a-z0-9-]*',args.tag)
     out=ROOT/'build'/args.tag
     out.mkdir(parents=True,exist_ok=True)
     image=out/'test.dsk';assert not image.exists(),'fresh test run required'
@@ -30,7 +31,12 @@ def main():
     for path,digest in built['outputs'].items():assert sha(asm/path)==digest,path
     from build_loader_cp62 import build as check_helper
     check_helper()
-    core,board=adapt()
+    build_profile=adapt
+    profile_path='build/cp62-boot'
+    if args.debug_cp63:
+        from build_debug_cp63 import adapt as build_profile
+        profile_path='build/cp63-debug'
+    core,board=build_profile()
     images=files();cases=generate_cases(images)
     base=ROOT/'../lsi11-fpga/images/rt11v503.dsk';base_hash=sha(base);shutil.copyfile(base,image)
     programs=[asm/'UJLOAD.SAV',asm/'UJCHEK.SAV']+[OUT/(n+'.BIN') for n in images]
@@ -47,20 +53,28 @@ def main():
     symbols={m[0]:int(m[1],8)+0o1000 for m in re.findall(r'\b([A-Z][A-Z0-9]{0,5})\s+([0-7]{6})R',listing)}
     assert all(n in symbols for n in ('COPY','VERIFY','COMMIT'))
     (out/'symbols.json').write_text(json.dumps(symbols,indent=2)+'\n')
-    core,board=adapt()
-    profile=json.loads((ROOT/'build/cp62-boot/inputs.json').read_text())
+    core,board=build_profile()
+    profile=json.loads((ROOT/profile_path/'inputs.json').read_text())
     for path in core+board:assert sha(ROOT/path)==profile['outputs'][path],path
     source_names=['tb/tb_vector_loader_rt11.v']+core+board+['rtl/uj11_rom.v','tb/models/ODDRXE.v',
                  'reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
+    if args.debug_cp63:
+        tb=out/'tb.v'
+        text=(ROOT/source_names[0]).read_text().replace('.reset(reset),.uart_rx(rx),',
+            '.reset(reset),.halt_button((clocks%100003)==3),.uart_rx(rx),')
+        tb.write_text(text)
+        source_names[0]=str(tb.relative_to(ROOT))
     paths=source_names+['tools/run_loader_cp62.py','tools/loader_fixtures_cp62.py','tools/service_image_cp62.py',
-        'tools/build_vector_loader_cp62.py','build/cp62-boot/inputs.json','build/cp62-boot/m0.mem','build/cp62-boot/decode.mem',
-        'build/cp62-boot/firmware.mem','build/cp62-loader/loader_cases.vh']+list(profile['inputs'])
+        'tools/build_vector_loader_cp62.py',profile_path+'/inputs.json',profile_path+'/m0.mem',profile_path+'/decode.mem',
+        profile_path+'/firmware.mem','build/cp62-loader/loader_cases.vh']+list(profile['inputs'])
+    if args.debug_cp63:paths+=['tb/tb_vector_loader_rt11.v']
     paths += [str(p.relative_to(ROOT)) for p in OUT.glob('expected-*.hex')]
     paths += [str(p.relative_to(ROOT)) for p in programs]
     paths += ['tools/build_loader_cp62.py','build/cp62-loader/cold.hex']
     paths += [str(p.relative_to(ROOT)) for p in (ROOT/'firmware/cp62').iterdir() if p.is_file()]
     manifest=dict(files={p:sha(ROOT/p) for p in paths},base_sha256=base_hash,image_sha256=sha(image),
-        baseline='cp61g',rtl_changed=False,profile=profile,cases=cases,symbols=symbols,build=built,error_lba=error_lba)
+        baseline='cp62a' if args.debug_cp63 else 'cp61g',rtl_changed=args.debug_cp63,
+        legacy_button_pulses=args.debug_cp63,profile=profile,cases=cases,symbols=symbols,build=built,error_lba=error_lba)
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     sources=source_names.copy()
     for i,name in enumerate(sources):
@@ -89,7 +103,7 @@ def main():
     assert '?UJLOAD-E-READ failed' in uart and '?UJLOAD-E-FRAM readback failed' in uart
     assert uart.count('?UJLOAD-E-Checksum or padding failed')==3
     result=dict(passed=True,cases=len(cases),ctrl_c=True,cold_reboot=True,guest_context=True,
-        uut='full CP62 recovery RTL, real SPI FRAM/SD and RT-11FB V05.03; actual UART input/output',
+        uut=('CP63 debug-capable' if args.debug_cp63 else 'CP62 recovery')+' RTL, real SPI FRAM/SD and RT-11FB V05.03; actual UART input/output',
         files={p.name:sha(p) for p in (out/'inputs.json',out/'simulation.log',out/'uart.txt',out/'build.log')})
     (out/'result.json').write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result,indent=2))

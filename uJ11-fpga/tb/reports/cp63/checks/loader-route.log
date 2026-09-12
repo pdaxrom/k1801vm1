@@ -1,0 +1,2 @@
+FATAL: tb/tb_debug_cp63.v:48: timeout case1 PC142200 IR122532 uPC12b
+       Time: 1000165000  Scope: tb_debug_cp63

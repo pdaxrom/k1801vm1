@@ -1,5 +1,23 @@
 # uJ11 FPGA
 
+**CP63: аппаратная основа ODT — кнопка RESET, внешний HALT и одиночный шаг.**
+Короткое нажатие запрашивает остановку, длинное (около 2 s) вызывает reset.
+STEP возвращает в HALT после команды; сохраняются WAIT и отложенный trace.
+Debug-вектор `110/112` отделён от загрузочного `170`; требуется явное включение
+после установки обработчика. Старый UJLOAD ABI2 остаётся совместимым.
+
+**CP63b: 1230 LUT / 381 FF / 6 EBR / Fmax 32,246 МГц**, 1005 uwords;
+полный gate 31,824 МГц / FRAM PASS. 19 CPU cases × 3, проверки кнопки
+и два SPI FRAM прогона PASS. Все 42 RT-11/UJLOAD cases, CTRL/C и cold reboot
+PASS; 971335085 clocks и UART transcript совпали с CP62.
+Профиль `--debug-cp63`; default CP52a, плата CP56a, новый JED не прошивался.
+Полный UART/HDSP ODT с зеркалированием команд в UART — следующий программный этап.
+
+[CP63: контракт и измерения](docs/debug-cp63.md), [проверки](docs/verification-cp63.json),
+[synthesis](docs/synthesis-cp63.json), [план ODT](docs/odt-debugger-plan.md).
+
+Ниже — предыдущие checkpoints.
+
 **CP62: UJLOAD переведён на HALT-вектор и ABI2.**
 Файлы читает RT-11; установка, readback, обнуление и проверка верхней FRAM
 выполняются загружаемым HALT helper. Его 456 байт входят в UJLOAD.SAV,

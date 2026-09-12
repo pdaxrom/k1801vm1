@@ -1,0 +1,2 @@
+FATAL: tb/tb_debug_cp63.v:65: case4 STEP on suspended WAIT does not fetch another instruction got00000000002 want00000000001 PC010042 IR010037 uPC020
+       Time: 133030000  Scope: tb_debug_cp63.eq

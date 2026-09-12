@@ -1,0 +1,2 @@
+PASS CP63 button: 28 checks HOLD=100
+tb/tb_button_cp63.v:37: $finish called at 17420000 (1ps)

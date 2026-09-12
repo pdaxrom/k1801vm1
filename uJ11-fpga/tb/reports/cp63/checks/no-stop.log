@@ -1,0 +1,2 @@
+FATAL: tb/tb_debug_cp63.v:48: timeout case1 PC020016 IR000777 uPC044
+       Time: 1000165000  Scope: tb_debug_cp63
