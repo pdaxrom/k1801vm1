@@ -7,7 +7,10 @@ no display framebuffer, keyboard scanner or HG packet engine in the FPGA.
 - `RUN DSPDEM`: two HCMS-3917 displays (16 characters).
 - `RUN RGBDEM`: display messages and all eight RGB states.
 - `RUN KEYDEM`: all twenty matrix keys and their raw key codes.
-- Panel ESC returns from these demos to RT-11.
+- The exit key is decoded as octal 023 (0x13). The demo text calls it ESC;
+  the user's actual panel has MEM/PREV/NEXT/ENTER, with no separate ESC.
+  Its physical exit-key label must be checked against the scanner code.
+  [User-provided layout and planned ODT controls](../../docs/panel-keyboard.md).
 
 Put JTAG_EN in GPIO mode after FPGA programming. HG and keyboard scanning share
 the four JTAG pads and cannot run concurrently. HG releases the keyboard columns
@@ -28,5 +31,5 @@ The original SD image is preserved. A local test copy with the four binaries is
 `build/rt11-uj11-panel-hg.dsk`; deployment of FPGA FLASH does not replace SD media.
 The physical SD card inspected during CP29 already contains all four programs.
 
-CP29 hardware: RGB/HDSP and keyboard/ESC are user-confirmed; HG DIR, COPY and
+CP29 hardware: RGB/HDSP, keyboard input and demo exit are user-confirmed; HG DIR, COPY and
 TYPE readback passed at 1000 Hz. The test host daemon was stopped after testing.
