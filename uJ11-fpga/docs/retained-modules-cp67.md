@@ -189,10 +189,13 @@ ESC-обход зависающего bootstrap с правильной checksum
 
 [Архив исходников, native DEC assembly и сырых результатов](../tb/reports/cp67/archive.json).
 [Файлы для установки через RT-11](../demos/rt11/service/cp67/README.md).
-Проверка архивов, текущих исходников, synthesis и JED:
+Проверка архивов, synthesis и JED в чистом checkout:
 
 ```sh
-python3 uJ11-fpga/tools/verify_modules_cp67.py --current
+python3 uJ11-fpga/tools/verify_modules_cp67.py
 ```
+
+После воспроизведения сборки и тестов можно добавить `--current`: он также
+сверяет рабочие исходники и сгенерированные файлы `build/` с архивом.
 
 Физическая проверка и прошивка CP67b — последующий шаг.
