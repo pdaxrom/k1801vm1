@@ -7,6 +7,9 @@ CP67b позднее записана во FLASH с Verify; RT-11FB/DIR пров
 [Аппаратная установка и проверки](board-bringup-cp67.md) учитываются отдельно
 от приведённых ниже simulation/synthesis результатов.
 
+[Пошаговая установка, STATUS и восстановление](user-guide-cp67.md),
+[полная карта системы](system-cp67.md), [сборка](development-cp67.md).
+
 ## Таблица и адреса
 
 Все адреса ниже восьмеричные, относятся к верхним 64 КиБ HALT FRAM.
@@ -139,6 +142,98 @@ ODT при cold init очищает старый сеанс, не применя
 Неизменяемый образ ODT — 10798 байт, всё размещение — 11860, свободно 428 байт
 в прежнем 12-КиБ окне. Пользовательские команды отладчика сохранены.
 
+## Как написать свой модуль
+
+Выбрать BASE с учётом **полного** размещения уже установленных модулей.
+Текущий ODT с BSS/стеком резервирует `010000..037777`, SDBOOT — малое окно
+`006000..006777`. Начало `040000` подходит для следующего модуля лишь если
+эта память не занята другим расширением; UJMOD не знает чужих BSS.
+
+Минимальный пример исходника `MOD.MAC`, который только подтверждает init:
+
+```asm
+        .TITLE MOD
+        .ASECT
+        .=40000
+INIT:   CLR R0
+        RTS PC
+IMMEND:
+        .END INIT
+```
+
+Это демонстрация ABI, не ODT/драйвер. Для полезного модуля добавить код,
+неизменяемые константы до IMMEND, а рабочую память после него. Инициализатор
+очищает/заполняет эту память при **каждом** вызове, проверяет результат и
+возвращает R0. Нельзя включать меняющееся состояние в проверяемую сумму,
+иначе последующий cold boot отвергнет ранее работавший модуль.
+
+После сохранения примера в `uJ11-fpga/build/module-example/MOD.MAC`, из корня
+репозитория собрать native MACRO/LINK в новом каталоге:
+
+```sh
+python3 uJ11-fpga/tools/rt11_build.py uJ11-fpga/build/module-example/MOD.MAC --out uJ11-fpga/build/module-example/asm
+```
+
+Проверить `.LST/.MAP`, entry и диапазоны. `.SAV` — адресный memory image:
+в файл модуля идёт срез **BASE..IMMEND**, не весь SAV. Для данного примера
+IMMEND=`040004`; у реального модуля взять символ из его assembly listing.
+У `module_image_cp67.py` нет CLI, используется Python API:
+
+```python
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path("uJ11-fpga/tools").resolve()))
+from module_image_cp67 import pack, decode
+
+root = Path("uJ11-fpga/build/module-example")
+base, immend = 0o40000, 0o40004  # только для примера выше
+sav = (root / "asm/MOD.SAV").read_bytes()
+image = sav[base:immend]
+assert len(image) == immend - base
+module = pack(base, image)
+print(decode(module))
+(root / "MOD.BIN").write_bytes(module)
+```
+
+`pack` добавляет header, image checksum и нулевой padding, `decode` независимо
+проверяет полученный формат. Это ещё не тест исполнения. До загрузки на плату
+проверить инициализатор в RTL, повторный reset, повреждение checksum и recovery;
+пример существующих сценариев — [tb_modules_cp67.v](../tb/tb_modules_cp67.v).
+Затем COPY `MOD.BIN` в `SY:`, `RUN UJMOD` → `MOD`, длинный RESET без ESC,
+`RUN UJMOD` → `STATUS`. BASE вызывается как обычная подпрограмма независимо
+от имени файла: тип модуля в таблице не появляется.
+
+### Перенос между пространствами
+
+ROM после cold reset ставит resident copier и **слово-указатель** `HALT[160]`.
+Модуль в HALT может скопировать подготовленный блок в USER:
+R1 — HALT-адрес сразу после блока, R5 — USER-адрес сразу после назначения,
+R2 — положительное число слов. Вызов `JSR PC,@160` косвенный через resident
+pointer; `JSR PC,@#160` имеет другой смысл и здесь неверен. Copier идёт назад,
+читает HALT обычным MOV, пишет USER через MTUS и проверяет через MFUS.
+Области должны быть чётными и вне I/O; это системная подпрограмма, а не
+публичный загрузчик с полной проверкой произвольного входа. Ошибка copier
+при доступе к памяти идёт через действующий HALT fault vector; несовпадение
+readback ведёт в resident idle/fallback, а не возвращает R0 с кодом ошибки.
+В последнем случае для восстановления может потребоваться длинный RESET/ESC.
+
+Именно так [SDBOOT](../firmware/cp67/SDBOOT.MAC.in) готовит USER `004000`,
+пишет BOOTPC в `HALT[120]` и возвращается через `RTS PC`. Сам модуль не делает
+START: после обхода всей таблицы это сделает resident.
+
+Обратный путь USER→HALT при установке организован через signature HALT:
+R4=`125061`, R5=USER source, R1=HALT destination, R2=1..64 слова. Resident
+проверяет параметры и возвращается в USER через START. R2=0 — вызов helper,
+предварительно установленного по `001000`. UJMOD читает файл средствами
+RT-11 в USER и переносит/проверяет данные helper-операциями по 8 слов.
+Между вызовами RT-11 снова может обслуживать IRQ. HALT helper/initializer
+не вызывает RT-11 API: во время службы IRQ/RK assist отложены.
+[Резидент и register contract](halt-boot-cp61.md),
+[helper/векторный ABI](vector-loader-cp62.md).
+
+Обычный возврат `RTS PC` из module init и служебный выход HALT→USER через
+START/общий return `166` — разные уровни. Их нельзя взаимозаменять.
+
 ## Измерения и воспроизведение
 
 CP67a — первый прототип дополнительного firmware EBR, ещё до окончательной
@@ -168,7 +263,7 @@ python3 uJ11-fpga/tools/test_modules_cp67.py
 python3 uJ11-fpga/tools/test_modules_cp67.py --vendor
 python3 uJ11-fpga/tools/test_modules_cp67.py --full-window
 python3 uJ11-fpga/tools/run_modules_cp67.py --out uJ11-fpga/build/cp67-rt11-new
-python3 uJ11-fpga/tools/checkpoint_board.py cp67b --modules-cp67 --clock-mhz 31.824 --fram-timing
+python3 uJ11-fpga/tools/checkpoint_board.py cp67new --modules-cp67 --clock-mhz 31.824 --fram-timing
 ```
 
 Сборка использует DEC MACRO/LINK в RT-11 на частной копии диска. `microasm11`

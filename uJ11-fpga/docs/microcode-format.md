@@ -1,5 +1,22 @@
 # 36-bit microinstruction, encoding version 12
 
+## Текущая установленная CP67b
+
+Microstore — **1005/1024 слов по 36 бит**, точный образ CP63b. CP67 меняет
+отдельную PDP-11 firmware ROM, не кодировку CPU. Актуальные hardware sources,
+полный `service.uasm`, команды assembler и hashes описаны в
+[development-cp67](development-cp67.md).
+
+Базовые ALU/control поля v12 ниже сохраняются. В выбранном engine действуют
+дополнения CP57 `space[8:7]`, `service[2:1]` и `d=STATUS`. Значение STATUS
+расширено CP63: ready, debug enable/pending/context, WAIT/deferred trace,
+capability bit8; полный [register contract](debug-cp63.md#расширение-configstatus).
+Это содержимое D-input/CONFIG, не расширение ширины микрокоманды.
+MMU/APR и удалённый FP11 v13 в текущий образ не входят.
+
+Следующие разделы фиксируют эволюцию формата. Числа 954/700/… и default
+относятся к своим прежним этапам; не использовать их как занятость CP67b.
+
 CP37 добавляет экспериментальный backend APR_READ/D=APR только в build-копии.
 Production v12 и 954 words сохранены; MMU translation ещё не подключена.
 [Кодирование, измерения и границы lookup gate](mmu-apr-lookup.md).

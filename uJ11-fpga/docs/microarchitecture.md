@@ -1,5 +1,10 @@
 # Микроархитектура: M0 → CP27
 
+> История datapath и его изменений. Для установленной CP67b см.
+> [microstore/decode, USER/HALT и загрузку](system-cp67.md) и
+> [точный набор synthesis sources](development-cp67.md).
+> CP67b имеет 1005 uwords, ROM decode и выключенный instruction prefetch.
+
 Текущее дополнение CP36: [побитовый opcode index и aligned-word read
 interface](area-decode.md). HC1200 включает `ALIGNED_WORD_READS=1`: opcode
 ROM получает полное слово, operand byte mux находится перед engine.

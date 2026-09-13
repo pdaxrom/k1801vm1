@@ -1,5 +1,10 @@
 # CP62: файловый UJLOAD через HALT-вектор
 
+> История UJLOAD/ABI2 и низкоуровневый контракт resident/helper. CP67 использует
+> этот helper из нового UJMOD, но **другой формат модулей ABI3** и общий пул
+> без фиксированного FP11-слота. [Актуальный ABI](retained-modules-cp67.md),
+> [установка через UJMOD](user-guide-cp67.md). Команды UJLOAD ниже исторические.
+
 Профиль `--loader-cp62`, без MMU. Цепочка старта CP61 сохранена:
 ROM → HALT FRAM → копирование bootstrap в USER FRAM → START → RT-11.
 Новые файловые операции выполняются загружаемой программой PDP-11 в HALT

@@ -1,5 +1,9 @@
 # CP28: полный HC1200 top, FRAM и RT-11
 
+> Исторический integration baseline. Текущие два банка FRAM, ROM boot,
+> SD/RK/CSR и ресурсы описаны в [system-cp67](system-cp67.md),
+> сборка без microasm11 — в [development-cp67](development-cp67.md).
+
 This is the CP28 integration baseline. [CP29 physical bring-up](board-bringup-cp29.md)
 adds synchronized panel/HG inputs and records the successful FPGA programming,
 RT-11 boot, panel/keyboard and HG read/write hardware tests.

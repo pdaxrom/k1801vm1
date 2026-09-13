@@ -1,5 +1,12 @@
 # uJ11 FPGA
 
+**[Документация установленной CP67b](docs/README.md):**
+[работа с платой, ODT и пультом](docs/user-guide-cp67.md),
+[CPU, FRAM, загрузка и периферия](docs/system-cp67.md),
+[сборка, тесты и прошивка](docs/development-cp67.md),
+[формат и разработка модулей](docs/retained-modules-cp67.md).
+Разделы предыдущих CP ниже сохраняют историю, а не текущие инструкции установки.
+
 **CP67: retained FRAM modules и самостоятельная активация ODT после cold RESET.**
 Таблица BASE/LENGTH/CHECKSUM/STATUS, общий инициализатор без типов модулей,
 загрузчик RT-11 UJMOD и заменяемый SDBOOT. UART ESC при старте пропускает все
@@ -20,6 +27,9 @@ native loader 38 / 49, прежние ODT core/breakpoint/panel 187 / 112 / 2699
 Полный RT-11 install/reset/recovery: 55 checks, 1 023 462 941 такт, 3983 байта UART.
 [Файлы для установки](demos/rt11/service/cp67/README.md),
 [архив исходников и результатов](tb/reports/cp67/archive.json).
+
+Ниже — история предыдущих checkpoints; их ресурсы/файлы/способы активации
+относятся к указанному этапу.
 
 **CP66: программные точки останова, RUN TO и STEP OVER с обычными IRQ.**
 Четыре постоянные точки и одна временная, проверка адреса возврата/SP,
