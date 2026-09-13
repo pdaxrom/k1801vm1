@@ -1,0 +1,10 @@
+{
+  "utc": "2026-09-13T07:15:15.390041+00:00",
+  "picocom_pid": 162709,
+  "picocom_resumed": true,
+  "picocom_state": "S",
+  "hg_running": false,
+  "odt_ready": true,
+  "debug_enabled": true,
+  "uart_tool_sha256": "c8a26928d57ff86492312b756174980f5cd64ee0fb7e20e3c59da6ca310e1bc9"
+}

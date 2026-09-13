@@ -1,0 +1,10 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-13T07:14:17Z",
+  "commands": [
+    "RUN UJON"
+  ],
+  "uart_bytes": 70,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-13T07:14:19Z"
+}
