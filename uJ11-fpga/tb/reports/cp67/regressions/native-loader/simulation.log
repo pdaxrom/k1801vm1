@@ -1,0 +1,5 @@
+PASS CP67 native loader: 38 cases, 49 checks, 261770 clocks
+- build/cp67-loader-functions/tb.v:84: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 3ms; walltime 0.095 s; speed 27.499 ms/s
+- Verilator: cpu 0.095 s on 1 threads; allocated 2 MB

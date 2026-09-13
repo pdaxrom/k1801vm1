@@ -1,0 +1,66 @@
+{
+  "passed": true,
+  "cases": 38,
+  "checks": 49,
+  "clocks": 261770,
+  "files": {
+    "build/cp67-loader-functions/tb.v": "1b58415e92f748862f34d0f37d1d058d14d34a5fff0133fe459e7703d09e7cb5",
+    "build/cp63-debug/src/rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+    "build/cp63-debug/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "build/cp63-debug/src/microcode/generated/uj11_decode_table.v": "2f2e53dc1c3a8bb32be5a7e69bd21e91701b35b09e3684d2a3b59807fe9285ad",
+    "build/cp63-debug/src/rtl/uj11_engine.v": "7ef906a1a16c1609e6cc8aba8b300bd7a799abdcc209ad4c3339445219e352e2",
+    "build/cp63-debug/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+    "build/cp63-debug/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+    "build/cp63-debug/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "build/cp63-debug/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "build/cp63-debug/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "build/cp63-debug/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "build/cp63-debug/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "build/cp67-loader-functions/odt_cases.vh": "9805c7a34449aac1bddd5e3a06d299f19bf487367f2c9503d1d6a1df620ffeca",
+    "build/cp67-software/loader/UJMOD.SAV": "7195501e4674fb2d5362b9b0a1876404824b788d3382ad4147268750e1da1f97",
+    "tb/tb_odt_cp64.v": "4f4040b17c3e662e560ce6b6125c6b3094b09b575ecb46b20e254bd83f9a9f41",
+    "firmware/cp62/resident.bin": "735395c77efb33f9ed18a5d806c41870e603ebc5f35ec01f25e8a822f293a62d",
+    "firmware/cp62/loader.bin": "b1e8a0887ef99a2d4506125ab880507cd28464407a779e1ed27c6d1bbbb959ea",
+    "tools/test_loader_functions_cp67.py": "c998fe3cdf2f28fc085d5d4de28e684d7ec52f3c78661cb019cd0e1de1fbb80a"
+  },
+  "loader": {
+    "symbols": {
+      "WORD": 57344,
+      "TABLE": 3584,
+      "TEND": 3648,
+      "HBASE": 8,
+      "HCNT": 228,
+      "HCS": 12,
+      "HDBYT": 512,
+      "HLEN": 10,
+      "V1": 3,
+      "V2": 23,
+      "LOAD": 3684
+    },
+    "assembler": {
+      "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+      "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+      "source_sha256": {
+        "build/cp67-software/loader/UJMOD.MAC": "15de05109a0e7fd18901a446457ee7b1a8b227866eaf8f5dbd356f74c72aa6c3"
+      },
+      "outputs": {
+        "UJMOD.SAV": "7195501e4674fb2d5362b9b0a1876404824b788d3382ad4147268750e1da1f97",
+        "UJMOD.OBJ": "57dfd8c6b58bd8c635016d7b2bd5d40b4be67e6cec3f8e52afe964e384d58f3a",
+        "UJMOD.LST": "171677b79509d1ee8908d6d2a72da3fff1a354ae0aea3e4baab7511894ceb20e",
+        "UJMOD.MAP": "0a662976224798216f23898eabeda4b11dc709105f6ab95c6667e6eb5ba8126e"
+      },
+      "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+    },
+    "assembly": "build/cp67-software/loader/asm-15de05109a0e",
+    "sources": {
+      "demos/rt11/service/cp62/UJLOAD.MAC": "f0062e9a60cc552bae2c7703d3329c08c397ff5632935b9f53710bcecf8c9968",
+      "firmware/cp67/UJMOD.MAC.in": "89e37a7636a230dea0db9d0fe0309b2bfbbba7a554a53660ee2dd441030d907f",
+      "tools/build_software_cp67.py": "724d38abe15fe8403e815d7a030f12df6bd1c9b3395ee4093680bed09a1cab7e"
+    },
+    "outputs": {
+      "build/cp67-software/loader/UJMOD.MAC": "15de05109a0e7fd18901a446457ee7b1a8b227866eaf8f5dbd356f74c72aa6c3",
+      "build/cp67-software/loader/UJMOD.SAV": "7195501e4674fb2d5362b9b0a1876404824b788d3382ad4147268750e1da1f97"
+    }
+  }
+}

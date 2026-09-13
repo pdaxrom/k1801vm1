@@ -1,5 +1,22 @@
 # uJ11 FPGA
 
+**CP67: retained FRAM modules и самостоятельная активация ODT после cold RESET.**
+Таблица BASE/LENGTH/CHECKSUM/STATUS, общий инициализатор без типов модулей,
+загрузчик RT-11 UJMOD и заменяемый SDBOOT. UART ESC при старте пропускает все
+модули и выбирает встроенный ROM bootstrap. Образы пока абсолютные.
+[ABI, восстановление и проверки](docs/retained-modules-cp67.md).
+
+Финальный HC1200 synthesis CP67b: **1244 LUT / 381 FF / 7 EBR / 32,032 MHz**,
+1005 микрокоманд; MAP/PAR/TRACE 31,824 MHz с FRAM constraints — PASS.
+Свободны 36 LUT, 12 slices, 0 EBR. JED экспортирован, **CP67 пока не прошит**;
+на физической плате остаются описанные ниже CP63b/CP66.
+
+Проверки CP67 — PASS: cold start portable/vendor ROM по 30 сценариев / 249 checks,
+native loader 38 / 49, прежние ODT core/breakpoint/panel 187 / 112 / 2699 checks.
+Полный RT-11 install/reset/recovery: 55 checks, 1 023 462 941 такт, 3983 байта UART.
+[Файлы для установки](demos/rt11/service/cp67/README.md),
+[архив исходников и результатов](tb/reports/cp67/archive.json).
+
 **CP66: программные точки останова, RUN TO и STEP OVER с обычными IRQ.**
 Четыре постоянные точки и одна временная, проверка адреса возврата/SP,
 восстановление оригинальных команд с readback и отмена коротким RESET.

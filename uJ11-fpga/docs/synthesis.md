@@ -1,5 +1,20 @@
 # Synthesis checkpoints
 
+## CP67 — доверенный cold walker для модулей FRAM
+
+| Revision | Features | LUT | FF | EBR | Fmax MHz | uwords | Notes |
+|---|---|---:|---:|---:|---:|---:|---|
+| CP67a | 1024x16 firmware ROM, table walker, early HALT overlay release | 1244 | 381 | 7 | 32,032 | 1005 | Full MAP/PAR/TRACE 31,824 MHz + FRAM PASS |
+| CP67b | Final cold walker, UART ESC recovery, generic BOOTPC | 1244 | 381 | 7 | 32,032 | 1005 | Repeated full MAP/PAR/TRACE 31,824 MHz + FRAM PASS |
+
+Первый прототип, до окончательных ESC/BOOTPC: +14 LUT / +10 slices / +1 EBR
+к CP63b. Свободны 36 LUT, 12 slices, 0 EBR. Источник цифр —
+[raw reports CP67a](../synth/reports/cp67a/result.json). Отдельный повторный
+[synthesis окончательного CP67b](../synth/reports/cp67b/result.json) дал те же
+ресурсы и timing. Номинальные CPU/FRAM 29,56 MHz, ядро и микрокод прежние.
+Дополнительный EBR содержит доверенный код запуска, ODT/SDBOOT остаются в FRAM.
+[Контракт CP67](retained-modules-cp67.md). CP67 на плату пока не прошивался.
+
 ## CP66 — программные breakpoints, без нового синтеза
 
 Сравнение SHA256 подтверждает тот же hardware CP63b: **1230 LUT / 381 FF /

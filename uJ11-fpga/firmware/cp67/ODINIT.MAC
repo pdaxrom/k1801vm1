@@ -1,0 +1,38 @@
+; CP67 initializer, called by the ROM directory walker, with its fault vector.
+; All code, glyphs and these defaults are inside the verified immutable image.
+; Old registers/breakpoint records are discarded, never replayed after reset.
+COLD:	.WORD 43
+	BIT #400,R0
+	BEQ CFAIL
+	BIC #177770,R0
+	MOV R0,R3
+	MOV #IMMEND,R1
+	MOV #<MEMEND-IMMEND>/2,R2
+CZ:	CLR (R1)
+	TST (R1)+
+	BNE CFAIL
+	SOB R2,CZ
+	MOV #CDEFS,R1
+	MOV #<CDEND-CDEFS>/4,R2
+CW:	MOV (R1)+,R5
+	MOV (R1)+,(R5)
+	CMP (R5),-2(R1)
+	BNE CFAIL
+	SOB R2,CW
+; Publish ODT/debug ready only after all data and vector readbacks succeed.
+	MOV R3,R0
+	BIS #5,R0
+	.WORD 42
+	CLR R0
+	RTS PC
+CFAIL:	MOV #1,R0
+	RTS PC
+CDEFS:	.WORD SHADOW,PINCE+PINBL,RGBRAW,7
+	.WORD KLAST,177777,KCAND,177777,AUTOSC,1,SCDIR,1
+	.WORD SCTIME,SCWAIT,KEYS,20,KEYS+2,21,KEYS+4,22,KEYS+6,23,RADIX,10
+; Shared HALT return/gate ABI. Vector 4 remains owned by the caller until RTS.
+	.WORD 6,340,320,177,322,177640,326,777,164,2000,166,1700
+	.WORD 1700,12737,1702,312,1704,4,1706,10
+	.WORD 2000,12737,2002,ODERR,2004,4,2006,137,2010,ODT
+	.WORD 110,ENTER,112,340
+CDEND:

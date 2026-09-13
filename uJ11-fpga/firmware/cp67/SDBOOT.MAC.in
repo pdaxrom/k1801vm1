@@ -1,0 +1,17 @@
+	.TITLE SDBOOT
+; Generic initializer at BASE. Copy the proven built-in USER bootstrap from
+; this replaceable FRAM image, then return to the trusted cold dispatcher.
+; DATA is generated from the SHA-verified CP63b image (firmware/sd_boot.asm).
+	.ASECT
+	.=6000
+INIT:	MOV #DEND,R1
+	MOV #4000+<DEND-DATA>,R5
+	MOV #<DEND-DATA>/2,R2
+	JSR PC,@160
+	MOV #4000,@#120
+	CLR R0
+	RTS PC
+DATA:
+@@BOOTSTRAP@@
+DEND:
+	.END INIT

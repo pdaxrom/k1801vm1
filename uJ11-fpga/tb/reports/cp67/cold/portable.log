@@ -1,0 +1,37 @@
+CP67 case1 cold clocks 280697
+CP67 case2 cold clocks 280697
+CP67 case3 cold clocks 292683
+CP67 case3 cold clocks 292683
+CP67 case4 cold clocks 280697
+CP67 case5 cold clocks 280697
+CP67 case6 cold clocks 280697
+CP67 case7 cold clocks 281632
+CP67 case8 cold clocks 281632
+CP67 case9 cold clocks 280697
+CP67 case10 cold clocks 280697
+CP67 case11 cold clocks 283655
+CP67 case12 cold clocks 284776
+CP67 case13 cold clocks 284776
+CP67 case14 cold clocks 284776
+CP67 case15 cold clocks 283463
+CP67 case16 cold clocks 283902
+CP67 case17 cold clocks 284080
+CP67 case18 cold clocks 284392
+CP67 case19 cold clocks 284392
+CP67 case20 cold clocks 292708
+CP67 case21 cold clocks 287640
+CP67 case22 cold clocks 295767
+CP67 case23 cold clocks 287064
+CP67 case24 cold clocks 286732
+CP67 case25 cold clocks 286924
+CP67 case26 cold clocks 288014
+CP67 case27 cold clocks 259993
+CP67 case28 cold clocks 2723031
+CP67 case28 cold clocks 2723031
+CP67 case29 cold clocks 2255525
+CP67 case30 cold clocks 259993
+PASS CP67 modules: 30 cases, 249 checks, actual SPI FRAM
+- tb/tb_modules_cp67.v:70: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 541ms; walltime 9.276 s; speed 58.345 ms/s
+- Verilator: cpu 9.272 s on 1 threads; allocated 2 MB

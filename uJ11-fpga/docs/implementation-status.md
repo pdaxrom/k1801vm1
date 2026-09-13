@@ -5,6 +5,24 @@
 [отдельном журнале](board-bringup-cp64.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP67 — retained FRAM modules
+
+Общая таблица из четырёх слов, immutable checksum и cold init по BASE.
+ODT сам восстанавливает данные/векторы и включает debug; простой SDBOOT —
+такой же заменяемый модуль. UJMOD публикует VALID после полного readback.
+UART ESC до первого FRAM-вызова выбирает встроенный bootstrap, независимо
+от правильности кода расширенного модуля. Образы абсолютные, relocation пока нет.
+
+CP67b MAP/PAR/TRACE: **1244 LUT, 381 FF, 7 EBR, 32,032 MHz**, 1005 uwords,
+31,824 MHz + FRAM timing PASS. JED экспортирован, аппаратной установки ещё нет.
+Portable/vendor cold tests: 30 cases / 249 checks каждый; native loader:
+38 cases / 49 checks; ODT: 187 core / 112 breakpoints / 2699 panel checks PASS.
+Полный RT-11 install/reset/recovery regression: 55 checks / 1 023 462 941 такт /
+3983 байта UART — PASS. Исходники, native assembly и сырые логи архивированы;
+ODT.BIN, SDBOOT.BIN и UJMOD.SAV подготовлены для установки. Следующий шаг —
+аппаратная установка и проверка CP67b.
+[Контракт, файлы и ограничения](retained-modules-cp67.md).
+
 ## CP66 — программные точки и STEP OVER с обычными IRQ
 
 Четыре постоянные HALT-точки и одна временная, RUN TO, STEP OVER с проверкой

@@ -1,0 +1,23 @@
+
+PDP-11 simulator V3.12-3
+
+RT-11FB (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.R MACRO
+*BOOT,BOOT=BOOT
+*^C
+
+.R LINK
+*BOOT,BOOT=BOOT
+*^C
+
+.
+Simulation stopped, PC: 142600 (MOV 121206,R4)
+sim> quit
+Goodbye

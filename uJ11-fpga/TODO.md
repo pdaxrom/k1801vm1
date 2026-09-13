@@ -1,5 +1,25 @@
 # uJ11 TODO
 
+## CP67 — retained FRAM modules
+
+- [x] Таблица из BASE/LENGTH/CHECKSUM/STATUS, без типов модулей; cold init по BASE.
+- [x] ROM recovery через UART ESC до первого вызова FRAM; сохраняется встроенный bootstrap.
+- [x] ODT с самоинициализацией и отдельный заменяемый SDBOOT; абсолютные образы.
+- [x] Первый synthesis CP67a: 1244 LUT / 381 FF / 7 EBR / 32,032 MHz, timing PASS.
+- [x] Directed portable: 30 сценариев / 249 checks; прежние 112 ODT breakpoint checks.
+- [x] Vendor-ROM: 30 cases / 249 checks; полный RT-11/UJMOD/reset/recovery:
+  55 checks / 1 023 462 941 такт / 3983 байта UART — PASS. Исходники, native
+  assembly и сырые результаты архивированы; добавлен проверяющий скрипт.
+- [x] Окончательный CP67b synthesis: 1244 LUT / 381 FF / 7 EBR / 32,032 MHz;
+  экспортирован JED, исходники и timing проверены по SHA256.
+- [ ] Отдельная аппаратная установка CP67b и проверка retained modules/recovery.
+- [ ] Relocatable modules: формат relocation records, исправление ссылок при
+  установке и checksum уже размещённого образа; четыре поля FRAM-таблицы сохранить.
+- [ ] Автоматическое размещение BSS/рабочих областей, если понадобится несколько
+  динамически размещаемых модулей. Сейчас диапазоны заданы при сборке.
+
+[ABI, восстановление и ограничения](docs/retained-modules-cp67.md).
+
 ## План ODT от 2026-09-12
 
 - [x] CP64 hardware: прошить точную CP63b, проверить FLASH Verify, RT-11FB

@@ -1,0 +1,141 @@
+	.TITLE BOOT
+	.IDENT /01.00/
+; CP67 generic retained-module startup. Addresses and constants are octal.
+; ROM installs this program in HALT FRAM before invoking CP62 initialize.
+; The resident calls MSTART after its verified HALT-to-USER bootstrap copy.
+; Table: eight entries of BASE, word LENGTH, CHECKSUM, STATUS at 007000.
+; STATUS=C100(hex)|VALID|AUTO; bits 2/3 are this boot's OK/ERROR result.
+	.ASECT
+TABLE=7000
+TEND=7100
+VALID=140401
+AUTO=2
+OK=4
+ERROR=10
+ROMOFF=76
+RECOV=74
+BOOTPC=120
+	.=5000
+MSTART:	MOV R1,-(SP)
+	MOV SP,BOOTSP
+; Execution is now in FRAM. Release only the HALT ROM mapping; SD boot
+; completion still requires its existing SD-control/USER-read0 handshake.
+	MOV #1,@#ROMOFF
+	MOV #4000,@#BOOTPC
+	MOV #TABLE,@#122
+	CLR @#RECOV
+; Holding/sending UART ESC across reset bypasses every retained FRAM call.
+; The bounded window and all recovery code are copied from ROM, not loaded
+; from the module table. Other received characters do not extend the window.
+	MOV #4,R2
+RLOOPS=.-2
+RBEGIN:	MOV #0,R3
+RSPINS=.-2
+RWAIT:	TSTB @#177560
+	BPL RDEC
+	MOV @#177562,R0
+	CMP R0,#33
+	BEQ RROM
+RDEC:	SOB R3,RWAIT
+	SOB R2,RBEGIN
+	MOV #TABLE,CURSOR
+MNEXT:	MOV BOOTSP,SP
+	MOV #MFAULT,@#4
+	.WORD 43
+	BIC #177770,R0
+	MOV R0,PRECFG
+	MOV @#BOOTPC,PREBOT
+	MOV CURSOR,R4
+	CMP R4,#TEND
+	BNE MENTRY
+	JMP MDONE
+MENTRY:
+	MOV 6(R4),R0
+	BIC #16,R0
+	CMP R0,#VALID
+	BNE MSKIP
+; Clear stale results, even for an installed module with AUTO disabled.
+	BIC #14,6(R4)
+	BIT #14,6(R4)
+	BNE MSKIP
+	BIT #AUTO,6(R4)
+	BEQ MSKIP
+	MOV (R4),R5
+	BIT #1,R5
+	BNE MFAIL
+	CMP R5,#6000
+	BLO MFAIL
+	MOV 2(R4),R2
+	BEQ MFAIL
+	MOV R2,R0
+	ASL R0
+	BCS MFAIL
+	ADD R5,R0
+	BCS MFAIL
+	CMP R0,#160000
+	BHI MFAIL
+	CMP R5,#10000
+	BHIS MRANGE
+	CMP R0,#7000
+	BHI MFAIL
+MRANGE:
+	CLR R1
+MSUM:	.WORD 40
+	ADD R0,R1
+	ADD #2,R5
+	SOB R2,MSUM
+	CMP R1,4(R4)
+	BNE MFAIL
+	CLR R0
+	JSR PC,@(R4)
+	TST R0
+	BNE MFAIL
+	MOV CURSOR,R4
+	BIS #OK,6(R4)
+	BR MSKIP
+MFAULT:	MOV BOOTSP,SP
+MFAIL:	MOV #MFALL,@#4
+	MOV PRECFG,R0
+	.WORD 42
+	MOV PREBOT,@#BOOTPC
+	MOV CURSOR,R4
+	BIS #ERROR,6(R4)
+MFALL:	MOV BOOTSP,SP
+MSKIP:	ADD #10,CURSOR
+	BR MNEXT
+RROM:	INC @#RECOV
+	BR MDONE
+; An initializer may prepare a USER bootstrap and publish its entry at 120.
+; The ROM default is 4000. Failed initializers restore the prior selection.
+MDONE:	MOV #MEXIT,@#4
+	MOV BOOTSP,SP
+	MOV @#BOOTPC,R0
+	BIT #1,R0
+	BNE MEXIT
+	CMP R0,#160000
+	BHIS MEXIT
+	MOV R0,(SP)
+MEXIT:	MOV #312,@#4
+	MOV BOOTSP,SP
+	MOV (SP)+,R1
+	RTS PC
+BOOTSP:	.WORD 0
+CURSOR:	.WORD 0
+PRECFG:	.WORD 0
+PREBOT:	.WORD 0
+MEND:
+; New ROM page. Its only job is to install/read back the cold-only walker.
+; CP62 resident and its public entry/fault/copier addresses stay fixed.
+	.=12000
+CSTART:	MOV #12040,R0
+	MOV #MSTART,R1
+	MOV #<MEND-MSTART>/2,R2
+CCOPY:	MOV (R0)+,R3
+	MOV R3,(R1)
+	CMP R3,(R1)+
+	BNE CFAIL
+	SOB R2,CCOPY
+	JMP @#322
+CFAIL:	BR CFAIL
+CEND:
+	.END CSTART
