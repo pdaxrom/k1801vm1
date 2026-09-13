@@ -1,0 +1,12 @@
+{
+  "revision": "2e776d303aa55ccc943d183916b91c8c2d3a30d3",
+  "host": "sash@192.168.1.108",
+  "remote_directory": "/tmp/uj11-cp65-install-20260913",
+  "files": {
+    "ODT.BIN": "38c422ec519bb98f6eecb250480155df7edf0239c84f43027adbd1fb8e4ed740",
+    "UJON.SAV": "e00a1022a0e5babb92050c28ebca62fdda93fbf407490d4bc6cdf63487350cbf"
+  },
+  "total_bytes": 11264,
+  "uart_tool_sha256": "c8a26928d57ff86492312b756174980f5cd64ee0fb7e20e3c59da6ca310e1bc9",
+  "fpga_reprogrammed": false
+}

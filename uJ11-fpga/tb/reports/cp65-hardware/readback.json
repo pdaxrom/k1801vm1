@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "source_sha256": {
+    "ODT.BIN": "38c422ec519bb98f6eecb250480155df7edf0239c84f43027adbd1fb8e4ed740",
+    "UJON.SAV": "e00a1022a0e5babb92050c28ebca62fdda93fbf407490d4bc6cdf63487350cbf"
+  },
+  "readback": {
+    "ODT.BIN": "ODCHK.BIN",
+    "UJON.SAV": "ONCHK.SAV"
+  },
+  "sd_files_verified": true
+}

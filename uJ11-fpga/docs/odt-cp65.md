@@ -114,7 +114,9 @@ pending в HALT-части; для отмены цикла использова�
 [Сводка с hashes](verification-cp65.json),
 [архив 102 исходных файлов и 45 артефактов](../tb/reports/cp65/archive.json),
 [готовая согласованная пара](../demos/rt11/service/cp65/README.md).
-CP65 **пока не установлен на плату**; там исходный CP64 поверх FPGA CP63b.
+CP65 затем **установлен на плату** поверх FPGA CP63b; SD readback,
+FRAM ready и debug enabled подтверждены в [аппаратном журнале](board-bringup-cp65.md).
+Сводка simulation выше сохранена отдельно от факта установки.
 
 Применяется production CPU, собранный DEC MACRO/LINK монитор, модель
 электрической матрицы и полный 640-bit поток двух HDSP. Проверяются:

@@ -1,0 +1,7 @@
+{
+  "utc": "2026-09-13T05:07:49.650800+00:00",
+  "picocom_pid": 157550,
+  "picocom_resumed": true,
+  "picocom_status": "    PID STAT COMMAND\n 157550 S    picocom -b 115200 /dev/ttyUSB1\n",
+  "hg_running": false
+}
