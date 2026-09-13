@@ -13,7 +13,8 @@
 [synthesis окончательного CP67b](../synth/reports/cp67b/result.json) дал те же
 ресурсы и timing. Номинальные CPU/FRAM 29,56 MHz, ядро и микрокод прежние.
 Дополнительный EBR содержит доверенный код запуска, ODT/SDBOOT остаются в FRAM.
-[Контракт CP67](retained-modules-cp67.md). CP67 на плату пока не прошивался.
+[Контракт CP67](retained-modules-cp67.md). Позднее CP67b
+[записана на плату с Verify](board-bringup-cp67.md), RT-11FB/DIR проверены.
 
 ## CP66 — программные breakpoints, без нового синтеза
 

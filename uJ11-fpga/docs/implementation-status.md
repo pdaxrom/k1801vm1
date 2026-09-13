@@ -1,8 +1,8 @@
 # Implementation status, 2026-09-13
 
-**Аппаратная установка:** CP63b записана и проверена во FLASH; RT-11FB и DIR
+**Аппаратная установка:** CP67b записана и проверена во FLASH; RT-11FB и DIR
 работают на плате. Установка ODT и аппаратные проверки отражаются в
-[отдельном журнале](board-bringup-cp64.md). Ниже — результаты checkpoints
+[отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
 ## CP67 — retained FRAM modules
@@ -14,13 +14,15 @@ UART ESC до первого FRAM-вызова выбирает встроенн
 от правильности кода расширенного модуля. Образы абсолютные, relocation пока нет.
 
 CP67b MAP/PAR/TRACE: **1244 LUT, 381 FF, 7 EBR, 32,032 MHz**, 1005 uwords,
-31,824 MHz + FRAM timing PASS. JED экспортирован, аппаратной установки ещё нет.
+31,824 MHz + FRAM timing PASS. JED записан во FLASH с Verify; RT-11FB и DIR PASS.
 Portable/vendor cold tests: 30 cases / 249 checks каждый; native loader:
 38 cases / 49 checks; ODT: 187 core / 112 breakpoints / 2699 panel checks PASS.
 Полный RT-11 install/reset/recovery regression: 55 checks / 1 023 462 941 такт /
 3983 байта UART — PASS. Исходники, native assembly и сырые логи архивированы;
-ODT.BIN, SDBOOT.BIN и UJMOD.SAV подготовлены для установки. Следующий шаг —
-аппаратная установка и проверка CP67b.
+ODT.BIN, SDBOOT.BIN и UJMOD.SAV установлены с полным обратным чтением.
+На плате после длинного RESET оба модуля получили `140407`; короткий RESET,
+ODT R/D/C и возврат в RT-11 проверены. Аппаратный ESC recovery остаётся отдельной
+проверкой. Журналы и SHA256 — в ссылке выше.
 [Контракт, файлы и ограничения](retained-modules-cp67.md).
 
 ## CP66 — программные точки и STEP OVER с обычными IRQ

@@ -1,0 +1,12 @@
+SET SL OFF
+[r[24H\
+.LOAD HG
+
+.DIR HG:
+ 
+SDBOOT.BIN     2  13-Sep-2026    UJMOD .SAV     9  13-Sep-2026
+ODT   .BIN    23  13-Sep-2026    
+ 3 Files, 34 Blocks
+ 8120 Free blocks
+
+.

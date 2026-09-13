@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "user_confirmed_short_reset": true,
+  "entry_banner_captured": false,
+  "registers": true,
+  "disassembly": true,
+  "continue_to_rt11": true
+}

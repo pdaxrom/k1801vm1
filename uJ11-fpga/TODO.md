@@ -12,7 +12,10 @@
   assembly и сырые результаты архивированы; добавлен проверяющий скрипт.
 - [x] Окончательный CP67b synthesis: 1244 LUT / 381 FF / 7 EBR / 32,032 MHz;
   экспортирован JED, исходники и timing проверены по SHA256.
-- [ ] Отдельная аппаратная установка CP67b и проверка retained modules/recovery.
+- [x] CP67b записана во FLASH с Verify; RT-11FB V05.03 и DIR проверены через UART.
+- [x] Установить ODT/SDBOOT/UJMOD на SD с полным readback, зарегистрировать во FRAM;
+  длинный RESET → оба `140407`, короткий RESET → ODT R/D/C и возврат в RT-11 — PASS.
+- [ ] Отдельно проверить UART ESC recovery на физической плате; simulation PASS.
 - [ ] Relocatable modules: формат relocation records, исправление ссылок при
   установке и checksum уже размещённого образа; четыре поля FRAM-таблицы сохранить.
 - [ ] Автоматическое размещение BSS/рабочих областей, если понадобится несколько
