@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-13",
+  "checkpoint": "cp67b",
+  "verdict": "incomplete_no_new_boot_observed",
+  "physical_recovery_verified": false,
+  "user_reset_confirmation_received": false,
+  "host_tests": {
+    "passed": true,
+    "tests": 4
+  },
+  "before_modules": [
+    [
+      0,
+      "010000",
+      "012427",
+      "076367",
+      "140407"
+    ],
+    [
+      1,
+      "006000",
+      "000342",
+      "053365",
+      "140407"
+    ]
+  ],
+  "recovery_attempt": {
+    "escape_bytes": 1795,
+    "fresh_rt11_banner": false,
+    "elapsed_seconds": 180.00028445501812
+  },
+  "rt11_prompt_after_timeout": true,
+  "picocom_resumed": true,
+  "picocom_pid": 175624,
+  "picocom_final_state": "S",
+  "fpga_reprogrammed": false,
+  "module_files_replaced": false,
+  "artifacts": {
+    "after-timeout/session.json": "ec013b5765c8ec7958cd28e7c488a0667faac980cd6e54171cfcf4c27ed42686",
+    "after-timeout/uart.bin": "11731dd4e1bcebf870ae3364045573f845aa61fee7ee1fa53c04a4dfe081bd66",
+    "baseline/session.json": "c39f53b5be94b7dce98a82239ef1b02d277b22fd99da359faaf78df9a1437251",
+    "baseline/uart.bin": "6abbe9eb73e62842d3e23c93ba5907cb49473953d982d8ac0ad3471f5341296a",
+    "escape-boot/session.json": "3c88470c8f04b0fe991ad5ef35c9f5d4682331a694d428863ba89e96cb41f577",
+    "escape-boot/uart.bin": "ccb776230879fa3ebff4e8c5d2ca3c734c8e74448d7df6bb38c8cc78f86b468e",
+    "host-tests.log": "9e5b31a8f299d5c1e300174624686f37d40201103395d9bcce3359cc7f9af3a3",
+    "host-tools.json": "47cf6659d8f52754a88831fbbf7c99958666813094598f2403ea0f57fe47ba05",
+    "source.tgz": "c09ade77e2ab5dd9102b8b1af50d0d81ee9bfe6798c77dd08f4265971c4857be",
+    "status-before/session.json": "1b6f353820b2fe87c2e486e4ca0eb3a387de734696f9154d285539f348207f18",
+    "status-before/uart.bin": "942c0f5efb1fac5ecbccca7e7cded38572c7916fc45c94835689de22a1d33a39",
+    ".gitattributes": "3bfa7ca15f8384594c9873a1de9304ca2ab24a4563296833eaf99ad2daf3a2aa"
+  }
+}

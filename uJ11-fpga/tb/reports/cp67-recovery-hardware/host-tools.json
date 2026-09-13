@@ -1,0 +1,11 @@
+{
+  "checkpoint": "cp67b",
+  "parent_commit": "de1f69d",
+  "purpose": "Physical UART ESC recovery validation; board reset is manual",
+  "source_sha256": {
+    "tools/hardware_uart.py": "6314ba36cdad5f7988ef85483a07ac33d456ba42c73b750ab26859d85d009761",
+    "tools/test_hardware_uart.py": "bd3cf79bd7f70f36998fbea7662df952890b25c693be295f8165c2e92c5bc80e"
+  },
+  "fpga_reprogrammed": false,
+  "module_images_changed": false
+}

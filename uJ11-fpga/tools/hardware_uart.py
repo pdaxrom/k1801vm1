@@ -5,8 +5,36 @@ Run on the Linux board host. Temporarily pause only the selected UART reader;
 restore its termios and resume it in finally. An unowned UART stays raw 115200
 to avoid echoing late device output back into RT-11. Commands use 10 chars/s.
 """
-import argparse, json, os, select, signal, subprocess, termios, time
+import argparse, json, os, re, select, signal, subprocess, termios, time
 from pathlib import Path
+
+
+def escape_until_boot(fd, capture, read_for, timeout, result):
+    """Select CP67 ROM recovery; stop transmitting on a fresh RT-11 banner.
+
+    Already captured text cannot complete a new attempt. In particular, neither
+    ESC echo nor an existing RT-11 prompt proves that cold reset took place.
+    On timeout the caller's finally still restores the UART reader.
+    """
+    start = len(capture)
+    began = time.monotonic()
+    result.update(escape_bytes=0, fresh_rt11_banner=False)
+    print('[ARMED] UART ESC recovery: perform a long RESET now.', flush=True)
+    try:
+        while True:
+            remaining = timeout - (time.monotonic() - began)
+            if remaining <= 0:
+                raise RuntimeError('Recovery timed out without a fresh RT-11FB V05.03 banner; no further commands sent')
+            if os.write(fd, b'\x1b') != 1:
+                raise RuntimeError('UART ESC write was not completed')
+            result['escape_bytes'] += 1
+            read_for(min(.1, remaining))
+            if re.search(rb'RT-11FB[^\r\n]*V05\.03', capture[start:]):
+                result['fresh_rt11_banner'] = True
+                print('\n[BOOT] Fresh RT-11 banner; UART ESC transmission stopped.', flush=True)
+                return
+    finally:
+        result['elapsed_seconds'] = time.monotonic() - began
 
 
 def main():
@@ -20,7 +48,15 @@ def main():
     p.add_argument('--command-wait',type=float,default=20)
     p.add_argument('--listen',type=float,default=1,help='initial passive capture seconds without programming')
     p.add_argument('--expect-prompt',action='store_true',help='require a returned RT-11 prompt after each command')
-    a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+    p.add_argument('--escape-until-boot',type=float,metavar='SECONDS',
+                   help='CP67 recovery: repeat UART ESC until a fresh RT-11FB V05.03 banner, then listen passively')
+    a=p.parse_args()
+    if a.escape_until_boot is not None:
+        if not 0 < a.escape_until_boot <= 600:
+            p.error('--escape-until-boot requires 0 < SECONDS <= 600')
+        if a.xcf or a.interrupt or a.command or a.expect_prompt:
+            p.error('--escape-until-boot is a capture-only operation; do not combine with programming or commands')
+    a.out.mkdir(parents=True,exist_ok=True)
     fd=None;old=None;paused=False;capture=bytearray()
     record=dict(port=a.port,started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),commands=a.command)
     def interrupted(signum,frame):raise KeyboardInterrupt
@@ -58,6 +94,10 @@ def main():
                     record['programmer_exit_code']=proc.returncode
                     assert proc.returncode==0,'Programmer failed; see programmer.log'
                 read_for(30)
+            elif a.escape_until_boot is not None:
+                record['recovery_attempt']={}
+                escape_until_boot(fd,capture,read_for,a.escape_until_boot,record['recovery_attempt'])
+                read_for(a.listen)
             else:read_for(a.listen)
             if a.interrupt:
                 os.write(fd,b'\x03');read_for(.2);os.write(fd,b'\x03');read_for(2)

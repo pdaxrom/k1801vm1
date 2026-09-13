@@ -1,0 +1,2 @@
+# Preserve UART CR/LF/control bytes exactly; these are evidence, not source text.
+**/uart.bin binary
