@@ -33,9 +33,9 @@
   "hg_stopped": true,
   "software_activation_message": "!UJON-I-CP64 DEBUG ENABLED; SHORT RESET ENTERS ODT",
   "activation_message_note": "Legacy text in the matched CP65 activator; hashes and FRAM code checks identify the CP65 build.",
-  "physical_cp65_button_entry_verified": false,
-  "physical_cp65_panel_verified": false,
-  "physical_validation_note": "No UART data arrived during the 60-second passive capture; awaiting user confirmation of short RESET and CP65 panel behavior.",
+  "physical_cp65_button_entry_verified": true,
+  "physical_cp65_panel_verified": true,
+  "physical_validation_note": "After the request to check short RESET and automatic scrolling, the user confirmed that the installed CP65 works. This is a user-reported basic hardware check; the earlier empty 60-second UART capture is unchanged. A complete per-command panel test is not claimed.",
   "artifacts": {
     "ODCHK.BIN": "38c422ec519bb98f6eecb250480155df7edf0239c84f43027adbd1fb8e4ed740",
     "ONCHK.SAV": "e00a1022a0e5babb92050c28ebca62fdda93fbf407490d4bc6cdf63487350cbf",
@@ -62,5 +62,13 @@
     "readback/uart.bin": "23fbf80e94ae01ecb7dbdc02cf0b4ab10ea2b36e76894ac4c5fcc565cda3f54a",
     "readback.json": "677e449b6321bdcd961c957810751dc92083b1093c8551628ac9a4f501118dc2",
     "transfer.json": "88a77c309ba73b34bdd4da1bebecaaedddc6663a14031837556fa15593622d67"
+  },
+  "user_confirmation": {
+    "date": "2026-09-13",
+    "source": "user message after CP65 installation and the short RESET / auto-scroll check request",
+    "message": "работает, коммить",
+    "scope": "basic operation of installed CP65 on the physical board",
+    "full_panel_command_matrix_verified": false,
+    "uart_capture_added": false
   }
 }
