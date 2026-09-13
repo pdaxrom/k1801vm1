@@ -22,6 +22,10 @@ ODT/SDBOOT установлены через RT-11 с обратным чтен�
 в RT-11 проверены на плате.
 [Текущая аппаратная установка](docs/board-bringup-cp67.md).
 
+**UART ESC recovery проверено на плате:** загрузка RT-11 с обходом ODT,
+сохранность таблицы, возврат ODT после обычного RESET без повторной установки,
+R/D/C и SD DIR. [Журналы и границы проверки](docs/board-recovery-cp67.md).
+
 Проверки CP67 — PASS: cold start portable/vendor ROM по 30 сценариев / 249 checks,
 native loader 38 / 49, прежние ODT core/breakpoint/panel 187 / 112 / 2699 checks.
 Полный RT-11 install/reset/recovery: 55 checks, 1 023 462 941 такт, 3983 байта UART.
