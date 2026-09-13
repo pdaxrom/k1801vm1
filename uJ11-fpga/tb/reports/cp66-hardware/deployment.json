@@ -35,7 +35,7 @@
   "activation_message_note": "Historical banner in the matched CP66 activator; exact file hashes and successful FRAM code check identify CP66.",
   "physical_cp66_button_entry_verified": false,
   "physical_cp66_panel_verified": false,
-  "physical_validation_note": "Real board installation, full SD file readback, HALT-FRAM READY and UJON verification/debug enable passed. Button entry and per-command panel/breakpoint tests are not claimed for this deployment.",
+  "physical_validation_note": "Installation, complete SD readback, HALT-FRAM READY and UJON verification/debug enable passed. The user subsequently reported that CP66 works. This is user-reported basic operation; individual button/panel/breakpoint scenarios are not separately recorded as verified.",
   "artifacts": {
     "ODCHK.BIN": "54e765644c19fb52a9fdb5b5f2599294bdc6b92cf7ee1bda140faa3eab1460a2",
     "ONCHK.SAV": "feca40caabfe6af8ead1d098f6106125ca9df39b6997d17947e3858e05057c81",
@@ -60,5 +60,14 @@
     "readback/uart.bin": "23fbf80e94ae01ecb7dbdc02cf0b4ab10ea2b36e76894ac4c5fcc565cda3f54a",
     "readback.json": "194443038b4981dacd759a7311ebb06f6afb08a26f19a2be1c37f28167ad7e47",
     "transfer.json": "025ce7767396ef858a068d5ba460338e4be9896b6de7589caaad928e95ec3d45"
+  },
+  "physical_cp66_basic_operation_verified": true,
+  "user_confirmation": {
+    "date": "2026-09-13",
+    "source": "user message after CP66 installation and the short RESET / key 9 check suggestion",
+    "message": "работает!",
+    "scope": "basic operation of CP66 on the physical board",
+    "full_panel_command_matrix_verified": false,
+    "uart_capture_added": false
   }
 }
