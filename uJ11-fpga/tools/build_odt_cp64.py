@@ -44,7 +44,7 @@ def tables():
 
 def build(out):
     out.mkdir(parents=True,exist_ok=True)
-    files=[ROOT/'firmware/odt'/n for n in ('ODT.MAC','DISASM.MAC','PANEL.MAC','NAV.MAC','OVER.MAC','DATA.MAC')]
+    files=[ROOT/'firmware/odt'/n for n in ('ODT.MAC','DISASM.MAC','PANEL.MAC','NAV.MAC','OVER.MAC','BREAK.MAC','DATA.MAC')]
     driver=ROOT/'demos/rt11/panel/PNLDRV.MAC'
     pnl=driver.read_text()
     pnl=pnl[pnl.index('PANEL\t='):pnl.rindex('\t.END')]

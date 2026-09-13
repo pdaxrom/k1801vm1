@@ -1,0 +1,14 @@
+{
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+  "source_sha256": {
+    "build/cp66-odt-final/UJON.MAC": "f5a2d192c209b23b78ce8268102bc4078a8ce4670c51076fcc2c7996b88366b0"
+  },
+  "outputs": {
+    "UJON.SAV": "feca40caabfe6af8ead1d098f6106125ca9df39b6997d17947e3858e05057c81",
+    "UJON.OBJ": "b6642026a8141a08b966ee3e9109976628aabf5b49ce9e63f2d6b22da8f380bd",
+    "UJON.LST": "0e245c65414b83275a52e035f3453782a1f084017f65c7153e33f4e78038fdb3",
+    "UJON.MAP": "9189dddca55d8a86600d1c9ff4fbec15113ef10e32f68d91c77257866f6471b1"
+  },
+  "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+}

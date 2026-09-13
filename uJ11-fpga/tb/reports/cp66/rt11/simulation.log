@@ -1,0 +1,48 @@
+SD image: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp66-rt11-final/test.dsk (53790 sectors), read-only backing, 256-sector RAM overlay
+CP66 progress 20000000 phase0 PC004466 UART0
+CP66 progress 40000000 phase0 PC160430 UART24
+CP66 progress 60000000 phase0 PC160432 UART66
+CP66 progress 80000000 phase1 PC070324 UART96
+CP66 progress 100000000 phase2 PC002600 UART224
+CP66 progress 120000000 phase2 PC001340 UART224
+CP66 progress 140000000 phase3 PC130442 UART322
+CP66 progress 160000000 phase4 PC031646 UART573
+CP66 progress 180000000 phase5 PC015030 UART980
+KEY start 16 clocks188999024 last177777
+KEY done 16 clocks191465520 last177777
+KEY start 19 clocks191465520 last177777
+KEY done 19 clocks195673726 last177777
+KEY start 18 clocks195673726 last177777
+KEY done 18 clocks199881480 last177777
+KEY start 19 clocks199881480 last177777
+CP66 progress 200000000 phase6 PC031726 UART1154
+KEY done 19 clocks202316057 last177777
+KEY start 7 clocks204894666 last177777
+KEY done 7 clocks207321266 last177777
+KEY start 19 clocks207321266 last177777
+KEY done 19 clocks213344329 last177777
+KEY start 18 clocks217665727 last177777
+CP66 progress 220000000 phase7 PC014730 UART1377
+KEY done 18 clocks222060541 last177777
+KEY start 17 clocks222060541 last177777
+KEY done 17 clocks226365719 last177777
+CP66 progress 240000000 phase7 PC031674 UART1450
+CP66 progress 260000000 phase7 PC031666 UART1450
+CP66 progress 280000000 phase7 PC031666 UART1450
+CP66 progress 300000000 phase7 PC021050 UART1450
+CP66 progress 320000000 phase7 PC031676 UART1450
+CP66 progress 340000000 phase7 PC031720 UART1450
+CP66 AUTO timing at nominal 29.56 MHz: initial 30924216 clocks, interior 5580491 clocks
+CP66 progress 360000000 phase7 PC031674 UART1619
+CP66 progress 380000000 phase7 PC014674 UART1992
+CP66 progress 400000000 phase7 PC031730 UART2382
+CP66 progress 420000000 phase7 PC031642 UART2719
+CP66 progress 440000000 phase9 PC001534 UART2914
+CP66 progress 460000000 phase10 PC004466 UART2969
+CP66 progress 480000000 phase10 PC143316 UART2969
+CP66 progress 500000000 phase10 PC120270 UART3031
+PASS CP66 RT11 + panel: 296 checks, 514657090 clocks, 3038 UART bytes, 80 HDSP frames
+- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp66-rt11-final/tb.v:239: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 5s; walltime 501.657 s; speed 10.259 ms/s
+- Verilator: cpu 500.510 s on 1 threads; allocated 2 MB

@@ -15,10 +15,11 @@ from rt11_build import build
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
-def run(odt,out,cp65=False):
+def run(odt,out,cp65=False,cp66=False):
     out.mkdir(parents=True,exist_ok=True);assert not (out/'test.dsk').exists(),'fresh run directory required'
     result=json.loads((odt/'result.json').read_text());sym=result['symbols']
-    revision='cp65' if cp65 else 'cp64'
+    assert not (cp65 and cp66)
+    revision='cp66' if cp66 else ('cp65' if cp65 else 'cp64')
     asm=out/'guest';build([ROOT/'demos/rt11/service'/revision/'UJTEST.MAC'],asm,ROOT/'../lsi11-fpga/images/rt11v503.dsk')
     listing=(asm/'UJTEST.LST').read_text(errors='replace')
     guest={n:int(v,8)+0o1000 for n,v in re.findall(r'\b([A-Z][A-Z0-9]{0,5})\s+([0-7]{6})R',listing)}
@@ -37,14 +38,24 @@ def run(odt,out,cp65=False):
     assert len(font)==320
     (out/'font.hex').write_text(''.join(f'{n:02x}\n' for n in font))
     core,board=adapt()
-    tb_path=ROOT/('tb/tb_odt_cp65_rt11.v' if cp65 else 'tb/tb_odt_rt11.v')
+    tb_path=ROOT/('tb/tb_odt_cp65_rt11.v' if cp65 or cp66 else 'tb/tb_odt_rt11.v')
     tb=tb_path.read_text()
+    if cp66:
+        tb=tb.replace('CP65','CP66')
+        tb=tb.replace('reg [15:0] oldsp;', 'reg [15:0] oldsp,oldpsw;')
+        tb=tb.replace('oldsp=upper(O_REGS+12);', 'oldsp=upper(O_REGS+12);oldpsw=upper(O_REGS+16);')
+        point='        cmdtext=$sformatf("R 7 %o",G_LOOP);odt_command(cmdtext);'
+        assert tb.count(point)==1
+        tb=tb.replace(point,(ROOT/'tb/odt_cp66_rt11.vh').read_text()+point)
+        tb=tb.replace('    integer clocks=', '    integer irq_total=0,rk_starts=0,old_irq=0,old_rk=0; reg rk_was=0;\n    always @(posedge clk)if(!reset)begin\n        if(dut.irq_ack)irq_total<=irq_total+1;\n        if(dut.bus.rk_service_active && !rk_was)rk_starts<=rk_starts+1;\n        rk_was<=dut.bus.rk_service_active;\n    end\n    integer clocks=')
     test=out/'tb.v';test.write_text(tb.replace('    integer clocks=',f'    initial $readmemh("{out}/font.hex",font);\n    integer clocks='))
-    guest_names=('LOOP','DONE','OVCALL','OVDONE','OLDSP') if cp65 else ('LOOP','DONE')
+    guest_names=('LOOP','DONE','OVCALL','OVDONE','OLDSP') if cp65 or cp66 else ('LOOP','DONE')
+    if cp66:guest_names+=('WKCALL','WKDONE','TICKS','DKCALL','DKDONE','DKOK')
     (out/'odt_symbols.vh').write_text(''.join(f"localparam integer O_{n}={v};\n" for n,v in sym.items() if n in ('REGS','SCREEN','RESULT','VIEW','SCROLL','KLAST','PNEN','PANEDIT','MAIN','STKTOP','DCUR'))+''.join(f'localparam integer G_{n}={guest[n]};\n' for n in guest_names))
     sources=[str(test)]+core+board+['rtl/uj11_rom.v','tb/models/ODDRXE.v',
                                  'reference/lsi11/spi_fram_model.v','reference/lsi11/spi_sd_model_cp28.v']
     manifest={str(p.relative_to(ROOT)):sha(p) for p in paths+[tb_path,Path(__file__)]}
+    if cp66:manifest['tb/odt_cp66_rt11.vh']=sha(ROOT/'tb/odt_cp66_rt11.vh')
     manifest.update({p:sha(ROOT/p) for p in core+board})
     (out/'inputs.json').write_text(json.dumps(dict(files=manifest,odt=result,guest=guest,image_sha256=imagehash),indent=2)+'\n')
     for i,name in enumerate(sources):
@@ -61,4 +72,5 @@ def run(odt,out,cp65=False):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--odt',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--cp65',action='store_true',help='CP65 automatic panel navigation and native STEP OVER fixture')
-    a=p.parse_args();run(a.odt.resolve(),a.out.resolve(),cp65=a.cp65)
+    p.add_argument('--cp66',action='store_true',help='CP66 breakpoints and STEP OVER with real KW11-L and RT-11 disk I/O')
+    a=p.parse_args();run(a.odt.resolve(),a.out.resolve(),cp65=a.cp65,cp66=a.cp66)
