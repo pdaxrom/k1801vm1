@@ -1,0 +1,75 @@
+{
+  "checkpoint": "CP68 control-only firmware",
+  "format": {
+    "base": 16384,
+    "words": 228,
+    "checksum": 47441,
+    "bytes": 456
+  },
+  "symbols": {
+    "WORD": 43592,
+    "ACS": 16846,
+    "ENTER": 16476,
+    "INIT": 16384,
+    "REGS": 16894,
+    "STACK": 16924,
+    "BUSERR": 16730,
+    "FATAL": 16838,
+    "INTRAP": 16922,
+    "RETURN": 16784,
+    "STFPS": 16690,
+    "CFAIL": 16470,
+    "FEA": 16844,
+    "LDFPS": 16678,
+    "SETD": 16662,
+    "STKTOP": 17052,
+    "CFCC": 16626,
+    "FEC": 16842,
+    "MEMEND": 17052,
+    "SETF": 16646,
+    "TRAP": 16742,
+    "COLD": 16392,
+    "FPS": 16840,
+    "OLDVEC": 16912,
+    "SETI": 16654,
+    "TVEC": 16920,
+    "CPC": 64,
+    "FPSMSK": 53231,
+    "OPADDR": 16916,
+    "SETL": 16670,
+    "UNIMPL": 16696,
+    "CPSW": 66,
+    "IMMEND": 16840,
+    "OPCODE": 16918,
+    "SIGN": 16388
+  },
+  "allocation_bytes": 668,
+  "free_halt_bytes": 40292,
+  "assembler": {
+    "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+    "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+    "source_sha256": {
+      "build/cp68-fp11/software/FP11.MAC": "0246f5a69e8738a4142a8131709bccab512372f46ef735784c69f907b7d2f939"
+    },
+    "outputs": {
+      "FP11.SAV": "602bc8fb4b2f718b3f442d0461cdee3cea9609ca88d4d8218b236a3cdc9a03c7",
+      "FP11.OBJ": "a5aa69f59c95d51ae444c80cf0c5740b8e98f8829a931f0837f7fccc46d7e4af",
+      "FP11.LST": "1d7a0c940faddb14536f6baa441f53c473c329ac3e6cc9ed7be529903996ecee",
+      "FP11.MAP": "cf056851f7db806af807940443e2367bead368a6a91a5d85b403f1b5ee31f0ea"
+    },
+    "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+  },
+  "assembly": "build/cp68-fp11/software/asm-0246f5a69e87",
+  "sources": {
+    "firmware/fp11/FP11.MAC": "0246f5a69e8738a4142a8131709bccab512372f46ef735784c69f907b7d2f939",
+    "tools/build_fp11_cp68.py": "95f0b1fc6d7e35242ba2f3de0705ca20c71898d660acd8b7ec952ec0b34f4808",
+    "tools/build_software_cp67.py": "724d38abe15fe8403e815d7a030f12df6bd1c9b3395ee4093680bed09a1cab7e",
+    "tools/module_image_cp67.py": "b2636d6d4e97a6277fe21ce9dec5a97dedb34f381038735afe1caf5eb0ecfa59",
+    "tools/rt11_build.py": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+  },
+  "outputs": {
+    "build/cp68-fp11/software/FP11.MAC": "0246f5a69e8738a4142a8131709bccab512372f46ef735784c69f907b7d2f939",
+    "build/cp68-fp11/software/FP11.BIN": "59896ae692f44615f2876b6b515c60ab5783392dc1ccae340032dfd7a5bd6e32",
+    "build/cp68-fp11/software/image.bin": "c07bed678db64edaac0d74fd318d2c9925acd21aa55367c2fdc2011a05221cf1"
+  }
+}

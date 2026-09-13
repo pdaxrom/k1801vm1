@@ -9,6 +9,18 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP68 — управляющая часть FP11 firmware
+
+Семь мнемоник / 21 кодировка, FPS/FEC/FEA, шесть 64-bit AC и частный stack
+в HALT FRAM: **456 байт кода, 668 байт полная аллокация**. Полная FP11 ISA
+ещё не реализована; FIS и hardware CP67b сохранены. Прирост FPGA нулевой.
+90 112 differential cases; 28 directed scenarios для faults/IRQ/trace/debug;
+4 SPI FRAM scenarios / 318 checks для cold init, совместимости ODT/SDBOOT
+и measurements. RT-11/UJMOD/ODT regression: **24 checks / 460895201 clocks /
+1982 UART bytes**, включая установку, STEP, повторный reset и OFF — PASS.
+Это результат симуляции; новый FP11.BIN **не установлен на физическую плату**.
+[Контракт, точная ISA и измерения](fp11-firmware-cp68.md).
+
 ## CP67 — retained FRAM modules
 
 Общая таблица из четырёх слов, immutable checksum и cold init по BASE.

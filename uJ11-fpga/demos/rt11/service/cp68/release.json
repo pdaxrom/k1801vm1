@@ -1,0 +1,21 @@
+{
+  "abi": 3,
+  "relocatable": false,
+  "checkpoint": "CP68 control-only",
+  "requires_fpga": "CP67b",
+  "installed_on_board": false,
+  "supported_encodings": 21,
+  "allocation_bytes": 668,
+  "format": {
+    "base": 16384,
+    "words": 228,
+    "checksum": 47441,
+    "bytes": 456
+  },
+  "files": {
+    "FP11.BIN": "59896ae692f44615f2876b6b515c60ab5783392dc1ccae340032dfd7a5bd6e32",
+    "FP11.MAC": "0246f5a69e8738a4142a8131709bccab512372f46ef735784c69f907b7d2f939",
+    "FPTST.MAC": "ede448f9ac74377cf6930b2dd1f5b2ac3cb738a2ee5d95e091191336de307e0f",
+    "FPTST.SAV": "1699676c71fd2fa4de475e13aaaaa85718a2a6ce70d8412cc8b95145bf9b48ba"
+  }
+}

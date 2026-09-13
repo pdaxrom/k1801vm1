@@ -1,0 +1,29 @@
+SD image: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp68-fp11/rt11b/test.dsk (53790 sectors), read-only backing, 256-sector RAM overlay
+CP68 progress 20000000 phase0 PC004466 UART0
+CP68 progress 40000000 phase0 PC160430 UART24
+CP68 progress 60000000 phase0 PC160430 UART66
+CP68 progress 80000000 phase1 PC070324 UART96
+CP68 progress 100000000 phase1 PC001422 UART175
+CP68 progress 120000000 phase1 PC143312 UART241
+CP68 progress 140000000 phase2 PC005276 UART541
+CP68 progress 160000000 phase2 PC004466 UART541
+CP68 progress 180000000 phase2 PC160430 UART565
+CP68 progress 200000000 phase2 PC112130 UART605
+CP68 progress 220000000 phase2 PC060306 UART637
+CP68 progress 240000000 phase3 PC031560 UART915
+CP68 progress 260000000 phase3 PC012174 UART1386
+CP68 progress 280000000 phase3 PC020772 UART1612
+CP68 progress 300000000 phase4 PC004466 UART1690
+CP68 progress 320000000 phase4 PC160224 UART1690
+CP68 progress 340000000 phase4 PC072730 UART1752
+CP68 progress 360000000 phase4 PC112460 UART1776
+CP68 progress 380000000 phase5 PC005276 UART1883
+CP68 progress 400000000 phase5 PC004466 UART1883
+CP68 progress 420000000 phase5 PC160430 UART1907
+CP68 progress 440000000 phase5 PC160430 UART1949
+CP68 progress 460000000 phase5 PC070322 UART1979
+PASS CP68 RT11 modules: 24 checks, 460895201 clocks, 1982 UART bytes
+- build/cp68-fp11/rt11b/tb.v:190: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 5s; walltime 432.348 s; speed 10.660 ms/s
+- Verilator: cpu 432.219 s on 1 threads; allocated 2 MB

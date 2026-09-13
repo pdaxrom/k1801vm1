@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP68 — FP11 firmware, без нового синтеза
+
+Все 53 обычных файла synthesis manifest CP67b совпали по SHA256. RTL,
+microstore и обе FPGA ROM сохранены. FP11.BIN занимает 668 байт внешней HALT
+FRAM; добавлено **0 LUT / 0 FF / 0 EBR / 0 uwords**.
+Прежний результат CP67b: **1244 LUT / 381 FF / 7 EBR / Fmax 32,032 MHz**,
+1005/1024 uwords, 36 свободных LUT, 0 свободных EBR. Это перенос измеренного
+baseline по идентичным исходникам, не новый MAP/PAR/TRACE.
+[Программный checkpoint и проверяемый архив](fp11-firmware-cp68.md).
+
 ## CP67 — доверенный cold walker для модулей FRAM
 
 | Revision | Features | LUT | FF | EBR | Fmax MHz | uwords | Notes |

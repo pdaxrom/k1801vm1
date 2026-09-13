@@ -1,0 +1,5 @@
+PASS CP68 control: 351 oracle cases / 22815 checks ROM_DECODE=0 stride=257
+- tb/tb_fp11_cp68.v:127: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 20ms; walltime 1.692 s; speed 11.536 ms/s
+- Verilator: cpu 1.691 s on 1 threads; allocated 2 MB

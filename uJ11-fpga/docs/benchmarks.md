@@ -1,4 +1,19 @@
-# Benchmarks: CP67 и предыдущие этапы
+# Benchmarks: CP68 и предыдущие этапы
+
+## CP68 — программное управление FP11
+
+FP11 firmware на прежнем CP67b, полный SPI FRAM path: **8145–9677 clocks**
+на управляющую команду, 128–152 CPU bus beats; **275,541–327,368 µs** при
+номинальных 29,56 MHz. Из USER opcode request до первого запроса handler —
+316 clocks; из START opcode request до USER return — 177 clocks.
+Все 21 кодировки измерены. Это начальный вариант с сохранением всего контекста;
+скорость FP-арифметики пока не измерялась.
+[Пооперационная таблица, границы измерения и сырые CSV](fp11-firmware-cp68.md).
+
+FP11 занимает 668 байт HALT FRAM. LUT/FF/EBR/Fmax не измерялись заново:
+аппаратные inputs совпали с CP67b, **1244 / 381 / 7 / 32,032 MHz**.
+Полный RT-11 integration test — 460895201 clocks, включая загрузки/ожидания
+UART, поэтому он не является отдельным ISA benchmark.
 
 ## CP67 — retained FRAM modules и восстановление
 
