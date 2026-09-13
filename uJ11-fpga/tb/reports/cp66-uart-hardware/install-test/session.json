@@ -1,0 +1,13 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-13T07:36:51Z",
+  "commands": [
+    "LOAD HG",
+    "COPY HG:U66TST.SAV DK:U66TST.SAV",
+    "COPY DK:U66TST.SAV HG:TSTCHK.SAV",
+    "UNLOAD HG"
+  ],
+  "uart_bytes": 191,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-13T07:37:09Z"
+}

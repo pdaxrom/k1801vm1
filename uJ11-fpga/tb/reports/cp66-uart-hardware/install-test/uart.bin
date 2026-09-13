@@ -1,0 +1,11 @@
+LOAD HG
+
+..[KCOPY HG:U66TST.SAV DK:U66TST.SAV
+?PIP-F-Directory input error HG:
+
+..[KCOPY DK:U66TST.SAV HG:TSTCHK.SAV
+?PIP-F-File not found DK:U66TST.SAV
+
+..[KUNLOAD HG
+
+..[K
