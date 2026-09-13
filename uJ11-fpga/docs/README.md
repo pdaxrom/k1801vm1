@@ -14,6 +14,7 @@
 | Написать/загрузить модуль, разобраться с checksum и ABI | [Модули HALT FRAM](retained-modules-cp67.md) |
 | Узнать, что действительно проверено на плате | [Аппаратный журнал CP67](board-bringup-cp67.md) |
 | Проверка UART ESC и возврата ODT | [Успешный аппаратный проход](board-recovery-cp67.md) |
+| HG до и после отладки | [Передача файлов до и после ODT](board-hg-odt-cp67.md) |
 | Взять готовые ODT.BIN, SDBOOT.BIN, UJMOD.SAV | [Пакет для RT-11](../demos/rt11/service/cp67/README.md) |
 | Узнать оставшиеся задачи | [TODO](../TODO.md) |
 

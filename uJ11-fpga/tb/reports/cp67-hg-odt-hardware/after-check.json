@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "same_daemon_pid": 180940,
+  "daemon_restart": false,
+  "files": {
+    "H67TST.BIN": {
+      "bytes": 1024,
+      "sha256": "ca60af9efb88db2f5a9f25ee8718dfa6437878437ed8572e573ac784c2580dbf"
+    },
+    "BEFORE.BIN": {
+      "bytes": 1024,
+      "sha256": "ca60af9efb88db2f5a9f25ee8718dfa6437878437ed8572e573ac784c2580dbf"
+    },
+    "AFTER.BIN": {
+      "bytes": 1024,
+      "sha256": "ca60af9efb88db2f5a9f25ee8718dfa6437878437ed8572e573ac784c2580dbf"
+    }
+  },
+  "hg_log_errors": false,
+  "checked_utc": "2026-09-13T18:44:23Z"
+}

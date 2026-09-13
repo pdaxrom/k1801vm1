@@ -1,0 +1,11 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-13T18:32:17Z",
+  "commands": [
+    "COPY HG:H67TST.BIN DK:H67TST.BIN",
+    "COPY DK:H67TST.BIN HG:BEFORE.BIN"
+  ],
+  "uart_bytes": 84,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-13T18:33:44Z"
+}

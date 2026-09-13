@@ -1,0 +1,15 @@
+{
+  "checked_utc": "2026-09-13T18:49:38Z",
+  "related_processes": [
+    {
+      "pid": 180461,
+      "state": "S",
+      "argv": [
+        "picocom",
+        "-b",
+        "115200",
+        "/dev/ttyUSB1"
+      ]
+    }
+  ]
+}
