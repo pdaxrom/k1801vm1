@@ -9,6 +9,19 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP70 — FP11 F/D transfers
+
+LDF/LDD и STF/STD, все modes, AC0–AC5, FIUV/FID и faults; всего 693 корректные
+кодировки, ещё 16 invalid-AC комбинаций явно дают FEC=2. **1022 байта кода /
+1250 байт полной аллокации**. 41812 cases / 2961696 checks, из них 136
+отдельных ожиданий для двух найденных дефектов неизменённого DCJ11 oracle.
+Logic: 12080 / 862956. Directed sync/vendor: 31 / 1110 каждый. SPI FRAM:
+4 / 450, 79 измеренных операций. Vendor transfers: 445 / 31814. Полный
+RT-11/UJMOD/ODT: 48 checks / 521238827 clocks / 3285 UART bytes — PASS.
+Аппаратные inputs CP67b побайтно прежние,
+прирост LUT/FF/EBR нулевой. Модуль не установлен на плату, арифметики ещё нет.
+[Полный контракт и результаты интеграции RT-11](fp11-transfers-cp70.md).
+
 ## CP69 — FP11 status addressing
 
 Все режимы LDFPS/STFPS/STST, включая R6/R7 и ошибки: **8 мнемоник /

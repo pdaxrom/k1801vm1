@@ -1,5 +1,13 @@
 # Synthesis checkpoints
 
+## CP70 — F/D transfers в HALT firmware
+
+1250 байт HALT FRAM с BSS/stack; код 1022 байта. Все 53 обычных файла
+из synthesis manifest CP67b совпали по SHA256. Прирост **0 LUT / 0 FF /
+0 EBR / 0 uwords**. Сохраняется измеренный baseline **1244 LUT / 381 FF /
+7 EBR / Fmax 32,032 MHz**, 1005/1024 uwords. Нового MAP/PAR/TRACE нет.
+[Программный checkpoint и исходники тестов](fp11-transfers-cp70.md).
+
 ## CP69 — адресация FP11 firmware, без нового синтеза
 
 LDFPS/STFPS/STST со всеми addressing modes занимают 950 байт HALT FRAM.

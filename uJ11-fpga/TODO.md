@@ -1,5 +1,23 @@
 # uJ11 TODO
 
+## CP70 — FP11 F/D transfers
+
+- [x] LDF/LDD, STF/STD: все addressing modes, AC0–AC5, AC6/7 illegal,
+  F-mode low-half preservation, immediate padding, dirty/negative zero.
+- [x] FIUV/FID, partial read/write faults и autoupdates, IRQ и ODT внутри LDD.
+- [x] 41676 differential cases плюс 136 отдельно отмеченных ожиданий
+  для двух дефектов oracle; общий `core/` не изменялся.
+- [x] Измерить переносы на SPI FRAM и повторить cold init/ODT/FP coexistence.
+- [x] RT-11/UJMOD/ODT: десять FP STEP, проверка FRES/DRES/BACK самой
+  программой FPTST, возврат в RT-11, cold reset и OFF — 48 checks PASS.
+- [ ] CLRF/TSTF/ABSF/NEGF и CMPF в F/D, затем арифметика и преобразования.
+- [ ] Отдельно исправить в общем emulator отмену trap для invalid AC6/7 и
+  отсутствующий abort check в immediate ReadFP. Reproducer и объяснение
+  сохранены в [CP70](docs/fp11-transfers-cp70.md); в uJ11 firmware дефектов нет.
+- [ ] FP disassembly и dump AC/FPS/FEC/FEA в ODT с версионированным module ABI.
+- [ ] Оптимизация короткого register path управляющих команд.
+- [ ] Аппаратная установка FP11 и UART-проверка; арифметика ещё не реализована.
+
 ## CP69 — FP11 memory status instructions
 
 - [x] LDFPS/STFPS/STST, все восемь режимов, R6/R7, immediate/absolute/PC-relative.
@@ -9,7 +27,7 @@
 - [x] RT-11/UJMOD/ODT: пошаговое исполнение memory commands, проверка FPTST,
   возврат в RT-11, cold reset и OFF модуля — 33 checks PASS в симуляции.
 - [x] Архивировать 950-byte module, native assembly и SPI measurements.
-- [ ] LDF/STF и F/D представление AC; затем арифметика и преобразования.
+- [x] LDF/STF и F/D представление AC — CP70. Арифметика и преобразования впереди.
 - [ ] Вернуть короткий register path: CP69 LDFPS/STFPS Rn медленнее CP68
   на 1698/1960 clocks из-за общей EA подготовки.
 - [ ] Полная дифференциальная проверка FP11-A rounding/exceptions и benchmarks.
@@ -30,7 +48,7 @@
 - [x] Измерить все управляющие команды на SPI FRAM: 8145–9677 clocks,
   вход до handler 316, START fetch→USER return 177 clocks.
 - [x] Memory addressing modes LDFPS/STFPS и STST, включая ошибки и SP/PC — CP69.
-- [ ] LDF/STF, представление F/D в AC, затем арифметика и преобразования.
+- [x] LDF/STF и представление F/D в AC — CP70; арифметика и преобразования впереди.
 - [ ] Полная дифференциальная проверка FP11-A rounding/exceptions и benchmarks.
 - [ ] Установить FP11 firmware на физическую плату и проверить через UART.
 

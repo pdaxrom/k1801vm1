@@ -1,0 +1,2 @@
+PASS CP70 transfers: 445 cases / 31814 checks / 66 manual DEC cases
+tb/tb_fp_transfer_cp70.v:107: $finish called at 33467310000 (1ps)

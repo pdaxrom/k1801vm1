@@ -1,0 +1,2 @@
+PASS CP70 events: 31 cases / 1110 checks
+tb/fp_events_cp70.vh:130: $finish called at 2067820000 (1ps)

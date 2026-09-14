@@ -1,4 +1,20 @@
-# Benchmarks: CP69 и предыдущие этапы
+# Benchmarks: CP70 и предыдущие этапы
+
+## CP70 — FP11 F/D transfers
+
+LDF/LDD/STF/STD на полной SPI FRAM модели: **15914–21299 clocks** для
+измеренных AC/memory/immediate вариантов, около 538–721 µs при 29,56 MHz.
+Измерены 36 F/D переносов и 43 прежних управляющих случая. Это время
+переносов с заданными raw operands, не оценка FP-арифметики.
+LDFPS/STFPS Rn стали ещё на 380 clocks длиннее CP69: 11755/11893 clocks.
+Special controls и интервалы входа/возврата 316/177 clocks прежние.
+[Полная таблица, определения интервалов и CSV](fp11-transfers-cp70.md).
+
+FP11: 1250 байт HALT FRAM, +300 от CP69. Hardware совпал с CP67b по всем
+53 обычным synthesis inputs: 1244 LUT / 381 FF / 7 EBR / 32,032 MHz.
+Нового synthesis/performance измерения FPGA нет.
+Полный RT-11/UJMOD/ODT regression — 521238827 clocks; его длительность
+включает UART, загрузки и RESET, поэтому не является ISA benchmark.
 
 ## CP69 — FP11 memory status instructions
 
