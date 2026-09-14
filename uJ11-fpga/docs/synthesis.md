@@ -1,5 +1,9 @@
 # Synthesis checkpoints
 
+## CP77 — FP debugger в HALT FRAM
+
+53 synthesis inputs CP67b совпали по SHA256. RTL/ROM/microcode прежние, нового synthesis нет. **1244 LUT / 381 FF / 7 EBR**, TRACE **32,032 MHz**, nominal **29,56 MHz**, 1005/1024 uwords. Свободны 36 LUT, 0 EBR, 19 uwords. ODT — 13668 байт (+1808), FP11 — 4560 (+10 descriptor); свободны 6812 байт перед FP и 28208 после него. Test-only PSW read для DEC diagnostics не входит в RTL и не меняет эти цифры. [Отчёт](odt-fp-cp77.md).
+
 ## CP76 — преобразования FP11 в программе FRAM
 
 Все 53 обычных synthesis inputs CP67b совпадают по SHA256. Нового

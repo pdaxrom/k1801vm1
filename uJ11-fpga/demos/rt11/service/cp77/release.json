@@ -1,0 +1,33 @@
+{
+  "checkpoint": "CP77",
+  "installed_on_board": false,
+  "modules": {
+    "odt": {
+      "format": {
+        "base": 4096,
+        "words": 6299,
+        "checksum": 47205,
+        "bytes": 12598
+      },
+      "allocation_bytes": 13668
+    },
+    "fp11": {
+      "format": {
+        "base": 24576,
+        "words": 2146,
+        "checksum": 19353,
+        "bytes": 4292
+      },
+      "allocation_bytes": 4560
+    }
+  },
+  "files": {
+    "FPTST.MAC": "c44c85129d77c444aa671cd62d95d8f2acea1749c5c410dca488180102e10b86",
+    "FP11.MAC": "05f97ee1d8c7bed25a0b66f7eb3690365c53a4c85a589ccb15e14a8e6f3fcbfa",
+    "UJMON.MAC": "6f81e99621c0f8645f92ed185d23c886efebde7c73fae345f12bf81c6b76594c",
+    "README.md": "c4071f592bd926acfc9924296a1252dee49f0323d237b83f1058a7f023a3dc4a",
+    "FP11.BIN": "492595782166f0c9fe60dd2fbaa9728ebbbc434041569db229bf7521e1a993bf",
+    "FPTST.SAV": "a51703c404afb3e5de3f92be64406f47671d2ab9edbb0137c4fba656ac15599b",
+    "ODT.BIN": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de"
+  }
+}

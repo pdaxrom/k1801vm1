@@ -1,0 +1,11 @@
+[1683824415000] %Fatal: tb.v:45: Assertion failed in tb_odt_cp64: DEC diagnostic errors: 
+DFFPA, FP11-A 11/34 FPP DIAGNOSTIC PART 1
+
+UNEXPECTED CPU TRAP TO 4.
+  TEST. PC OF CALL.     PC OF TRAP.
+     2  040240          004712  
+
+
+END PASS #     1  TOTAL ERRORS SINCE LAST REPORT      1
+%Error: build/cp77-diagnostics/FFPAA1/tb.v:45: Verilog $stop
+Aborting...

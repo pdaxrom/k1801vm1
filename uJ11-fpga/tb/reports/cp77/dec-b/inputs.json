@@ -1,0 +1,18 @@
+{
+  "tools/run_dec_fp_cp77.py": "40b7dbfea3f859f379c7b3074c1fca22d425189d14634e4140de4ec5ac395a05",
+  "build/cp77-diagnostics/FFPBA0-psw/tb.v": "69a96b8eb675dd193738f6ed9f6594d0c3ab21ee570b16e310c676782965621a",
+  "build/cp77-diagnostics/FFPBA0-psw/memory.mem": "3bfc294c313be53fcb89a0399fb78b637e6d843171145106e27c100963e336f5",
+  "build/cp77-diagnostics/extraction.json": "a322d5073e41f2f74804cb2087e49a967dcd23204680457b18cdbe45f1bb31af",
+  "build/cp77-fp11/software/result.json": "9bf1875b361b1931049b846648aa930211ccf723c615537356d014cde12512b5",
+  "build/cp67-modules/src/rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+  "build/cp67-modules/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+  "build/cp67-modules/src/microcode/generated/uj11_decode_table.v": "f98cee81a9010cd3c4ebf6a52fb8beedc47f0a861ea0515dcee537a9d0b80b29",
+  "build/cp67-modules/src/rtl/uj11_engine.v": "1764b2a587e9a90596ae56c8da940362525bbd05994da5ee22878519a2bf6f43",
+  "build/cp67-modules/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+  "build/cp67-modules/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+  "build/cp67-modules/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+  "build/cp67-modules/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+  "build/cp67-modules/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+  "build/cp67-modules/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+  "build/cp67-modules/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8"
+}

@@ -80,7 +80,7 @@ def run(odt,execute=True,out=None,mode='sync'):
                 pc+=2+len(extra)*2
     for opcode,assembly in [(0o000600, 'BR'),(0o077301,'SOB R3'),(0o070327,'MUL #123456,R3'),
                             (0o004327,'JSR R3,#123456'),(0o074327,'XOR R3,#123456'),
-                            (0o075025,'FMUL R5'),(0o237,'SPL 000007'),(0o177777,'.WORD 177777')]:
+                            (0o075025,'FMUL R5'),(0o237,'SPL 000007'),(0o177777,'LDCff @')]:
         put(pc,[opcode,0o123456]);corpus.append(f'command("D {pc:o}");contains("{assembly}");');pc+=4
     for words,assembly in [([0o600],f"BR {pc+2-256:06o}"),
                            ([0o16767,0o177774,0o12],f"MOV {pc+2:06o},{pc+18:06o}")]:

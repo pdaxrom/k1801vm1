@@ -1,5 +1,9 @@
 ; Immutable code and text end here. UJON verifies only this part on re-enable.
 IMMEND:
+FPPTR:	.WORD 0
+FPAC:	.WORD 0
+FPLIVE:	.WORD 0
+FSEL:	.WORD 0
 SAVPN:	.WORD 0
 PNEN:	.WORD 0
 KLAST:	.WORD -1

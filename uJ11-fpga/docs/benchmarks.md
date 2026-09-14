@@ -1,5 +1,9 @@
 # Benchmarks: CP76 и предыдущие этапы
 
+## CP77 — FP debugger
+
+Аппаратура и численный engine FP прежние; новый SPI performance sweep не выполнялся. Diagnostic clocks в [CP77](odt-fp-cp77.md) относятся к RAM-стенду с test-only PSW read и не являются оценкой скорости платы с FRAM.
+
 ## CP76 — программные преобразования FP11
 
 На полной модели SPI FRAM получены **403 измерения**, из них 144 новых.

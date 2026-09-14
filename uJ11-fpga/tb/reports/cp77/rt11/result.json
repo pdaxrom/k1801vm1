@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "checks": 99,
+  "clocks": 832912588,
+  "uart_bytes": 9776,
+  "files": {
+    "inputs.json": "cb001c062331705585d7528ee468b239be4463f314ee149ee94413919a5db307",
+    "simulation.log": "2bd550a8def257823dcd6e753056858447c51eafd6ad2126c034e02a91858c1d",
+    "uart.txt": "929cabe9c10b879262f581b1832767e147baacf7e3b1bdfdf3f5bbe597da7e63",
+    "build.log": "ecac0021ac01acf2dae8707cffe2488513aa0fd5429ce687a3320f5be7d0fa3c"
+  }
+}

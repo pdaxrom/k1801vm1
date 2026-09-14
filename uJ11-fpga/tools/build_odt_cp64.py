@@ -34,11 +34,40 @@ def tables():
     add(0xfe00,0o74000,5,'XOR');add(0xffc0,0o6400,8,'MARK')
     for base,n in [(0o104000,'EMT'),(0o104400,'TRAP')]:add(0xff00,base,9,n)
     for base,n in [(0o75000,'FADD'),(0o75010,'FSUB'),(0o75020,'FMUL'),(0o75030,'FDIV')]:add(0xfff8,base,4,n)
+    # CP77 FP formats: float unary/load/store, integer store/load. Each mode
+    # table has FI, DI, FL, DL, then the context-independent DEC generic name.
+    for value, name in ((0o170000, 'CFCC'), (0o170001, 'SETF'),
+                        (0o170002, 'SETI'), (0o170011, 'SETD'), (0o170012, 'SETL')):
+        add(0xffff, value, 0, name)
+    for value, name in ((0o170100, 'LDFPS'), (0o170200, 'STFPS'), (0o170300, 'STST')):
+        add(0xffc0, value, 1, name)
+    for value, name in ((0o170400, 'CLR'), (0o170500, 'TST'),
+                        (0o170600, 'ABS'), (0o170700, 'NEG')):
+        add(0xffc0, value, 11, (name+'F', name+'D', name+'F', name+'D', name+'f'))
+    for value, name, form in ((0o171000,'MUL',12), (0o171400,'MOD',12),
+                              (0o172000,'ADD',12), (0o172400,'LD',12),
+                              (0o173000,'SUB',12), (0o173400,'CMP',12),
+                              (0o174000,'ST',13), (0o174400,'DIV',12)):
+        add(0xff00, value, form, (name+'F', name+'D', name+'F', name+'D', name+'f'))
+    for value, form, names in (
+        (0o175000,14,('STEXP',)*5),
+        (0o175400,14,('STCFI','STCDI','STCFL','STCDL','STCfi')),
+        (0o176000,13,('STCFD','STCDF','STCFD','STCDF','STCff')),
+        (0o176400,15,('LDEXP',)*5),
+        (0o177000,15,('LDCIF','LDCID','LDCLF','LDCLD','LDCif')),
+        (0o177400,12,('LDCDF','LDCFD','LDCDF','LDCFD','LDCff'))):
+        add(0xff00, value, form, names)
     # Table stores the complement of mask, for a single BIC in the decoder.
     text='DTAB:\n'+''.join(f'\t.WORD {mask^65535:o},{value:o},{form:o},DN{i}\n' for i,(mask,value,form,n) in enumerate(rows))
     # An all-ones sentinel distinguishes exact-match entries (complement zero).
     text+='\t.WORD 177777\n'
-    text+=''.join(f'DN{i}:\t.ASCIZ /{n}/\n' for i,(_,_,_,n) in enumerate(rows))+'\t.EVEN\n'
+    for i, (_, _, _, name) in enumerate(rows):
+        if isinstance(name, tuple):
+            text+='\t.EVEN\n'+f'DN{i}:\t.WORD '+','.join(f'FN{i}{j}' for j in range(5))+'\n'
+            text+=''.join(f'FN{i}{j}:\t.ASCIZ /{n}/\n' for j,n in enumerate(name))
+        else:
+            text+=f'DN{i}:\t.ASCIZ /{name}/\n'
+    text+='\t.EVEN\n'
     return text
 
 

@@ -1,5 +1,18 @@
 # uJ11 TODO
 
+## CP77 — ODT FP и внешние диагностики
+
+- [x] FP disassembly, CPU/AC operand forms, live FPS у остановленного PC.
+- [x] UART F и один FP-регистр за раз на пульте, прежний scroll.
+- [x] Развести расширенный ODT и FP11 на 060000, descriptor состояния.
+- [x] 4096 opcode/1008 FPS-context проверок, прежний ODT/IRQ/panel регресс.
+- [x] Извлечь DEC FFPAA1/FFPBA0/FFPCB0, проверить chain/loader checksums.
+- [x] По одному проходу трёх DEC FP11-A частей в RTL с test-only PSW read.
+- [ ] Отдельный CP: memory-mapped PSW 177776, затем native DEC diagnostics без test-only adapter; обязательно измерить LUT/Fmax. Сейчас DFFPA test 2 получает bus error.
+- [ ] Установить CP77 ODT/FP11 через RT-11 и проверить на физической плате.
+
+[Команды, раскладка FRAM и границы PASS](docs/odt-fp-cp77.md).
+
 ## CP76 — преобразования FP11-A
 
 - [x] STEXP/LDEXP; STCfi/LDCif I/L/F/D; STCff/LDCff F/D, все addressing modes.

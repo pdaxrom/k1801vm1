@@ -30,9 +30,9 @@ def native(src):
     return (out/(src.stem+'.SAV')).read_bytes(),symbols,meta,out
 
 
-def odt():
-    out=OUT/'odt';out.mkdir(parents=True,exist_ok=True)
-    files=[ROOT/'firmware/odt'/n for n in ('ODT.MAC','DISASM.MAC','PANEL.MAC','NAV.MAC','OVER.MAC','BREAK.MAC','DATA.MAC')]
+def odt(out=None):
+    out=out or OUT/'odt';out.mkdir(parents=True,exist_ok=True)
+    files=[ROOT/'firmware/odt'/n for n in ('ODT.MAC','DISASM.MAC','PANEL.MAC','NAV.MAC','OVER.MAC','BREAK.MAC','FPDEBUG.MAC','DATA.MAC')]
     driver=ROOT/'demos/rt11/panel/PNLDRV.MAC'
     scanner=ROOT/'firmware/odt/PNKEY.MAC'
     cold=ROOT/'firmware/cp67/ODINIT.MAC'
@@ -54,7 +54,7 @@ def odt():
     text+=files[-1].read_text().replace('IMMEND:','').replace('\t.END ODT','\t.END INIT')
     src=out/'UJMON.MAC';src.write_text(text)
     blob,sym,meta,asm=native(src)
-    assert sym['INIT']==0o10000 and sym['MEMEND']<=0o40000
+    assert sym['INIT']==0o10000 and sym['MEMEND']<=0o60000
     assert sym['FONT']<sym['IMMEND'] and sym['KEYMAP']<sym['IMMEND']
     image=blob[0o10000:sym['IMMEND']]
     result=pack(0o10000,image)
@@ -63,7 +63,7 @@ def odt():
     (out/'payload.bin').write_bytes(blob[0o10000:sym['PAYEND']])
     (out/'image.bin').write_bytes(image)
     record=dict(format=decode(result),symbols=sym,assembler=meta,assembly=str(asm.relative_to(ROOT)),
-                allocation_bytes=sym['MEMEND']-0o10000,free_bytes=0o40000-sym['MEMEND'],
+                allocation_bytes=sym['MEMEND']-0o10000,free_bytes=0o60000-sym['MEMEND'],
                 sources={str(p.relative_to(ROOT)):sha(p) for p in files+[driver,scanner,cold,Path(__file__),ROOT/'tools/module_image_cp67.py']},
                 outputs={str(p.relative_to(ROOT)):sha(p) for p in (src,out/'ODT.BIN',out/'payload.bin',out/'image.bin')})
     (out/'result.json').write_text(json.dumps(record,indent=2)+'\n')
