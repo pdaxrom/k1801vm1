@@ -7,6 +7,13 @@
 [формат и разработка модулей](docs/retained-modules-cp67.md).
 Разделы предыдущих CP ниже сохраняют историю, а не текущие инструкции установки.
 
+**CP69: все режимы адресации LDFPS/STFPS и STST в HALT FRAM.**
+8 мнемоник / 197 кодировок; 734 байта кода, 950 байт с данными и стеком.
+5012 differential cases и полный RT-11/UJMOD/ODT STEP regression — PASS.
+Арифметики пока нет; прирост FPGA нулевой, на плату модуль не установлен.
+[Контракт, fault semantics и измерения](docs/fp11-memory-cp69.md),
+[тестовый пакет](demos/rt11/service/cp69/README.md).
+
 **CP68: первый программный FP11-модуль в HALT FRAM.** Семь управляющих
 мнемоник / 21 кодировка, 456 байт кода и 668 байт со всем состоянием.
 90 112 differential cases и полный RT-11/UJMOD/ODT STEP regression — PASS.

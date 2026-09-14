@@ -1,5 +1,22 @@
 # uJ11 TODO
 
+## CP69 — FP11 memory status instructions
+
+- [x] LDFPS/STFPS/STST, все восемь режимов, R6/R7, immediate/absolute/PC-relative.
+- [x] Отложенные autoupdates, ошибки extension/pointer/data, partial STST write,
+  нечётные адреса и USER trap frame; 5012 differential cases.
+- [x] Сохранить IRQ/trace/ODT regression; SPI FRAM cold init и checksum rejection.
+- [x] RT-11/UJMOD/ODT: пошаговое исполнение memory commands, проверка FPTST,
+  возврат в RT-11, cold reset и OFF модуля — 33 checks PASS в симуляции.
+- [x] Архивировать 950-byte module, native assembly и SPI measurements.
+- [ ] LDF/STF и F/D представление AC; затем арифметика и преобразования.
+- [ ] Вернуть короткий register path: CP69 LDFPS/STFPS Rn медленнее CP68
+  на 1698/1960 clocks из-за общей EA подготовки.
+- [ ] Полная дифференциальная проверка FP11-A rounding/exceptions и benchmarks.
+- [ ] Установить FP11 firmware на физическую плату и проверить через UART.
+
+[Контракт, документация DEC и результаты CP69](docs/fp11-memory-cp69.md).
+
 ## CP68 — программный FP11 в HALT FRAM
 
 - [x] Перечитать DEC FP11-A: FPS, AC0–AC5, управляющие команды и исключения.
@@ -12,7 +29,7 @@
   через FP-команды, возврат в RT-11, повторный reset и OFF отдельного модуля.
 - [x] Измерить все управляющие команды на SPI FRAM: 8145–9677 clocks,
   вход до handler 316, START fetch→USER return 177 clocks.
-- [ ] Memory addressing modes LDFPS/STFPS и STST, включая ошибки и SP/PC.
+- [x] Memory addressing modes LDFPS/STFPS и STST, включая ошибки и SP/PC — CP69.
 - [ ] LDF/STF, представление F/D в AC, затем арифметика и преобразования.
 - [ ] Полная дифференциальная проверка FP11-A rounding/exceptions и benchmarks.
 - [ ] Установить FP11 firmware на физическую плату и проверить через UART.

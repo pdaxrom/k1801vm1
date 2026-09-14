@@ -1,4 +1,19 @@
-# Benchmarks: CP68 и предыдущие этапы
+# Benchmarks: CP69 и предыдущие этапы
+
+## CP69 — FP11 memory status instructions
+
+Полный SPI FRAM path: STST memory **13524–15218 clocks**, 213–240 bus beats,
+около 457,51–514,82 µs при 29,56 MHz. Вход 316 и возврат 177 clocks прежние.
+Измерены 43 кодировки на SPI и все 197 в ideal RAM модели.
+LDFPS Rn стал медленнее на 1698 clocks (9677→11375), STFPS Rn — на 1960
+(9553→11513): общая подготовка effective address добавила работу register path.
+Это измеренный baseline; оптимизация и FP-арифметика остаются следующими этапами.
+[Таблица по режимам, интервалы и сырые CSV](fp11-memory-cp69.md).
+
+FP11 занимает 950 байт HALT FRAM, прирост 282 байта от CP68. Hardware
+побайтно совпадает с CP67b; 1244 LUT / 381 FF / 7 EBR / 32,032 MHz — прежний
+synthesis, нового измерения нет. Полный RT-11 test — 503618729 clocks,
+включая UART/загрузки/reset; это интеграционный прогон, не ISA benchmark.
 
 ## CP68 — программное управление FP11
 

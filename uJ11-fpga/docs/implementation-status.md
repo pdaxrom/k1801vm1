@@ -9,6 +9,17 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP69 — FP11 status addressing
+
+Все режимы LDFPS/STFPS/STST, включая R6/R7 и ошибки: **8 мнемоник /
+197 кодировок**, 734 байта кода и **950 байт полной аллокации** в HALT FRAM.
+5012 differential cases / 348576 checks; прежние faults/IRQ/trace/ODT
+сценарии сохранены. SPI FRAM: 4 scenarios / 366 checks. Полный RT-11/UJMOD/ODT:
+**33 checks / 503618729 clocks / 2921 UART bytes — PASS**.
+Hardware CP67b побайтно прежний; дополнительных LUT/FF/EBR нет.
+LDF/STF и арифметика ещё не реализованы. FP11.BIN не установлен на плату.
+[Контракт, ограничения и benchmark с регрессией register path](fp11-memory-cp69.md).
+
 ## CP68 — управляющая часть FP11 firmware
 
 Семь мнемоник / 21 кодировка, FPS/FEC/FEA, шесть 64-bit AC и частный stack

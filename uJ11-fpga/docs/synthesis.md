@@ -1,5 +1,14 @@
 # Synthesis checkpoints
 
+## CP69 — адресация FP11 firmware, без нового синтеза
+
+LDFPS/STFPS/STST со всеми addressing modes занимают 950 байт HALT FRAM.
+Все 53 обычных файла synthesis manifest CP67b совпали; прирост
+**0 LUT / 0 FF / 0 EBR / 0 uwords**. Прежний результат: **1244 LUT /
+381 FF / 7 EBR / Fmax 32,032 MHz**, 1005/1024 microinstructions.
+Новый MAP/PAR/TRACE не выполнялся: аппаратные inputs сохранены.
+[Программные тесты и ресурсный контракт](fp11-memory-cp69.md).
+
 ## CP68 — FP11 firmware, без нового синтеза
 
 Все 53 обычных файла synthesis manifest CP67b совпали по SHA256. RTL,
