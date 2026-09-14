@@ -1,0 +1,22 @@
+{
+  "abi": 3,
+  "relocatable": false,
+  "checkpoint": "CP71 unary and compare",
+  "requires_fpga": "CP67b",
+  "installed_on_board": false,
+  "supported_encodings": 1189,
+  "rejected_ac_encodings": 32,
+  "allocation_bytes": 1594,
+  "format": {
+    "base": 16384,
+    "words": 682,
+    "checksum": 24567,
+    "bytes": 1364
+  },
+  "files": {
+    "FP11.BIN": "3071a9843a827ace8d51cf952ff91e04e389bdea6764e11481805851f7ef4683",
+    "FP11.MAC": "04d0a89dffaa2fc04614fe6414dc3e78bd6098b4d74f8b385f52832735ff260a",
+    "FPTST.MAC": "01c8f932fc76e8093a5e085ef148617ef93e4cc795cfcbcea7775e5aa9f30c8a",
+    "FPTST.SAV": "c84f191ae58bbefb239840e34eb533ef2baba08b8d9d905e5013df46180ed022"
+  }
+}

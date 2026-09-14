@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP71 — FP11-A unary/compare в HALT FRAM
+
+**1364 байта кода / 1594 байта с BSS/stack**, +344 байта FRAM от CP70.
+Все 53 обычных файла synthesis manifest CP67b совпали по SHA256.
+Прирост **0 LUT / 0 FF / 0 EBR / 0 uwords**, нового MAP/PAR/TRACE нет.
+Сохраняется измеренный CP67b: **1244 LUT / 381 FF / 7 EBR / Fmax 32,032 MHz**,
+1005/1024 uwords. Свободны 36 LUT, 0 EBR. Это программное расширение;
+FPGA и установленная плата прежние. Замедление прежних FP-переносов
+измерено отдельно в [контракте и benchmarks CP71](fp11-unary-cp71.md).
+
 ## CP70 — F/D transfers в HALT firmware
 
 1250 байт HALT FRAM с BSS/stack; код 1022 байта. Все 53 обычных файла

@@ -9,6 +9,20 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP71 — FP11-A unary и compare
+
+CLR/TST/ABS/NEG/CMP F/D со всеми addressing modes, AC0–AC5 и exceptions.
+Всего **1189 корректных кодировок**, 32 illegal-AC комбинации; **1364 байта
+кода / 1594 байта полной аллокации**. Sync 99104 / 6947312, из них
+97176 differential и 1928 явно отдельных ожиданий. Logic 22748 / 1621848;
+directed sync/vendor 33 / 1172 каждый; SPI FRAM 4 / 632, 169 измеренных операций.
+Vendor: 1347 cases / 96842 checks — PASS. RT-11/UJMOD/ODT: **43 checks / 531033015 clocks /
+3476 UART bytes — PASS**. TST реализует FP11-A flags-before-UV; J-11
+отличается. Hardware CP67b совпал по 53 обычным synthesis inputs,
+прирост LUT/FF/EBR нулевой. Модуль не установлен на физическую плату.
+ADD/SUB/MUL/DIV и преобразований ещё нет; замедление переносов от CP70
+задокументировано. [Контракт, проверки и пакет](fp11-unary-cp71.md).
+
 ## CP70 — FP11 F/D transfers
 
 LDF/LDD и STF/STD, все modes, AC0–AC5, FIUV/FID и faults; всего 693 корректные

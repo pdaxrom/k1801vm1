@@ -1,5 +1,25 @@
 # uJ11 TODO
 
+## CP71 — FP11-A unary и compare
+
+- [x] CLR/TST/ABS/NEG/CMP F/D, все addressing modes, AC0–AC5 и AC6/7 illegal.
+- [x] F-mode low-half preservation, dirty/negative zero, CMP exact-zero AC
+  special case и различия в последнем слове D.
+- [x] Документированное FP11-A TST flags-before-UV; отдельно от J-11 oracle.
+- [x] 97176 differential cases и 1928 маркированных manual expectations;
+  faults, partial writes, IRQ/ODT, cold init и сохранение ODT/SDBOOT.
+- [x] RT-11/UJMOD/ODT: одиннадцать FP STEP, самостоятельная проверка FPTST,
+  возврат, DIR, cold reset и OFF — 43 checks PASS в симуляции.
+- [ ] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests.
+- [ ] Затем MUL/DIV и преобразования; полная FP11 ISA пока не готова.
+- [ ] Устранить измеренную регрессию CP71: LDF/LDD AC5 +4255/+4777 clocks,
+  memory +2341…2400; STF/STD AC5 +1225, memory +1652 относительно CP70.
+  Проверить короткий путь AC transfer, общий dispatch и flags helper.
+- [ ] FP disassembly и dump AC/FPS/FEC/FEA в ODT с версионированным ABI.
+- [ ] Установка FP11 на плату и UART-проверка; аппаратная прошивка CP67b прежняя.
+
+[Контракт FP11-A, отдельные ожидания oracle и measurements](docs/fp11-unary-cp71.md).
+
 ## CP70 — FP11 F/D transfers
 
 - [x] LDF/LDD, STF/STD: все addressing modes, AC0–AC5, AC6/7 illegal,
@@ -10,7 +30,7 @@
 - [x] Измерить переносы на SPI FRAM и повторить cold init/ODT/FP coexistence.
 - [x] RT-11/UJMOD/ODT: десять FP STEP, проверка FRES/DRES/BACK самой
   программой FPTST, возврат в RT-11, cold reset и OFF — 48 checks PASS.
-- [ ] CLRF/TSTF/ABSF/NEGF и CMPF в F/D, затем арифметика и преобразования.
+- [x] CLRF/TSTF/ABSF/NEGF и CMPF в F/D — CP71; арифметика и преобразования впереди.
 - [ ] Отдельно исправить в общем emulator отмену trap для invalid AC6/7 и
   отсутствующий abort check в immediate ReadFP. Reproducer и объяснение
   сохранены в [CP70](docs/fp11-transfers-cp70.md); в uJ11 firmware дефектов нет.

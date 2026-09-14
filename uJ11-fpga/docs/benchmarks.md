@@ -1,4 +1,21 @@
-# Benchmarks: CP70 и предыдущие этапы
+# Benchmarks: CP71 и предыдущие этапы
+
+## CP71 — FP11-A CLR/TST/ABS/NEG/CMP F/D
+
+Полная SPI FRAM модель: **18810–26502 clocks**, около 636–897 µs при
+29,56 MHz, для измеренных AC/memory/immediate вариантов новых команд.
+169 операций в CSV: прежние 79 и новые 90. Вход/возврат 316/177 clocks.
+[Пооперационная таблица, данные и границы интервалов](fp11-unary-cp71.md).
+
+Регрессия от CP70: LDF/LDD AC5 +4255/+4777 clocks (21369/22472);
+memory LDF/LDD +2341…2400; STF/STD AC5 +1225, memory +1652.
+Причины — общая буферизация operand/flags и дополнительные dispatch
+comparisons. Все 43 прежних управляющих случая по clocks сохранились.
+Короткие register paths требуют отдельной оптимизации и повторных измерений.
+
+1594 байта HALT FRAM; +344 от CP70. Hardware совпал по 53 обычным
+synthesis inputs CP67b, нового синтеза нет. RT-11/UJMOD/ODT regression:
+531033015 clocks, включая UART/загрузки/reset; это не ISA benchmark.
 
 ## CP70 — FP11 F/D transfers
 

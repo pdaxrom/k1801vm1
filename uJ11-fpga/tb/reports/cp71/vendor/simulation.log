@@ -1,0 +1,2 @@
+PASS CP71 unary: 1347 cases / 96842 checks / 404 manual DEC cases
+tb/tb_fp_unary_cp71.v:107: $finish called at 105718040000 (1ps)

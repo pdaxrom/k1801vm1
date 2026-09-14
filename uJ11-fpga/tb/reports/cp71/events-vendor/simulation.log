@@ -1,0 +1,2 @@
+PASS CP71 events: 33 cases / 1172 checks
+tb/fp_events_cp71.vh:151: $finish called at 2243450000 (1ps)
