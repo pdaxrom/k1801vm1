@@ -1,4 +1,22 @@
-# Benchmarks: CP75 и предыдущие этапы
+# Benchmarks: CP76 и предыдущие этапы
+
+## CP76 — программные преобразования FP11
+
+На полной модели SPI FRAM получены **403 измерения**, из них 144 новых.
+STEXP AC2,R5 — **24161 clocks / 381 beats / 0,817 ms**;
+STCFI AC2,R5 — **121891 / 1960 / 4,124 ms**;
+STCDL AC2,R5 — **123613 / 1987 / 4,182 ms**;
+STCFD/STCDF AC2,AC5 — **27316/28253 clocks / 0,924/0,956 ms**.
+Nominal clock 29,56 MHz. Новые samples: 24161–126315 clocks,
+разные operands; это не worst-case граница.
+
+Все 259 samples CP75 сохраняют USER layout и начальные данные. Пять
+коротких controls прежние, остальные 254 получили **+384 clocks / 6 beats**
+на общий conversion dispatch. Вход/выход — прежние **316/177 clocks**.
+Новые измерения исполняются отдельной программой после reset, обе
+программы защищены от пересечения с bootstrap и данными.
+Cold ODT+FP+SDBOOT — 3561244 clocks; bad FP checksum — 3508689;
+FP+benchmark — 1125033. [Полные данные и границы сравнения](fp11-conversions-cp76.md).
 
 ## CP75 — программные MODF/MODD
 

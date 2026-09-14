@@ -1,0 +1,2 @@
+PASS CP76 paths: 128 cases / 8896 checks / 4 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 21357940000 (1ps)

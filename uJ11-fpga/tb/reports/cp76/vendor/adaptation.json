@@ -1,0 +1,19 @@
+{
+  "description": "Build a private reference: unchanged CPU/EA + explicit FP11-A adaptations.\n\nNever edit the shared emulator. Keep the original copyright in the copy.\nADD/SUB use reference_fp_add_cp73.h; ABS/NEG defer FIUV until after writes.\nMUL/DIV use exact unsigned 128-bit arithmetic.\nMOD keeps the original 59-bit product helper unchanged.\nStore conversions commit flags/exceptions after memory accesses and set CPU C.\nLDC preserves fetch-negative-zero FN; FIUV load flags use explicit marker 5.\nEarlier marked invalid-AC/immediate-abort/unary expectations are retained.\n",
+  "original": {
+    "../core/core.c": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+    "../core/core.h": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+    "../core/hardware.c": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+    "../core/hardware.h": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057",
+    "../core/pdp11_fp.c": "ad5ef37ef0ee8fa9221632ad903224599759cf95a4bcbe4f5dfd77e0870f2220"
+  },
+  "adapted": {
+    "build/cp76-fp11/vendor/reference/core.c": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+    "build/cp76-fp11/vendor/reference/core.h": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+    "build/cp76-fp11/vendor/reference/hardware.c": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+    "build/cp76-fp11/vendor/reference/hardware.h": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057",
+    "build/cp76-fp11/vendor/reference/pdp11_fp.c": "32857cdbca7545364fc0e81c19861ee519204a3d63d73ae12e2951f40d9d6798",
+    "build/cp76-fp11/vendor/reference/reference_fp_add_cp73.h": "a718b14bfedac09f26c8a0e5f34a1fb494d84b687b3e55672668c3ab341d8e3a",
+    "build/cp76-fp11/vendor/reference/reference_fp_muldiv_cp74.h": "e64875f6fc3a9ac7a50f811224e90161e88abeb615c04140b9246bc6584b5c42"
+  }
+}

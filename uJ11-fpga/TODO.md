@@ -1,5 +1,21 @@
 # uJ11 TODO
 
+## CP76 — преобразования FP11-A
+
+- [x] STEXP/LDEXP; STCfi/LDCif I/L/F/D; STCff/LDCff F/D, все addressing modes.
+- [x] NZVC процессора и FPS, min I/L, LONG register/immediate, FT, exceptions.
+- [x] LDF/LDC flags при memory FIUV по DEC; изменения эталона помечены явно.
+- [x] 251328 независимых числовых сравнений; 444444 RTL cases, logic/vendor.
+- [x] 111 directed IRQ/ODT/fault cases; 403 SPI FRAM measurements.
+- [x] Native RT-11/UJMOD/43 STEP, самопроверка, cold init/OFF и checksum.
+- [x] Release и замороженный архив CP76, без изменения аппаратуры CP67b.
+- [ ] Внешние DEC FP diagnostics и программы, использующие полный FP11.
+- [ ] FP disassembly и AC/FPS/FEC/FEA в ODT для UART и пульта.
+- [ ] Установить программный FP11 на плату и проверить через UART.
+- [ ] После diagnostics оптимизировать STCfi shifts и dispatch: есть SPI baseline.
+
+[Семантика, точные границы проверок и измерения](docs/fp11-conversions-cp76.md).
+
 ## CP75 — программные MODF/MODD
 
 - [x] Разделение произведения по DEC: целая часть с усечением, дробная
@@ -14,7 +30,7 @@
 - [x] 3420 байт HALT FRAM (+400); 53 hardware inputs CP67b прежние.
 - [x] Полный sync: 225084 / 15632368; все 194396 fixtures CP74 сохранены.
   Release и замороженный архив CP75.
-- [ ] Преобразования FP11-A и полные diagnostics.
+- [x] Преобразования FP11-A — CP76; внешние diagnostics остаются отдельно.
 - [ ] FP disassembly и AC/FPS/FEC/FEA dump в ODT.
 - [ ] Установить программный FP11 на плату и проверить через UART.
   На физической плате пока CP67b с ODT/SDBOOT, без FP-модуля.

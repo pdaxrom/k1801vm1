@@ -1,0 +1,19 @@
+PASS CP76 paths: 128 cases / 8896 checks / 4 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 21357940000 (1ps)
+PASS CP76 paths: 128 cases / 9346 checks / 54 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 12393860000 (1ps)
+PASS CP76 paths: 128 cases / 8974 checks / 10 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 12608870000 (1ps)
+PASS CP76 paths: 128 cases / 9214 checks / 4 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 13316740000 (1ps)
+PASS CP76 paths: 128 cases / 8970 checks / 0 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 13266910000 (1ps)
+PASS CP76 paths: 128 cases / 8904 checks / 8 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 12298690000 (1ps)
+PASS CP76 paths: 128 cases / 8716 checks / 0 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 13580960000 (1ps)
+PASS CP76 paths: 128 cases / 8708 checks / 0 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 13083500000 (1ps)
+PASS CP76 paths: 68 cases / 4632 checks / 0 manual DEC cases
+tb/tb_fp_paths_cp76.v:107: $finish called at 6625280000 (1ps)
+PASS CP76 paths: 1092 cases / 76360 checks / 80 manual DEC cases (all aligned partitions)

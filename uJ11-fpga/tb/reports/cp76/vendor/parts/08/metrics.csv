@@ -1,0 +1,3 @@
+opcode,initial_fps,ack_wait_clocks,core_clocks,memory_beats
+00000177205,00000101010,0,3847,703
+00000177605,00000101010,0,2836,460

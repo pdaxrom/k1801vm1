@@ -1,5 +1,16 @@
 # Synthesis checkpoints
 
+## CP76 — преобразования FP11 в программе FRAM
+
+Все 53 обычных synthesis inputs CP67b совпадают по SHA256. Нового
+MAP/PAR/TRACE нет; прирост **0 LUT / 0 FF / 0 EBR / 0 uwords**.
+Hardware: **1244 LUT / 381 FF / 7 EBR / 628 slices / TRACE 32,032 MHz**,
+1005/1024 microinstructions, nominal clock 29,56 MHz.
+FP11 — 4282 байта кода и 268 BSS/stack, **4550 байт HALT FRAM** (+1130).
+Свободны 36 LUT, 0 EBR, 19 uwords и 36410 байт после FP до HALT 160000.
+На плату FP-пакет ещё не установлен.
+[Реализация и проверки](fp11-conversions-cp76.md).
+
 ## CP75 — MODF/MODD в программе FRAM
 
 Все 53 обычных synthesis inputs CP67b совпали по SHA256. RTL, microcode,

@@ -1,0 +1,5 @@
+PASS CP76 events: 111 cases / 4174 checks
+- tb/fp_events_cp76.vh:439: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 12ms; walltime 0.845 s; speed 13.920 ms/s
+- Verilator: cpu 0.844 s on 1 threads; allocated 2 MB

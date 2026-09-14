@@ -9,6 +9,22 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP76 — преобразования FP11-A
+
+46 мнемоник / 3949 корректных кодировок; все документированные семейства.
+88 illegal-AC комбинаций и 59 reserved control кодов проверены отдельно.
+4282 байта кода + 268 BSS/stack = **4550 байт HALT FRAM** (+1130).
+Исправлены LDF/LDD flags при memory FIUV; остальные старые fixtures прежние.
+
+Полный RTL регресс: **444444 cases / 30951840 checks — PASS**.
+Logic: 215784 / 15052576; vendor: 1092 / 76360;
+directed sync/vendor: 111 / 4174 каждый.
+SPI FRAM: 5 / 1144, 403 измерения; numeric model: 251328 comparisons.
+Native RT-11/UJMOD/43 STEP: **94 checks / 811627733 clocks /
+9429 UART bytes — PASS**. 53 обычных hardware inputs CP67b прежние.
+FPGA/плата не менялись; FP11.BIN физически не установлен. Внешние DEC
+FP diagnostics ещё не пройдены. [Отчёт](fp11-conversions-cp76.md).
+
 ## CP75 — MODF/MODD в программе FRAM
 
 32 мнемоники / 2429 корректных кодировок, 72 illegal-AC сочетания.
