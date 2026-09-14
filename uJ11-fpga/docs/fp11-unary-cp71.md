@@ -1,5 +1,9 @@
 # CP71: FP11-A CLR, TST, ABS, NEG и CMP
 
+> Исторический checkpoint. В CP73 исправлен порядок исключения ABS/NEG
+> для memory negative zero с FIUV: ноль записывается до trap.
+> [Актуальная семантика FP11-A](fp11-arithmetic-cp73.md).
+
 2026-09-14. Программный модуль HALT FRAM дополнен **CLRF/CLRD, TSTF/TSTD,
 ABSF/ABSD, NEGF/NEGD и CMPF/CMPD**. Сохраняются все управляющие команды и
 переносы CP70. Всего **22 мнемоники / 1189 корректных кодировок**; ещё

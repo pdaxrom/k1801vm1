@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP73 — ADD/SUB F/D в программе FRAM
+
+**2252 байта кода / 2510 байт со всем состоянием**, +886 байт от CP72.
+53 обычных synthesis inputs CP67b совпали по SHA256. Прирост **0 LUT /
+0 FF / 0 EBR / 0 uwords**; новый synthesis не выполнялся. Сохраняется
+CP67b: **1244 LUT / 381 FF / 7 EBR / Fmax 32,032 MHz**, 1005/1024 uwords.
+Остаток — 36 LUT, 0 EBR; nominal clock 29,56 MHz. Арифметика, семь guard
+bits и нормализация выполнены обычными командами PDP-11.
+[Контракт и измерения CP73](fp11-arithmetic-cp73.md).
+
 ## CP72 — ускорение AC transfers в программе FRAM
 
 **1394 байта кода / 1624 байта со всем состоянием**, +30 байт от CP71.

@@ -1,0 +1,22 @@
+{
+  "abi": 3,
+  "relocatable": false,
+  "checkpoint": "CP73 F/D ADD/SUB",
+  "requires_fpga": "CP67b",
+  "installed_on_board": false,
+  "supported_encodings": 1685,
+  "rejected_ac_encodings": 48,
+  "allocation_bytes": 2510,
+  "format": {
+    "base": 16384,
+    "words": 1126,
+    "checksum": 13561,
+    "bytes": 2252
+  },
+  "files": {
+    "FP11.BIN": "4279aa5abb4d7f7d9cac26c5d1ca007a7de54e7bb72ef9fd7ac8e661b1fbe5f6",
+    "FP11.MAC": "9b1f716a50c9a039bd87728fc7af826cd9f883447a151e4340c357fbdbcecf6d",
+    "FPTST.MAC": "552eda5bb8ce188c6e9b229cf7ceed0ff0a21fe9dd6563231c21b82b14584e68",
+    "FPTST.SAV": "cf9a21e1cc29960715578b025273ebba74bbf2bc96f3b7ed7c9e47a29a29a1f9"
+  }
+}

@@ -1,5 +1,24 @@
 # uJ11 TODO
 
+## CP73 — программные ADD/SUB F/D
+
+- [x] Семь guard bits FP11-A, нормализация, округление/усечение,
+  overflow/underflow, все addressing modes и F low-half preservation.
+- [x] Исправить ABS/NEG: запись нуля и flags перед memory FIUV exception.
+- [x] Независимые uint64/Python эталоны: 200000 сравнений, точные
+  границы ошибки; общий emulator оставлен без изменений.
+- [x] Logic: 46040 cases / 3254816 checks; directed sync/vendor:
+  39 cases / 1389 checks каждый; SPI FRAM: 4 / 732 — PASS.
+- [x] Полный sync: 149404 / 10426000, vendor: 472 / 33088;
+  RT-11/UJMOD/18 ODT STEP: 56 checks, cold init и OFF — PASS.
+- [ ] Оптимизировать программные shifts/pack и dispatch: ADD F/D в
+  измеренном AC случае 65229/67862 clocks; старые memory/unary paths
+  получили +384–576 clocks. Сохранить correctness baseline CP73.
+- [ ] Затем MUL/DIV, MOD и преобразования FP11-A.
+- [ ] FP disassembly и AC/FPS/FEC/FEA dump в ODT; проверка пакета на плате.
+
+[Документация CP73](docs/fp11-arithmetic-cp73.md).
+
 ## CP72 — ускорение FP11 AC transfers
 
 - [x] Убрать промежуточный FBUF при LDF/LDD AC→AC, фиксированный перенос
@@ -11,7 +30,7 @@
   измерений прежние. Цена — 30 байт FRAM, без дополнительных ресурсов FPGA.
 - [x] DP8KC: 467 cases / 32176 checks; RT-11/UJMOD/ODT: 43 checks,
   включая 11 STEP, самопроверку, cold reset и OFF — PASS в симуляции.
-- [ ] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests.
+- [x] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests — CP73.
 - [ ] Дальнейшая оптимизация dispatch: LDF/LDD AC всё ещё +548/+425 clocks
   к CP70, STF +115. Memory LDF/LDD +2341…2400, STF/STD +1652 остаются.
 - [ ] FP disassembly и dump AC/FPS/FEC/FEA в ODT; установка FP11 на плату.
@@ -28,7 +47,7 @@
   faults, partial writes, IRQ/ODT, cold init и сохранение ODT/SDBOOT.
 - [x] RT-11/UJMOD/ODT: одиннадцать FP STEP, самостоятельная проверка FPTST,
   возврат, DIR, cold reset и OFF — 43 checks PASS в симуляции.
-- [ ] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests.
+- [x] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests — CP73.
 - [ ] Затем MUL/DIV и преобразования; полная FP11 ISA пока не готова.
 - [ ] Устранить измеренную регрессию CP71: LDF/LDD AC5 +4255/+4777 clocks,
   memory +2341…2400; STF/STD AC5 +1225, memory +1652 относительно CP70.

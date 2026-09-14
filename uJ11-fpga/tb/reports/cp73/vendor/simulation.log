@@ -1,0 +1,2 @@
+PASS CP73 paths: 472 cases / 33088 checks / 80 manual DEC cases
+tb/tb_fp_paths_cp73.v:107: $finish called at 55560380000 (1ps)

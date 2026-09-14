@@ -9,6 +9,20 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP73 — ADD/SUB F/D в программе FRAM
+
+26 мнемоник / 1685 корректных кодировок, 48 illegal-AC комбинаций.
+2252 байта кода, 2510 байт с BSS/stack. Семь guard bits FP11-A,
+округление/усечение, нормализация, FIV/FIU/FIUV/FID и все modes.
+ABS/NEG теперь завершают запись нуля перед FIUV exception.
+Sync: 149404 cases / 10426000 checks, logic: 46040 / 3254816 — PASS.
+Vendor: 472 / 33088, directed sync/vendor: 39 / 1389 каждый, SPI FRAM:
+4 / 732; RT-11/UJMOD/ODT: 56 checks / 592741136 clocks / 4779 UART bytes
+(18 FP STEP, самопроверка, cold init и OFF) — PASS.
+Аппаратные inputs CP67b совпали по 53 SHA256; новых LUT/FF/EBR нет.
+Физическая плата прежняя, FP11.BIN не установлен.
+[Точные границы проверки и измерения](fp11-arithmetic-cp73.md).
+
 ## CP72 — прямые переносы FP11 AC
 
 Mode-0 LDF/LDD копируют напрямую без FBUF, STF/STD используют общий

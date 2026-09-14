@@ -1,0 +1,14 @@
+{
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+  "source_sha256": {
+    "build/cp73-fp11/rt11-final/FPTST.MAC": "552eda5bb8ce188c6e9b229cf7ceed0ff0a21fe9dd6563231c21b82b14584e68"
+  },
+  "outputs": {
+    "FPTST.SAV": "cf9a21e1cc29960715578b025273ebba74bbf2bc96f3b7ed7c9e47a29a29a1f9",
+    "FPTST.OBJ": "959a42596ef6220da98275f03c948e956296d18820e89727de8fde4dfe1157d7",
+    "FPTST.LST": "329e5f27410c324866240f0d35a6e7b8c6d879b1aa8f151012f30bcd6a02e6e6",
+    "FPTST.MAP": "1c3a33eca4b5f50885dc0d7a05adfea98a91c6b680593a96a17404893901e084"
+  },
+  "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+}
