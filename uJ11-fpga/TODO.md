@@ -1,5 +1,26 @@
 # uJ11 TODO
 
+## CP75 — программные MODF/MODD
+
+- [x] Разделение произведения по DEC: целая часть с усечением, дробная
+  с округлением/усечением, 59-битный D product, чётные/нечётные AC.
+- [x] Проверки двух AC, aliases, F low halves, ошибок и flags;
+  направленные округления дроби до +1/−1.
+- [x] 200000 сравнений Python/C128 и ещё 200000 с неизменённым MOD helper.
+- [x] Logic 81544 / 5707456; vendor 276 / 19712;
+  directed sync/vendor 49 / 1742 каждый; SPI FRAM 4 / 848.
+- [x] Native RT-11/UJMOD/29 STEP, собственная FPTST и cold init/OFF:
+  80 checks / 689803088 clocks / 6825 UART bytes.
+- [x] 3420 байт HALT FRAM (+400); 53 hardware inputs CP67b прежние.
+- [x] Полный sync: 225084 / 15632368; все 194396 fixtures CP74 сохранены.
+  Release и замороженный архив CP75.
+- [ ] Преобразования FP11-A и полные diagnostics.
+- [ ] FP disassembly и AC/FPS/FEC/FEA dump в ODT.
+- [ ] Установить программный FP11 на плату и проверить через UART.
+  На физической плате пока CP67b с ODT/SDBOOT, без FP-модуля.
+
+[Документация CP75](docs/fp11-mod-cp75.md).
+
 ## CP74 — программные MUL/DIV F/D
 
 - [x] Умножение 24/56 и деление 31/63 итераций, все addressing modes,
@@ -12,7 +33,7 @@
 - [x] Sync: 194396 / 13529088, logic: 64248 / 4519200,
   vendor: 304 / 21764; RT-11/UJMOD/22 ODT STEP: 66 checks — PASS.
   Directed sync/vendor: 43 / 1527 каждый; архив и native release CP74.
-- [ ] MODF/MODD и преобразования FP11-A, затем полные diagnostics.
+- [x] MODF/MODD — CP75; преобразования и полные diagnostics ещё впереди.
 - [ ] Сократить программные MUL/DIV и общий dispatch после correctness
   baseline: исследовать частичные произведения через имеющийся integer
   EIS MUL и выход DIV при нулевом остатке, без дополнительного RTL.

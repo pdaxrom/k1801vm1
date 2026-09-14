@@ -9,6 +9,22 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP75 — MODF/MODD в программе FRAM
+
+32 мнемоники / 2429 корректных кодировок, 72 illegal-AC сочетания.
+3154 байта кода и 266 байт состояния/стека, всего 3420 (+400 к CP74).
+Семантика FP11-A с 59-битным произведением D; оба результата, чётные/
+нечётные AC, все addressing modes, flags и ошибки. Преобразований пока нет.
+
+Полный RTL регресс: **225084 cases / 15632368 checks — PASS**.
+Logic: 81544 / 5707456; vendor: 276 / 19712; directed sync/vendor:
+49 / 1742 каждый. SPI FRAM: 4 / 848, 259 измерений. Native RT-11/UJMOD/
+29 STEP: **80 checks / 689803088 clocks / 6825 UART bytes — PASS**.
+200000 Python/C128 и 200000 original MOD helper comparisons.
+Все 53 обычных hardware inputs CP67b совпали по SHA256; нового synthesis
+нет. На физическую плату FP-пакет не установлен.
+[Семантика и результаты](fp11-mod-cp75.md).
+
 ## CP74 — MUL/DIV F/D в программе FRAM
 
 30 мнемоник / 2181 корректная кодировка, 64 illegal-AC комбинации.

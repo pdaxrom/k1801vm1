@@ -1,5 +1,14 @@
 # Synthesis checkpoints
 
+## CP75 — MODF/MODD в программе FRAM
+
+Все 53 обычных synthesis inputs CP67b совпали по SHA256. RTL, microcode,
+firmware ROM и constraints прежние; нового synthesis нет. **1244 LUT /
+381 FF / 7 EBR / 628 slices / TRACE 32,032 MHz**, 1005/1024 uwords.
+Прирост FPGA — ноль. Внешний FP-модуль занимает **3420 байт HALT FRAM**,
+на 400 байт больше CP74; состояние/стек не выросли. На плату не установлен.
+[Реализация и проверки](fp11-mod-cp75.md).
+
 ## CP74 — MUL/DIV F/D в программе FRAM
 
 **2754 байта кода / 3020 байт со всем состоянием**, +510 байт от CP73.

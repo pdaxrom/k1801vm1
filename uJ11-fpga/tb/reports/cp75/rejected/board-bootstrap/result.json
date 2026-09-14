@@ -1,0 +1,13 @@
+{
+  "passed": false,
+  "reason": "Test program at USER 004000 overwritten by normal resident bootstrap copy 004000..004651 before launch; no measurements completed. Relocated to USER 006000 and assert both boundaries.",
+  "files": {
+    "firmware-test.mem": "b2341ab5dbac02ce8247a20205cb52dc5f83bd277396ca7607c9fc4bcb63ce90",
+    "tb.v": "f872ccf6059bb6ab3d4007020785da249f44a334d0690797fff08f7d0b8e9a22",
+    "module_cases.vh": "553e74cd4860b786b7cda693d32c585a6988780bfccdc32149f78c329e663f15",
+    "metrics.csv": "5b76d415925296b6e095e8ec93a887611c1f769f876d43589ac0180d45ce7893",
+    "test_fp_board_cp75.py": "ab688a22f55a8cf4b596aa89d26654529a50647d67a218a7ee754bd16660874d",
+    "build.log": "1d2f35a074b194ea8241ac8b0bbc3eca53f3590c3a5ff61618ae2ffd971f8352",
+    "simulation.log": "ee522f97856a4766c656080aa819434ec167f75d41923de34efad17a6c000be2"
+  }
+}

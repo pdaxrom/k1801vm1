@@ -1,8 +1,8 @@
 	.TITLE UJFP11
-	.IDENT /00.07/
-; CP74 FP11-A firmware: F/D multiply/divide. Absolute HALT FRAM, CP67 module ABI3.
+	.IDENT /00.08/
+; CP75 FP11-A firmware: MOD F/D. Absolute HALT FRAM, CP67 module ABI3.
 ; LDFPS/STFPS/STST support all eight word addressing modes.
-; F/D CLR/TST/ABS/NEG/CMP/ADD/SUB/MUL/DIV; MOD/conversions remain absent.
+; F/D CLR/TST/ABS/NEG/CMP/ADD/SUB/MUL/DIV/MOD; conversions remain absent.
 	.ASECT
 	.=40000
 INIT:	JMP @#COLD
@@ -122,6 +122,8 @@ ENTER:	MOV R0,REGS
 	CMP R4,#171000
 	BEQ XFER
 	CMP R4,#174400
+	BEQ XFER
+	CMP R4,#171400
 	BEQ XFER
 	JMP UNIMPL
 CFCC:	MOV FPS,R0
@@ -344,6 +346,8 @@ FEXEC:	CMP R4,#172000
 	JEQ ARITH
 	CMP R4,#174400
 	JEQ ARITH
+	CMP R4,#171400
+	JEQ ARITH
 	BIT #77600,FBUF
 	BNE USIGN
 	JSR PC,ZBUF
@@ -462,6 +466,8 @@ ARITH:	CLR AERR
 	JEQ AMULT
 	CMP R4,#174400
 	JEQ ADIV
+	CMP R4,#171400
+	JEQ AMULT
 	CMP R4,#173000
 	BNE ASORT
 	TST BEXP
@@ -635,9 +641,9 @@ ARIGHT:	CLC
 ; only bits below the retained product, including after one normalization.
 ; PMAN is the product/quotient; operands remain private until ACOMIT.
 AMULT:	TST AEXP
-	JEQ AZERO
+	JEQ MZERO
 	TST BEXP
-	JEQ AZERO
+	JEQ MZERO
 	ADD BEXP,AEXP
 	SUB #128.,AEXP
 	JSR PC,MDINIT
@@ -677,6 +683,10 @@ MRIGHT:	CLC
 	ROR PMAN+2
 	ROR PMAN
 	SOB R4,MLOOP
+	MOV #ANORM,R4
+	BIT #400,OPCODE
+	BEQ MDONE
+	MOV #MNORM,R4
 	BR MDONE
 ; DIV by exponent-zero source precedes dividend zero. No AC or NZVC write;
 ; successful EA autoupdates still commit, including when FID inhibits trap.
@@ -735,11 +745,12 @@ DNEXT:	ASL AMAN
 	ROL AMAN+6
 	DEC R4
 	BNE DLOOP
+	MOV #ANORM,R4
 MDONE:	MOV PMAN,AMAN
 	MOV PMAN+2,AMAN+2
 	MOV PMAN+4,AMAN+4
 	MOV PMAN+6,AMAN+6
-	JMP ANORM
+	JMP (R4)
 MDINIT:	MOV BSIGN,R0
 	XOR R0,ASIGN
 	CLR PMAN
@@ -752,6 +763,106 @@ BRIGHT:	CLC
 	ROR BMAN+4
 	ROR BMAN+2
 	ROR BMAN
+	RTS PC
+; FP11-A MOD develops 48 exact F bits / 59 D product bits (DEC 1978
+; table 5-2, DEC 1983 pp.147-149). Discard four CP74 guard positions
+; BEFORE the optional normalization; F's exact product already has zeros.
+MNORM:	BIC #17,AMAN
+	BIT #40000,AMAN+6
+	BNE MSPLIT
+	ASL AMAN
+	ROL AMAN+2
+	ROL AMAN+4
+	ROL AMAN+6
+	DEC AEXP
+MSPLIT:	CMP AEXP,#128.
+	BGT MWHOLE
+	JSR PC,MZINT
+	JMP AROUND
+MWHOLE:	MOV AMAN,BMAN
+	MOV AMAN+2,BMAN+2
+	MOV AMAN+4,BMAN+4
+	MOV AMAN+6,BMAN+6
+	MOV #152.,R0
+	BIT #200,FPS
+	BEQ MLIMIT
+	ADD #32.,R0
+MLIMIT:	CMP AEXP,R0
+	BLE MMASK
+; Product >= 2**L: integer is always chopped, fractional result is zero.
+	JSR PC,MPINT
+	JMP AZERO
+MMASK:	MOV AEXP,R4
+	SUB #128.,R4
+	MOV #177777,PMAN
+	MOV PMAN,PMAN+2
+	MOV PMAN,PMAN+4
+	MOV #77777,PMAN+6
+MMLOOP:	CLC
+	ROR PMAN+6
+	ROR PMAN+4
+	ROR PMAN+2
+	ROR PMAN
+	SOB R4,MMLOOP
+; BMAN keeps the integer bits; AMAN keeps the fractional bits. Sources
+; have already been buffered, including aliases with the second AC.
+	MOV #AMAN,R1
+	MOV #BMAN,R2
+	MOV #PMAN,R3
+	MOV #4,R4
+MAND:	MOV (R3)+,R0
+	BIC R0,(R2)+
+	COM R0
+	BIC R0,(R1)+
+	SOB R4,MAND
+	JSR PC,MPINT
+	MOV AMAN,R0
+	BIS AMAN+2,R0
+	BIS AMAN+4,R0
+	BIS AMAN+6,R0
+	JEQ AZERO
+	JMP ANORM
+; Only MUL/MOD reach this zero shortcut. MOD also clears its integer AC.
+MZERO:	BIT #400,OPCODE
+	JEQ AZERO
+	JSR PC,MZINT
+	JMP AZERO
+; Store a positive exact integer zero only for even destination AC.
+MZINT:	BIT #100,OPCODE
+	BNE MIRET
+	MOV ACPTR,R1
+	ADD #10,R1
+	MOV FLEN,R2
+	ASR R2
+MZLOOP:	CLR (R1)+
+	SOB R2,MZLOOP
+MIRET:	RTS PC
+; Pack BMAN WITHOUT rounding. Even when AC is odd (integer discarded),
+; overflow sets FV/FEC. Fractional AC/FPS commit and trap happen later.
+MPINT:	CMP AEXP,#377
+	BLE MIPACK
+	MOV #2,AOVF
+	BIT #1000,FPS
+	BEQ MZINT
+	MOV #10,AERR
+MIPACK:	BIT #100,OPCODE
+	BNE MIRET
+	MOV #7,R2
+MISHFT:	JSR PC,BRIGHT
+	SOB R2,MISHFT
+	MOV AEXP,R0
+	BIC #177400,R0
+	ASH #7,R0
+	BIS ASIGN,R0
+	BIC #177600,BMAN+6
+	BIS R0,BMAN+6
+	MOV ACPTR,R1
+	ADD #10,R1
+	MOV #BMAN+10,R5
+	MOV FLEN,R2
+	ASR R2
+MICOPY:	MOV -(R5),(R1)+
+	SOB R2,MICOPY
 	RTS PC
 ; R5=raw operand, R1=64-bit output; returns R0=exponent, R3=sign.
 ; Exponent-zero encodings become exact positive zero before arithmetic.

@@ -1,0 +1,14 @@
+{
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+  "source_sha256": {
+    "build/cp75-fp11/software/FP11.MAC": "47ba855b961489860ce4f67808557f60f1a741fd474a45022bac8a2b350b3d67"
+  },
+  "outputs": {
+    "FP11.SAV": "a3ba3930a71d6ab19d8428485841866a4125ec16a86b2e2fea79543dc884db56",
+    "FP11.OBJ": "2d735d1f975a9ff020e1f4e712d83b4d5f44e72f9bade71182c9e3d784194acd",
+    "FP11.LST": "e2952f49843359990b8be96c118d3d9aa906e344c1fe48b8cf4b04ddf66ff15a",
+    "FP11.MAP": "1b13b19907927599a78f6f706af3e2255d4825cccfd49baef5b0a3aab3932d5d"
+  },
+  "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+}

@@ -1,4 +1,22 @@
-# Benchmarks: CP74 и предыдущие этапы
+# Benchmarks: CP75 и предыдущие этапы
+
+## CP75 — программные MODF/MODD
+
+Полная модель SPI FRAM, nominal 29,56 MHz, запрос USER opcode → START:
+
+| Команда AC5,AC2 | Core clocks | Memory beats | Время |
+|---|---:|---:|---:|
+| MODF | 197367 | 3166 | 6,677 ms |
+| MODD | 315491 | 5072 | 10,673 ms |
+
+18 новых samples: 143758–382241 clocks, разные AC/memory/immediate
+операнды; не worst-case. Вход/возврат — 316/177 clocks. Из 241 измерения
+CP74 неизменны 133; ADD/SUB и ABS/NEG +192 clocks (72 случая), MUL +322
+(18), DIV +72 (18). AC transfers прежние. Программа начинается по USER
+006000: прежние данные/R0–R6 сохранены, PC и операнд LDFPS R7 отличаются.
+Cold init ODT+FP+SDBOOT — 3355008 clocks; плохая checksum FP — 3302829;
+FP+benchmark initializer — 918797. Модуль 3420 байт HALT FRAM (+400),
+FPGA прежняя. [Детали и границы сравнения](fp11-mod-cp75.md).
 
 ## CP74 — программные MUL/DIV F/D
 

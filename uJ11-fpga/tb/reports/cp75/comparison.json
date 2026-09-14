@@ -1,0 +1,1023 @@
+{
+  "passed": true,
+  "previous_operations": 241,
+  "operations": 259,
+  "unchanged_operations": 133,
+  "changed": [
+    {
+      "opcode": "170605",
+      "initial_fps": "000000",
+      "cp74": 24074,
+      "cp75": 24266,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170612",
+      "initial_fps": "000000",
+      "cp74": 23353,
+      "cp75": 23545,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170622",
+      "initial_fps": "000000",
+      "cp74": 24800,
+      "cp75": 24992,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170632",
+      "initial_fps": "000000",
+      "cp74": 25047,
+      "cp75": 25239,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170642",
+      "initial_fps": "000000",
+      "cp74": 25681,
+      "cp75": 25873,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170652",
+      "initial_fps": "000000",
+      "cp74": 25047,
+      "cp75": 25239,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170662",
+      "initial_fps": "000000",
+      "cp74": 24234,
+      "cp75": 24426,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170672",
+      "initial_fps": "000000",
+      "cp74": 25291,
+      "cp75": 25483,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170627",
+      "initial_fps": "000000",
+      "cp74": 23536,
+      "cp75": 23728,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170705",
+      "initial_fps": "000000",
+      "cp74": 24266,
+      "cp75": 24458,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170712",
+      "initial_fps": "000000",
+      "cp74": 23863,
+      "cp75": 24055,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170722",
+      "initial_fps": "000000",
+      "cp74": 25310,
+      "cp75": 25502,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170732",
+      "initial_fps": "000000",
+      "cp74": 25557,
+      "cp75": 25749,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170742",
+      "initial_fps": "000000",
+      "cp74": 25873,
+      "cp75": 26065,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170752",
+      "initial_fps": "000000",
+      "cp74": 25557,
+      "cp75": 25749,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170762",
+      "initial_fps": "000000",
+      "cp74": 24744,
+      "cp75": 24936,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170772",
+      "initial_fps": "000000",
+      "cp74": 25483,
+      "cp75": 25675,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170727",
+      "initial_fps": "000000",
+      "cp74": 24046,
+      "cp75": 24238,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170605",
+      "initial_fps": "000200",
+      "cp74": 25177,
+      "cp75": 25369,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170612",
+      "initial_fps": "000200",
+      "cp74": 24942,
+      "cp75": 25134,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170622",
+      "initial_fps": "000200",
+      "cp74": 26389,
+      "cp75": 26581,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170632",
+      "initial_fps": "000200",
+      "cp74": 26636,
+      "cp75": 26828,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170642",
+      "initial_fps": "000200",
+      "cp74": 27270,
+      "cp75": 27462,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170652",
+      "initial_fps": "000200",
+      "cp74": 26636,
+      "cp75": 26828,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170662",
+      "initial_fps": "000200",
+      "cp74": 25823,
+      "cp75": 26015,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170672",
+      "initial_fps": "000200",
+      "cp74": 26880,
+      "cp75": 27072,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170627",
+      "initial_fps": "000200",
+      "cp74": 23595,
+      "cp75": 23787,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170705",
+      "initial_fps": "000200",
+      "cp74": 25369,
+      "cp75": 25561,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170712",
+      "initial_fps": "000200",
+      "cp74": 25452,
+      "cp75": 25644,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170722",
+      "initial_fps": "000200",
+      "cp74": 26899,
+      "cp75": 27091,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170732",
+      "initial_fps": "000200",
+      "cp74": 27146,
+      "cp75": 27338,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170742",
+      "initial_fps": "000200",
+      "cp74": 27462,
+      "cp75": 27654,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170752",
+      "initial_fps": "000200",
+      "cp74": 27146,
+      "cp75": 27338,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170762",
+      "initial_fps": "000200",
+      "cp74": 26333,
+      "cp75": 26525,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170772",
+      "initial_fps": "000200",
+      "cp74": 27072,
+      "cp75": 27264,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "170727",
+      "initial_fps": "000200",
+      "cp74": 24105,
+      "cp75": 24297,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172205",
+      "initial_fps": "000000",
+      "cp74": 65613,
+      "cp75": 65805,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172212",
+      "initial_fps": "000000",
+      "cp74": 115280,
+      "cp75": 115472,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172222",
+      "initial_fps": "000000",
+      "cp74": 116727,
+      "cp75": 116919,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172232",
+      "initial_fps": "000000",
+      "cp74": 125878,
+      "cp75": 126070,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172242",
+      "initial_fps": "000000",
+      "cp74": 52518,
+      "cp75": 52710,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172252",
+      "initial_fps": "000000",
+      "cp74": 125878,
+      "cp75": 126070,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172262",
+      "initial_fps": "000000",
+      "cp74": 125065,
+      "cp75": 125257,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172272",
+      "initial_fps": "000000",
+      "cp74": 52128,
+      "cp75": 52320,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172227",
+      "initial_fps": "000000",
+      "cp74": 64211,
+      "cp75": 64403,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173205",
+      "initial_fps": "000000",
+      "cp74": 53271,
+      "cp75": 53463,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173212",
+      "initial_fps": "000000",
+      "cp74": 122930,
+      "cp75": 123122,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173222",
+      "initial_fps": "000000",
+      "cp74": 124377,
+      "cp75": 124569,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173232",
+      "initial_fps": "000000",
+      "cp74": 133528,
+      "cp75": 133720,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173242",
+      "initial_fps": "000000",
+      "cp74": 53142,
+      "cp75": 53334,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173252",
+      "initial_fps": "000000",
+      "cp74": 133528,
+      "cp75": 133720,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173262",
+      "initial_fps": "000000",
+      "cp74": 132715,
+      "cp75": 132907,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173272",
+      "initial_fps": "000000",
+      "cp74": 52752,
+      "cp75": 52944,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173227",
+      "initial_fps": "000000",
+      "cp74": 67761,
+      "cp75": 67953,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172205",
+      "initial_fps": "000200",
+      "cp74": 68246,
+      "cp75": 68438,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172212",
+      "initial_fps": "000200",
+      "cp74": 118773,
+      "cp75": 118965,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172222",
+      "initial_fps": "000200",
+      "cp74": 120220,
+      "cp75": 120412,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172232",
+      "initial_fps": "000200",
+      "cp74": 128007,
+      "cp75": 128199,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172242",
+      "initial_fps": "000200",
+      "cp74": 54647,
+      "cp75": 54839,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172252",
+      "initial_fps": "000200",
+      "cp74": 128007,
+      "cp75": 128199,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172262",
+      "initial_fps": "000200",
+      "cp74": 127194,
+      "cp75": 127386,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172272",
+      "initial_fps": "000200",
+      "cp74": 54257,
+      "cp75": 54449,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "172227",
+      "initial_fps": "000200",
+      "cp74": 65704,
+      "cp75": 65896,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173205",
+      "initial_fps": "000200",
+      "cp74": 55286,
+      "cp75": 55478,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173212",
+      "initial_fps": "000200",
+      "cp74": 124005,
+      "cp75": 124197,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173222",
+      "initial_fps": "000200",
+      "cp74": 125452,
+      "cp75": 125644,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173232",
+      "initial_fps": "000200",
+      "cp74": 133239,
+      "cp75": 133431,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173242",
+      "initial_fps": "000200",
+      "cp74": 55271,
+      "cp75": 55463,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173252",
+      "initial_fps": "000200",
+      "cp74": 133239,
+      "cp75": 133431,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173262",
+      "initial_fps": "000200",
+      "cp74": 132426,
+      "cp75": 132618,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173272",
+      "initial_fps": "000200",
+      "cp74": 54881,
+      "cp75": 55073,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "173227",
+      "initial_fps": "000200",
+      "cp74": 69254,
+      "cp75": 69446,
+      "delta": 192,
+      "beat_delta": 3
+    },
+    {
+      "opcode": "171205",
+      "initial_fps": "000000",
+      "cp74": 151755,
+      "cp75": 152077,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171212",
+      "initial_fps": "000000",
+      "cp74": 138787,
+      "cp75": 139109,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171222",
+      "initial_fps": "000000",
+      "cp74": 140234,
+      "cp75": 140556,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171232",
+      "initial_fps": "000000",
+      "cp74": 140481,
+      "cp75": 140803,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171242",
+      "initial_fps": "000000",
+      "cp74": 145523,
+      "cp75": 145845,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171252",
+      "initial_fps": "000000",
+      "cp74": 140481,
+      "cp75": 140803,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171262",
+      "initial_fps": "000000",
+      "cp74": 139668,
+      "cp75": 139990,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171272",
+      "initial_fps": "000000",
+      "cp74": 139844,
+      "cp75": 140166,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171227",
+      "initial_fps": "000000",
+      "cp74": 139417,
+      "cp75": 139739,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "174605",
+      "initial_fps": "000000",
+      "cp74": 153290,
+      "cp75": 153362,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174612",
+      "initial_fps": "000000",
+      "cp74": 166580,
+      "cp75": 166652,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174622",
+      "initial_fps": "000000",
+      "cp74": 168027,
+      "cp75": 168099,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174632",
+      "initial_fps": "000000",
+      "cp74": 168274,
+      "cp75": 168346,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174642",
+      "initial_fps": "000000",
+      "cp74": 186461,
+      "cp75": 186533,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174652",
+      "initial_fps": "000000",
+      "cp74": 168274,
+      "cp75": 168346,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174662",
+      "initial_fps": "000000",
+      "cp74": 167461,
+      "cp75": 167533,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174672",
+      "initial_fps": "000000",
+      "cp74": 167637,
+      "cp75": 167709,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174627",
+      "initial_fps": "000000",
+      "cp74": 167210,
+      "cp75": 167282,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "171205",
+      "initial_fps": "000200",
+      "cp74": 270036,
+      "cp75": 270358,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171212",
+      "initial_fps": "000200",
+      "cp74": 220894,
+      "cp75": 221216,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171222",
+      "initial_fps": "000200",
+      "cp74": 222341,
+      "cp75": 222663,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171232",
+      "initial_fps": "000200",
+      "cp74": 222588,
+      "cp75": 222910,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171242",
+      "initial_fps": "000200",
+      "cp74": 233153,
+      "cp75": 233475,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171252",
+      "initial_fps": "000200",
+      "cp74": 222588,
+      "cp75": 222910,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171262",
+      "initial_fps": "000200",
+      "cp74": 221775,
+      "cp75": 222097,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171272",
+      "initial_fps": "000200",
+      "cp74": 221951,
+      "cp75": 222273,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "171227",
+      "initial_fps": "000200",
+      "cp74": 220888,
+      "cp75": 221210,
+      "delta": 322,
+      "beat_delta": 5
+    },
+    {
+      "opcode": "174605",
+      "initial_fps": "000200",
+      "cp74": 242853,
+      "cp75": 242925,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174612",
+      "initial_fps": "000200",
+      "cp74": 288257,
+      "cp75": 288329,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174622",
+      "initial_fps": "000200",
+      "cp74": 289704,
+      "cp75": 289776,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174632",
+      "initial_fps": "000200",
+      "cp74": 289951,
+      "cp75": 290023,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174642",
+      "initial_fps": "000200",
+      "cp74": 295877,
+      "cp75": 295949,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174652",
+      "initial_fps": "000200",
+      "cp74": 289951,
+      "cp75": 290023,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174662",
+      "initial_fps": "000200",
+      "cp74": 289138,
+      "cp75": 289210,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174672",
+      "initial_fps": "000200",
+      "cp74": 289314,
+      "cp75": 289386,
+      "delta": 72,
+      "beat_delta": 1
+    },
+    {
+      "opcode": "174627",
+      "initial_fps": "000200",
+      "cp74": 288251,
+      "cp75": 288323,
+      "delta": 72,
+      "beat_delta": 1
+    }
+  ],
+  "new_arithmetic": [
+    {
+      "opcode": "171605",
+      "initial_fps": "000000",
+      "core_clocks": "197367",
+      "memory_beats": "3166",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171612",
+      "initial_fps": "000000",
+      "core_clocks": "143758",
+      "memory_beats": "2305",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171622",
+      "initial_fps": "000000",
+      "core_clocks": "145205",
+      "memory_beats": "2328",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171632",
+      "initial_fps": "000000",
+      "core_clocks": "145452",
+      "memory_beats": "2332",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171642",
+      "initial_fps": "000000",
+      "core_clocks": "187300",
+      "memory_beats": "3004",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171652",
+      "initial_fps": "000000",
+      "core_clocks": "145452",
+      "memory_beats": "2332",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171662",
+      "initial_fps": "000000",
+      "core_clocks": "144639",
+      "memory_beats": "2319",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171672",
+      "initial_fps": "000000",
+      "core_clocks": "184032",
+      "memory_beats": "2952",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171627",
+      "initial_fps": "000000",
+      "core_clocks": "183605",
+      "memory_beats": "2945",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171605",
+      "initial_fps": "000200",
+      "core_clocks": "315491",
+      "memory_beats": "5072",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171612",
+      "initial_fps": "000200",
+      "core_clocks": "380794",
+      "memory_beats": "6132",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171622",
+      "initial_fps": "000200",
+      "core_clocks": "382241",
+      "memory_beats": "6155",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171632",
+      "initial_fps": "000200",
+      "core_clocks": "228209",
+      "memory_beats": "3669",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171642",
+      "initial_fps": "000200",
+      "core_clocks": "277991",
+      "memory_beats": "4469",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171652",
+      "initial_fps": "000200",
+      "core_clocks": "228209",
+      "memory_beats": "3669",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171662",
+      "initial_fps": "000200",
+      "core_clocks": "227396",
+      "memory_beats": "3656",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171672",
+      "initial_fps": "000200",
+      "core_clocks": "266789",
+      "memory_beats": "4289",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    },
+    {
+      "opcode": "171627",
+      "initial_fps": "000200",
+      "core_clocks": "265726",
+      "memory_beats": "4272",
+      "entry_to_handler_clocks": "316",
+      "start_fetch_to_return_clocks": "177"
+    }
+  ],
+  "inputs": {
+    "tb/reports/cp74/board-sync/metrics.csv": "789e336a6f9f9120aabb40b6b23535a04fb3df18a4402ae50b7b073864efe7b3",
+    "build/cp75-fp11/board-sync/metrics.csv": "fe544a1b1ffb5509a9dcb993592f0999ea4cd4226b79fb53c615e194fbc9b098",
+    "tools/compare_fp75.py": "252065998c74dca917b8dd5c7388a40540b6f6348993b88d1855a8dc4729b91f"
+  }
+}
