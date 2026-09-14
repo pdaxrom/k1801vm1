@@ -1,0 +1,5 @@
+PASS CP74 events: 43 cases / 1527 checks
+- tb/fp_events_cp74.vh:269: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 4ms; walltime 0.254 s; speed 15.684 ms/s
+- Verilator: cpu 0.253 s on 1 threads; allocated 2 MB

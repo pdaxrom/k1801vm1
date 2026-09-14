@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "cause": "Immediate ReadFP misses fAbort. DIV erroneously sets FEC/FEA to divide zero after failed read. Marker 2 must preserve FEC/FEA as well as FPS/AC.",
+  "files": {
+    "vector.txt": "8978c9f8114bff88e0b954744ed5f652814ff854b11c85f9dfd5ba15af3480be",
+    "reference_fp_arith_cp74.c": "efc57714b5a80ec734b13cc5fed1f82ece5c4d4e3f805499ed43d486f7857956",
+    "simulation.log": "2b8d37b1664d11553f1e4bbb7d43a0527f5ee6f236b7ea2ff9b045aa3a628025"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "unchanged_previous_cases": 149404,
+  "current_cases": 194396,
+  "new_cases": 44992,
+  "ignored_field": "79: case ID only",
+  "previous_source_sha256": "3c272097887a59a85e99f1292ee573bb5d94eb6649ed8109ca86aae6c914b685",
+  "inputs": {
+    "tb/reports/cp73/archive.json": "fef7a4c2fdac370f6e077500bdd85551bb6ee4afca6440f120e2ab7fcd466ee9",
+    "build/cp74-fp11/sync/vectors.txt": "522dff20a60d2eb913947167322f31d312d5123971520fdb5c7c42c10566ceb8",
+    "tools/compare_vectors_fp74.py": "2468a74b572c61de8160617c1fde7eec967b8475d9ab7537658cf4659463cd03"
+  }
+}

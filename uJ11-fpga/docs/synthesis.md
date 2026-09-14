@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP74 — MUL/DIV F/D в программе FRAM
+
+**2754 байта кода / 3020 байт со всем состоянием**, +510 байт от CP73.
+53 обычных synthesis inputs CP67b совпадают по SHA256: **0 LUT / 0 FF /
+0 EBR / 0 uwords** прироста. Новый synthesis не выполнялся. Hardware
+CP67b: **1244 LUT / 381 FF / 7 EBR / Fmax 32,032 MHz**, 1005/1024 uwords,
+остаток 36 LUT/0 EBR. Nominal clock 29,56 MHz. MUL/DIV — обычные
+PDP-11 программы в HALT FRAM; добавлен лишь восьмибайтный PMAN.
+[Алгоритмы и измерения CP74](fp11-muldiv-cp74.md).
+
 ## CP73 — ADD/SUB F/D в программе FRAM
 
 **2252 байта кода / 2510 байт со всем состоянием**, +886 байт от CP72.

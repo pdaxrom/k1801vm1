@@ -1,8 +1,8 @@
 	.TITLE UJFP11
-	.IDENT /00.06/
-; CP73 FP11-A firmware: F/D add/subtract, seven guard bits. Absolute HALT FRAM, CP67 module ABI3.
+	.IDENT /00.07/
+; CP74 FP11-A firmware: F/D multiply/divide. Absolute HALT FRAM, CP67 module ABI3.
 ; LDFPS/STFPS/STST support all eight word addressing modes.
-; F/D CLR/TST/ABS/NEG/CMP/ADD/SUB; multiply/divide/conversion remain absent.
+; F/D CLR/TST/ABS/NEG/CMP/ADD/SUB/MUL/DIV; MOD/conversions remain absent.
 	.ASECT
 	.=40000
 INIT:	JMP @#COLD
@@ -118,6 +118,10 @@ ENTER:	MOV R0,REGS
 	CMP R4,#172000
 	BEQ XFER
 	CMP R4,#173000
+	BEQ XFER
+	CMP R4,#171000
+	BEQ XFER
+	CMP R4,#174400
 	BEQ XFER
 	JMP UNIMPL
 CFCC:	MOV FPS,R0
@@ -336,6 +340,10 @@ FEXEC:	CMP R4,#172000
 	BEQ FFLAGS
 	CMP R4,#170400
 	BEQ UWRITE
+	CMP R4,#171000
+	JEQ ARITH
+	CMP R4,#174400
+	JEQ ARITH
 	BIT #77600,FBUF
 	BNE USIGN
 	JSR PC,ZBUF
@@ -450,6 +458,10 @@ ARITH:	CLR AERR
 	JSR PC,UNPACK
 	MOV R0,BEXP
 	MOV R3,BSIGN
+	CMP R4,#171000
+	JEQ AMULT
+	CMP R4,#174400
+	JEQ ADIV
 	CMP R4,#173000
 	BNE ASORT
 	TST BEXP
@@ -619,6 +631,128 @@ ARIGHT:	CLC
 	ROR AMAN+2
 	ROR AMAN
 	RTS PC
+; Shift/add multiply retains seven guard bits. Each right shift discards
+; only bits below the retained product, including after one normalization.
+; PMAN is the product/quotient; operands remain private until ACOMIT.
+AMULT:	TST AEXP
+	JEQ AZERO
+	TST BEXP
+	JEQ AZERO
+	ADD BEXP,AEXP
+	SUB #128.,AEXP
+	JSR PC,MDINIT
+; BMAN becomes the unguarded 56-bit multiplier (24 bits in F mode).
+	MOV #7,R2
+MSHIFT:	JSR PC,BRIGHT
+	SOB R2,MSHIFT
+	MOV #56.,R4
+	BIT #200,FPS
+	BNE MLOOP
+	MOV BMAN+4,BMAN
+	MOV BMAN+6,BMAN+2
+	CLR BMAN+4
+	CLR BMAN+6
+	MOV #24.,R4
+MLOOP:	JSR PC,BRIGHT
+	BCC MRIGHT
+	ADD AMAN,PMAN
+	BCC MA1
+	INC PMAN+2
+	BNE MA1
+	INC PMAN+4
+	BNE MA1
+	INC PMAN+6
+MA1:	ADD AMAN+2,PMAN+2
+	BCC MA2
+	INC PMAN+4
+	BNE MA2
+	INC PMAN+6
+MA2:	ADD AMAN+4,PMAN+4
+	BCC MA3
+	INC PMAN+6
+MA3:	ADD AMAN+6,PMAN+6
+MRIGHT:	CLC
+	ROR PMAN+6
+	ROR PMAN+4
+	ROR PMAN+2
+	ROR PMAN
+	SOB R4,MLOOP
+	BR MDONE
+; DIV by exponent-zero source precedes dividend zero. No AC or NZVC write;
+; successful EA autoupdates still commit, including when FID inhibits trap.
+ADIV:	TST BEXP
+	BNE DNONZ
+	JSR PC,UPD
+	MOV #4,R0
+	JMP FPERR
+DNONZ:	TST AEXP
+	JEQ AZERO
+	SUB BEXP,AEXP
+	ADD #129.,AEXP
+	JSR PC,MDINIT
+	MOV #PMAN,R5
+	MOV #63.,R4
+	BIT #200,FPS
+	BNE DLOOP
+	ADD #4,R5
+	MOV #31.,R4
+; Restoring division: remainder < 2*divisor fits unsigned 64 bits. F builds
+; the quotient in PMAN[63:32]; D uses all words. No premature rounding.
+DLOOP:	ASL PMAN
+	ROL PMAN+2
+	ROL PMAN+4
+	ROL PMAN+6
+	MOV #AMAN+10,R1
+	MOV #BMAN+10,R2
+	MOV #4,R3
+DCMPL:	CMP -(R1),-(R2)
+	BLO DNEXT
+	BHI DSUB
+	SOB R3,DCMPL
+DSUB:	SUB BMAN,AMAN
+	BCC DS1
+	DEC AMAN+2
+	CMP AMAN+2,#177777
+	BNE DS1
+	DEC AMAN+4
+	CMP AMAN+4,#177777
+	BNE DS1
+	DEC AMAN+6
+DS1:	SUB BMAN+2,AMAN+2
+	BCC DS2
+	DEC AMAN+4
+	CMP AMAN+4,#177777
+	BNE DS2
+	DEC AMAN+6
+DS2:	SUB BMAN+4,AMAN+4
+	BCC DS3
+	DEC AMAN+6
+DS3:	SUB BMAN+6,AMAN+6
+	BIS #1,(R5)
+DNEXT:	ASL AMAN
+	ROL AMAN+2
+	ROL AMAN+4
+	ROL AMAN+6
+	DEC R4
+	BNE DLOOP
+MDONE:	MOV PMAN,AMAN
+	MOV PMAN+2,AMAN+2
+	MOV PMAN+4,AMAN+4
+	MOV PMAN+6,AMAN+6
+	JMP ANORM
+MDINIT:	MOV BSIGN,R0
+	XOR R0,ASIGN
+	CLR PMAN
+	CLR PMAN+2
+	CLR PMAN+4
+	CLR PMAN+6
+	RTS PC
+BRIGHT:	CLC
+	ROR BMAN+6
+	ROR BMAN+4
+	ROR BMAN+2
+	ROR BMAN
+	RTS PC
 ; R5=raw operand, R1=64-bit output; returns R0=exponent, R3=sign.
 ; Exponent-zero encodings become exact positive zero before arithmetic.
 UNPACK:	MOV (R5)+,R0
@@ -710,6 +844,7 @@ EADDR:	.BLKW 1
 FBUF:	.BLKW 4
 AMAN:	.BLKW 4
 BMAN:	.BLKW 4
+PMAN:	.BLKW 4
 AEXP:	.BLKW 1
 BEXP:	.BLKW 1
 ASIGN:	.BLKW 1

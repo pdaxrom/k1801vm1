@@ -1,0 +1,9 @@
+CP74 case1 cold clocks 3282008
+CP74 case1 cold clocks 3282008
+CP74 case2 cold clocks 3282008
+CP74 case2 cold clocks 3282008
+CP74 case3 cold clocks 3229829
+CP74 case4 cold clocks 845797
+[1058840597000] %Fatal: tb.v:25: Assertion failed in tb_fp11_board_cp74: CP74 case4 timeout/stopped PC050004 IR012345 uPC3e0
+%Error: build/cp74-fp11/board-sync/tb.v:25: Verilog $stop
+Aborting...

@@ -1,0 +1,91 @@
+`timescale 1ns/1ps
+module tb_fp11_board_cp74;
+    reg clk=0,reset=1,uart_rx=1;
+    wire fc,fs,fm,fi,stopped;
+    integer clocks=0,scenario=0,checks=0,i;
+    reg [15:0] expected_pc=16'o4000;
+    reg fail_read=0;
+    uj11_board dut(.clk(clk),.reset(reset),.halt_button(1'b0),.uart_rx(uart_rx),.uart_tx(),
+        .panel_keys(4'b0),.panel_din(),.panel_ce(),.panel_clk(),.panel_rs(),.panel_blank(),.panel_latch(),
+        .host_miso(),.host_miso_oe(),.fram_cs_n(fc),.fram_sck(fs),.fram_mosi(fm),.fram_miso(fi),
+        .sd_cs_n(),.sd_sck(),.sd_mosi(),.sd_miso(1'b1),.boot_complete(),.stopped(stopped));
+    spi_fram_model fram(.cs_n(fc),.sck(fs),.mosi(fm),.miso(fi));
+`ifdef UJ11_VENDOR_ROM
+    GSR GSR_INST(.GSR(1'b1)); PUR PUR_INST(.PUR(1'b1));
+`endif
+    always #17 clk=~clk;
+    always @(negedge clk) begin
+        if(fail_read && dut.bus_request && dut.bank && !dut.writing && dut.address==16'o7500)
+            force dut.error=1'b1;
+        else release dut.error;
+    end
+    always @(posedge clk) if(!reset) begin
+        clocks<=clocks+1;
+        if(clocks>100000000 || stopped)
+            $fatal(1,"CP74 case%0d timeout/stopped PC%o IR%o uPC%h",scenario,dut.cpu.engine.dp.rf.words[7],dut.cpu.ir,dut.cpu.debug_upc);
+    end
+    task put(input integer address,input [15:0] value);
+        begin fram.memory[65536+address]=value[7:0];fram.memory[65537+address]=value[15:8];end
+    endtask
+    function [15:0] peek(input integer address);
+        peek={fram.memory[65537+address],fram.memory[65536+address]};
+    endfunction
+    task eq(input [15:0] got,want,input string what);
+        begin
+            checks=checks+1;
+            if(got!==want)$fatal(1,"CP74 case%0d %s got%o want%o",scenario,what,got,want);
+        end
+    endtask
+    task fresh;
+        begin
+            @(negedge clk);reset=1;fail_read=0;uart_rx=1;expected_pc=16'o4000;repeat(4)@(negedge clk);
+            for(i=0;i<131072;i=i+1)fram.memory[i]=0;
+            clocks=0;
+        end
+    endtask
+    task boot;
+        begin
+            @(negedge clk);reset=0;wait(!dut.cpu.engine.service_mode);@(negedge clk);
+            eq(dut.cpu.engine.dp.rf.words[7],expected_pc,"selected bootstrap entry");
+            eq(dut.cpu.engine.dp.rf.words[6],16'o1000,"cold stack balanced");
+            eq(dut.cpu.psw,0,"initial USER PSW");
+            eq(peek(4),16'o312,"resident fault vector restored");
+            eq(dut.bus.boot_overlay_active,0,"HALT ROM released before module entry");
+            eq(dut.bus.boot_complete,0,"module initialization does not fake SD completion");
+            $display("CP74 case%0d cold clocks %0d",scenario,clocks);
+        end
+    endtask
+    task send_byte(input [7:0] value);
+        integer bitno;
+        begin
+            uart_rx=0;repeat(256)@(negedge clk);
+            for(bitno=0;bitno<8;bitno=bitno+1)begin uart_rx=value[bitno];repeat(256)@(negedge clk);end
+            uart_rx=1;repeat(256)@(negedge clk);
+        end
+    endtask
+    integer metrics,start_cycle,start_beat,entry_cycles,exit_start,beats=0;
+    always @(posedge clk) if(!reset && dut.acknowledge)beats<=beats+1;
+    localparam FP_ENTER=16476,FP_START=19134;
+    task measure(input [15:0] pc,opcode,fps_value,nextpc);
+        begin
+            wait(dut.bus_request && !dut.bank && dut.cpu.engine.fetching && dut.address==pc);
+            start_cycle=clocks;start_beat=beats;
+            wait(dut.bus_request && dut.bank && dut.cpu.engine.fetching && dut.address==FP_ENTER);
+            entry_cycles=clocks-start_cycle;
+            wait(dut.bus_request && dut.bank && dut.cpu.engine.fetching && dut.address==FP_START);
+            exit_start=clocks;
+            wait(!dut.cpu.engine.service_mode);@(negedge clk);
+            $fwrite(metrics,"%06o,%06o,%0d,%0d,%0d,%0d\n",opcode,fps_value,clocks-start_cycle,beats-start_beat,entry_cycles,clocks-exit_start);
+            eq(dut.cpu.engine.service_ready,2,"FP remains ready after operation");
+            eq(dut.cpu.engine.dp.rf.words[7],nextpc,"FP return PC");
+        end
+    endtask
+    initial begin
+        metrics=$fopen("build/cp74-fp11/board-sync/metrics.csv","w");
+        $fwrite(metrics,"opcode,initial_fps,core_clocks,memory_beats,entry_to_handler_clocks,start_fetch_to_return_clocks\n");
+        #100;
+        `include "module_cases.vh"
+        $display("PASS CP74 modules: %0d cases, %0d checks, actual SPI FRAM",scenario,checks);
+        $finish;
+    end
+endmodule

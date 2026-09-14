@@ -1,4 +1,23 @@
-# Benchmarks: CP73 и предыдущие этапы
+# Benchmarks: CP74 и предыдущие этапы
+
+## CP74 — программные MUL/DIV F/D
+
+Полная SPI FRAM модель, одинаковые ненулевые operands AC5/AC2:
+
+| Операция | Clocks | CPU memory beats | ms при 29,56 MHz |
+|---|---:|---:|---:|
+| MULF | 151755 | 2435 | 5,134 |
+| MULD | 270036 | 4344 | 9,135 |
+| DIVF | 153290 | 2449 | 5,186 |
+| DIVD | 242853 | 3884 | 8,216 |
+
+36 новых measurements: 138787–295877 clocks, не worst-case bound.
+Из 205 прежних 133 совпали, 72 (ADD/SUB и ABS/NEG) +384 clocks из-за
+dispatch. Прямые AC transfers прежние; вход/возврат 316/177 clocks.
+Программа теста перенесена в 010000 из-за роста её размера; заданные
+данные и R0–R6 прежние, PC и операнд LDFPS R7 отличаются от CP73.
+Cold init ODT+FP+SDBOOT: 3282008 clocks. Модуль FP — 3020 байт FRAM,
+новых FPGA ресурсов нет. [Полный отчёт](fp11-muldiv-cp74.md).
 
 ## CP73 — программные ADD/SUB F/D
 

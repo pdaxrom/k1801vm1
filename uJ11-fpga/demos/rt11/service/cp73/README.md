@@ -14,7 +14,7 @@ CLR/TST/ABS/NEG/CMP и **ADD/SUB F/D**. 26 мнемоник / 1685 коррек�
 | release.json | SHA256, immutable length и полная аллокация |
 
 FP11 резервирует **040000–044715, 2510 байт** HALT FRAM с BSS/stack.
-Checksum `032371` покрывает 2252 байта кода; FP11.BIN — пять RT-11 блоков.
+Checksum `032371` покрывает 2252 байта кода; FP11.BIN — шесть RT-11 блоков (3072 байта, включая header; уточнено в CP74).
 До MEMEND=`044716` нельзя размещать другие модули: таблица хранит только
 immutable length, автоматического BSS allocator/relocation нет.
 

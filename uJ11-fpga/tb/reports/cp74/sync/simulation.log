@@ -1,0 +1,5 @@
+PASS CP74 paths: 194396 cases / 13529088 checks / 4184 manual DEC cases
+- tb/tb_fp_paths_cp74.v:107: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 24s; walltime 890.734 s; speed 26.697 ms/s
+- Verilator: cpu 889.417 s on 1 threads; allocated 2 MB

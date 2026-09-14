@@ -1,5 +1,26 @@
 # uJ11 TODO
 
+## CP74 — программные MUL/DIV F/D
+
+- [x] Умножение 24/56 и деление 31/63 итераций, все addressing modes,
+  F/D округление и усечение, FIV/FIU/FIUV/FID, F low-half preservation.
+- [x] DIV zero: сохранить AC/NZVC, коммитить EA update, FEC=4;
+  IRQ/ODT видят завершённую инструкцию и целый результат.
+- [x] По 200000 сравнений с uint128/Fraction/serial моделями;
+  сохранить все fixtures CP73, отметить immediate-abort дефект эталона.
+- [x] Измерения SPI FRAM: 241 операция; модуль 3020 байт, FPGA +0.
+- [x] Sync: 194396 / 13529088, logic: 64248 / 4519200,
+  vendor: 304 / 21764; RT-11/UJMOD/22 ODT STEP: 66 checks — PASS.
+  Directed sync/vendor: 43 / 1527 каждый; архив и native release CP74.
+- [ ] MODF/MODD и преобразования FP11-A, затем полные diagnostics.
+- [ ] Сократить программные MUL/DIV и общий dispatch после correctness
+  baseline: исследовать частичные произведения через имеющийся integer
+  EIS MUL и выход DIV при нулевом остатке, без дополнительного RTL.
+- [ ] FP disassembly и AC/FPS/FEC/FEA dump в ODT; аппаратная установка
+  и проверка FP11.BIN. Плата пока остаётся CP67b без FP11 module.
+
+[Документация CP74](docs/fp11-muldiv-cp74.md).
+
 ## CP73 — программные ADD/SUB F/D
 
 - [x] Семь guard bits FP11-A, нормализация, округление/усечение,
@@ -14,7 +35,7 @@
 - [ ] Оптимизировать программные shifts/pack и dispatch: ADD F/D в
   измеренном AC случае 65229/67862 clocks; старые memory/unary paths
   получили +384–576 clocks. Сохранить correctness baseline CP73.
-- [ ] Затем MUL/DIV, MOD и преобразования FP11-A.
+- [x] MUL/DIV F/D — CP74; MOD и преобразования остаются отдельным этапом.
 - [ ] FP disassembly и AC/FPS/FEC/FEA dump в ODT; проверка пакета на плате.
 
 [Документация CP73](docs/fp11-arithmetic-cp73.md).
@@ -48,7 +69,7 @@
 - [x] RT-11/UJMOD/ODT: одиннадцать FP STEP, самостоятельная проверка FPTST,
   возврат, DIR, cold reset и OFF — 43 checks PASS в симуляции.
 - [x] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests — CP73.
-- [ ] Затем MUL/DIV и преобразования; полная FP11 ISA пока не готова.
+- [x] MUL/DIV F/D — CP74; преобразования и полная FP11 ISA ещё впереди.
 - [ ] Устранить измеренную регрессию CP71: LDF/LDD AC5 +4255/+4777 clocks,
   memory +2341…2400; STF/STD AC5 +1225, memory +1652 относительно CP70.
   Проверить короткий путь AC transfer, общий dispatch и flags helper.
