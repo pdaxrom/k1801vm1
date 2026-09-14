@@ -9,6 +9,20 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP72 — прямые переносы FP11 AC
+
+Mode-0 LDF/LDD копируют напрямую без FBUF, STF/STD используют общий
+фиксированный перенос 2/4 слов. LDF/LDD AC5→AC2: **17662/18120 clocks**,
+на 17–19% короче CP71; STF/STD AC2→AC5: **16845/17303**, выигрыш 6–7%.
+Другие 165 SPI measurements прежние. **1394 байта кода / 1624 байта FRAM**,
++30 байт кода; BSS/stack и hardware CP67b не менялись.
+
+99104 / 6947312 sync и 22748 / 1621848 logic — PASS на прежних векторах.
+Directed sync/vendor: 35 / 1254 каждый, включая IRQ/ODT между записями AC;
+SPI FRAM: 4 / 632 — PASS. Vendor: **467 cases / 32176 checks**, 128 manual — PASS. RT-11: **43 checks / 531124415 clocks / 3476 UART bytes — PASS**.
+ISA и ограничения CP71 сохранены. На плату пакет не установлен.
+[Контракт оптимизации, остаточная регрессия и пакет](fp11-paths-cp72.md).
+
 ## CP71 — FP11-A unary и compare
 
 CLR/TST/ABS/NEG/CMP F/D со всеми addressing modes, AC0–AC5 и exceptions.

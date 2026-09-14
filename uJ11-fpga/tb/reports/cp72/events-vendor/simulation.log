@@ -1,0 +1,2 @@
+PASS CP72 events: 35 cases / 1254 checks
+tb/fp_events_cp72.vh:173: $finish called at 2418900000 (1ps)

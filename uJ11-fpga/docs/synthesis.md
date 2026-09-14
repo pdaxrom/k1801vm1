@@ -1,5 +1,15 @@
 # Synthesis checkpoints
 
+## CP72 — ускорение AC transfers в программе FRAM
+
+**1394 байта кода / 1624 байта со всем состоянием**, +30 байт от CP71.
+BSS/stack прежние 230 байт. Все 53 обычных файла synthesis manifest CP67b
+совпали по SHA256. Прирост **0 LUT / 0 FF / 0 EBR / 0 uwords**;
+нового MAP/PAR/TRACE нет. Сохраняется CP67b: **1244 LUT / 381 FF / 7 EBR /
+Fmax 32,032 MHz**, 1005/1024 uwords. Свободны 36 LUT, 0 EBR.
+Ускорение достигнуто уменьшением программных переносов и bus beats;
+частота и memory controller прежние. [Измерения CP72](fp11-paths-cp72.md).
+
 ## CP71 — FP11-A unary/compare в HALT FRAM
 
 **1364 байта кода / 1594 байта с BSS/stack**, +344 байта FRAM от CP70.

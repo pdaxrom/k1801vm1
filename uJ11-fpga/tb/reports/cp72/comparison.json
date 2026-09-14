@@ -1,0 +1,68 @@
+{
+  "passed": true,
+  "interval": "USER opcode request through START return",
+  "nominal_hz": 29560000,
+  "operations": 169,
+  "unchanged_operations": 165,
+  "optimized": [
+    {
+      "opcode": "172605",
+      "fps": "000000",
+      "cp70_clocks": 17114,
+      "cp71_clocks": 21369,
+      "cp72_clocks": 17662,
+      "saved_clocks": 3707,
+      "reduction_percent": 17.348,
+      "cp70_delta": 548,
+      "cp71_beats": 337,
+      "cp72_beats": 278
+    },
+    {
+      "opcode": "174205",
+      "fps": "000000",
+      "cp70_clocks": 16730,
+      "cp71_clocks": 17955,
+      "cp72_clocks": 16845,
+      "saved_clocks": 1110,
+      "reduction_percent": 6.182,
+      "cp70_delta": 115,
+      "cp71_beats": 283,
+      "cp72_beats": 265
+    },
+    {
+      "opcode": "172605",
+      "fps": "000200",
+      "cp70_clocks": 17695,
+      "cp71_clocks": 22472,
+      "cp72_clocks": 18120,
+      "saved_clocks": 4352,
+      "reduction_percent": 19.366,
+      "cp70_delta": 425,
+      "cp71_beats": 354,
+      "cp72_beats": 285
+    },
+    {
+      "opcode": "174205",
+      "fps": "000200",
+      "cp70_clocks": 17311,
+      "cp71_clocks": 18536,
+      "cp72_clocks": 17303,
+      "saved_clocks": 1233,
+      "reduction_percent": 6.652,
+      "cp70_delta": -8,
+      "cp71_beats": 292,
+      "cp72_beats": 272
+    }
+  ],
+  "inputs": {
+    "tb/reports/cp70/archive.json": "768a42a7f5edfbf039e32812f0528f26cc166a354829471576cf5b10bd4e3902",
+    "tb/reports/cp70/board-sync/metrics.csv": "cf297dccac86a56299bbc0d01b67a5d78c6c80c4578f4ff0cb1feba639a9eb97",
+    "tb/reports/cp71/archive.json": "8f4cbff81559e60ad236c060d4c768e2ca8abeed7c98a9cefa1cc724affce491",
+    "tb/reports/cp71/board-sync/metrics.csv": "165702d1a8b3c03f6c785dfebecc534b34877dddfd7cc6f61253845c6efd5eec",
+    "build/cp72-fp11/board-sync/result.json": "3cf012c199341f3398778375bfa0582b1fa860eb978ef4a2ac978f74bf4a48c5",
+    "build/cp72-fp11/board-sync/metrics.csv": "dcd597b18ac157cf0581005cb87320c66d6cd1263e58db831439724db4c86da1",
+    "build/cp72-fp11/sync/vectors.txt": "a9628ed827613c07a1f61a283889e1b5963adb7952c5c30e5b35b0ca6c0fbff7",
+    "build/cp72-fp11/logic/vectors.txt": "bc57a7e108f542a10f33d89b3c54db34ba7d1651ac8e348ba4d7670458fe4c7e",
+    "tools/compare_fp72.py": "90f7bf604e4083408c6a5347f190783f854c406a41e3f2698c32767d9a7defa3"
+  }
+}

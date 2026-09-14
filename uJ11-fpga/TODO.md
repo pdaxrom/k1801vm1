@@ -1,5 +1,23 @@
 # uJ11 TODO
 
+## CP72 — ускорение FP11 AC transfers
+
+- [x] Убрать промежуточный FBUF при LDF/LDD AC→AC, фиксированный перенос
+  2/4 слов, сохранение младшей половины в F mode и корректный self-copy.
+- [x] Проверять AC6/7 до доступа; пропускать autoupdate bookkeeping в mode 0.
+- [x] Повторить полный sync/logic набор с побайтно прежними vectors/expectations.
+- [x] IRQ/ODT между записями AC: 35 directed cases / 1254 checks в sync/vendor.
+- [x] SPI FRAM: ускорение LDF/LDD 17–19%, STF/STD 6–7%; все 165 прочих
+  измерений прежние. Цена — 30 байт FRAM, без дополнительных ресурсов FPGA.
+- [x] DP8KC: 467 cases / 32176 checks; RT-11/UJMOD/ODT: 43 checks,
+  включая 11 STEP, самопроверку, cold reset и OFF — PASS в симуляции.
+- [ ] ADD/SUB F/D с FP11-A rounding, overflow/underflow и cancellation tests.
+- [ ] Дальнейшая оптимизация dispatch: LDF/LDD AC всё ещё +548/+425 clocks
+  к CP70, STF +115. Memory LDF/LDD +2341…2400, STF/STD +1652 остаются.
+- [ ] FP disassembly и dump AC/FPS/FEC/FEA в ODT; установка FP11 на плату.
+
+[Контракт CP72, сравнение и результаты проверок](docs/fp11-paths-cp72.md).
+
 ## CP71 — FP11-A unary и compare
 
 - [x] CLR/TST/ABS/NEG/CMP F/D, все addressing modes, AC0–AC5 и AC6/7 illegal.
