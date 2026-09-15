@@ -1,6 +1,6 @@
 	.TITLE FPTST
-	.IDENT /00.08/
-; CP76: ODT steps all conversion families; native integer/range checks.
+	.IDENT /00.09/
+; CP79: DCJ11 FPP software, ODT steps and native numeric/exception checks.
 	.MACRO JNE DST,?OK
 	BEQ OK
 	JMP DST
@@ -59,7 +59,7 @@ CSD:	SETD
 CLFTOD:	LDCFD AC1,AC0
 CSTORE:	STCDL AC0,LONG
 LOOP:	BR .
-FINISH:	CMP RESULT,#144014
+FINISH:	CMP RESULT,#144000
 	JNE FAIL
 	CMP ERR,#14
 	JNE FAIL
@@ -78,15 +78,15 @@ CHECK:	CMP (R0)+,(R1)+
 	TST (R2)+
 	JNE FAIL
 	SOB R3,CHECK
-; Negative-zero memory is overwritten before the enabled UV exception.
+; DCJ11 cancels ABS before execution: preserve operand and FPS NZVC.
 	LDFPS #44000
 	ABSF MINUS
 	STFPS RESULT
-	CMP RESULT,#144004
+	CMP RESULT,#144000
 	JNE FAIL
-	TST MINUS
+	CMP MINUS,#100123
 	JNE FAIL
-	TST MINUS+2
+	CMP MINUS+2,#4567
 	JNE FAIL
 ; Rounded double 1/3, then divide-zero preserves all four AC words/NZVC.
 	SETD

@@ -1,6 +1,6 @@
 	.TITLE UJFP11
-	.IDENT /00.10/
-; CP76 FP11-A firmware: conversions. Absolute HALT FRAM, CP67 module ABI3.
+	.IDENT /00.11/
+; CP79 DCJ11 FPP software emulation. Absolute HALT FRAM, CP67 module ABI3.
 ; LDFPS/STFPS/STST support all eight word addressing modes.
 ; Full documented FP11 instruction families; ordinary code in HALT FRAM.
 	.ASECT
@@ -328,25 +328,11 @@ FREAD:	.WORD 21
 	BNE FEXEC
 	BIT #4000,FPS
 	BEQ FEXEC
-; FP11-A unary UV exceptions complete the operation first (DEC 1981
-; pp. 320/334). Arithmetic/compare/load cancel before execution.
-	CMP R4,#170600
-	BEQ FUWR
-	CMP R4,#170700
-	BEQ FUWR
-; TST retains the sign while setting flags (FP11-A manual 5.3.8).
-	CMP R4,#172400
-	BEQ FUVCC
-	CMP R4,#170500
-	BNE FUV
-FUVCC:
-	JSR PC,SETCC
+; DCJ11 User Guide chapter 7: FIUV aborts before execution. Preserve
+; operand/AC and FPS condition codes, including unary and load operations.
 FUV:	JSR PC,UPD
 	MOV #14,R0
 	JMP FPERR
-FUWR:	JSR PC,ZBUF
-	MOV #170610,R4
-	JMP UWRITE
 FEXEC:	CMP R4,#172000
 	JEQ ARITH
 	CMP R4,#173000
@@ -389,8 +375,6 @@ USTORE:	MOV R3,R2
 	JSR PC,WRITE
 FFLAGS:	MOV FBUF,R0
 	JSR PC,SETCC
-	CMP R4,#170610
-	JEQ FUV
 	JMP COMMIT
 FLOAD:	MOV #FBUF,R5
 	MOV ACPTR,R1
@@ -465,7 +449,8 @@ CDONE:	BIC #17,FPS
 	JMP COMMIT
 ZEROS:	.WORD 0,0,0,0
 ; Two 64-bit integer mantissas in little-word order: hidden bit 62,
-; seven low guard bits. The same width serves F and D; F ignores AC[31:0].
+; seven low work bits. ADD/SUB jam discarded alignment bits into bit 0
+; for DCJ11 7.6 rounding/chopping accuracy. F ignores AC[31:0].
 ; No host floating arithmetic, FPGA additions or new microinstructions.
 ARITH:	CLR AERR
 	CLR AOVF
@@ -522,7 +507,15 @@ AREADY:	TST AEXP
 	MOV AEXP,R2
 	SUB BEXP,R2
 	CMP R2,#64.
-	JGE APACK
+	BLT AGAP
+; Nonzero source below the working precision still matters to chopped
+; subtraction and to half-way rounding. Preserve it as a sticky bit.
+	CLR BMAN+6
+	CLR BMAN+4
+	CLR BMAN+2
+	MOV #1,BMAN
+	BR ALIGNED
+AGAP:
 	TST R2
 	BEQ ALIGNED
 ASHIFT:	CLC
@@ -530,6 +523,9 @@ ASHIFT:	CLC
 	ROR BMAN+4
 	ROR BMAN+2
 	ROR BMAN
+	BCC ASNEXT
+	BIS #1,BMAN
+ASNEXT:
 	SOB R2,ASHIFT
 ALIGNED:	MOV ASIGN,R0
 	MOV BSIGN,R1
@@ -781,8 +777,8 @@ BRIGHT:	CLC
 	ROR BMAN+2
 	ROR BMAN
 	RTS PC
-; FP11-A MOD develops 48 exact F bits / 59 D product bits (DEC 1978
-; table 5-2, DEC 1983 pp.147-149). Discard four CP74 guard positions
+; DCJ11 MOD develops 48 exact F bits / 59 D product bits (User Guide
+; 7-21/7-22). Discard four CP74 guard positions
 ; BEFORE the optional normalization; F's exact product already has zeros.
 MNORM:	BIC #17,AMAN
 	BIT #40000,AMAN+6
@@ -974,19 +970,15 @@ CMREAD:	.WORD 21
 	BNE CEXEC
 	BIT #4000,FPS
 	BEQ CEXEC
-; DEC 1983 p143: flags reflect fetched -0 even when FIUV aborts LDC.
-	JSR PC,SETCC
+; DCJ11 7-17: FIUV precedes execution and preserves FPS condition codes.
 	JMP FUV
 CEXEC:	CMP R4,#176400
 	JEQ CLDE
 	CMP R4,#177000
 	JEQ CLDI
-; LDC F/D: canonical zero; retain the fetched -0 sign in condition codes.
+; DCJ11 LDC F/D: canonical zero; flags describe the converted AC.
 	BIT #77600,FBUF
 	BNE CROUND
-	TST FBUF
-	BPL CZLOAD
-	MOV #10,BEXP
 CZLOAD:	JSR PC,ZBUF
 	BR CROUND
 CSTF:	JSR PC,CGETAC

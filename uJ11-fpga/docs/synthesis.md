@@ -1,12 +1,39 @@
 # Synthesis checkpoints
 
-## CP78 — аппаратное отображение PSW, gate ожидается
+## CP79 — профиль J‑11 в программном FPP
 
-| Revision | Features | LUT | FF | EBR | Fmax | Microcode words | Notes |
-|---|---|---:|---:|---:|---:|---:|---|
-| CP78a candidate | CP67b + CPU-local PSW word/byte | — | — | — | — | 1005 | Только project/manifest prepared; MAP/PAR/TRACE не запущен |
+Только внешний FRAM module: 4518 байт вместо 4560. RTL/ROM/microcode
+CP67b прежние; **0 LUT / 0 FF / 0 EBR / 0 uwords** прироста.
+52 из 53 обычных файлов исторического hardware manifest CP77 совпали
+по SHA256; единственное отличие — расширение `checkpoint_board.py` для
+отдельных CP78 экспериментов. Оно не меняет CP67b hardware inputs.
+На плате CP67b: 1244 LUT / 381 FF / 7 EBR / 628 slices, TRACE 32,032 MHz.
+[Подробности](fpp-j11-cp79.md).
 
-`--psw-cp78 --clock-mhz 31.824 --fram-timing`, LCMXO2-1200HC-4SG32C. RTL изменилась, поэтому **1244 LUT / 381 FF / 7 EBR / 32,032 MHz относятся только к CP67b**. В CP78 нет новых ROM/microcode words; ожидаемые 7 EBR ещё требуют подтверждения synthesis. Передачу исходников на сервер остановила автоматическая проверка доступа. [Семантика и gate](psw-cp78.md).
+## CP78 — CPU-local PSW: три варианта не прошли MAP
+
+LCMXO2-1200HC-4SG32C, constraint 31,824 MHz, внешние FRAM delays включены.
+Синтез выполнен на `192.168.1.108` 2026-09-15 после разрешения передачи.
+
+| Revision | Features | LUT | FF | EBR | Slices | Fmax | Microcode words | Notes |
+|---|---|---:|---:|---:|---:|---|---:|---|
+| CP67b | Установленная плата | 1244 | 381 | 7 | 628 | 32,032 MHz | 1005 | MAP/PAR/TRACE PASS |
+| CP78a | CPU-local PSW word/byte | 1290 | 380 | 7 | 649 | — | 1005 | MAP FAIL |
+| CP78b | Раздельные PSW data/enable equations | 1277 | 380 | 7 | 643 | — | 1005 | MAP FAIL, предел 640 slices |
+| CP78c | Общий ALU data path для PSW stores | 1286 | 380 | 7 | 648 | — | 1005 | MAP FAIL |
+
+CP78b экономит 13 LUT и 6 slices относительно CP78a, но тоже не помещается.
+CP78c оказался хуже CP78b и не принят; функциональную квалификацию этого
+отброшенного варианта не проводили. PAR/TRACE у всех трёх отсутствуют,
+Fmax не получен, новых JED нет. Прежние запреты передачи сняты; актуальная
+причина остановки — превышение аппаратных ресурсов.
+
+Сырые отчёты и точные SHA256-исходники:
+[CP78a](../synth/reports/cp78a/result.json),
+[CP78b](../synth/reports/cp78b/result.json),
+[CP78c](../synth/reports/cp78c/result.json).
+Исторический функциональный архив CP78 сохранён без перезаписи.
+[Семантика и проверки](psw-cp78.md).
 
 ## CP77 — FP debugger в HALT FRAM
 

@@ -1,0 +1,907 @@
+{
+  "checkpoint": "CP79",
+  "passed": true,
+  "installed_on_board": false,
+  "qualification": "DCJ11 documented FPP software profile; PSW MMIO operands and physical-board qualification remain open",
+  "source_files": {
+    "tb/reference_fp_add_cp79.h": {
+      "sha256": "e373b1c7c3d907e62a7efe072d45aea0405f3c5b8cecd133dd449c6475194630",
+      "member": "project/tb/reference_fp_add_cp79.h"
+    },
+    "tools/test_fp_math_cp79.py": {
+      "sha256": "bcf959b806e3e5054b51800d3b2c3ec08f840814235f86168add11fe91c662a4",
+      "member": "project/tools/test_fp_math_cp79.py"
+    },
+    "tools/test_fp_conversions_cp79.py": {
+      "sha256": "467ebeb5d0a215a006c54d2432708b4f3228a52091acb157b0616b13a73f0e60",
+      "member": "project/tools/test_fp_conversions_cp79.py"
+    },
+    "tools/test_fp_math_cp73.py": {
+      "sha256": "2a54a336561bdfcdecd4ae5e66a4f009b214f9e5db189f3fe7fbf7b8d59122b0",
+      "member": "project/tools/test_fp_math_cp73.py"
+    },
+    "tools/test_fp_math_cp75.py": {
+      "sha256": "55b2890dba1350b95c7b9a4f9ed6e43f1e02f6f23b0b6dea90131edf2123b965",
+      "member": "project/tools/test_fp_math_cp75.py"
+    },
+    "tools/fp_reference_cp79.py": {
+      "sha256": "dae8a41d5bb7b79e18ebc04de470cfcba02f4037f39961cb550e4ae4954619c6",
+      "member": "project/tools/fp_reference_cp79.py"
+    },
+    "build/cp79-fp11/conversions/reference.c": {
+      "sha256": "5ed4575127eb7278c70f741d804acea688824f007289ba278073cc1c6afc2499",
+      "member": "project/build/cp79-fp11/conversions/reference.c"
+    },
+    "../core/core.c": {
+      "sha256": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+      "member": "external/core/core.c"
+    },
+    "../core/core.h": {
+      "sha256": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+      "member": "external/core/core.h"
+    },
+    "../core/hardware.c": {
+      "sha256": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+      "member": "external/core/hardware.c"
+    },
+    "../core/hardware.h": {
+      "sha256": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057",
+      "member": "external/core/hardware.h"
+    },
+    "../core/pdp11_fp.c": {
+      "sha256": "ad5ef37ef0ee8fa9221632ad903224599759cf95a4bcbe4f5dfd77e0870f2220",
+      "member": "external/core/pdp11_fp.c"
+    },
+    "build/cp79-fp11/conversions/reference/core.c": {
+      "sha256": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+      "member": "project/build/cp79-fp11/conversions/reference/core.c"
+    },
+    "build/cp79-fp11/conversions/reference/core.h": {
+      "sha256": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+      "member": "project/build/cp79-fp11/conversions/reference/core.h"
+    },
+    "build/cp79-fp11/conversions/reference/hardware.c": {
+      "sha256": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+      "member": "project/build/cp79-fp11/conversions/reference/hardware.c"
+    },
+    "build/cp79-fp11/conversions/reference/hardware.h": {
+      "sha256": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057",
+      "member": "project/build/cp79-fp11/conversions/reference/hardware.h"
+    },
+    "build/cp79-fp11/conversions/reference/pdp11_fp.c": {
+      "sha256": "aa6c95f96ab85d62e0b01ec4242fc9e56c08bc68868b0128b7749116f01caa9b",
+      "member": "project/build/cp79-fp11/conversions/reference/pdp11_fp.c"
+    },
+    "build/cp79-fp11/conversions/reference/reference_fp_add_cp73.h": {
+      "sha256": "a718b14bfedac09f26c8a0e5f34a1fb494d84b687b3e55672668c3ab341d8e3a",
+      "member": "project/build/cp79-fp11/conversions/reference/reference_fp_add_cp73.h"
+    },
+    "build/cp79-fp11/conversions/reference/reference_fp_add_cp79.h": {
+      "sha256": "e373b1c7c3d907e62a7efe072d45aea0405f3c5b8cecd133dd449c6475194630",
+      "member": "project/build/cp79-fp11/conversions/reference/reference_fp_add_cp79.h"
+    },
+    "build/cp79-fp11/conversions/reference/reference_fp_muldiv_cp74.h": {
+      "sha256": "e64875f6fc3a9ac7a50f811224e90161e88abeb615c04140b9246bc6584b5c42",
+      "member": "project/build/cp79-fp11/conversions/reference/reference_fp_muldiv_cp74.h"
+    },
+    "build/cp79-fp11/software/FP11.MAC": {
+      "sha256": "7c597dc5e33aa646e0ebfb79a213d600f92416480db94ad3bca5c0b569f6fc8d",
+      "member": "project/build/cp79-fp11/software/FP11.MAC"
+    },
+    "firmware/fp11/FP11.MAC": {
+      "sha256": "7c597dc5e33aa646e0ebfb79a213d600f92416480db94ad3bca5c0b569f6fc8d",
+      "member": "project/firmware/fp11/FP11.MAC"
+    },
+    "tools/build_fp11_cp79.py": {
+      "sha256": "453269d21784aab57a7b86165157449740f78cbe6737d50262ca802b9144204c",
+      "member": "project/tools/build_fp11_cp79.py"
+    },
+    "tools/build_software_cp67.py": {
+      "sha256": "3427e667aa8548a3537bc63f62e8f96b3902d96dc6956e97c0f5e825af4a56cb",
+      "member": "project/tools/build_software_cp67.py"
+    },
+    "tools/module_image_cp67.py": {
+      "sha256": "b2636d6d4e97a6277fe21ce9dec5a97dedb34f381038735afe1caf5eb0ecfa59",
+      "member": "project/tools/module_image_cp67.py"
+    },
+    "tools/rt11_build.py": {
+      "sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002",
+      "member": "project/tools/rt11_build.py"
+    },
+    "build/cp79-fp11/software/FP11.BIN": {
+      "sha256": "35708587dea03ee076339e0752f5bae0100264d4db474f08e9feb04b3226010d",
+      "member": "project/build/cp79-fp11/software/FP11.BIN"
+    },
+    "build/cp79-fp11/software/image.bin": {
+      "sha256": "202e13b4bfaaa3d9dd903b4b2424cb6f5c55f2d45152a8b8ffdc38fe36427037",
+      "member": "project/build/cp79-fp11/software/image.bin"
+    },
+    "tb/tb_fp_paths_cp79.v": {
+      "sha256": "05d60c681955c355d8e52c79a10804098b6506c8484c5bf78e27a339da9a350a",
+      "member": "project/tb/tb_fp_paths_cp79.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_core.v": {
+      "sha256": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+      "member": "project/build/cp67-modules/src/rtl/uj11_core.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_decode_rom.v": {
+      "sha256": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+      "member": "project/build/cp67-modules/src/rtl/uj11_decode_rom.v"
+    },
+    "build/cp67-modules/src/microcode/generated/uj11_decode_table.v": {
+      "sha256": "f98cee81a9010cd3c4ebf6a52fb8beedc47f0a861ea0515dcee537a9d0b80b29",
+      "member": "project/build/cp67-modules/src/microcode/generated/uj11_decode_table.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_engine.v": {
+      "sha256": "1764b2a587e9a90596ae56c8da940362525bbd05994da5ee22878519a2bf6f43",
+      "member": "project/build/cp67-modules/src/rtl/uj11_engine.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_decode.v": {
+      "sha256": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+      "member": "project/build/cp67-modules/src/rtl/uj11_decode.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_microseq.v": {
+      "sha256": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+      "member": "project/build/cp67-modules/src/rtl/uj11_microseq.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_datapath.v": {
+      "sha256": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+      "member": "project/build/cp67-modules/src/rtl/uj11_datapath.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_regfile.v": {
+      "sha256": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+      "member": "project/build/cp67-modules/src/rtl/uj11_regfile.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_alu.v": {
+      "sha256": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+      "member": "project/build/cp67-modules/src/rtl/uj11_alu.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_psw.v": {
+      "sha256": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+      "member": "project/build/cp67-modules/src/rtl/uj11_psw.v"
+    },
+    "build/cp67-modules/src/rtl/uj11_mem.v": {
+      "sha256": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+      "member": "project/build/cp67-modules/src/rtl/uj11_mem.v"
+    },
+    "rtl/uj11_rom.v": {
+      "sha256": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+      "member": "project/rtl/uj11_rom.v"
+    },
+    "tb/reference_fp_arith_cp79.c": {
+      "sha256": "978577f291cc3ca952fafc045d7bd27437622ca3010610afa5196ed1ed2b22e6",
+      "member": "project/tb/reference_fp_arith_cp79.c"
+    },
+    "tb/reference_fp_muldiv_cp74.h": {
+      "sha256": "e64875f6fc3a9ac7a50f811224e90161e88abeb615c04140b9246bc6584b5c42",
+      "member": "project/tb/reference_fp_muldiv_cp74.h"
+    },
+    "tools/test_fp_paths_cp79.py": {
+      "sha256": "09940e5252a548aac307a0edf5c9d6dfed2a7f6f18784f7e6b8924a599df3b70",
+      "member": "project/tools/test_fp_paths_cp79.py"
+    },
+    "build/cp79-fp11/test-image.mem": {
+      "sha256": "afb86d2a17fb4adad8fee48e4005ab2ab849c70db7633a726248b70a4e4b43bc",
+      "member": "project/build/cp79-fp11/test-image.mem"
+    },
+    "build/cp79-fp11/fp76_symbols.vh": {
+      "sha256": "4a0839ae81ab68bc830243268bb34e9471f400d6b4598d83c0a1b6c7a891fb25",
+      "member": "project/build/cp79-fp11/fp76_symbols.vh"
+    },
+    "build/cp79-fp11/logic/vectors.txt": {
+      "sha256": "00e47c0b364fafa342584908a336ec1953a05585f91762fd78b85fe16ad08b42",
+      "member": "project/build/cp79-fp11/logic/vectors.txt"
+    },
+    "build/cp79-fp11/logic/reference/core.c": {
+      "sha256": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+      "member": "project/build/cp79-fp11/logic/reference/core.c"
+    },
+    "build/cp79-fp11/logic/reference/core.h": {
+      "sha256": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+      "member": "project/build/cp79-fp11/logic/reference/core.h"
+    },
+    "build/cp79-fp11/logic/reference/hardware.c": {
+      "sha256": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+      "member": "project/build/cp79-fp11/logic/reference/hardware.c"
+    },
+    "build/cp79-fp11/logic/reference/hardware.h": {
+      "sha256": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057",
+      "member": "project/build/cp79-fp11/logic/reference/hardware.h"
+    },
+    "build/cp79-fp11/logic/reference/pdp11_fp.c": {
+      "sha256": "aa6c95f96ab85d62e0b01ec4242fc9e56c08bc68868b0128b7749116f01caa9b",
+      "member": "project/build/cp79-fp11/logic/reference/pdp11_fp.c"
+    },
+    "build/cp79-fp11/logic/reference/reference_fp_add_cp73.h": {
+      "sha256": "a718b14bfedac09f26c8a0e5f34a1fb494d84b687b3e55672668c3ab341d8e3a",
+      "member": "project/build/cp79-fp11/logic/reference/reference_fp_add_cp73.h"
+    },
+    "build/cp79-fp11/logic/reference/reference_fp_add_cp79.h": {
+      "sha256": "e373b1c7c3d907e62a7efe072d45aea0405f3c5b8cecd133dd449c6475194630",
+      "member": "project/build/cp79-fp11/logic/reference/reference_fp_add_cp79.h"
+    },
+    "build/cp79-fp11/logic/reference/reference_fp_muldiv_cp74.h": {
+      "sha256": "e64875f6fc3a9ac7a50f811224e90161e88abeb615c04140b9246bc6584b5c42",
+      "member": "project/build/cp79-fp11/logic/reference/reference_fp_muldiv_cp74.h"
+    },
+    "tools/test_fp_paths_parallel_cp79.py": {
+      "sha256": "2cd3b7bb7e5a21a69b9f92b343f8c7dec00c7a1bb07b78716393ea3337da00f5",
+      "member": "project/tools/test_fp_paths_parallel_cp79.py"
+    },
+    "build/cp79-fp11/sync/vectors.txt": {
+      "sha256": "36b465c3f5b00fee67664433e86ce643a77aae079cbe752151b1a4b6807ce06a",
+      "member": "project/build/cp79-fp11/sync/vectors.txt"
+    },
+    "build/cp79-fp11/sync/reference/core.c": {
+      "sha256": "81be4663f087bcb21158ab1b7af0a7a8258e3e3897d4a8d99e988aa646e43089",
+      "member": "project/build/cp79-fp11/sync/reference/core.c"
+    },
+    "build/cp79-fp11/sync/reference/core.h": {
+      "sha256": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+      "member": "project/build/cp79-fp11/sync/reference/core.h"
+    },
+    "build/cp79-fp11/sync/reference/hardware.c": {
+      "sha256": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+      "member": "project/build/cp79-fp11/sync/reference/hardware.c"
+    },
+    "build/cp79-fp11/sync/reference/hardware.h": {
+      "sha256": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057",
+      "member": "project/build/cp79-fp11/sync/reference/hardware.h"
+    },
+    "build/cp79-fp11/sync/reference/pdp11_fp.c": {
+      "sha256": "aa6c95f96ab85d62e0b01ec4242fc9e56c08bc68868b0128b7749116f01caa9b",
+      "member": "project/build/cp79-fp11/sync/reference/pdp11_fp.c"
+    },
+    "build/cp79-fp11/sync/reference/reference_fp_add_cp73.h": {
+      "sha256": "a718b14bfedac09f26c8a0e5f34a1fb494d84b687b3e55672668c3ab341d8e3a",
+      "member": "project/build/cp79-fp11/sync/reference/reference_fp_add_cp73.h"
+    },
+    "build/cp79-fp11/sync/reference/reference_fp_add_cp79.h": {
+      "sha256": "e373b1c7c3d907e62a7efe072d45aea0405f3c5b8cecd133dd449c6475194630",
+      "member": "project/build/cp79-fp11/sync/reference/reference_fp_add_cp79.h"
+    },
+    "build/cp79-fp11/sync/reference/reference_fp_muldiv_cp74.h": {
+      "sha256": "e64875f6fc3a9ac7a50f811224e90161e88abeb615c04140b9246bc6584b5c42",
+      "member": "project/build/cp79-fp11/sync/reference/reference_fp_muldiv_cp74.h"
+    },
+    "build/cp79-fp11/sync/parts/00/simulation.log": {
+      "sha256": "5a2587a1ddfed762b41b424882d0d28ca2837f6dbc57e2c4c7c35433cb63f6bb",
+      "member": "project/build/cp79-fp11/sync/parts/00/simulation.log"
+    },
+    "build/cp79-fp11/sync/parts/00/metrics.csv": {
+      "sha256": "864d28d692aa39f08cb1cb9431d0bba49cceb9a82a6cd93859ef68539398e531",
+      "member": "project/build/cp79-fp11/sync/parts/00/metrics.csv"
+    },
+    "build/cp79-fp11/sync/parts/01/simulation.log": {
+      "sha256": "4d5be394981c790261e90b17ddba039a86c679c591cde5ad757854f81bdbecab",
+      "member": "project/build/cp79-fp11/sync/parts/01/simulation.log"
+    },
+    "build/cp79-fp11/sync/parts/01/metrics.csv": {
+      "sha256": "b6e541ef1c89b40104d05b83be91306c7a136d7c58ce28e9e825e16ccfca0344",
+      "member": "project/build/cp79-fp11/sync/parts/01/metrics.csv"
+    },
+    "build/cp79-fp11/sync/parts/02/simulation.log": {
+      "sha256": "334f31762353787e876a4b660e03da6e539825fbc565001432fe1229ec27f7ba",
+      "member": "project/build/cp79-fp11/sync/parts/02/simulation.log"
+    },
+    "build/cp79-fp11/sync/parts/02/metrics.csv": {
+      "sha256": "4976fc497d62520a499acf2e7fbaeab73408d1bd08a789401c567d1eb17e8168",
+      "member": "project/build/cp79-fp11/sync/parts/02/metrics.csv"
+    },
+    "build/cp79-fp11/sync/parts/03/simulation.log": {
+      "sha256": "0c61c8d03361f7d84f5b5bbdf382d121596070750e5e8027f2840ce370466672",
+      "member": "project/build/cp79-fp11/sync/parts/03/simulation.log"
+    },
+    "build/cp79-fp11/sync/parts/03/metrics.csv": {
+      "sha256": "77966aae6982099a00f6196707aa3e456b2637d61e8148720382432eb9c8741c",
+      "member": "project/build/cp79-fp11/sync/parts/03/metrics.csv"
+    },
+    "build/cp79-fp11/events-sync/tb.v": {
+      "sha256": "63929b6627ae75109ecc630fda57fa44d6ffeda27271b73f7b6b9c98ea6fb6a2",
+      "member": "project/build/cp79-fp11/events-sync/tb.v"
+    },
+    "tb/tb_fp11_cp68.v": {
+      "sha256": "0dd0f78c9e96d8b3ec4a43f760c1b6327b93d840cbc04dc14ed267cadaa34c62",
+      "member": "project/tb/tb_fp11_cp68.v"
+    },
+    "tb/fp_events_cp79.vh": {
+      "sha256": "c0d137f056fe8a628dfce0ec17c3d290f90c0cad280d07ae9c5fe594b0240551",
+      "member": "project/tb/fp_events_cp79.vh"
+    },
+    "tools/test_fp_events_cp79.py": {
+      "sha256": "a16a0830dee0d25ad83d79f8a1b67a15479cd45c03bf7008a1d707894979424e",
+      "member": "project/tools/test_fp_events_cp79.py"
+    },
+    "build/cp79-fp11/events-vendor/tb.v": {
+      "sha256": "63929b6627ae75109ecc630fda57fa44d6ffeda27271b73f7b6b9c98ea6fb6a2",
+      "member": "project/build/cp79-fp11/events-vendor/tb.v"
+    },
+    "build/cp67-modules/uj11_m0_ebr.v": {
+      "sha256": "b4a8489c815fed2f14d2b65d7962b11a10ce393aeffce958efed8d8773f28f4b",
+      "member": "project/build/cp67-modules/uj11_m0_ebr.v"
+    },
+    "build/vendor/DP8KC.v": {
+      "sha256": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+      "member": "project/build/vendor/DP8KC.v"
+    },
+    "build/vendor/GSR.v": {
+      "sha256": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+      "member": "project/build/vendor/GSR.v"
+    },
+    "build/vendor/PUR.v": {
+      "sha256": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4",
+      "member": "project/build/vendor/PUR.v"
+    },
+    "build/cp79-odt/ODT.BIN": {
+      "sha256": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de",
+      "member": "project/build/cp79-odt/ODT.BIN"
+    },
+    "build/cp67-software/sdboot/SDBOOT.BIN": {
+      "sha256": "201c1c0707bfad7d0a6b766d4c9f54baa8bdcd518bcdfa3acd3f631d95257a23",
+      "member": "project/build/cp67-software/sdboot/SDBOOT.BIN"
+    },
+    "build/cp67-software/loader/UJMOD.SAV": {
+      "sha256": "7195501e4674fb2d5362b9b0a1876404824b788d3382ad4147268750e1da1f97",
+      "member": "project/build/cp67-software/loader/UJMOD.SAV"
+    },
+    "build/cp79-rt11/FPTST.SAV": {
+      "sha256": "f0cc3089f2d185f2e236f459d5717acfde29b9c5d22c1a9f3793deee75dcc7bc",
+      "member": "project/build/cp79-rt11/FPTST.SAV"
+    },
+    "build/cp79-rt11/tb.v": {
+      "sha256": "1d9311db8b6731aa4e4c86d175820d455612738fe59dbaa835285399cb8dbee6",
+      "member": "project/build/cp79-rt11/tb.v"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_board.v": {
+      "sha256": "08d754d67b2dcf98ba366d45cb96152261da51a8b205fcc2d6ddfaeb615e8be9",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_board.v"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_board_bus.v": {
+      "sha256": "a7ad5ee2f838536c6708c5ada307250702ba7f8fa21cbc0b5cb723b2be6350a2",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_board_bus.v"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_panel.v": {
+      "sha256": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_panel.v"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_board_fram.v": {
+      "sha256": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_board_fram.v"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_tick.v": {
+      "sha256": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_tick.v"
+    },
+    "build/cp67-modules/src/reference/lsi11/spi_byte_service.v": {
+      "sha256": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+      "member": "project/build/cp67-modules/src/reference/lsi11/spi_byte_service.v"
+    },
+    "build/cp67-modules/src/reference/lsi11/wbc_uart_xo2.v": {
+      "sha256": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+      "member": "project/build/cp67-modules/src/reference/lsi11/wbc_uart_xo2.v"
+    },
+    "build/cp79-rt11/firmware.v": {
+      "sha256": "fe02943781abee445c40352366605be9f6863d313ea45ab3c51f8d9ec69a9916",
+      "member": "project/build/cp79-rt11/firmware.v"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_button.v": {
+      "sha256": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_button.v"
+    },
+    "tb/models/ODDRXE.v": {
+      "sha256": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d",
+      "member": "project/tb/models/ODDRXE.v"
+    },
+    "reference/lsi11/spi_fram_model.v": {
+      "sha256": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+      "member": "project/reference/lsi11/spi_fram_model.v"
+    },
+    "reference/lsi11/spi_sd_model_cp28.v": {
+      "sha256": "e159dd7c1f6545a69d4e61e6688c3f16ac2762c693447b92c1642d20721bb7ad",
+      "member": "project/reference/lsi11/spi_sd_model_cp28.v"
+    },
+    "tb/tb_odt_rt11.v": {
+      "sha256": "e13a83e952051009193f72f72e8859524b6f7277fe0a20cccf5719dc5fe2f038",
+      "member": "project/tb/tb_odt_rt11.v"
+    },
+    "tb/fp_rt11_cp79.vh": {
+      "sha256": "e1a7d40b6b8ad662d60a1431df779ff65394d3e48c383ea6965781757685537b",
+      "member": "project/tb/fp_rt11_cp79.vh"
+    },
+    "tools/run_fp11_rt11_cp79.py": {
+      "sha256": "24dd1556c1c758e8c168443d592753514bb8cd92dc48c5a41f1a1d1208200b31",
+      "member": "project/tools/run_fp11_rt11_cp79.py"
+    },
+    "firmware/fp11/FPTST.MAC": {
+      "sha256": "a0cc5336fb42896b5fcbcc41a5c90db888a36dd5555774c057025ab17cae6a52",
+      "member": "project/firmware/fp11/FPTST.MAC"
+    },
+    "build/cp79-rt11/FPTST.MAC": {
+      "sha256": "a0cc5336fb42896b5fcbcc41a5c90db888a36dd5555774c057025ab17cae6a52",
+      "member": "project/build/cp79-rt11/FPTST.MAC"
+    },
+    "build/cp79-rt11/odt_symbols.vh": {
+      "sha256": "2eaf26a1411c4db66e419d7e0edb9883a07750088ec4dcb53c88935dd1392305",
+      "member": "project/build/cp79-rt11/odt_symbols.vh"
+    },
+    "build/cp79-rt11/firmware.mem": {
+      "sha256": "b2341ab5dbac02ce8247a20205cb52dc5f83bd277396ca7607c9fc4bcb63ce90",
+      "member": "project/build/cp79-rt11/firmware.mem"
+    },
+    "build/cp67-modules/inputs.json": {
+      "sha256": "b72ddaaa9b9c0e3a9cf8a6b0c2ae0906f5a894ac0c318732685dec050c4f033b",
+      "member": "project/build/cp67-modules/inputs.json"
+    },
+    "build/cp67-modules/m0.mem": {
+      "sha256": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97",
+      "member": "project/build/cp67-modules/m0.mem"
+    },
+    "build/cp67-modules/decode.mem": {
+      "sha256": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5",
+      "member": "project/build/cp67-modules/decode.mem"
+    },
+    "build/cp79-odt/UJMON.MAC": {
+      "sha256": "6f81e99621c0f8645f92ed185d23c886efebde7c73fae345f12bf81c6b76594c",
+      "member": "project/build/cp79-odt/UJMON.MAC"
+    },
+    "firmware/odt/ODT.MAC": {
+      "sha256": "e162003299f5b2a499f504723166e550513afcaa443c5424adc83a7a4a5824c4",
+      "member": "project/firmware/odt/ODT.MAC"
+    },
+    "firmware/odt/DISASM.MAC": {
+      "sha256": "fe7149622062e84c4c3a80cdacd20eb46385565689f38ed5c756684933a75ad1",
+      "member": "project/firmware/odt/DISASM.MAC"
+    },
+    "firmware/odt/PANEL.MAC": {
+      "sha256": "47aa5727eee2c97b44943adf15c88595ffc0929c6a239734f38eea87d9fcacf7",
+      "member": "project/firmware/odt/PANEL.MAC"
+    },
+    "firmware/odt/NAV.MAC": {
+      "sha256": "cb4a3dcd9a56bf2a3e1d07cc3e9363fc01360dd98a45766f9ad363b62133aa9c",
+      "member": "project/firmware/odt/NAV.MAC"
+    },
+    "firmware/odt/OVER.MAC": {
+      "sha256": "de4b896059a81766d7c75da8f13211e10bac71681ed04d7d6c3168974f385ac6",
+      "member": "project/firmware/odt/OVER.MAC"
+    },
+    "firmware/odt/BREAK.MAC": {
+      "sha256": "565dca3bf4b68a7816897c8d9fa3205432593ec92fe0f787139a97de22b633a2",
+      "member": "project/firmware/odt/BREAK.MAC"
+    },
+    "firmware/odt/FPDEBUG.MAC": {
+      "sha256": "baa1edce0732402794729d303abc948bd19a0f55a84167cdbcfa54b9221ad328",
+      "member": "project/firmware/odt/FPDEBUG.MAC"
+    },
+    "firmware/odt/DATA.MAC": {
+      "sha256": "065aeab2a3600bbf8f721ca10681cd7492dab1579e2f40bf9ad7f39f20393fc7",
+      "member": "project/firmware/odt/DATA.MAC"
+    },
+    "demos/rt11/panel/PNLDRV.MAC": {
+      "sha256": "13af32da914fcf248ad62573c4588b1e87d66756af7cdb029afe19c7bf4fc0cb",
+      "member": "project/demos/rt11/panel/PNLDRV.MAC"
+    },
+    "firmware/odt/PNKEY.MAC": {
+      "sha256": "fb1abc5d41c02f59273acb4785159ab7192e5c0867e7bf2115dea200fc852a7c",
+      "member": "project/firmware/odt/PNKEY.MAC"
+    },
+    "firmware/cp67/ODINIT.MAC": {
+      "sha256": "06f0a2bb411fc24c4a399cbb2efd043b95a3f3ee90417cd08243e7ce0a4afdc0",
+      "member": "project/firmware/cp67/ODINIT.MAC"
+    },
+    "build/cp79-odt/payload.bin": {
+      "sha256": "5434f583cdd8a76e897b0932cec8b6b6759ececc43410dfd9888971dc538c27a",
+      "member": "project/build/cp79-odt/payload.bin"
+    },
+    "build/cp79-odt/image.bin": {
+      "sha256": "4b158f6ea7efc22dd4ef56efc5f23c73e11e12755026ebadd801d5089573e5fe",
+      "member": "project/build/cp79-odt/image.bin"
+    },
+    "build/cp67-software/sdboot/SDBOOT.MAC": {
+      "sha256": "8ebf07d96dba80d8707df506c7a90943bc85c35b48e652ae34a3d57705cdf4a5",
+      "member": "project/build/cp67-software/sdboot/SDBOOT.MAC"
+    },
+    "firmware/cp67/SDBOOT.MAC.in": {
+      "sha256": "695c2e4e007144b5e3977a229ad1fdfb058d271979417ed2a827b251e26f2698",
+      "member": "project/firmware/cp67/SDBOOT.MAC.in"
+    },
+    "synth/reports/cp63b/inputs.json": {
+      "sha256": "416ae538cf16ab0d1ddf41d03ce82b136ff5b70ac1534a3131666cf149a3ddcb",
+      "member": "project/synth/reports/cp63b/inputs.json"
+    },
+    "synth/reports/cp63b/source.tgz": {
+      "sha256": "ce86b070d934ee1f8fb2e6c83706fb5709e59796cea42814005091976c265113",
+      "member": "project/synth/reports/cp63b/source.tgz"
+    },
+    "build/cp67-software/sdboot/image.bin": {
+      "sha256": "adfc7babdd75e471ddf5b0e2c44348ef0e3efcd63f74628bf8016c02067cf54d",
+      "member": "project/build/cp67-software/sdboot/image.bin"
+    },
+    "build/cp67-software/loader/UJMOD.MAC": {
+      "sha256": "15de05109a0e7fd18901a446457ee7b1a8b227866eaf8f5dbd356f74c72aa6c3",
+      "member": "project/build/cp67-software/loader/UJMOD.MAC"
+    },
+    "demos/rt11/service/cp62/UJLOAD.MAC": {
+      "sha256": "f0062e9a60cc552bae2c7703d3329c08c397ff5632935b9f53710bcecf8c9968",
+      "member": "project/demos/rt11/service/cp62/UJLOAD.MAC"
+    },
+    "firmware/cp67/UJMOD.MAC.in": {
+      "sha256": "89e37a7636a230dea0db9d0fe0309b2bfbbba7a554a53660ee2dd441030d907f",
+      "member": "project/firmware/cp67/UJMOD.MAC.in"
+    },
+    "build/cp79-odt/result.json": {
+      "sha256": "e145b8064fee7fe37a2e5ccf54c8d00c4c68c0054d3874b90af8165a83650cc7",
+      "member": "project/build/cp79-odt/result.json"
+    },
+    "build/cp79-fp11/software/result.json": {
+      "sha256": "7a9c3eefbf4851448ede37c4fac9546490312bb24135dc274c8ef7b19835f607",
+      "member": "project/build/cp79-fp11/software/result.json"
+    },
+    "demos/rt11/service/cp79/FPTST.MAC": {
+      "sha256": "a0cc5336fb42896b5fcbcc41a5c90db888a36dd5555774c057025ab17cae6a52",
+      "member": "project/demos/rt11/service/cp79/FPTST.MAC"
+    },
+    "demos/rt11/service/cp79/FP11.MAC": {
+      "sha256": "7c597dc5e33aa646e0ebfb79a213d600f92416480db94ad3bca5c0b569f6fc8d",
+      "member": "project/demos/rt11/service/cp79/FP11.MAC"
+    },
+    "demos/rt11/service/cp79/UJMON.MAC": {
+      "sha256": "6f81e99621c0f8645f92ed185d23c886efebde7c73fae345f12bf81c6b76594c",
+      "member": "project/demos/rt11/service/cp79/UJMON.MAC"
+    },
+    "demos/rt11/service/cp79/release.json": {
+      "sha256": "da524b1be87c052005262dd906c68fd3d549cd2d9a7c10589c535fff60ae9cd5",
+      "member": "project/demos/rt11/service/cp79/release.json"
+    },
+    "demos/rt11/service/cp79/README.md": {
+      "sha256": "29f12b065f0c1cea3366a6a7a61a3c30fa9c1bc29713ef02cc751533db282042",
+      "member": "project/demos/rt11/service/cp79/README.md"
+    },
+    "demos/rt11/service/cp79/FP11.BIN": {
+      "sha256": "35708587dea03ee076339e0752f5bae0100264d4db474f08e9feb04b3226010d",
+      "member": "project/demos/rt11/service/cp79/FP11.BIN"
+    },
+    "demos/rt11/service/cp79/FPTST.SAV": {
+      "sha256": "f0cc3089f2d185f2e236f459d5717acfde29b9c5d22c1a9f3793deee75dcc7bc",
+      "member": "project/demos/rt11/service/cp79/FPTST.SAV"
+    },
+    "demos/rt11/service/cp79/ODT.BIN": {
+      "sha256": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de",
+      "member": "project/demos/rt11/service/cp79/ODT.BIN"
+    },
+    "boards/hc1200/pins.lpf": {
+      "sha256": "b75315f0e3900ed628d058d6aba7b5e6d8c8d6ee8e13975626eb9fd590be08ed",
+      "member": "project/boards/hc1200/pins.lpf"
+    },
+    "build/cp67-modules/boot-symbols.json": {
+      "sha256": "6c5f44b8e98f14366b53c18da884d7f43f0bebddb6faadd985a1e91fc720a228",
+      "member": "project/build/cp67-modules/boot-symbols.json"
+    },
+    "build/cp67-modules/firmware.mem": {
+      "sha256": "34f506e4f6735616bd07e778d1eaf45a3e8612df2ffdaf3bbf5c7d652293f134",
+      "member": "project/build/cp67-modules/firmware.mem"
+    },
+    "build/cp67-modules/m0.labels.json": {
+      "sha256": "92315db841ff4328aa501dec4270b09ef5712688ac2b11a30af2adacec609f82",
+      "member": "project/build/cp67-modules/m0.labels.json"
+    },
+    "build/cp67-modules/m0.lst": {
+      "sha256": "04a03869cff6d23ab2e27b9cf8aa34e59db431920320faf5b73cc96faaf2bf4c",
+      "member": "project/build/cp67-modules/m0.lst"
+    },
+    "build/cp67-modules/m0.stats.json": {
+      "sha256": "e3140cdf5a2ff6e58398927618dd24c2960169853173bfefd7d5aa7bd844ab6e",
+      "member": "project/build/cp67-modules/m0.stats.json"
+    },
+    "build/cp67-modules/service.uasm": {
+      "sha256": "2dd63dc064350fc95dc80fb7e7bde3dd87de5a1b9370207e046f2f0a272cf299",
+      "member": "project/build/cp67-modules/service.uasm"
+    },
+    "build/cp67-modules/src/boards/hc1200/uj11_microcomp.v": {
+      "sha256": "f11be1d5444d1fddae7307cbbe93dbe8ed0617133d23b06ecde32740db566204",
+      "member": "project/build/cp67-modules/src/boards/hc1200/uj11_microcomp.v"
+    },
+    "build/cp67-modules/src/microcode/generated/uj11_firmware_rom.v": {
+      "sha256": "794f991206a0022601c9f4f26a0b87d0a401a584046a0fb22ffd124a2f636e6a",
+      "member": "project/build/cp67-modules/src/microcode/generated/uj11_firmware_rom.v"
+    },
+    "firmware/cp67/BOOT.MAC": {
+      "sha256": "f68bbcc5a8e179fe28eaf88bec35710e49757403e85f72ef2286b3cd20acdc58",
+      "member": "project/firmware/cp67/BOOT.MAC"
+    },
+    "firmware/rk_service.asm": {
+      "sha256": "207b4d383825de9c6bc3f561c62ac20b9ef445ff0e4a909a321cda28f86ae69d",
+      "member": "project/firmware/rk_service.asm"
+    },
+    "firmware/sd_boot.asm": {
+      "sha256": "ca1438c930ef5d350a87d1122d214a93cf6ee3a428f808cab3ebae556f5746fe",
+      "member": "project/firmware/sd_boot.asm"
+    },
+    "microasm/uj11asm.py": {
+      "sha256": "f2d0eeb31678ad39edb771e17459c76a2c2c1ad6defdb2b68fbcfc3b7ab43104",
+      "member": "project/microasm/uj11asm.py"
+    },
+    "microcode/fis.uasm": {
+      "sha256": "176c697098954b00851da729de36f7765ca60e0e7f06758d30b6b48f301890e2",
+      "member": "project/microcode/fis.uasm"
+    },
+    "microcode/generated/m0.stats.json": {
+      "sha256": "b6f5ca5648d515deeef8395523e41d575a702e927836e78600a98499247cdafd",
+      "member": "project/microcode/generated/m0.stats.json"
+    },
+    "microcode/m0.uasm": {
+      "sha256": "0bc7033fc66e11eeb1b77244be4bb94657915811cc9dde61c713b34814ad0432",
+      "member": "project/microcode/m0.uasm"
+    },
+    "synth/machxo2/fram-timing.lpf": {
+      "sha256": "c901844d22ecdb64c3e132061cf9ecc33f0f4df5c092238f4a271202142b1b1a",
+      "member": "project/synth/machxo2/fram-timing.lpf"
+    },
+    "synth/machxo2/uj11-board.sty": {
+      "sha256": "0759168d7465a5eba298a9cb20a4bc3e5ae69bfcb04c7e36f1a864c764440449",
+      "member": "project/synth/machxo2/uj11-board.sty"
+    },
+    "tools/board_common.py": {
+      "sha256": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+      "member": "project/tools/board_common.py"
+    },
+    "tools/build_decode_rom.py": {
+      "sha256": "d01eada6465963872777c4a7d8c9212605910c50e581f61c6bfdd6dfed7a6a07",
+      "member": "project/tools/build_decode_rom.py"
+    },
+    "tools/build_firmware.py": {
+      "sha256": "13e03744777f124256ba459268d12478f0ae8affcb9c1fb346a9992661d8893f",
+      "member": "project/tools/build_firmware.py"
+    },
+    "tools/build_fram_cp52.py": {
+      "sha256": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+      "member": "project/tools/build_fram_cp52.py"
+    },
+    "tools/build_modules_cp67.py": {
+      "sha256": "ac44941c4b682915525a0c7f8482f50c6fbf74aa11c95c534a523d6c396978bc",
+      "member": "project/tools/build_modules_cp67.py"
+    },
+    "tools/checkpoint_board.py": {
+      "sha256": "66fcb500183c1b47771979c0c73e7b020a7acebbf02224a5b7dac06a10c3e5fc",
+      "member": "project/tools/checkpoint_board.py"
+    },
+    "tools/link_fis.py": {
+      "sha256": "fcf7b576c7e122b9d95811a7c9bb7d6c9c781ff14a4c8f8768f5fd927158c59d",
+      "member": "project/tools/link_fis.py"
+    },
+    "tools/make_ebr.py": {
+      "sha256": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "member": "project/tools/make_ebr.py"
+    },
+    "tools/report_synthesis.py": {
+      "sha256": "6c3ccec6e995cd7ba6f1cdbe6c9360e5bc572675eb7f487561e4460650375e62",
+      "member": "project/tools/report_synthesis.py"
+    },
+    "tools/archive_cp79.py": {
+      "sha256": "6a8db629f32e6cf4e2d33dc08a93e7ee585877228db39e5db2ad4e2d5572554c",
+      "member": "project/tools/archive_cp79.py"
+    },
+    "tools/verify_cp79.py": {
+      "sha256": "50cd72116fa8ceb943e307d81b46d28a3578ac09db885ce1b35f9ac6c8f73995",
+      "member": "project/tools/verify_cp79.py"
+    },
+    "README.md": {
+      "sha256": "651642badfd515945c29ccf813a60d42a15e19c883bb13adc75e1a050dc3a0ac",
+      "member": "project/README.md"
+    },
+    "TODO.md": {
+      "sha256": "ae512fc09e1221de22407ee31adc9ef70ed365db6de30e8ba8d0f54e443008c8",
+      "member": "project/TODO.md"
+    },
+    "docs/README.md": {
+      "sha256": "bf3cee706d5abccc61b6a24d459fa72d8474143c73d7038495a9cd2d99fcdf5a",
+      "member": "project/docs/README.md"
+    },
+    "docs/implementation-status.md": {
+      "sha256": "062539a0f918af9a149a73d4e17f4e9173f7f0848b1b0fbebcf31d1ebb7f9492",
+      "member": "project/docs/implementation-status.md"
+    },
+    "docs/synthesis.md": {
+      "sha256": "f21b40a1b97ae413526a8a786cf06956aa3deac0d29b5438dcf822c84da2c7de",
+      "member": "project/docs/synthesis.md"
+    },
+    "docs/benchmarks.md": {
+      "sha256": "49aa3f8e13a7a30d9ef460087db53bbbe6ccd17e686d52b7779db24b7995ce77",
+      "member": "project/docs/benchmarks.md"
+    },
+    "docs/fpp-j11-cp79.md": {
+      "sha256": "aca491c5203fe51f787e18e367d1c44205a5d64f8652c0cdf3554c28b1d2e9c8",
+      "member": "project/docs/fpp-j11-cp79.md"
+    }
+  },
+  "references": {
+    "build/cp79-fp11/sync/parts/00/vectors.txt": {
+      "master": "build/cp79-fp11/sync/vectors.txt",
+      "begin": 0,
+      "end": 111112,
+      "sha256": "02d2e905d603cdfc59cf0156a782944478869ba8b44acf751efab45483572c91"
+    },
+    "build/cp79-fp11/sync/parts/01/vectors.txt": {
+      "master": "build/cp79-fp11/sync/vectors.txt",
+      "begin": 111112,
+      "end": 222224,
+      "sha256": "c8686db4517622ecf595e135dc47b9b18ba147daf03080d9413beb4bed7dc892"
+    },
+    "build/cp79-fp11/sync/parts/02/vectors.txt": {
+      "master": "build/cp79-fp11/sync/vectors.txt",
+      "begin": 222224,
+      "end": 333336,
+      "sha256": "0e9db1c2bd70118d7583ee44003c0d4c05b29beeaa072d5f1894651905b02790"
+    },
+    "build/cp79-fp11/sync/parts/03/vectors.txt": {
+      "master": "build/cp79-fp11/sync/vectors.txt",
+      "begin": 333336,
+      "end": 444420,
+      "sha256": "75b5ebfaa42cdec76c1252e863d4fca9ffe3aa2ba6e15a015ef77c62126d4b4f"
+    }
+  },
+  "artifacts": {
+    "math/result.json": "e28c9f9f394a1e35ebf908ad9dc5b6fb5d19f7f47f57294d862dea285cc7bacf",
+    "conversions/result.json": "9dfab338fe6ededd344658978712ed9e00436bafcb63b37eb18eb1f40f6adf11",
+    "logic/result.json": "1634227bca2ad2874508e135d2271e00e6ef2391b6efb4097db26fe438e9bd9d",
+    "logic/coverage.json": "7c4c04fd215fa6f494bef15be70165f52c9eee3ef79d55cc1dc79bec46fa3bff",
+    "logic/simulation.log": "4d8946e0d09356424ca573f6f69267c006e6fa3bee8f0a573871712b063a11cb",
+    "logic/build.log": "1c8d28c2edbe01e842dc46d7b50a8c3599b966b05b62e6a645b3cfeb497cbfb6",
+    "logic/metrics.csv": "d42e1b191a387e536ab2378d718c4b870f66a797ac778f1172d845d251701bdd",
+    "sync/result.json": "6d9fcc9532e906e90a68dd70533bdd405610eb8a393885df93c24cd5863bc4f9",
+    "sync/coverage.json": "9934cf13a2ea74c9a836ff10d57dd3d999189f03e723e06b3a9a36e7320ce948",
+    "sync/simulation.log": "b36ee7779be3cd2d59507f4206c143609e07d80dcaabfe7f1d80319eebfaedc4",
+    "sync/build.log": "f83dcd269f3c0a92738ab561a59d248f4758a4bae48bac4d4b4f66ba01a242f3",
+    "events-sync/result.json": "5cc4b381f192f35c4f52e29a2c49353c147f21853a3c0e30b16987b58a166e6e",
+    "events-sync/simulation.log": "843a296725d0c65bd9ac0daa7f418e5251c8c91d42d180fffc4a501029194ab6",
+    "events-sync/build.log": "658123c4e710239bcb429e09a4b272c6d44674d03ce718dba0bf251c82c50f97",
+    "events-vendor/result.json": "1030060234f3cfc849f82d0dbf0bfdac0fedb72cfa2155b448d7ceda0ef67ab4",
+    "events-vendor/simulation.log": "514ab5be512ea28d5e0a5e1ad0870254b9bc52a545d3a01505393d5a4a4e4634",
+    "events-vendor/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rt11/result.json": "1732fc702b389300f7a09fc8acb36cc3112cdde3fe85f37e8c2db3d9bdc5e59a",
+    "rt11/inputs.json": "c9f8d6bb2adc6248de667860909592ec76c459df56700328932522e7797ff36b",
+    "rt11/simulation.log": "7e7971781904c4c8825621f3351f8b2a8f2b337ab108a3e5f738b7232b50accb",
+    "rt11/uart.txt": "f8ce709e1c7646ddd51ed33544e797a1c8b48bb3ee08e5727d04637bc30e0fea",
+    "rt11/build.log": "3b2246d9637e1e0f337758e00dff49c53b7d74166bad71787ccc8e437ca3a85e",
+    "assembly/odt/UJMON.OBJ": "e6a5d7f939dac21788c1eaa7e3a37f2fbd05c979b2b985d6529f8c1cec897591",
+    "assembly/odt/UJMON.SAV": "fb29fcfd965eb66633949ae84e1be2cf83b72e8a1057dde195e2a81bba9d951a",
+    "assembly/odt/build-inputs.json": "a41abba35974a1e2931671b274c4a1ebfbec8490a97ea399f4b40d8af34360b5",
+    "assembly/odt/UJMON.MAP": "d3d099781f2b43f033e1b4694366854d0555178beee880f63b24aba4d012bc06",
+    "assembly/odt/UJMON.LST": "cf3f8e49d8ab7570e0c28d4ce5a8d91840b83cbe838f1563c28a3181f6c97cf1",
+    "assembly/fp11/FP11.LST": "280f88590efe635f421abd49c21770711bfa0526f375adacb337fcdeac577198",
+    "assembly/fp11/build-inputs.json": "69b71eb0c9cea912b8fcfddab29468bc9dccc015e6631f8b0d918f012200a390",
+    "assembly/fp11/FP11.MAP": "bfc1b9e4159790b9614024314dcff043f169e8f2daa747838b76215d45adee8c",
+    "assembly/fp11/FP11.OBJ": "93f658fd930aea3c8c947892a07563081b30d7adb7625a0a6ea3da9ee7bcaf77",
+    "assembly/fp11/FP11.SAV": "42349a1122e3171ebe387c290108cf90f3f50d56bc2df1795fa4b029393f5b59",
+    "source.tgz": "5e4bf0187f9a0c0368e32e53ca46af1ad800b313c77ab4d5630d3c97b8c3343a"
+  },
+  "results": {
+    "math": {
+      "passed": true,
+      "comparisons": 250200
+    },
+    "conversions": {
+      "passed": true,
+      "comparisons": 251328
+    },
+    "logic": {
+      "passed": true
+    },
+    "sync": {
+      "passed": true
+    },
+    "events-sync": {
+      "passed": true
+    },
+    "events-vendor": {
+      "passed": true
+    },
+    "rt11": {
+      "passed": true,
+      "checks": 99,
+      "clocks": 832783650,
+      "uart_bytes": 9776
+    }
+  },
+  "release": {
+    "checkpoint": "CP79",
+    "profile": "DEC DCJ11 FPP software",
+    "installed_on_board": false,
+    "modules": {
+      "odt": {
+        "format": {
+          "base": 4096,
+          "words": 6299,
+          "checksum": 47205,
+          "bytes": 12598
+        },
+        "allocation_bytes": 13668
+      },
+      "fp11": {
+        "format": {
+          "base": 24576,
+          "words": 2125,
+          "checksum": 14547,
+          "bytes": 4250
+        },
+        "allocation_bytes": 4518
+      }
+    },
+    "files": {
+      "FPTST.MAC": "a0cc5336fb42896b5fcbcc41a5c90db888a36dd5555774c057025ab17cae6a52",
+      "FP11.MAC": "7c597dc5e33aa646e0ebfb79a213d600f92416480db94ad3bca5c0b569f6fc8d",
+      "UJMON.MAC": "6f81e99621c0f8645f92ed185d23c886efebde7c73fae345f12bf81c6b76594c",
+      "README.md": "29f12b065f0c1cea3366a6a7a61a3c30fa9c1bc29713ef02cc751533db282042",
+      "FP11.BIN": "35708587dea03ee076339e0752f5bae0100264d4db474f08e9feb04b3226010d",
+      "FPTST.SAV": "f0cc3089f2d185f2e236f459d5717acfde29b9c5d22c1a9f3793deee75dcc7bc",
+      "ODT.BIN": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de"
+    }
+  },
+  "hardware": {
+    "baseline": "CP67b",
+    "unchanged_files": {
+      "boards/hc1200/pins.lpf": "b75315f0e3900ed628d058d6aba7b5e6d8c8d6ee8e13975626eb9fd590be08ed",
+      "build/cp67-modules/boot-symbols.json": "6c5f44b8e98f14366b53c18da884d7f43f0bebddb6faadd985a1e91fc720a228",
+      "build/cp67-modules/decode.mem": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5",
+      "build/cp67-modules/firmware.mem": "34f506e4f6735616bd07e778d1eaf45a3e8612df2ffdaf3bbf5c7d652293f134",
+      "build/cp67-modules/inputs.json": "b72ddaaa9b9c0e3a9cf8a6b0c2ae0906f5a894ac0c318732685dec050c4f033b",
+      "build/cp67-modules/m0.labels.json": "92315db841ff4328aa501dec4270b09ef5712688ac2b11a30af2adacec609f82",
+      "build/cp67-modules/m0.lst": "04a03869cff6d23ab2e27b9cf8aa34e59db431920320faf5b73cc96faaf2bf4c",
+      "build/cp67-modules/m0.mem": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97",
+      "build/cp67-modules/m0.stats.json": "e3140cdf5a2ff6e58398927618dd24c2960169853173bfefd7d5aa7bd844ab6e",
+      "build/cp67-modules/service.uasm": "2dd63dc064350fc95dc80fb7e7bde3dd87de5a1b9370207e046f2f0a272cf299",
+      "build/cp67-modules/src/boards/hc1200/uj11_board.v": "08d754d67b2dcf98ba366d45cb96152261da51a8b205fcc2d6ddfaeb615e8be9",
+      "build/cp67-modules/src/boards/hc1200/uj11_board_bus.v": "a7ad5ee2f838536c6708c5ada307250702ba7f8fa21cbc0b5cb723b2be6350a2",
+      "build/cp67-modules/src/boards/hc1200/uj11_board_fram.v": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+      "build/cp67-modules/src/boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+      "build/cp67-modules/src/boards/hc1200/uj11_microcomp.v": "f11be1d5444d1fddae7307cbbe93dbe8ed0617133d23b06ecde32740db566204",
+      "build/cp67-modules/src/boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+      "build/cp67-modules/src/boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+      "build/cp67-modules/src/microcode/generated/uj11_decode_table.v": "f98cee81a9010cd3c4ebf6a52fb8beedc47f0a861ea0515dcee537a9d0b80b29",
+      "build/cp67-modules/src/microcode/generated/uj11_firmware_rom.v": "794f991206a0022601c9f4f26a0b87d0a401a584046a0fb22ffd124a2f636e6a",
+      "build/cp67-modules/src/reference/lsi11/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+      "build/cp67-modules/src/reference/lsi11/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+      "build/cp67-modules/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+      "build/cp67-modules/src/rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+      "build/cp67-modules/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+      "build/cp67-modules/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+      "build/cp67-modules/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+      "build/cp67-modules/src/rtl/uj11_engine.v": "1764b2a587e9a90596ae56c8da940362525bbd05994da5ee22878519a2bf6f43",
+      "build/cp67-modules/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+      "build/cp67-modules/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+      "build/cp67-modules/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+      "build/cp67-modules/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+      "build/cp67-modules/uj11_m0_ebr.v": "b4a8489c815fed2f14d2b65d7962b11a10ce393aeffce958efed8d8773f28f4b",
+      "firmware/cp67/BOOT.MAC": "f68bbcc5a8e179fe28eaf88bec35710e49757403e85f72ef2286b3cd20acdc58",
+      "firmware/rk_service.asm": "207b4d383825de9c6bc3f561c62ac20b9ef445ff0e4a909a321cda28f86ae69d",
+      "firmware/sd_boot.asm": "ca1438c930ef5d350a87d1122d214a93cf6ee3a428f808cab3ebae556f5746fe",
+      "microasm/uj11asm.py": "f2d0eeb31678ad39edb771e17459c76a2c2c1ad6defdb2b68fbcfc3b7ab43104",
+      "microcode/fis.uasm": "176c697098954b00851da729de36f7765ca60e0e7f06758d30b6b48f301890e2",
+      "microcode/generated/m0.stats.json": "b6f5ca5648d515deeef8395523e41d575a702e927836e78600a98499247cdafd",
+      "microcode/m0.uasm": "0bc7033fc66e11eeb1b77244be4bb94657915811cc9dde61c713b34814ad0432",
+      "synth/machxo2/fram-timing.lpf": "c901844d22ecdb64c3e132061cf9ecc33f0f4df5c092238f4a271202142b1b1a",
+      "synth/machxo2/uj11-board.sty": "0759168d7465a5eba298a9cb20a4bc3e5ae69bfcb04c7e36f1a864c764440449",
+      "synth/reports/cp63b/inputs.json": "416ae538cf16ab0d1ddf41d03ce82b136ff5b70ac1534a3131666cf149a3ddcb",
+      "synth/reports/cp63b/source.tgz": "ce86b070d934ee1f8fb2e6c83706fb5709e59796cea42814005091976c265113",
+      "tools/board_common.py": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+      "tools/build_decode_rom.py": "d01eada6465963872777c4a7d8c9212605910c50e581f61c6bfdd6dfed7a6a07",
+      "tools/build_firmware.py": "13e03744777f124256ba459268d12478f0ae8affcb9c1fb346a9992661d8893f",
+      "tools/build_fram_cp52.py": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+      "tools/build_modules_cp67.py": "ac44941c4b682915525a0c7f8482f50c6fbf74aa11c95c534a523d6c396978bc",
+      "tools/link_fis.py": "fcf7b576c7e122b9d95811a7c9bb7d6c9c781ff14a4c8f8768f5fd927158c59d",
+      "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "tools/report_synthesis.py": "6c3ccec6e995cd7ba6f1cdbe6c9360e5bc572675eb7f487561e4460650375e62",
+      "tools/rt11_build.py": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+    },
+    "tool_changes": {
+      "tools/checkpoint_board.py": {
+        "cp77": "9e128cc0d5d12f0d25515877a74adf784b1578f84dd9f0ef2c4f9f022cbc89b1",
+        "current": "66fcb500183c1b47771979c0c73e7b020a7acebbf02224a5b7dac06a10c3e5fc",
+        "reason": "explicit CP78 experiment options; CP67b unchanged"
+      }
+    },
+    "added_lut": 0,
+    "added_ff": 0,
+    "added_ebr": 0,
+    "added_uwords": 0
+  }
+}

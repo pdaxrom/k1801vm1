@@ -1,12 +1,24 @@
 # uJ11 TODO
 
+## CP79 — целевой программный FPP J‑11
+
+- [x] Заменить FP11-A-specific unary/load FIUV на семантику DCJ11.
+- [x] LDC exponent-zero: флаги по нулевому результату.
+- [x] ADD/SUB по точности DCJ11 §7.6, exact-integer reference.
+- [x] Полный sync 444420/30934144, logic 215760/15037488; directed portable/vendor 111/4174 каждый; RT‑11/ODT 99 checks. Замороженный CP79 и пакет подготовлены.
+- [ ] Проверить на физической плате через UART/ODT.
+- [ ] Квалифицировать PSW-операнды и подобрать внешнюю диагностику J‑11 FPP; A-specific результаты CP78 не переносить.
+
+[Профиль DCJ11 и источники](docs/fpp-j11-cp79.md).
+
 ## CP78 — memory-mapped PSW
 
 - [x] Реализовать слово/байты PSW, T protection, NZVC precedence, PS<10:9>=0 по DEC.
 - [x] Проверить USER/HALT, физический bypass, odd/error, IRQ/trace; portable/vendor.
 - [x] Пройти DFFPA/DFFPB/DFFPC на реальном RTL CPU без test-only adapter.
 - [x] Полный RT-11/UJMOD/ODT/FP11 регресс CP78: 99 checks, 43 FP шага, cold init/OFF — PASS; исходники и логи сохранены.
-- [ ] Получить MAP/PAR/TRACE HC1200 и принять или оптимизировать кандидат по реальным LUT/Fmax. Передача на synthesis host пока заблокирована автоматической проверкой.
+- [x] Выполнить synthesis CP78a/b/c и сохранить отчёты: все три не прошли MAP (649/643/648 slices).
+- [ ] Найти способ разместить CPU-local PSW; лучший CP78b превышает лимит на 3 slices. Fmax ещё не получен.
 - [ ] FP11 firmware: обращения операндов к 177776/177777 должны читать/писать сохранённый USER CPSW, с защитой T и byte lanes; отдельно проверить STFPS/LDFPS/STCFI и fault/flags precedence. GUEST-доступ из HALT сейчас видит живой HALT PSW.
 - [ ] Только после аппаратного gate собрать JED, установить и проверить UART/пульт/FRAM-модули на плате.
 
@@ -21,7 +33,7 @@
 - [x] Извлечь DEC FFPAA1/FFPBA0/FFPCB0, проверить chain/loader checksums.
 - [x] По одному проходу трёх DEC FP11-A частей в RTL с test-only PSW read.
 - [x] Реализовать memory-mapped PSW и native DEC diagnostics: функциональная часть CP78 выполнена. Hardware gate остаётся в списке CP78 выше.
-- [ ] Установить CP77 ODT/FP11 через RT-11 и проверить на физической плате.
+- [ ] Установить ODT и программный FPP J11 после квалификации CP79; прежний FP11-A профиль CP77 заменён по запросу пользователя.
 
 [Команды, раскладка FRAM и границы PASS](docs/odt-fp-cp77.md).
 

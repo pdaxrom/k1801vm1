@@ -9,9 +9,13 @@
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
+## CP79 — программная эмуляция FPP J‑11
+
+Текущий FP11.MAC 00.11 следует руководству DCJ11: FIUV до выполнения, load flags по J11, jammed ADD/SUB. 4518 байт HALT FRAM, прирост FPGA нулевой. Sync 444420/30934144, logic 215760/15037488, directed portable/vendor 111/4174 каждый, RT‑11/ODT 99 checks — PASS. Плата пока не обновлялась. [Границы совместимости и проверки](fpp-j11-cp79.md).
+
 ## CP78 — CPU-local PSW
 
-Чтение/запись слова и байтов `177776/177777` реализованы в отдельном профиле `--psw-cp78`. T защищён, PS<10:9>=0, явная запись NZVC не затирается флагами команды. 1741 native cases / 12486 checks, portable/vendor; DFFPA/DFFPB/DFFPC — по одному проходу без ошибок и без test-only adapter. RT-11/UJMOD/43 ODT STEP/cold init/OFF — 99 checks PASS. Microstore прежняя: 1005 слов. MAP/PAR/TRACE ещё не выполнен; CP78 не установлен. [Границы и результаты](psw-cp78.md).
+Чтение/запись слова и байтов `177776/177777` реализованы в отдельном профиле `--psw-cp78`. T защищён, PS<10:9>=0, явная запись NZVC не затирается флагами команды. 1741 native cases / 12486 checks, portable/vendor; DFFPA/DFFPB/DFFPC — по одному проходу без ошибок и без test-only adapter. RT-11/UJMOD/43 ODT STEP/cold init/OFF — 99 checks PASS. Microstore прежняя: 1005 слов. CP78a/b/c не прошли MAP: 1290/1277/1286 LUT, 649/643/648 slices. PAR/TRACE отсутствуют; CP78 не установлен. [Границы и результаты](psw-cp78.md).
 
 ## CP77 — FP debugger и DEC diagnostics
 
