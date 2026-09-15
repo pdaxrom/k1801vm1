@@ -1,4 +1,8 @@
-# Benchmarks: CP76 и предыдущие этапы
+# Benchmarks: CP78 и предыдущие этапы
+
+## CP78 — native DEC FP11-A diagnostics
+
+DFFPA/DFFPB/DFFPC: **177182640 / 2669489 / 1476999 core clocks**, по одному полному проходу, ноль ошибок, PSW обслуживается RTL CPU. Счётчики совпали с CP77 с test-only adapter. Это zero-wait RAM fixture; измерений Fmax и скорости физической FRAM для CP78 пока нет. Полный RT-11/ODT сценарий: 832980518 clocks / 9776 UART bytes, +67930 clocks к CP77; В UART изменилась только дата FPTST.SAV в DIR (14→15 Sep 2026), поэтому это не изолированный аппаратный speed comparison. [Отчёт](psw-cp78.md).
 
 ## CP77 — FP debugger
 

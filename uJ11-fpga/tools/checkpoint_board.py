@@ -25,6 +25,7 @@ def main():
     p.add_argument('--service-cp58',action='store_true',help='CP58 HALT fault recovery and STEP, frozen CP57e base')
     p.add_argument('--timing-cp59',action='store_true',help='CP59 remove unobservable current bus-error predicate')
     p.add_argument('--rk-cp60',action='store_true',help='CP60 RK611 RECALIBRATE and SD error recovery')
+    p.add_argument('--psw-cp78',action='store_true',help='CP78 CPU-local word/byte PSW over frozen CP67b')
     p.add_argument('--modules-cp67',action='store_true',help='CP67 generic FRAM module table and cold initialization')
     p.add_argument('--debug-cp63',action='store_true',help='CP63 button and external HALT/STEP gate')
     p.add_argument('--loader-cp62',action='store_true',help='CP62 vector-called RT-11 file loader gate')
@@ -34,7 +35,7 @@ def main():
     args=p.parse_args()
     assert 1 <= args.clock_mhz <= 100
     assert not args.fram_timing or args.clock_mhz>=31.824, 'FRAM budgets require the conservative internal clock gate'
-    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57,args.service_cp58,args.timing_cp59,args.rk_cp60,args.boot_cp61,args.loader_cp62,args.debug_cp63,args.modules_cp67))<=1, 'Choose one native candidate or the retained MMU profile'
+    assert sum(bool(x) for x in (args.mmu,args.fram_cp52,args.cursor_cp53,args.ack_cp54,args.rx_cp55,args.spi_cp56,args.service_cp57,args.service_cp58,args.timing_cp59,args.rk_cp60,args.boot_cp61,args.loader_cp62,args.debug_cp63,args.modules_cp67,args.psw_cp78))<=1, 'Choose one native candidate or the retained MMU profile'
     assert re.fullmatch(r'cp[0-9]+[a-z][a-z0-9-]*',args.name)
     out=ROOT/'build'/args.name
     out.mkdir(parents=True,exist_ok=True)
@@ -56,8 +57,10 @@ def main():
     if args.spi_cp56:
         from build_spi_cp56 import adapt
         core,board=adapt()
-    if args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67:
-        if args.modules_cp67:
+    if args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67 or args.psw_cp78:
+        if args.psw_cp78:
+            from build_psw_cp78 import adapt
+        elif args.modules_cp67:
             from build_modules_cp67 import adapt
         elif args.debug_cp63:
             from build_debug_cp63 import adapt
@@ -74,10 +77,10 @@ def main():
         else:
             from build_service_cp57 import adapt
         core,board=adapt()
-    service_path='build/cp67-modules' if args.modules_cp67 else 'build/cp63-debug' if args.debug_cp63 else 'build/cp62-boot' if args.loader_cp62 else 'build/cp61-boot' if args.boot_cp61 else 'build/cp60-rk' if args.rk_cp60 else 'build/cp59-service' if args.timing_cp59 else 'build/cp58-service' if args.service_cp58 else 'build/cp57-service'
+    service_path='build/cp78-psw' if args.psw_cp78 else 'build/cp67-modules' if args.modules_cp67 else 'build/cp63-debug' if args.debug_cp63 else 'build/cp62-boot' if args.loader_cp62 else 'build/cp61-boot' if args.boot_cp61 else 'build/cp60-rk' if args.rk_cp60 else 'build/cp59-service' if args.timing_cp59 else 'build/cp58-service' if args.service_cp58 else 'build/cp57-service'
     sources=core+board+['boards/hc1200/uj11_microcomp.v','microcode/generated/uj11_m0_ebr.v']
-    if args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67:sources[-2]=service_path+'/src/boards/hc1200/uj11_microcomp.v'
-    if args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67:
+    if args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67 or args.psw_cp78:sources[-2]=service_path+'/src/boards/hc1200/uj11_microcomp.v'
+    if args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67 or args.psw_cp78:
         sources[-1]=service_path+'/uj11_m0_ebr.v'
     if args.mmu:sources+=MMU
     proj=ET.Element('BaliProject',version='3.2',title=args.name,device='LCMXO2-1200HC-4SG32C',default_implementation='impl1')
@@ -149,13 +152,13 @@ exit 0
     if args.spi_cp56:
         inputs+=['tools/build_spi_cp56.py','tools/build_fram_cp52.py','build/cp56-spi/inputs.json',
                  'synth/reports/cp54b/inputs.json','synth/reports/cp54b/source.tgz']
-    if args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67:
+    if args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67 or args.psw_cp78:
         record=json.loads((ROOT/service_path/'inputs.json').read_text())
         inputs+=list(record['inputs'])+list(record['outputs'])+[service_path+'/inputs.json']
     hashes={n:hashlib.sha256((ROOT/n).read_bytes()).hexdigest() for n in sorted(inputs)}
     hashes['generated:clock.lpf']=hashlib.sha256(lpf.encode()).hexdigest()
     hashes['generated:build.tcl']=hashlib.sha256((out/'build.tcl').read_bytes()).hexdigest()
-    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,timing_cp59=args.timing_cp59,rk_cp60=args.rk_cp60,boot_cp61=args.boot_cp61,loader_cp62=args.loader_cp62,debug_cp63=args.debug_cp63,modules_cp67=args.modules_cp67,defines=['UJ11_MMU'] if args.mmu else [],
+    manifest=dict(name=args.name,top=top,files=hashes,mmu=args.mmu,fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,timing_cp59=args.timing_cp59,rk_cp60=args.rk_cp60,boot_cp61=args.boot_cp61,loader_cp62=args.loader_cp62,debug_cp63=args.debug_cp63,modules_cp67=args.modules_cp67,psw_cp78=args.psw_cp78,defines=['UJ11_MMU'] if args.mmu else [],
                   input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if args.prepare_only:
@@ -168,9 +171,9 @@ exit 0
                           stdout=log,stderr=subprocess.STDOUT).returncode
     prefix=out/'impl1'/f'{args.name}_impl1'
     report=dict(inputs=manifest,scope='Full board: core/FIS + SPI FRAM + KL11/KW11/panel/SD/RK + bootstrap + OSCH/reset/pins; prefetch disabled',
-                device='LCMXO2-1200HC-4SG32C',constraint_mhz=args.clock_mhz,expected_ebr=7 if args.mmu or args.modules_cp67 else 6,diamond_returncode=rc,
-                mmu=args.mmu,microcode_words=json.loads((ROOT/(service_path+'/m0.stats.json' if (args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67) else 'microcode/generated/m0.stats.json')).read_text())['used_words'],
-                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,timing_cp59=args.timing_cp59,rk_cp60=args.rk_cp60,boot_cp61=args.boot_cp61,loader_cp62=args.loader_cp62,debug_cp63=args.debug_cp63,modules_cp67=args.modules_cp67,
+                device='LCMXO2-1200HC-4SG32C',constraint_mhz=args.clock_mhz,expected_ebr=7 if args.mmu or args.modules_cp67 or args.psw_cp78 else 6,diamond_returncode=rc,
+                mmu=args.mmu,microcode_words=json.loads((ROOT/(service_path+'/m0.stats.json' if (args.service_cp57 or args.service_cp58 or args.timing_cp59 or args.rk_cp60 or args.boot_cp61 or args.loader_cp62 or args.debug_cp63 or args.modules_cp67 or args.psw_cp78) else 'microcode/generated/m0.stats.json')).read_text())['used_words'],
+                fram_cp52=args.fram_cp52,cursor_cp53=args.cursor_cp53,ack_cp54=args.ack_cp54,rx_cp55=args.rx_cp55,spi_cp56=args.spi_cp56,service_cp57=args.service_cp57,service_cp58=args.service_cp58,timing_cp59=args.timing_cp59,rk_cp60=args.rk_cp60,boot_cp61=args.boot_cp61,loader_cp62=args.loader_cp62,debug_cp63=args.debug_cp63,modules_cp67=args.modules_cp67,psw_cp78=args.psw_cp78,
                 external_pin_delays_constrained=args.fram_timing)
     try:
         timing_text=prefix.with_suffix('.twr').read_text()

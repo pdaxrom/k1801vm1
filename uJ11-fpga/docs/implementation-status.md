@@ -1,4 +1,4 @@
-# Implementation status, 2026-09-14
+# Implementation status, 2026-09-15
 
 [Актуальная документация CP67b](README.md):
 [эксплуатация](user-guide-cp67.md), [устройство](system-cp67.md),
@@ -8,6 +8,10 @@
 работают на плате. Установка ODT и аппаратные проверки отражаются в
 [отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
+
+## CP78 — CPU-local PSW
+
+Чтение/запись слова и байтов `177776/177777` реализованы в отдельном профиле `--psw-cp78`. T защищён, PS<10:9>=0, явная запись NZVC не затирается флагами команды. 1741 native cases / 12486 checks, portable/vendor; DFFPA/DFFPB/DFFPC — по одному проходу без ошибок и без test-only adapter. RT-11/UJMOD/43 ODT STEP/cold init/OFF — 99 checks PASS. Microstore прежняя: 1005 слов. MAP/PAR/TRACE ещё не выполнен; CP78 не установлен. [Границы и результаты](psw-cp78.md).
 
 ## CP77 — FP debugger и DEC diagnostics
 

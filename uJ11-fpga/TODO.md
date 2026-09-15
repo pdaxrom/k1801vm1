@@ -1,5 +1,17 @@
 # uJ11 TODO
 
+## CP78 — memory-mapped PSW
+
+- [x] Реализовать слово/байты PSW, T protection, NZVC precedence, PS<10:9>=0 по DEC.
+- [x] Проверить USER/HALT, физический bypass, odd/error, IRQ/trace; portable/vendor.
+- [x] Пройти DFFPA/DFFPB/DFFPC на реальном RTL CPU без test-only adapter.
+- [x] Полный RT-11/UJMOD/ODT/FP11 регресс CP78: 99 checks, 43 FP шага, cold init/OFF — PASS; исходники и логи сохранены.
+- [ ] Получить MAP/PAR/TRACE HC1200 и принять или оптимизировать кандидат по реальным LUT/Fmax. Передача на synthesis host пока заблокирована автоматической проверкой.
+- [ ] FP11 firmware: обращения операндов к 177776/177777 должны читать/писать сохранённый USER CPSW, с защитой T и byte lanes; отдельно проверить STFPS/LDFPS/STCFI и fault/flags precedence. GUEST-доступ из HALT сейчас видит живой HALT PSW.
+- [ ] Только после аппаратного gate собрать JED, установить и проверить UART/пульт/FRAM-модули на плате.
+
+[Реализация, источники DEC и команды](docs/psw-cp78.md).
+
 ## CP77 — ODT FP и внешние диагностики
 
 - [x] FP disassembly, CPU/AC operand forms, live FPS у остановленного PC.
@@ -8,7 +20,7 @@
 - [x] 4096 opcode/1008 FPS-context проверок, прежний ODT/IRQ/panel регресс.
 - [x] Извлечь DEC FFPAA1/FFPBA0/FFPCB0, проверить chain/loader checksums.
 - [x] По одному проходу трёх DEC FP11-A частей в RTL с test-only PSW read.
-- [ ] Отдельный CP: memory-mapped PSW 177776, затем native DEC diagnostics без test-only adapter; обязательно измерить LUT/Fmax. Сейчас DFFPA test 2 получает bus error.
+- [x] Реализовать memory-mapped PSW и native DEC diagnostics: функциональная часть CP78 выполнена. Hardware gate остаётся в списке CP78 выше.
 - [ ] Установить CP77 ODT/FP11 через RT-11 и проверить на физической плате.
 
 [Команды, раскладка FRAM и границы PASS](docs/odt-fp-cp77.md).

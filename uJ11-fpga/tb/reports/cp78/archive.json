@@ -1,0 +1,1705 @@
+{
+  "checkpoint": "CP78",
+  "functional_pass": true,
+  "synthesis_completed": false,
+  "installed_on_board": false,
+  "qualification": "Functional candidate only; native DEC passes without PSW adapter; HC1200 gate pending",
+  "synthesis_blocker": "Automatic approval review denied source transfer twice; renewed trusted-host confirmation pending",
+  "source_files": {
+    "tb/tb_psw_cp78.v": {
+      "sha256": "5e888ffdb466e5e054fd586fe701d58282733eb7a522811eaa0402e380531cf2",
+      "member": "project/tb/tb_psw_cp78.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_core.v": {
+      "sha256": "ff1063aa0b893d661ed385634c35d1f964a76b51a6a0054280ebb2db5bb0f595",
+      "member": "project/build/cp78-psw/src/rtl/uj11_core.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_decode_rom.v": {
+      "sha256": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+      "member": "project/build/cp78-psw/src/rtl/uj11_decode_rom.v"
+    },
+    "build/cp78-psw/src/microcode/generated/uj11_decode_table.v": {
+      "sha256": "d93019e1b7a2e326e8a552e41d8d3463a1fb173c33fe08f0a144961504c5187c",
+      "member": "project/build/cp78-psw/src/microcode/generated/uj11_decode_table.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_engine.v": {
+      "sha256": "cccd24e99d6acc46c235d622060992a2dfa3b5450518e379a0291a68b1d0abb7",
+      "member": "project/build/cp78-psw/src/rtl/uj11_engine.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_decode.v": {
+      "sha256": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+      "member": "project/build/cp78-psw/src/rtl/uj11_decode.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_microseq.v": {
+      "sha256": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+      "member": "project/build/cp78-psw/src/rtl/uj11_microseq.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_datapath.v": {
+      "sha256": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+      "member": "project/build/cp78-psw/src/rtl/uj11_datapath.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_regfile.v": {
+      "sha256": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+      "member": "project/build/cp78-psw/src/rtl/uj11_regfile.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_alu.v": {
+      "sha256": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+      "member": "project/build/cp78-psw/src/rtl/uj11_alu.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_psw.v": {
+      "sha256": "30bbae142901c4cbbb89c56d31586283ec5db8e944da7a7e25d83ee3da84c275",
+      "member": "project/build/cp78-psw/src/rtl/uj11_psw.v"
+    },
+    "build/cp78-psw/src/rtl/uj11_mem.v": {
+      "sha256": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+      "member": "project/build/cp78-psw/src/rtl/uj11_mem.v"
+    },
+    "rtl/uj11_rom.v": {
+      "sha256": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+      "member": "project/rtl/uj11_rom.v"
+    },
+    "tools/test_psw_cp78.py": {
+      "sha256": "7e263ba1db6a03bf475b81771d130772d0f452b7b0d06f79d27c8e7777fe2724",
+      "member": "project/tools/test_psw_cp78.py"
+    },
+    "tools/build_psw_cp78.py": {
+      "sha256": "9d4bfd4229d87e6a7999b2c7723d16dc5d0ecc00b607aa152b4aeea86a9f6a1f",
+      "member": "project/tools/build_psw_cp78.py"
+    },
+    "build/cp78-tests/rtl-d0-a0/vectors.txt": {
+      "sha256": "b99f18decb7aa1a3e207e2b7a96be4dc6b296238c66d095263ffd781c877d7b3",
+      "member": "project/build/cp78-tests/rtl-d0-a0/vectors.txt"
+    },
+    "build/cp78-psw/inputs.json": {
+      "sha256": "d02d93910df8b349e08cbd7de9c79cfff5f3cedd1f92700709166b5a88edf7ac",
+      "member": "project/build/cp78-psw/inputs.json"
+    },
+    "build/cp78-tests/rtl-d0-a1/vectors.txt": {
+      "sha256": "b99f18decb7aa1a3e207e2b7a96be4dc6b296238c66d095263ffd781c877d7b3",
+      "member": "project/build/cp78-tests/rtl-d0-a1/vectors.txt"
+    },
+    "build/cp78-tests/rtl-d1-a0/vectors.txt": {
+      "sha256": "b99f18decb7aa1a3e207e2b7a96be4dc6b296238c66d095263ffd781c877d7b3",
+      "member": "project/build/cp78-tests/rtl-d1-a0/vectors.txt"
+    },
+    "build/cp78-tests/rtl-d1-a1/vectors.txt": {
+      "sha256": "b99f18decb7aa1a3e207e2b7a96be4dc6b296238c66d095263ffd781c877d7b3",
+      "member": "project/build/cp78-tests/rtl-d1-a1/vectors.txt"
+    },
+    "build/cp78-psw/uj11_m0_ebr.v": {
+      "sha256": "b4a8489c815fed2f14d2b65d7962b11a10ce393aeffce958efed8d8773f28f4b",
+      "member": "project/build/cp78-psw/uj11_m0_ebr.v"
+    },
+    "build/vendor/DP8KC.v": {
+      "sha256": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+      "member": "project/build/vendor/DP8KC.v"
+    },
+    "build/vendor/GSR.v": {
+      "sha256": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+      "member": "project/build/vendor/GSR.v"
+    },
+    "build/vendor/PUR.v": {
+      "sha256": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4",
+      "member": "project/build/vendor/PUR.v"
+    },
+    "build/cp78-tests/vendor-d1-a1/vectors.txt": {
+      "sha256": "b99f18decb7aa1a3e207e2b7a96be4dc6b296238c66d095263ffd781c877d7b3",
+      "member": "project/build/cp78-tests/vendor-d1-a1/vectors.txt"
+    },
+    "build/cp78-fp-events/sync/tb.v": {
+      "sha256": "9765920830b1a8670881bfaa75bad85597f10f0dee25aa29f7877296565ba7ae",
+      "member": "project/build/cp78-fp-events/sync/tb.v"
+    },
+    "tb/tb_fp11_cp68.v": {
+      "sha256": "0dd0f78c9e96d8b3ec4a43f760c1b6327b93d840cbc04dc14ed267cadaa34c62",
+      "member": "project/tb/tb_fp11_cp68.v"
+    },
+    "tb/fp_events_cp76.vh": {
+      "sha256": "3ee0e762884756cf39c613acfcec4245e3a6d09c7ca3fa847e083c0390c34a6d",
+      "member": "project/tb/fp_events_cp76.vh"
+    },
+    "tools/test_fp_events_cp78.py": {
+      "sha256": "4136efd6e2e58a51387c27b007f747f9e77326c670decc40397e11123f1e6ac8",
+      "member": "project/tools/test_fp_events_cp78.py"
+    },
+    "build/cp78-psw/m0.mem": {
+      "sha256": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97",
+      "member": "project/build/cp78-psw/m0.mem"
+    },
+    "build/cp78-psw/decode.mem": {
+      "sha256": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5",
+      "member": "project/build/cp78-psw/decode.mem"
+    },
+    "build/cp77-fp11/test-image.mem": {
+      "sha256": "b3b1651586f06d27eace8f064549adae67ee4a502cd0c07cad869fd6be7e4543",
+      "member": "project/build/cp77-fp11/test-image.mem"
+    },
+    "build/cp77-fp11/fp76_symbols.vh": {
+      "sha256": "74fa453060cb05e167dc48b6ddbe5dee05365ffb473e9548dadcc35038c35236",
+      "member": "project/build/cp77-fp11/fp76_symbols.vh"
+    },
+    "build/cp78-fp-events/vendor/tb.v": {
+      "sha256": "9765920830b1a8670881bfaa75bad85597f10f0dee25aa29f7877296565ba7ae",
+      "member": "project/build/cp78-fp-events/vendor/tb.v"
+    },
+    "tools/run_dec_fp_cp78.py": {
+      "sha256": "780dd103144629fe26b6e2c24b7971c85327a41ed095ea7b8f436f65df6f675c",
+      "member": "project/tools/run_dec_fp_cp78.py"
+    },
+    "build/cp78-diagnostics/FFPAA1/tb.v": {
+      "sha256": "aba13bc961b648340065ebbd9f3a89132141f30a403a01cb87803bd9dec4701e",
+      "member": "project/build/cp78-diagnostics/FFPAA1/tb.v"
+    },
+    "build/cp78-diagnostics/FFPAA1/memory.mem": {
+      "sha256": "14e7774dbab61ac9156df88b58acaa1b1c15d72e1a24414b28e86913023b052a",
+      "member": "project/build/cp78-diagnostics/FFPAA1/memory.mem"
+    },
+    "build/cp77-diagnostics/extraction.json": {
+      "sha256": "a322d5073e41f2f74804cb2087e49a967dcd23204680457b18cdbe45f1bb31af",
+      "member": "project/build/cp77-diagnostics/extraction.json"
+    },
+    "build/cp77-fp11/software/result.json": {
+      "sha256": "9bf1875b361b1931049b846648aa930211ccf723c615537356d014cde12512b5",
+      "member": "project/build/cp77-fp11/software/result.json"
+    },
+    "build/cp78-diagnostics/FFPBA0/tb.v": {
+      "sha256": "e77ed62b696f683cfc5969eb212cd02b21fa22d2746b0a836284ca3cf823e62b",
+      "member": "project/build/cp78-diagnostics/FFPBA0/tb.v"
+    },
+    "build/cp78-diagnostics/FFPBA0/memory.mem": {
+      "sha256": "3bfc294c313be53fcb89a0399fb78b637e6d843171145106e27c100963e336f5",
+      "member": "project/build/cp78-diagnostics/FFPBA0/memory.mem"
+    },
+    "build/cp78-diagnostics/FFPCB0/tb.v": {
+      "sha256": "9515e528d059aba9065bd85e4b1e2c814fbb948729a63bdd871f29f06958bca8",
+      "member": "project/build/cp78-diagnostics/FFPCB0/tb.v"
+    },
+    "build/cp78-diagnostics/FFPCB0/memory.mem": {
+      "sha256": "9fc37c8f8c829179b3e755a64d1a1a4217617c0c1578b09ed5d2dc7142167619",
+      "member": "project/build/cp78-diagnostics/FFPCB0/memory.mem"
+    },
+    "build/cp77-odt/ODT.BIN": {
+      "sha256": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de",
+      "member": "project/build/cp77-odt/ODT.BIN"
+    },
+    "build/cp67-software/sdboot/SDBOOT.BIN": {
+      "sha256": "201c1c0707bfad7d0a6b766d4c9f54baa8bdcd518bcdfa3acd3f631d95257a23",
+      "member": "project/build/cp67-software/sdboot/SDBOOT.BIN"
+    },
+    "build/cp67-software/loader/UJMOD.SAV": {
+      "sha256": "7195501e4674fb2d5362b9b0a1876404824b788d3382ad4147268750e1da1f97",
+      "member": "project/build/cp67-software/loader/UJMOD.SAV"
+    },
+    "build/cp77-fp11/software/FP11.BIN": {
+      "sha256": "492595782166f0c9fe60dd2fbaa9728ebbbc434041569db229bf7521e1a993bf",
+      "member": "project/build/cp77-fp11/software/FP11.BIN"
+    },
+    "build/cp78-rt11/FPTST.SAV": {
+      "sha256": "a51703c404afb3e5de3f92be64406f47671d2ab9edbb0137c4fba656ac15599b",
+      "member": "project/build/cp78-rt11/FPTST.SAV"
+    },
+    "build/cp78-rt11/tb.v": {
+      "sha256": "a8e0fddab338c9513422150779a5ec72798c71d0ec3b18c78b0df001a6ffe084",
+      "member": "project/build/cp78-rt11/tb.v"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_board.v": {
+      "sha256": "08d754d67b2dcf98ba366d45cb96152261da51a8b205fcc2d6ddfaeb615e8be9",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_board.v"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_board_bus.v": {
+      "sha256": "a7ad5ee2f838536c6708c5ada307250702ba7f8fa21cbc0b5cb723b2be6350a2",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_board_bus.v"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_panel.v": {
+      "sha256": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_panel.v"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_board_fram.v": {
+      "sha256": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_board_fram.v"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_tick.v": {
+      "sha256": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_tick.v"
+    },
+    "build/cp78-psw/src/reference/lsi11/spi_byte_service.v": {
+      "sha256": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+      "member": "project/build/cp78-psw/src/reference/lsi11/spi_byte_service.v"
+    },
+    "build/cp78-psw/src/reference/lsi11/wbc_uart_xo2.v": {
+      "sha256": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+      "member": "project/build/cp78-psw/src/reference/lsi11/wbc_uart_xo2.v"
+    },
+    "build/cp78-rt11/firmware.v": {
+      "sha256": "9d30bfe6a29e6ffa96faf67ea1baa41e5dd3237d2a44db985792ee20d04ed2c3",
+      "member": "project/build/cp78-rt11/firmware.v"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_button.v": {
+      "sha256": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_button.v"
+    },
+    "tb/models/ODDRXE.v": {
+      "sha256": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d",
+      "member": "project/tb/models/ODDRXE.v"
+    },
+    "reference/lsi11/spi_fram_model.v": {
+      "sha256": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+      "member": "project/reference/lsi11/spi_fram_model.v"
+    },
+    "reference/lsi11/spi_sd_model_cp28.v": {
+      "sha256": "e159dd7c1f6545a69d4e61e6688c3f16ac2762c693447b92c1642d20721bb7ad",
+      "member": "project/reference/lsi11/spi_sd_model_cp28.v"
+    },
+    "tb/tb_odt_rt11.v": {
+      "sha256": "e13a83e952051009193f72f72e8859524b6f7277fe0a20cccf5719dc5fe2f038",
+      "member": "project/tb/tb_odt_rt11.v"
+    },
+    "tb/fp_rt11_cp77.vh": {
+      "sha256": "019f613e84baa3ffd585f705a45600546982aea4b4a1d16d96cac06474d2dbd2",
+      "member": "project/tb/fp_rt11_cp77.vh"
+    },
+    "tools/run_fp11_rt11_cp78.py": {
+      "sha256": "3e9d4c470096d2273b984c8068a9487dfbc020835dfc65ff01a25fb0f4c01f13",
+      "member": "project/tools/run_fp11_rt11_cp78.py"
+    },
+    "firmware/fp11/FPTST.MAC": {
+      "sha256": "c44c85129d77c444aa671cd62d95d8f2acea1749c5c410dca488180102e10b86",
+      "member": "project/firmware/fp11/FPTST.MAC"
+    },
+    "build/cp78-rt11/FPTST.MAC": {
+      "sha256": "c44c85129d77c444aa671cd62d95d8f2acea1749c5c410dca488180102e10b86",
+      "member": "project/build/cp78-rt11/FPTST.MAC"
+    },
+    "build/cp78-rt11/odt_symbols.vh": {
+      "sha256": "e92d3bc87d4a65946ecbdd0c4183c9ff420eb2ac103991cdf5d323d3cbc47d61",
+      "member": "project/build/cp78-rt11/odt_symbols.vh"
+    },
+    "build/cp78-rt11/firmware.mem": {
+      "sha256": "b2341ab5dbac02ce8247a20205cb52dc5f83bd277396ca7607c9fc4bcb63ce90",
+      "member": "project/build/cp78-rt11/firmware.mem"
+    },
+    "build/cp77-odt/UJMON.MAC": {
+      "sha256": "6f81e99621c0f8645f92ed185d23c886efebde7c73fae345f12bf81c6b76594c",
+      "member": "project/build/cp77-odt/UJMON.MAC"
+    },
+    "firmware/odt/ODT.MAC": {
+      "sha256": "e162003299f5b2a499f504723166e550513afcaa443c5424adc83a7a4a5824c4",
+      "member": "project/firmware/odt/ODT.MAC"
+    },
+    "firmware/odt/DISASM.MAC": {
+      "sha256": "fe7149622062e84c4c3a80cdacd20eb46385565689f38ed5c756684933a75ad1",
+      "member": "project/firmware/odt/DISASM.MAC"
+    },
+    "firmware/odt/PANEL.MAC": {
+      "sha256": "47aa5727eee2c97b44943adf15c88595ffc0929c6a239734f38eea87d9fcacf7",
+      "member": "project/firmware/odt/PANEL.MAC"
+    },
+    "firmware/odt/NAV.MAC": {
+      "sha256": "cb4a3dcd9a56bf2a3e1d07cc3e9363fc01360dd98a45766f9ad363b62133aa9c",
+      "member": "project/firmware/odt/NAV.MAC"
+    },
+    "firmware/odt/OVER.MAC": {
+      "sha256": "de4b896059a81766d7c75da8f13211e10bac71681ed04d7d6c3168974f385ac6",
+      "member": "project/firmware/odt/OVER.MAC"
+    },
+    "firmware/odt/BREAK.MAC": {
+      "sha256": "565dca3bf4b68a7816897c8d9fa3205432593ec92fe0f787139a97de22b633a2",
+      "member": "project/firmware/odt/BREAK.MAC"
+    },
+    "firmware/odt/FPDEBUG.MAC": {
+      "sha256": "baa1edce0732402794729d303abc948bd19a0f55a84167cdbcfa54b9221ad328",
+      "member": "project/firmware/odt/FPDEBUG.MAC"
+    },
+    "firmware/odt/DATA.MAC": {
+      "sha256": "065aeab2a3600bbf8f721ca10681cd7492dab1579e2f40bf9ad7f39f20393fc7",
+      "member": "project/firmware/odt/DATA.MAC"
+    },
+    "demos/rt11/panel/PNLDRV.MAC": {
+      "sha256": "13af32da914fcf248ad62573c4588b1e87d66756af7cdb029afe19c7bf4fc0cb",
+      "member": "project/demos/rt11/panel/PNLDRV.MAC"
+    },
+    "firmware/odt/PNKEY.MAC": {
+      "sha256": "fb1abc5d41c02f59273acb4785159ab7192e5c0867e7bf2115dea200fc852a7c",
+      "member": "project/firmware/odt/PNKEY.MAC"
+    },
+    "firmware/cp67/ODINIT.MAC": {
+      "sha256": "06f0a2bb411fc24c4a399cbb2efd043b95a3f3ee90417cd08243e7ce0a4afdc0",
+      "member": "project/firmware/cp67/ODINIT.MAC"
+    },
+    "tools/build_software_cp67.py": {
+      "sha256": "3427e667aa8548a3537bc63f62e8f96b3902d96dc6956e97c0f5e825af4a56cb",
+      "member": "project/tools/build_software_cp67.py"
+    },
+    "tools/module_image_cp67.py": {
+      "sha256": "b2636d6d4e97a6277fe21ce9dec5a97dedb34f381038735afe1caf5eb0ecfa59",
+      "member": "project/tools/module_image_cp67.py"
+    },
+    "build/cp77-odt/payload.bin": {
+      "sha256": "5434f583cdd8a76e897b0932cec8b6b6759ececc43410dfd9888971dc538c27a",
+      "member": "project/build/cp77-odt/payload.bin"
+    },
+    "build/cp77-odt/image.bin": {
+      "sha256": "4b158f6ea7efc22dd4ef56efc5f23c73e11e12755026ebadd801d5089573e5fe",
+      "member": "project/build/cp77-odt/image.bin"
+    },
+    "build/cp67-software/sdboot/SDBOOT.MAC": {
+      "sha256": "8ebf07d96dba80d8707df506c7a90943bc85c35b48e652ae34a3d57705cdf4a5",
+      "member": "project/build/cp67-software/sdboot/SDBOOT.MAC"
+    },
+    "firmware/cp67/SDBOOT.MAC.in": {
+      "sha256": "695c2e4e007144b5e3977a229ad1fdfb058d271979417ed2a827b251e26f2698",
+      "member": "project/firmware/cp67/SDBOOT.MAC.in"
+    },
+    "synth/reports/cp63b/inputs.json": {
+      "sha256": "416ae538cf16ab0d1ddf41d03ce82b136ff5b70ac1534a3131666cf149a3ddcb",
+      "member": "project/synth/reports/cp63b/inputs.json"
+    },
+    "synth/reports/cp63b/source.tgz": {
+      "sha256": "ce86b070d934ee1f8fb2e6c83706fb5709e59796cea42814005091976c265113",
+      "member": "project/synth/reports/cp63b/source.tgz"
+    },
+    "build/cp67-software/sdboot/image.bin": {
+      "sha256": "adfc7babdd75e471ddf5b0e2c44348ef0e3efcd63f74628bf8016c02067cf54d",
+      "member": "project/build/cp67-software/sdboot/image.bin"
+    },
+    "build/cp67-software/loader/UJMOD.MAC": {
+      "sha256": "15de05109a0e7fd18901a446457ee7b1a8b227866eaf8f5dbd356f74c72aa6c3",
+      "member": "project/build/cp67-software/loader/UJMOD.MAC"
+    },
+    "demos/rt11/service/cp62/UJLOAD.MAC": {
+      "sha256": "f0062e9a60cc552bae2c7703d3329c08c397ff5632935b9f53710bcecf8c9968",
+      "member": "project/demos/rt11/service/cp62/UJLOAD.MAC"
+    },
+    "firmware/cp67/UJMOD.MAC.in": {
+      "sha256": "89e37a7636a230dea0db9d0fe0309b2bfbbba7a554a53660ee2dd441030d907f",
+      "member": "project/firmware/cp67/UJMOD.MAC.in"
+    },
+    "build/cp77-fp11/software/FP11.MAC": {
+      "sha256": "05f97ee1d8c7bed25a0b66f7eb3690365c53a4c85a589ccb15e14a8e6f3fcbfa",
+      "member": "project/build/cp77-fp11/software/FP11.MAC"
+    },
+    "firmware/fp11/FP11.MAC": {
+      "sha256": "05f97ee1d8c7bed25a0b66f7eb3690365c53a4c85a589ccb15e14a8e6f3fcbfa",
+      "member": "project/firmware/fp11/FP11.MAC"
+    },
+    "tools/build_fp11_cp77.py": {
+      "sha256": "32a9bca05b347e6038f62fd7a87801f764855fa1635271b38468d548b332af35",
+      "member": "project/tools/build_fp11_cp77.py"
+    },
+    "tools/rt11_build.py": {
+      "sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002",
+      "member": "project/tools/rt11_build.py"
+    },
+    "build/cp77-fp11/software/image.bin": {
+      "sha256": "658b973c6074148ecf4be4ca17d7fe425f20e0d79d064a8e40129a1ee5359329",
+      "member": "project/build/cp77-fp11/software/image.bin"
+    },
+    "tb/reports/cp77/rt11/uart.txt": {
+      "sha256": "929cabe9c10b879262f581b1832767e147baacf7e3b1bdfdf3f5bbe597da7e63",
+      "member": "project/tb/reports/cp77/rt11/uart.txt"
+    },
+    "tools/board_common.py": {
+      "sha256": "26d004423fddf7c46589a76ccdecf7958cd0279e8b20307c1cb9fbea9eb1a514",
+      "member": "project/tools/board_common.py"
+    },
+    "tools/build_fram_cp52.py": {
+      "sha256": "cf00336c5b1fb3c0499c135adc3163b8d4d26a2383c4aec65225ca93708053d1",
+      "member": "project/tools/build_fram_cp52.py"
+    },
+    "synth/reports/cp67b/inputs.json": {
+      "sha256": "f5c4952bddff255b4375f8d5892ea4d197f5c05a837b7684f3cc9fbe14b83177",
+      "member": "project/synth/reports/cp67b/inputs.json"
+    },
+    "synth/reports/cp67b/source.tgz": {
+      "sha256": "d993d0c6a55e7022fa4c41fa1e00c17422432b874b5924b51368129573cb0655",
+      "member": "project/synth/reports/cp67b/source.tgz"
+    },
+    "rtl/cp78/uj11_core.v": {
+      "sha256": "ff1063aa0b893d661ed385634c35d1f964a76b51a6a0054280ebb2db5bb0f595",
+      "member": "project/rtl/cp78/uj11_core.v"
+    },
+    "rtl/cp78/uj11_psw.v": {
+      "sha256": "30bbae142901c4cbbb89c56d31586283ec5db8e944da7a7e25d83ee3da84c275",
+      "member": "project/rtl/cp78/uj11_psw.v"
+    },
+    "build/cp78-psw/boot-symbols.json": {
+      "sha256": "6c5f44b8e98f14366b53c18da884d7f43f0bebddb6faadd985a1e91fc720a228",
+      "member": "project/build/cp78-psw/boot-symbols.json"
+    },
+    "build/cp78-psw/firmware.mem": {
+      "sha256": "34f506e4f6735616bd07e778d1eaf45a3e8612df2ffdaf3bbf5c7d652293f134",
+      "member": "project/build/cp78-psw/firmware.mem"
+    },
+    "build/cp78-psw/m0.labels.json": {
+      "sha256": "92315db841ff4328aa501dec4270b09ef5712688ac2b11a30af2adacec609f82",
+      "member": "project/build/cp78-psw/m0.labels.json"
+    },
+    "build/cp78-psw/m0.lst": {
+      "sha256": "04a03869cff6d23ab2e27b9cf8aa34e59db431920320faf5b73cc96faaf2bf4c",
+      "member": "project/build/cp78-psw/m0.lst"
+    },
+    "build/cp78-psw/m0.stats.json": {
+      "sha256": "e3140cdf5a2ff6e58398927618dd24c2960169853173bfefd7d5aa7bd844ab6e",
+      "member": "project/build/cp78-psw/m0.stats.json"
+    },
+    "build/cp78-psw/service.uasm": {
+      "sha256": "2dd63dc064350fc95dc80fb7e7bde3dd87de5a1b9370207e046f2f0a272cf299",
+      "member": "project/build/cp78-psw/service.uasm"
+    },
+    "build/cp78-psw/src/boards/hc1200/uj11_microcomp.v": {
+      "sha256": "f11be1d5444d1fddae7307cbbe93dbe8ed0617133d23b06ecde32740db566204",
+      "member": "project/build/cp78-psw/src/boards/hc1200/uj11_microcomp.v"
+    },
+    "build/cp78-psw/src/microcode/generated/uj11_firmware_rom.v": {
+      "sha256": "96b67ecb536875348a1a9189378da8df28e4ac2644e50f58fc0b550b054bdefe",
+      "member": "project/build/cp78-psw/src/microcode/generated/uj11_firmware_rom.v"
+    },
+    "boards/hc1200/pins.lpf": {
+      "sha256": "b75315f0e3900ed628d058d6aba7b5e6d8c8d6ee8e13975626eb9fd590be08ed",
+      "member": "project/boards/hc1200/pins.lpf"
+    },
+    "firmware/rk_service.asm": {
+      "sha256": "207b4d383825de9c6bc3f561c62ac20b9ef445ff0e4a909a321cda28f86ae69d",
+      "member": "project/firmware/rk_service.asm"
+    },
+    "firmware/sd_boot.asm": {
+      "sha256": "ca1438c930ef5d350a87d1122d214a93cf6ee3a428f808cab3ebae556f5746fe",
+      "member": "project/firmware/sd_boot.asm"
+    },
+    "microasm/uj11asm.py": {
+      "sha256": "f2d0eeb31678ad39edb771e17459c76a2c2c1ad6defdb2b68fbcfc3b7ab43104",
+      "member": "project/microasm/uj11asm.py"
+    },
+    "microcode/fis.uasm": {
+      "sha256": "176c697098954b00851da729de36f7765ca60e0e7f06758d30b6b48f301890e2",
+      "member": "project/microcode/fis.uasm"
+    },
+    "microcode/generated/m0.stats.json": {
+      "sha256": "b6f5ca5648d515deeef8395523e41d575a702e927836e78600a98499247cdafd",
+      "member": "project/microcode/generated/m0.stats.json"
+    },
+    "microcode/m0.uasm": {
+      "sha256": "0bc7033fc66e11eeb1b77244be4bb94657915811cc9dde61c713b34814ad0432",
+      "member": "project/microcode/m0.uasm"
+    },
+    "synth/machxo2/fram-timing.lpf": {
+      "sha256": "c901844d22ecdb64c3e132061cf9ecc33f0f4df5c092238f4a271202142b1b1a",
+      "member": "project/synth/machxo2/fram-timing.lpf"
+    },
+    "synth/machxo2/uj11-board.sty": {
+      "sha256": "0759168d7465a5eba298a9cb20a4bc3e5ae69bfcb04c7e36f1a864c764440449",
+      "member": "project/synth/machxo2/uj11-board.sty"
+    },
+    "tools/build_decode_rom.py": {
+      "sha256": "d01eada6465963872777c4a7d8c9212605910c50e581f61c6bfdd6dfed7a6a07",
+      "member": "project/tools/build_decode_rom.py"
+    },
+    "tools/build_firmware.py": {
+      "sha256": "13e03744777f124256ba459268d12478f0ae8affcb9c1fb346a9992661d8893f",
+      "member": "project/tools/build_firmware.py"
+    },
+    "tools/checkpoint_board.py": {
+      "sha256": "35c3ce3094cef38c6c0e0f170267d857379a1ea30d0fedf7d76dd41d93907591",
+      "member": "project/tools/checkpoint_board.py"
+    },
+    "tools/link_fis.py": {
+      "sha256": "fcf7b576c7e122b9d95811a7c9bb7d6c9c781ff14a4c8f8768f5fd927158c59d",
+      "member": "project/tools/link_fis.py"
+    },
+    "tools/make_ebr.py": {
+      "sha256": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+      "member": "project/tools/make_ebr.py"
+    },
+    "tools/report_synthesis.py": {
+      "sha256": "6c3ccec6e995cd7ba6f1cdbe6c9360e5bc572675eb7f487561e4460650375e62",
+      "member": "project/tools/report_synthesis.py"
+    },
+    "demos/rt11/service/cp77/ODT.BIN": {
+      "sha256": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de",
+      "member": "project/demos/rt11/service/cp77/ODT.BIN"
+    },
+    "demos/rt11/service/cp77/FP11.BIN": {
+      "sha256": "492595782166f0c9fe60dd2fbaa9728ebbbc434041569db229bf7521e1a993bf",
+      "member": "project/demos/rt11/service/cp77/FP11.BIN"
+    },
+    "tools/archive_cp78.py": {
+      "sha256": "3702b911b2143fe7359bd20c6f25576669248c9fa143d8eb3a7a70db85b5c85a",
+      "member": "project/tools/archive_cp78.py"
+    },
+    "tools/verify_cp78.py": {
+      "sha256": "9eea528c1e0047b274a9be36a4aa40b56c0ec98f5f8d66fedda0c75bffe237c4",
+      "member": "project/tools/verify_cp78.py"
+    },
+    "docs/psw-cp78.md": {
+      "sha256": "a351e697910eb423bca96ffb225f7c9601bf8cc37d612ce4bba4c14b48dc3d2c",
+      "member": "project/docs/psw-cp78.md"
+    },
+    "README.md": {
+      "sha256": "57f5825afc4ba94a81dc1c723df7cef9dad3f6e058d3e7a802af784cbeaeb93a",
+      "member": "project/README.md"
+    },
+    "TODO.md": {
+      "sha256": "a2c7c0e92fc8c1ac91913989f4639f7df88e40c662156bf0a0184fb14a7b174b",
+      "member": "project/TODO.md"
+    },
+    "docs/README.md": {
+      "sha256": "eb15f90dc44c07a62c6badf24e1cdea043c38ac6b056ff35daf4820328e53e21",
+      "member": "project/docs/README.md"
+    },
+    "docs/implementation-status.md": {
+      "sha256": "206f47a40143f1e4ae24efb7e854e5fab259b6f4ea3e44add0ff92b273853c28",
+      "member": "project/docs/implementation-status.md"
+    },
+    "docs/synthesis.md": {
+      "sha256": "9267152e07a756ba54a87378d4574b058ebbc010874832c23afd313153a70548",
+      "member": "project/docs/synthesis.md"
+    },
+    "docs/benchmarks.md": {
+      "sha256": "e1b3cf553a23e2179ac705ace2aaf79f394c9c8cbf465ee4802edec914458b9b",
+      "member": "project/docs/benchmarks.md"
+    }
+  },
+  "artifacts": {
+    "psw-d0-a0/result.json": "1ea878774c9c8ce0258c08d9cce603556f589902017c5d98c748ca7452cefce3",
+    "psw-d0-a0/inputs.json": "baa39b5ec14e586bf503ee0cd6e4ac744816413b39776138fb0ff022f010fc77",
+    "psw-d0-a0/simulation.log": "0a79eb97034b0a3b9b79a87ae8b270c153a3283d933d0dd7ced4eaf9c91a84df",
+    "psw-d0-a0/build.log": "ddd8df6d66c676fb53959c6e14283b27cf0d639f0a99c12cab8743d29dec7442",
+    "psw-d0-a1/result.json": "ef2e5d6aec3a2b9aa4ec9fca8c48b1e1be632bbf6830482c2d66841d17a18ed7",
+    "psw-d0-a1/inputs.json": "5822a2e11069c4190bc0c24cf7c5122ee9084833d31b7e9d3433a43c787b4adc",
+    "psw-d0-a1/simulation.log": "690a20c3d7ae40d49b5b7f4e09dc802b35de66a3987812156cb03de0bf9f838f",
+    "psw-d0-a1/build.log": "4a1669fe7f192170f437cac8ebdc7725ac55cf5a3d79ee2da1d184eebb987bca",
+    "psw-d1-a0/result.json": "cf6a689ae78361d9a0b0e6095f060cdd73e6b03961f1b365f09c7251bdcd4922",
+    "psw-d1-a0/inputs.json": "9768c845007acac70d6dfe76d29ddee3fa29f9bfb4c5f7a102029c68b5dbd1de",
+    "psw-d1-a0/simulation.log": "dd9014c37bb71793bd974b1bbebb2da0a6c6db33f952b741dc4524c6c2dcdc88",
+    "psw-d1-a0/build.log": "85a4613163fafb730f3cee0dcda47fe7672c03282c126d22480084a290dec567",
+    "psw-d1-a1/result.json": "3b2bb71ae6de23074b83e6a85e8000b1b22fcb707f493d17d8e8d159287e3938",
+    "psw-d1-a1/inputs.json": "6fd113770101a1e18d0b267b923e809388da23149fab2142fe9b2a338584f0d0",
+    "psw-d1-a1/simulation.log": "4bbe78eade5ee91b03d9a67b3b5ea43feec088bb0fb816ed1dbf23b45ca262f0",
+    "psw-d1-a1/build.log": "4d7836e5cc2a48a6e8fff29fcf941980ed40d17d8caf57c04308041157cd5ef6",
+    "psw-vendor/result.json": "d884fe0de7234a187a0a2e32f7e93fafbc72167c3cd251b8202084ca9c2bc100",
+    "psw-vendor/inputs.json": "96583fec92c6172331d1fc8a8a474281cbab74205bc4a030d0790fbb19e4df24",
+    "psw-vendor/simulation.log": "a64fb6111b704edfe263c3efe0f409f0b000a1fb7c0142e2098609d4f3973468",
+    "psw-vendor/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "events-sync/result.json": "2dc38ac0f946b1bbf256ebbff84f1f1c49fcc3ab647e18c9567e992773af33f6",
+    "events-sync/simulation.log": "9c5d838f383385b13c77663543550088cdc9287ec1cb2f39e0b02c9cb3cfb90a",
+    "events-sync/build.log": "e404554c3abc5923c85ac5d3941bda544d9aee0326545282dca8a87a4d514360",
+    "events-vendor/result.json": "3d7530dbf2d5f9793bd693fa78487094b4cab89961150bf615a4f96670ac05fe",
+    "events-vendor/simulation.log": "df215a5626cffbd9c1c6e853a99b01821c0fec48e4c1c2a099675a62792deae4",
+    "events-vendor/build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dec-a/result.json": "26a1e0325ad7b8130aa60871ea3f74e2a5bbecf3ee99b18082cebd30f67ce7f3",
+    "dec-a/inputs.json": "a3443d484dc46aba462db2e06959d74706c4195cdb014709ff3d07630d3efe77",
+    "dec-a/simulation.log": "6bfdb56423b4d8bb4d26beab4e453480ff2680d8a581c988735fa4b9cac0d841",
+    "dec-a/uart.txt": "9b410b89dd680894937fe1e2a8927fa5ee229196be1280d0f4fcf80d7677f5ec",
+    "dec-a/build.log": "10eb4d21ab87850075a8dfb502111771a6a396d8f45305cf73c6d737684a78d8",
+    "dec-b/result.json": "c65359d4f5132aff51e29a14614989c075219c4cf94c8cb346cbf342626e7bd4",
+    "dec-b/inputs.json": "b820eaabd865e5f436d26609dc167dd454b2f22b192acaebe438b5560cbc8890",
+    "dec-b/simulation.log": "4f500a67892844fdaef54a0ee10b58b73c2aabb40ad9621933bd3051630ab093",
+    "dec-b/uart.txt": "0426580dfba1545390a02ee3f676113cf11ad49ad463700f97dd37a5b775c855",
+    "dec-b/build.log": "2fb4d44bbd01e715b5ae971be0359e697e619a0ce44f3694f86846189ba59239",
+    "dec-c/result.json": "1bcac749958a09c678e16f0458d8895744a74fa70ade68c9303502e6fa5d5666",
+    "dec-c/inputs.json": "05fcbef6d840ac3628a97c65c8e556afa10d2abe2cd56d2ace58d355483b4fe5",
+    "dec-c/simulation.log": "f0bb6b9555078783d0e0953e92d7f677baeb08cbd3d3119cf21e810ac95a0f6a",
+    "dec-c/uart.txt": "bf932315d6d5a1502f40b7a073d214f7d3a33e0038f5079ed97c035bb261bb00",
+    "dec-c/build.log": "9545dd063acb86721527f5fa6aeaf1785b6c2a9d5c542d464cd90c4efb5b866e",
+    "rt11/result.json": "5fe1966083d4718d8a2b5d17c07c249787951c3cfe4a9e41eaa7625707ce0cac",
+    "rt11/inputs.json": "aebc664ac0aa794a4a312831476a04a7da183989a931e66c1af13e12bc9ab62e",
+    "rt11/simulation.log": "df821aa206949c012c6397bfc0e7ebcaf7ba857807cc6a8f4576e37159b48142",
+    "rt11/uart.txt": "f1430eb7bd8cc68ff2dd491cedd949c755d69411fb29e6c0f41beb7c3ab4410e",
+    "rt11/build.log": "55c7480db45e34c9fc5da0aa20df3dc86ea135e1a9afda83e3be092cb78952d5",
+    "prepared/inputs.json": "04230c9da15540eee6f07fadb930f14192c409aed222d9780c2992f39135f5f9",
+    "prepared/clock.lpf": "93caa8d288480930b9ccbf435e7bef4539a99611ca55769e6b640c013fa52b3a",
+    "prepared/build.tcl": "fbaa03819ba65c33be603f1c57ceec6d2162ebdd6a71e2016824ebc53a7efdf0",
+    "prepared/cp78a.ldf": "7c2610664e5f599173746376ade0feff2a0874699f357cae269ea877cb4c4f33",
+    "diagnostics/extraction.json": "a322d5073e41f2f74804cb2087e49a967dcd23204680457b18cdbe45f1bb31af",
+    "diagnostics/FFPAA1.BIN": "df3b255f2855eacebd14375b28638a84453f7c3f045e7110494dd2a19a68ddec",
+    "diagnostics/FFPAA1.BIN.ram": "ea052b3918bab306c6e01e54ac5c4cd01a52cfe52519064e685c801ea475a80f",
+    "diagnostics/FFPBA0.BIN": "ae967b3220ada468a466b43f62039dee2526e11e6e561465fd360092418ea6f8",
+    "diagnostics/FFPBA0.BIN.ram": "7c116c7a56ba95c890fb6bc76ab3a84646fa3190e5557c47ea50e3089e727835",
+    "diagnostics/FFPCB0.BIC": "2261c41e594b78ec5366317760c85def1ae3c3f1925d24a3fd664ae6b56c1264",
+    "diagnostics/FFPCB0.BIC.ram": "ca8fe5e4c69f959aed81b9593156827a05fd454d32e3df4bc54bc2c24e89b47e",
+    "source.tgz": "cfe402f4cdd2e99a5dc7f82228ac2ce731ef501b0ca862ac594955f6ae6d767a"
+  },
+  "results": {
+    "psw-d0-a0": {
+      "passed": true,
+      "cases": 1741,
+      "checks": 12486,
+      "clocks": 228164,
+      "vendor": false,
+      "decode": 0,
+      "aligned": 0
+    },
+    "psw-d0-a1": {
+      "passed": true,
+      "cases": 1741,
+      "checks": 12486,
+      "clocks": 228164,
+      "vendor": false,
+      "decode": 0,
+      "aligned": 1
+    },
+    "psw-d1-a0": {
+      "passed": true,
+      "cases": 1741,
+      "checks": 12486,
+      "clocks": 238577,
+      "vendor": false,
+      "decode": 1,
+      "aligned": 0
+    },
+    "psw-d1-a1": {
+      "passed": true,
+      "cases": 1741,
+      "checks": 12486,
+      "clocks": 238577,
+      "vendor": false,
+      "decode": 1,
+      "aligned": 1
+    },
+    "psw-vendor": {
+      "passed": true,
+      "cases": 1741,
+      "checks": 12486,
+      "clocks": 238577,
+      "vendor": true,
+      "decode": 1,
+      "aligned": 1
+    },
+    "events-sync": {
+      "passed": true,
+      "vendor": false
+    },
+    "events-vendor": {
+      "passed": true,
+      "vendor": true
+    },
+    "dec-a": {
+      "passed": true,
+      "clocks": 177182640,
+      "psw_read_adapter": false,
+      "hardware": "cp78"
+    },
+    "dec-b": {
+      "passed": true,
+      "clocks": 2669489,
+      "psw_read_adapter": false,
+      "hardware": "cp78"
+    },
+    "dec-c": {
+      "passed": true,
+      "clocks": 1476999,
+      "psw_read_adapter": false,
+      "hardware": "cp78"
+    },
+    "rt11": {
+      "passed": true,
+      "checks": 99,
+      "clocks": 832980518,
+      "uart_bytes": 9776
+    }
+  },
+  "hardware_changes": [
+    "src/rtl/uj11_core.v",
+    "src/rtl/uj11_engine.v",
+    "src/rtl/uj11_psw.v"
+  ],
+  "microcode_words": 1005,
+  "expected_ebr": 7,
+  "diagnostics": {
+    "disk": "../lsi11/disks/xxdp25.dsk",
+    "disk_sha256": "d8dcd0dbef1045aa574a1ac87e1e4510a930419b8ac4dccbeed83c98bf0728b1",
+    "entries": [
+      {
+        "name": "FFPAA1.BIN",
+        "start": 1384,
+        "blocks": 60,
+        "chain": [
+          1384,
+          1385,
+          1386,
+          1387,
+          1388,
+          1389,
+          1390,
+          1391,
+          1392,
+          1393,
+          1394,
+          1395,
+          1396,
+          1397,
+          1398,
+          1399,
+          1400,
+          1401,
+          1402,
+          1403,
+          1404,
+          1405,
+          1406,
+          1407,
+          1408,
+          1409,
+          1410,
+          1411,
+          1412,
+          1413,
+          1414,
+          1415,
+          1416,
+          1417,
+          1418,
+          1419,
+          1420,
+          1421,
+          1422,
+          1423,
+          1424,
+          1425,
+          1426,
+          1427,
+          1428,
+          1429,
+          1430,
+          1431,
+          1432,
+          1433,
+          1434,
+          1435,
+          1436,
+          1437,
+          1438,
+          1439,
+          1440,
+          1441,
+          1442,
+          1443
+        ],
+        "file_sha256": "df3b255f2855eacebd14375b28638a84453f7c3f045e7110494dd2a19a68ddec",
+        "ram_sha256": "ea052b3918bab306c6e01e54ac5c4cd01a52cfe52519064e685c801ea475a80f",
+        "records": [
+          [
+            0,
+            503
+          ],
+          [
+            503,
+            503
+          ],
+          [
+            1006,
+            503
+          ],
+          [
+            1509,
+            503
+          ],
+          [
+            2012,
+            503
+          ],
+          [
+            2515,
+            503
+          ],
+          [
+            3018,
+            503
+          ],
+          [
+            3521,
+            503
+          ],
+          [
+            4024,
+            503
+          ],
+          [
+            4527,
+            503
+          ],
+          [
+            5030,
+            503
+          ],
+          [
+            5533,
+            503
+          ],
+          [
+            6036,
+            503
+          ],
+          [
+            6539,
+            503
+          ],
+          [
+            7042,
+            503
+          ],
+          [
+            7545,
+            503
+          ],
+          [
+            8048,
+            503
+          ],
+          [
+            8551,
+            503
+          ],
+          [
+            9054,
+            503
+          ],
+          [
+            9557,
+            503
+          ],
+          [
+            10060,
+            503
+          ],
+          [
+            10563,
+            503
+          ],
+          [
+            11066,
+            503
+          ],
+          [
+            11569,
+            503
+          ],
+          [
+            12072,
+            503
+          ],
+          [
+            12575,
+            503
+          ],
+          [
+            13078,
+            503
+          ],
+          [
+            13581,
+            503
+          ],
+          [
+            14084,
+            503
+          ],
+          [
+            14587,
+            503
+          ],
+          [
+            15090,
+            503
+          ],
+          [
+            15593,
+            503
+          ],
+          [
+            16096,
+            503
+          ],
+          [
+            16599,
+            503
+          ],
+          [
+            17102,
+            503
+          ],
+          [
+            17605,
+            503
+          ],
+          [
+            18108,
+            503
+          ],
+          [
+            18611,
+            503
+          ],
+          [
+            19114,
+            503
+          ],
+          [
+            19617,
+            503
+          ],
+          [
+            20120,
+            503
+          ],
+          [
+            20623,
+            503
+          ],
+          [
+            21126,
+            503
+          ],
+          [
+            21629,
+            503
+          ],
+          [
+            22132,
+            503
+          ],
+          [
+            22635,
+            503
+          ],
+          [
+            23138,
+            503
+          ],
+          [
+            23641,
+            503
+          ],
+          [
+            24144,
+            503
+          ],
+          [
+            24647,
+            503
+          ],
+          [
+            25150,
+            503
+          ],
+          [
+            25653,
+            503
+          ],
+          [
+            26156,
+            503
+          ],
+          [
+            26659,
+            503
+          ],
+          [
+            27162,
+            503
+          ],
+          [
+            27665,
+            503
+          ],
+          [
+            28168,
+            503
+          ],
+          [
+            28671,
+            503
+          ],
+          [
+            29174,
+            491
+          ],
+          [
+            29665,
+            1
+          ],
+          [
+            29666,
+            1
+          ],
+          [
+            29667,
+            1
+          ],
+          [
+            29668,
+            1
+          ],
+          [
+            29669,
+            1
+          ],
+          [
+            29670,
+            1
+          ],
+          [
+            29671,
+            1
+          ],
+          [
+            29672,
+            1
+          ],
+          [
+            29673,
+            1
+          ],
+          [
+            29674,
+            1
+          ],
+          [
+            29675,
+            1
+          ],
+          [
+            29676,
+            1
+          ],
+          [
+            29677,
+            1
+          ],
+          [
+            29678,
+            1
+          ],
+          [
+            29679,
+            1
+          ]
+        ],
+        "transfer": 1,
+        "standalone_start": 128,
+        "high": 29680
+      },
+      {
+        "name": "FFPBA0.BIN",
+        "start": 1444,
+        "blocks": 59,
+        "chain": [
+          1444,
+          1445,
+          1446,
+          1447,
+          1448,
+          1449,
+          1450,
+          1451,
+          1452,
+          1453,
+          1454,
+          1455,
+          1456,
+          1457,
+          1458,
+          1459,
+          1460,
+          1461,
+          1462,
+          1463,
+          1464,
+          1465,
+          1466,
+          1467,
+          1468,
+          1469,
+          1470,
+          1471,
+          1472,
+          1473,
+          1474,
+          1475,
+          1476,
+          1477,
+          1478,
+          1479,
+          1480,
+          1481,
+          1482,
+          1483,
+          1484,
+          1485,
+          1486,
+          1487,
+          1488,
+          1489,
+          1490,
+          1491,
+          1492,
+          1493,
+          1494,
+          1495,
+          1496,
+          1497,
+          1498,
+          1499,
+          1500,
+          1501,
+          1502
+        ],
+        "file_sha256": "ae967b3220ada468a466b43f62039dee2526e11e6e561465fd360092418ea6f8",
+        "ram_sha256": "7c116c7a56ba95c890fb6bc76ab3a84646fa3190e5557c47ea50e3089e727835",
+        "records": [
+          [
+            0,
+            503
+          ],
+          [
+            503,
+            503
+          ],
+          [
+            1006,
+            503
+          ],
+          [
+            1509,
+            503
+          ],
+          [
+            2012,
+            503
+          ],
+          [
+            2515,
+            503
+          ],
+          [
+            3018,
+            503
+          ],
+          [
+            3521,
+            503
+          ],
+          [
+            4024,
+            503
+          ],
+          [
+            4527,
+            503
+          ],
+          [
+            5030,
+            503
+          ],
+          [
+            5533,
+            503
+          ],
+          [
+            6036,
+            503
+          ],
+          [
+            6539,
+            503
+          ],
+          [
+            7042,
+            503
+          ],
+          [
+            7545,
+            503
+          ],
+          [
+            8048,
+            503
+          ],
+          [
+            8551,
+            503
+          ],
+          [
+            9054,
+            503
+          ],
+          [
+            9557,
+            503
+          ],
+          [
+            10060,
+            503
+          ],
+          [
+            10563,
+            503
+          ],
+          [
+            11066,
+            503
+          ],
+          [
+            11569,
+            503
+          ],
+          [
+            12072,
+            503
+          ],
+          [
+            12575,
+            503
+          ],
+          [
+            13078,
+            503
+          ],
+          [
+            13581,
+            503
+          ],
+          [
+            14084,
+            503
+          ],
+          [
+            14587,
+            503
+          ],
+          [
+            15090,
+            503
+          ],
+          [
+            15593,
+            503
+          ],
+          [
+            16096,
+            503
+          ],
+          [
+            16599,
+            503
+          ],
+          [
+            17102,
+            503
+          ],
+          [
+            17605,
+            503
+          ],
+          [
+            18108,
+            503
+          ],
+          [
+            18611,
+            503
+          ],
+          [
+            19114,
+            503
+          ],
+          [
+            19617,
+            503
+          ],
+          [
+            20120,
+            503
+          ],
+          [
+            20623,
+            503
+          ],
+          [
+            21126,
+            503
+          ],
+          [
+            21629,
+            503
+          ],
+          [
+            22132,
+            503
+          ],
+          [
+            22635,
+            503
+          ],
+          [
+            23138,
+            503
+          ],
+          [
+            23641,
+            503
+          ],
+          [
+            24144,
+            503
+          ],
+          [
+            24647,
+            503
+          ],
+          [
+            25150,
+            503
+          ],
+          [
+            25653,
+            503
+          ],
+          [
+            26156,
+            503
+          ],
+          [
+            26659,
+            503
+          ],
+          [
+            27162,
+            503
+          ],
+          [
+            27665,
+            503
+          ],
+          [
+            28168,
+            503
+          ],
+          [
+            28671,
+            503
+          ],
+          [
+            29174,
+            430
+          ]
+        ],
+        "transfer": 1,
+        "standalone_start": 128,
+        "high": 29604
+      },
+      {
+        "name": "FFPCB0.BIC",
+        "start": 1503,
+        "blocks": 59,
+        "chain": [
+          1503,
+          1504,
+          1505,
+          1506,
+          1507,
+          1508,
+          1509,
+          1510,
+          1511,
+          1512,
+          1513,
+          1514,
+          1515,
+          1516,
+          1517,
+          1518,
+          1519,
+          1520,
+          1521,
+          1522,
+          1523,
+          1524,
+          1525,
+          1526,
+          1527,
+          1528,
+          1529,
+          1530,
+          1531,
+          1532,
+          1533,
+          1534,
+          1535,
+          1536,
+          1537,
+          1538,
+          1539,
+          1540,
+          1541,
+          1542,
+          1543,
+          1544,
+          1545,
+          1546,
+          1547,
+          1548,
+          1549,
+          1550,
+          1551,
+          1552,
+          1553,
+          1554,
+          1555,
+          1556,
+          1557,
+          1558,
+          1559,
+          1560,
+          1561
+        ],
+        "file_sha256": "2261c41e594b78ec5366317760c85def1ae3c3f1925d24a3fd664ae6b56c1264",
+        "ram_sha256": "ca8fe5e4c69f959aed81b9593156827a05fd454d32e3df4bc54bc2c24e89b47e",
+        "records": [
+          [
+            0,
+            503
+          ],
+          [
+            503,
+            503
+          ],
+          [
+            1006,
+            503
+          ],
+          [
+            1509,
+            503
+          ],
+          [
+            2012,
+            503
+          ],
+          [
+            2515,
+            503
+          ],
+          [
+            3018,
+            503
+          ],
+          [
+            3521,
+            503
+          ],
+          [
+            4024,
+            503
+          ],
+          [
+            4527,
+            503
+          ],
+          [
+            5030,
+            503
+          ],
+          [
+            5533,
+            503
+          ],
+          [
+            6036,
+            503
+          ],
+          [
+            6539,
+            503
+          ],
+          [
+            7042,
+            503
+          ],
+          [
+            7545,
+            503
+          ],
+          [
+            8048,
+            503
+          ],
+          [
+            8551,
+            503
+          ],
+          [
+            9054,
+            503
+          ],
+          [
+            9557,
+            503
+          ],
+          [
+            10060,
+            503
+          ],
+          [
+            10563,
+            503
+          ],
+          [
+            11066,
+            503
+          ],
+          [
+            11569,
+            503
+          ],
+          [
+            12072,
+            503
+          ],
+          [
+            12575,
+            503
+          ],
+          [
+            13078,
+            503
+          ],
+          [
+            13581,
+            503
+          ],
+          [
+            14084,
+            503
+          ],
+          [
+            14587,
+            503
+          ],
+          [
+            15090,
+            503
+          ],
+          [
+            15593,
+            503
+          ],
+          [
+            16096,
+            503
+          ],
+          [
+            16599,
+            503
+          ],
+          [
+            17102,
+            503
+          ],
+          [
+            17605,
+            503
+          ],
+          [
+            18108,
+            503
+          ],
+          [
+            18611,
+            503
+          ],
+          [
+            19114,
+            503
+          ],
+          [
+            19617,
+            503
+          ],
+          [
+            20120,
+            503
+          ],
+          [
+            20623,
+            503
+          ],
+          [
+            21126,
+            503
+          ],
+          [
+            21629,
+            503
+          ],
+          [
+            22132,
+            503
+          ],
+          [
+            22635,
+            503
+          ],
+          [
+            23138,
+            503
+          ],
+          [
+            23641,
+            503
+          ],
+          [
+            24144,
+            503
+          ],
+          [
+            24647,
+            503
+          ],
+          [
+            25150,
+            503
+          ],
+          [
+            25653,
+            503
+          ],
+          [
+            26156,
+            503
+          ],
+          [
+            26659,
+            503
+          ],
+          [
+            27162,
+            503
+          ],
+          [
+            27665,
+            503
+          ],
+          [
+            28168,
+            503
+          ],
+          [
+            28671,
+            503
+          ],
+          [
+            29174,
+            452
+          ]
+        ],
+        "transfer": 1,
+        "standalone_start": 128,
+        "high": 29626
+      }
+    ],
+    "directory_source": "XXDP 2.5 native D *.* on read-only SIMH RL02",
+    "identification": "FP11-A manual chapter 7.2, DFFPA/DFFPB/DFFPC",
+    "script_sha256": "4fa89de8e4ce43144db8d9aff3b0ade9ee5d3cae72ab8513b1249569362cf826"
+  }
+}

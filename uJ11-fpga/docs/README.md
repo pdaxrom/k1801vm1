@@ -1,5 +1,7 @@
 # Документация uJ11
 
+**Кандидат CP78:** [PSW 177776 в CPU, native DEC diagnostics и pending synthesis gate](psw-cp78.md). На плате остаётся CP67b.
+
 **Разработка CP77:** [FP11 в ODT, новая раскладка FRAM и DEC diagnostics](odt-fp-cp77.md). Пакет ещё не установлен на плату.
 
 Актуальная установленная система — **CP67b**, HC1200, без MMU, с FIS,

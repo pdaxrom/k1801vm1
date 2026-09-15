@@ -1,0 +1,2 @@
+PASS CP76 events: 111 cases / 4174 checks
+build/cp78-fp-events/vendor/tb.v:532: $finish called at 11765590000 (1ps)
