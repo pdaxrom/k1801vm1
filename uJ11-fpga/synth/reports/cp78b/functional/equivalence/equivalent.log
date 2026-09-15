@@ -1,0 +1,2 @@
+PASS CP78 PSW factor equivalence: 131078 clock comparisons
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tb/tb_psw_factor_cp78.v:41: $finish called at 393234000 (1ps)

@@ -64,19 +64,22 @@ def vectors():
     return '\n'.join(rows)+'\n'
 
 
-def run(vendor=False,decode=1,aligned=1):
-    core,_=adapt();out=ROOT/'build/cp78-tests'/f'{"vendor" if vendor else "rtl"}-d{decode}-a{aligned}'
+def run(vendor=False,decode=1,aligned=1,factored=False):
+    if factored:
+        from build_psw_cp78b import adapt as build_hw,OUT as hardware
+    else:build_hw,hardware=adapt,OUT
+    core,_=build_hw();out=ROOT/('build/cp78b-tests' if factored else 'build/cp78-tests')/f'{"vendor" if vendor else "rtl"}-d{decode}-a{aligned}'
     out.mkdir(parents=True,exist_ok=True);(out/'vectors.txt').write_text(vectors())
     sources=['tb/tb_psw_cp78.v']+core
     if vendor:
-        sources+=[str((OUT/'uj11_m0_ebr.v').relative_to(ROOT))]+['build/vendor/'+n+'.v' for n in ('DP8KC','GSR','PUR')]
+        sources+=[str((hardware/'uj11_m0_ebr.v').relative_to(ROOT))]+['build/vendor/'+n+'.v' for n in ('DP8KC','GSR','PUR')]
         cmd=['iverilog','-g2012','-DUJ11_VENDOR_ROM','-s','tb_psw_cp78',f'-Ptb_psw_cp78.ROM_DECODE={decode}',f'-Ptb_psw_cp78.ALIGNED_WORD_READS={aligned}','-o',str(out/'sim')]+sources
         sim=['vvp',str(out/'sim')]
     else:
         sources+=['rtl/uj11_rom.v']
         cmd=['verilator','--binary','--timing','-Wno-WIDTH','--top-module','tb_psw_cp78',f'-GROM_DECODE={decode}',f'-GALIGNED_WORD_READS={aligned}','-j','4','--Mdir',str(out/'obj')]+sources
         sim=[str(out/'obj/Vtb_psw_cp78')]
-    paths=sources+['tools/test_psw_cp78.py','tools/build_psw_cp78.py',str((out/'vectors.txt').relative_to(ROOT)),str((OUT/'inputs.json').relative_to(ROOT))]
+    paths=sources+['tools/test_psw_cp78.py','tools/build_psw_cp78.py',str((out/'vectors.txt').relative_to(ROOT)),str((hardware/'inputs.json').relative_to(ROOT))]
     inputs={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in paths}
     (out/'inputs.json').write_text(json.dumps(inputs,indent=2)+'\n')
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
@@ -84,7 +87,7 @@ def run(vendor=False,decode=1,aligned=1):
     text=(out/'simulation.log').read_text();print(text[-1500:],flush=True);r.check_returncode()
     m=re.search(r'PASS CP78 PSW: (\d+) cases (\d+) checks (\d+) clocks',text);assert m
     for p,h in inputs.items():assert hashlib.sha256((ROOT/p).read_bytes()).hexdigest()==h,p
-    (out/'result.json').write_text(json.dumps(dict(passed=True,cases=int(m[1]),checks=int(m[2]),clocks=int(m[3]),vendor=vendor,decode=decode,aligned=aligned,inputs=inputs),indent=2)+'\n')
+    (out/'result.json').write_text(json.dumps(dict(passed=True,cases=int(m[1]),checks=int(m[2]),clocks=int(m[3]),vendor=vendor,decode=decode,aligned=aligned,factored=factored,inputs=inputs),indent=2)+'\n')
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--vendor',action='store_true');p.add_argument('--decode',type=int,choices=(0,1),default=1);p.add_argument('--aligned',type=int,choices=(0,1),default=1);a=p.parse_args();run(a.vendor,a.decode,a.aligned)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--factored',action='store_true');p.add_argument('--vendor',action='store_true');p.add_argument('--decode',type=int,choices=(0,1),default=1);p.add_argument('--aligned',type=int,choices=(0,1),default=1);a=p.parse_args();run(a.vendor,a.decode,a.aligned,a.factored)

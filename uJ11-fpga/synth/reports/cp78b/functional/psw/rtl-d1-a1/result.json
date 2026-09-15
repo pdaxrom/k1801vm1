@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "cases": 1741,
+  "checks": 12486,
+  "clocks": 238577,
+  "vendor": false,
+  "decode": 1,
+  "aligned": 1,
+  "factored": true,
+  "inputs": {
+    "tb/tb_psw_cp78.v": "5e888ffdb466e5e054fd586fe701d58282733eb7a522811eaa0402e380531cf2",
+    "build/cp78b-psw/src/rtl/uj11_core.v": "ff1063aa0b893d661ed385634c35d1f964a76b51a6a0054280ebb2db5bb0f595",
+    "build/cp78b-psw/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "build/cp78b-psw/src/microcode/generated/uj11_decode_table.v": "ae176899f4f74ae12eb9d42ee477acc03886d4e771a0f4123b4c464994d4368f",
+    "build/cp78b-psw/src/rtl/uj11_engine.v": "677a46cc7e6466c49a12d9d16875ecb7d2f38d8928fd30698a275e0ede5938d3",
+    "build/cp78b-psw/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+    "build/cp78b-psw/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+    "build/cp78b-psw/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "build/cp78b-psw/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "build/cp78b-psw/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "build/cp78b-psw/src/rtl/uj11_psw.v": "6c845bebb1e3183e78d3c03c7f3638be09b955d02384fe8dcbb9ed1b552ed9d5",
+    "build/cp78b-psw/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "tools/test_psw_cp78.py": "de6d6f5bd58c40264f483d1c2d22ea115bc3965abbde58357ea14817573ca6b4",
+    "tools/build_psw_cp78.py": "9d4bfd4229d87e6a7999b2c7723d16dc5d0ecc00b607aa152b4aeea86a9f6a1f",
+    "build/cp78b-tests/rtl-d1-a1/vectors.txt": "b99f18decb7aa1a3e207e2b7a96be4dc6b296238c66d095263ffd781c877d7b3",
+    "build/cp78b-psw/inputs.json": "ba789e4b7f1e2a35578dc47a23a62ea0cc93e8bb9f3875266b4a939ee9e94100"
+  }
+}
