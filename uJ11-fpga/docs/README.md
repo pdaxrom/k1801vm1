@@ -1,12 +1,12 @@
 # Документация uJ11
 
-**Кандидат CP78:** [PSW 177776 в CPU, native DEC diagnostics и pending synthesis gate](psw-cp78.md). На плате остаётся CP67b.
+**Установлено 2026-09-15:** [программный FPP J‑11 CP79 и ODT с FP-просмотром](board-fpp-cp79.md). SD readback, самоинициализация, 43 аппаратных STEP и FPTST — PASS.
 
-**Разработка CP77:** [FP11 в ODT, новая раскладка FRAM и DEC diagnostics](odt-fp-cp77.md). Пакет ещё не установлен на плату.
-
-Актуальная установленная система — **CP67b**, HC1200, без MMU, с FIS,
-двумя банками FRAM и самоинициализирующимися ODT/SDBOOT. Аппаратная установка
-и проверка выполнены 2026-09-13, коммит `a600155`.
+Аппаратная система — **CP67b**, HC1200, без MMU, с FIS и двумя банками
+FRAM. При cold boot самоинициализируются ODT, SDBOOT и программный FPP.
+FPGA прошита 2026-09-13; установка программного CP79 не меняет RTL/микрокод
+и не добавляет LUT/FF/EBR. Аппаратные варианты PSW CP78 не прошли MAP
+и на плату не устанавливались.
 
 ## С чего начать
 
@@ -24,10 +24,11 @@
 | MODF/MODD в программном FP11-A | [CP75: семантика, проверки и измерения](fp11-mod-cp75.md) |
 | MUL/DIV F/D в программном FP11-A | [CP74: алгоритмы, проверки и измерения](fp11-muldiv-cp74.md) |
 | Новый FP11 firmware: ADD/SUB F/D, семь guard bits, исправлены ABS/NEG UV | [CP73: семантика, измерения и проверки](fp11-arithmetic-cp73.md) |
-| Взять готовые ODT.BIN, SDBOOT.BIN, UJMOD.SAV | [Пакет для RT-11](../demos/rt11/service/cp67/README.md) |
+| Взять ODT.BIN, FP11.BIN, FPTST.SAV | [Пакет CP79](../demos/rt11/service/cp79/README.md) |
+| Взять SDBOOT.BIN и UJMOD.SAV | [Неизменённый пакет CP67](../demos/rt11/service/cp67/README.md) |
 | Узнать оставшиеся задачи | [TODO](../TODO.md) |
 
-Операционные инструкции выше описывают CP67b целиком. Документы с номерами
+Операционные инструкции описывают CP67b с программным обновлением CP79. Документы с номерами
 предыдущих CP сохраняют решения и результаты **на момент соответствующего
 этапа**. В частности, прежние UJLOAD/UJON, отсутствие автозапуска ODT,
 старые роли PREV/NEXT и старые суммы ресурсов не описывают текущую установку.
@@ -51,6 +52,8 @@
 | Все измеренные варианты | [synthesis](synthesis.md), [benchmarks](benchmarks.md) |
 
 ## Где лежат доказательства
+
+- [Аппаратная установка программного CP79](../tb/reports/cp79-hardware/deployment.json): SD readbacks, cold init, 43 STEP, FPTST.
 
 - [CP67b synthesis](../synth/reports/cp67b/result.json): MAP/PAR/TRACE,
   исходный manifest и `source.tgz` рядом.

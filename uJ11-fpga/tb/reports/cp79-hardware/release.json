@@ -1,0 +1,34 @@
+{
+  "checkpoint": "CP79",
+  "profile": "DEC DCJ11 FPP software",
+  "installed_on_board": false,
+  "modules": {
+    "odt": {
+      "format": {
+        "base": 4096,
+        "words": 6299,
+        "checksum": 47205,
+        "bytes": 12598
+      },
+      "allocation_bytes": 13668
+    },
+    "fp11": {
+      "format": {
+        "base": 24576,
+        "words": 2125,
+        "checksum": 14547,
+        "bytes": 4250
+      },
+      "allocation_bytes": 4518
+    }
+  },
+  "files": {
+    "FPTST.MAC": "a0cc5336fb42896b5fcbcc41a5c90db888a36dd5555774c057025ab17cae6a52",
+    "FP11.MAC": "7c597dc5e33aa646e0ebfb79a213d600f92416480db94ad3bca5c0b569f6fc8d",
+    "UJMON.MAC": "6f81e99621c0f8645f92ed185d23c886efebde7c73fae345f12bf81c6b76594c",
+    "README.md": "29f12b065f0c1cea3366a6a7a61a3c30fa9c1bc29713ef02cc751533db282042",
+    "FP11.BIN": "35708587dea03ee076339e0752f5bae0100264d4db474f08e9feb04b3226010d",
+    "FPTST.SAV": "f0cc3089f2d185f2e236f459d5717acfde29b9c5d22c1a9f3793deee75dcc7bc",
+    "ODT.BIN": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de"
+  }
+}

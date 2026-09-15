@@ -1,0 +1,9 @@
+{
+  "utc": "2026-09-15T12:03:11Z",
+  "uart_released": true,
+  "hg_stopped": true,
+  "reader_exited_during_capture": true,
+  "picocom_pid_before": 185402,
+  "picocom_restart_attempted": false,
+  "board_final_state": "RT-11 prompt; slots 0,1,2 AUTO/OK"
+}

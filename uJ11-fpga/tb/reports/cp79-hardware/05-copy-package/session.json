@@ -1,0 +1,12 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-15T11:38:08Z",
+  "commands": [
+    "COPY HG:FP11.BIN DK:FP11.BIN",
+    "COPY HG:FPTST.SAV DK:FPTST.SAV",
+    "COPY HG:ODT.BIN DK:ODT.BIN"
+  ],
+  "uart_bytes": 99,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-15T11:42:30Z"
+}

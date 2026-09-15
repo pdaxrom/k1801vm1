@@ -1,0 +1,12 @@
+LOAD HG
+
+.DIR HG:
+ 
+FPTST .SAV     3  15-Sep-2026    FP11  .BIN    10  15-Sep-2026
+ODT   .BIN    26  15-Sep-2026    
+ 3 Files, 39 Blocks
+ 8115 Free blocks
+
+.COPY DK:ODT.BIN HG:OLDODT.BIN
+
+.

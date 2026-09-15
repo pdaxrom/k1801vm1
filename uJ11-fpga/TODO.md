@@ -6,7 +6,7 @@
 - [x] LDC exponent-zero: флаги по нулевому результату.
 - [x] ADD/SUB по точности DCJ11 §7.6, exact-integer reference.
 - [x] Полный sync 444420/30934144, logic 215760/15037488; directed portable/vendor 111/4174 каждый; RT‑11/ODT 99 checks. Замороженный CP79 и пакет подготовлены.
-- [ ] Проверить на физической плате через UART/ODT.
+- [x] Установить на физическую плату через HG/UJMOD: readback всех файлов, cold init, 43 STEP PC/PSW, FP dump и FPTST — PASS 2026-09-15. [Журнал](docs/board-fpp-cp79.md).
 - [ ] Квалифицировать PSW-операнды и подобрать внешнюю диагностику J‑11 FPP; A-specific результаты CP78 не переносить.
 
 [Профиль DCJ11 и источники](docs/fpp-j11-cp79.md).
@@ -33,7 +33,7 @@
 - [x] Извлечь DEC FFPAA1/FFPBA0/FFPCB0, проверить chain/loader checksums.
 - [x] По одному проходу трёх DEC FP11-A частей в RTL с test-only PSW read.
 - [x] Реализовать memory-mapped PSW и native DEC diagnostics: функциональная часть CP78 выполнена. Hardware gate остаётся в списке CP78 выше.
-- [ ] Установить ODT и программный FPP J11 после квалификации CP79; прежний FP11-A профиль CP77 заменён по запросу пользователя.
+- [x] ODT CP77 и программный FPP J11 установлены как пакет CP79; аппаратные проверки прошли 2026-09-15. Прежний FP11-A профиль заменён по запросу пользователя.
 
 [Команды, раскладка FRAM и границы PASS](docs/odt-fp-cp77.md).
 

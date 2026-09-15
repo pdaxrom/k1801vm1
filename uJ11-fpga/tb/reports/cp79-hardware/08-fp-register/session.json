@@ -1,0 +1,11 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-15T11:49:43Z",
+  "commands": [
+    "RUN UJMOD",
+    "FP11"
+  ],
+  "uart_bytes": 147,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-15T11:49:56Z"
+}

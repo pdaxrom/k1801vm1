@@ -5,13 +5,13 @@
 [разработка и воспроизведение](development-cp67.md).
 
 **Аппаратная установка:** CP67b записана и проверена во FLASH; RT-11FB и DIR
-работают на плате. Установка ODT и аппаратные проверки отражаются в
-[отдельном журнале](board-bringup-cp67.md). Ниже — результаты checkpoints
+работают на плате. ODT и программный FPP обновлены до пакета CP79:
+[текущая установка](board-fpp-cp79.md), [исходная CP67b](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
 ## CP79 — программная эмуляция FPP J‑11
 
-Текущий FP11.MAC 00.11 следует руководству DCJ11: FIUV до выполнения, load flags по J11, jammed ADD/SUB. 4518 байт HALT FRAM, прирост FPGA нулевой. Sync 444420/30934144, logic 215760/15037488, directed portable/vendor 111/4174 каждый, RT‑11/ODT 99 checks — PASS. Плата пока не обновлялась. [Границы совместимости и проверки](fpp-j11-cp79.md).
+Текущий FP11.MAC 00.11 следует руководству DCJ11: FIUV до выполнения, load flags по J11, jammed ADD/SUB. 4518 байт HALT FRAM, прирост FPGA нулевой. Sync 444420/30934144, logic 215760/15037488, directed portable/vendor 111/4174 каждый, RT‑11/ODT 99 checks — PASS. Установлен 2026-09-15: три SD readback, cold init всех модулей, 43 аппаратных STEP PC/PSW, FP dump и native FPTST — PASS. [Аппаратный журнал](board-fpp-cp79.md). [Границы совместимости и проверки](fpp-j11-cp79.md).
 
 ## CP78 — CPU-local PSW
 

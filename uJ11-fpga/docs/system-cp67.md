@@ -1,6 +1,7 @@
 # Устройство uJ11 CP67b
 
-Это описание установленного компьютера по состоянию на 2026-09-13.
+Аппаратная часть соответствует установленной CP67b от 2026-09-13.
+Программный FPP J‑11 и ODT обновлены 2026-09-15: [установка CP79](board-fpp-cp79.md).
 Пользовательские команды находятся в [руководстве](user-guide-cp67.md),
 процедура сборки — в [development-cp67](development-cp67.md).
 Все PDP-11 адреса и opcode ниже **восьмеричные**, если явно не указано иначе.
@@ -14,7 +15,7 @@
 | CPU | Специализированный микрокодный PDP-11/J-11 integer engine |
 | Основная память | MR45V100A, 128 КиБ SPI FRAM, сохраняет содержимое без питания |
 | Адрес CPU | 16 бит + выбор USER/HALT банка; без translation |
-| Математика | Integer, EIS и FIS; аппаратных MUL/DIV/barrel shifter нет |
+| Математика | Integer, EIS, микрокодный FIS и программный FPP J‑11 во FRAM; аппаратных MUL/DIV/barrel shifter нет |
 | Системный диск | SD через подмножество RK611; на плате RT-11FB V05.03 |
 | Консоль | KL11, UART 115200 8N1 |
 | Таймер | KW11-L, номинально 50 Гц |
@@ -39,7 +40,7 @@ TRACE, не частота на плате. Допущения о внешних
 |---|---|---|---|
 | Микрокод, слова 36 бит | Микросеквенсор CPU | Четыре EBR, 1024×36 | uJ11 microasm; в CP67 взят точный образ CP63b |
 | SD bootstrap, RK service, cold startup | Тот же uJ11 как обычные инструкции PDP-11 | Отдельная firmware memory, два EBR; resident/walker копируются в HALT FRAM | Проверенные старые binary/listing и новый DEC MACRO-11 BOOT.MAC |
-| RT-11, UJMOD, ODT, SDBOOT | Тот же uJ11 | RT-11/UJMOD в USER FRAM; ODT/SDBOOT в HALT FRAM | DEC MACRO/LINK, файлы SAV/BIN на SD |
+| RT-11, UJMOD, ODT, SDBOOT, FPP | Тот же uJ11 | RT-11/UJMOD в USER FRAM; ODT/SDBOOT/FPP в HALT FRAM | DEC MACRO/LINK, файлы SAV/BIN на SD |
 
 **SD/RK обслуживает PDP-11 firmware, а не микрокод CPU.** Отдельного
 вспомогательного процессора нет. FIS, напротив, реализован именно микрокодом.

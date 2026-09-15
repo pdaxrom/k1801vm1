@@ -48,16 +48,13 @@ def main():
     p.add_argument('--command-wait',type=float,default=20)
     p.add_argument('--listen',type=float,default=1,help='initial passive capture seconds without programming')
     p.add_argument('--expect-prompt',action='store_true',help='require a returned RT-11 prompt after each command')
-    p.add_argument('--expect-odt-prompt',action='store_true',help='require a returned ODT prompt after each command')
     p.add_argument('--escape-until-boot',type=float,metavar='SECONDS',
                    help='CP67 recovery: repeat UART ESC until a fresh RT-11FB V05.03 banner, then listen passively')
     a=p.parse_args()
-    if a.expect_prompt and a.expect_odt_prompt:
-        p.error('select either RT-11 or ODT prompt, not both')
     if a.escape_until_boot is not None:
         if not 0 < a.escape_until_boot <= 600:
             p.error('--escape-until-boot requires 0 < SECONDS <= 600')
-        if a.xcf or a.interrupt or a.command or a.expect_prompt or a.expect_odt_prompt:
+        if a.xcf or a.interrupt or a.command or a.expect_prompt:
             p.error('--escape-until-boot is a capture-only operation; do not combine with programming or commands')
     a.out.mkdir(parents=True,exist_ok=True)
     fd=None;old=None;paused=False;capture=bytearray()
@@ -71,8 +68,7 @@ def main():
             while time.monotonic()<deadline:
                 ready,_,_=select.select([fd],[],[],min(.1,max(0,deadline-time.monotonic())))
                 if ready:
-                    try:data=os.read(fd,4096)
-                    except BlockingIOError:continue
+                    data=os.read(fd,4096)
                     if not data:raise RuntimeError('UART disconnected')
                     capture.extend(data);log.write(data);log.flush()
                     print(data.decode('ascii','backslashreplace'),end='',flush=True)
@@ -110,17 +106,16 @@ def main():
                 print('\n[SEND] '+command,flush=True)
                 for byte in (command+'\r').encode('ascii'):
                     os.write(fd,bytes([byte]));read_for(.1)
-                if a.expect_prompt or a.expect_odt_prompt:
-                    prompt=b'ODT> ' if a.expect_odt_prompt else b'\n.'
+                if a.expect_prompt:
                     deadline=time.monotonic()+a.command_wait
                     while True:
                         response=bytes(capture[start:])
                         echoed=response.find(command.encode('ascii'))
-                        if echoed>=0 and prompt in response[echoed+len(command):]:
+                        if echoed>=0 and b'\n.' in response[echoed+len(command):]:
                             read_for(.3)
                             break
                         if time.monotonic()>=deadline:
-                            raise RuntimeError('Command echo and following selected prompt required; do not send another command')
+                            raise RuntimeError('Command echo and following RT-11 prompt required; do not send another command')
                         read_for(.25)
                 else:
                     read_for(a.command_wait)
@@ -135,15 +130,6 @@ def main():
                         if old is not None and paused:termios.tcsetattr(fd,termios.TCSANOW,old)
                     finally:os.close(fd)
             finally:
-                try:
-                    if paused:
-                        try:os.kill(a.pause_pid,signal.SIGCONT)
-                        except ProcessLookupError:record['reader_exited']=True
-                finally:
-                    # Preserve the actual capture even if reading, programming,
-                    # termios restoration or reader cleanup failed.
-                    record['uart_bytes']=len(capture)
-                    record['rt11_banner_seen']=b'RT-11' in capture
-                    record['capture_closed_utc']=time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
-                    (a.out/'session.json').write_text(json.dumps(record,indent=2)+'\n')
+                if paused:os.kill(a.pause_pid,signal.SIGCONT)
+                (a.out/'session.json').write_text(json.dumps(record,indent=2)+'\n')
 if __name__=='__main__':main()
