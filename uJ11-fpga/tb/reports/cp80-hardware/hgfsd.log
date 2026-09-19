@@ -1,0 +1,52 @@
+hgfsd: serving /tmp/uj11-cp80-hardware-20260919/share/.hg-volume.dsk at 1000 Hz
+hgfsd: read block 1, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 48, 512 bytes (more)
+hgfsd: write block 49, 512 bytes (more)
+hgfsd: write block 50, 512 bytes (more)
+hgfsd: write block 51, 512 bytes (more)
+hgfsd: write block 52, 512 bytes (more)
+hgfsd: write block 53, 512 bytes (more)
+hgfsd: write block 54, 512 bytes (more)
+hgfsd: write block 55, 512 bytes (more)
+hgfsd: write block 56, 512 bytes (more)
+hgfsd: write block 57, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 38, 512 bytes (more)
+hgfsd: read block 39, 512 bytes (more)
+hgfsd: read block 40, 512 bytes (more)
+hgfsd: read block 41, 512 bytes (more)
+hgfsd: read block 42, 512 bytes (more)
+hgfsd: read block 43, 512 bytes (more)
+hgfsd: read block 44, 512 bytes (more)
+hgfsd: read block 45, 512 bytes (more)
+hgfsd: read block 46, 512 bytes (more)
+hgfsd: read block 47, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 58, 512 bytes (more)
+hgfsd: write block 59, 512 bytes (more)
+hgfsd: write block 60, 512 bytes (more)
+hgfsd: write block 61, 512 bytes (more)
+hgfsd: write block 62, 512 bytes (more)
+hgfsd: write block 63, 512 bytes (more)
+hgfsd: write block 64, 512 bytes (more)
+hgfsd: write block 65, 512 bytes (more)
+hgfsd: write block 66, 512 bytes (more)
+hgfsd: write block 67, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes

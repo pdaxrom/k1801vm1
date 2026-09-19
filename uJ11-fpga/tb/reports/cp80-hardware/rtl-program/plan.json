@@ -1,0 +1,300 @@
+{
+  "base": 3072,
+  "words": [
+    61527,
+    0,
+    62743,
+    16512,
+    64287,
+    65534,
+    61535,
+    65534,
+    61568,
+    64031,
+    65534,
+    62743,
+    17024,
+    64287,
+    65534,
+    62743,
+    16512,
+    61888,
+    64287,
+    65534,
+    61535,
+    65534,
+    61569,
+    61527,
+    0,
+    61696,
+    64287,
+    65534,
+    61535,
+    65534,
+    61570,
+    61527,
+    1536,
+    61599,
+    65534,
+    61535,
+    65534,
+    61571,
+    511
+  ],
+  "initial_psw": 224,
+  "steps": [
+    {
+      "instruction": "LDFPS #0",
+      "pc": 3076,
+      "psw": 224,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "LDF #1,AC0",
+      "pc": 3080,
+      "psw": 224,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "STCFI AC0,@#177776",
+      "pc": 3084,
+      "psw": 1,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "LDFPS @#177776",
+      "pc": 3088,
+      "psw": 1,
+      "fps": 1,
+      "registers": {}
+    },
+    {
+      "instruction": "STFPS R0",
+      "pc": 3090,
+      "psw": 1,
+      "fps": 1,
+      "registers": {
+        "0": 1
+      }
+    },
+    {
+      "instruction": "STEXP AC0,@#177776",
+      "pc": 3094,
+      "psw": 1,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "LDF #16,AC0",
+      "pc": 3098,
+      "psw": 1,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "STCFI AC0,@#177776; cannot set T",
+      "pc": 3102,
+      "psw": 0,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "LDF #1,AC0",
+      "pc": 3106,
+      "psw": 0,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "NEGF AC0",
+      "pc": 3108,
+      "psw": 0,
+      "fps": 8,
+      "registers": {}
+    },
+    {
+      "instruction": "STCFI AC0,@#177776; negative",
+      "pc": 3112,
+      "psw": 63983,
+      "fps": 8,
+      "registers": {}
+    },
+    {
+      "instruction": "LDFPS @#177776; reserved FPS mask",
+      "pc": 3116,
+      "psw": 63983,
+      "fps": 51695,
+      "registers": {}
+    },
+    {
+      "instruction": "STFPS R1",
+      "pc": 3118,
+      "psw": 63983,
+      "fps": 51695,
+      "registers": {
+        "1": 51695
+      }
+    },
+    {
+      "instruction": "LDFPS #0",
+      "pc": 3122,
+      "psw": 63983,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "CLRF AC0",
+      "pc": 3124,
+      "psw": 63983,
+      "fps": 4,
+      "registers": {}
+    },
+    {
+      "instruction": "STCFI AC0,@#177776; zero",
+      "pc": 3128,
+      "psw": 0,
+      "fps": 4,
+      "registers": {}
+    },
+    {
+      "instruction": "LDFPS @#177776; zero",
+      "pc": 3132,
+      "psw": 0,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "STFPS R2",
+      "pc": 3134,
+      "psw": 0,
+      "fps": 0,
+      "registers": {
+        "2": 0
+      }
+    },
+    {
+      "instruction": "LDFPS #3000",
+      "pc": 3138,
+      "psw": 0,
+      "fps": 1536,
+      "registers": {}
+    },
+    {
+      "instruction": "STFPS @#177776; reserved PSW bits",
+      "pc": 3142,
+      "psw": 0,
+      "fps": 1536,
+      "registers": {}
+    },
+    {
+      "instruction": "LDFPS @#177776; reserved bits read zero",
+      "pc": 3146,
+      "psw": 0,
+      "fps": 0,
+      "registers": {}
+    },
+    {
+      "instruction": "STFPS R3",
+      "pc": 3148,
+      "psw": 0,
+      "fps": 0,
+      "registers": {
+        "3": 0
+      }
+    }
+  ],
+  "writes": [
+    "W 6000 170127",
+    "W 6002 0",
+    "W 6004 172427",
+    "W 6006 40200",
+    "W 6010 175437",
+    "W 6012 177776",
+    "W 6014 170137",
+    "W 6016 177776",
+    "W 6020 170200",
+    "W 6022 175037",
+    "W 6024 177776",
+    "W 6026 172427",
+    "W 6030 41200",
+    "W 6032 175437",
+    "W 6034 177776",
+    "W 6036 172427",
+    "W 6040 40200",
+    "W 6042 170700",
+    "W 6044 175437",
+    "W 6046 177776",
+    "W 6050 170137",
+    "W 6052 177776",
+    "W 6054 170201",
+    "W 6056 170127",
+    "W 6060 0",
+    "W 6062 170400",
+    "W 6064 175437",
+    "W 6066 177776",
+    "W 6070 170137",
+    "W 6072 177776",
+    "W 6074 170202",
+    "W 6076 170127",
+    "W 6100 3000",
+    "W 6102 170237",
+    "W 6104 177776",
+    "W 6106 170137",
+    "W 6110 177776",
+    "W 6112 170203",
+    "W 6114 777"
+  ],
+  "setup": [
+    "R 10 340",
+    "R 7 6000"
+  ],
+  "commands": [
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6",
+    "S",
+    "F 6"
+  ]
+}

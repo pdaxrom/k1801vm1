@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "instructions": 22,
+  "inputs": {
+    "build/cp80-fp11/hardware-program/tb.v": "c7d881e92dcc06f8ebef4b85f9fa06c42e67fc14009bacea117c6bd7a3eeccf3",
+    "build/cp67-modules/src/rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+    "build/cp67-modules/src/rtl/uj11_decode_rom.v": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952",
+    "build/cp67-modules/src/microcode/generated/uj11_decode_table.v": "f98cee81a9010cd3c4ebf6a52fb8beedc47f0a861ea0515dcee537a9d0b80b29",
+    "build/cp67-modules/src/rtl/uj11_engine.v": "1764b2a587e9a90596ae56c8da940362525bbd05994da5ee22878519a2bf6f43",
+    "build/cp67-modules/src/rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+    "build/cp67-modules/src/rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+    "build/cp67-modules/src/rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "build/cp67-modules/src/rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "build/cp67-modules/src/rtl/uj11_alu.v": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4",
+    "build/cp67-modules/src/rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "build/cp67-modules/src/rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_rom.v": "70fb4bb2ab9e800034e892fdedc7dea699445d71fc088a3a7bd628b389124328",
+    "build/cp80-fp11/psw-sync/tb.v": "8458e5349158e58026b6d44f52a524b64f7d19a0a28fbe96ede572dec78b2d58",
+    "build/cp80-fp11/psw-sync/image.mem": "36cde82f08e1f9efba05d89f57d3c1ce02c931c61cf55e96018baad2c8e7ffdc",
+    "build/cp80-fp11/psw-sync/fp80_symbols.vh": "acf18fc18f587ef53f0b4ecb62525069699ab6cc8dc566a662337b9647c0272c",
+    "tools/fp_psw_hardware_cp80.py": "0cb4d3b4786ca3f90e235c528f0e734a7b22d50f40d53098017c855e6321727f",
+    "tools/test_fp_psw_program_cp80.py": "0cbcbd6fc255939cc96f059c7e35635f3c95dfd36e9d951c539c4b58424ac5c2",
+    "firmware/fp11/FP11.MAC": "7b9a790fb0c931cd268b318324b8e0afdb33195f6ab708faccace6c8487ec965"
+  }
+}

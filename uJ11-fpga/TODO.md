@@ -6,7 +6,7 @@
 - [x] Сохранить T, обнулить reserved PS<10:9>, разделить явную запись CPU NZVC и conversion FPS.
 - [x] Проверить EA, PC/wrap, частичные записи, bus/address faults, IRQ/trace/ODT и сброс признака между FP-командами.
 - [x] Квалификация CP80: 712/25823 PSW в трёх конфигурациях; прежние sync 444420/30934144 и logic 215760/15037488; events portable/vendor 111/4174; RT‑11 99 checks. Пакет и исходные результаты заморожены.
-- [ ] Установить CP80 через RT‑11/UJMOD и проверить PSW-операнды на физической плате.
+- [x] Установить CP80 через RT‑11/UJMOD: SD readback/cold init, 22 PSW/FPS шага, 43 STEP и native FPTST — PASS 2026-09-19. Память и CPU-контекст пробы восстановлены. [Журнал](docs/board-fpp-cp80.md).
 
 ## CP79 — целевой программный FPP J‑11
 

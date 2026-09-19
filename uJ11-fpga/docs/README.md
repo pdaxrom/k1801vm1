@@ -1,15 +1,15 @@
 # Документация uJ11
 
-**Установлено 2026-09-15:** [программный FPP J‑11 CP79 и ODT с FP-просмотром](board-fpp-cp79.md). SD readback, самоинициализация, 43 аппаратных STEP и FPTST — PASS.
+**Установлено 2026-09-19:** [CP80: программный FPP J‑11 с PSW-операндами](board-fpp-cp80.md). SD readback, самоинициализация, 22 PSW/FPS шага, 43 шага регрессии и FPTST — PASS. ODT CP77 сохранён.
 
 Аппаратная система — **CP67b**, HC1200, без MMU, с FIS и двумя банками
 FRAM. При cold boot самоинициализируются ODT, SDBOOT и программный FPP.
-FPGA прошита 2026-09-13; установка программного CP79 не меняет RTL/микрокод
+FPGA прошита 2026-09-13; установка программного CP80 не меняет RTL/микрокод
 и не добавляет LUT/FF/EBR. Аппаратные варианты PSW CP78 не прошли MAP
 и на плату не устанавливались.
 
-Подготовлен программный [CP80: PSW-операнды FPP](fpp-psw-cp80.md),
-[пакет](../demos/rt11/service/cp80/README.md). Он ещё не установлен на плату.
+[Семантика и RTL-проверки CP80](fpp-psw-cp80.md),
+[готовый пакет](../demos/rt11/service/cp80/README.md).
 
 ## С чего начать
 
@@ -22,16 +22,16 @@ FPGA прошита 2026-09-13; установка программного CP79
 | Узнать, что действительно проверено на плате | [Аппаратный журнал CP67](board-bringup-cp67.md) |
 | Проверка UART ESC и возврата ODT | [Успешный аппаратный проход](board-recovery-cp67.md) |
 | HG до и после отладки | [Передача файлов до и после ODT](board-hg-odt-cp67.md) |
-| Актуальный программный FPP J‑11 | [CP79: профиль DCJ11 и проверки](fpp-j11-cp79.md) |
+| Актуальный программный FPP J‑11 | [CP80: PSW-операнды](fpp-psw-cp80.md), [профиль DCJ11](fpp-j11-cp79.md) |
 | Преобразования FP11-A F/D/I/L | [CP76: семантика, проверки и измерения](fp11-conversions-cp76.md) |
 | MODF/MODD в программном FP11-A | [CP75: семантика, проверки и измерения](fp11-mod-cp75.md) |
 | MUL/DIV F/D в программном FP11-A | [CP74: алгоритмы, проверки и измерения](fp11-muldiv-cp74.md) |
 | Новый FP11 firmware: ADD/SUB F/D, семь guard bits, исправлены ABS/NEG UV | [CP73: семантика, измерения и проверки](fp11-arithmetic-cp73.md) |
-| Взять ODT.BIN, FP11.BIN, FPTST.SAV | [Пакет CP79](../demos/rt11/service/cp79/README.md) |
+| Взять ODT.BIN, FP11.BIN, FPTST.SAV | [Пакет CP80](../demos/rt11/service/cp80/README.md) |
 | Взять SDBOOT.BIN и UJMOD.SAV | [Неизменённый пакет CP67](../demos/rt11/service/cp67/README.md) |
 | Узнать оставшиеся задачи | [TODO](../TODO.md) |
 
-Операционные инструкции описывают CP67b с программным обновлением CP79. Документы с номерами
+Операционные инструкции описывают CP67b с программным обновлением CP80. Документы с номерами
 предыдущих CP сохраняют решения и результаты **на момент соответствующего
 этапа**. В частности, прежние UJLOAD/UJON, отсутствие автозапуска ODT,
 старые роли PREV/NEXT и старые суммы ресурсов не описывают текущую установку.
@@ -56,7 +56,9 @@ FPGA прошита 2026-09-13; установка программного CP79
 
 ## Где лежат доказательства
 
-- [Аппаратная установка программного CP79](../tb/reports/cp79-hardware/deployment.json): SD readbacks, cold init, 43 STEP, FPTST.
+- [Аппаратная установка CP80](../tb/reports/cp80-hardware/deployment.json): SD readback, cold init, 22 PSW/FPS шага, восстановление памяти, 43 STEP и FPTST.
+
+- [Предыдущая установка CP79](../tb/reports/cp79-hardware/deployment.json): SD readbacks, cold init, 43 STEP, FPTST.
 
 - [CP67b synthesis](../synth/reports/cp67b/result.json): MAP/PAR/TRACE,
   исходный manifest и `source.tgz` рядом.

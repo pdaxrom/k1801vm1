@@ -1,0 +1,11 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-19T09:41:55Z",
+  "commands": [
+    "RUN FPTST"
+  ],
+  "uart_bytes": 41,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-19T09:42:01Z",
+  "capture_closed_utc": "2026-09-19T09:42:01Z"
+}

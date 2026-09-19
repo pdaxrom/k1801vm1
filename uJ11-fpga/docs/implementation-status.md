@@ -1,21 +1,21 @@
-# Implementation status, 2026-09-15
+# Implementation status, 2026-09-19
 
 [Актуальная документация CP67b](README.md):
 [эксплуатация](user-guide-cp67.md), [устройство](system-cp67.md),
 [разработка и воспроизведение](development-cp67.md).
 
 **Аппаратная установка:** CP67b записана и проверена во FLASH; RT-11FB и DIR
-работают на плате. ODT и программный FPP обновлены до пакета CP79:
-[текущая установка](board-fpp-cp79.md), [исходная CP67b](board-bringup-cp67.md). Ниже — результаты checkpoints
+работают на плате. Программный FPP обновлён до CP80, ODT CP77 сохранён:
+[текущая установка](board-fpp-cp80.md), [исходная CP67b](board-bringup-cp67.md). Ниже — результаты checkpoints
 на момент их фиксации.
 
 ## CP80 — PSW-операнды в программном FPP
 
-FP11.MAC 00.12: обращения к 177776 обслуживаются через USER CPSW, T защищён, FPS обновляется независимо от явной записи CPU flags. Размещение 4614 байт HALT FRAM, +96 к CP79; FPGA без изменений. PSW: 712 cases / 25823 checks в sync/logic/vendor; прежняя матрица: 444420 sync и 215760 logic; RT‑11 99 checks — PASS. На физической плате пока CP79. [Контракт, проверки и ограничения](fpp-psw-cp80.md).
+FP11.MAC 00.12: обращения к 177776 обслуживаются через USER CPSW, T защищён, FPS обновляется независимо от явной записи CPU flags. Размещение 4614 байт HALT FRAM, +96 к CP79; FPGA без изменений. PSW: 712 cases / 25823 checks в sync/logic/vendor; прежняя матрица: 444420 sync и 215760 logic; RT‑11 99 checks — PASS. Установлен 2026-09-19: SD readback, cold init, 22 PSW/FPS шага, восстановление 39 слов и CPU-контекста, 43 STEP PC/PSW, FP dump и native FPTST — PASS. [Аппаратный журнал](board-fpp-cp80.md). [Контракт, проверки и ограничения](fpp-psw-cp80.md).
 
 ## CP79 — программная эмуляция FPP J‑11
 
-Установленный FP11.MAC 00.11 следует руководству DCJ11: FIUV до выполнения, load flags по J11, jammed ADD/SUB. 4518 байт HALT FRAM, прирост FPGA нулевой. Sync 444420/30934144, logic 215760/15037488, directed portable/vendor 111/4174 каждый, RT‑11/ODT 99 checks — PASS. Установлен 2026-09-15: три SD readback, cold init всех модулей, 43 аппаратных STEP PC/PSW, FP dump и native FPTST — PASS. [Аппаратный журнал](board-fpp-cp79.md). [Границы совместимости и проверки](fpp-j11-cp79.md).
+FP11.MAC 00.11 следует руководству DCJ11: FIUV до выполнения, load flags по J11, jammed ADD/SUB. 4518 байт HALT FRAM, прирост FPGA нулевой. Sync 444420/30934144, logic 215760/15037488, directed portable/vendor 111/4174 каждый, RT‑11/ODT 99 checks — PASS. Установлен 2026-09-15: три SD readback, cold init всех модулей, 43 аппаратных STEP PC/PSW, FP dump и native FPTST — PASS. [Аппаратный журнал](board-fpp-cp79.md). [Границы совместимости и проверки](fpp-j11-cp79.md).
 
 ## CP78 — CPU-local PSW
 

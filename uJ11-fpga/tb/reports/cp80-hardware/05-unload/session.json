@@ -1,0 +1,11 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-19T09:16:39Z",
+  "commands": [
+    "UNLOAD HG"
+  ],
+  "uart_bytes": 19,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-19T09:16:42Z",
+  "capture_closed_utc": "2026-09-19T09:16:42Z"
+}
