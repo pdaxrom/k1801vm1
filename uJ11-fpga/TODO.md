@@ -1,5 +1,13 @@
 # uJ11 TODO
 
+## CP80 — PSW-операнды программного FPP
+
+- [x] Перехватить word operands/EA pointers/extension по 177776 в сохранённый USER PSW, без нового RTL.
+- [x] Сохранить T, обнулить reserved PS<10:9>, разделить явную запись CPU NZVC и conversion FPS.
+- [x] Проверить EA, PC/wrap, частичные записи, bus/address faults, IRQ/trace/ODT и сброс признака между FP-командами.
+- [x] Квалификация CP80: 712/25823 PSW в трёх конфигурациях; прежние sync 444420/30934144 и logic 215760/15037488; events portable/vendor 111/4174; RT‑11 99 checks. Пакет и исходные результаты заморожены.
+- [ ] Установить CP80 через RT‑11/UJMOD и проверить PSW-операнды на физической плате.
+
 ## CP79 — целевой программный FPP J‑11
 
 - [x] Заменить FP11-A-specific unary/load FIUV на семантику DCJ11.
@@ -7,7 +15,8 @@
 - [x] ADD/SUB по точности DCJ11 §7.6, exact-integer reference.
 - [x] Полный sync 444420/30934144, logic 215760/15037488; directed portable/vendor 111/4174 каждый; RT‑11/ODT 99 checks. Замороженный CP79 и пакет подготовлены.
 - [x] Установить на физическую плату через HG/UJMOD: readback всех файлов, cold init, 43 STEP PC/PSW, FP dump и FPTST — PASS 2026-09-15. [Журнал](docs/board-fpp-cp79.md).
-- [ ] Квалифицировать PSW-операнды и подобрать внешнюю диагностику J‑11 FPP; A-specific результаты CP78 не переносить.
+- [x] Реализовать и проверить PSW-операнды программного FPP — CP80.
+- [ ] Подобрать внешнюю диагностику J‑11 FPP; A-specific результаты CP78 не переносить.
 
 [Профиль DCJ11 и источники](docs/fpp-j11-cp79.md).
 
@@ -19,7 +28,7 @@
 - [x] Полный RT-11/UJMOD/ODT/FP11 регресс CP78: 99 checks, 43 FP шага, cold init/OFF — PASS; исходники и логи сохранены.
 - [x] Выполнить synthesis CP78a/b/c и сохранить отчёты: все три не прошли MAP (649/643/648 slices).
 - [ ] Найти способ разместить CPU-local PSW; лучший CP78b превышает лимит на 3 slices. Fmax ещё не получен.
-- [ ] FP11 firmware: обращения операндов к 177776/177777 должны читать/писать сохранённый USER CPSW, с защитой T и byte lanes; отдельно проверить STFPS/LDFPS/STCFI и fault/flags precedence. GUEST-доступ из HALT сейчас видит живой HALT PSW.
+- [x] FP11 firmware: word operands 177776 читают/пишут сохранённый USER CPSW, с защитой T и fault/flags precedence — CP80. Нечётное слово 177777 вызывает address fault. Байтовых операндов в FPP нет; CPU byte PSW interface остаётся частью аппаратного CP78.
 - [ ] Только после аппаратного gate собрать JED, установить и проверить UART/пульт/FRAM-модули на плате.
 
 [Реализация, источники DEC и команды](docs/psw-cp78.md).

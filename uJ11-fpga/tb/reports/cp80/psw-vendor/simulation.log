@@ -1,0 +1,2 @@
+PASS CP80 PSW: 712 cases / 25823 checks ROM_DECODE=1
+build/cp80-fp11/psw-vendor/tb.v:311: $finish called at 57764330000 (1ps)

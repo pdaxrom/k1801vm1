@@ -1,5 +1,13 @@
 # Synthesis checkpoints
 
+## CP80 — программная обработка PSW-операндов FPP
+
+RTL и микрокод CP67b не менялись, synthesis не повторялся.
+Изменение FP11.MAC 00.12 занимает +96 байт внешней HALT FRAM,
+**+0 LUT / FF / EBR / microinstructions**. Предыдущая аппаратная оценка:
+1244 LUT / 381 FF / 7 EBR / 628 slices / TRACE 32,032 MHz.
+[Программный контракт и квалификация](fpp-psw-cp80.md).
+
 ## CP79 — профиль J‑11 в программном FPP
 
 Только внешний FRAM module: 4518 байт вместо 4560. RTL/ROM/microcode

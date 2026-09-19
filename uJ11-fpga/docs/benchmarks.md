@@ -1,4 +1,14 @@
-# Benchmarks: CP79 и предыдущие этапы
+# Benchmarks: CP80 и предыдущие этапы
+
+## CP80 — PSW-операнды программного FPP
+
+Сравнены 8512 zero-wait RAM samples на одинаковых vectors/partitions CP79:
+CFCC 790→803 clocks, LDFPS (R2) 1234→1290, STF AC0,(R2) 1802→1867,
+STCFI AC0,R5 8183→8212. Это конкретные samples, не SPI FRAM timings.
+Проверка PSW добавляет программные инструкции и memory beats; числовые
+алгоритмы прежние. FPGA CP67b неизменна. Полная RT‑11 интеграция:
+**833104183 clocks / 9776 UART bytes / 99 checks PASS**; это весь
+сценарий, включая UART/ODT и cold boot, не CPI отдельной FP-команды. [Детали и таблица](fpp-psw-cp80.md#накладные-расходы).
 
 ## CP79 — программная семантика FPP J‑11
 
