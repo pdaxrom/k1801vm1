@@ -1,0 +1,359 @@
+{
+  "phase": "fis-only",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "SET SL OFF",
+      "offset": 74,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 99,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.7028924629557878
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 99,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 117,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4024967639707029
+    },
+    {
+      "command": "STATUS",
+      "offset": 117,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 384,
+      "response": "STATUS\r\n0: 010000 014233 134145 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140401\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.201744936988689
+    },
+    {
+      "command": "RUN B81FIS",
+      "offset": 384,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "end": 467,
+      "response": "RUN B81FIS\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? ",
+      "elapsed_seconds": 1.6027736080577597
+    },
+    {
+      "command": "A",
+      "offset": 467,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 479,
+      "response": "A\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 0.6007991130463779
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 479,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 547,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 5.00928791007027
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 547,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 591,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.30212353693787
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 591,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 643,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.8030983310891315
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 643,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 694,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.003388858982362
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 694,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 719,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3021377549739555
+    },
+    {
+      "command": "PRINT 1E-30*1E-30",
+      "offset": 719,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 773,
+      "response": "PRINT 1E-30*1E-30\r\n?FLOATING UNDERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.2038857910083607
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 773,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 817,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.4022350030718371
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 817,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 842,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3021350449416786
+    },
+    {
+      "command": "BYE",
+      "offset": 842,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 850,
+      "response": "BYE\r\n\r\n.",
+      "elapsed_seconds": 1.6027395910350606
+    },
+    {
+      "command": "RUN B81FIJ",
+      "offset": 850,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "end": 933,
+      "response": "RUN B81FIJ\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? ",
+      "elapsed_seconds": 1.7028568000532687
+    },
+    {
+      "command": "A",
+      "offset": 933,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 945,
+      "response": "A\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 0.6007833400508389
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 945,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1013,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 4.909271776094101
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 1013,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1057,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3021455249981955
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 1057,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1109,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.8030236930353567
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 1109,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1160,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.0033871569903567
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 1160,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1185,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3021191010484472
+    },
+    {
+      "command": "PRINT 1E-30*1E-30",
+      "offset": 1185,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1239,
+      "response": "PRINT 1E-30*1E-30\r\n?FLOATING UNDERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.203895849059336
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 1239,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1283,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.4023131490685046
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 1283,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 1308,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3021291800541803
+    },
+    {
+      "command": "BYE",
+      "offset": 1308,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1316,
+      "response": "BYE\r\n\r\n.",
+      "elapsed_seconds": 1.602747398079373
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1316,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1334,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4022761710220948
+    },
+    {
+      "command": "STATUS",
+      "offset": 1334,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1601,
+      "response": "STATUS\r\n0: 010000 014233 134145 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140401\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2018242749618366
+    }
+  ],
+  "started_utc": "2026-09-20T06:09:58Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "boot": {
+    "offset": 0,
+    "fresh_banner": true,
+    "end": 74
+  },
+  "uart_bytes": 1601,
+  "before": [
+    [
+      4096,
+      6299,
+      47205,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      24576,
+      2172,
+      50204,
+      49409
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "after": [
+    [
+      4096,
+      6299,
+      47205,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      24576,
+      2172,
+      50204,
+      49409
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "finished_utc": "2026-09-20T06:15:04Z"
+}

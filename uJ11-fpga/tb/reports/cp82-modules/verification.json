@@ -1,0 +1,28 @@
+{
+  "checkpoint": "CP82",
+  "fpga_changed": false,
+  "software_fpp": "CP80",
+  "baseline_commit": "37a2fab",
+  "qualification": "Physical OFF/cold boot/unmodified FIS/restore/FIS+FPP and independent full RTL module/RT11 CONFIG/ODT checks passed.",
+  "files": {
+    "hardware/01-disable/session.json": "a5e40360ce981b3497811c980240c6799314e814995d2db1c53b8fb5cc399387",
+    "hardware/01-disable/uart.bin": "ef523b35dee41f3701a953c42fe155507e77012458b140e95e0d1a4a75d18758",
+    "hardware/02-fis-only/session.json": "e1a95943723db7b57d99ddeaecef695d9926c677ff2e8b9f33e876a0bd9da236",
+    "hardware/02-fis-only/uart.bin": "83cc6f1483e29246156206150616ec9adb21760cea35587879805340410473c3",
+    "hardware/03-restore/session.json": "793e3f4336e8305c82bddebb9afb63285a80a0b4949c75f30b71da1e60e63ad4",
+    "hardware/03-restore/uart.bin": "536be3f94ac54562bfbfaf08b9b2b2db29ec6380287bcbd1d09ffa3decd8dbc7",
+    "hardware/04-combined/session.json": "8d6094de97b430552dd180dec8f335395c9ad000836a255bc0bfa8548fd2c99d",
+    "hardware/04-combined/uart.bin": "d1069bb481a9c16ae323f4980dbc8544c820b5040cd3ac80f966960c668e0a21",
+    "hardware/cleanup.json": "98785eeccdeba34eff6ae99f3cdd0dc437776cfc5b7fe6c4c5596c5fc3ee73b6",
+    "hardware/hardware_modules_cp82.py": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+    "rtl/build.log": "d92627b85beaaf1a4c00844919f5107659b67d71977e2d09f46db9079c3ca265",
+    "rtl/inputs.json": "6783ca8692c337855b21f805a71ebada8648d72c5218a7dc63e2398401e4b463",
+    "rtl/replay-lint.log": "84ac814b32073118a24937142f39b9ccb8eaa5a344d6a2d57649e1545ddb2330",
+    "rtl/replay.json": "bb789de2154f07e4aadacccdc4e0573e1ff943de93683d097321a336fe3284ac",
+    "rtl/result.json": "1880a1157f745306b3ed1697662c3e4002f8701f26f4b188fae8cfc52d9d6dc2",
+    "rtl/simulation.log": "f538fb2b4a913356b91542d8979d5028da2d7e25683dde8be37504997726129c",
+    "rtl/source.tgz": "7a68a2196c88d714cf51664414e99cfaf1473aa89afd41357f9b111b43776015",
+    "rtl/test.dsk.gz": "b678b6850fa447cdb73c173ffc78292d3d982b5a4752c9e3f5db3fd5d1572bd7",
+    "rtl/uart.txt": "8c146ee5a0d9c8616ad1a627ec2e87c5d46e60a7b110b6612e595ac05d03e5e7"
+  }
+}

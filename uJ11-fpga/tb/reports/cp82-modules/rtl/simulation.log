@@ -1,0 +1,17 @@
+SD image: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp82-modules/rtl-c/test.dsk (53790 sectors), read-only backing, 256-sector RAM overlay
+CP82 RT11 CONFIG=124141 FPP=1
+CP82 progress 100000000 phase2 PC004466 UART193
+CP82 RT11 CONFIG=124041 FPP=0
+CP82 progress 200000000 phase2 PC042226 UART578
+CP82 B81FIS errors FPP=0 HALT=0
+CP82 progress 300000000 phase2 PC147412 UART1005
+CP82 B81FIJ errors FPP=0 HALT=0
+CP82 progress 400000000 phase4 PC001406 UART1540
+CP82 RT11 CONFIG=124141 FPP=1
+CP82 progress 500000000 phase5 PC006162 UART1815
+CP82 B81FIJ errors FPP=4 HALT=4
+PASS CP82 modules: 206 checks, 582937544 clocks, 2107 UART bytes
+- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp82-modules/rtl-c/tb.v:271: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 6s; walltime 580.718 s; speed 10.038 ms/s
+- Verilator: cpu 580.636 s on 1 threads; allocated 2 MB

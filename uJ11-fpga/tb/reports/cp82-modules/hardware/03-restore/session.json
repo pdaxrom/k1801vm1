@@ -1,0 +1,174 @@
+{
+  "phase": "restore",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "",
+      "offset": 0,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 5,
+      "response": "\r\n\r\n.",
+      "elapsed_seconds": 0.40043684805277735
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 5,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 23,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4023631759919226
+    },
+    {
+      "command": "STATUS",
+      "offset": 23,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 290,
+      "response": "STATUS\r\n0: 010000 014233 134145 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140401\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2017376619623974
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 290,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 308,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.3021224309923127
+    },
+    {
+      "command": "FP11",
+      "offset": 308,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 437,
+      "response": "FP11\r\n!UJMOD-I-WRITING; services disabled, record invalid\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 1.402260964969173
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 437,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 455,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.3019290670054033
+    },
+    {
+      "command": "STATUS",
+      "offset": 455,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 722,
+      "response": "STATUS\r\n0: 010000 014233 134145 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140403\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2018581229494885
+    }
+  ],
+  "started_utc": "2026-09-20T06:15:22Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "uart_bytes": 722,
+  "before": [
+    [
+      4096,
+      6299,
+      47205,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      24576,
+      2172,
+      50204,
+      49409
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "after": [
+    [
+      4096,
+      6299,
+      47205,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      24576,
+      2172,
+      50204,
+      49411
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "finished_utc": "2026-09-20T06:15:32Z"
+}
