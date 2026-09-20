@@ -1,0 +1,26 @@
+	.TITLE FISABI
+	.IDENT /00.01/
+; BASIC-11 V2.1 FIS arithmetic on an unmapped RT-11 system with FPP.
+; RT-11 .SFPA adds FEC/FEA ahead of PC/PS when CONFIG bit 6 is set.
+; The original BSOT1S.FIS handler expects just PC/PS. Drop only those
+; two extra words; the actual FIS error is still in the saved CPU PS.
+; With FPP absent the original FIS stack passes through unchanged.
+;
+; RMON pointer 54, CONFIG offset 300, bit 100: RT-11 system communication
+; area. Read the same flag used by the monitor; never change that flag.
+;
+; IFPMP is exported by BSOT1S.FIS. Its original handler is IFPMP+16.
+; The builder verifies that instruction/data layout before redirecting
+; the .SFPA argument word IFPMP+14 to FIADPT. No fixed linked address.
+	.GLOBL IFPMP,FIADPT
+	.PSECT FISABI,RO,I,GBL,REL,CON
+FIADPT:	MOV R0,-(SP)
+	MOV @#54,R0
+	BIT #100,300(R0)
+	BEQ 10$
+; Save R0 in the discarded FEA slot, then discard R0's old save and FEC.
+	MOV (SP),4(SP)
+	CMP (SP)+,(SP)+
+10$:	MOV (SP)+,R0
+	JMP IFPMP+16
+	.END

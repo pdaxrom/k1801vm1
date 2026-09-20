@@ -1,0 +1,10 @@
+{
+  "uJ11-fpga/build/cp81-basic/fis-abi-c/B81FIJ.SAV": {
+    "bytes": 27136,
+    "sha256": "5601be5c721ab5657ed6b7d177f719342c5164e177134441c24a58c624f5a349"
+  },
+  "uJ11-fpga/tools/hardware_basic_cp81.py": {
+    "bytes": 6022,
+    "sha256": "9098dbbaffe7267f991544ca1aca12ffe62b3cf02706fc5daf2a719d72efea75"
+  }
+}

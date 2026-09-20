@@ -1,0 +1,18 @@
+{
+  "pid": 241349,
+  "argv": [
+    "/tmp/uj11-cp29-a/host-hg/hgfsd",
+    "--directory",
+    "/tmp/uj11-cp81-basic-20260920/share",
+    "--clock",
+    "1000"
+  ],
+  "started_utc": "2026-09-19T22:50:37Z",
+  "files": {
+    "B81FPD.SAV": "d466e9019d95f88db4bff6ec50e25a85bea3fdd28fa2102d3c41af24d7f75808",
+    "B81DBL.BAS": "aa379b479c65e2cc73567caa730b96799da3e2c443535c7bd70a110beec2e7cf",
+    "B81FIS.SAV": "1a324b9ca412a0470602d1db8ee5dbd4d2503859ede22b0e1392304cefc50195",
+    "B81FPU.SAV": "560950404bd738385e4176552ea6e0781107397d27854bf16cf2a6493500ca0e",
+    "B81TST.BAS": "430ee12f95ae96dc736e0f6c4b575b5fa8481b0cc926fc06758c85d7637d83aa"
+  }
+}

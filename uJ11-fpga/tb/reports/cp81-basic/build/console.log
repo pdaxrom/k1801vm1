@@ -1,0 +1,371 @@
+
+PDP-11 simulator V3.12-3
+HK: unit is read only
+
+RT-11FB (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.COPY DK1:*.* DK0:
+ Files copied:
+DK1:BSOT0D.EAE to DK0:BSOT0D.EAE
+DK1:BSOT0S.EAE to DK0:BSOT0S.EAE
+DK1:BSOT1D.EAE to DK0:BSOT1D.EAE
+DK1:BSOT1S.EAE to DK0:BSOT1S.EAE
+DK1:BSOT0D.EIS to DK0:BSOT0D.EIS
+DK1:BSOT0S.EIS to DK0:BSOT0S.EIS
+DK1:BSOT1D.EIS to DK0:BSOT1D.EIS
+DK1:BSOT1S.EIS to DK0:BSOT1S.EIS
+DK1:BSOT0S.FIS to DK0:BSOT0S.FIS
+DK1:BSOT1S.FIS to DK0:BSOT1S.FIS
+DK1:BSOT0D.FPU to DK0:BSOT0D.FPU
+DK1:BSOT0S.FPU to DK0:BSOT0S.FPU
+DK1:BSOT1D.FPU to DK0:BSOT1D.FPU
+DK1:BSOT1S.FPU to DK0:BSOT1S.FPU
+DK1:BSCLIN.OBJ to DK0:BSCLIN.OBJ
+DK1:BSCLLB.OBJ to DK0:BSCLLB.OBJ
+DK1:BSCLS.OBJ  to DK0:BSCLS.OBJ
+DK1:BSCLSN.OBJ to DK0:BSCLSN.OBJ
+DK1:BSCMP.OBJ  to DK0:BSCMP.OBJ
+DK1:BSERML.OBJ to DK0:BSERML.OBJ
+DK1:BSERMS.OBJ to DK0:BSERMS.OBJ
+DK1:BSERR.OBJ  to DK0:BSERR.OBJ
+DK1:BSE0.OBJ   to DK0:BSE0.OBJ
+DK1:BSE1.OBJ   to DK0:BSE1.OBJ
+DK1:BSFUNC.OBJ to DK0:BSFUNC.OBJ
+DK1:BSKEYS.OBJ to DK0:BSKEYS.OBJ
+DK1:BSOT0D.OBJ to DK0:BSOT0D.OBJ
+DK1:BSOT0S.OBJ to DK0:BSOT0S.OBJ
+DK1:BSOT1D.OBJ to DK0:BSOT1D.OBJ
+DK1:BSOT1S.OBJ to DK0:BSOT1S.OBJ
+DK1:BSPAT.OBJ  to DK0:BSPAT.OBJ
+DK1:BSPR0.OBJ  to DK0:BSPR0.OBJ
+DK1:BSPR0N.OBJ to DK0:BSPR0N.OBJ
+DK1:BSPR1.OBJ  to DK0:BSPR1.OBJ
+DK1:BSPR1N.OBJ to DK0:BSPR1N.OBJ
+DK1:BSPTRD.OBJ to DK0:BSPTRD.OBJ
+DK1:BSPTRS.OBJ to DK0:BSPTRS.OBJ
+DK1:BSRSQ.OBJ  to DK0:BSRSQ.OBJ
+DK1:BSRSQN.OBJ to DK0:BSRSQN.OBJ
+DK1:BSR0D.OBJ  to DK0:BSR0D.OBJ
+DK1:BSR0S.OBJ  to DK0:BSR0S.OBJ
+DK1:BSR1D.OBJ  to DK0:BSR1D.OBJ
+DK1:BSR1S.OBJ  to DK0:BSR1S.OBJ
+DK1:BSSUB.OBJ  to DK0:BSSUB.OBJ
+DK1:BSSUBN.OBJ to DK0:BSSUBN.OBJ
+DK1:BSX0A.OBJ  to DK0:BSX0A.OBJ
+DK1:BSX0B.OBJ  to DK0:BSX0B.OBJ
+DK1:BSX1A.OBJ  to DK0:BSX1A.OBJ
+DK1:BSX1B.OBJ  to DK0:BSX1B.OBJ
+DK1:BSX2.OBJ   to DK0:BSX2.OBJ
+DK1:SUDTCM.OBJ to DK0:SUDTCM.OBJ
+DK1:SUEID.OBJ  to DK0:SUEID.OBJ
+DK1:SUE1ID.OBJ to DK0:SUE1ID.OBJ
+DK1:SUIMP.OBJ  to DK0:SUIMP.OBJ
+DK1:SUIOID.OBJ to DK0:SUIOID.OBJ
+DK1:SUIOPO.OBJ to DK0:SUIOPO.OBJ
+DK1:SUIOPR.OBJ to DK0:SUIOPR.OBJ
+DK1:SUOPT.OBJ  to DK0:SUOPT.OBJ
+DK1:SUO1ID.OBJ to DK0:SUO1ID.OBJ
+DK1:SUR1ID.OBJ to DK0:SUR1ID.OBJ
+DK1:SUXID.OBJ  to DK0:SUXID.OBJ
+DK1:SUX2ID.OBJ to DK0:SUX2ID.OBJ
+DK1:SUCNFG.BAS to DK0:SUCNFG.BAS
+DK1:SUCNF1.BAS to DK0:SUCNF1.BAS
+DK1:SUCNF2.BAS to DK0:SUCNF2.BAS
+DK1:SUCNF3.BAS to DK0:SUCNF3.BAS
+DK1:SUCNF4.BAS to DK0:SUCNF4.BAS
+DK1:SUCNF5.BAS to DK0:SUCNF5.BAS
+DK1:SUCNF6.BAS to DK0:SUCNF6.BAS
+DK1:SUCNF7.BAS to DK0:SUCNF7.BAS
+DK1:SUCVT.BAS  to DK0:SUCVT.BAS
+DK1:SUCVT1.BAS to DK0:SUCVT1.BAS
+DK1:SUCNFG.DAT to DK0:SUCNFG.DAT
+DK1:BSASM.MAC  to DK0:BSASM.MAC
+DK1:BSCLI.SAV  to DK0:BSCLI.SAV
+DK1:BSMAC.MAC  to DK0:BSMAC.MAC
+DK1:BASIC.SAV  to DK0:BASIC.SAV
+DK1:YSTART.OBJ to DK0:YSTART.OBJ
+DK1:ZSTART.OBJ to DK0:ZSTART.OBJ
+DK1:BSASM.OLD  to DK0:BSASM.OLD
+DK1:BSCLI.OLD  to DK0:BSCLI.OLD
+DK1:BSMAC.OLD  to DK0:BSMAC.OLD
+DK1:BSCLIN.SAV to DK0:BSCLIN.SAV
+DK1:BSASM.OBJ  to DK0:BSASM.OBJ
+DK1:POSITI.LST to DK0:POSITI.LST
+DK1:XSTART.OBJ to DK0:XSTART.OBJ
+DK1:BSCLI.OK1  to DK0:BSCLI.OK1
+DK1:JOYSTI.OK1 to DK0:JOYSTI.OK1
+DK1:CNC.OK1    to DK0:CNC.OK1
+DK1:ACMOTO.MAC to DK0:ACMOTO.MAC
+DK1:WINDOW.MAC to DK0:WINDOW.MAC
+DK1:POSITI.MAC to DK0:POSITI.MAC
+DK1:JOYSTI.MAC to DK0:JOYSTI.MAC
+DK1:SPEEDS.OLD to DK0:SPEEDS.OLD
+DK1:XSTASP.OBJ to DK0:XSTASP.OBJ
+DK1:YSTASP.OBJ to DK0:YSTASP.OBJ
+DK1:ZSTASP.OBJ to DK0:ZSTASP.OBJ
+DK1:XDIREC.OBJ to DK0:XDIREC.OBJ
+DK1:YDIREC.OBJ to DK0:YDIREC.OBJ
+DK1:ZDIREC.OBJ to DK0:ZDIREC.OBJ
+DK1:ACMOTO.OBJ to DK0:ACMOTO.OBJ
+DK1:WINDOW.OBJ to DK0:WINDOW.OBJ
+DK1:POSITI.OBJ to DK0:POSITI.OBJ
+DK1:STATUS.MAC to DK0:STATUS.MAC
+DK1:STATUS.OBJ to DK0:STATUS.OBJ
+DK1:JOYSTI.OBJ to DK0:JOYSTI.OBJ
+DK1:CNC.SAV    to DK0:CNC.SAV
+DK1:SPEEDS.OBJ to DK0:SPEEDS.OBJ
+DK1:VECTOR.MAC to DK0:VECTOR.MAC
+DK1:VECTOR.OBJ to DK0:VECTOR.OBJ
+DK1:BSCLI.MAC  to DK0:BSCLI.MAC
+DK1:CNC.COM    to DK0:CNC.COM
+DK1:XLINIE.MAC to DK0:XLINIE.MAC
+DK1:YLINIE.MAC to DK0:YLINIE.MAC
+DK1:ZLINIE.MAC to DK0:ZLINIE.MAC
+DK1:XLINIE.OBJ to DK0:XLINIE.OBJ
+DK1:YLINIE.OBJ to DK0:YLINIE.OBJ
+DK1:ZLINIE.OBJ to DK0:ZLINIE.OBJ
+DK1:BSCLI.OBJ  to DK0:BSCLI.OBJ
+DK1:T.BAS      to DK0:T.BAS
+DK1:NULLPU.XYZ to DK0:NULLPU.XYZ
+
+.R BASIC
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+RUN SUCNFG
+BASIC-11/RT-11 V02 Configuration Program
+
+Type "?<ret>" after any prompt for HELP.
+
+.SAV and .COM file name (default is BASIC): B81FIS
+
+Do you want a map? (Y or N; default is N): Y
+
+.MAP name (default is same as .SAV name): 
+
+Background or Foreground ? (B or F; default is B): B
+
+Do you want PRINT USING? (Y or N; default is Y): Y
+
+Do you want CALL support? (Y or N; default is N): N
+
+Single or Double precision math? (S or D; default is S): S
+
+Arithmetic hardware (NONE, EAE, EIS, FIS, or FPU; default is NONE): FIS
+
+Do you want the transcendental functions? (Y or N; default is Y): Y
+
+Do you want the SUB command? (Y or N, default is Y): Y
+
+Do you want the RESEQ command? (Y or N, default is Y): Y
+
+Do you want long error messages? (Y or N; default is Y): Y
+
+Overlay structure type (1, 2, 3, 4, or 5; default is 1): 2
+
+The following GLOBALS will be undefined. These
+errors may be ignored.
+..UAC$, ..NRC$, and ..MSP$ (from no CALL).
+
+To create the BASIC that you have just defined,
+type "BYE<ret>" after BASIC prints "READY". When the system
+prompts for input, type "@B81FIS<ret>" to link the new BASIC.
+You may type "R B81FIS<ret>" to run it.
+
+READY
+BYE
+
+.@B81FIS
+
+.R LINK
+*B81FIS,B81FIS=/B:1000//
+*BSPTRS,BSPAT,BSR0S
+*BSR1S,BSPR0
+*BSCLIN
+*SUO1ID,BSOT0S.FIS,BSOT1S.FIS
+*SUIOPR,SUIOPO,SUDTCM
+*BSX0A,BSX0B,BSX2,BSX1A
+*BSX1B,BSPR1,BSCLSN
+*BSE0,BSCMP
+*BSSUB,BSRSQ
+*SUE1ID,BSE1,BSKEYS/O:1
+*BSERR,BSERML/O:1
+*SUIMP,BSFUNC,SUOPT/O:2
+*//
+?LINK-W-Undefined globals:
+..UAC$
+..NRC$
+..MSP$
+*^C
+
+.DIR B81FIS.SAV
+ 
+B81FIS.SAV    53    -BAD-        
+ 1 Files, 53 Blocks
+ 50685 Free blocks
+
+.R BASIC
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+RUN SUCNFG
+BASIC-11/RT-11 V02 Configuration Program
+
+Type "?<ret>" after any prompt for HELP.
+
+.SAV and .COM file name (default is BASIC): B81FPU
+
+Do you want a map? (Y or N; default is N): Y
+
+.MAP name (default is same as .SAV name): 
+
+Background or Foreground ? (B or F; default is B): B
+
+Do you want PRINT USING? (Y or N; default is Y): Y
+
+Do you want CALL support? (Y or N; default is N): N
+
+Single or Double precision math? (S or D; default is S): S
+
+Arithmetic hardware (NONE, EAE, EIS, FIS, or FPU; default is NONE): FPU
+
+Do you want the transcendental functions? (Y or N; default is Y): Y
+
+Do you want the SUB command? (Y or N, default is Y): Y
+
+Do you want the RESEQ command? (Y or N, default is Y): Y
+
+Do you want long error messages? (Y or N; default is Y): Y
+
+Overlay structure type (1, 2, 3, 4, or 5; default is 1): 2
+
+The following GLOBALS will be undefined. These
+errors may be ignored.
+..UAC$, ..NRC$, and ..MSP$ (from no CALL).
+
+To create the BASIC that you have just defined,
+type "BYE<ret>" after BASIC prints "READY". When the system
+prompts for input, type "@B81FPU<ret>" to link the new BASIC.
+You may type "R B81FPU<ret>" to run it.
+
+READY
+BYE
+
+.@B81FPU
+
+.R LINK
+*B81FPU,B81FPU=/B:1000//
+*BSPTRS,BSPAT,BSR0S
+*BSR1S,BSPR0
+*BSCLIN
+*SUO1ID,BSOT0S.FPU,BSOT1S.FPU
+*SUIOPR,SUIOPO,SUDTCM
+*BSX0A,BSX0B,BSX2,BSX1A
+*BSX1B,BSPR1,BSCLSN
+*BSE0,BSCMP
+*BSSUB,BSRSQ
+*SUE1ID,BSE1,BSKEYS/O:1
+*BSERR,BSERML/O:1
+*SUIMP,BSFUNC,SUOPT/O:2
+*//
+?LINK-W-Undefined globals:
+..UAC$
+..NRC$
+..MSP$
+*^C
+
+.DIR B81FPU.SAV
+ 
+B81FPU.SAV    52    -BAD-        
+ 1 Files, 52 Blocks
+ 50602 Free blocks
+
+.R BASIC
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+RUN SUCNFG
+BASIC-11/RT-11 V02 Configuration Program
+
+Type "?<ret>" after any prompt for HELP.
+
+.SAV and .COM file name (default is BASIC): B81FPD
+
+Do you want a map? (Y or N; default is N): Y
+
+.MAP name (default is same as .SAV name): 
+
+Background or Foreground ? (B or F; default is B): B
+
+Do you want PRINT USING? (Y or N; default is Y): Y
+
+Do you want CALL support? (Y or N; default is N): N
+
+Single or Double precision math? (S or D; default is S): D
+
+Arithmetic hardware (NONE, EAE, EIS, FIS, or FPU; default is NONE): FPU
+
+Do you want the transcendental functions? (Y or N; default is Y): Y
+
+Do you want the SUB command? (Y or N, default is Y): Y
+
+Do you want the RESEQ command? (Y or N, default is Y): Y
+
+Do you want long error messages? (Y or N; default is Y): Y
+
+Overlay structure type (1, 2, 3, 4, or 5; default is 1): 2
+
+The following GLOBALS will be undefined. These
+errors may be ignored.
+..UAC$, ..NRC$, and ..MSP$ (from no CALL).
+
+To create the BASIC that you have just defined,
+type "BYE<ret>" after BASIC prints "READY". When the system
+prompts for input, type "@B81FPD<ret>" to link the new BASIC.
+You may type "R B81FPD<ret>" to run it.
+
+READY
+BYE
+
+.@B81FPD
+
+.R LINK
+*B81FPD,B81FPD=/B:1200//
+*BSPTRD,BSPAT,BSR0D
+*BSR1D,BSPR0
+*BSCLIN
+*SUO1ID,BSOT0D.FPU,BSOT1D.FPU
+*SUIOPR,SUIOPO,SUDTCM
+*BSX0A,BSX0B,BSX2,BSX1A
+*BSX1B,BSPR1,BSCLSN
+*BSE0,BSCMP
+*BSSUB,BSRSQ
+*SUE1ID,BSE1,BSKEYS/O:1
+*BSERR,BSERML/O:1
+*SUIMP,BSFUNC,SUOPT/O:2
+*//
+?LINK-W-Undefined globals:
+..UAC$
+..NRC$
+..MSP$
+*^C
+
+.DIR B81FPD.SAV
+ 
+B81FPD.SAV    53    -BAD-        
+ 1 Files, 53 Blocks
+ 50517 Free blocks
+
+.
+Simulation stopped, PC: 142766 (BMI 143026)
+sim> quit
+Goodbye

@@ -7,6 +7,8 @@
 [формат и разработка модулей](docs/retained-modules-cp67.md).
 Разделы предыдущих CP ниже сохраняют историю, а не текущие инструкции установки.
 
+**CP81: DEC BASIC-11.** Установлены и проверены через RT‑11/UART на плате FIS single (B81FIJ) и FPU single/double: по 29 сравнений без ошибок, double и восстановление после арифметических ошибок — PASS. Для FIS исправлено программное расхождение стека `.SFPA` при активном FPP: 26-байтовый адаптер прошёл SIMH, полный RTL и плату. Обычный PSW `177776` не потребовался; FPGA/FPP остаются CP67b/CP80. [Результаты](docs/basic-cp81.md), [сборка и запуск](demos/rt11/basic/README.md).
+
 **CP80: PSW-операнды программного FPP.** FP11.MAC 00.12 перенаправляет слово `177776` на сохранённый USER PSW, защищает T и разделяет CPU/FPS flags. 4614 байт HALT FRAM (+96), FPGA +0. PSW: 712 случаев в трёх конфигурациях, общая матрица 660180 случаев, RT‑11 99 checks — PASS. Установлен 2026-09-19: 22 аппаратных PSW/FPS шага, 43 шага регрессии и FPTST — PASS. [Установка](docs/board-fpp-cp80.md), [семантика](docs/fpp-psw-cp80.md), [пакет](demos/rt11/service/cp80/README.md).
 
 **CP79: программная эмуляция FPP J‑11.** Исправлены FIUV, load flags и точность ADD/SUB по руководству DCJ11. Модуль — 4518 байт HALT FRAM, FPGA +0. Полный RTL: 444420 cases / 30934144 checks PASS; RT‑11/ODT: 99 checks PASS. [Семантика и проверки](docs/fpp-j11-cp79.md). 2026-09-15 пакет установлен: SD readback, cold init, 43 аппаратных STEP и FPTST — PASS. [Журнал установки](docs/board-fpp-cp79.md).

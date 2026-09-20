@@ -1,0 +1,211 @@
+{
+  "port": "/dev/ttyUSB1",
+  "variants": [
+    "B81FPU",
+    "B81FPD"
+  ],
+  "started_utc": "2026-09-19T23:32:08Z",
+  "commands": [
+    {
+      "command": "",
+      "offset": 0,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "elapsed_seconds": 0.4004593619611114,
+      "end": 5,
+      "response": "\r\n\r\n."
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 5,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "elapsed_seconds": 1.4024445050163195,
+      "end": 23,
+      "response": "RUN UJMOD\r\nUJMOD> "
+    },
+    {
+      "command": "STATUS",
+      "offset": 23,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "elapsed_seconds": 1.201699765981175,
+      "end": 290,
+      "response": "STATUS\r\n0: 010000 014233 134145 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n."
+    },
+    {
+      "command": "RUN B81FPU",
+      "offset": 290,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "elapsed_seconds": 1.6026827410096303,
+      "end": 373,
+      "response": "RUN B81FPU\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? "
+    },
+    {
+      "command": "A",
+      "offset": 373,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 0.6008099879836664,
+      "end": 385,
+      "response": "A\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 385,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 10.319884399068542,
+      "end": 453,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 453,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 1.4022984530311078,
+      "end": 497,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 497,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 1.8031205559382215,
+      "end": 549,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 549,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 2.0033996319398284,
+      "end": 600,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 600,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 1.302130786003545,
+      "end": 625,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "BYE",
+      "offset": 625,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "elapsed_seconds": 1.6027473580325022,
+      "end": 633,
+      "response": "BYE\r\n\r\n."
+    },
+    {
+      "command": "RUN B81FPD",
+      "offset": 633,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "elapsed_seconds": 1.702846447005868,
+      "end": 716,
+      "response": "RUN B81FPD\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? "
+    },
+    {
+      "command": "A",
+      "offset": 716,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 0.600777943036519,
+      "end": 728,
+      "response": "A\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 728,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 13.12544066796545,
+      "end": 796,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "RUN B81DBL",
+      "offset": 796,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 2.604462745017372,
+      "end": 866,
+      "response": "RUN B81DBL\r\nDOUBLE DELTA= 1  9.99978E-13 \r\nCP81 DOUBLE PASS\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 866,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 1.4023122759535909,
+      "end": 910,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 910,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 1.8030292659532279,
+      "end": 962,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 962,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 2.0034494569990784,
+      "end": 1013,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 1013,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "elapsed_seconds": 1.3021311869379133,
+      "end": 1038,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "BYE",
+      "offset": 1038,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "elapsed_seconds": 1.6027898750035092,
+      "end": 1046,
+      "response": "BYE\r\n\r\n."
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1046,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "elapsed_seconds": 1.3022016870090738,
+      "end": 1064,
+      "response": "RUN UJMOD\r\nUJMOD> "
+    },
+    {
+      "command": "STATUS",
+      "offset": 1064,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "elapsed_seconds": 1.2015573389362544,
+      "end": 1331,
+      "response": "STATUS\r\n0: 010000 014233 134145 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n."
+    }
+  ],
+  "passed": true,
+  "uart_bytes": 1331,
+  "finished_utc": "2026-09-19T23:33:01Z"
+}

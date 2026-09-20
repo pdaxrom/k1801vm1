@@ -1,0 +1,13 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-19T23:44:51Z",
+  "commands": [
+    "RUN B81FIS",
+    "A",
+    "PRINT 1/0"
+  ],
+  "uart_bytes": 130,
+  "rt11_banner_seen": true,
+  "finished_utc": "2026-09-19T23:45:04Z",
+  "capture_closed_utc": "2026-09-19T23:45:04Z"
+}

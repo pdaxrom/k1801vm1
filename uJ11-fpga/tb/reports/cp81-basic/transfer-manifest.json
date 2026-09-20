@@ -1,0 +1,42 @@
+{
+  "host": "sash@192.168.1.108",
+  "files": [
+    {
+      "path": "uJ11-fpga/build/cp81-basic/build-d/B81FIS.SAV",
+      "bytes": 27136,
+      "sha256": "1a324b9ca412a0470602d1db8ee5dbd4d2503859ede22b0e1392304cefc50195",
+      "content": "DEC BASIC from user-provided disk",
+      "destination": "/tmp/uj11-cp81-basic-20260920/share/B81FIS.SAV"
+    },
+    {
+      "path": "uJ11-fpga/build/cp81-basic/build-d/B81FPU.SAV",
+      "bytes": 26624,
+      "sha256": "560950404bd738385e4176552ea6e0781107397d27854bf16cf2a6493500ca0e",
+      "content": "DEC BASIC from user-provided disk",
+      "destination": "/tmp/uj11-cp81-basic-20260920/share/B81FPU.SAV"
+    },
+    {
+      "path": "uJ11-fpga/build/cp81-basic/build-d/B81FPD.SAV",
+      "bytes": 27136,
+      "sha256": "d466e9019d95f88db4bff6ec50e25a85bea3fdd28fa2102d3c41af24d7f75808",
+      "content": "DEC BASIC from user-provided disk",
+      "destination": "/tmp/uj11-cp81-basic-20260920/share/B81FPD.SAV"
+    },
+    {
+      "path": "uJ11-fpga/build/cp81-basic/simh-a/B81TST.BAS",
+      "bytes": 1876,
+      "sha256": "430ee12f95ae96dc736e0f6c4b575b5fa8481b0cc926fc06758c85d7637d83aa",
+      "content": "new numerical BASIC self-test",
+      "destination": "/tmp/uj11-cp81-basic-20260920/share/B81TST.BAS"
+    },
+    {
+      "path": "uJ11-fpga/build/cp81-basic/simh-a/B81DBL.BAS",
+      "bytes": 292,
+      "sha256": "aa379b479c65e2cc73567caa730b96799da3e2c443535c7bd70a110beec2e7cf",
+      "content": "new numerical BASIC self-test",
+      "destination": "/tmp/uj11-cp81-basic-20260920/share/B81DBL.BAS"
+    }
+  ],
+  "total_bytes": 83064,
+  "excluded": "No disks, credentials, unrelated projects, microasm11, or personal files"
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "image": "lsi11/disks/rt11v5.3/basic.dsk",
+    "sha256": "f68488b0da8106153a95fc1178198d687c227c1521b6506d07054207daf06b11",
+    "returncode": 0
+  },
+  {
+    "image": "lsi11/disks/RT11_V5_CFB.RL02",
+    "sha256": "dcba92a7da359c86b4c1d1f5cde5b6c8717dafd38e445605adf5a08db360ac2b",
+    "returncode": 0
+  },
+  {
+    "image": "lsi11/disks/rt11v5.3/system.dsk",
+    "sha256": "9350c62f50e2713f56904b7222f2d829f6bf020cd67e28562e3252a48b6993dd",
+    "returncode": 0
+  },
+  {
+    "image": "lsi11-fpga/images/rt11v503.dsk",
+    "sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+    "returncode": 0
+  }
+]

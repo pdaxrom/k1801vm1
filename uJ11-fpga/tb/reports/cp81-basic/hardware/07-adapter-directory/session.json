@@ -1,0 +1,11 @@
+{
+  "port": "/dev/ttyUSB1",
+  "started_utc": "2026-09-19T23:59:42Z",
+  "commands": [
+    "DIR B81FIJ.SAV"
+  ],
+  "uart_bytes": 64,
+  "rt11_banner_seen": false,
+  "finished_utc": "2026-09-19T23:59:46Z",
+  "capture_closed_utc": "2026-09-19T23:59:46Z"
+}
