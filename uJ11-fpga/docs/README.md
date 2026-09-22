@@ -1,5 +1,9 @@
 # Документация uJ11
 
+Актуальность руководств сверена **2026-09-22**. Последняя аппаратная проверка —
+[CP82 от 2026-09-20](modules-cp82.md): отключение FPP, FIS BASIC, возврат FPP
+и совместная работа FIS/FPU. [Точный состав программного комплекта](software-current.md).
+
 **Установлено 2026-09-19:** [CP80: программный FPP J‑11 с PSW-операндами](board-fpp-cp80.md). SD readback, самоинициализация, 22 PSW/FPS шага, 43 шага регрессии и FPTST — PASS. ODT CP77 сохранён.
 
 Аппаратная система — **CP67b**, HC1200, без MMU, с FIS и двумя банками
@@ -9,12 +13,13 @@ FPGA прошита 2026-09-13; установка программного CP80
 и на плату не устанавливались.
 
 [Семантика и RTL-проверки CP80](fpp-psw-cp80.md),
-[готовый пакет](../demos/rt11/service/cp80/README.md).
+[файлы для установки и текущие контрольные суммы](software-current.md).
 
 ## С чего начать
 
 | Задача | Документ |
 |---|---|
+| Выбрать актуальные BIN/SAV и сверить таблицу FRAM | [Текущий программный комплект](software-current.md) |
 | Пользоваться платой, RESET, UART, ODT и пультом | [Руководство пользователя CP67](user-guide-cp67.md) |
 | Понять устройство CPU, банки памяти, EBR, SD/RK и периферию | [Устройство установленной системы](system-cp67.md) |
 | Собрать, проверить, синтезировать и прошить | [Разработка и воспроизведение CP67](development-cp67.md) |
@@ -29,8 +34,7 @@ FPGA прошита 2026-09-13; установка программного CP80
 | MODF/MODD в программном FP11-A | [CP75: семантика, проверки и измерения](fp11-mod-cp75.md) |
 | MUL/DIV F/D в программном FP11-A | [CP74: алгоритмы, проверки и измерения](fp11-muldiv-cp74.md) |
 | Новый FP11 firmware: ADD/SUB F/D, семь guard bits, исправлены ABS/NEG UV | [CP73: семантика, измерения и проверки](fp11-arithmetic-cp73.md) |
-| Взять ODT.BIN, FP11.BIN, FPTST.SAV | [Пакет CP80](../demos/rt11/service/cp80/README.md) |
-| Взять SDBOOT.BIN и UJMOD.SAV | [Неизменённый пакет CP67](../demos/rt11/service/cp67/README.md) |
+| Взять ODT.BIN, FP11.BIN, FPTST.SAV, SDBOOT.BIN и UJMOD.SAV | [Текущие файлы из пакетов CP80/CP67](software-current.md) |
 | Узнать оставшиеся задачи | [TODO](../TODO.md) |
 
 Операционные инструкции описывают CP67b с программным обновлением CP80. Документы с номерами
@@ -46,7 +50,7 @@ FPGA прошита 2026-09-13; установка программного CP80
 | Развитие datapath и формата микрокоманд | [microarchitecture](microarchitecture.md), [microcode-format](microcode-format.md) |
 | Адресация, byte/word, ветвления | [addressing-modes](addressing-modes.md), [byte-instructions](byte-instructions.md), [control-flow](control-flow.md) |
 | EIS | [MUL](eis-mul.md), [DIV](eis-div.md), [ASH](eis-ash.md), [ASHC](eis-ashc.md), [XOR](eis-xor.md) |
-| FIS и программный FP11 | [FIS](fis.md), [FP11 firmware CP76](fp11-conversions-cp76.md), [CP75](fp11-mod-cp75.md), [CP74](fp11-muldiv-cp74.md), [CP73](fp11-arithmetic-cp73.md), [CP72](fp11-paths-cp72.md), [CP71](fp11-unary-cp71.md), [CP70](fp11-transfers-cp70.md), [CP69](fp11-memory-cp69.md), [CP68](fp11-firmware-cp68.md), [история аппаратного FP11](fp11a.md) |
+| FIS и программный FPP | [FIS](fis.md), [текущий CP80](fpp-psw-cp80.md), [профиль J‑11 CP79](fpp-j11-cp79.md); история: [CP76](fp11-conversions-cp76.md), [CP75](fp11-mod-cp75.md), [CP74](fp11-muldiv-cp74.md), [CP73](fp11-arithmetic-cp73.md), [CP72](fp11-paths-cp72.md), [CP71](fp11-unary-cp71.md), [CP70](fp11-transfers-cp70.md), [CP69](fp11-memory-cp69.md), [CP68](fp11-firmware-cp68.md), [аппаратный FP11](fp11a.md) |
 | Прерывания, ошибки, RTI/RTT | [interrupts](interrupts.md), [memory-faults](memory-faults.md), [trace-rtt](trace-rtt.md) |
 | HALT, STEP, кнопка и контекст | [ВМ2: исходное исследование](vm2-halt-reference.md), [CP58](service-bank-cp58.md), [CP63](debug-cp63.md) |
 | Резидент копирования и вызов helper | [CP61](halt-boot-cp61.md), [CP62](vector-loader-cp62.md) |
@@ -58,6 +62,8 @@ FPGA прошита 2026-09-13; установка программного CP80
 
 ## Где лежат доказательства
 
+- [CP82: модульные конфигурации](../tb/reports/cp82-modules/verification.json): аппаратный OFF/cold/restore, FIS/FPU BASIC, точное восстановление таблицы и полный RTL.
+- [CP81: BASIC](../tb/reports/cp81-basic/verification.json): исходные программы, SIMH, RTL, аппаратные журналы и FISABI.
 - [Аппаратная установка CP80](../tb/reports/cp80-hardware/deployment.json): SD readback, cold init, 22 PSW/FPS шага, восстановление памяти, 43 STEP и FPTST.
 
 - [Предыдущая установка CP79](../tb/reports/cp79-hardware/deployment.json): SD readbacks, cold init, 43 STEP, FPTST.
@@ -70,7 +76,9 @@ FPGA прошита 2026-09-13; установка программного CP80
 - [Аппаратный deployment manifest](../tb/reports/cp67-hardware/deployment.json):
   фактическая прошивка, SD readback, cold init, UART R/D/C и hashes журналов.
 
-Release/test manifests неизменяемы. Их `programmed: false` фиксирует состояние
+Release/test manifests и входящие в их hashes README неизменяемы.
+`installed_on_board: false` в CP80 — состояние при выпуске пакета;
+текущая установка описана выше. Их `programmed: false` фиксирует состояние
 до аппаратной установки; последующая прошивка записана в deployment manifest.
 Fmax из TRACE, расчётные clocks/second и результаты физической платы имеют
 разные источники и не подменяют друг друга.

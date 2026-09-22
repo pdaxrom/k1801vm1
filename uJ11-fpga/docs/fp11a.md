@@ -3,7 +3,9 @@
 > Исторический эксперимент CP30. По решению пользователя от 2026-09-10
 > FP11 отложен; в CP31 его RTL, decoder, state и микрокод удалены из рабочей
 > сборки. Для воспроизведения использовать коммит `d59f19c` или snapshots
-> `synth/reports/cp30*/source.tgz`. Текущая floating-point ISA — FIS.
+> `synth/reports/cp30*/source.tgz`. На этапе CP31 оставалась только FIS.
+> Теперь FIS дополнена программным FPP J‑11 в HALT FRAM:
+> [текущий комплект](software-current.md). Аппаратный CP30 не возвращён.
 
 
 2026-09-10. **Это первый checkpoint, не полный FP11.** ODT отложен по решению
@@ -47,8 +49,9 @@ DCJ11, `ENABLE_MMU=0`. Он использует integer FP representation; host
 | LDFPS | 170100…170107 | R0…R7 |
 | STFPS | 170200…170207 | R0…R7 |
 
-Всего 21 opcode encoding, семь мнемоник. Это **настоящие микропрограммы uJ11**
-в [fp11_control.uasm](../microcode/fp11_control.uasm), не firmware PDP-11.
+Всего 21 opcode encoding, семь мнемоник. Это **настоящие микропрограммы uJ11**:
+`microcode/fp11_control.uasm` внутри [архива CP30a](../synth/reports/cp30a/source.tgz),
+не firmware PDP-11.
 При выключенной опции все FP encodings сохраняют прежний reserved trap.
 При включённой опции остальные FP encodings пока тоже дают прежний reserved
 trap; FEC=2 / FP exception 0244 ещё не реализованы. Полного FPU не заявляем,

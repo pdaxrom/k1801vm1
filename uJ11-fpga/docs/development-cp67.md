@@ -1,6 +1,10 @@
 # Разработка и воспроизведение CP67
 
 Это инструкция для **CP67b `--modules-cp67`**, установленной на HC1200.
+Аппаратный профиль не менялся; актуальное ПО — **ODT CP77, FPP CP80**,
+SDBOOT/UJMOD CP67, прикладные и модульные проверки CP81/CP82.
+[Точные файлы и размеры](software-current.md). Сверено 2026-09-22;
+последняя аппаратная проверка — CP82 от 2026-09-20.
 [Пользовательские операции](user-guide-cp67.md), [устройство](system-cp67.md),
 [ABI модулей](retained-modules-cp67.md), [аппаратный журнал](board-bringup-cp67.md).
 Все shell-команды ниже выполняются из **корня репозитория k1801vm1**,
@@ -21,6 +25,7 @@
 | [CP63b archive](../synth/reports/cp63b/source.tgz) и [manifest](../synth/reports/cp63b/inputs.json) | Точный прежний CPU, RF/ALU, microstore, decode, button, FRAM и периферия |
 | [firmware/cp67/BOOT.MAC](../firmware/cp67/BOOT.MAC) | Cold walker и ROM-процедура его установки |
 | [build_software_cp67.py](../tools/build_software_cp67.py) | Собирает ODT/SDBOOT/UJMOD, упаковывает ABI3 |
+| [build_fp11_cp80.py](../tools/build_fp11_cp80.py) и [FP11.MAC](../firmware/fp11/FP11.MAC) | Текущий программный FPP DCJ11 с PSW-операндами, ABI3 |
 | [firmware/odt](../firmware/odt/) | Общие ODT, дизассемблер, панель, история, STEP OVER, точки и данные |
 | [ODINIT.MAC](../firmware/cp67/ODINIT.MAC) | Новый инициализатор ODT, очистка/проверка mutable state, включение debug |
 | [SDBOOT.MAC.in](../firmware/cp67/SDBOOT.MAC.in) | Шаблон заменяемого bootstrap с resident-вызовом HALT→USER |
@@ -68,21 +73,34 @@ MMU-прототип сохранён, но здесь флаг `--mmu`/define `
 
 ## Собрать software и проверить имеющийся release
 
+Сначала проверить сохранённые аппаратные и программные архивы:
+
 ```sh
 python3 uJ11-fpga/tools/verify_modules_cp67.py
-python3 uJ11-fpga/tools/build_modules_cp67.py
-python3 uJ11-fpga/tools/build_software_cp67.py
+python3 uJ11-fpga/tools/verify_cp80.py
+python3 uJ11-fpga/tools/verify_cp80_hardware.py
+python3 uJ11-fpga/tools/verify_basic_cp81.py
+python3 uJ11-fpga/tools/verify_modules_cp82.py
 ```
 
-Первая команда проверяет **архив**: SHA, успешные отчёты и согласованность
-JED/software; она не запускает тесты заново и не опрашивает плату.
+Эти команды не собирают код заново и не обращаются к плате. Для новой
+сборки из текущих исходников:
+
+```sh
+python3 uJ11-fpga/tools/build_modules_cp67.py
+python3 uJ11-fpga/tools/build_software_cp67.py
+python3 uJ11-fpga/tools/build_fp11_cp80.py
+```
+
+`verify_modules_cp67.py` проверяет **архив**: SHA, успешные отчёты и согласованность
+JED/software; он не запускает тесты заново и не опрашивает плату.
 Её `programmed: false` — сохранённое до установки состояние release.
 Фактическая прошивка отражена в [deployment.json](../tb/reports/cp67-hardware/deployment.json).
 `--current` дополнительно сравнивает текущие файлы с архивными, включая
 сгенерированные выходы; несовпадение после намеренной правки не исправляется
 перезаписью старого manifest.
 
-Результат software build:
+Результат общей software build:
 
 | Путь под `build/cp67-software/` | Содержание |
 |---|---|
@@ -91,11 +109,18 @@ JED/software; она не запускает тесты заново и не о�
 | `sdboot/SDBOOT.BIN` | Заменяемый bootstrap |
 | `loader/UJMOD.MAC`, `loader/UJMOD.SAV` | Итоговый source и RT-11 executable загрузчика |
 
+Суффикс `cp67` у общего сборщика обозначает происхождение ABI/загрузчика:
+ODT он собирает из **текущего** `firmware/odt`, включая FP-функции CP77.
+FPP собирается отдельно в `build/cp80-fp11/software/`: `FP11.BIN`, исходник,
+`image.bin`, `result.json` с символами, размерами и hashes.
+
 Assembly-каталоги с hash в имени содержат DEC OBJ/SAV/LST/MAP, console.log,
 build-inputs.json. Старый cache используется только после проверки hashes.
 `payload.bin` ODT — подготовленное состояние для регрессионных стендов;
-для установки нужен именно `ODT.BIN` с ABI3 header. Файлы `demos/.../cp67`
-— опубликованный release; новая сборка сама его не заменяет.
+для установки нужен именно `ODT.BIN` с ABI3 header. Каталоги `demos/.../cpNN`
+— опубликованные releases; новая сборка сама их не заменяет. Для текущей
+платы ODT/FPP берутся из CP80, SDBOOT/UJMOD — из CP67. Старый ODT из
+пакета CP67 не содержит FP-функций; его не подменять текущим в архиве.
 
 Чтобы отдельно получить listing/labels/statistics уже подготовленного полного
 микрокода, после `build_modules_cp67.py`:
@@ -111,7 +136,7 @@ routine — статический размер, не динамический C
 десятичные, `$...`/`0x...` — HEX, `0o...` — OCT; в DEC MACRO-11 числа без
 суффикса обычно восьмеричные. Эти синтаксисы нельзя смешивать.
 
-Изменение только ODT/SDBOOT/UJMOD проверяется на уровне PDP-11 кода и FRAM:
+Изменение только ODT/FPP/SDBOOT/UJMOD проверяется на уровне PDP-11 кода и FRAM:
 число LUT/FF/EBR от размера BIN не меняется. Изменение BOOT.MAC в EBR или RTL
 уже требует нового аппаратного checkpoint, timing и JED.
 
@@ -132,10 +157,24 @@ python3 uJ11-fpga/tools/run_modules_cp67.py --out uJ11-fpga/build/cp67-rt11-new
 ```
 
 Суффиксы `cp64/cp65/cp66` у ODT test runners обозначают происхождение стенда;
-аргумент `--odt` подаёт **новый CP67 образ**, `--cp66` выбирает текущее меню/T.
+аргумент `--odt` подаёт **вновь собранный образ**, `--cp66` выбирает меню/T.
 Эти направленные тесты используют прежний проверенный CPU и модель памяти.
 Полный `run_modules_cp67` проверяет новый board path с UART wire/SPI FRAM/SD
 и настоящей RT-11. Его каталог должен быть новым.
+
+Для текущего FPP/ODT полный RT-11 прогон запускается отдельно:
+
+```sh
+python3 uJ11-fpga/tools/run_fp11_rt11_cp80.py --out uJ11-fpga/build/cp80-rt11-new
+```
+
+Он собирает текущие ODT/FPP/SDBOOT/UJMOD и проверяет загрузку, FP STEP,
+самопроверку FPTST, cold init/OFF. Направленные PSW/IRQ/fault и числовые
+проверки выбирать по изменению из [CP80](fpp-psw-cp80.md).
+Прикладные BASIC-проверки описаны в [CP81](basic-cp81.md), а полный цикл
+конфигурации FPP OFF/cold/restore — в [CP82](modules-cp82.md), со скриптом
+[run_basic_modules_cp82.py](../tools/run_basic_modules_cp82.py).
+Таблица ниже сохраняет исходный baseline CP67, не результаты текущего FPP.
 
 | Архивный результат CP67 | Объём | Итог |
 |---|---|---|
@@ -153,12 +192,14 @@ ESC; отдельный `--full-window` исполняет производст�
 длительность многоразовой загрузки/тестирования не является CPI benchmark.
 [Первичные логи, assembly и hashes](../tb/reports/cp67/archive.json).
 
-На плате отдельно подтверждены FLASH Verify, RT-11FB/DIR, полный обратный COPY
+В исходном аппаратном проходе CP67 отдельно подтверждены FLASH Verify, RT-11FB/DIR, полный обратный COPY
 трёх файлов, оба cold init без повторной загрузки, короткий RESET и ODT R/D/C.
 Отдельно прошёл [аппаратный ESC/обычный RESET/возврат ODT](board-recovery-cp67.md),
 с проверкой таблицы и RT-11 DIR. Отключение питания посреди записи, внедрение
 зависшего модуля и полный проход матрицы в CP67-сеансе ещё не квалифицированы;
 не заменять это PASS симулятора.
+Позднейшие проверки: [FPP CP80 на плате](board-fpp-cp80.md),
+[BASIC CP81](basic-cp81.md), [конфигурации CP82](modules-cp82.md).
 
 ## Synthesis и готовый JED
 
