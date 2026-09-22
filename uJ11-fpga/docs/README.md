@@ -15,6 +15,7 @@ SDBOOT/UJMOD ABI3. Последняя аппаратная проверка — 
 | Понять FPP и PSW-операнды | [FPP J‑11](fpp.md), [PSW](fpp-psw.md) |
 | Смотреть FP-регистры в ODT | [Отладчик FPP](odt-fpp.md) |
 | Разобраться с микрокодом | [36-битный формат](microcode-format.md) |
+| Написать и собрать микропрограмму | [Микроассемблер: синтаксис, примеры и ошибки](microassembler.md) |
 | Подключить клавиатуру | [Клавиши и схема](panel-keyboard.md) |
 | Проверить временные ограничения FRAM | [SPI timing](memory-timing.md) |
 | Узнать ресурсы и измеренную скорость | [Synthesis](synthesis.md), [измерения](benchmarks.md) |

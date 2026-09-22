@@ -6,6 +6,9 @@ Microstore 1024×36, занято 1005 слов. Единственный раб
 `make hardware` создаёт ROM, listing, labels и stats в `build/hardware`.
 Все неуказанные адреса заполняются STOP; отдельного старого m0/FIS linker нет.
 
+Полный синтаксис, значения полей по умолчанию, CLI, собираемые примеры
+и диагностика — в [руководстве по микроассемблеру](microassembler.md).
+
 Синтаксис: одна микрокоманда на строку, метки, `.org`, `$hex`, `0xhex`,
 `0o` для восьмеричных, обычные числа десятичные, комментарии после `;`.
 
@@ -55,9 +58,9 @@ Shifts/rotates дают V=N XOR shifted-out bit, C=shifted-out bit.
 Sequencing 0 NEXT (uPC+1), 1 PAGE (`{uPC[9:8],low8}`),
 2 FETCH (0x020, одновременно retirement), 3 FETCH_A1 (FETCH+retire при
 исходном RF[A]==1, иначе NEXT). Predicate учитывает все 16 bits, не PSW
-или ALU output. Stall запрещает и transition, и retirement. Prefetch policy
-запрещает speculative launch на seq3; обычные ALU words наследуют policy.
-IMM использует low8 только с NEXT/FETCH. PAGE+IMM — ошибка assembler.
+или ALU output. Stall запрещает и transition, и retirement. В текущей
+плате speculative prefetch отсутствует; seq3 не включает его.
+IMM использует low8 с NEXT/FETCH/FETCH_A1. PAGE+IMM — ошибка assembler.
 Без IMM/PAGE low8 должен быть нулём. Dsel != IMM с заданным literal запрещён.
 
 Пример ровно одной execution microinstruction:
@@ -93,7 +96,9 @@ READ/WRITE продолжают на полный target после completion. 
 opcode entry из слова, принимаемого вместе с IR. Sequencer не декодирует
 memory handshake: `advance` удерживает ROM/uPC до ACK; `step` отдельно
 запрещает commit при fault. При fault_inc выполняется одна continuation,
-затем 015; остальные faults сразу переходят 015. CALL slot очищается.
+затем fault entry: 0x015 в USER или 0x2b6 в HALT; остальные faults сразу
+переходят к этому entry. При redirect CALL slot очищается. Fault во время
+защищённого построения frame останавливает CPU.
 FETCH — исключение из обычного control layout: bits20:10 имеют ALU layout,
 а target и condition не читаются. Assembler задаёт эти поля автоматически
 и не разрешает программисту менять FETCH operands. Для остальных control
@@ -101,12 +106,16 @@ words ALU может вычислять произвольный результ�
 
 Conditions 0 ALWAYS, 1 C, 2 V, 3 Z, 4 N, 5 Q0, 6 LOOPZ, 7 ERROR;
 8..15 инвертируют соответствующий predicate. Условие читает старые flags.
-Q0/LOOPZ/ERROR — входы sequencer primitive; отдельного аппаратного loop counter нет, циклы используют RF.
+Q0/LOOPZ/ERROR — входы sequencer primitive. В production engine Q0=Q[0],
+LOOPZ=ERROR=0; ошибки обслуживаются отдельным fault redirect. Отдельного
+аппаратного loop counter нет, циклы используют RF.
 
 OR masks: MS/MD 0x007, RR/BT 0x003, R67 0x001. Base должен быть выровнен
 по mask+1; получаемые адреса должны принадлежать заполненным source words.
 RR=`{dst_mode==0,src_mode==0}`; BT=`{address_odd,byte_instruction}`;
 R67=`~(selected_A[2]&selected_A[1])`. Никакого hidden addition.
+OR_BT не допускает `a=` в синтаксисе: A=R0, address_odd=R0[0].
+OR_R67 допускает выбор A; для архитектурных R6/R7 его bit0=0, для R0..R5 — 1.
 
 CALL записывает uPC+1 в единственный link register, RETURN его читает.
 Аппаратного стека глубже одного вызова нет. Nested CALL и RETURN без CALL
@@ -127,16 +136,18 @@ READ/WRITE bits8:7: ACTIVE=0, GUEST=1, UPPER=2, LOWER=3. UPPER/LOWER —
 физическая FRAM без I/O/ROM overlays. Ассемблер запрещает сочетать special
 space с byte или stream. CPC/CPSW читаются через эти же обычные операции.
 
-JUMP bits2:1: NONE=0, ENTER=1, LEAVE=2, CONFIG=3. Требуются `prefetch=0`
-и `init=0`; CONFIG получает ready[1:0] с A-порта RF.
+JUMP bits2:1: NONE=0, ENTER=1, LEAVE=2, CONFIG=3. Для ненулевого service
+требуются `prefetch=0` и `init=0`; CONFIG получает ready[1:0] и debug bits
+с A-порта RF. Полная таблица CONFIG/STATUS — в [руководстве](microassembler.md).
 ALU `d=STATUS` использует D=ZERO и bit7=1, только с NEXT/FETCH;
 PAGE, FETCH_A1, IMM и trace с ним несовместимы.
 ALU `trace=RETURN` использует low bit0=1, только с FETCH, KEEP и без IMM.
 Это завершение RTI/RTT с корректной обработкой trace.
 
 `byte=IR` и `byte=1` взаимоисключающие. READ stream допустим только с
-A=R7/RS/RD; проверка фактического R7 аппаратная. Pointer/displacement reads
-всегда word. Byte opcode определяется отдельно от SUB/branch.
+A=R7/RS/RD и byte=0/IR. Пометка сохраняется в кодировке, но production
+engine её не использует. Pointer/displacement reads всегда word.
+Byte opcode определяется отдельно от SUB/branch.
 
 Физическая плата не включает speculative prefetch. Наличие полей
 prefetch/stream в формате не означает, что отдельный prefetch engine собран.

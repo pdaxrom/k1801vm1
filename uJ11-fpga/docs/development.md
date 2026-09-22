@@ -25,6 +25,9 @@ RT-11 сборщик использует оригинальные MACRO/LINK н
 Для `vendor` скопировать штатные модели из
 `$DIAMOND_HOME/cae_library/simulation/verilog/machxo2/` в `.cache/vendor/`.
 
+Синтаксис микрокода, отдельный запуск assembler, справочник полей и пример
+добавления инструкции — в [руководстве по микроассемблеру](microassembler.md).
+
 ## Получение ROM и программ
 
 ```sh

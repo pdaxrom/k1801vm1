@@ -47,6 +47,7 @@ make prepare-synthesis OUT=build/hc1200-new
 
 - [Эксплуатация, RESET, ODT, UART и пульт](docs/user-guide.md).
 - [Архитектура, карта FRAM, SD/RK и ресурсы](docs/architecture.md).
+- [Микроассемблер и примеры микрокода](docs/microassembler.md), [36-битный формат](docs/microcode-format.md).
 - [Формат и создание модулей](docs/modules.md), [конфигурация FPP/FIS](docs/configuration.md).
 - [Программный FPP J‑11](docs/fpp.md), [BASIC](docs/basic.md).
 - [Проверки и их границы](docs/verification.md), [Synthesis](docs/synthesis.md).
