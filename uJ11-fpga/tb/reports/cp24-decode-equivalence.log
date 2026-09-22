@@ -1,2 +1,0 @@
-PASS CP24 decoder: all 65536 checked; only XOR differ from archived CP23c
-build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

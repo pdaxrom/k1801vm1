@@ -1,8 +1,0 @@
-PASS ASH negative: missing-ash; archived cp20c
-PASS ASH negative: ignored-high-count; archived cp22c
-PASS ASH negative: zero-keeps-carry; archived cp22c
-PASS ASH negative: lost-count-sign; archived cp22c
-PASS ASH negative: lost-sticky-overflow; archived cp22c
-PASS ASH negative: logical-right; archived cp22c
-PASS ASH negative: early-register-capture; archived cp22c
-PASS ASH negative: flags-before-read; archived cp22c

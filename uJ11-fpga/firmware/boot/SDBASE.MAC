@@ -1,0 +1,198 @@
+	.TITLE SDBASE
+	.ASECT
+
+SDDATA = 0177500
+SDCONT = 0177502
+DIAGVA = 0157774
+DIAGST = 0157776
+
+; Ordinary PDP-11 bootstrap, stored in the separate uJ11 firmware ROM.
+; Cold startup copies it through HALT RAM to USER address 004000.
+	.= 004000
+START:
+	mov #004000, sp
+	clr @#DIAGVA
+	clr @#DIAGST
+	clr r1
+
+	; Preserve the original bootstrap's power-settle interval: one full
+	; 16-bit SOB sweep before the first SD clocks.
+	clr r3
+POWERS:
+	sob r3, POWERS
+
+	; At least 80 clocks with CS high before CMD0.
+	mov #000012, r3
+POWERC:
+	mov #000377, @#SDDATA
+	sob r3, POWERC
+
+	inc r1			; diagnostic stage: CMD0
+	clr r5			; slow clock, CS low
+	mov #CMD0, r2
+	jsr pc, COMMAN
+	cmp #1, r0
+	bne FAILED
+	jsr pc, CLOSEC
+
+	inc r1			; diagnostic stage: CMD8
+	mov #CMD8, r2
+	jsr pc, COMMAN
+	cmp #1, r0
+	bne FAILED
+	mov @#SDDATA, r0
+	bne FAILED
+	mov @#SDDATA, r0
+	bne FAILED
+	mov @#SDDATA, r0
+	cmp #1, r0
+	bne FAILED
+	mov @#SDDATA, r0
+	cmp #0252, r0
+	bne FAILED
+	jsr pc, CLOSEC
+
+	; ACMD41 may remain idle while the card finishes initialization.  At the
+	; 195.6-kHz slow clock, 4096 command pairs provide a multi-second bound
+	; comparable to the proven Stable bootstrap's two-second timer window.
+	mov #010000, r4
+INITIA:
+	inc r1			; diagnostic stage: CMD55
+	mov #CMD55, r2
+	jsr pc, COMMAN
+	bit #0177776, r0
+	bne FAILED
+	; Match the hardware-proven Stable transport: finish CMD55 with CS high
+	; and trailing clocks, then start ACMD41 as a new SPI transaction.  APP_CMD
+	; state survives CS deassertion on SD cards, while some cards stop answering
+	; after many command packets kept under one continuous selection.
+	jsr pc, CLOSEC
+	inc r1			; diagnostic stage: ACMD41
+	mov #ACMD41, r2
+	jsr pc, COMMAN
+	tst r0
+	beq INITI1
+	cmp #1, r0
+	bne FAILED
+	jsr pc, CLOSEC
+	sob r4, INITIA
+	br FAILED
+
+INITI1:
+	jsr pc, CLOSEC
+	inc r1			; diagnostic stage: CMD58/OCR
+	mov #CMD58, r2
+	jsr pc, COMMAN
+	tst r0
+	bne FAILED
+	mov @#SDDATA, r0
+	bic #0177477, r0		; require OCR power-up and CCS bits
+	cmp #000300, r0
+	bne FAILED
+	mov @#SDDATA, r0
+	mov @#SDDATA, r0
+	mov @#SDDATA, r0
+	jsr pc, CLOSEC
+
+	mov #2, r5			; fast clock, CS low
+	clr r4				; sector destination in FRAM
+	inc r1			; diagnostic stage: CMD17 LBA0
+	mov #CMD17L, r2
+	jsr pc, READSE
+	inc r1			; diagnostic stage: CMD17 LBA1
+	mov #CMD171, r2
+	jsr pc, READSE
+
+	; Stable two-sector entry ABI.  Bit 2 arms removal of the boot/ODT
+	; overlay; CLR PC is still fetched from boot ROM before address zero
+	; exposes ordinary FRAM and leaves PSW.Z set.
+	mov #002000, sp
+	clr r0
+	mov #0177440, r1
+	clr r2
+	clr r3
+	mov #002020, r4
+	clr r5
+	mov #7, @#SDCONT
+	clr pc
+
+FAILED:
+	mov r0, @#DIAGVA
+	mov r1, @#DIAGST
+	halt
+	br FAILED
+
+; Send a six-byte command from R2 and return a valid idle/ready R1 byte in R0.
+; Some physical cards can expose a transient low-MSB byte before their R1;
+; this bootstrap only accepts the two states it can handle, 0 and 1.
+COMMAN:
+	mov r5, @#SDCONT
+	mov #6, r3
+COMMA1:
+	movb (r2)+, r0
+	mov r0, @#SDDATA
+	sob r3, COMMA1
+	mov #000020, r3
+COMMA3:
+	mov @#SDDATA, r0
+	bit #0177776, r0
+	beq COMMA2
+	sob r3, COMMA3
+	br FAILED
+COMMA2:
+	rts pc
+
+; Keep CS asserted briefly after the last response/data byte, then deassert it
+; and provide one trailing byte without changing R5.  The physical HC1200 card
+; needs this margin; J11_BOOT_TRACE supplied it accidentally through UART I/O.
+CLOSEC:
+	mov #0100000, r3
+CLOSE1:
+	sob r3, CLOSE1
+	mov r5, r0
+	inc r0			; R5 is always 0 or 2, so this sets only CS-high bit 0
+	mov r0, @#SDCONT
+	mov #000377, @#SDDATA
+	rts pc
+
+; Read one 512-byte sector through the byte service into sequential FRAM.
+READSE:
+	jsr pc, COMMAN
+	tst r0
+	bne FAILED
+	clr r3
+WAITTO:
+	mov @#SDDATA, r0
+	cmp #000376, r0
+	beq SECTOR
+	cmp #000377, r0
+	bne FAILED
+	sob r3, WAITTO
+	br FAILED
+SECTOR:
+	mov #001000, r3
+SECTO1:
+	mov @#SDDATA, r0
+	movb r0, (r4)+
+	sob r3, SECTO1
+	mov @#SDDATA, r0		; discard CRC16
+	mov @#SDDATA, r0
+	jsr pc, CLOSEC
+	rts pc
+
+CMD0:
+	.BYTE 0100, 0, 0, 0, 0, 0225
+CMD8:
+	.BYTE 0110, 0, 0, 1, 0252, 0207
+CMD55:
+	.BYTE 0167, 0, 0, 0, 0, 1
+ACMD41:
+	.BYTE 0151, 0100, 0, 0, 0, 1
+CMD58:
+	.BYTE 0172, 0, 0, 0, 0, 1
+CMD17L:
+	.BYTE 0121, 0, 0, 0, 0, 1
+CMD171:
+	.BYTE 0121, 0, 0, 0, 1, 1
+IMEND:
+	.END

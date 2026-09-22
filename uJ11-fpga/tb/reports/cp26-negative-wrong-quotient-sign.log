@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'DIV_NEGATIVE_QUOTIENT:\n    alu SUB, pair=ZQ', 'DIV_NEGATIVE_QUOTIENT:\n    alu PASSB, pair=ZQ')]
-FATAL: tb/tb_trace_bit.v:121: trace case1936 op071002 prePSW0000 upc020 clocks131 beats1/1 flags000a/0008 fault0 IRQ0/0 retires1
-       Time: 1586000  Scope: tb_trace_bit

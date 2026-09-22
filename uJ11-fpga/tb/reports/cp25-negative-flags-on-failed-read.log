@@ -1,3 +1,0 @@
-Archive: cp25a; mutations: [('microcode/m0.uasm', 'MUL_MEMORY:\n    CALL, target=DESTINATION_EA, prefetch=0', 'MUL_MEMORY:\n    JUMP, target=MUL_EARLY_FLAGS, prefetch=0'), ('microcode/m0.uasm', '; CP25 MUL:', '.org $045\nMUL_EARLY_FLAGS:\n    alu PASSA, a=RS, flags=NZVC\n    CALL, target=DESTINATION_EA, prefetch=0\n    JUMP, target=$067, prefetch=0\n\n; CP25 MUL:')]
-FATAL: tb/tb_bus_fault.v:86: fault case1000 op070010 beat4 got 001 5ffe:0000 want 0001 5ffe:0003 upc3e0
-       Time: 505000  Scope: tb_bus_fault

@@ -1,3 +1,0 @@
-Archive: cp22c; ASHC-only mutation: ('alu PASSA, a=RS, b=T4, dst=RF', 'alu PASSA, a=RS, b=T4, dst=RF, flags=NZV')
-FATAL: tb/tb_bus_fault.v:86: fault case250 op073010 beat4 got 001 5ffe:0001 want 0001 5ffe:0003 upc3e0
-       Time: 605000  Scope: tb_bus_fault

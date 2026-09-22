@@ -1,6 +1,0 @@
-{
-  "tb/tb_mmu_fram.v": "7e96c209dbf20499192bf5a9d9913c2f645ed7ef0f6a7354f95877af11a42456",
-  "rtl/uj11_mmu_translate.v": "6d90669abbdfce80d70fb9f07e418df4e8800852fe7c260c59e6d5fad439f057",
-  "boards/hc1200/uj11_board_fram.v": "c4c6dd46972f66d593bc05c74e649eeeed0bdb08f03e64bd2acae3d66015f25d",
-  "reference/lsi11/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a"
-}

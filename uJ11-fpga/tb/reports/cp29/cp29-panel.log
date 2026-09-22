@@ -1,2 +1,0 @@
-PASS panel physical top: 2958 bus beats; HCMS command/640 dots, 8 RGB colors, 20 keys, HG inputs/TDO/Z/reset
-tb/tb_board_panel.v:120: $finish called at 119630000 (1ps)

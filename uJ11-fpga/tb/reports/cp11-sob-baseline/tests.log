@@ -1,7 +1,0 @@
-cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DENABLE_MMU=0 -I.. -I../core tb/control_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/control_vectors
-build/control_vectors > build/control-vectors.txt.tmp 2> build/control-oracle.log
-mv build/control-vectors.txt.tmp build/control-vectors.txt
-PASS control differential mode-1: 14814 DCJ11 cases, 199668 clocks, 30956 exact bus beats
-tb/tb_ea.v:169: $finish called at 4811436000 (1ps)
-PASS control differential mode2: 14814 DCJ11 cases, 3353570 clocks, 30956 exact bus beats
-tb/tb_ea.v:169: $finish called at 36350456000 (1ps)

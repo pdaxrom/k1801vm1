@@ -1,3 +1,0 @@
-cc -O2 -Wall -DENABLE_MMU=0 -I.. ../tests/core_tests.c ../core/core.c ../core/disas.c ../core/hardware.c -lm -o build/cp22-core-tests
-build/cp22-core-tests
-All core instruction tests passed

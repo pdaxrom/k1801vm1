@@ -1,3 +1,0 @@
-Archive: cp20a; mutation: None
-FATAL: tb/tb_trace_bit.v:84: unexpected peripheral reset side effect
-       Time: 305000  Scope: tb_trace_bit

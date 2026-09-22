@@ -1,3 +1,0 @@
-PASS MMR3 bus: 2097152 decode/DMA combinations; 65536 data values, canonical CSR, lanes, RESET, APR isolation
-PASS board bus: 131115 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI
-build/cp43-tests/tb_board_bus.v:169: $finish called at 8666952000 (1ps)

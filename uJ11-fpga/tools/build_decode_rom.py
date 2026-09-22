@@ -29,7 +29,7 @@ endmodule
         assert index not in seen or seen[index]==entry,(oct(opcode),index,entry,seen.get(index))
         seen[index]=entry;words[index]=entry
     print(f'{len(seen)} addressed rows; exhaustive opcode collision check passed')
-    dest=ROOT/'microcode/generated';dest.mkdir(exist_ok=True)
+    dest=ROOT/'build/hardware';dest.mkdir(exist_ok=True)
     (dest/'decode.mem').write_text(''.join(f'{w:03x}\n' for w in words))
     # Reuse the vendor-tested 1024x9 packing; retain just the first lane.
     source=generate(words).split('    DP8KC #(',2)
@@ -43,7 +43,7 @@ endmodule
 `ifdef UJ11_DECODE_EBR
 '''+vendor+'''`else
     reg [8:0] words[0:1023]; reg [8:0] value;
-    initial $readmemh("microcode/generated/decode.mem",words);
+    initial $readmemh("build/hardware/decode.mem",words);
     always @(posedge clk) if(enable) value<=words[address];
     assign data=value;
 `endif

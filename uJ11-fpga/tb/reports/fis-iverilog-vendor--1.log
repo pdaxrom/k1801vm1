@@ -1,2 +1,0 @@
-PASS FIS memory_mode=-1: 23840 exact state/PSW/bus/memory cases, 3072 injected faults
-tb/tb_fis.v:150: $finish called at 82026226000 (1ps)

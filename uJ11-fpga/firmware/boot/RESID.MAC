@@ -1,0 +1,83 @@
+	.TITLE RESID
+	.ASECT
+; CP62 cold-start gate. This PDP-11 program is copied from ROM into HALT RAM.
+; Calling convention: R4=125061, R5=USER source, R1=HALT destination,
+; R2=1..64 words. Clobbers R0/R1/R2/R3/R5; preserves R4/SP and saved PSW.
+; R0 result: 0 success, 1 bad range, bus error or readback mismatch.
+; Whole ranges must be even, below the shared I/O page, destination >=001000.
+; No RT-11 calls, no stack, no UJRD/UJWR and no implicit module enable.
+	.= 000200
+RESID1:
+	cmp r4, #0125061
+	bne IDLE
+	cmp r2, #000100
+	bhi INVALI
+	mov r5, r0
+	bis r1, r0
+	bit #1, r0
+	bne INVALI
+	cmp r1, #001000
+	bcs INVALI
+	mov r2, r3
+	asl r3
+	add r5, r3
+	bcs INVALI
+	cmp r3, #0160000
+	bhi INVALI
+	mov r2, r3
+	asl r3
+	add r1, r3
+	bcs INVALI
+	cmp r3, #0160000
+	bhi INVALI
+	tst r2
+	beq EXECUT
+COPY:
+	.WORD 000021               ; MFUS: R0=USER[R5], R5+=2
+	mov r0, (r1)
+	cmp r0, (r1)+
+	bne FAULT
+	sob r2, COPY
+	clr r0
+RETURN:
+	.WORD 000010               ; START: restore guest CPC/CPSW and USER bank
+FAULT:
+INVALI:
+	mov #1, r0
+	br RETURN
+IDLE:
+	br IDLE                 ; Full ODT is a separately loaded future module.
+INITIA:
+; Executed only after the ROM has copied AND read back this entire payload.
+	mov #000200, @#000170
+	mov #000340, r0
+	mov r0, @#000172
+	mov r0, @#000006
+	mov #IDLE, @#000004     ; Cold-copy faults must not start incomplete USER code.
+	mov #001000, sp
+	mov #COPYUS, @#000160 ; HALT subroutine vector, one address word
+	mov #004652, r1         ; End of bootstrap copy in HALT RAM
+	mov r1, r5              ; End of destination in USER RAM
+	mov #000325, r2         ; 213 words, original bootstrap is exactly 426 bytes
+	jsr pc, @000160
+	JSR PC,@#005000
+	NOP
+	mov r1, @#000100        ; CPC: copied start address 004000
+	clr @#000102            ; CPSW
+	.WORD 000010               ; START, not RTI
+COPYUS:
+; Trusted HALT caller supplies even end pointers and a nonzero word count.
+; MTUS writes backward; MFUS reads back the same USER word and advances R5.
+	mov -(r1), r0
+	.WORD 000031               ; MTUS
+	.WORD 000021               ; MFUS
+	cmp r0, (r1)
+	bne IDLE
+	tst -(r5)              ; Same decrement; harmless HALT bootstrap read saves one ROM word
+	sob r2, COPYUS
+	rts pc
+EXECUT:
+	jmp (r1)               ; R2=0: explicit call of an uploaded HALT routine
+RESIDE:
+IMEND:
+	.END

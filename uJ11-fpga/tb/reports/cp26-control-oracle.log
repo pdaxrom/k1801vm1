@@ -1,6 +1,0 @@
-JMP: 910 completed, 0 excluded
-JSR: 8504 completed, 456 excluded
-RTS: 920 completed, 0 excluded
-SOB: 4480 completed, 0 excluded
-Control DCJ11 ENABLE_MMU=0: 14814 completed cases; 456 excluded.
-Reasons (may overlap): abort=0 trap=448 I/O=402 odd-word=0

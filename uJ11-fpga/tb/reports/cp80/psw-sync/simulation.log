@@ -1,5 +1,0 @@
-PASS CP80 PSW: 712 cases / 25823 checks ROM_DECODE=1
-- build/cp80-fp11/psw-sync/tb.v:311: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 58ms; walltime 3.853 s; speed 14.993 ms/s
-- Verilator: cpu 3.508 s on 1 threads; allocated 2 MB

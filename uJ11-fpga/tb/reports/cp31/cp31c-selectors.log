@@ -1,4 +1,0 @@
-PASS board bus: 30 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI
-PASS board selector/mux equivalence: 16777216 combinations, all 16-bit addresses and overlay/RK states
-tb/tb_board_bus.v:118: $finish called at 16791676000 (1ps)
-

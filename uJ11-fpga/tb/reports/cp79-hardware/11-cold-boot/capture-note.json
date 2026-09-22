@@ -1,6 +1,0 @@
-{
-  "note": "Second capture contains the fresh cold boot. First empty attempt metadata retained separately. The second run raised EAGAIN while reading and ESRCH while resuming vanished picocom PID 185402; its metadata was not written by the old helper.",
-  "raw_uart_bytes": 97,
-  "reader_pid": 185402,
-  "complete_session_metadata": false
-}

@@ -1,3 +1,0 @@
-PASS APR reset: 9 helper positions, including held read/save/return
-FATAL: tb/tb_mmu_apr_lookup.v:134: helper word flags depend on guest byte opcode case1
-       Time: 3096000  Scope: tb_mmu_apr_lookup

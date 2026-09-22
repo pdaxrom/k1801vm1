@@ -1,0 +1,30 @@
+{
+  "revision": "3d4c8d5b026852adc262c9a5fac2953377f95962",
+  "files": {
+    "ODT.BIN": {
+      "sha256": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de",
+      "bytes": 13312,
+      "source": "demos/rt11/service/cp80/ODT.BIN"
+    },
+    "FP11.BIN": {
+      "sha256": "9cab00b3ecad2e4cb2fea5a3c89cd9810a199cc195a6a2e454758f9e734d7f30",
+      "bytes": 5120,
+      "source": "demos/rt11/service/cp80/FP11.BIN"
+    },
+    "FPTST.SAV": {
+      "sha256": "f0cc3089f2d185f2e236f459d5717acfde29b9c5d22c1a9f3793deee75dcc7bc",
+      "bytes": 1536,
+      "source": "demos/rt11/service/cp80/FPTST.SAV"
+    },
+    "UJMOD.SAV": {
+      "sha256": "7195501e4674fb2d5362b9b0a1876404824b788d3382ad4147268750e1da1f97",
+      "bytes": 4608,
+      "source": "demos/rt11/service/cp67/UJMOD.SAV"
+    },
+    "SDBOOT.BIN": {
+      "sha256": "201c1c0707bfad7d0a6b766d4c9f54baa8bdcd518bcdfa3acd3f631d95257a23",
+      "bytes": 1024,
+      "source": "demos/rt11/service/cp67/SDBOOT.BIN"
+    }
+  }
+}

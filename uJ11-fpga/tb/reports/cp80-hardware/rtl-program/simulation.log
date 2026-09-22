@@ -1,5 +1,0 @@
-PASS CP80 hardware program: 22 instructions / 97 checks
-- build/cp80-fp11/hardware-program/tb.v:237: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 648us; walltime 0.058 s; speed 11.226 ms/s
-- Verilator: cpu 0.058 s on 1 threads; allocated 2 MB

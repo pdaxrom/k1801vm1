@@ -1,3 +1,0 @@
-Archived source: cp17a; mutation: ("wire return_trace = uword[0] && uword[12:10]!=3'd6;", "wire return_trace = 1'b0;")
-FATAL: tb/tb_trace_bit.v:112: trace case8220 op000002 prePSW00e5 upc020 clocks8 beats3/7 flags0010/00d5 fault0 IRQ0/0 retires1
-       Time: 356000  Scope: tb_trace_bit

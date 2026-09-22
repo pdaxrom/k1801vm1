@@ -1,16 +1,16 @@
-// UJ11_MMU is opt-in: undefined = CP40h, defined = experimental CP47c.
+// Production MMU-less profile. The archived MMU experiment is not a build target.
 `timescale 1ns/1ps
-// CP28 complete board system. A single legacy FRAM transport owns the pins.
+// Complete computer. One SPI FRAM transport owns the memory pins.
 `ifdef UJ11_MMU
-// CP44 direct relocation cost gate; original CPU, no PDR/abort/restart.
+// Historical MMU hooks; see history/README.md for the complete prototype.
 `else
-// No prefetch in this initial full-peripheral resource baseline; no MMU.
+// No instruction prefetch or MMU in the production computer.
 `endif
 module uj11_board #(
     parameter integer CLOCK_HZ=29560000, TICK_DIVISOR=591200,
     parameter integer SD_SLOW_DIV=68, SD_FAST_DIV=2
 ) (
-    input wire clk, reset, uart_rx,
+    input wire clk, reset, uart_rx, halt_button,
     output wire uart_tx,
     input wire [3:0] panel_keys,
     output wire panel_din, panel_ce, panel_clk, panel_rs, panel_blank, panel_latch,
@@ -22,6 +22,7 @@ module uj11_board #(
     output wire boot_complete, stopped
 );
     wire request, writing, byte_access, acknowledge, error, raw_ack;
+    wire bank, physical, debug_block;
 `ifdef UJ11_MMU
     wire apr_request, apr_grant, apr_csr_request, apr_csr_ack;
     wire [6:0] apr_address;
@@ -73,14 +74,14 @@ module uj11_board #(
         end
     end
     uj11_core #(.ROM_DECODE(1),.ALIGNED_WORD_READS(1),.IRQ_VECTOR_BITS(15),.UNMASKED_VECTOR(16'o160000)) cpu(
-        .clk(clk),.reset(reset),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector[15:1]),
+        .clk(clk),.reset(reset),.halt_button(halt_button),.debug_block(debug_block),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector[15:1]),
         .irq_ack(irq_ack),.waiting(),.peripheral_reset(peripheral_reset),
 `ifdef UJ11_MMU
         .mem_addr(virtual_address),.mem_write_data(data),.mem_request(request),.mem_read(),
 `else
         .mem_addr(address),.mem_write_data(data),.mem_request(request),.mem_read(),
 `endif
-        .mem_write(writing),.mem_byte(byte_access),.mem_ack(acknowledge),.mem_error(error),.mem_read_data(rdata),
+        .mem_bank(bank),.mem_physical(physical),.mem_write(writing),.mem_byte(byte_access),.mem_ack(acknowledge),.mem_error(error),.mem_read_data(rdata),
         .stopped(stopped),.fault_code(),.retire(),.debug_upc(),.debug_uword(uword),
         .ir(),.mdr(),.psw(),.q(),.debug_rf_write(),.debug_rf_address(),.debug_rf_data());
 `ifdef UJ11_MMU
@@ -95,20 +96,20 @@ module uj11_board #(
 `else
 `endif
     wire rom_enable;
-    wire [8:0] rom_address;
+    wire [9:0] rom_address;
     wire [15:0] rom_data;
     wire [1:0] rom_write;
     uj11_firmware_rom firmware(.clk(clk),.enable(rom_enable),.address(rom_address),.data(rom_data),
         .write_enable(rom_write),.write_data(lane_data));
     uj11_board_bus #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(TICK_DIVISOR),.FRAM_CLK_DIV(1),
         .SD_BOOT_ENABLE(1),.RK_SERVICE_ENABLE(1),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV)) bus(
-        .clk(clk),.rst(reset),.peripheral_reset(peripheral_reset),.request(bus_request),.write(writing),
+        .clk(clk),.rst(reset),.debug_block(debug_block),.peripheral_reset(peripheral_reset),.request(bus_request),.write(writing),
 `ifdef UJ11_MMU
         .mmu_enabled(mmu_enabled),.map22(map22),.mmu_bypass(mmu_bypass),
         .virtual_address(virtual_address),.memory_writing(uword[35] && uword[34:31]==4'd12),
 `else
 `endif
-        .byte_select(lanes),.address(address),.wdata(lane_data),.instruction_fetch(opcode_fetch),
+        .bank(bank),.physical(physical),.byte_select(lanes),.address(address),.wdata(lane_data),.instruction_fetch(opcode_fetch),
 `ifdef UJ11_MMU
         .apr_request(apr_csr_request),.apr_entry(apr_entry),.apr_pdr(apr_pdr),
         .apr_data(apr_data),.apr_ack(apr_csr_ack),.rdata(lane_rdata),.acknowledge(raw_ack),.virq(device_irq),.interrupt_vector(device_vector),

@@ -1,2 +1,0 @@
-PASS CP69 memory: 665 cases / 47540 checks
-tb/tb_fp_memory_cp69.v:106: $finish called at 45772240000 (1ps)

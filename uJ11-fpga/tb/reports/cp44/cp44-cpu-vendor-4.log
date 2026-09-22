@@ -1,3 +1,0 @@
-PASS CP44 CPU relocation: 4 words x 8 pages x 2 address modes, upper FRAM write/read, low bank intact; 110412 clocks 8 control beats 848 PAR reads
-PASS CP44 enable lifetime: unmapped enable with non-I/O KIPAR7, mapped disable via alternate I/O, stable physical requests
-tb/tb_relocate_cpu_cp44.v:121: $finish called at 1104170000 (1ps)

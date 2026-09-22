@@ -1,2 +1,0 @@
-PASS CP64 monitor: 187 checks 175 commands 5255740 clocks
-build/cp64-vendor-final/tb.v:84: $finish called at 52557435000 (1ps)

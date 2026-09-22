@@ -1,3 +1,0 @@
-Archive: cp24a; mutations: [('rtl/uj11_alu.v', "4'd8: result = a ^ b;", "4'd8: begin result = a ^ b; v=1; end")]
-FATAL: tb/tb_trace_bit.v:121: trace case192 op074001 prePSW0000 upc020 clocks2 beats1/1 flags0002/0000 fault0 IRQ0/0 retires1
-       Time: 296000  Scope: tb_trace_bit

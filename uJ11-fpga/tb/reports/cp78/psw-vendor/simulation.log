@@ -1,2 +1,0 @@
-PASS CP78 PSW: 1741 cases 12486 checks 238577 clocks decode=1 aligned=1
-tb/tb_psw_cp78.v:129: $finish called at 2472830000 (1ps)

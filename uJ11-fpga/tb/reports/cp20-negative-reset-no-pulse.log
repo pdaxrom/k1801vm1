@@ -1,3 +1,0 @@
-Archive: cp20c; mutation: ('target=RESET_SETTLE, init=1', 'target=RESET_SETTLE, init=0')
-FATAL: tb/tb_trace_bit.v:121: trace case1 op000005 prePSW0000 upc020 clocks5 beats1/1 flags0000/0000 fault0 IRQ0/0 retires1
-       Time: 326000  Scope: tb_trace_bit

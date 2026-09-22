@@ -1,0 +1,21 @@
+{
+  "revision": "3d4c8d5b026852adc262c9a5fac2953377f95962",
+  "files": {
+    "B81FIS.SAV": {
+      "sha256": "1a324b9ca412a0470602d1db8ee5dbd4d2503859ede22b0e1392304cefc50195",
+      "source": "tb/reports/cp81-basic/build/B81FIS.SAV"
+    },
+    "B81FPU.SAV": {
+      "sha256": "560950404bd738385e4176552ea6e0781107397d27854bf16cf2a6493500ca0e",
+      "source": "tb/reports/cp81-basic/build/B81FPU.SAV"
+    },
+    "B81FPD.SAV": {
+      "sha256": "d466e9019d95f88db4bff6ec50e25a85bea3fdd28fa2102d3c41af24d7f75808",
+      "source": "tb/reports/cp81-basic/build/B81FPD.SAV"
+    },
+    "B81FIJ.SAV": {
+      "sha256": "5601be5c721ab5657ed6b7d177f719342c5164e177134441c24a58c624f5a349",
+      "source": "tb/reports/cp81-basic/adapter/B81FIJ.SAV"
+    }
+  }
+}

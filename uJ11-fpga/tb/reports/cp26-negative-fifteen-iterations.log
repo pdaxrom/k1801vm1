@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'd=IMM, imm=16, b=T1, dst=RF\n    alu PASSA, pair=DA, d=ONE, b=T5', 'd=IMM, imm=15, b=T1, dst=RF\n    alu PASSA, pair=DA, d=ONE, b=T5')]
-FATAL: tb/tb_trace_bit.v:121: trace case592 op071002 prePSW0000 upc020 clocks133 beats1/1 flags0002/0000 fault0 IRQ0/0 retires1
-       Time: 1606000  Scope: tb_trace_bit

@@ -1,3 +1,0 @@
-Archive: cp25a; mutations: [('microcode/m0.uasm', 'MUL_CARRY_COMPARE:\n    alu SUB, a=T4, b=T5, flags=NZVC', 'MUL_CARRY_COMPARE:\n    alu SUB, a=T0, b=T5, flags=NZVC')]
-FATAL: tb/tb_trace_bit.v:121: trace case480 op070002 prePSW0000 upc020 clocks112 beats1/1 flags0001/0000 fault0 IRQ0/0 retires1
-       Time: 1396000  Scope: tb_trace_bit

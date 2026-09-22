@@ -1,3 +1,0 @@
-Archive: cp18e; mutation: ('imm=5, b=R0, dst=RF, seq=FETCH', 'imm=4, b=R0, dst=RF, seq=FETCH')
-FATAL: tb/tb_trace_bit.v:116: trace case16384 op000007 R0 got0004 expected0005
-       Time: 296000  Scope: tb_trace_bit

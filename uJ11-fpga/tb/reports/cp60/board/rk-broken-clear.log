@@ -1,2 +1,0 @@
-FATAL: tb/tb_rk_recovery_cp60.v:66: CCLR generated stale IRQ/pending command
-       Time: 600000  Scope: tb_rk_recovery_cp60.check_clear

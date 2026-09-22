@@ -1,3 +1,0 @@
-Archive: cp21a; ASHC-only mutation: None
-FATAL: tb/tb_trace_bit.v:123: trace case25912 op072020 R0 got4000 expected4002
-       Time: 416000  Scope: tb_trace_bit

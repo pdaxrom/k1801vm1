@@ -1,3 +1,0 @@
-Archive: cp22c; ASHC-only mutation: ('alu OR, a=T6, pair=AD, d=PSW, b=T6, dst=RF', 'alu PASSA, pair=DA, d=PSW, b=T6, dst=RF')
-FATAL: tb/tb_trace_bit.v:121: trace case6176 op073002 prePSW0000 upc020 clocks34 beats1/1 flags0004/0006 fault0 IRQ0/0 retires1
-       Time: 616000  Scope: tb_trace_bit

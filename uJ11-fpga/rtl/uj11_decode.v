@@ -52,5 +52,39 @@ module uj11_decode(input wire [15:0] ir, output reg [9:0] entry);
             endcase
             default: entry=10'h042;
         endcase
+        if(ir[15:12]==4'hf)entry=10'h02d;
+        case(ir)
+            16'o000000: entry=10'h053;
+            16'o000010: entry=10'h10e;
+            16'o000011: entry=10'h10e;
+            16'o000012: entry=10'h10e;
+            16'o000013: entry=10'h10e;
+            16'o000020: entry=10'h13e;
+            16'o000021: entry=10'h0ad;
+            16'o000022: entry=10'h116;
+            16'o000023: entry=10'h116;
+            16'o000024: entry=10'h11e;
+            16'o000025: entry=10'h11e;
+            16'o000026: entry=10'h11e;
+            16'o000027: entry=10'h11e;
+            16'o000031: entry=10'h136;
+            16'o000032: entry=10'h126;
+            16'o000033: entry=10'h126;
+            16'o000034: entry=10'h12e;
+            16'o000035: entry=10'h12e;
+            16'o000036: entry=10'h12e;
+            16'o000037: entry=10'h12e;
+            16'o000040: entry=10'h057;
+            16'o000041: entry=10'h06b;
+            16'o000042: entry=10'h06f;
+            16'o000043: entry=10'h0a1;
+            16'o000044: entry=10'h0a5;
+            16'o000045: entry=10'h0a9;
+            16'o000014: entry=10'h10e;
+            16'o000015: entry=10'h10e;
+            16'o000016: entry=10'h10e;
+            16'o000017: entry=10'h10e;
+            default: begin end
+        endcase
     end
 endmodule

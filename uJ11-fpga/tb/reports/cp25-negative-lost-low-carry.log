@@ -1,3 +1,0 @@
-Archive: cp25a; mutations: [('microcode/m0.uasm', 'alu ADC, a=T5, b=T4, dst=RF', 'alu ADD, a=T5, b=T4, dst=RF')]
-FATAL: tb/tb_trace_bit.v:121: trace case1248 op070002 prePSW0000 upc020 clocks139 beats1/1 flags0000/0001 fault0 IRQ0/0 retires1
-       Time: 1666000  Scope: tb_trace_bit

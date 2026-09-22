@@ -1,3 +1,0 @@
-Archive: cp20c; mutation: ('TRAP, target=HALT_ENTRY', 'TRAP, target=BUS_FAULT_ENTRY')
-FATAL: tb/tb_trace_bit.v:75: case0 op000000 beat1 got wr0 0006:a500 expected wr0001 5ffe:0000 upc3d9
-       Time: 355000  Scope: tb_trace_bit

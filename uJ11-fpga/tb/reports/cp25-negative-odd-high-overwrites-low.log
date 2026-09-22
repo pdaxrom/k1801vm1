@@ -1,3 +1,0 @@
-Archive: cp25a; mutations: [('microcode/m0.uasm', 'alu PASSA, a=T4, b=RS, dst=RF\n    alu PASSB, pair=ZQ, b=RS1, dst=RF, seq=FETCH', 'alu PASSB, pair=ZQ, b=RS1, dst=RF\n    alu PASSA, a=T4, b=RS, dst=RF, seq=FETCH')]
-FATAL: tb/tb_trace_bit.v:123: trace case1025 op070102 R1 got0000 expected8000
-       Time: 1416000  Scope: tb_trace_bit

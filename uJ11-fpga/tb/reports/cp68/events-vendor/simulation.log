@@ -1,2 +1,0 @@
-PASS CP68 events: 28 cases / 1008 checks
-tb/fp11_events_cp68.vh:100: $finish called at 1688880000 (1ps)

@@ -1,2 +1,0 @@
-PASS MMU + SPI FRAM: 413 beats FULL=0, 50400 clocks; bank boundary, complete 128 KiB comparison, abort/NXM/I-O inhibit, odd/byte/held request
-tb/tb_mmu_fram.v:106: $finish called at 504050000 (1ps)

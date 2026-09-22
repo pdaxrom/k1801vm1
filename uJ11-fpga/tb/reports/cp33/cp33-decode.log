@@ -1,8 +1,0 @@
-iverilog -g2012 -Wall -s tb_mmu_apr_decode -o build/mmu_apr_decode tb/tb_mmu_apr_decode.v rtl/uj11_mmu_apr_decode.v
-vvp build/mmu_apr_decode
-PASS APR CSR decode: 4194304 PA22 bytes, 192 selected; 96 registers, no mode2 or lower aliases
-tb/tb_mmu_apr_decode.v:28: $finish called at 4194304000 (1ps)
-verilator --lint-only --Wall --top-module uj11_probe_apr_csr synth/machxo2/uj11_probe_apr_csr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v rtl/uj11_mmu_apr_decode.v
-- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
-- Verilator: Built from 0.089 MB sources in 5 modules, into 0.039 MB in 3 C++ files needing 0.000 MB
-- Verilator: Walltime 0.007 s (elab=0.001, cvt=0.003, bld=0.000); cpu 0.007 s on 1 threads; allocated 10.578 MB

@@ -1,2 +1,0 @@
-PASS MMR3 unit: 1030 checked edges; all values/read-write/lane/hold/reset
-tb/tb_mmr3_cp43.v:35: $finish called at 10300000 (1ps)

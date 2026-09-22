@@ -1,7 +1,0 @@
-{
-  "port": "/dev/ttyUSB1",
-  "started_utc": "2026-09-13T10:29:45Z",
-  "commands": [
-    "COPY DK:ODT.BIN HG:OLDODT.BIN"
-  ]
-}

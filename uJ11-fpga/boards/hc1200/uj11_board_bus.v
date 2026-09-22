@@ -1,11 +1,11 @@
-// UJ11_MMU is opt-in: undefined = CP40h, defined = experimental CP47c.
+// Production peripheral bus with sequential FRAM READ transactions.
+// UJ11_MMU remains undefined; experimental MMU sources are in Git history.
 `timescale 1ns/1ps
 
-// Derived from frozen reference/lsi11/am4_cpu11_bus.v for uJ11 CP28.  It combines KL11, a
-// KW11-L-compatible clock and panel GPIO with bank-zero SPI FRAM.  During SD
-// boot, a second MicROM port supplies an ordinary PDP-11 bootstrap and a byte
-// SPI service at 177500/2.  Six reset/ODT words remain available on failure;
-// the complete overlay disappears before a successful transfer to address 0.
+// Derived from the lsi11-fpga AM4 bus. Combines KL11, KW11-L and panel GPIO
+// with USER/HALT SPI FRAM. Separate firmware EBR supplies the ordinary PDP-11
+// bootstrap, resident, cold walker and RK service. SD byte data/control is at
+// 177500/177502. Cold startup releases the HALT ROM overlay before modules run.
 module uj11_board_bus #(
 	parameter integer CLOCK_HZ = 29560000,
 	parameter integer TICK_DIVISOR = 591200,
@@ -23,25 +23,27 @@ module uj11_board_bus #(
 	input  wire        request,
 	input  wire        write,
 	input  wire [1:0]  byte_select,
-`ifdef UJ11_MMU
-	input  wire [21:0] address,
-    input wire [15:0] virtual_address,
-    input wire memory_writing,
-    output wire mmu_enabled, map22, mmu_bypass,
-`else
+
+
+
+
+
+
+	input  wire bank, physical,
 	input  wire [15:0] address,
-`endif
+
 	input  wire [15:0] wdata,
 	input  wire        instruction_fetch,
-`ifdef UJ11_MMU
-    output wire apr_request, apr_pdr,
-    output wire [5:0] apr_entry,
-    input wire [15:0] apr_data, input wire apr_ack,
-`else
-`endif
+
+
+
+
+
+
 	output wire [15:0] rdata,
 	output wire        acknowledge,
 	output wire        virq,
+	output wire debug_block,
 	output wire [15:0] interrupt_vector,
 	output wire [2:0] interrupt_priority,
 	input  wire        interrupt_strobe,
@@ -65,7 +67,7 @@ module uj11_board_bus #(
 	output wire        sd_mosi,
 	input  wire        sd_miso,
 	output wire        boot_rom_ena,
-	output wire [8:0]  boot_rom_addr,
+	output wire [9:0]  boot_rom_addr,
 	output wire [1:0]  boot_rom_write,
 	input  wire [15:0] boot_rom_data,
 	output reg         boot_complete,
@@ -95,6 +97,7 @@ module uj11_board_bus #(
 	reg boot_release_wait;
 	reg rk_service_pending;
 	reg rk_service_active;
+	assign debug_block=rk_service_active;
 	reg rk_service_movb;
 	reg rk_write_command;
 	reg rk_service_release;
@@ -103,29 +106,23 @@ module uj11_board_bus #(
 	reg rk_cs1_initialized;
 	reg rk_interrupt_enable;
 	reg rk_immediate_done;
-`ifdef UJ11_MMU
-	wire local_boot_selected = BOOT_ROM_ENABLE && address[21:16]==0 && boot_overlay_active && !write &&
-`else
-	wire local_boot_selected = BOOT_ROM_ENABLE && boot_overlay_active && !write &&
-`endif
-		((!boot_release_armed && (word_address == 0 || word_address == 2)) ||
-		 word_address == 16'o000024 || word_address == 16'o000026 ||
-		 word_address == 16'o000100 || word_address == 16'o000102 ||
-		 word_address == 16'o000104 || word_address == 16'o000106);
-`ifdef UJ11_MMU
-	wire boot_program_selected = BOOT_ROM_ENABLE && SD_BOOT_ENABLE && address[21:16]==0 &&
-		boot_overlay_active && !write && word_address[15:9] == BOOT_BASE[15:9];
-`else
-	wire boot_program_selected = BOOT_ROM_ENABLE && SD_BOOT_ENABLE &&
-		boot_overlay_active && !write && word_address >= BOOT_BASE &&
-		word_address <= BOOT_LAST;
-`endif
+
+
+
+	// Only the cold HALT PC/PSW pair is supplied by the small overlay.
+	// USER bootstrap and legacy USER ODT words now reside in FRAM.
+	wire local_boot_selected = bank && !physical && BOOT_ROM_ENABLE &&
+		boot_overlay_active && !write && word_address[15:2]==0;
+
+	wire boot_program_selected = bank && !physical && BOOT_ROM_ENABLE && SD_BOOT_ENABLE &&
+		boot_overlay_active && !write && word_address[15:11]==5'd2;
+
 	wire boot_selected = local_boot_selected || boot_program_selected;
-`ifdef UJ11_MMU
-	wire io_page = &address[21:13];
-`else
+
+
+
 	wire io_page = &address[15:13];
-`endif
+
 	// 160000..160777 share one seven-bit prefix.  Bit 8 selects the compact
 	// extension; the service never branches into its unused upper aliases.
 	// The service executes from a ROM overlay in the CPU I/O page, but RK DMA
@@ -134,75 +131,76 @@ module uj11_board_bus #(
 	// word. READ copies use the write operand as physical memory; WRITE copies
 	// use the non-fetch read operand. This avoids a wide instruction-register
 	// decoder while keeping opcode and extension reads in the private ROM.
-	wire service_dma_selected = RK_SERVICE_ENABLE && rk_service_active &&
-		rk_service_movb && io_page &&
-		((!rk_write_command && write) ||
-		 (rk_write_command && !write && !instruction_fetch));
-`ifdef UJ11_MMU
-	wire service_program_selected = RK_SERVICE_ENABLE && rk_service_active && io_page &&
-`else
-	wire service_program_selected = RK_SERVICE_ENABLE && rk_service_active &&
-`endif
+	// Direction and RK state do not depend on the decoded address region.
+	wire service_dma_operand = RK_SERVICE_ENABLE && rk_service_active &&
+		rk_service_movb && ((!rk_write_command && write) ||
+		(rk_write_command && !write && !instruction_fetch));
+	wire service_dma_selected = io_page && service_dma_operand;
+
+
+
+	wire service_program_selected = !bank && !physical && RK_SERVICE_ENABLE && rk_service_active &&
+
 		!service_dma_selected && !write &&
 		word_address[15:9] == SERVICE_BASE[15:9];
 		wire program_selected = boot_program_selected || service_program_selected;
 	// A physical RK DMA operand wins over every CPU-visible device decode.
 	// Share the inhibited I/O-page term across the small-device decoders; this
 	// also prevents a DMA write from changing a coincident device CSR.
-	wire cpu_io_page = io_page && !service_dma_selected;
-`ifdef UJ11_MMU
-    wire apr_decoded;
-    // This gate retains the 16-bit unmapped bus. Only its CPU I/O page is
-    // canonicalized; a physical RK service operand never selects a CPU CSR.
-    uj11_mmu_apr_decode apr_decode(.physical_address(address),
-        .selected(apr_decoded),.entry(apr_entry),.pdr_select(apr_pdr));
-    wire apr_selected=cpu_io_page && apr_decoded;
-    assign apr_request=request && apr_selected;
-    // Canonical MMR3 at 17772516 (unmapped VA 172516). RK physical
-    // service operands must reach FRAM even at this numeric address.
-    wire mmr3_selected=cpu_io_page && word_address[12:0]==13'o12516;
-    // Bypass only private ROM reads and the physical MOVB copy operand.
-    // Kernel vector/frame/stack traffic otherwise remains translated.
-    wire private_copy=RK_SERVICE_ENABLE && rk_service_active && rk_service_movb &&
-        ((!rk_write_command && memory_writing) ||
-         (rk_write_command && !memory_writing && !instruction_fetch));
-    assign mmu_bypass=private_copy || (RK_SERVICE_ENABLE && rk_service_active &&
-        !memory_writing && virtual_address[15:9]==SERVICE_BASE[15:9] &&
-        (!virtual_address[8] || virtual_address[7:6]==0));
-    wire mmr0_selected=cpu_io_page && word_address[12:0]==13'o17572;
-    wire [15:0] mmr0_value;
-    wire mmr0_ready;
-    uj11_mmr0_control mmr0(.clk(clk),.reset(rst || peripheral_reset),
-        .request(request && mmr0_selected),.writing(write),.byte_enable(byte_select),
-        .write_data(wdata),.value(mmr0_value),.enabled(mmu_enabled),.ready(mmr0_ready));
-    assign map22=mmr3_value[4];
-    wire [5:0] mmr3_value;
-    wire mmr3_ready;
-    uj11_mmr3 mmr3(.clk(clk),.reset(rst || peripheral_reset),
-        .request(request && mmr3_selected),.writing(write),
-        .low_byte_enable(byte_select[0]),.write_data(wdata[5:0]),
-        .value(mmr3_value),.ready(mmr3_ready));
-`else
-`endif
+	wire cpu_io_page = io_page && !service_dma_operand && !physical;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	wire uart_selected = cpu_io_page &&
-`ifdef UJ11_MMU
-		word_address[12:3] == KL11_BASE[12:3];
-`else
+
+
+
 		word_address[12:0] >= KL11_BASE[12:0] &&
 		word_address[12:0] <= 13'o17566;
-`endif
+
 	wire ltc_selected = cpu_io_page && word_address[12:0] == LTC_CSR[12:0];
 	wire panel_selected = cpu_io_page && word_address[12:0] == PANEL_BASE[12:0];
 	// Read-only board identification, KDJ11-A field layout: module1, no FPA,
 	// Q-bus, HALT trap option and power-good. No MMU capability is advertised.
 	wire maint_selected = cpu_io_page && word_address[12:0] == 13'o17750;
 	wire sd_selected = cpu_io_page && SD_BOOT_ENABLE &&
-`ifdef UJ11_MMU
-		word_address[12:2] == SD_BASE[12:2];
-`else
+
+
+
 		(word_address[12:0] == SD_BASE[12:0] ||
 		 word_address[12:0] == SD_BASE[12:0] + 2);
-`endif
+
 	wire rk_selected = cpu_io_page && RK_SERVICE_ENABLE &&
 		word_address[12:5] == RK_BASE[12:5];
 	wire rk_cs1_selected = rk_selected && word_address[4:1] == 4'o0;
@@ -212,14 +210,22 @@ module uj11_board_bus #(
 		(rk_cs1_selected && !write &&
 		 (!rk_cs1_initialized || rk_immediate_done));
 	wire rk_store_selected = rk_selected && !rk_fixed_selected;
-`ifdef UJ11_MMU
-	wire guest_fram_selected = (address[21:17]==0 && !boot_selected) ||
-`else
-	wire guest_fram_selected = (!io_page && !boot_selected) ||
-`endif
+
+
+
+	wire guest_fram_selected = physical || (!io_page && !boot_selected) ||
+
 		service_dma_selected;
 	wire fram_selected = guest_fram_selected;
 	wire firmware_selected = program_selected || rk_store_selected;
+	// Compute the small, zero-wait responses before the common I/O/DMA gate.
+	wire immediate_rk_response = RK_SERVICE_ENABLE &&
+		(word_address[12:1] == RK_DS[12:1] ||
+		 (word_address[12:1] == RK_CS1[12:1] && !write &&
+		  (!rk_cs1_initialized || rk_immediate_done)));
+	wire immediate_io_response = word_address[12:1] == LTC_CSR[12:1] ||
+		word_address[12:1] == PANEL_BASE[12:1] ||
+		word_address[12:0] == 13'o17750 || immediate_rk_response;
 	wire uart_strobe = request && uart_selected;
 	wire sd_strobe = request && sd_selected;
 	wire [15:0] uart_rdata;
@@ -257,11 +263,16 @@ module uj11_board_bus #(
 	uj11_board_fram #(.CLK_DIV(FRAM_CLK_DIV)) guest_memory (
 		.clk(clk), .rst(rst || peripheral_reset),
 		.req(fram_request), .write(write),
-`ifdef UJ11_MMU
-		.byte_access(fram_byte_access), .bank(service_dma_selected ? 1'b0 : address[16]),
-`else
-		.byte_access(fram_byte_access), .bank(1'b0),
-`endif
+        // Qualify at the real board decode. ROM, CSR and private RK DMA
+        // operands cannot retain a READ, including aliases in the I/O page.
+        // This also helps consecutive data reads without decoding the IR.
+        .keep_read(!io_page && !boot_selected && !service_dma_selected && !physical),
+        .close_read(request && !fram_selected),
+
+
+
+		.byte_access(fram_byte_access), .bank(bank && !service_dma_operand),
+
 		.address(fram_address), .wdata(fram_wdata),
 		.rdata(fram_rdata), .ready(fram_ready), .error(fram_error),
 		.busy(fram_busy), .spi_cs_n(spi_cs_n), .spi_sck(spi_sck),
@@ -278,37 +289,8 @@ module uj11_board_bus #(
 		.cs_n(sd_cs_n), .sck(sd_sck), .mosi(sd_mosi), .miso(sd_miso)
 	);
 
-	// Cold uJ11 starts at PC=0. These two overlay words jump to the SD ROM.
-	// They disappear with the same explicit bootstrap release as the loader.
-	always @(*) begin
-`ifdef UJ11_MMU
-		case (word_address[6:1])
-			6'o00: local_rdata = 16'o000137; // JMP @#004000
-			6'o01: local_rdata = BOOT_BASE;
-			6'o12: local_rdata = SD_BOOT_ENABLE ?
-`else
-		case (word_address)
-			16'o000000: local_rdata = 16'o000137; // JMP @#004000
-			16'o000002: local_rdata = BOOT_BASE;
-			16'o000024: local_rdata = SD_BOOT_ENABLE ?
-`endif
-				BOOT_BASE : 16'o000100;
-`ifdef UJ11_MMU
-			6'o13: local_rdata = 16'o000000;
-			6'o40: local_rdata = 16'o012706;
-			6'o41: local_rdata = 16'o004000;
-			6'o42: local_rdata = 16'o000000;
-			6'o43: local_rdata = 16'o000774;
-`else
-			16'o000026: local_rdata = 16'o000000;
-			16'o000100: local_rdata = 16'o012706;
-			16'o000102: local_rdata = 16'o004000;
-			16'o000104: local_rdata = 16'o000000;
-			16'o000106: local_rdata = 16'o000774;
-`endif
-			default:    local_rdata = 16'o000000;
-		endcase
-	end
+	// Fixed initial HALT vector. Every USER address reads ordinary RAM.
+	always @(*) local_rdata = word_address[1] ? 16'o000340 : 16'o010652;
 
 	generate if (UART_XO2) begin : fixed_uart
 	wbc_uart_xo2 #(.REFCLK(CLOCK_HZ)) console (
@@ -338,32 +320,32 @@ module uj11_board_bus #(
 	wire [15:0] panel_rdata;
 	// Decodes are mutually exclusive, including boot overlays and RK physical
 	// copy cycles. Parallel masked buses avoid an eight-level priority chain.
-`ifdef UJ11_MMU
-    wire read_mmr0_selected = word_address[12:0]==13'o17572;
-    wire read_mmr3_selected = word_address[12:0]==13'o12516;
-    wire read_uart_selected = word_address[12:3] == KL11_BASE[12:3];
-    wire read_maint_selected = word_address[12:0] == 13'o17750;
-    wire read_ltc_selected = word_address[12:0] == LTC_CSR[12:0];
-    wire read_panel_selected = word_address[12:0] == PANEL_BASE[12:0];
-    wire read_sd_selected = SD_BOOT_ENABLE &&
-		word_address[12:2] == SD_BASE[12:2];
-    wire read_rk_selected = RK_SERVICE_ENABLE &&
-		word_address[12:5] == RK_BASE[12:5];
-    wire read_rk_cs1_selected = read_rk_selected && word_address[4:1] == 4'o0;
-    wire read_rk_ds_selected = read_rk_selected && word_address[4:1] == 4'o5;
-    wire read_rk_fixed_selected = read_rk_ds_selected ||
-		(read_rk_cs1_selected && !write &&
-		 (!rk_cs1_initialized || rk_immediate_done));
-    wire [15:0] io_rdata = (mmr0_value & {16{read_mmr0_selected}}) | {10'b0,mmr3_value & {6{read_mmr3_selected}}} |  (uart_rdata & {16{read_uart_selected}}) |
-		(16'o000031 & {16{read_maint_selected}}) |
-		(ltc_rdata & {16{read_ltc_selected}}) |
-		(panel_rdata & {16{read_panel_selected}}) |
-		(sd_rdata & {16{read_sd_selected}}) |
-		((read_rk_ds_selected ? 16'o100701 : 16'o000200) & {16{read_rk_fixed_selected}});
-    wire [15:0] small_rdata = (io_rdata & {16{cpu_io_page}}) |
-        (local_rdata & {16{local_boot_selected}});
-	assign rdata = apr_selected ? apr_data : firmware_selected ? boot_program_word :
-`else
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	wire [15:0] small_rdata = (uart_rdata & {16{uart_selected}}) |
 		(16'o000031 & {16{maint_selected}}) |
 		(ltc_rdata & {16{ltc_selected}}) |
@@ -372,18 +354,14 @@ module uj11_board_bus #(
 		((rk_ds_selected ? 16'o100701 : 16'o000200) & {16{rk_fixed_selected}}) |
 		(local_rdata & {16{local_boot_selected}});
 	assign rdata = firmware_selected ? boot_program_word :
-`endif
+
 		fram_selected ? fram_rdata : small_rdata;
-`ifdef UJ11_MMU
-	assign acknowledge = mmr0_ready || mmr3_ready || apr_ack || uart_ack || (request && ltc_selected) ||
-`else
-	assign acknowledge = uart_ack || (request && ltc_selected) ||
-`endif
-		(request && maint_selected) ||
-		(request && panel_selected) ||
-		(sd_ready && !sd_error) || boot_ack ||
-		boot_program_ack || (request && rk_fixed_selected) ||
-		(fram_ready && !fram_error);
+
+
+
+	assign acknowledge = uart_ack || (sd_ready && !sd_error) ||
+		boot_ack || boot_program_ack || (fram_ready && !fram_error) ||
+		(request && cpu_io_page && immediate_io_response);
 	assign virq = rk_service_pending || rk_irq_pending || uart_irq;
 	// uJ11 samples the resolved vector on the accepting IRQ edge.
 	assign interrupt_vector = rk_service_pending ? SERVICE_BASE :
@@ -401,14 +379,17 @@ module uj11_board_bus #(
 			boot_release_wait <= 0;
 			boot_complete <= !SD_BOOT_ENABLE;
 		end else begin
+			// Cold walker runs from FRAM before releasing HALT ROM.
+			if (bank && !physical && request && write && word_address==16'o76)
+				boot_overlay_active <= 0;
 			if (SD_BOOT_ENABLE && sd_ready && write &&
 				word_address == SD_BASE + 2 && wdata[2])
 				boot_release_armed <= 1;
-`ifdef UJ11_MMU
-			if (boot_release_armed && request && !write && address == 0) begin
-`else
-			if (boot_release_armed && request && !write && word_address == 0) begin
-`endif
+
+
+
+			if (boot_release_armed && !bank && !physical && request && !write && word_address == 0) begin
+
 				boot_overlay_active <= 0;
 				boot_release_armed <= 0;
 				boot_release_wait <= 1;
@@ -422,8 +403,8 @@ module uj11_board_bus #(
 
 	// A complete PDP-11 word comes from one synchronous firmware EBR.
 	// Words 0f0..0ff are writable RK storage, outside both firmware images.
-	assign boot_rom_addr = rk_store_selected ? {5'b01111,word_address[4:1]} :
-		{service_program_selected,word_address[8:1]};
+	assign boot_rom_addr = rk_store_selected ? {6'b001111,word_address[4:1]} :
+		{bank && word_address[10],service_program_selected || (bank && word_address[9]),word_address[8:1]};
 	assign boot_rom_write = {2{rk_store_selected && write}} & byte_select;
 	assign boot_rom_ena = boot_rom_phase == 1 && !rst && !peripheral_reset;
 	always @(posedge clk) begin
@@ -478,7 +459,8 @@ module uj11_board_bus #(
 				rk_interrupt_enable <= wdata[6];
 				rk_immediate_done <= 0;
 				if (wdata[0]) begin
-					if (wdata[5:2] == 4'o4) begin
+					if (wdata[5:2] == 4'o4 || wdata[5:1] == 5'o5) begin
+// READ/WRITE and RECALIBRATE complete through firmware.
 						rk_service_pending <= 1;
 						rk_irq_pending <= 0;
 						rk_write_command <= wdata[1];
@@ -497,8 +479,11 @@ module uj11_board_bus #(
 				end
 			end
 
-			if (boot_rom_phase == 2 && rk_cs2_selected && write && byte_select[0] &&
-				wdata[5]) begin
+			// Guest CS1 bit 15 is CCLR, not a request for another IRQ.
+			// The private service uses the same EBR word to publish CERR.
+			if (boot_rom_phase == 2 && write &&
+				((rk_cs2_selected && byte_select[0] && wdata[5]) ||
+				 (rk_cs1_selected && byte_select[1] && wdata[15] && !rk_service_active))) begin
 				rk_cs1_initialized <= 0;
 				rk_interrupt_enable <= 0;
 				rk_service_pending <= 0;

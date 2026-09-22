@@ -1,5 +1,0 @@
-PASS DEC diagnostic: 1476999 core clocks
-- build/cp77-diagnostics/FFPCB0-psw/tb.v:46: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 15ms; walltime 0.421 s; speed 35.103 ms/s
-- Verilator: cpu 0.421 s on 1 threads; allocated 2 MB

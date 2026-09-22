@@ -1,2 +1,0 @@
-FATAL: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tb/tb_psw_factor_cp78.v:17: PSW mismatch old/new 0010/0000 ctl 0100100 data 0000/0000/0
-       Time: 6926000  Scope: tb_psw_factor_cp78.edge_check

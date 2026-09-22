@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "files": {
-    "inputs.json": "f73895f5d0960abbb0bdd4d559396366c6fbc5512d5476e010b72eb10b54c799",
-    "simulation.log": "498ce74584aa73bc47ce0bce4ca85504d9e7c4d40fad99dc4043875ded791324",
-    "uart.txt": "e8f338a8414f866dc9ade81c2e59183618773575203c5d7317baa408aa5da408",
-    "build.log": "d62045a80e74eae788602597f8f4ffde78b27817fe96fada540bf09a4bb0bec4"
-  }
-}

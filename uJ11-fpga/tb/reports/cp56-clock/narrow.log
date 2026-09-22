@@ -1,3 +1,0 @@
-CP56 oscillator high=18.27755 low=13.14701 ns
-FATAL: build/cp56-clock-tests/tb_narrow.v:45: SCK high timing
-       Time: 488522  Scope: tb_spi_cp56

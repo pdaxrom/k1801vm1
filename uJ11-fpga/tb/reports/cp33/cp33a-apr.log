@@ -1,8 +1,0 @@
-iverilog -g2012 -Wall -s tb_mmu_apr -o build/mmu_apr tb/tb_mmu_apr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v
-vvp build/mmu_apr
-PASS APR: 1144373 commands FULL=1; PAR16/PDR, byte lanes, W set/clear, all 64 entries, held/idle/reset
-tb/tb_mmu_apr.v:117: $finish called at 58394106000 (1ps)
-verilator --lint-only --Wall --top-module uj11_probe_apr synth/machxo2/uj11_probe_apr.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v
-- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
-- Verilator: Built from 0.069 MB sources in 4 modules, into 0.034 MB in 3 C++ files needing 0.000 MB
-- Verilator: Walltime 0.007 s (elab=0.001, cvt=0.003, bld=0.000); cpu 0.006 s on 1 threads; allocated 10.438 MB

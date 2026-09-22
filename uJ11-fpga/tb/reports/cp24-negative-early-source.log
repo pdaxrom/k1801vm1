@@ -1,3 +1,0 @@
-Archive: cp24a; mutations: [('microcode/m0.uasm', 'XOR_EA:\n    CALL, target=DESTINATION_EA, prefetch=0', 'XOR_EA:\n    JUMP, target=XOR_EARLY, prefetch=0\n.org $312\nXOR_EARLY:\n    alu PASSA, a=RS, b=T4, dst=RF\n    CALL, target=DESTINATION_EA, prefetch=0'), ('microcode/m0.uasm', 'alu XOR, a=RS, pair=AD, d=MDR, b=T2, dst=RF', 'alu XOR, a=T4, pair=AD, d=MDR, b=T2, dst=RF')]
-FATAL: tb/tb_trace_bit.v:75: case2560 op074020 beat2 got wr1 4000:dc56 expected wr0001 4000:dc54 upc095
-       Time: 395000  Scope: tb_trace_bit

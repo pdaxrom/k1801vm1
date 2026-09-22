@@ -1,2 +1,0 @@
-FATAL: tb/tb_mmu_dp_compare.v:36: MMU datapath post-edge mismatch check27
-       Time: 276000  Scope: tb_mmu_dp_compare.cycle

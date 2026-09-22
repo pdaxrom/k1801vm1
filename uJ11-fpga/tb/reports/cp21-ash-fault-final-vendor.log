@@ -1,7 +1,0 @@
-cc -O2 -Wall -DENABLE_MMU=0 -I.. -I../core tb/eis_ash_fault_vectors.c build/oracle_fault_core.c ../core/hardware.c -lm -o build/eis_ash_fault_vectors
-build/eis_ash_fault_vectors > build/eis-ash-fault-vectors.txt.tmp 2> build/eis-ash-fault-oracle.log
-mv build/eis-ash-fault-vectors.txt.tmp build/eis-ash-fault-vectors.txt
-PASS ASH fault differential mode-1: 1024 DCJ11 vector-boundary cases, 35180 clocks, 6280 exact bus beats, 112 repair clocks
-tb/tb_bus_fault.v:129: $finish called at 546456000 (1ps)
-PASS ASH fault differential mode2: 1024 DCJ11 vector-boundary cases, 651680 clocks, 6280 exact bus beats, 112 repair clocks
-tb/tb_bus_fault.v:129: $finish called at 6711456000 (1ps)

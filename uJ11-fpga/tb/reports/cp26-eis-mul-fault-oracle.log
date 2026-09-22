@@ -1,2 +1,0 @@
-MUL fault oracle: 4000 completed frames (3008 ACK error, 992 odd-word), 0 excluded candidates.
-Original emulator after the captured frame: 0 changed register/PSW states, 0 additional bus traces; preserved as observed C continuation, not compared as frame entry.

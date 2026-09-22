@@ -1,2 +1,0 @@
-Fault-frame oracle: 32780 completed frames (28256 ACK error, 4524 odd-word), 8 excluded candidates.
-Original emulator after the captured frame: 296 changed register/PSW states, 4 additional bus traces; preserved as observed C continuation, not compared as frame entry.

@@ -1,4 +1,0 @@
-build/vendor/ODDRXE.v:50: warning: implicit definition of wire 'OP'.
-build/vendor/ODDRXE.v:51: warning: implicit definition of wire 'ON'.
-build/vendor/ODDRXE.v:52: warning: implicit definition of wire 'RSTB1'.
-build/vendor/ODDRXE.v:84: warning: implicit definition of wire 'SR'.

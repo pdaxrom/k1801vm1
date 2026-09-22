@@ -1,5 +1,0 @@
-PASS CP71 unary: 99104 cases / 6947312 checks / 1928 manual DEC cases
-- tb/tb_fp_unary_cp71.v:107: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 8s; walltime 298.855 s; speed 26.633 ms/s
-- Verilator: cpu 298.671 s on 1 threads; allocated 2 MB

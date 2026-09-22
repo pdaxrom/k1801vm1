@@ -1,2 +1,0 @@
-PASS CP17 decoder: all 65536 checked; only RTT differs from archived CP16e
-build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

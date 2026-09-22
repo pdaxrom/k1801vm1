@@ -1,4 +1,0 @@
-SWAB/SXT: 1468 completed
-MARK: 3056 completed
-Extra DCJ11 ENABLE_MMU=0: 4524 completed cases; 1044 excluded.
-Reasons (may overlap): abort=4 trap=4 I/O=1040 odd-word=0

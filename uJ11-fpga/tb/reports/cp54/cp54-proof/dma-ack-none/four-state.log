@@ -1,2 +1,0 @@
-PASS CP54 four-state device data: 262144 cases
-four_state.v:54: $finish called at 262144000 (1ps)

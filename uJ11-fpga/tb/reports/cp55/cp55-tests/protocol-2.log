@@ -1,2 +1,0 @@
-PASS CP52 FRAM: 327 checked beats; sequential/redirect/byte/odd/write/bank/reset/hold/CS timing, divider2
-tb/tb_fram_cp52.v:120: $finish called at 1149778000 (1ps)

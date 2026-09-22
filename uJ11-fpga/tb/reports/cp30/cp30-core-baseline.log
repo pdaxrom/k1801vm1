@@ -1,9 +1,0 @@
-iverilog -g2012 -Wall -s tb_core -o build/core tb/tb_core.v tb/uj11_ram.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
-vvp build/core
-PASS differential: 12928 DCJ11 cases, R0..R7/PSW/memory/traps; 0..3 waits, 45248 clocks
-PASS core boundaries: 16-bit PC wrap
-tb/tb_core.v:76: $finish called at 2779816000 (1ps)
-verilator --lint-only --Wall --top-module uj11_probe_core synth/machxo2/uj11_probe_core.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
-- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
-- Verilator: Built from 0.365 MB sources in 13 modules, into 0.281 MB in 3 C++ files needing 0.000 MB
-- Verilator: Walltime 0.024 s (elab=0.003, cvt=0.014, bld=0.000); cpu 0.024 s on 1 threads; allocated 14.203 MB

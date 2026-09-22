@@ -1,5 +1,0 @@
-PASS CP76 events: 111 cases / 4174 checks
-- build/cp77-fp11/events-sync/tb.v:532: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 12ms; walltime 0.841 s; speed 13.982 ms/s
-- Verilator: cpu 0.841 s on 1 threads; allocated 2 MB

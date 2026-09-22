@@ -1,2 +1,0 @@
-PASS CP56 timed SPI: 950 beats, 560 reset offsets; half=17.80500 ns SCK/MOSI/CS=6.0/6.0/6.0 ns MISO=13.0+2.0 ns
-tb/tb_spi_cp56.v:112: $finish called at 2873620170 (1ps)

@@ -1,8 +1,0 @@
-python3 tools/oracle_core.py --vectors
-Audited DCJ11 build copy: four address hooks, 1 vector hook; source unchanged
-cc -O2 -Wall -DORACLE_ACCESS_AUDIT=1 -DORACLE_VECTOR_AUDIT=1 -DORACLE_TRAP_PROFILE=1 -DENABLE_MMU=0 -I.. -I../core tb/trap_vectors.c build/oracle_control_core.c ../core/hardware.c -lm -o build/trap_vectors
-build/trap_vectors > build/trap-vectors.txt.tmp 2> build/trap-oracle.log
-mv build/trap-vectors.txt.tmp build/trap-vectors.txt
-FATAL: tb/tb_ea.v:77: case3585 op000002 beat0 got wr0 1000:0001 expected wr0000 1000:0002 upc020
-       Time: 1559605000  Scope: tb_ea
-make: *** [test-trap] Error 1

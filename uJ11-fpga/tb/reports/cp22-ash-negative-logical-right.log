@@ -1,3 +1,0 @@
-Archive: cp22c; mutation: ('alu ASR, a=T4, b=T4, dst=RF, flags=NZVC', 'alu LSR, a=T4, b=T4, dst=RF, flags=NZVC')
-FATAL: tb/tb_trace_bit.v:121: trace case9200 op072001 prePSW0000 upc020 clocks16 beats1/1 flags0000/0008 fault0 IRQ0/0 retires1
-       Time: 436000  Scope: tb_trace_bit

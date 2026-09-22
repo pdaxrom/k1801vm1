@@ -1,5 +1,0 @@
-PASS CP78 PSW: 1741 cases 12486 checks 238577 clocks decode=1 aligned=1
-- tb/tb_psw_cp78.v:129: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 2ms; walltime 0.094 s; speed 26.287 ms/s
-- Verilator: cpu 0.094 s on 1 threads; allocated 2 MB

@@ -1,8 +1,0 @@
-PASS EA differential mode-1: 31671 DCJ11 cases, all 7x8x8 mode pairs, 948247 clocks, 137006 exact bus beats
-tb/tb_ea.v:116: $finish called at 15500056000 (1ps)
-PASS EA differential mode2: 31671 DCJ11 cases, all 7x8x8 mode pairs, 14739672 clocks, 137006 exact bus beats
-tb/tb_ea.v:116: $finish called at 153414306000 (1ps)
-iverilog -g2012 -DVENDOR_ROM -s tb_ea_faults -o build/vendor_ea_faults tb/tb_ea_faults.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v microcode/generated/uj11_m0_ebr.v "build/vendor/DP8KC.v" "build/vendor/GSR.v" "build/vendor/PUR.v"
-vvp build/vendor_ea_faults
-PASS EA directed: 14 cases, seven word operations demand I/O, odd source/pointer, five store errors preserve flags and memory
-tb/tb_ea_faults.v:87: $finish called at 5326000 (1ps)

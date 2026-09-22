@@ -1,2 +1,0 @@
-PASS CP42 D-input: 135168 comparisons, 131072 known vectors + 4096 four-state vectors
-/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tb/tb_d_input_cp42.v:51: $finish called at 135168000 (1ps)

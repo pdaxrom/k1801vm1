@@ -1,0 +1,121 @@
+{
+  "revision": "3d4c8d5b026852adc262c9a5fac2953377f95962",
+  "hardware": "CP67b",
+  "sources": [
+    {
+      "path": "tests/baseline/decode.mem",
+      "archive_path": "build/cp67-modules/decode.mem",
+      "sha256": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5"
+    },
+    {
+      "path": "tests/baseline/firmware.mem",
+      "archive_path": "build/cp67-modules/firmware.mem",
+      "sha256": "34f506e4f6735616bd07e778d1eaf45a3e8612df2ffdaf3bbf5c7d652293f134"
+    },
+    {
+      "path": "tests/baseline/microcode.mem",
+      "archive_path": "build/cp67-modules/m0.mem",
+      "sha256": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97"
+    },
+    {
+      "path": "microcode/uj11.uasm",
+      "archive_path": "build/cp67-modules/service.uasm",
+      "sha256": "2dd63dc064350fc95dc80fb7e7bde3dd87de5a1b9370207e046f2f0a272cf299"
+    },
+    {
+      "path": "boards/hc1200/uj11_board.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_board.v",
+      "sha256": "08d754d67b2dcf98ba366d45cb96152261da51a8b205fcc2d6ddfaeb615e8be9"
+    },
+    {
+      "path": "boards/hc1200/uj11_board_bus.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_board_bus.v",
+      "sha256": "a7ad5ee2f838536c6708c5ada307250702ba7f8fa21cbc0b5cb723b2be6350a2"
+    },
+    {
+      "path": "boards/hc1200/uj11_board_fram.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_board_fram.v",
+      "sha256": "f9a4f9964d0ec26062f06dbbd91f8c76ce6a427a474c18c45656a3c4e63f3976"
+    },
+    {
+      "path": "boards/hc1200/uj11_button.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_button.v",
+      "sha256": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0"
+    },
+    {
+      "path": "boards/hc1200/uj11_microcomp.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_microcomp.v",
+      "sha256": "f11be1d5444d1fddae7307cbbe93dbe8ed0617133d23b06ecde32740db566204"
+    },
+    {
+      "path": "boards/hc1200/uj11_panel.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_panel.v",
+      "sha256": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54"
+    },
+    {
+      "path": "boards/hc1200/uj11_tick.v",
+      "archive_path": "build/cp67-modules/src/boards/hc1200/uj11_tick.v",
+      "sha256": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4"
+    },
+    {
+      "path": "rtl/peripherals/spi_byte_service.v",
+      "archive_path": "build/cp67-modules/src/reference/lsi11/spi_byte_service.v",
+      "sha256": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb"
+    },
+    {
+      "path": "rtl/peripherals/wbc_uart_xo2.v",
+      "archive_path": "build/cp67-modules/src/reference/lsi11/wbc_uart_xo2.v",
+      "sha256": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b"
+    },
+    {
+      "path": "rtl/uj11_alu.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_alu.v",
+      "sha256": "dcbd712b6ee35bcb60e5032bd14a3a1a05deaa8e138325c05935c8846f0ccdf4"
+    },
+    {
+      "path": "rtl/uj11_core.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_core.v",
+      "sha256": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13"
+    },
+    {
+      "path": "rtl/uj11_datapath.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_datapath.v",
+      "sha256": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68"
+    },
+    {
+      "path": "rtl/uj11_decode.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_decode.v",
+      "sha256": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9"
+    },
+    {
+      "path": "rtl/uj11_decode_rom.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_decode_rom.v",
+      "sha256": "fb251759af9bb03d169daef8af87b62bdd7d6305e0d35ff7553c7617f0501952"
+    },
+    {
+      "path": "rtl/uj11_engine.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_engine.v",
+      "sha256": "1764b2a587e9a90596ae56c8da940362525bbd05994da5ee22878519a2bf6f43"
+    },
+    {
+      "path": "rtl/uj11_mem.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_mem.v",
+      "sha256": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8"
+    },
+    {
+      "path": "rtl/uj11_microseq.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_microseq.v",
+      "sha256": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38"
+    },
+    {
+      "path": "rtl/uj11_psw.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_psw.v",
+      "sha256": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5"
+    },
+    {
+      "path": "rtl/uj11_regfile.v",
+      "archive_path": "build/cp67-modules/src/rtl/uj11_regfile.v",
+      "sha256": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09"
+    }
+  ]
+}

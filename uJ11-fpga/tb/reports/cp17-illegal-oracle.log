@@ -1,2 +1,0 @@
-Reserved/invalid-mode DCJ11 kernel/T=0 ENABLE_MMU=0: 4160 completed of 18534 candidates; 14374 excluded.
-Reasons (may overlap): abort=394 different/no-vector=14374 I/O=550 odd-word=0

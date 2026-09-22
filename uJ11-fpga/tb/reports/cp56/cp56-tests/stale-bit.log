@@ -1,2 +1,0 @@
-FATAL: tb/tb_spi_cp56.v:71: timed MISO read 1000 got1108 expected1110
-       Time: 2334270  Scope: tb_spi_cp56.beat

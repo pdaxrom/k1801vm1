@@ -1,3 +1,0 @@
-Archive: cp19a; mutation: ('imm=$ef, b=T4', 'imm=$ff, b=T4')
-FATAL: tb/tb_trace_bit.v:114: trace case2560 op106400 prePSW0007 upc020 clocks8 beats1/1 flags0010/0000 fault0 IRQ0/0 retires1
-       Time: 356000  Scope: tb_trace_bit

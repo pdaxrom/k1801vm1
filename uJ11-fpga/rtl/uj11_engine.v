@@ -3,6 +3,7 @@
 // combinational function of dispatch_ir (incoming data during FETCH).
 module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, parameter [15:0] UNMASKED_VECTOR=0) (
     input wire clk, reset,
+    input wire halt_button, debug_block,
     input wire irq_valid,
     input wire [2:0] irq_priority,
     input wire [IRQ_VECTOR_BITS:1] irq_vector,
@@ -12,6 +13,7 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
     output wire [15:0] dispatch_ir,
     output wire [15:0] mem_addr, mem_write_data,
     output wire mem_request, mem_read, mem_write, mem_byte,
+    output wire mem_bank, mem_physical,
     input wire mem_ack, mem_error,
     input wire [15:0] mem_read_data,
     output wire stopped,
@@ -25,6 +27,86 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
     output wire [3:0] debug_rf_address,
     output wire [15:0] debug_rf_data
 );
+    localparam [9:0] S_FP=10'h02d;
+    localparam [9:0] S_ODT=10'h053;
+    localparam [9:0] S_START=10'h10e;
+    localparam [9:0] S_RCPC=10'h116;
+    localparam [9:0] S_RCPS=10'h11e;
+    localparam [9:0] S_WCPC=10'h126;
+    localparam [9:0] S_WCPS=10'h12e;
+    localparam [9:0] S_UPPER_READ=10'h057;
+    localparam [9:0] S_UPPER_WRITE=10'h06b;
+    localparam [9:0] S_CONFIG=10'h06f;
+    localparam [9:0] S_STATUS=10'h0a1;
+    localparam [9:0] S_LOWER_READ=10'h0a5;
+    localparam [9:0] S_LOWER_WRITE=10'h0a9;
+    localparam [9:0] S_MFUS=10'h0ad;
+    localparam [9:0] S_MTUS=10'h136;
+    localparam [9:0] S_RSEL=10'h13e;
+    // Single frozen context. Cold reset clears readiness, not FRAM.
+    reg service_mode;
+    // CONFIG/STATUS low bits 0..1 retain ABI2 meaning. Bit2 enables debug;
+    // legacy service software cannot enter an uninstalled debug vector.
+    reg debug_enabled, debug_pending, debug_context, debug_wait, debug_trace;
+    wire debug_wanted=debug_enabled && service_ready[0] && debug_pending &&
+                      !service_mode && !debug_block;
+    wire debug_ack=step && debug_wanted && (alu_boundary || wait_command);
+    wire wait_return=service_leave && debug_context && debug_wait;
+    always @(posedge clk) begin
+        if(reset) begin
+            debug_enabled<=0; debug_pending<=0; debug_context<=0;
+            debug_wait<=0; debug_trace<=0;
+        end else begin
+            if(halt_button && debug_enabled && service_ready[0]) debug_pending<=1;
+            if(step && service_config) begin
+                debug_enabled<=read_a[2];
+                debug_pending<=read_a[3];
+                debug_wait<=read_a[5];
+                debug_trace<=read_a[6];
+            end
+            if(debug_ack) begin
+                debug_pending<=0;
+                debug_context<=1;
+                debug_wait<=wait_command;
+                debug_trace<=trace_pending;
+            end
+            if(step && service_leave) begin
+                debug_context<=0;
+                if(debug_context) debug_pending<=0;
+                if(ir[2] && debug_enabled && service_ready[0]) debug_pending<=1;
+            end
+        end
+    end
+    reg [1:0] service_ready;
+    wire [1:0] service_space=(reading || writing) ? uword[8:7] : 2'd0;
+    wire service_enter=control && command==0 && uword[2:1]==1;
+    wire service_leave=control && command==0 && uword[2:1]==2;
+    wire service_config=control && command==0 && uword[2:1]==3;
+    // ACTIVE selects current CPU space. GUEST is logical bank zero;
+    // UPPER/LOWER bypass every CPU ROM/CSR overlay for raw physical RAM.
+    // CPC/CPSW are ordinary UPPER memory words, addressed by microcode in T5.
+    assign mem_bank=(service_mode || service_space[1]) && !service_space[0];
+    assign mem_physical=service_space[1];
+    always @(posedge clk) begin
+        if(reset)begin
+            service_mode<=1;
+            service_ready<=0;
+        end else if(step)begin
+            if(service_enter)service_mode<=1;
+            if(service_leave)service_mode<=0;
+            if(service_config)service_ready<=read_a[1:0];
+        end
+    end
+    // Use the opcode prefix instead of comparing ten microcode entry addresses.
+    // Logic decode consumes incoming data; EBR decode has already captured IR.
+    wire [15:0] service_ir=ROM_DECODE!=0 ? ir : dispatch_ir;
+    wire service_privileged=service_ir[15:6]==0 &&
+        (service_ir[5] ? ~|service_ir[4:3] : |service_ir[4:3]);
+    wire [9:0] service_dispatch=
+        service_ir[15:12]==4'hf ? (service_mode ? 10'h3ff : service_ready[1] ? S_FP : 10'h042) :
+        service_ir==0 ? (service_mode ? 10'h3ff : S_ODT) :
+        (!service_mode && service_privileged) ? 10'h042 : dispatch_address;
+
     wire [35:0] uword;
     wire [9:0] next_address;
     wire control = uword[35];
@@ -40,7 +122,7 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
     wire trap_command = control && command==4'd15;
     wire [15:0] resolved_vector={{(15-IRQ_VECTOR_BITS){1'b0}},irq_vector,1'b0};
     // Optional private board firmware assist. External IRQs retain IPL rules.
-    wire irq_pending = irq_valid && (irq_priority > psw[7:5] ||
+    wire irq_pending = !service_mode && irq_valid && (irq_priority > psw[7:5] ||
                        (UNMASKED_VECTOR!=0 && resolved_vector==UNMASKED_VECTOR)) && !irq_active[1];
     wire alu_boundary = !control &&
                         (uword[9:8]==2'd2 || (uword[9:8]==2'd3 && read_a==16'd1));
@@ -49,10 +131,10 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
     // T is sampled before an instruction; RTI instead uses restored T and
     // RTT suppresses its own trace. WAIT checks T only after its first step.
     wire return_trace = uword[0] && uword[12:10]!=3'd6;
-    wire trace_pending = irq_active==0 && (wait_command ? (wait_seen && psw[4]) :
+    wire trace_pending = !service_mode && irq_active==0 && (wait_command ? (wait_seen && psw[4]) :
                          (return_trace ? (psw[4] && !ir[2]) : trace_latched));
-    wire trace_ack = step && trace_pending && (alu_boundary || wait_command);
-    assign irq_ack = step && irq_pending && !trace_pending && (alu_boundary || wait_command);
+    wire trace_ack = step && trace_pending && !debug_wanted && (alu_boundary || wait_command);
+    assign irq_ack = step && irq_pending && !trace_pending && !debug_wanted && (alu_boundary || wait_command);
     assign waiting = wait_command && !reset && !stopped;
     // Register JUMP.init for peripherals with asynchronous reset inputs.
     // Pulse covers the following settling word; IRQ samples after release.
@@ -119,7 +201,7 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
                           (flags==2'd1 || flags==2'd2 || destination==3'd5 || destination==3'd6);
     always @* begin
         case (uword[12:10])
-            3'd0: d = 0;
+            3'd0: d = (uword[7] && uword[9:8]!=1) ? {7'b0,1'b1,!service_ready[1],debug_trace,debug_wait,debug_context,debug_pending,debug_enabled,service_ready} : 16'b0;
             3'd1: d = 1;
             3'd2: d = 2;
             3'd3: d = (byte_instruction && a<4'd6) ? 16'd1 : 16'd2;
@@ -142,14 +224,17 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
         .address(read_a),.data(read_b),.ack(effective_ack),.error(mem_error && !decode_wait),
         .request(raw_request),.read(raw_read),.write(raw_write),.byte_word(mem_byte),
         .addr(mem_addr),.write_data(mem_write_data),.complete(complete),.fault(bus_fault));
+    // CJUMP and a memory operation are mutually exclusive. Its current
+    // bus-error predicate is therefore always zero. Fault redirect/repair
+    // remain connected to the real fault; no error is masked or delayed.
     uj11_microseq seq(.clk(clk),.reset(reset),.enable(advance),.uword(uword),.ir(ir),
-        .nzvc(psw[3:0]),.dispatch_address(dispatch_address),.address_odd(read_a[0]),
+        .nzvc(psw[3:0]),.dispatch_address(service_dispatch),.address_odd(read_a[0]),
         .byte_instruction(byte_instruction),.selected_a(a),.q0(q[0]),
-        .loop_zero(1'b0),.bus_error(bus_fault!=0),.a_one(read_a==16'd1),.irq_pending(irq_pending),.trace_pending(trace_pending),.fault_redirect(fault_redirect),.fault_repair(fault_repair),.upc(debug_upc),.next_address(next_address));
+        .loop_zero(1'b0),.bus_error(1'b0),.a_one(read_a==16'd1),.irq_pending(irq_pending),.trace_pending(trace_pending),.fault_target(service_mode ? 10'h2b6 : 10'h015),.debug_pending(debug_wanted),.wait_return(wait_return),.step_return(service_leave && ir[2]),.fault_redirect(fault_redirect),.fault_repair(fault_repair),.upc(debug_upc),.next_address(next_address));
 `ifdef UJ11_VENDOR_ROM
     uj11_rom rom(.clk(clk),.enable(reset || advance),.address(next_address),.data(uword));
 `else
-    uj11_rom #(.IMAGE("microcode/generated/m0.mem")) rom(
+    uj11_rom #(.IMAGE("build/hardware/m0.mem")) rom(
         .clk(clk),.enable(reset || advance),.address(next_address),.data(uword));
 `endif
     assign dispatch_ir = fetching ? mem_read_data : ir;
@@ -165,12 +250,16 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
             retire <= 0;
             wait_seen <= 0;
             irq_active <= 0;
-            frame_active <= 0;
+            frame_active <= 1;
             fault_repair <= 0;
             trace_latched <= 0;
         end else begin
-            retire <= step && ((alu_boundary && irq_active==0) || (wait_command && !wait_seen));
+            retire <= step && ((alu_boundary && irq_active==0) || (wait_command && !wait_seen) || (service_leave && ir[2]));
             if (step) wait_seen <= wait_command;
+            if (step && service_leave) begin
+                trace_latched <= debug_context ? debug_trace : psw[4];
+                if(wait_return) wait_seen<=1;
+            end
             // These READ continuations contain exactly one architectural +1/+2.
             // Defer only that delta until after a failed bus edge; preserve the
             // successful stream-read/PC-update order and its prefetch hit.
@@ -184,8 +273,11 @@ module uj11_engine #(parameter integer ROM_DECODE=0, IRQ_VECTOR_BITS=8, paramete
             // The default 8-bit external interrupt-vector interface is unchanged.
             if (irq_ack) mdr <= resolved_vector;
             if (bus_fault!=0 && frame_active) fault_latched <= bus_fault;
-            if (step && trap_command) frame_active <= 1;
-            else if (step && alu_boundary) frame_active <= 0;
+            // Guard incomplete entry/context and fault-vector construction through
+            // the first successful handler opcode fetch. A fault while guarded
+            // remains terminal; SEL174/274 escalation is not implemented.
+            if ((step && (trap_command || service_enter)) || (fault_redirect && service_mode)) frame_active <= 1;
+            else if (service_mode ? ((step && fetching && ROM_DECODE==0) || fetch_capture) : (step && alu_boundary)) frame_active <= 0;
             if ((step && (reading || (fetching && ROM_DECODE==0))) || fetch_capture) mdr <= mem_read_data;
             if ((step && fetching && ROM_DECODE==0) || fetch_capture) begin
                 ir <= mem_read_data;

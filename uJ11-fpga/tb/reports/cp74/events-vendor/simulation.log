@@ -1,2 +1,0 @@
-PASS CP74 events: 43 cases / 1527 checks
-tb/fp_events_cp74.vh:269: $finish called at 3980370000 (1ps)

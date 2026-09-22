@@ -1,4 +1,0 @@
-PASS trace negative: missing-trace; archived cp16f
-PASS trace negative: rti-old-T; archived cp17a with one explicit mutation
-PASS trace negative: rtt-traces; archived cp17a with one explicit mutation
-PASS trace negative: trace-irq-ack; archived cp17a with one explicit mutation

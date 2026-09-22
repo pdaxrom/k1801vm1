@@ -1,0 +1,191 @@
+PANEL	= 166000
+PANELO	= PANEL+1
+
+PINDIN	= 1
+PINCE	= 2
+PINCLK	= 4
+PINRS	= 10
+PINBL	= 20
+PINLAT	= 40
+	.ASECT
+
+;	Initialise the HCMS chain, turn the RGB LED off and clear all 16 digits.
+PNINIT:
+	MOV	R0,-(SP)
+	MOV	#PINCE+PINRS+PINBL,R0
+	MOVB	R0,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	#1000,R0
+10$:	SOB	R0,10$
+	JSR	PC,PNCMD
+	CLR	R0
+	JSR	PC,PNRGB
+	MOV	#BLANKS,R0
+	JSR	PC,PNDISP
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Load Control Word 0 (0x4c) through all eight devices in the chain.
+PNCMD:
+	MOV	R0,-(SP)
+	MOV	R1,-(SP)
+	BISB	#PINCE+PINRS,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	#10,R1
+	MOV	#114,R0
+10$:	JSR	PC,SHBYTE
+	SOB	R1,10$
+	BISB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Display 16 characters.  The downstream eight-character module is sent
+;	first, matching the original HC1200 firmware and physical daisy chain.
+PNDISP:
+	MOV	R0,-(SP)
+	MOV	R1,-(SP)
+	MOV	R2,-(SP)
+	MOV	R3,-(SP)
+	MOV	R4,-(SP)
+	MOV	R5,-(SP)
+	BISB	#PINCE,SHADOW
+	BICB	#PINRS,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	R0,R5
+	ADD	#10,R5
+	MOV	#10,R4
+10$:	JSR	PC,PNCHAR
+	SOB	R4,10$
+	MOV	12(SP),R5	; PNCHAR uses R0; recover the saved buffer pointer
+	MOV	#10,R4
+20$:	JSR	PC,PNCHAR
+	SOB	R4,20$
+	BISB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINBL,SHADOW
+	MOVB	SHADOW,@#PANELO
+	MOV	(SP)+,R5
+	MOV	(SP)+,R4
+	MOV	(SP)+,R3
+	MOV	(SP)+,R2
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Send one 5-column glyph.  The compact font covers ASCII 040..137.
+PNCHAR:
+	MOVB	(R5)+,R1
+	BIC	#177400,R1
+	CMP	R1,#40
+	BLO	10$
+	CMP	R1,#137
+	BHI	10$
+	SUB	#40,R1
+	BR	20$
+10$:	CLR	R1
+20$:	MOV	R1,R3
+	ASL	R3
+	ASL	R3
+	ADD	R1,R3
+	ADD	#FONT,R3
+	MOV	#5,R2
+30$:	MOVB	(R3)+,R0
+	BIC	#177400,R0
+	JSR	PC,SHBYTE
+	SOB	R2,30$
+	RTS	PC
+
+;	Set RGB using an intuitive active-high mask.  The external register uses
+;	active-low LED outputs, while its upper five bits select key columns.
+PNRGB:
+	MOV	R0,-(SP)
+	BIC	#177770,R0
+	COM	R0
+	BIC	#177770,R0
+	MOVB	R0,RGBRAW
+	BIS	#370,R0
+	JSR	PC,PNLATC
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Scan the 4-by-5 keyboard.  The mapping is the one used by the original
+;	HC1200 display module: 0..15 are hex keys and 16..19 are function keys.
+; Full-matrix scan rejects more than one active intersection. No chords.
+PNKEY:	MOV R1,-(SP)
+	MOV R2,-(SP)
+	MOV R3,-(SP)
+	MOV R4,-(SP)
+	MOV R5,-(SP)
+	MOV #-1,R5
+	CLR R2
+	MOV #10,R3
+1$:	MOV R3,R0
+	BIS RGBRAW,R0
+	JSR PC,PNLATC
+	MOV @#PANEL,R4
+	ASH #-4,R4
+	BIC #177760,R4
+	BEQ 4$
+	TST R5
+	BPL 8$
+	MOV R4,R0
+	DEC R0
+	BIT R0,R4
+	BNE 8$
+	MOV R2,R1
+2$:	INC R1
+	ASR R4
+	BNE 2$
+	MOVB KEYMAP(R1),R5
+	BIC #177400,R5
+4$:	ADD #4,R2
+	ASL R3
+	CMP R3,#400
+	BLO 1$
+	MOV R5,R0
+	BR 9$
+8$:	MOV #-2,R0
+9$:	MOV (SP)+,R5
+	MOV (SP)+,R4
+	MOV (SP)+,R3
+	MOV (SP)+,R2
+	MOV (SP)+,R1
+	RTS PC
+SHBYTE:
+	MOV	R0,-(SP)
+	MOV	R1,-(SP)
+	MOV	#10,R1
+10$:	ASLB	R0
+	BCC	20$
+	BISB	#PINDIN,SHADOW
+	BR	30$
+20$:	BICB	#PINDIN,SHADOW
+30$:	MOVB	SHADOW,@#PANELO
+	BISB	#PINCLK,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINCLK,SHADOW
+	MOVB	SHADOW,@#PANELO
+	JSR	PC,RXPOLL
+	SOB	R1,10$
+	MOV	(SP)+,R1
+	MOV	(SP)+,R0
+	RTS	PC
+
+;	Shift and latch the external RGB/keyboard register.  HCMS CE is forced
+;	high so the shared DIN/CLK transitions cannot change display contents.
+PNLATC:
+	BISB	#PINCE,SHADOW
+	MOVB	SHADOW,@#PANELO
+	JSR	PC,SHBYTE
+	BISB	#PINLAT,SHADOW
+	MOVB	SHADOW,@#PANELO
+	BICB	#PINLAT,SHADOW
+	MOVB	SHADOW,@#PANELO
+	RTS	PC
+	.ASECT

@@ -1,3 +1,0 @@
-PASS APR: 1144373 commands FULL=1; PAR16/PDR, byte lanes, W set/clear, all 64 entries, held/idle/reset
-PASS shared APR: 2288746 coherent lookup reads, CSR collision/release
-build/cp46-combined-apr-tests/tb_mmu_apr.v:137: $finish called at 92725290000 (1ps)

@@ -1,7 +1,0 @@
-{
-  "port": "/dev/ttyUSB1",
-  "started_utc": "2026-09-13T07:47:49Z",
-  "commands": [
-    "COPY DK:U66TST.SAV HG:TSTCHK.SAV"
-  ]
-}

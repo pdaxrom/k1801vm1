@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'CJUMP, cond=NOT_N, target=DIV_COMMIT', 'JUMP, target=DIV_COMMIT')]
-FATAL: tb/tb_trace_bit.v:123: trace case1952 op071002 R1 got0001 expectedffff
-       Time: 1526000  Scope: tb_trace_bit

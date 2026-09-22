@@ -1,2 +1,0 @@
-PASS CP72 paths: 467 cases / 32176 checks / 128 manual DEC cases
-tb/tb_fp_paths_cp72.v:107: $finish called at 35971300000 (1ps)

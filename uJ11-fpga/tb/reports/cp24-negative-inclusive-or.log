@@ -1,3 +1,0 @@
-Archive: cp24a; mutations: [('microcode/m0.uasm', 'alu XOR, a=RS, b=RD, dst=RF, flags=NZV, seq=FETCH', 'alu OR, a=RS, b=RD, dst=RF, flags=NZV, seq=FETCH')]
-FATAL: tb/tb_trace_bit.v:121: trace case1248 op074001 prePSW0000 upc020 clocks2 beats1/1 flags0008/0004 fault0 IRQ0/0 retires1
-       Time: 296000  Scope: tb_trace_bit

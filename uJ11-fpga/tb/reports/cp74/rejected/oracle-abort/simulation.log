@@ -1,3 +1,0 @@
-[2741242400000] %Fatal: tb_fp_paths_cp74.v:35: Assertion failed in tb_fp_paths_cp74.eq: case116993 op00000174427 kind1 addr00000001002 oracle FEC got000014 want000004 PC001400 IR000010 uPC0b9
-%Error: tb/tb_fp_paths_cp74.v:35: Verilog $stop
-Aborting...

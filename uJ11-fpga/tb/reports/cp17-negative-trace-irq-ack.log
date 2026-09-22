@@ -1,3 +1,0 @@
-Archived source: cp17a; mutation: ('irq_pending && !trace_pending &&', 'irq_pending &&')
-FATAL: tb/tb_trace_system.v:37: wrong return/IRQ trace boundary
-       Time: 1345000  Scope: tb_trace_system

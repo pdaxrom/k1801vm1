@@ -1,3 +1,0 @@
-Archive: cp22c; ASHC-only mutation: ('alu LSR, a=T5, flags=NZVC', 'alu LSR, a=T4, flags=NZVC')
-FATAL: tb/tb_trace_bit.v:121: trace case5104 op073002 prePSW0000 upc020 clocks30 beats1/1 flags0001/0000 fault0 IRQ0/0 retires1
-       Time: 576000  Scope: tb_trace_bit

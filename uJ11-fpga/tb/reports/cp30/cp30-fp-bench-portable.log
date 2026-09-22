@@ -1,9 +1,0 @@
-FPBENCH 170100 6 1
-FPBENCH 170200 6 1
-FPBENCH 170000 10 1
-FPBENCH 170001 10 1
-FPBENCH 170002 10 1
-FPBENCH 170011 10 1
-FPBENCH 170012 10 1
-PASS FP11 control differential: 7 cases, all LDFPS values, all Rn including PC/SP, PSW/RF/FPS, no external data beats; cycles=62 max=10
-tb/tb_fp_control.v:76: $finish called at 2816000 (1ps)

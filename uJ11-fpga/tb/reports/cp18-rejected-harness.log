@@ -1,5 +1,0 @@
-Pre-final test harness, CP18a portable run. Architectural source fitted successfully; regression stopped at a packed-string filename error. Final tb_trace_bit.v uses an explicit string variable and was tested with both suites/ROMs.
-WARNING: tb/tb_trace_bit.v:89: $fopen's file name argument (vpiConstant) is not a valid string.
-FATAL: tb/tb_trace_bit.v:89: missing vectors
-       Time: 100000  Scope: tb_trace_bit
-make: *** [test-trace-bit] Error 1

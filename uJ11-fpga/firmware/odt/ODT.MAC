@@ -1,11 +1,11 @@
 	.TITLE UJODT
 	.IDENT /01.01/
 ; CP64 software debugger. All addresses/numbers are octal unless dotted.
-; Absolute HALT-FRAM module, loaded with the unchanged ABI2 UJLOAD.
+; Absolute HALT-FRAM ABI3 module. UJMOD installs it; INIT initializes it.
 	.ASECT
 	.=10000
+INIT:	JMP @#COLD
 ODT:	JMP @#ENTER
-ACTV:	JMP @#ENABLE
 SIGN:	.WORD 125064,1
 	.MACRO JNE DST,?OK
 	BEQ OK
@@ -44,28 +44,6 @@ RBUF=177562
 TCSR=177564
 TBUF=177566
 PANEL=166000
-; Invoked ONLY after UJON has checked code checksum, wrapper and common ABI.
-; No stack and no calls, so the caller's RT-11 context cannot become ODT's.
-ENABLE:	.WORD 43
-	BIT #400,R0
-	BEQ ENFAIL
-	BIT #1,R0
-	BEQ ENFAIL
-	BIC #177774,R0
-	.WORD 42
-	MOV #ENTER,@#110
-	CMP @#110,#ENTER
-	BNE ENFAIL
-	MOV #340,@#112
-	CMP @#112,#340
-	BNE ENFAIL
-	BIS #4,R0
-	.WORD 42
-	CLR R2
-	BR ENEXIT
-ENFAIL:	MOV #1,R2
-ENEXIT:	MOV #312,@#4
-	.WORD 10
 ; Both the normal HALT wrapper and the dedicated debug vector enter here.
 ENTER:	MOV R0,REGS
 	MOV R1,REGS+2

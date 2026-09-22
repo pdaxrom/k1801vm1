@@ -1,2 +1,0 @@
-PASS board FRAM: 2048 transactions, both banks, byte/word/odd, held ACK, complete 128 KiB comparison; divider3
-build/cp53-tests/compare/tb_board_fram.v:46: $finish called at 4812850000 (1ps)

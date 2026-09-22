@@ -1,2 +1,0 @@
-PASS MMR3 C oracle: 262160 commands, 16 RESET; all word values and four lane masks
-tb/tb_mmr3_oracle_cp43.v:27: $finish called at 5243230000 (1ps)

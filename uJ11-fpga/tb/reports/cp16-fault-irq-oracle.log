@@ -1,2 +1,0 @@
-build/fault_irq_order
-PASS fault IRQ oracle: 8 DCJ11 bus/odd faults at IPL0/IPL7; handler instruction precedes IRQ

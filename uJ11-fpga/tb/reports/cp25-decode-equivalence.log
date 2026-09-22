@@ -1,2 +1,0 @@
-PASS CP25 decoder: all 65536 checked; only MUL differ from archived CP24a
-build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

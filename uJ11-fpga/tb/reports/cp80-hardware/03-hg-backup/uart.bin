@@ -1,11 +1,0 @@
-LOAD HG
-
-..[KDIR HG:
- 
-FP11  .BIN    10  19-Sep-2026    
- 1 Files, 10 Blocks
- 8144 Free blocks
-
-..[KCOPY DK:FP11.BIN HG:OLDFP.BIN
-
-..[K

@@ -1,2 +1,0 @@
-PASS CP63 CPU: 19 cases 169 checks ROM_DECODE=1
-tb/tb_debug_cp63.v:93: $finish called at 288250000 (1ps)

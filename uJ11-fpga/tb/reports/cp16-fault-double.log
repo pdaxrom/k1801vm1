@@ -1,4 +1,0 @@
-iverilog -g2012 -Wall -s tb_bus_fault_double -o build/bus_fault_double tb/tb_bus_fault_double.v rtl/uj11_core.v rtl/uj11_decode.v rtl/uj11_engine.v rtl/uj11_microseq.v rtl/uj11_datapath.v rtl/uj11_regfile.v rtl/uj11_alu.v rtl/uj11_psw.v rtl/uj11_mem.v rtl/uj11_rom.v
-vvp build/bus_fault_double
-PASS bus double fault: 96 FETCH/operand-error and odd-PC cases with all four frame errors, odd SP and 0..3 waits
-tb/tb_bus_fault_double.v:82: $finish called at 46456000 (1ps)

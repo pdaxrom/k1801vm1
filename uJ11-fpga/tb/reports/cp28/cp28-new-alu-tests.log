@@ -1,8 +1,0 @@
-iverilog -g2012 -Wall -s tb_alu -o build/alu tb/tb_alu.v rtl/uj11_alu.v
-vvp build/alu
-PASS ALU: 66592 independent result/NZVC checks
-tb/tb_alu.v:62: $finish called at 66592000 (1ps)
-iverilog -g2012 -Wall -s tb_datapath -o build/datapath tb/tb_datapath.v rtl/uj11_alu.v rtl/uj11_regfile.v rtl/uj11_datapath.v
-vvp build/datapath
-PASS datapath: 16 RF words, 256 dual reads, 4096 pair checks, BA SUB/BIC writeback, Q/shift/stall/reset
-tb/tb_datapath.v:66: $finish called at 4646000 (1ps)

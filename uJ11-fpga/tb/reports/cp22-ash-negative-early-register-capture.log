@@ -1,3 +1,0 @@
-Archive: cp22c; mutation: ('ASH:\n    CALL, target=DESTINATION_EA, prefetch=0\n    alu PASSA, a=RS, b=T4, dst=RF', 'ASH:\n    alu PASSA, a=RS, b=T4, dst=RF\n    CALL, target=DESTINATION_EA, prefetch=0')
-FATAL: tb/tb_trace_bit.v:123: trace case25912 op072020 R0 got4000 expected4002
-       Time: 416000  Scope: tb_trace_bit

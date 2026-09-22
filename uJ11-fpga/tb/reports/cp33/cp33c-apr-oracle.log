@@ -1,7 +1,0 @@
-cc -O2 -Wall -DENABLE_MMU=1 -I.. tb/reference_mmu_apr.c ../core/hardware.c -lm -o build/reference_mmu_apr
-build/reference_mmu_apr > build/mmu-apr-oracle.txt.tmp
-mv build/mmu-apr-oracle.txt.tmp build/mmu-apr-oracle.txt
-iverilog -g2012 -Wall -s tb_mmu_apr_oracle -o build/mmu_apr_oracle tb/tb_mmu_apr_oracle.v rtl/uj11_mmu_apr.v rtl/uj11_mmu_apr_ram.v rtl/uj11_mmu_apr_decode.v rtl/uj11_mmu_translate.v
-vvp build/mmu_apr_oracle
-PASS APR C oracle: 65536 cases / 196608 CSR commands, 4149 translated / 61387 faults; byte/W/readback + serial PAR/PDR lookup
-tb/tb_mmu_apr_oracle.v:70: $finish called at 6022097000 (1ps)

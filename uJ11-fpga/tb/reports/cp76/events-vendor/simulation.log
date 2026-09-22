@@ -1,2 +1,0 @@
-PASS CP76 events: 111 cases / 4174 checks
-tb/fp_events_cp76.vh:439: $finish called at 11765590000 (1ps)

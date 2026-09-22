@@ -1,2 +1,0 @@
-PASS CP79 events: 111 cases / 4174 checks
-build/cp80-fp11/events-vendor/tb.v:532: $finish called at 11843850000 (1ps)

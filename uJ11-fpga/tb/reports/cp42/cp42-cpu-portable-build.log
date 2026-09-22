@@ -1,4 +1,0 @@
-build/cp39-csr/uj11_engine.v:92: warning: implicit definition of wire 'running'.
-build/cp39-csr/uj11_engine.v:93: warning: implicit definition of wire 'advance'.
-reference/lsi11/wbc_uart_xo2.v:8: warning: timescale for wbc_uart_xo2 inherited from another file.
-reference/lsi11/spi_byte_service.v:1: ...: The inherited timescale is here.

@@ -1,2 +1,0 @@
-PASS CP55 FRAM miter: divider2 195 beats 256 reset offsets 61132 clock comparisons, SPI/ACK and valid X/Z data
-build/cp55-tests/tb_miter.v:76: $finish called at 611327000 (1ps)

@@ -1,2 +1,0 @@
-FATAL: tb/tb_fram_miter_cp47.v:28: SPI/handshake mismatch clock391
-       Time: 3911000  Scope: tb_fram_miter_cp47

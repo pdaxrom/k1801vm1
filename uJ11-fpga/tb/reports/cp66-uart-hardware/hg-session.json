@@ -1,9 +1,0 @@
-{
-  "pid": 165206,
-  "executable": "/tmp/uj11-cp29-a/host-hg/hgfsd",
-  "executable_sha256": "9481f1d47e8187f24f52a5954ee4029a3d55521c84d10c145cadec24db486dbc",
-  "share": "/tmp/uj11-cp66-uart-test-20260913/share",
-  "clock_hz": 1000,
-  "stopped": true,
-  "result": "directory input error; test file not installed"
-}

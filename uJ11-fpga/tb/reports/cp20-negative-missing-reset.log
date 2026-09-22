@@ -1,3 +1,0 @@
-Archive: cp19a; mutation: None
-FATAL: tb/tb_trace_bit.v:75: case1 op000005 beat1 got wr0 000a:945c expected wrxxxx xxxx:xxxx upc3d9
-       Time: 365000  Scope: tb_trace_bit

@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'imm=7, b=T5, dst=RF', 'imm=3, b=T5, dst=RF')]
-FATAL: tb/tb_trace_bit.v:121: trace case192 op071002 prePSW0000 upc020 clocks15 beats1/1 flags0003/0007 fault0 IRQ0/0 retires1
-       Time: 426000  Scope: tb_trace_bit

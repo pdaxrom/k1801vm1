@@ -1,0 +1,31 @@
+	.TITLE START
+	.ASECT
+; Fits the 54 bytes following the unchanged 426-byte SD bootstrap.
+; The build verifies every fixed address against both assembled listings.
+; Cold reset already selected HALT; these are all ordinary logical MOVs.
+	.= 010652
+START:
+	mov #010000, r0         ; Copy original SD bootstrap to HALT RAM first
+	mov #004000, r1
+	mov #000325, r2
+INSTA1:
+	mov (r0)+, r3
+	mov r3, (r1)
+	cmp r3, (r1)+
+	bne FAILED
+	sob r2, INSTA1
+	mov #011534, r0         ; ROM payload after CP60's 348-byte RK firmware
+	mov #000200, r1
+	mov #000122, r2         ; Checked by build against resident.bin
+INSTAL:
+	mov (r0)+, r3
+	mov r3, (r1)
+	cmp r3, (r1)+
+	bne FAILED
+	sob r2, INSTAL
+	jmp @#012000            ; resident initialize label, checked by build
+FAILED:
+	br FAILED               ; Remain in ROM/HALT if FRAM readback failed.
+STARTE:
+IMEND:
+	.END

@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "comparisons": 250200,
-  "exponent_gaps": 255,
-  "inputs": {
-    "tb/reference_fp_add_cp79.h": "e373b1c7c3d907e62a7efe072d45aea0405f3c5b8cecd133dd449c6475194630",
-    "tools/test_fp_math_cp79.py": "bcf959b806e3e5054b51800d3b2c3ec08f840814235f86168add11fe91c662a4"
-  }
-}

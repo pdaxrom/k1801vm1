@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'CJUMP, cond=N, target=DIV_REMAINDER', 'CJUMP, cond=N, target=DIV_OVERFLOW')]
-FATAL: tb/tb_trace_bit.v:121: trace case2128 op071002 prePSW0000 upc020 clocks129 beats1/1 flags000a/0008 fault0 IRQ0/0 retires1
-       Time: 1566000  Scope: tb_trace_bit

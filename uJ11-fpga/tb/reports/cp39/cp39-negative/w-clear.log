@@ -1,2 +1,0 @@
-FATAL: build/cp39-tests/tb_mmu_apr.v:71: shared PDR stale/wrong entry
-       Time: 10836000  Scope: tb_mmu_apr.send

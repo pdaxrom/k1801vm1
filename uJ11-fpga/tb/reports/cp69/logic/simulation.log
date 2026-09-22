@@ -1,5 +1,0 @@
-PASS CP69 memory: 665 cases / 47540 checks
-- tb/tb_fp_memory_cp69.v:106: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 42ms; walltime 1.634 s; speed 25.705 ms/s
-- Verilator: cpu 1.632 s on 1 threads; allocated 2 MB

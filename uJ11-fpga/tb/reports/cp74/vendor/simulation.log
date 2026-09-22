@@ -1,2 +1,0 @@
-PASS CP74 paths: 304 cases / 21764 checks / 72 manual DEC cases
-tb/tb_fp_paths_cp74.v:107: $finish called at 36373650000 (1ps)

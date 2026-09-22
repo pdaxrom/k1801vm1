@@ -1,0 +1,332 @@
+{
+  "date": "2026-09-22",
+  "previous_tree_revision": "3d4c8d5b026852adc262c9a5fac2953377f95962",
+  "purpose": "Production-source cleanup and regression; no new synthesis or board programming",
+  "hardware": "CP67b",
+  "software": "ODT CP77 / FPP CP80 / SDBOOT and UJMOD ABI3",
+  "equivalence": "All RTL/EBR tokens, assembled microcode and three ROM word images match the released baseline; four rebuilt BIN/SAV images and JED match byte for byte. Source comments and unused harness tails cleaned without changing executed code.",
+  "unit_checks": {
+    "python_assembler": 18,
+    "python_clock_gate": 4,
+    "module_format": 6,
+    "uart_helper": 7,
+    "alu_word": 66592,
+    "alu_byte": 2097152,
+    "rf_pairs": 4096,
+    "byte_datapath": 16384,
+    "microsequencer": 4336,
+    "reset_button": 28,
+    "psw_memory": "PASS masks/lanes/waits/odd/beat checks"
+  },
+  "regressions": [
+    {
+      "name": "FPP exact sums",
+      "passed": true,
+      "comparisons": 250200,
+      "result_sha256": "2d6a1293b33b4dfa71a0e8e341ef9677c128e76e371cb746b1b613b668f567bb"
+    },
+    {
+      "name": "FPP conversions",
+      "passed": true,
+      "comparisons": 251328,
+      "result_sha256": "e325b929d6a74cc2cc75af52637b61791aa46434a2ee4a929d4ccd8647d749ca"
+    },
+    {
+      "name": "FPP smoke",
+      "passed": true,
+      "mode": "sync",
+      "cases": 5084,
+      "checks": 351328,
+      "manual_expectations": 0,
+      "pass_lines": [
+        "PASS CP79 paths: 5084 cases / 351328 checks / 0 manual DEC cases"
+      ],
+      "log_sha256": "ba64bf403dc508dec522734c2f02a0542dada2f78bf8144226eb4c3373e36cb6",
+      "result_sha256": "bf7d91a00636fec594cf1dba4beadebddd9e2b5d3d080e43ca126a9430caecbe"
+    },
+    {
+      "name": "FPP PSW",
+      "passed": true,
+      "mode": "sync",
+      "cases": 712,
+      "checks": 25823,
+      "pass_lines": [
+        "PASS CP80 PSW: 712 cases / 25823 checks ROM_DECODE=1"
+      ],
+      "log_sha256": "2ae22c275ddc5ae56cf64251356c804839504e711554b2a4758a79ab78767a74",
+      "result_sha256": "dcfe0efc4d180431272faed1c8f6c8fc9cb1860a6533b87e77914625c2d95309"
+    },
+    {
+      "name": "FPP events portable",
+      "passed": true,
+      "pass_lines": [
+        "PASS CP79 events: 111 cases / 4174 checks"
+      ],
+      "log_sha256": "2eac5889ce72b8e3633e0693020ecb603f815b032429229b197b4b6f814d8a02",
+      "result_sha256": "91399dff65e602004ff73ed2004b2807151eabac2fde1d08b955583be466de5f"
+    },
+    {
+      "name": "FPP events Lattice EBR",
+      "passed": true,
+      "pass_lines": [
+        "PASS CP79 events: 111 cases / 4174 checks"
+      ],
+      "log_sha256": "3abebfff6ccbb4a42e3e0151521efc48c78522b5dd6a078805cdd28bea94a1f6",
+      "result_sha256": "23c03aa6768bbe451db4cab3093965dddb10f6d24213ec867dd5fead366003e1"
+    },
+    {
+      "name": "UJMOD",
+      "passed": true,
+      "cases": 38,
+      "checks": 49,
+      "clocks": 261770,
+      "pass_lines": [
+        "PASS CP67 native loader: 38 cases, 49 checks, 261770 clocks"
+      ],
+      "log_sha256": "e2f9d32d87b6b3d90bed644dce57d32a097fbc9bae50f23a4d1420bf66c6a027",
+      "result_sha256": "a97a78ce051099658050cf9ba152a74a7edf7082c96ce71883b9891f68e21b35"
+    },
+    {
+      "name": "ODT",
+      "passed": true,
+      "mode": "sync",
+      "pass_lines": [
+        "PASS CP64 monitor: 187 checks 175 commands 5493498 clocks"
+      ],
+      "log_sha256": "3f35fb1d4fbda5033eaa6c83640f74e4d7b6c66e64d3405114b8d60b5c5cae9c",
+      "result_sha256": "cc33ba1ebfe982210c2feda698a019ae15f11e4c253205f830e615054d069b39"
+    },
+    {
+      "name": "Breakpoints",
+      "passed": true,
+      "checks": 112,
+      "clocks": 4026967,
+      "pass_lines": [
+        "PASS CP66: 112 checks 4026967 clocks",
+        "PASS CP64 monitor: 112 checks 103 commands 4026967 clocks"
+      ],
+      "log_sha256": "4d86e68b48ff7a8d2653442ce9f2442790622371c84bddd0afd1dc138f7793da",
+      "result_sha256": "f7b520fe2763ea9232235e7e228651c5bdc7b6b21783972f9515921edb6c8230"
+    },
+    {
+      "name": "Panel",
+      "passed": true,
+      "checks": 2700,
+      "windows": 85,
+      "clocks": 114750732,
+      "pass_lines": [
+        "PASS CP66: 2700 checks 85 windows 114750732 clocks",
+        "PASS CP64 monitor: 2700 checks 164 commands 114750732 clocks"
+      ],
+      "log_sha256": "7112fee2095d1d6d6c31358f9f474aea09ab3d3e30d9b934e361ead38da663ec",
+      "result_sha256": "a107b45f8e016382c98133f8aea90099526ab6008af087a9ef2631365e831e60"
+    },
+    {
+      "name": "ODT FPP",
+      "passed": true,
+      "checks": 9262,
+      "clocks": 209981546,
+      "opcodes": 4096,
+      "live_contexts": 1008,
+      "pass_lines": [
+        "PASS CP64 monitor: 9262 checks 5133 commands 209981546 clocks"
+      ],
+      "log_sha256": "45200c58115497f96cc3cebec9eca1bf87ea56bde674fc7b226c9d7d59b1d4fe",
+      "result_sha256": "b45407975dcb191ccadacf18853543cb710be2fd9aeb22776fb39740637fcd89"
+    },
+    {
+      "name": "RT-11 integration",
+      "passed": true,
+      "checks": 99,
+      "clocks": 833104183,
+      "uart_bytes": 9776,
+      "pass_lines": [
+        "PASS CP79 RT11 modules: 99 checks, 833104183 clocks, 9776 UART bytes"
+      ],
+      "log_sha256": "1a4b53b59597d57d5ac43d3e3defa2e62bc10b7bbc550155f5c0cb3488e99f22",
+      "result_sha256": "c02bbb448ddb3bafe532dccfbae6f6aede1df303b1695332632ae26b7878f226"
+    },
+    {
+      "name": "Module configuration",
+      "passed": true,
+      "checks": 206,
+      "clocks": 576076980,
+      "uart_bytes": 2092,
+      "pass_lines": [
+        "PASS CP82 modules: 206 checks, 576076980 clocks, 2092 UART bytes"
+      ],
+      "log_sha256": "8838590f566c53f7b61f0cdf6e3637acf02b43d0306d24a5e2c618de35d0ff56",
+      "result_sha256": "0eebd614d85779d8f4851fc07e1a13d3e3fd321bdf22259190c545a02cea802a"
+    },
+    {
+      "name": "BASIC FIS",
+      "passed": true,
+      "checks": 13,
+      "clocks": 441457102,
+      "uart_bytes": 811,
+      "pass_lines": [
+        "PASS CP81 BASIC: 13 checks, 441457102 clocks, 811 UART bytes"
+      ],
+      "log_sha256": "9a2ad6e0b1eafcb7aa26445ef3658e7baa999eb7f14cbb19d8c050fb9a9d7630",
+      "result_sha256": "c3761ece9020ee823f34a220ee799c49425e23f4e58ffa27cd07d1a3b675b7dd"
+    },
+    {
+      "name": "BASIC FPU single",
+      "passed": true,
+      "checks": 9,
+      "clocks": 602031107,
+      "uart_bytes": 811,
+      "pass_lines": [
+        "PASS CP81 BASIC: 9 checks, 602031107 clocks, 811 UART bytes"
+      ],
+      "log_sha256": "828cd3b54c8e84ff77e6fdc78c5c6378f362398265c4e34f135b2d06e2d9b1ea",
+      "result_sha256": "627d0d4542c449727387f7c657c7b9acc5f308198aed2091308d9359d8d76856"
+    },
+    {
+      "name": "BASIC FPU double",
+      "passed": true,
+      "checks": 10,
+      "clocks": 743275169,
+      "uart_bytes": 881,
+      "pass_lines": [
+        "PASS CP81 BASIC: 10 checks, 743275169 clocks, 881 UART bytes"
+      ],
+      "log_sha256": "951357f1fa10cb09646a30d0fe3bb34f742f560f13935cc976b76c3746066a8d",
+      "result_sha256": "247ad46f2e3f7c0791aa7ad31671c1a7c2501cc6bcaaeeadf841aec7c6f290b1"
+    },
+    {
+      "name": "Cold modules",
+      "passed": true,
+      "cases": 30,
+      "checks": 249,
+      "result_sha256": "7aba3a36fbe28362b4fcea2c6f5e49440459545a5f7574773f695eca5cab65f2"
+    }
+  ],
+  "source_sha256": {
+    "Makefile": "07486f913a5f53a09dbb5b06dab1c55faa66f2ce1796ecdc5a1a42c530fd5ce2",
+    "boards/hc1200/pins.lpf": "b75315f0e3900ed628d058d6aba7b5e6d8c8d6ee8e13975626eb9fd590be08ed",
+    "boards/hc1200/uj11_board.v": "7a98d0b7942be1512f8fe76da179cfb870860a4691226b247b20dd71d4776ee8",
+    "boards/hc1200/uj11_board_bus.v": "5ecf567c7669bd167f1b14a5441dcf99030b4448db59c8481f2287467e16f387",
+    "boards/hc1200/uj11_board_fram.v": "57f7a1d2de74e3e3567f12509d64c037c29b1f862509a251a94602ec7ea1d44c",
+    "boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+    "boards/hc1200/uj11_microcomp.v": "f11be1d5444d1fddae7307cbbe93dbe8ed0617133d23b06ecde32740db566204",
+    "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+    "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "firmware/boot/BOOT.MAC": "f68bbcc5a8e179fe28eaf88bec35710e49757403e85f72ef2286b3cd20acdc58",
+    "firmware/boot/RESID.MAC": "f9feace5281d1020776ed3834cfe0a581b35301aa2ffe9440af955fdfac5fbad",
+    "firmware/boot/RKSERV.MAC": "5fce5497449602010cba0d1cf1a2776dd279cf6fb788bcee8683ef959b891dc8",
+    "firmware/boot/SDBASE.MAC": "e45f7f951141b6bdb5875b6894d4adee1e336453830e2b9172e004afb174982b",
+    "firmware/boot/SDBOOT.MAC.in": "695c2e4e007144b5e3977a229ad1fdfb058d271979417ed2a827b251e26f2698",
+    "firmware/boot/START.MAC": "5e435a6a302785ab3f4d431ab26ac509e9b0a74f5f9c24d68c31084efa90249d",
+    "firmware/fpp/FP11.MAC": "7b9a790fb0c931cd268b318324b8e0afdb33195f6ab708faccace6c8487ec965",
+    "firmware/fpp/FPTST.MAC": "a0cc5336fb42896b5fcbcc41a5c90db888a36dd5555774c057025ab17cae6a52",
+    "firmware/modules/HELPER.MAC": "53ff562d0ff67dd605f6c3b6b7d3dee7ac99429a1189a215cea8e93cbbac0d1c",
+    "firmware/modules/UJMOD.MAC.in": "452eaa0b5d2e5a8e8506ff59cc58e228180718413cedda48c44d7b722d20ff2b",
+    "firmware/odt/BREAK.MAC": "565dca3bf4b68a7816897c8d9fa3205432593ec92fe0f787139a97de22b633a2",
+    "firmware/odt/CONSTS.MAC": "079e21b910fa5f96ade91bf522eb348264500d1548a9fa2f5e795adfd8de250d",
+    "firmware/odt/DATA.MAC": "9c91b301b72d472aaf78dae6a2f8806f3ec36b3b1b69c0275321ac7469452c8f",
+    "firmware/odt/DISASM.MAC": "fe7149622062e84c4c3a80cdacd20eb46385565689f38ed5c756684933a75ad1",
+    "firmware/odt/DRIVER.MAC": "d41802f4fa8e875ad91a1c4b162cc663ff24e92e3882d17959a6af97ea672337",
+    "firmware/odt/FPDEBUG.MAC": "baa1edce0732402794729d303abc948bd19a0f55a84167cdbcfa54b9221ad328",
+    "firmware/odt/NAV.MAC": "cb4a3dcd9a56bf2a3e1d07cc3e9363fc01360dd98a45766f9ad363b62133aa9c",
+    "firmware/odt/ODINIT.MAC": "06f0a2bb411fc24c4a399cbb2efd043b95a3f3ee90417cd08243e7ce0a4afdc0",
+    "firmware/odt/ODT.MAC": "551d877d7a1f49ae9f1748b1dc3bac56db249b1fac92a2c28942d87483c20ded",
+    "firmware/odt/OVER.MAC": "de4b896059a81766d7c75da8f13211e10bac71681ed04d7d6c3168974f385ac6",
+    "firmware/odt/PANEL.MAC": "47aa5727eee2c97b44943adf15c88595ffc0929c6a239734f38eea87d9fcacf7",
+    "firmware/odt/STATE.MAC": "4933de79c5f3afa4d8b8454ae9bcfe83d55d6fe797081b7750520e45db38b169",
+    "microasm/uj11asm.py": "f2d0eeb31678ad39edb771e17459c76a2c2c1ad6defdb2b68fbcfc3b7ab43104",
+    "microcode/uj11.uasm": "2d9f0984048198cdd6481faca253430f7e31c3235ff4e95de916a580405dec77",
+    "rtl/peripherals/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+    "rtl/peripherals/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+    "rtl/uj11_alu.v": "a2ee1fff687eabbd4058028c95c5bc1f637e503a0aa584965a78aaba78c164d7",
+    "rtl/uj11_core.v": "bc68c1143ea6e3e07bae05ca73810616b820f6d34694f7198a317baa18496b13",
+    "rtl/uj11_datapath.v": "80c4193b65d9acda30fc1ad9921a76147d1b187c292b4e3ca720f5f14a481f68",
+    "rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+    "rtl/uj11_decode_rom.v": "4723b76f81180b16177fd1a57473d1cbb67aff5bc3c8b60f00e3fcae3d058921",
+    "rtl/uj11_engine.v": "d84d4c0c64c3b23d70e1ea7d7376db15afef4ceb1fea829a79d2a38b41dd62ed",
+    "rtl/uj11_mem.v": "50ab3b36bf3687d7f1d732d3bd24594a6007c58ae1124be37e0fc582b188daa8",
+    "rtl/uj11_microseq.v": "5995ed8a9aaa8928910205a39d93ec3da16c7e24faf50ecc63929da6fb6fbb38",
+    "rtl/uj11_psw.v": "098e5c43d888e6006948f7894520c47c0496fe54850dd2407b80802ecc0503d5",
+    "rtl/uj11_regfile.v": "25abe866389ea8cceb75be10a554d4245bfd43584692b28d1bae0b44777b9d09",
+    "rtl/uj11_rom.v": "2e655b7117e5f44f59929d47961b8615613326ed68d78fd28fa2b42595cf9817",
+    "synth/machxo2/fram-timing.lpf": "c901844d22ecdb64c3e132061cf9ecc33f0f4df5c092238f4a271202142b1b1a",
+    "synth/machxo2/uj11-board.sty": "0759168d7465a5eba298a9cb20a4bc3e5ae69bfcb04c7e36f1a864c764440449",
+    "tests/baseline/decode.mem": "7b23792c5ad7c00879fae78524d92eb65e8c147c21d390a5211ff719c9f4dfa5",
+    "tests/baseline/firmware.mem": "34f506e4f6735616bd07e778d1eaf45a3e8612df2ffdaf3bbf5c7d652293f134",
+    "tests/baseline/microcode.mem": "333df7128889e4a30b86a2ead546d84a3e6981f624d94c54ea18af05872b2e97",
+    "tests/baseline/production.json": "6e76f38695916be256cd4105381980a894d1d7a447e5b9f5daa0f1c74c49c0c2",
+    "tests/basic_modules.vh": "58d2f7b319a1e6dd7bf0282e044c468217249c95ba330c1376f0e9e010c08f24",
+    "tests/basic_rt11.vh": "eb6d714010eff9abe89a8caa3dab395775f3c2c7909158c7565875a7b25e7bd0",
+    "tests/breakpoint_cases.vh": "9790b47d964add06bf8a12f999e243a9fd2997d7670175486751e5db41139dde",
+    "tests/fixtures/sequencer.uasm": "8c076cf486708863f0be00173b7fe544d3847270e4caef51df9eea8986c51cb3",
+    "tests/fpp_events.vh": "aecfd76f1774a7de8e6c9af49b5e87559a0a57b0192eb78f51e959f80cd424f9",
+    "tests/fpp_harness.vh": "adf10f3c856a159f00fed783eb22dd7cbc50f0d796a42b28a16d37f543539182",
+    "tests/fpp_psw.vh": "d9309348832aaf3d1662a38528a1d17883813b4bfb84b63db7c6c60eeb2fe5a3",
+    "tests/fpp_rt11.vh": "e1a7d40b6b8ad662d60a1431df779ff65394d3e48c383ea6965781757685537b",
+    "tests/models/ODDRXE.v": "0abb8af96c74991b754c0776e565da907a5d30cc2696f8ab6f0f203161c4543d",
+    "tests/models/spi_fram_model.v": "01a9056a9ced33fd4df8a01f1d98af3fa228cd978f9381e0a1e69e744172876a",
+    "tests/models/spi_sd_model.v": "e159dd7c1f6545a69d4e61e6688c3f16ac2762c693447b92c1642d20721bb7ad",
+    "tests/odt_panel_scroll.vh": "1ce1bb3d8b8f58898b2094e79cd94de5c9d990b14115793ef9ebe86ec8a16f07",
+    "tests/panel_breakpoints.vh": "1f6e5427a99ccdaf858805c1e12713182dbf950ad4bfe999b5efc37b7677bb91",
+    "tests/panel_cases.vh": "25df1265c97f91a8af806f6b7af2a7d35e8cea01645f2e5b068ddd3e4a985f57",
+    "tests/reference_fpp.c": "978577f291cc3ca952fafc045d7bd27437622ca3010610afa5196ed1ed2b22e6",
+    "tests/reference_fpp_add.h": "e373b1c7c3d907e62a7efe072d45aea0405f3c5b8cecd133dd449c6475194630",
+    "tests/reference_fpp_muldiv.h": "e64875f6fc3a9ac7a50f811224e90161e88abeb615c04140b9246bc6584b5c42",
+    "tests/rt11_harness.vh": "260e261e854cae08d8d9ac800f2abccebd8dd10c7de14fdeca3aab91fb4c8648",
+    "tests/tb_alu.v": "ebe422f0485d5a3cc876b3e33dd1ecd210b684ef5f2b25f37cb1a07a731516cd",
+    "tests/tb_alu_byte.v": "85252db1af05037c217175cd88aa82304ec400783956ab6e826b8da56966c44e",
+    "tests/tb_button.v": "3757f8346e61f34cd3f5feb1958285b6a51736c4b1427fa652aec2ec031df69b",
+    "tests/tb_datapath.v": "f6410c0e02d9ee06787759475f42ee3b6b194bf2af40d70883404c248d12a725",
+    "tests/tb_datapath_byte.v": "fd2bc8d04e44ff17659950f3e0c3a92f48caa06a3e08111f54653b0ece9a9014",
+    "tests/tb_fpp.v": "05dc9df082df5b26d28f45f1ef73138a21a72d89017ad1da7026adb201d6f0ae",
+    "tests/tb_mem_psw.v": "b818f82c7c716dfc53da4208619261b24aefcb8f2df3f8deda900cb00473c978",
+    "tests/tb_microseq.v": "b497ca85c005fe9f6c76edbf5190faec3182c8c51db50826a17ddbbd647f4a8e",
+    "tests/tb_modules.v": "64d59bc4f915cd7c1606e342458da07072f77b91807d09747ec4c31bde69a960",
+    "tests/tb_odt.v": "92774001cf65fc40848c6c3037372db2d8b91c52d1bce13035377ff2201b8feb",
+    "tests/test_board_clock.py": "df328fcd269af1db381566244ad1e6b2d49d1842d74ebf3062d3def4390d9d67",
+    "tests/test_microasm.py": "647ddbd3eadfa64eefba68008ef6673ca9cb2d33f73d6db7cae3577ef50506f4",
+    "tests/uj11_ram.v": "860616204e4ae883a6de2c0a534748369ce605f20cbecefe9454304367cf6338",
+    "tools/board_common.py": "ef211188ce1b8dcd48519f43dbab109cb64d43dac24d90275caace70089afdec",
+    "tools/build_basic.py": "5908274691dacad21f9ecc43c4b3147caa9678e4726caa15c102193c46b5ca46",
+    "tools/build_basic_fis_abi.py": "842e052d943664fba2ebd82dbd45b94a5276e6ac31cb07454007799833419e6a",
+    "tools/build_decode_rom.py": "eda6b260ad5c70d8ffd5e896218cf8c3d7aa9d66ff49db705cf3cf882b176f77",
+    "tools/build_fpp.py": "0dd958c47473d0a2b574a49b69fc989e1bc03332b0f2d3b2205da33fee96fe96",
+    "tools/build_hardware.py": "ab860d30fc114f7c2aeac360f323ae21b7cf347330954eb0997c1635c74b76be",
+    "tools/build_software.py": "cb25833a6adc45f757e7711e789e74a0ee59a7412860e5c77a33f75ef5700cec",
+    "tools/export_jed.py": "e6c43d651a9ed91795b315eeff0b630d98bc76dcfd803f8dc483b71b83951eb3",
+    "tools/firmware_rom.py": "5467cc0e45ffd7346c24d5cd0cd5914a5ab8fb9449cef90576da35e259344f06",
+    "tools/fp_numbers.py": "8e3b6d677165aef8fd0921dd1dcbf56bdcda23e162cafb70bb025d5e655d49cb",
+    "tools/fpp_fixture.py": "3b535f1caa578986f0afffa1c1d9c814f0b1e542d6b060ddb063d8ed72c5327d",
+    "tools/fpp_reference.py": "98e3da49764bd6b1cc804fc2665be8127ce0bdd655ef19166dc4c2f89f95e4e4",
+    "tools/hardware_basic.py": "9098dbbaffe7267f991544ca1aca12ffe62b3cf02706fc5daf2a719d72efea75",
+    "tools/hardware_fpp_psw.py": "0cb4d3b4786ca3f90e235c528f0e734a7b22d50f40d53098017c855e6321727f",
+    "tools/hardware_modules.py": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+    "tools/hardware_uart.py": "9856240db86a6130585d3a6ef74854f22b382cbaeb879acb659c50126c59e38b",
+    "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae",
+    "tools/make_programmer_xcf.py": "7a430b0d39ce5cdd21dc798ea47828468db464e303e2385231b32d8534355b6a",
+    "tools/module_image.py": "b2636d6d4e97a6277fe21ce9dec5a97dedb34f381038735afe1caf5eb0ecfa59",
+    "tools/odt_tables.py": "850a0abcaedc837a65a7266b7028bd6cb23e358dd985fbed6b73979b32acf0cf",
+    "tools/pdp11_program.py": "1319d213a6f14605ee56ec0fed5a90a69d1d00baaa592a93739dd01007ff520f",
+    "tools/report_synthesis.py": "c2f69349245be0e7c4414816fe5a41a2c0056145dedb36bc18e18af0c4e701cf",
+    "tools/rt11_build.py": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002",
+    "tools/run_basic.py": "8db7e97baff8c857bf251885ee5c904eb6ba307bbb5741b1e9c06b90717641d5",
+    "tools/run_rt11.py": "0745f4347ecfa73ec24f7a75464c199a267c88fa66b2b379de9210c4c18f319a",
+    "tools/synthesis.py": "bee8bc74398c3694708a800a798198e717aca637a3777b104e4399f61c38f620",
+    "tools/test_basic.py": "df367bf52042e59041d4da3af1b88929a4107ac7f0add949e5836ca2bbdba076",
+    "tools/test_breakpoints.py": "5f9b0a5a420fe40a642f421e9e8f7a90872c5adab5c697dfe2363775b95ba19a",
+    "tools/test_fpp.py": "e614fd362c08a600c1bad1fd49dfa099f268cb87b2f2e6ffc4f5358c49cc9ba8",
+    "tools/test_fpp_conversions.py": "406f35c6b4d97e4c63c9fafd2c58e952d6066f8e6901425064b360a0f612dd23",
+    "tools/test_fpp_events.py": "26a0ce9977e3ac558a775ed4ed93b823d0a4261ff6a97a59ea9cc864d74086bf",
+    "tools/test_fpp_math.py": "9a992859e259cd79057f029e42383da80412bd2324b035fd79db38d2b2a1d620",
+    "tools/test_fpp_psw.py": "27a3168c8e213403514f8aa2324e074cdb7b9603a6a2b4d03331a20aa078678b",
+    "tools/test_hardware_uart.py": "c13f757bcfe9cacf1310c4ec944f89ba51d54d307ab3e36f44dd6b11af479130",
+    "tools/test_loader.py": "b0ebc148d081f2876ec80ce39218742bc1f568042e99c50160b33323cde298c3",
+    "tools/test_module_image.py": "35112ee62e3e0f71dfa2be3741a53d0d08a850a0c44e9a6e92bc53883a15b11b",
+    "tools/test_modules.py": "8990a990840478f9af41d79ddda84bdf0caa69cce63ae7e2d93f04db60f323d2",
+    "tools/test_odt.py": "7728195efa11e8da627adb56ee3aedcc57287a5ebdfd955800ce15a7529b0ee3",
+    "tools/test_odt_fpp.py": "1c2f5593fff1312230ded061f66cd0adad04706a1b650f4f16de9513c4b4a6f7",
+    "tools/test_panel.py": "520636ab9d31d755b6e82d4aaf13955b2cfbde3ff93c260979372991df02f5af",
+    "tools/verify_production.py": "01f78d6b19f2e5f1e64f3f4dd38b75ab01ef438f2677800a428c625926d6449a"
+  },
+  "evidence": "Detailed logs remain in local ignored build directories; this compact record preserves counts and hashes. Older checkpoints and physical-board logs are in the previous Git tree. BASIC variants ran as three independent complete board instances with CRLF copies of BAS files."
+}

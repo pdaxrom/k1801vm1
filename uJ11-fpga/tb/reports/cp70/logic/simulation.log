@@ -1,5 +1,0 @@
-PASS CP70 transfers: 12080 cases / 862956 checks / 136 manual DEC cases
-- tb/tb_fp_transfer_cp70.v:107: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 834ms; walltime 32.526 s; speed 25.654 ms/s
-- Verilator: cpu 32.419 s on 1 threads; allocated 2 MB

@@ -1,2 +1,0 @@
-FATAL: tb/tb_mmu_entry_core.v:75: guest bus mismatch case1 upc020/020
-       Time: 865000  Scope: tb_mmu_entry_core

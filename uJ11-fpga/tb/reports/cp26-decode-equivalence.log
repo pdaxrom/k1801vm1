@@ -1,2 +1,0 @@
-PASS CP26 decoder: all 65536 checked; only DIV differ from archived CP25a
-build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

@@ -1,8 +1,0 @@
-COPY result RAM=065432 R0=000000 R1=006002 R2=000000 R4=125061 R5=035002
-PASS CP66: 112 checks 4026367 clocks
-- /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tb/odt_cp66_cases.vh:145: Verilog $finish
-PASS CP64 monitor: 112 checks 103 commands 4026367 clocks
-- build/cp66-breakpoints-final/tb.v:95: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 40ms; walltime 2.907 s; speed 13.849 ms/s
-- Verilator: cpu 2.901 s on 1 threads; allocated 2 MB

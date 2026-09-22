@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'DIV_INIT:\n    alu PASSA, a=RS, b=T4, dst=RF\n    alu PASSA, a=RS1, dst=Q', 'DIV_INIT:\n    alu PASSA, a=RS, b=T4, dst=RF\n    alu SUB, a=RS1, pair=AD, d=TWO, dst=Q')]
-FATAL: tb/tb_trace_bit.v:123: trace case4800 op071021 R0 got1555 expected1556
-       Time: 1656000  Scope: tb_trace_bit

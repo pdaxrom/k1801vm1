@@ -1,2 +1,0 @@
-PASS CP63 board: cold boot, native upload, physical button, SPI STEP/CONTINUE, long reset
-/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/cp63-debug/board_cases.vh:445: $finish called at 17170323000 (1ps)

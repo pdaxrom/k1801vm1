@@ -1,2 +1,0 @@
-FATAL: build/cp39-tests/tb_board_bus.v:99: DMA intercepted by APR CSR
-       Time: 14520000  Scope: tb_board_bus

@@ -1,6 +1,0 @@
-PASS CP44 CPU relocation: 4096 words x 8 pages x 2 address modes, upper FRAM write/read, low bank intact; 67468380 clocks 8 control beats 590096 PAR reads
-PASS CP44 enable lifetime: unmapped enable with non-I/O KIPAR7, mapped disable via alternate I/O, stable physical requests
-- tb/tb_relocate_cpu_cp44.v:121: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
-- Verilator: $finish at 675ms; walltime 46.867 s; speed 14.396 ms/s
-- Verilator: cpu 46.855 s on 1 threads; allocated 2 MB

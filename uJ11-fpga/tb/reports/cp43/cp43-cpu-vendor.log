@@ -1,3 +1,0 @@
-PASS CPU MMR3: 324 readbacks, 516 beats, 3508 lookup reads, 157988 clocks; all values, MOV/MOVB, RESET, APR persistence
-PASS CPU MMR3 odd: word read/write vector4, CSR preserved and no failed bus beat
-tb/tb_mmr3_cpu_cp43.v:95: $finish called at 1621530000 (1ps)

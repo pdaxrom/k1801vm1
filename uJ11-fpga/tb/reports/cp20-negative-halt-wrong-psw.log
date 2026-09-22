@@ -1,3 +1,0 @@
-Archive: cp20c; mutation: ('d=IMM, imm=$e0, flags=LOAD', 'd=IMM, imm=$00, flags=LOAD')
-FATAL: tb/tb_trace_bit.v:121: trace case0 op000000 prePSW0000 upc020 clocks12 beats4/4 flags0000/00e0 fault0 IRQ0/0 retires1
-       Time: 396000  Scope: tb_trace_bit

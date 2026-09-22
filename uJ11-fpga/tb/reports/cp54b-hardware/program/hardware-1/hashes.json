@@ -1,9 +1,0 @@
-{
-  "verify-id-2.log": "e1e0a522f4d0b7b1484ac691d7a80172626333e615e43411cc642b80d5c40bb3",
-  "hardware-1/programmer-old.log": "c3ed251e7a9d526f252ba651e39f2b09830d8bc42a0e0240f211bf0d17645d61",
-  "hardware-1/programmer-stdout.log": "44304813e3ca218f1674772a0a82c9a7b7c024ac27bb41cfa0bd240e1d11a72e",
-  "hardware-1/programmer.log": "d79f4cd2457286a725c407a5ef65d1fd04a8c5ace9f5f78a3c5ff0a89bb0d60b",
-  "hardware-1/session.json": "8a0ba18a56b9b9b939540b6513d2856e649ad4b9199953b71a20deb0607632e1",
-  "hardware-1/uart.bin": "d2fb7e42a9a1b6b752f136c37963a2912743e258cbda0c49939307ff24d64699",
-  "hardware-1/verification.json": "365368810e15cfcc2ac2b22fafd67d44399b1d309691c6cf161563b333a9750b"
-}

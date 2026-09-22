@@ -1,2 +1,0 @@
-FATAL: tb/tb_mmu_entry_core.v:91: CALL link mismatch case88 upc1cd
-       Time: 74256000  Scope: tb_mmu_entry_core

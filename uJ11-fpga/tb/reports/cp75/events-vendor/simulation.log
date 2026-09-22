@@ -1,2 +1,0 @@
-PASS CP75 events: 49 cases / 1742 checks
-tb/fp_events_cp75.vh:334: $finish called at 5519050000 (1ps)

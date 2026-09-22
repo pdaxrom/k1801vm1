@@ -1,9 +1,0 @@
-{
-  "destination": "sash@192.168.1.108:/tmp/uj11-cp54-20260911",
-  "file_count": 9,
-  "source_bytes": 71944,
-  "archive": "/tmp/uj11-cp54-delta.tgz",
-  "archive_bytes": 14919,
-  "archive_sha256": "9e323faa7249c4b1aa6ae4282c07ae1087fde1e367f092ddd2dc3a1a32f4b2a6",
-  "listing": "/tmp/cp54-files.txt"
-}

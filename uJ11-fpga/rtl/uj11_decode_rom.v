@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// CP36: every opcode and enable hold is checked against the old dispatch.
+// Opcode ROM generated with an exhaustive collision check against the decoder.
 module uj11_decode_rom(input wire clk, enable,
     input wire [15:0] incoming, output wire [9:0] entry);
     wire [15:0] op = incoming;

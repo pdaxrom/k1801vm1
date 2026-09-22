@@ -1,2 +1,0 @@
-PASS CP20 decoder: all 65536 checked; only HALT and RESET differ from archived CP19a
-build/tb_decode_equivalence.v:11: $finish called at 65536000 (1ps)

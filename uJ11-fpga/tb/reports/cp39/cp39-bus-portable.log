@@ -1,3 +1,0 @@
-PASS APR bus: 2097152 decode/DMA combinations; physical FRAM alias preserves CSR
-PASS board bus: 33 beats; bootstrap/MAINT, byte lanes, KW11, UART/SD side effects, RK EBR/vector/DMA/RTI
-build/cp39-tests/tb_board_bus.v:150: $finish called at 2112832000 (1ps)

@@ -1,5 +1,5 @@
 ; Immutable code and text end here. UJON verifies only this part on re-enable.
-IMMEND:
+
 FPPTR:	.WORD 0
 FPAC:	.WORD 0
 FPLIVE:	.WORD 0
@@ -89,4 +89,4 @@ ASMBUF:	.BLKB 192.
 STACK:	.BLKW 128.
 STKTOP:
 MEMEND:
-	.END ODT
+	.END INIT

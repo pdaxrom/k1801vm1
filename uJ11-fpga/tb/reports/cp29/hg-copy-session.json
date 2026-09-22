@@ -1,7 +1,0 @@
-{
-  "port": "/dev/ttyUSB1",
-  "started_utc": "2026-09-09T20:56:09Z",
-  "commands": [
-    "COPY HG:HELLO.TXT HG:ROUND.TXT"
-  ]
-}

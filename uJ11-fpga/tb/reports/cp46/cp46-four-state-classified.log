@@ -1,2 +1,0 @@
-PASS CP46 four-state data: 131072 cases, X/Z selected and unselected device words
-four_state.v:60: $finish called at 131072000 (1ps)

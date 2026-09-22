@@ -1,7 +1,0 @@
-{
-  "inputs_sha256": {
-    "tools/check_mmu_apr_csr.py": "120822eabdf5d8219ed6e20c69deb830573648a8b96a8df8f86115a6a862831f",
-    "tools/check_d_input_cp42_cpu.py": "8bbadb2fba5b519d73d5b9c35522d7e40fa8675093cc30c1a90dbe23183f5095",
-    "build/cp42-cpu/csr-portable.py": "356eb430cef82d1c31ce4c55c3658e2b8bfd26c8e2793dbae820b10832f1863f"
-  }
-}

@@ -1,9 +1,0 @@
-{
-  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
-  "image_sha256": "3b610b70a45972ca8b98fb20a1f440d7d09385a2d33cbe9b0d48ed1fb8d36304",
-  "programs": {
-    "UJLOAD.SAV": "106d2459e5f87cea70c03f1672c4f322f84bd071750e27df154ec22544dd64b6"
-  },
-  "modules": {},
-  "driver_sha256": "69db9e65bd9345de1d06f2b293414abcf8b87fb30212122d2ec5537d896b4c53"
-}

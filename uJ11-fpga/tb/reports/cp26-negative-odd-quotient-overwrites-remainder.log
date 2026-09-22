@@ -1,3 +1,0 @@
-Archive: cp26a; mutations: [('microcode/m0.uasm', 'alu PASSB, pair=ZQ, b=RS, dst=RF, flags=NZVC', 'alu PASSA, a=T4, b=RS1, dst=RF'), ('microcode/m0.uasm', 'alu PASSA, a=T4, b=RS1, dst=RF, seq=FETCH', 'alu PASSB, pair=ZQ, b=RS, dst=RF, flags=NZVC, seq=FETCH')]
-FATAL: tb/tb_trace_bit.v:123: trace case2736 op071102 R1 got0002 expected0003
-       Time: 1526000  Scope: tb_trace_bit

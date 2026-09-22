@@ -1,27 +1,0 @@
-^C
-^C
-
-..[KSHOW DEVICE
-
-Device    Status          CSR     Vector(s)
-------    ------          ---     ---------
-  RK      Not installed  177400   220
-  LP      Not installed  177514   200
-  BA      Installed      000000   000
-  VM      Not installed  177572   250
-  DL      Not installed  174400   160
-  DU      Not installed  172150   154
-  DM      Resident       177440   210
-  NL      Installed      000000   000
-  MT      Not installed  172520   224
-  MM      Not installed  172440   224
-  MU      Not installed  174500   260
-  LD      Installed      000000   000
-  EL      Not installed  000000   000
-  DP      Not installed  176710   254
-  SL      110344         000000   000
-  HG      Installed      166000   000
-
-
-
-..[K

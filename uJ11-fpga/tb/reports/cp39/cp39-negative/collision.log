@@ -1,2 +1,0 @@
-FATAL: build/cp39-tests/tb_mmu_apr.v:20: lookup stole CSR/reset port
-       Time: 45000  Scope: tb_mmu_apr

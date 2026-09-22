@@ -1,0 +1,160 @@
+	.TITLE HELPER
+	.ASECT
+; ABI2 HALT helper, uploaded by UJLOAD into FRAM, never into FPGA ROM.
+; R5 -> USER descriptor: operation, raw upper address, value.
+; Operations: 0 read, 1 write/readback, 2 ready mask, 3 status, 4 initialize.
+; Result R0=data/status, R2=0 success or 1 failure. R1/R3/R5 clobbered.
+; Caller enters via resident vector 170 with R4=125061, R2=0, R1=1000.
+	.= 001000
+LOADE1:
+	mov @#000004, r4
+	mov #FAILED, @#000004
+	.WORD 000021
+	mov r0, r3
+	.WORD 000021
+	mov r0, r1
+	.WORD 000021
+	cmp r3, #4
+	bhi BLOCK
+	cmp r3, #4
+	beq INITIA
+	cmp r3, #3
+	beq STATUS
+	cmp r3, #2
+	beq CONFIG
+	cmp r3, #1
+	bhi FAILED
+	bit #1, r1
+	bne FAILED
+	mov r1, r5
+	tst r3
+	beq READ
+	cmp r5, #001000
+	bcs FAILED
+	mov r0, r3
+	.WORD 000041               ; HALT-only raw upper write, including I/O backing
+	.WORD 000040
+	cmp r0, r3
+	bne FAILED
+	br SUCCES
+READ:
+	cmp r5, #4
+	bne PHYSIC
+	mov r4, r0
+	br SUCCES
+PHYSIC:
+	.WORD 000040
+	br SUCCES
+CONFIG:
+	cmp r0, #3
+	bhi FAILED
+	.WORD 000042
+	br SELECT
+STATUS:
+	.WORD 000043
+	br SUCCES
+INITIA:
+; An active module's system records are checked by UJLOAD before replacing it.
+; Do not silently repair them here. No ready modules: install the common ABI.
+	.WORD 000043
+	bit #3, r0
+	bne IDENTI
+	mov #000177, @#000320   ; JMP @000164, uses no guest register or guest stack
+	mov #0177640, @#000322  ; 164 - 324
+	mov #000777, @#000326   ; No loaded ODT: remain in HALT
+	mov #MODULE, @#000166
+	mov #002020, @#000010
+	mov #000340, @#000012
+SELECT:
+	mov #000326, @#000164
+	bit #1, r0
+	beq IDENTI
+	mov #002000, @#000164
+IDENTI:
+	mov #0125062, r0
+SUCCES:
+	clr r2
+LEAVE:
+	mov #000312, @#000004   ; Resident copy/execute failures use its own START
+	.WORD 000010
+FAILED:
+	mov #1, r2
+	br LEAVE
+; Bounded block calls. value=count (1..8 words). Copy op7 adds a fourth
+; descriptor word, USER source. The 65536-byte raw endpoint is legal.
+BLOCK:
+	cmp r3, #000010
+	bhi FAILED
+	tst r0
+	beq FAILED
+	cmp r0, #000010
+	bhi FAILED
+	bit #1, r1
+	bne FAILED
+	cmp r1, #001000
+	bcs FAILED
+	mov r0, r2
+	asl r0
+	add r1, r0
+	bcc BLOCKR
+	tst r0
+	bne FAILED
+BLOCKR:
+	cmp r3, #7
+	bne BLOCK2
+	.WORD 000021
+	bit #1, r0
+	bne FAILED
+	mov r0, r4
+	add r2, r0
+	bcs FAILED
+	add r2, r0
+	bcs FAILED
+	cmp r0, #0160000
+	bhi FAILED
+BLOCK2:
+	mov r1, r5
+	clr r1
+BLOCKL:
+	cmp r3, #000010
+	beq BLOCKC
+	cmp r3, #5
+	beq BLOCK1
+	cmp r3, #6
+	beq BLOCKZ
+	mov r5, r1
+	mov r4, r5
+	.WORD 000021
+	mov r5, r4
+	mov r1, r5
+	br BLOCKW
+BLOCKZ:
+	clr r0
+BLOCKW:
+	mov r0, r1
+	.WORD 000041
+	.WORD 000040
+	cmp r0, r1
+	bne FAILED
+	br BLOCKN
+BLOCKC:
+	.WORD 000040
+	tst r0
+	bne FAILED
+	br BLOCKN
+BLOCK1:
+	.WORD 000040
+	add r0, r1
+BLOCKN:
+	add #2, r5
+	sob r2, BLOCKL
+	mov r1, r0
+	jmp @#SUCCES
+	.= 001700
+MODULE:
+; ABI2 module exit: JMP @000166. Preserve R0-R6 and restore original CPSW.
+	mov #000312, @#000004
+	.WORD 000010
+LOADER:
+IMEND:
+	.END

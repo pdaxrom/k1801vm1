@@ -6,7 +6,8 @@ module uj11_microseq (
     input wire [35:0] uword,
     input wire [15:0] ir,
     input wire [3:0] nzvc,
-    input wire [9:0] dispatch_address,
+    input wire [9:0] dispatch_address, fault_target,
+    input wire step_return, debug_pending, wait_return,
     input wire address_odd, byte_instruction,
     input wire [3:0] selected_a,
     input wire q0, loop_zero, bus_error, a_one, irq_pending, trace_pending, fault_redirect, fault_repair,
@@ -14,7 +15,7 @@ module uj11_microseq (
     output reg [9:0] next_address
 );
     localparam [9:0] FETCH = 10'h020, IRQ = 10'h013, STOP = 10'h3ff;
-    wire [9:0] fetch_address = trace_pending ? 10'h024 : irq_pending ? IRQ : FETCH;
+    wire [9:0] fetch_address = debug_pending ? 10'h0c1 : trace_pending ? 10'h024 : irq_pending ? IRQ : FETCH;
     reg [9:0] link;
     reg link_valid;
     wire [9:0] sequential = upc + 10'd1;
@@ -44,7 +45,7 @@ module uj11_microseq (
                 4'd3: next_address = link_valid ? link : STOP;
                 4'd4, 4'd2: next_address = dispatch_address;
                 4'd13: next_address = upc;
-                4'd14: next_address = (trace_pending || irq_pending) ? fetch_address : upc;
+                4'd14: next_address = (debug_pending || trace_pending || irq_pending) ? fetch_address : upc;
                 default: begin end // JUMP/TRAP, OR_* and memory continuations
             endcase
         end else begin
@@ -55,8 +56,12 @@ module uj11_microseq (
                 2'd3: next_address = a_one ? fetch_address : sequential;
             endcase
         end
-        if (fault_redirect) next_address = uword[2] ? target : 10'h015;
-        if (fault_repair) next_address = 10'h015;
+        // STEP returns directly to FETCH, bypassing this one boundary's
+        // trace and IRQ arbitration. It does not set T or suppress later faults.
+        if (step_return) next_address = FETCH;
+        if (wait_return) next_address = 10'h012;
+        if (fault_redirect) next_address = uword[2] ? target : fault_target;
+        if (fault_repair) next_address = fault_target;
         if (reset)
             next_address = 10'b0;
     end

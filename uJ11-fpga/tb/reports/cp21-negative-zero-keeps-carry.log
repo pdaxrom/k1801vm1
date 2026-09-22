@@ -1,3 +1,0 @@
-Archive: cp21a; mutation: ('imm=63, b=T0, dst=RF, flags=NZVC', 'imm=63, b=T0, dst=RF, flags=NZV')
-FATAL: tb/tb_trace_bit.v:121: trace case1025 op072001 prePSW0001 upc020 clocks11 beats1/1 flags0001/0000 fault0 IRQ0/0 retires1
-       Time: 386000  Scope: tb_trace_bit

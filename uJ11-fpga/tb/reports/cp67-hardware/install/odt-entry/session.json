@@ -1,8 +1,0 @@
-{
-  "port": "/dev/ttyUSB1",
-  "started_utc": "2026-09-13T10:47:49Z",
-  "commands": [],
-  "uart_bytes": 0,
-  "rt11_banner_seen": false,
-  "finished_utc": "2026-09-13T10:48:34Z"
-}

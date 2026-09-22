@@ -1,5 +1,5 @@
 // Four shared output paths: carry chain, Boolean truth table, left, right.
-// Bit-exact with CP27 for all operands, all 16 operations, carry and width.
+// Shared word/byte ALU: 16 operations, carry input and NZVC result.
 `timescale 1ns/1ps
 module uj11_alu (
     input wire [15:0] a,b,input wire [3:0] operation,
