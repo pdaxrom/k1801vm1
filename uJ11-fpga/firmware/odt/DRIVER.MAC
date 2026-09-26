@@ -7,6 +7,8 @@ PINCLK	= 4
 PINRS	= 10
 PINBL	= 20
 PINLAT	= 40
+; Match the RT-11 panel driver: HCMS-3917 CW0, awake, 4.0 mA, PWM 28/60.
+PNCW0	= 154		; 0x6c; Broadcom AV02-3679EN, Table 2
 	.ASECT
 
 ;	Initialise the HCMS chain, turn the RGB LED off and clear all 16 digits.
@@ -25,7 +27,7 @@ PNINIT:
 	MOV	(SP)+,R0
 	RTS	PC
 
-;	Load Control Word 0 (0x4c) through all eight devices in the chain.
+;	Repeat the same Control Word 0 through the complete display chain.
 PNCMD:
 	MOV	R0,-(SP)
 	MOV	R1,-(SP)
@@ -34,7 +36,7 @@ PNCMD:
 	BICB	#PINCE,SHADOW
 	MOVB	SHADOW,@#PANELO
 	MOV	#10,R1
-	MOV	#114,R0
+	MOV	#PNCW0,R0
 10$:	JSR	PC,SHBYTE
 	SOB	R1,10$
 	BISB	#PINCE,SHADOW

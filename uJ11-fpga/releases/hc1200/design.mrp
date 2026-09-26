@@ -6,15 +6,17 @@ Design Information
 ------------------
 
 Command line:   map -a MachXO2 -p LCMXO2-1200HC -t QFN32 -s 4 -oc Commercial
-     cp67b_impl1.ngd -o cp67b_impl1_map.ncd -pr cp67b_impl1.prf -mp
-     cp67b_impl1.mrp -lpf /tmp/uj11-cp67b-20260913/uJ11-fpga/build/cp67b/impl1/c
-     p67b_impl1_synplify.lpf -lpf
-     /tmp/uj11-cp67b-20260913/uJ11-fpga/build/cp67b/clock.lpf -c 0 -pe 
+     hc1200-clock-calibrated_impl1.ngd -o hc1200-clock-calibrated_impl1_map.ncd
+     -pr hc1200-clock-calibrated_impl1.prf -mp hc1200-clock-calibrated_impl1.mrp
+     -lpf /tmp/uj11-clock-calibration.Dtwa6w/uJ11-fpga/build/hc1200-clock-calibr
+     ated/impl1/hc1200-clock-calibrated_impl1_synplify.lpf -lpf /tmp/uj11-clock-
+     calibration.Dtwa6w/uJ11-fpga/build/hc1200-clock-calibrated/clock.lpf -c 0
+     -pe 
 Target Vendor:  LATTICE
 Target Device:  LCMXO2-1200HCQFN32
 Target Performance:   4
 Mapper:  xo2c00,  version:  Diamond (64-bit) 3.14.0.75.2
-Mapped on:  09/13/26  13:31:22
+Mapped on:  09/22/26  23:52:53
 
 Design Summary
 --------------
@@ -58,18 +60,18 @@ Design Summary
    Number of Dynamic Bank Controller (BCLVDSO):  0 out of 1 (0%)
    Number of DCCA:  0 out of 8 (0%)
    Number of DCMA:  0 out of 2 (0%)
-   Number of PLLs:  0 out of 1 (0%)
-   Number of DQSDLLs:  0 out of 2 (0%)
 
                                     Page 1
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Design Summary (cont)
 ---------------------
+   Number of PLLs:  0 out of 1 (0%)
+   Number of DQSDLLs:  0 out of 2 (0%)
    Number of CLKDIVC:  0 out of 4 (0%)
    Number of ECLKSYNCA:  0 out of 4 (0%)
    Number of ECLKBRIDGECS:  0 out of 2 (0%)
@@ -124,18 +126,18 @@ Design Summary (cont)
      Net system/bus/rk_irq_pending_en: 1 loads, 1 LSLICEs
      Net system/bus/rk_immediate_done_2_sqmuxa_i: 3 loads, 3 LSLICEs
      Net system/bus/boot_release_armed_1_sqmuxa_i: 1 loads, 1 LSLICEs
-     Net system/bus/N_55_i: 1 loads, 1 LSLICEs
-     Net system/cpu/engine/irq_active_4_sqmuxa_i: 1 loads, 1 LSLICEs
 
                                     Page 2
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Design Summary (cont)
 ---------------------
+     Net system/bus/N_55_i: 1 loads, 1 LSLICEs
+     Net system/cpu/engine/irq_active_4_sqmuxa_i: 1 loads, 1 LSLICEs
      Net system/cpu/engine/un1_reset: 8 loads, 0 LSLICEs
      Net system/cpu/engine/advance: 6 loads, 6 LSLICEs
      Net system/cpu/engine/seq/un1_upc6_i: 1 loads, 1 LSLICEs
@@ -166,7 +168,7 @@ Design Summary (cont)
      Net system/bus/byte_sd/un1_rst: 1 loads, 1 LSLICEs
      Net system/bus/byte_sd/un1_rst_RNIJMTKH: 3 loads, 3 LSLICEs
      Net system/bus/byte_sd/divider10_NE_RNI1PJEQ: 4 loads, 4 LSLICEs
-     Net system/bus/timebase/state12: 10 loads, 10 LSLICEs
+     Net system/bus/timebase/state26: 10 loads, 10 LSLICEs
      Net system/bus/timebase/state[19]: 1 loads, 1 LSLICEs
      Net system/immediate_io_response_RNIUT25H: 6 loads, 6 LSLICEs
      Net system/N_36_i: 65 loads, 65 LSLICEs
@@ -190,18 +192,19 @@ Design Summary (cont)
 
 
 
-   Number of warnings:  3
-   Number of errors:    0
 
                                     Page 3
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
- (cont)
--------
+
+
+
+   Number of warnings:  3
+   Number of errors:    0
      
 
 Design Errors/Warnings
@@ -255,19 +258,19 @@ IO (PIO) Attributes
 +---------------------+-----------+-----------+------------+
 | gpio_miso           | INPUT     | LVCMOS33  | IN         |
 +---------------------+-----------+-----------+------------+
-| gpio_mosi           | OUTPUT    | LVCMOS33  | OUT        |
-+---------------------+-----------+-----------+------------+
-| tx                  | OUTPUT    | LVCMOS33  |            |
 
                                     Page 4
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 IO (PIO) Attributes (cont)
 --------------------------
+| gpio_mosi           | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| tx                  | OUTPUT    | LVCMOS33  |            |
 +---------------------+-----------+-----------+------------+
 | rx                  | INPUT     | LVCMOS33  | IN         |
 +---------------------+-----------+-----------+------------+
@@ -321,19 +324,19 @@ Signal VCC undriven or does not drive anything - clipped.
 Signal button/GND undriven or does not drive anything - clipped.
 Signal system/GND undriven or does not drive anything - clipped.
 Signal system/cpu/sync_decode.decode/table_rom/VCC undriven or does not drive
-     anything - clipped.
-Signal system/cpu/sync_decode.decode/table_rom/GND undriven or does not drive
-     anything - clipped.
 
                                     Page 5
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Removed logic (cont)
 --------------------
+     anything - clipped.
+Signal system/cpu/sync_decode.decode/table_rom/GND undriven or does not drive
+     anything - clipped.
 Signal system/cpu/engine/dp/alu/GND undriven or does not drive anything -
      clipped.
 Signal system/cpu/engine/seq/GND undriven or does not drive anything - clipped.
@@ -387,19 +390,19 @@ Signal system/cpu/engine/seq/un1_upc_s_9_0_S1 undriven or does not drive
      anything - clipped.
 Signal system/cpu/engine/seq/un1_upc_s_9_0_COUT undriven or does not drive
      anything - clipped.
-Signal system/cpu/engine/rom/lane_3_DOB8 undriven or does not drive anything -
-     clipped.
-Signal system/cpu/engine/rom/lane_3_DOB7 undriven or does not drive anything -
 
                                     Page 6
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Removed logic (cont)
 --------------------
+Signal system/cpu/engine/rom/lane_3_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_3_DOB7 undriven or does not drive anything -
      clipped.
 Signal system/cpu/engine/rom/lane_3_DOB6 undriven or does not drive anything -
      clipped.
@@ -453,19 +456,19 @@ Signal system/cpu/engine/rom/lane_1_DOB0 undriven or does not drive anything -
      clipped.
 Signal system/cpu/engine/rom/lane_0_DOB8_0 undriven or does not drive anything -
      clipped.
-Signal system/cpu/engine/rom/lane_0_DOB7_0 undriven or does not drive anything -
-     clipped.
-Signal system/cpu/engine/rom/lane_0_DOB6_0 undriven or does not drive anything -
 
                                     Page 7
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Removed logic (cont)
 --------------------
+Signal system/cpu/engine/rom/lane_0_DOB7_0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/engine/rom/lane_0_DOB6_0 undriven or does not drive anything -
      clipped.
 Signal system/cpu/engine/rom/lane_0_DOB5_0 undriven or does not drive anything -
      clipped.
@@ -519,19 +522,19 @@ Signal system/bus/guest_memory/un1_address_2_0_I_33_0_S0 undriven or does not
      drive anything - clipped.
 Signal system/bus/guest_memory/un1_address_2_0_I_45_0_S0 undriven or does not
      drive anything - clipped.
-Signal system/bus/guest_memory/un1_address_2_0_I_45_0_COUT undriven or does not
-     drive anything - clipped.
-Signal system/bus/byte_sd/un1_divider_cry_0_0_S0 undriven or does not drive
 
                                     Page 8
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Removed logic (cont)
 --------------------
+Signal system/bus/guest_memory/un1_address_2_0_I_45_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/byte_sd/un1_divider_cry_0_0_S0 undriven or does not drive
      anything - clipped.
 Signal system/bus/byte_sd/N_1 undriven or does not drive anything - clipped.
 Signal system/bus/byte_sd/un1_divider_cry_5_0_COUT undriven or does not drive
@@ -585,19 +588,19 @@ Memory Usage
 /system/cpu/engine/dp/rf/words_1_ram_1:
     EBRs: 0
     RAM SLICEs: 3
-    Logic SLICEs: 0
-    PFU Registers: 0
-/system/cpu/engine/dp/rf/words_1_ram_2:
 
                                     Page 9
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Memory Usage (cont)
 -------------------
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/engine/dp/rf/words_1_ram_2:
     EBRs: 0
     RAM SLICEs: 3
     Logic SLICEs: 0
@@ -651,19 +654,19 @@ Memory Usage (cont)
     EBRs: 2
     RAM SLICEs: 0
     Logic SLICEs: 0
-    PFU Registers: 0
-    -Contains EBR fw1:  TYPE= DP8KC,  Width_A= 8,  Depth_A= 1024,  Depth_B=
-         1024,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
 
                                    Page 10
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 Memory Usage (cont)
 -------------------
+    PFU Registers: 0
+    -Contains EBR fw1:  TYPE= DP8KC,  Width_A= 8,  Depth_A= 1024,  Depth_B=
+         1024,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
          ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
          GSR= DISABLED
     -Contains EBR fw0:  TYPE= DP8KC,  Width_A= 8,  Depth_A= 1024,  Depth_B=
@@ -718,18 +721,18 @@ GSR Component:
         not.
         
 
-     Components on inferred reset domain with GSR Property disabled
---------------------------------------------------------------
-
                                    Page 11
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 GSR Usage (cont)
 ----------------
+
+     Components on inferred reset domain with GSR Property disabled
+--------------------------------------------------------------
 
      These components have the GSR property set to DISABLED and are on the
      inferred reset domain. The components will respond to the reset signal
@@ -783,19 +786,19 @@ GSR Usage (cont)
    Register : system/bus/guest_memory/next_word[0]
    Register : system/bus/guest_memory/rdata[15]
    Register : system/bus/guest_memory/rdata[14]
-   Register : system/bus/guest_memory/rdata[13]
-   Register : system/bus/guest_memory/rdata[12]
-   Register : system/bus/guest_memory/rdata[11]
 
                                    Page 12
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 GSR Usage (cont)
 ----------------
+   Register : system/bus/guest_memory/rdata[13]
+   Register : system/bus/guest_memory/rdata[12]
+   Register : system/bus/guest_memory/rdata[11]
    Register : system/bus/guest_memory/rdata[10]
    Register : system/bus/guest_memory/rdata[9]
    Register : system/bus/guest_memory/rdata[8]
@@ -849,19 +852,19 @@ GSR Usage (cont)
    Register : system/bus/byte_sd/tx_shift[0]
    Register : system/bus/panel_io/pins[7]
    Register : system/bus/panel_io/pins[6]
-   Register : system/bus/panel_io/pins[5]
-   Register : system/bus/panel_io/pins[4]
-   Register : system/bus/panel_io/pins[3]
 
                                    Page 13
 
 
 
 
-Design:  uj11_hc1200_microcomp                         Date:  09/13/26  13:31:22
+Design:  uj11_hc1200_microcomp                         Date:  09/22/26  23:52:53
 
 GSR Usage (cont)
 ----------------
+   Register : system/bus/panel_io/pins[5]
+   Register : system/bus/panel_io/pins[4]
+   Register : system/bus/panel_io/pins[3]
    Register : system/bus/panel_io/pins[2]
    Register : system/bus/panel_io/pins[1]
    Register : system/bus/panel_io/pins[0]
@@ -879,9 +882,6 @@ Run Time and Memory Usage
    Total REAL Time: 0 secs  
    Peak Memory Usage: 167 MB
         
-
-
-
 
 
 

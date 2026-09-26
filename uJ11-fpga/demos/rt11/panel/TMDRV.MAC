@@ -1,0 +1,86 @@
+	.TITLE	TMDRV
+	.IDENT	/01.00/
+	.MCALL	.GVAL,.GTIM,.DATE
+;	RMON configuration word at offset 300 (RT-11 V5.03).
+CLOCK$	= 100000
+CLK50$	= 40
+	.GLOBL	TMINIT,TMGET,TMFMT,TMTICK,TMTEXT,CLKHZ
+
+;	RT-11 time service and 16-character panel formatter. No GPIO accesses.
+;	TMINIT: C set if monitor has no clock, otherwise CLKHZ = 50 or 60.
+;	TMGET:  R0 -> "HH:MM:SS DD/MM  " plus NUL. Clobbers R0..R5.
+;	TMFMT:  same formatter for a supplied TMTICK high/low snapshot.
+;	.GTIM performs the monitor's configured midnight/date rollover.
+	.PSECT	TMCODE,I,RO
+TMINIT:
+	.GVAL	#TMARG,#300
+	BIT	#CLOCK$,R0
+	BEQ	20$
+	MOV	#60.,CLKHZ
+	BIT	#CLK50$,R0
+	BEQ	10$
+	MOV	#50.,CLKHZ
+10$:	MOV	CLKHZ,R0
+	MUL	#60.,R0
+	MOV	R1,MINHZ
+	CLC
+	RTS	PC
+20$:	SEC
+	RTS	PC
+
+TMGET:
+	.GTIM	#TMARG,#TMTICK
+TMFMT:
+	MOV	TMTICK,R0
+	MOV	TMTICK+2,R1
+;	Divide by ticks/minute first: quotient <= 1439, never signed DIV overflow.
+	DIV	MINHZ,R0
+	MOV	R1,R5
+	MOV	R0,R3
+	CLR	R2
+	DIV	#60.,R2
+	MOV	R3,R4
+	MOV	R2,R1
+	MOV	#TMTEXT,R2
+	JSR	PC,TWOCHR
+	INC	R2
+	MOV	R4,R1
+	JSR	PC,TWOCHR
+	INC	R2
+	CLR	R0
+	MOV	R5,R1
+	DIV	CLKHZ,R0
+	MOV	R0,R1
+	JSR	PC,TWOCHR
+	INC	R2
+	.DATE
+	MOV	R0,R4
+	ASH	#-5,R0
+	BIC	#177740,R0
+	MOV	R0,R1
+	JSR	PC,TWOCHR
+	INC	R2
+	MOV	R4,R1
+	ASH	#-10.,R1
+	BIC	#177760,R1
+	JSR	PC,TWOCHR
+	MOV	#TMTEXT,R0
+	RTS	PC
+
+TWOCHR:
+	CLR	R0
+	DIV	#10.,R0
+	ADD	#60,R0
+	MOVB	R0,(R2)+
+	ADD	#60,R1
+	MOVB	R1,(R2)+
+	RTS	PC
+
+	.PSECT	TMDATA,D,RW
+CLKHZ:	.WORD	0
+MINHZ:	.WORD	0
+TMARG:	.BLKW	2
+TMTICK:	.BLKW	2
+TMTEXT:	.ASCIZ	"00:00:00 00/00  "
+	.EVEN
+	.END

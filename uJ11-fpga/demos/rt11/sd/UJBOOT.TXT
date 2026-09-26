@@ -1,0 +1,20 @@
+UJBOOT 01.00 - SOFTWARE RESTART
+
+  RUN SY:UJBOOT
+
+Restores the production bootstrap/resident code, enters HALT startup,
+validates and initializes enabled modules, then boots RT-11 from SD.
+Use after installing modules or ON/OFF configuration changes.
+No FPGA programming or physical RESET is needed for this normal path.
+
+Finish file transfers first. Stop/unload foreground jobs and stop HG
+activity. Restart ends the current RT-11 session, including all jobs.
+ODT breakpoints/context are reinitialized; module code stays in FRAM.
+Set/synchronize date and time again after a restart.
+
+UJBOOT requires a working RT-11, CPU and resident entry. For a hung CPU,
+bad module initializer or broken software bootstrap use the physical
+long RESET plus UART ESC fallback instead. That bypasses optional
+modules and still requires a valid SD card.
+
+This utility does not change the FPGA image or program its FLASH.

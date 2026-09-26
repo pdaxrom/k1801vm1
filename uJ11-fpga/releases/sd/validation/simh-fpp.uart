@@ -1,0 +1,608 @@
+
+PDP-11 simulator V3.12-3
+
+RT-11FB (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL OFF
+[r[24H\
+.TYPE SY:HELLO.TXT
+uJ11 / RT-11FB V05.03 - SD software kit 2026-09-26
+TYPE SY:README.TXT for utilities, setup and on-disk documentation.
+FRAM modules are not changed by this disk. HG setup: TYPE SY:HG.TXT.
+
+
+.TYPE SY:BASIC.TXT
+DEC BASIC-11/RT-11 V2.1 - uJ11 BUILDS
+
+  B81FIJ.SAV   FIS single, exception-stack adapter; with OR without FPP
+  B81FIS.SAV   Original FIS single; use with FPP disabled and rebooted
+  B81FPU.SAV   FPP single; requires initialized FP11 module
+  B81FPD.SAV   FPP double; requires initialized FP11 module
+
+START AND TEST
+  RUN SY:B81FIJ
+  ... OPTIONAL FUNCTIONS (ALL,NONE,OR INDIVIDUAL)?
+  A
+  ... READY
+  RUN SY:B81TST
+  ... CHECKS= 29  ERRORS= 0
+  ... CP81 PASS
+  BYE
+
+Use the same B81TST.BAS with B81FPU/B81FPD. Under B81FPD only, also
+RUN SY:B81DBL to test the extra precision. BYE returns to RT-11.
+For an interactive calculation try PRINT 2+2 at READY.
+
+The B81 names are stable filenames retained from the verified builds.
+CP81 in test output identifies the test's origin, not the FPGA version.
+All four executables are included separately; no BASIC.SAV alias hides
+the selected arithmetic implementation.
+
+B81FIJ adds a 26-byte adapter for the extra FEC/FEA words that RT-11
+places on the exception stack when it has detected an FPP. It still
+executes FIS in microcode. Without FPP the original stack is passed on.
+B81FIS + enabled FPP can mis-handle divide-by-zero and other exceptions;
+use B81FIJ, or OFF the FPP slot and reboot first (see UJMOD.TXT).
+
+B81TST covers 29 arithmetic/transcendental/language comparisons.
+B81DBL checks extra double precision. Their success is not an exhaustive
+test of all hardware or arbitrary PEEK/POKE peripheral addresses.
+
+
+.TYPE SY:CLOCK.TXT
+CLOCK 01.01 - RT-11 TIME ON HDSP
+
+  RUN SY:CLOCK        Run CLOCK.SAV in the ordinary background job.
+  FRUN SY:CLOCK       Load CLOCK.REL into the RT-11FB foreground job.
+
+FRUN needs the REL file, not SAV. Both are included on this disk.
+Foreground CLOCK leaves background available for commands/programs.
+After FRUN press Ctrl-B to select the background console.
+To stop foreground CLOCK: Ctrl-F, then Q (no Enter), then Ctrl-B.
+UNLOAD F releases the foreground job's allocated memory after exit.
+For ordinary RUN, Q, q or UART ESC exits; Ctrl-C is handled by RT-11.
+RUN SY:CLOCK.REL is also valid, but uses the ordinary background job.
+
+The sixteen-character display shows HH:MM:SS DD/MM and trailing spaces.
+CLOCK reads RT-11 .GTIM; it does not synchronize the host by itself.
+Use HGTIME first, or set DATE/TIME with the RT-11 commands.
+HG is not required while CLOCK runs. The wait uses .TWAIT (100 ms),
+allowing the other FB job to execute. Only changed text is redrawn.
+
+HCMS current control is 0x6C (4.0 mA peak instead of 9.3 mA).
+This setting and CLOCK are software only. No FPGA changes are needed.
+Stop CLOCK before using other panel programs or starting HG transfers.
+The retained ODT also owns the display while the CPU is stopped.
+
+Time accuracy follows the calibrated KW11/OSCH on this particular board.
+It is not a crystal RTC. Re-sync after reboot, long debugging stops or
+when drift matters. TMRATE measures raw system tick rate; see TESTS.TXT.
+
+
+.TYPE SY:FP11.TXT
+FP11.BIN - SOFTWARE DCJ11 FPP IN HALT FRAM
+
+This optional module emulates the J-11 floating-point instruction set.
+It is ordinary PDP-11 firmware, not a hardware multiplier/FPU and not
+additional FPGA microcode. The filename does not select an FP11-A CPU.
+Arithmetic/profile: DCJ11 release 00.12. Package: relocatable format 4.
+Install/enable using UJMOD.TXT, then reboot so RT-11 detects the FPP.
+
+FIS remains implemented in microcode and is independent of this module.
+F/D arithmetic, conversions, modes/status, exceptions and PSW operands
+are described in project docs/fpp.md and docs/fpp-psw.md.
+CPU integer accesses to PSW address 177776 are still unsupported;
+this module's FP PSW-operand support does not add integer PSW hardware.
+
+Use RUN SY:B81FPU for single-precision BASIC or RUN SY:B81FPD for double.
+Use B81FIJ for FIS BASIC when FPP is enabled. Original B81FIS assumes
+the old exception stack and should be used only after FPP OFF + reboot.
+ON restores a retained FPP without rereading SD, followed by reboot.
+
+ODT command F shows AC0..AC5, FPS, FEC and FEA. Values are raw octal/hex
+words; viewing them does not change the floating-point context.
+RUN SY:ODTCHK provides a known AC2 pattern and enters installed ODT.
+See TESTS.TXT before running FPTST: it intentionally spins for debugging.
+
+No MMU, register banking or memory-mapped integer PSW is added by this
+software kit. A successful BASIC test is not complete J-11 certification.
+
+
+.TYPE SY:HELLO.TXT
+uJ11 / RT-11FB V05.03 - SD software kit 2026-09-26
+TYPE SY:README.TXT for utilities, setup and on-disk documentation.
+FRAM modules are not changed by this disk. HG setup: TYPE SY:HG.TXT.
+
+
+.TYPE SY:HG.TXT
+HG 01.01 / HGTIME - HOST DISK AND RT-11 SYSTEM TIME
+
+HG.SYS talks to the host through the shared FT2232/JTAG GPIO wiring.
+STARTF.COM does not access HG. INSTALL requires the HC1200 GPIO CSR.
+Select GPIO with JTAG_EN; stop/unplug the JTAG programmer. The host must
+run the current hgfsd, built from lsi11-fpga/host/hg in this repository.
+
+HOST (EXAMPLE)
+  TZ=Asia/Yerevan hgfsd --directory /path/to/new-share --clock 1000
+
+Without TZ, hgfsd uses the host's local zone. A fresh share imports its
+files into .hg-volume.dsk. If that file already exists, it is authoritative:
+copying new files beside it does not automatically update the HG volume.
+
+RT-11
+  INSTALL HG
+  LOAD HG
+  DIR HG:
+  COPY HG:FILE.EXT SY:FILE.EXT
+  RUN SY:HGTIME
+  DATE
+  TIME
+  UNLOAD HG
+
+Then stop the host daemon to release the shared pins before panel use.
+Stop CLOCK and other panel programs before active HG transfers. Do not
+press panel keys while hgfsd is running. One reader owns the UART.
+Wait for each COPY to finish: 15 KiB can take several minutes at 1 kHz.
+A host-script timeout does not cancel an in-progress guest transfer.
+
+HGTIME sets BOTH system date and time via the RT-11 .SDTTM request.
+It validates reply status, checksum, calendar and ticks before changing
+anything. On failure the old RT-11 time remains intact. No periodic sync
+occurs; run HGTIME again when needed, after reboot or long ODT stops.
+The monitor is 50 Hz; HGTIME also understands a 60-Hz monitor build.
+Supported dates for this V5.03 interface: 1972..2035.
+Both the updated HG.SYS and updated host daemon are required for TIME.
+HG disk transfer does not require the FPP or ODT modules.
+
+After successful sync and releasing HG pins, RUN SY:CLOCK or
+FRUN SY:CLOCK displays RT-11 time. See CLOCK.TXT.
+
+
+.TYPE SY:ODT.TXT
+uJ11 ODT - UART AND 16-CHARACTER PANEL DEBUGGER
+
+Install ODT.BIN with UJMOD; normal reboot initializes it. Short RESET
+stops USER execution at an instruction boundary. UART prints ODT>.
+Long RESET starts a fresh session, clearing breakpoints and view state.
+All numbers below are OCTAL unless X selected HEX. No decimal input.
+
+UART COMMANDS
+  H                    Help
+  R                    All R0..R7 and PSW, without pauses
+  R n [value]          Show / edit register (PSW = 10 octal, 8 hex)
+  F [n]                All / one FP register, read only
+                       AC0..5=0..5, FPS=6, FEC=7, FEA=10 octal
+  M addr [count]       Read USER words (default range below)
+  B addr [count]       Read USER bytes
+  W addr value         Write word with readback
+  V addr value         Write byte with readback
+  D [addr [count]]     Disassemble, including opcode/extension words
+  L / N                Previous / next known instruction in view history
+  S [count]            Step into; at most 100 octal steps
+  T                    Step over JSR; otherwise one step
+  T limit              Different operation: bounded loop of single steps
+  C                    Continue saved/edited context
+  G addr               Set PC and run
+  P [addr]             List / set persistent breakpoint (maximum four)
+  Z [addr]             Clear all / one breakpoint
+  U addr               Run to one temporary breakpoint
+  O / X                Select octal / hexadecimal
+  A / A 0 / A 1        Toggle / disable / enable HDSP auto-scroll
+  < / >                Manually move the HDSP window
+  K m p n e            MEM/PREV/NEXT/ENTER codes (distinct 20..23 octal)
+  ESC or Ctrl-C        Cancel input / stop a dump between lines
+
+RAM access is limited to USER 000000..157777; words must be aligned.
+Dump/disassembly count limit is 20 octal. No raw HALT/CSR memory editor.
+FP dump requires the active FP11 module; its relocated base is discovered.
+Disassembly uses the stopped instruction's FPS mode for F/D and I/L.
+
+PANEL LAYOUT
+  7     8     9     C     MEM
+  4     5     6     D     PREV
+  1     2     3     E     NEXT
+  0     A     B     F     ENTER
+
+Outside number entry: 8 step in, 9 step over, A registers, B memory,
+C disassembly, D set PC/run, E continue, F OCT/HEX. In HEX input 8..F
+are digits. Release a step key before pressing it again.
+MEM opens/cancels the menu. PREV/NEXT browse entries or adjacent
+registers/words/instructions. ENTER edits a register/word, advances a
+disassembly/FP view, or confirms input. PREV erases a digit during input.
+FP REGISTERS in the menu opens AC0. Only the PANEL waits at each register;
+UART R/F prints the whole set. Long lines scroll to the end and back.
+Disassembly remembers 32 known boundaries; HISTORY START is not PC-2.
+Panel actions/results are also printed on UART.
+
+BREAKPOINTS AND STEPS
+Breakpoints replace instructions temporarily with HALT. Use aligned
+instruction starts in your own code, 001000..157776, not data/overlays.
+Original words are restored at the ODT prompt. If restoration reports
+?BP, do not continue until Z successfully restores the affected code.
+T without an argument and U run with IRQ enabled. T checks the return
+PC and original SP for JSR. Short RESET interrupts that run.
+S and T limit defer ordinary IRQ/trace; an IRQ-dependent routine may
+not finish under bounded single-stepping. WAIT remains a wait.
+Timers/peripherals do not freeze while stopped. Resync time afterward.
+
+Select GPIO and unplug JTAG. UNLOAD HG and stop its host daemon before
+using panel keys. For recovery use long RESET followed by UART ESC.
+
+
+.TYPE SY:PANEL.TXT
+HC1200 PANEL DEMONSTRATIONS
+
+  RUN SY:DSPDEM       Cycle display messages.
+  RUN SY:KEYDEM       Display KEY: xx (hex), change RGB with each key.
+  RUN SY:RGBDEM       Cycle RGB colors and labels.
+
+Use only one display program at a time; stop foreground CLOCK first.
+JTAG_EN must select GPIO. Unplug programmer pins, UNLOAD HG and stop
+the host daemon before using keys.
+
+These older demo banners say PRESS PANEL ESC. There is no physical
+ESC-labelled button on the current 20-key panel. Demo exit tests key
+code 0x13 (023 octal), the default ODT ENTER code. Use that key; UART
+Ctrl-C can also abort a running RT-11 background demo.
+KEYDEM prints other key codes on HDSP, not UART. These are the same
+PNLDRV codes used by ODT. Do not infer a new wiring map from old banners.
+
+The demos use the current dimmed PNLDRV (HCMS control word 0x6C).
+They do not install FRAM modules. See ODT.TXT for the debugger's separate
+panel menu, hotkeys 8..F, per-register browsing and automatic scrolling.
+
+
+.TYPE SY:README.TXT
+uJ11 SD SOFTWARE KIT - 2026-09-26
+
+RT-11FB V05.03, HC1200, 128 KiB FRAM, no MMU.
+UART: 115200 baud, 8 data bits, no parity, 1 stop bit, no flow control.
+This is a raw RK07 image starting at SD sector 0, not a FAT file.
+Write the decompressed image to the WHOLE SDHC/SDXC card on the host.
+The project guide docs/sd-image.md explains writing and verification.
+
+Type commands at the RT-11 dot prompt. Do not type the dot itself.
+Use SY: explicitly if you have changed the default DK: device.
+TYPE SY:filename.TXT reads a manual. Ctrl-S pauses; Ctrl-Q resumes.
+
+DOCUMENTS AND PROGRAMS
+  UJMOD.TXT   UJMOD.SAV: install, enable, disable and list FRAM modules
+  UJBOOT.TXT  UJBOOT.SAV: software reboot through the resident bootstrap
+  ODT.TXT     ODT.BIN: UART/panel debugger, steps and breakpoints
+  FP11.TXT    FP11.BIN: optional software DCJ11 FPP
+              SDBOOT.BIN: optional replaceable SD bootstrap (UJMOD.TXT)
+  HG.TXT      HG.SYS and HGTIME.SAV: host disk and system time sync
+  CLOCK.TXT   CLOCK.SAV / CLOCK.REL: HDSP clock, including FB foreground
+  PANEL.TXT   DSPDEM.SAV, KEYDEM.SAV, RGBDEM.SAV: panel demonstrations
+  BASIC.TXT   B81FIJ, B81FIS, B81FPU, B81FPD and two BASIC test programs
+  TESTS.TXT   TMRATE.SAV, ODTCHK.SAV, FPTST.SAV: diagnostics
+
+FIRST START
+  The disk boots without optional FRAM modules. FIS is in microcode.
+  Existing valid AUTO modules in FRAM remain active after normal reset.
+  Copying BIN files to SD does not install/update them in HALT FRAM.
+  RUN SY:UJMOD, then STATUS, shows the existing eight slots.
+  Read UJMOD.TXT before changing an existing installation.
+  The startup file does not install FRAM modules or start the clock.
+  It disables SL and prints this kit's short welcome.
+
+QUICK START
+  RUN SY:B81FIJ  - FIS BASIC, usable both with and without FPP.
+                  Answer A to the optional-functions question.
+                  Type BYE at READY to return to RT-11.
+  RUN SY:HGTIME  - sync RT-11 time after LOAD HG and starting the host.
+  FRUN SY:CLOCK  - HDSP clock with a separate background console.
+                  Ctrl-B selects the background console.
+
+PANEL AND RECOVERY
+  Select GPIO with JTAG_EN and unplug the programmer from shared pins.
+  Stop the HG host daemon and UNLOAD HG before using panel keys.
+  Short RESET enters installed/initialized ODT; C continues execution.
+  Long RESET (about two seconds) restarts and checks retained modules.
+  UART ESC immediately after long RESET bypasses all optional modules.
+  The built-in fallback still needs a readable bootable SD card.
+
+The standard DEC tools from the source distribution remain on the disk:
+DIR, PIP, DUP, EDIT, MACRO, LINK, LIBR, HELP and others.
+The boot monitor is FB. Included SJ/XM distribution files do not imply
+XM support: the current uJ11 FPGA has no enabled MMU.
+Text manuals use ASCII/CRLF for the standard RT-11 terminal.
+
+
+.TYPE SY:TESTS.TXT
+uJ11 SOFTWARE DIAGNOSTICS
+
+TMRATE.SAV - SYSTEM TICK SAMPLING
+  RUN SY:TMRATE
+Prints CFG and 121 raw high/low .GTIM pairs, about 50 ticks apart.
+At 50 Hz the run takes about two minutes. UART Q/q/ESC exits early.
+The host must timestamp arrivals with a monotonic clock to calculate
+frequency; raw numbers alone are not a wall-clock measurement.
+No date/time, divisor or FPGA setting is changed. Do not synchronize
+time during this measurement. The current board divisor is 596037.
+Host automation: tools/hardware_clock_rate.py (project source tree).
+
+ODTCHK.SAV - INTERACTIVE FP DEBUGGER CHECK
+Requires installed/initialized ODT and FP11, with RT-11 freshly booted
+after their activation. Stop CLOCK and release HG pins first.
+  RUN SY:ODTCHK
+The program loads AC2, sets double mode and HALTs into ODT automatically.
+  ODT> F 2
+Expected raw words: 040200 012345 067012 034567 (octal).
+  ODT> F 6
+FPS has D mode set; other FPS bits may be retained from earlier software.
+  ODT> C
+The guest prints !ODTCHK-I-RETURNED TO RT11 and exits.
+Without ODT/FPP this diagnostic is not a safe stand-alone smoke test.
+
+FPTST.SAV - AUTOMATED ODT/FPP REGRESSION FIXTURE
+Not a run-to-completion utility. It raises IPL to 7, executes a sequence
+of FPP instructions and intentionally loops for ODT inspection.
+The source and symbol maps drive tools/run_rt11.py, which single-steps
+and later redirects execution to FINISH for additional assertions.
+Do not expect Ctrl-C at its loop: ordinary interrupts are masked.
+Short RESET enters installed ODT; long RESET reboots for recovery.
+For ordinary user validation prefer BASIC tests and ODTCHK above.
+
+B81TST.BAS / B81DBL.BAS - see BASIC.TXT.
+DSPDEM / KEYDEM / RGBDEM - see PANEL.TXT.
+UJMOD STATUS shows retained-module checksums/initialization status;
+the old OK bit after an ESC bypass is not proof of active services.
+
+
+.TYPE SY:UJBOOT.TXT
+UJBOOT 01.00 - SOFTWARE RESTART
+
+  RUN SY:UJBOOT
+
+Restores the production bootstrap/resident code, enters HALT startup,
+validates and initializes enabled modules, then boots RT-11 from SD.
+Use after installing modules or ON/OFF configuration changes.
+No FPGA programming or physical RESET is needed for this normal path.
+
+Finish file transfers first. Stop/unload foreground jobs and stop HG
+activity. Restart ends the current RT-11 session, including all jobs.
+ODT breakpoints/context are reinitialized; module code stays in FRAM.
+Set/synchronize date and time again after a restart.
+
+UJBOOT requires a working RT-11, CPU and resident entry. For a hung CPU,
+bad module initializer or broken software bootstrap use the physical
+long RESET plus UART ESC fallback instead. That bypasses optional
+modules and still requires a valid SD card.
+
+This utility does not change the FPGA image or program its FLASH.
+
+
+.TYPE SY:UJMOD.TXT
+UJMOD 04.00 - RETAINED HALT FRAM MODULES
+
+RUN SY:UJMOD starts the loader. At UJMOD> enter ONE command.
+It returns to RT-11 after that command; run it again for the next one.
+
+  STATUS       List slots 0..7: BASE LENGTH CHECKSUM STATUS, all octal.
+  NAME         Load SY:NAME.BIN at its preferred address.
+  NAME AUTO    Relocate to a free aligned range in the module's pool.
+  OFFn         Disable slot n at the next normal boot; keep its bytes.
+  ONn          Check retained checksum and re-enable slot n without SD.
+  DELn         Remove the slot/allocation; does not erase the old bytes.
+  EXIT         Return without changes.
+
+BIN files on this disk use format 4 / ABI3 with DEC relocation records.
+The loader reserves code AND BSS/stack and checks overlap and readback.
+Names have 1..6 letters/digits, with no extension or device prefix.
+SDBOOT uses the small bootstrap pool. ODT and FP11 use the main pool.
+Same BASE replaces a slot. AUTO allocates a NEW slot/range: it is not
+an in-place update by module name. STATUS first; do not create duplicate
+ODT or FPP services. To replace a relocated module, DEL its old slot,
+then install the new NAME AUTO and reboot.
+
+EXAMPLE FOR AN EMPTY TABLE ONLY
+  RUN SY:UJMOD
+  UJMOD> ODT
+  RUN SY:UJMOD
+  UJMOD> SDBOOT
+  RUN SY:UJMOD
+  UJMOD> FP11 AUTO
+  RUN SY:UJBOOT
+  ... wait for RT-11FB ...
+  RUN SY:UJMOD
+  UJMOD> STATUS
+
+FP11 is optional; omit its installation for FIS-only operation.
+SDBOOT is replaceable software; the built-in ROM remains a fallback.
+In an empty table this sequence places ODT at 010000, SDBOOT at 006000
+and FP11 at 042710. Slot numbers and addresses are not module types.
+
+STATUS (OCTAL)
+  140403  Installed, AUTO enabled, cold initialization not yet confirmed
+  140407  Successfully initialized in the last normal boot
+  140413  Validation/initialization failure
+  140401  Retained, AUTO disabled
+  140402  Incomplete installation; bootstrap skips it
+  000000  Empty
+LENGTH counts immutable words, not bytes or the complete allocation.
+After ESC boot an old OK bit is not proof of current activation.
+
+Installation/OFF/DEL disable live HALT services. Finish all module
+changes, then RUN SY:UJBOOT or long RESET without ESC. Do not run FPP
+software between a configuration change and reboot. ON also requires
+reboot to apply. RT-11 detects FPP availability at boot time.
+
+Example: STATUS identifies FPP as slot 2. OFF2 then reboot disables it;
+ON2 then reboot restores it from FRAM with no need to reload FP11.BIN.
+ODT and SDBOOT are retained independently.
+
+Recovery: long RESET, immediately send UART ESC, wait for RT-11,
+then use UJMOD to disable/remove/replace the faulty module. An initializer
+can have a valid checksum and still hang: the physical recovery path
+does not depend on it. There is no automatic module watchdog.
+
+
+.DIR SY:
+ 
+SWAP  .SYS    27P 26-Jan-1999    RT11FB.SYS   103P 26-Jan-1999
+RT11SJ.SYS    88P 26-Jan-1999    RT11XM.SYS   116P 26-Jan-1999
+RK    .SYS     3P 26-Jan-1999    LP    .SYS     2P 26-Jan-1999
+BA    .SYS     7P 26-Jan-1999    VM    .SYS     3P 26-Jan-1999
+DL    .SYS     5P 26-Jan-1999    DU    .SYS     8P 26-Jan-1999
+DM    .SYS     5P 26-Jan-1999    NL    .SYS     2P 26-Jan-1999
+MT    .SYS     9P 26-Jan-1999    MM    .SYS     9P 26-Jan-1999
+MU    .SYS    13P 26-Jan-1999    LD    .SYS     8P 26-Jan-1999
+EL    .SYS     5P 26-Jan-1999    DP    .SYS     3P 26-Jan-1999
+SL    .SYS    14P 26-Jan-1999    VMX   .SYS     3P 26-Jan-1999
+LDX   .SYS     8P 26-Jan-1999    LPX   .SYS     2P 26-Jan-1999
+BAX   .SYS     7P 26-Jan-1999    DLX   .SYS     5P 26-Jan-1999
+DUX   .SYS     9P 26-Jan-1999    DMX   .SYS     5P 26-Jan-1999
+RKX   .SYS     3P 26-Jan-1999    MTX   .SYS     9P 26-Jan-1999
+MMX   .SYS    10P 26-Jan-1999    MUX   .SYS    15P 26-Jan-1999
+NLX   .SYS     2P 26-Jan-1999    DPX   .SYS     3P 26-Jan-1999
+SLX   .SYS    16P 26-Jan-1999    PIP   .SAV    30P 26-Jan-1999
+DUP   .SAV    47P 26-Jan-1999    DIR   .SAV    19P 26-Jan-1999
+IND   .SAV    56P 26-Jan-1999    RESORC.SAV    25P 26-Jan-1999
+EDIT  .SAV    19P 26-Jan-1999    K52   .SAV    54P 26-Jan-1999
+KED   .SAV    58P 26-Jan-1999    KEX   .SAV    53P 26-Jan-1999
+MACRO .SAV    61P 26-Jan-1999    CREF  .SAV     6P 26-Jan-1999
+LINK  .SAV    49P 26-Jan-1999    LIBR  .SAV    24P 26-Jan-1999
+FILEX .SAV    22P 26-Jan-1999    SRCCOM.SAV    26P 26-Jan-1999
+BINCOM.SAV    24P 26-Jan-1999    SLP   .SAV    13P 26-Jan-1999
+DUMP  .SAV     9P 26-Jan-1999    SIPP  .SAV    21P 26-Jan-1999
+BUP   .SAV    50P 26-Jan-1999    PAT   .SAV    10P 26-Jan-1999
+HELP  .SAV   132P 26-Jan-1999    BATCH .SAV    26P 26-Jan-1999
+ERROUT.SAV    18P 26-Jan-1999    QUEMAN.SAV    15P 26-Jan-1999
+FORMAT.SAV    24P 26-Jan-1999    SETUP .SAV    41P 26-Jan-1999
+VTCOM .SAV    24P 26-Jan-1999    SPEED .SAV     4P 26-Jan-1999
+DATIME.SAV     4P 26-Jan-1999    LET   .SAV     5P 26-Jan-1999
+SPLIT .SAV     3P 26-Jan-1999    UCL   .SAV    15P 26-Jan-1999
+VBGEXE.SAV    16P 26-Jan-1999    TERMID.SAV     3P 26-Jan-1999
+TRANSF.SAV    16P 26-Jan-1999    GIDIS .SAV    72P 26-Jan-1999
+MDUP  .SAV    20P 26-Jan-1999    CONFIG.SAV     7P 26-Jan-1999
+ELINIT.SAV     7P 26-Jan-1999    QUEUE .REL    14P 26-Jan-1999
+RTMON .REL     8P 26-Jan-1999    SPOOL .REL    11P 26-Jan-1999
+VTCOM .REL    27P 26-Jan-1999    ERRLOG.REL     9P 26-Jan-1999
+SYSMAC.SML    60P 26-Jan-1999    SYSLIB.OBJ    54P 26-Jan-1999
+ODT   .OBJ     8P 26-Jan-1999    VDT   .OBJ     8P 26-Jan-1999
+ODTHWD.OBJ     8P 26-Jan-1999    MDUP  .MM     56P 26-Jan-1999
+MDUP  .MS     56P 26-Jan-1999    MDUP  .MT     56P 26-Jan-1999
+MBOOT .BOT     1P 26-Jan-1999    MBOT16.BOT     1P 26-Jan-1999
+MSBOOT.BOT     3P 26-Jan-1999    CUSTOM.TXT     9P 26-Jan-1999
+V5NOTE.TXT    41P 26-Jan-1999    SYSGEN.ANS     9P 26-Jan-1999
+RT11SJ.MAP    29P 26-Jan-1999    RT11FB.MAP    36P 26-Jan-1999
+RT11XM.MAP    39P 26-Jan-1999    B81DBL.BAS     1  26-Sep-2026
+STARTS.COM     1  26-Jan-1999    STARTX.COM     1  26-Jan-1999
+B81FIJ.SAV    53  26-Sep-2026    B81FIS.SAV    53  26-Sep-2026
+B81FPD.SAV    53  26-Sep-2026    B81FPU.SAV    52  26-Sep-2026
+B81TST.BAS     4  26-Sep-2026    BASIC .TXT     3  26-Sep-2026
+CLOCK .REL     5  26-Sep-2026    CLOCK .SAV     4  26-Sep-2026
+CLOCK .TXT     3  26-Sep-2026    DSPDEM.SAV     4  26-Sep-2026
+FP11  .BIN    11  26-Sep-2026    FP11  .TXT     3  26-Sep-2026
+FPTST .SAV     3  26-Sep-2026    HELLO .TXT     1  26-Sep-2026
+HG    .SYS     3  26-Sep-2026    HG    .TXT     4  26-Sep-2026
+HGTIME.SAV     3  26-Sep-2026    KEYDEM.SAV     4  26-Sep-2026
+ODT   .BIN    30  26-Sep-2026    ODT   .TXT     8  26-Sep-2026
+ODTCHK.SAV     2  26-Sep-2026    PANEL .TXT     2  26-Sep-2026
+README.TXT     6  26-Sep-2026    RGBDEM.SAV     4  26-Sep-2026
+SDBOOT.BIN     3  26-Sep-2026    STARTF.COM     1  26-Sep-2026
+TESTS .TXT     4  26-Sep-2026    TMRATE.SAV     2  26-Sep-2026
+UJBOOT.SAV     4  26-Sep-2026    UJBOOT.TXT     2  26-Sep-2026
+UJMOD .SAV    11  26-Sep-2026    UJMOD .TXT     6  26-Sep-2026
+ 130 Files, 2552 Blocks
+ 51104 Free blocks
+
+.RUN SY:B81FPU
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+RUN SY:B81TST
+CP81 BEGIN
+CHECKS= 29  ERRORS= 0 
+CP81 PASS
+
+READY
+BYE
+
+.RUN SY:B81FPD
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+RUN SY:B81TST
+CP81 BEGIN
+CHECKS= 29  ERRORS= 0 
+CP81 PASS
+
+READY
+RUN SY:B81DBL
+DOUBLE DELTA= 1  9.99978E-13 
+CP81 DOUBLE PASS
+
+READY
+BYE
+
+.COPY SY:README.TXT SY:CHKSD.TXT
+
+.TYPE SY:CHKSD.TXT
+uJ11 SD SOFTWARE KIT - 2026-09-26
+
+RT-11FB V05.03, HC1200, 128 KiB FRAM, no MMU.
+UART: 115200 baud, 8 data bits, no parity, 1 stop bit, no flow control.
+This is a raw RK07 image starting at SD sector 0, not a FAT file.
+Write the decompressed image to the WHOLE SDHC/SDXC card on the host.
+The project guide docs/sd-image.md explains writing and verification.
+
+Type commands at the RT-11 dot prompt. Do not type the dot itself.
+Use SY: explicitly if you have changed the default DK: device.
+TYPE SY:filename.TXT reads a manual. Ctrl-S pauses; Ctrl-Q resumes.
+
+DOCUMENTS AND PROGRAMS
+  UJMOD.TXT   UJMOD.SAV: install, enable, disable and list FRAM modules
+  UJBOOT.TXT  UJBOOT.SAV: software reboot through the resident bootstrap
+  ODT.TXT     ODT.BIN: UART/panel debugger, steps and breakpoints
+  FP11.TXT    FP11.BIN: optional software DCJ11 FPP
+              SDBOOT.BIN: optional replaceable SD bootstrap (UJMOD.TXT)
+  HG.TXT      HG.SYS and HGTIME.SAV: host disk and system time sync
+  CLOCK.TXT   CLOCK.SAV / CLOCK.REL: HDSP clock, including FB foreground
+  PANEL.TXT   DSPDEM.SAV, KEYDEM.SAV, RGBDEM.SAV: panel demonstrations
+  BASIC.TXT   B81FIJ, B81FIS, B81FPU, B81FPD and two BASIC test programs
+  TESTS.TXT   TMRATE.SAV, ODTCHK.SAV, FPTST.SAV: diagnostics
+
+FIRST START
+  The disk boots without optional FRAM modules. FIS is in microcode.
+  Existing valid AUTO modules in FRAM remain active after normal reset.
+  Copying BIN files to SD does not install/update them in HALT FRAM.
+  RUN SY:UJMOD, then STATUS, shows the existing eight slots.
+  Read UJMOD.TXT before changing an existing installation.
+  The startup file does not install FRAM modules or start the clock.
+  It disables SL and prints this kit's short welcome.
+
+QUICK START
+  RUN SY:B81FIJ  - FIS BASIC, usable both with and without FPP.
+                  Answer A to the optional-functions question.
+                  Type BYE at READY to return to RT-11.
+  RUN SY:HGTIME  - sync RT-11 time after LOAD HG and starting the host.
+  FRUN SY:CLOCK  - HDSP clock with a separate background console.
+                  Ctrl-B selects the background console.
+
+PANEL AND RECOVERY
+  Select GPIO with JTAG_EN and unplug the programmer from shared pins.
+  Stop the HG host daemon and UNLOAD HG before using panel keys.
+  Short RESET enters installed/initialized ODT; C continues execution.
+  Long RESET (about two seconds) restarts and checks retained modules.
+  UART ESC immediately after long RESET bypasses all optional modules.
+  The built-in fallback still needs a readable bootable SD card.
+
+The standard DEC tools from the source distribution remain on the disk:
+DIR, PIP, DUP, EDIT, MACRO, LINK, LIBR, HELP and others.
+The boot monitor is FB. Included SJ/XM distribution files do not imply
+XM support: the current uJ11 FPGA has no enabled MMU.
+Text manuals use ASCII/CRLF for the standard RT-11 terminal.
+
+
+.DELETE/NOQUERY SY:CHKSD.TXT
+
+.
+Simulation stopped, PC: 142766 (BMI 143026)
+sim> quit
+Goodbye

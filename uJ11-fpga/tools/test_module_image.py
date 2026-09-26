@@ -2,7 +2,7 @@
 """Malformed-file and range tests for the published CP67 module format."""
 import struct
 import unittest
-from module_image import pack, decode, entry, bounds
+from module_image import pack, decode, entry, bounds, allocation_entry, placed_image, relocate
 
 
 class ModuleFormat(unittest.TestCase):
@@ -41,6 +41,43 @@ class ModuleFormat(unittest.TestCase):
     def test_partial_word_or_empty_image(self):
         for image in (b'',b'\0',b'\0'*3):
             with self.subTest(length=len(image)),self.assertRaises(ValueError):pack(0o6000,image)
+
+    def test_full_allocation(self):
+        image=struct.pack('<3H',0o12700,0,0o207)
+        module=pack(0o10000,image,memory_bytes=512)
+        record=decode(module)
+        self.assertEqual((record['version'],record['bytes'],record['memory_bytes']),(3,6,512))
+        meta=struct.unpack('<8H',allocation_entry(0o10000,image,512))
+        self.assertEqual(meta[1:6],(0o10000,3,0o13107,256,3))
+        self.assertEqual(sum(meta)&65535,0)
+        for memory_bytes in (0,4,7,65536):
+            with self.subTest(memory_bytes=memory_bytes),self.assertRaises(ValueError):
+                pack(0o10000,image,memory_bytes=memory_bytes)
+        for words in (0,2,32768,65535):
+            data=bytearray(module);h=list(struct.unpack('<16H',data[:32]))
+            h[8]=words;h[7]=0;h[7]=-sum(h)&65535;data[:32]=struct.pack('<16H',*h)
+            with self.subTest(words=words),self.assertRaises(ValueError):decode(data)
+
+    def test_relocation(self):
+        image=struct.pack('<4H',0o12700,0o1000,0o160,0o207)
+        pairs=[(1,0o1000),(0x8002,0o160)]
+        module=pack(0o10000,image,memory_bytes=128,relocations=pairs)
+        self.assertEqual(decode(module)['relocations'],pairs)
+        for base in (0o10000,0o44000,0o140000):
+            expected=struct.pack('<4H',0o12700,base,(0o160-base+0o1000)&65535,0o207)
+            self.assertEqual(placed_image(module,base),expected)
+        for index in (18,20,22,24,1024,1026,1032,1535):
+            data=bytearray(module);data[index]^=1
+            with self.subTest(index=index),self.assertRaises(ValueError):decode(data)
+        for bad in (pairs[::-1],pairs+[pairs[1]],[(4,0)],[(1,0)]):
+            with self.subTest(pairs=bad),self.assertRaises(ValueError):relocate(image,bad,0o10000)
+        for base in (0o7000,0o157776):
+            with self.subTest(base=base),self.assertRaises(ValueError):placed_image(module,base)
+
+    def test_zero_relocations(self):
+        module=pack(0o6000,b'\x87\x00',memory_bytes=2,relocations=[])
+        self.assertEqual(len(module),1024)
+        self.assertEqual(placed_image(module,0o10000),b'\x87\x00')
 
 
 if __name__=='__main__':unittest.main()

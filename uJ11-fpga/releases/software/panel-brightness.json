@@ -1,0 +1,171 @@
+{
+  "date": "2026-09-23",
+  "scope": "HCMS-3917 current reduction in software only",
+  "previous_cw0_hex": "4c",
+  "cw0_hex": "6c",
+  "typical_peak_pixel_ma_before": 9.3,
+  "typical_peak_pixel_ma_after": 4.0,
+  "pwm_on_cycles": 28,
+  "pwm_max_on_cycles": 60,
+  "refresh_cycles": 512,
+  "estimated_led_current_ratio": 0.4301075268817204,
+  "board_current_measured": false,
+  "fpga_changed": false,
+  "odt_size_and_addresses_unchanged": true,
+  "binary_changes": "One byte 0x4c to 0x6c in each SAV; one byte in ODT image plus image checksum and header checksum",
+  "files": {
+    "releases/software/ODT.BIN": {
+      "bytes": 13312,
+      "sha256": "db3b7f3700b876aca49f2bed7e5d2dc3d29eb7e6fab5650450ceddfdbc02c734"
+    },
+    "releases/hg/CLOCK.SAV": {
+      "bytes": 2048,
+      "sha256": "96e11f17bc5993b1518f3fb53eca4d4e01f9541435ef2bc88fa948d234068933"
+    },
+    "demos/rt11/panel/DSPDEM.SAV": {
+      "bytes": 2048,
+      "sha256": "e9fe944742741644fed1784a61f45117d0b67e766077a668ac81b88831b625ea"
+    },
+    "demos/rt11/panel/RGBDEM.SAV": {
+      "bytes": 2048,
+      "sha256": "79f05171575577d3ca92e8244c9279e773acdd8fa46f5bd7fe05e23a5f77ff3f"
+    },
+    "demos/rt11/panel/KEYDEM.SAV": {
+      "bytes": 2048,
+      "sha256": "c819fa3d6d0107f318b4e08b70a24335e01526879feffedb634db1e7b7b59a38"
+    }
+  },
+  "sources": {
+    "demos/rt11/panel/PNLDRV.MAC": "a383dfacb53aa931dde84668753335078710b88164cc6a42d2f4b8bb9af9853f",
+    "firmware/odt/DRIVER.MAC": "3c27582c3f35c757012fb4041d5af4ebe065de3320de67e713a7dba2290f33e5",
+    "tests/rt11_harness.vh": "b97c3ae9840f7d2b581254de3a688553efb4d232f6f2b50d01c13a2192801620"
+  },
+  "tests": {
+    "panel_checks": 2700,
+    "hdsp_windows": 85,
+    "clocks": 114751044,
+    "hg_and_hgtime_unchanged": true,
+    "test_result_sha256": "2ff7fb0a72958b137437a2acadb289b260c8fea39c873e25fa58846a162f0414",
+    "simulated_gpio_command_bits_checked": true,
+    "physical_brightness_confirmed": false
+  },
+  "board_installation": {
+    "date": "2026-09-23",
+    "programs_copied_to_sd": true,
+    "clock_sd_sha256_verified": true,
+    "odt_fram_loader_checksum_and_readback": true,
+    "odt_table_before_cold": [
+      "010000",
+      "014233",
+      "134205",
+      "140403"
+    ],
+    "cold_boot_verified": true,
+    "clock_started": true,
+    "capture_hashes": {
+      "install/session.json": "220a953886c6877a8d9b31c914feb819a2ef14998f353b3ba85fd056d0822056",
+      "install/uart.bin": "e31f04015caf0fc022117c02ff9d720d33251b2b338ea5348673ae537e7a167f"
+    },
+    "clock_uart_exit_verified": true,
+    "hg_unloaded_and_stopped": true,
+    "picocom_restored": true,
+    "odt_table_after_cold": [
+      "010000",
+      "014233",
+      "134205",
+      "140407"
+    ],
+    "all_module_status_octal": [
+      "140407",
+      "140407",
+      "140407"
+    ],
+    "time_synchronized": true,
+    "guest_time": "22:36:26",
+    "host_before_time": "2026-09-23T22:36:26.161032+04:00",
+    "host_after_time": "2026-09-23T22:36:26.963444+04:00",
+    "cold_capture_hashes": {
+      "session.json": "a1dd3cc671afba16664fbfd662bf7709b93082eed22b7125ba316eac938112f7",
+      "uart.bin": "9f43166beb4f945fcaf96c48188cf77a9e02aa43e774a953d7cc792b070fbe9b"
+    }
+  },
+  "odt_sources": {
+    "firmware/odt/ODT.MAC": "551d877d7a1f49ae9f1748b1dc3bac56db249b1fac92a2c28942d87483c20ded",
+    "firmware/odt/DISASM.MAC": "fe7149622062e84c4c3a80cdacd20eb46385565689f38ed5c756684933a75ad1",
+    "firmware/odt/PANEL.MAC": "47aa5727eee2c97b44943adf15c88595ffc0929c6a239734f38eea87d9fcacf7",
+    "firmware/odt/NAV.MAC": "cb4a3dcd9a56bf2a3e1d07cc3e9363fc01360dd98a45766f9ad363b62133aa9c",
+    "firmware/odt/OVER.MAC": "de4b896059a81766d7c75da8f13211e10bac71681ed04d7d6c3168974f385ac6",
+    "firmware/odt/BREAK.MAC": "565dca3bf4b68a7816897c8d9fa3205432593ec92fe0f787139a97de22b633a2",
+    "firmware/odt/FPDEBUG.MAC": "baa1edce0732402794729d303abc948bd19a0f55a84167cdbcfa54b9221ad328",
+    "firmware/odt/DRIVER.MAC": "3c27582c3f35c757012fb4041d5af4ebe065de3320de67e713a7dba2290f33e5",
+    "firmware/odt/ODINIT.MAC": "06f0a2bb411fc24c4a399cbb2efd043b95a3f3ee90417cd08243e7ce0a4afdc0",
+    "firmware/odt/CONSTS.MAC": "079e21b910fa5f96ade91bf522eb348264500d1548a9fa2f5e795adfd8de250d",
+    "firmware/odt/STATE.MAC": "4933de79c5f3afa4d8b8454ae9bcfe83d55d6fe797081b7750520e45db38b169",
+    "firmware/odt/DATA.MAC": "9c91b301b72d472aaf78dae6a2f8806f3ec36b3b1b69c0275321ac7469452c8f",
+    "tools/odt_tables.py": "850a0abcaedc837a65a7266b7028bd6cb23e358dd985fbed6b73979b32acf0cf",
+    "tools/build_software.py": "cb25833a6adc45f757e7711e789e74a0ee59a7412860e5c77a33f75ef5700cec"
+  },
+  "odt_format": {
+    "base": 4096,
+    "words": 6299,
+    "checksum": 47237,
+    "bytes": 12598
+  },
+  "demos_build": {
+    "tool": "RT-11 MACRO/LINK in SIMH; linked with PNLDRV.OBJ from HG build",
+    "sources": {
+      "demos/rt11/panel/DSPDEM.MAC": "aab43c442c690ded46f0ef6c7ca6586ed8c4a01022dd7442725899ba30595265",
+      "demos/rt11/panel/RGBDEM.MAC": "bca76739a9a3a60d53154508b6f3c7c5d93ed6ba3e8a54b83b07280e688805fb",
+      "demos/rt11/panel/KEYDEM.MAC": "d5dbb3b5c6d9d58483e97f0eb69a71eab132f7893812394a6f3f7a97ead765b2",
+      "demos/rt11/panel/PNLDRV.MAC": "a383dfacb53aa931dde84668753335078710b88164cc6a42d2f4b8bb9af9853f"
+    },
+    "outputs": {
+      "DSPDEM.SAV": "e9fe944742741644fed1784a61f45117d0b67e766077a668ac81b88831b625ea",
+      "DSPDEM.OBJ": "9b6604fcf07c4feba6bc508acfa732d1e760eb43a3faa1dcd8c71fdd2bb9c068",
+      "DSPDEM.LST": "8e4637988473930fd6c1fcdc0109f15f43fb993cb71025d17c7a5966c53f254c",
+      "DSPDEM.MAP": "8de259cca1bf7d6083b9fd3816097c265978f12f9a07eef559df78b3add6d3ec",
+      "RGBDEM.SAV": "79f05171575577d3ca92e8244c9279e773acdd8fa46f5bd7fe05e23a5f77ff3f",
+      "RGBDEM.OBJ": "4503bef4e24b5f7f6c45aa64aaa2f39c6703156805f134f552dcbc1cf12be411",
+      "RGBDEM.LST": "af2daff53e1d72b840f80cf13308a4f11b976d1a2f2f89b00c46841349d6fef9",
+      "RGBDEM.MAP": "a43ec5917fcc6db0aeae82e0b5c4cb98a9a2d77f74ca0ac0797717576891d81b",
+      "KEYDEM.SAV": "c819fa3d6d0107f318b4e08b70a24335e01526879feffedb634db1e7b7b59a38",
+      "KEYDEM.OBJ": "4ef444ff7b6b93f2d3d27c8e6ddffc93cc40aedca1ece59da6f4cfd9fb45dc81",
+      "KEYDEM.LST": "f796217e09c129aa0a2cc12317e5b7ab789ed868a36a1e9e7156583c50ea4923",
+      "KEYDEM.MAP": "0f04dc02ed684e44f6f02f96d941355650b11f980232e0b5454cfe556cf5159f"
+    }
+  },
+  "hg_build": {
+    "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+    "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+    "sources": {
+      "demos/rt11/hostdisk/HG.MAC": "0e4d226caa119ec0db6821ec84a6ba5823bff07908c9d04ca98637de47c3e3a5",
+      "demos/rt11/hostdisk/HGTIME.MAC": "8519d6cf1ded7d458cdc6b2c63e114786c7016f933e72b590965a2652ff44fcf",
+      "demos/rt11/panel/TMDRV.MAC": "16814dae24222d11f85556309da64437f986f896786a4dfd3cb451b9260d2a96",
+      "demos/rt11/panel/CLOCK.MAC": "cd97e17c1a28b3e0a6a81525f265a064281b8bca0c137fe8289daf65da88b296",
+      "demos/rt11/panel/PNLDRV.MAC": "a383dfacb53aa931dde84668753335078710b88164cc6a42d2f4b8bb9af9853f"
+    },
+    "outputs": {
+      "HG.SYS": "f98e81fb4e98a8ca2165102e57db2b5782a6c9be23420f4aea8a71f0c0901abd",
+      "HGTIME.SAV": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c",
+      "CLOCK.SAV": "96e11f17bc5993b1518f3fb53eca4d4e01f9541435ef2bc88fa948d234068933",
+      "HGTIME.MAP": "bf67c6e9397ab347d7018b81f2a13d563f0db18231b57b9e9d69537fc820d813",
+      "CLOCK.MAP": "6d1f85fa040455d0f01051ed0bb97d891cd29f72fcbcf7453f4a87f104345d76",
+      "HG.LST": "a05df5705ff631ba504e46683e6911333c3acc01e8d4ac99dc04d204a6db7144",
+      "HG.OBJ": "3c689403a0522a9da1a70320187de4391ca76ed22354d4c7d0e09e07b09a7961",
+      "HGTIME.LST": "1eb2a1cee940e380e41d2697473b8107c1c80b792c233896560271f9e0d199a8",
+      "HGTIME.OBJ": "0c2df3efbe6fac1a125a0fbe42bac274cd84cf757f568b407d9cf5c5d42a46ca",
+      "TMDRV.LST": "5fe269acbd7a5e62141d689a061e214d922596c1ef7cc1aab288c305cefbd043",
+      "TMDRV.OBJ": "a6089258552064d2609e1fc814d5dc1329d94eedfa24d31aee935f1283906ba2",
+      "CLOCK.LST": "fe7f21eb1c054c71eb918b786e041890443525164390a823d7bb9f0dd5770c6e",
+      "CLOCK.OBJ": "31866c6b5ab68167c5fc9665b3ee62e25ec7108629ba369b254e11c80748ff5d",
+      "PNLDRV.LST": "92b0f39dd6c06295a8abf66fc0e154c524ebbcb70ad7010965536adb652e7632",
+      "PNLDRV.OBJ": "ffc0b1955132157b2a94b797cec13242d791c3f98b199031441dba5273a24518"
+    }
+  },
+  "backups": {
+    "remote": "/home/sash/Work/FPGA/uj11-hg/panel-brightness-20260923/share",
+    "old_odt_sha256": "3d4523125abd7f3997912d0f4404c9479af239e775f01331ac69cd047dc7c9de",
+    "old_clock_sha256": "1f9cb1c54563701b55a35ac6af9a790a78d218055814a6285e861dd183207fee",
+    "sd_readback_matches_previous_release": true
+  }
+}

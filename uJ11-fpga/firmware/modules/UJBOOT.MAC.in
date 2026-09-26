@@ -1,0 +1,35 @@
+	.TITLE UJBOOT
+	.IDENT /01.00/
+; Software reboot from an idle RT-11 console. Upload/read back a trampoline
+; through the existing resident. After EXEC, this USER program never resumes.
+	.MCALL .PRINT,.EXIT
+	.PSECT BOOT,I,RW
+START:	.PRINT #MSG
+	MOV #TRAMP,R5
+	MOV #1000,R1
+	MOV #125061,R4
+	MOV #WORDS,R3
+1$:	MOV #100,R2
+	CMP R3,R2
+	BHIS 2$
+	MOV R3,R2
+2$:	MOV R3,-(SP)
+	SUB R2,(SP)
+	HALT
+	MOV (SP)+,R3
+	TST R0
+	BNE FAILED
+	TST R3
+	BNE 1$
+	MOV #1000,R1
+	CLR R2
+	HALT
+FAILED:	.PRINT #BAD
+	.EXIT
+MSG:	.ASCIZ /UJBOOT: restarting through retained-module bootstrap/
+BAD:	.ASCIZ /?UJBOOT-E-HALT upload or execution failed/
+	.EVEN
+TRAMP:
+@@TRAMPOLINE@@
+WORDS=<.-TRAMP>/2
+	.END START

@@ -1,0 +1,78 @@
+{
+  "image_sha256": "5850239d1c27d57cdd307da7bdcf85d255475f1db3f39f52994685994645c295",
+  "simh": [
+    {
+      "passed": true,
+      "cpu": "11/73",
+      "documents": 11,
+      "basic": [
+        {
+          "program": "B81FPU",
+          "comparisons": 29,
+          "errors": 0
+        },
+        {
+          "program": "B81FPD",
+          "comparisons": 29,
+          "errors": 0
+        }
+      ],
+      "startup": true,
+      "hg_not_accessed": true,
+      "native_copy_delete": true,
+      "console_sha256": "ecc626ca6150a72520d440571791675410398628d29c2f1bcef798548e2ffe78"
+    },
+    {
+      "passed": true,
+      "cpu": "11/03",
+      "documents": 11,
+      "basic": [
+        {
+          "program": "B81FIS",
+          "comparisons": 29,
+          "errors": 0
+        },
+        {
+          "program": "B81FIJ",
+          "comparisons": 29,
+          "errors": 0
+        }
+      ],
+      "startup": true,
+      "hg_not_accessed": true,
+      "native_copy_delete": true,
+      "console_sha256": "a41fe01ecdf64c2200d6bbe249dfe0b2c099a36aae71e21d8f937491482b27ca"
+    }
+  ],
+  "runner_sha256": "4ffaa080209c70fd51025fb44e1fee68a072a955cf9c52fc1db72d144225f869",
+  "rtl": {
+    "passed": true,
+    "checks": 24,
+    "clocks": 399490007,
+    "uart_bytes": 3434,
+    "production_rom": true,
+    "recovery_window_overrides": false,
+    "console_sha256": "776c92604cd193c719c25ca5e35a627dc9df21d1cb0588f1749ac27e1e7e0b66",
+    "simulation_sha256": "fdba80474a91a23f4300024529d3ae69365f47bf9d826ad10cca9c36dce4078b"
+  },
+  "passed": true,
+  "date": "2026-09-26",
+  "physical_sd_written": false,
+  "physical_boot_of_this_image": false,
+  "independent_rebuild_identical": true,
+  "production_verify": true,
+  "foreground_words": 1007,
+  "background_words_before_during_after": [
+    20341,
+    19334,
+    20341
+  ],
+  "logs": {
+    "production.txt": "1887ce97c89968ce0ba8801305a2183389151655396daac455f00941cafbd5ca",
+    "rtl-inputs.json": "7f32a024d7d28bd300364848183ead0f91feb64f2b00b8b7ac25adcda5c67f30",
+    "rtl.txt": "fdba80474a91a23f4300024529d3ae69365f47bf9d826ad10cca9c36dce4078b",
+    "simh-fis.uart": "a41fe01ecdf64c2200d6bbe249dfe0b2c099a36aae71e21d8f937491482b27ca",
+    "simh-fpp.uart": "ecc626ca6150a72520d440571791675410398628d29c2f1bcef798548e2ffe78",
+    "uj11.uart": "776c92604cd193c719c25ca5e35a627dc9df21d1cb0588f1749ac27e1e7e0b66"
+  }
+}

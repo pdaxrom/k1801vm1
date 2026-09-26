@@ -1,0 +1,32 @@
+	.TITLE REBOOT
+; This absolute helper is uploaded at HALT 001000. Payloads are generated
+; from the SAME assembled sources as the released ROM, never FRAM leftovers.
+	.ASECT
+	.=1000
+ENTRY:	MOV #1000,SP
+	CLR R0
+	.WORD 42
+	RESET
+	MOV #PAYLOAD,R0
+	MOV #4000,R1
+	MOV #325,R2
+	JSR PC,COPY
+	MOV #200,R1
+	MOV #122,R2
+	JSR PC,COPY
+	MOV #5000,R1
+	MOV #BWORDS,R2
+	JSR PC,COPY
+	JMP @#322
+; This stack is used only before the resident establishes its own stack.
+COPY:	MOV (R0)+,R3
+	MOV R3,(R1)
+	CMP R3,(R1)+
+	BNE FAILED
+	SOB R2,COPY
+	RTS PC
+FAILED:	BR FAILED
+PAYLOAD:
+@@PAYLOAD@@
+IMEND:
+	.END ENTRY

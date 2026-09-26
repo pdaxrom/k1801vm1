@@ -8,6 +8,7 @@ from board_common import ROOT
 from rt11_build import build as assemble
 from module_image import pack, decode
 from odt_tables import tables
+from module_relocation import build_module
 OUT = ROOT/'build/software'
 
 def sha(p):
@@ -33,11 +34,15 @@ def module(source, out, base, end, inputs=()):
     src.write_bytes(source.read_bytes())
     blob, symbols, assembly, directory = native(src)
     image = blob[base:symbols[end]]
+    binary, relocation = build_module(src, base, len(image), len(image), image)
     (out/'image.bin').write_bytes(image)
-    (out/(source.stem+'.BIN')).write_bytes(pack(base, image))
-    record = dict(format=decode(pack(base,image)), symbols=symbols,
+    (out/(source.stem+'.BIN')).write_bytes(binary)
+    record = dict(format=decode(binary), symbols=symbols,
+                  relocation_assembly=str(relocation.relative_to(ROOT)),
+                  relocation_assembler=json.loads((relocation/'build-inputs.json').read_text()),
                   assembly=str(directory.relative_to(ROOT)), assembler=assembly,
-                  sources={str(p.relative_to(ROOT)):sha(p) for p in (source, *inputs)},
+                  sources={str(p.relative_to(ROOT)):sha(p) for p in (source, *inputs,
+                      ROOT/'tools/module_relocation.py',ROOT/'tools/module_image.py')},
                   outputs={str(p.relative_to(ROOT)):sha(p) for p in
                            (src,out/'image.bin',out/(source.stem+'.BIN'))})
     (out/'result.json').write_text(json.dumps(record,indent=2)+'\n')
@@ -54,11 +59,14 @@ def odt(out=None):
     blob,sym,assembly,directory=native(src)
     assert sym['INIT']==0o10000 and sym['MEMEND']<=0o60000
     image=blob[sym['INIT']:sym['IMMEND']]
-    (out/'ODT.BIN').write_bytes(pack(sym['INIT'],image))
+    binary, relocation = build_module(src, sym['INIT'], len(image), sym['MEMEND']-sym['INIT'], image)
+    (out/'ODT.BIN').write_bytes(binary)
     (out/'image.bin').write_bytes(image)
     (out/'payload.bin').write_bytes(blob[sym['INIT']:sym['PAYEND']])
-    paths+=tail+[ROOT/'tools/odt_tables.py',Path(__file__)]
+    paths+=tail+[ROOT/'tools/odt_tables.py',Path(__file__),ROOT/'tools/module_relocation.py',ROOT/'tools/module_image.py']
     record=dict(format=decode((out/'ODT.BIN').read_bytes()),symbols=sym,assembler=assembly,
+        relocation_assembly=str(relocation.relative_to(ROOT)),
+        relocation_assembler=json.loads((relocation/'build-inputs.json').read_text()),
         assembly=str(directory.relative_to(ROOT)),allocation_bytes=sym['MEMEND']-sym['INIT'],
         free_bytes=0o60000-sym['MEMEND'],sources={str(p.relative_to(ROOT)):sha(p) for p in paths},
         outputs={str(p.relative_to(ROOT)):sha(p) for p in (src,out/'ODT.BIN',out/'image.bin',out/'payload.bin')})
@@ -94,6 +102,35 @@ def loader():
     (out/'result.json').write_text(json.dumps(record,indent=2)+'\n');return record
 
 
+def reboot():
+    # Read the already generated ROM components; build_hardware owns the exact
+    # low resident listing extraction. No new ROM content is generated here.
+    hw=ROOT/'build/hardware';out=OUT/'reboot';out.mkdir(parents=True,exist_ok=True)
+    walker,bs,_,_=native(ROOT/'firmware/boot/BOOT.MAC')
+    data=walker[bs['MSTART']:bs['MEND']]
+    data=(hw/'sdbase.bin').read_bytes()+(hw/'resid.bin').read_bytes()+data
+    def words(blob):
+        w=[int.from_bytes(blob[i:i+2],'little') for i in range(0,len(blob),2)]
+        return ''.join('\t.WORD '+','.join(f'{v:o}' for v in w[i:i+8])+'\n' for i in range(0,len(w),8))
+    source=ROOT/'firmware/modules/REBOOT.MAC.in'
+    text=source.read_text().replace('@@PAYLOAD@@',words(data))
+    text=text.replace('\t.TITLE REBOOT','\t.TITLE REBOOT\nBWORDS='+f"{(bs['MEND']-bs['MSTART'])//2:o}")
+    src=out/'REBOOT.MAC';src.write_text(text)
+    blob,sym,_,_=native(src);tramp=blob[0o1000:sym['IMEND']]
+    assert sym['IMEND']<=0o4000,'trampoline overlaps bootstrap destination'
+    template=ROOT/'firmware/modules/UJBOOT.MAC.in';src=out/'UJBOOT.MAC'
+    src.write_text(template.read_text().replace('@@TRAMPOLINE@@',words(tramp)))
+    blob,sym,assembly,directory=native(src);(out/'UJBOOT.SAV').write_bytes(blob)
+    paths=(template,source,ROOT/'firmware/boot/BOOT.MAC',ROOT/'firmware/boot/RESID.MAC',
+           ROOT/'firmware/boot/SDBASE.MAC',Path(__file__))
+    record=dict(assembly=str(directory.relative_to(ROOT)),assembler=assembly,
+                sources={str(p.relative_to(ROOT)):sha(p) for p in paths},
+                outputs={str(p.relative_to(ROOT)):sha(p) for p in (src,out/'REBOOT.MAC',out/'UJBOOT.SAV')})
+    (out/'result.json').write_text(json.dumps(record,indent=2)+'\n');return record
+
+
 if __name__=='__main__':
     for name,fn in (('odt',odt),('sdboot',bootstrap),('loader',loader)):
-        result=fn();print(name, result.get('format',{}),flush=True)
+        result=fn();fmt=result.get('format',{}).copy()
+        if 'relocations' in fmt:fmt['relocations']=len(fmt['relocations'])
+        print(name,fmt,flush=True)

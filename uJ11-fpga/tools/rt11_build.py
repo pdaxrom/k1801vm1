@@ -63,7 +63,7 @@ class Console:
             os.close(self.fd)
 
 
-def build(sources, out, base):
+def build(sources, out, base, *, foreground=False):
     out.mkdir(parents=True, exist_ok=True)
     disk = out/'build.dsk'
     if disk.exists(): raise ValueError('Use a fresh build directory: '+str(out))
@@ -89,13 +89,14 @@ def build(sources, out, base):
                 assert b'Errors detected' not in text and b'Error' not in text and b'?MACRO' not in text, text
                 c.send('\x03'); c.expect(rb'\r\n\.')
                 c.send('R LINK\r'); c.expect(rb'\*')
-                c.send(f'{name},{name}={name}\r'); text = c.expect(rb'\*')
+                option = '/R' if foreground else ''
+                c.send(f'{name}{option},{name}={name}\r'); text = c.expect(rb'\*')
                 assert b'?LINK' not in text, text
                 c.send('\x03'); c.expect(rb'\r\n\.')
         finally: c.close()
     results = {}
     for src in sources:
-        for ext in ('SAV', 'OBJ', 'LST', 'MAP'):
+        for ext in ('REL' if foreground else 'SAV', 'OBJ', 'LST', 'MAP'):
             name = src.stem+'.'+ext
             subprocess.run([str(rt), 'extract', str(disk), str(out), name], check=True, capture_output=True)
             results[name] = hashlib.sha256((out/name).read_bytes()).hexdigest()
@@ -103,6 +104,7 @@ def build(sources, out, base):
         assert re.search(r'Errors detected:\s+0\b', listing), listing[-3000:]
     assert hashlib.sha256(base.read_bytes()).hexdigest() == digest
     record = dict(base_sha256=digest, tool='RT-11 V5.03 MACRO/LINK in SIMH',
+                  foreground=foreground,
                   source_sha256={str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
                   outputs=results, driver_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     (out/'build-inputs.json').write_text(json.dumps(record, indent=2)+'\n')

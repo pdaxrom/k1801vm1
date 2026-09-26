@@ -1,0 +1,41 @@
+HG 01.01 / HGTIME - HOST DISK AND RT-11 SYSTEM TIME
+
+HG.SYS talks to the host through the shared FT2232/JTAG GPIO wiring.
+STARTF.COM does not access HG. INSTALL requires the HC1200 GPIO CSR.
+Select GPIO with JTAG_EN; stop/unplug the JTAG programmer. The host must
+run the current hgfsd, built from lsi11-fpga/host/hg in this repository.
+
+HOST (EXAMPLE)
+  TZ=Asia/Yerevan hgfsd --directory /path/to/new-share --clock 1000
+
+Without TZ, hgfsd uses the host's local zone. A fresh share imports its
+files into .hg-volume.dsk. If that file already exists, it is authoritative:
+copying new files beside it does not automatically update the HG volume.
+
+RT-11
+  INSTALL HG
+  LOAD HG
+  DIR HG:
+  COPY HG:FILE.EXT SY:FILE.EXT
+  RUN SY:HGTIME
+  DATE
+  TIME
+  UNLOAD HG
+
+Then stop the host daemon to release the shared pins before panel use.
+Stop CLOCK and other panel programs before active HG transfers. Do not
+press panel keys while hgfsd is running. One reader owns the UART.
+Wait for each COPY to finish: 15 KiB can take several minutes at 1 kHz.
+A host-script timeout does not cancel an in-progress guest transfer.
+
+HGTIME sets BOTH system date and time via the RT-11 .SDTTM request.
+It validates reply status, checksum, calendar and ticks before changing
+anything. On failure the old RT-11 time remains intact. No periodic sync
+occurs; run HGTIME again when needed, after reboot or long ODT stops.
+The monitor is 50 Hz; HGTIME also understands a 60-Hz monitor build.
+Supported dates for this V5.03 interface: 1972..2035.
+Both the updated HG.SYS and updated host daemon are required for TIME.
+HG disk transfer does not require the FPP or ODT modules.
+
+After successful sync and releasing HG pins, RUN SY:CLOCK or
+FRUN SY:CLOCK displays RT-11 time. See CLOCK.TXT.

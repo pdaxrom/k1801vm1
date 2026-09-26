@@ -1,0 +1,20 @@
+HC1200 PANEL DEMONSTRATIONS
+
+  RUN SY:DSPDEM       Cycle display messages.
+  RUN SY:KEYDEM       Display KEY: xx (hex), change RGB with each key.
+  RUN SY:RGBDEM       Cycle RGB colors and labels.
+
+Use only one display program at a time; stop foreground CLOCK first.
+JTAG_EN must select GPIO. Unplug programmer pins, UNLOAD HG and stop
+the host daemon before using keys.
+
+These older demo banners say PRESS PANEL ESC. There is no physical
+ESC-labelled button on the current 20-key panel. Demo exit tests key
+code 0x13 (023 octal), the default ODT ENTER code. Use that key; UART
+Ctrl-C can also abort a running RT-11 background demo.
+KEYDEM prints other key codes on HDSP, not UART. These are the same
+PNLDRV codes used by ODT. Do not infer a new wiring map from old banners.
+
+The demos use the current dimmed PNLDRV (HCMS control word 0x6C).
+They do not install FRAM modules. See ODT.TXT for the debugger's separate
+panel menu, hotkeys 8..F, per-register browsing and automatic scrolling.

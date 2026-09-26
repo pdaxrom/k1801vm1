@@ -1,0 +1,26 @@
+FP11.BIN - SOFTWARE DCJ11 FPP IN HALT FRAM
+
+This optional module emulates the J-11 floating-point instruction set.
+It is ordinary PDP-11 firmware, not a hardware multiplier/FPU and not
+additional FPGA microcode. The filename does not select an FP11-A CPU.
+Arithmetic/profile: DCJ11 release 00.12. Package: relocatable format 4.
+Install/enable using UJMOD.TXT, then reboot so RT-11 detects the FPP.
+
+FIS remains implemented in microcode and is independent of this module.
+F/D arithmetic, conversions, modes/status, exceptions and PSW operands
+are described in project docs/fpp.md and docs/fpp-psw.md.
+CPU integer accesses to PSW address 177776 are still unsupported;
+this module's FP PSW-operand support does not add integer PSW hardware.
+
+Use RUN SY:B81FPU for single-precision BASIC or RUN SY:B81FPD for double.
+Use B81FIJ for FIS BASIC when FPP is enabled. Original B81FIS assumes
+the old exception stack and should be used only after FPP OFF + reboot.
+ON restores a retained FPP without rereading SD, followed by reboot.
+
+ODT command F shows AC0..AC5, FPS, FEC and FEA. Values are raw octal/hex
+words; viewing them does not change the floating-point context.
+RUN SY:ODTCHK provides a known AC2 pattern and enters installed ODT.
+See TESTS.TXT before running FPTST: it intentionally spins for debugging.
+
+No MMU, register banking or memory-mapped integer PSW is added by this
+software kit. A successful BASIC test is not complete J-11 certification.

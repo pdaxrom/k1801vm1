@@ -1,0 +1,15 @@
+Image blocks: 53790 (octal 151036)
+Partitions: 1
+Partition: 0 (base block 0)
+Partition blocks: 53790 (octal 151036)
+Usable RT-11 blocks: 53790 (octal 151036)
+Directory start block: 6
+Pack cluster size: 1
+System version: V05
+Volume ID: RT11V503
+Owner: FORM
+System ID: DECRT11A
+Directory segments: total 37, highest 2, extra bytes 0
+Segments:
+  1: next 2, data_start 104
+  2: next 0, data_start 3264

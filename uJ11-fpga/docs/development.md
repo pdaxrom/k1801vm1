@@ -25,8 +25,31 @@ RT-11 сборщик использует оригинальные MACRO/LINK н
 Для `vendor` скопировать штатные модели из
 `$DIAMOND_HOME/cae_library/simulation/verilog/machxo2/` в `.cache/vendor/`.
 
+Для HG TIME и часов HDSP: `make hg HG_OUT=build/hg-new` и
+`make test-hg-time HG_TEST_OUT=build/test-hg-new`.
+Сборка выдаёт оба CLOCK: `.SAV` для RUN и `.REL` для FRUN в RT-11FB.
+Тест выполняет foreground/background одновременно и проверяет освобождение
+памяти через UNLOAD F, помимо форматирования и синхронизации времени.
+Нужны также C compiler, `pkg-config` и `libftdi1` для общего host daemon.
+Использовать новые каталоги результатов. Эти отдельные цели не меняют
+установленный baseline `make verify`; [сборка, протокол и установка](host-time.md).
+
 Синтаксис микрокода, отдельный запуск assembler, справочник полей и пример
 добавления инструкции — в [руководстве по микроассемблеру](microassembler.md).
+
+## Сборка готовой SD
+
+```sh
+make sd-image SD_OUT=build/sd-new
+make test-sd-image SD_OUT=build/sd-new SD_TEST_OUT=build/sd-test-new
+```
+
+Первый шаг упаковывает проверенные `releases/software`, `releases/hg`,
+`releases/basic`, демо пульта, native-сборки TMRATE/ODTCHK и ASCII-справку
+из `demos/rt11/sd/`. Второй загружает именно полученный образ в SIMH
+и полном RTL с SPI FRAM/SD/UART. Нужны новые каталоги; исходный системный
+диск, физическая плата и SD не меняются. Выходы: `.img`, `.img.gz`, SHA256,
+manifest, каталог и журналы. [Формат, установка и границы проверки](sd-image.md).
 
 ## Получение ROM и программ
 
@@ -48,7 +71,8 @@ make verify
 | `build/hardware/uj11_*_ebr.v`, `uj11_decode_table.v`, `uj11_firmware_rom.v` | Vendor EBR initializers |
 | `build/software/odt/ODT.BIN` | Отладчик |
 | `build/software/sdboot/SDBOOT.BIN` | Заменяемый bootstrap |
-| `build/software/loader/UJMOD.SAV` | RT-11 загрузчик |
+| `build/software/loader/UJMOD.SAV` | RT-11 загрузчик, ON и AUTO |
+| `build/software/reboot/UJBOOT.SAV` | Программный перезапуск bootstrap и модулей |
 | `build/fpp/software/FP11.BIN` | Программный FPP |
 
 ODT собирается из отдельных `.MAC` частей и генерируемой таблицы мнемоник.
@@ -79,7 +103,7 @@ make test-configuration OUT=build/configuration-new
 ```
 
 `make test` включает assembler/format/UART unit tests, word/byte ALU, RF/Q,
-PSW/memory, кнопку RESET и sequencer,
+PSW/memory, кнопку RESET, точные периоды KW11 и sequencer,
 cold modules/UJMOD, независимые FPP math/conversion models, FPP
 smoke/PSW/events и ODT/panel/breakpoints/FP dump.
 `test-fpp-full` выполняет полные числовые матрицы sync и logic.
@@ -156,3 +180,24 @@ Helper восстанавливает terminal settings и процесс пос
 
 `make clean` удаляет только генерируемый `build/`; `.cache/vendor`, исходники
 и релизы сохраняются. Предыдущие эксперименты — в [Git-истории](../history/README.md).
+
+## Перемещаемые модули
+
+`make software` собирает абсолютный reference и relocatable `.REL` через
+DEC MACRO/LINK. `module_relocation.py` извлекает настоящие fixup records;
+результат переноса на reference BASE должен совпасть побайтно. В релиз идёт
+BIN формата 4 с immutable size, полным allocation size и fixup trailer.
+ROM/RTL по-прежнему используют ABI3 и checksum размещённого кода.
+
+`make test-modules` проверяет cold walker, loader и программный UJBOOT.
+Для полного RT-11 пути с размещением FPP в первое свободное место:
+
+```sh
+python3 tools/run_rt11.py --auto --out build/modules-auto-new
+```
+
+Результаты включают SD-загрузку, readback, холодную инициализацию, STEP
+и FP dump перемещённого модуля, OFF/ON без перечитывания BIN.
+`tools/hardware_module_update.py` повторяет установку и BASIC через UART
+на Linux-хосте; фазы install/activate раздельны, файлы сначала копируются
+обратно через HG и проверяются SHA256. Сценарий не программирует FPGA.

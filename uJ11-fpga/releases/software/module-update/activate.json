@@ -1,0 +1,856 @@
+{
+  "phase": "activate",
+  "port": "/dev/ttyUSB1",
+  "passed": false,
+  "commands": [
+    {
+      "command": "SET SL OFF",
+      "offset": 0,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 25,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.5034807980009646
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 25,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 43,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4031316300006438
+    },
+    {
+      "command": "STATUS",
+      "offset": 43,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 310,
+      "response": "STATUS\r\n0: 010000 014233 134205 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.3023863489997893
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 310,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 328,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4029333179987589
+    },
+    {
+      "command": "ODT",
+      "offset": 328,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 456,
+      "response": "ODT\r\n!UJMOD-I-WRITING; services disabled, record invalid\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 3.1072700200002146
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 456,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 474,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4028293040009885
+    },
+    {
+      "command": "SDBOOT",
+      "offset": 474,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 605,
+      "response": "SDBOOT\r\n!UJMOD-I-WRITING; services disabled, record invalid\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 1.3025127880009677
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 605,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 623,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030984219989477
+    },
+    {
+      "command": "DEL2",
+      "offset": 623,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 699,
+      "response": "DEL2\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 0.8013478749999194
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 699,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 717,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4029612199992698
+    },
+    {
+      "command": "FP11 AUTO",
+      "offset": 717,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 851,
+      "response": "FP11 AUTO\r\n!UJMOD-I-WRITING; services disabled, record invalid\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 2.104516674000479
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 851,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 869,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030824489982479
+    },
+    {
+      "command": "STATUS",
+      "offset": 869,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1136,
+      "response": "STATUS\r\n0: 010000 014315 031761 140403\r\n1: 006000 000342 053365 140403\r\n2: 042710 004174 166644 140403\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2022924390003027
+    },
+    {
+      "command": "RUN UJBOOT",
+      "offset": 1136,
+      "expected": "RT-11FB[^\\r\\n]*V05\\.03",
+      "complete": true,
+      "end": 1226,
+      "response": "RUN UJBOOT\r\nUJBOOT: restarting through retained-module bootstrap\r\n\r\nRT-11FB (S) V05.03  \r\n",
+      "elapsed_seconds": 4.9118757090000145
+    },
+    {
+      "command": "SET SL OFF",
+      "offset": 1276,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1301,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.7036646550004662
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1301,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1319,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030636300012702
+    },
+    {
+      "command": "STATUS",
+      "offset": 1319,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1586,
+      "response": "STATUS\r\n0: 010000 014315 031761 140407\r\n1: 006000 000342 053365 140407\r\n2: 042710 004174 166644 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2022851559995615
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1586,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1604,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.402885162999155
+    },
+    {
+      "command": "OFF2",
+      "offset": 1604,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1680,
+      "response": "OFF2\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 0.8013817600003676
+    },
+    {
+      "command": "RUN UJBOOT",
+      "offset": 1680,
+      "expected": "RT-11FB[^\\r\\n]*V05\\.03",
+      "complete": true,
+      "end": 1770,
+      "response": "RUN UJBOOT\r\nUJBOOT: restarting through retained-module bootstrap\r\n\r\nRT-11FB (S) V05.03  \r\n",
+      "elapsed_seconds": 4.911759471999176
+    },
+    {
+      "command": "SET SL OFF",
+      "offset": 1820,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1845,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.7036379679993843
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1845,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1863,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4029675300007511
+    },
+    {
+      "command": "STATUS",
+      "offset": 1863,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 2130,
+      "response": "STATUS\r\n0: 010000 014315 031761 140407\r\n1: 006000 000342 053365 140407\r\n2: 042710 004174 166644 140401\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2023310549993766
+    },
+    {
+      "command": "RUN B81FIS",
+      "offset": 2130,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "end": 2213,
+      "response": "RUN B81FIS\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? ",
+      "elapsed_seconds": 1.60355338699992
+    },
+    {
+      "command": "A",
+      "offset": 2213,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2225,
+      "response": "A\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 0.6012286109998968
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 2225,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2293,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 5.0118785020004
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 2293,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2337,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.302704169000208
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 2337,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2389,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.8039068969992513
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 2389,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2440,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.0044526099991344
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 2440,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2465,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.30265354400035
+    },
+    {
+      "command": "PRINT 1E-30*1E-30",
+      "offset": 2465,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2519,
+      "response": "PRINT 1E-30*1E-30\r\n?FLOATING UNDERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.2048998119989847
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 2519,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2563,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3025660540006356
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 2563,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2588,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3027431669997895
+    },
+    {
+      "command": "BYE",
+      "offset": 2588,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 2596,
+      "response": "BYE\r\n\r\n.",
+      "elapsed_seconds": 1.6035592589996668
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 2596,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 2614,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4029332339996472
+    },
+    {
+      "command": "ON2",
+      "offset": 2614,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 2689,
+      "response": "ON2\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 0.9016412780001701
+    },
+    {
+      "command": "RUN UJBOOT",
+      "offset": 2689,
+      "expected": "RT-11FB[^\\r\\n]*V05\\.03",
+      "complete": true,
+      "end": 2779,
+      "response": "RUN UJBOOT\r\nUJBOOT: restarting through retained-module bootstrap\r\n\r\nRT-11FB (S) V05.03  \r\n",
+      "elapsed_seconds": 4.911819046001256
+    },
+    {
+      "command": "SET SL OFF",
+      "offset": 2829,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 2854,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.7036390739995113
+    },
+    {
+      "command": "RUN B81FIJ",
+      "offset": 2854,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "end": 2937,
+      "response": "RUN B81FIJ\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? ",
+      "elapsed_seconds": 1.7036314029992354
+    },
+    {
+      "command": "A",
+      "offset": 2937,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 2949,
+      "response": "A\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 0.6010356700007833
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 2949,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3017,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 4.911753358999704
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 3017,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3061,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3026173140005994
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 3061,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3113,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.8037527930009674
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 3113,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3164,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.0044635200010816
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 3164,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3189,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3027439039997262
+    },
+    {
+      "command": "PRINT 1E-30*1E-30",
+      "offset": 3189,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3243,
+      "response": "PRINT 1E-30*1E-30\r\n?FLOATING UNDERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.2049968230003287
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 3243,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3287,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3026486819999263
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 3287,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3312,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3026245370001561
+    },
+    {
+      "command": "BYE",
+      "offset": 3312,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 3320,
+      "response": "BYE\r\n\r\n.",
+      "elapsed_seconds": 1.6036517510001431
+    },
+    {
+      "command": "RUN B81FPU",
+      "offset": 3320,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "end": 3403,
+      "response": "RUN B81FPU\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? ",
+      "elapsed_seconds": 1.7036774469997908
+    },
+    {
+      "command": "A",
+      "offset": 3403,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3415,
+      "response": "A\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 0.6010267439996824
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 3415,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3483,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 10.325756901000204
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 3483,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3527,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.4029537309997977
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 3527,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3579,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.8039862869991339
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 3579,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3630,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.004463160999876
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 3630,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3655,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3027956349997112
+    },
+    {
+      "command": "BYE",
+      "offset": 3655,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 3663,
+      "response": "BYE\r\n\r\n.",
+      "elapsed_seconds": 1.6035252580004453
+    },
+    {
+      "command": "RUN B81FPD",
+      "offset": 3663,
+      "expected": "INDIVIDUAL\\)\\?",
+      "complete": true,
+      "end": 3746,
+      "response": "RUN B81FPD\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? ",
+      "elapsed_seconds": 1.7036075420000998
+    },
+    {
+      "command": "A",
+      "offset": 3746,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3758,
+      "response": "A\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 0.6010469419998117
+    },
+    {
+      "command": "RUN B81TST",
+      "offset": 3758,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3826,
+      "response": "RUN B81TST\r\nCP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 13.132501639000111
+    },
+    {
+      "command": "RUN B81DBL",
+      "offset": 3826,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3896,
+      "response": "RUN B81DBL\r\nDOUBLE DELTA= 1  9.99978E-13 \r\nCP81 DOUBLE PASS\r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.6060141939997266
+    },
+    {
+      "command": "PRINT 1/0",
+      "offset": 3896,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3940,
+      "response": "PRINT 1/0\r\n?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.4029510410000512
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "offset": 3940,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 3992,
+      "response": "PRINT SQR(-1)\r\n?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.8038094619987532
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "offset": 3992,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 4043,
+      "response": "PRINT 1E30*1E30\r\n?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 2.0043867380009033
+    },
+    {
+      "command": "PRINT 2+2",
+      "offset": 4043,
+      "expected": "\\r\\nREADY\\r\\n",
+      "complete": true,
+      "end": 4068,
+      "response": "PRINT 2+2\r\n 4 \r\n\r\nREADY\r\n",
+      "elapsed_seconds": 1.3027374100001907
+    },
+    {
+      "command": "BYE",
+      "offset": 4068,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4076,
+      "response": "BYE\r\n\r\n.",
+      "elapsed_seconds": 1.6034525260001828
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 4076,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 4094,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030006230004801
+    },
+    {
+      "command": "STATUS",
+      "offset": 4094,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4361,
+      "response": "STATUS\r\n0: 010000 014315 031761 140407\r\n1: 006000 000342 053365 140407\r\n2: 042710 004174 166644 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2022237399996811
+    },
+    {
+      "command": "LOAD HG",
+      "offset": 4361,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4373,
+      "response": "LOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.2017018550013745
+    },
+    {
+      "command": "COPY HG:ODTCHK.SAV SY:ODTCHK.SAV",
+      "offset": 4373,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4410,
+      "response": "COPY HG:ODTCHK.SAV SY:ODTCHK.SAV\r\n\r\n.",
+      "elapsed_seconds": 26.459353432999706
+    },
+    {
+      "command": "COPY SY:ODTCHK.SAV HG:CHKODT.SAV",
+      "offset": 4410,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4447,
+      "response": "COPY SY:ODTCHK.SAV HG:CHKODT.SAV\r\n\r\n.",
+      "elapsed_seconds": 59.24857849900036
+    },
+    {
+      "command": "RUN HGTIME",
+      "offset": 4447,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4532,
+      "response": "RUN HGTIME\r\n!HGTIME-I-RT-11 SYSTEM DATE AND TIME SET FROM HOST\r\n11:09:27 26/09  \r\n\r\n.",
+      "elapsed_seconds": 1.7037821229987458
+    },
+    {
+      "command": "DATE",
+      "offset": 4532,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4554,
+      "response": "DATE\r\n26-Sep-2026\r\n\r\n.",
+      "elapsed_seconds": 0.8018243980004627
+    },
+    {
+      "command": "TIME",
+      "offset": 4554,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4573,
+      "response": "TIME\r\n11:09:29\r\n\r\n.",
+      "elapsed_seconds": 0.8016215789994021
+    },
+    {
+      "command": "UNLOAD HG",
+      "offset": 4573,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 4587,
+      "response": "UNLOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.3028825239998696
+    },
+    {
+      "command": "RUN ODTCHK",
+      "offset": 4587,
+      "expected": "ODT> ",
+      "complete": true,
+      "end": 4841,
+      "response": "RUN ODTCHK\r\n!ODTCHK-I-HALT with AC2 test pattern\r\nUJ11 ODT CP77: HALT (PC IS AFTER HALT)\r\nR0=001040\r\nR1=000104\r\nR2=001000\r\nR3=070000\r\nR4=000000\r\nR5=120352\r\nR6=001000\r\nR7=001020\r\nPSW=000004 T=0 IPL=0 NZVC=0100\r\n001020: 012700 001105  MOV #001105,R0\r\nODT> ",
+      "elapsed_seconds": 1.7039231499984453
+    },
+    {
+      "command": "F 6",
+      "offset": 4841,
+      "expected": "ODT> ",
+      "complete": true,
+      "end": 4872,
+      "response": "F 6\r\nFPS=003600 MODE=D,I\r\nODT> ",
+      "elapsed_seconds": 0.7012321080001129
+    }
+  ],
+  "started_utc": "2026-09-26T07:05:34Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "uart_bytes": 4872,
+  "before": [
+    [
+      4096,
+      6299,
+      47237,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      24576,
+      2172,
+      50204,
+      49415
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "staged": [
+    [
+      4096,
+      6349,
+      13297,
+      49411
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49411
+    ],
+    [
+      17864,
+      2172,
+      60836,
+      49411
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "initialized": [
+    [
+      4096,
+      6349,
+      13297,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      17864,
+      2172,
+      60836,
+      49415
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "date": "DATE\r\n26-Sep-2026\r\n\r\n.",
+  "time": "TIME\r\n11:09:29\r\n\r\n.",
+  "finished_utc": "2026-09-26T07:09:33Z"
+}

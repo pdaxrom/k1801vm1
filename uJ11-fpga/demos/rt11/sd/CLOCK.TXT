@@ -1,0 +1,27 @@
+CLOCK 01.01 - RT-11 TIME ON HDSP
+
+  RUN SY:CLOCK        Run CLOCK.SAV in the ordinary background job.
+  FRUN SY:CLOCK       Load CLOCK.REL into the RT-11FB foreground job.
+
+FRUN needs the REL file, not SAV. Both are included on this disk.
+Foreground CLOCK leaves background available for commands/programs.
+After FRUN press Ctrl-B to select the background console.
+To stop foreground CLOCK: Ctrl-F, then Q (no Enter), then Ctrl-B.
+UNLOAD F releases the foreground job's allocated memory after exit.
+For ordinary RUN, Q, q or UART ESC exits; Ctrl-C is handled by RT-11.
+RUN SY:CLOCK.REL is also valid, but uses the ordinary background job.
+
+The sixteen-character display shows HH:MM:SS DD/MM and trailing spaces.
+CLOCK reads RT-11 .GTIM; it does not synchronize the host by itself.
+Use HGTIME first, or set DATE/TIME with the RT-11 commands.
+HG is not required while CLOCK runs. The wait uses .TWAIT (100 ms),
+allowing the other FB job to execute. Only changed text is redrawn.
+
+HCMS current control is 0x6C (4.0 mA peak instead of 9.3 mA).
+This setting and CLOCK are software only. No FPGA changes are needed.
+Stop CLOCK before using other panel programs or starting HG transfers.
+The retained ODT also owns the display while the CPU is stopped.
+
+Time accuracy follows the calibrated KW11/OSCH on this particular board.
+It is not a crystal RTC. Re-sync after reboot, long debugging stops or
+when drift matters. TMRATE measures raw system tick rate; see TESTS.TXT.

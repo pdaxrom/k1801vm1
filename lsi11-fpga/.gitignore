@@ -15,4 +15,5 @@ __pycache__/
 /images/*.dsk
 /host/hg/hgfsd
 /host/hg/test_hg
+/host/hg/test_hg_service
 /host/hg/*.dSYM/

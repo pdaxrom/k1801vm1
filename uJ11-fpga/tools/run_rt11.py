@@ -13,7 +13,7 @@ from build_fpp import build as fp_build, OUT as FP
 from build_software import native
 
 
-def run(out):
+def run(out, auto=False):
     out.mkdir(parents=True,exist_ok=True)
     od=odt(ROOT/'build/software/odt');sd=bootstrap();ld=loader();core,board=adapt()
     # One UART poll for this long regression. Production timing is separately
@@ -52,14 +52,22 @@ def run(out):
     original=ROOT/'tests/rt11_harness.vh';cases=ROOT/'tests/fpp_rt11.vh'
     text=original.read_text()
     text=text+cases.read_text()+'\nendmodule\n'
+    fp_symbols=fp['symbols'].copy()
+    if auto:
+        target=od['symbols']['MEMEND']
+        delta=target-fp_symbols['INIT']
+        for name in set(re.findall(r'\bF_([A-Z][A-Z0-9]*)',text)):
+            fp_symbols[name]+=delta
+        text=text.replace('module_command("FP11")','module_command("FP11 AUTO")')
+        text=text.replace("upper('o7020)=='o60000",f"upper('o7020)=='o{target:o}")
     text=text.replace('if(window=="UJLOAD> ")','if(window[55:0]=="UJMOD> ")')
     text=text.replace('clocks>500000000','clocks>2000000000').replace('CP64 progress','CP79 progress')
     test=out/'tb.v';test.write_text(text)
-    (out/'odt_symbols.vh').write_text(''.join(f'localparam integer {prefix}_{n}={v};\n' for prefix,sym in (('O',od['symbols']),('F',fp['symbols']),('G',gs)) for n,v in sym.items()))
+    (out/'odt_symbols.vh').write_text(''.join(f'localparam integer {prefix}_{n}={v};\n' for prefix,sym in (('O',od['symbols']),('F',fp_symbols),('G',gs)) for n,v in sym.items()))
     sources=[str(test.relative_to(ROOT))]+core+board+['rtl/uj11_rom.v','tests/models/ODDRXE.v','tests/models/spi_fram_model.v','tests/models/spi_sd_model.v']
     paths += [ROOT/p for p in sources]+[original,cases,Path(__file__),ROOT/'firmware/fpp/FPTST.MAC',src,out/'odt_symbols.vh',out/'firmware.mem',HW/'inputs.json',HW/'m0.mem',HW/'decode.mem']
     manifest=dict(files={str(p.relative_to(ROOT)):sha(p) for p in paths},base_sha256=basehash,image_sha256=imagehash,
-                  odt=od,bootstrap=sd,loader=ld,fp=fp,guest_assembly=assembly,recovery_window_overrides=overrides)
+                  odt=od,bootstrap=sd,loader=ld,fp=fp,auto=auto,guest_assembly=assembly,recovery_window_overrides=overrides)
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     cmd=['verilator','--binary','--timing','-Wno-WIDTH','--top-module','tb_rt11','-j','4','--Mdir',str(out/'obj'),'-I'+str(out)]+sources
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
@@ -75,4 +83,5 @@ def run(out):
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',type=Path,required=True)
-    run(p.parse_args().out.resolve())
+    p.add_argument('--auto',action='store_true')
+    a=p.parse_args();run(a.out.resolve(),a.auto)

@@ -40,7 +40,7 @@ I/O cells:       21
 SUB MODULES 
           spi_byte_service_68s_2s_7s        1       100.0
                            uj11_alu        1       100.0
-                         uj11_board        1       100.0
+          uj11_board_29560000s_596037s_68s_2s        1       100.0
                   uj11_board_bus_Z3        1       100.0
                  uj11_board_fram_Z2        1       100.0
                         uj11_button        1       100.0
@@ -55,14 +55,14 @@ SUB MODULES
                          uj11_panel        1       100.0
                            uj11_psw        1       100.0
                        uj11_regfile        1       100.0
-          uj11_rom_build/cp67-modules/m0.mem        1       100.0
-          uj11_tick_591200s_87984_1        1       100.0
-          uj11_tick_591200s_87984_1_0        1       100.0
+          uj11_rom_build/hardware/m0.mem        1       100.0
+            uj11_tick_591200s_87984        1       100.0
+            uj11_tick_596037s_31580        1       100.0
           wbc_uart_xo2_29560000s_257s_128s_9s        1       100.0
                             
                          TOTAL          1758           
 ----------------------------------------------------------------------
-Report for cell uj11_board.netlist
+Report for cell uj11_board_29560000s_596037s_68s_2s.netlist
      Instance path:  system
                                           Cell usage:
                                cell       count    Res Usage(%)
@@ -102,8 +102,8 @@ SUB MODULES
                          uj11_panel        1       100.0
                            uj11_psw        1       100.0
                        uj11_regfile        1       100.0
-          uj11_rom_build/cp67-modules/m0.mem        1       100.0
-          uj11_tick_591200s_87984_1_0        1       100.0
+          uj11_rom_build/hardware/m0.mem        1       100.0
+            uj11_tick_596037s_31580        1       100.0
           wbc_uart_xo2_29560000s_257s_128s_9s        1       100.0
                             
                          TOTAL          1650           
@@ -133,7 +133,7 @@ SUB MODULES
           spi_byte_service_68s_2s_7s        1       100.0
                  uj11_board_fram_Z2        1       100.0
                          uj11_panel        1       100.0
-          uj11_tick_591200s_87984_1_0        1       100.0
+            uj11_tick_596037s_31580        1       100.0
           wbc_uart_xo2_29560000s_257s_128s_9s        1       100.0
                             
                          TOTAL           729           
@@ -198,8 +198,7 @@ Report for cell uj11_board_fram_Z2.netlist
                             
                          TOTAL           190           
 ----------------------------------------------------------------------
-Report for cell uj11_tick_591200s_87984_1_0.netlist
-  Original Cell name uj11_tick_591200s_87984_1
+Report for cell uj11_tick_596037s_31580.netlist
      Instance path:  system.bus.timebase
                                           Cell usage:
                                cell       count    Res Usage(%)
@@ -248,7 +247,7 @@ SUB MODULES
                       uj11_microseq        1       100.0
                            uj11_psw        1       100.0
                        uj11_regfile        1       100.0
-          uj11_rom_build/cp67-modules/m0.mem        1       100.0
+          uj11_rom_build/hardware/m0.mem        1       100.0
                             
                          TOTAL           887           
 ----------------------------------------------------------------------
@@ -276,11 +275,11 @@ SUB MODULES
                       uj11_microseq        1       100.0
                            uj11_psw        1       100.0
                        uj11_regfile        1       100.0
-          uj11_rom_build/cp67-modules/m0.mem        1       100.0
+          uj11_rom_build/hardware/m0.mem        1       100.0
                             
                          TOTAL           841           
 ----------------------------------------------------------------------
-Report for cell uj11_rom_build/cp67-modules/m0.mem.netlist
+Report for cell uj11_rom_build/hardware/m0.mem.netlist
      Instance path:  system.cpu.engine.rom
                                           Cell usage:
                                cell       count    Res Usage(%)
@@ -410,12 +409,11 @@ Report for cell uj11_button.netlist
                                 VHI        2         9.1
                                 VLO        2         9.1
 SUB MODULES 
-          uj11_tick_591200s_87984_1        1       100.0
+            uj11_tick_591200s_87984        1       100.0
                             
                          TOTAL            68           
 ----------------------------------------------------------------------
-Report for cell uj11_tick_591200s_87984_1.netlist
-  Original Cell name uj11_tick_591200s_87984
+Report for cell uj11_tick_591200s_87984.netlist
      Instance path:  button.timebase
                                           Cell usage:
                                cell       count    Res Usage(%)

@@ -1,0 +1,386 @@
+{
+  "date": "2026-09-26",
+  "build": {
+    "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+    "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+    "sources": {
+      "demos/rt11/hostdisk/HG.MAC": "0e4d226caa119ec0db6821ec84a6ba5823bff07908c9d04ca98637de47c3e3a5",
+      "demos/rt11/hostdisk/HGTIME.MAC": "8519d6cf1ded7d458cdc6b2c63e114786c7016f933e72b590965a2652ff44fcf",
+      "demos/rt11/panel/TMDRV.MAC": "16814dae24222d11f85556309da64437f986f896786a4dfd3cb451b9260d2a96",
+      "demos/rt11/panel/CLOCK.MAC": "112829b1bf36d265d2e85723b34dac2faedee91a4d5a47e99ab263b261c160d8",
+      "demos/rt11/panel/PNLDRV.MAC": "a383dfacb53aa931dde84668753335078710b88164cc6a42d2f4b8bb9af9853f"
+    },
+    "outputs": {
+      "HG.SYS": "f98e81fb4e98a8ca2165102e57db2b5782a6c9be23420f4aea8a71f0c0901abd",
+      "HGTIME.SAV": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c",
+      "CLOCK.SAV": "03656efcc33f60ef92f6dc6ced7fcd5b9ce2dd72efc51e6e32bb151979334e25",
+      "CLOCK.REL": "6059623a6bac1a31ac79f57860517e545b3364cf1ad3b17ee11549385d9c861e",
+      "HGTIME.MAP": "bf67c6e9397ab347d7018b81f2a13d563f0db18231b57b9e9d69537fc820d813",
+      "CLOCK.MAP": "9102cc9c2a2c1b0adae10bf80fba459e8ef73dd0fe88fec678c7a4a5791c040f",
+      "CLKFG.MAP": "5aab64970c450b11327c91afb09b099b230fc855d26a49faa8914eaf54f7be2c",
+      "HG.LST": "a05df5705ff631ba504e46683e6911333c3acc01e8d4ac99dc04d204a6db7144",
+      "HG.OBJ": "3c689403a0522a9da1a70320187de4391ca76ed22354d4c7d0e09e07b09a7961",
+      "HGTIME.LST": "1eb2a1cee940e380e41d2697473b8107c1c80b792c233896560271f9e0d199a8",
+      "HGTIME.OBJ": "0c2df3efbe6fac1a125a0fbe42bac274cd84cf757f568b407d9cf5c5d42a46ca",
+      "TMDRV.LST": "5fe269acbd7a5e62141d689a061e214d922596c1ef7cc1aab288c305cefbd043",
+      "TMDRV.OBJ": "a6089258552064d2609e1fc814d5dc1329d94eedfa24d31aee935f1283906ba2",
+      "CLOCK.LST": "5fb6a89940cb4a19c4798851fe7b6500baaf0797643f1a8a0c73799fbfcc7d58",
+      "CLOCK.OBJ": "b007d7de16e6dc60e21bf950f53cf05d4c078092aee2a065f121bad63a2a0dba",
+      "PNLDRV.LST": "92b0f39dd6c06295a8abf66fc0e154c524ebbcb70ad7010965536adb652e7632",
+      "PNLDRV.OBJ": "ffc0b1955132157b2a94b797cec13242d791c3f98b199031441dba5273a24518"
+    }
+  },
+  "verification": {
+    "formatter_cases": 56,
+    "system_time": true,
+    "failure_modes": [
+      "status",
+      "checksum",
+      "timeout",
+      "invalid_date",
+      "day_limit",
+      "high_ticks"
+    ],
+    "failure_preserves_time": true,
+    "clock_uart_exit": true,
+    "midnight_date_rollover": true,
+    "clock_foreground": true,
+    "foreground_background_commands": true,
+    "foreground_background_program": true,
+    "foreground_unload_restart": true,
+    "gpio": "handshake and byte I/O mocked; actual HG framing/checksum and RT-11 requests tested"
+  },
+  "hardware_tested": true,
+  "fpga_unchanged": true,
+  "test_artifacts": {
+    "tools/build_hg.py": "7c79189764e02a610fd7a95754520def49502d4ee7959ef3bc1f0cb974b308a8",
+    "tools/rt11_build.py": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002",
+    "tools/test_hg_time.py": "cb2ae3d027259258054cd6ecf2e4c50fe86b594d9241f744da56e2947c5941b3",
+    "build/clock-foreground/test3/success/test-console.log": "50f1b7e63a252216e5f8d9c94b18c856055018ba8a9f829b287497de0f806f35",
+    "build/clock-foreground/test3/result.json": "f5b0456db285bf53a89be3470a39f25261b832b3e5c7946b95861957184c878d",
+    "build/clock-foreground/native/console.log": "4617a1bd6d3727209cc5adc2910939e53b10546142575ecb1c8631a0e5efdc79"
+  },
+  "hardware": {
+    "phase": "clock-foreground-install",
+    "port": "/dev/ttyUSB1",
+    "passed": true,
+    "commands": [
+      {
+        "command": "SET SL OFF",
+        "offset": 0,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 25,
+        "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+        "elapsed_seconds": 1.5034077840000464
+      },
+      {
+        "command": "UNLOAD HG",
+        "offset": 25,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 39,
+        "response": "UNLOAD HG\r\n\r\n.",
+        "elapsed_seconds": 1.3028076340001462
+      },
+      {
+        "command": "LOAD HG",
+        "offset": 39,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 51,
+        "response": "LOAD HG\r\n\r\n.",
+        "elapsed_seconds": 1.1021252209998238
+      },
+      {
+        "command": "DIR SY:CLK926.SAV",
+        "offset": 51,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 129,
+        "response": "DIR SY:CLK926.SAV\r\n 26-Sep-2026\r\n\r\n 0 Files, 0 Blocks\r\n 51067 Free blocks\r\n\r\n.",
+        "elapsed_seconds": 2.7062333100002434
+      },
+      {
+        "command": "COPY SY:CLOCK.SAV SY:CLK926.SAV",
+        "offset": 129,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 165,
+        "response": "COPY SY:CLOCK.SAV SY:CLK926.SAV\r\n\r\n.",
+        "elapsed_seconds": 4.807613082999978
+      },
+      {
+        "command": "COPY HG:CLOCK.SAV SY:CLOCK.SAV",
+        "offset": 165,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 200,
+        "response": "COPY HG:CLOCK.SAV SY:CLOCK.SAV\r\n\r\n.",
+        "elapsed_seconds": 37.38505621500008
+      },
+      {
+        "command": "COPY HG:CLOCK.REL SY:CLOCK.REL",
+        "offset": 200,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 235,
+        "response": "COPY HG:CLOCK.REL SY:CLOCK.REL\r\n\r\n.",
+        "elapsed_seconds": 42.88947245600002
+      },
+      {
+        "command": "COPY SY:CLOCK.SAV HG:CKSCHK.SAV",
+        "offset": 235,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 271,
+        "response": "COPY SY:CLOCK.SAV HG:CKSCHK.SAV\r\n\r\n.",
+        "elapsed_seconds": 70.24382889800017
+      },
+      {
+        "command": "COPY SY:CLOCK.REL HG:CKRCHK.REL",
+        "offset": 271,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 307,
+        "response": "COPY SY:CLOCK.REL HG:CKRCHK.REL\r\n\r\n.",
+        "elapsed_seconds": 75.85629745200004
+      },
+      {
+        "command": "RUN HGTIME",
+        "offset": 307,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 392,
+        "response": "RUN HGTIME\r\n!HGTIME-I-RT-11 SYSTEM DATE AND TIME SET FROM HOST\r\n09:24:16 26/09  \r\n\r\n.",
+        "elapsed_seconds": 1.7020333360001132
+      },
+      {
+        "command": "DATE",
+        "offset": 392,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 414,
+        "response": "DATE\r\n26-Sep-2026\r\n\r\n.",
+        "elapsed_seconds": 0.8015102809999917
+      },
+      {
+        "command": "TIME",
+        "offset": 414,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 433,
+        "response": "TIME\r\n09:24:17\r\n\r\n.",
+        "elapsed_seconds": 0.8015099839999493
+      },
+      {
+        "command": "UNLOAD HG",
+        "offset": 433,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 447,
+        "response": "UNLOAD HG\r\n\r\n.",
+        "elapsed_seconds": 1.302825207999831
+      },
+      {
+        "command": "FRUN SY:CLOCK",
+        "offset": 447,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 527,
+        "response": "FRUN SY:CLOCK\r\n\r\nF>\r\nCLOCK: RT-11 TIME ON HDSP; UART Q OR ESC TO EXIT\r\n\r\nB>\r\n\r\n.",
+        "elapsed_seconds": 2.00438252999993
+      },
+      {
+        "command": "SHOW MEMORY",
+        "offset": 527,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 776,
+        "response": "SHOW MEMORY\r\n\r\nAddress   Module    Words\r\n-------   ------    -----\r\n160000    IOPAGE     4096.       \r\n155234    DM          690.       \r\n120352    RMON       7385.       \r\n114414    CLOCK      1007.       \r\n001000    ..BG..    19334.       \r\n\r\n\r\n.",
+        "elapsed_seconds": 2.2048067470000206
+      },
+      {
+        "command": "DIR SY:CLOCK.*",
+        "offset": 776,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 913,
+        "response": "DIR SY:CLOCK.*\r\n 26-Sep-2026\r\nCLOCK .SAV     4  26-Sep-1994    CLOCK .REL     5  26-Sep-1994\r\n 2 Files, 9 Blocks\r\n 51058 Free blocks\r\n\r\n.",
+        "elapsed_seconds": 2.5055837650002104
+      },
+      {
+        "command": "RUN UJMOD",
+        "offset": 913,
+        "expected": "UJMOD> ",
+        "complete": true,
+        "end": 931,
+        "response": "RUN UJMOD\r\nUJMOD> ",
+        "elapsed_seconds": 1.4031729539997286
+      },
+      {
+        "command": "STATUS",
+        "offset": 931,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1198,
+        "response": "STATUS\r\n0: 010000 014233 134205 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+        "elapsed_seconds": 1.3026044850003018
+      },
+      {
+        "command": "TIME",
+        "offset": 1198,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1217,
+        "response": "TIME\r\n09:24:29\r\n\r\n.",
+        "elapsed_seconds": 0.8014387389998774
+      },
+      {
+        "command": "TIME",
+        "offset": 1217,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1236,
+        "response": "TIME\r\n09:24:33\r\n\r\n.",
+        "elapsed_seconds": 0.8015672590004215
+      },
+      {
+        "command": "UNLOAD F",
+        "offset": 1248,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1261,
+        "response": "UNLOAD F\r\n\r\n.",
+        "elapsed_seconds": 1.2024802360001559
+      },
+      {
+        "command": "SHOW MEMORY",
+        "offset": 1261,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1475,
+        "response": "SHOW MEMORY\r\n\r\nAddress   Module    Words\r\n-------   ------    -----\r\n160000    IOPAGE     4096.       \r\n155234    DM          690.       \r\n120352    RMON       7385.       \r\n001000    ..BG..    20341.       \r\n\r\n\r\n.",
+        "elapsed_seconds": 2.1046201939998355
+      },
+      {
+        "command": "FRUN SY:CLOCK",
+        "offset": 1475,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1555,
+        "response": "FRUN SY:CLOCK\r\n\r\nF>\r\nCLOCK: RT-11 TIME ON HDSP; UART Q OR ESC TO EXIT\r\n\r\nB>\r\n\r\n.",
+        "elapsed_seconds": 2.0044336920000205
+      },
+      {
+        "command": "SHOW MEMORY",
+        "offset": 1555,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1804,
+        "response": "SHOW MEMORY\r\n\r\nAddress   Module    Words\r\n-------   ------    -----\r\n160000    IOPAGE     4096.       \r\n155234    DM          690.       \r\n120352    RMON       7385.       \r\n114414    CLOCK      1007.       \r\n001000    ..BG..    19334.       \r\n\r\n\r\n.",
+        "elapsed_seconds": 2.2048825490001036
+      },
+      {
+        "command": "TIME",
+        "offset": 1804,
+        "expected": "\\r\\n\\.",
+        "complete": true,
+        "end": 1823,
+        "response": "TIME\r\n09:24:43\r\n\r\n.",
+        "elapsed_seconds": 0.8015201910002361
+      }
+    ],
+    "started_utc": "2026-09-26T05:20:13Z",
+    "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+    "uart_bytes": 1823,
+    "previous_hg": {
+      "pid": 4313,
+      "command": [
+        "./lsi11-fpga/host/hg/hgfsd",
+        "--directory",
+        "/home/sash/Work/FPGA/uj11-hg/share",
+        "--clock",
+        "1000",
+        "--read-only"
+      ],
+      "cwd": "/home/sash/Work/FPGA/uj11-hg-time-20260922.PPWizX"
+    },
+    "transfer_hg_pid": 4674,
+    "readback_sha256": {
+      "CLOCK.SAV": "03656efcc33f60ef92f6dc6ced7fcd5b9ce2dd72efc51e6e32bb151979334e25",
+      "CLOCK.REL": "6059623a6bac1a31ac79f57860517e545b3364cf1ad3b17ee11549385d9c861e"
+    },
+    "date": "DATE\r\n26-Sep-2026\r\n\r\n.",
+    "host_before_time": "2026-09-26T09:24:17.375668+04:00",
+    "time": "TIME\r\n09:24:17\r\n\r\n.",
+    "host_after_time": "2026-09-26T09:24:18.178026+04:00",
+    "hg_stopped": true,
+    "memory_running": "SHOW MEMORY\r\n\r\nAddress   Module    Words\r\n-------   ------    -----\r\n160000    IOPAGE     4096.       \r\n155234    DM          690.       \r\n120352    RMON       7385.       \r\n114414    CLOCK      1007.       \r\n001000    ..BG..    19334.       \r\n\r\n\r\n.",
+    "module_table": [
+      [
+        4096,
+        6299,
+        47237,
+        49415
+      ],
+      [
+        3072,
+        226,
+        22261,
+        49415
+      ],
+      [
+        24576,
+        2172,
+        50204,
+        49415
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "memory_unloaded": "SHOW MEMORY\r\n\r\nAddress   Module    Words\r\n-------   ------    -----\r\n160000    IOPAGE     4096.       \r\n155234    DM          690.       \r\n120352    RMON       7385.       \r\n001000    ..BG..    20341.       \r\n\r\n\r\n.",
+    "memory_final": "SHOW MEMORY\r\n\r\nAddress   Module    Words\r\n-------   ------    -----\r\n160000    IOPAGE     4096.       \r\n155234    DM          690.       \r\n120352    RMON       7385.       \r\n114414    CLOCK      1007.       \r\n001000    ..BG..    19334.       \r\n\r\n\r\n.",
+    "clock_foreground_running": true,
+    "console_background": true,
+    "finished_utc": "2026-09-26T05:24:44Z"
+  },
+  "foreground_ram_words": 1007,
+  "foreground_ram_bytes": 2014,
+  "visual_confirmation": false,
+  "remote_artifacts": "/home/sash/Work/FPGA/uj11-hg/clock-foreground-20260926",
+  "hardware_artifact_sha256": {
+    "hardware/session.json": "908773530de7885c29df453f668cbe4d3594398333beec1d102b2224fad785c2",
+    "hardware/uart.bin": "117748f4d741dc1ae7b2f8f6ef46b17330eaa956c004f6b43772ba03fcba27a5",
+    "hg.log": "eea449437f9c0d9aab8040c0ccb3de344ce8916e6478d9f8eed3afa9c5722ad7",
+    "install.py": "d7600bcd18e3df5b651f501b79cfc6885e77cebbdd42d9e0aa45760c5eda2911"
+  }
+}

@@ -1,0 +1,19 @@
+	.TITLE ODTCHK
+	.IDENT /01.00/
+; Native RT-11 fixture: enter the installed debugger through ordinary HALT.
+; No RESET button or test-only FPGA signal is needed for UART qualification.
+	.MCALL .PRINT,.EXIT
+AC2=%2
+	.PSECT TEST,I,RW
+START:	.PRINT #MSG
+	SETD
+	LDD SOURCE,AC2
+	CLR R4
+	HALT
+	.PRINT #DONE
+	.EXIT
+SOURCE:	.WORD 40200,12345,67012,34567
+MSG:	.ASCIZ /!ODTCHK-I-HALT with AC2 test pattern/
+DONE:	.ASCIZ /!ODTCHK-I-RETURNED TO RT11/
+	.EVEN
+	.END START

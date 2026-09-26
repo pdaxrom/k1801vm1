@@ -1,4 +1,14 @@
 *.BIN binary
 *.SAV binary
+*.uart binary
 *.tgz binary
 *.jed binary
+*.REL binary
+*.img binary
+*.gz binary
+# Preserve vendor report bytes: their hashes are part of the release gate.
+releases/hc1200/design.areasrr -whitespace
+releases/hc1200/design.mrp -whitespace
+releases/hc1200/design.par -whitespace
+releases/hc1200/design.srr -whitespace
+releases/hc1200/design.twr -whitespace

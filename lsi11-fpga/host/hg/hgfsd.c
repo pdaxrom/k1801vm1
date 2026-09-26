@@ -2,6 +2,7 @@
 #include "hg_image.h"
 #include "hg_mpsse.h"
 #include "hg_protocol.h"
+#include "hg_time.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -88,8 +89,11 @@ static int hg_serve_one(struct hg_mpsse *link, struct hg_image *image,
 	if (request_out)
 		*request_out = request;
 
-	if (request.operation == HG_OP_READ) {
-		if (hg_image_read(image, request.block, payload, request.count) != 0) {
+	if (request.operation == HG_OP_READ || request.operation == HG_OP_TIME) {
+		int failed = request.operation == HG_OP_TIME ?
+			hg_time_now(request.block, payload) :
+			hg_image_read(image, request.block, payload, request.count);
+		if (failed != 0) {
 			status = hg_status_from_errno(errno, 0);
 			if (hg_send_status(link, status) != 0)
 				goto link_error;
@@ -151,6 +155,7 @@ static void hg_usage(FILE *out)
 	fprintf(out,
 		"usage: hgfsd (--image FILE | --directory DIR) [options]\n"
 		"  --read-only       reject RT-11 writes\n"
+		"  TIME requests return host local date/time (TZ environment applies)\n"
 		"  --blocks N        directory image size (default 8192)\n"
 		"  --clock HZ        MPSSE clock (default 4000)\n"
 		"  --serial TEXT     select an FT2232 by serial number\n"
@@ -271,7 +276,9 @@ int main(int argc, char **argv)
 				mirror_dirty = directory != NULL;
 				last_write = hg_milliseconds();
 			}
-			if (request.operation != 0)
+			if (request.operation == HG_OP_TIME)
+				fprintf(stderr, "hgfsd: local time, %u ticks/sec\n", request.block);
+			else if (request.operation != 0)
 				fprintf(stderr, "hgfsd: %s block %u, %u bytes%s\n",
 					request.operation == HG_OP_WRITE ? "write" : "read",
 					request.block, request.count,

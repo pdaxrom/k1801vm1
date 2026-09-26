@@ -1,7 +1,7 @@
 	.TITLE	PNLDRV
 	.IDENT	/01.00/
 
-;	HC1200 panel driver for RT-11 on the AM4 FPGA build.
+;	HC1200 panel driver for RT-11 on uJ11.
 ;
 ;	The private CSR is deliberately raw: its high byte directly drives the
 ;	HCMS-3917 and 74HC595 pins.  This module follows the proven transfer order
@@ -25,6 +25,9 @@ PINCLK	= 4
 PINRS	= 10
 PINBL	= 20
 PINLAT	= 40
+; HCMS-3917 CW0: awake, peak current 4.0 mA (D5:D4=10), PWM 28/60.
+; Was 114 octal (0x4c), 9.3 mA. Same PWM, about 43% of former LED current.
+PNCW0	= 154		; 0x6c; Broadcom AV02-3679EN, Table 2
 
 	.PSECT	PNCODE,I,RO
 
@@ -44,7 +47,7 @@ PNINIT:
 	MOV	(SP)+,R0
 	RTS	PC
 
-;	Load Control Word 0 (0x4c) through all eight devices in the chain.
+;	Repeat the same Control Word 0 through the complete display chain.
 PNCMD:
 	MOV	R0,-(SP)
 	MOV	R1,-(SP)
@@ -53,7 +56,7 @@ PNCMD:
 	BICB	#PINCE,SHADOW
 	MOVB	SHADOW,@#PANELO
 	MOV	#10,R1
-	MOV	#114,R0
+	MOV	#PNCW0,R0
 10$:	JSR	PC,SHBYTE
 	SOB	R1,10$
 	BISB	#PINCE,SHADOW

@@ -44,6 +44,12 @@ module tb_rt11;
     end
     always @(posedge latch)outputs=shifted;
     always @(negedge ce)begin display_count=0;display_bits=0;end
+    // Observe the physical command stream, not a CPU register/label value.
+    // Eight repeated CW0 bytes cover the existing HCMS daisy-chain transfer.
+    always @(posedge ce)if(display_count!=0 && rs)begin
+        if(display_count!=64 || display_bits[63:0]!=={8{8'h6c}})
+            $fatal(1,"bad HCMS brightness command: %0d bits %016h",display_count,display_bits[63:0]);
+    end
     always @(posedge ce)if(display_count!=0 && !rs)begin
         if(display_count!=640)$fatal(1,"bad HDSP frame: %0d bits",display_count);
         display_frames=display_frames+1;last_display=display_bits;

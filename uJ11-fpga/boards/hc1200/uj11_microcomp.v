@@ -16,7 +16,9 @@ module uj11_hc1200_microcomp(
     OSCH #(.NOM_FREQ("29.56")) oscillator(.STDBY(1'b0),.OSC(clk));
     wire host_miso, host_miso_oe;
     assign gpio_key_row[3]=host_miso_oe ? host_miso : 1'bz;
-    uj11_board system(.clk(clk),.reset(power_on[0] || hard_reset),.halt_button(halt_button),.uart_rx(rx),.uart_tx(tx),
+    // This board measured 50.409051 Hz with /591200 (2026-09-22).
+    // Calibrate KW11 only; OSCH and peripheral clocks keep their settings.
+    uj11_board #(.TICK_DIVISOR(596037)) system(.clk(clk),.reset(power_on[0] || hard_reset),.halt_button(halt_button),.uart_rx(rx),.uart_tx(tx),
         .panel_keys(gpio_key_row),.panel_din(gpio_din),.panel_ce(gpio_ce),.panel_clk(gpio_clk),
         .panel_rs(gpio_rs),.panel_blank(gpio_blank),.panel_latch(gpio_reg_latch),
         .host_miso(host_miso),.host_miso_oe(host_miso_oe),

@@ -24,7 +24,8 @@ int hg_decode_header(const uint8_t header[HG_HEADER_SIZE],
 	operation = header[3] & HG_OP_MASK;
 	if (header[0] != 'H' || header[1] != 'G' ||
 	    header[2] != HG_PROTOCOL_VERSION ||
-	    (operation != HG_OP_READ && operation != HG_OP_WRITE) ||
+	    (operation != HG_OP_READ && operation != HG_OP_WRITE &&
+	     operation != HG_OP_TIME) ||
 	    hg_header_checksum(header) != header[HG_HEADER_SIZE - 1u]) {
 		errno = EPROTO;
 		return -1;
@@ -37,6 +38,12 @@ int hg_decode_header(const uint8_t header[HG_HEADER_SIZE],
 	request->count = (uint16_t)(header[7] | ((uint16_t)header[8] << 8));
 	if (request->unit != 0 || request->count == 0 ||
 	    request->count > HG_BLOCK_SIZE) {
+		errno = EPROTO;
+		return -1;
+	}
+	if (operation == HG_OP_TIME &&
+	    (request->more || request->count != HG_TIME_SIZE ||
+	     (request->block != 50 && request->block != 60))) {
 		errno = EPROTO;
 		return -1;
 	}

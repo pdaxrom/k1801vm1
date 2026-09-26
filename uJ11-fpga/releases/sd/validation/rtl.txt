@@ -1,0 +1,25 @@
+SD image: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/sd-release/uj11-rt11fb.img (53790 sectors), read-only backing, 256-sector RAM overlay
+SD image progress 20000000 phase0 PC005050 UART0
+SD image progress 40000000 phase0 PC005050 UART0
+SD image progress 60000000 phase0 PC005050 UART0
+SD image progress 80000000 phase0 PC004466 UART0
+SD image progress 100000000 phase0 PC160224 UART24
+SD image progress 120000000 phase0 PC153112 UART63
+SD image progress 140000000 phase0 PC012356 UART95
+SD image progress 160000000 phase1 PC014506 UART309
+SD image progress 180000000 phase1 PC152572 UART1510
+SD image progress 200000000 phase1 PC020756 UART1822
+SD image progress 220000000 phase1 PC160224 UART2060
+SD image progress 240000000 phase2 PC053306 UART2423
+SD image progress 260000000 phase2 PC160430 UART2531
+SD image progress 280000000 phase2 PC160430 UART2531
+SD image progress 300000000 phase2 PC160432 UART2531
+SD image progress 320000000 phase3 PC153456 UART2667
+SD image progress 340000000 phase3 PC160224 UART2846
+SD image progress 360000000 phase3 PC143314 UART2940
+SD image progress 380000000 phase3 PC064424 UART3198
+PASS SD image: 24 checks, 399490007 clocks, 3434 UART bytes
+- build/sd-acceptance/rtl/tb.v:199: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 4s; walltime 295.906 s; speed 13.501 ms/s
+- Verilator: cpu 295.542 s on 1 threads; allocated 3 MB

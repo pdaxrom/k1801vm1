@@ -1,0 +1,82 @@
+{
+  "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "sources": {
+    "demos/rt11/hostdisk/HG.MAC": "0e4d226caa119ec0db6821ec84a6ba5823bff07908c9d04ca98637de47c3e3a5",
+    "demos/rt11/hostdisk/HGTIME.MAC": "8519d6cf1ded7d458cdc6b2c63e114786c7016f933e72b590965a2652ff44fcf",
+    "demos/rt11/panel/TMDRV.MAC": "16814dae24222d11f85556309da64437f986f896786a4dfd3cb451b9260d2a96",
+    "demos/rt11/panel/CLOCK.MAC": "112829b1bf36d265d2e85723b34dac2faedee91a4d5a47e99ab263b261c160d8",
+    "demos/rt11/panel/PNLDRV.MAC": "a383dfacb53aa931dde84668753335078710b88164cc6a42d2f4b8bb9af9853f"
+  },
+  "files": {
+    "HG.SYS": {
+      "bytes": 1536,
+      "sha256": "f98e81fb4e98a8ca2165102e57db2b5782a6c9be23420f4aea8a71f0c0901abd"
+    },
+    "HGTIME.SAV": {
+      "bytes": 1536,
+      "sha256": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c"
+    },
+    "CLOCK.SAV": {
+      "bytes": 2048,
+      "sha256": "03656efcc33f60ef92f6dc6ced7fcd5b9ce2dd72efc51e6e32bb151979334e25",
+      "variant": "CLOCK 01.01; .TWAIT; background; HCMS CW0=0x6c",
+      "built_date": "2026-09-26",
+      "hardware_tested": true,
+      "previous_sha256": "96e11f17bc5993b1518f3fb53eca4d4e01f9541435ef2bc88fa948d234068933",
+      "hardware_report": "foreground.json"
+    },
+    "CLOCK.REL": {
+      "bytes": 2560,
+      "sha256": "6059623a6bac1a31ac79f57860517e545b3364cf1ad3b17ee11549385d9c861e",
+      "variant": "CLOCK 01.01; .TWAIT; foreground relocation; HCMS CW0=0x6c",
+      "built_date": "2026-09-26",
+      "hardware_tested": true,
+      "hardware_report": "foreground.json"
+    }
+  },
+  "host_sources": {
+    "lsi11-fpga/host/hg/Makefile": "e0520826f60c077085d68fbcb4b528a57234e905858f1a3872c6b485a606e569",
+    "lsi11-fpga/host/hg/hg_directory.c": "fb07b9e79eee46c2e8a8da0dbcf34266e150b772ca6849054055bc683de964d1",
+    "lsi11-fpga/host/hg/hg_directory.h": "905b6da0c3d572dc02649913d2329959a9d03f4546dfd9f24bca6677469f76b1",
+    "lsi11-fpga/host/hg/hg_image.c": "1340e3129c2fdfd18331ff20d9e6ff238aa7598e5dae0b21162eab4990023ada",
+    "lsi11-fpga/host/hg/hg_image.h": "4d7ed867bdf665f4be8f340840b4702893b5ba3eb4b0081b383d5c73b52977ac",
+    "lsi11-fpga/host/hg/hg_mpsse.c": "81539d14c2b2165996e6bab4356556a630a7c06d57d7c8686c961c4a7ccda9bd",
+    "lsi11-fpga/host/hg/hg_mpsse.h": "8912521c1d68af28ba8ee877b59ed97debdf79fcf641899dbbe070d1297496fa",
+    "lsi11-fpga/host/hg/hg_protocol.c": "81ea631d29d028ef5c8fd86a119c6dc37158e9d1cdea27033f25c5555fe52f10",
+    "lsi11-fpga/host/hg/hg_protocol.h": "00531fed2aa386ce654781ec48f4be6f5a12c35aaeed095d8ccece782bdc9be5",
+    "lsi11-fpga/host/hg/hg_time.c": "b1de98729146d4bb415043c439406e48070e25c3fcf09b40609770e355d86e66",
+    "lsi11-fpga/host/hg/hg_time.h": "5240a0f8633f98329f65f8123984004c23e4965549a4920557eef39bf9ba01b3",
+    "lsi11-fpga/host/hg/hgfsd.c": "7c5e034817d9a68d3c96542ece0abe5ea46ac6ed82f72a09ac218494364face6",
+    "lsi11-fpga/host/hg/test_hg.c": "9aac7baff6d78a53807d0d154e482e2b483f609c467be07f1490eed34f0cc5db",
+    "lsi11-fpga/host/hg/test_hg_service.c": "cce03354ac1940ca36da8374d0d6cfe271ec170a94aca49f49fb9fc246988dca"
+  },
+  "verification": {
+    "formatter_cases": 56,
+    "system_time": true,
+    "failure_modes": [
+      "status",
+      "checksum",
+      "timeout",
+      "invalid_date",
+      "day_limit",
+      "high_ticks"
+    ],
+    "failure_preserves_time": true,
+    "clock_uart_exit": true,
+    "midnight_date_rollover": true,
+    "gpio": "handshake and byte I/O mocked; actual HG framing/checksum and RT-11 requests tested",
+    "host_calendar_cases": 23808,
+    "host_disk_regression": true,
+    "clock_foreground": true,
+    "foreground_background_commands": true,
+    "foreground_background_program": true,
+    "foreground_unload_restart": true
+  },
+  "hardware_tested": true,
+  "date": "2026-09-22",
+  "hardware_report": "hardware.json",
+  "panel_brightness_report": "../software/panel-brightness.json",
+  "foreground_report": "foreground.json",
+  "updated_date": "2026-09-26"
+}

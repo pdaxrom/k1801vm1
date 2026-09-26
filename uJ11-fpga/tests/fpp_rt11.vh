@@ -109,6 +109,12 @@
         module_command("OFF2");contains("!UJMOD-I-DONE");
         phase=5;cold();check(dut.cpu.engine.service_ready==1,"FP can be disabled without removing ODT");
         check(upper('o7026)=='hc101,"disabled FP remains allocated");
+        module_command("ON2");contains("!UJMOD-I-DONE");
+        check(upper('o7026)=='hc103,"ON enables retained image");
+        check(dut.cpu.engine.service_ready==1,"ON preserves services until cold boot");
+        phase=6;cold();
+        check(dut.cpu.engine.service_ready==3 && dut.cpu.engine.debug_enabled,"ON initialized retained FP and ODT");
+        check(upper('o7026)=='hc107 && upper(F_FPS)==0,"ON rechecks checksum and clears mutable state");
         check(rx_overruns==0,"UART has no receive overrun");
         $display("PASS CP79 RT11 modules: %0d checks, %0d clocks, %0d UART bytes",checks,clocks,serial_chars);
         $fclose(uart_file);$finish;

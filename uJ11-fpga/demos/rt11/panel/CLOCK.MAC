@@ -1,0 +1,74 @@
+	.TITLE	CLOCK
+	.IDENT	/01.01/
+	.MCALL	.PRINT,.EXIT,.TTINR,.TWAIT
+TTSPC$	= 10000
+TCBIT$	= 100
+	.GLOBL	TMINIT,TMGET,CLKHZ,PNINIT,PNDISP
+
+;	Display the RT-11 system clock. HG is not polled; no keyboard matrix scan
+;	is attempted because its rows share FT2232 pins. UART Q/ESC or ^C exits.
+;	Link both CLOCK.SAV (RUN) and CLOCK.REL (/FOREGROUND, FRUN).
+;	In FB, ^B selects the background console; ^F selects CLOCK's Q/ESC input.
+	.PSECT	CLKCOD,I,RO
+START:
+	JSR	PC,TMINIT
+	BCS	NOCLK
+	CLR	R0
+	MOV	CLKHZ,R1
+	DIV	#10.,R0
+	MOV	R0,DELAY+2	; poll every 100 ms at either 50 or 60 Hz
+	.PRINT	#BANNER
+	BIS	#<TTSPC$!TCBIT$>,@#44 ; special mode + no-wait terminal input
+	JSR	PC,PNINIT
+AGAIN:
+	JSR	PC,TMGET
+	MOV	R0,R1
+	MOV	#LAST,R2
+	MOV	#10,R3
+10$:	CMP	(R1)+,(R2)+
+	BNE	UPDATE
+	SOB	R3,10$
+	BR	KEY
+UPDATE:
+	MOV	R0,R1
+	MOV	#LAST,R2
+	MOV	#10,R3
+20$:	MOV	(R1)+,(R2)+
+	SOB	R3,20$
+	JSR	PC,PNDISP
+KEY:
+	.TTINR
+	BCS	PAUSE
+	CMPB	R0,#'Q
+	BEQ	FINISH
+	CMPB	R0,#'q
+	BEQ	FINISH
+	CMPB	R0,#33
+	BEQ	FINISH
+PAUSE:
+	.TWAIT	#WAITAR,#DELAY	; suspend this job, let the background run
+	BCS	NOQUEUE		; never busy-loop at foreground priority
+	BR	AGAIN
+FINISH:
+	MOV	#READY,R0
+	JSR	PC,PNDISP
+	.EXIT
+NOCLK:
+	.PRINT	#CLKERR
+	BR	ERROR
+NOQUEUE:
+	.PRINT	#QERR
+ERROR:
+	BISB	#10,@#53
+	.EXIT
+
+	.PSECT	CLKDAT,D,RW
+LAST:	.BLKW	10
+WAITAR:	.BLKW	2
+DELAY:	.WORD	0,5
+BANNER:	.ASCIZ	/CLOCK: RT-11 TIME ON HDSP; UART Q OR ESC TO EXIT/
+CLKERR:	.ASCIZ	/?CLOCK-F-NO MONITOR CLOCK/
+QERR:	.ASCIZ	/?CLOCK-F-NO TIMER QUEUE ELEMENT/
+READY:	.ASCII	/RT-11 READY     /
+	.EVEN
+	.END	START

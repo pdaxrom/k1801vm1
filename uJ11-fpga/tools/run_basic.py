@@ -57,7 +57,8 @@ def run(out, configuration=False, variant='all'):
     if configuration:
         state=bytearray(131072)
         for slot,path in enumerate((modules[0],modules[1],modules[3])):
-            data=path.read_bytes();h=decode(data);payload=data[512:512+h['bytes']]
+            from module_image import placed_image
+            data=path.read_bytes();h=decode(data);payload=placed_image(data)
             state[65536+h['base']:65536+h['base']+len(payload)]=payload
             address=65536+0o7000+8*slot
             state[address:address+8]=entry(h['base'],payload)

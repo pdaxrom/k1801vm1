@@ -1,0 +1,31 @@
+python3 tools/build_hardware.py
+604 addressed rows; exhaustive opcode collision check passed
+Opcode table: 1024 x 9, one EBR
+{
+  "mmu": false,
+  "microcode_words": 1005
+}
+python3 tools/build_software.py
+odt {'base': 4096, 'words': 6349, 'checksum': 19953, 'bytes': 12698, 'memory_bytes': 13768, 'memory_words': 6884, 'version': 4, 'link_base': 512, 'relocations': 437}
+sdboot {'base': 3072, 'words': 226, 'checksum': 22261, 'bytes': 452, 'memory_bytes': 452, 'memory_words': 226, 'version': 4, 'link_base': 512, 'relocations': 2}
+loader {}
+python3 tools/build_fpp.py
+{
+  "checkpoint": "CP80 DCJ11 FPP software",
+  "format": {
+    "base": 24576,
+    "words": 2172,
+    "checksum": 54812,
+    "bytes": 4344,
+    "memory_bytes": 4614,
+    "memory_words": 2307,
+    "version": 4,
+    "link_base": 512,
+    "relocations": 57
+  },
+  "allocation_bytes": 4614,
+  "free_halt_bytes": 28154
+}
+PYTHONPATH=tools python3 -c "from build_software import reboot; reboot()"
+python3 tools/verify_production.py
+PASS production: RTL/EBR token identity, three exact ROM images, rebuilt software, released BASIC and JED

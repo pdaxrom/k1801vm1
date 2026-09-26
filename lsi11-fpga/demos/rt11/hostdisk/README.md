@@ -61,6 +61,13 @@ Writes are flushed before the daemon sends the final success status.
 Deleting a file in RT-11 does not delete the corresponding
 host file in this initial implementation.
 
+The shared host daemon also supports TIME (operation 3): local date/time,
+including when serving a read-only disk. `TZ` selects the host time zone.
+The AM4 handler in this directory remains disk-only; the new RT-11 `.SPFUN 200`
+interface, `HGTIME` system-clock utility and `CLOCK` HDSP application are in
+[uJ11-fpga](../../../../uJ11-fpga/docs/host-time.md). Existing READ/WRITE
+requests are unchanged.
+
 The default MPSSE clock is 4 kHz, verified for both reads and writes on the
 HC1200/AM4 target. The RT-11 handler bit-bangs this link in software, so faster
 symmetric TCK periods can overrun its per-bit GPIO loop. The host clocks one

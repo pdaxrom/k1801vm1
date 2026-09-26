@@ -1,0 +1,3 @@
+uJ11 / RT-11FB V05.03 - SD software kit 2026-09-26
+TYPE SY:README.TXT for utilities, setup and on-disk documentation.
+FRAM modules are not changed by this disk. HG setup: TYPE SY:HG.TXT.

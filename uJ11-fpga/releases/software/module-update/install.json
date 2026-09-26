@@ -1,0 +1,357 @@
+{
+  "phase": "install",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "SET SL OFF",
+      "offset": 0,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 25,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.5026547190009296
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 25,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 43,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4027534309989278
+    },
+    {
+      "command": "STATUS",
+      "offset": 43,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 310,
+      "response": "STATUS\r\n0: 010000 014233 134205 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2019691450004757
+    },
+    {
+      "command": "UNLOAD HG",
+      "offset": 310,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 324,
+      "response": "UNLOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.3025006700008817
+    },
+    {
+      "command": "LOAD HG",
+      "offset": 324,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 336,
+      "response": "LOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.2020083709994651
+    },
+    {
+      "command": "DIR SY:UM0926.SAV",
+      "offset": 336,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 414,
+      "response": "DIR SY:UM0926.SAV\r\n 26-Sep-2026\r\n\r\n 0 Files, 0 Blocks\r\n 51058 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 2.703890490000049
+    },
+    {
+      "command": "COPY SY:UJMOD.SAV SY:UM0926.SAV",
+      "offset": 414,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 450,
+      "response": "COPY SY:UJMOD.SAV SY:UM0926.SAV\r\n\r\n.",
+      "elapsed_seconds": 5.005176286000278
+    },
+    {
+      "command": "DIR SY:OD0926.BIN",
+      "offset": 450,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 528,
+      "response": "DIR SY:OD0926.BIN\r\n 26-Sep-2026\r\n\r\n 0 Files, 0 Blocks\r\n 51049 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 2.7027687660010997
+    },
+    {
+      "command": "COPY SY:ODT.BIN SY:OD0926.BIN",
+      "offset": 528,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 562,
+      "response": "COPY SY:ODT.BIN SY:OD0926.BIN\r\n\r\n.",
+      "elapsed_seconds": 5.409942104999573
+    },
+    {
+      "command": "DIR SY:SD0926.BIN",
+      "offset": 562,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 640,
+      "response": "DIR SY:SD0926.BIN\r\n 26-Sep-2026\r\n\r\n 0 Files, 0 Blocks\r\n 51023 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 2.7048104040004546
+    },
+    {
+      "command": "COPY SY:SDBOOT.BIN SY:SD0926.BIN",
+      "offset": 640,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 677,
+      "response": "COPY SY:SDBOOT.BIN SY:SD0926.BIN\r\n\r\n.",
+      "elapsed_seconds": 4.9091705120008555
+    },
+    {
+      "command": "DIR SY:FP0926.BIN",
+      "offset": 677,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 755,
+      "response": "DIR SY:FP0926.BIN\r\n 26-Sep-2026\r\n\r\n 0 Files, 0 Blocks\r\n 51021 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 2.7048004070002207
+    },
+    {
+      "command": "COPY SY:FP11.BIN SY:FP0926.BIN",
+      "offset": 755,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 790,
+      "response": "COPY SY:FP11.BIN SY:FP0926.BIN\r\n\r\n.",
+      "elapsed_seconds": 5.009677059999376
+    },
+    {
+      "command": "COPY HG:UJMOD.SAV SY:UJMOD.SAV",
+      "offset": 790,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 825,
+      "response": "COPY HG:UJMOD.SAV SY:UJMOD.SAV\r\n\r\n.",
+      "elapsed_seconds": 75.06431994600098
+    },
+    {
+      "command": "COPY HG:UJBOOT.SAV SY:UJBOOT.SAV",
+      "offset": 825,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 862,
+      "response": "COPY HG:UJBOOT.SAV SY:UJBOOT.SAV\r\n\r\n.",
+      "elapsed_seconds": 36.77670510899952
+    },
+    {
+      "command": "COPY HG:ODT.BIN SY:ODT.BIN",
+      "offset": 862,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 893,
+      "response": "COPY HG:ODT.BIN SY:ODT.BIN\r\n\r\n.",
+      "elapsed_seconds": 177.97004182099954
+    },
+    {
+      "command": "COPY HG:SDBOOT.BIN SY:SDBOOT.BIN",
+      "offset": 893,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 930,
+      "response": "COPY HG:SDBOOT.BIN SY:SDBOOT.BIN\r\n\r\n.",
+      "elapsed_seconds": 31.25136564499917
+    },
+    {
+      "command": "COPY HG:FP11.BIN SY:FP11.BIN",
+      "offset": 930,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 963,
+      "response": "COPY HG:FP11.BIN SY:FP11.BIN\r\n\r\n.",
+      "elapsed_seconds": 75.26131200500095
+    },
+    {
+      "command": "COPY SY:UJMOD.SAV HG:CHMOD.SAV",
+      "offset": 963,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 998,
+      "response": "COPY SY:UJMOD.SAV HG:CHMOD.SAV\r\n\r\n.",
+      "elapsed_seconds": 105.80760500200086
+    },
+    {
+      "command": "COPY SY:UJBOOT.SAV HG:CHBOOT.SAV",
+      "offset": 998,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1035,
+      "response": "COPY SY:UJBOOT.SAV HG:CHBOOT.SAV\r\n\r\n.",
+      "elapsed_seconds": 69.04802645000018
+    },
+    {
+      "command": "COPY SY:ODT.BIN HG:CHODT.BIN",
+      "offset": 1035,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1068,
+      "response": "COPY SY:ODT.BIN HG:CHODT.BIN\r\n\r\n.",
+      "elapsed_seconds": 213.20843833000072
+    },
+    {
+      "command": "COPY SY:SDBOOT.BIN HG:CHSD.BIN",
+      "offset": 1068,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1103,
+      "response": "COPY SY:SDBOOT.BIN HG:CHSD.BIN\r\n\r\n.",
+      "elapsed_seconds": 65.06180142800076
+    },
+    {
+      "command": "COPY SY:FP11.BIN HG:CHFP.BIN",
+      "offset": 1103,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1136,
+      "response": "COPY SY:FP11.BIN HG:CHFP.BIN\r\n\r\n.",
+      "elapsed_seconds": 108.57276581800033
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1136,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1154,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030521670010785
+    },
+    {
+      "command": "ON0",
+      "offset": 1154,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1229,
+      "response": "ON0\r\n!UJMOD-I-DONE; long RESET without ESC initializes enabled modules\r\n\r\n.",
+      "elapsed_seconds": 1.202491463000115
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1229,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1247,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030192209993402
+    },
+    {
+      "command": "STATUS",
+      "offset": 1247,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1514,
+      "response": "STATUS\r\n0: 010000 014233 134205 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.2023236929999257
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1514,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1532,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.403016115000355
+    },
+    {
+      "command": "OFF7",
+      "offset": 1532,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1611,
+      "response": "OFF7\r\n?UJMOD-E-Use filename [AUTO], STATUS, ON0..7, OFF0..7, DEL0..7, EXIT\r\n\r\n.",
+      "elapsed_seconds": 0.9017424310004571
+    },
+    {
+      "command": "RUN UJMOD",
+      "offset": 1611,
+      "expected": "UJMOD> ",
+      "complete": true,
+      "end": 1629,
+      "response": "RUN UJMOD\r\nUJMOD> ",
+      "elapsed_seconds": 1.4030177719996573
+    },
+    {
+      "command": "STATUS",
+      "offset": 1629,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1896,
+      "response": "STATUS\r\n0: 010000 014233 134205 140407\r\n1: 006000 000342 053365 140407\r\n2: 060000 004174 142034 140407\r\n3: 000000 000000 000000 000000\r\n4: 000000 000000 000000 000000\r\n5: 000000 000000 000000 000000\r\n6: 000000 000000 000000 000000\r\n7: 000000 000000 000000 000000\r\n\r\n.",
+      "elapsed_seconds": 1.20240836999983
+    },
+    {
+      "command": "UNLOAD HG",
+      "offset": 1896,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1910,
+      "response": "UNLOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.403013290000672
+    }
+  ],
+  "started_utc": "2026-09-26T06:47:32Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "uart_bytes": 1910,
+  "before": [
+    [
+      4096,
+      6299,
+      47237,
+      49415
+    ],
+    [
+      3072,
+      226,
+      22261,
+      49415
+    ],
+    [
+      24576,
+      2172,
+      50204,
+      49415
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "hg_pid": 5954,
+  "readback_sha256": {
+    "UJMOD.SAV": "0b7fbba8db3012e82869b3f114b5966cf1b61d8a6cdb173ebbf362a8298904ae",
+    "UJBOOT.SAV": "789226fbd1887db1bc55ad967f26b0894a7cf1305b356273931aa603c5318d6e",
+    "ODT.BIN": "05103d20fcd25837d6521f939679e9d2aef82db818b88520ff37d821cea1731e",
+    "SDBOOT.BIN": "af24da2192b13aead7c7dc85788203ae2032436e0653be52e8a4ae20b547133b",
+    "FP11.BIN": "0e322a39de1460b8159691cf82e811cfc7545f321e70feba692bc67f7e773a20"
+  },
+  "finished_utc": "2026-09-26T07:04:23Z"
+}

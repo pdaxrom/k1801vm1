@@ -2,17 +2,32 @@ PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
 OUT ?= build/hc1200
+HG_OUT ?= build/hg
+HG_TEST_OUT ?= build/test-hg
+SD_OUT ?= build/sd
+SD_TEST_OUT ?= build/test-sd
 
 # Runners share generated ROM/module inputs and validate their hashes.
 .NOTPARALLEL:
 
-.PHONY: all hardware software test test-python test-rtl test-modules test-fpp test-fpp-full test-odt test-rt11 test-basic test-configuration verify synthesis prepare-synthesis export clean
+.PHONY: all hardware software hg test-hg-time sd-image test-sd-image test test-python test-rtl test-modules test-fpp test-fpp-full test-odt test-rt11 test-basic test-configuration test-reboot verify synthesis prepare-synthesis export clean
 all: hardware software
 hardware:
 	$(PYTHON) tools/build_hardware.py
-software:
+software: hardware
 	$(PYTHON) tools/build_software.py
 	$(PYTHON) tools/build_fpp.py
+	PYTHONPATH=tools $(PYTHON) -c "from build_software import reboot; reboot()"
+hg:
+	$(MAKE) -C ../lsi11-fpga/host/hg all
+	$(PYTHON) tools/build_hg.py --out $(HG_OUT)
+test-hg-time:
+	$(MAKE) -C ../lsi11-fpga/host/hg test
+	$(PYTHON) tools/test_hg_time.py --out $(HG_TEST_OUT)
+sd-image:
+	$(PYTHON) tools/build_sd_image.py --out $(SD_OUT)
+test-sd-image:
+	$(PYTHON) tools/test_sd_image.py --image $(SD_OUT)/uj11-rt11fb.img --out $(SD_TEST_OUT) --rtl
 verify: all
 	$(PYTHON) tools/verify_production.py
 
@@ -37,9 +52,14 @@ test-rtl:
 	$(VVP) build/unit/mem_psw
 	$(IVERILOG) -g2012 -s tb_button -o build/unit/button tests/tb_button.v boards/hc1200/uj11_button.v boards/hc1200/uj11_tick.v
 	$(VVP) build/unit/button
+	$(IVERILOG) -g2012 -s tb_tick -o build/unit/tick tests/tb_tick.v boards/hc1200/uj11_tick.v
+	$(VVP) build/unit/tick
 test-modules: all
 	$(PYTHON) tools/test_modules.py
 	$(PYTHON) tools/test_loader.py
+	$(PYTHON) tools/test_reboot.py
+test-reboot: all
+	$(PYTHON) tools/test_reboot.py
 test-fpp: all
 	$(PYTHON) tools/test_fpp_math.py
 	$(PYTHON) tools/test_fpp_conversions.py

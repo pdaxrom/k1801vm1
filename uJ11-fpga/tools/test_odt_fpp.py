@@ -51,6 +51,7 @@ def run(out):
     def blob(a,data):
         for i in range(0,len(data),2):put(a+i,int.from_bytes(data[i:i+2],'little'))
     blob(0o10000,(od/'payload.bin').read_bytes());blob(f['INIT'],(fp/'image.bin').read_bytes())
+    for i,w in enumerate((f['INIT'],fre['format']['words'],0,0xc107)):put(0o7020+2*i,w)
     put(0o10,f['ENTER']);put(0o12,0o340)
     boot=Program(0o2000).mov(0,0o20000).store(0,0o100).mov(0,0o341).store(0,0o102)
     boot.mov(0,o['ENTER']).store(0,0o110).mov(0,0o340).store(0,0o112).mov(0,7).emit(0o42)

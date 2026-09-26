@@ -1,0 +1,68 @@
+uJ11 ODT - UART AND 16-CHARACTER PANEL DEBUGGER
+
+Install ODT.BIN with UJMOD; normal reboot initializes it. Short RESET
+stops USER execution at an instruction boundary. UART prints ODT>.
+Long RESET starts a fresh session, clearing breakpoints and view state.
+All numbers below are OCTAL unless X selected HEX. No decimal input.
+
+UART COMMANDS
+  H                    Help
+  R                    All R0..R7 and PSW, without pauses
+  R n [value]          Show / edit register (PSW = 10 octal, 8 hex)
+  F [n]                All / one FP register, read only
+                       AC0..5=0..5, FPS=6, FEC=7, FEA=10 octal
+  M addr [count]       Read USER words (default range below)
+  B addr [count]       Read USER bytes
+  W addr value         Write word with readback
+  V addr value         Write byte with readback
+  D [addr [count]]     Disassemble, including opcode/extension words
+  L / N                Previous / next known instruction in view history
+  S [count]            Step into; at most 100 octal steps
+  T                    Step over JSR; otherwise one step
+  T limit              Different operation: bounded loop of single steps
+  C                    Continue saved/edited context
+  G addr               Set PC and run
+  P [addr]             List / set persistent breakpoint (maximum four)
+  Z [addr]             Clear all / one breakpoint
+  U addr               Run to one temporary breakpoint
+  O / X                Select octal / hexadecimal
+  A / A 0 / A 1        Toggle / disable / enable HDSP auto-scroll
+  < / >                Manually move the HDSP window
+  K m p n e            MEM/PREV/NEXT/ENTER codes (distinct 20..23 octal)
+  ESC or Ctrl-C        Cancel input / stop a dump between lines
+
+RAM access is limited to USER 000000..157777; words must be aligned.
+Dump/disassembly count limit is 20 octal. No raw HALT/CSR memory editor.
+FP dump requires the active FP11 module; its relocated base is discovered.
+Disassembly uses the stopped instruction's FPS mode for F/D and I/L.
+
+PANEL LAYOUT
+  7     8     9     C     MEM
+  4     5     6     D     PREV
+  1     2     3     E     NEXT
+  0     A     B     F     ENTER
+
+Outside number entry: 8 step in, 9 step over, A registers, B memory,
+C disassembly, D set PC/run, E continue, F OCT/HEX. In HEX input 8..F
+are digits. Release a step key before pressing it again.
+MEM opens/cancels the menu. PREV/NEXT browse entries or adjacent
+registers/words/instructions. ENTER edits a register/word, advances a
+disassembly/FP view, or confirms input. PREV erases a digit during input.
+FP REGISTERS in the menu opens AC0. Only the PANEL waits at each register;
+UART R/F prints the whole set. Long lines scroll to the end and back.
+Disassembly remembers 32 known boundaries; HISTORY START is not PC-2.
+Panel actions/results are also printed on UART.
+
+BREAKPOINTS AND STEPS
+Breakpoints replace instructions temporarily with HALT. Use aligned
+instruction starts in your own code, 001000..157776, not data/overlays.
+Original words are restored at the ODT prompt. If restoration reports
+?BP, do not continue until Z successfully restores the affected code.
+T without an argument and U run with IRQ enabled. T checks the return
+PC and original SP for JSR. Short RESET interrupts that run.
+S and T limit defer ordinary IRQ/trace; an IRQ-dependent routine may
+not finish under bounded single-stepping. WAIT remains a wait.
+Timers/peripherals do not freeze while stopped. Resync time afterward.
+
+Select GPIO and unplug JTAG. UNLOAD HG and stop its host daemon before
+using panel keys. For recovery use long RESET followed by UART ESC.

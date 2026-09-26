@@ -1,0 +1,62 @@
+UJMOD 04.00 - RETAINED HALT FRAM MODULES
+
+RUN SY:UJMOD starts the loader. At UJMOD> enter ONE command.
+It returns to RT-11 after that command; run it again for the next one.
+
+  STATUS       List slots 0..7: BASE LENGTH CHECKSUM STATUS, all octal.
+  NAME         Load SY:NAME.BIN at its preferred address.
+  NAME AUTO    Relocate to a free aligned range in the module's pool.
+  OFFn         Disable slot n at the next normal boot; keep its bytes.
+  ONn          Check retained checksum and re-enable slot n without SD.
+  DELn         Remove the slot/allocation; does not erase the old bytes.
+  EXIT         Return without changes.
+
+BIN files on this disk use format 4 / ABI3 with DEC relocation records.
+The loader reserves code AND BSS/stack and checks overlap and readback.
+Names have 1..6 letters/digits, with no extension or device prefix.
+SDBOOT uses the small bootstrap pool. ODT and FP11 use the main pool.
+Same BASE replaces a slot. AUTO allocates a NEW slot/range: it is not
+an in-place update by module name. STATUS first; do not create duplicate
+ODT or FPP services. To replace a relocated module, DEL its old slot,
+then install the new NAME AUTO and reboot.
+
+EXAMPLE FOR AN EMPTY TABLE ONLY
+  RUN SY:UJMOD
+  UJMOD> ODT
+  RUN SY:UJMOD
+  UJMOD> SDBOOT
+  RUN SY:UJMOD
+  UJMOD> FP11 AUTO
+  RUN SY:UJBOOT
+  ... wait for RT-11FB ...
+  RUN SY:UJMOD
+  UJMOD> STATUS
+
+FP11 is optional; omit its installation for FIS-only operation.
+SDBOOT is replaceable software; the built-in ROM remains a fallback.
+In an empty table this sequence places ODT at 010000, SDBOOT at 006000
+and FP11 at 042710. Slot numbers and addresses are not module types.
+
+STATUS (OCTAL)
+  140403  Installed, AUTO enabled, cold initialization not yet confirmed
+  140407  Successfully initialized in the last normal boot
+  140413  Validation/initialization failure
+  140401  Retained, AUTO disabled
+  140402  Incomplete installation; bootstrap skips it
+  000000  Empty
+LENGTH counts immutable words, not bytes or the complete allocation.
+After ESC boot an old OK bit is not proof of current activation.
+
+Installation/OFF/DEL disable live HALT services. Finish all module
+changes, then RUN SY:UJBOOT or long RESET without ESC. Do not run FPP
+software between a configuration change and reboot. ON also requires
+reboot to apply. RT-11 detects FPP availability at boot time.
+
+Example: STATUS identifies FPP as slot 2. OFF2 then reboot disables it;
+ON2 then reboot restores it from FRAM with no need to reload FP11.BIN.
+ODT and SDBOOT are retained independently.
+
+Recovery: long RESET, immediately send UART ESC, wait for RT-11,
+then use UJMOD to disable/remove/replace the faulty module. An initializer
+can have a valid checksum and still hang: the physical recovery path
+does not depend on it. There is no automatic module watchdog.

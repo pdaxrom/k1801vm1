@@ -1,0 +1,35 @@
+DEC BASIC-11/RT-11 V2.1 - uJ11 BUILDS
+
+  B81FIJ.SAV   FIS single, exception-stack adapter; with OR without FPP
+  B81FIS.SAV   Original FIS single; use with FPP disabled and rebooted
+  B81FPU.SAV   FPP single; requires initialized FP11 module
+  B81FPD.SAV   FPP double; requires initialized FP11 module
+
+START AND TEST
+  RUN SY:B81FIJ
+  ... OPTIONAL FUNCTIONS (ALL,NONE,OR INDIVIDUAL)?
+  A
+  ... READY
+  RUN SY:B81TST
+  ... CHECKS= 29  ERRORS= 0
+  ... CP81 PASS
+  BYE
+
+Use the same B81TST.BAS with B81FPU/B81FPD. Under B81FPD only, also
+RUN SY:B81DBL to test the extra precision. BYE returns to RT-11.
+For an interactive calculation try PRINT 2+2 at READY.
+
+The B81 names are stable filenames retained from the verified builds.
+CP81 in test output identifies the test's origin, not the FPGA version.
+All four executables are included separately; no BASIC.SAV alias hides
+the selected arithmetic implementation.
+
+B81FIJ adds a 26-byte adapter for the extra FEC/FEA words that RT-11
+places on the exception stack when it has detected an FPP. It still
+executes FIS in microcode. Without FPP the original stack is passed on.
+B81FIS + enabled FPP can mis-handle divide-by-zero and other exceptions;
+use B81FIJ, or OFF the FPP slot and reboot first (see UJMOD.TXT).
+
+B81TST covers 29 arithmetic/transcendental/language comparisons.
+B81DBL checks extra double precision. Their success is not an exhaustive
+test of all hardware or arbitrary PEEK/POKE peripheral addresses.

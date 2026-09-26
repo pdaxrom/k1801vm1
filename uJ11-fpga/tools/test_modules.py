@@ -7,6 +7,7 @@ import subprocess
 from board_common import ROOT
 from build_hardware import adapt, OUT, firmware_rom
 from build_software import odt, bootstrap, OUT as SOFTWARE
+from module_image import checksum
 
 
 def run(vendor=False,full_window=False):
@@ -85,7 +86,7 @@ def run(vendor=False,full_window=False):
         data=(SOFTWARE/name/'image.bin').read_bytes()
         h=record['format']
         for i in range(0,len(data),2):put(h['base']+i,int.from_bytes(data[i:i+2],'little'))
-        entry(slot,h['base'],h['words'],h['checksum'])
+        entry(slot,h['base'],h['words'],checksum(data))
     case();load_module('odt',od,0);load_module('sdboot',sd,1)
     for address in range(os['IMMEND'],os['MEMEND'],2):put(address,0xa5a5)
     lines.append('boot();')

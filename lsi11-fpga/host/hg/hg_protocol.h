@@ -10,6 +10,8 @@
 
 #define HG_OP_READ 1u
 #define HG_OP_WRITE 2u
+#define HG_OP_TIME 3u
+#define HG_TIME_SIZE 6u
 #define HG_OP_MASK 0x7fu
 #define HG_OP_MORE 0x80u
 

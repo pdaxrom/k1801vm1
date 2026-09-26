@@ -1,7 +1,10 @@
 {
-  "checkpoint": "cp67b",
-  "sha256": "d2e9000c47477c0ad8e8b4167338c74f274f2650dc46d8f1378446bb467e710d",
-  "checksum": "84CC",
-  "input_revision_sha256": "d8669ab5a2779f05492c361ac1e27fa3fc2ad99b0e41c3112f8c905817ed8cc6",
-  "programmed": false
+  "name": "hc1200-clock-calibrated",
+  "jed": "/tmp/uj11-clock-calibration.Dtwa6w/uJ11-fpga/build/hc1200-clock-calibrated/impl1/hc1200-clock-calibrated_impl1.jed",
+  "sha256": "e719d0563824df1c7ca488d6833a8602ab06aae534e93d43e8093dca6383b14f",
+  "checksum": "8F32",
+  "input_revision_sha256": "bf80e72789f38b6a9f3565d67f3fc3341a11d3224a760dd5d61e87009bd1e659",
+  "programmed": true,
+  "programmed_date": "2026-09-23",
+  "hardware_report": "hardware.json"
 }

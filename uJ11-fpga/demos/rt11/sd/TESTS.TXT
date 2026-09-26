@@ -1,0 +1,38 @@
+uJ11 SOFTWARE DIAGNOSTICS
+
+TMRATE.SAV - SYSTEM TICK SAMPLING
+  RUN SY:TMRATE
+Prints CFG and 121 raw high/low .GTIM pairs, about 50 ticks apart.
+At 50 Hz the run takes about two minutes. UART Q/q/ESC exits early.
+The host must timestamp arrivals with a monotonic clock to calculate
+frequency; raw numbers alone are not a wall-clock measurement.
+No date/time, divisor or FPGA setting is changed. Do not synchronize
+time during this measurement. The current board divisor is 596037.
+Host automation: tools/hardware_clock_rate.py (project source tree).
+
+ODTCHK.SAV - INTERACTIVE FP DEBUGGER CHECK
+Requires installed/initialized ODT and FP11, with RT-11 freshly booted
+after their activation. Stop CLOCK and release HG pins first.
+  RUN SY:ODTCHK
+The program loads AC2, sets double mode and HALTs into ODT automatically.
+  ODT> F 2
+Expected raw words: 040200 012345 067012 034567 (octal).
+  ODT> F 6
+FPS has D mode set; other FPS bits may be retained from earlier software.
+  ODT> C
+The guest prints !ODTCHK-I-RETURNED TO RT11 and exits.
+Without ODT/FPP this diagnostic is not a safe stand-alone smoke test.
+
+FPTST.SAV - AUTOMATED ODT/FPP REGRESSION FIXTURE
+Not a run-to-completion utility. It raises IPL to 7, executes a sequence
+of FPP instructions and intentionally loops for ODT inspection.
+The source and symbol maps drive tools/run_rt11.py, which single-steps
+and later redirects execution to FINISH for additional assertions.
+Do not expect Ctrl-C at its loop: ordinary interrupts are masked.
+Short RESET enters installed ODT; long RESET reboots for recovery.
+For ordinary user validation prefer BASIC tests and ODTCHK above.
+
+B81TST.BAS / B81DBL.BAS - see BASIC.TXT.
+DSPDEM / KEYDEM / RGBDEM - see PANEL.TXT.
+UJMOD STATUS shows retained-module checksums/initialization status;
+the old OK bit after an ESC bypass is not proof of active services.

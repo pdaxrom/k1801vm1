@@ -1,0 +1,75 @@
+{
+  "date": "2026-09-22",
+  "host": "sash@192.168.1.108",
+  "board": "HC1200, FPGA CP67b unchanged",
+  "deployment": "/home/sash/Work/FPGA/uj11-hg-time-20260922.PPWizX",
+  "launcher": "/home/sash/Work/FPGA/uj11-hg/start-hg.sh",
+  "files": {
+    "HG.SYS": {
+      "sha256": "f98e81fb4e98a8ca2165102e57db2b5782a6c9be23420f4aea8a71f0c0901abd",
+      "bytes": 1536,
+      "readback": "HGCHK.SYS"
+    },
+    "HGTIME.SAV": {
+      "sha256": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c",
+      "bytes": 1536,
+      "readback": "HTBACK.SAV"
+    },
+    "CLOCK.SAV": {
+      "sha256": "1f9cb1c54563701b55a35ac6af9a790a78d218055814a6285e861dd183207fee",
+      "bytes": 2048,
+      "readback": "CLKBAK.SAV"
+    }
+  },
+  "backup": {
+    "sd": "SY:HGOLD.SYS",
+    "host": "share/HGOLD.SYS",
+    "sha256": "38cf7b77fc4172c785132d14dfdef6c886aa6840b3f8db5111f9b51048776fa3"
+  },
+  "resident_driver_words": {
+    "before": 368,
+    "after": 403,
+    "added_bytes": 70
+  },
+  "test": {
+    "started_utc": "2026-09-22T19:08:42Z",
+    "finished_utc": "2026-09-22T19:09:11Z",
+    "passed": true,
+    "time_checks": [
+      {
+        "host_before": "2026-09-22T23:08:45.628635+04:00",
+        "guest": "2026-09-22T23:08:45+04:00",
+        "host_after": "2026-09-22T23:08:46.430884+04:00"
+      },
+      {
+        "host_before": "2026-09-22T23:08:50.938566+04:00",
+        "guest": "2026-09-22T23:08:51+04:00",
+        "host_after": "2026-09-22T23:08:51.740827+04:00"
+      }
+    ],
+    "clock_advanced_seconds": 5.0,
+    "clock_q_exit": true,
+    "panel_visual_confirmed": false
+  },
+  "final_state": {
+    "clock_running": true,
+    "hg_unloaded": true,
+    "hg_daemon_stopped": true,
+    "picocom_resumed": true
+  },
+  "limitations": [
+    "No measurement of synchronization latency or long-term drift",
+    "HDSP visual confirmation pending",
+    "ESC exit and midnight rollover tested in SIMH, not this hardware pass"
+  ],
+  "captures": {
+    "capture/activate/uart.bin": "adcb9cc9b12327ed0b3cdd0db0238559c018e4e7e80d6529ebecf7057c24363f",
+    "capture/backup-check/uart.bin": "269c2ffac333107c0335cbfb618aabd1f9be03510f9a6b8d7afaa88d65e066a3",
+    "capture/before/uart.bin": "3f78abc03aa31a65f15ac5704713ab33759a054aea2116dc2be8b327ced1bb29",
+    "capture/copy/uart.bin": "ac84efc1626a04086cf252c52fa53c4f68e374bb14106953849b67b207ab6add",
+    "capture/link/uart.bin": "8504e33af096bcec8c6c152ce64884d607222ce38afb4c71bb069b459a225131",
+    "capture/readback/uart.bin": "ac84232e97d3b541dd7deac8a0a3111e2e94453cf80c3aa8e2b4940a59cbe606",
+    "capture/status/uart.bin": "6abbe9eb73e62842d3e23c93ba5907cb49473953d982d8ac0ad3471f5341296a",
+    "capture/time-clock/uart.bin": "6e69ff0efb83689539b992ef66376d7dd6ea849349093362243af7367a553f47"
+  }
+}
