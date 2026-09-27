@@ -109,6 +109,20 @@ list_xp:
         beq     list_rq
         mov     #msg_line_xp, r1
         jsr     pc, print_str
+        clr     r3
+list_xp_units:
+        mov     r3, r0
+        mov     #KIND_XP, r1
+        jsr     pc, unit_check
+        tst     r0
+        beq     list_xp_next
+        jsr     pc, print_unit
+list_xp_next:
+        inc     r3
+        cmp     r3, #8.
+        bcs     list_xp_units
+        mov     #msg_crlf, r1
+        jsr     pc, print_str
 list_rq:
         tstb    present_rq
         beq     list_rl
@@ -118,6 +132,20 @@ list_rl:
         tstb    present_rl
         beq     list_tq
         mov     #msg_line_rl, r1
+        jsr     pc, print_str
+        clr     r3
+list_rl_units:
+        mov     r3, r0
+        mov     #KIND_RL, r1
+        jsr     pc, unit_check
+        tst     r0
+        beq     list_rl_next
+        jsr     pc, print_unit
+list_rl_next:
+        inc     r3
+        cmp     r3, #4.
+        bcs     list_rl_units
+        mov     #msg_crlf, r1
         jsr     pc, print_str
 list_tq:
         tstb    present_tq
@@ -129,9 +157,25 @@ default_prompt:
         mov     @#STORAGE_STATUS, r0
         bit     #0010000, r0
         bne     select_controller
+        mov     r0, r1
         bic     #0177770, r0
         mov     r0, selected_unit
+        ash     #-3, r1
+        bic     #0177770, r1
+        bne     default_kind
+        mov     #KIND_RH, r1
+default_kind:
+        movb    r1, selected_kind
         mov     #msg_default, r1
+        jsr     pc, print_str
+        mov     #msg_name_rh, r1
+        cmpb    selected_kind, #KIND_RH
+        beq     default_name
+        mov     #msg_name_xp, r1
+        cmpb    selected_kind, #KIND_XP
+        beq     default_name
+        mov     #msg_name_rl, r1
+default_name:
         jsr     pc, print_str
         mov     selected_unit, r0
         add     #ASC_0, r0
@@ -160,7 +204,6 @@ auto_key:
         jsr     pc, print_str
         br      select_controller
 boot_default:
-        movb    #KIND_RH, selected_kind
         jmp     boot_dispatch
 
 select_controller:
@@ -277,11 +320,10 @@ unit_loop:
         bgt     bad_unit
 
         mov     r0, selected_unit
-        cmpb    selected_kind, #KIND_RH
+        movb    selected_kind, r1
+        jsr     pc, unit_check
+        tst     r0
         bne     unit_available
-        mov     r0, @#(RHCS1+10)
-        tst     @#(RHCS1+12)
-        bmi     unit_available
         mov     #msg_unit_absent, r1
         jsr     pc, print_str
         br      unit_loop
@@ -342,6 +384,42 @@ boot_tq:
         mov     #msg_boot_tq, r1
         jsr     pc, print_str
         jmp     tq_boot_run
+
+; R0 unit, R1 controller kind -> R0 present. Select without launching a command.
+unit_check:
+        cmp     r1, #KIND_RH
+        bne     unit_check_xp
+        mov     r0, @#(RHCS1+10)
+        tst     @#(RHCS1+12)
+        bmi     unit_yes
+        br      unit_no
+unit_check_xp:
+        cmp     r1, #KIND_XP
+        bne     unit_check_rl
+        mov     r0, @#(XPCS1+10)
+        bit     #0400, @#(XPCS1+12)
+        bne     unit_yes
+        br      unit_no
+unit_check_rl:
+        cmp     r1, #KIND_RL
+        bne     unit_yes
+        swab    r0
+        bis     #0200, r0
+        mov     r0, @#RLCS
+        bit     #1, @#RLCS
+        bne     unit_yes
+unit_no:
+        clr     r0
+        rts     pc
+unit_yes:
+        mov     #1, r0
+        rts     pc
+print_unit:
+        mov     r3, r0
+        add     #ASC_0, r0
+        jsr     pc, putc
+        mov     #0040, r0
+        jmp     putc
 
 detect_controllers:
         clr     present_any
@@ -469,7 +547,10 @@ print_done:
 msg_banner:
         DB      "uJ11 SD BOOT MENU\r\n", 0
 msg_default:
-        DB      "Default: RH", 0
+        DB      "Default: ", 0
+msg_name_rh: DB "RH", 0
+msg_name_xp: DB "XP", 0
+msg_name_rl: DB "RL", 0
 msg_default_key:
         DB      " - boot in 5s, Enter=boot, other key=menu: ", 0
 msg_unit_absent:
@@ -487,11 +568,11 @@ msg_line_rk:
 msg_line_rh:
         DB      "  2 - RH11/HK, units: ", 0
 msg_line_xp:
-        DB      "  3 - XP/RP (xp0..xp7)\r\n", 0
+        DB      "  3 - XP/RP, units: ", 0
 msg_line_rq:
         DB      "  4 - RQ (MSCP) (rq0..rq3)\r\n", 0
 msg_line_rl:
-        DB      "  5 - RL11 (rl0..rl3)\r\n", 0
+        DB      "  5 - RL11, units: ", 0
 msg_line_tq:
         DB      "  6 - TQ11/TMSCP (tq0..tq7)\r\n", 0
 msg_choose_ctl:
@@ -638,6 +719,9 @@ xp_boot_run:
         mov     #0000040, 10(r1)
         mov     r0, 10(r1)
         mov     #0000021, (r1)
+xp_wait_preset:
+        tstb    (r1)
+        bpl     xp_wait_preset
         mov     #0010000, 32(r1)
         mov     #0177000, 2(r1)
         clr     4(r1)
@@ -647,6 +731,8 @@ xp_boot_run:
 xp_wait:
         tstb    (r1)
         bpl     xp_wait
+        tst     (r1)
+        bmi     rh_boot_failed
         clr     r2
         clr     r3
         mov     #002020, r4
@@ -731,6 +817,11 @@ rl_wait1:
 rl_wait2:
         tstb    (r1)
         bpl     rl_wait2
+        tst     (r1)
+        bpl     rl_boot_ok
+        jmp     rh_boot_failed
+rl_boot_ok:
+        mov     selected_unit, r0
         mov     #7, @#SD_CONTROL
         clr     pc
 

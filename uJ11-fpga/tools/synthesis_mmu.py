@@ -70,7 +70,7 @@ exit 0
             stdout=log,stderr=subprocess.STDOUT).returncode
     prefix=out/'impl1'/f'{name}_impl1'
     report=dict(inputs=manifest,scope='MMU profile; physical-board qualification pending',device=device,fpp=hw['fpp'],
-        constraint_mhz=24,input_clock_mhz=12,expected_ebr=hw['cpu']['microcode_ebr']+4+hw['iop']['ebr']+int(hw['fp_arithmetic']),diamond_returncode=rc,
+        constraint_mhz=24,input_clock_mhz=12,expected_ebr=hw['cpu']['microcode_ebr']+4+hw['iop']['ebr']+int(hw['fp_arithmetic'])+int(hw['iop']['profile']=='storage'),diamond_returncode=rc,
         mmu=True,microcode_words=hw['cpu']['microcode_words'],external_pin_delays_constrained=True)
     try:
         timing=prefix.with_suffix('.twr').read_text()

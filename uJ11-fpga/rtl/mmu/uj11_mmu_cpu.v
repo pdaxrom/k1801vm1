@@ -310,7 +310,9 @@ module uj11_mmu_cpu #(
                 if(boundary)event_active<=0;
                 if(trace_ack)event_active<=3;
                 if(irq_ack)begin event_active<=1;mdr<=irq_vector;end
-                if(trap_op)begin link_sp<=0;trap_frame<=1;trap_loading<=1;saved_psw<=psw;end
+                // Explicit PSW writes suppress only that instruction's ALU flags.
+                // An immediately accepted IRQ must still load its vector PSW.
+                if(trap_op)begin link_sp<=0;trap_frame<=1;trap_loading<=1;saved_psw<=psw;explicit_psw<=0;end
                 if(control && command==10 && link_sp<4)begin links[link_sp[1:0]]<=upc+1'b1;link_sp<=link_sp+1'b1;end
                 if(control && command==3 && link_sp!=0)link_sp<=link_sp-1'b1;
                 if(control && command==0 && uword[2:1]!=0)begin

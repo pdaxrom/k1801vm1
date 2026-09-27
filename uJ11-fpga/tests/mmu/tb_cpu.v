@@ -254,6 +254,15 @@ module tb_cpu;
         debug_register_address=17;#1;check(debug_register_data=='o2600,"supervisor SP restored after RTI");
         debug_register_address=19;#1;check(debug_register_data=='o3000,"supervisor vector preserves user SP");
         check(ram['o2574/2]==fp_error_pc && ram['o2576/2]=='o140000,"TRAP frame uses vector-selected supervisor stack");
+        // A pending IRQ may be taken on the boundary of MOV @#PSW.
+        // The explicit-write flag must not suppress loading the vector PSW.
+        pos='o4000;word('o12706);word('o2000);mov(0,'o177776);word(0);
+        ram['o100/2]='o6000;ram['o102/2]='o340;
+        pos='o6000;word('o13701);word('o177776);word(0);
+        @(negedge clk);irq_priority=6;irq_vector='o100;irq_valid=1;
+        next_prompt=prompts+1;restart();do @(posedge clk);while(!irq_ack);@(negedge clk);irq_valid=0;
+        wait_prompt(next_prompt);debug_register_address=1;#1;
+        check(debug_register_data==16'o340,"IRQ after explicit PSW write loads vector IPL");
         // A console stop of WAIT must resume WAIT until an unmasked IRQ.
         pos='o4000;word('o12706);word('o2000);word('o230);word(1);word('o5200);word(0);
         ram['o100/2]='o6000;ram['o102/2]='o340;

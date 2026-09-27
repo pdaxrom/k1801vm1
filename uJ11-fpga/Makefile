@@ -10,6 +10,7 @@ HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
 SD_OUT ?= build/$(if $(filter mmu,$(CPU)),sd-hc7000,sd)
 SD_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-sd-hc7000,test-sd)
+BSD_OUT ?= build/sd-bsd
 MMU_BOOT_MENU ?= 0
 MMU_SD_IMAGE ?= $(if $(filter storage,$(IOP)),build/storage-card.img,../lsi11/disks/rt11v5.3/system.dsk)
 
@@ -40,7 +41,7 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and the 24 MHz MAP/PAR/TRACE gate.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-storage storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
@@ -218,7 +219,7 @@ else
 	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_disk --out build/test-mmu-disk
 endif
 
-.PHONY: test-storage storage-menu test-storage-menu
+.PHONY: test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu
 storage-menu:
 	$(PYTHON) tools/build_storage_menu.py
 test-storage-menu:
@@ -228,6 +229,18 @@ test-storage-menu:
 test-storage:
 	$(PYTHON) -m unittest discover -s tests -p test_storage_label.py -q
 	$(PYTHON) tools/test_storage.py
+
+bsd-image:
+	@test "$(BOARD)/$(CPU)/$(FPP)/$(IOP)" = hc7000-lcd-sram/mmu/off/storage || { echo 'BSD requires HC7000 MMU, FPP=off, IOP=storage'; exit 1; }
+	$(PYTHON) tools/build_sd_bsd.py --out $(BSD_OUT)
+test-bsd:
+	@test "$(BOARD)/$(CPU)/$(FPP)/$(IOP)" = hc7000-lcd-sram/mmu/off/storage || { echo 'BSD requires HC7000 MMU, FPP=off, IOP=storage'; exit 1; }
+	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_bsd --image $(BSD_OUT)/uj11-hc7000-2.9bsd.img --out build/test-bsd
+test-storage-controllers:
+	$(PYTHON) tools/test_storage_rl_xp.py
+	$(PYTHON) tools/test_mmu_board.py --name tb_storage_bus --image build/test-storage-rl-xp/controllers.img --out build/test-storage-bus
+	$(IVERILOG) -g2012 -s tb_ubmap -o build/test-storage-bus/ubmap tests/mmu/tb_ubmap.v boards/hc7000/mmu/uj11_mmu_ubmap.v rtl/mmu/uj11_mmu_apr_ram.v
+	$(VVP) build/test-storage-bus/ubmap
 
 .PHONY: test-mmu-fpp
 test-mmu-fpp:

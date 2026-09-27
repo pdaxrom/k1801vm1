@@ -13,8 +13,10 @@ from sdcard import Label,add_partition,publish,MENU,main as sdcard
 from storage_menu import crc16
 
 def fixture(path,menu,mode):
-    label=add_partition(Label(131072),'rk07',0)
-    label=add_partition(label,'rk07',7,boot=mode!='no-default')
+    media='rm05' if mode=='xp-auto' else 'rl02' if mode=='rl-auto' else 'rk07'
+    unit=1 if mode=='rl-auto' else 7
+    label=add_partition(Label(1048576 if mode=='xp-auto' else 131072),media,0)
+    label=add_partition(label,media,unit,boot=mode!='no-default')
     with path.open('w+b') as f:
         f.truncate(label.blocks*512);publish(f,label)
         for p in label.partitions:
@@ -34,7 +36,7 @@ def fixture(path,menu,mode):
                     hdr[510:512]=crc16(hdr[:510]).to_bytes(2,'big')
                 f.seek(2*512);f.write(hdr)
 
-CASES=('auto','enter','cancel','no-default','direct','bad-header','bad-payload','bad-size','bad-wire')
+CASES=('auto','rl-auto','xp-auto','enter','cancel','no-default','direct','bad-header','bad-payload','bad-size','bad-wire')
 
 def run(out,only=None):
     record=build();out.mkdir(parents=True,exist_ok=True)

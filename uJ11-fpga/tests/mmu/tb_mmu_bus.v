@@ -15,7 +15,7 @@ module tb_mmu_bus;
     wire tx,cs,sck,mosi;wire [7:0] pins;
     integer checks=0,n;
     uj11_mmu_board_bus #(.CLEAR_WORDS(1),.TICK_DIVISOR(1024)) dut(
-        .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),
+        .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.dma_map_enabled(1'b0),
         .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),
         .ready(ready),.error(error),.read_data(read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),
         .irq_vector(irq_vector),.irq_ack(irq_ack),.uart_rx(1'b1),.uart_tx(tx),

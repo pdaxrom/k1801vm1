@@ -11,7 +11,7 @@ module tb_storage_disk;
     wire [15:0] rd;wire ready,irq;reg irq_ack=0;
     reg sr=0,sw=0;reg [1:0] sa=0;reg [15:0] sd=0;
     wire [15:0] srd;wire sready,serror,cs,sck,mosi,miso;
-    wire dr,dw,dready;wire [17:0] da;wire [15:0] dd;
+    wire dr,dw,dready;wire [21:0] da;wire [15:0] dd;
     wire mr,mw,mready;wire [19:0] ma;wire [1:0] ml;wire [15:0] md,mrd;
     wire initialized;wire [19:0] pa;wire [15:0] pd;
     wire ce_n,oe_n,we_n,lb_n,ub_n;
@@ -19,13 +19,15 @@ module tb_storage_disk;
     reg traffic=0;integer cpu_cycles=0,dma_cycles=0,checks=0;
     reg absent=0,fail_read=0,fail_write=0,stuck_busy=0;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
-        .clk(clk),.reset(reset),.rk_request(rr),.rk_write(rw),.rk_address(ra),.rk_lanes(rl),
+        .clk(clk),.reset(reset),.bus_reset(1'b0),.rl_request(1'b0),.xp_request(1'b0),.rl_irq_ack(1'b0),.xp_irq_ack(1'b0),.storage_address(5'b0),
+        .rl_rdata(),.xp_rdata(),.rl_ready(),.xp_ready(),.rl_irq(),.xp_irq(),.rh_enabled(),.rl_enabled(),.xp_enabled(),
+        .rk_request(rr),.rk_write(rw),.rk_address(ra),.rk_lanes(rl),
         .rk_wdata(wd),.rk_rdata(rd),.rk_ready(ready),.rk_irq(irq),.storage_enabled(),.storage_status(),.rk_irq_ack(irq_ack),
         .sd_request(sr),.sd_write(sw),.sd_byte(1'b0),.sd_address(sa),.sd_wdata(sd),
         .sd_rdata(srd),.sd_ready(sready),.sd_error(serror),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),
-        .dma_request(dr),.dma_write(dw),.dma_address(da),.dma_data(dd),
-        .dma_ready(dready),.dma_rdata(mrd));
+        .dma_request(dr),.dma_write(dw),.dma_unibus(),.dma_address(da),.dma_data(dd),
+        .dma_ready(dready),.dma_error(1'b0),.dma_rdata(mrd));
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(reset),
         .cpu_request(cr),.cpu_write(cw),.cpu_address(ca),.cpu_lanes(2'b11),.cpu_data(cd),.cpu_ready(cready),
         .dma_request(dr),.dma_write(dw),.dma_address(da),.dma_data(dd),.dma_ready(dready),
@@ -142,8 +144,8 @@ module tb_storage_disk;
         before_dma=dma_cycles;card.corrupt_read_crc=1;
         start(16'o21,256,16'hb000,4,0);wait_done();expect_reg(6,16'o100000,"CRC error");
         check(dma_cycles==before_dma,"bad sector CRC cannot reach SRAM");card.corrupt_read_crc=0;
-        // Reset while DMA is active: firmware restarts and rereads metadata in
-        // its own RAM, and no old completion or DMA can escape cancellation.
+        // Reset while DMA is active: cancel only this controller generation;
+        // preserve metadata and reject the old completion and remaining DMA.
         start(16'o121,256,16'hb000,4,0);wait(dr && dready);put(4,16'o40);
         repeat(100)@(negedge clk);before_dma=dma_cycles;
         initialized_iop();

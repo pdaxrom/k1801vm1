@@ -1,5 +1,5 @@
 #include "label.h"
-/* Autonomous SDHC initialization and partitioned RK07 service. */
+/* SDHC service for independent RK07, RL01/RL02 and RM05 controllers. */
 typedef unsigned int u32;
 #define MMIO(a) (*(volatile u32 *)(a))
 #define RK(n) MMIO(0x40000000u + 4u*(n))
@@ -9,9 +9,17 @@ typedef unsigned int u32;
 #define DMA_COUNT MMIO(0x40000204u)
 #define ENGINE MMIO(0x40000208u)
 #define TIME MMIO(0x40000300u)
+#define RL(n) MMIO(0x40000400u + 4u*(n))
+#define XP(n) MMIO(0x40000500u + 4u*(n))
+#define WINDOW MMIO(0x4000020cu)
+#define DMA_MODE MMIO(0x40000210u)
+#define R(n) regs[n]
+static volatile u32 *regs;
+static u32 meta;
+static int active(void) { return R(meta+9)&1; }
 enum { CS1, WC, BA, DA, CS2, DS, ER, MR, DC, DB, STATUS=16, COMPLETE, PRESENT, PROTECTED, BOOT_STATUS };
-enum { RX=1, TX, LOAD, STORE };
-enum { ILF=0000001, IAE=0002000, DTE=0020000, WLE=0004000, DCK=0100000 };
+enum { RX=1, TX, LOAD, STORE, COMPARE };
+enum { ILF=0000001, IAE=0002000, DTE=0020000, WLE=0004000, DCK=0100000, NXM=0200000 };
 
 static int elapsed(u32 start, u32 limit) { return ((TIME-start)&65535u)>=limit; }
 static void pause_ms(u32 delay) { u32 start=TIME; while(!elapsed(start,delay)) {} }
@@ -20,7 +28,9 @@ static void pause_ms(u32 delay) { u32 start=TIME; while(!elapsed(start,delay)) {
 static u32 speed;
 static uint8_t sector[512];
 static struct sd_label label;
-static u32 unit_base[8], present, protected;
+static u32 present[3], protected[3];
+static uint16_t rl_position[4];
+static uint8_t rl_rotation[4];
 static void close_card(void) { CONTROL=speed|1; (void)SPI; }
 static u32 send(u32 opcode,u32 arg,u32 crc) {
     CONTROL=speed;
@@ -87,21 +97,25 @@ static u32 initialize(void) {
     u32 boot=0xffffffffu;
     for(unsigned i=0;i<label.count;i++) {
         struct sd_partition *p=label.part+i;
-        int supported=p->kind==2 && p->media==3 && p->mode==0;
+        int supported=(p->kind==2 && p->media==3 && p->mode==0) ||
+            (p->kind==5 && (p->media==6 || p->media==7)) || (p->kind==3 && p->media==4);
+        unsigned bank=p->kind==2 ? 0 : p->kind==5 ? 1 : 2;
         if(p->flags&SD_BOOT) {
             if(!supported)return 7;
-            boot=p->unit;
+            if(p->kind!=2 && !(label.features&SD_MENU))return 8;
+            boot=p->unit | ((p->kind==2 ? 0 : p->kind)<<3);
         }
         if(supported) {
-            present|=1u<<p->unit;unit_base[p->unit]=p->start;
-            if(p->flags&SD_READONLY)protected|=1u<<p->unit;
+            present[bank]|=1u<<p->unit;
+            if(p->flags&SD_READONLY)protected[bank]|=1u<<p->unit;
         }
     }
     if(boot==0xffffffffu) {
         if(!(label.features&SD_MENU))return 8;
         boot=0x1000; /* menu without an automatic/default drive */
     }
-    RK(PRESENT)=present;RK(PROTECTED)=protected;
+    RK(PRESENT)=present[0];RK(PROTECTED)=protected[0];
+    RL(18)=present[1];XP(34)=present[2];XP(35)=protected[2];
     close_card();RK(BOOT_STATUS)=0x8000u|boot|((label.features&SD_MENU)?0x2000:0);
     return 0;
 }
@@ -111,7 +125,7 @@ static u32 transfer(u32 op) {
     do { status=ENGINE; } while(status&1);
     return status;
 }
-static u32 read_sector(u32 lba) {
+static u32 fetch_sector(u32 lba) {
     if(!command(0x51,lba))return DTE;
     u32 start=TIME;
     for(;;) {
@@ -124,10 +138,9 @@ static u32 read_sector(u32 lba) {
     received|=SPI;
     if(crc!=received)return DCK;
     close_card();
-    return (transfer(STORE)&2) ? DTE : 0;
+    return 0;
 }
 static u32 write_sector(u32 lba) {
-    if(transfer(LOAD)&2)return DTE;
     if(!command(0x58,lba))return DTE;
     SPI=0xfe;
     u32 crc=transfer(TX)>>16;
@@ -145,47 +158,147 @@ static u32 write_sector(u32 lba) {
     close_card();
     return 0;
 }
-static u32 execute(void) {
-    u32 cs1=RK(CS1),fn=(cs1>>1)&31;
-    u32 unit=RK(CS2)&7;
-    if(!(present&(1u<<unit))) { RK(CS2)|=0010000;return 0; }
-    if(fn==0 || fn==1 || fn==5)return 0; /* NOP, PACK ACK, RECAL */
-    if(fn!=010 && fn!=011)return ILF;
-    if(fn==011 && (protected&(1u<<unit)))return WLE;
-    /* Reject the entire request before writing if it crosses this drive. */
-    u32 first=RK(DC)*66+((RK(DA)>>8)&7)*22+(RK(DA)&31);
-    u32 sectors=(65536u-RK(WC)+255)>>8;
-    if(first>=53790 || sectors>53790-first)return IAE;
-    u32 start=TIME;
-    while(!(RK(STATUS)&2))if(elapsed(start,1000))return DTE;
-    do {
-        u32 da=RK(DA),dc=RK(DC),wc=RK(WC),ba=RK(BA) | ((RK(CS1)&0001400)<<8);
-        u32 head=(da>>8)&7,sector=da&31;
-        if(head>=3 || sector>=22 || dc>=815)return IAE;
-        u32 lba=unit_base[unit]+dc*66+head*22+sector;
-        u32 count=65536u-wc;
-        if(count>256)count=256;
-        DMA_ADDR=ba;DMA_COUNT=count;
-        u32 error=fn==010 ? read_sector(lba) : write_sector(lba);
-        close_card();
-        if(error)return error;
-        ba=(ba+2*count)&0x3ffff;
-        RK(BA)=ba&65535;
-        RK(CS1)=(ba>>8)&0001400;
-        RK(WC)=(wc+count)&65535;
-        if(++sector==22) { sector=0;if(++head==3) { head=0;++dc; } }
-        RK(DA)=(head<<8)|sector;RK(DC)=dc;
-    } while(RK(WC)!=0);
+/* Operation 0 reads, 1 writes, 2 compares. A 256-byte RL sector shares
+ * its SD sector with a neighbour; read/modify/write preserves that neighbour. */
+static u32 sector_io(u32 lba,u32 op,u32 count,u32 offset,u32 span) {
+    WINDOW=offset | ((offset+span)<<8);DMA_COUNT=count;
+    if(op!=1 || span!=256) {
+        u32 error=fetch_sector(lba);if(error)return error;
+    }
+    if(!active())return DTE;
+    if(op==1) {
+        u32 status=transfer(LOAD);
+        if(status&2)return status&8 ? NXM : DTE;
+        if(!active())return DTE;
+        return write_sector(lba);
+    }
+    u32 result=transfer(op==2 ? COMPARE : STORE);
+    return result&2 ? (result&8 ? NXM : DTE) : result&4 ? DCK : 0;
+}
+static struct sd_partition *find_drive(u32 kind,u32 unit) {
+    for(unsigned i=0;i<label.count;i++)
+        if(label.part[i].kind==kind && label.part[i].unit==unit)return label.part+i;
     return 0;
+}
+static u32 disks(struct sd_partition *p,u32 xp) {
+    u32 fn=(R(CS1)>>1)&31,unit=R(CS2)&7,dc_reg=xp ? 14 : DC;
+    if(!p) { R(CS2)|=0010000;return 0; }
+    if(xp && fn<024) {
+        if(fn==010) { R(DA)=0;R(14)=0;R(13)=0; }
+        if(fn==3)R(14)=0;
+        if(fn==2 || fn==014 || fn==3) {
+            if(R(14)>=823)return IAE;
+            R(15)=R(14);R(DS)|=0100000;
+        } else if(fn==010 || fn==011)R(DS)|=0100;
+        else if(fn==4)R(DS)&=~0100000u;
+        else if(fn!=0 && fn!=1 && fn!=5 && fn!=6 && fn!=7)return ILF;
+        return 0;
+    }
+    if(!xp && (fn==0 || fn==1 || fn==5))return 0;
+    u32 op=xp ? (fn==030 || fn==031 ? 1 : fn==024 ? 2 : 0) : fn==011;
+    if(xp ? (fn!=024 && fn!=030 && fn!=031 && fn!=034 && fn!=035) : (fn!=010 && fn!=011))return ILF;
+    if(op==1 && (p->flags&SD_READONLY))return WLE;
+    u32 per_track=xp ? 32 : 22,heads=xp ? 19 : 3;
+    u32 da=R(DA),dc=R(dc_reg),head=(da>>8)&63,sec=da&63;
+    if(head>=heads || sec>=per_track || dc>=(xp ? 823u : 815u))return IAE;
+    u32 lba=(dc*heads+head)*per_track+sec;
+    u32 wc=R(WC),left=65536u-wc;
+    if(xp && !wc)return 0;
+    if(lba>=p->blocks || ((left+255)>>8)>p->blocks-lba)return IAE;
+    u32 ba=R(BA) | (xp ? R(20)<<16 : (R(CS1)&0001400)<<8);
+    u32 inhibit=xp && (R(CS2)&8);
+    DMA_MODE=xp | (inhibit<<1);
+    while(left && active()) {
+        u32 count=left>256 ? 256 : left;
+        DMA_ADDR=ba;
+        /* RM05 short writes preserve the untouched tail, as the reference
+         * controller does. RK07 retains its legacy zero padding. */
+        u32 error=sector_io(p->start+lba,op,count,0,xp && op==1 ? count : 256);
+        close_card();
+        if(xp && error==NXM) { R(CS2)|=0004000;return 0; }
+        if(xp && op==2 && error==DCK) { R(CS2)|=0040000;return 0; }
+        if(error)return error;
+        if(!inhibit)ba=(ba+2*count)&(xp ? 0x3fffffu : 0x3ffffu);
+        left-=count;R(WC)=(wc+=count)&65535;R(BA)=ba&65535;
+        if(xp)R(20)=ba>>16;else R(CS1)=(ba>>8)&0001400;
+        ++lba;
+        if(++sec==per_track) { sec=0;if(++head==heads) { head=0;++dc; } }
+        if(xp && lba==p->blocks) { dc=822;head=18;sec=31;R(DS)|=02000; }
+        R(DA)=(head<<8)|sec;R(dc_reg)=dc;if(xp)R(15)=dc;
+    }
+    (void)unit;return 0;
+}
+static u32 rl_error(u32 code) { return 0100000u | (code<<10); }
+static u32 rl_command(struct sd_partition *p) {
+    u32 cs=R(0),fn=(cs>>1)&7,unit=(cs>>8)&3,da=R(2);
+    if(!fn)return 0;
+    if(!p)return rl_error(5);
+    u32 max_cyl=p->media==7 ? 511 : 255;
+    u32 position=rl_position[unit];
+    if(fn==2) {
+        if((da&7)!=3)return rl_error(1);
+        R(3)=035 | ((position&64) ? 0100 : 0) | (p->media==7 ? 0200 : 0) |
+            ((p->flags&SD_READONLY) ? 020000 : 0);
+        return 0;
+    }
+    if(fn==3) {
+        if((da&3)!=1)return rl_error(1);
+        u32 cyl=position>>7,diff=da>>7;
+        if(da&4) { cyl+=diff;if(cyl>max_cyl)cyl=max_cyl; }
+        else cyl=diff>cyl ? 0 : cyl-diff;
+        rl_position[unit]=(cyl<<7)|((da&020)?64:0);
+        return 0;
+    }
+    if(fn==4) {
+        u32 header=position|rl_rotation[unit],crc=0,data=header;
+        for(unsigned i=0;i<32;i++) {
+            u32 bit=(crc^data)&1;crc=(crc>>1)^(bit?0120001:0);data>>=1;
+        }
+        R(3)=header;R(5)=crc;R(6)=1;
+        rl_rotation[unit]=(rl_rotation[unit]+1)%40;
+        return 0;
+    }
+    if(fn==5 && (p->flags&SD_READONLY))return rl_error(1)|040000;
+    if(fn==7)da=position|rl_rotation[unit];
+    else if((da>>7)!=(position>>7))return rl_error(5);
+    u32 sec=da&63,cyl=da>>7,head=(da>>6)&1;
+    if(sec>=40 || cyl>max_cyl)return rl_error(5);
+    u32 left=(-R(3))&65535,maximum=(40-sec)*128,overrun=left>maximum;
+    if(overrun)left=maximum;
+    u32 ba=R(1)|(R(4)<<16),mp=R(3),original=R(2),done=0;
+    DMA_MODE=1;
+    while(left && active()) {
+        u32 span=(sec&1)?128:256,count=left>span?span:left;
+        if(count<=128)span=128;
+        u32 lba=(cyl*2+head)*40+sec;
+        DMA_ADDR=ba;
+        u32 error=sector_io(p->start+(lba>>1),fn==5 ? 1 : fn==1 ? 2 : 0,
+                            count,(sec&1)?128:0,span);
+        close_card();if(error)return rl_error(error==DCK ? 2 : error==NXM ? 8 : 4);
+        left-=count;done+=count;mp=(mp+count)&65535;ba=(ba+2*count)&0x3fffff;
+        sec+=(count+127)>>7;R(3)=mp;R(1)=ba&65535;R(4)=ba>>16;
+        R(2)=(original+((done+127)>>7))&65535;
+    }
+    rl_position[unit]=(cyl<<7)|(head<<6);rl_rotation[unit]=sec>=40?0:sec;
+    return overrun ? rl_error(1) : 0;
 }
 void main(void) {
     u32 error=initialize();
-    if(error) { present=0;protected=0;close_card();RK(BOOT_STATUS)=0xc000u|error; }
-    for(;;) {
-        while(!(RK(STATUS)&1)) {}
-        u32 error=execute();
-        // If arbitration timed out, leave the legacy owner's SD transaction alone.
-        if(RK(STATUS)&2)close_card();
-        RK(COMPLETE)=error;
+    if(error) { for(unsigned n=0;n<3;n++)present[n]=0;close_card();RK(BOOT_STATUS)=0xc000u|error; }
+    for(;;)for(unsigned bank=0;bank<3;bank++) {
+        regs=(volatile u32 *)(0x40000000u+(bank ? (bank+3)<<8 : 0));
+        meta=bank==2 ? 32 : 16;
+        if(!(R(meta)&1))continue;
+        R(meta+9)=R(meta+8); /* claim the current command generation */
+        error=0;
+        if(active()) {
+            u32 unit=bank==1 ? (R(0)>>8)&3 : R(CS2)&7;
+            u32 kind=bank==0 ? 2 : bank==1 ? 5 : 3;
+            struct sd_partition *p=find_drive(kind,unit);
+            if(!(present[bank]&(1u<<unit)))p=0;
+            error=bank==1 ? rl_command(p) : disks(p,bank==2);
+        }
+        if(R(meta)&2)close_card();
+        R(meta+1)=error; /* old generations cannot update registers or raise IRQ */
     }
 }

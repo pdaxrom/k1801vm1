@@ -11,7 +11,7 @@ from iop_ebr import block
 
 BOARD=['boards/hc7000/mmu/'+n+'.v' for n in (
     'uj11_mmu_board','uj11_mmu_board_bus','uj11_mmu_disk','uj11_mmu_rk611',
-    'uj11_mmu_sector_engine','uj11_mmu_sram_arbiter')]
+    'uj11_mmu_sector_engine','uj11_mmu_ubmap','uj11_mmu_sram_arbiter','uj11_mmu_rl11','uj11_mmu_xp')]
 BOARD+=['boards/hc7000/uj11_sram.v','boards/hc7000/uj11_hg_inputs.v',
     'boards/hc1200/uj11_tick.v','boards/hc1200/uj11_button.v','boards/hc1200/uj11_panel.v',
     'rtl/peripherals/spi_byte_service.v','rtl/peripherals/wbc_uart_xo2.v',
@@ -49,7 +49,7 @@ def build():
     record=dict(cpu=cpu,iop=iop,bootstrap=dict(assembly=assembly,directory=str(directory.relative_to(ROOT))),
         files={p:sha(ROOT/p) for p in CORE+BOARD+[TOP,'tools/build_mmu_board.py',boot_source]},
         scope='MMU board; physical-board qualification pending',fpp=cpu['fpp'],
-        fp_arithmetic=cpu['fpp']=='microcode',boot_pc_octal='004000',sram_bytes=2097152,dma_address_bits=18)
+        fp_arithmetic=cpu['fpp']=='microcode',boot_pc_octal='004000',sram_bytes=2097152,dma_address_bits=22 if iop_profile()=='storage' else 18)
     (OUT/'board-inputs.json').write_text(json.dumps(record,indent=2)+'\n')
     return record
 

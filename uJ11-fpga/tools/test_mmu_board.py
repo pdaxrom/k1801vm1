@@ -22,7 +22,7 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
         cmd=['verilator','--binary','--timing','-Wno-WIDTH','-Wno-TIMESCALEMOD',
              '--top-module',name,'-j','4','--Mdir',str(out/'obj')]+inventory
         sim=[str(out/'obj'/('V'+name))]
-    if name=='tb_mmu_boot':
+    if name in ('tb_mmu_boot','tb_mmu_bsd','tb_storage_bus'):
         image=image or ROOT/'../lsi11-fpga/images/rt11v503.dsk'
         image_hash=sha(image)
         sim += [f'+SD_IMAGE={image.resolve()}',f'+UART_LOG={out}/uart.txt',f'+MONITOR={monitor}']
@@ -34,7 +34,7 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
     with (out/'simulation.log').open('w') as log:rc=subprocess.run(sim,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT).returncode
     print((out/'simulation.log').read_text()[-3000:])
     if rc:raise SystemExit(rc)
-    if name=='tb_mmu_boot':assert sha(image)==image_hash
+    if name in ('tb_mmu_boot','tb_mmu_bsd','tb_storage_bus'):assert sha(image)==image_hash
     assert 'PASS MMU' in (out/'simulation.log').read_text()
     assert all(sha(ROOT/p)==h for p,h in record['test_files'].items())
     (out/'result.json').write_text(json.dumps(dict(passed=True,inputs=record),indent=2)+'\n')
@@ -42,7 +42,7 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--out',type=Path,default=ROOT/'build/test-mmu-board')
-    p.add_argument('--name',choices=('tb_mmu_disk','tb_mmu_bus','tb_mmu_boot'),default='tb_mmu_disk')
+    p.add_argument('--name',choices=('tb_mmu_disk','tb_mmu_bus','tb_mmu_boot','tb_mmu_bsd','tb_storage_bus'),default='tb_mmu_disk')
     p.add_argument('--vendor-library',type=Path)
     p.add_argument('--image',type=Path)
     p.add_argument('--monitor',choices=('fb','xm'),default='fb')

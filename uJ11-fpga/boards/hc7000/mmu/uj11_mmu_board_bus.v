@@ -7,7 +7,7 @@ module uj11_mmu_board_bus #(
     parameter integer CLEAR_WORDS=1048576,
     parameter BOOT_ROM_ENABLE=1
 )(
-    input wire clk,reset,power_on,peripheral_reset,
+    input wire clk,reset,power_on,peripheral_reset,dma_map_enabled,
     input wire request,writing,byte_access,
     input wire [21:0] address,
     input wire [15:0] write_data,
@@ -40,25 +40,46 @@ module uj11_mmu_board_bus #(
     wire timer_selected=io_page && offset==13'o17546;
     wire panel_selected=io_page && offset==13'o06000;
     wire maint_selected=io_page && offset==13'o17750;
-    wire storage_enabled;
+    wire storage_enabled,rh_enabled,rl_enabled,xp_enabled;
     wire [15:0] storage_status;
     wire storage_selected=storage_enabled && io_page && offset==13'o17504;
     wire sd_selected=io_page && offset[12:2]==(13'o17500>>2);
-    wire rk_selected=io_page && offset[12:5]==(13'o17440>>5);
+    wire rk_selected=(!storage_enabled || rh_enabled) && io_page && offset[12:5]==(13'o17440>>5);
+    wire rl_selected=storage_enabled && rl_enabled && io_page && offset>=13'o14400 && offset<=13'o14410;
+    wire xp_selected=storage_enabled && xp_enabled && io_page && offset>=13'o16700 && offset<=13'o16752;
+    wire map_selected=storage_enabled && io_page && offset[12:7]==(13'o10200>>7);
+    // No physical cache or parity RAM is fitted. CCR retains software control
+    // bits; MEMERR reports no memory-system/parity error.
+    wire ccr_selected=storage_enabled && io_page && offset==13'o17746;
+    wire memerr_selected=storage_enabled && io_page && offset==13'o17744;
+    reg [15:0] cache_control;
+    always @(posedge clk)begin
+        if(rst)cache_control<=0;
+        else if(request && ccr_selected && writing)begin
+            if(lanes[0])cache_control[7:0]<=write_data[7:0];
+            if(lanes[1])cache_control[15:8]<=write_data[15:8];
+        end
+    end
     wire selected=ram_selected || rom_selected || uart_selected || timer_selected ||
-        panel_selected || maint_selected || sd_selected || rk_selected || storage_selected;
-    wire dma_request,dma_write,dma_ready,ram_ready;
-    wire [17:0] dma_address;
+        panel_selected || maint_selected || sd_selected || rk_selected || storage_selected || rl_selected || xp_selected || map_selected || ccr_selected || memerr_selected;
+    wire dma_request,dma_write,dma_ready,dma_error,dma_unibus,ram_ready;
+    wire mapped_request,mapped_ready,map_ready;wire [21:0] mapped_address;wire [15:0] map_data;
+    wire [21:0] dma_address;
     wire [15:0] dma_data,ram_data;
     wire memory_request,memory_write,memory_ready;
     wire [19:0] memory_address;
     wire [1:0] memory_lanes;
     wire [15:0] memory_data;
+    uj11_mmu_ubmap unibus_map(.clk(clk),.reset(rst),.enabled(storage_enabled && dma_map_enabled && dma_unibus),
+        .request(request && map_selected),.write(writing),.address(address[6:1]),.lanes(lanes),.wdata(write_data),
+        .rdata(map_data),.ready(map_ready),.dma_request(dma_request),.dma_address(dma_address),
+        .dma_ready(dma_ready),.dma_error(dma_error),.memory_request(mapped_request),
+        .memory_address(mapped_address),.memory_ready(mapped_ready));
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(rst),
         .cpu_request(request && ram_selected),.cpu_write(writing),.cpu_address(address[20:1]),
         .cpu_lanes(lanes),.cpu_data(write_data),.cpu_ready(ram_ready),
-        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),
-        .dma_data(dma_data),.dma_ready(dma_ready),.request(memory_request),.write(memory_write),
+        .dma_request(mapped_request),.dma_write(dma_write),.dma_address(mapped_address),
+        .dma_data(dma_data),.dma_ready(mapped_ready),.request(memory_request),.write(memory_write),
         .address(memory_address),.lanes(memory_lanes),.data(memory_data),.ready(memory_ready));
     uj11_sram #(.CLEAR_WORDS(CLEAR_WORDS)) memory(.clk(clk),.power_on(power_on),.reset(rst),
         .initialized(memory_initialized),.request(memory_request),.write(memory_write),
@@ -66,17 +87,21 @@ module uj11_mmu_board_bus #(
         .read_data(ram_data),.ready(memory_ready),.sram_address(sram_address),.sram_data(sram_data),
         .sram_ce_n(sram_ce_n),.sram_oe_n(sram_oe_n),.sram_we_n(sram_we_n),
         .sram_lb_n(sram_lb_n),.sram_ub_n(sram_ub_n));
-    wire rk_ready,rk_irq,sd_ready,sd_error;
-    wire [15:0] rk_data,sd_data;
+    wire rk_ready,rk_irq,rl_ready,rl_irq,xp_ready,xp_irq,sd_ready,sd_error;
+    wire [15:0] rk_data,rl_data,xp_data,sd_data;
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV)) disk(
-        .clk(clk),.reset(rst),.rk_request(request && rk_selected),.rk_write(writing),
+        .clk(clk),.reset(reset),.bus_reset(peripheral_reset),.rk_request(request && rk_selected),.rk_write(writing),
         .rk_address(address[4:1]),.rk_lanes(lanes),.rk_wdata(write_data),.rk_rdata(rk_data),
-        .rk_ready(rk_ready),.rk_irq(rk_irq),.storage_enabled(storage_enabled),.storage_status(storage_status),.rk_irq_ack(irq_ack && irq_priority==5),
+        .rk_ready(rk_ready),.rk_irq(rk_irq),.storage_enabled(storage_enabled),.storage_status(storage_status),.rk_irq_ack(irq_ack && irq_vector==16'o210),
+        .rl_request(request && rl_selected),.xp_request(request && xp_selected),.storage_address(address[5:1]),
+        .rl_irq_ack(irq_ack && irq_vector==16'o160),.xp_irq_ack(irq_ack && irq_vector==16'o254),
+        .rl_rdata(rl_data),.xp_rdata(xp_data),.rl_ready(rl_ready),.xp_ready(xp_ready),.rl_irq(rl_irq),.xp_irq(xp_irq),
+        .rh_enabled(rh_enabled),.rl_enabled(rl_enabled),.xp_enabled(xp_enabled),
         .sd_request(request && sd_selected),.sd_write(writing),.sd_byte(byte_access),
         .sd_address(address[1:0]),.sd_wdata(write_data),.sd_rdata(sd_data),.sd_ready(sd_ready),.sd_error(sd_error),
         .sd_cs_n(sd_cs_n),.sd_sck(sd_sck),.sd_mosi(sd_mosi),.sd_miso(sd_miso),
-        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),.dma_data(dma_data),
-        .dma_ready(dma_ready),.dma_rdata(ram_data));
+        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),.dma_data(dma_data),.dma_unibus(dma_unibus),
+        .dma_ready(dma_ready),.dma_error(dma_error),.dma_rdata(ram_data));
     wire rx_irq,tx_irq,uart_ready;
     wire [15:0] uart_data;
     wire uart_ack=irq_ack && irq_priority==4;
@@ -109,9 +134,9 @@ module uj11_mmu_board_bus #(
             end
         end
     end
-    assign irq_valid=timer_pending || rk_irq || rx_irq || tx_irq;
-    assign irq_priority=timer_pending ? 3'd6 : rk_irq ? 3'd5 : 3'd4;
-    assign irq_vector=timer_pending ? 16'o100 : rk_irq ? 16'o210 : rx_irq ? 16'o60 : 16'o64;
+    assign irq_valid=timer_pending || rl_irq || rk_irq || xp_irq || rx_irq || tx_irq;
+    assign irq_priority=timer_pending ? 3'd6 : (rl_irq || rk_irq || xp_irq) ? 3'd5 : 3'd4;
+    assign irq_vector=timer_pending ? 16'o100 : rl_irq ? 16'o160 : rk_irq ? 16'o210 : xp_irq ? 16'o254 : rx_irq ? 16'o60 : 16'o64;
     wire [15:0] rom_data;
     reg [1:0] rom_phase;
     uj11_mmu_boot_rom boot(.clk(clk),.enable(rom_phase==1),.address({1'b0,address[8:1]}),.data(rom_data));
@@ -130,11 +155,11 @@ module uj11_mmu_board_bus #(
     // stays clear: the new profile implements FP instructions in microcode.
     assign read_data=({16{ram_selected}} & ram_data) | ({16{rom_selected}} & rom_data) |
         ({16{uart_selected}} & uart_data) | ({16{sd_selected}} & sd_data) |
-        ({16{rk_selected}} & rk_data) | ({16{panel_selected}} & panel_data) |
+        ({16{ccr_selected}} & cache_control) | ({16{map_selected}} & map_data) | ({16{rl_selected}} & rl_data) | ({16{xp_selected}} & xp_data) | ({16{rk_selected}} & rk_data) | ({16{panel_selected}} & panel_data) |
         ({16{timer_selected}} & {8'b0,timer_done,timer_ie,6'b0}) |
         ({16{maint_selected}} & 16'o31) | ({16{storage_selected}} & storage_status);
     assign ready=request && ((ram_selected && ram_ready) || (rom_selected && rom_phase==3) ||
-        (uart_selected && uart_ready) || (sd_selected && sd_ready) || (rk_selected && rk_ready) ||
-        timer_selected || panel_selected || maint_selected || storage_selected || !selected);
+        (uart_selected && uart_ready) || (sd_selected && sd_ready) || (rk_selected && rk_ready) || (map_selected && map_ready) || (rl_selected && rl_ready) || (xp_selected && xp_ready) ||
+        timer_selected || panel_selected || maint_selected || storage_selected || ccr_selected || memerr_selected || !selected);
     assign error=request && (!selected || (sd_selected && sd_ready && sd_error));
 endmodule

@@ -2,7 +2,7 @@
 // RK611 front end for the HC7000 I/O processor. Guest offsets are word indices;
 // IOP offsets are 32-bit indices. IOP 16=status, 17=completion/error word.
 module uj11_mmu_rk611(
-    input wire clk, reset, request, write, storage_enabled,
+    input wire clk, reset, bus_reset, request, write, storage_enabled,
     output reg [15:0] storage_status,
     input wire [3:0] address,
     input wire [1:0] lanes,
@@ -14,18 +14,22 @@ module uj11_mmu_rk611(
     output wire cancel,
     input wire iop_write,
     input wire [4:0] iop_address,
-    input wire [15:0] iop_data,
-    output reg [15:0] iop_rdata
+    input wire [31:0] iop_data,
+    output wire iop_valid,enabled,
+    output reg [31:0] iop_rdata
 );
     reg seen;
+    reg [31:0] epoch,claim;
+    assign iop_valid=busy && epoch==claim;
+    assign enabled=|present;
     reg [7:0] present,write_protected;
     reg [15:0] cs1,wc,ba,da,cs2,er,dc,db,mr;
     wire accept=request && !seen;
     wire [15:0] merged=(rdata & ~{{8{lanes[1]}},{8{lanes[0]}}}) |
                                (wdata & {{8{lanes[1]}},{8{lanes[0]}}});
-    assign cancel=accept && write &&
+    assign cancel=bus_reset || (accept && write &&
         ((address==0 && lanes[1] && wdata[15]) ||
-         (address==4 && lanes[0] && wdata[5]));
+         (address==4 && lanes[0] && wdata[5])));
     wire [15:0] drive_status=!storage_enabled ? 16'o100701 :
         !present[cs2[2:0]] ? 16'b0 : 16'o100701 | (write_protected[cs2[2:0]] ? 16'o4000 : 16'b0);
     wire [159:0] register_words={db,dc,mr,er,drive_status,cs2,da,ba,wc,cs1};
@@ -34,13 +38,16 @@ module uj11_mmu_rk611(
     endfunction
     always @* begin
         rdata=value(address,register_words);
-        iop_rdata=iop_address[4] ? {15'b0,busy} : value(iop_address[3:0],register_words);
+        iop_rdata=iop_address==24 ? epoch : iop_address==25 ? {31'b0,iop_valid} :
+            iop_address[4] ? {31'b0,busy} : {16'b0,value(iop_address[3:0],register_words)};
     end
     always @(posedge clk) begin
         ready<=0;
         if(reset || cancel) begin
             cs1<=16'o200;wc<=0;ba<=0;da<=0;cs2<=0;er<=0;dc<=0;db<=0;mr<=0;
-            irq<=0;busy<=0;seen<=request;present<=0;write_protected<=0;storage_status<=0;
+            irq<=0;busy<=0;seen<=request;
+            if(reset) begin epoch<=0;claim<=0;end else epoch<=epoch+1'b1;
+            if(reset || !storage_enabled)begin present<=0;write_protected<=0;storage_status<=0;end
             ready<=cancel && !reset;
         end else begin
             if(!request) seen<=0;
@@ -55,7 +62,7 @@ module uj11_mmu_rk611(
                             else if(!busy && cs1[7]) irq<=1;
                             if(!busy && wdata[0]) begin
                                 cs1<=(merged & 16'o003577) | 16'o1;
-                                er<=0;cs2<=cs2 & 16'o7;busy<=1;irq<=0;
+                                er<=0;cs2<=cs2 & 16'o7;busy<=1;irq<=0;epoch<=epoch+1'b1;
                             end
                         end
                         if(lanes[1] && !busy) cs1[9:8]<=wdata[9:8];
@@ -75,10 +82,11 @@ module uj11_mmu_rk611(
             if(iop_write && storage_enabled) case(iop_address)
                 18:present<=iop_data[7:0];
                 19:write_protected<=iop_data[7:0];
-                20:storage_status<=iop_data;
+                20:storage_status<=iop_data[15:0];
+                25:claim<=iop_data;
                 default:begin end
             endcase
-            if(iop_write && busy) case(iop_address)
+            if(iop_write && busy && (!storage_enabled || iop_valid)) case(iop_address)
                 0:cs1[9:8]<=iop_data[9:8];
                 1:wc<=iop_data; 2:ba<=iop_data; 3:da<=iop_data;
                 4:cs2<=iop_data; 6:er<=iop_data; 8:dc<=iop_data; 9:db<=iop_data;

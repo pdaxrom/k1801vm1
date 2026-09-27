@@ -1,4 +1,4 @@
-# SERV storage: first partitioned-SD implementation
+# SERV storage: partitioned SD, RK07, RL01/RL02 and RM05
 
 This is an opt-in HC7000 **MMU** build. The default remains `IOP=legacy`.
 HC1200 and the MMU-less HC7000 sources, firmware and boot path are unchanged.
@@ -22,19 +22,36 @@ writes retain sector DMA, CRC16 checking, partial-sector zero padding and 18-bit
 DMA wrap. A transfer crossing the end of a drive is rejected before its first
 write. Write-protected media reports DS.WRL and ER.WLE (octal 004000).
 
-The table can describe RK05, RK06, RK07, RM05, variable-size MSCP disks, RL01,
-RL02 and TK50 `.tap` containers. **Only RH11/RK07 is currently emulated in this
-SERV firmware.** Unsupported nonboot entries are ignored; an unsupported boot
-entry gives startup error 7. RH70, the other controller front ends and tape
-record interpretation are subsequent work. A `.tap` entry stores the file's
-byte length separately from the partition capacity; the host tool does not
-interpret or validate tape records yet.
+RL11 is at **174400**, vector **160**, with four RL01/RL02 units. It implements
+status, relative seek, three-word read-header FIFO, read, write, write-check and
+read without header checking. Guest sectors are 256 bytes; partial writes zero
+only the remainder of the selected RL sector, preserving the adjacent half of
+the physical SD sector. Transfers stop at a track boundary with a residual count.
+The BAE extension supports direct 22-bit DMA when UNIBUS mapping is disabled.
+
+XP/RP is at **176700**, vector **254**, with eight RM05 units (823 cylinders,
+19 heads, 32 sectors, 512 bytes per sector). It provides per-drive position,
+attention/volume status, seek/recalibrate/preset/pack, read/write/write-check,
+22-bit BAE and address-inhibit transfers. Short writes preserve their sector tail.
+This is the RM05/RH70-style direct DMA path; it bypasses UNIBUS mapping.
+
+In the storage profile, **170200..170376** exposes the 32 UNIBUS map registers.
+MMR3 bit 5 enables translation for RL11 and RH11 DMA; page 31 maps to the I/O
+page. The mapper uses one EBR, and DMA to anything outside installed SRAM
+returns NXM without accessing aliased RAM. With mapping disabled, the existing
+RK07 18-bit wrap and RL/RP direct DMA paths remain available. The CCR at 177746
+retains software writes; 177744 reports no memory parity error (no cache/parity
+hardware is fitted). These addresses let the 2.9BSD loader take its 11/70 path.
+
+The table also reserves RK05, RK06, MSCP, RH70 mode for RK06/07, and TK50 `.tap`
+entries. They are not implemented by SERV yet. Unsupported nonboot entries are
+ignored; an unsupported boot entry gives startup error 7. Tape entries retain
+file length separately from capacity; the utility does not parse tape records.
 
 Kinds match `lsi11/demo/boot_menu.asm`: RK=1, RH=2, XP=3, RQ=4, RL=5, TQ=6.
-`firmware/boot/SDMENU.asm` adapts that menu as a second stage loaded from SD
-at PDP address 0100000. It probes controllers, lists the RH units actually
-present, and rejects selection of an absent unit. The six original bootstrap
-families are retained; only RH is currently exposed by this FPGA build.
+`firmware/boot/SDMENU.asm` is loaded at PDP 0100000. It lists controllers and
+present RH, RL and XP units, rejects absent units, and dispatches the selected
+bootstrap. `-rp` in the emulator corresponds to the SD table's `xp`/`rm05`.
 
 The `bootable` flag selects the **default for automatic boot after five seconds**.
 Enter boots it immediately; another key cancels the timer and opens manual
@@ -139,7 +156,7 @@ not atomic payload replacement. Sector counts are limited to 32 bits in v1.
 The descriptor occupies SD LBA 2; its payload starts at LBA 3 and contains
 1..16 sectors. Menu installation requires at least 19 reserved sectors, even
 for a shorter menu, so the fixed loader window can never overlap a partition.
-The current binary is 2596 bytes, padded to six sectors. Header fields are:
+The current menu is padded to six sectors; its exact size and hashes are recorded by the builder. Header fields are:
 
 | Offset | Bytes | Meaning |
 |---|---:|---|
@@ -175,19 +192,62 @@ reinterpret a corrupt label as a raw disk. Existing unpartitioned cards use
 Read-only PDP register **177504** is present only in the storage build:
 bit 15 means startup finished, bit 14 means failure, bit 13 requests the menu,
 and bit 12 means no default is configured. On success bits 2..0 contain the
-default unit when bit 12 is clear. On failure the low bits hold an error code:
+default unit when bit 12 is clear; bits 5..3 select its kind (0 means RH for
+backward compatibility, 3 means XP, 5 means RL). RL/XP boot requires the menu. On failure the low bits hold an error code:
 1 CMD0, 2 CMD8, 3 ACMD41, 4 OCR, 5 CSD/CRC, 6 both labels invalid,
-7 unsupported boot media/mode, 8 no boot entry in direct-boot mode.
+7 unsupported boot media/mode, 8 missing boot entry or non-RH boot in direct-boot mode.
 The ROM adds diagnostic 9 for an invalid menu descriptor/payload and 10 for
 SD read or transport CRC failure (11 and 12 respectively in octal). The bootstrap saves diagnostics
 at 157774/157776 and enters microcoded ODT on failure.
 
-SERV MMIO RK indices 18/19 publish the present/write-protected masks; index 20
-publishes startup status. They are separate from guest RK CSRs. Controller
-clear cancels SPI/DMA and restarts SERV, including BSS clearing and metadata
-validation. The PDP CPU continues running. Before adding independent controllers,
-replace this whole-SERV reset with per-controller cancellation/epochs so that a
-reset of one controller cannot interrupt another controller's operation.
+SERV MMIO windows are RK=40000000, RL=40000400 and XP=40000500 (hex).
+RK/RL status and completion indices are 16/17, epoch/claim indices 24/25;
+XP uses 32/33 and 40/41. RK indices 18/19 publish present/protected masks and
+20 publishes startup status; RL presence uses 18, XP uses 34/35.
+
+Each command has a generation token. Clearing a controller invalidates its
+old DMA and completion without resetting SERV or another controller. An active
+SPI sector transaction finishes before ownership is released. PDP `RESET`
+clears all controller commands and IRQs but retains SD attachments and head
+positions. Board reset restarts SERV and rereads the table. Simultaneous disk
+interrupts have independent vector acknowledgements: RL160, RH210 and XP254.
+
+## 2.9BSD image
+
+```
+make BOARD=hc7000-lcd-sram CPU=mmu FPP=off IOP=storage bsd-image
+make BOARD=hc7000-lcd-sram CPU=mmu FPP=off IOP=storage test-storage-controllers
+make BOARD=hc7000-lcd-sram CPU=mmu FPP=off IOP=storage test-bsd
+```
+
+`tools/build_sd_bsd.py` creates a new 512 MiB regular file from
+`lsi11/disks/bsd2.9/`: RL0=`2.9BSD-root.rl02` (default), RL1=`swap.rl02`,
+XP0=`2.9BSD-usr.rm05`. It copies every source byte unchanged and zero-fills
+the omitted tails up to physical geometry, verifies all three payloads,
+installs the menu, and produces a deterministic gzip plus manifest/checksums.
+It never opens a physical card. The source filesystem already has `/etc/fstab`
+entries for root, `/usr` on `/dev/xp0h`, and swap on `/dev/rl1`.
+
+At `70Boot`, enter `rl(0,0)rlunix`; at the single-user `#`, press Ctrl+D,
+then log in as `root`. The board has 2 MiB, not the 4 MiB of some SIMH examples.
+The original `/etc/ttys` is retained for future display/keyboard terminals;
+until DZ is implemented, init reports that tty00..tty07 cannot open. Wait about
+two seconds at `login:` before typing, as this getty clears early input after
+its initial delay.
+The new BSD/UNIBUS build still needs its own physical-board qualification;
+the earlier RH7-only hardware release remains separately preserved.
+`releases/hc7000-bsd` contains the SD archive and matching JED. Full RTL and
+SIMH boots pass through multiuser root login, RL/RP file writes/readback and
+`sync`; the final RTL run has 18926 checks. The 24 MHz MAP/PAR/TRACE build uses
+5435 LUT4, 2137 FF and 25/26 EBR, with Fmax 25.539 MHz. The old partitioned
+RH7 RT-11XM image also boots on this RTL. See the release README and manifests
+for exact checksums, source inputs and UART logs.
+
+The additional [OS boot matrix](boot-validation.md) covers the original
+five-disk RT-11 XM setup, RT-11 V4 on RK0, and RSX on RQ0. XM boots from RH0
+and reads RH1 on the current RTL; RK05 and RQ/MSCP remain unsupported. The
+requested RSX RQ0 image is also nonbootable in SIMH, while its RQ1 companion
+boots RSX-11M-PLUS. Saved tests preserve these failures as explicit limitations.
 
 ## Qualification
 
@@ -214,7 +274,7 @@ a menu, and corrupt header/payload/size. Its KW11 tick is accelerated by 100x;
 CPU/SPI/UART clocks remain unchanged and it checks exactly 250 timeout ticks.
 Full RT-11 boot uses the real 50 Hz timer and the full five-second delay.
 
-The menu MAP/PAR/TRACE run uses 3366 LUT, 1103 FF, 24/26 EBR; Fmax 25.713 MHz
+The earlier RH7-only menu MAP/PAR/TRACE run uses 3366 LUT, 1103 FF, 24/26 EBR; Fmax 25.713 MHz
 at the unchanged 24 MHz system clock (12 MHz external oscillator). Physical
 qualification on HC7000 now passes with one RK07 partition at RH7: FLASH verify,
 RT-11XM with 2 MiB and 22-bit MMU, 4.987-second automatic boot, immediate Enter,

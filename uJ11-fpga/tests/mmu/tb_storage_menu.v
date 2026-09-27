@@ -106,7 +106,7 @@ module tb_storage_menu;
     function [15:0] word_at(input integer a);word_at={ram.memory[a+1],ram.memory[a]};endfunction
     initial begin
         if(!$value$plusargs("MODE=%s",mode))mode="auto";
-        signature=mode=="cancel" ? 'o12345 : 'o12354;
+        signature=mode=="cancel" ? 'o12345 : mode=="rl-auto" ? 'o12346 : 'o12354;
         repeat(5)@(negedge clk);power_on=0;
         if(mode=="bad-wire")begin
             wait(dut.bus.disk.storage_status[15]);card.corrupt_read_crc=1;
@@ -118,7 +118,7 @@ module tb_storage_menu;
         end else begin
             if(mode!="direct")begin
                 until_text("uJ11 SD BOOT MENU");
-                until_text("RH11/HK, units: 0 7");
+                until_text(mode=="rl-auto" ? "RL11, units: 0 1" : mode=="xp-auto" ? "XP/RP, units: 0 7" : "RH11/HK, units: 0 7");
             end
             if(mode=="cancel" || mode=="enter")begin
                 until_text("other key=menu: ");
@@ -135,10 +135,10 @@ module tb_storage_menu;
             end
             wait(boot_complete);
             while(word_at('o1002)!=signature)@(negedge clk);
-            check(word_at('o1000)==(mode=="cancel" ? 0 : 7),"selected unit in boot ABI");
-            while(word_at('o1004)!='o177440)@(negedge clk);
+            check(word_at('o1000)==(mode=="cancel" ? 0 : mode=="rl-auto" ? 1 : 7),"selected unit in boot ABI");
+            while(word_at('o1004)!=(mode=="rl-auto" ? 'o174400 : mode=="xp-auto" ? 'o176700 : 'o177440))@(negedge clk);
             check(card.writes==0,"menu never writes SD");
-            if(mode=="auto")check(timer_clears==251,"five seconds use 250 timer ticks");
+            if(mode=="auto" || mode=="rl-auto" || mode=="xp-auto")check(timer_clears==251,"five seconds use 250 timer ticks");
             if(mode=="enter")check(timer_clears<251,"Enter boots before timeout");
             if(mode=="no-default" || mode=="direct")check(timer_clears==0,"no unwanted timeout");
         end

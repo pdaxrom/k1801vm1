@@ -9,7 +9,7 @@ module uj11_mmu_sram_arbiter(
     input wire [15:0] cpu_data,
     output wire cpu_ready,
     input wire dma_request, dma_write,
-    input wire [17:0] dma_address,
+    input wire [21:0] dma_address,
     input wire [15:0] dma_data,
     output wire dma_ready,
     output wire request, write,
@@ -23,8 +23,8 @@ module uj11_mmu_sram_arbiter(
     reg last_dma;
     assign request=(state==CPU && cpu_request) || (state==DMA && dma_request);
     assign write=state==DMA ? dma_write : cpu_write;
-    // DMA addresses are untranslated 18-bit physical byte addresses (low 256 KiB).
-    assign address=state==DMA ? {3'b0,dma_address[17:1]} : cpu_address;
+    // The sector engine checks 22-bit DMA against the installed 2 MiB SRAM.
+    assign address=state==DMA ? dma_address[20:1] : cpu_address;
     assign lanes=state==DMA ? 2'b11 : cpu_lanes;
     assign data=state==DMA ? dma_data : cpu_data;
     assign cpu_ready=state==CPU && cpu_request && ready;
