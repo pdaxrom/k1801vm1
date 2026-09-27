@@ -1,0 +1,218 @@
+{
+  "phase": "hc7000-hgx-xm",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "SET SL OFF",
+      "offset": 0,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 25,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.403271596005652
+    },
+    {
+      "command": "SHOW CONFIGURATION",
+      "offset": 25,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 590,
+      "response": "SHOW CONFIGURATION\r\n\r\nRT-11FB (S) V05.03  \r\nBooted from DM0:RT11FB\r\n\r\nUSR   is set SWAP\r\nEXIT  is set SWAP\r\nKMON  is set NOIND\r\nTT    is set NOQUIET\r\nERROR is set ERROR\r\nSL    is set OFF\r\nEDIT  is set KED\r\nKMON nesting depth is 3\r\nGlobal .SCCA flag is disabled\r\n\r\nPDP 11/73A Processor\r\n2048KB of memory\r\nFloating Point Microcode\r\nExtended Instruction Set (EIS)\r\nMemory Management Unit\r\n50 Cycle System Clock                  \r\n\r\nDevice I/O time-out support\r\nError logging support\r\nMulti-terminal support\r\nSystem job support\r\nGlobal .SCCA support\r\nFPU support\r\n\r\n\r\n.",
+      "elapsed_seconds": 2.60590730200056
+    },
+    {
+      "command": "LOAD HG",
+      "offset": 590,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 602,
+      "response": "LOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.102021007987787
+    },
+    {
+      "command": "DIFFERENCES/BINARY HG:HGX.SYS SY:HGX.SYS",
+      "offset": 602,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 679,
+      "response": "DIFFERENCES/BINARY HG:HGX.SYS SY:HGX.SYS\r\n?BINCOM-I-No differences found\r\n\r\n.",
+      "elapsed_seconds": 13.933567088999553
+    },
+    {
+      "command": "COPY SY:HGTIME.SAV HG:OLDTIM.SAV",
+      "offset": 679,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 716,
+      "response": "COPY SY:HGTIME.SAV HG:OLDTIM.SAV\r\n\r\n.",
+      "elapsed_seconds": 24.46098708899808
+    },
+    {
+      "command": "UNLOAD HG",
+      "offset": 716,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 730,
+      "response": "UNLOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.30277326599753
+    },
+    {
+      "command": "BOOT SY:",
+      "offset": 730,
+      "expected": "RT-11XM[^\\r\\n]*V05\\.03",
+      "complete": true,
+      "end": 769,
+      "response": "BOOT SY:\r\n\r\nRT-11XM (S) V05.03  \r\n\r\n.SE",
+      "elapsed_seconds": 8.22071620200586
+    },
+    {
+      "command": "SET SL OFF",
+      "offset": 814,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 839,
+      "response": "SET SL OFF\r\n\u001b[r\u001b[24H\u001b\\\r\n.",
+      "elapsed_seconds": 1.5031912120030029
+    },
+    {
+      "command": "LOAD HG",
+      "offset": 839,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 851,
+      "response": "LOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.1022608640050748
+    },
+    {
+      "command": "RUN HGTIME",
+      "offset": 851,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 936,
+      "response": "RUN HGTIME\r\n!HGTIME-I-RT-11 SYSTEM DATE AND TIME SET FROM HOST\r\n18:06:03 27/09  \r\n\r\n.",
+      "elapsed_seconds": 1.6033870459941681
+    },
+    {
+      "command": "TIME",
+      "offset": 936,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 955,
+      "response": "TIME\r\n18:06:04\r\n\r\n.",
+      "elapsed_seconds": 0.8015814989921637
+    },
+    {
+      "command": "DATE",
+      "offset": 955,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 977,
+      "response": "DATE\r\n27-Sep-2026\r\n\r\n.",
+      "elapsed_seconds": 0.8015418230061186
+    },
+    {
+      "command": "TYPE HG:HELLO.TXT",
+      "offset": 977,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1031,
+      "response": "TYPE HG:HELLO.TXT\r\nHC7000 XM HG MAPPED TRANSFER\r\n\r\n\r\n.",
+      "elapsed_seconds": 7.919347768998705
+    },
+    {
+      "command": "DIR SY:XGTEST.BIN",
+      "offset": 1031,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1109,
+      "response": "DIR SY:XGTEST.BIN\r\n 27-Sep-2026\r\n\r\n 0 Files, 0 Blocks\r\n 50994 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 2.5056597240036353
+    },
+    {
+      "command": "COPY HG:ROUND.BIN SY:XGTEST.BIN",
+      "offset": 1109,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1145,
+      "response": "COPY HG:ROUND.BIN SY:XGTEST.BIN\r\n\r\n.",
+      "elapsed_seconds": 70.8788144459977
+    },
+    {
+      "command": "COPY SY:XGTEST.BIN HG:RETURN.BIN",
+      "offset": 1145,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1182,
+      "response": "COPY SY:XGTEST.BIN HG:RETURN.BIN\r\n\r\n.",
+      "elapsed_seconds": 82.20657622700674
+    },
+    {
+      "command": "DELETE/NOQUERY SY:XGTEST.BIN",
+      "offset": 1182,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1215,
+      "response": "DELETE/NOQUERY SY:XGTEST.BIN\r\n\r\n.",
+      "elapsed_seconds": 3.6091056669974932
+    },
+    {
+      "command": "SHOW MEMORY",
+      "offset": 1215,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1760,
+      "response": "SHOW MEMORY\r\n\r\n------- Extended Memory --------\r\nAddress   Module    Words   Type\r\n-------   ------    -----   ----\r\n17760000  IOPAGE     4096.   HDW \r\n10000000  MEMTOP       \r\n01000000  VM       917504.   SHR \r\n00166200  ......   100800.       \r\n00160000  SL         1600.   PVT \r\n\r\n------ Low Memory -------\r\nAddress   Module    Words\r\n-------   ------    -----\r\n155006    DM          765.       \r\n106460    RMON       9835.       \r\n104760    HG          416.       \r\n073714    USR        2322.       \r\n001000    ..BG..    15078.       \r\n\r\n\r\n.",
+      "elapsed_seconds": 2.004301335007767
+    },
+    {
+      "command": "UNLOAD HG",
+      "offset": 1760,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1774,
+      "response": "UNLOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.302739777995157
+    },
+    {
+      "command": "LOAD HG",
+      "offset": 1774,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1786,
+      "response": "LOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.102235323007335
+    },
+    {
+      "command": "UNLOAD HG",
+      "offset": 1786,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 1800,
+      "response": "UNLOAD HG\r\n\r\n.",
+      "elapsed_seconds": 1.3026863429986406
+    },
+    {
+      "command": "SHOW CONFIGURATION",
+      "offset": 1800,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 2392,
+      "response": "SHOW CONFIGURATION\r\n\r\nRT-11XM (S) V05.03  \r\nBooted from DM0:RT11XM\r\n22 bit addressing is on\r\n\r\nUSR   is set NOSWAP\r\nEXIT  is set SWAP\r\nKMON  is set NOIND\r\nTT    is set NOQUIET\r\nERROR is set ERROR\r\nSL    is set OFF\r\nEDIT  is set KEX\r\nKMON nesting depth is 3\r\nGlobal .SCCA flag is disabled\r\n\r\nPDP 11/73A Processor\r\n2048KB of memory\r\nFloating Point Microcode\r\nExtended Instruction Set (EIS)\r\nMemory Management Unit\r\n50 Cycle System Clock                  \r\n\r\nDevice I/O time-out support\r\nError logging support\r\nMulti-terminal support\r\nSystem job support\r\nGlobal .SCCA support\r\nFPU support\r\n\r\n\r\n.",
+      "elapsed_seconds": 2.7061400819948176
+    }
+  ],
+  "started_utc": "2026-09-27T14:05:01Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "uart_bytes": 2392,
+  "existing_hgtime_sha256": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c",
+  "host_time_delta_seconds": 0,
+  "roundtrip": {
+    "payload_bytes": 17021,
+    "rt11_bytes": 17408,
+    "sha256": "27c847f32b8c1927e772d629135065f2f1a5200417dd10f099d86f7eabafeac6",
+    "mapped_monitor": "RT11XM"
+  },
+  "hgx_sha256": "8da61b185d4095683b046296921b63c791f3bfa16bd0e5deec84828f8a8f2f30",
+  "finished_utc": "2026-09-27T14:09:01Z"
+}

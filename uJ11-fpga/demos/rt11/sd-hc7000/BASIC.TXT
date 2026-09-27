@@ -1,0 +1,31 @@
+BASIC ON HC7000 XM
+
+RUN B81FPU selects single precision; RUN B81FPD selects double.
+Answer A to OPTIONS (ALL, NONE, OR INDIVIDUAL)?
+At READY, use RUN B81TST. Expected: CHECKS=29 ERRORS=0 and CP81 PASS.
+In B81FPD also use RUN B81DBL. Expected: CP81 DOUBLE PASS.
+
+Error recovery checks (type each line at READY):
+  PRINT 1/0              -> ?DIVISION BY ZERO
+  PRINT 2+2              -> 4
+  PRINT SQR(-1)          -> ?NEGATIVE SQUARE ROOT
+  PRINT 2+2              -> 4
+  PRINT 1E30*1E30        -> ?FLOATING OVERFLOW
+  PRINT 2+2              -> 4
+Every command returns READY; BYE returns to the RT-11 dot prompt.
+Stopping in ODT is a CPU/firmware failure, not the expected BASIC result.
+
+A small program:
+  10 FOR I=1 TO 5
+  20 PRINT I,I*I
+  30 NEXT I
+  40 END
+  RUN
+  SAVE DEMO
+  BYE
+Use an unused name when saving a program.
+
+B81FIS/B81FIJ are not part of this kit. Use the FP11 builds above.
+There is no FP11.BIN module to load or enable in the MMU profile.
+
+END BASIC.TXT

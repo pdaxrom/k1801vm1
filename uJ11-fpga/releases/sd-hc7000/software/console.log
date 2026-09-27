@@ -1,0 +1,84 @@
+
+PDP-11 simulator V3.12-3
+Disabling RK
+Disabling HK
+Disabling TM
+
+RT-11FB (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.R MACRO
+*HGX,HGX=HGX
+*^C
+
+.R MACRO
+*HGTIME,HGTIME=HGTIME
+*^C
+
+.R MACRO
+*TMDRV,TMDRV=TMDRV
+*^C
+
+.R MACRO
+*TMRATE,TMRATE=TMRATE
+*^C
+
+.LINK/NOBITMAP/EXECUTE:HGX.SYS HGX
+
+.LINK/MAP:HGTIME HGTIME,TMDRV
+
+.LINK/MAP:TMRATE TMRATE
+
+.COPY/BOOT SY:RT11XM.SYS SY:
+
+.BOOT SY:
+
+RT-11XM (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.SHOW CONFIGURATION
+
+RT-11XM (S) V05.03  
+Booted from DM0:RT11XM
+22 bit addressing is on
+
+USR   is set NOSWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KEX
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/73A Processor
+2048KB of memory
+Floating Point Microcode
+Extended Instruction Set (EIS)
+Memory Management Unit
+Cache Memory
+50 Cycle System Clock                  
+
+Device I/O time-out support
+Error logging support
+Multi-terminal support
+System job support
+Global .SCCA support
+FPU support
+
+
+.
+Simulation stopped, PC: 133604 (SUB #2,107002)
+sim> quit
+Goodbye

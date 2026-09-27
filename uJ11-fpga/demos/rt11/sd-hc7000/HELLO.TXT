@@ -1,0 +1,16 @@
+
+uJ11 HC7000 - RT-11XM V05.03 SD KIT
+2 MiB SRAM / MMU / microcoded FPP and ODT / 24 MHz
+
+TYPE README.TXT       Kit contents and quick start
+TYPE BASIC.TXT        Single/double BASIC and error recovery
+TYPE ODT.TXT          Microcoded console, button and registers
+TYPE MEMORY.TXT       Extended memory and VM: disk
+TYPE TIMER.TXT        System clock diagnostic
+TYPE HOST.TXT         HG host disk, time sync and JTAG wiring
+TYPE BUILD.TXT        Rebuild HGX and the included utilities
+TYPE FILES.TXT        Standard RT-11 tools and disk commands
+@HGSYNC               Set system date/time from the running HG host
+@XMCHK                Show CPU, monitor and memory configuration
+
+HC7000 XM KIT READY

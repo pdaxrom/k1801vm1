@@ -1,0 +1,44 @@
+
+PDP-11 simulator V3.12-3
+Disabling RK
+Disabling HK
+Disabling TM
+
+RT-11XM (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.DATE 1-JAN-90
+
+.TIME 12:34:56
+
+.REMOVE HG
+
+.INSTALL HG
+
+.LOAD HG
+
+.@HGSYNC
+
+.LOAD HG
+
+.RUN HGTIME
+!HGTIME-I-RT-11 SYSTEM DATE AND TIME SET FROM HOST
+23:59:50 22/09  
+
+.DATE
+22-Sep-2026
+
+.TIME
+23:59:50
+
+.UNLOAD HG
+
+.
+Simulation stopped, PC: 133612 (BMI 133652)
+sim> quit
+Goodbye

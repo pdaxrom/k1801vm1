@@ -1,0 +1,91 @@
+"""Regression boundary: selecting MMU must not change released CPU images."""
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import sys
+import unittest
+ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'tools'))
+sys.path.insert(0,str(ROOT/'microasm'))
+from board_common import sources
+from build_mmu import CORE,MICROCODE,build
+from uj11mmuasm import assemble,AssemblyError
+
+class Profiles(unittest.TestCase):
+    def test_mmuless_sources_unchanged(self):
+        baseline=json.loads((ROOT/'releases/hc7000-serv/validation/hc1200-unchanged.json').read_text())
+        for path,digest in baseline['unchanged_sources'].items():
+            with self.subTest(path=path):
+                self.assertEqual(hashlib.sha256((ROOT.parent/path).read_bytes()).hexdigest(),digest)
+
+    def test_microcode_build_does_not_touch_legacy_images(self):
+        paths=[ROOT/'build/hardware'/name for name in
+               ('m0.mem','decode.mem','firmware.mem','uj11_m0_ebr.v','uj11_decode_table.v','uj11_firmware_rom.v')]
+        before={p:p.read_bytes() for p in paths if p.exists()}
+        build()
+        self.assertTrue(all(p.read_bytes()==data for p,data in before.items()))
+        self.assertFalse(any('/mmu/' in p for p in sum((sources()[0],sources()[1]),[])))
+        self.assertIn('rtl/mmu/uj11_mmu_cpu.v',CORE)
+
+    def test_reject_unsupported_build_before_running_tools(self):
+        for args in (['CPU=oops'],['CPU=mmu','BOARD=hc1200'],['CPU=mmu','BOARD=hc7000-lcd-sram','software']):
+            result=subprocess.run(['make','-n',*args],cwd=ROOT,capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0,result.stdout)
+
+    def test_board_targets_use_only_mmu_runners(self):
+        for goal,runner in (('hardware','build_mmu_board.py'),('synthesis','synthesis_mmu.py'),
+                            ('test-rt11','test_mmu_board.py'),('export','export_jed.py'),
+                            ('sd-image','build_sd_mmu.py'),('test-sd-image','test_sd_mmu.py'),
+                            ('hg','build_hgx.py'),('test-hg-time','test_hgx.py')):
+            result=subprocess.run(['make','-n','CPU=mmu','BOARD=hc7000-lcd-sram',goal],cwd=ROOT,capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertIn(runner,result.stdout)
+            self.assertNotIn('build_hardware.py',result.stdout)
+            self.assertNotIn('run_rt11.py',result.stdout)
+
+class Microassembler(unittest.TestCase):
+    def test_high_target_and_immediate_do_not_overlap_flags(self):
+        image,_,_,_=assemble('''JUMP, target=HIGH
+            .org $700
+            HIGH: alu PASSA, pair=DA, d=IMM, imm=0xcafe, flags=NZVC, uflags=1
+            STOP
+        ''')
+        self.assertEqual((image[0]>>36 & 1)*1024+(image[0]>>11 & 1023),0x700)
+        w=image[0x700]
+        self.assertEqual((w>>45 & 255)*256+(w & 255),0xcafe)
+        self.assertEqual(w>>40 & 1,1)
+
+    def test_third_rom_bank_direct_reads_and_wide_operations(self):
+        from uj11mmuasm import FPOPS
+        image,_,labels,_=assemble("""JUMP, target=HIGH
+            .org $aff
+            HIGH: READ, space=INTERNAL, address=0x00e8, b=T6, load=1
+            FOP, value=X_TO_Z
+            STOP
+        """)
+        w=image[0]
+        self.assertEqual(((w>>53&1)<<11)|((w>>36&1)<<10)|(w>>11&1023),0xaff)
+        w=image[0xaff]
+        self.assertEqual(w>>40&3,3)  # direct load, absolute internal address
+        self.assertEqual((w&255)|((w>>45&255)<<8),0xe8)
+        w=image[0xb00]
+        self.assertEqual(w>>42&1,1)
+        self.assertEqual(w&255,FPOPS['X_TO_Z'])
+        with self.assertRaises(AssemblyError):assemble('JUMP, target=3072')
+
+    def test_old_vm2_extensions_are_rejected(self):
+        for text in ('READ, space=UPPER, target=0','JUMP, service=ENTER, target=0'):
+            with self.assertRaises(AssemblyError):assemble(text)
+
+    def test_complete_image_has_no_vm2_spaces(self):
+        text='\n'.join((ROOT/p).read_text() for p in MICROCODE)
+        image,_,labels,stats=assemble(text)
+        self.assertEqual(len(image),3072)
+        self.assertEqual(stats['word_bits'],54)
+        self.assertEqual(labels['ODT_ENTRY'],0x500)
+        self.assertEqual(labels['FPP_ENTRY'],0x700)
+        for name in ('S_MFUS','S_MTUS','S_FP','S_VECTOR'):
+            self.assertNotIn(name,labels)
+
+if __name__=='__main__':unittest.main()

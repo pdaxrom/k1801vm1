@@ -1,0 +1,25 @@
+RT-11 FILES AND TOOLS
+
+SY: is the current system disk, DM0: (RK611/RK07).
+File names have up to six characters plus a three-character extension.
+
+  DIR                       List files
+  DIR *.TXT                 List the on-disk manuals
+  TYPE README.TXT           Read a text file
+  HELP                      DEC help
+  SHOW CONFIGURATION        Processor, monitor and device information
+  SHOW MEMORY               Memory layout
+  COPY FROM.TXT TO.TXT       Copy to an unused name
+  DIFFERENCES/BINARY A B     Compare files, using BINCOM
+  DELETE/NOQUERY NAME.EXT    Delete a file without confirmation
+  RUN NAME                  Run a .SAV program
+  @XMCHK                    Execute a command file
+
+Native development tools from the original distribution are retained:
+MACRO, LINK, LIBR, EDIT, PIP, DUP, BINCOM, and their libraries/help files.
+
+BOOT SY: reboots the default XM system using this disk's boot blocks.
+COPY/BOOT SY:RT11XM.SYS SY: selects XM persistently if deliberately changed.
+An FPGA long-button reset performs a cold hardware boot from the SD card.
+
+END FILES.TXT

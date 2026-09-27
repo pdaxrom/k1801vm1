@@ -1,4 +1,5 @@
 *.BIN binary
+*.bin binary
 *.SAV binary
 *.uart binary
 *.tgz binary
@@ -12,3 +13,12 @@ releases/hc1200/design.mrp -whitespace
 releases/hc1200/design.par -whitespace
 releases/hc1200/design.srr -whitespace
 releases/hc1200/design.twr -whitespace
+# Archived synthesis/console evidence is kept byte-for-byte for SHA-256 checks.
+releases/hc7000-mmu-*/synthesis/impl1/* -whitespace
+releases/hc7000-mmu-*/**/*.log -whitespace
+releases/hc7000-mmu-*/**/uart.txt -whitespace
+releases/hc7000-mmu-*/**/source.tgz binary
+releases/sd-hc7000/software/*.LST -whitespace
+releases/sd-hc7000/software/*.MAP -whitespace
+releases/sd-hc7000/**/*.log -whitespace
+releases/sd-hc7000/**/uart.txt -whitespace

@@ -1,0 +1,6 @@
+./test_hg
+hg time: 23808 calendar cases, 50/60 Hz and malformed headers passed
+hg tests passed
+./test_hg_service
+hgfsd: rejected malformed request: 48 47 01 03 00 33 00 06 00 38
+hg service: TIME read-only, framing, checksum and disk regression passed

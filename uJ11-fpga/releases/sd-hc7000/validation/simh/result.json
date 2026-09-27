@@ -1,0 +1,178 @@
+{
+  "passed": true,
+  "cpu": "11/73",
+  "memory_kib": 2048,
+  "clock_hz": 50,
+  "steps": [
+    {
+      "command": "SHOW CONFIGURATION",
+      "response": "\r\nRT-11XM (S) V05.03  \r\nBooted from DM0:RT11XM\r\n22 bit addressing is on\r\n\r\nUSR   is set NOSWAP\r\nEXIT  is set SWAP\r\nKMON  is set NOIND\r\nTT    is set NOQUIET\r\nERROR is set ERROR\r\nSL    is set OFF\r\nEDIT  is set KEX\r\nKMON nesting depth is 3\r\nGlobal .SCCA flag is disabled\r\n\r\nPDP 11/73A Processor\r\n2048KB of memory\r\nFloating Point Microcode\r\nExtended Instruction Set (EIS)\r\nMemory Management Unit\r\nCache Memory\r\n50 Cycle System Clock                  \r\n\r\nDevice I/O time-out support\r\nError logging support\r\nMulti-terminal support\r\nSystem job support\r\nGlobal .SCCA support\r\nFPU support\r\n\r\n\r\n."
+    },
+    {
+      "command": "SHOW MEMORY",
+      "response": "\r\n------- Extended Memory --------\r\nAddress   Module    Words   Type\r\n-------   ------    -----   ----\r\n17760000  IOPAGE     4096.   HDW \r\n10000000  MEMTOP       \r\n01000000  VM       917504.   SHR \r\n00202300  ......    97696.       \r\n00174100  SL         1600.   PVT \r\n00170000  MU         1056.   PVT \r\n00160000  DU         2048.   PVT \r\n\r\n------ Low Memory -------\r\nAddress   Module    Words\r\n-------   ------    -----\r\n155006    DM          765.       \r\n106460    RMON       9835.       \r\n075416    USR        2321.       \r\n001000    ..BG..    15495.       \r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE README.TXT",
+      "response": "uJ11 HC7000 RT-11XM SD KIT - 27-SEP-2026\r\n\r\nTarget: LCMXO2-7000HC-4TG144C, hardware-lcd with 2 MiB SRAM.\r\n12 MHz oscillator, 24 MHz CPU. UART 115200 8N1, no flow control.\r\nUse the CPU=mmu firmware with the TRAP-mode fix (build 08 or newer).\r\nThe boot blocks select DM0:RT11XM. No manual BOOT switch is needed.\r\n\r\nThis is a raw RK07 disk: 53790 sectors of 512 bytes, no partition table.\r\nThe SD card is written with the uncompressed image starting at sector 0.\r\nKeep a backup of a working card before replacing its contents.\r\n\r\nIncluded utilities:\r\n  B81FPU.SAV   BASIC with FP11 single precision (24-bit significand)\r\n  B81FPD.SAV   BASIC with FP11 double precision (56-bit significand)\r\n  B81TST.BAS   29 numerical checks, expected ERRORS=0 / CP81 PASS\r\n  B81DBL.BAS   Double-precision checks, expected CP81 DOUBLE PASS\r\n  HGX.SYS      Mapped HG host disk driver for XM\r\n  HGTIME.SAV   Set system date/time from the HG host\r\n  HGSYNC.COM   LOAD HG and RUN HGTIME\r\n  TMRATE.SAV   Monitor clock snapshots, Q or ESC exits\r\n  *.MAC        Sources for HGX, HGTIME, TMDRV and TMRATE\r\n  XMCHK.COM   SHOW CONFIGURATION and SHOW MEMORY\r\n  *.TXT       These on-disk manuals (ASCII with CRLF)\r\n\r\nThe original DEC tools, libraries, monitors and handlers are retained.\r\nUse HELP, DIR, PIP, DUP, MACRO, LINK, EDIT and BINCOM as usual.\r\nThe original FB monitor remains available, but XM is the kit default.\r\n\r\nFPP and ODT are part of the FPGA microcode. UJMOD, UJBOOT, ODT.BIN,\r\nFP11.BIN and the old HALT-space tools are not used by this CPU profile.\r\nPanel/HDSP applications are omitted: this target currently uses SD/UART.\r\nFor the HG host disk and time synchronization, see HOST.TXT.\r\nFor native rebuild commands, see BUILD.TXT.\r\n\r\nQuick check:\r\n  @XMCHK\r\n  RUN B81FPU\r\n  A\r\n  RUN B81TST\r\n  PRINT 1/0\r\n  PRINT 2+2\r\n  BYE\r\nBASIC must report DIVISION BY ZERO, return READY, then print 4.\r\n\r\nEND README.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE BASIC.TXT",
+      "response": "BASIC ON HC7000 XM\r\n\r\nRUN B81FPU selects single precision; RUN B81FPD selects double.\r\nAnswer A to OPTIONS (ALL, NONE, OR INDIVIDUAL)?\r\nAt READY, use RUN B81TST. Expected: CHECKS=29 ERRORS=0 and CP81 PASS.\r\nIn B81FPD also use RUN B81DBL. Expected: CP81 DOUBLE PASS.\r\n\r\nError recovery checks (type each line at READY):\r\n  PRINT 1/0              -> ?DIVISION BY ZERO\r\n  PRINT 2+2              -> 4\r\n  PRINT SQR(-1)          -> ?NEGATIVE SQUARE ROOT\r\n  PRINT 2+2              -> 4\r\n  PRINT 1E30*1E30        -> ?FLOATING OVERFLOW\r\n  PRINT 2+2              -> 4\r\nEvery command returns READY; BYE returns to the RT-11 dot prompt.\r\nStopping in ODT is a CPU/firmware failure, not the expected BASIC result.\r\n\r\nA small program:\r\n  10 FOR I=1 TO 5\r\n  20 PRINT I,I*I\r\n  30 NEXT I\r\n  40 END\r\n  RUN\r\n  SAVE DEMO\r\n  BYE\r\nUse an unused name when saving a program.\r\n\r\nB81FIS/B81FIJ are not part of this kit. Use the FP11 builds above.\r\nThere is no FP11.BIN module to load or enable in the MMU profile.\r\n\r\nEND BASIC.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE ODT.TXT",
+      "response": "HC7000 MICROCODED ODT\r\n\r\nShort button press enters ODT. Long press resets the board and boots SD.\r\nThe console prompt is >. Input is not echoed. Numbers are octal.\r\nFinish each command with Enter. Invalid input/access prints ?.\r\n\r\n  R 7           Saved PC\r\n  R 40          Saved PSW\r\n  R 20          Kernel SP\r\n  R 21          Supervisor SP\r\n  R 23          User SP\r\n  R 0 .. R 5    Main registers; R 10 .. R 15 are the second bank\r\n  F 0           FPS\r\n  F 1           FEC\r\n  F 2           FEA\r\n  F 4 .. F 7    Four words of AC0 (four words per accumulator)\r\n  P 17777776    PSW at its physical I/O address\r\n  P 34          Physical TRAP vector PC; P 36 reads vector PSW\r\n  M 6           Select User instruction space\r\n  V 1000        Read virtual address 001000 in selected space\r\n  W 123         Write value to the last R/F/P/V selection\r\n  C             Continue execution\r\n  S             Execute one instruction and stop\r\n\r\nM spaces: 0 KI, 1 KD, 2 SI, 3 SD, 6 UI, 7 UD.\r\nPSW is also visible at virtual 177776 when the I/O page is mapped there.\r\nPhysical RAM spans 00000000-07777777; I/O spans 17760000-17777777.\r\nReading device registers has the usual hardware side effects.\r\n\r\nTo diagnose a failure, record R 7, R 40, R 20, R 23 and F 0/1/2 before\r\nchanging anything. Read instruction words using M and V in the saved\r\ncurrent mode. The saved PC can point past the instruction that stopped.\r\nW changes state; register/memory inspection alone does not change it.\r\n\r\nThis ODT has no old HALT-space modules, disassembler or breakpoints.\r\nThe HC1200 ODT.BIN manual and commands do not apply.\r\n\r\nEND ODT.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE MEMORY.TXT",
+      "response": "EXTENDED MEMORY UNDER XM\r\n\r\nSHOW CONFIGURATION should report PDP 11/73A, 2048KB, MMU, Floating Point\r\nMicrocode, EIS, 50 Cycle System Clock, 22 bit addressing on and RT11XM.\r\nSHOW MEMORY should report MEMTOP=10000000 (octal).\r\n@XMCHK runs these two commands without changing memory or disk contents.\r\n\r\nA user program still has a 16-bit virtual address space. XM maps its pages\r\nonto physical SRAM. The VM: handler uses extended RAM as a volatile disk.\r\nVM: contents are lost on power loss and must not be used as a backup.\r\n\r\nOptional memory/disk test. INITIALIZE below ERASES the contents of VM:.\r\nUse only when you have no files to keep on VM:.\r\n  INITIALIZE/NOQUERY VM:\r\n  COPY RT11XM.SYS VM:MMUTST.SYS\r\n  DIFFERENCES/BINARY RT11XM.SYS VM:MMUTST.SYS\r\nExpected: No differences found. Then remove the temporary copy:\r\n  UNPROTECT VM:MMUTST.SYS\r\n  DELETE/NOQUERY VM:MMUTST.SYS\r\n\r\nThe RK611 SERV processor performs DMA in the low 256 KiB. CPU MMU maps\r\nall 2 MiB; the XM monitor/DMX handler handle the disk I/O buffer mapping.\r\nThere is no VM2 HALT/USER bank ABI in this configuration.\r\n\r\nEND MEMORY.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE TIMER.TXT",
+      "response": "MONITOR CLOCK DIAGNOSTIC\r\n\r\nRUN TMRATE\r\nPrints CFG (the RT-11 configuration word) and T high low snapshots of\r\nthe .GTIM service. Numbers are octal. Consecutive samples are at least 50 ticks apart.\r\nAt 50 Hz, this is about one second. UART output can add some delay.\r\nAfter 121 samples the program exits. Q or ESC exits early.\r\n\r\nThe utility uses monitor calls and needs no panel, HG, FRAM or HALT ABI.\r\nIt reads the clock without changing the date or time.\r\nUse @HGSYNC to set system date/time from the host; see HOST.TXT.\r\nDATE and TIME display/set the system clock manually.\r\n\r\nTMRATE.MAC is included. To rebuild with the original RT-11 tools:\r\n  MACRO TMRATE\r\n  LINK TMRATE\r\n\r\nCLOCK.SAV/CLOCK.REL from HC1200 drive an HDSP display and are not included.\r\n\r\nEND TIMER.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE HOST.TXT",
+      "response": "HG HOST DISK AND DATE/TIME FOR XM\r\n\r\nHGX.SYS is the mapped RT-11XM driver. The device name is still HG:.\r\nThe monitor discovers HGX.SYS at boot. HG.SYS for SJ/FB is separate.\r\nHGX uses the XM monitor's byte services to access the calling job's buffer.\r\nThe wire format is compatible with the existing hgfsd host service.\r\n\r\nOn the Linux host, use a directory dedicated to the shared RT-11 files:\r\n  hgfsd --directory /path/to/shared --jtag-enable-adbus7\r\n\r\nOn RT-11XM:\r\n  LOAD HG\r\n  DIR HG:\r\n  RUN HGTIME\r\n  DATE\r\n  TIME\r\nOr use @HGSYNC to load HG and run HGTIME together.\r\n\r\nHGTIME sets the RT-11 system date and time from the host's local time zone.\r\nIt does not merely display host time. A failed request, bad checksum or\r\ninvalid reply leaves the system clock unchanged and prints an error.\r\nThe host must be running hgfsd before the request. The startup script does\r\nnot wait for the host; run @HGSYNC when the link is available.\r\n\r\nExamples, with unused destination file names:\r\n  COPY HG:HELLO.TXT SY:HELLO1.TXT\r\n  COPY SY:HELLO1.TXT HG:BACK.TXT\r\n  DELETE/NOQUERY SY:HELLO1.TXT\r\nFiles written to the host directory have RT-11 block padding (512 bytes).\r\nThe host directory is a live file service; use care when deleting files.\r\n\r\nJTAGENB wiring: FT2232 port A ADBUS7 -> FPGA pin 120 (R22 pull-up).\r\nhgfsd pulls this line low for HG and releases it on shutdown. Stop hgfsd\r\nbefore JTAG programming. hgfsd --jtag-only explicitly releases JTAGENB.\r\n\r\nIf a driver was copied onto SD after boot, use INSTALL HG before LOAD HG.\r\nAfter a normal boot from this kit, installation has already been done.\r\nNo FPGA reconfiguration or HC1200 HALT modules are needed for HGX.\r\n\r\nEND HOST.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE FILES.TXT",
+      "response": "RT-11 FILES AND TOOLS\r\n\r\nSY: is the current system disk, DM0: (RK611/RK07).\r\nFile names have up to six characters plus a three-character extension.\r\n\r\n  DIR                       List files\r\n  DIR *.TXT                 List the on-disk manuals\r\n  TYPE README.TXT           Read a text file\r\n  HELP                      DEC help\r\n  SHOW CONFIGURATION        Processor, monitor and device information\r\n  SHOW MEMORY               Memory layout\r\n  COPY FROM.TXT TO.TXT       Copy to an unused name\r\n  DIFFERENCES/BINARY A B     Compare files, using BINCOM\r\n  DELETE/NOQUERY NAME.EXT    Delete a file without confirmation\r\n  RUN NAME                  Run a .SAV program\r\n  @XMCHK                    Execute a command file\r\n\r\nNative development tools from the original distribution are retained:\r\nMACRO, LINK, LIBR, EDIT, PIP, DUP, BINCOM, and their libraries/help files.\r\n\r\nBOOT SY: reboots the default XM system using this disk's boot blocks.\r\nCOPY/BOOT SY:RT11XM.SYS SY: selects XM persistently if deliberately changed.\r\nAn FPGA long-button reset performs a cold hardware boot from the SD card.\r\n\r\nEND FILES.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "TYPE BUILD.TXT",
+      "response": "REBUILDING THE INCLUDED UTILITIES\r\n\r\nThe original MACRO and LINK tools and libraries are on this disk.\r\nHGX.MAC is isolated from the released HC1200 SJ/FB HG.MAC.\r\n\r\n  MACRO HGX\r\n  LINK/NOBITMAP/EXECUTE:HGX.SYS HGX\r\n  MACRO HGTIME\r\n  MACRO TMDRV\r\n  LINK HGTIME,TMDRV\r\n  MACRO TMRATE\r\n  LINK TMRATE\r\n\r\nBuild into a scratch volume/directory when preserving the released files.\r\nUnload HG before replacing its driver, then reboot to refresh installation.\r\nHGTIME and TMDRV sources are shared with the SJ/FB kit and use monitor calls.\r\n\r\nOn the development host, from the uJ11-fpga directory:\r\n  make BOARD=hc7000-lcd-sram CPU=mmu sd-image\r\nThe new image is in build/sd-hc7000. Each build needs a fresh output folder.\r\nThe builder uses a private SIMH disk for MACRO/LINK and COPY/BOOT, fixes the\r\nrelease file dates, clears free extents and produces a reproducible gzip.\r\nThe source FB disk and the HC1200 release are never modified.\r\n\r\nEND BUILD.TXT\r\n\r\n\r\n."
+    },
+    {
+      "command": "DIR *.SAV",
+      "response": " \r\nPIP   .SAV    30P 26-Jan-1999    DUP   .SAV    47P 26-Jan-1999\r\nDIR   .SAV    19P 26-Jan-1999    IND   .SAV    56P 26-Jan-1999\r\nRESORC.SAV    25P 26-Jan-1999    EDIT  .SAV    19P 26-Jan-1999\r\nK52   .SAV    54P 26-Jan-1999    KED   .SAV    58P 26-Jan-1999\r\nKEX   .SAV    53P 26-Jan-1999    MACRO .SAV    61P 26-Jan-1999\r\nCREF  .SAV     6P 26-Jan-1999    LINK  .SAV    49P 26-Jan-1999\r\nLIBR  .SAV    24P 26-Jan-1999    FILEX .SAV    22P 26-Jan-1999\r\nSRCCOM.SAV    26P 26-Jan-1999    BINCOM.SAV    24P 26-Jan-1999\r\nSLP   .SAV    13P 26-Jan-1999    DUMP  .SAV     9P 26-Jan-1999\r\nSIPP  .SAV    21P 26-Jan-1999    BUP   .SAV    50P 26-Jan-1999\r\nPAT   .SAV    10P 26-Jan-1999    HELP  .SAV   132P 26-Jan-1999\r\nBATCH .SAV    26P 26-Jan-1999    ERROUT.SAV    18P 26-Jan-1999\r\nQUEMAN.SAV    15P 26-Jan-1999    FORMAT.SAV    24P 26-Jan-1999\r\nSETUP .SAV    41P 26-Jan-1999    VTCOM .SAV    24P 26-Jan-1999\r\nSPEED .SAV     4P 26-Jan-1999    DATIME.SAV     4P 26-Jan-1999\r\nLET   .SAV     5P 26-Jan-1999    SPLIT .SAV     3P 26-Jan-1999\r\nUCL   .SAV    15P 26-Jan-1999    VBGEXE.SAV    16P 26-Jan-1999\r\nTERMID.SAV     3P 26-Jan-1999    TRANSF.SAV    16P 26-Jan-1999\r\nGIDIS .SAV    72P 26-Jan-1999    MDUP  .SAV    20P 26-Jan-1999\r\nCONFIG.SAV     7P 26-Jan-1999    ELINIT.SAV     7P 26-Jan-1999\r\nB81FPD.SAV    53  27-Sep-2026    B81FPU.SAV    52  27-Sep-2026\r\nHGTIME.SAV     3  27-Sep-2026    TMRATE.SAV     2  27-Sep-2026\r\n 44 Files, 1238 Blocks\r\n 51287 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "RUN B81FPU",
+      "response": "BASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)?"
+    },
+    {
+      "command": "A",
+      "response": "\r\nREADY\r\n"
+    },
+    {
+      "command": "RUN B81TST",
+      "response": "CP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1/0",
+      "response": "?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "response": " 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "response": "?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "response": " 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "response": "?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "response": " 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "BYE",
+      "response": "\r\n."
+    },
+    {
+      "command": "RUN B81FPD",
+      "response": "BASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)?"
+    },
+    {
+      "command": "A",
+      "response": "\r\nREADY\r\n"
+    },
+    {
+      "command": "RUN B81TST",
+      "response": "CP81 BEGIN\r\nCHECKS= 29  ERRORS= 0 \r\nCP81 PASS\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "RUN B81DBL",
+      "response": "DOUBLE DELTA= 1  9.99978E-13 \r\nCP81 DOUBLE PASS\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1/0",
+      "response": "?DIVISION BY ZERO\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "response": " 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT SQR(-1)",
+      "response": "?NEGATIVE SQUARE ROOT\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "response": " 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 1E30*1E30",
+      "response": "?FLOATING OVERFLOW\r\n 0 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+2",
+      "response": " 4 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "BYE",
+      "response": "\r\n."
+    },
+    {
+      "command": "RUN TMRATE / Q",
+      "samples": [
+        "T 000000 000071\r\n",
+        "T 000000 000153\r\n"
+      ]
+    },
+    {
+      "command": "COPY README.TXT XMTEST.TXT",
+      "response": "\r\n."
+    },
+    {
+      "command": "DIFFERENCES/BINARY README.TXT XMTEST.TXT",
+      "response": "?BINCOM-I-No differences found\r\n\r\n."
+    },
+    {
+      "command": "DELETE/NOQUERY XMTEST.TXT",
+      "response": "\r\n."
+    },
+    {
+      "command": "INITIALIZE/NOQUERY VM:",
+      "response": "\r\n."
+    },
+    {
+      "command": "COPY RT11XM.SYS VM:MMUTST.SYS",
+      "response": "\r\n."
+    },
+    {
+      "command": "DIFFERENCES/BINARY RT11XM.SYS VM:MMUTST.SYS",
+      "response": "?BINCOM-I-No differences found\r\n\r\n."
+    },
+    {
+      "command": "UNPROTECT VM:MMUTST.SYS",
+      "response": "\r\n."
+    },
+    {
+      "command": "DELETE/NOQUERY VM:MMUTST.SYS",
+      "response": "\r\n."
+    }
+  ],
+  "image_sha256": "08a30e2e0e6c71383e2ab6d12cbaea360577a923f4706c73631974800f68e5b9",
+  "simulator_sha256": "7df21d89d49a323caeef67a3172521d08c30e4d3accb99c29735806f5dbcd635",
+  "hg": "Production GPIO driver qualified separately on real HC7000; SIMH has no GPIO"
+}

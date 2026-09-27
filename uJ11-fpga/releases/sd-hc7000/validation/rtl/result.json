@@ -1,0 +1,180 @@
+{
+  "passed": true,
+  "simulation_passed": true,
+  "simulation_exit_code": 0,
+  "checks": 28552,
+  "clocks": 585902155,
+  "dma_words": 592344,
+  "mapped_fetches": 15376777,
+  "image_sha256": "08a30e2e0e6c71383e2ab6d12cbaea360577a923f4706c73631974800f68e5b9",
+  "hardware": {
+    "cpu": {
+      "cpu": "mmu",
+      "board": "hc7000-lcd-sram",
+      "scope": "CPU microcode; board manifest is built separately",
+      "microcode_words": 1883,
+      "physical_words": 3072,
+      "word_bits": 54,
+      "microcode_ebr": 18,
+      "files": {
+        "rtl/uj11_alu.v": "a2ee1fff687eabbd4058028c95c5bc1f637e503a0aa584965a78aaba78c164d7",
+        "rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+        "rtl/mmu/uj11_mmu_cpu.v": "24e242cb3288b5d97ee3a444f82104d610f41d677c77908e0ae8782214d0d0be",
+        "rtl/mmu/uj11_mmu_fp_state.v": "b4a3bfef414b410e39ec1ba442d4224244431f5c9609150cdaf700362e7575a8",
+        "rtl/mmu/uj11_mmu_fp_datapath.v": "c5849b710b2e2f26f2e51d63a38110e000b07d9153d178a33ba0a9b80f7b2f3d",
+        "rtl/mmu/uj11_mmu_datapath.v": "cfd036bc796379f8185e0a8173a16e5c7c1099efe3ea740276237a6139d25f8c",
+        "rtl/mmu/uj11_mmu_regfile.v": "f352d2ee3faed917159cd8df68f4a27fb68d12466523d59a77f4ce6a0cdd3b36",
+        "rtl/mmu/uj11_mmu.v": "db9e317ec7a9ae7fdf2bc39f156a63321bb277d9df43d0f53cdf17022498c50a",
+        "rtl/mmu/uj11_mmu_translate.v": "f300fe3da7d501b937009880029dfbf3fcfd0cb06a6222f1773190bf4baee6a0",
+        "rtl/mmu/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+        "rtl/mmu/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+        "microcode/uj11-mmu.uasm": "4ff8158497af80d5cb498875d94dc0c263d6b4cc8e4d6165277a4e305e8d0021",
+        "microcode/mmu/odt.uasm": "9a717274bb27a3aec90d0448073e44e90effa466340201d27f36278abd7a9ac3",
+        "microcode/mmu/fpp.uasm": "4a17d3d4fe78452a963012d7470bfe25a24fd23c69c5bf7660e76265bb0fbd84",
+        "microcode/mmu/fpp-exec.uasm": "a3389f73006271227d1afd1259b8c2504c5f1b74398022021bc9dc5c3b5566ee",
+        "microasm/uj11mmuasm.py": "b935e925dae7307dcc19598dd5896146aabeea2ba871042eb616b3579228e303",
+        "tools/build_mmu.py": "89f77d26c8fbd7a47a32678d0e94b6cfdb800dc976731252033dc31bc717f32f",
+        "tools/make_ebr.py": "1a87d72fef0622c02e0c183b8f3fa6ea29dc34f4a53d8500a70218f40c8a41ae"
+      },
+      "outputs": {
+        "microcode.mem": "5204fcd2bb29159cf2ce2afdb7ca76f4dce2d3a3443a47a5f636d7ee84ce97da",
+        "microcode.lst": "f83ff82afffb428b6d5acebb8f4e0719703e3870e658f48abb9b677ee7bc7030",
+        "labels.json": "543485077786f66d48950132746309aee31685d98ec95324346217f573e3549c",
+        "stats.json": "5e6426c4f8a1e75644846796b2285cdc7878f3b330e0a42dac891f4c0a7888d9",
+        "uj11_mmu_rom.v": "047f822029b59376abfc82e9cdf7396d023b41eb54ea748eb24b090b7988ee4d"
+      }
+    },
+    "iop": {
+      "inputs": {
+        "firmware/iop/start.S": "1cea94a00be4e9e026e4547c29e7f981f713a83b39317305752e19666643744b",
+        "firmware/iop-mmu/rk.c": "0015fac3667b96cd5dad6a2c73dcc799bfc9b656ae8fbbc24da8d754bd9b92b3",
+        "firmware/iop/link.ld": "ca79e645229f5ad484fcf574b2740ac8503f9e5b89f0d1c0351a8ea8621b8cae",
+        "tools/build_iop_mmu.py": "26ed1e5a47989a65d77812722c45a23fd9190a3931099bfb6a68b4517ae50181",
+        "tools/iop_ebr.py": "fab85ab54ef5400fba426d107866afa959cf85e9dc4b0fb65615a165108b482e"
+      },
+      "flags": [
+        "-march=rv32i",
+        "-mabi=ilp32",
+        "-Os",
+        "-ffreestanding",
+        "-fno-builtin",
+        "-fno-pic",
+        "-fno-stack-protector",
+        "-msmall-data-limit=0",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-nostdlib",
+        "-nostartfiles",
+        "-Wl,--gc-sections",
+        "-Wl,--no-relax"
+      ],
+      "compiler": "riscv64-unknown-elf-gcc (13.2.0-11ubuntu1+12) 13.2.0",
+      "program_bytes": 1188,
+      "ram_bytes": 2048,
+      "outputs": {
+        "firmware.elf": "f90929870cbc87e4877135cd08e4e42f1ef2723e5bec16d9fe95f14a5a1b0bcc",
+        "uj11_sector_ram.v": "5c45e5ca467e8e831589cab8a90ad11f9b78ce3c1e2fa80a5dc1fc4fda628af5",
+        "firmware.lst": "31db6d6c0e298349d77a4ac5514a865655e381c20d4bfaac1c44ea26ee16e1ec",
+        "firmware.map": "4f9bf6c9ba11c392c4c313249be05eaa0aab99c1f16308162ccd2f82be2a55ea",
+        "firmware.bin": "bf24a0a99cb39e92fe4f482123ff11d6829d15856d045fb5f9ecaf59eee797de",
+        "uj11_mmu_iop_ram.v": "2d684b545cb4b61db99c5084242f49c6bce994630480324709e2f4d7f24e6860",
+        "firmware.mem": "c7646f328dc1b8e86b97d865ab48172b9065f0be950dffce1e1607ad1092252a"
+      }
+    },
+    "bootstrap": {
+      "assembly": {
+        "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+        "tool": "RT-11 V5.03 MACRO/LINK in SIMH",
+        "source_sha256": {
+          "firmware/boot/SDBASE.MAC": "e45f7f951141b6bdb5875b6894d4adee1e336453830e2b9172e004afb174982b"
+        },
+        "outputs": {
+          "SDBASE.SAV": "29f2eb229dbfe54964363ac49ddc71fe6da1366ad7e78b946e0552b3535e5f8d",
+          "SDBASE.OBJ": "3aea0f6d668b971d4ea72dbe184a5c36044c3be48a1002e1249c1097e382798f",
+          "SDBASE.LST": "8fe2cb7bba7afb0095b8a95d4a82afc204af5267d79b46ea53e5b5c3483b418e",
+          "SDBASE.MAP": "e4b1ba173f309c5bdddf8e6b8b01e0c49871daf8914586623ee6a9080a24fb04"
+        },
+        "driver_sha256": "1ed21ad34f0ad9afb8df1a587b180a993b5ae6978a179e41b2dd2dda3ded0002"
+      },
+      "directory": "build/assembly/sdbase-e45f7f951141"
+    },
+    "files": {
+      "rtl/uj11_alu.v": "a2ee1fff687eabbd4058028c95c5bc1f637e503a0aa584965a78aaba78c164d7",
+      "rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+      "rtl/mmu/uj11_mmu_cpu.v": "24e242cb3288b5d97ee3a444f82104d610f41d677c77908e0ae8782214d0d0be",
+      "rtl/mmu/uj11_mmu_fp_state.v": "b4a3bfef414b410e39ec1ba442d4224244431f5c9609150cdaf700362e7575a8",
+      "rtl/mmu/uj11_mmu_fp_datapath.v": "c5849b710b2e2f26f2e51d63a38110e000b07d9153d178a33ba0a9b80f7b2f3d",
+      "rtl/mmu/uj11_mmu_datapath.v": "cfd036bc796379f8185e0a8173a16e5c7c1099efe3ea740276237a6139d25f8c",
+      "rtl/mmu/uj11_mmu_regfile.v": "f352d2ee3faed917159cd8df68f4a27fb68d12466523d59a77f4ce6a0cdd3b36",
+      "rtl/mmu/uj11_mmu.v": "db9e317ec7a9ae7fdf2bc39f156a63321bb277d9df43d0f53cdf17022498c50a",
+      "rtl/mmu/uj11_mmu_translate.v": "f300fe3da7d501b937009880029dfbf3fcfd0cb06a6222f1773190bf4baee6a0",
+      "rtl/mmu/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+      "rtl/mmu/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+      "boards/hc7000/mmu/uj11_mmu_board.v": "b1272b2eca4aebeabfe2b24f10753c6e21e41a8ef23fac952c5a298ca9cbbf9a",
+      "boards/hc7000/mmu/uj11_mmu_board_bus.v": "d722141a3d1247d4b710a86b0e5054544a1d9ee3c60d7d1feddb803040549fcc",
+      "boards/hc7000/mmu/uj11_mmu_disk.v": "4adfbb39997e11765f0a04f0682697fc81c60509830a7d6c4acdfe5363be6df4",
+      "boards/hc7000/mmu/uj11_mmu_rk611.v": "a2aa3592d485ce93289be83006001ef822409cf7924a1de57322f1ed3964bccf",
+      "boards/hc7000/mmu/uj11_mmu_sector_engine.v": "01da92886189a556f7cc64f5d73341c9649107cc54e61d514da830171d684bd4",
+      "boards/hc7000/mmu/uj11_mmu_sram_arbiter.v": "0caa50366bd066997f96ba69b15786d8c30a0fb9449bb539c7741c412c748ad8",
+      "boards/hc7000/uj11_sram.v": "0fb45681f74a333db7d6aca69e77727dcef55eb4ec12ddf587a3e304b3e644e5",
+      "boards/hc7000/uj11_hg_inputs.v": "de74492a053d506ec70b84850d252f049b02f2fefb49b7fd073515539d210cf4",
+      "boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+      "boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+      "boards/hc1200/uj11_panel.v": "f16d7dfde6c898d6eb828efb63665b3e10c27735c0727906947888d55265bd54",
+      "rtl/peripherals/spi_byte_service.v": "488b6e55ac5badabdd9ecfda3f32bc9f9aad65c17acdd8fa76244125d2dc00fb",
+      "rtl/peripherals/wbc_uart_xo2.v": "686b7d1a0424f54088e1524767df5634cb4657f2bdde8b2ec24ef76f9528ed4b",
+      "build/hc7000-mmu-hardware/uj11_mmu_rom.v": "047f822029b59376abfc82e9cdf7396d023b41eb54ea748eb24b090b7988ee4d",
+      "build/hc7000-mmu-hardware/uj11_mmu_boot_rom.v": "fb60dbc14c4adae0259213e8395a9b64b8c1c0e6ea61af51d194e1160f4284b6",
+      "build/hc7000-mmu-iop/uj11_mmu_iop_ram.v": "2d684b545cb4b61db99c5084242f49c6bce994630480324709e2f4d7f24e6860",
+      "build/hc7000-mmu-iop/uj11_sector_ram.v": "5c45e5ca467e8e831589cab8a90ad11f9b78ce3c1e2fa80a5dc1fc4fda628af5",
+      "vendor/serv/rtl/serv_bufreg.v": "76404174ec92c6cf68e0042798dede84d77c5e454c7f428afc7b9f612a3c52d4",
+      "vendor/serv/rtl/serv_bufreg2.v": "6586c95a64a064ff6f4d001996d33f15e0f6d452e01ebb4da6120db06ddd0a51",
+      "vendor/serv/rtl/serv_alu.v": "2e0c31b5b992618e514083aacf10cb38c2229b68b3b1e93d6663104f32143332",
+      "vendor/serv/rtl/serv_csr.v": "2dd7167ed44817d921318a5d463281b43820c25e476039a604e95948be567e62",
+      "vendor/serv/rtl/serv_ctrl.v": "eb198ba7594f918da2784f9b6f8c82de1b95e3ffdd3383f2f533872999e9dab5",
+      "vendor/serv/rtl/serv_decode.v": "eac5b2097ebd1f4587d2aa27aba130897d057dd8a28ba678edce0f2a3c9f640a",
+      "vendor/serv/rtl/serv_immdec.v": "80ec5a265194eb40f3413742fc9da0a23ed78f8bdf5add3e58b45fa1850b2bd5",
+      "vendor/serv/rtl/serv_mem_if.v": "a4fbd74579447710ed43e81dd80b4ea9415da0a3425a447f29446f9bd7a9aa6f",
+      "vendor/serv/rtl/serv_rf_if.v": "63fd0d2ec2f89201b20690c467ebbcae964a85b4570254a95154f832cf0dcb2e",
+      "vendor/serv/rtl/serv_rf_ram_if.v": "abb39b6bdf4d335bd2f90f75ddb1a410500a1a51a3e9f170453cb491d98d8697",
+      "vendor/serv/rtl/serv_rf_ram.v": "779ad3243dfa648f276240d260ff4ac1a1e83cc1364afb93d40c586905ce4338",
+      "vendor/serv/rtl/serv_state.v": "f7f981a28ed92243d812b3e6d723a77ec9278c7690eb4a530edc136aed5319b3",
+      "vendor/serv/rtl/serv_debug.v": "815a6b0da1a49d41faa72edd8f397f89ec79334b292b94991f60002b0776082f",
+      "vendor/serv/rtl/serv_top.v": "c35b88bed5732309069203b2d04421622eaae108d5bf5daef3de273daf43388e",
+      "vendor/serv/rtl/serv_rf_top.v": "89faedf7530c34305bfbffd261732d95016bf5627f10b7bbafaa8e1fd6cd49c9",
+      "vendor/serv/rtl/serv_aligner.v": "adeff8f442db6c93f48e551721146b40c398ab14dcb5b22339746329e7a24f3b",
+      "vendor/serv/rtl/serv_compdec.v": "b1799ad9c5f10756fc336788d4bf871c5a6d4181c2f62568fad1b3bbe86504ae",
+      "boards/hc7000/mmu/uj11_mmu_microcomp.v": "ee13bd54bb7c69364056508dc08df4ad2f5e5d5aaef69325b2adae1a4469a009",
+      "tools/build_mmu_board.py": "a33d7290acc89b036fcf40b335b7a9759e4e62bfbe0fd7afc3d07549807f8b4e",
+      "firmware/boot/SDBASE.MAC": "e45f7f951141b6bdb5875b6894d4adee1e336453830e2b9172e004afb174982b"
+    },
+    "scope": "MMU board with microcoded FPP; physical-board qualification pending",
+    "fp_arithmetic": true,
+    "boot_pc_octal": "004000",
+    "sram_bytes": 2097152,
+    "dma_address_bits": 18
+  },
+  "timer_samples_octal": [
+    [
+      "000000",
+      "000554"
+    ],
+    [
+      "000000",
+      "000636"
+    ]
+  ],
+  "timer_step_ticks": 50,
+  "uart_error_scan_passed": true,
+  "build_start_hardware_hashes_unchanged": true,
+  "executed_runner_sha256": "7cfc6cf00a2c57fce160c3e06c4bcd05ac61fbca4e7d456735fc87a384ad17e2",
+  "harness_sha256": "0163779a0ed115b2cb70e783f6454ccc04ae07d5943c5f5a40c863ec5ea9f075",
+  "wrapper": {
+    "exit_code": 1,
+    "reason": "The runner source changed during simulation when UART postchecks were added. The end-of-run source hash assertion rejected report generation, after the compiled HDL test completed with PASS.",
+    "resolution": "Executed runner version archived. Added UART/timer postchecks performed independently on the completed log. Core, board, generated ROM/IOP and image hashes verified against build-start records; no HDL or image changed. This report records that completed simulation, not a second run."
+  }
+}

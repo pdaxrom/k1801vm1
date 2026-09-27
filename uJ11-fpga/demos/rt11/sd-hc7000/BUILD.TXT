@@ -1,0 +1,25 @@
+REBUILDING THE INCLUDED UTILITIES
+
+The original MACRO and LINK tools and libraries are on this disk.
+HGX.MAC is isolated from the released HC1200 SJ/FB HG.MAC.
+
+  MACRO HGX
+  LINK/NOBITMAP/EXECUTE:HGX.SYS HGX
+  MACRO HGTIME
+  MACRO TMDRV
+  LINK HGTIME,TMDRV
+  MACRO TMRATE
+  LINK TMRATE
+
+Build into a scratch volume/directory when preserving the released files.
+Unload HG before replacing its driver, then reboot to refresh installation.
+HGTIME and TMDRV sources are shared with the SJ/FB kit and use monitor calls.
+
+On the development host, from the uJ11-fpga directory:
+  make BOARD=hc7000-lcd-sram CPU=mmu sd-image
+The new image is in build/sd-hc7000. Each build needs a fresh output folder.
+The builder uses a private SIMH disk for MACRO/LINK and COPY/BOOT, fixes the
+release file dates, clears free extents and produces a reproducible gzip.
+The source FB disk and the HC1200 release are never modified.
+
+END BUILD.TXT

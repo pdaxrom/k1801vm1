@@ -1,0 +1,37 @@
+{
+  "base_sha256": "e769228f2e1262220297bfa98b8f2841688849ab4c49ad9cd48d0d73d0a99553",
+  "tool": "DEC MACRO/LINK and COPY/BOOT in SIMH 11/73",
+  "sources": {
+    "demos/rt11/hostdisk/HGX.MAC": "4d3d9d5945ce2b965817dc3ac1ce2c6cd33ebb6c0c5596e2a0107329bc17c7bb",
+    "demos/rt11/hostdisk/HGTIME.MAC": "8519d6cf1ded7d458cdc6b2c63e114786c7016f933e72b590965a2652ff44fcf",
+    "demos/rt11/panel/TMDRV.MAC": "16814dae24222d11f85556309da64437f986f896786a4dfd3cb451b9260d2a96",
+    "demos/rt11/panel/TMRATE.MAC": "64a992ed3bbb22d6936c23b99395fd880e22d83daccfe01cd2ecdf57bc5d5878"
+  },
+  "assembled_sources": {
+    "demos/rt11/hostdisk/HGX.MAC": "142c5b0b48a7fe9914d14f8e80e2a74042aa69263ef7fd4207d32a5b6fd71919",
+    "demos/rt11/hostdisk/HGTIME.MAC": "8519d6cf1ded7d458cdc6b2c63e114786c7016f933e72b590965a2652ff44fcf",
+    "demos/rt11/panel/TMDRV.MAC": "16814dae24222d11f85556309da64437f986f896786a4dfd3cb451b9260d2a96",
+    "demos/rt11/panel/TMRATE.MAC": "64a992ed3bbb22d6936c23b99395fd880e22d83daccfe01cd2ecdf57bc5d5878"
+  },
+  "outputs": {
+    "HGX.SYS": "1b30fcd84d783a067e76a3555bc6a5bc33dee70bca98ce68736c2fff49fea46c",
+    "HGTIME.SAV": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c",
+    "TMRATE.SAV": "078fc88865523ee677e654e0efe24dbb388b664525bb6974d6bfe12160306c5b",
+    "HGTIME.MAP": "bf67c6e9397ab347d7018b81f2a13d563f0db18231b57b9e9d69537fc820d813",
+    "TMRATE.MAP": "f2c43d13207b9f3ae167e85ef5619f038281e2ef9b4f16e6e6d12f09f9fdc532",
+    "HGX.LST": "6b80e581d10b29987b154e10fd3d6c1b1d4dbfb45b811ef3d7c440c008e8601e",
+    "HGX.OBJ": "457aebcdcfec8135447d9fc22b44108a0d75822e39b6b4357a65765efbec359a",
+    "HGTIME.LST": "9958f36ab31d2dade0c78cd4aad4110bc1ed5c484c0e2d681d657ba96e59d511",
+    "HGTIME.OBJ": "0c2df3efbe6fac1a125a0fbe42bac274cd84cf757f568b407d9cf5c5d42a46ca",
+    "TMDRV.LST": "5fe269acbd7a5e62141d689a061e214d922596c1ef7cc1aab288c305cefbd043",
+    "TMDRV.OBJ": "a6089258552064d2609e1fc814d5dc1329d94eedfa24d31aee935f1283906ba2",
+    "TMRATE.LST": "f18968f6d94add897859e82291e8d5b281655fc07d33480bb0dc0a22a983d50b",
+    "TMRATE.OBJ": "052fc8acf9b3f5b4f562704364998572d1070bd35f85d7be2d97d2b6efea5fd1",
+    "xm-boot.bin": "f016a1a35f03a867838424e7e36b4d28289d7a76d28c5b6f03960be4682200e3"
+  },
+  "scripts": {
+    "tools/build_hgx.py": "07d7385cb6ddd364ec313b9493318d603af02bb202fbd95ff6c0cc7a9c5b54c4",
+    "tools/rt11_build.py": "690ccc3930a542252442ccdf366234f9ba65bb3994be91036f83ebf65eb563b1"
+  },
+  "fixtures": true
+}

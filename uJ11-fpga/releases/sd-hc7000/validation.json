@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "image_sha256": "08a30e2e0e6c71383e2ab6d12cbaea360577a923f4706c73631974800f68e5b9",
+  "simh": true,
+  "rtl": {
+    "passed": true,
+    "checks": 28552,
+    "clocks": 585902155,
+    "dma_words": 592344,
+    "mapped_fetches": 15376777,
+    "timer_step_ticks": 50,
+    "wrapper": {
+      "exit_code": 1,
+      "reason": "The runner source changed during simulation when UART postchecks were added. The end-of-run source hash assertion rejected report generation, after the compiled HDL test completed with PASS.",
+      "resolution": "Executed runner version archived. Added UART/timer postchecks performed independently on the completed log. Core, board, generated ROM/IOP and image hashes verified against build-start records; no HDL or image changed. This report records that completed simulation, not a second run."
+    }
+  },
+  "hg_hardware": true,
+  "hg_time_fixtures": true,
+  "reproducible": true,
+  "legacy_unchanged_files": 170
+}

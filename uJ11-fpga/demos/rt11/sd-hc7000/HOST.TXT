@@ -1,0 +1,40 @@
+HG HOST DISK AND DATE/TIME FOR XM
+
+HGX.SYS is the mapped RT-11XM driver. The device name is still HG:.
+The monitor discovers HGX.SYS at boot. HG.SYS for SJ/FB is separate.
+HGX uses the XM monitor's byte services to access the calling job's buffer.
+The wire format is compatible with the existing hgfsd host service.
+
+On the Linux host, use a directory dedicated to the shared RT-11 files:
+  hgfsd --directory /path/to/shared --jtag-enable-adbus7
+
+On RT-11XM:
+  LOAD HG
+  DIR HG:
+  RUN HGTIME
+  DATE
+  TIME
+Or use @HGSYNC to load HG and run HGTIME together.
+
+HGTIME sets the RT-11 system date and time from the host's local time zone.
+It does not merely display host time. A failed request, bad checksum or
+invalid reply leaves the system clock unchanged and prints an error.
+The host must be running hgfsd before the request. The startup script does
+not wait for the host; run @HGSYNC when the link is available.
+
+Examples, with unused destination file names:
+  COPY HG:HELLO.TXT SY:HELLO1.TXT
+  COPY SY:HELLO1.TXT HG:BACK.TXT
+  DELETE/NOQUERY SY:HELLO1.TXT
+Files written to the host directory have RT-11 block padding (512 bytes).
+The host directory is a live file service; use care when deleting files.
+
+JTAGENB wiring: FT2232 port A ADBUS7 -> FPGA pin 120 (R22 pull-up).
+hgfsd pulls this line low for HG and releases it on shutdown. Stop hgfsd
+before JTAG programming. hgfsd --jtag-only explicitly releases JTAGENB.
+
+If a driver was copied onto SD after boot, use INSTALL HG before LOAD HG.
+After a normal boot from this kit, installation has already been done.
+No FPGA reconfiguration or HC1200 HALT modules are needed for HGX.
+
+END HOST.TXT

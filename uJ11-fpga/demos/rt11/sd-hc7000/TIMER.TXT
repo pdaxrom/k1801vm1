@@ -1,0 +1,20 @@
+MONITOR CLOCK DIAGNOSTIC
+
+RUN TMRATE
+Prints CFG (the RT-11 configuration word) and T high low snapshots of
+the .GTIM service. Numbers are octal. Consecutive samples are at least 50 ticks apart.
+At 50 Hz, this is about one second. UART output can add some delay.
+After 121 samples the program exits. Q or ESC exits early.
+
+The utility uses monitor calls and needs no panel, HG, FRAM or HALT ABI.
+It reads the clock without changing the date or time.
+Use @HGSYNC to set system date/time from the host; see HOST.TXT.
+DATE and TIME display/set the system clock manually.
+
+TMRATE.MAC is included. To rebuild with the original RT-11 tools:
+  MACRO TMRATE
+  LINK TMRATE
+
+CLOCK.SAV/CLOCK.REL from HC1200 drive an HDSP display and are not included.
+
+END TIMER.TXT

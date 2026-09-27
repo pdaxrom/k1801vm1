@@ -10,12 +10,15 @@ HG TIME и foreground CLOCK установлены; [текущий компле
 |---|---|
 | Пользоваться платой и отладчиком | [Эксплуатация](user-guide.md) |
 | Записать готовую SD с RT-11FB, утилитами и справкой | [SD-образ](sd-image.md) |
+| Записать готовую SD с XM, HG и BASIC для HC7000 | [HC7000 XM SD-комплект](sd-image-hc7000.md) |
 | Выбрать BIN/SAV и проверить STATUS | [Программный комплект](software.md) |
 | Синхронизировать RT-11 с хостом, показать часы на HDSP | [HG TIME и CLOCK](host-time.md) |
 | Настроить яркость и снизить ток дисплея | [Яркость HDSP](panel-brightness.md) |
 | Понять CPU, FRAM, SD/RK и периферию | [Архитектура](architecture.md) |
 | Собрать и проверить исходники | [Разработка](development.md) |
 | Собрать и запустить HC7000 с SRAM | [HC7000 hardware-lcd](hc7000.md), [план этапов](hc7000-port-plan.md) |
+| Разобраться с планом MMU без VM2 HALT/USER | [Конфигурации mmuless/mmu](hc7000-mmu-plan.md) |
+| Собрать и проверить экспериментальный MMU-профиль | [HC7000 MMU: состояние и ограничения](hc7000-mmu.md) |
 | Написать и загрузить модуль | [ABI модулей](modules.md) |
 | Выключить/вернуть FPP | [Конфигурация](configuration.md) |
 | Проверить математику BASIC | [BASIC](basic.md) |

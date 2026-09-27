@@ -1,0 +1,138 @@
+SET SL OFF
+[r[24H\
+.SHOW CONFIGURATION
+
+RT-11FB (S) V05.03  
+Booted from DM0:RT11FB
+
+USR   is set SWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KED
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/73A Processor
+2048KB of memory
+Floating Point Microcode
+Extended Instruction Set (EIS)
+Memory Management Unit
+50 Cycle System Clock                  
+
+Device I/O time-out support
+Error logging support
+Multi-terminal support
+System job support
+Global .SCCA support
+FPU support
+
+
+.LOAD HG
+
+.DIFFERENCES/BINARY HG:HGX.SYS SY:HGX.SYS
+?BINCOM-I-No differences found
+
+.COPY SY:HGTIME.SAV HG:OLDTIM.SAV
+
+.UNLOAD HG
+
+.BOOT SY:
+
+RT-11XM (S) V05.03  
+
+.SET TT SCOPE,NOCRLF
+
+.SET SL ON
+\<
+..[KSET SL OFF
+[r[24H\
+.LOAD HG
+
+.RUN HGTIME
+!HGTIME-I-RT-11 SYSTEM DATE AND TIME SET FROM HOST
+18:06:03 27/09  
+
+.TIME
+18:06:04
+
+.DATE
+27-Sep-2026
+
+.TYPE HG:HELLO.TXT
+HC7000 XM HG MAPPED TRANSFER
+
+
+.DIR SY:XGTEST.BIN
+ 27-Sep-2026
+
+ 0 Files, 0 Blocks
+ 50994 Free blocks
+
+.COPY HG:ROUND.BIN SY:XGTEST.BIN
+
+.COPY SY:XGTEST.BIN HG:RETURN.BIN
+
+.DELETE/NOQUERY SY:XGTEST.BIN
+
+.SHOW MEMORY
+
+------- Extended Memory --------
+Address   Module    Words   Type
+-------   ------    -----   ----
+17760000  IOPAGE     4096.   HDW 
+10000000  MEMTOP       
+01000000  VM       917504.   SHR 
+00166200  ......   100800.       
+00160000  SL         1600.   PVT 
+
+------ Low Memory -------
+Address   Module    Words
+-------   ------    -----
+155006    DM          765.       
+106460    RMON       9835.       
+104760    HG          416.       
+073714    USR        2322.       
+001000    ..BG..    15078.       
+
+
+.UNLOAD HG
+
+.LOAD HG
+
+.UNLOAD HG
+
+.SHOW CONFIGURATION
+
+RT-11XM (S) V05.03  
+Booted from DM0:RT11XM
+22 bit addressing is on
+
+USR   is set NOSWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KEX
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/73A Processor
+2048KB of memory
+Floating Point Microcode
+Extended Instruction Set (EIS)
+Memory Management Unit
+50 Cycle System Clock                  
+
+Device I/O time-out support
+Error logging support
+Multi-terminal support
+System job support
+Global .SCCA support
+FPU support
+
+
+.

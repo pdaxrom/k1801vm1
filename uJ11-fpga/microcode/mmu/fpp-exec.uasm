@@ -1,0 +1,754 @@
+; FP11 execution inside uJ11 microcode. Guest EA uses the ordinary MMU.
+; Wide scratch operations never decode guest opcodes or commit AC/FPS.
+; T0=FPS, T2=family; scratch b8=EA, ba=count, bc=AC, 86=error/V.
+.org $800
+FP_EXEC:
+    alu PASSA, b=T2, dst=RF, pair=DA, d=IR
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61696, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_ILLEGAL, prefetch=0
+    READ, space=INTERNAL, address=128, b=T0, load=1
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=0
+    WRITE, space=INTERNAL, address=134, b=T6
+    alu AND, a=T2, b=T2, dst=RF, pair=AD, d=IMM, imm=65280
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61696, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_UNARY_KIND, prefetch=0
+    JUMP, target=FP_KIND_READY, prefetch=0
+FP_UNARY_KIND:
+    alu PASSA, b=T2, dst=RF, pair=DA, d=IR
+    alu AND, a=T2, b=T2, dst=RF, pair=AD, d=IMM, imm=65472
+FP_KIND_READY:
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=4
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LENGTH, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=8
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=1
+FP_LENGTH:
+    WRITE, space=INTERNAL, address=232, b=T6
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPPOSITE_SIZE, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65280, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPPOSITE_SIZE, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_SAVE_LENGTH, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=2
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_SIZE, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65024, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_SIZE, prefetch=0
+    JUMP, target=FP_SAVE_LENGTH, prefetch=0
+FP_INTEGER_SIZE:
+    alu AND, a=T0, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SAVE_LENGTH, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=4
+    JUMP, target=FP_SAVE_LENGTH, prefetch=0
+FP_OPPOSITE_SIZE:
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=12
+    alu SUB, a=T6, b=T4, dst=RF
+FP_SAVE_LENGTH:
+    WRITE, space=INTERNAL, address=88, b=T4
+    alu PASSA, b=T3, dst=RF, pair=DA, d=IR
+    alu AND, a=T3, b=T3, dst=RF, pair=AD, d=IMM, imm=192
+    alu LSR, a=T3, b=T3, dst=RF
+    alu LSR, a=T3, b=T3, dst=RF
+    alu LSR, a=T3, b=T3, dst=RF
+    alu ADD, a=T3, b=T3, dst=RF, pair=AD, d=IMM, imm=136
+    WRITE, space=INTERNAL, address=188, b=T3
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IR
+    alu AND, a=T6, pair=AD, d=IMM, imm=56, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_GUEST_EA, prefetch=0
+    alu AND, a=T6, b=T1, dst=RF, pair=AD, d=IMM, imm=7
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_FLOAT_REGISTER, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_FLOAT_REGISTER, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65280, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_FLOAT_REGISTER, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=2
+    JUMP, target=FP_EA_READY, prefetch=0
+FP_FLOAT_REGISTER:
+    alu SUB, a=T1, pair=AD, d=IMM, imm=6, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_C, uflags=1, target=FP_ILLEGAL, prefetch=0
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=136
+    JUMP, target=FP_EA_READY, prefetch=0
+FP_GUEST_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+FP_EA_READY:
+    alu LSR, a=T4, b=T4, dst=RF
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IR
+    alu AND, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=63
+    alu SUB, a=T6, pair=AD, d=IMM, imm=23, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_EA_COUNT, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=1
+FP_EA_COUNT:
+    WRITE, space=INTERNAL, address=184, b=T1
+    WRITE, space=INTERNAL, address=186, b=T4
+    FOP, value=ZERO_Y
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD_AC, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD_AC, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD_AC, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=63488, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD_AC, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61696, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_CLEAR, prefetch=0
+    alu PASSA, b=T7, dst=RF, pair=DA, d=IMM, imm=200
+FP_READ_OPERAND:
+    OR_MD, target=FP_READ_MODES, prefetch=0
+.align 8
+FP_READ_MODES:
+    JUMP, target=FP_READ_REGISTER, prefetch=0
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+    READ, a=T1, b=T6, load=1, target=FP_BUFFER_WORD
+FP_READ_REGISTER:
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_READ_AC_OPERAND, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_READ_AC_OPERAND, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65280, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_READ_AC_OPERAND, prefetch=0
+    alu PASSA, a=RD, b=T6, dst=RF
+    JUMP, target=FP_BUFFER_WORD, prefetch=0
+FP_READ_AC_OPERAND:
+    READ, space=INTERNAL, a=T1, b=T6, load=1
+FP_BUFFER_WORD:
+    WRITE, space=INTERNAL, a=T7, b=T6
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=2
+    alu ADD, a=T7, b=T7, dst=RF, pair=AD, d=IMM, imm=2
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_READ_OPERAND, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64768, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPERAND_READY, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65024, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPERAND_READY, prefetch=0
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IR
+    alu AND, a=T6, pair=AD, d=IMM, imm=56, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPERAND_READY, prefetch=0
+    READ, space=INTERNAL, address=200, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=32768, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPERAND_READY, prefetch=0
+    alu AND, a=T6, pair=AD, d=IMM, imm=32640, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_OPERAND_READY, prefetch=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=2048, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OPERAND_READY, prefetch=0
+    alu PASSA, b=T0, dst=RF, pair=DA, d=IMM, imm=12
+    JUMP, target=FP_ERROR_CODE, prefetch=0
+FP_OPERAND_READY:
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65280, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_CROSS_LOAD, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=65024, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD_INTEGER, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=62720, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61952, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_UNARY, prefetch=0
+FP_LOAD_AC:
+    FOP, value=ZERO_X
+    READ, space=INTERNAL, address=188, b=T1, load=1
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=2
+    alu AND, a=T0, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_AC_SIZE, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=4
+FP_AC_SIZE:
+    alu PASSA, b=T7, dst=RF, pair=DA, d=IMM, imm=192
+FP_AC_WORD:
+    READ, space=INTERNAL, a=T1, b=T6, load=1
+    WRITE, space=INTERNAL, a=T7, b=T6
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=2
+    alu ADD, a=T7, b=T7, dst=RF, pair=AD, d=IMM, imm=2
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_AC_WORD, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=63488, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_STORE_OPERAND, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_STORE_EXPONENT, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_STORE_INTEGER, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_CROSS_STORE, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64768, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LOAD_EXPONENT, prefetch=0
+    JUMP, target=FP_ARITHMETIC, prefetch=0
+FP_LOAD:
+    FOP, value=Y_TO_X
+    JUMP, target=FP_STORE_AC, prefetch=0
+FP_CLEAR:
+    FOP, value=ZERO_X
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_UNARY:
+    FOP, value=Y_TO_X
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61760, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_FLAGS, prefetch=0
+    READ, space=INTERNAL, address=192, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=32640, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_CHANGE_SIGN, prefetch=0
+    FOP, value=ZERO_X
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_CHANGE_SIGN:
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61824, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_ABSOLUTE, prefetch=0
+    alu XOR, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=32768
+    JUMP, target=FP_CHANGED_SIGN, prefetch=0
+FP_ABSOLUTE:
+    alu BIC, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=32768
+FP_CHANGED_SIGN:
+    WRITE, space=INTERNAL, address=192, b=T6
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_STORE_OPERAND:
+    READ, space=INTERNAL, address=184, b=T1, load=1
+    READ, space=INTERNAL, address=186, b=T4, load=1
+    alu PASSA, b=T7, dst=RF, pair=DA, d=IMM, imm=192
+FP_OUTPUT_WORD:
+    READ, space=INTERNAL, a=T7, b=T6, load=1
+    OR_MD, target=FP_WRITE_MODES, prefetch=0
+.align 8
+FP_WRITE_MODES:
+    JUMP, target=FP_WRITE_REGISTER, prefetch=0
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+    WRITE, a=T1, b=T6, target=FP_OUTPUT_NEXT
+FP_WRITE_REGISTER:
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_WRITE_AC_OPERAND, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_WRITE_AC_OPERAND, prefetch=0
+    alu PASSA, a=T6, b=RD, dst=RF
+    JUMP, target=FP_OUTPUT_NEXT, prefetch=0
+FP_WRITE_AC_OPERAND:
+    WRITE, space=INTERNAL, a=T1, b=T6, target=FP_OUTPUT_NEXT
+FP_OUTPUT_NEXT:
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=2
+    alu ADD, a=T7, b=T7, dst=RF, pair=AD, d=IMM, imm=2
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_OUTPUT_WORD, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=63488, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=NOP, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64000, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_FLAGS, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_FLAGS, prefetch=0
+    JUMP, target=FP_FLAGS, prefetch=0
+FP_STORE_AC:
+    READ, space=INTERNAL, address=188, b=T1, load=1
+    CALL, target=FP_COPY_AC, prefetch=0
+    JUMP, target=FP_FLAGS, prefetch=0
+FP_COPY_AC:
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=2
+    alu AND, a=T0, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_RESULT_SIZE, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=4
+FP_RESULT_SIZE:
+    alu PASSA, b=T7, dst=RF, pair=DA, d=IMM, imm=192
+FP_RESULT_WORD:
+    READ, space=INTERNAL, a=T7, b=T6, load=1
+    WRITE, space=INTERNAL, a=T1, b=T6
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=2
+    alu ADD, a=T7, b=T7, dst=RF, pair=AD, d=IMM, imm=2
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_RESULT_WORD, prefetch=0
+    RETURN, prefetch=0
+FP_FLAGS:
+    READ, space=INTERNAL, address=192, b=T6, load=1
+    alu BIC, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=15
+    alu AND, a=T6, pair=AD, d=IMM, imm=32768, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_ZERO_FLAG, prefetch=0
+    alu OR, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=8
+FP_ZERO_FLAG:
+    alu AND, a=T6, pair=AD, d=IMM, imm=32640, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_V_FLAG, prefetch=0
+    alu OR, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=4
+FP_V_FLAG:
+    READ, space=INTERNAL, address=134, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_FINISH, prefetch=0
+    alu OR, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=2
+FP_FINISH:
+    WRITE, space=INTERNAL, address=128, b=T0
+    READ, space=INTERNAL, address=134, b=T6, load=1
+    alu AND, a=T6, b=T0, dst=RF, pair=AD, d=IMM, imm=255, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=NOP, prefetch=0
+    JUMP, target=FP_ERROR_CODE, prefetch=0
+FP_ARITHMETIC:
+    FOP, value=UNPACK_X
+    FOP, value=UNPACK_Y
+    alu SUB, a=T2, pair=AD, d=IMM, imm=63232, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_COMPARE, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=61952, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_MULTIPLY, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=62208, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_MULTIPLY, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=63744, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_DIVIDE, prefetch=0
+    alu SUB, a=T2, pair=AD, d=IMM, imm=62976, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SUBTRACT_SIGN, prefetch=0
+    JUMP, target=FP_SORT, prefetch=0
+FP_SUBTRACT_SIGN:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=2, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_SORT, prefetch=0
+    READ, space=INTERNAL, address=230, b=T6, load=1
+    alu XOR, a=T6, b=T6, dst=RF, pair=AD, d=TWO
+    WRITE, space=INTERNAL, address=230, b=T6
+FP_SORT:
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    READ, space=INTERNAL, address=228, b=T3, load=1
+    alu SUB, a=T1, b=T3, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_SWAP, prefetch=0
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_SORTED, prefetch=0
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=4, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SORTED, prefetch=0
+FP_SWAP:
+    FOP, value=SWAP
+FP_SORTED:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=2, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ROUND, prefetch=0
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    READ, space=INTERNAL, address=228, b=T3, load=1
+    alu PASSA, a=T3, b=T4, dst=RF
+    alu SUB, a=T1, b=T4, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_ALIGNED, prefetch=0
+FP_ALIGN:
+    FOP, value=JAM_Y
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ALIGN, prefetch=0
+FP_ALIGNED:
+    READ, space=INTERNAL, address=230, b=T6, load=1
+    alu SUB, a=T6, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SUBTRACT, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SUBTRACT, prefetch=0
+    FOP, value=ADD
+    JUMP, target=FP_CARRY, prefetch=0
+FP_SUBTRACT:
+    FOP, value=SUB
+    JUMP, target=FP_NORMALIZE, prefetch=0
+FP_CARRY:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_ROUND, prefetch=0
+    FOP, value=SHR_X
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=1
+    WRITE, space=INTERNAL, address=226, b=T1
+    JUMP, target=FP_ROUND, prefetch=0
+FP_NORMALIZE:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ZERO_RESULT, prefetch=0
+FP_NORMAL_LOOP:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ROUND, prefetch=0
+    FOP, value=SHL_X
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu SUB, a=T1, b=T1, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    WRITE, space=INTERNAL, address=226, b=T1
+    JUMP, target=FP_NORMAL_LOOP, prefetch=0
+FP_ROUND:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ZERO_RESULT, prefetch=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_PACK, prefetch=0
+    FOP, value=ROUND
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_PACK, prefetch=0
+    FOP, value=SHR_X
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=1
+    WRITE, space=INTERNAL, address=226, b=T1
+FP_PACK:
+    FOP, value=PACK_X
+FP_CHECK_EXPONENT:
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu PASSA, a=T1, flags=NZVC, uflags=1
+    CJUMP, cond=N, uflags=1, target=FP_UNDERFLOW, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_UNDERFLOW, prefetch=0
+    alu SUB, a=T1, pair=AD, d=IMM, imm=255, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_COMMIT, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_COMMIT, prefetch=0
+FP_OVERFLOW:
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=256
+    alu AND, a=T0, pair=AD, d=IMM, imm=512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_OVER_ZERO, prefetch=0
+    alu ADD, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=8
+    WRITE, space=INTERNAL, address=134, b=T6
+    JUMP, target=FP_COMMIT, prefetch=0
+FP_OVER_ZERO:
+    WRITE, space=INTERNAL, address=134, b=T6
+    JUMP, target=FP_ZERO_RESULT, prefetch=0
+FP_UNDERFLOW:
+    alu AND, a=T0, pair=AD, d=IMM, imm=1024, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_ZERO_RESULT, prefetch=0
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=10
+    WRITE, space=INTERNAL, address=134, b=T6
+    JUMP, target=FP_COMMIT, prefetch=0
+FP_ZERO_RESULT:
+    FOP, value=ZERO_X
+FP_COMMIT:
+    alu SUB, a=T2, pair=AD, d=IMM, imm=64512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_STORE_OPERAND, prefetch=0
+    JUMP, target=FP_STORE_AC, prefetch=0
+FP_PRODUCT_SIGN:
+    READ, space=INTERNAL, address=230, b=T6, load=1
+    alu LSR, a=T6, b=T4, dst=RF
+    alu XOR, a=T4, b=T6, dst=RF
+    WRITE, space=INTERNAL, address=230, b=T6
+    RETURN, prefetch=0
+FP_MULTIPLY:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=3, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_MULTIPLY_ZERO, prefetch=0
+    CALL, target=FP_PRODUCT_SIGN, prefetch=0
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    READ, space=INTERNAL, address=228, b=T3, load=1
+    alu ADD, a=T3, b=T1, dst=RF
+    alu SUB, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=128
+    WRITE, space=INTERNAL, address=226, b=T1
+    FOP, value=MULTIPLIER
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=64
+FP_MULTIPLY_LOOP:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_MULTIPLY_SHIFT, prefetch=0
+    FOP, value=ADD_HIGH
+FP_MULTIPLY_SHIFT:
+    FOP, value=SHR_Z
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_MULTIPLY_LOOP, prefetch=0
+    FOP, value=PRODUCT
+    alu SUB, a=T2, pair=AD, d=IMM, imm=62208, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_MOD_PRODUCT, prefetch=0
+    JUMP, target=FP_NORMALIZE, prefetch=0
+FP_DIVIDE:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_DIVISOR_OK, prefetch=0
+    alu PASSA, b=T0, dst=RF, pair=DA, d=IMM, imm=4
+    JUMP, target=FP_ERROR_CODE, prefetch=0
+FP_DIVISOR_OK:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ZERO_RESULT, prefetch=0
+    CALL, target=FP_PRODUCT_SIGN, prefetch=0
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    READ, space=INTERNAL, address=228, b=T3, load=1
+    alu PASSA, a=T1, b=T4, dst=RF
+    alu SUB, a=T4, b=T3, dst=RF
+    alu ADD, a=T3, b=T3, dst=RF, pair=AD, d=IMM, imm=129
+    WRITE, space=INTERNAL, address=226, b=T3
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=4, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_DIVISION_INIT, prefetch=0
+    FOP, value=SHL_X
+    alu SUB, a=T3, b=T3, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    WRITE, space=INTERNAL, address=226, b=T3
+FP_DIVISION_INIT:
+    FOP, value=ZERO_Z
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=63
+FP_DIVISION_LOOP:
+    FOP, value=SHL_Z
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=4, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_DIVISION_SHIFT, prefetch=0
+    FOP, value=SUB
+    FOP, value=SET_Z0
+FP_DIVISION_SHIFT:
+    FOP, value=SHL_X
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_DIVISION_LOOP, prefetch=0
+    FOP, value=Z_TO_X
+    JUMP, target=FP_ROUND, prefetch=0
+FP_COMPARE:
+    READ, space=INTERNAL, address=230, b=T6, load=1
+    alu AND, a=T6, b=T4, dst=RF, pair=AD, d=TWO
+    alu LSL, a=T4, b=T4, dst=RF
+    alu LSL, a=T4, b=T4, dst=RF
+    alu SUB, a=T6, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_COMPARE_DONE, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_COMPARE_DONE, prefetch=0
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    READ, space=INTERNAL, address=228, b=T3, load=1
+    alu SUB, a=T3, b=T1, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_COMPARE_LESS, prefetch=0
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_COMPARE_DONE, prefetch=0
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=8, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_COMPARE_EQUAL, prefetch=0
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=4, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_COMPARE_DONE, prefetch=0
+FP_COMPARE_LESS:
+    alu XOR, a=T4, b=T4, dst=RF, pair=AD, d=IMM, imm=8
+    JUMP, target=FP_COMPARE_DONE, prefetch=0
+FP_COMPARE_EQUAL:
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_ZERO_RESULT, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=4
+FP_COMPARE_DONE:
+    alu BIC, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=15
+    alu OR, a=T4, b=T0, dst=RF
+    JUMP, target=FP_FINISH, prefetch=0
+FP_MULTIPLY_ZERO:
+    alu SUB, a=T2, pair=AD, d=IMM, imm=62208, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_MOD_ZERO, prefetch=0
+    JUMP, target=FP_ZERO_RESULT, prefetch=0
+FP_MOD_ZERO:
+    FOP, value=ZERO_X
+    CALL, target=FP_MOD_STORE_INTEGER, prefetch=0
+    JUMP, target=FP_ZERO_RESULT, prefetch=0
+FP_MOD_PRODUCT:
+    FOP, value=TRUNC59
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_MOD_SPLIT, prefetch=0
+    FOP, value=SHL_X
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu SUB, a=T1, b=T1, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    WRITE, space=INTERNAL, address=226, b=T1
+FP_MOD_SPLIT:
+    FOP, value=X_TO_Z
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu PASSA, a=T1, flags=NZVC, uflags=1
+    CJUMP, cond=N, uflags=1, target=FP_MOD_SMALL, prefetch=0
+    alu SUB, a=T1, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_MOD_SMALL, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_MOD_SMALL, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=152
+    alu AND, a=T0, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_MOD_LIMIT, prefetch=0
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=184
+FP_MOD_LIMIT:
+    alu SUB, a=T4, b=T1, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_MOD_LARGE, prefetch=0
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=32767
+    WRITE, space=INTERNAL, address=200, b=T6
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=65535
+    WRITE, space=INTERNAL, address=202, b=T6
+    WRITE, space=INTERNAL, address=204, b=T6
+    WRITE, space=INTERNAL, address=206, b=T6
+    READ, space=INTERNAL, address=226, b=T4, load=1
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=IMM, imm=128
+FP_MOD_MASK:
+    FOP, value=SHR_Y
+    alu SUB, a=T4, b=T4, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_MOD_MASK, prefetch=0
+    FOP, value=BIC
+    JUMP, target=FP_MOD_INTEGER, prefetch=0
+FP_MOD_LARGE:
+    FOP, value=ZERO_Y
+FP_MOD_INTEGER:
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu SUB, a=T1, pair=AD, d=IMM, imm=255, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_MOD_PACK_INTEGER, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_MOD_PACK_INTEGER, prefetch=0
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=256
+    alu AND, a=T0, pair=AD, d=IMM, imm=512, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_MOD_OVERFLOW, prefetch=0
+    WRITE, space=INTERNAL, address=134, b=T6
+    FOP, value=ZERO_X
+    JUMP, target=FP_MOD_PACK_INTEGER, prefetch=0
+FP_MOD_OVERFLOW:
+    alu ADD, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=8
+    WRITE, space=INTERNAL, address=134, b=T6
+FP_MOD_PACK_INTEGER:
+    FOP, value=PACK_X
+    CALL, target=FP_MOD_STORE_INTEGER, prefetch=0
+    FOP, value=Z_TO_X
+    FOP, value=AND
+    JUMP, target=FP_NORMALIZE, prefetch=0
+FP_MOD_SMALL:
+    FOP, value=ZERO_X
+    CALL, target=FP_MOD_STORE_INTEGER, prefetch=0
+    FOP, value=Z_TO_X
+    JUMP, target=FP_ROUND, prefetch=0
+FP_MOD_STORE_INTEGER:
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IR
+    alu AND, a=T6, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_MOD_INTEGER_DONE, prefetch=0
+    READ, space=INTERNAL, address=188, b=T1, load=1
+    alu ADD, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=8
+    CALL, target=FP_COPY_AC, prefetch=0
+FP_MOD_INTEGER_DONE:
+    RETURN, prefetch=0
+FP_CROSS_LOAD:
+    FOP, value=Y_TO_X
+    READ, space=INTERNAL, address=232, b=T6, load=1
+    alu XOR, a=T6, b=T6, dst=RF, pair=AD, d=ONE
+    WRITE, space=INTERNAL, address=232, b=T6
+    FOP, value=UNPACK_X
+    alu XOR, a=T6, b=T6, dst=RF, pair=AD, d=ONE
+    WRITE, space=INTERNAL, address=232, b=T6
+    JUMP, target=FP_ROUND, prefetch=0
+FP_CROSS_STORE:
+    FOP, value=UNPACK_X
+    READ, space=INTERNAL, address=232, b=T6, load=1
+    alu XOR, a=T6, b=T6, dst=RF, pair=AD, d=ONE
+    WRITE, space=INTERNAL, address=232, b=T6
+    JUMP, target=FP_ROUND, prefetch=0
+FP_LOAD_INTEGER:
+    FOP, value=Y_TO_X
+    alu PASSA, b=T3, dst=RF, pair=DA, d=IMM, imm=0
+    READ, space=INTERNAL, address=224, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_MAGNITUDE, prefetch=0
+    alu PASSA, b=T3, dst=RF, pair=DA, d=IMM, imm=1
+    FOP, value=NEGATE
+FP_INTEGER_MAGNITUDE:
+    WRITE, space=INTERNAL, address=230, b=T3
+    alu PASSA, b=T1, dst=RF, pair=DA, d=IMM, imm=144
+    alu AND, a=T0, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_EXPONENT, prefetch=0
+    alu PASSA, b=T1, dst=RF, pair=DA, d=IMM, imm=160
+FP_INTEGER_EXPONENT:
+    WRITE, space=INTERNAL, address=226, b=T1
+    FOP, value=SHR_X
+    JUMP, target=FP_NORMALIZE, prefetch=0
+FP_LOAD_EXPONENT:
+    READ, space=INTERNAL, address=200, b=T3, load=1
+    alu ADD, a=T3, b=T1, dst=RF, pair=AD, d=IMM, imm=128
+    WRITE, space=INTERNAL, address=226, b=T1
+    alu AND, a=T1, b=T1, dst=RF, pair=AD, d=IMM, imm=255
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    READ, space=INTERNAL, address=192, b=T6, load=1
+    alu BIC, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=32640
+    alu OR, a=T1, b=T6, dst=RF
+    WRITE, space=INTERNAL, address=192, b=T6
+    alu PASSA, a=T3, flags=NZVC, uflags=1
+    CJUMP, cond=N, uflags=1, target=FP_EXPONENT_NEGATIVE, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=127, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_COMMIT, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_COMMIT, prefetch=0
+    JUMP, target=FP_OVERFLOW, prefetch=0
+FP_EXPONENT_NEGATIVE:
+    alu SUB, a=T3, pair=AD, d=IMM, imm=65408, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_UNDERFLOW, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_UNDERFLOW, prefetch=0
+    JUMP, target=FP_COMMIT, prefetch=0
+FP_STORE_EXPONENT:
+    READ, space=INTERNAL, address=192, b=T6, load=1
+    alu AND, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=32640
+    alu LSR, a=T6, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu SUB, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=128
+    FOP, value=ZERO_X
+    WRITE, space=INTERNAL, address=192, b=T6
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_STORE_INTEGER:
+    FOP, value=UNPACK_X
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu SUB, a=T1, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_INTEGER_ZERO, prefetch=0
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_ZERO, prefetch=0
+    alu PASSA, b=T3, dst=RF, pair=DA, d=IMM, imm=144
+    alu AND, a=T0, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_LIMIT, prefetch=0
+    alu PASSA, b=T3, dst=RF, pair=DA, d=IMM, imm=160
+FP_INTEGER_LIMIT:
+    alu SUB, a=T3, b=T1, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_INTEGER_OVERFLOW, prefetch=0
+    READ, space=INTERNAL, address=226, b=T1, load=1
+    alu PASSA, b=T4, dst=RF, pair=DA, d=IMM, imm=191
+    alu SUB, a=T4, b=T1, dst=RF
+FP_INTEGER_SHIFT:
+    FOP, value=SHR_X
+    alu SUB, a=T1, b=T1, dst=RF, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_INTEGER_SHIFT, prefetch=0
+    READ, space=INTERNAL, address=198, b=T6, load=1
+    alu AND, a=T0, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_SIGN_CHECK, prefetch=0
+    READ, space=INTERNAL, address=196, b=T6, load=1
+FP_INTEGER_SIGN_CHECK:
+    READ, space=INTERNAL, address=230, b=T3, load=1
+    alu AND, a=T3, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_POSITIVE, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=32768, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=FP_INTEGER_SIGN, prefetch=0
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_INTEGER_OVERFLOW, prefetch=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_SIGN, prefetch=0
+    READ, space=INTERNAL, address=198, b=T6, load=1
+    alu PASSA, a=T6, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_INTEGER_OVERFLOW, prefetch=0
+    JUMP, target=FP_INTEGER_SIGN, prefetch=0
+FP_INTEGER_POSITIVE:
+    alu AND, a=T6, pair=AD, d=IMM, imm=32768, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_INTEGER_OVERFLOW, prefetch=0
+FP_INTEGER_SIGN:
+    alu AND, a=T3, pair=AD, d=IMM, imm=1, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_PACK, prefetch=0
+    FOP, value=NEGATE
+FP_INTEGER_PACK:
+    READ, space=INTERNAL, address=198, b=T6, load=1
+    READ, space=INTERNAL, address=196, b=T3, load=1
+    FOP, value=ZERO_X
+    alu AND, a=T0, pair=AD, d=IMM, imm=64, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_SHORT, prefetch=0
+    WRITE, space=INTERNAL, address=192, b=T3
+    WRITE, space=INTERNAL, address=194, b=T6
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_INTEGER_SHORT:
+    WRITE, space=INTERNAL, address=192, b=T6
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_INTEGER_OVERFLOW:
+    alu PASSA, b=T6, dst=RF, pair=DA, d=IMM, imm=512
+    alu AND, a=T0, pair=AD, d=IMM, imm=256, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_ERROR, prefetch=0
+    alu ADD, a=T6, b=T6, dst=RF, pair=AD, d=IMM, imm=6
+FP_INTEGER_ERROR:
+    WRITE, space=INTERNAL, address=134, b=T6
+FP_INTEGER_ZERO:
+    FOP, value=ZERO_X
+    JUMP, target=FP_STORE_OPERAND, prefetch=0
+FP_INTEGER_FLAGS:
+    alu BIC, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=15
+    READ, space=INTERNAL, address=192, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=32768, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_Z, prefetch=0
+    alu OR, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=8
+FP_INTEGER_Z:
+    READ, space=INTERNAL, address=194, b=T3, load=1
+    alu OR, a=T3, b=T6, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=FP_INTEGER_C, prefetch=0
+    alu OR, a=T0, b=T0, dst=RF, pair=AD, d=IMM, imm=4
+FP_INTEGER_C:
+    READ, space=INTERNAL, address=134, b=T6, load=1
+    alu AND, a=T6, pair=AD, d=IMM, imm=512, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_INTEGER_PSW, prefetch=0
+    alu OR, a=T0, b=T0, dst=RF, pair=AD, d=ONE
+FP_INTEGER_PSW:
+    alu AND, a=T0, b=T6, dst=RF, pair=AD, d=IMM, imm=15
+    alu PASSA, b=T3, dst=RF, pair=DA, d=PSW
+    alu BIC, a=T3, b=T3, dst=RF, pair=AD, d=IMM, imm=15
+    alu OR, a=T6, b=T3, flags=LOAD
+    JUMP, target=FP_FINISH, prefetch=0

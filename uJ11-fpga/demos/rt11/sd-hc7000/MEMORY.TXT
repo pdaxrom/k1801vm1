@@ -1,0 +1,25 @@
+EXTENDED MEMORY UNDER XM
+
+SHOW CONFIGURATION should report PDP 11/73A, 2048KB, MMU, Floating Point
+Microcode, EIS, 50 Cycle System Clock, 22 bit addressing on and RT11XM.
+SHOW MEMORY should report MEMTOP=10000000 (octal).
+@XMCHK runs these two commands without changing memory or disk contents.
+
+A user program still has a 16-bit virtual address space. XM maps its pages
+onto physical SRAM. The VM: handler uses extended RAM as a volatile disk.
+VM: contents are lost on power loss and must not be used as a backup.
+
+Optional memory/disk test. INITIALIZE below ERASES the contents of VM:.
+Use only when you have no files to keep on VM:.
+  INITIALIZE/NOQUERY VM:
+  COPY RT11XM.SYS VM:MMUTST.SYS
+  DIFFERENCES/BINARY RT11XM.SYS VM:MMUTST.SYS
+Expected: No differences found. Then remove the temporary copy:
+  UNPROTECT VM:MMUTST.SYS
+  DELETE/NOQUERY VM:MMUTST.SYS
+
+The RK611 SERV processor performs DMA in the low 256 KiB. CPU MMU maps
+all 2 MiB; the XM monitor/DMX handler handle the disk I/O buffer mapping.
+There is no VM2 HALT/USER bank ABI in this configuration.
+
+END MEMORY.TXT

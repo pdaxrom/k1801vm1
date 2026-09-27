@@ -1,0 +1,144 @@
+; J-11 FPP microcode. FPS/FEC/FEA/ACs are internal EBR words, not guest RAM.
+; Control instructions first; arithmetic families are added separately.
+.org $700
+FPP_ENTRY:
+    alu PASSA, pair=DA, d=TWO, b=T0, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=88, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=FP_DECODE, prefetch=0
+FP_DECODE:
+    alu PASSA, pair=DA, d=IR, b=T6, dst=RF
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170000, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_CFCC, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170001, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SETF, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170002, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SETI, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170011, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SETD, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170012, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_SETL, prefetch=0
+    alu BIC, a=T6, pair=AD, d=IMM, imm=63, b=T6, dst=RF
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170100, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_LDFPS, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170200, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_STFPS, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o170300, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=FP_STST, prefetch=0
+    JUMP, target=FP_EXEC, prefetch=0
+FP_GET_FPS:
+    alu PASSA, pair=DA, d=IMM, imm=128, b=T5, dst=RF
+    READ, space=INTERNAL, a=T5, target=FP_GOT_FPS, prefetch=0
+FP_GOT_FPS:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    RETURN, prefetch=0
+FP_SAVE_FPS:
+    alu PASSA, pair=DA, d=IMM, imm=128, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=NOP, prefetch=0
+FP_CFCC:
+    CALL, target=FP_GET_FPS, prefetch=0
+    alu AND, a=T0, pair=AD, d=IMM, imm=15, b=T0, dst=RF
+    alu PASSA, pair=DA, d=PSW, b=T1, dst=RF
+    alu BIC, a=T1, pair=AD, d=IMM, imm=15, b=T1, dst=RF
+    alu OR, a=T0, b=T1, flags=LOAD, seq=FETCH
+FP_SETF:
+    CALL, target=FP_GET_FPS, prefetch=0
+    alu BIC, a=T0, pair=AD, d=IMM, imm=128, b=T0, dst=RF
+    JUMP, target=FP_SAVE_FPS, prefetch=0
+FP_SETI:
+    CALL, target=FP_GET_FPS, prefetch=0
+    alu BIC, a=T0, pair=AD, d=IMM, imm=64, b=T0, dst=RF
+    JUMP, target=FP_SAVE_FPS, prefetch=0
+FP_SETD:
+    CALL, target=FP_GET_FPS, prefetch=0
+    alu OR, a=T0, pair=AD, d=IMM, imm=128, b=T0, dst=RF
+    JUMP, target=FP_SAVE_FPS, prefetch=0
+FP_SETL:
+    CALL, target=FP_GET_FPS, prefetch=0
+    alu OR, a=T0, pair=AD, d=IMM, imm=64, b=T0, dst=RF
+    JUMP, target=FP_SAVE_FPS, prefetch=0
+FP_LDFPS:
+    CALL, target=DESTINATION_EA, prefetch=0
+    OR_MD, target=FP_LOAD_MODE, prefetch=0
+.align 8
+FP_LOAD_MODE:
+    alu PASSA, a=RD, b=T0, dst=RF, seq=PAGE, next=FP_SAVE_FPS
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+    JUMP, target=FP_LOAD_MEMORY, prefetch=0
+FP_LOAD_MEMORY:
+    READ, a=T1, target=FP_LOAD_VALUE, prefetch=0
+FP_LOAD_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    JUMP, target=FP_SAVE_FPS, prefetch=0
+FP_STFPS:
+    CALL, target=DESTINATION_EA, prefetch=0
+    CALL, target=FP_GET_FPS, prefetch=0
+    OR_MD, target=FP_STORE_MODE, prefetch=0
+.align 8
+FP_STORE_MODE:
+    alu PASSA, a=T0, b=RD, dst=RF, seq=FETCH
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+FP_STORE_MEMORY:
+    WRITE, a=T1, b=T0, target=NOP, prefetch=0
+FP_STST:
+    alu PASSA, pair=DA, d=IMM, imm=4, b=T0, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=88, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=FP_STST_EA, prefetch=0
+FP_STST_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=130, b=T5, dst=RF
+    READ, space=INTERNAL, a=T5, target=FP_STST_FEC, prefetch=0
+FP_STST_FEC:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    OR_MD, target=FP_STST_MODE, prefetch=0
+.align 8
+FP_STST_MODE:
+    alu PASSA, a=T0, b=RD, dst=RF, seq=FETCH
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+    JUMP, target=FP_STST_MEMORY, prefetch=0
+FP_STST_MEMORY:
+    WRITE, a=T1, b=T0, target=FP_STST_NEXT, prefetch=0
+FP_STST_NEXT:
+    alu PASSA, pair=DA, d=IR, b=T6, dst=RF
+    alu AND, a=T6, pair=AD, d=IMM, imm=63, b=T6, dst=RF
+    alu SUB, a=T6, pair=AD, d=IMM, imm=0o27, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=NOP, prefetch=0
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+    alu ADD, a=T5, pair=AD, d=TWO, b=T5, dst=RF
+    READ, space=INTERNAL, a=T5, target=FP_STST_FEA, prefetch=0
+FP_STST_FEA:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    JUMP, target=FP_STORE_MEMORY, prefetch=0
+FP_ILLEGAL:
+    alu PASSA, pair=DA, d=TWO, b=T0, dst=RF
+FP_ERROR_CODE:
+    alu PASSA, pair=DA, d=IMM, imm=130, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=FP_ERROR_PC, prefetch=0
+FP_ERROR_PC:
+    alu PASSA, pair=DA, d=OP_PC, b=T0, dst=RF
+    alu ADD, a=T5, pair=AD, d=TWO, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=FP_ERROR_FPS, prefetch=0
+FP_ERROR_FPS:
+    CALL, target=FP_GET_FPS, prefetch=0
+    alu OR, a=T0, pair=AD, d=IMM, imm=0x8000, b=T0, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=FP_ERROR_TRAP, prefetch=0
+FP_ERROR_TRAP:
+    alu AND, a=T0, pair=AD, d=IMM, imm=0x4000, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=NOP, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=0o244, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0

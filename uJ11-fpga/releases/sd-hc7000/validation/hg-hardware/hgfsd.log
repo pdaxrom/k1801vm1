@@ -1,0 +1,100 @@
+hgfsd: JTAGENB low readback verified, HG enabled
+hgfsd: serving /home/sash/Work/FPGA/uj11-mmu-profile-20260927/build/hgx-board-03/volume/.hg-volume.dsk at 4000 Hz
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 73, 512 bytes (more)
+hgfsd: read block 74, 512 bytes (more)
+hgfsd: read block 75, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 76, 512 bytes (more)
+hgfsd: write block 77, 512 bytes (more)
+hgfsd: write block 78, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: local time, 50 ticks/sec
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 72, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: read block 38, 512 bytes (more)
+hgfsd: read block 39, 512 bytes (more)
+hgfsd: read block 40, 512 bytes (more)
+hgfsd: read block 41, 512 bytes (more)
+hgfsd: read block 42, 512 bytes (more)
+hgfsd: read block 43, 512 bytes (more)
+hgfsd: read block 44, 512 bytes (more)
+hgfsd: read block 45, 512 bytes (more)
+hgfsd: read block 46, 512 bytes (more)
+hgfsd: read block 47, 512 bytes (more)
+hgfsd: read block 48, 512 bytes (more)
+hgfsd: read block 49, 512 bytes (more)
+hgfsd: read block 50, 512 bytes (more)
+hgfsd: read block 51, 512 bytes (more)
+hgfsd: read block 52, 512 bytes (more)
+hgfsd: read block 53, 512 bytes (more)
+hgfsd: read block 54, 512 bytes (more)
+hgfsd: read block 55, 512 bytes (more)
+hgfsd: read block 56, 512 bytes (more)
+hgfsd: read block 57, 512 bytes (more)
+hgfsd: read block 58, 512 bytes (more)
+hgfsd: read block 59, 512 bytes (more)
+hgfsd: read block 60, 512 bytes (more)
+hgfsd: read block 61, 512 bytes (more)
+hgfsd: read block 62, 512 bytes (more)
+hgfsd: read block 63, 512 bytes (more)
+hgfsd: read block 64, 512 bytes (more)
+hgfsd: read block 65, 512 bytes (more)
+hgfsd: read block 66, 512 bytes (more)
+hgfsd: read block 67, 512 bytes (more)
+hgfsd: read block 68, 512 bytes (more)
+hgfsd: read block 69, 512 bytes (more)
+hgfsd: read block 70, 512 bytes (more)
+hgfsd: read block 71, 512 bytes
+hgfsd: read block 6, 512 bytes (more)
+hgfsd: read block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 79, 512 bytes (more)
+hgfsd: write block 80, 512 bytes (more)
+hgfsd: write block 81, 512 bytes (more)
+hgfsd: write block 82, 512 bytes (more)
+hgfsd: write block 83, 512 bytes (more)
+hgfsd: write block 84, 512 bytes (more)
+hgfsd: write block 85, 512 bytes (more)
+hgfsd: write block 86, 512 bytes (more)
+hgfsd: write block 87, 512 bytes (more)
+hgfsd: write block 88, 512 bytes (more)
+hgfsd: write block 89, 512 bytes (more)
+hgfsd: write block 90, 512 bytes (more)
+hgfsd: write block 91, 512 bytes (more)
+hgfsd: write block 92, 512 bytes (more)
+hgfsd: write block 93, 512 bytes (more)
+hgfsd: write block 94, 512 bytes (more)
+hgfsd: write block 95, 512 bytes (more)
+hgfsd: write block 96, 512 bytes (more)
+hgfsd: write block 97, 512 bytes (more)
+hgfsd: write block 98, 512 bytes (more)
+hgfsd: write block 99, 512 bytes (more)
+hgfsd: write block 100, 512 bytes (more)
+hgfsd: write block 101, 512 bytes (more)
+hgfsd: write block 102, 512 bytes (more)
+hgfsd: write block 103, 512 bytes (more)
+hgfsd: write block 104, 512 bytes (more)
+hgfsd: write block 105, 512 bytes (more)
+hgfsd: write block 106, 512 bytes (more)
+hgfsd: write block 107, 512 bytes (more)
+hgfsd: write block 108, 512 bytes (more)
+hgfsd: write block 109, 512 bytes (more)
+hgfsd: write block 110, 512 bytes (more)
+hgfsd: write block 111, 512 bytes (more)
+hgfsd: write block 112, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes
+hgfsd: write block 6, 512 bytes (more)
+hgfsd: write block 7, 512 bytes

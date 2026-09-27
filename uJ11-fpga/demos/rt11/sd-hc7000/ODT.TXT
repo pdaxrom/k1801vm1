@@ -1,0 +1,38 @@
+HC7000 MICROCODED ODT
+
+Short button press enters ODT. Long press resets the board and boots SD.
+The console prompt is >. Input is not echoed. Numbers are octal.
+Finish each command with Enter. Invalid input/access prints ?.
+
+  R 7           Saved PC
+  R 40          Saved PSW
+  R 20          Kernel SP
+  R 21          Supervisor SP
+  R 23          User SP
+  R 0 .. R 5    Main registers; R 10 .. R 15 are the second bank
+  F 0           FPS
+  F 1           FEC
+  F 2           FEA
+  F 4 .. F 7    Four words of AC0 (four words per accumulator)
+  P 17777776    PSW at its physical I/O address
+  P 34          Physical TRAP vector PC; P 36 reads vector PSW
+  M 6           Select User instruction space
+  V 1000        Read virtual address 001000 in selected space
+  W 123         Write value to the last R/F/P/V selection
+  C             Continue execution
+  S             Execute one instruction and stop
+
+M spaces: 0 KI, 1 KD, 2 SI, 3 SD, 6 UI, 7 UD.
+PSW is also visible at virtual 177776 when the I/O page is mapped there.
+Physical RAM spans 00000000-07777777; I/O spans 17760000-17777777.
+Reading device registers has the usual hardware side effects.
+
+To diagnose a failure, record R 7, R 40, R 20, R 23 and F 0/1/2 before
+changing anything. Read instruction words using M and V in the saved
+current mode. The saved PC can point past the instruction that stopped.
+W changes state; register/memory inspection alone does not change it.
+
+This ODT has no old HALT-space modules, disassembler or breakpoints.
+The HC1200 ODT.BIN manual and commands do not apply.
+
+END ODT.TXT
