@@ -4,7 +4,8 @@ import hashlib
 import json
 from board_common import ROOT,sources
 from build_mmu import build as cpu_build,CORE,OUT
-from build_iop_mmu import build as iop_build
+from build_iop_mmu import build as iop_build, profile as iop_profile
+from build_mmu import fpp_mode
 from build_software import native
 from iop_ebr import block
 
@@ -22,10 +23,14 @@ TOP='boards/hc7000/mmu/uj11_mmu_microcomp.v'
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 
 def build():
+    if iop_profile()=='storage' and fpp_mode()!='off':
+        raise ValueError('IOP=storage requires FPP=off: 8 KiB SERV RAM needs six additional EBRs')
     cpu=cpu_build();iop=iop_build()
-    raw,symbols,assembly,directory=native(ROOT/'firmware/boot/SDBASE.MAC')
+    boot_source='firmware/boot/SDIOP.MAC' if iop_profile()=='storage' else 'firmware/boot/SDBASE.MAC'
+    raw,symbols,assembly,directory=native(ROOT/boot_source)
     blob=raw[0o4000:symbols['IMEND']]
-    assert len(blob)==426
+    assert 0<len(blob)<=512
+    if iop_profile()=='legacy':assert len(blob)==426
     (OUT/'bootstrap.bin').write_bytes(blob)
     blob=blob.ljust(1024,b'\0')
     words=[int.from_bytes(blob[i:i+2],'little') for i in range(0,1024,2)]
@@ -42,7 +47,7 @@ def build():
         '`endif','`undef UJ11_BOOT_EBR','endmodule','']
     (OUT/'uj11_mmu_boot_rom.v').write_text('\n'.join(source))
     record=dict(cpu=cpu,iop=iop,bootstrap=dict(assembly=assembly,directory=str(directory.relative_to(ROOT))),
-        files={p:sha(ROOT/p) for p in CORE+BOARD+[TOP,'tools/build_mmu_board.py','firmware/boot/SDBASE.MAC']},
+        files={p:sha(ROOT/p) for p in CORE+BOARD+[TOP,'tools/build_mmu_board.py',boot_source]},
         scope='MMU board; physical-board qualification pending',fpp=cpu['fpp'],
         fp_arithmetic=cpu['fpp']=='microcode',boot_pc_octal='004000',sram_bytes=2097152,dma_address_bits=18)
     (OUT/'board-inputs.json').write_text(json.dumps(record,indent=2)+'\n')

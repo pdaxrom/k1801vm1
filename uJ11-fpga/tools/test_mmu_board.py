@@ -7,7 +7,7 @@ from pathlib import Path
 from board_common import ROOT
 from build_mmu_board import build,CORE,BOARD,sha
 
-def run(out,name,vendor=None,image=None,monitor='fb'):
+def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
     record=build();out.mkdir(parents=True,exist_ok=True)
     inventory=CORE+BOARD+['tests/mmu/'+name+'.v',
         'tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
@@ -28,6 +28,8 @@ def run(out,name,vendor=None,image=None,monitor='fb'):
         sim += [f'+SD_IMAGE={image.resolve()}',f'+UART_LOG={out}/uart.txt',f'+MONITOR={monitor}']
         record['sd_image_sha256']=image_hash
         record['sd_image']=str(image.resolve())
+        record['boot_menu']=boot_menu
+        if boot_menu:sim.append('+BOOT_MENU')
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     with (out/'simulation.log').open('w') as log:rc=subprocess.run(sim,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT).returncode
     print((out/'simulation.log').read_text()[-3000:])
@@ -44,4 +46,5 @@ if __name__=='__main__':
     p.add_argument('--vendor-library',type=Path)
     p.add_argument('--image',type=Path)
     p.add_argument('--monitor',choices=('fb','xm'),default='fb')
-    a=p.parse_args();run(a.out.resolve(),a.name,a.vendor_library,a.image,a.monitor)
+    p.add_argument('--boot-menu',action='store_true',help='allow the five-second SD menu autoboot')
+    a=p.parse_args();run(a.out.resolve(),a.name,a.vendor_library,a.image,a.monitor,a.boot_menu)

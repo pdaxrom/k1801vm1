@@ -11,7 +11,7 @@ from board_common import ROOT
 from iop_ebr import block, sector_ram
 
 OUT=ROOT/'build/hc7000-mmu-iop'
-SOURCES=['firmware/iop/start.S','firmware/iop-mmu/rk.c','firmware/iop/link.ld',
+LEGACY_SOURCES=['firmware/iop/start.S','firmware/iop-mmu/rk.c','firmware/iop/link.ld',
          'tools/build_iop_mmu.py','tools/iop_ebr.py']
 FLAGS=['-march=rv32i','-mabi=ilp32','-Os','-ffreestanding','-fno-builtin',
        '-fno-pic','-fno-stack-protector','-msmall-data-limit=0',
@@ -20,30 +20,52 @@ FLAGS=['-march=rv32i','-mabi=ilp32','-Os','-ffreestanding','-fno-builtin',
 
 def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 
+def profile():
+    mode=os.environ.get('UJ11_MMU_IOP','legacy')
+    if mode not in ('legacy','storage'):raise ValueError('UJ11_MMU_IOP must be legacy or storage')
+    return mode
+
+def sources():
+    if profile()=='legacy':return LEGACY_SOURCES
+    return ['firmware/storage/'+p for p in ('start.S','main.c','label.c','label.h','link.ld')]+['tools/build_iop_mmu.py','tools/iop_ebr.py']
+
 def ram(words):
-    lines=['// Generated 2 KiB RV32I RAM, two 512x18 EBRs with byte enables.',
-        'module uj11_mmu_iop_ram(input wire clk, enable, input wire [8:0] address,',
-        ' input wire [3:0] write_enable, input wire [31:0] write_data, output wire [31:0] data);',
+    banks=len(words)//512
+    lines=[f'// Generated {len(words)*4} byte RV32I RAM, {banks*2} EBRs with byte enables.',
+        'module uj11_mmu_iop_ram(input wire clk, enable, input wire [10:0] address,',
+        ' input wire [3:0] write_enable, input wire [31:0] write_data, output wire [31:0] data,',
+        ' output wire storage_enabled);',f"assign storage_enabled=1'b{int(banks==4)};",
         '`ifdef SYNTHESIS','`define UJ11_IOP_EBR',
         '`elsif UJ11_IOP_VENDOR_RAM','`define UJ11_IOP_EBR','`endif','`ifdef UJ11_IOP_EBR']
-    for half in range(2):
-        lo,hi=16*half,16*half+15
-        lines += [f'wire [15:0] wd{half}=write_data[{hi}:{lo}];',
-                  f'wire [1:0] we{half}=write_enable[{2*half+1}:{2*half}];',
-                  f'wire [15:0] rd{half};assign data[{hi}:{lo}]=rd{half};',
-                  block(f'half{half}','address',f'wd{half}',f'we{half}',f'rd{half}',
-                        [(w>>lo)&65535 for w in words])]
-    lines+=['`else','reg [31:0] words[0:511];reg [31:0] value;',
+    if banks>1:
+        lines+=['reg [1:0] read_bank;always @(posedge clk)if(enable && !(|write_enable))read_bank<=address[10:9];']
+    for bank in range(banks):
+        lines+=[f'wire bank{bank}_enable=enable'+(f" && address[10:9]==2'd{bank};" if banks>1 else ';'),
+                f'wire [31:0] bank{bank}_data;','wire [8:0] bank_address=address[8:0];' if bank==0 else '']
+        for half in range(2):
+            lo,hi=16*half,16*half+15
+            tag=f'b{bank}h{half}'
+            lines += [f'wire [15:0] {tag}_wd=write_data[{hi}:{lo}];',
+                      f'wire [1:0] {tag}_we=write_enable[{2*half+1}:{2*half}];',
+                      f'wire [15:0] {tag}_rd;assign bank{bank}_data[{hi}:{lo}]={tag}_rd;',
+                      block(tag,'bank_address',tag+'_wd',tag+'_we',tag+'_rd',
+                            [(w>>lo)&65535 for w in words[bank*512:(bank+1)*512]])
+                            .replace('enable &&',f'bank{bank}_enable &&')]
+    lines+=['assign data='+('bank0_data;' if banks==1 else
+        'read_bank==0 ? bank0_data : read_bank==1 ? bank1_data : read_bank==2 ? bank2_data : bank3_data;'),
+        '`else',f'reg [31:0] words[0:{len(words)-1}];reg [31:0] value;',
+        'wire ['+('8:0' if banks==1 else '10:0')+'] a=address;',
         'initial $readmemh("build/hc7000-mmu-iop/firmware.mem",words);',
         'always @(posedge clk) if(enable) begin',
-        ' if(!(|write_enable))value<=words[address];']
+        ' if(!(|write_enable))value<=words[a];']
     for lane in range(4):
-        lines.append(f' if(write_enable[{lane}])words[address][{8*lane+7}:{8*lane}]<=write_data[{8*lane+7}:{8*lane}];')
+        lines.append(f' if(write_enable[{lane}])words[a][{8*lane+7}:{8*lane}]<=write_data[{8*lane+7}:{8*lane}];')
     lines+=['end','assign data=value;','`endif','`undef UJ11_IOP_EBR','endmodule','']
     return '\n'.join(lines)
 
 def build(rebuild=False):
-    inputs={p:sha(ROOT/p) for p in SOURCES}
+    mode=profile();ram_bytes=8192 if mode=='storage' else 2048
+    inputs={p:sha(ROOT/p) for p in sources()}
     compiler=os.environ.get('RISCV_CC','riscv64-unknown-elf-gcc')
     record_path=OUT/'build.json'
     if record_path.exists() and not rebuild:
@@ -59,26 +81,27 @@ def build(rebuild=False):
     objects=[]
     # Stable object filenames keep the linker map reproducible too; direct
     # source-to-ELF linking embeds random /tmp/ccXXXX.o names in that report.
-    for name in ('start.S','rk.c'):
+    for source in (p for p in sources() if p.endswith(('.S','.c'))):
+        name=Path(source).name
         obj=OUT/(Path(name).stem+'.o');objects.append(str(obj))
-        subprocess.run([compiler]+FLAGS+['-c',str(ROOT/('firmware/iop-mmu' if name=='rk.c' else 'firmware/iop')/name),'-o',str(obj)],check=True,cwd=ROOT)
-    cmd=[compiler]+FLAGS+['-T',str(ROOT/'firmware/iop/link.ld'),
+        subprocess.run([compiler]+FLAGS+['-c',str(ROOT/source),'-o',str(obj)],check=True,cwd=ROOT)
+    cmd=[compiler]+FLAGS+['-T',str(ROOT/next(p for p in sources() if p.endswith('.ld'))),
         '-Wl,-Map='+str(OUT/'firmware.map')]+objects+['-o',str(OUT/'firmware.elf'),'-lgcc']
     subprocess.run(cmd,check=True,cwd=ROOT)
     subprocess.run([prefix+'objcopy','-O','binary',str(OUT/'firmware.elf'),str(OUT/'firmware.bin')],check=True)
     data=(OUT/'firmware.bin').read_bytes()
-    if len(data)>1536: raise ValueError('IOP program overlaps stack')
-    words=[int.from_bytes(data.ljust(2048,b'\0')[i:i+4],'little') for i in range(0,2048,4)]
+    if len(data)>ram_bytes-(1024 if mode=='storage' else 512): raise ValueError('IOP program overlaps stack')
+    words=[int.from_bytes(data.ljust(ram_bytes,b'\0')[i:i+4],'little') for i in range(0,ram_bytes,4)]
     (OUT/'firmware.mem').write_text(''.join(f'{w:08x}\n' for w in words))
     (OUT/'uj11_mmu_iop_ram.v').write_text(ram(words))
     (OUT/'uj11_sector_ram.v').write_text(sector_ram())
     (OUT/'firmware.lst').write_bytes(subprocess.check_output([prefix+'objdump','-d',str(OUT/'firmware.elf')]))
     version=subprocess.check_output([compiler,'--version'],text=True).splitlines()[0]
-    record=dict(inputs=inputs,flags=FLAGS,compiler=version,program_bytes=len(data),ram_bytes=2048,
+    record=dict(inputs=inputs,flags=FLAGS,compiler=version,program_bytes=len(data),ram_bytes=ram_bytes,ebr=ram_bytes//1024,profile=mode,
         outputs={p.name:sha(p) for p in OUT.iterdir() if p.name in
                  ('firmware.elf','firmware.bin','firmware.mem','firmware.map','firmware.lst','uj11_mmu_iop_ram.v','uj11_sector_ram.v')})
     record_path.write_text(json.dumps(record,indent=2)+'\n')
-    print(f'HC7000 MMU IOP: {len(data)} bytes RV32I, 2048 bytes RAM, {version}')
+    print(f'HC7000 MMU IOP: {len(data)} bytes RV32I, {ram_bytes} bytes RAM, {version}')
     return record
 
 if __name__=='__main__':

@@ -43,8 +43,17 @@ def program(u,a):
     while not re.search(rb'RT-11'+a.monitor.encode()+rb'[^\r\n]*V05\.03',u.capture[offset:]):
         if time.monotonic()>deadline:raise TimeoutError('No fresh RT-11 '+a.monitor+' banner')
         u.read(.1)
-    u.read(3);u.command('SET SL OFF')
     u.record['fresh_boot_monitor']=a.monitor
+    if a.boot_ready:
+        ready=a.boot_ready.encode('ascii');deadline=time.monotonic()+a.command_timeout
+        while True:
+            data=bytes(u.capture[offset:]);marker=data.find(ready)
+            if marker>=0 and re.search(rb'\r\n\.',data[marker+len(ready):]):break
+            if time.monotonic()>deadline:raise TimeoutError('No startup completion marker/prompt: '+a.boot_ready)
+            u.read(.1)
+        u.record['boot_ready']=a.boot_ready;u.read(.3)
+    else:u.read(3)
+    u.save();u.command('SET SL OFF')
 
 def run(a):
     u=UART(a)
@@ -64,6 +73,7 @@ def run(a):
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--build');p.add_argument('--monitor',choices=('FB','XM'),default='XM')
+    p.add_argument('--boot-ready',help='wait for this startup completion text and a following prompt before sending commands')
     p.add_argument('--hgfsd',type=Path);p.add_argument('--port',default='/dev/ttyUSB1')
     p.add_argument('--pause-pid',type=int);p.add_argument('--out',type=Path,required=True)
     p.add_argument('--phase',required=True);p.add_argument('--command',action='append',default=[])

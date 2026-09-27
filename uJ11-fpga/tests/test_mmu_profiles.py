@@ -15,7 +15,7 @@ from uj11mmuasm import assemble,AssemblyError
 # These checks intentionally start independent configurations, including when
 # invoked by `make ... FPP=off test`; do not inherit command-line overrides.
 MAKE_ENV={k:v for k,v in os.environ.items() if k not in
-          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','OUT')}
+          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','IOP','UJ11_MMU_IOP','OUT')}
 
 class Profiles(unittest.TestCase):
     def test_mmuless_sources_unchanged(self):
@@ -36,7 +36,9 @@ class Profiles(unittest.TestCase):
     def test_reject_unsupported_build_before_running_tools(self):
         for args in (['CPU=oops'],['CPU=mmu','BOARD=hc1200'],['CPU=mmu','BOARD=hc7000-lcd-sram','software'],
                      ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=oops'],['FPP=off'],
-                     ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=off','test-sd-image']):
+                     ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=off','test-sd-image'],
+                     ['IOP=storage'],['CPU=mmu','BOARD=hc7000-lcd-sram','IOP=storage'],
+                     ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=off','IOP=bogus']):
             result=subprocess.run(['make','-n',*args],cwd=ROOT,capture_output=True,text=True,env=MAKE_ENV)
             self.assertNotEqual(result.returncode,0,result.stdout)
 

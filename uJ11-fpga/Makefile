@@ -4,12 +4,14 @@ VVP ?= vvp
 BOARD ?= hc1200
 CPU ?= mmuless
 FPP ?= microcode
-OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp))
+IOP ?= legacy
+OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage))
 HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
 SD_OUT ?= build/$(if $(filter mmu,$(CPU)),sd-hc7000,sd)
 SD_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-sd-hc7000,test-sd)
-MMU_SD_IMAGE ?= ../lsi11/disks/rt11v5.3/system.dsk
+MMU_BOOT_MENU ?= 0
+MMU_SD_IMAGE ?= $(if $(filter storage,$(IOP)),build/storage-card.img,../lsi11/disks/rt11v5.3/system.dsk)
 
 ifeq ($(filter $(CPU),mmuless mmu),)
 $(error Unknown CPU=$(CPU); expected mmuless or mmu)
@@ -19,6 +21,15 @@ ifeq ($(filter $(FPP),microcode off),)
 $(error Unknown FPP=$(FPP); expected microcode or off)
 endif
 export UJ11_MMU_FPP := $(FPP)
+ifeq ($(filter $(IOP),legacy storage),)
+$(error Unknown IOP=$(IOP); expected legacy or storage)
+endif
+export UJ11_MMU_IOP := $(IOP)
+ifeq ($(IOP),storage)
+ifneq ($(FPP),off)
+$(error IOP=storage requires FPP=off)
+endif
+endif
 ifeq ($(FPP),off)
 ifneq ($(filter test-mmu-fpp test-sd-image,$(MAKECMDGOALS)),)
 $(error This target exercises FP11 programs and requires FPP=microcode; use test or test-rt11 for FPP=off)
@@ -29,10 +40,13 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and the 24 MHz MAP/PAR/TRACE gate.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-storage storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
+ifneq ($(IOP),legacy)
+$(error IOP selection is available only for CPU=mmu)
+endif
 ifneq ($(FPP),microcode)
 $(error FPP selection is available only for CPU=mmu)
 endif
@@ -142,7 +156,7 @@ test-odt: all
 	$(PYTHON) tools/test_odt_fpp.py --out build/test-odt-fpp
 test-rt11:
 ifeq ($(CPU),mmu)
-	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_boot --monitor xm --image $(MMU_SD_IMAGE) --out $(OUT)
+	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_boot --monitor xm --image $(MMU_SD_IMAGE) --out $(OUT) $(if $(filter 1,$(MMU_BOOT_MENU)),--boot-menu)
 else
 	$(PYTHON) tools/run_rt11.py --out $(OUT) --board $(BOARD)
 endif
@@ -197,8 +211,23 @@ test-mmu:
 
 .PHONY: test-mmu-board
 test-mmu-board:
+ifeq ($(IOP),storage)
+	$(PYTHON) tools/test_storage.py
+else
 	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_bus --out build/test-mmu-bus
 	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_disk --out build/test-mmu-disk
+endif
+
+.PHONY: test-storage storage-menu test-storage-menu
+storage-menu:
+	$(PYTHON) tools/build_storage_menu.py
+test-storage-menu:
+	$(PYTHON) -m unittest discover -s tests -p test_menu_image.py -q
+	$(PYTHON) tools/test_storage_menu.py
+
+test-storage:
+	$(PYTHON) -m unittest discover -s tests -p test_storage_label.py -q
+	$(PYTHON) tools/test_storage.py
 
 .PHONY: test-mmu-fpp
 test-mmu-fpp:

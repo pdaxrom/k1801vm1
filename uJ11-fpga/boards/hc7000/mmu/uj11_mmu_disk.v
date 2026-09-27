@@ -11,6 +11,8 @@ module uj11_mmu_disk #(
     input wire [15:0] rk_wdata,
     output wire [15:0] rk_rdata,
     output wire rk_ready, rk_irq,
+    output wire storage_enabled,
+    output wire [15:0] storage_status,
     input wire rk_irq_ack,
     input wire sd_request, sd_write, sd_byte,
     input wire [1:0] sd_address,
@@ -31,7 +33,7 @@ module uj11_mmu_disk #(
     wire [3:0] ds;
     wire ic,dc,de;
     reg ia_ack,da_ack,dseen;
-    wire memory_selected=da[31:11]==0;
+    wire memory_selected=storage_enabled ? da[31:13]==0 : da[31:11]==0;
     wire io_selected=da[31:10]==22'h100000;
     wire csr_selected=io_selected && da[9:8]==0;
     wire spi_selected=io_selected && da[9:8]==1;
@@ -59,13 +61,13 @@ module uj11_mmu_disk #(
         .i_ext_ready(1'b0),.o_mdu_valid());
 
     uj11_mmu_iop_ram ram(.clk(clk),.enable(ic || (dc && memory_selected)),
-        .address(dc && memory_selected ? da[10:2] : ia[10:2]),
+        .address(dc && memory_selected ? da[12:2] : ia[12:2]),
         .write_enable(ds & {4{data_accept && memory_selected && de && !iop_reset}}),
-        .write_data(dw),.data(mem_data));
+        .write_data(dw),.data(mem_data),.storage_enabled(storage_enabled));
     always @(posedge clk) begin
         if(iop_reset) begin ia_ack<=0;da_ack<=0;dseen<=0;end
         else begin
-            ia_ack<=ic && !ia_ack && !(dc && memory_selected) && ia[31:11]==0;
+            ia_ack<=ic && !ia_ack && !(dc && memory_selected) && (storage_enabled ? ia[31:13]==0 : ia[31:11]==0);
             da_ack<=0;
             if(!dc)dseen<=0;
             if(data_accept && (!spi_selected || iop_spi_done)) begin
@@ -87,7 +89,7 @@ module uj11_mmu_disk #(
         ({32{engine_selected}} & engine_data) |
         ({32{timer_selected}} & {16'b0,milliseconds});
 
-    uj11_mmu_rk611 registers(.clk(clk),.reset(reset),.request(rk_request),.write(rk_write),
+    uj11_mmu_rk611 registers(.clk(clk),.reset(reset),.storage_enabled(storage_enabled),.storage_status(storage_status),.request(rk_request),.write(rk_write),
         .address(rk_address),.lanes(rk_lanes),.wdata(rk_wdata),.rdata(rk_rdata),.ready(rk_ready),
         .irq_ack(rk_irq_ack),.irq(rk_irq),.busy(rk_busy),.cancel(cancel),
         .iop_write(data_accept && csr_selected && de && ds[0]),
@@ -101,8 +103,8 @@ module uj11_mmu_disk #(
         .dma_data(dma_data),.dma_ready(dma_ready),.dma_rdata(dma_rdata));
     always @(posedge clk) begin
         if(iop_reset) owner<=0;
-        else if(!owner && rk_busy && !sd_request && !spi_busy && sd_cs_n)owner<=1;
-        else if(owner && !rk_busy && !engine_busy && !spi_busy && sd_cs_n)owner<=0;
+        else if(!owner && (rk_busy || (storage_enabled && !storage_status[15])) && !sd_request && !spi_busy && sd_cs_n)owner<=1;
+        else if(owner && !rk_busy && (!storage_enabled || storage_status[15]) && !engine_busy && !spi_busy && sd_cs_n)owner<=0;
     end
     spi_byte_service #(.SLOW_DIV(SD_SLOW_DIV),.FAST_DIV(SD_FAST_DIV)) spi(
         .clk(clk),.rst(iop_reset),

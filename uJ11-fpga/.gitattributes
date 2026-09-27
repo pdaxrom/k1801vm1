@@ -22,3 +22,11 @@ releases/sd-hc7000/software/*.LST -whitespace
 releases/sd-hc7000/software/*.MAP -whitespace
 releases/sd-hc7000/**/*.log -whitespace
 releases/sd-hc7000/**/uart.txt -whitespace
+# SERV release evidence also retains raw vendor and console formatting.
+releases/hc7000-serv-*/synthesis/impl1/* -whitespace
+releases/hc7000-serv-*/**/*.log -whitespace
+releases/hc7000-serv-*/**/uart.txt -whitespace
+releases/hc7000-serv-*/**/*-uart.txt -whitespace
+releases/hc7000-serv-*/firmware/*.lst -whitespace
+releases/hc7000-serv-*/firmware/*.map -whitespace
+releases/hc7000-serv-*/menu/*.lst -whitespace

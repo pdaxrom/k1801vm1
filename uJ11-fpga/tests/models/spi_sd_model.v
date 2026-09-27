@@ -89,7 +89,7 @@ module spi_sd_model #(
 		begin response[tail] = value; tail = tail + 1; end
 	endtask
 	task command;
-		integer c, i;
+		integer c, i, csize;
 		reg previous_app;
 		reg [15:0] block_crc;
 		begin
@@ -130,6 +130,23 @@ module spi_sd_model #(
 				enqueue(initialized ? 0 : 1);
 				enqueue(bad_ocr ? 8'h80 : 8'hc0); enqueue(8'hff); enqueue(8'h80); enqueue(0);
 			end
+            9: begin
+                if (!initialized) enqueue(1);
+                else begin
+                    // SDHC CSD v2 capacity is in groups of 1024 sectors.
+                    csize = (image_sectors + 1023) / 1024 - 1;
+                    for(i=0;i<16;i=i+1)image_sector[i]=0;
+                    image_sector[0]=8'h40;
+                    image_sector[7]=(csize>>16)&63;
+                    image_sector[8]=(csize>>8)&255;
+                    image_sector[9]=csize&255;
+                    enqueue(0);enqueue(8'hff);enqueue(8'hfe);block_crc=0;
+                    for(i=0;i<16;i=i+1)begin
+                        enqueue(image_sector[i]);block_crc=crc16_byte(block_crc,image_sector[i]);
+                    end
+                    enqueue(block_crc[15:8]);enqueue(block_crc[7:0]);
+                end
+            end
 			13: begin enqueue(0); enqueue(bad_status ? 8'h04 : 8'h00); end
 			17: begin
 				read_count = read_count + 1;

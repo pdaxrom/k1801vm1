@@ -20,7 +20,7 @@ module tb_mmu_disk;
     reg absent=0,fail_read=0,fail_write=0,stuck_busy=0;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
         .clk(clk),.reset(reset),.rk_request(rr),.rk_write(rw),.rk_address(ra),.rk_lanes(rl),
-        .rk_wdata(wd),.rk_rdata(rd),.rk_ready(ready),.rk_irq(irq),.rk_irq_ack(irq_ack),
+        .rk_wdata(wd),.rk_rdata(rd),.rk_ready(ready),.rk_irq(irq),.storage_enabled(),.storage_status(),.rk_irq_ack(irq_ack),
         .sd_request(sr),.sd_write(sw),.sd_byte(1'b0),.sd_address(sa),.sd_wdata(sd),
         .sd_rdata(srd),.sd_ready(sready),.sd_error(serror),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),

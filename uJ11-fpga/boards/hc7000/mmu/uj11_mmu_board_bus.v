@@ -40,10 +40,13 @@ module uj11_mmu_board_bus #(
     wire timer_selected=io_page && offset==13'o17546;
     wire panel_selected=io_page && offset==13'o06000;
     wire maint_selected=io_page && offset==13'o17750;
+    wire storage_enabled;
+    wire [15:0] storage_status;
+    wire storage_selected=storage_enabled && io_page && offset==13'o17504;
     wire sd_selected=io_page && offset[12:2]==(13'o17500>>2);
     wire rk_selected=io_page && offset[12:5]==(13'o17440>>5);
     wire selected=ram_selected || rom_selected || uart_selected || timer_selected ||
-        panel_selected || maint_selected || sd_selected || rk_selected;
+        panel_selected || maint_selected || sd_selected || rk_selected || storage_selected;
     wire dma_request,dma_write,dma_ready,ram_ready;
     wire [17:0] dma_address;
     wire [15:0] dma_data,ram_data;
@@ -68,7 +71,7 @@ module uj11_mmu_board_bus #(
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV)) disk(
         .clk(clk),.reset(rst),.rk_request(request && rk_selected),.rk_write(writing),
         .rk_address(address[4:1]),.rk_lanes(lanes),.rk_wdata(write_data),.rk_rdata(rk_data),
-        .rk_ready(rk_ready),.rk_irq(rk_irq),.rk_irq_ack(irq_ack && irq_priority==5),
+        .rk_ready(rk_ready),.rk_irq(rk_irq),.storage_enabled(storage_enabled),.storage_status(storage_status),.rk_irq_ack(irq_ack && irq_priority==5),
         .sd_request(request && sd_selected),.sd_write(writing),.sd_byte(byte_access),
         .sd_address(address[1:0]),.sd_wdata(write_data),.sd_rdata(sd_data),.sd_ready(sd_ready),.sd_error(sd_error),
         .sd_cs_n(sd_cs_n),.sd_sck(sd_sck),.sd_mosi(sd_mosi),.sd_miso(sd_miso),
@@ -129,9 +132,9 @@ module uj11_mmu_board_bus #(
         ({16{uart_selected}} & uart_data) | ({16{sd_selected}} & sd_data) |
         ({16{rk_selected}} & rk_data) | ({16{panel_selected}} & panel_data) |
         ({16{timer_selected}} & {8'b0,timer_done,timer_ie,6'b0}) |
-        ({16{maint_selected}} & 16'o31);
+        ({16{maint_selected}} & 16'o31) | ({16{storage_selected}} & storage_status);
     assign ready=request && ((ram_selected && ram_ready) || (rom_selected && rom_phase==3) ||
         (uart_selected && uart_ready) || (sd_selected && sd_ready) || (rk_selected && rk_ready) ||
-        timer_selected || panel_selected || maint_selected || !selected);
+        timer_selected || panel_selected || maint_selected || storage_selected || !selected);
     assign error=request && (!selected || (sd_selected && sd_ready && sd_error));
 endmodule
