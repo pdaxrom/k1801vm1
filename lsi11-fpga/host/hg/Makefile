@@ -25,8 +25,14 @@ test: test_hg test_hg_service
 	./test_hg
 	./test_hg_service
 
-clean:
-	rm -f hgfsd test_hg test_hg_service
-	rm -rf hgfsd.dSYM test_hg.dSYM test_hg_service.dSYM
+test_hg_mpsse: test_hg_mpsse.c hg_mpsse.c hg_mpsse.h
+	$(CC) $(CFLAGS) $(FTDI_CFLAGS) -o $@ test_hg_mpsse.c $(FTDI_LIBS)
 
-.PHONY: all test clean
+test-mpsse: test_hg_mpsse
+	./test_hg_mpsse
+
+clean:
+	rm -f hgfsd test_hg test_hg_service test_hg_mpsse
+	rm -rf hgfsd.dSYM test_hg.dSYM test_hg_service.dSYM test_hg_mpsse.dSYM
+
+.PHONY: all test test-mpsse clean

@@ -13,6 +13,7 @@ int hg_mpsse_open(struct hg_mpsse *l, int v, int p, const char *s,
 	unsigned int i, unsigned int hz)
 { (void)l; (void)v; (void)p; (void)s; (void)i; (void)hz; return -1; }
 void hg_mpsse_close(struct hg_mpsse *l) { (void)l; }
+int hg_mpsse_jtag_enable(struct hg_mpsse *l, int e) { (void)l; (void)e; return 0; }
 int hg_mpsse_request_pending(struct hg_mpsse *l) { (void)l; return 0; }
 int hg_mpsse_select(struct hg_mpsse *l, int value)
 { (void)l; selected=value; return 0; }

@@ -32,5 +32,22 @@ class BoardClock(unittest.TestCase):
         r=copy.deepcopy(self.report);r['fmax_mhz']=29.0
         self.assertFalse(check_clock(r,self.trace,31.824)['timing_pass'])
 
+    def test_pll_input_is_not_system_fmax(self):
+        text=('Preference: FREQUENCY PORT "clk_ext" 12 MHz ;\n'
+              'Report: 150.015MHz is the maximum frequency for this preference.\n'+self.trace)
+        folder=ROOT/'releases/hc1200'
+        args=((folder/'design.mrp').read_text(),text,(folder/'design.par').read_text())
+        with self.assertRaises(ValueError):extract(*args)
+        result=extract(*args,clock='clk')
+        self.assertEqual(result['fmax_mhz'],self.report['fmax_mhz'])
+        self.assertTrue(result['timing_pass'])
+        with self.assertRaises(ValueError):extract(*args,clock='missing')
+
+    def test_io_failure_still_fails_selected_clock(self):
+        folder=ROOT/'releases/hc1200'
+        text=self.trace+'\nPreference: CLOCK_TO_OUT PORT "sram_data[*]" MAX 15 ns;\nCumulative negative slack: 1\n'
+        result=extract((folder/'design.mrp').read_text(),text,(folder/'design.par').read_text(),clock='clk')
+        self.assertFalse(check_clock(result,text,31.824)['timing_pass'])
+
 
 if __name__=='__main__':unittest.main()

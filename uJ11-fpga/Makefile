@@ -1,7 +1,8 @@
 PYTHON ?= python3
 IVERILOG ?= iverilog
 VVP ?= vvp
-OUT ?= build/hc1200
+BOARD ?= hc1200
+OUT ?= build/$(BOARD)
 HG_OUT ?= build/hg
 HG_TEST_OUT ?= build/test-hg
 SD_OUT ?= build/sd
@@ -13,7 +14,7 @@ SD_TEST_OUT ?= build/test-sd
 .PHONY: all hardware software hg test-hg-time sd-image test-sd-image test test-python test-rtl test-modules test-fpp test-fpp-full test-odt test-rt11 test-basic test-configuration test-reboot verify synthesis prepare-synthesis export clean
 all: hardware software
 hardware:
-	$(PYTHON) tools/build_hardware.py
+	$(if $(filter hc7000-lcd-sram,$(BOARD)),$(PYTHON) tools/build_hc7000.py,$(PYTHON) tools/build_hardware.py)
 software: hardware
 	$(PYTHON) tools/build_software.py
 	$(PYTHON) tools/build_fpp.py
@@ -78,16 +79,28 @@ test-odt: all
 	$(PYTHON) tools/test_panel.py --odt build/software/odt --out build/test-panel
 	$(PYTHON) tools/test_odt_fpp.py --out build/test-odt-fpp
 test-rt11:
-	$(PYTHON) tools/run_rt11.py --out $(OUT)
+	$(PYTHON) tools/run_rt11.py --out $(OUT) --board $(BOARD)
 test-basic:
+	@test "$(BOARD)" = hc1200 || { echo 'Use the HC7000 hardware BASIC tests; this simulation target is HC1200-only.'; exit 1; }
 	$(PYTHON) tools/run_basic.py --out $(OUT)
 test-configuration:
+	@test "$(BOARD)" = hc1200 || { echo 'The retained FRAM configuration simulation is HC1200-only.'; exit 1; }
 	$(PYTHON) tools/run_basic.py --configuration --out $(OUT)
 prepare-synthesis:
-	$(PYTHON) tools/synthesis.py $(notdir $(OUT)) --prepare-only
+	$(PYTHON) tools/synthesis.py $(notdir $(OUT)) --board $(BOARD) --prepare-only
 synthesis:
-	$(PYTHON) tools/synthesis.py $(notdir $(OUT))
+	$(PYTHON) tools/synthesis.py $(notdir $(OUT)) --board $(BOARD)
 export:
 	$(PYTHON) tools/export_jed.py $(notdir $(OUT))
 clean:
 	$(PYTHON) -c "import shutil; shutil.rmtree('build', ignore_errors=True)"
+
+.PHONY: test-sram test-hc7000-hg
+test-sram:
+	mkdir -p build/unit
+	$(IVERILOG) -g2012 -s tb_sram -o build/unit/sram tests/tb_sram.v boards/hc7000/uj11_sram.v tests/models/async_sram_model.v
+	$(VVP) build/unit/sram
+test-hc7000-hg:
+	mkdir -p build/unit
+	$(IVERILOG) -g2012 -s tb_hc7000_hg -o build/unit/hc7000-hg tests/tb_hc7000_hg.v boards/hc7000/uj11_hg_inputs.v
+	$(VVP) build/unit/hc7000-hg

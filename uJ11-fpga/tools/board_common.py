@@ -10,3 +10,20 @@ BOARD = ['boards/hc1200/'+n+'.v' for n in (
 BOARD += ['rtl/peripherals/spi_byte_service.v', 'rtl/peripherals/wbc_uart_xo2.v',
           'build/hardware/uj11_firmware_rom.v']
 TOP = 'boards/hc1200/uj11_microcomp.v'
+
+PROFILES = ('hc1200', 'hc7000-lcd-sram')
+
+
+def sources(profile='hc1200'):
+    """Explicit board inventory; legacy imports/defaults remain HC1200."""
+    if profile == 'hc1200':
+        return CORE.copy(), BOARD.copy(), TOP
+    if profile != 'hc7000-lcd-sram':
+        raise ValueError(f'Unknown board: {profile}')
+    core = [p.replace('build/hardware/', 'build/hc7000-hardware/') for p in CORE]
+    board = ['boards/hc7000/'+n+'.v' for n in
+             ('uj11_board', 'uj11_board_bus', 'uj11_sram', 'uj11_hg_inputs')]
+    board += ['boards/hc1200/'+n+'.v' for n in ('uj11_panel', 'uj11_tick', 'uj11_button')]
+    board += ['rtl/peripherals/spi_byte_service.v', 'rtl/peripherals/wbc_uart_xo2.v',
+              'build/hc7000-hardware/uj11_firmware_rom.v']
+    return core, board, 'boards/hc7000/uj11_microcomp.v'

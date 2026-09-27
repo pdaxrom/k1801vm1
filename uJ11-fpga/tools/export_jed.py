@@ -12,7 +12,8 @@ def main():
     assert re.fullmatch(r'[a-z][a-z0-9-]*',a.name)
     out=ROOT/'build'/a.name
     result=json.loads((out/'result.json').read_text())
-    assert result['device']=='LCMXO2-1200HC-4SG32C'
+    expected={'hc1200':'LCMXO2-1200HC-4SG32C','hc7000-lcd-sram':'LCMXO2-7000HC-4TG144C'}
+    assert result['device']==expected[result['inputs'].get('board','hc1200')]
     assert result['diamond_returncode']==0 and result['fully_routed'] and result['timing_pass']
     prefix=out/'impl1'/(a.name+'_impl1')
     for name,want in result['inputs']['files'].items():

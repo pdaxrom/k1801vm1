@@ -2,7 +2,7 @@
 """Prepare or run the production HC1200 MAP/PAR/TRACE gate."""
 import argparse, hashlib, json, os, re, subprocess
 import xml.etree.ElementTree as ET
-from board_common import ROOT, CORE, BOARD, TOP
+from board_common import ROOT, CORE, BOARD, TOP, PROFILES
 from build_hardware import build
 from report_synthesis import extract, check_clock
 
@@ -11,9 +11,13 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('name',help='fresh build directory name, e.g. hc1200-check')
     p.add_argument('--prepare-only',action='store_true')
+    p.add_argument('--board',choices=PROFILES,default='hc1200')
     p.add_argument('--clock-mhz',type=float,default=31.824)
     args=p.parse_args()
     if not re.fullmatch(r'[a-z][a-z0-9-]*',args.name):p.error('invalid build name')
+    if args.board != 'hc1200':
+        from synthesis_hc7000 import run
+        return run(args.name,args.prepare_only)
     if not 31.824<=args.clock_mhz<=100:p.error('FRAM timing requires at least 31.824 MHz constraint')
     args.fram_timing=True
     out=ROOT/'build'/args.name;out.mkdir(parents=True,exist_ok=True)

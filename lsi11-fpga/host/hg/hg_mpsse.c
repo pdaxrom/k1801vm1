@@ -11,6 +11,7 @@
 #define HG_PIN_TDO 0x04u
 #define HG_PIN_TMS 0x08u
 #define HG_MPSSE_DIRECTION (HG_PIN_TCK | HG_PIN_TDI | HG_PIN_TMS)
+#define HG_PIN_JTAGENB 0x80u
 
 static void hg_delay_us(unsigned int microseconds)
 {
@@ -146,11 +147,40 @@ fail:
 	return -1;
 }
 
+int hg_mpsse_jtag_enable(struct hg_mpsse *link, int enable)
+{
+	uint8_t command[2] = {GET_BITS_LOW, SEND_IMMEDIATE};
+	uint8_t pins;
+	link->jtag_adbus7 = 1;
+	/* Emulate open drain: only drive low, otherwise release to board R22. */
+	link->low_value &= (uint8_t)~HG_PIN_JTAGENB;
+	if (enable)
+		link->low_direction &= (uint8_t)~HG_PIN_JTAGENB;
+	else
+		link->low_direction |= HG_PIN_JTAGENB;
+	if (hg_set_low(link) != 0)
+		return -1;
+	hg_delay_us(1000);
+	if (hg_write_all(link->ftdi, command, sizeof(command)) != 0 ||
+	    hg_read_exact(link->ftdi, &pins, 1) != 0)
+		return -1;
+	if (!!(pins & HG_PIN_JTAGENB) != !!enable) {
+		errno = EIO;
+		return -1;
+	}
+	return 0;
+}
+
 void hg_mpsse_close(struct hg_mpsse *link)
 {
 	if (!link || !link->ftdi)
 		return;
 	link->low_value = 0;
+	/* Stop clock/select before returning the pins to the FPGA JTAG port. */
+	if (link->jtag_adbus7) {
+		hg_set_low(link);
+		hg_mpsse_jtag_enable(link, 1);
+	}
 	link->low_direction = 0;
 	hg_set_low(link);
 	ftdi_set_bitmode(link->ftdi, 0, BITMODE_RESET);

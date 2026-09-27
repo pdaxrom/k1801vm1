@@ -16,4 +16,5 @@ __pycache__/
 /host/hg/hgfsd
 /host/hg/test_hg
 /host/hg/test_hg_service
+/host/hg/test_hg_mpsse
 /host/hg/*.dSYM/

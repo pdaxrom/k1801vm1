@@ -15,6 +15,7 @@ HG TIME и foreground CLOCK установлены; [текущий компле
 | Настроить яркость и снизить ток дисплея | [Яркость HDSP](panel-brightness.md) |
 | Понять CPU, FRAM, SD/RK и периферию | [Архитектура](architecture.md) |
 | Собрать и проверить исходники | [Разработка](development.md) |
+| Собрать и запустить HC7000 с SRAM | [HC7000 hardware-lcd](hc7000.md), [план этапов](hc7000-port-plan.md) |
 | Написать и загрузить модуль | [ABI модулей](modules.md) |
 | Выключить/вернуть FPP | [Конфигурация](configuration.md) |
 | Проверить математику BASIC | [BASIC](basic.md) |

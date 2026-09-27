@@ -1,0 +1,16 @@
+# IS61WV102416BLL-10T, 24 MHz. Explicit conservative one-cycle I/O budgets.
+# Read: FPGA launch <=10 ns + SRAM tAA <=10 ns + assumed PCB round-trip <=2 ns.
+# The controller actually allows two access cycles and a full turnaround.
+# DQ data/tri-state launch <=15 ns. A setup cycle leaves >=26.6 ns before
+# WE assertion; a hold cycle leaves >=31.6 ns after WE deassertion.
+# WE pulse >=73.3 ns (two clocks minus 10 ns skew); tPWE>=8, tSD>=6 ns.
+# OE is off a full cycle before DQ ownership can change; tHZOE<=4 ns.
+# Board flight-time budget is an assumption, not an oscilloscope measurement.
+INPUT_SETUP PORT "sram_data[*]" INPUT_DELAY 22 NS HOLD 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_address[*]" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_data[*]" MAX 15 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_ce_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_oe_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_we_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_lb_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_ub_n" MAX 10 NS MIN 0 NS CLKNET "clk";

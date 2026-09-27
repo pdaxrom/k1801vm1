@@ -155,6 +155,8 @@ static void hg_usage(FILE *out)
 	fprintf(out,
 		"usage: hgfsd (--image FILE | --directory DIR) [options]\n"
 		"  --read-only       reject RT-11 writes\n"
+		"  --jtag-enable-adbus7  HC7000 jumper: switch JTAG to HG on start\n"
+		"  --jtag-only       release HC7000 JTAGENB and exit; no image needed\n"
 		"  TIME requests return host local date/time (TZ environment applies)\n"
 		"  --blocks N        directory image size (default 8192)\n"
 		"  --clock HZ        MPSSE clock (default 4000)\n"
@@ -189,6 +191,7 @@ int main(int argc, char **argv)
 	int vendor = 0x0403;
 	int product = 0x6010;
 	int read_only = 0;
+	int jtag_adbus7 = 0, jtag_only = 0;
 	struct hg_image image = {.fd = -1};
 	struct hg_mpsse link;
 	uint64_t last_write = 0;
@@ -203,6 +206,10 @@ int main(int argc, char **argv)
 			directory = argv[++i];
 		else if (strcmp(argv[i], "--read-only") == 0)
 			read_only = 1;
+		else if (strcmp(argv[i], "--jtag-enable-adbus7") == 0)
+			jtag_adbus7 = 1;
+		else if (strcmp(argv[i], "--jtag-only") == 0)
+			jtag_only = 1;
 		else if (strcmp(argv[i], "--blocks") == 0 && i + 1 < argc)
 			blocks = (unsigned int)hg_number(argv[++i], "--blocks");
 		else if (strcmp(argv[i], "--clock") == 0 && i + 1 < argc)
@@ -222,6 +229,19 @@ int main(int argc, char **argv)
 			hg_usage(stderr);
 			return 2;
 		}
+	}
+	if (jtag_only) {
+		if (image_path || directory || jtag_adbus7) {
+			hg_usage(stderr);
+			return 2;
+		}
+		if (hg_mpsse_open(&link, vendor, product, serial, index, clock_hz) != 0)
+			return 1;
+		int rc = hg_mpsse_jtag_enable(&link, 1);
+		hg_mpsse_close(&link);
+		if (rc != 0) { perror("JTAGENB readback"); return 1; }
+		fprintf(stderr, "hgfsd: JTAGENB released, high readback verified\n");
+		return 0;
 	}
 	if ((!image_path && !directory) || (image_path && directory)) {
 		hg_usage(stderr);
@@ -254,6 +274,12 @@ int main(int argc, char **argv)
 
 	signal(SIGINT, hg_signal);
 	signal(SIGTERM, hg_signal);
+	if (jtag_adbus7 && hg_mpsse_jtag_enable(&link, 0) != 0) {
+		perror("hgfsd: JTAGENB low readback");
+		goto out_link;
+	}
+	if (jtag_adbus7)
+		fprintf(stderr, "hgfsd: JTAGENB low readback verified, HG enabled\n");
 	fprintf(stderr, "hgfsd: serving %s at %u Hz%s\n", image_path,
 		link.clock_hz, read_only ? " read-only" : "");
 	/* Re-export a preserved image after restart, including writes that reached

@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 
 
-def extract(map_text, timing_text, par_text):
+def extract(map_text, timing_text, par_text, *, clock=None):
     result = {}
     for name, pattern in [('lut4','LUT4s'),('ff','registers'),('ebr','block RAMs'),('slices','SLICEs')]:
         m = re.search(r'Number of '+pattern+r':\s+(\d+)\s+out of\s+(\d+)',map_text)
@@ -15,7 +15,12 @@ def extract(map_text, timing_text, par_text):
             raise ValueError(f'MAP missing {name}')
         result[name] = int(m[1])
         result[name+'_capacity'] = int(m[2])
-    frequencies = re.findall(r'(?:Report|Warning):\s+([0-9.]+)MHz is the maximum frequency',timing_text)
+    frequency_text = timing_text
+    if clock is not None:
+        sections = re.split(r'(?=^Preference:)', timing_text, flags=re.M)
+        frequency_text = '\n'.join(s for s in sections if re.match(
+            r'Preference:\s+FREQUENCY NET "'+re.escape(clock)+r'"\s', s))
+    frequencies = re.findall(r'(?:Report|Warning):\s+([0-9.]+)MHz is the maximum frequency',frequency_text)
     slacks = re.findall(r'Cumulative negative slack:\s*(-?[0-9.]+)',timing_text)
     if len(frequencies) != 1 or not slacks:
         raise ValueError('Expected one clock preference and completed TRACE slack summary')
