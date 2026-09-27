@@ -123,9 +123,11 @@ module tb_cpu;
         pos='o1004000;
         word('o12706);word('o2000);
         word('o13704);word('o1000); // MOV @#1000,R4 uses UD, immediate is UI
-        word('o172427);word('o40200); // LDF #1: operand is in user I
-        word('o172037);word('o1004); // ADD @#1004: pointer in I, data in D
-        word('o174037);word('o1100); // STF result to user D
+        if(dut.fpp_enabled)begin
+            word('o172427);word('o40200); // LDF #1: operand is in user I
+            word('o172037);word('o1004); // ADD @#1004: pointer in I, data in D
+            word('o174037);word('o1100); // STF result to user D
+        end
         word(3); // BPT
         word('o12703);word('o1234);word('o104000); // EMT
         ram['o2001000/2]='o76543;ram['o1001000/2]='o11111;
@@ -147,8 +149,10 @@ module tb_cpu;
         debug_register_address=5;#1;check(debug_register_data==16'o2000,"MFPI accesses previous SP");
         debug_register_address=19;#1;check(debug_register_data==16'o2000,"user SP preserved across traps");
         check(psw[15:14]==0 && psw[13:12]==3,"EMT entered kernel before HALT");
-        check(ram['o2001100/2]=='o40500 && ram['o2001102/2]==0,"FPP user immediate uses I, operand/result use D");
-        check(ram['o1001100/2]=='o7777,"FPP user data store does not alias I space");
+        if(dut.fpp_enabled)begin
+            check(ram['o2001100/2]=='o40500 && ram['o2001102/2]==0,"FPP user immediate uses I, operand/result use D");
+            check(ram['o1001100/2]=='o7777,"FPP user data store does not alias I space");
+        end
         saved0=mmr0;saved1=mmr1;saved2=mmr2;saved_psw=psw;saved_pc=pc;
         command("R 3\015");check(uart_window=="001234\015\n>","ODT register octal display");
         command("W 5670\015");check(uart_window=="005670\015\n>","ODT register deposit readback");
@@ -163,6 +167,7 @@ module tb_cpu;
         check(mmr0==saved0 && mmr1==saved1 && mmr2==saved2,"ODT leaves guest MMU diagnostics unchanged");
         check(psw==saved_psw && pc==saved_pc,"ODT preserves guest PC/PSW");
         // Microcoded FPP control/state, including memory operands and faults.
+        if(dut.fpp_enabled)begin
         pos='o4000;
         word('o12706);word('o2000);
         word('o170011);word('o170012);word('o170200); // SETD; SETL; STFPS R0
@@ -190,6 +195,28 @@ module tb_cpu;
         command("F 4\015");command("W 40200\015");
         command("F 4\015");check(uart_window=="040200\015\n>","ODT deposits AC0 high word");
         check(psw==saved_psw && pc==saved_pc,"FP console access preserves guest context");
+        end else begin
+            // Probe control instructions and every FP opcode group. An absent
+            // FPP must trap before touching even an odd autoincrement operand.
+            for(i=0;i<18;i=i+1)begin
+                pos='o4000;word('o12706);word('o2000);
+                word('o12700);word('o160001);word('o277); // SCC
+                fp_error_pc=pos;
+                word(i==0 ? 16'o170000 : i==1 ? 16'o170011 : 16'o170020+((i-2)<<8));
+                word(0);
+                ram['o10/2]='o6000;ram['o12/2]='o340;
+                ram['o6000/2]='o5201;ram['o6002/2]=2; // INC R1; RTI
+                next_prompt=prompts+1;restart();wait_prompt(next_prompt);
+                debug_register_address=0;#1;check(debug_register_data=='o160001,"absent FPP leaves operand register unchanged");
+                debug_register_address=1;#1;check(debug_register_data==1,"absent FPP enters vector 010 exactly once");
+                check(ram['o1774/2]==fp_error_pc+2 && ram['o1776/2]=='o357,"absent FPP stacks next PC and original PSW");
+                check(pc==fp_error_pc+4 && psw=='o357,"RTI resumes after absent FPP instruction");
+            end
+            saved_pc=pc;saved_psw=psw;
+            command("F 0\015");check(uart_window[31:0]=="?\015\n>","ODT rejects absent FPS");
+            command("F 4\015");check(uart_window[31:0]=="?\015\n>","ODT rejects absent accumulator");
+            check(pc==saved_pc && psw==saved_psw,"absent FPP console access preserves context");
+        end
         // Register-set changes select an independent physical R0-R5 bank.
         pos='o4000;word('o12700);word(1);mov('o4000,'o177776);
         word('o12700);word(2);mov(0,'o177776);word(0);
@@ -242,6 +269,7 @@ module tb_cpu;
         debug_register_address=1;#1;check(debug_register_data==1,"IRQ handler and RTI executed");
         // STST's second word faults across a page boundary. The first write
         // is visible, but FP auto-update R3 and FPS have not committed.
+        if(dut.fpp_enabled)begin
         pos='o4000;word('o12706);word('o2000);
         mov(16'o177406,16'o172300);mov(0,16'o172340);
         mov(16'o177402,16'o172302);mov(16'o10000,16'o172342);
@@ -283,6 +311,7 @@ module tb_cpu;
         check(ram['o1310/2]=='o20076 && ram['o1320/2]=='o40200 && ram['o1330/2]=='o40200,"FP abort preserves source GPR, AC and FPS");
         check(ram['o1200/2]=='o40500 && ram['o1202/2]==0 && ram['o1204/2]==0 && ram['o1206/2]==0,"restarted D ADD returns exactly three");
         debug_register_address=0;#1;check(debug_register_data=='o20106,"FP restart commits postincrement exactly once");
+        end
         $display("\nPASS MMU CPU: %0d checks, %0d cycles",checks,cycles);$finish;
     end
 endmodule

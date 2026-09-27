@@ -74,6 +74,10 @@ ODT_REG_VALID:
     alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
     JUMP, target=ODT_SELECT, prefetch=0
 ODT_FP:
+    READ, space=INTERNAL, address=0x005a, b=T2, load=1, target=ODT_FP_PRESENT, prefetch=0
+ODT_FP_PRESENT:
+    alu PASSA, a=T2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_ERROR, prefetch=0
     alu SUB, a=T0, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
     CJUMP, cond=NOT_C, uflags=1, target=ODT_ERROR, prefetch=0
     alu LSL, a=T0, b=T0, dst=RF

@@ -3,7 +3,8 @@ IVERILOG ?= iverilog
 VVP ?= vvp
 BOARD ?= hc1200
 CPU ?= mmuless
-OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu)
+FPP ?= microcode
+OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp))
 HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
 SD_OUT ?= build/$(if $(filter mmu,$(CPU)),sd-hc7000,sd)
@@ -14,6 +15,15 @@ ifeq ($(filter $(CPU),mmuless mmu),)
 $(error Unknown CPU=$(CPU); expected mmuless or mmu)
 endif
 ifeq ($(CPU),mmu)
+ifeq ($(filter $(FPP),microcode off),)
+$(error Unknown FPP=$(FPP); expected microcode or off)
+endif
+export UJ11_MMU_FPP := $(FPP)
+ifeq ($(FPP),off)
+ifneq ($(filter test-mmu-fpp test-sd-image,$(MAKECMDGOALS)),)
+$(error This target exercises FP11 programs and requires FPP=microcode; use test or test-rt11 for FPP=off)
+endif
+endif
 ifneq ($(BOARD),hc7000-lcd-sram)
 $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
@@ -21,6 +31,10 @@ endif
 # Export validates source hashes and the 24 MHz MAP/PAR/TRACE gate.
 ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
+endif
+else
+ifneq ($(FPP),microcode)
+$(error FPP selection is available only for CPU=mmu)
 endif
 endif
 
@@ -73,7 +87,11 @@ verify: all
 	$(PYTHON) tools/verify_production.py
 
 ifeq ($(CPU),mmu)
+ifeq ($(FPP),off)
+test: test-mmu test-mmu-board
+else
 test: test-mmu test-mmu-fpp test-mmu-board
+endif
 else
 test: verify test-python test-rtl test-modules test-fpp test-odt
 endif
@@ -184,4 +202,5 @@ test-mmu-board:
 
 .PHONY: test-mmu-fpp
 test-mmu-fpp:
+	@test "$(FPP)" != off || { echo 'FPP tests require FPP=microcode'; exit 1; }
 	$(PYTHON) tools/test_mmu_fpp.py

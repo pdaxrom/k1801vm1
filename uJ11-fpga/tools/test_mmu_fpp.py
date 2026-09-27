@@ -9,6 +9,7 @@ from fpp_reference import prepare
 
 def run(out,families=None,smoke=False):
     out.mkdir(parents=True,exist_ok=True);hw=build()
+    if hw['fpp']!='microcode':raise ValueError('FPP tests require UJ11_MMU_FPP=microcode')
     reference=out/'reference';adaptation=prepare(reference)
     oracle=out/'oracle';all_vectors=out/'all-vectors.txt'
     sources=['tests/reference_fpp.c','tests/reference_fpp_add.h','tests/reference_fpp_muldiv.h','tools/fpp_reference.py']

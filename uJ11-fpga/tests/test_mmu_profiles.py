@@ -1,6 +1,7 @@
 """Regression boundary: selecting MMU must not change released CPU images."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -9,8 +10,12 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
 sys.path.insert(0,str(ROOT/'microasm'))
 from board_common import sources
-from build_mmu import CORE,MICROCODE,build
+from build_mmu import CORE,MICROCODE,build,fpp_mode
 from uj11mmuasm import assemble,AssemblyError
+# These checks intentionally start independent configurations, including when
+# invoked by `make ... FPP=off test`; do not inherit command-line overrides.
+MAKE_ENV={k:v for k,v in os.environ.items() if k not in
+          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','OUT')}
 
 class Profiles(unittest.TestCase):
     def test_mmuless_sources_unchanged(self):
@@ -29,8 +34,10 @@ class Profiles(unittest.TestCase):
         self.assertIn('rtl/mmu/uj11_mmu_cpu.v',CORE)
 
     def test_reject_unsupported_build_before_running_tools(self):
-        for args in (['CPU=oops'],['CPU=mmu','BOARD=hc1200'],['CPU=mmu','BOARD=hc7000-lcd-sram','software']):
-            result=subprocess.run(['make','-n',*args],cwd=ROOT,capture_output=True,text=True)
+        for args in (['CPU=oops'],['CPU=mmu','BOARD=hc1200'],['CPU=mmu','BOARD=hc7000-lcd-sram','software'],
+                     ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=oops'],['FPP=off'],
+                     ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=off','test-sd-image']):
+            result=subprocess.run(['make','-n',*args],cwd=ROOT,capture_output=True,text=True,env=MAKE_ENV)
             self.assertNotEqual(result.returncode,0,result.stdout)
 
     def test_board_targets_use_only_mmu_runners(self):
@@ -38,11 +45,27 @@ class Profiles(unittest.TestCase):
                             ('test-rt11','test_mmu_board.py'),('export','export_jed.py'),
                             ('sd-image','build_sd_mmu.py'),('test-sd-image','test_sd_mmu.py'),
                             ('hg','build_hgx.py'),('test-hg-time','test_hgx.py')):
-            result=subprocess.run(['make','-n','CPU=mmu','BOARD=hc7000-lcd-sram',goal],cwd=ROOT,capture_output=True,text=True)
+            result=subprocess.run(['make','-n','CPU=mmu','BOARD=hc7000-lcd-sram',goal],cwd=ROOT,capture_output=True,text=True,env=MAKE_ENV)
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertIn(runner,result.stdout)
             self.assertNotIn('build_hardware.py',result.stdout)
             self.assertNotIn('run_rt11.py',result.stdout)
+
+    def test_no_fpp_removes_microcode_bank_and_restores_enabled_build(self):
+        from build_mmu import OUT
+        enabled=build('microcode')
+        original=(OUT/'microcode.mem').read_bytes()
+        try:
+            disabled=build('off')
+            self.assertEqual(disabled['microcode_ebr'],12)
+            self.assertNotIn('FPP_ENTRY',json.loads((OUT/'labels.json').read_text()))
+            self.assertEqual((OUT/'uj11_mmu_rom.v').read_text().count('DP8KC #('),12)
+            self.assertLess(disabled['microcode_words'],enabled['microcode_words'])
+            with self.assertRaises(ValueError):fpp_mode('bogus')
+            build('microcode')
+            self.assertEqual((OUT/'microcode.mem').read_bytes(),original)
+        finally:
+            build()
 
 class Microassembler(unittest.TestCase):
     def test_high_target_and_immediate_do_not_overlap_flags(self):

@@ -43,8 +43,8 @@ def build():
     (OUT/'uj11_mmu_boot_rom.v').write_text('\n'.join(source))
     record=dict(cpu=cpu,iop=iop,bootstrap=dict(assembly=assembly,directory=str(directory.relative_to(ROOT))),
         files={p:sha(ROOT/p) for p in CORE+BOARD+[TOP,'tools/build_mmu_board.py','firmware/boot/SDBASE.MAC']},
-        scope='MMU board with microcoded FPP; physical-board qualification pending',
-        fp_arithmetic=True,boot_pc_octal='004000',sram_bytes=2097152,dma_address_bits=18)
+        scope='MMU board; physical-board qualification pending',fpp=cpu['fpp'],
+        fp_arithmetic=cpu['fpp']=='microcode',boot_pc_octal='004000',sram_bytes=2097152,dma_address_bits=18)
     (OUT/'board-inputs.json').write_text(json.dumps(record,indent=2)+'\n')
     return record
 

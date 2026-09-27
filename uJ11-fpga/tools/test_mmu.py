@@ -13,7 +13,8 @@ def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def run(out,vendor=None):
     hardware=build();out.mkdir(parents=True,exist_ok=True)
     inventory=CORE+['build/hc7000-mmu-hardware/uj11_mmu_rom.v']
-    tests=['tb_rom','tb_translate','tb_mmu','tb_cpu','tb_fp_datapath']
+    tests=['tb_rom','tb_translate','tb_mmu','tb_cpu']
+    if hardware['fpp']=='microcode':tests.append('tb_fp_datapath')
     hashes={p:sha(ROOT/p) for p in inventory+['tests/mmu/'+n+'.v' for n in tests]}
     extra=[]
     if vendor:

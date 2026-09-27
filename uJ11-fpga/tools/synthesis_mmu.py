@@ -58,7 +58,7 @@ exit 0
     for p in ('clock.lpf','build.tcl'):
         hashes['generated:'+p]=hashlib.sha256((out/p).read_bytes()).hexdigest()
     manifest=dict(name=name,board='hc7000-lcd-sram',top='uj11_mmu_microcomp',files=hashes,
-        mmu=True,defines=[],input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
+        mmu=True,fpp=hw['fpp'],defines=[],input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if prepare_only:
         print(f'Prepared {name}: {device}, 12 MHz reference / 24 MHz PLL, SRAM')
@@ -69,8 +69,8 @@ exit 0
             env=dict(os.environ,LD_PRELOAD=os.environ.get('DIAMOND_LIBSTDCPP','/lib/x86_64-linux-gnu/libstdc++.so.6')),
             stdout=log,stderr=subprocess.STDOUT).returncode
     prefix=out/'impl1'/f'{name}_impl1'
-    report=dict(inputs=manifest,scope='MMU profile with microcoded FPP; physical-board qualification pending',device=device,
-        constraint_mhz=24,input_clock_mhz=12,expected_ebr=hw['cpu']['microcode_ebr']+7,diamond_returncode=rc,
+    report=dict(inputs=manifest,scope='MMU profile; physical-board qualification pending',device=device,fpp=hw['fpp'],
+        constraint_mhz=24,input_clock_mhz=12,expected_ebr=hw['cpu']['microcode_ebr']+6+int(hw['fp_arithmetic']),diamond_returncode=rc,
         mmu=True,microcode_words=hw['cpu']['microcode_words'],external_pin_delays_constrained=True)
     try:
         timing=prefix.with_suffix('.twr').read_text()

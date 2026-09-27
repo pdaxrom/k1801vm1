@@ -28,8 +28,11 @@ module uj11_mmu_cpu #(
     input wire [4:0] debug_register_address
 );
     wire [53:0] instruction;
+    // The generated ROM supplies a build-time constant so the decoder and
+    // synthesized FPP hardware always match the selected microcode image.
+    wire fpp_enabled;
     uj11_mmu_rom #(.IMAGE(MICROCODE)) microstore(.clk(clk),.enable(reset || advance),
-        .address(next),.data(instruction));
+        .address(next),.data(instruction),.fpp_enabled(fpp_enabled));
     assign uword=instruction;
     wire control=uword[35];
     wire [3:0] command=uword[34:31];
@@ -63,7 +66,7 @@ module uj11_mmu_cpu #(
             0:d=0;
             1:d=1;
             2:d=2;
-            3:d=ir[15:12]==15 ? (a==7 && ir[5:3]==2 ? 16'd2 : {12'b0,fp_length}) : byte_instruction && a<6 ? 16'd1 : 16'd2;
+            3:d=fpp_enabled && ir[15:12]==15 ? (a==7 && ir[5:3]==2 ? 16'd2 : {12'b0,fp_length}) : byte_instruction && a<6 ? 16'd1 : 16'd2;
             4:d=mdr;
             5:d={{7{ir[7] && !ir[14]}},(ir[7:6] & {2{!ir[14]}}),ir[5:0],1'b0};
             6:d={uword[52:45],uword[7:0]};
@@ -79,7 +82,7 @@ module uj11_mmu_cpu #(
     wire [3:0] nzvc;
     wire unused_datapath=^{q[15:1],writeback[15:5]};
     wire rf_initialized,fp_initialized,rf_write;
-    wire initialized=rf_initialized && fp_initialized;
+    wire initialized=rf_initialized && (!fpp_enabled || fp_initialized);
     // Direct internal loads use MDR as a pipeline register. Otherwise the
     // path RF address -> internal register mux -> ALU -> RF/MMR crosses
     // two register-file reads and exceeds the 24 MHz MachXO2 budget.
@@ -90,8 +93,8 @@ module uj11_mmu_cpu #(
     wire request=initialized && bus_cycle && !reset && !turnaround;
     wire [15:0] internal_address=uword[42] ? 16'he0 : uword[41] ? {uword[52:45],uword[7:0]} : read_a;
     wire [15:0] internal_write_data=uword[42] ? {uword[52:45],uword[7:0]} : read_b;
-    wire fp_selected=internal_access && internal_address[15:6]==10'd2;
-    wire wide_selected=internal_access && internal_address[15:6]==10'd3;
+    wire fp_selected=fpp_enabled && internal_access && internal_address[15:6]==10'd2;
+    wire wide_selected=fpp_enabled && internal_access && internal_address[15:6]==10'd3;
     wire wide_ready;
     wire [15:0] wide_data;
     uj11_mmu_fp_datapath fp_datapath(.clk(clk),.reset(reset),
@@ -117,7 +120,7 @@ module uj11_mmu_cpu #(
     // J-11 FP addressing commits R0-R6 auto-updates only after successful
     // operand transfers. Forward a pending value for predecrement EA, and
     // discard it on abort. PC stream/pointer increments remain immediate.
-    wire fp_defer=ir[15:12]==15 && !control && uword[37] && b<7;
+    wire fp_defer=fpp_enabled && ir[15:12]==15 && !control && uword[37] && b<7;
     // Architectural RF commits never depend on the wide scratch ready mux.
     // Internal GPR writes are single-cycle accesses by definition (<0x40).
     wire local_step=initialized && !reset && !memory_op;
@@ -162,7 +165,8 @@ module uj11_mmu_cpu #(
             16'h50:internal_data=console_address;
             16'h52:internal_data={10'b0,console_high};
             16'h54:internal_data={14'b0,console_kind};
-            16'h58:internal_data={12'b0,fp_length};
+            16'h58:internal_data=fpp_enabled ? {12'b0,fp_length} : 16'b0;
+            16'h5a:internal_data={15'b0,fpp_enabled};
             default:internal_data=0;
         endcase
     end
@@ -177,7 +181,7 @@ module uj11_mmu_cpu #(
     wire byte_access=memory_op && !fetching && (uword[6] || (uword[3] && byte_instruction));
     wire [15:0] lane_data=byte_access && read_a[0] ? {read_b[7:0],8'b0} : read_b;
     reg delta_recorded;
-    wire read_delta=request && !memory_started && reading && uword[2] && !(ir[15:12]==15 && a<7);
+    wire read_delta=request && !memory_started && reading && uword[2] && !(fpp_enabled && ir[15:12]==15 && a<7);
     wire alu_delta=step && !control && uword[37] && rf_write && b<8 && !delta_recorded && !fp_defer;
     wire [4:0] read_amount=byte_instruction && a<6 && uword[3] ? 5'd1 : 5'd2;
     wire [4:0] alu_amount=writeback[4:0]-read_b[4:0];
@@ -235,7 +239,7 @@ module uj11_mmu_cpu #(
         if((decode_ir & 16'o177770)==16'o230 && psw[15:14]!=0)dispatch=12'h0b9;
         if((decode_ir & 16'o077700)==16'o6500)dispatch=12'h400;
         if((decode_ir & 16'o077700)==16'o6600)dispatch=12'h420;
-        if(decode_ir[15:12]==15)dispatch=12'h700;
+        if(decode_ir[15:12]==15)dispatch=fpp_enabled ? 12'h700 : 12'h042;
     end
     wire [11:0] boundary_target=debug_pending ? 12'h500 : trace_pending ? 12'h024 : irq_pending ? 12'h013 : 12'h020;
     wire [7:0] predicates={1'b0,1'b0,q[0],condition_flags[3:0],1'b1};
@@ -337,7 +341,7 @@ module uj11_mmu_cpu #(
                     16'h50:console_address<=read_b;
                     16'h52:console_high<=read_b[5:0];
                     16'h54:console_kind<=read_b[1:0];
-                    16'h58:fp_length<=read_b[3:0];
+                    16'h58:if(fpp_enabled)fp_length<=read_b[3:0];
                     default:begin end
                 endcase
             end
