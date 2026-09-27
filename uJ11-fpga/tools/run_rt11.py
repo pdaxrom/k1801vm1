@@ -76,6 +76,10 @@ def run(out, auto=False, profile='hc1200'):
         sources=[p for p in sources if p not in ('rtl/uj11_rom.v','tests/models/ODDRXE.v','tests/models/spi_fram_model.v')]
         sources+=['build/hc7000-hardware/uj11_rom_model.v','tests/models/async_sram_model.v']
     paths += [ROOT/p for p in sources]+[original,cases,Path(__file__),ROOT/'firmware/fpp/FPTST.MAC',src,out/'odt_symbols.vh',out/'firmware.mem',HW/'inputs.json',HW/'m0.mem',HW/'decode.mem']
+    if profile != 'hc1200':
+        from build_iop import SOURCES as iop_sources, OUT as iop_out
+        paths += [ROOT/p for p in iop_sources]+[ROOT/'tools/hc7000_testbench.py',
+            iop_out/'firmware.mem',iop_out/'build.json']
     manifest=dict(files={str(p.relative_to(ROOT)):sha(p) for p in paths},base_sha256=basehash,image_sha256=imagehash,
                   odt=od,bootstrap=sd,loader=ld,fp=fp,auto=auto,board=profile,guest_assembly=assembly,recovery_window_overrides=overrides)
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')

@@ -1,10 +1,10 @@
-// HC7000 SRAM bus. Decode/IRQ/firmware ABI derived unchanged from HC1200.
+// HC7000 SRAM bus with autonomous RK611/SERV and CPU/DMA arbitration.
 // UJ11_MMU remains undefined; experimental MMU sources are in Git history.
 `timescale 1ns/1ps
 
 // Derived from the lsi11-fpga AM4 bus. Combines KL11, KW11-L and panel GPIO
-// with USER/HALT SPI FRAM. Separate firmware EBR supplies the ordinary PDP-11
-// bootstrap, resident, cold walker and RK service. SD byte data/control is at
+// with USER/HALT SRAM. Separate firmware EBR supplies the ordinary PDP-11
+// bootstrap, resident and cold walker. SD byte data/control is at
 // 177500/177502. Cold startup releases the HALT ROM overlay before modules run.
 module uj11_hc7000_bus #(
 	parameter integer CLOCK_HZ = 24000000,
@@ -73,28 +73,14 @@ module uj11_hc7000_bus #(
 	localparam [15:0] BOOT_BASE = 16'o004000;
 	localparam [15:0] BOOT_LAST = 16'o004777;
 	localparam [15:0] RK_BASE = 16'o177440;
-	localparam [15:0] RK_LAST = 16'o177476;
-	localparam [15:0] RK_CS1 = 16'o177440;
-	localparam [15:0] RK_CS2 = 16'o177450;
-	localparam [15:0] RK_DS = 16'o177452;
-	localparam [15:0] SERVICE_BASE = 16'o160000;
-	localparam [15:0] SERVICE_RTI = 16'o160476;
 
 	wire [15:0] word_address = {address[15:1], 1'b0};
 	reg boot_overlay_active;
 	reg boot_release_armed;
 	reg boot_release_wait;
-	reg rk_service_pending;
-	reg rk_service_active;
-	assign debug_block=rk_service_active;
-	reg rk_service_movb;
-	reg rk_write_command;
-	reg rk_service_release;
+	wire rk_irq_pending, rk_ready;
 	reg rk_local_vector_ack;
-	reg rk_irq_pending;
-	reg rk_cs1_initialized;
-	reg rk_interrupt_enable;
-	reg rk_immediate_done;
+	assign debug_block=1'b0;
 
 	// Only the cold HALT PC/PSW pair is supplied by the small overlay.
 	// USER bootstrap and legacy USER ODT words now reside in FRAM.
@@ -108,29 +94,8 @@ module uj11_hc7000_bus #(
 
 	wire io_page = &address[15:13];
 
-	// 160000..160777 share one seven-bit prefix.  Bit 8 selects the compact
-	// extension; the service never branches into its unused upper aliases.
-	// The service executes from a ROM overlay in the CPU I/O page, but RK DMA
-	// addresses are physical Q-bus addresses and may occupy the full I/O page.
-	// A fetched MOVB word latches the service-copy phase until the next program
-	// word. READ copies use the write operand as physical memory; WRITE copies
-	// use the non-fetch read operand. This avoids a wide instruction-register
-	// decoder while keeping opcode and extension reads in the private ROM.
-	// Direction and RK state do not depend on the decoded address region.
-	wire service_dma_operand = RK_SERVICE_ENABLE && rk_service_active &&
-		rk_service_movb && ((!rk_write_command && write) ||
-		(rk_write_command && !write && !instruction_fetch));
-	wire service_dma_selected = io_page && service_dma_operand;
-
-	wire service_program_selected = !bank && !physical && RK_SERVICE_ENABLE && rk_service_active &&
-
-		!service_dma_selected && !write &&
-		word_address[15:9] == SERVICE_BASE[15:9];
-		wire program_selected = boot_program_selected || service_program_selected;
-	// A physical RK DMA operand wins over every CPU-visible device decode.
-	// Share the inhibited I/O-page term across the small-device decoders; this
-	// also prevents a DMA write from changing a coincident device CSR.
-	wire cpu_io_page = io_page && !service_dma_operand && !physical;
+	wire program_selected=boot_program_selected;
+	wire cpu_io_page=io_page && !physical;
 
 	wire uart_selected = cpu_io_page &&
 
@@ -149,50 +114,28 @@ module uj11_hc7000_bus #(
 
 	wire rk_selected = cpu_io_page && RK_SERVICE_ENABLE &&
 		word_address[12:5] == RK_BASE[12:5];
-	wire rk_cs1_selected = rk_selected && word_address[4:1] == 4'o0;
-	wire rk_cs2_selected = rk_selected && word_address[4:1] == 4'o4;
-	wire rk_ds_selected = rk_selected && word_address[4:1] == 4'o5;
-	wire rk_fixed_selected = rk_ds_selected ||
-		(rk_cs1_selected && !write &&
-		 (!rk_cs1_initialized || rk_immediate_done));
-	wire rk_store_selected = rk_selected && !rk_fixed_selected;
-
-	wire guest_fram_selected = physical || (!io_page && !boot_selected) ||
-
-		service_dma_selected;
-	wire fram_selected = guest_fram_selected;
-	wire firmware_selected = program_selected || rk_store_selected;
-	// Compute the small, zero-wait responses before the common I/O/DMA gate.
-	wire immediate_rk_response = RK_SERVICE_ENABLE &&
-		(word_address[12:1] == RK_DS[12:1] ||
-		 (word_address[12:1] == RK_CS1[12:1] && !write &&
-		  (!rk_cs1_initialized || rk_immediate_done)));
-	wire immediate_io_response = word_address[12:1] == LTC_CSR[12:1] ||
-		word_address[12:1] == PANEL_BASE[12:1] ||
-		word_address[12:0] == 13'o17750 || immediate_rk_response;
+	wire fram_selected=physical || (!io_page && !boot_selected);
+	wire firmware_selected=program_selected;
+	wire immediate_io_response=word_address[12:1]==LTC_CSR[12:1] ||
+		word_address[12:1]==PANEL_BASE[12:1] || word_address[12:0]==13'o17750;
 	wire uart_strobe = request && uart_selected;
 	wire sd_strobe = request && sd_selected;
 	wire [15:0] uart_rdata;
 	wire uart_ack;
 	wire uart_rts;
 	wire tx_irq, rx_irq, tx_irq_ack, rx_irq_ack;
-	wire vic_strobe = interrupt_strobe && !rk_service_pending &&
-		!rk_irq_pending && !rk_local_vector_ack;
+	wire vic_strobe = interrupt_strobe && !rk_irq_pending && !rk_local_vector_ack;
 	wire uart_irq = rx_irq || tx_irq;
 	wire [15:0] vic_data = rx_irq ? 16'o000060 : 16'o000064;
 	wire vic_ack = vic_strobe && uart_irq;
 	assign rx_irq_ack = vic_ack && rx_irq;
 	assign tx_irq_ack = vic_ack && !rx_irq && tx_irq;
 	wire fram_request = request && fram_selected;
-	wire fram_byte_access = write && byte_select != 2'b11;
-	// Reads return an aligned word; writes retain the byte address.
-	wire [15:0] fram_address = {address[15:1],write && address[0]};
-	wire [15:0] fram_wdata = byte_select == 2'b10 ?
-		{8'b0, wdata[15:8]} : wdata;
 	wire [15:0] fram_rdata;
 	wire fram_ready, fram_error, fram_busy;
 	wire [15:0] sd_rdata;
-	wire sd_ready, sd_error, sd_busy;
+	wire sd_ready, sd_error;
+	wire [15:0] rk_rdata;
 	reg boot_ack;
 	reg boot_program_ack;
 	reg [1:0] boot_rom_phase;
@@ -204,28 +147,40 @@ module uj11_hc7000_bus #(
 	wire [7:0] panel_output;
 	reg [15:0] local_rdata;
 
+    wire dma_request,dma_write,dma_ready;
+    wire [15:0] dma_address,dma_data;
+    wire memory_request,memory_write,memory_ready;
+    wire [19:0] memory_address;
+    wire [1:0] memory_lanes;
+    wire [15:0] memory_data;
+    uj11_sram_arbiter arbiter(.clk(clk),.reset(rst || peripheral_reset),
+        .cpu_request(fram_request),.cpu_write(write),.cpu_address({4'b0,bank,address[15:1]}),
+        .cpu_lanes(write ? byte_select : 2'b11),.cpu_data(wdata),.cpu_ready(fram_ready),
+        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),
+        .dma_data(dma_data),.dma_ready(dma_ready),
+        .request(memory_request),.write(memory_write),.address(memory_address),
+        .lanes(memory_lanes),.data(memory_data),.ready(memory_ready));
     uj11_sram guest_memory (
         .clk(clk), .power_on(power_on), .reset(rst || peripheral_reset),
-        .initialized(memory_initialized), .request(fram_request), .write(write),
-        .address({4'b0, bank && !service_dma_operand, address[15:1]}),
-        .byte_enable(write ? byte_select : 2'b11), .write_data(wdata),
-        .read_data(fram_rdata), .ready(fram_ready),
+        .initialized(memory_initialized), .request(memory_request), .write(memory_write),
+        .address(memory_address),.byte_enable(memory_lanes),.write_data(memory_data),
+        .read_data(fram_rdata), .ready(memory_ready),
         .sram_address(sram_address), .sram_data(sram_data),
         .sram_ce_n(sram_ce_n), .sram_oe_n(sram_oe_n), .sram_we_n(sram_we_n),
         .sram_lb_n(sram_lb_n), .sram_ub_n(sram_ub_n)
     );
     assign fram_error=1'b0;
     assign fram_busy=1'b0;
-
-	spi_byte_service #(
-		.SLOW_DIV(SD_SLOW_DIV), .FAST_DIV(SD_FAST_DIV)
-	) byte_sd (
-		.clk(clk), .rst(rst || peripheral_reset), .req(sd_strobe),
-		.write(write), .byte_access(byte_select != 2'b11),
-		.address(address[1:0]), .wdata(wdata), .rdata(sd_rdata),
-		.ready(sd_ready), .error(sd_error), .busy(sd_busy),
-		.cs_n(sd_cs_n), .sck(sd_sck), .mosi(sd_mosi), .miso(sd_miso)
-	);
+    uj11_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV)) disk(
+        .clk(clk),.reset(rst || peripheral_reset),
+        .rk_request(request && rk_selected),.rk_write(write),.rk_address(word_address[4:1]),
+        .rk_lanes(byte_select),.rk_wdata(wdata),.rk_rdata(rk_rdata),.rk_ready(rk_ready),
+        .rk_irq(rk_irq_pending),.rk_irq_ack(interrupt_strobe && rk_irq_pending && !rk_local_vector_ack),
+        .sd_request(sd_strobe),.sd_write(write),.sd_byte(byte_select!=2'b11),
+        .sd_address(address[1:0]),.sd_wdata(wdata),.sd_rdata(sd_rdata),.sd_ready(sd_ready),.sd_error(sd_error),
+        .sd_cs_n(sd_cs_n),.sd_sck(sd_sck),.sd_mosi(sd_mosi),.sd_miso(sd_miso),
+        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),.dma_data(dma_data),
+        .dma_ready(dma_ready),.dma_rdata(fram_rdata));
 
 	// Fixed initial HALT vector. Every USER address reads ordinary RAM.
 	always @(*) local_rdata = word_address[1] ? 16'o000340 : 16'o010652;
@@ -264,21 +219,23 @@ module uj11_hc7000_bus #(
 		(ltc_rdata & {16{ltc_selected}}) |
 		(panel_rdata & {16{panel_selected}}) |
 		(sd_rdata & {16{sd_selected}}) |
-		((rk_ds_selected ? 16'o100701 : 16'o000200) & {16{rk_fixed_selected}}) |
+		(rk_rdata & {16{rk_selected}}) |
 		(local_rdata & {16{local_boot_selected}});
 	assign rdata = firmware_selected ? boot_program_word :
 
 		fram_selected ? fram_rdata : small_rdata;
 
-	assign acknowledge = uart_ack || (sd_ready && !sd_error) ||
+	assign acknowledge = rk_ready || uart_ack || (sd_ready && !sd_error) ||
 		boot_ack || boot_program_ack || (fram_ready && !fram_error) ||
 		(request && cpu_io_page && immediate_io_response);
-	assign virq = rk_service_pending || rk_irq_pending || uart_irq;
-	// uJ11 samples the resolved vector on the accepting IRQ edge.
-	assign interrupt_vector = rk_service_pending ? SERVICE_BASE :
-		rk_irq_pending ? 16'o000210 : vic_data;
-	assign interrupt_priority = rk_service_pending ? 3'd7 : rk_irq_pending ? 3'd5 : 3'd4;
+	assign virq = rk_irq_pending || uart_irq;
+	assign interrupt_vector = rk_irq_pending ? 16'o000210 : vic_data;
+	assign interrupt_priority = rk_irq_pending ? 3'd5 : 3'd4;
 	assign interrupt_acknowledge = rk_local_vector_ack || vic_ack;
+	always @(posedge clk) begin
+		if(rst || peripheral_reset || !interrupt_strobe)rk_local_vector_ack<=0;
+		else if(rk_irq_pending)rk_local_vector_ack<=1;
+	end
 
 	// The bootstrap sets control bit 2 immediately before CLR PC.  Its first
 	// read at address zero can then expose all RAM, including 024/026 and the
@@ -311,10 +268,8 @@ module uj11_hc7000_bus #(
 	end
 
 	// A complete PDP-11 word comes from one synchronous firmware EBR.
-	// Words 0f0..0ff are writable RK storage, outside both firmware images.
-	assign boot_rom_addr = rk_store_selected ? {6'b001111,word_address[4:1]} :
-		{bank && word_address[10],service_program_selected || (bank && word_address[9]),word_address[8:1]};
-	assign boot_rom_write = {2{rk_store_selected && write}} & byte_select;
+	assign boot_rom_addr = {bank && word_address[10],bank && word_address[9],word_address[8:1]};
+	assign boot_rom_write = 2'b0;
 	assign boot_rom_ena = boot_rom_phase == 1 && !rst && !peripheral_reset;
 	always @(posedge clk) begin
 		if (rst || peripheral_reset) begin
@@ -332,90 +287,6 @@ module uj11_hc7000_bus #(
 				boot_rom_phase <= 0;
 			end
 		endcase
-	end
-
-	// Writable RK words share unused firmware EBR cells. Before
-	// the first CS1 write (and after controller clear), CS1 reads as DONE.  The
-	// only persistent RTL state is command/interrupt sequencing.
-	always @(posedge clk) begin
-		if (rst || peripheral_reset) begin
-			rk_service_pending <= 0;
-			rk_service_active <= 0;
-			rk_service_movb <= 0;
-			rk_write_command <= 0;
-			rk_service_release <= 0;
-			rk_local_vector_ack <= 0;
-			rk_irq_pending <= 0;
-			rk_cs1_initialized <= 0;
-			rk_interrupt_enable <= 0;
-			rk_immediate_done <= 0;
-		end else begin
-			if (!interrupt_strobe) begin
-				rk_local_vector_ack <= 0;
-			end else if (!rk_local_vector_ack) begin
-				if (rk_service_pending) begin
-					rk_local_vector_ack <= 1;
-					rk_service_pending <= 0;
-					rk_service_active <= 1;
-				end else if (rk_irq_pending) begin
-					rk_local_vector_ack <= 1;
-					rk_irq_pending <= 0;
-				end
-			end
-
-			if (boot_rom_phase == 2 && rk_cs1_selected && write && byte_select[0]) begin
-				rk_cs1_initialized <= 1;
-				rk_interrupt_enable <= wdata[6];
-				rk_immediate_done <= 0;
-				if (wdata[0]) begin
-					if (wdata[5:2] == 4'o4 || wdata[5:1] == 5'o5) begin
-// READ/WRITE and RECALIBRATE complete through firmware.
-						rk_service_pending <= 1;
-						rk_irq_pending <= 0;
-						rk_write_command <= wdata[1];
-					end else if (wdata[5:1] == 5'o0 ||
-						wdata[5:1] == 5'o1) begin
-						// NOP and PACK ACK complete without media traffic.
-						// RT-11 uses both while bringing up the RK611.
-						rk_immediate_done <= 1;
-						rk_irq_pending <= wdata[6];
-					end
-				end else begin
-					if (!wdata[6])
-						rk_irq_pending <= 0;
-					else if (!rk_service_active && wdata[7])
-						rk_irq_pending <= 1;
-				end
-			end
-
-			// Guest CS1 bit 15 is CCLR, not a request for another IRQ.
-			// The private service uses the same EBR word to publish CERR.
-			if (boot_rom_phase == 2 && write &&
-				((rk_cs2_selected && byte_select[0] && wdata[5]) ||
-				 (rk_cs1_selected && byte_select[1] && wdata[15] && !rk_service_active))) begin
-				rk_cs1_initialized <= 0;
-				rk_interrupt_enable <= 0;
-				rk_service_pending <= 0;
-				rk_irq_pending <= 0;
-				rk_immediate_done <= 0;
-				rk_service_movb <= 0;
-				rk_write_command <= 0;
-			end
-
-			if (rk_service_active && program_selected && boot_program_ack && request)
-				rk_service_movb <= boot_program_word[15:12] == 4'h9;
-
-			if (rk_service_active && program_selected && boot_program_ack && request &&
-				word_address == SERVICE_RTI)
-				rk_service_release <= 1;
-			if (rk_service_release && !request) begin
-				rk_service_release <= 0;
-				rk_service_active <= 0;
-				rk_service_movb <= 0;
-				if (rk_interrupt_enable)
-					rk_irq_pending <= 1;
-			end
-		end
 	end
 
 	// The small reset overlay responds like a registered ROM.  Unmapped I/O and
@@ -480,5 +351,4 @@ module uj11_hc7000_bus #(
 
 	wire unused_uart_rts = uart_rts;
 	wire unused_fram_busy = fram_busy;
-	wire unused_sd_busy = sd_busy;
 endmodule

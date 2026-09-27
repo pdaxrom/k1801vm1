@@ -7,6 +7,8 @@ OUT = ROOT/'build/hc7000-hardware'
 
 
 def hardware():
+    from build_iop import build as build_iop
+    iop = build_iop()
     record = build()
     OUT.mkdir(parents=True, exist_ok=True)
     for p in BASE.iterdir():
@@ -19,7 +21,7 @@ def hardware():
     (OUT/'uj11_rom_model.v').write_text(portable)
     (OUT/'profile.json').write_text(json.dumps(dict(board='hc7000-lcd-sram',
         device='LCMXO2-7000HC-4TG144C',input_clock_hz=12000000,
-        system_clock_hz=24000000,source_hardware=record),indent=2)+'\n')
+        system_clock_hz=24000000,source_hardware=record,iop=iop),indent=2)+'\n')
     return record
 
 

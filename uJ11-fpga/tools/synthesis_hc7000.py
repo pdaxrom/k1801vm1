@@ -9,6 +9,7 @@ from pathlib import Path
 from board_common import ROOT, sources
 from build_hc7000 import hardware, OUT as HW
 from report_synthesis import extract, check_clock
+from build_iop import SOURCES as IOP_SOURCES, OUT as IOP_OUT
 
 
 def run(name,prepare_only=False):
@@ -48,6 +49,10 @@ exit 0
         'boards/hc7000/pins.lpf','boards/hc7000/sram-timing.lpf','boards/hc7000/synthesis.sty',
         'tools/synthesis_hc7000.py','tools/board_common.py','tools/build_hc7000.py',
         'tools/report_synthesis.py'}
+    inputs.update(IOP_SOURCES)
+    inputs.update(str(IOP_OUT.relative_to(ROOT)/p) for p in
+                  ('build.json','firmware.bin','firmware.mem','uj11_iop_ram.v','uj11_sector_ram.v'))
+    inputs.add('vendor/serv/UPSTREAM.json')
     hashes={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in sorted(inputs)}
     for p in ('clock.lpf','build.tcl'):
         hashes['generated:'+p]=hashlib.sha256((out/p).read_bytes()).hexdigest()
@@ -63,8 +68,8 @@ exit 0
             env=dict(os.environ,LD_PRELOAD=os.environ.get('DIAMOND_LIBSTDCPP','/lib/x86_64-linux-gnu/libstdc++.so.6')),
             stdout=log,stderr=subprocess.STDOUT).returncode
     prefix=out/'impl1'/f'{name}_impl1'
-    report=dict(inputs=manifest,scope='HC7000 SRAM UART SD HG',device=device,
-        constraint_mhz=24,input_clock_mhz=12,expected_ebr=7,diamond_returncode=rc,
+    report=dict(inputs=manifest,scope='HC7000 SRAM UART SD HG, autonomous RK611/SERV/DMA',device=device,
+        constraint_mhz=24,input_clock_mhz=12,expected_ebr=11,diamond_returncode=rc,
         mmu=False,microcode_words=hw['microcode_words'],external_pin_delays_constrained=True)
     try:
         timing=prefix.with_suffix('.twr').read_text()

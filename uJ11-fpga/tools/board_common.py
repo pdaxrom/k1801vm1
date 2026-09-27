@@ -22,8 +22,15 @@ def sources(profile='hc1200'):
         raise ValueError(f'Unknown board: {profile}')
     core = [p.replace('build/hardware/', 'build/hc7000-hardware/') for p in CORE]
     board = ['boards/hc7000/'+n+'.v' for n in
-             ('uj11_board', 'uj11_board_bus', 'uj11_sram', 'uj11_hg_inputs')]
+             ('uj11_board', 'uj11_board_bus', 'uj11_sram', 'uj11_hg_inputs',
+              'uj11_sram_arbiter', 'uj11_disk', 'uj11_rk611', 'uj11_sector_engine')]
     board += ['boards/hc1200/'+n+'.v' for n in ('uj11_panel', 'uj11_tick', 'uj11_button')]
     board += ['rtl/peripherals/spi_byte_service.v', 'rtl/peripherals/wbc_uart_xo2.v',
-              'build/hc7000-hardware/uj11_firmware_rom.v']
+              'build/hc7000-hardware/uj11_firmware_rom.v', 'build/hc7000-iop/uj11_iop_ram.v',
+              'build/hc7000-iop/uj11_sector_ram.v']
+    board += ['vendor/serv/rtl/'+name+'.v' for name in (
+        'serv_bufreg', 'serv_bufreg2', 'serv_alu', 'serv_csr', 'serv_ctrl',
+        'serv_decode', 'serv_immdec', 'serv_mem_if', 'serv_rf_if', 'serv_rf_ram_if',
+        'serv_rf_ram', 'serv_state', 'serv_debug', 'serv_top', 'serv_rf_top',
+        'serv_aligner', 'serv_compdec')]
     return core, board, 'boards/hc7000/uj11_microcomp.v'

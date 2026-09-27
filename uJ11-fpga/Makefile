@@ -104,3 +104,10 @@ test-hc7000-hg:
 	mkdir -p build/unit
 	$(IVERILOG) -g2012 -s tb_hc7000_hg -o build/unit/hc7000-hg tests/tb_hc7000_hg.v boards/hc7000/uj11_hg_inputs.v
 	$(VVP) build/unit/hc7000-hg
+
+.PHONY: iop test-hc7000-disk
+iop:
+	$(PYTHON) tools/build_iop.py
+test-hc7000-disk:
+	$(PYTHON) tools/test_hc7000_disk.py --memory --icarus --out build/test-hc7000-iop-ram
+	$(PYTHON) tools/test_hc7000_disk.py
