@@ -65,55 +65,43 @@ UNSUPPORTED:
     STOP
 
 ; Source mode 0 is sampled AFTER destination EA updates, as on DCJ11.
-.org $030
-CAPTURE_REGISTER_SOURCE:
-    OR_MS, target=CAPTURE_TABLE, prefetch=0
-.org $038
-CAPTURE_TABLE:
+; Memory sources tail into destination EA after saving their operand.
+.org $1dd
+REGISTER_SOURCE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
     alu PASSA, a=RS, b=T0, dst=RF
-    RETURN, prefetch=0
-    RETURN, prefetch=0
-    RETURN, prefetch=0
-    RETURN, prefetch=0
-    RETURN, prefetch=0
-    RETURN, prefetch=0
     RETURN, prefetch=0
 
 .org $118
 MOV_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=MOV_DESTINATION, prefetch=0
 .org $128
 CMP_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=CMP_DESTINATION, prefetch=0
 .org $168
 ADD_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=ADD_DESTINATION, prefetch=0
 
 .org $200
-SOURCE_EA:
+TWO_OPERAND_EA:
     OR_MS, target=SOURCE_TABLE, prefetch=0
 .org $208
 SOURCE_TABLE:
-    RETURN, prefetch=0
-    JUMP, target=SOURCE_1, prefetch=0
-    JUMP, target=SOURCE_2, prefetch=0
-    JUMP, target=SOURCE_3, prefetch=0
-    JUMP, target=SOURCE_4, prefetch=0
-    JUMP, target=SOURCE_5, prefetch=0
-    JUMP, target=SOURCE_6, prefetch=0
-    JUMP, target=SOURCE_7, prefetch=0
-.org $220
-SOURCE_1:
+    JUMP, target=REGISTER_SOURCE_EA, prefetch=0
     READ, a=RS, byte=IR, target=SOURCE_SAVE, prefetch=0
+    READ, a=RS, byte=IR, stream=1, target=SOURCE_2_INC, fault_inc=1, prefetch=0
+    READ, a=RS, stream=1, target=SOURCE_3_INC, fault_inc=1, prefetch=0
+    alu SUB, a=RS, b=RS, pair=AD, d=STEP, dst=RF, delta=1, seq=PAGE, next=SOURCE_4_CONT
+    alu SUB, a=RS, b=RS, pair=AD, d=TWO, dst=RF, delta=1, seq=PAGE, next=SOURCE_5_CONT
+    READ, a=R7, stream=1, target=SOURCE_6_INC, prefetch=0
+    READ, a=R7, stream=1, target=SOURCE_7_INC, prefetch=0
+.org $220
+SOURCE_DESTINATION:
+    CALL, target=DESTINATION_EA, prefetch=0
+    RETURN, prefetch=0
 .org $224
 SOURCE_2:
     READ, a=RS, byte=IR, stream=1, target=SOURCE_2_INC, fault_inc=1, prefetch=0
@@ -129,10 +117,12 @@ SOURCE_3_INC:
 .org $238
 SOURCE_4:
     alu SUB, a=RS, b=RS, pair=AD, d=STEP, dst=RF, delta=1
+SOURCE_4_CONT:
     READ, a=RS, byte=IR, target=SOURCE_SAVE, prefetch=0
 .org $240
 SOURCE_5:
     alu SUB, a=RS, b=RS, pair=AD, d=TWO, dst=RF, delta=1
+SOURCE_5_CONT:
     READ, a=RS, target=SOURCE_INDIRECT, prefetch=0
 .org $248
 SOURCE_6:
@@ -153,9 +143,9 @@ SOURCE_INDIRECT:
     READ, a=T3, byte=IR, target=SOURCE_SAVE, prefetch=0
 .org $260
 SOURCE_SAVE:
-    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF
-    RETURN, prefetch=0
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF, seq=PAGE, next=SOURCE_DESTINATION
 
+; Dispatch slots issue their first EA operation directly, avoiding a JUMP.
 ; Destination EA does not read the final operand. MOV must never read its
 ; destination CSR. CMP/ADD read only in their execution routines below.
 .org $280
@@ -164,20 +154,22 @@ DESTINATION_EA:
 .org $288
 DESTINATION_TABLE:
     RETURN ; source ready, destination is register: safe lookahead window
-    JUMP, target=DESTINATION_1, prefetch=0
-    JUMP, target=DESTINATION_2, prefetch=0
-    JUMP, target=DESTINATION_3, prefetch=0
-    JUMP, target=DESTINATION_4, prefetch=0
-    JUMP, target=DESTINATION_5, prefetch=0
-    JUMP, target=DESTINATION_6, prefetch=0
-    JUMP, target=DESTINATION_7, prefetch=0
+    alu PASSA, a=RD, b=T1, dst=RF, seq=PAGE, next=DESTINATION_1_CONT
+    alu PASSA, a=RD, b=T1, dst=RF, seq=PAGE, next=DESTINATION_2_CONT
+    READ, a=RD, stream=1, target=DESTINATION_3_INC, fault_inc=1, prefetch=0
+    alu SUB, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1, seq=PAGE, next=DESTINATION_4_CONT
+    alu SUB, a=RD, b=RD, pair=AD, d=TWO, dst=RF, delta=1, seq=PAGE, next=DESTINATION_5_CONT
+    READ, a=R7, stream=1, target=DESTINATION_6_INC, prefetch=0
+    READ, a=R7, stream=1, target=DESTINATION_7_INC, prefetch=0
 .org $2a0
 DESTINATION_1:
     alu PASSA, a=RD, b=T1, dst=RF
+DESTINATION_1_CONT:
     RETURN, prefetch=0
 .org $2a4
 DESTINATION_2:
     alu PASSA, a=RD, b=T1, dst=RF
+DESTINATION_2_CONT:
     alu ADD, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1
     RETURN, prefetch=0
 .org $2a8
@@ -189,11 +181,13 @@ DESTINATION_3_INC:
 .org $2b0
 DESTINATION_4:
     alu SUB, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1
+DESTINATION_4_CONT:
     alu PASSA, a=RD, b=T1, dst=RF
     RETURN, prefetch=0
 .org $2b4
 DESTINATION_5:
     alu SUB, a=RD, b=RD, pair=AD, d=TWO, dst=RF, delta=1
+DESTINATION_5_CONT:
     READ, a=RD, target=DESTINATION_FROM_MDR, prefetch=0
 .org $2b8
 DESTINATION_6:
@@ -217,13 +211,13 @@ DESTINATION_FROM_MDR:
 .org $300
 MOV_DESTINATION:
     alu PASSA, a=T0, b=RD, dst=MOV, flags=NZV, seq=FETCH
-    JUMP, target=MOV_MEMORY, prefetch=0
-    JUMP, target=MOV_MEMORY, prefetch=0
-    JUMP, target=MOV_MEMORY, prefetch=0
-    JUMP, target=MOV_MEMORY, prefetch=0
-    JUMP, target=MOV_MEMORY, prefetch=0
-    JUMP, target=MOV_MEMORY, prefetch=0
-    JUMP, target=MOV_MEMORY, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
 .org $310
 MOV_MEMORY:
     WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
@@ -232,36 +226,34 @@ MOV_MEMORY_FLAGS:
 .org $320
 CMP_DESTINATION:
     alu SUB, a=T0, b=RD, flags=NZVC, seq=FETCH
-    JUMP, target=CMP_MEMORY, prefetch=0
-    JUMP, target=CMP_MEMORY, prefetch=0
-    JUMP, target=CMP_MEMORY, prefetch=0
-    JUMP, target=CMP_MEMORY, prefetch=0
-    JUMP, target=CMP_MEMORY, prefetch=0
-    JUMP, target=CMP_MEMORY, prefetch=0
-    JUMP, target=CMP_MEMORY, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
 .org $330
 CMP_MEMORY:
     READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
 CMP_MEMORY_CAPTURE:
-    alu PASSA, b=T2, pair=DA, d=MDR, dst=RF
-    alu SUB, a=T0, b=T2, flags=NZVC, seq=FETCH
+    alu SUB, a=T0, pair=AD, d=MDR, flags=NZVC, seq=FETCH
 .org $340
 ADD_DESTINATION:
     alu ADD, a=T0, b=RD, dst=OPERAND, flags=NZVC, seq=FETCH
-    JUMP, target=ADD_MEMORY, prefetch=0
-    JUMP, target=ADD_MEMORY, prefetch=0
-    JUMP, target=ADD_MEMORY, prefetch=0
-    JUMP, target=ADD_MEMORY, prefetch=0
-    JUMP, target=ADD_MEMORY, prefetch=0
-    JUMP, target=ADD_MEMORY, prefetch=0
-    JUMP, target=ADD_MEMORY, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
 .org $350
 ADD_MEMORY:
     READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
 ADD_MEMORY_CAPTURE:
-    alu PASSA, b=T2, pair=DA, d=MDR, dst=RF
-    alu PASSA, a=T2, b=T3, dst=RF
-    alu ADD, a=T0, b=T2, dst=OPERAND
+    alu PASSA, b=T3, pair=DA, d=MDR, dst=RF
+    alu ADD, a=T0, b=T2, pair=AD, d=MDR, dst=RF
     WRITE, a=T1, byte=IR, b=T2, target=ADD_MEMORY_FLAGS, prefetch=0
 ADD_MEMORY_FLAGS:
     ; Recompute from saved old destination; flags commit only after write ACK.
@@ -272,52 +264,46 @@ BIT_RR:
     alu AND, a=RS, b=RD, pair=AB, flags=NZV, seq=FETCH
 .org $138
 BIT_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=BIT_DESTINATION, prefetch=0
 .org $360
 BIT_DESTINATION:
     alu AND, a=T0, b=RD, pair=AB, flags=NZV, seq=FETCH
-    JUMP, target=BIT_MEMORY, prefetch=0
-    JUMP, target=BIT_MEMORY, prefetch=0
-    JUMP, target=BIT_MEMORY, prefetch=0
-    JUMP, target=BIT_MEMORY, prefetch=0
-    JUMP, target=BIT_MEMORY, prefetch=0
-    JUMP, target=BIT_MEMORY, prefetch=0
-    JUMP, target=BIT_MEMORY, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
 .org $370
 BIT_MEMORY:
     READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
 BIT_MEMORY_CAPTURE:
-    alu PASSA, b=T2, pair=DA, d=MDR, dst=RF
-    alu AND, a=T0, b=T2, pair=AB, flags=NZV, seq=FETCH
+    alu AND, a=T0, pair=AD, d=MDR, flags=NZV, seq=FETCH
 
 .org $140
 BIC_RR:
     alu BIC, a=RS, b=RD, pair=BA, dst=OPERAND, flags=NZV, seq=FETCH
 .org $148
 BIC_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=BIC_DESTINATION, prefetch=0
 .org $380
 BIC_DESTINATION:
     alu BIC, a=T0, b=RD, pair=BA, dst=OPERAND, flags=NZV, seq=FETCH
-    JUMP, target=BIC_MEMORY, prefetch=0
-    JUMP, target=BIC_MEMORY, prefetch=0
-    JUMP, target=BIC_MEMORY, prefetch=0
-    JUMP, target=BIC_MEMORY, prefetch=0
-    JUMP, target=BIC_MEMORY, prefetch=0
-    JUMP, target=BIC_MEMORY, prefetch=0
-    JUMP, target=BIC_MEMORY, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
 .org $390
 BIC_MEMORY:
     READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
 BIC_MEMORY_CAPTURE:
-    alu PASSA, b=T2, pair=DA, d=MDR, dst=RF
-    alu BIC, a=T0, b=T2, pair=BA, dst=OPERAND
+    alu BIC, a=T0, b=T2, pair=DA, d=MDR, dst=RF
     WRITE, a=T1, byte=IR, b=T2, target=BIC_MEMORY_FLAGS, prefetch=0
 BIC_MEMORY_FLAGS:
     alu PASSA, a=T2, flags=NZV, seq=FETCH
@@ -327,26 +313,23 @@ BIS_RR:
     alu OR, a=RS, b=RD, pair=AB, dst=OPERAND, flags=NZV, seq=FETCH
 .org $158
 BIS_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=BIS_DESTINATION, prefetch=0
 .org $3a0
 BIS_DESTINATION:
     alu OR, a=T0, b=RD, pair=AB, dst=OPERAND, flags=NZV, seq=FETCH
-    JUMP, target=BIS_MEMORY, prefetch=0
-    JUMP, target=BIS_MEMORY, prefetch=0
-    JUMP, target=BIS_MEMORY, prefetch=0
-    JUMP, target=BIS_MEMORY, prefetch=0
-    JUMP, target=BIS_MEMORY, prefetch=0
-    JUMP, target=BIS_MEMORY, prefetch=0
-    JUMP, target=BIS_MEMORY, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
 .org $3b0
 BIS_MEMORY:
     READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
 BIS_MEMORY_CAPTURE:
-    alu PASSA, b=T2, pair=DA, d=MDR, dst=RF
-    alu OR, a=T0, b=T2, pair=AB, dst=OPERAND
+    alu OR, a=T0, b=T2, pair=AD, d=MDR, dst=RF
     WRITE, a=T1, byte=IR, b=T2, target=BIS_MEMORY_FLAGS, prefetch=0
 BIS_MEMORY_FLAGS:
     alu PASSA, a=T2, flags=NZV, seq=FETCH
@@ -356,27 +339,24 @@ SUB_RR:
     alu SUB, a=RS, b=RD, pair=BA, dst=OPERAND, flags=NZVC, seq=FETCH
 .org $1e8
 SUB_EA:
-    CALL, target=SOURCE_EA, prefetch=0
-    CALL, target=DESTINATION_EA, prefetch=0
-    CALL, target=CAPTURE_REGISTER_SOURCE, prefetch=0
+    CALL, target=TWO_OPERAND_EA, prefetch=0
     OR_MD, target=SUB_DESTINATION, prefetch=0
-.org $3c0
+.org $038
 SUB_DESTINATION:
     alu SUB, a=T0, b=RD, pair=BA, dst=OPERAND, flags=NZVC, seq=FETCH
-    JUMP, target=SUB_MEMORY, prefetch=0
-    JUMP, target=SUB_MEMORY, prefetch=0
-    JUMP, target=SUB_MEMORY, prefetch=0
-    JUMP, target=SUB_MEMORY, prefetch=0
-    JUMP, target=SUB_MEMORY, prefetch=0
-    JUMP, target=SUB_MEMORY, prefetch=0
-    JUMP, target=SUB_MEMORY, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
 .org $3d0
 SUB_MEMORY:
     READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
 SUB_MEMORY_CAPTURE:
-    alu PASSA, b=T2, pair=DA, d=MDR, dst=RF
-    alu PASSA, a=T2, b=T3, dst=RF
-    alu SUB, a=T0, b=T2, pair=BA, dst=OPERAND
+    alu PASSA, b=T3, pair=DA, d=MDR, dst=RF
+    alu SUB, a=T0, b=T2, pair=DA, d=MDR, dst=RF
     WRITE, a=T1, byte=IR, b=T2, target=SUB_MEMORY_FLAGS, prefetch=0
 SUB_MEMORY_FLAGS:
     alu SUB, a=T0, b=T3, pair=BA, flags=NZVC, seq=FETCH
@@ -1067,30 +1047,36 @@ MUL_MDR:
 .org $312
 MUL_INIT:
     alu PASSA, a=RS, b=T0, dst=RF
-    alu PASSA, a=RS, b=T3, dst=RF
     alu PASSA, pair=DA, d=ZERO, b=T4, dst=RF
     alu PASSA, pair=DA, d=ZERO, dst=Q
-    alu PASSA, pair=DA, d=IMM, imm=16, b=T1, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T1, dst=RF
     alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
     alu PASSA, a=T2, flags=NZVC
     CJUMP, cond=NOT_N, target=MUL_LOOP
-    alu NOTA, pair=DA, d=ZERO, b=T5, dst=RF
-    JUMP, target=MUL_LOOP
+    alu NOTA, pair=DA, d=ZERO, b=T5, dst=RF, seq=PAGE, next=MUL_LOOP
 .org $333
 MUL_LOOP:
+    ; Two bits per counter update; ADC carries only within each bit.
     alu PASSA, a=T4, b=T4, dst=RFQ_L
     alu LSL, a=T0, b=T0, dst=RF, flags=NZVC
-    CJUMP, cond=NOT_C, target=MUL_NEXT_BIT
+    CJUMP, cond=NOT_C, target=MUL_SECOND_BIT
+    alu ADD, a=T2, pair=AQ, dst=Q, flags=NZVC
+    alu ADC, a=T5, b=T4, dst=RF, seq=PAGE, next=MUL_SECOND_BIT
+.org $3e9
+MUL_SECOND_BIT:
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    alu LSL, a=T0, b=T0, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_C, target=MUL_NEXT_PAIR
     alu ADD, a=T2, pair=AQ, dst=Q, flags=NZVC
     alu ADC, a=T5, b=T4, dst=RF
-MUL_NEXT_BIT:
+MUL_NEXT_PAIR:
     alu SUB, a=T1, pair=AD, d=ONE, b=T1, dst=RF, flags=NZVC
     CJUMP, cond=NOT_Z, target=MUL_LOOP
     ; M * unsigned(R) - (R<0 ? M<<16 : 0), modulo 2^32.
-    alu PASSA, a=T3, flags=NZVC
+    ; RS is unchanged until MUL_COMMIT; no saved copy is needed.
+    alu PASSA, a=RS, flags=NZVC
     CJUMP, cond=NOT_N, target=MUL_FLAGS
-    alu SUB, a=T2, b=T4, pair=BA, dst=RF
-    JUMP, target=MUL_FLAGS
+    alu SUB, a=T2, b=T4, pair=BA, dst=RF, seq=PAGE, next=MUL_FLAGS
 .org $373
 MUL_FLAGS:
     alu PASSB, pair=ZQ, b=T0, dst=RF, flags=NZVC
@@ -1152,19 +1138,26 @@ DIV_MAGNITUDE:
 DIV_NORMALIZED:
     alu SUB, a=T4, b=T2, flags=NZVC
     CJUMP, cond=NOT_C, target=DIV_OVERFLOW
-    alu PASSA, pair=DA, d=IMM, imm=16, b=T1, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T1, dst=RF
     alu PASSA, pair=DA, d=ONE, b=T5, dst=RF
     JUMP, target=DIV_LOOP
 .org $3b5
 DIV_LOOP:
+    ; Two independent trial subtractions per counter update.
     alu PASSA, a=T4, b=T4, dst=RFQ_L
-    alu SUB, a=T2, b=T4, pair=BA, dst=RF, flags=NZVC
-    CJUMP, cond=C, target=DIV_RESTORE
+    ; Trial subtraction leaves the remainder intact when it would borrow.
+    ; This removes the restore ADD on a zero quotient bit.
+    alu SUB, a=T2, b=T4, pair=BA, flags=NZVC
+    CJUMP, cond=C, target=DIV_SECOND_BIT
+    alu SUB, a=T2, b=T4, pair=BA, dst=RF
+    alu OR, a=T5, pair=AQ, dst=Q, seq=PAGE, next=DIV_SECOND_BIT
+DIV_SECOND_BIT:
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    alu SUB, a=T2, b=T4, pair=BA, flags=NZVC
+    CJUMP, cond=C, target=DIV_NEXT_PAIR
+    alu SUB, a=T2, b=T4, pair=BA, dst=RF
     alu OR, a=T5, pair=AQ, dst=Q
-    JUMP, target=DIV_NEXT_BIT
-DIV_RESTORE:
-    alu ADD, a=T2, b=T4, dst=RF
-DIV_NEXT_BIT:
+DIV_NEXT_PAIR:
     alu SUB, a=T1, pair=AD, d=ONE, b=T1, dst=RF, flags=NZVC
     CJUMP, cond=NOT_Z, target=DIV_LOOP
     alu PASSA, a=T3, flags=NZVC

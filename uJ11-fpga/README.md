@@ -50,6 +50,8 @@ make prepare-synthesis OUT=build/hc1200-new
 
 ## Документация
 
+- [Устранение задержек консоли 2.9BSD на HC7000](docs/bsd-console.md).
+- [Кэш PAR/PDR и ускорение микрокода HC7000 MMU](docs/hc7000-cpu-performance.md).
 - [Эксплуатация, RESET, ODT, UART и пульт](docs/user-guide.md).
 - [Готовый SD-образ: состав, запись и первый запуск](docs/sd-image.md).
 - [Архитектура, карта FRAM, SD/RK и ресурсы](docs/architecture.md).

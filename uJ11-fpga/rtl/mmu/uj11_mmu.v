@@ -1,9 +1,10 @@
 `timescale 1ns/1ps
-// J-11 memory-management transaction controller. No TLB: each mapped beat
-// reads PAR/PDR from one EBR, so CSR changes are visible on the next access.
+// J-11 memory-management transaction controller. Two PAR/PDR cache entries
+// keep the last instruction-space and data-space mappings in flip-flops.
+// Protection is checked on every hit; CSR accesses always use the APR EBR.
 // Data and byte lanes are bus-aligned. Hold request/payload through ready,
 // then drop request for one clock. Faults never issue an external bus beat.
-module uj11_mmu (
+module uj11_mmu #(parameter CACHE_ENABLE=1) (
     input wire clk, reset, peripheral_reset,
     input wire request, writing, byte_access,
     input wire [15:0] virtual_address, write_data,
@@ -33,8 +34,16 @@ module uj11_mmu (
     reg [21:0] pa;
     reg wr, byte_op, debug_access;
     reg [5:0] entry;
+    reg cache_i_valid,cache_d_valid;
+    reg [5:0] cache_i_tag,cache_d_tag;
+    reg [15:0] cache_i_par,cache_d_par,cache_i_pdr,cache_d_pdr;
+    reg cached,cache_data;
+    reg [15:0] hit_pdr;
     wire frozen=|mmr0[15:13];
     wire split=mode==0 ? mmr3[2] : mode==1 ? mmr3[1] : mode==3 ? mmr3[0] : 1'b0;
+    wire [5:0] requested_entry={mode,data_space && split,virtual_address[15:13]};
+    wire cache_hit=CACHE_ENABLE && (data_space ?
+        cache_d_valid && cache_d_tag==requested_entry : cache_i_valid && cache_i_tag==requested_entry);
     wire [1:0] lanes=byte_op ? (va[0] ? 2'b10 : 2'b01) : 2'b11;
     wire [15:0] mask={{8{lanes[1]}},{8{lanes[0]}}};
     wire [7:0] delta={delta_amount,delta_register};
@@ -42,6 +51,7 @@ module uj11_mmu (
     wire [5:0] csr_entry;
     uj11_mmu_apr_decode decode(pa,apr_selected,pdr_selected,csr_entry);
     wire [15:0] ram_data;
+    wire [15:0] pdr=cached ? hit_pdr : ram_data;
     wire csr_modify=state==CSR_UPDATE && wr;
     wire mark=state==CHECK && wr && !debug_access;
     wire ram_enable=!reset && !peripheral_reset &&
@@ -51,7 +61,7 @@ module uj11_mmu (
         (state==PDR_READ || state==CHECK) ? {entry,1'b1} :
         {csr_entry,(state==CSR_PAR || state==CSR_OLD_PAR) ? 1'b0 : (wr || pdr_selected)};
     wire [15:0] merged=(ram_data & ~mask) | (data & mask);
-    wire [15:0] ram_write_data=mark ? (ram_data | 16'o100) :
+    wire [15:0] ram_write_data=mark ? (pdr | 16'o100) :
         state==CSR_PAR ? merged :
         (pdr_selected ? merged : ram_data) & (pdr_selected ? 16'o177416 : 16'o177677);
     // PAR writes need their previous value for byte merge. PDR.W is first
@@ -65,7 +75,7 @@ module uj11_mmu (
     wire [21:0] translated;
     wire [2:0] abort_flags;
     uj11_mmu_translate translate(.enabled(1'b1),.map22(mmr3[4]),.writing(wr),
-        .invalid_mode(entry[5:4]==2),.virtual_address(va),.par(par),.pdr(ram_data),
+        .invalid_mode(entry[5:4]==2),.virtual_address(va),.par(par),.pdr(pdr),
         .physical_address(translated),.abort_flags(abort_flags),
         .ram_selected(),.io_selected(),.nxm());
     wire csr_mmr0={pa[21:1],1'b0}==22'o17777572;
@@ -97,6 +107,7 @@ module uj11_mmu (
             va<=0;data<=0;pa<=0;par<=0;entry<=0;wr<=0;byte_op<=0;
             debug_access<=0;old_par<=0;
             opcode_fetch<=0;
+            cache_i_valid<=0;cache_d_valid<=0;cached<=0;cache_data<=0;hit_pdr<=0;
         end else begin
             if(instruction_start && !frozen) begin mmr1<=0;mmr2<=instruction_pc;end
             if(delta_valid && !frozen) begin
@@ -109,19 +120,35 @@ module uj11_mmu (
                     data<=write_data;wr<=writing;
                     opcode_fetch<=instruction_start;
                     byte_op<=byte_access;debug_access<=console;
-                    entry<={mode,data_space && split,virtual_address[15:13]};
+                    entry<=requested_entry;cache_data<=data_space;cached<=0;
                     fault<=0;ready<=0;
                     if(!byte_access && (physical ? physical_address[0] : virtual_address[0])) begin
                         fault<=1;ready<=1;state<=HOLD;
                     end else if(physical) begin pa<=physical_address;state<=DECODE;end
                     else if(!mmr0[0]) begin
                         pa<={ {6{&virtual_address[15:13]}},virtual_address};state<=DECODE;
+                    end else if(cache_hit)begin
+                        par<=data_space ? cache_d_par : cache_i_par;
+                        hit_pdr<=data_space ? cache_d_pdr : cache_i_pdr;
+                        cached<=1;state<=CHECK;
                     end else state<=PAR_READ;
                 end
                 PAR_READ: state<=PDR_READ;
                 PDR_READ: begin par<=ram_data;state<=CHECK;end
                 CHECK: begin
                     pa<=translated;
+                    // Write-through PDR.W, including faulting writes. A stale
+                    // W bit in the other I/D entry is harmless: translation
+                    // ignores it, CSR reads use EBR, and marking only sets W.
+                    if(CACHE_ENABLE)begin
+                        if(cache_data)begin
+                            cache_d_valid<=1;cache_d_tag<=entry;
+                            cache_d_par<=par;cache_d_pdr<=pdr | (mark ? 16'o100 : 16'b0);
+                        end else begin
+                            cache_i_valid<=1;cache_i_tag<=entry;
+                            cache_i_par<=par;cache_i_pdr<=pdr | (mark ? 16'o100 : 16'b0);
+                        end
+                    end
                     if(!debug_access && !frozen) begin
                         mmr0[6:1]<=entry;
                         if(|abort_flags) mmr0[15:13]<=abort_flags;
@@ -137,11 +164,15 @@ module uj11_mmu (
                     end else if(mmr_selected) begin
                         read_data<=mmr_value;
                         if(wr) begin
+                            cache_i_valid<=0;cache_d_valid<=0;
                             if(csr_mmr0) mmr0<=(mmr0 & 16'o000176) | (mmr_merged & 16'o160001);
                             if(csr_mmr3) mmr3<=mmr_merged & 16'o77;
                         end
                         ready<=1;state<=HOLD;
                     end else if(apr_selected) begin
+                        // Both entries can hold the same unified I/D page.
+                        // Invalidate before any PAR/PDR byte or word update.
+                        if(wr)begin cache_i_valid<=0;cache_d_valid<=0;end
                         state<=wr && !pdr_selected ? CSR_OLD_PAR : CSR_READ;
                     end
                     else state<=BUS;
