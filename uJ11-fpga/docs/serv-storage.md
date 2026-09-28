@@ -9,10 +9,14 @@ make BOARD=hc7000-lcd-sram CPU=mmu FPP=off IOP=storage test-storage
 ```
 
 Direct Python tools use `UJ11_MMU_FPP=off UJ11_MMU_IOP=storage`.
-The firmware requires the existing RV32I cross compiler on Linux; the builder
+The storage firmware uses RV32IC (compressed instructions) with the existing
+RISC-V cross compiler on Linux; the builder
 also accepts a source/hash-matched `build/hc7000-mmu-iop` cache on macOS.
 `IOP=storage` with microcoded FPP is rejected before building: its 8 KiB SERV RAM
 uses eight EBRs. Code, data and stack remain in EBR; PDP-11 keeps all 2 MiB SRAM.
+Legacy SERV remains RV32I. The verified intermediate compaction saves 1520 code
+bytes and three microstore EBRs; see
+[resource and regression results](../releases/hc7000-serv-compact/README.md).
 
 ## Implemented and reserved
 

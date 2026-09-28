@@ -29,6 +29,28 @@ def sources():
     if profile()=='legacy':return LEGACY_SOURCES
     return ['firmware/storage/'+p for p in ('start.S','main.c','label.c','label.h','link.ld')]+['tools/build_iop_mmu.py','tools/iop_ebr.py']
 
+def flags():
+    # Compressed instructions only for the partitioned HC7000 storage profile.
+    return [('-march=rv32ic' if f=='-march=rv32i' and profile()=='storage' else f) for f in FLAGS]
+
+def cpu_wrapper():
+    return '''
+// Keep the firmware ISA and its hardware decoder in the same generated file.
+module uj11_mmu_service_cpu(
+ input wire clk,i_rst,i_timer_irq,
+ output wire [31:0] o_ibus_adr,output wire o_ibus_cyc,
+ input wire [31:0] i_ibus_rdt,input wire i_ibus_ack,
+ output wire [31:0] o_dbus_adr,o_dbus_dat,output wire [3:0] o_dbus_sel,
+ output wire o_dbus_we,o_dbus_cyc,input wire [31:0] i_dbus_rdt,input wire i_dbus_ack);
+ serv_rf_top #(.WITH_CSR(0),.COMPRESSED(%d),.MDU(0),.PRE_REGISTER(1),.RESET_STRATEGY("MINI")) core(
+ .clk(clk),.i_rst(i_rst),.i_timer_irq(i_timer_irq),
+ .o_ibus_adr(o_ibus_adr),.o_ibus_cyc(o_ibus_cyc),.i_ibus_rdt(i_ibus_rdt),.i_ibus_ack(i_ibus_ack),
+ .o_dbus_adr(o_dbus_adr),.o_dbus_dat(o_dbus_dat),.o_dbus_sel(o_dbus_sel),.o_dbus_we(o_dbus_we),.o_dbus_cyc(o_dbus_cyc),
+ .i_dbus_rdt(i_dbus_rdt),.i_dbus_ack(i_dbus_ack),
+ .o_ext_rs1(),.o_ext_rs2(),.o_ext_funct3(),.i_ext_rd(32'b0),.i_ext_ready(1'b0),.o_mdu_valid());
+endmodule
+''' % int(profile()=='storage')
+
 def ram(words):
     banks=len(words)//512
     lines=[f'// Generated {len(words)*4} byte RV32I RAM, {banks*2} EBRs with byte enables.',
@@ -61,18 +83,19 @@ def ram(words):
     for lane in range(4):
         lines.append(f' if(write_enable[{lane}])words[a][{8*lane+7}:{8*lane}]<=write_data[{8*lane+7}:{8*lane}];')
     lines+=['end','assign data=value;','`endif','`undef UJ11_IOP_EBR','endmodule','']
-    return '\n'.join(lines)
+    return '\n'.join(lines)+cpu_wrapper()
 
 def build(rebuild=False):
     mode=profile();ram_bytes=8192 if mode=='storage' else 2048
+    build_flags=flags()
     inputs={p:sha(ROOT/p) for p in sources()}
     compiler=os.environ.get('RISCV_CC','riscv64-unknown-elf-gcc')
     record_path=OUT/'build.json'
     if record_path.exists() and not rebuild:
         record=json.loads(record_path.read_text())
-        if record['inputs']==inputs and record['flags']==FLAGS and all(
+        if record['inputs']==inputs and record['flags']==build_flags and all(
                 (OUT/p).exists() and sha(OUT/p)==h for p,h in record['outputs'].items()):
-            print(f"HC7000 MMU IOP: verified firmware cache ({record['program_bytes']} bytes RV32I)")
+            print(f"HC7000 MMU IOP: verified firmware cache ({record['program_bytes']} bytes, {build_flags[0]})")
             return record
     if not shutil.which(compiler):
         raise RuntimeError('Install gcc-riscv64-unknown-elf/binutils-riscv64-unknown-elf or copy a source-matched build/hc7000-mmu-iop cache from Linux')
@@ -84,8 +107,8 @@ def build(rebuild=False):
     for source in (p for p in sources() if p.endswith(('.S','.c'))):
         name=Path(source).name
         obj=OUT/(Path(name).stem+'.o');objects.append(str(obj))
-        subprocess.run([compiler]+FLAGS+['-c',str(ROOT/source),'-o',str(obj)],check=True,cwd=ROOT)
-    cmd=[compiler]+FLAGS+['-T',str(ROOT/next(p for p in sources() if p.endswith('.ld'))),
+        subprocess.run([compiler]+build_flags+['-c',str(ROOT/source),'-o',str(obj)],check=True,cwd=ROOT)
+    cmd=[compiler]+build_flags+['-T',str(ROOT/next(p for p in sources() if p.endswith('.ld'))),
         '-Wl,-Map='+str(OUT/'firmware.map')]+objects+['-o',str(OUT/'firmware.elf'),'-lgcc']
     subprocess.run(cmd,check=True,cwd=ROOT)
     subprocess.run([prefix+'objcopy','-O','binary',str(OUT/'firmware.elf'),str(OUT/'firmware.bin')],check=True)
@@ -97,11 +120,11 @@ def build(rebuild=False):
     (OUT/'uj11_sector_ram.v').write_text(sector_ram())
     (OUT/'firmware.lst').write_bytes(subprocess.check_output([prefix+'objdump','-d',str(OUT/'firmware.elf')]))
     version=subprocess.check_output([compiler,'--version'],text=True).splitlines()[0]
-    record=dict(inputs=inputs,flags=FLAGS,compiler=version,program_bytes=len(data),ram_bytes=ram_bytes,ebr=ram_bytes//1024,profile=mode,
+    record=dict(inputs=inputs,flags=build_flags,compiler=version,program_bytes=len(data),ram_bytes=ram_bytes,ebr=ram_bytes//1024,profile=mode,
         outputs={p.name:sha(p) for p in OUT.iterdir() if p.name in
                  ('firmware.elf','firmware.bin','firmware.mem','firmware.map','firmware.lst','uj11_mmu_iop_ram.v','uj11_sector_ram.v')})
     record_path.write_text(json.dumps(record,indent=2)+'\n')
-    print(f'HC7000 MMU IOP: {len(data)} bytes RV32I, {ram_bytes} bytes RAM, {version}')
+    print(f'HC7000 MMU IOP: {len(data)} bytes, {build_flags[0]}, {ram_bytes} bytes RAM, {version}')
     return record
 
 if __name__=='__main__':

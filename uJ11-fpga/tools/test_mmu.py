@@ -18,7 +18,7 @@ def run(out,vendor=None):
     hashes={p:sha(ROOT/p) for p in inventory+['tests/mmu/'+n+'.v' for n in tests]}
     extra=[]
     if vendor:
-        extra=['-DUJ11_VENDOR_ROM']+[str(vendor/(n+'.v')) for n in ('DP8KC','GSR','PUR')]
+        extra=['-DUJ11_VENDOR_ROM']+[str(vendor/(n+'.v')) for n in ('DP8KC','PDPW8KC','GSR','PUR')]
     results={}
     for name in tests:
         cmd=['iverilog','-g2012','-s',name,'-o',str(out/name)]+extra+['tests/mmu/'+name+'.v']+inventory

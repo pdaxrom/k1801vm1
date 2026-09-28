@@ -62,14 +62,11 @@ module uj11_mmu_disk #(
     wire iop_spi_done=owner && !engine_busy && spi_ready;
     wire engine_spi_done=owner && engine_busy && spi_ready;
 
-    serv_rf_top #(.WITH_CSR(0),.COMPRESSED(0),.MDU(0),.PRE_REGISTER(1),
-        .RESET_STRATEGY("MINI")) cpu(
+    uj11_mmu_service_cpu cpu(
         .clk(clk),.i_rst(iop_reset),.i_timer_irq(1'b0),
         .o_ibus_adr(ia),.o_ibus_cyc(ic),.i_ibus_rdt(mem_data),.i_ibus_ack(ia_ack),
         .o_dbus_adr(da),.o_dbus_dat(dw),.o_dbus_sel(ds),.o_dbus_we(de),.o_dbus_cyc(dc),
-        .i_dbus_rdt(dr),.i_dbus_ack(da_ack),
-        .o_ext_rs1(),.o_ext_rs2(),.o_ext_funct3(),.i_ext_rd(32'b0),
-        .i_ext_ready(1'b0),.o_mdu_valid());
+        .i_dbus_rdt(dr),.i_dbus_ack(da_ack));
 
     uj11_mmu_iop_ram ram(.clk(clk),.enable(ic || (dc && memory_selected)),
         .address(dc && memory_selected ? da[12:2] : ia[12:2]),
