@@ -1838,6 +1838,52 @@ MTPI_DESTINATION:
     JUMP, target=MTPI_MEMORY, prefetch=0
 MTPI_MEMORY:
     WRITE, space=PREVIOUS_I, a=T1, b=T0, target=MFPI_FLAGS, prefetch=0
+
+; CSM uses the caller's SP value in supervisor D space. Save the frame before
+; changing either architectural SP or mode, so an aborted write retains the
+; caller context. The supervisor entry PC comes from supervisor I-space 010.
+.org $440
+CSM:
+    CALL, target=DESTINATION_EA, prefetch=0
+    OR_MD, target=CSM_SOURCE, prefetch=0
+.org $448
+CSM_SOURCE:
+    alu PASSA, a=RD, b=T0, dst=RF, seq=PAGE, next=CSM_FRAME
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+CSM_MEMORY:
+    READ, a=T1, target=CSM_VALUE, prefetch=0
+CSM_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+CSM_FRAME:
+    alu SUB, a=R6, pair=AD, d=TWO, b=T2, dst=RF
+    alu PASSA, pair=DA, d=PSW, b=T3, dst=RF
+    alu BIC, a=T3, pair=AD, d=IMM, imm=15, b=T3, dst=RF
+    WRITE, space=SUPERVISOR, a=T2, b=T3, target=CSM_PUSH_PC, prefetch=0
+CSM_PUSH_PC:
+    alu SUB, a=T2, pair=AD, d=TWO, b=T2, dst=RF
+    WRITE, space=SUPERVISOR, a=T2, b=R7, target=CSM_PUSH_ARG, prefetch=0
+CSM_PUSH_ARG:
+    alu SUB, a=T2, pair=AD, d=TWO, b=T2, dst=RF
+    WRITE, space=SUPERVISOR, a=T2, b=T0, target=CSM_MODE, prefetch=0
+CSM_MODE:
+    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF
+    alu LSR, a=T5, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu AND, a=T6, pair=AD, d=IMM, imm=0o030000, b=T6, dst=RF
+    alu BIC, a=T5, pair=AD, d=IMM, imm=0o170020, b=T5, dst=RF
+    alu OR, a=T5, pair=AD, d=IMM, imm=0o040000, b=T5, dst=RF
+    alu OR, a=T5, b=T6, flags=LOAD
+    alu PASSA, a=T2, b=R6, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T4, dst=RF
+    READ, space=INSTRUCTION, a=T4, target=CSM_PC, prefetch=0
+CSM_PC:
+    alu PASSA, pair=DA, d=MDR, b=R7, dst=RF, seq=FETCH, trace=RETURN
 .org $7ff
 STOP:
     STOP

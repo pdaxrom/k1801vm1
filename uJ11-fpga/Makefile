@@ -238,7 +238,10 @@ test-bsd:
 	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_bsd --image $(BSD_OUT)/uj11-hc7000-2.9bsd.img --out build/test-bsd
 test-storage-controllers:
 	$(PYTHON) tools/test_storage_rl_xp.py
+	$(PYTHON) tools/test_storage_rk_rq.py
 	$(PYTHON) tools/test_mmu_board.py --name tb_storage_bus --image build/test-storage-rl-xp/controllers.img --out build/test-storage-bus
+	$(IVERILOG) -g2012 -s tb_iop_bus -o build/test-storage-bus/iop-bus tests/mmu/tb_iop_bus.v boards/hc7000/mmu/uj11_mmu_iop_bus.v
+	$(VVP) build/test-storage-bus/iop-bus
 	$(IVERILOG) -g2012 -s tb_ubmap -o build/test-storage-bus/ubmap tests/mmu/tb_ubmap.v boards/hc7000/mmu/uj11_mmu_ubmap.v rtl/mmu/uj11_mmu_apr_ram.v
 	$(VVP) build/test-storage-bus/ubmap
 

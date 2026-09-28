@@ -19,6 +19,7 @@ HG TIME и foreground CLOCK установлены; [текущий компле
 | Собрать и запустить HC7000 с SRAM | [HC7000 hardware-lcd](hc7000.md), [план этапов](hc7000-port-plan.md) |
 | Разобраться с планом MMU без VM2 HALT/USER | [Конфигурации mmuless/mmu](hc7000-mmu-plan.md) |
 | Собрать и проверить экспериментальный MMU-профиль | [HC7000 MMU: состояние и ограничения](hc7000-mmu.md) |
+| Сравнить инструкции mmuless/MMU с эталонным core.c | [Аудит ISA J11](j11-isa-audit.md) |
 | Написать и загрузить модуль | [ABI модулей](modules.md) |
 | Выключить/вернуть FPP | [Конфигурация](configuration.md) |
 | Проверить математику BASIC | [BASIC](basic.md) |

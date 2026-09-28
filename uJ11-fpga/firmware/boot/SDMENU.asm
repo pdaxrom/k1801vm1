@@ -15,6 +15,7 @@ RLCS      equ 0174400
 TQ_SA     equ 0174502
 
 STORAGE_STATUS equ 0177504
+STORAGE_UNITS equ 0177506
 SD_CONTROL equ 0177502
 
 KIND_RK   equ 1
@@ -83,6 +84,20 @@ has_any:
         beq     list_rh
         mov     #msg_line_rk, r1
         jsr     pc, print_str
+        clr     r3
+list_rk_units:
+        mov     r3, r0
+        mov     #KIND_RK, r1
+        jsr     pc, unit_check
+        tst     r0
+        beq     list_rk_next
+        jsr     pc, print_unit
+list_rk_next:
+        inc     r3
+        cmp     r3, #8.
+        bcs     list_rk_units
+        mov     #msg_crlf, r1
+        jsr     pc, print_str
 list_rh:
         tstb    present_rh
         beq     list_xp
@@ -127,6 +142,20 @@ list_rq:
         tstb    present_rq
         beq     list_rl
         mov     #msg_line_rq, r1
+        jsr     pc, print_str
+        clr     r3
+list_rq_units:
+        mov     r3, r0
+        mov     #KIND_RQ, r1
+        jsr     pc, unit_check
+        tst     r0
+        beq     list_rq_next
+        jsr     pc, print_unit
+list_rq_next:
+        inc     r3
+        cmp     r3, #4.
+        bcs     list_rq_units
+        mov     #msg_crlf, r1
         jsr     pc, print_str
 list_rl:
         tstb    present_rl
@@ -173,6 +202,12 @@ default_kind:
         beq     default_name
         mov     #msg_name_xp, r1
         cmpb    selected_kind, #KIND_XP
+        beq     default_name
+        mov     #msg_name_rk, r1
+        cmpb    selected_kind, #KIND_RK
+        beq     default_name
+        mov     #msg_name_rq, r1
+        cmpb    selected_kind, #KIND_RQ
         beq     default_name
         mov     #msg_name_rl, r1
 default_name:
@@ -387,6 +422,21 @@ boot_tq:
 
 ; R0 unit, R1 controller kind -> R0 present. Select without launching a command.
 unit_check:
+        cmp     r1, #KIND_RK
+        beq     unit_mask_rk
+        cmp     r1, #KIND_RQ
+        bne     unit_check_rh
+        br      unit_mask
+unit_mask_rk:
+        add     #8., r0
+unit_mask:
+        mov     r0, r1
+        mov     #1, r0
+        ash     r1, r0
+        bit     r0, @#STORAGE_UNITS
+        bne     unit_yes
+        br      unit_no
+unit_check_rh:
         cmp     r1, #KIND_RH
         bne     unit_check_xp
         mov     r0, @#(RHCS1+10)
@@ -551,6 +601,8 @@ msg_default:
 msg_name_rh: DB "RH", 0
 msg_name_xp: DB "XP", 0
 msg_name_rl: DB "RL", 0
+msg_name_rk: DB "RK", 0
+msg_name_rq: DB "RQ", 0
 msg_default_key:
         DB      " - boot in 5s, Enter=boot, other key=menu: ", 0
 msg_unit_absent:
@@ -564,13 +616,13 @@ msg_found:
 msg_none:
         DB      "No RK11/RH11/XP/RP/RQ/RL11/TQ11 controllers detected.\r\n", 0
 msg_line_rk:
-        DB      "  1 - RK11 (rk0..rk7)\r\n", 0
+        DB      "  1 - RK05, units: ", 0
 msg_line_rh:
         DB      "  2 - RH11/HK, units: ", 0
 msg_line_xp:
         DB      "  3 - XP/RP, units: ", 0
 msg_line_rq:
-        DB      "  4 - RQ (MSCP) (rq0..rq3)\r\n", 0
+        DB      "  4 - RQ/MSCP, units: ", 0
 msg_line_rl:
         DB      "  5 - RL11, units: ", 0
 msg_line_tq:

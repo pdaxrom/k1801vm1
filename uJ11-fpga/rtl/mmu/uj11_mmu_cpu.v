@@ -172,11 +172,13 @@ module uj11_mmu_cpu #(
     end
     wire stream=reading && uword[5] && a==7;
     wire previous_memory=(reading || writing) && (space==3 || space==4);
+    // Space 7 is ODT's selected space while in console; CSM uses it to write
+    // supervisor D-space before committing the architectural mode/stack.
     wire [1:0] previous_mode=psw[13:12]==2 ? 2'd3 : psw[13:12];
     wire [1:0] access_mode=(reading || writing) && space==2 ? 2'd0 :
-        previous_memory ? previous_mode : space==7 && console_active ? console_space[2:1] : psw[15:14];
+        previous_memory ? previous_mode : space==7 ? (console_active ? console_space[2:1] : 2'd1) : psw[15:14];
     wire access_data=space==2 ? 1'b1 : previous_memory ? (space==4 || ir[15]) :
-        space==7 && console_active ? console_space[0] : !(fetching || stream || space==1 || (a==9 && ir[5:0]==6'o27));
+        space==7 ? (console_active ? console_space[0] : writing) : !(fetching || stream || space==1 || (a==9 && ir[5:0]==6'o27));
     wire access_physical=(reading || writing) && space==5 && console_active;
     wire byte_access=memory_op && !fetching && (uword[6] || (uword[3] && byte_instruction));
     wire [15:0] lane_data=byte_access && read_a[0] ? {read_b[7:0],8'b0} : read_b;
@@ -239,6 +241,7 @@ module uj11_mmu_cpu #(
         if((decode_ir & 16'o177770)==16'o230 && psw[15:14]!=0)dispatch=12'h0b9;
         if((decode_ir & 16'o077700)==16'o6500)dispatch=12'h400;
         if((decode_ir & 16'o077700)==16'o6600)dispatch=12'h420;
+        if((decode_ir & 16'o177700)==16'o7000 && mmr3[3] && psw[15:14]!=0)dispatch=12'h440;
         if(decode_ir[15:12]==15)dispatch=fpp_enabled ? 12'h700 : 12'h042;
     end
     wire [11:0] boundary_target=debug_pending ? 12'h500 : trace_pending ? 12'h024 : irq_pending ? 12'h013 : 12'h020;

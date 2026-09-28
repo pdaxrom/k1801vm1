@@ -13,10 +13,11 @@ from sdcard import Label,add_partition,publish,MENU,main as sdcard
 from storage_menu import crc16
 
 def fixture(path,menu,mode):
-    media='rm05' if mode=='xp-auto' else 'rl02' if mode=='rl-auto' else 'rk07'
-    unit=1 if mode=='rl-auto' else 7
-    label=add_partition(Label(1048576 if mode=='xp-auto' else 131072),media,0)
-    label=add_partition(label,media,unit,boot=mode!='no-default')
+    media={'xp-auto':'rm05','rl-auto':'rl02','rk-auto':'rk05','rq-auto':'mscp'}.get(mode,'rk07')
+    unit=1 if mode=='rl-auto' else 3 if mode=='rq-auto' else 7
+    options={'blocks':32768} if media=='mscp' else {}
+    label=add_partition(Label(1048576 if mode=='xp-auto' else 131072),media,0,**options)
+    label=add_partition(label,media,unit,boot=mode!='no-default',**options)
     with path.open('w+b') as f:
         f.truncate(label.blocks*512);publish(f,label)
         for p in label.partitions:
@@ -36,11 +37,11 @@ def fixture(path,menu,mode):
                     hdr[510:512]=crc16(hdr[:510]).to_bytes(2,'big')
                 f.seek(2*512);f.write(hdr)
 
-CASES=('auto','rl-auto','xp-auto','enter','cancel','no-default','direct','bad-header','bad-payload','bad-size','bad-wire')
+CASES=('auto','rl-auto','xp-auto','rk-auto','rq-auto','enter','cancel','no-default','direct','bad-header','bad-payload','bad-size','bad-wire')
 
-def run(out,only=None):
+def run(out,only=None,assembler=None):
     record=build();out.mkdir(parents=True,exist_ok=True)
-    record['menu']=build_menu(out/'menu')
+    record['menu']=build_menu(out/'menu',assembler)
     inventory=CORE+BOARD+['tests/mmu/tb_storage_menu.v','tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
     record['test_files']={p:sha(ROOT/p) for p in inventory+['tools/test_storage_menu.py','tools/sdcard.py','tools/storage_menu.py']}
     cmd=['verilator','--binary','--timing','-Wno-WIDTH','-Wno-TIMESCALEMOD','--top-module','tb_storage_menu','-j','4','--Mdir',str(out/'obj')]+inventory
@@ -61,4 +62,5 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--out',type=Path,default=ROOT/'build/test-storage-menu')
     p.add_argument('--case',choices=CASES)
-    a=p.parse_args();run(a.out.resolve(),a.case)
+    p.add_argument('--assembler-source',type=Path)
+    a=p.parse_args();run(a.out.resolve(),a.case,a.assembler_source)

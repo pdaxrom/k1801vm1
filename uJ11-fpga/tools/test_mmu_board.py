@@ -4,14 +4,15 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+from serv_test import GUARD,memory_args
 from board_common import ROOT
 from build_mmu_board import build,CORE,BOARD,sha
 
 def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
     record=build();out.mkdir(parents=True,exist_ok=True)
-    inventory=CORE+BOARD+['tests/mmu/'+name+'.v',
+    inventory=CORE+BOARD+[GUARD,'tests/mmu/'+name+'.v',
         'tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
-    record['test_files']={p:sha(ROOT/p) for p in inventory}
+    record['test_files']={p:sha(ROOT/p) for p in inventory+['tools/test_mmu_board.py','tools/serv_test.py']}
     extra=[]
     if vendor:
         extra=['-DUJ11_VENDOR_ROM','-DUJ11_IOP_VENDOR_RAM']+[str(vendor/(n+'.v')) for n in ('DP8KC','PDPW8KC','GSR','PUR')]
@@ -31,7 +32,7 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
         record['boot_menu']=boot_menu
         if boot_menu:sim.append('+BOOT_MENU')
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
-    with (out/'simulation.log').open('w') as log:rc=subprocess.run(sim,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT).returncode
+    with (out/'simulation.log').open('w') as log:rc=subprocess.run(sim+memory_args(record),cwd=ROOT,stdout=log,stderr=subprocess.STDOUT).returncode
     print((out/'simulation.log').read_text()[-3000:])
     if rc:raise SystemExit(rc)
     if name in ('tb_mmu_boot','tb_mmu_bsd','tb_storage_bus'):assert sha(image)==image_hash

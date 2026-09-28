@@ -1,4 +1,4 @@
-# SERV storage: partitioned SD, RK07, RL01/RL02 and RM05
+# SERV storage: software disk controllers on partitioned SD
 
 This is an opt-in HC7000 **MMU** build. The default remains `IOP=legacy`.
 HC1200 and the MMU-less HC7000 sources, firmware and boot path are unchanged.
@@ -12,11 +12,38 @@ Direct Python tools use `UJ11_MMU_FPP=off UJ11_MMU_IOP=storage`.
 The storage firmware uses RV32IC (compressed instructions) with the existing
 RISC-V cross compiler on Linux; the builder
 also accepts a source/hash-matched `build/hc7000-mmu-iop` cache on macOS.
-`IOP=storage` with microcoded FPP is rejected before building: its 8 KiB SERV RAM
-uses eight EBRs. Code, data and stack remain in EBR; PDP-11 keeps all 2 MiB SRAM.
+`IOP=storage` with microcoded FPP is rejected before building: the storage firmware currently reserves 12 KiB SERV RAM
+in twelve EBRs. Code, data and stack remain in EBR; PDP-11 keeps all 2 MiB SRAM.
 Legacy SERV remains RV32I. The verified intermediate compaction saves 1520 code
 bytes and three microstore EBRs; see
 [resource and regression results](../releases/hc7000-serv-compact/README.md).
+
+## Shared peripheral interface
+
+The storage profile forwards peripheral bus cycles to SERV. The request contains
+an I/O-page address, read/write direction, byte lanes and write data. The CPU
+holds the transaction until firmware replies with a word or NXM. Register files,
+READY/GO, byte-write merging, per-drive state, command generations, initialization
+and interrupt selection are C code/data; adding a controller does not require a
+new RTL register bank. Firmware also answers absent-device probes and implements
+177504/177506 boot metadata, CCR and MEMERR.
+
+Existing physical UART, KW11 clock, HG pins, boot SPI and UNIBUS DMA translation
+retain their hardware interfaces. Main RAM, the CPU MMU and processor registers
+remain on their existing CPU paths. The shared sector engine still moves bulk
+SPI/SRAM data; SERV interprets disk commands and MSCP packets.
+
+SERV polls the bus between operations and while waiting for SD/DMA. A PDP-11
+I/O cycle therefore takes firmware service time; ordinary instruction execution
+and RAM access continue independently of disk commands. The boot-time SD-label
+CRC validation can hold a probe longer than normal register accesses.
+
+`firmware/storage/controllers.c` owns all emulated registers. `main.c` provides
+SD transport, RH/RL/XP commands and scheduling; `rk05.c` and `mscp.c` provide the
+other command implementations, with declarations in `storage.h`. The initial
+label buffer is reused for controller state and MSCP packet scratch after the
+label is decoded. The linker reserves a 768-byte stack; stack usage is reported
+by GCC, and its call paths must be checked when extending the firmware.
 
 ## Implemented and reserved
 
@@ -40,21 +67,32 @@ attention/volume status, seek/recalibrate/preset/pack, read/write/write-check,
 This is the RM05/RH70-style direct DMA path; it bypasses UNIBUS mapping.
 
 In the storage profile, **170200..170376** exposes the 32 UNIBUS map registers.
-MMR3 bit 5 enables translation for RL11 and RH11 DMA; page 31 maps to the I/O
+MMR3 bit 5 enables translation for RK11, RL11 and RH11 DMA; page 31 maps to the I/O
 page. The mapper uses one EBR, and DMA to anything outside installed SRAM
 returns NXM without accessing aliased RAM. With mapping disabled, the existing
 RK07 18-bit wrap and RL/RP direct DMA paths remain available. The CCR at 177746
 retains software writes; 177744 reports no memory parity error (no cache/parity
 hardware is fitted). These addresses let the 2.9BSD loader take its 11/70 path.
 
-The table also reserves RK05, RK06, MSCP, RH70 mode for RK06/07, and TK50 `.tap`
-entries. They are not implemented by SERV yet. Unsupported nonboot entries are
-ignored; an unsupported boot entry gives startup error 7. Tape entries retain
-file length separately from capacity; the utility does not parse tape records.
+RK11/RK05 is at **177400**, vector **220**, with eight units. It implements
+read/write/write-check/read-check, seek, recalibrate and software write lock,
+18-bit DMA wrapping and address inhibit. Short writes preserve the sector tail.
+
+RQ/MSCP is at **172150**, with a programmable interrupt vector and four units.
+SERV handles UQSSP initialization, command/response rings, credits, ONLINE,
+GET UNIT STATUS, SET CONTROLLER/UNIT CHARACTERISTICS, AVAILABLE, ACCESS,
+READ/WRITE/COMPARE and direct 22-bit packet/data DMA. Short writes zero-pad their
+sector tail. Images are regular MSCP disk partitions; geometry is selected from
+the supported RD/RA types using image capacity.
+
+The table still reserves RK06, RH70 mode for RK06/07, and TK50 `.tap` entries.
+Unsupported nonboot entries are ignored; an unsupported boot entry gives startup
+error 7. Tape entries retain file length separately from capacity; the utility
+does not parse tape records.
 
 Kinds match `lsi11/demo/boot_menu.asm`: RK=1, RH=2, XP=3, RQ=4, RL=5, TQ=6.
 `firmware/boot/SDMENU.asm` is loaded at PDP 0100000. It lists controllers and
-present RH, RL and XP units, rejects absent units, and dispatches the selected
+present RK, RH, RL, XP and RQ units, rejects absent units, and dispatches the selected
 bootstrap. `-rp` in the emulator corresponds to the SD table's `xp`/`rm05`.
 
 The `bootable` flag selects the **default for automatic boot after five seconds**.
@@ -197,24 +235,39 @@ Read-only PDP register **177504** is present only in the storage build:
 bit 15 means startup finished, bit 14 means failure, bit 13 requests the menu,
 and bit 12 means no default is configured. On success bits 2..0 contain the
 default unit when bit 12 is clear; bits 5..3 select its kind (0 means RH for
-backward compatibility, 3 means XP, 5 means RL). RL/XP boot requires the menu. On failure the low bits hold an error code:
+backward compatibility, 1 means RK, 3 means XP, 4 means RQ, 5 means RL). Non-RH boot requires the menu. On failure the low bits hold an error code:
 1 CMD0, 2 CMD8, 3 ACMD41, 4 OCR, 5 CSD/CRC, 6 both labels invalid,
 7 unsupported boot media/mode, 8 missing boot entry or non-RH boot in direct-boot mode.
 The ROM adds diagnostic 9 for an invalid menu descriptor/payload and 10 for
 SD read or transport CRC failure (11 and 12 respectively in octal). The bootstrap saves diagnostics
 at 157774/157776 and enters microcoded ODT on failure.
 
-SERV MMIO windows are RK=40000000, RL=40000400 and XP=40000500 (hex).
-RK/RL status and completion indices are 16/17, epoch/claim indices 24/25;
-XP uses 32/33 and 40/41. RK indices 18/19 publish present/protected masks and
-20 publishes startup status; RL presence uses 18, XP uses 34/35.
+Read-only **177506** reports RK05 units in bits 15..8 and RQ units in bits
+3..0. The menu uses these masks without resetting MSCP or changing drive state.
 
-Each command has a generation token. Clearing a controller invalidates its
-old DMA and completion without resetting SERV or another controller. An active
+SERV uses one shared MMIO mailbox at hexadecimal **40000000**:
+
+| Offset | Direction | Meaning |
+| --- | --- | --- |
+| 00 | read | Request pending (bit 0), bus reset (1), IRQ acknowledgement (2), SD ownership (3), acknowledged vector divided by four (14..8) |
+| 00 | write | Clear consumed reset/IRQ acknowledgement flags (bits 1/2) |
+| 04 | read | Address (12..0), write (13), byte lanes (15..14), data (31..16) |
+| 08 | write | Response data (15..0) and NXM (16); completes this CPU cycle once |
+| 0C | write | Publish interrupt vector (8..2), valid (16) |
+| 10 | write | Request SD ownership (0), UNIBUS DMA (1), cancel DMA (2), service active (3) |
+
+SPI remains at 40000100, the sector/DMA engine at 40000200, and the millisecond
+counter at 40000300. MSCP uses engine operations 6/7 for single-word physical DMA.
+There are no per-controller SERV MMIO windows in this profile.
+
+Each command has a software generation token. Clearing a controller invalidates
+its old DMA/completion without resetting SERV or another controller. An active
 SPI sector transaction finishes before ownership is released. PDP `RESET`
-clears all controller commands and IRQs but retains SD attachments and head
-positions. Board reset restarts SERV and rereads the table. Simultaneous disk
-interrupts have independent vector acknowledgements: RL160, RH210 and XP254.
+clears commands and IRQs but retains SD attachments and head positions. Board
+reset restarts SERV and rereads the table. Independent interrupt requests queue
+in SERV RAM; the bridge publishes one BR5 vector at a time, in order RL, RH, XP,
+RK, RQ. An acknowledgement is retained until firmware consumes it and cannot be
+overwritten by a simultaneous publication. Bus reset rejects a stale response.
 
 ## 2.9BSD image
 
@@ -238,20 +291,29 @@ The original `/etc/ttys` is retained for future display/keyboard terminals;
 until DZ is implemented, init reports that tty00..tty07 cannot open. Wait about
 two seconds at `login:` before typing, as this getty clears early input after
 its initial delay.
-The new BSD/UNIBUS build still needs its own physical-board qualification;
-the earlier RH7-only hardware release remains separately preserved.
-`releases/hc7000-bsd` contains the SD archive and matching JED. Full RTL and
+The earlier `releases/hc7000-bsd` contains the SD archive and matching JED. Its RTL and
 SIMH boots pass through multiuser root login, RL/RP file writes/readback and
-`sync`; the final RTL run has 18926 checks. The 24 MHz MAP/PAR/TRACE build uses
+`sync`; that release's RTL run has 18926 checks. Its 24 MHz MAP/PAR/TRACE build uses
 5435 LUT4, 2137 FF and 25/26 EBR, with Fmax 25.539 MHz. The old partitioned
-RH7 RT-11XM image also boots on this RTL. See the release README and manifests
-for exact checksums, source inputs and UART logs.
+RH7 RT-11XM image also boots on that RTL. See its README and manifests for
+exact checksums, source inputs and UART logs. The replacement shared-I/O
+implementation and its qualification are preserved separately in
+`releases/hc7000-serv-io`; it has not yet been installed on the physical board.
 
 The additional [OS boot matrix](boot-validation.md) covers the original
-five-disk RT-11 XM setup, RT-11 V4 on RK0, and RSX on RQ0. XM boots from RH0
-and reads RH1 on the current RTL; RK05 and RQ/MSCP remain unsupported. The
-requested RSX RQ0 image is also nonbootable in SIMH, while its RQ1 companion
-boots RSX-11M-PLUS. Saved tests preserve these failures as explicit limitations.
+five-disk RT-11 XM setup, RT-11 V4 on RK0, and both RSX RQ images. The software
+controller build boots XM from RH0, reads RH1 and all three RK05 images, and
+boots V4 from RK0. The requested RSX RQ0 image contains a nonbootable placeholder;
+RQ1 is checked separately without changing the original disk ordering.
+
+RSX-11M-PLUS also needs the CPU's CSM instruction during STARTUP. The MMU
+microcode now builds its supervisor stack frame, changes mode and loads the
+entry PC from supervisor I-space. Thirty-one added microinstructions fit in
+the existing nine microstore EBRs. Instruction dispatch and supervisor-space
+selection require a small RTL change: synthesis rises from 3985 to 4014 LUT
+for the shared-I/O build, with no additional EBR. The final 24 MHz build uses
+1187 flip-flops and 26/26 EBR and passes routed timing at 26.087 MHz.
+HC1200 and the MMU-less microcode are unchanged.
 
 ## Qualification
 
@@ -263,9 +325,17 @@ a concurrent CPU master. It checks independent drives, write lock, partition
 bounds before writing, CRC, cancellation, DMA wrap and both label failure paths.
 Backing images are opened read-only by the SD model; writes go to a RAM overlay.
 
+The shared request/response bridge has an independent test in
+`tests/mmu/tb_iop_bus.v`, including held cycles, NXM, reset and interrupt
+acknowledgement races. `tools/test_storage_rk_rq.py` executes the real firmware
+with separate writable/protected drives, RK05 short writes, UQSSP initialization,
+two-slot rings, interrupts, 22-bit DMA, MSCP read/write/compare, error responses
+and controller reset. The integration and OS tests also monitor SERV RAM writes
+against linker boundaries and report measured stack usage.
+
 An independent EBR check is available in `tests/tb_storage_ram.v`; compile with
 `UJ11_IOP_VENDOR_RAM` and Diamond's PDPW8KC/DP8KC/GSR/PUR models. It tests all
-2048 words, all byte lanes, bank isolation and consecutive bank selection.
+3072 words, all byte lanes, bank isolation and consecutive bank selection.
 For full OS boot, pass a partitioned card image:
 
 ```

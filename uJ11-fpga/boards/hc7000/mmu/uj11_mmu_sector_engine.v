@@ -28,6 +28,7 @@ module uj11_mmu_sector_engine(
     wire [7:0] dma_index=inhibit ? 8'b0 : relative_index;
     wire [17:0] short_address=base[17:0]+{9'b0,dma_index,1'b0};
     reg [15:0] crc;
+    reg [15:0] direct_data;
     reg [8:0] count;
     reg [7:0] index,low;
     reg high,error,nxm;
@@ -42,11 +43,12 @@ module uj11_mmu_sector_engine(
     assign spi_write=mode==2;
     assign spi_data=high ? buffer_data[15:8] : buffer_data[7:0];
     assign dma_request=state==DMA_WAIT;
-    assign dma_write=mode==4;
-    assign dma_address=wide ? base+{13'b0,dma_index,1'b0} : {4'b0,short_address};
-    assign dma_data=buffer_data;
+    assign dma_write=mode==4 || mode==7;
+    assign dma_address=mode>=6 ? base : wide ? base+{13'b0,dma_index,1'b0} : {4'b0,short_address};
+    assign dma_data=mode==7 ? direct_data : buffer_data;
     assign reg_rdata=reg_address==0 ? {10'b0,base} :
-                     reg_address==1 ? {23'b0,count} : {crc,12'b0,nxm,mismatch,error,busy};
+                     reg_address==1 ? {23'b0,count} : reg_address==5 ? {16'b0,direct_data} :
+                     {crc,12'b0,nxm,mismatch,error,busy};
     function [15:0] crc_byte(input [15:0] old, input [7:0] data);
         reg [15:0] v; integer b;
         begin
@@ -60,6 +62,7 @@ module uj11_mmu_sector_engine(
         if(reset) begin
             state<=IDLE;mode<=0;base<=0;count<=0;index<=0;low<=0;high<=0;crc<=0;error<=0;
             offset<=0;limit<=256;wide<=0;inhibit<=0;mismatch<=0;nxm<=0;
+            direct_data<=0;
         end else begin
             if(reg_write && !busy) case(reg_address)
                 0:base<=reg_data[21:0];
@@ -68,6 +71,7 @@ module uj11_mmu_sector_engine(
                     index<=reg_data[2:0]<=2 ? 0 : offset;high<=0;crc<=0;mode<=reg_data[2:0];error<=0;mismatch<=0;nxm<=0;
                     if(reg_data[2:0]==1) state<=SPI_WAIT;
                     else if(reg_data[2:0]==2) state<=BUFFER_READ;
+                    else if(reg_data[2:0]>=6 && !abort && !base[0] && !base[21])state<=DMA_WAIT;
                     else if((reg_data[2:0]>=3 && reg_data[2:0]<=5) && !abort &&
                             !base[0] && count>0 && {1'b0,offset}+count<=limit && limit<=256 &&
                             (!wide || ({1'b0,base}+(inhibit ? 23'd2 : {13'b0,count,1'b0})<=23'h200000)))
@@ -76,6 +80,7 @@ module uj11_mmu_sector_engine(
                 end
                 3:begin offset<=reg_data[7:0];limit<=reg_data[16:8];end
                 4:begin wide<=reg_data[0];inhibit<=reg_data[1];end
+                5:direct_data<=reg_data[15:0];
                 default:begin end
             endcase
             case(state)
@@ -94,9 +99,10 @@ module uj11_mmu_sector_engine(
                     else begin index<=index+1'b1;state<=mode==1 ? SPI_WAIT : BUFFER_READ;end
                 end
                 DMA_WAIT:if(dma_ready)begin
+                    if(mode==6 && !dma_error)direct_data<=dma_rdata;
                     if(mode==5 && dma_rdata!=buffer_data)mismatch<=1;
                     if(dma_error)begin state<=IDLE;error<=1;nxm<=1;end
-                    else state<=DMA_GAP;
+                    else state<=mode>=6 ? IDLE : DMA_GAP;
                 end
                 DMA_GAP:begin
                     if(abort)begin state<=IDLE;error<=1;end

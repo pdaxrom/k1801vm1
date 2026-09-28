@@ -6,14 +6,15 @@ import json
 import os
 from pathlib import Path
 import subprocess
+from serv_test import GUARD,memory_args
 from board_common import ROOT
 from build_mmu_board import build, CORE, BOARD, sha
 from sdcard import Label, add_partition, publish
 
 def fixture(path, damaged=0, boot_kind=None):
-    label=add_partition(Label(131072),'rk07',0)
+    label=add_partition(Label(262144 if boot_kind else 131072),'rk07',0)
     label=add_partition(label,'rk07',7,boot=boot_kind is None,readonly=True)
-    if boot_kind:label=add_partition(label,boot_kind,0,boot=True)
+    if boot_kind:label=add_partition(label,boot_kind,1,boot=True)
     with path.open('w+b') as f:
         f.truncate(label.blocks*512);publish(f,label)
         for p,offset in zip(label.partitions,(0,100)):
@@ -27,8 +28,8 @@ def fixture(path, damaged=0, boot_kind=None):
 def run(out,vendor=None):
     if os.environ.get('UJ11_MMU_IOP')!='storage':raise ValueError('Set UJ11_MMU_IOP=storage and UJ11_MMU_FPP=off')
     record=build();out.mkdir(parents=True,exist_ok=True)
-    inventory=CORE+BOARD+['tests/mmu/tb_storage_disk.v','tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
-    record['test_files']={p:sha(ROOT/p) for p in inventory+['tools/test_storage.py','tools/sdcard.py']}
+    inventory=CORE+BOARD+[GUARD,'tests/mmu/tb_storage_disk.v','tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
+    record['test_files']={p:sha(ROOT/p) for p in inventory+['tools/test_storage.py','tools/sdcard.py','tools/serv_test.py']}
     if vendor:
         extra=['-DUJ11_VENDOR_ROM','-DUJ11_IOP_VENDOR_RAM']+[str(vendor/(n+'.v')) for n in ('DP8KC','PDPW8KC','GSR','PUR')]
         cmd=['iverilog','-g2012','-s','tb_storage_disk','-o',str(out/'sim')]+extra+inventory
@@ -38,10 +39,10 @@ def run(out,vendor=None):
         sim=[str(out/'obj/Vtb_storage_disk')]
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     cases=[]
-    for name,damage,boot_kind,error in [('primary',0,None,0),('backup',1,None,0),('invalid',2,None,6),('unsupported',0,'rk05',7)]:
+    for name,damage,boot_kind,error in [('primary',0,None,0),('backup',1,None,0),('invalid',2,None,6),('unsupported',0,'rk06',7)]:
         path=out/(name+'.img');fixture(path,damage,boot_kind);before=sha(path)
         with (out/(name+'.log')).open('w') as log:
-            subprocess.run(sim+[f'+SD_IMAGE={path}']+([f'+FAIL_INIT={error}'] if error else []),cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
+            subprocess.run(sim+memory_args(record)+[f'+SD_IMAGE={path}']+([f'+FAIL_INIT={error}'] if error else []),cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
         text=(out/(name+'.log')).read_text();print(text[-1500:])
         assert 'PASS MMU' in text and sha(path)==before
         cases.append(dict(name=name,image_sha256=before))

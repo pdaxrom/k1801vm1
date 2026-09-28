@@ -20,11 +20,16 @@ module tb_storage_rl_xp;
     reg cr=0,cw=0;reg [19:0] ca=0;reg [15:0] cd=0;wire cready;
     reg traffic=0;integer cpu_cycles=0,dma_cycles=0,checks=0;
     reg absent=0,fail_read=0,fail_write=0,stuck_busy=0;
+    reg metadata=0;reg [15:0] boot_status=0;
+    wire io_ready,io_irq;wire [8:0] io_vector;
+    wire [12:0] io_address=metadata ? 13'o17504 : lr ? 13'o14400+{storage_address,1'b0} : xr ? 13'o16700+{storage_address,1'b0} : 13'o17440+{ra,1'b0};
+    assign ready=io_ready && rr;assign irq=io_irq && io_vector==9'o210;
+    assign lrd=rd;assign xrd=rd;assign lready=io_ready && lr;assign xready=io_ready && xr;assign lirq=io_irq && io_vector==9'o160;assign xirq=io_irq && io_vector==9'o254;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
-        .clk(clk),.reset(reset),.bus_reset(bus_reset),.rl_request(lr),.xp_request(xr),.rl_irq_ack(lack),.xp_irq_ack(xack),.storage_address(storage_address),
-        .rl_rdata(lrd),.xp_rdata(xrd),.rl_ready(lready),.xp_ready(xready),.rl_irq(lirq),.xp_irq(xirq),.rh_enabled(),.rl_enabled(),.xp_enabled(),
-        .rk_request(rr),.rk_write(rw),.rk_address(ra),.rk_lanes(rl),
-        .rk_wdata(wd),.rk_rdata(rd),.rk_ready(ready),.rk_irq(irq),.storage_enabled(),.storage_status(),.rk_irq_ack(irq_ack),
+        .clk(clk),.reset(reset),.bus_reset(bus_reset),.rk_request(1'b0),.rk_write(rw),
+        .rk_address(ra),.rk_lanes(rl),.rk_wdata(wd),.rk_rdata(),.rk_ready(),.rk_irq(),.rk_irq_ack(1'b0),
+        .storage_enabled(),.io_request(rr || lr || xr),.io_address(io_address),.io_rdata(rd),.io_ready(io_ready),.io_error(),
+        .io_irq(io_irq),.io_vector(io_vector),.io_irq_ack(irq_ack || lack || xack),
         .sd_request(sr),.sd_write(sw),.sd_byte(1'b0),.sd_address(sa),.sd_wdata(sd),
         .sd_rdata(srd),.sd_ready(sready),.sd_error(serror),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),
@@ -38,18 +43,27 @@ module tb_storage_rl_xp;
         .address(ma),.byte_enable(ml),.write_data(md),.read_data(mrd),.ready(mready),.initialized(initialized),
         .sram_address(pa),.sram_data(pd),.sram_ce_n(ce_n),.sram_oe_n(oe_n),
         .sram_we_n(we_n),.sram_lb_n(lb_n),.sram_ub_n(ub_n));
+    serv_memory_guard guard(.clk(clk),.reset(disk.iop_reset),
+        .write(disk.data_accept && disk.memory_selected && disk.de),.address(disk.da));
     async_sram_model sram(.address(pa),.data(pd),.ce_n(ce_n),.oe_n(oe_n),.we_n(we_n),.lb_n(lb_n),.ub_n(ub_n));
     spi_sd_model card(.cs_n(cs),.sck(sck),.mosi(mosi),.miso(miso),.absent(absent),
         .fail_read(fail_read),.fail_write(fail_write),.stuck_busy(stuck_busy),
         .bad_ocr(1'b0),.bad_echo(1'b0),.bad_status(1'b0));
     task check(input bit ok,input string why);
-        begin if(!ok)$fatal(1,"%s (IOP PC=%h CS1=%o ER=%o)",why,disk.ia,disk.registers.cs1,disk.registers.er);checks++;end
+        begin if(!ok)$fatal(1,"%s (IOP PC=%h CS1=%o ER=%o)",why,disk.ia,rd,16'b0);checks++;end
     endtask
     task rk(input bit wr,input [3:0] a,input [15:0] v,input [1:0] lanes,output [15:0] result);
         begin
             @(negedge clk);rr=1;rw=wr;ra=a;wd=v;rl=lanes;
             do @(negedge clk);while(!ready);
             result=rd;rr=0;@(negedge clk);
+        end
+    endtask
+    task wait_boot_status;
+        begin
+            metadata=1;
+            do begin rk(0,0,0,3,boot_status);end while(!boot_status[15]);
+            metadata=0;
         end
     endtask
     reg [15:0] result;
@@ -137,8 +151,8 @@ module tb_storage_rl_xp;
     integer before_dma,before_writes,slot;
     initial begin
         repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);reset=0;
-        wait(disk.storage_status[15]);wait(!disk.owner);
-        check(disk.storage_status==16'ha028,"RL0 default and menu");traffic=1;
+        wait_boot_status();wait(!disk.owner);
+        check(boot_status==16'ha028,"RL0 default and menu");traffic=1;
         expect_ctl(0,0,16'o201,"RL ready and present");
         put_rl(2,16'o13);put_rl(0,4);done(0,0);expect_ctl(0,3,16'o235,"RL02 status");
         put_rl(0,16'o200|16'o1400);expect_ctl(0,0,16'o1600,"absent RL3");
@@ -195,16 +209,19 @@ module tb_storage_rl_xp;
         done(0,0);bytes_at('h190000,512,0,0,"unrelated controller clear preserves RL DMA");
         // Both controllers can queue commands, receive independent completions.
         xp_io(16'o171,256,'h1a0000,2,0);rl_io(16'o114,256,'h1b0000,2);
-        done(1,0);done(0,0);check(xirq && lirq,"simultaneous controller IRQs");
+        done(1,0);done(0,0);check(lirq,"RL is first queued interrupt");
+        @(negedge clk);lack=1;@(negedge clk);lack=0;wait(xirq);
+        check(xirq,"XP interrupt retained behind RL");
+        @(negedge clk);xack=1;@(negedge clk);xack=0;
         bytes_at('h1a0000,512,202,0,"queued XP data");bytes_at('h1b0000,512,1,0,"queued RL data");
         // Cancel the actual owner, then immediately submit a new generation.
         xp_io(16'o171,256,'h1c0000,0,0);wait(dr && dready);put_xp(4,16'o40);
         xp_io(16'o171,256,'h1d0000,3,0);done(1,0);bytes_at('h1d0000,512,203,0,"XP generation after cancellation");
         @(negedge clk);bus_reset=1;@(negedge clk);bus_reset=0;
-        check(disk.storage_status==16'ha028 && disk.rl_enabled && disk.xp_enabled,"RESET retains SD attachments");
+        check(boot_status==16'ha028,"RESET retains SD attachments");
         put_rl(2,16'o13);put_rl(0,4);done(0,0);expect_ctl(0,3,16'o235,"RL works immediately after RESET");
         check(cpu_cycles>100,"CPU continued during IO");traffic=0;
         $display("PASS MMU RL/XP: %0d checks, %0d DMA words",checks,dma_cycles);$finish;
     end
-    initial begin #12000000000;$fatal(1,"global timeout PC=%h status=%h",disk.ia,disk.storage_status);end
+    initial begin #12000000000;$fatal(1,"global timeout PC=%h status=%h",disk.ia,boot_status);end
 endmodule

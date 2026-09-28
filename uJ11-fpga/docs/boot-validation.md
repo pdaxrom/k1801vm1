@@ -35,17 +35,24 @@ substitute for executing the HC7000 RTL.
 
 | Configuration | Result on HC7000 MMU / FPP off / SERV storage |
 |---|---|
-| RT-11 XM, boot RH0 | Boot passes at 24 MHz with 2 MiB and 22-bit addressing; RH1 directory reads pass. RK0 returns `?DIR-F-Invalid device RK0:`. RK0..RK2 are not implemented. |
-| RSX, boot RQ0 | SERV rejects the unsupported boot controller with startup status `c007` and enters ODT before any guest SD write. RQ/MSCP is not implemented. The RQ0 image also has the independent nonbootable-block issue described above. |
-| RT-11 V4, boot RK0 | SERV reports `c007` and enters ODT before any guest SD write. RK05 is not implemented. |
+| RT-11 XM, boot RH0 | Boot passes at 24 MHz with 2 MiB and 22-bit addressing; RH1 and all three RK05 directory reads pass. |
+| RSX, boot RQ0 | The software MSCP controller loads the original placeholder. It prints its nonbootable-volume message and halts at PC 000034, matching SIMH. No guest SD writes occur. |
+| RSX, boot RQ1 | RSX-11M-PLUS V4.6 BL87 completes STARTUP, accepts the date, reports DU0/DU1 and lists `DU1:[1,54]RSX11M.SYS` (1026 blocks). |
+| RT-11 V4, boot RK0 | Boot and system-directory/text reads pass through the software RK05 controller. |
 
-The XM RTL run has 5503 checks, 364257064 clocks and 135715 DMA words. It
+The XM RTL run has 6085 checks, 446981194 clocks and 164871 DMA words. It
 executes the actual CPU, SERV firmware, SPI SD model, SRAM pins and UART
-waveforms, including the five-second menu default. The two unsupported-boot
-tests verify the current failure behavior; they are **not successful OS boots**.
-The complete requested matrix therefore remains incomplete on FPGA until
-RK05 and RQ/MSCP support is added. No hardware or firmware changes were made
-to disguise these outcomes.
+waveforms, including the five-second menu default. V4 passes 2816 checks in
+187814328 clocks with 63670 DMA words. RQ0 remains an expected nonbootable image,
+not a successful OS boot. Its own final RESET discards pending UART characters;
+the test models this reset while checking the full message and HALT address.
+
+RQ1 passes 3346 checks in 1637690453 clocks with 786149 DMA words. This run
+includes the MMU CSM implementation needed by AT.T0. The terminal test waits
+half a second after the date prompt so AT can queue its read, then waits for
+STARTUP's final `QUE BAP0:/BATCH` before issuing interactive commands. Without
+that delay, the immediately injected date was consumed as an MCR command.
+The same FPGA/firmware sources pass with this console sequencing correction.
 
 ## Reproduce
 
@@ -62,10 +69,11 @@ Repeat with `--cpu 11/70` to test without FPP. The nonbootable RQ0 run saves
 `passed: false`, `status: not_bootable` and exits with status 2.
 
 ```
-UJ11_MMU_FPP=off UJ11_MMU_IOP=storage python3 tools/test_os_boot_rtl.py --out build/matrix-rtl
+UJ11_MMU_FPP=off UJ11_MMU_IOP=storage python3 tools/test_os_boot_rtl.py --out build/matrix-rtl --menu build/storage-menu/menu.img
 ```
 
-The RTL runner uses the packaged SD menu and the current hardware/firmware.
-It distinguishes an OS boot from a successful test of an expected rejection;
-`all_configurations_passed` remains false while RK05 and RQ/MSCP are absent.
-Saved evidence is under `releases/hc7000-bsd/validation/boot-matrix/`.
+The RTL runner uses the supplied SD menu and current hardware/firmware.
+It distinguishes a successful OS boot (`boot_passed`) from validation of the
+nonbootable RQ0 placeholder (`expected_nonbootable`). Original SIMH evidence is
+under `releases/hc7000-bsd/validation/boot-matrix/`; current shared-I/O RTL
+evidence is under `releases/hc7000-serv-io/validation/`.

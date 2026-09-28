@@ -26,7 +26,7 @@ CONDS = {s: i for i, s in enumerate('ALWAYS C V Z N Q0 LOOPZ ERROR'.split())}
 CONDS.update({'NOT_' + k: v + 8 for k, v in list(CONDS.items())})
 REGS = {**{f'R{i}': i for i in range(8)}, **{f'T{i}': 8+i for i in range(8)},
         'RS': 16, 'RD': 17, 'RS1': 18, 'RD1': 19}
-SPACES = {'DATA': 0, 'INSTRUCTION': 1, 'KERNEL': 2, 'PREVIOUS_I': 3, 'PREVIOUS_D': 4, 'PHYSICAL': 5, 'INTERNAL': 6, 'CONSOLE': 7}
+SPACES = {'DATA': 0, 'INSTRUCTION': 1, 'KERNEL': 2, 'PREVIOUS_I': 3, 'PREVIOUS_D': 4, 'PHYSICAL': 5, 'INTERNAL': 6, 'CONSOLE': 7, 'SUPERVISOR': 7}
 CONSOLE = {'NONE': 0, 'ENTER': 1, 'LEAVE': 2, 'STEP': 3}
 FPOPS={name:i for i,name in enumerate('NOP ZERO_X ZERO_Y ZERO_Z SWAP Y_TO_X X_TO_Y UNPACK_X UNPACK_Y PACK_X SHL_X SHR_X JAM_Y ADD SUB ROUND ADD_HIGH SHR_Z PRODUCT MULTIPLIER SHL_Z SET_Z0 Z_TO_X NEGATE SEXT16 SEXT32 TRUNC59 AND BIC SHL_Y SHR_Y SET_Y0 X_TO_Z'.split())}
 DEPTH = 3072

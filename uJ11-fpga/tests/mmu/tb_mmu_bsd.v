@@ -16,6 +16,8 @@ module tb_mmu_bsd;
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete),.stopped(stopped));
+    serv_memory_guard guard(.clk(clk),.reset(dut.bus.disk.iop_reset),
+        .write(dut.bus.disk.data_accept && dut.bus.disk.memory_selected && dut.bus.disk.de),.address(dut.bus.disk.da));
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
     spi_sd_model #(.SECTORS(2048)) card(.cs_n(cs),.sck(sck),.mosi(mosi),.miso(miso),.absent(1'b0),
         .fail_read(1'b0),.fail_write(1'b0),.stuck_busy(1'b0),.bad_ocr(1'b0),.bad_echo(1'b0),.bad_status(1'b0));

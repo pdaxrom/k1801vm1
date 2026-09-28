@@ -64,7 +64,7 @@ def compact_rom(image):
     Validate the entire mapping, including STOP-filled holes, before emitting.
     """
     stop=0x0e80000000
-    def tail_valid(a):return 0x400<=a<0x440 or 0x500<=a<0x600 or 0x6f0<=a<0x700
+    def tail_valid(a):return 0x400<=a<0x480 or 0x500<=a<0x600 or 0x6f0<=a<0x700
     tail=[stop]*512
     for a in range(1024,len(image)):
         if tail_valid(a):tail[a&511]=image[a]
@@ -79,7 +79,7 @@ def compact_rom(image):
         "assign fpp_enabled=1'b0;",
         '`ifdef SYNTHESIS','`define UJ11_MMU_EBR','`elsif UJ11_VENDOR_ROM','`define UJ11_MMU_EBR','`endif',
         '`ifdef UJ11_MMU_EBR','wire [53:0] bank0,tail;reg dense_selected,valid;',
-        "wire tail_valid=(address[11:6]==6'h10 || address[11:8]==4'h5 || address[11:4]==8'h6f);",
+        "wire tail_valid=(address[11:7]==5'h08 || address[11:8]==4'h5 || address[11:4]==8'h6f);",
         'always @(posedge clk)if(enable)begin dense_selected<=address[11:10]==0;valid<=address[11:10]==0 || tail_valid;end',
         "assign data=!valid ? 54'h0e80000000 : dense_selected ? bank0 : tail;"]+blocks
     for lane in range(3):

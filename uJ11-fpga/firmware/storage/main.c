@@ -1,37 +1,17 @@
-#include "label.h"
-/* SDHC service for independent RK07, RL01/RL02 and RM05 controllers. */
-typedef unsigned int u32;
-#define MMIO(a) (*(volatile u32 *)(a))
-#define RK(n) MMIO(0x40000000u + 4u*(n))
-#define SPI MMIO(0x40000100u)
-#define CONTROL MMIO(0x40000104u)
-#define DMA_ADDR MMIO(0x40000200u)
-#define DMA_COUNT MMIO(0x40000204u)
-#define ENGINE MMIO(0x40000208u)
-#define TIME MMIO(0x40000300u)
-#define RL(n) MMIO(0x40000400u + 4u*(n))
-#define XP(n) MMIO(0x40000500u + 4u*(n))
-#define WINDOW MMIO(0x4000020cu)
-#define DMA_MODE MMIO(0x40000210u)
-#define R(n) regs[n]
-static volatile u32 *regs;
-static u32 meta;
-static int active(void) { return R(meta+9)&1; }
-enum { CS1, WC, BA, DA, CS2, DS, ER, MR, DC, DB, STATUS=16, COMPLETE, PRESENT, PROTECTED, BOOT_STATUS };
-enum { RX=1, TX, LOAD, STORE, COMPARE };
-enum { ILF=0000001, IAE=0002000, DTE=0020000, WLE=0004000, DCK=0100000, NXM=0200000 };
+#include "storage.h"
+/* SDHC service and scheduler for independent PDP-11 disk controllers. */
 
 static int elapsed(u32 start, u32 limit) { return ((TIME-start)&65535u)>=limit; }
-static void pause_ms(u32 delay) { u32 start=TIME; while(!elapsed(start,delay)) {} }
+static void pause_ms(u32 delay) { u32 start=TIME; while(!elapsed(start,delay))poll_io(); }
 /* A write already clocks a byte. Reading SPI clocks another, so command output
  * uses plain writes; input uses reads which clock FF. */
 static u32 speed;
-static uint8_t sector[512];
+union storage_scratch scratch;
+#define sector scratch.sector
 static struct sd_label label;
-static u32 present[3], protected[3];
 static uint16_t rl_position[4];
 static uint8_t rl_rotation[4];
-static void close_card(void) { CONTROL=speed|1; (void)SPI; }
+void close_card(void) { CONTROL=speed|1; (void)SPI; }
 static u32 send(u32 opcode,u32 arg,u32 crc) {
     CONTROL=speed;
     SPI=opcode; SPI=arg>>24; SPI=arg>>16; SPI=arg>>8; SPI=arg; SPI=crc;
@@ -45,7 +25,7 @@ static int command(u32 opcode,u32 lba) { return send(opcode,lba,1)==0; }
 static int token(void) {
     u32 start=TIME;
     for(;;) {
-        u32 r=SPI;
+        poll_io();u32 r=SPI;
         if(r==0xfe)return 1;
         if(r!=0xff || elapsed(start,250))return 0;
     }
@@ -54,7 +34,7 @@ static int receive(uint8_t *p,u32 n) {
     if(!token())return 0;
     u32 crc=0;
     for(u32 i=0;i<n;i++) {
-        u32 byte=SPI;p[i]=byte;crc^=byte<<8;
+        u32 byte=SPI;p[i]=byte;crc^=byte<<8;poll_io();
         for(unsigned b=0;b<8;b++)crc=((crc<<1)^((crc&0x8000)?0x1021:0))&65535;
     }
     u32 actual=SPI<<8;actual|=SPI;
@@ -62,7 +42,7 @@ static int receive(uint8_t *p,u32 n) {
 }
 static u32 initialize(void) {
     /* Firmware owns the byte port throughout startup; no guest SRAM is used. */
-    while(!(RK(STATUS)&2)) {}
+    sd_ownership(1);
     pause_ms(10);CONTROL=1;
     for(unsigned n=0;n<10;n++)SPI=255;
     if(send(0x40,0,0x95)!=1)return 1;
@@ -94,42 +74,42 @@ static u32 initialize(void) {
         if(valid && sd_label_decode(sector,capacity,&label)) { good=1;break; }
     }
     if(!good)return 6;
+    controllers_init();
     u32 boot=0xffffffffu;
     for(unsigned i=0;i<label.count;i++) {
         struct sd_partition *p=label.part+i;
         int supported=(p->kind==2 && p->media==3 && p->mode==0) ||
-            (p->kind==5 && (p->media==6 || p->media==7)) || (p->kind==3 && p->media==4);
-        unsigned bank=p->kind==2 ? 0 : p->kind==5 ? 1 : 2;
+            (p->kind==5 && (p->media==6 || p->media==7)) || (p->kind==3 && p->media==4) ||
+            (p->kind==1 && p->media==1) || (p->kind==4 && p->media==5);
+        unsigned bank=p->kind==2 ? 0 : p->kind==5 ? 1 : p->kind==3 ? 2 : p->kind==1 ? 3 : 4;
         if(p->flags&SD_BOOT) {
             if(!supported)return 7;
             if(p->kind!=2 && !(label.features&SD_MENU))return 8;
             boot=p->unit | ((p->kind==2 ? 0 : p->kind)<<3);
         }
         if(supported) {
-            present[bank]|=1u<<p->unit;
-            if(p->flags&SD_READONLY)protected[bank]|=1u<<p->unit;
+            controllers[bank].present|=1u<<p->unit;
+            if(p->flags&SD_READONLY)controllers[bank].ro|=1u<<p->unit;
         }
     }
     if(boot==0xffffffffu) {
         if(!(label.features&SD_MENU))return 8;
         boot=0x1000; /* menu without an automatic/default drive */
     }
-    RK(PRESENT)=present[0];RK(PROTECTED)=protected[0];
-    RL(18)=present[1];XP(34)=present[2];XP(35)=protected[2];
-    close_card();RK(BOOT_STATUS)=0x8000u|boot|((label.features&SD_MENU)?0x2000:0);
+    close_card();boot_status=0x8000u|boot|((label.features&SD_MENU)?0x2000:0);
     return 0;
 }
-static u32 transfer(u32 op) {
+u32 transfer(u32 op) {
     ENGINE=op;
     u32 status;
-    do { status=ENGINE; } while(status&1);
+    while((status=ENGINE)&1)poll_io();
     return status;
 }
-static u32 fetch_sector(u32 lba) {
+u32 fetch_sector(u32 lba) {
     if(!command(0x51,lba))return DTE;
     u32 start=TIME;
     for(;;) {
-        u32 r=SPI;
+        poll_io();u32 r=SPI;
         if(r==0xfe)break;
         if(r!=0xff || elapsed(start,250))return DTE;
     }
@@ -160,7 +140,7 @@ static u32 write_sector(u32 lba) {
 }
 /* Operation 0 reads, 1 writes, 2 compares. A 256-byte RL sector shares
  * its SD sector with a neighbour; read/modify/write preserves that neighbour. */
-static u32 sector_io(u32 lba,u32 op,u32 count,u32 offset,u32 span) {
+u32 sector_io(u32 lba,u32 op,u32 count,u32 offset,u32 span) {
     WINDOW=offset | ((offset+span)<<8);DMA_COUNT=count;
     if(op!=1 || span!=256) {
         u32 error=fetch_sector(lba);if(error)return error;
@@ -175,7 +155,7 @@ static u32 sector_io(u32 lba,u32 op,u32 count,u32 offset,u32 span) {
     u32 result=transfer(op==2 ? COMPARE : STORE);
     return result&2 ? (result&8 ? NXM : DTE) : result&4 ? DCK : 0;
 }
-static struct sd_partition *find_drive(u32 kind,u32 unit) {
+struct sd_partition *find_drive(u32 kind,u32 unit) {
     for(unsigned i=0;i<label.count;i++)
         if(label.part[i].kind==kind && label.part[i].unit==unit)return label.part+i;
     return 0;
@@ -215,12 +195,13 @@ static u32 disks(struct sd_partition *p,u32 xp) {
          * controller does. RK07 retains its legacy zero padding. */
         u32 error=sector_io(p->start+lba,op,count,0,xp && op==1 ? count : 256);
         close_card();
+        if(!active())return DTE;
         if(xp && error==NXM) { R(CS2)|=0004000;return 0; }
         if(xp && op==2 && error==DCK) { R(CS2)|=0040000;return 0; }
         if(error)return error;
         if(!inhibit)ba=(ba+2*count)&(xp ? 0x3fffffu : 0x3ffffu);
         left-=count;R(WC)=(wc+=count)&65535;R(BA)=ba&65535;
-        if(xp)R(20)=ba>>16;else R(CS1)=(ba>>8)&0001400;
+        if(xp)R(20)=ba>>16;else R(CS1)=(R(CS1)&~0001400u)|((ba>>8)&0001400);
         ++lba;
         if(++sec==per_track) { sec=0;if(++head==heads) { head=0;++dc; } }
         if(xp && lba==p->blocks) { dc=822;head=18;sec=31;R(DS)|=02000; }
@@ -274,7 +255,8 @@ static u32 rl_command(struct sd_partition *p) {
         DMA_ADDR=ba;
         u32 error=sector_io(p->start+(lba>>1),fn==5 ? 1 : fn==1 ? 2 : 0,
                             count,(sec&1)?128:0,span);
-        close_card();if(error)return rl_error(error==DCK ? 2 : error==NXM ? 8 : 4);
+        close_card();if(!active())return 0;
+        if(error)return rl_error(error==DCK ? 2 : error==NXM ? 8 : 4);
         left-=count;done+=count;mp=(mp+count)&65535;ba=(ba+2*count)&0x3fffff;
         sec+=(count+127)>>7;R(3)=mp;R(1)=ba&65535;R(4)=ba>>16;
         R(2)=(original+((done+127)>>7))&65535;
@@ -284,21 +266,25 @@ static u32 rl_command(struct sd_partition *p) {
 }
 void main(void) {
     u32 error=initialize();
-    if(error) { for(unsigned n=0;n<3;n++)present[n]=0;close_card();RK(BOOT_STATUS)=0xc000u|error; }
-    for(;;)for(unsigned bank=0;bank<3;bank++) {
-        regs=(volatile u32 *)(0x40000000u+(bank ? (bank+3)<<8 : 0));
-        meta=bank==2 ? 32 : 16;
-        if(!(R(meta)&1))continue;
-        R(meta+9)=R(meta+8); /* claim the current command generation */
-        error=0;
+    if(error) {
+        controllers_init();
+        close_card();boot_status=0xc000u|error;
+    }
+    sd_ownership(0);
+    for(;;)for(unsigned bank=0;bank<NCONTROLLERS;bank++) {
+        poll_io();
+        if(!controllers[bank].busy)continue;
+        service_begin(bank);error=0;
         if(active()) {
-            u32 unit=bank==1 ? (R(0)>>8)&3 : R(CS2)&7;
-            u32 kind=bank==0 ? 2 : bank==1 ? 5 : 3;
-            struct sd_partition *p=find_drive(kind,unit);
-            if(!(present[bank]&(1u<<unit)))p=0;
-            error=bank==1 ? rl_command(p) : disks(p,bank==2);
+            if(bank==RQ_BANK)error=rq_service();
+            else {
+                u32 unit=bank==RL_BANK?(R(0)>>8)&3:bank==RK_BANK?R(5)>>13:R(CS2)&7;
+                u32 kind=bank==RH_BANK?2:bank==RL_BANK?5:bank==XP_BANK?3:1;
+                struct sd_partition *p=find_drive(kind,unit);
+                if(!(current->present&(1u<<unit)))p=0;
+                error=bank==RL_BANK?rl_command(p):bank==RK_BANK?rk05_command(p):disks(p,bank==XP_BANK);
+            }
         }
-        if(R(meta)&2)close_card();
-        R(meta+1)=error; /* old generations cannot update registers or raise IRQ */
+        close_card();controller_finish(error);
     }
 }

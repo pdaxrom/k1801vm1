@@ -53,7 +53,7 @@ module tb_mmu_boot;
             wait(prompts>0);unchanged=0;last_chars=bus_chars;
             while(unchanged<2000000)begin
                 @(negedge clk);
-                if(last_chars!=bus_chars || dut.bus.disk.rk_busy)unchanged=0;
+                if(last_chars!=bus_chars || dut.bus.disk.pending)unchanged=0;
                 else unchanged++;
                 last_chars=bus_chars;
             end
@@ -77,7 +77,7 @@ module tb_mmu_boot;
         if(initialized && !power_on)begin
             if(dut.bus.dma_request && dut.bus.dma_ready)dma_words++;
             if(dut.cpu.step && dut.cpu.fetching)begin
-                if(dut.bus.disk.rk_busy)concurrent_fetches++;
+                if(dut.bus.disk.pending)concurrent_fetches++;
                 if(dut.cpu.mmr0[0])mmu_fetches++;
             end
             if(dut.request && dut.ready && dut.writing && dut.address==22'o17777566)begin

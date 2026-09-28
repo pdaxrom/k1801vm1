@@ -54,7 +54,7 @@ module tb_storage_menu;
             wait(prompts>0);unchanged=0;last_chars=bus_chars;
             while(unchanged<2000000)begin
                 @(negedge clk);
-                if(last_chars!=bus_chars || dut.bus.disk.rk_busy)unchanged=0;
+                if(last_chars!=bus_chars || dut.bus.disk.pending)unchanged=0;
                 else unchanged++;
                 last_chars=bus_chars;
             end
@@ -78,7 +78,7 @@ module tb_storage_menu;
         if(initialized && !power_on)begin
             if(dut.bus.dma_request && dut.bus.dma_ready)dma_words++;
             if(dut.cpu.step && dut.cpu.fetching)begin
-                if(dut.bus.disk.rk_busy)concurrent_fetches++;
+                if(dut.bus.disk.pending)concurrent_fetches++;
                 if(dut.cpu.mmr0[0])mmu_fetches++;
             end
             if(dut.request && dut.ready && dut.writing && dut.address==22'o17777566)begin
@@ -106,10 +106,10 @@ module tb_storage_menu;
     function [15:0] word_at(input integer a);word_at={ram.memory[a+1],ram.memory[a]};endfunction
     initial begin
         if(!$value$plusargs("MODE=%s",mode))mode="auto";
-        signature=mode=="cancel" ? 'o12345 : mode=="rl-auto" ? 'o12346 : 'o12354;
+        signature=mode=="cancel" ? 'o12345 : mode=="rl-auto" ? 'o12346 : mode=="rq-auto" ? 'o12350 : 'o12354;
         repeat(5)@(negedge clk);power_on=0;
         if(mode=="bad-wire")begin
-            wait(dut.bus.disk.storage_status[15]);card.corrupt_read_crc=1;
+            wait(dut.bus.iop_selected && dut.ready && dut.bus.offset==13'o17504 && dut.bus.io_data[15]);card.corrupt_read_crc=1;
         end
         if(mode=="bad-header" || mode=="bad-payload" || mode=="bad-size" || mode=="bad-wire")begin
             wait(stopped);
@@ -118,7 +118,7 @@ module tb_storage_menu;
         end else begin
             if(mode!="direct")begin
                 until_text("uJ11 SD BOOT MENU");
-                until_text(mode=="rl-auto" ? "RL11, units: 0 1" : mode=="xp-auto" ? "XP/RP, units: 0 7" : "RH11/HK, units: 0 7");
+                until_text(mode=="rl-auto" ? "RL11, units: 0 1" : mode=="xp-auto" ? "XP/RP, units: 0 7" : mode=="rk-auto" ? "RK05, units: 0 7" : mode=="rq-auto" ? "RQ/MSCP, units: 0 3" : "RH11/HK, units: 0 7");
             end
             if(mode=="cancel" || mode=="enter")begin
                 until_text("other key=menu: ");
@@ -135,10 +135,11 @@ module tb_storage_menu;
             end
             wait(boot_complete);
             while(word_at('o1002)!=signature)@(negedge clk);
-            check(word_at('o1000)==(mode=="cancel" ? 0 : mode=="rl-auto" ? 1 : 7),"selected unit in boot ABI");
-            while(word_at('o1004)!=(mode=="rl-auto" ? 'o174400 : mode=="xp-auto" ? 'o176700 : 'o177440))@(negedge clk);
+            check(word_at('o1000)==(mode=="cancel" ? 0 : mode=="rl-auto" ? 1 : mode=="rq-auto" ? 3 : 7),"selected unit in boot ABI");
+            // RK bootstrap passes RKCS (base+4), as the standard RK05 ABI does.
+            while(word_at('o1004)!=(mode=="rl-auto" ? 'o174400 : mode=="xp-auto" ? 'o176700 : mode=="rk-auto" ? 'o177404 : mode=="rq-auto" ? 'o172150 : 'o177440))@(negedge clk);
             check(card.writes==0,"menu never writes SD");
-            if(mode=="auto" || mode=="rl-auto" || mode=="xp-auto")check(timer_clears==251,"five seconds use 250 timer ticks");
+            if(mode=="auto" || mode=="rl-auto" || mode=="xp-auto" || mode=="rk-auto" || mode=="rq-auto")check(timer_clears==251,"five seconds use 250 timer ticks");
             if(mode=="enter")check(timer_clears<251,"Enter boots before timeout");
             if(mode=="no-default" || mode=="direct")check(timer_clears==0,"no unwanted timeout");
         end

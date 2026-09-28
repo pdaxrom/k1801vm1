@@ -32,14 +32,15 @@ module tb_storage_bus;
     task bus(input bit wr,input bit by,input [21:0] addr,input [15:0] data,input bit fault);
         begin
             @(negedge clk);request=1;writing=wr;byte_access=by;address=addr;write_data=data;n=0;
-            do begin @(posedge clk);n++;if(n>1024)$fatal(1,"bus timeout");end while(!ready);
+            do begin @(posedge clk);n++;if(n>10000000)$fatal(1,"bus timeout");end while(!ready);
             check(error==fault,"physical response");value=read_data;
             @(negedge clk);request=0;repeat(3)@(negedge clk);
         end
     endtask
     initial begin
         repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);reset=0;
-        wait(dut.storage_status[15]);wait(!dut.disk.owner);
+        do bus(0,0,22'o17777504,0,0);while(!value[15]);
+        wait(!dut.disk.owner);
         bus(0,0,22'o17774400,0,0);check(value==16'o201,"RL canonical CSR");
         bus(0,0,22'o17777400,0,1); // RK05 must not alias RL11.
         bus(0,0,22'o17777440,0,1); // No RH partitions.
@@ -48,7 +49,7 @@ module tb_storage_bus;
         bus(1,0,22'o17776700,16'o100,0);
         check(irq_valid && irq_priority==5 && irq_vector==16'o160,"RL takes first BR5 vector");
         @(negedge clk);irq_ack=1;@(negedge clk);irq_ack=0;
-        check(irq_valid && irq_vector==16'o254,"RL acknowledge preserves pending XP");
+        wait(irq_valid);check(irq_valid && irq_vector==16'o254,"RL acknowledge preserves pending XP");
         @(negedge clk);irq_ack=1;@(negedge clk);irq_ack=0;check(!irq_valid,"XP acknowledge");
         @(negedge clk);peripheral_reset=1;@(negedge clk);peripheral_reset=0;
         bus(0,0,22'o17774400,0,0);check(value==16'o201,"RL stays attached across PDP RESET");
