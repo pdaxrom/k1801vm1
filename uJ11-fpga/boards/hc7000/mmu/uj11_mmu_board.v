@@ -14,20 +14,20 @@ module uj11_mmu_board #(
     input wire sd_miso,
     output wire boot_complete,stopped
 );
-    wire request,writing,byte_access,ready,error,peripheral_reset,irq_valid,irq_ack;
+    wire request,writing,byte_access,ready,error,peripheral_reset,irq_valid,irq_ack,cpu_lock;
     wire [21:0] address;
     wire [15:0] write_data,read_data,irq_vector,mmr3;
     wire [2:0] irq_priority;
     uj11_mmu_cpu cpu(.clk(clk),.reset(reset),.halt_button(halt_button),
         .irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),.irq_ack(irq_ack),
-        .peripheral_reset(peripheral_reset),.mem_request(request),.mem_write(writing),.mem_byte(byte_access),
+        .peripheral_reset(peripheral_reset),.mem_request(request),.mem_write(writing),.mem_byte(byte_access),.mem_lock(cpu_lock),
         .mem_address(address),.mem_write_data(write_data),.mem_ready(ready),.mem_error(error),
         .mem_read_data(read_data),.console_active(stopped),.waiting(),.retire(),.psw(),.ir(),
         .mmr0(),.mmr1(),.mmr2(),.mmr3(mmr3),.upc(),.uword(),.pc(),.debug_register_data(),.debug_register_address(5'd0));
     uj11_mmu_board_bus #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(TICK_DIVISOR),
         .SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),.CLEAR_WORDS(CLEAR_WORDS)) bus(
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.dma_map_enabled(mmr3[5]),
-        .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),
+        .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(cpu_lock),.address(address),.write_data(write_data),
         .ready(ready),.error(error),.read_data(read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),
         .irq_vector(irq_vector),.irq_ack(irq_ack),.uart_rx(uart_rx),.uart_tx(uart_tx),
         .panel_keys(panel_keys),.panel_pins(panel_pins),.memory_initialized(memory_initialized),

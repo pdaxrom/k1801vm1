@@ -18,7 +18,10 @@ typedef uint32_t u32;
 #define DIRECT MMIO(0x40000214u)
 #define TIME MMIO(0x40000300u)
 enum { RH_BANK,RL_BANK,XP_BANK,RK_BANK,RQ_BANK,NCONTROLLERS };
-struct controller { uint16_t r[22],epoch;uint8_t busy,irq,present,ro,pad[14]; };
+struct controller {
+	uint16_t r[22],epoch;
+	uint8_t busy,irq,present,ro,pad[14];
+};
 
 extern struct controller *current;
 extern uint16_t *regs,boot_status;
@@ -36,8 +39,11 @@ enum { ILF=0000001, IAE=0002000, DTE=0020000, WLE=0004000, DCK=0100000, NXM=0200
 /* The label bytes are dead after decoding. Reuse their RAM for controller
  * registers, drive positions and MSCP packets instead of reserving both. */
 union storage_scratch {
-    uint8_t sector[512];
-    struct { struct controller controllers[NCONTROLLERS];uint16_t xp[8][6],packet[2][32]; } live;
+	uint8_t sector[512];
+	struct {
+		struct controller controllers[NCONTROLLERS];
+		uint16_t xp[8][6],packet[2][32];
+	} live;
 };
 extern union storage_scratch scratch;
 #define controllers scratch.live.controllers

@@ -52,16 +52,18 @@ static int hg_send_status(struct hg_mpsse *link, enum hg_status status)
 
 static enum hg_status hg_status_from_errno(int error, int writing)
 {
-	if (error == ERANGE)
+	if (error == ERANGE) {
 		return HG_STATUS_RANGE;
-	if (writing && error == EROFS)
+	}
+	if (writing && error == EROFS) {
 		return HG_STATUS_READ_ONLY;
+	}
 	return HG_STATUS_IO;
 }
 
 /* Return 1 after a successful write, 0 otherwise, and -1 on link failure. */
 static int hg_serve_one(struct hg_mpsse *link, struct hg_image *image,
-	struct hg_request *request_out)
+                        struct hg_request *request_out)
 {
 	uint8_t header[HG_HEADER_SIZE];
 	uint8_t payload[HG_BLOCK_SIZE + 2u];
@@ -70,79 +72,93 @@ static int hg_serve_one(struct hg_mpsse *link, struct hg_image *image,
 	enum hg_status status;
 	int wrote = 0;
 
-	if (hg_mpsse_select(link, 1) != 0)
+	if (hg_mpsse_select(link, 1) != 0) {
 		return -1;
+	}
 	hg_delay_us(2000);
-	if (hg_mpsse_exchange(link, NULL, header, sizeof(header)) != 0)
+	if (hg_mpsse_exchange(link, NULL, header, sizeof(header)) != 0) {
 		goto link_error;
+	}
 	if (hg_decode_header(header, &request) != 0) {
 		size_t i;
 
 		fprintf(stderr, "hgfsd: rejected malformed request:");
-		for (i = 0; i < sizeof(header); i++)
+		for (i = 0; i < sizeof(header); i++) {
 			fprintf(stderr, " %02x", header[i]);
+		}
 		fputc('\n', stderr);
-		if (hg_send_status(link, HG_STATUS_PROTOCOL) != 0)
+		if (hg_send_status(link, HG_STATUS_PROTOCOL) != 0) {
 			goto link_error;
+		}
 		goto done;
 	}
-	if (request_out)
+	if (request_out) {
 		*request_out = request;
+	}
 
 	if (request.operation == HG_OP_READ || request.operation == HG_OP_TIME) {
 		int failed = request.operation == HG_OP_TIME ?
-			hg_time_now(request.block, payload) :
-			hg_image_read(image, request.block, payload, request.count);
+		             hg_time_now(request.block, payload) :
+		             hg_image_read(image, request.block, payload, request.count);
 		if (failed != 0) {
 			status = hg_status_from_errno(errno, 0);
-			if (hg_send_status(link, status) != 0)
+			if (hg_send_status(link, status) != 0) {
 				goto link_error;
+			}
 			goto done;
 		}
-		if (hg_send_status(link, HG_STATUS_OK) != 0)
+		if (hg_send_status(link, HG_STATUS_OK) != 0) {
 			goto link_error;
+		}
 		checksum = hg_data_checksum(payload, request.count);
 		payload[request.count] = (uint8_t)(checksum & 0xffu);
 		payload[request.count + 1u] = (uint8_t)(checksum >> 8);
 		hg_delay_us(500);
-		if (hg_mpsse_exchange(link, payload, NULL, request.count + 2u) != 0)
+		if (hg_mpsse_exchange(link, payload, NULL, request.count + 2u) != 0) {
 			goto link_error;
+		}
 	} else {
 		if (image->read_only) {
-			if (hg_send_status(link, HG_STATUS_READ_ONLY) != 0)
+			if (hg_send_status(link, HG_STATUS_READ_ONLY) != 0) {
 				goto link_error;
+			}
 			goto done;
 		}
 		if ((uint64_t)request.block * HG_BLOCK_SIZE + request.count >
-		    image->size) {
-			if (hg_send_status(link, HG_STATUS_RANGE) != 0)
+		                image->size) {
+			if (hg_send_status(link, HG_STATUS_RANGE) != 0) {
 				goto link_error;
+			}
 			goto done;
 		}
-		if (hg_send_status(link, HG_STATUS_OK) != 0)
+		if (hg_send_status(link, HG_STATUS_OK) != 0) {
 			goto link_error;
+		}
 		hg_delay_us(500);
-		if (hg_mpsse_exchange(link, NULL, payload, request.count + 2u) != 0)
+		if (hg_mpsse_exchange(link, NULL, payload, request.count + 2u) != 0) {
 			goto link_error;
+		}
 		checksum = hg_data_checksum(payload, request.count);
 		if (payload[request.count] != (uint8_t)(checksum & 0xffu) ||
-		    payload[request.count + 1u] != (uint8_t)(checksum >> 8)) {
+		                payload[request.count + 1u] != (uint8_t)(checksum >> 8)) {
 			status = HG_STATUS_CHECKSUM;
 		} else if (hg_image_write(image, request.block, payload,
-			request.count) != 0) {
+		                          request.count) != 0) {
 			status = hg_status_from_errno(errno, 1);
 		} else {
 			status = HG_STATUS_OK;
 			wrote = 1;
 		}
-		if (hg_send_status(link, status) != 0)
+		if (hg_send_status(link, status) != 0) {
 			goto link_error;
+		}
 	}
 
 done:
 	hg_delay_us(500);
-	if (hg_mpsse_select(link, 0) != 0)
+	if (hg_mpsse_select(link, 0) != 0) {
 		return -1;
+	}
 	return wrote;
 
 link_error:
@@ -153,16 +169,16 @@ link_error:
 static void hg_usage(FILE *out)
 {
 	fprintf(out,
-		"usage: hgfsd (--image FILE | --directory DIR) [options]\n"
-		"  --read-only       reject RT-11 writes\n"
-		"  --jtag-enable-adbus7  HC7000 jumper: switch JTAG to HG on start\n"
-		"  --jtag-only       release HC7000 JTAGENB and exit; no image needed\n"
-		"  TIME requests return host local date/time (TZ environment applies)\n"
-		"  --blocks N        directory image size (default 8192)\n"
-		"  --clock HZ        MPSSE clock (default 4000)\n"
-		"  --serial TEXT     select an FT2232 by serial number\n"
-		"  --index N         select matching FT2232 index (default 0)\n"
-		"  --vid N --pid N   USB ids (defaults 0x0403:0x6010)\n");
+	        "usage: hgfsd (--image FILE | --directory DIR) [options]\n"
+	        "  --read-only       reject RT-11 writes\n"
+	        "  --jtag-enable-adbus7  HC7000 jumper: switch JTAG to HG on start\n"
+	        "  --jtag-only       release HC7000 JTAGENB and exit; no image needed\n"
+	        "  TIME requests return host local date/time (TZ environment applies)\n"
+	        "  --blocks N        directory image size (default 8192)\n"
+	        "  --clock HZ        MPSSE clock (default 4000)\n"
+	        "  --serial TEXT     select an FT2232 by serial number\n"
+	        "  --index N         select matching FT2232 index (default 0)\n"
+	        "  --vid N --pid N   USB ids (defaults 0x0403:0x6010)\n");
 }
 
 static unsigned long hg_number(const char *text, const char *option)
@@ -200,29 +216,29 @@ int main(int argc, char **argv)
 	int result = 1;
 
 	for (i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "--image") == 0 && i + 1 < argc)
+		if (strcmp(argv[i], "--image") == 0 && i + 1 < argc) {
 			image_path = argv[++i];
-		else if (strcmp(argv[i], "--directory") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--directory") == 0 && i + 1 < argc) {
 			directory = argv[++i];
-		else if (strcmp(argv[i], "--read-only") == 0)
+		} else if (strcmp(argv[i], "--read-only") == 0) {
 			read_only = 1;
-		else if (strcmp(argv[i], "--jtag-enable-adbus7") == 0)
+		} else if (strcmp(argv[i], "--jtag-enable-adbus7") == 0) {
 			jtag_adbus7 = 1;
-		else if (strcmp(argv[i], "--jtag-only") == 0)
+		} else if (strcmp(argv[i], "--jtag-only") == 0) {
 			jtag_only = 1;
-		else if (strcmp(argv[i], "--blocks") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--blocks") == 0 && i + 1 < argc) {
 			blocks = (unsigned int)hg_number(argv[++i], "--blocks");
-		else if (strcmp(argv[i], "--clock") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--clock") == 0 && i + 1 < argc) {
 			clock_hz = (unsigned int)hg_number(argv[++i], "--clock");
-		else if (strcmp(argv[i], "--serial") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--serial") == 0 && i + 1 < argc) {
 			serial = argv[++i];
-		else if (strcmp(argv[i], "--index") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--index") == 0 && i + 1 < argc) {
 			index = (unsigned int)hg_number(argv[++i], "--index");
-		else if (strcmp(argv[i], "--vid") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--vid") == 0 && i + 1 < argc) {
 			vendor = (int)hg_number(argv[++i], "--vid");
-		else if (strcmp(argv[i], "--pid") == 0 && i + 1 < argc)
+		} else if (strcmp(argv[i], "--pid") == 0 && i + 1 < argc) {
 			product = (int)hg_number(argv[++i], "--pid");
-		else if (strcmp(argv[i], "--help") == 0) {
+		} else if (strcmp(argv[i], "--help") == 0) {
 			hg_usage(stdout);
 			return 0;
 		} else {
@@ -235,11 +251,15 @@ int main(int argc, char **argv)
 			hg_usage(stderr);
 			return 2;
 		}
-		if (hg_mpsse_open(&link, vendor, product, serial, index, clock_hz) != 0)
+		if (hg_mpsse_open(&link, vendor, product, serial, index, clock_hz) != 0) {
 			return 1;
+		}
 		int rc = hg_mpsse_jtag_enable(&link, 1);
 		hg_mpsse_close(&link);
-		if (rc != 0) { perror("JTAGENB readback"); return 1; }
+		if (rc != 0) {
+			perror("JTAGENB readback");
+			return 1;
+		}
 		fprintf(stderr, "hgfsd: JTAGENB released, high readback verified\n");
 		return 0;
 	}
@@ -249,7 +269,7 @@ int main(int argc, char **argv)
 	}
 	if (directory) {
 		int length = snprintf(directory_image, sizeof(directory_image),
-			"%s/.hg-volume.dsk", directory);
+		                      "%s/.hg-volume.dsk", directory);
 		if (length < 0 || (size_t)length >= sizeof(directory_image)) {
 			fprintf(stderr, "hgfsd: directory path is too long\n");
 			return 1;
@@ -257,18 +277,18 @@ int main(int argc, char **argv)
 		image_path = directory_image;
 		if (hg_directory_prepare(directory, image_path, blocks) != 0) {
 			fprintf(stderr, "hgfsd: cannot prepare %s: %s\n", image_path,
-				strerror(errno));
+			        strerror(errno));
 			return 1;
 		}
 	}
 	if (hg_image_open(&image, image_path, read_only) != 0) {
 		fprintf(stderr, "hgfsd: cannot open %s: %s\n", image_path,
-			strerror(errno));
+		        strerror(errno));
 		return 1;
 	}
 	if (hg_mpsse_open(&link, vendor, product, serial, index, clock_hz) != 0) {
 		fprintf(stderr, "hgfsd: cannot open FT2232 channel A: %s\n",
-			strerror(errno));
+		        strerror(errno));
 		goto out_image;
 	}
 
@@ -278,10 +298,11 @@ int main(int argc, char **argv)
 		perror("hgfsd: JTAGENB low readback");
 		goto out_link;
 	}
-	if (jtag_adbus7)
+	if (jtag_adbus7) {
 		fprintf(stderr, "hgfsd: JTAGENB low readback verified, HG enabled\n");
+	}
 	fprintf(stderr, "hgfsd: serving %s at %u Hz%s\n", image_path,
-		link.clock_hz, read_only ? " read-only" : "");
+	        link.clock_hz, read_only ? " read-only" : "");
 	/* Re-export a preserved image after restart, including writes that reached
 	 * disk before a crash but missed the previous idle export. */
 	mirror_dirty = directory != NULL && !read_only;
@@ -302,18 +323,19 @@ int main(int argc, char **argv)
 				mirror_dirty = directory != NULL;
 				last_write = hg_milliseconds();
 			}
-			if (request.operation == HG_OP_TIME)
+			if (request.operation == HG_OP_TIME) {
 				fprintf(stderr, "hgfsd: local time, %u ticks/sec\n", request.block);
-			else if (request.operation != 0)
+			} else if (request.operation != 0)
 				fprintf(stderr, "hgfsd: %s block %u, %u bytes%s\n",
-					request.operation == HG_OP_WRITE ? "write" : "read",
-					request.block, request.count,
-					request.more ? " (more)" : "");
+				        request.operation == HG_OP_WRITE ? "write" : "read",
+				        request.block, request.count,
+				        request.more ? " (more)" : "");
 			continue;
 		}
 		if (mirror_dirty && hg_milliseconds() - last_write >= 500u) {
-			if (hg_directory_export(directory, image_path) == 0)
+			if (hg_directory_export(directory, image_path) == 0) {
 				mirror_dirty = 0;
+			}
 		}
 		hg_delay_us(2000);
 	}
@@ -321,8 +343,9 @@ int main(int argc, char **argv)
 
 out_link:
 	hg_mpsse_close(&link);
-	if (mirror_dirty)
+	if (mirror_dirty) {
 		hg_directory_export(directory, image_path);
+	}
 out_image:
 	hg_image_close(&image);
 	return result;

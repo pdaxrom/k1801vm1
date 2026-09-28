@@ -104,6 +104,11 @@ def encode(line, addr, labels):
                  bounded(number(f.get('previous','0')),1,'previous') << 39 |
                  bounded(number(f.get('uflags','0')),1,'uflags') << 40 |
                  EXT_D.get(f.get('d','ZERO').upper(),0) << 41)
+        if number(f.get('delta','0')):
+            if (headparts[1] not in ('ADD','SUB') or f.get('pair','AB').upper()!='AD' or
+                    f.get('dst','NONE').upper()!='RF' or
+                    f.get('a','R0').upper()!=f.get('b','R0').upper()):
+                raise AssemblyError('delta requires ADD/SUB, pair=AD, dst=RF and a=b')
         if seq == SEQS['PAGE']:
             if 'next' not in f or 'imm' in f or din == DINPUT['IMM']:
                 raise AssemblyError('PAGE needs next and conflicts with IMM')

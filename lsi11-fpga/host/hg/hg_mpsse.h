@@ -15,13 +15,13 @@ struct hg_mpsse {
 };
 
 int hg_mpsse_open(struct hg_mpsse *link, int vendor, int product,
-	const char *serial, unsigned int index, unsigned int clock_hz);
+                  const char *serial, unsigned int index, unsigned int clock_hz);
 void hg_mpsse_close(struct hg_mpsse *link);
 /* HC7000 jumper: enable=1 releases ADBUS7 to the JTAGENB pull-up. */
 int hg_mpsse_jtag_enable(struct hg_mpsse *link, int enable);
 int hg_mpsse_request_pending(struct hg_mpsse *link);
 int hg_mpsse_select(struct hg_mpsse *link, int selected);
 int hg_mpsse_exchange(struct hg_mpsse *link, const uint8_t *tx,
-	uint8_t *rx, size_t length);
+                      uint8_t *rx, size_t length);
 
 #endif

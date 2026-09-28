@@ -6,18 +6,31 @@ from pathlib import Path
 import subprocess
 import sys
 import unittest
+from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
 sys.path.insert(0,str(ROOT/'microasm'))
 from board_common import sources
-from build_mmu import CORE,MICROCODE,build,fpp_mode
+from build_mmu import CORE,MICROCODE,build,fpp_mode,clock_mhz,pipeline_mode
 from uj11mmuasm import assemble,AssemblyError
 # These checks intentionally start independent configurations, including when
 # invoked by `make ... FPP=off test`; do not inherit command-line overrides.
 MAKE_ENV={k:v for k,v in os.environ.items() if k not in
-          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','IOP','UJ11_MMU_IOP','OUT')}
+          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','IOP','UJ11_MMU_IOP','UJ11_MMU_CLOCK_MHZ','UJ11_MMU_PIPELINE','MMU_CLOCK_MHZ','OUT')}
 
 class Profiles(unittest.TestCase):
+    def test_clock_selects_pipeline_and_rejects_invalid_combinations(self):
+        with patch.dict(os.environ,{},clear=True):
+            self.assertEqual(clock_mhz(),24)
+            self.assertFalse(pipeline_mode())
+            os.environ['UJ11_MMU_CLOCK_MHZ']='50'
+            self.assertEqual(clock_mhz(),50)
+            self.assertTrue(pipeline_mode())
+            os.environ['UJ11_MMU_PIPELINE']='off'
+            with self.assertRaises(ValueError):pipeline_mode()
+            os.environ['UJ11_MMU_CLOCK_MHZ']='49'
+            with self.assertRaises(ValueError):clock_mhz()
+
     def test_mmuless_sources_unchanged(self):
         baseline=json.loads((ROOT/'releases/hc7000-serv/validation/hc1200-unchanged.json').read_text())
         for path,digest in baseline['unchanged_sources'].items():
@@ -34,7 +47,7 @@ class Profiles(unittest.TestCase):
         self.assertIn('rtl/mmu/uj11_mmu_cpu.v',CORE)
 
     def test_reject_unsupported_build_before_running_tools(self):
-        for args in (['CPU=oops'],['CPU=mmu','BOARD=hc1200'],['CPU=mmu','BOARD=hc7000-lcd-sram','software'],
+        for args in (['MMU_CLOCK_MHZ=50'],['CPU=mmu','BOARD=hc7000-lcd-sram','MMU_CLOCK_MHZ=49'],['CPU=oops'],['CPU=mmu','BOARD=hc1200'],['CPU=mmu','BOARD=hc7000-lcd-sram','software'],
                      ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=oops'],['FPP=off'],
                      ['CPU=mmu','BOARD=hc7000-lcd-sram','FPP=off','test-sd-image'],
                      ['IOP=storage'],['CPU=mmu','BOARD=hc7000-lcd-sram','IOP=storage'],
@@ -59,9 +72,11 @@ class Profiles(unittest.TestCase):
         original=(OUT/'microcode.mem').read_bytes()
         try:
             disabled=build('off')
-            self.assertEqual(disabled['microcode_ebr'],12)
+            self.assertEqual(disabled['microcode_ebr'],9)
             self.assertNotIn('FPP_ENTRY',json.loads((OUT/'labels.json').read_text()))
-            self.assertEqual((OUT/'uj11_mmu_rom.v').read_text().count('DP8KC #('),12)
+            compact=(OUT/'uj11_mmu_rom.v').read_text()
+            self.assertEqual(compact.count('DP8KC #('),6)
+            self.assertEqual(compact.count('PDPW8KC #('),3)
             self.assertLess(disabled['microcode_words'],enabled['microcode_words'])
             with self.assertRaises(ValueError):fpp_mode('bogus')
             build('microcode')
@@ -70,6 +85,15 @@ class Profiles(unittest.TestCase):
             build()
 
 class Microassembler(unittest.TestCase):
+    def test_delta_requires_register_plus_or_minus_d(self):
+        for op in ('ADD','SUB'):
+            assemble(f'alu {op}, a=RS, b=RS, pair=AD, d=STEP, dst=RF, delta=1\nSTOP')
+        for text in ('alu ADC, a=R0, b=R0, pair=AD, dst=RF, delta=1',
+                     'alu ADD, a=R0, b=R1, pair=AD, dst=RF, delta=1',
+                     'alu SUB, a=R0, b=R0, pair=AB, dst=RF, delta=1',
+                     'alu ADD, a=R0, b=R0, pair=AD, dst=OPERAND, delta=1'):
+            with self.subTest(text=text), self.assertRaises(AssemblyError):assemble(text)
+
     def test_high_target_and_immediate_do_not_overlap_flags(self):
         image,_,_,_=assemble('''JUMP, target=HIGH
             .org $700

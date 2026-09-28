@@ -34,7 +34,7 @@ struct hg_request {
 
 uint8_t hg_header_checksum(const uint8_t header[HG_HEADER_SIZE]);
 int hg_decode_header(const uint8_t header[HG_HEADER_SIZE],
-	struct hg_request *request);
+                     struct hg_request *request);
 uint16_t hg_data_checksum(const uint8_t *data, size_t length);
 
 #endif

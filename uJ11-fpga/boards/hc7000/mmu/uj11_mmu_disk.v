@@ -40,7 +40,11 @@ module uj11_mmu_disk #(
     wire [31:0] ia,da,dw,dr,mem_data;
     wire [3:0] ds;
     wire ic,dc,de;
-    reg ia_ack,da_ack,dseen;
+    reg ia_ack,da_ack,dseen,instruction_pending;
+    reg [31:0] instruction_data;
+    always @(posedge clk)instruction_data<=mem_data;
+    wire instruction_read=ic && !ia_ack && !(dc && memory_selected) &&
+        (storage_enabled ? (ia[31:14]==0 && ia[13:12]!=3) : ia[31:11]==0);
     wire memory_selected=storage_enabled ? (da[31:14]==0 && da[13:12]!=3) : da[31:11]==0;
     wire io_selected=da[31:10]==22'h100000;
     wire csr_selected=io_selected && da[9:8]==0;
@@ -59,7 +63,7 @@ module uj11_mmu_disk #(
     wire engine_spi_done=owner && engine_busy && spi_ready;
     uj11_mmu_service_cpu cpu(
         .clk(clk),.i_rst(iop_reset),.i_timer_irq(1'b0),
-        .o_ibus_adr(ia),.o_ibus_cyc(ic),.i_ibus_rdt(mem_data),.i_ibus_ack(ia_ack),
+        .o_ibus_adr(ia),.o_ibus_cyc(ic),.i_ibus_rdt(CLOCK_HZ==50000000 ? instruction_data : mem_data),.i_ibus_ack(ia_ack),
         .o_dbus_adr(da),.o_dbus_dat(dw),.o_dbus_sel(ds),.o_dbus_we(de),.o_dbus_cyc(dc),
         .i_dbus_rdt(dr),.i_dbus_ack(da_ack));
     uj11_mmu_iop_ram ram(.clk(clk),.enable(ic || (dc && memory_selected)),
@@ -67,9 +71,13 @@ module uj11_mmu_disk #(
         .write_enable(ds & {4{data_accept && memory_selected && de && !iop_reset}}),
         .write_data(dw),.data(mem_data),.storage_enabled(storage_enabled));
     always @(posedge clk)begin
-        if(iop_reset)begin ia_ack<=0;da_ack<=0;dseen<=0;end
+        if(iop_reset)begin ia_ack<=0;da_ack<=0;dseen<=0;instruction_pending<=0;end
         else begin
-            ia_ack<=ic && !ia_ack && !(dc && memory_selected) && (storage_enabled ? (ia[31:14]==0 && ia[13:12]!=3) : ia[31:11]==0);
+            // Separate the EBR/bank mux from SERV's RV32C expansion at
+            // 50 MHz. An idle cycle after each ACK lets the aligner change
+            // address for the second half of a straddling instruction.
+            ia_ack<=CLOCK_HZ==50000000 ? instruction_pending : instruction_read;
+            instruction_pending<=CLOCK_HZ==50000000 && instruction_read && !instruction_pending;
             da_ack<=0;
             if(!dc)dseen<=0;
             if(data_accept && (!spi_selected || iop_spi_done))begin da_ack<=1;dseen<=1;end

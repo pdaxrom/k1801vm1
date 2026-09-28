@@ -6,7 +6,7 @@ module tb_fpp;
     reg clk=0;always #5 clk=~clk;
     reg reset=1,halt_button=0,irq_valid=0;
     reg [2:0] irq_priority=0;reg [15:0] irq_vector=0;
-    wire irq_ack,peripheral_reset,mem_request,mem_write,mem_byte,console_active,waiting,retire;
+    wire mem_lock,irq_ack,peripheral_reset,mem_request,mem_write,mem_byte,console_active,waiting,retire;
     wire [21:0] mem_address;wire [15:0] mem_write_data;
     reg mem_ready=0,mem_error=0;reg [15:0] mem_read_data=0;
     wire [15:0] psw,ir,pc,mmr0,mmr1,mmr2,mmr3,debug_register_data;

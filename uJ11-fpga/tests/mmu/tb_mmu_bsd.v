@@ -1,8 +1,9 @@
 `timescale 1ns/1ps
 // Full 2.9BSD multiuser boot using actual CPU, SERV, SRAM and UART waveforms.
-module tb_mmu_bsd;
+module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
     reg clk=0,power_on=1,rx=1,halt_button=0;
-    always #20.833 clk=~clk;
+    localparam integer BIT_TICKS=(CLOCK_HZ+57600)/115200;
+    always #(500000000.0/CLOCK_HZ) clk=~clk;
     wire initialized,tx,boot_complete,stopped;
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     wire cs,sck,mosi,miso;wire [7:0] pins;
@@ -11,7 +12,8 @@ module tb_mmu_bsd;
     integer dma_words=0,concurrent_fetches=0,mmu_fetches=0,uart_file,b;
     reg [7:0] expected[0:65535],serial_value,previous_char=0;
     string segment="",uart_path,monitor;
-    uj11_mmu_board dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
+    uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(CLOCK_HZ/50),
+        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
@@ -36,11 +38,11 @@ module tb_mmu_bsd;
     task send_byte(input [7:0] value);
         begin
             if(phase>=11)$display("BSD input %h at %0d",value,clocks);
-            @(negedge clk);rx=0;repeat(208)@(negedge clk);
-            for(integer bitno=0;bitno<8;bitno++)begin rx=value[bitno];repeat(208)@(negedge clk);end
+            @(negedge clk);rx=0;repeat(BIT_TICKS)@(negedge clk);
+            for(integer bitno=0;bitno<8;bitno++)begin rx=value[bitno];repeat(BIT_TICKS)@(negedge clk);end
             // A DL11 has one receive holding register. Pace terminal input
             // for the BSD interrupt handler rather than blasting a paste.
-            rx=1;repeat(480000)@(negedge clk);
+            rx=1;repeat(CLOCK_HZ/50)@(negedge clk);
         end
     endtask
     task shell(input string command);
@@ -55,7 +57,7 @@ module tb_mmu_bsd;
         integer unchanged,last_chars;
         begin
             wait(prompts>0);unchanged=0;last_chars=bus_chars;
-            while(unchanged<2000000)begin
+            while(unchanged<CLOCK_HZ/12)begin
                 @(negedge clk);
                 if(last_chars!=bus_chars || dut.bus.disk.pending)unchanged=0;
                 else unchanged++;
@@ -68,10 +70,10 @@ module tb_mmu_bsd;
         if(!$value$plusargs("UART_LOG=%s",uart_path))$fatal(1,"UART_LOG required");
         uart_file=$fopen(uart_path,"w");
         forever begin
-            @(negedge tx);repeat(104)@(negedge clk);
+            @(negedge tx);repeat(BIT_TICKS/2)@(negedge clk);
             check(tx===0,"UART start bit");
-            for(b=0;b<8;b++)begin repeat(208)@(negedge clk);serial_value[b]=tx;end
-            repeat(208)@(negedge clk);
+            for(b=0;b<8;b++)begin repeat(BIT_TICKS)@(negedge clk);serial_value[b]=tx;end
+            repeat(BIT_TICKS)@(negedge clk);
             check(tx===1 && serial_chars<bus_chars && serial_value===expected[serial_chars],"UART waveform");
             serial_chars++;$fwrite(uart_file,"%c",serial_value & 127);$fflush(uart_file);
         end
@@ -143,7 +145,7 @@ module tb_mmu_bsd;
         repeat(5)@(negedge clk);power_on=0;
         await_text("other key=menu: ");contains("Default: RL0");contains("units: 0 1");
         send_byte(13);segment="";
-        await_text("70Boot");repeat(500000)@(negedge clk);
+        await_text("70Boot");repeat(CLOCK_HZ/48)@(negedge clk);
         begin static string command="rl(0,0)rlunix";for(integer i=0;i<command.len();i++)send_byte(command[i]);end
         send_byte(13);
         await_text("# ");settled_prompt();contains("Berkeley UNIX");contains("rl 0 csr 174400");contains("xp 0 csr 176700");
@@ -152,7 +154,7 @@ module tb_mmu_bsd;
         phase=11;$display("BSD login prompt at %0d",clocks);
         // This getty prints its prompt, sleeps, then flushes pending input.
         // Allow two real seconds for its HZ-based delay on the 50 Hz board.
-        segment="";repeat(48000000)@(negedge clk);phase=12;send_byte("r");send_byte("o");send_byte("o");send_byte("t");send_byte(13);phase=13;
+        segment="";repeat(2*CLOCK_HZ)@(negedge clk);phase=12;send_byte("r");send_byte("o");send_byte("o");send_byte("t");send_byte(13);phase=13;
         await_text("# ");contains("Welcome to the 2.9BSD");
         phase=2;shell("ls /usr");contains("bin");contains("lib");
         phase=3;shell("cat /etc/fstab");contains("/dev/rl1:swap");contains("/dev/xp0h:/usr");

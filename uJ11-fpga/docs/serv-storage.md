@@ -313,6 +313,12 @@ the existing nine microstore EBRs. Instruction dispatch and supervisor-space
 selection require a small RTL change: synthesis rises from 3985 to 4014 LUT
 for the shared-I/O build, with no additional EBR. The final 24 MHz build uses
 1187 flip-flops and 26/26 EBR and passes routed timing at 26.087 MHz.
+
+The subsequent [integer/MMU corrections](j11-isa-audit.md) add TSTSET/WRTLCK
+in ten existing microstore words, correct MFPI/MTPS/RESET, and hold off new
+DMA grants while TSTSET executes its read/modify/write. Synthesis `isa-fix-style-02`
+uses 4043 LUT, 1188 FF and the same 26 EBR; it passes 24 MHz constraints with
+a routed Fmax of 25.662 MHz. SERV firmware remains byte-for-byte identical.
 HC1200 and the MMU-less microcode are unchanged.
 
 ## Qualification
@@ -365,3 +371,10 @@ card. `tools/hardware_storage_hg.py --unit 7 --hgfsd PATH --out NEW_DIR` checks
 the already installed XM HG driver, time synchronization and a binary round
 trip. Both tools require a fresh output directory and restore a UART reader
 specified with `--pause-pid`, when one is present.
+
+The subsequent CPUERR/PIRQ and kernel-stack changes use **4173 LUT, 1205 FF,
+26/26 EBR**, with routed Fmax **26.263 MHz** at the same 24 MHz system clock.
+These are processor functions; the SERV peripheral implementation and its
+10515-byte RV32IC firmware are unchanged. The increase over the integer-fix
+build is 130 LUT and 17 FF, with eleven additional microinstructions in the
+existing EBR layout. See [CPU events](cpu-events.md) for behavior and validation.

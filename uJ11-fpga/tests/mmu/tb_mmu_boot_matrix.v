@@ -1,20 +1,25 @@
 `timescale 1ns/1ps
 // Full SD bootstrap -> RT-11 using actual CPU, SERV, SRAM and UART waveforms.
-module tb_mmu_boot_matrix #(parameter TICK_DIVISOR=480000);
+module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLOCK_HZ/50);
     reg clk=0,power_on=1,rx=1,halt_button=0;
-    always #20.833 clk=~clk;
+    localparam integer BIT_TICKS=(CLOCK_HZ+57600)/115200;
+    always #(500000000.0/CLOCK_HZ) clk=~clk;
     wire initialized,tx,boot_complete,stopped;
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     wire cs,sck,mosi,miso;wire [7:0] pins;
     string boot_case;
-    integer max_clocks=2000000000;
+    // Preserve the 24 MHz wall-time budget at faster system clocks. Both
+    // counters must exceed 32 bits: 83 seconds at 50 MHz is over 4e9 clocks.
+    longint max_clocks=64'd2000000000*CLOCK_HZ/24000000;
     initial if($value$plusargs("MAX_CLOCKS=%d",max_clocks))begin end
     initial if(!$value$plusargs("CASE=%s",boot_case))$fatal(1,"CASE required");
-    integer clocks=0,bus_chars=0,serial_chars=0,prompts=0,phase=0,checks=0;
+    longint clocks=0;
+    integer bus_chars=0,serial_chars=0,prompts=0,phase=0,checks=0;
     integer dma_words=0,concurrent_fetches=0,mmu_fetches=0,uart_file,b;
     reg [7:0] expected[0:65535],serial_value,previous_char=0;
     string segment="",uart_path,monitor;
-    uj11_mmu_board #(.TICK_DIVISOR(TICK_DIVISOR)) dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
+    uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(TICK_DIVISOR),
+        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
@@ -53,9 +58,9 @@ module tb_mmu_boot_matrix #(parameter TICK_DIVISOR=480000);
     endtask
     task send_byte(input [7:0] value);
         begin
-            @(negedge clk);rx=0;repeat(208)@(negedge clk);
-            for(integer bitno=0;bitno<8;bitno++)begin rx=value[bitno];repeat(208)@(negedge clk);end
-            rx=1;repeat(20000)@(negedge clk);
+            @(negedge clk);rx=0;repeat(BIT_TICKS)@(negedge clk);
+            for(integer bitno=0;bitno<8;bitno++)begin rx=value[bitno];repeat(BIT_TICKS)@(negedge clk);end
+            rx=1;repeat(CLOCK_HZ/1200)@(negedge clk);
         end
     endtask
     task shell(input string command);
@@ -70,7 +75,7 @@ module tb_mmu_boot_matrix #(parameter TICK_DIVISOR=480000);
         integer unchanged,last_chars;
         begin
             wait(prompts>0);unchanged=0;last_chars=bus_chars;
-            while(unchanged<2000000)begin
+            while(unchanged<CLOCK_HZ/12)begin
                 @(negedge clk);
                 if(last_chars!=bus_chars || dut.bus.disk.pending)unchanged=0;
                 else unchanged++;
@@ -85,7 +90,7 @@ module tb_mmu_boot_matrix #(parameter TICK_DIVISOR=480000);
         forever begin : receive_frame
             @(negedge tx);
             for(integer sample=0;sample<10;sample++)begin
-                repeat(sample==0?104:208)begin
+                repeat(sample==0?BIT_TICKS/2:BIT_TICKS)begin
                     @(negedge clk);
                     // PDP RESET resets the UART, including its shifter and
                     // holding register. Abort this frame and resync on start.
@@ -158,7 +163,7 @@ module tb_mmu_boot_matrix #(parameter TICK_DIVISOR=480000);
             wait_text("[S]: ");contains("RSX-11M-PLUS V4.6  BL87");
             // The prompt write completes before AT queues its terminal read.
             // Give that QIO time to attach before sending the user's reply.
-            repeat(12000000)@(negedge clk);
+            repeat(CLOCK_HZ/2)@(negedge clk);
             shell("12:00 28-SEP-1999");
             wait_text("QUE BAP0:/BATCH");settled_prompt();
             phase=1;shell("DEV DU:");contains("DU0:");contains("DU1:");

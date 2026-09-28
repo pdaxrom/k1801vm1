@@ -19,7 +19,7 @@ def main():
     for name,want in result['inputs']['files'].items():
         if name.startswith('generated:'):
             generated=name.removeprefix('generated:')
-            assert generated in ('clock.lpf','build.tcl'),name
+            assert generated in ('clock.lpf','build.tcl','strategy.sty'),name
             path=out/generated
         else:path=ROOT/name
         assert hashlib.sha256(path.read_bytes()).hexdigest()==want, str(path)

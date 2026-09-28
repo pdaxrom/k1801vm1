@@ -5,7 +5,7 @@ module uj11_mmu_regfile(
     input wire clk, reset, write_enable,
     input wire [3:0] a,b,
     input wire [15:0] write_data,psw,
-    input wire previous,
+    input wire previous,pipeline_enabled,
     input wire defer_write,commit_deferred,discard_deferred,
     output wire [15:0] read_a,read_b,
     output reg initialized,
@@ -34,8 +34,12 @@ module uj11_mmu_regfile(
     // Previous space instructions select the previous SP only. R0-R5 retain
     // the currently selected register set, as do their effective-address bases.
     wire [4:0] aa=address(a,psw[15:11],previous),ba=address(b,psw[15:11],previous);
-    assign read_a=pending && aa==pending_address ? pending_data : words[aa];
-    assign read_b=pending && ba==pending_address ? pending_data : words[ba];
+    wire [15:0] raw_a=pending && aa==pending_address ? pending_data : words[aa];
+    wire [15:0] raw_b=pending && ba==pending_address ? pending_data : words[ba];
+    reg [15:0] operand_a,operand_b;
+    always @(posedge clk)begin operand_a<=raw_a;operand_b<=raw_b;end
+    assign read_a=pipeline_enabled ? operand_a : raw_a;
+    assign read_b=pipeline_enabled ? operand_b : raw_b;
     assign pc=words[7];
     assign debug_read_data=words[debug_address];
     always @(posedge clk) begin

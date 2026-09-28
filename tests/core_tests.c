@@ -7872,6 +7872,58 @@ cleanup:
     return rc;
 }
 
+static int test_dcj11_trap_vector_selects_mode(void)
+{
+	cpu_fixture fx;
+	int rc = 0;
+	const word stacks[] = {02000, 02600, 0, 03000};
+	current_test = "dcj11_trap_vector_mode";
+	fixture_setup_model(&fx, DCJ11);
+	for (unsigned from = 0; from < 4; from++) if (from != 2) {
+			for (unsigned to = 0; to < 4; to++) if (to != 2) {
+					fx.r.sp_mode_init = 1;
+					for (unsigned m = 0; m < 4; m++) {
+						fx.r.sp_mode[m] = stacks[m];
+					}
+					fx.r.r[6] = stacks[from];
+					fx.r.psw = (word)((from << 14) | 000003);
+					write_op(&fx, 000003); /* BPT */
+					store_word(&fx, 000014, 07000);
+					store_word(&fx, 000016, (word)((to << 14) | 000340));
+					ASSERT_EQ(core_step(&fx.r), 0, "BPT should execute");
+					ASSERT_EQ(fx.r.psw, (to << 14) | (from << 12) | 000340,
+					          "Vector supplies CM; interrupted context supplies PM");
+					ASSERT_EQ(fx.r.r[6], stacks[to] - 4, "Vector selects destination stack");
+					ASSERT_EQ(fx.r.load_word(&fx.r, stacks[to] - 4), TEST_BASE + 2,
+					          "Destination frame contains return PC");
+					ASSERT_EQ(fx.r.load_word(&fx.r, stacks[to] - 2), (from << 14) | 3,
+					          "Destination frame contains interrupted PSW");
+					if (from != to) {
+						ASSERT_EQ(fx.r.sp_mode[from], stacks[from], "Caller stack is preserved");
+					}
+				}
+		}
+cleanup:
+	fixture_teardown(&fx);
+	return rc;
+}
+
+static int test_dcj11_psw_unused_bits(void)
+{
+	cpu_fixture fx;
+	int rc = 0;
+	const word program[] = {012737, 0177777, 0177776}; /* MOV #-1,@#PSW */
+	current_test = "dcj11_psw_unused_bits";
+	fixture_setup_model(&fx, DCJ11);
+	load_program(&fx, TEST_BASE, program, sizeof(program) / sizeof(program[0]));
+	fx.r.psw = 0;
+	ASSERT_EQ(core_step(&fx.r), 0, "PSW write should execute");
+	ASSERT_EQ(fx.r.psw, 0174757, "PSW<10:9> read zero and explicit writes preserve T");
+cleanup:
+	fixture_teardown(&fx);
+	return rc;
+}
+
 static int test_dcj11_iot_stack_order(void)
 {
     cpu_fixture fx;
@@ -7933,6 +7985,41 @@ static int test_dcj11_bus_error_stack_order(void)
 cleanup:
     fixture_teardown(&fx);
     return rc;
+}
+
+static int test_dcj11_pirq_external_priority(void)
+{
+	cpu_fixture fx;
+	int rc = 0;
+	const word program[] = {0000240};
+	current_test = "dcj11_pirq_external_priority";
+	fixture_setup_model(&fx, DCJ11);
+	for (int pir = 1; pir <= 7; pir++) {
+		for (int ext = 1; ext <= 7; ext++) {
+			load_program(&fx, TEST_BASE, program, 1);
+			store_word(&fx, 0000240, 02000);
+			store_word(&fx, 0000242, 0000340);
+			store_word(&fx, 0000120, 03000);
+			store_word(&fx, 0000122, 0000340);
+			fx.r.r[7] = TEST_BASE;
+			fx.r.r[6] = 01000;
+			fx.r.psw = 0;
+			fx.r.J11_PIRQ = (word)(1u << (pir + 8));
+			fx.r.poll_irq = test_poll_irq_highest;
+			memset(test_irq_pending_pri, 0, sizeof(test_irq_pending_pri));
+			memset(test_irq_vector_pri, 0, sizeof(test_irq_vector_pri));
+			test_irq_pending_pri[ext] = 1;
+			test_irq_vector_pri[ext] = 0000120;
+			ASSERT_EQ(core_step(&fx.r), 0, "IRQ arbitration should complete");
+			ASSERT_EQ(fx.r.r[7], ext > pir ? 03000 : 02000, "highest level wins, equal chooses PIRQ");
+			ASSERT_EQ(test_irq_pending_pri[ext], ext > pir ? 0 : 1, "unselected device remains pending");
+			ASSERT_EQ(fx.r.J11_PIRQ, (word)(1u << (pir + 8)), "PIRQ stays set until software clears it");
+			ASSERT_EQ(fx.r.load_word(&fx.r, 0000776), 0, "saved PSW must not contain temporary IRQ mask");
+		}
+	}
+cleanup:
+	fixture_teardown(&fx);
+	return rc;
 }
 
 static int test_dcj11_yellow_stack_trap_autodec_sp(void)
@@ -8085,6 +8172,41 @@ cleanup:
 #else
     current_test = "dcj11_red_stack_push_abort";
     return 0;
+#endif
+}
+
+static int test_dcj11_user_stack_abort_is_not_red(void)
+{
+#if defined(ENABLE_MMU) && (ENABLE_MMU)
+	cpu_fixture fx;
+	int rc = 0;
+	const word program[] = {0000003};
+	current_test = "dcj11_user_stack_abort_is_not_red";
+	fixture_setup_model(&fx, DCJ11);
+	load_program(&fx, TEST_BASE, program, 1);
+	store_word(&fx, 000014, 02000);
+	store_word(&fx, 000016, 0140340);
+	store_word(&fx, 000250, 03000);
+	store_word(&fx, 000252, 000340);
+	fx.r.sp_mode_init = 1;
+	fx.r.sp_mode[0] = fx.r.r[6] = 01000;
+	fx.r.sp_mode[3] = 020004;
+	fx.r.psw = 3;
+	fx.r.mmu_ssr0 = 1;
+	fx.r.mmu_par[0][0][0] = 0;
+	fx.r.mmu_pdr[0][0][0] = 0177006;
+	ASSERT_EQ(core_step(&fx.r), 0, "user stack abort should take ordinary MMU trap");
+	ASSERT_EQ(fx.r.r[7], 03000, "MMU vector rather than red-stack vector");
+	ASSERT_EQ(fx.r.psw, 030340, "MMU handler records previous user mode");
+	ASSERT_EQ(fx.r.r[6], 0774, "ordinary kernel frame rather than emergency stack");
+	ASSERT_EQ(fx.r.J11_CPUERR & 4, 0, "user stack abort does not set RED");
+	ASSERT_EQ(fx.r.load_word(&fx.r, 0774), TEST_BASE + 2, "nested trap saves current PC");
+	ASSERT_EQ(fx.r.load_word(&fx.r, 0776), 0140340, "nested trap saves failed handler PSW");
+cleanup:
+	fixture_teardown(&fx);
+	return rc;
+#else
+	return 0;
 #endif
 }
 
@@ -8310,12 +8432,16 @@ int main(void)
     failed += test_dcj11_bpl_after_tstb();
     failed += test_dcj11_bpl_after_tstb_neg();
     failed += test_dcj11_bpt_stack_order();
+    failed += test_dcj11_trap_vector_selects_mode();
+    failed += test_dcj11_psw_unused_bits();
     failed += test_dcj11_iot_stack_order();
     failed += test_dcj11_bus_error_stack_order();
+    failed += test_dcj11_pirq_external_priority();
     failed += test_dcj11_yellow_stack_trap_autodec_sp();
     failed += test_dcj11_yellow_stack_trap_on_bpt_push();
     failed += test_dcj11_stack_limit_boundary_no_trap();
     failed += test_dcj11_red_stack_trap_on_vector_push_abort();
+    failed += test_dcj11_user_stack_abort_is_not_red();
     failed += test_dcj11_trace_priority_over_yellow_stack();
 
     if (failed) {

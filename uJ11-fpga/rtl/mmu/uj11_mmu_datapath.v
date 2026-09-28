@@ -5,7 +5,7 @@ module uj11_mmu_datapath (
     input wire [3:0] a, b, operation,
     input wire [2:0] pair, destination,
     input wire [15:0] d,psw,
-    input wire previous,
+    input wire previous,pipeline_enabled,
     input wire defer_write,commit_deferred,discard_deferred,
     output wire initialized,
     input wire debug_write,
@@ -46,7 +46,7 @@ module uj11_mmu_datapath (
                       (destination==3'd1 || destination==3'd3 || destination==3'd4 ||
                        destination==3'd5 || destination==3'd6);
     uj11_mmu_regfile rf(.clk(clk),.reset(reset),.write_enable(rf_write),.a(a),.b(b),
-        .psw(psw),.previous(previous),.initialized(initialized),
+        .psw(psw),.previous(previous),.pipeline_enabled(pipeline_enabled),.initialized(initialized),
         .defer_write(defer_write),.commit_deferred(commit_deferred),.discard_deferred(discard_deferred),
         .debug_write(debug_write),.debug_address(debug_address),
         .debug_data(debug_data),.debug_read_data(debug_read_data),.pc(pc),

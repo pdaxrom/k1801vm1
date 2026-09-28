@@ -5,7 +5,8 @@ BOARD ?= hc1200
 CPU ?= mmuless
 FPP ?= microcode
 IOP ?= legacy
-OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage))
+MMU_CLOCK_MHZ ?= 24
+OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage)$(if $(filter 50,$(MMU_CLOCK_MHZ)),-50mhz))
 HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
 SD_OUT ?= build/$(if $(filter mmu,$(CPU)),sd-hc7000,sd)
@@ -18,6 +19,10 @@ ifeq ($(filter $(CPU),mmuless mmu),)
 $(error Unknown CPU=$(CPU); expected mmuless or mmu)
 endif
 ifeq ($(CPU),mmu)
+ifeq ($(filter $(MMU_CLOCK_MHZ),24 50),)
+$(error Unknown MMU_CLOCK_MHZ=$(MMU_CLOCK_MHZ); expected 24 or 50)
+endif
+export UJ11_MMU_CLOCK_MHZ := $(MMU_CLOCK_MHZ)
 ifeq ($(filter $(FPP),microcode off),)
 $(error Unknown FPP=$(FPP); expected microcode or off)
 endif
@@ -40,11 +45,14 @@ ifneq ($(BOARD),hc7000-lcd-sram)
 $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
-# Export validates source hashes and the 24 MHz MAP/PAR/TRACE gate.
+# Export validates source hashes and MAP/PAR/TRACE at the selected clock.
 ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
+ifneq ($(MMU_CLOCK_MHZ),24)
+$(error MMU_CLOCK_MHZ selection is available only for CPU=mmu)
+endif
 ifneq ($(IOP),legacy)
 $(error IOP selection is available only for CPU=mmu)
 endif

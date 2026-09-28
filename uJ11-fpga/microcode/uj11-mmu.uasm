@@ -1884,6 +1884,47 @@ CSM_MODE:
     READ, space=INSTRUCTION, a=T4, target=CSM_PC, prefetch=0
 CSM_PC:
     alu PASSA, pair=DA, d=MDR, b=R7, dst=RF, seq=FETCH, trace=RETURN
+; Locked memory operations share the ordinary EA and ALU. Register forms
+; are rejected by dispatch, before evaluating any operand side effects.
+; R0 is loaded before TSTSET's store, and WRTLCK samples it after EA updates.
+; A failed kernel trap push still has the original PSW/PC in T0/T1.
+; Use physical 6/4 for the vector and physical 2/0 for its emergency frame.
+; The internal RF write selects kernel SP regardless of the vector's CM.
+.org $431
+RED_STACK:
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T4, dst=RF
+    READ, space=PHYSICAL, a=T4, target=RED_PSW, prefetch=0
+RED_PSW:
+    alu PASSA, pair=DA, d=MDR, flags=LOAD
+    alu PASSA, pair=DA, d=TWO, b=T4, dst=RF
+    WRITE, space=PHYSICAL, a=T4, b=T0, target=RED_PC, prefetch=0
+RED_PC:
+    alu PASSA, pair=DA, d=ZERO, b=T4, dst=RF
+    WRITE, space=PHYSICAL, a=T4, b=T1, target=RED_SP, prefetch=0
+RED_SP:
+    WRITE, space=INTERNAL, address=$20, b=T4, target=RED_VECTOR, prefetch=0
+RED_VECTOR:
+    alu PASSA, pair=DA, d=IMM, imm=4, b=T4, dst=RF
+    READ, space=PHYSICAL, a=T4, target=RED_COMMIT, prefetch=0
+RED_COMMIT:
+    alu PASSA, pair=DA, d=MDR, b=R7, dst=RF, seq=FETCH
+.org $470
+TSTSET:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, target=TSTSET_VALUE, prefetch=0
+TSTSET_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=R0, dst=RF
+    alu OR, a=R0, pair=AD, d=ONE, b=T2, dst=RF
+    WRITE, a=T1, b=T2, target=TSTSET_FLAGS, prefetch=0
+TSTSET_FLAGS:
+    alu LSR, a=R0, flags=NZVC
+    alu PASSA, a=R0, flags=NZV, seq=FETCH
+.org $478
+WRTLCK:
+    CALL, target=DESTINATION_EA, prefetch=0
+    WRITE, a=T1, b=R0, target=WRTLCK_FLAGS, prefetch=0
+WRTLCK_FLAGS:
+    alu PASSA, a=R0, flags=NZV, seq=FETCH
 .org $7ff
 STOP:
     STOP

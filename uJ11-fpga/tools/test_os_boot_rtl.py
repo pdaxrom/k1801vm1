@@ -60,7 +60,7 @@ def run(out, menu, selected):
     files = {p: sha(ROOT / p) for p in inventory + ['tools/test_os_boot_rtl.py', 'tools/test_os_boot_simh.py','tools/serv_test.py']}
     with (out / 'build.log').open('w') as log:
         subprocess.run(['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD',
-                        '--top-module', 'tb_mmu_boot_matrix', '-j', '4', '--Mdir', str(out / 'obj')]
+                        '--top-module', 'tb_mmu_boot_matrix', f'-GCLOCK_HZ={hardware["clock_mhz"]*1000000}', '-j', '4', '--Mdir', str(out / 'obj')]
                        + inventory, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     records = []
     for case in selected:

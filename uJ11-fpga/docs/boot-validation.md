@@ -77,3 +77,34 @@ It distinguishes a successful OS boot (`boot_passed`) from validation of the
 nonbootable RQ0 placeholder (`expected_nonbootable`). Original SIMH evidence is
 under `releases/hc7000-bsd/validation/boot-matrix/`; current shared-I/O RTL
 evidence is under `releases/hc7000-serv-io/validation/`.
+
+The MMU integer corrections are qualified again in
+`releases/hc7000-isa-fix/validation/`: XM, V4 and both RQ cases retain the
+results above. The accompanying 2.9BSD run passes 22108 checks, reaches
+multiuser root, and verifies RL/RP file writes, readback and sync. These are
+RTL results; the new JED has not been programmed onto the board.
+
+The subsequent C/header formatting preserves all SERV firmware bytes and
+generated memory contents used by these runs. `serv-format.json` records
+that comparison; `style-extra/` records the same check for both legacy IOP
+profiles and the passing HG host tests.
+
+## CPU-event regression
+
+The CPUERR/PIRQ and fixed-limit stack implementation is qualified separately
+in [`releases/hc7000-cpu-events/`](../releases/hc7000-cpu-events/README.md).
+These runs use the current processor RTL and the unchanged SERV firmware:
+
+| Case | Checks | Clocks | DMA words | Result |
+|---|---:|---:|---:|---|
+| RT-11 XM, RH0 | 6085 | 446981194 | 164871 | Boot; RH1 and RK0/RK1/RK2 directory reads |
+| RT-11 V4, RK0 | 2816 | 187814328 | 63670 | Boot; directory and text reads |
+| 2.9BSD, RL0 | 22108 | 1305665221 | 421632 | Multiuser root; RL/RP file writes, readback and sync |
+| RSX-11M-PLUS, RQ1 | 3346 | 1637179270 | 786149 | STARTUP; DU devices; directory listing |
+
+The RSX console log includes `PIP DU1:[1,54]RSX11M.SYS/LI`,
+`RSX11M.SYS;1 1026. C`, and a total of 1026 blocks in one file.
+The separate RQ0 run validates the original nonbootable-volume message and
+HALT at PC `000034`; it is recorded as `expected_nonbootable`, not an OS boot.
+The current JED uses 4173 LUT, 1205 FF and 26 EBR; timing passes at 24 MHz.
+It has not been programmed onto the physical board.

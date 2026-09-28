@@ -3,7 +3,7 @@
 // neither can steal a held response or change pins during another transfer.
 module uj11_mmu_sram_arbiter(
     input wire clk, reset,
-    input wire cpu_request, cpu_write,
+    input wire cpu_request, cpu_write, cpu_lock,
     input wire [19:0] cpu_address,
     input wire [1:0] cpu_lanes,
     input wire [15:0] cpu_data,
@@ -32,7 +32,7 @@ module uj11_mmu_sram_arbiter(
     always @(posedge clk) begin
         if(reset) begin state<=IDLE;last_dma<=1;end
         else case(state)
-            IDLE: if(dma_request && (!cpu_request || !last_dma)) begin
+            IDLE: if(dma_request && !cpu_lock && (!cpu_request || !last_dma)) begin
                 state<=DMA;last_dma<=1;
             end else if(cpu_request) begin state<=CPU;last_dma<=0;end
             CPU: if(!cpu_request) state<=RELEASE;

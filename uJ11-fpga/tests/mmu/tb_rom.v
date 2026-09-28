@@ -6,7 +6,7 @@ module tb_rom;
     reg clk=0,enable=0;always #5 clk=~clk;
     reg [11:0] address=0;
     wire [53:0] data;
-    wire fpp_enabled;
+    wire fpp_enabled,pipeline_enabled;
     reg [53:0] expected[0:3071];
     uj11_mmu_rom dut(.*);
     initial begin

@@ -348,278 +348,282 @@ static INLINE void dcj11_set_psw(regs *r, word new_psw);
 static INLINE word dcj11_explicit_psw_write(regs *r, word new_psw);
 
 static INLINE bool dcj11_reg_block_load_word(regs *r, word offset,
-        word *value)
+                word *value)
 {
-    switch (offset & 0177776) {
-    case DCJ11_REG_MEMERR:
-        *value = r->J11_MEMERR;
-        return true;
-    case DCJ11_REG_CCR:
-        *value = r->J11_CCR;
-        return true;
-    case DCJ11_REG_MAINT:
-        *value = r->J11_MAINT;
-        return true;
-    case DCJ11_REG_HITMISS:
-        *value = r->J11_HITMISS;
-        return true;
+	switch (offset & 0177776) {
+	case DCJ11_REG_MEMERR:
+		*value = r->J11_MEMERR;
+		return true;
+	case DCJ11_REG_CCR:
+		*value = r->J11_CCR;
+		return true;
+	case DCJ11_REG_MAINT:
+		*value = r->J11_MAINT;
+		return true;
+	case DCJ11_REG_HITMISS:
+		*value = r->J11_HITMISS;
+		return true;
 #ifdef DCJ_REG_RSVD_ENABLED
-    case DCJ11_REG_RSVD_177754:
-        *value = r->J11_RSVD_177754;
-        return true;
-    case DCJ11_REG_RSVD_177756:
-        *value = r->J11_RSVD_177756;
-        return true;
-    case DCJ11_REG_RSVD_177760:
-        *value = r->J11_RSVD_177760;
-        return true;
-    case DCJ11_REG_RSVD_177762:
-        *value = r->J11_RSVD_177762;
-        return true;
-    case DCJ11_REG_RSVD_177764:
-        *value = r->J11_RSVD_177764;
-        return true;
+	case DCJ11_REG_RSVD_177754:
+		*value = r->J11_RSVD_177754;
+		return true;
+	case DCJ11_REG_RSVD_177756:
+		*value = r->J11_RSVD_177756;
+		return true;
+	case DCJ11_REG_RSVD_177760:
+		*value = r->J11_RSVD_177760;
+		return true;
+	case DCJ11_REG_RSVD_177762:
+		*value = r->J11_RSVD_177762;
+		return true;
+	case DCJ11_REG_RSVD_177764:
+		*value = r->J11_RSVD_177764;
+		return true;
 #endif
-    case DCJ11_REG_CPUERR:
-        *value = (word)(r->J11_CPUERR & DCJ11_CPUERR_MASK);
-        return true;
+	case DCJ11_REG_CPUERR:
+		*value = (word)(r->J11_CPUERR & DCJ11_CPUERR_MASK);
+		return true;
 #ifdef DCJ_REG_RSVD_ENABLED
-    case DCJ11_REG_RSVD_177770:
-        *value = r->J11_RSVD_177770;
-        return true;
+	case DCJ11_REG_RSVD_177770:
+		*value = r->J11_RSVD_177770;
+		return true;
 #endif
-    case DCJ11_REG_PIRQ:
-        *value = dcj11_pirq_visible(r->J11_PIRQ);
-        return true;
-    case DCJ11_REG_STKLIM:
-        *value = r->J11_STKLIM;
-        return true;
-    case DCJ11_REG_PSW:
-        *value = r->psw;
-        return true;
-    default:
-        return false;
-    }
+	case DCJ11_REG_PIRQ:
+		*value = dcj11_pirq_visible(r->J11_PIRQ);
+		return true;
+	case DCJ11_REG_STKLIM:
+		*value = r->J11_STKLIM;
+		return true;
+	case DCJ11_REG_PSW:
+		*value = r->psw;
+		return true;
+	default:
+		return false;
+	}
 }
 
 static INLINE bool dcj11_reg_block_store_word(regs *r, word offset,
-        word value)
+                word value)
 {
-    switch (offset & 0177776) {
-    case DCJ11_REG_MEMERR:
-        /* Memory system error register: cleared by any write. */
-        r->J11_MEMERR = 0;
-        return true;
-    case DCJ11_REG_CCR:
-        r->J11_CCR = value;
-        return true;
-    case DCJ11_REG_MAINT:
-        /* Maintenance register is read-only in normal mode. */
-        return true;
-    case DCJ11_REG_HITMISS:
-        /* Hit/miss register is read-only for software. */
-        return true;
+	switch (offset & 0177776) {
+	case DCJ11_REG_MEMERR:
+		/* Memory system error register: cleared by any write. */
+		r->J11_MEMERR = 0;
+		return true;
+	case DCJ11_REG_CCR:
+		r->J11_CCR = value;
+		return true;
+	case DCJ11_REG_MAINT:
+		/* Maintenance register is read-only in normal mode. */
+		return true;
+	case DCJ11_REG_HITMISS:
+		/* Hit/miss register is read-only for software. */
+		return true;
 #ifdef DCJ_REG_RSVD_ENABLED
-    case DCJ11_REG_RSVD_177754:
-        r->J11_RSVD_177754 = value;
-        return true;
-    case DCJ11_REG_RSVD_177756:
-        r->J11_RSVD_177756 = value;
-        return true;
-    case DCJ11_REG_RSVD_177760:
-        r->J11_RSVD_177760 = value;
-        return true;
-    case DCJ11_REG_RSVD_177762:
-        r->J11_RSVD_177762 = value;
-        return true;
-    case DCJ11_REG_RSVD_177764:
-        r->J11_RSVD_177764 = value;
-        return true;
+	case DCJ11_REG_RSVD_177754:
+		r->J11_RSVD_177754 = value;
+		return true;
+	case DCJ11_REG_RSVD_177756:
+		r->J11_RSVD_177756 = value;
+		return true;
+	case DCJ11_REG_RSVD_177760:
+		r->J11_RSVD_177760 = value;
+		return true;
+	case DCJ11_REG_RSVD_177762:
+		r->J11_RSVD_177762 = value;
+		return true;
+	case DCJ11_REG_RSVD_177764:
+		r->J11_RSVD_177764 = value;
+		return true;
 #endif
-    case DCJ11_REG_CPUERR:
-        /* CPU error register clears on write. */
-        r->J11_CPUERR = 0;
-        return true;
+	case DCJ11_REG_CPUERR:
+		/* CPU error register clears on write. */
+		r->J11_CPUERR = 0;
+		return true;
 #ifdef DCJ_REG_RSVD_ENABLED
-    case DCJ11_REG_RSVD_177770:
-        r->J11_RSVD_177770 = value;
-        return true;
+	case DCJ11_REG_RSVD_177770:
+		r->J11_RSVD_177770 = value;
+		return true;
 #endif
-    case DCJ11_REG_PIRQ:
-        r->J11_PIRQ = (word)(value & DCJ11_PIRQ_RW);
-        return true;
-    case DCJ11_REG_STKLIM:
-        /* Stack limit register is word-addressed. */
-        r->J11_STKLIM = (word)(value & 0177776);
-        return true;
-    case DCJ11_REG_PSW:
-        dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
-        r->dcj11_explicit_psw_write = 1;
-        return true;
-    default:
-        return false;
-    }
+	case DCJ11_REG_PIRQ:
+		r->J11_PIRQ = (word)(value & DCJ11_PIRQ_RW);
+		return true;
+	case DCJ11_REG_STKLIM:
+		/* Stack limit register is word-addressed. */
+		r->J11_STKLIM = (word)(value & 0177776);
+		return true;
+	case DCJ11_REG_PSW:
+		dcj11_set_psw(r, dcj11_explicit_psw_write(r, value));
+		r->dcj11_explicit_psw_write = 1;
+		return true;
+	default:
+		return false;
+	}
 }
 
 static INLINE bool dcj11_reg_block_load_byte(regs *r, word offset, byte *val8)
 {
-    word value;
-    if (!dcj11_reg_block_load_word(r, offset, &value)) {
-        return false;
-    }
-    *val8 = (byte)((offset & 1) ? ((value >> 8) & 0377) : (value & 0377));
-    return true;
+	word value;
+	if (!dcj11_reg_block_load_word(r, offset, &value)) {
+		return false;
+	}
+	*val8 = (byte)((offset & 1) ? ((value >> 8) & 0377) : (value & 0377));
+	return true;
 }
 
 static INLINE bool dcj11_reg_block_store_byte(regs *r, word offset,
-        byte value)
+                byte value)
 {
-    if ((offset & 0177776) == DCJ11_REG_PIRQ) {
-        if ((offset & 1) == 0) {
-            /* Byte writes to PIRQ low byte are ignored. */
-            return true;
-        }
-        /* Byte writes to PIRQ high byte update request bits. */
-        return dcj11_reg_block_store_word(r, DCJ11_REG_PIRQ, (word)(value << 8));
-    }
+	if ((offset & 0177776) == DCJ11_REG_PIRQ) {
+		if ((offset & 1) == 0) {
+			/* Byte writes to PIRQ low byte are ignored. */
+			return true;
+		}
+		/* Byte writes to PIRQ high byte update request bits. */
+		return dcj11_reg_block_store_word(r, DCJ11_REG_PIRQ, (word)(value << 8));
+	}
 
-    if (offset == DCJ11_REG_MEMERR || offset == DCJ11_REG_HITMISS ||
-            offset == DCJ11_REG_CPUERR || offset == DCJ11_REG_MAINT) {
-        return dcj11_reg_block_store_word(r, offset, 0);
-    }
+	if (offset == DCJ11_REG_MEMERR || offset == DCJ11_REG_HITMISS ||
+	                offset == DCJ11_REG_CPUERR || offset == DCJ11_REG_MAINT) {
+		return dcj11_reg_block_store_word(r, offset, 0);
+	}
 
-    word regv;
-    if (!dcj11_reg_block_load_word(r, offset, &regv)) {
-        return false;
-    }
-    if (offset & 1) {
-        regv = (word)((regv & 000377) | (((word)value & 0377) << 8));
-    } else {
-        regv = (word)((regv & 0177400) | ((word)value & 0377));
-    }
-    return dcj11_reg_block_store_word(r, offset, regv);
+	word regv;
+	if (!dcj11_reg_block_load_word(r, offset, &regv)) {
+		return false;
+	}
+	if (offset & 1) {
+		regv = (word)((regv & 000377) | (((word)value & 0377) << 8));
+	} else {
+		regv = (word)((regv & 0177400) | ((word)value & 0377));
+	}
+	return dcj11_reg_block_store_word(r, offset, regv);
 }
 
 static INLINE word dcj11_explicit_psw_write(regs *r, word new_psw)
 {
-    if (r->model == DCJ11) {
-        /* 11/84-class behavior: explicit PSW references do not alter T-bit. */
-        new_psw = (word)((new_psw & ~FLAG_T) | (r->psw & FLAG_T));
-    }
-    return new_psw;
+	if (r->model == DCJ11) {
+		/* 11/84-class behavior: explicit PSW references do not alter T-bit. */
+		new_psw = (word)((new_psw & ~FLAG_T) | (r->psw & FLAG_T));
+	}
+	return new_psw;
 }
 
 static INLINE word trap_psw(regs *r, word old_psw, word vec_psw)
 {
-    if (is_vm2(r)) {
-        if (old_psw & FLAG_H) {
-            /* HALT entry: vector may load PSW[8:0] (0000777). */
-            return (word)((old_psw & ~0000777) | (vec_psw & 0000777));
-        }
-        /* USER entry: load PSW[7:0] and force H/U (0000400) to 0. */
-        return (word)((old_psw & ~0000777) | (vec_psw & 0000377));
-    } else if (r->model == DCJ11) {
-        int old_cm = dcj11_psw_cur_mode(old_psw);
-        vec_psw = dcj11_psw_set_cur_mode(vec_psw, 0);
-        vec_psw = dcj11_psw_set_prev_mode(vec_psw, old_cm);
-    }
-    return vec_psw;
+	if (is_vm2(r)) {
+		if (old_psw & FLAG_H) {
+			/* HALT entry: vector may load PSW[8:0] (0000777). */
+			return (word)((old_psw & ~0000777) | (vec_psw & 0000777));
+		}
+		/* USER entry: load PSW[7:0] and force H/U (0000400) to 0. */
+		return (word)((old_psw & ~0000777) | (vec_psw & 0000377));
+	} else if (r->model == DCJ11) {
+		int old_cm = dcj11_psw_cur_mode(old_psw);
+		/* DCJ11 User's Guide, table 1-4: CM and RS come from the vector.
+		 * Only PM comes from the interrupted context. Kernel data space
+		 * is used to read the vector, not necessarily to push its frame. */
+		vec_psw = dcj11_psw_set_prev_mode(vec_psw, old_cm);
+	}
+	return vec_psw;
 }
 
 static INLINE word dcj11_rti_rtt_protect_psw(word old_psw, word new_psw)
 {
-    const word set_only_mask = 0174000; /* PS<15:11>: may only be set outside kernel */
-    const word keep_ipl_mask = 000340;  /* PS<7:5>: unchanged outside kernel */
+	const word set_only_mask = 0174000; /* PS<15:11>: may only be set outside kernel */
+	const word keep_ipl_mask = 000340;  /* PS<7:5>: unchanged outside kernel */
 
-    new_psw = (word)((new_psw & ~set_only_mask) |
-                     ((new_psw | old_psw) & set_only_mask));
-    new_psw = (word)((new_psw & ~keep_ipl_mask) | (old_psw & keep_ipl_mask));
-    return new_psw;
+	new_psw = (word)((new_psw & ~set_only_mask) |
+	                 ((new_psw | old_psw) & set_only_mask));
+	new_psw = (word)((new_psw & ~keep_ipl_mask) | (old_psw & keep_ipl_mask));
+	return new_psw;
 }
 
 static INLINE void dcj11_sp_mode_init(regs *r)
 {
-    int mode;
+	int mode;
 
-    if (r->model != DCJ11) {
-        return;
-    }
-    if (r->sp_mode_init) {
-        return;
-    }
-    for (mode = 0; mode < 4; mode++) {
-        r->sp_mode[mode] = r->r[6];
-    }
-    r->sp_mode_init = 1;
+	if (r->model != DCJ11) {
+		return;
+	}
+	if (r->sp_mode_init) {
+		return;
+	}
+	for (mode = 0; mode < 4; mode++) {
+		r->sp_mode[mode] = r->r[6];
+	}
+	r->sp_mode_init = 1;
 }
 
 static INLINE void dcj11_switch_stack_mode(regs *r, word old_psw,
-        word new_psw)
+                word new_psw)
 {
-    int old_mode;
-    int new_mode;
+	int old_mode;
+	int new_mode;
 
-    if (r->model != DCJ11) {
-        return;
-    }
-    old_mode = dcj11_psw_cur_mode(old_psw);
-    new_mode = dcj11_psw_cur_mode(new_psw);
-    if (old_mode == new_mode) {
-        return;
-    }
+	if (r->model != DCJ11) {
+		return;
+	}
+	old_mode = dcj11_psw_cur_mode(old_psw);
+	new_mode = dcj11_psw_cur_mode(new_psw);
+	if (old_mode == new_mode) {
+		return;
+	}
 
-    dcj11_sp_mode_init(r);
-    r->sp_mode[old_mode] = r->r[6];
-    r->r[6] = r->sp_mode[new_mode];
+	dcj11_sp_mode_init(r);
+	r->sp_mode[old_mode] = r->r[6];
+	r->r[6] = r->sp_mode[new_mode];
 }
 
 static INLINE void dcj11_regset_init(regs *r)
 {
-    int reg;
+	int reg;
 
-    if (r->model != DCJ11) {
-        return;
-    }
-    if (r->rset_bank_init) {
-        return;
-    }
-    for (reg = 0; reg < 6; reg++) {
-        r->rset_bank[0][reg] = r->r[reg];
-        r->rset_bank[1][reg] = r->r[reg];
-    }
-    r->rset_bank_init = 1;
+	if (r->model != DCJ11) {
+		return;
+	}
+	if (r->rset_bank_init) {
+		return;
+	}
+	for (reg = 0; reg < 6; reg++) {
+		r->rset_bank[0][reg] = r->r[reg];
+		r->rset_bank[1][reg] = r->r[reg];
+	}
+	r->rset_bank_init = 1;
 }
 
 static INLINE void dcj11_switch_regset(regs *r, word old_psw, word new_psw)
 {
-    int old_sel;
-    int new_sel;
-    int reg;
+	int old_sel;
+	int new_sel;
+	int reg;
 
-    if (r->model != DCJ11) {
-        return;
-    }
-    old_sel = dcj11_psw_regset(old_psw);
-    new_sel = dcj11_psw_regset(new_psw);
-    if (old_sel == new_sel) {
-        return;
-    }
+	if (r->model != DCJ11) {
+		return;
+	}
+	old_sel = dcj11_psw_regset(old_psw);
+	new_sel = dcj11_psw_regset(new_psw);
+	if (old_sel == new_sel) {
+		return;
+	}
 
-    dcj11_regset_init(r);
-    for (reg = 0; reg < 6; reg++) {
-        r->rset_bank[old_sel][reg] = r->r[reg];
-        r->r[reg] = r->rset_bank[new_sel][reg];
-    }
+	dcj11_regset_init(r);
+	for (reg = 0; reg < 6; reg++) {
+		r->rset_bank[old_sel][reg] = r->r[reg];
+		r->r[reg] = r->rset_bank[new_sel][reg];
+	}
 }
 
 static INLINE void dcj11_set_psw(regs *r, word new_psw)
 {
-    word old_psw = r->psw;
-    if (r->model == DCJ11) {
-        dcj11_switch_stack_mode(r, old_psw, new_psw);
-        dcj11_switch_regset(r, old_psw, new_psw);
-    }
-    r->psw = new_psw;
+	word old_psw = r->psw;
+	if (r->model == DCJ11) {
+		/* PS<10:9> are unused and read as zero on J11 (UG figure 1-3). */
+		new_psw &= 0174777;
+		dcj11_switch_stack_mode(r, old_psw, new_psw);
+		dcj11_switch_regset(r, old_psw, new_psw);
+	}
+	r->psw = new_psw;
 }
 
 static INLINE void dcj11_note_stack_reference(regs *r, word addr)
@@ -742,13 +746,28 @@ static INLINE int dcj11_pirq_poll(regs *r, word *irq_vector)
 
 static INLINE int core_poll_irq_any(regs *r, word *irq_vector)
 {
-    if (dcj11_pirq_poll(r, irq_vector)) {
-        return 1;
-    }
-    if (r->poll_irq && r->poll_irq(r, irq_vector)) {
-        return 1;
-    }
-    return 0;
+	word program_vector;
+	if (dcj11_pirq_poll(r, &program_vector)) {
+		if (r->poll_irq) {
+			/* The callback grants (and consumes) only requests above PSW.IPL.
+			 * Temporarily mask through the pending PIR level so a lower or
+			 * equal external request stays pending. Restore the real PSW
+			 * before taking either vector or saving the interrupt frame. */
+			word saved_psw = r->psw;
+			r->psw = (word)((saved_psw & ~0000340) | ((program_vector >> 4) & 0000340));
+			int external = r->poll_irq(r, irq_vector);
+			r->psw = saved_psw;
+			if (external) {
+				return 1;
+			}
+		}
+		*irq_vector = program_vector;
+		return 1;
+	}
+	if (r->poll_irq && r->poll_irq(r, irq_vector)) {
+		return 1;
+	}
+	return 0;
 }
 
 #define raw_load_byte(a, b) (((a)->load_byte)((a), (b)))
@@ -2481,64 +2500,66 @@ static INLINE int dcj11_service_stack_trap(regs *r)
 
 static INLINE int dcj11_take_red_stack_abort(regs *r, const char *cause)
 {
-    word old_psw;
-    word old_pc;
-    word vector_psw;
-    word new_psw;
-    word new_pc;
-    (void)cause;
+	word old_psw;
+	word old_pc;
+	word vector_psw;
+	word new_psw;
+	word new_pc;
+	(void)cause;
 
-    if (r->model != DCJ11 || !r->dcj11_vector_push_active) {
-        return 0;
-    }
+	/* Red stack is a kernel-stack abort (DCJ11 UG 1.8). A failed push
+	 * on a user/supervisor stack takes the ordinary bus/MMU vector. */
+	if (r->model != DCJ11 || !r->dcj11_vector_push_active || !dcj11_kernel_psw(r->psw)) {
+		return 0;
+	}
 
-    old_psw = r->dcj11_vector_old_psw;
-    old_pc = r->dcj11_vector_old_pc;
-    r->dcj11_vector_push_active = 0;
-    r->dcj11_yellow_pending = 0;
+	old_psw = r->dcj11_vector_old_psw;
+	old_pc = r->dcj11_vector_old_pc;
+	r->dcj11_vector_push_active = 0;
+	r->dcj11_yellow_pending = 0;
 
-    /*
-     * Abort during trap/interrupt stack push: restore pre-trap state and
-     * take red stack trap using emergency kernel stack at locations 2 and 0.
-     */
-    dcj11_set_psw(r, old_psw);
-    r->r[7] = old_pc;
-    dcj11_set_cpuerr(r, DCJ11_CPUERR_RED);
+	/*
+	 * Abort during trap/interrupt stack push: restore pre-trap state and
+	 * take red stack trap using emergency kernel stack at locations 2 and 0.
+	 */
+	dcj11_set_psw(r, old_psw);
+	r->r[7] = old_pc;
+	dcj11_set_cpuerr(r, DCJ11_CPUERR_RED);
 
-    /*
-     * Red-stack fallback must not re-enter VA/MMU translation paths.
-     * Use physical low-memory vector reads/writes for the emergency stack.
-     */
-    vector_psw = raw_load_word_phys(r, 000006);
-    if (r->fAbort) {
-        return 1;
-    }
-    new_psw = trap_psw(r, old_psw, vector_psw);
-    dcj11_set_psw(r, new_psw);
+	/*
+	 * Red-stack fallback must not re-enter VA/MMU translation paths.
+	 * Use physical low-memory vector reads/writes for the emergency stack.
+	 */
+	vector_psw = raw_load_word_phys(r, 000006);
+	if (r->fAbort) {
+		return 1;
+	}
+	new_psw = trap_psw(r, old_psw, vector_psw);
+	dcj11_set_psw(r, new_psw);
 
-    dcj11_sp_mode_init(r);
-    r->sp_mode[0] = 000004;
-    if (dcj11_psw_cur_mode(r->psw) == 0) {
-        r->r[6] = 000004;
-    }
+	dcj11_sp_mode_init(r);
+	r->sp_mode[0] = 000004;
+	if (dcj11_psw_cur_mode(r->psw) == 0) {
+		r->r[6] = 000004;
+	}
 
-    r->r[6] -= 2;
-    raw_store_word_phys(r, r->r[6], old_psw);
-    if (r->fAbort) {
-        return 1;
-    }
-    r->r[6] -= 2;
-    raw_store_word_phys(r, r->r[6], old_pc);
-    if (r->fAbort) {
-        return 1;
-    }
+	r->r[6] -= 2;
+	raw_store_word_phys(r, r->r[6], old_psw);
+	if (r->fAbort) {
+		return 1;
+	}
+	r->r[6] -= 2;
+	raw_store_word_phys(r, r->r[6], old_pc);
+	if (r->fAbort) {
+		return 1;
+	}
 
-    new_pc = raw_load_word_phys(r, 000004);
-    if (!r->fAbort) {
-        r->r[7] = new_pc;
-    }
-    r->fAbort = 1;
-    return 1;
+	new_pc = raw_load_word_phys(r, 000004);
+	if (!r->fAbort) {
+		r->r[7] = new_pc;
+	}
+	r->fAbort = 1;
+	return 1;
 }
 
 static INLINE void dcj11_reset_instruction_state(regs *r)

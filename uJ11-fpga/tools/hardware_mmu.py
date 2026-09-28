@@ -16,7 +16,9 @@ def program(u,a):
     exported=json.loads((build/'jed.json').read_text())
     assert report['mmu'] and report['device']=='LCMXO2-7000HC-4TG144C'
     assert report['timing_pass'] and report['fully_routed'] and report['diamond_returncode']==0
-    assert report['applied_clock_mhz']==24
+    clock=report['inputs'].get('clock_mhz',24)
+    assert clock in (24,50) and report['applied_clock_mhz']==clock
+    assert clock!=50 or report['inputs']['pipeline']
     for name,want in report['inputs']['files'].items():
         path=build/name.removeprefix('generated:') if name.startswith('generated:') else ROOT/name
         assert hashlib.sha256(path.read_bytes()).hexdigest()==want,path

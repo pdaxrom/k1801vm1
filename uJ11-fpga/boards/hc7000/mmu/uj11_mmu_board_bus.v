@@ -8,7 +8,7 @@ module uj11_mmu_board_bus #(
     parameter BOOT_ROM_ENABLE=1
 )(
     input wire clk,reset,power_on,peripheral_reset,dma_map_enabled,
-    input wire request,writing,byte_access,
+    input wire request,writing,byte_access,cpu_lock,
     input wire [21:0] address,
     input wire [15:0] write_data,
     output wire ready,error,
@@ -64,7 +64,7 @@ module uj11_mmu_board_bus #(
         .dma_ready(dma_ready),.dma_error(dma_error),.memory_request(mapped_request),
         .memory_address(mapped_address),.memory_ready(mapped_ready));
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(rst),
-        .cpu_request(request && ram_selected),.cpu_write(writing),.cpu_address(address[20:1]),
+        .cpu_request(request && ram_selected),.cpu_write(writing),.cpu_lock(cpu_lock),.cpu_address(address[20:1]),
         .cpu_lanes(lanes),.cpu_data(write_data),.cpu_ready(ram_ready),
         .dma_request(mapped_request),.dma_write(dma_write),.dma_address(mapped_address),
         .dma_data(dma_data),.dma_ready(mapped_ready),.request(memory_request),.write(memory_write),

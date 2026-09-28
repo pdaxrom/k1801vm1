@@ -33,7 +33,7 @@ module tb_storage_disk;
         .dma_request(dr),.dma_write(dw),.dma_unibus(),.dma_address(da),.dma_data(dd),
         .dma_ready(dready),.dma_error(1'b0),.dma_rdata(mrd));
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(reset),
-        .cpu_request(cr),.cpu_write(cw),.cpu_address(ca),.cpu_lanes(2'b11),.cpu_data(cd),.cpu_ready(cready),
+        .cpu_lock(1'b0),.cpu_request(cr),.cpu_write(cw),.cpu_address(ca),.cpu_lanes(2'b11),.cpu_data(cd),.cpu_ready(cready),
         .dma_request(dr),.dma_write(dw),.dma_address(da),.dma_data(dd),.dma_ready(dready),
         .request(mr),.write(mw),.address(ma),.lanes(ml),.data(md),.ready(mready));
     uj11_sram memory(.clk(clk),.power_on(power_on),.reset(reset),.request(mr),.write(mw),

@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module uj11_mmu_microcomp(
+module uj11_mmu_microcomp #(parameter integer CLOCK_HZ=24000000)(
     input wire clk_ext, res, rx,
     output wire tx,
     output wire [19:0] sram_address,
@@ -13,20 +13,27 @@ module uj11_mmu_microcomp(
     output wire [5:0] tvout, output wire [1:0] audio
 );
     wire clk, locked;
-    uj11_hc7000_pll pll(.CLKI(clk_ext),.CLKOP(clk),.CLKOS(),.LOCK(locked));
+    generate if(CLOCK_HZ==50000000)begin: clock50
+        uj11_hc7000_pll50 pll(.CLKI(clk_ext),.CLKOP(),.CLKOS(clk),.LOCK(locked));
+    end else begin: clock24
+        uj11_hc7000_pll pll(.CLKI(clk_ext),.CLKOP(clk),.CLKOS(),.LOCK(locked));
+    end endgenerate
     reg [3:0] power_on=4'b1111;
     always @(posedge clk or negedge locked)
         if(!locked) power_on<=4'b1111;
         else power_on<={power_on[2:0],1'b0};
     wire hard_reset, halt_button, memory_initialized;
-    uj11_button #(.SAMPLE_DIVISOR(480000)) button(
+    uj11_button #(.SAMPLE_DIVISOR(CLOCK_HZ/50)) button(
         .clk(clk),.power_on(power_on[3]),.button_n(res),
         .hard_reset(hard_reset),.halt_pulse(halt_button));
+    reg system_reset=1'b1;
+    always @(posedge clk)system_reset<=power_on[3] || hard_reset || !memory_initialized;
     wire [7:0] panel_pins;
     wire host_miso=panel_pins[6], host_miso_oe=panel_pins[7];
     assign hg_tdo=host_miso_oe ? host_miso : 1'bz;
-    uj11_mmu_board system(
-        .clk(clk),.reset(power_on[3] || hard_reset || !memory_initialized),
+    uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(CLOCK_HZ/50),
+        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000),.SD_FAST_DIV(2)) system(
+        .clk(clk),.reset(CLOCK_HZ==50000000 ? system_reset : power_on[3] || hard_reset || !memory_initialized),
         .power_on(power_on[3]),.memory_initialized(memory_initialized),
         .halt_button(halt_button),.uart_rx(rx),.uart_tx(tx),
         .panel_keys({1'b0,hg_tdi,hg_tck,hg_tms}),

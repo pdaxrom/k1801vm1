@@ -61,7 +61,8 @@ static void test_time(void)
 	uint8_t data[HG_TIME_SIZE];
 	struct hg_request request;
 	struct tm local = {.tm_year=126, .tm_mon=8, .tm_mday=22,
-		.tm_hour=23, .tm_min=59, .tm_sec=59};
+		                                            .tm_hour=23, .tm_min=59, .tm_sec=59
+	};
 	unsigned int hz, year, month, day;
 	unsigned int cases = 0;
 
@@ -83,19 +84,24 @@ static void test_time(void)
 		assert(hg_time_encode(&local, 999999999L, hz, data) == 0);
 		assert((data[0] | data[1]<<8) == (1<<14 | 9<<10 | 22<<5 | 22));
 		uint32_t ticks = ((uint32_t)(data[2] | data[3]<<8)<<16) |
-			(uint32_t)(data[4] | data[5]<<8);
+		                 (uint32_t)(data[4] | data[5]<<8);
 		assert(ticks == 86400u*hz-1);
-		local.tm_hour=0; local.tm_min=0; local.tm_sec=0;
+		local.tm_hour=0;
+		local.tm_min=0;
+		local.tm_sec=0;
 		assert(hg_time_encode(&local, 0, hz, data) == 0);
 		assert(data[2]==0 && data[3]==0 && data[4]==0 && data[5]==0);
-		local.tm_hour=23; local.tm_min=59; local.tm_sec=59;
+		local.tm_hour=23;
+		local.tm_min=59;
+		local.tm_sec=59;
 	}
 	for (year=1972; year<=2035; year++) {
 		for (month=1; month<=12; month++) {
 			for (day=1; day<=31; day++) {
-				static const unsigned int days[]={31,28,31,30,31,30,31,31,30,31,30,31};
+				static const unsigned int days[]= {31,28,31,30,31,30,31,31,30,31,30,31};
 				unsigned int limit=days[month-1]+(month==2 && year%4==0);
-				local.tm_year=(int)year-1900; local.tm_mon=(int)month-1;
+				local.tm_year=(int)year-1900;
+				local.tm_mon=(int)month-1;
 				local.tm_mday=(int)day;
 				int result=hg_time_encode(&local,0,50,data);
 				assert((result==0)==(day<=limit));
@@ -112,7 +118,9 @@ static void test_time(void)
 	assert(hg_time_encode(&local,0,50,data)!=0);
 	local.tm_year=71;
 	assert(hg_time_encode(&local,0,50,data)!=0);
-	local.tm_year=126; local.tm_mon=0; local.tm_mday=1;
+	local.tm_year=126;
+	local.tm_mon=0;
+	local.tm_mday=1;
 	assert(hg_time_encode(&local,-1,50,data)!=0);
 	assert(hg_time_encode(&local,1000000000L,50,data)!=0);
 	assert(hg_time_encode(&local,0,51,data)!=0);
@@ -124,7 +132,7 @@ static void test_time(void)
 static uint16_t test_word(const uint8_t *data, size_t word)
 {
 	return (uint16_t)(data[word * 2u] |
-		((uint16_t)data[word * 2u + 1u] << 8));
+	                  ((uint16_t)data[word * 2u + 1u] << 8));
 }
 
 static void test_directory(void)
@@ -152,7 +160,7 @@ static void test_directory(void)
 	fd = open(image_path, O_RDONLY);
 	assert(fd >= 0);
 	assert(lseek(fd, 6 * RT11_BLOCK_SIZE, SEEK_SET) ==
-		6 * RT11_BLOCK_SIZE);
+	       6 * RT11_BLOCK_SIZE);
 	assert(read(fd, segment, sizeof(segment)) == (ssize_t)sizeof(segment));
 	close(fd);
 	assert(test_word(segment, 0) == 16);

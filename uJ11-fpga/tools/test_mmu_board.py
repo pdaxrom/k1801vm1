@@ -31,6 +31,9 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False):
         record['sd_image']=str(image.resolve())
         record['boot_menu']=boot_menu
         if boot_menu:sim.append('+BOOT_MENU')
+    if name=='tb_mmu_bsd':
+        hz=record['clock_mhz']*1000000
+        cmd.append(f'-P{name}.CLOCK_HZ={hz}' if vendor else f'-GCLOCK_HZ={hz}')
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     with (out/'simulation.log').open('w') as log:rc=subprocess.run(sim+memory_args(record),cwd=ROOT,stdout=log,stderr=subprocess.STDOUT).returncode
     print((out/'simulation.log').read_text()[-3000:])

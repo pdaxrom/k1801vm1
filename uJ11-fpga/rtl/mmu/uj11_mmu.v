@@ -72,6 +72,11 @@ module uj11_mmu (
     wire csr_mmr1={pa[21:1],1'b0}==22'o17777574;
     wire csr_mmr2={pa[21:1],1'b0}==22'o17777576;
     wire csr_mmr3={pa[21:1],1'b0}==22'o17772516;
+    wire mmr_selected=csr_mmr0 || csr_mmr1 || csr_mmr2 || csr_mmr3;
+    wire cpu_internal={pa[21:1],1'b0}==22'o17777776 ||
+        {pa[21:1],1'b0}==22'o17777772 || {pa[21:1],1'b0}==22'o17777766 ||
+        {pa[21:1],1'b0}==22'o17777752;
+    reg opcode_fetch;
     wire [15:0] mmr_value=csr_mmr0 ? mmr0 : csr_mmr1 ? mmr1 : csr_mmr2 ? mmr2 : mmr3;
     wire [15:0] mmr_merged=(mmr_value & ~mask) | (data & mask);
     assign bus_request=state==BUS && request && !reset && !peripheral_reset;
@@ -84,9 +89,14 @@ module uj11_mmu (
     always @(posedge clk) begin
         if(reset || peripheral_reset) begin
             state<=IDLE;ready<=0;fault<=0;read_data<=0;
-            mmr0<=0;mmr1<=0;mmr2<=0;mmr3<=0;
+            mmr0<=0;mmr3<=0;
+            // RESET clears translation controls, not the restart record.
+            // Only board/power reset clears MMR1/MMR2; the next ordinary
+            // instruction fetch will update them once MMR0 is unfrozen.
+            if(reset)begin mmr1<=0;mmr2<=0;end
             va<=0;data<=0;pa<=0;par<=0;entry<=0;wr<=0;byte_op<=0;
             debug_access<=0;old_par<=0;
+            opcode_fetch<=0;
         end else begin
             if(instruction_start && !frozen) begin mmr1<=0;mmr2<=instruction_pc;end
             if(delta_valid && !frozen) begin
@@ -97,6 +107,7 @@ module uj11_mmu (
                 IDLE: if(request) begin
                     va<=physical ? physical_address[15:0] : virtual_address;
                     data<=write_data;wr<=writing;
+                    opcode_fetch<=instruction_start;
                     byte_op<=byte_access;debug_access<=console;
                     entry<={mode,data_space && split,virtual_address[15:13]};
                     fault<=0;ready<=0;
@@ -119,7 +130,11 @@ module uj11_mmu (
                     else state<=DECODE;
                 end
                 DECODE: begin
-                    if(csr_mmr0 || csr_mmr1 || csr_mmr2 || csr_mmr3) begin
+                    // J11 internal registers are data-only. Fetching an
+                    // opcode from one raises address error, not a bus timeout.
+                    if(opcode_fetch && (mmr_selected || apr_selected || cpu_internal))begin
+                        fault<=1;ready<=1;state<=HOLD;
+                    end else if(mmr_selected) begin
                         read_data<=mmr_value;
                         if(wr) begin
                             if(csr_mmr0) mmr0<=(mmr0 & 16'o000176) | (mmr_merged & 16'o160001);

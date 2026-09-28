@@ -6,7 +6,7 @@ module tb_cpu;
     reg clk=0;always #5 clk=~clk;
     reg reset=1,halt_button=0,irq_valid=0;
     reg [2:0] irq_priority=0;reg [15:0] irq_vector=0;
-    wire irq_ack,peripheral_reset,mem_request,mem_write,mem_byte,console_active,waiting,retire;
+    wire mem_lock,irq_ack,peripheral_reset,mem_request,mem_write,mem_byte,console_active,waiting,retire;
     wire [21:0] mem_address;wire [15:0] mem_write_data;
     reg mem_ready=0,mem_error=0;reg [15:0] mem_read_data=0;
     wire [15:0] psw,ir,pc,mmr0,mmr1,mmr2,mmr3,debug_register_data;
@@ -272,7 +272,8 @@ module tb_cpu;
         saved_pc=pc;rx="C";wait(!console_active);repeat(100)@(negedge clk);
         check(waiting && pc==saved_pc,"ODT CONTINUE restores WAIT");
         @(negedge clk);irq_priority=6;irq_vector='o100;irq_valid=1;
-        wait(irq_ack);@(negedge clk);irq_valid=0;
+        // Hold the interrupt through the rising edge that accepts the grant.
+        do @(posedge clk);while(!irq_ack);@(negedge clk);irq_valid=0;
         next_prompt=prompts+1;wait_prompt(next_prompt);
         debug_register_address=0;#1;check(debug_register_data==1,"execution resumes after WAIT IRQ");
         debug_register_address=1;#1;check(debug_register_data==1,"IRQ handler and RTI executed");
