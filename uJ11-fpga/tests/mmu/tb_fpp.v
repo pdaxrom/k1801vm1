@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module tb_fpp;
+    wire console_halt,wait_active;
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif

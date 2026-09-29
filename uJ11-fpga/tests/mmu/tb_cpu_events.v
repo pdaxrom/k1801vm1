@@ -134,6 +134,7 @@ module tb_cpu_events;
         prepare();mov(3,'o177776);word(3);inject=1;bad_address='o1776;emergency_error=1;reset=0;
         while(!console_active && cycles<12000)@(negedge clk);
         check(console_active && dut.cpuerr=='o44,"failed emergency stack enters ODT without recursive traps");
+        check(!dut.console_halt,"emergency ODT entry is not an executed HALT");
         $display("PASS MMU CPU events: %0d checks",checks);$finish;
     end
 endmodule

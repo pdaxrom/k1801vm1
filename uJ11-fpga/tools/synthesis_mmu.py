@@ -13,6 +13,16 @@ from report_synthesis import extract, check_clock
 from build_iop_mmu import sources as iop_sources, OUT as IOP_OUT
 
 
+def display_constraints(lpf,enabled):
+    if not enabled:return lpf
+    # Weakest LVCMOS33 drive on both anodes and cathodes. This specifies
+    # drive capability, not a 4 mA current clamp. Keep other ports untouched.
+    lpf,count=re.subn(r'(IOBUF PORT "seg_led_[hl]\[[0-8]\]" IO_TYPE=LVCMOS33 PULLMODE=NONE) ;',
+                      r'\1 DRIVE=4 SLEWRATE=SLOW ;',lpf)
+    assert count==18,'Expected all eighteen display pins'
+    return lpf
+
+
 def run(name,prepare_only=False):
     out=ROOT/'build'/name
     out.mkdir(parents=True,exist_ok=True)
@@ -30,6 +40,7 @@ def run(name,prepare_only=False):
         ET.SubElement(node,'Options')
     sram_lpf='boards/hc7000/mmu/sram-timing-50.lpf' if mhz==50 else 'boards/hc7000/sram-timing.lpf'
     lpf=(ROOT/'boards/hc7000/pins.lpf').read_text()+'\n'+(ROOT/sram_lpf).read_text()
+    lpf=display_constraints(lpf,hw['diagnostics'])
     lpf,count=re.subn(r'FREQUENCY NET "clk" 24 MHz',f'FREQUENCY NET "clk" {mhz} MHz',lpf)
     assert count==1,'Expected one system-clock constraint'
     (out/'clock.lpf').write_text(lpf)
@@ -75,7 +86,7 @@ exit 0
     for p in generated:
         hashes['generated:'+p]=hashlib.sha256((out/p).read_bytes()).hexdigest()
     manifest=dict(name=name,board='hc7000-lcd-sram',top='uj11_mmu_microcomp',files=hashes,
-        mmu=True,fpp=hw['fpp'],clock_mhz=mhz,pipeline=hw['cpu']['pipeline'],defines=[],input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
+        mmu=True,fpp=hw['fpp'],clock_mhz=mhz,diagnostics=hw['diagnostics'],pipeline=hw['cpu']['pipeline'],defines=[],input_revision_sha256=hashlib.sha256(json.dumps(hashes,sort_keys=True).encode()).hexdigest())
     (out/'inputs.json').write_text(json.dumps(manifest,indent=2)+'\n')
     if prepare_only:
         print(f'Prepared {name}: {device}, 12 MHz reference / {mhz} MHz PLL, SRAM')

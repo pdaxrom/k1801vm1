@@ -7,6 +7,7 @@ module tb_cpu;
     reg reset=1,halt_button=0,irq_valid=0;
     reg [2:0] irq_priority=0;reg [15:0] irq_vector=0;
     wire mem_lock,irq_ack,peripheral_reset,mem_request,mem_write,mem_byte,console_active,waiting,retire;
+    wire console_halt,wait_active;
     wire [21:0] mem_address;wire [15:0] mem_write_data;
     reg mem_ready=0,mem_error=0;reg [15:0] mem_read_data=0;
     wire [15:0] psw,ir,pc,mmr0,mmr1,mmr2,mmr3,debug_register_data;
@@ -76,10 +77,13 @@ module tb_cpu;
         restart();wait_prompt(1);
         check(debug_register_data==3 && ram['o1000/2]==3,"integer microcode executes");
         check(psw==16'o340,"ODT preserves PSW");
+        check(console_halt,"HALT records console stop reason");
         rx="S";wait_prompt(2);
         check(debug_register_data==4,"STEP executes one instruction");
+        check(!console_halt,"STEP console stop is not HALT");
         rx="C";wait_prompt(3);
         check(debug_register_data==5,"CONTINUE returns to guest");
+        check(console_halt,"HALT reason is restored after CONTINUE");
         // Kernel unified translation; keep code page zero and I/O page seven.
         pos='o4000;
         mov(16'o177406,16'o172300);mov(0,16'o172340);
@@ -166,6 +170,7 @@ module tb_cpu;
         command("R 3\015");check(uart_window=="005670\015\n>","ODT recovers after invalid input");
         check(mmr0==saved0 && mmr1==saved1 && mmr2==saved2,"ODT leaves guest MMU diagnostics unchanged");
         check(psw==saved_psw && pc==saved_pc,"ODT preserves guest PC/PSW");
+        check(console_halt,"ODT commands and console faults preserve HALT reason");
         // Microcoded FPP control/state, including memory operands and faults.
         if(dut.fpp_enabled)begin
         pos='o4000;
@@ -268,9 +273,12 @@ module tb_cpu;
         ram['o100/2]='o6000;ram['o102/2]='o340;
         ram['o6000/2]='o5201;ram['o6002/2]=2;
         next_prompt=prompts+1;restart();wait(waiting);
+        repeat(12)begin @(negedge clk);check(wait_active,"WAIT diagnostic remains asserted across pipeline preparation");end
         @(negedge clk);halt_button=1;@(negedge clk);halt_button=0;wait_prompt(next_prompt);
+        check(!console_halt,"button console stop is not HALT");
         saved_pc=pc;rx="C";wait(!console_active);repeat(100)@(negedge clk);
         check(waiting && pc==saved_pc,"ODT CONTINUE restores WAIT");
+        check(!console_halt,"CONTINUE clears console stop reason");
         @(negedge clk);irq_priority=6;irq_vector='o100;irq_valid=1;
         // Hold the interrupt through the rising edge that accepts the grant.
         do @(posedge clk);while(!irq_ack);@(negedge clk);irq_valid=0;

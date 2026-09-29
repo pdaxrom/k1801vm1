@@ -12,13 +12,51 @@ sys.path.insert(0,str(ROOT/'tools'))
 sys.path.insert(0,str(ROOT/'microasm'))
 from board_common import sources
 from build_mmu import CORE,MICROCODE,build,fpp_mode,clock_mhz,pipeline_mode
+from build_mmu_board import diagnostics_enabled
+from synthesis_mmu import display_constraints
 from uj11mmuasm import assemble,AssemblyError
 # These checks intentionally start independent configurations, including when
 # invoked by `make ... FPP=off test`; do not inherit command-line overrides.
 MAKE_ENV={k:v for k,v in os.environ.items() if k not in
-          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','IOP','UJ11_MMU_IOP','UJ11_MMU_CLOCK_MHZ','UJ11_MMU_PIPELINE','MMU_CLOCK_MHZ','OUT')}
+          ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','IOP','UJ11_MMU_IOP','UJ11_MMU_CLOCK_MHZ','UJ11_MMU_PIPELINE','MMU_CLOCK_MHZ','HC7000_DIAGNOSTICS','UJ11_HC7000_DIAGNOSTICS','OUT')}
 
 class Profiles(unittest.TestCase):
+    def test_display_constraints_only_touch_display_when_enabled(self):
+        original=(ROOT/'boards/hc7000/pins.lpf').read_text()
+        self.assertEqual(display_constraints(original,False),original)
+        modified=display_constraints(original,True)
+        before=original.splitlines();after=modified.splitlines()
+        self.assertEqual(len(before),len(after))
+        changed=0
+        for old,new in zip(before,after):
+            if old==new:continue
+            changed+=1
+            self.assertTrue(old.startswith('IOBUF PORT "seg_led_'))
+            self.assertEqual(new,old.replace(' ;',' DRIVE=4 SLEWRATE=SLOW ;'))
+        self.assertEqual(changed,18)
+        with self.assertRaises(AssertionError):display_constraints('IOBUF PORT "tx" ;',True)
+
+    def test_diagnostics_default_off_and_hc7000_mmu_only(self):
+        with patch.dict(os.environ,{},clear=True):
+            self.assertFalse(diagnostics_enabled())
+            os.environ['UJ11_HC7000_DIAGNOSTICS']='1'
+            self.assertTrue(diagnostics_enabled())
+            os.environ['UJ11_HC7000_DIAGNOSTICS']='yes'
+            with self.assertRaises(ValueError):diagnostics_enabled()
+        for args in (['HC7000_DIAGNOSTICS=1'],
+                     ['BOARD=hc7000-lcd-sram','HC7000_DIAGNOSTICS=1'],
+                     ['CPU=mmu','BOARD=hc7000-lcd-sram','HC7000_DIAGNOSTICS=2']):
+            result=subprocess.run(['make','-n',*args],cwd=ROOT,capture_output=True,text=True,env=MAKE_ENV)
+            self.assertNotEqual(result.returncode,0,result.stdout)
+        result=subprocess.run(['make','-n','CPU=mmu','BOARD=hc7000-lcd-sram','HC7000_DIAGNOSTICS=1',
+                               'synthesis'],cwd=ROOT,capture_output=True,text=True,env=MAKE_ENV)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('-diagnostics',result.stdout)
+        result=subprocess.run(['make','-n'],cwd=ROOT,capture_output=True,text=True,env=MAKE_ENV)
+        self.assertEqual(result.returncode,0,result.stderr)
+        self.assertIn('build_hardware.py',result.stdout)
+        self.assertNotIn('test_diagnostics.py',result.stdout)
+
     def test_alu_return_encoding_and_abort_repair(self):
         image,_,_,_=assemble('alu ADD, a=R0, b=R1, pair=AD, d=IMM, imm=0xabcd, dst=RF, flags=NZVC, seq=RETURN')
         self.assertEqual(image[0]>>38&1,1)

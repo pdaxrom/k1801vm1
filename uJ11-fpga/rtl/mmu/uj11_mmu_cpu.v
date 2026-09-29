@@ -18,6 +18,8 @@ module uj11_mmu_cpu #(
     input wire mem_ready, mem_error,
     input wire [15:0] mem_read_data,
     output reg console_active,
+    output reg console_halt,
+    output wire wait_active,
     output wire waiting,
     output reg retire,
     output reg [15:0] psw,ir,
@@ -304,6 +306,9 @@ module uj11_mmu_cpu #(
     wire trace_ack=step && (boundary || wait_op) && trace_pending && !debug_pending;
     wire debug_ack=step && (boundary || wait_op) && debug_pending;
     assign waiting=wait_op && operands_ready && !reset;
+    // Diagnostic level: unlike the handshake above, it must not blink on
+    // alternate preparation/execution clocks in the 50 MHz pipeline.
+    assign wait_active=wait_op && !reset;
     wire [15:0] incoming=byte_access ? (read_a[0] ? {8'b0,translation_data[15:8]} : {8'b0,translation_data[7:0]}) : translation_data;
     // Opcode fetches are always words. Bypass the operand byte-lane mux so
     // RF address/bit 0 cannot extend the fetch-to-dispatch timing path.
@@ -361,7 +366,7 @@ module uj11_mmu_cpu #(
         if(reset)begin
             psw<=16'o340;ir<=0;mdr<=0;saved_psw<=0;uflags<=0;instruction_pc<=0;fp_length<=2;
             turnaround<=0;memory_started<=0;direct_pending<=0;peripheral_reset<=0;retire<=0;mem_lock<=0;
-            delta_recorded<=0;physical_high<=6'h3f;console_space<=0;console_active<=0;
+            delta_recorded<=0;physical_high<=6'h3f;console_space<=0;console_active<=0;console_halt<=0;
             console_address<=0;console_high<=0;console_kind<=0;
             explicit_psw<=0;trap_frame<=0;trap_loading<=0;trace_latched<=0;
             halt_pending<=0;single_step<=0;wait_seen<=0;console_wait<=0;event_active<=0;fault_repair<=0;link_sp<=0;
@@ -392,6 +397,7 @@ module uj11_mmu_cpu #(
             if(read_delta)delta_recorded<=1;
             else if(step && !control)delta_recorded<=0;
             if(halt_button)halt_pending<=1;
+            if(debug_ack || (!console_active && fault!=0))console_halt<=0;
             if(debug_ack)begin halt_pending<=0;single_step<=0;console_wait<=wait_op;end
             if(fault!=0)begin
                 mem_lock<=0;
@@ -407,6 +413,7 @@ module uj11_mmu_cpu #(
                 fault_repair<=0;
                 wait_seen<=wait_op;
                 if(fetching)begin
+                    if(!console_active)console_halt<=incoming==0 && psw[15:14]==0;
                     ir<=incoming;trace_latched<=psw[4];explicit_psw<=0;trap_frame<=0;console_wait<=0;
                     // Finish any in-flight DMA, then hold off new grants until
                     // the whole TSTSET completes (including the read/write gap).
@@ -425,7 +432,7 @@ module uj11_mmu_cpu #(
                 if(control && command==0 && uword[2:1]!=0)begin
                     console_active<=uword[2:1]==1;
                     if(uword[2:1]==1)begin red_active<=0;stack_active<=0;yellow_pending<=0;end
-                    if(uword[2:1]!=1)begin single_step<=uword[2:1]==3;halt_pending<=0;end
+                    if(uword[2:1]!=1)begin single_step<=uword[2:1]==3;halt_pending<=0;console_halt<=0;end
                 end
                 if(flags!=0)begin
                     if(use_uflags)case(flags)
