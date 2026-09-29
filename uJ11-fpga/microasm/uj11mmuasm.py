@@ -2,7 +2,7 @@
 """MMU microassembler: 3072 x 54, independent of the released mmuless backend.
 
 Low 36 bits retain the integer datapath layout. Control target bits 10/11 are
-bits 36/53. Memory space is 39:37. ALU extension: delta=37, previous=39,
+bits 36/53. Memory space is 39:37. ALU extension: delta=37, return=38, previous=39,
 uflags=40, external D input=44:41. For IMM, 52:45 carry its high byte without overlapping the control fields.
 """
 import argparse
@@ -21,7 +21,7 @@ FLAGS = {s: i for i, s in enumerate('KEEP NZV NZVC LOAD'.split())}
 DINPUT = {s: i for i, s in enumerate('ZERO ONE TWO STEP MDR DISP IMM PSW'.split())}
 EXT_D = {'IR': 1, 'SAVED_PSW': 2, 'MMR0': 3, 'MMR1': 4, 'MMR2': 5, 'MMR3': 6, 'BOOT_PC': 7, 'OP_PC': 8}
 DINPUT.update({n: 0 for n in EXT_D})
-SEQS = {'NEXT': 0, 'PAGE': 1, 'FETCH': 2, 'FETCH_A1': 3}
+SEQS = {'NEXT': 0, 'PAGE': 1, 'FETCH': 2, 'FETCH_A1': 3, 'RETURN': 4}
 CONDS = {s: i for i, s in enumerate('ALWAYS C V Z N Q0 LOOPZ ERROR'.split())}
 CONDS.update({'NOT_' + k: v + 8 for k, v in list(CONDS.items())})
 REGS = {**{f'R{i}': i for i in range(8)}, **{f'T{i}': 8+i for i in range(8)},
@@ -119,7 +119,7 @@ def encode(line, addr, labels):
             edges.append(target)
         elif 'next' in f:
             raise AssemblyError('next field requires seq=PAGE')
-        else:
+        elif seq != SEQS['RETURN']:
             edges.append(FETCH_ADDRESS if seq == SEQS['FETCH'] else addr + 1)
             if seq == SEQS['FETCH_A1']:
                 edges.append(FETCH_ADDRESS)
@@ -142,7 +142,7 @@ def encode(line, addr, labels):
                 enum(f.get('pair','AB'), PAIRS) << 18 |
                 enum(f.get('dst','NONE'), DESTS) << 15 |
                 enum(f.get('flags','KEEP'), FLAGS) << 13 |
-                din << 10 | seq << 8 | low)
+                din << 10 | (seq & 3) << 8 | (int(seq == SEQS['RETURN']) << 38) | low)
     else:
         if len(headparts) != 1:
             raise AssemblyError('expected COMMAND, field=value')
@@ -286,7 +286,7 @@ def assemble(source):
                     c >> 26 & 31 == a and c >> 21 & 31 == a and
                     c >> 18 & 7 == PAIRS['AD'] and c >> 15 & 7 == DESTS['RF'] and
                     c >> 13 & 3 == FLAGS['KEEP'] and c >> 10 & 7 in (DINPUT['TWO'],DINPUT['STEP']) and
-                    c & 1023 == 0):
+                    c & 1023 == 0 and not (c >> 38 & 1)):
                 raise AssemblyError(f'fault_inc at {addr:03x} needs a same-register ADD STEP/TWO continuation without flags or sequencing')
     groups = sorted((addr, name) for name, addr in labels.items())
     routines = {}
@@ -294,7 +294,7 @@ def assemble(source):
         end = groups[index+1][0] if index+1 < len(groups) else DEPTH
         routines[name] = {'address': start,
                           'words_until_next_label': sum(start <= a < end for a in instructions)}
-    stats = {'encoding_version': 'mmu1', 'word_bits': 54, 'physical_words': DEPTH,
+    stats = {'encoding_version': 'mmu2', 'word_bits': 54, 'physical_words': DEPTH,
              'used_words': len(instructions), 'occupancy_percent': len(instructions)*100/DEPTH,
              'highest_address': max(instructions), 'routines': routines,
              'note': 'Label spans are static word counts, not dynamic instruction CPI.'}

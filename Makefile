@@ -7,7 +7,7 @@ OBJS = core/core.o core/disas.o core/hardware.o
 
 TESTS = tests/core_tests
 MMU_TESTS_OFF = tests/test_mmu_disable_build
-MMU_TESTS_ON = tests/test_mmu_basic tests/test_mmu_faults tests/test_mmu_splitid tests/test_mmu_22bit
+MMU_TESTS_ON = tests/test_mmu_basic tests/test_mmu_faults tests/test_mmu_combined tests/test_mmu_splitid tests/test_mmu_22bit
 DIAG = tests/cpu_diag
 
 core/core.o: core/core.c core/core.h core/pdp11_fp.c
@@ -26,6 +26,9 @@ tests/test_mmu_basic: tests/test_mmu_basic.o core/core.o core/hardware.o
 tests/test_mmu_faults: tests/test_mmu_faults.o core/core.o core/hardware.o
 	$(CC) -g -o $@ $^
 
+tests/test_mmu_combined: tests/test_mmu_combined.o core/core.o core/hardware.o
+	$(CC) -g -o $@ $^
+
 tests/test_mmu_splitid: tests/test_mmu_splitid.o core/core.o core/hardware.o
 	$(CC) -g -o $@ $^
 
@@ -37,6 +40,7 @@ tests/test_mmu_22bit: tests/test_mmu_22bit.o core/core.o core/hardware.o
 
 tests/test_mmu_basic.o: tests/test_mmu_basic.c tests/mmu_test_common.h core/core.h core/hardware.h
 tests/test_mmu_faults.o: tests/test_mmu_faults.c tests/mmu_test_common.h core/core.h core/hardware.h
+tests/test_mmu_combined.o: tests/test_mmu_combined.c tests/mmu_test_common.h core/core.h core/hardware.h
 tests/test_mmu_splitid.o: tests/test_mmu_splitid.c tests/mmu_test_common.h core/core.h core/hardware.h
 tests/test_mmu_disable_build.o: tests/test_mmu_disable_build.c tests/mmu_test_common.h core/core.h core/hardware.h
 tests/test_mmu_22bit.o: tests/test_mmu_22bit.c tests/mmu_test_common.h core/core.h core/hardware.h
@@ -56,6 +60,7 @@ test-mmu-on:
 	./tests/core_tests
 	./tests/test_mmu_basic
 	./tests/test_mmu_faults
+	./tests/test_mmu_combined
 	./tests/test_mmu_splitid
 	./tests/test_mmu_22bit
 

@@ -1,6 +1,9 @@
 `timescale 1ns/1ps
 // Full 2.9BSD multiuser boot using actual CPU, SERV, SRAM and UART waveforms.
 module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
+`ifdef UJ11_VENDOR_ROM
+    GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
+`endif
     reg clk=0,power_on=1,rx=1,halt_button=0;
     localparam integer BIT_TICKS=(CLOCK_HZ+57600)/115200;
     always #(500000000.0/CLOCK_HZ) clk=~clk;
@@ -23,6 +26,37 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
     spi_sd_model #(.SECTORS(2048)) card(.cs_n(cs),.sck(sck),.mosi(mosi),.miso(miso),.absent(1'b0),
         .fail_read(1'b0),.fail_write(1'b0),.stuck_busy(1'b0),.bad_ocr(1'b0),.bad_echo(1'b0),.bad_status(1'b0));
+    // Simulation-only profiling. Exclusive bins partition elapsed clocks;
+    // disk/SPI/DMA counters overlap and describe work concurrent with the CPU.
+    bit profile_enabled=0,profile_active=0;
+    longint unsigned profile_bins[0:7],profile_total,profile_disk,profile_disk_wait,profile_spi,profile_dma;
+    longint unsigned profile_upc[0:3071];
+    integer profile_bin;
+    initial begin
+        profile_enabled=$test$plusargs("PROFILE_BSD");
+        for(integer i=0;i<3072;i++)profile_upc[i]=0;
+    end
+    always @(posedge clk)if(profile_active)begin
+        profile_total++;
+        if(dut.cpu.wait_op)profile_bin=0;
+        else if(!dut.cpu.operands_ready)profile_bin=1;
+        else if(dut.cpu.memory_op && !dut.cpu.memory_done)begin
+            if(dut.cpu.mmu.state==1 || dut.cpu.mmu.state==2 || dut.cpu.mmu.state==3)profile_bin=3;
+            else if(dut.cpu.mmu.state==5)begin
+                if(dut.bus.iop_selected)profile_bin=5;
+                else if(dut.bus.ram_selected)profile_bin=4;
+                else profile_bin=6;
+            end else profile_bin=7;
+        end else profile_bin=2;
+        profile_bins[profile_bin]++;
+        if(dut.bus.disk.pending)begin
+            profile_disk++;
+            if(dut.cpu.wait_op)profile_disk_wait++;
+        end
+        if(dut.bus.disk.spi_busy)profile_spi++;
+        if(dut.bus.dma_request)profile_dma++;
+        if(dut.cpu.step && !dut.cpu.waiting)profile_upc[dut.cpu.upc]++;
+    end
     task check(input bit ok,input string why);
         begin if(!ok)$fatal(1,"phase %0d: %s",phase,why);checks++;end
     endtask
@@ -49,8 +83,20 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
         integer oldprompt;
         begin
             oldprompt=prompts;segment="";
-            for(integer i=0;i<command.len();i++)send_byte(command[i]);send_byte(13);
+            for(integer i=0;i<command.len();i++)send_byte(command[i]);
+            for(integer i=0;i<8;i++)profile_bins[i]=0;
+            profile_total=0;profile_disk=0;profile_disk_wait=0;profile_spi=0;profile_dma=0;
+            profile_active=profile_enabled && phase>=2 && phase<10;
+            send_byte(13);
             wait(prompts>oldprompt);wait(serial_chars==bus_chars);repeat(1000)@(negedge clk);
+            profile_active=0;
+            if(profile_enabled && phase>=2 && phase<10)begin
+                check(profile_total==profile_bins[0]+profile_bins[1]+profile_bins[2]+profile_bins[3]+profile_bins[4]+profile_bins[5]+profile_bins[6]+profile_bins[7],"profile clock partition");
+                $display("BSD_PROFILE {\"command\":\"%s\",\"cycles\":%0d,\"wait\":%0d,\"prepare\":%0d,\"execute\":%0d,\"mmu\":%0d,\"ram\":%0d,\"iop\":%0d,\"other_bus\":%0d,\"handshake\":%0d,\"disk_work\":%0d,\"disk_wait\":%0d,\"spi\":%0d,\"dma\":%0d}",
+                    command,profile_total,profile_bins[0],profile_bins[1],profile_bins[2],profile_bins[3],
+                    profile_bins[4],profile_bins[5],profile_bins[6],profile_bins[7],
+                    profile_disk,profile_disk_wait,profile_spi,profile_dma);
+            end
         end
     endtask
     task settled_prompt;
@@ -156,6 +202,7 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
         // Allow two real seconds for its HZ-based delay on the 50 Hz board.
         segment="";repeat(2*CLOCK_HZ)@(negedge clk);phase=12;send_byte("r");send_byte("o");send_byte("o");send_byte("t");send_byte(13);phase=13;
         await_text("# ");contains("Welcome to the 2.9BSD");
+        if(profile_enabled)begin phase=20;shell("stty nl0 cr0");end
         phase=2;shell("ls /usr");contains("bin");contains("lib");
         phase=3;shell("cat /etc/fstab");contains("/dev/rl1:swap");contains("/dev/xp0h:/usr");
         phase=4;shell("echo SERV-RL-WRITE > /tmp/serv-test");
@@ -163,6 +210,8 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
         phase=5;shell("echo SERV-RP-WRITE > /usr/tmp/serv-test");
         shell("cat /usr/tmp/serv-test");contains("SERV-RP-WRITE");
         shell("rm /tmp/serv-test /usr/tmp/serv-test");shell("sync");
+        if(profile_enabled)for(integer i=0;i<3072;i++)
+            if(profile_upc[i])$display("BSD_UPC %03x %0d",i,profile_upc[i]);
         check(mmu_fetches>1000 && dma_words>1000 && concurrent_fetches>100,"BSD MMU and autonomous IO");
         $display("PASS MMU BSD: %0d checks, %0d clocks, %0d DMA words, %0d mapped fetches",checks,clocks,dma_words,mmu_fetches);$finish;
     end

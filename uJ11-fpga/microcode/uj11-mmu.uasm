@@ -69,8 +69,7 @@ UNSUPPORTED:
 .org $1dd
 REGISTER_SOURCE_EA:
     CALL, target=DESTINATION_EA, prefetch=0
-    alu PASSA, a=RS, b=T0, dst=RF
-    RETURN, prefetch=0
+    alu PASSA, a=RS, b=T0, dst=RF, seq=RETURN
 
 .org $118
 MOV_EA:
@@ -100,8 +99,8 @@ SOURCE_TABLE:
     READ, a=R7, stream=1, target=SOURCE_7_INC, prefetch=0
 .org $220
 SOURCE_DESTINATION:
-    CALL, target=DESTINATION_EA, prefetch=0
-    RETURN, prefetch=0
+    ; Tail dispatch: DESTINATION returns directly to the two-operand caller.
+    OR_MD, target=DESTINATION_TABLE, prefetch=0
 .org $224
 SOURCE_2:
     READ, a=RS, byte=IR, stream=1, target=SOURCE_2_INC, fault_inc=1, prefetch=0
@@ -154,7 +153,7 @@ DESTINATION_EA:
 .org $288
 DESTINATION_TABLE:
     RETURN ; source ready, destination is register: safe lookahead window
-    alu PASSA, a=RD, b=T1, dst=RF, seq=PAGE, next=DESTINATION_1_CONT
+    alu PASSA, a=RD, b=T1, dst=RF, seq=RETURN
     alu PASSA, a=RD, b=T1, dst=RF, seq=PAGE, next=DESTINATION_2_CONT
     READ, a=RD, stream=1, target=DESTINATION_3_INC, fault_inc=1, prefetch=0
     alu SUB, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1, seq=PAGE, next=DESTINATION_4_CONT
@@ -170,8 +169,7 @@ DESTINATION_1_CONT:
 DESTINATION_2:
     alu PASSA, a=RD, b=T1, dst=RF
 DESTINATION_2_CONT:
-    alu ADD, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1
-    RETURN, prefetch=0
+    alu ADD, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1, seq=RETURN
 .org $2a8
 DESTINATION_3:
     READ, a=RD, stream=1, target=DESTINATION_3_INC, fault_inc=1, prefetch=0
@@ -182,8 +180,7 @@ DESTINATION_3_INC:
 DESTINATION_4:
     alu SUB, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1
 DESTINATION_4_CONT:
-    alu PASSA, a=RD, b=T1, dst=RF
-    RETURN, prefetch=0
+    alu PASSA, a=RD, b=T1, dst=RF, seq=RETURN
 .org $2b4
 DESTINATION_5:
     alu SUB, a=RD, b=RD, pair=AD, d=TWO, dst=RF, delta=1
@@ -194,8 +191,7 @@ DESTINATION_6:
     READ, a=R7, stream=1, target=DESTINATION_6_INC, prefetch=0
 DESTINATION_6_INC:
     alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
-    alu ADD, a=RD, b=T1, pair=AD, d=MDR, dst=RF
-    RETURN, prefetch=0
+    alu ADD, a=RD, b=T1, pair=AD, d=MDR, dst=RF, seq=RETURN
 .org $2c0
 DESTINATION_7:
     READ, a=R7, stream=1, target=DESTINATION_7_INC, prefetch=0
@@ -205,8 +201,7 @@ DESTINATION_7_INC:
     READ, a=T1, target=DESTINATION_FROM_MDR, prefetch=0
 .org $2c8
 DESTINATION_FROM_MDR:
-    alu PASSA, b=T1, pair=DA, d=MDR, dst=RF
-    RETURN, prefetch=0
+    alu PASSA, b=T1, pair=DA, d=MDR, dst=RF, seq=RETURN
 
 .org $300
 MOV_DESTINATION:
@@ -680,8 +675,7 @@ SWAB_COMMON:
     alu PASSA, a=T2, b=T2, dst=RFQ_L
     alu PASSA, a=T2, b=T2, dst=RFQ_L
     alu PASSA, a=T2, b=T2, dst=RFQ_L
-    alu OR, a=T2, b=T2, pair=AQ, dst=RF
-    RETURN, prefetch=0
+    alu OR, a=T2, b=T2, pair=AQ, dst=RF, seq=RETURN
 
 
 ; First software-trap gate: one kernel register set, T=0. No IRQ or mode exchange.

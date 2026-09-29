@@ -19,6 +19,18 @@ MAKE_ENV={k:v for k,v in os.environ.items() if k not in
           ('MAKEFLAGS','MFLAGS','MAKEOVERRIDES','MAKELEVEL','CPU','BOARD','FPP','IOP','UJ11_MMU_IOP','UJ11_MMU_CLOCK_MHZ','UJ11_MMU_PIPELINE','MMU_CLOCK_MHZ','OUT')}
 
 class Profiles(unittest.TestCase):
+    def test_alu_return_encoding_and_abort_repair(self):
+        image,_,_,_=assemble('alu ADD, a=R0, b=R1, pair=AD, d=IMM, imm=0xabcd, dst=RF, flags=NZVC, seq=RETURN')
+        self.assertEqual(image[0]>>38&1,1)
+        self.assertEqual(image[0]>>35&1,0)
+        self.assertEqual(image[0]>>8&3,0)
+        self.assertEqual((image[0]&255)|((image[0]>>45&255)<<8),0xabcd)
+        self.assertEqual(image[0]>>13&3,2)
+        for text in ('alu PASSA, seq=RETURN, next=0',
+                     'alu PASSA, seq=RETURN, trace=RETURN',
+                     'READ, a=R0, fault_inc=1\nalu ADD, a=R0, b=R0, pair=AD, d=STEP, dst=RF, seq=RETURN'):
+            with self.subTest(text=text), self.assertRaises(AssemblyError):assemble(text)
+
     def test_clock_selects_pipeline_and_rejects_invalid_combinations(self):
         with patch.dict(os.environ,{},clear=True):
             self.assertEqual(clock_mhz(),24)

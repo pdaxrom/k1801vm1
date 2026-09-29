@@ -320,18 +320,23 @@ module uj11_mmu_cpu #(
         ({1'b0,read_a[0],byte_instruction} & {3{command==8}}) |
         ({2'b0,~(a[2] & a[1])} & {3{command==9}});
     reg [11:0] links[0:3];reg [2:0] link_sp;
+    // Bit 38 is an ALU extension; control memory words use it for space.
+    // Share the existing return stack mux with a final ALU operation.
+    wire micro_return=control ? command==3 : uword[38];
+    wire [11:0] return_target=link_sp!=0 ? links[(link_sp-1'b1)&3] : 12'h7ff;
     reg [11:0] next;
     always @* begin
         next={target[11:3],target[2:0] | dispatch_bits};
         if(control)case(command)
             1:if(!condition)next=upc+1'b1;
             2,4:next=dispatch;
-            3:next=link_sp!=0 ? links[(link_sp-1'b1)&3] : 12'h7ff;
+            3:next=return_target;
             10:if(link_sp==4)next=12'h7ff;
             13:next=upc;
             14:next=debug_pending || trace_pending || yellow_ready || irq_pending ? boundary_target : upc;
             default:begin end
         endcase
+        else if(micro_return)next=return_target;
         else case(uword[9:8])
             0:next=upc+1'b1;
             1:next={upc[11:8],uword[7:0]};
@@ -416,7 +421,7 @@ module uj11_mmu_cpu #(
                 // An immediately accepted IRQ must still load its vector PSW.
                 if(trap_op)begin link_sp<=0;trap_frame<=1;trap_loading<=1;saved_psw<=psw;explicit_psw<=0;end
                 if(control && command==10 && link_sp<4)begin links[link_sp[1:0]]<=upc+1'b1;link_sp<=link_sp+1'b1;end
-                if(control && command==3 && link_sp!=0)link_sp<=link_sp-1'b1;
+                if(micro_return && link_sp!=0)link_sp<=link_sp-1'b1;
                 if(control && command==0 && uword[2:1]!=0)begin
                     console_active<=uword[2:1]==1;
                     if(uword[2:1]==1)begin red_active<=0;stack_active<=0;yellow_pending<=0;end

@@ -62,6 +62,6 @@ if __name__ == '__main__':
     p.add_argument('--clock-mhz', type=int, choices=(24, 50), default=50)
     p.add_argument('--microcode-source', type=Path, help='optional baseline microcode for the same guest fixtures')
     p.add_argument('--combined-abort', action='store_true',
-                   help='reproduce the known C-core/RTL difference for simultaneous MMU abort causes (fails)')
+                   help='check simultaneous length and nonresident MMU abort causes')
     a = p.parse_args()
     run(a.out.resolve(), a.clock_mhz, a.microcode_source.resolve() if a.microcode_source else None, a.combined_abort)

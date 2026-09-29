@@ -927,10 +927,10 @@ static INLINE void raw_store_word_phys(regs *r, dword pa, word value)
 }
 
 enum {
-    MMU_FAULT_NONE = 0,
-    MMU_FAULT_NONRES = 1,
-    MMU_FAULT_LENGTH = 2,
-    MMU_FAULT_PROTECT = 3,
+	MMU_FAULT_NONE = 0,
+	MMU_FAULT_NONRES = 1,
+	MMU_FAULT_LENGTH = 2,
+	MMU_FAULT_PROTECT = 4,
 };
 
 /* MMR/SSR and PAR/PDR map (octal) */
@@ -1007,6 +1007,8 @@ static INLINE dword mmu_phys_finalize(dword pa, word ssr3);
 static INLINE int mmu_acf_read_ok(word pdr);
 static INLINE int mmu_acf_write_ok(word pdr);
 static INLINE int mmu_acf_write_is_protect(word pdr);
+
+
 #endif
 static INLINE int mmu_decode_parpdr(word addr, int *mode, int *space,
                                     int *is_par, int *seg)
@@ -1418,16 +1420,9 @@ static INLINE void mmu_note_internal_reg_write(regs *r, word va,
 
 static INLINE word mmu_fault_to_ssr0_bits(int fault)
 {
-    switch (fault) {
-    case MMU_FAULT_NONRES:
-        return MMU_SSR0_NONRES;
-    case MMU_FAULT_LENGTH:
-        return MMU_SSR0_LENGTH;
-    case MMU_FAULT_PROTECT:
-        return MMU_SSR0_PROTECT;
-    default:
-        return 0;
-    }
+	return (word)(((fault & MMU_FAULT_NONRES) ? MMU_SSR0_NONRES : 0) |
+	              ((fault & MMU_FAULT_LENGTH) ? MMU_SSR0_LENGTH : 0) |
+	              ((fault & MMU_FAULT_PROTECT) ? MMU_SSR0_PROTECT : 0));
 }
 
 static INLINE dword mmu_phys_finalize(dword pa, word ssr3)
@@ -1462,6 +1457,27 @@ static INLINE int mmu_acf_write_is_protect(word pdr)
     int acf = pdr & 06;
     return (acf == 02);
 }
+
+/* A single J11 access can set both the length and access abort bits. */
+static INLINE int mmu_access_fault(word pdr, int block, int is_write)
+{
+	int ed = (pdr >> 3) & 01;
+	int len = (pdr >> 8) & 0177;
+	int fault = MMU_FAULT_NONE;
+
+	if ((!ed && block > len) || (ed && block < len)) {
+		fault |= MMU_FAULT_LENGTH;
+	}
+	if (is_write) {
+		if (!mmu_acf_write_ok(pdr)) {
+			fault |= mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT : MMU_FAULT_NONRES;
+		}
+	} else if (!mmu_acf_read_ok(pdr)) {
+		fault |= MMU_FAULT_NONRES;
+	}
+	return fault;
+}
+
 #endif
 
 #if !defined(ENABLE_MMU) || !(ENABLE_MMU)
@@ -1534,122 +1550,105 @@ static INLINE int translate_va_ex(regs *r, word va, int is_write, int is_ifetch,
                                   int *fault_code_out, int *mode_out,
                                   int *space_out, int *seg_out)
 {
-    if (pa_out) {
-        *pa_out = va;
-    }
-    if (fault_code_out) {
-        *fault_code_out = MMU_FAULT_NONE;
-    }
-    if (mode_out) {
-        *mode_out = 0;
-    }
-    if (space_out) {
-        *space_out = 0;
-    }
-    if (seg_out) {
-        *seg_out = (va >> 13) & 07;
-    }
+	if (pa_out) {
+		*pa_out = va;
+	}
+	if (fault_code_out) {
+		*fault_code_out = MMU_FAULT_NONE;
+	}
+	if (mode_out) {
+		*mode_out = 0;
+	}
+	if (space_out) {
+		*space_out = 0;
+	}
+	if (seg_out) {
+		*seg_out = (va >> 13) & 07;
+	}
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-    if (r->model != DCJ11) {
-        return 0;
-    }
+	if (r->model != DCJ11) {
+		return 0;
+	}
 
-    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
-        if (pa_out) {
-            *pa_out = (dword)(va & 0177777);
-        }
-        return 0;
-    }
+	if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+		if (pa_out) {
+			*pa_out = (dword)(va & 0177777);
+		}
+		return 0;
+	}
 
-    {
-        int mode = force_kernel_d ? 0 : mmu_mode_from_psw(r->psw);
-        int space = force_kernel_d
-                    ? (mmu_split_enabled(r, 0) ? 1 : 0)
-                    : (is_ifetch ? 0 : (mmu_split_enabled(r, mode) ? 1 : 0));
-        int seg = (va >> 13) & 07;
-        int block = (va >> 6) & 0177;
-        word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
-        word par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
-        int ed = (pdr >> 3) & 01;
-        int len = (pdr >> 8) & 0177;
+	{
+		int mode = force_kernel_d ? 0 : mmu_mode_from_psw(r->psw);
+		int space = force_kernel_d
+		            ? (mmu_split_enabled(r, 0) ? 1 : 0)
+		            : (is_ifetch ? 0 : (mmu_split_enabled(r, mode) ? 1 : 0));
+		int seg = (va >> 13) & 07;
+		int block = (va >> 6) & 0177;
+		word pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
+		word par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
+		int fault;
 
-        if (mode_out) {
-            *mode_out = mode;
-        }
-        if (space_out) {
-            *space_out = space;
-        }
-        if (seg_out) {
-            *seg_out = seg;
-        }
+		if (mode_out) {
+			*mode_out = mode;
+		}
+		if (space_out) {
+			*space_out = space;
+		}
+		if (seg_out) {
+			*seg_out = seg;
+		}
 
-        if (mode == 2) {
-            /*
-             * J-11 PSW current mode 2 is illegal for MMU translation paths.
-             * Model this as an immediate non-resident abort rather than
-             * normalizing to kernel mode.
-             */
-            if (is_write) {
-                mmu_note_write_pdrw(r, mode, space, seg);
-            }
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_NONRES;
-            }
-            return -1;
-        }
+		if (mode == 2) {
+			/*
+			 * J-11 PSW current mode 2 is illegal for MMU translation paths.
+			 * Model this as an immediate non-resident abort rather than
+			 * normalizing to kernel mode.
+			 */
+			if (is_write) {
+				mmu_note_write_pdrw(r, mode, space, seg);
+			}
+			if (fault_code_out) {
+				*fault_code_out = MMU_FAULT_NONRES;
+			}
+			return -1;
+		}
 
-        if ((!ed && block > len) || (ed && block < len)) {
-            if (is_write) {
-                mmu_note_write_pdrw(r, mode, space, seg);
-            }
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_LENGTH;
-            }
-            return -1;
-        }
+		fault = mmu_access_fault(pdr, block, is_write);
+		if (fault != MMU_FAULT_NONE) {
+			if (is_write) {
+				mmu_note_write_pdrw(r, mode, space, seg);
+			}
+			if (fault_code_out) {
+				*fault_code_out = fault;
+			}
+			return -1;
+		}
 
-        if (is_write) {
-            if (!mmu_acf_write_ok(pdr)) {
-                mmu_note_write_pdrw(r, mode, space, seg);
-                if (fault_code_out) {
-                    *fault_code_out =
-                        mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
-                        : MMU_FAULT_NONRES;
-                }
-                return -1;
-            }
-        } else if (!mmu_acf_read_ok(pdr)) {
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_NONRES;
-            }
-            return -1;
-        }
+		if (is_write) {
+			/* Write implies access; keep PDR<A/W> status bits updated. */
+			r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
+		} else {
+			r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
+		}
 
-        if (is_write) {
-            /* Write implies access; keep PDR<A/W> status bits updated. */
-            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-        } else {
-            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-        }
-
-        if (pa_out) {
-            dword pa_block = (dword)((par + block) & MMU_PAR_J_MASK);
-            *pa_out = mmu_phys_finalize((pa_block << 6) | (va & 077), r->mmu_ssr3);
-        }
-    }
+		if (pa_out) {
+			dword pa_block = (dword)((par + block) & MMU_PAR_J_MASK);
+			*pa_out = mmu_phys_finalize((pa_block << 6) | (va & 077), r->mmu_ssr3);
+		}
+	}
 #else
-    (void)r;
-    (void)is_write;
-    (void)is_ifetch;
-    (void)force_kernel_d;
-    (void)fault_code_out;
-    (void)mode_out;
-    (void)space_out;
-    (void)seg_out;
+	(void)r;
+	(void)is_write;
+	(void)is_ifetch;
+	(void)force_kernel_d;
+	(void)fault_code_out;
+	(void)mode_out;
+	(void)space_out;
+	(void)seg_out;
 #endif
 
-    return 0;
+	return 0;
 }
 
 /*
@@ -1665,109 +1664,90 @@ static INLINE int translate_va(regs *r, word va, int is_write, int is_ifetch,
 }
 
 static INLINE int translate_va_mode_space(regs *r, word va, int is_write,
-        int mode_in, int space_in,
-        dword *pa_out, int *fault_code_out,
-        int *space_out, int *seg_out)
+                int mode_in, int space_in,
+                dword *pa_out, int *fault_code_out,
+                int *space_out, int *seg_out)
 {
-    if (pa_out) {
-        *pa_out = va;
-    }
-    if (fault_code_out) {
-        *fault_code_out = MMU_FAULT_NONE;
-    }
-    if (space_out) {
-        *space_out = space_in ? 1 : 0;
-    }
-    if (seg_out) {
-        *seg_out = (va >> 13) & 07;
-    }
+	if (pa_out) {
+		*pa_out = va;
+	}
+	if (fault_code_out) {
+		*fault_code_out = MMU_FAULT_NONE;
+	}
+	if (space_out) {
+		*space_out = space_in ? 1 : 0;
+	}
+	if (seg_out) {
+		*seg_out = (va >> 13) & 07;
+	}
 
 #if defined(ENABLE_MMU) && (ENABLE_MMU)
-    if (r->model != DCJ11) {
-        return 0;
-    }
+	if (r->model != DCJ11) {
+		return 0;
+	}
 
-    if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
-        if (pa_out) {
-            *pa_out = (dword)(va & 0177777);
-        }
-        return 0;
-    }
+	if ((r->mmu_ssr0 & MMU_SSR0_ENABLE) == 0) {
+		if (pa_out) {
+			*pa_out = (dword)(va & 0177777);
+		}
+		return 0;
+	}
 
-    {
-        int mode = psw_mode_normalize(mode_in);
-        int space = space_in ? 1 : 0;
-        int seg = (va >> 13) & 07;
-        int block = (va >> 6) & 0177;
-        word pdr;
-        word par;
-        int ed;
-        int len;
+	{
+		int mode = psw_mode_normalize(mode_in);
+		int space = space_in ? 1 : 0;
+		int seg = (va >> 13) & 07;
+		int block = (va >> 6) & 0177;
+		word pdr;
+		word par;
+		int fault;
 
-        if (space && !mmu_split_enabled(r, mode)) {
-            space = 0;
-        }
-        if (space_out) {
-            *space_out = space;
-        }
-        if (seg_out) {
-            *seg_out = seg;
-        }
+		if (space && !mmu_split_enabled(r, mode)) {
+			space = 0;
+		}
+		if (space_out) {
+			*space_out = space;
+		}
+		if (seg_out) {
+			*seg_out = seg;
+		}
 
-        pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
-        par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
-        ed = (pdr >> 3) & 01;
-        len = (pdr >> 8) & 0177;
+		pdr = (word)(r->mmu_pdr[mode][space][seg] & MMU_PDR_J_MASK);
+		par = (word)(r->mmu_par[mode][space][seg] & MMU_PAR_J_MASK);
 
-        if ((!ed && block > len) || (ed && block < len)) {
-            if (is_write) {
-                mmu_note_write_pdrw(r, mode, space, seg);
-            }
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_LENGTH;
-            }
-            return -1;
-        }
+		fault = mmu_access_fault(pdr, block, is_write);
+		if (fault != MMU_FAULT_NONE) {
+			if (is_write) {
+				mmu_note_write_pdrw(r, mode, space, seg);
+			}
+			if (fault_code_out) {
+				*fault_code_out = fault;
+			}
+			return -1;
+		}
 
-        if (is_write) {
-            if (!mmu_acf_write_ok(pdr)) {
-                mmu_note_write_pdrw(r, mode, space, seg);
-                if (fault_code_out) {
-                    *fault_code_out =
-                        mmu_acf_write_is_protect(pdr) ? MMU_FAULT_PROTECT
-                        : MMU_FAULT_NONRES;
-                }
-                return -1;
-            }
-        } else if (!mmu_acf_read_ok(pdr)) {
-            if (fault_code_out) {
-                *fault_code_out = MMU_FAULT_NONRES;
-            }
-            return -1;
-        }
+		if (is_write) {
+			r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
+		} else {
+			r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
+		}
 
-        if (is_write) {
-            r->mmu_pdr[mode][space][seg] |= (MMU_PDR_A | MMU_PDR_W);
-        } else {
-            r->mmu_pdr[mode][space][seg] |= MMU_PDR_A;
-        }
-
-        if (pa_out) {
-            dword pa_block = (dword)((par + block) & MMU_PAR_J_MASK);
-            *pa_out = mmu_phys_finalize((pa_block << 6) | (va & 077), r->mmu_ssr3);
-        }
-    }
+		if (pa_out) {
+			dword pa_block = (dword)((par + block) & MMU_PAR_J_MASK);
+			*pa_out = mmu_phys_finalize((pa_block << 6) | (va & 077), r->mmu_ssr3);
+		}
+	}
 #else
-    (void)r;
-    (void)is_write;
-    (void)mode_in;
-    (void)space_in;
-    (void)fault_code_out;
-    (void)space_out;
-    (void)seg_out;
+	(void)r;
+	(void)is_write;
+	(void)mode_in;
+	(void)space_in;
+	(void)fault_code_out;
+	(void)space_out;
+	(void)seg_out;
 #endif
 
-    return 0;
+	return 0;
 }
 
 static INLINE void mmu_record_fault(regs *r, word va, word pc, int fault,
