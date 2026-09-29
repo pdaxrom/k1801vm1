@@ -4,6 +4,7 @@
 typedef uint32_t u32;
 #define MMIO(a) (*(volatile u32 *)(a))
 #define BUS_STATUS MMIO(0x40000000u)
+#define BUS_MAP_ENABLED 0x10000u
 #define BUS_REQUEST MMIO(0x40000004u)
 #define BUS_RESPONSE MMIO(0x40000008u)
 #define BUS_IRQ MMIO(0x4000000cu)
@@ -26,6 +27,12 @@ struct controller {
 extern struct controller *current;
 extern uint16_t *regs,boot_status;
 extern unsigned service_bank;
+extern u32 dma_mode;
+union unibus_map {
+	u32 base[32];
+	uint16_t word[64];
+};
+extern union unibus_map ubmap;
 #define R(n) regs[n]
 void poll_io(void);
 int active(void);

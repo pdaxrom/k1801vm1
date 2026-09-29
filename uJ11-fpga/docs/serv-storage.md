@@ -26,9 +26,9 @@ holds the transaction until firmware replies with a word or NXM. Register files,
 READY/GO, byte-write merging, per-drive state, command generations, initialization
 and interrupt selection are C code/data; adding a controller does not require a
 new RTL register bank. Firmware also answers absent-device probes and implements
-177504/177506 boot metadata, CCR and MEMERR.
+177504/177506 boot metadata, CCR, MEMERR, board identification and UNIBUS map registers.
 
-Existing physical UART, KW11 clock, HG pins, boot SPI and UNIBUS DMA translation
+Existing physical UART, KW11 clock, HG pins and boot SPI
 retain their hardware interfaces. Main RAM, the CPU MMU and processor registers
 remain on their existing CPU paths. The shared sector engine still moves bulk
 SPI/SRAM data; SERV interprets disk commands and MSCP packets.
@@ -42,8 +42,13 @@ CRC validation can hold a probe longer than normal register accesses.
 SD transport, RH/RL/XP commands and scheduling; `rk05.c` and `mscp.c` provide the
 other command implementations, with declarations in `storage.h`. The initial
 label buffer is reused for controller state and MSCP packet scratch after the
-label is decoded. The linker reserves a 768-byte stack; stack usage is reported
-by GCC, and its call paths must be checked when extending the firmware.
+label is decoded. The linker reserves a 640-byte stack; stack usage is reported
+by GCC, and its call paths must be checked when extending the firmware. The
+current controller integration tests observe at most 352 bytes, including bus
+service during DMA. The RTL guard checks every SERV data/stack write against
+the ELF bounds. Storage startup initializes `gp` without relaxation; subsequent
+global-data and constant-table references may use linker GP relaxation. Legacy
+firmware retains its original flags and startup.
 
 ## Implemented and reserved
 
@@ -68,11 +73,36 @@ This is the RM05/RH70-style direct DMA path; it bypasses UNIBUS mapping.
 
 In the storage profile, **170200..170376** exposes the 32 UNIBUS map registers.
 MMR3 bit 5 enables translation for RK11, RL11 and RH11 DMA; page 31 maps to the I/O
-page. The mapper uses one EBR, and DMA to anything outside installed SRAM
+page. The 128-byte table and address translation live in SERV RAM; the former
+hardware map EBR and per-word translation logic are removed. SERV splits DMA
+bursts at 8 KiB UNIBUS page boundaries, translates each fragment, and submits
+physical addresses to the shared sector engine. Inhibited addresses stay fixed;
+compare mismatches survive subsequent fragments, and only the final LOAD
+fragment may zero-pad its sector. DMA to the I/O page or outside installed SRAM
 returns NXM without accessing aliased RAM. With mapping disabled, the existing
 RK07 18-bit wrap and RL/RP direct DMA paths remain available. The CCR at 177746
 retains software writes; 177744 reports no memory parity error (no cache/parity
 hardware is fitted). These addresses let the 2.9BSD loader take its 11/70 path.
+
+The storage profile reports **MAINT 177750 = 001045** (KDJ11-B, UNIBUS,
+ROM boot, BPOK, no FP accelerator) and **HIT/MISS 177752 = 000010**. These
+are the 11/84 identification values used by the local `pdp1184` reference and
+[SIMH's J11 register implementation](https://github.com/simh/simh/blob/master/PDP11/pdp11_cpumod.c).
+They describe the bus presented to the OS; they do not enable FPP in the CPU.
+The legacy MMU profile retains its previous MAINT value.
+
+This corrects the stock RT-11 RKX handler's Q-bus restriction: the previous
+11/73A identity made RKX reject transfers above 64 KiB before issuing any RK
+controller command. With the UNIBUS identity it uses 18-bit DMA and the map.
+`RKX.SYS`, monitor binaries and compiler binaries remain unchanged. SD compiler
+preparation modifies only the three startup command files to assign RK1/2/3
+to BAS/PAS/FOR and preserves DM1 as VOL.
+
+The [7AE8 release record](../releases/hc7000-serv-unibus/README.md) includes
+source-matched integration tests and the 50 MHz synthesis: 3979 LUT4 and
+25 EBR, saving 406 LUT4 and one EBR relative to 9DF6. Its compiler test
+boots the remapped media, runs Pascal XM directly from RK2, and compiles,
+links and executes programs with the stock drivers and FPP disabled.
 
 RK11/RK05 is at **177400**, vector **220**, with eight units. It implements
 read/write/write-check/read-check, seek, recalibrate and software write lock,
@@ -249,7 +279,7 @@ SERV uses one shared MMIO mailbox at hexadecimal **40000000**:
 
 | Offset | Direction | Meaning |
 | --- | --- | --- |
-| 00 | read | Request pending (bit 0), bus reset (1), IRQ acknowledgement (2), SD ownership (3), acknowledged vector divided by four (14..8) |
+| 00 | read | Request pending (bit 0), bus reset (1), IRQ acknowledgement (2), SD ownership (3), acknowledged vector divided by four (14..8), live MMR3 UNIBUS-map enable (16) |
 | 00 | write | Clear consumed reset/IRQ acknowledgement flags (bits 1/2) |
 | 04 | read | Address (12..0), write (13), byte lanes (15..14), data (31..16) |
 | 08 | write | Response data (15..0) and NXM (16); completes this CPU cycle once |

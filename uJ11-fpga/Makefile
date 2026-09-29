@@ -261,8 +261,6 @@ test-storage-controllers:
 	$(PYTHON) tools/test_mmu_board.py --name tb_storage_bus --image build/test-storage-rl-xp/controllers.img --out build/test-storage-bus
 	$(IVERILOG) -g2012 -s tb_iop_bus -o build/test-storage-bus/iop-bus tests/mmu/tb_iop_bus.v boards/hc7000/mmu/uj11_mmu_iop_bus.v
 	$(VVP) build/test-storage-bus/iop-bus
-	$(IVERILOG) -g2012 -s tb_ubmap -o build/test-storage-bus/ubmap tests/mmu/tb_ubmap.v boards/hc7000/mmu/uj11_mmu_ubmap.v rtl/mmu/uj11_mmu_apr_ram.v
-	$(VVP) build/test-storage-bus/ubmap
 
 .PHONY: test-mmu-fpp
 test-mmu-fpp:

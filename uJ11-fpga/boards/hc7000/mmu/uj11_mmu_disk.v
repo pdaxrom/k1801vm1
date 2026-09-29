@@ -3,7 +3,7 @@
 module uj11_mmu_disk #(
     parameter integer CLOCK_HZ=24000000, SD_SLOW_DIV=60, SD_FAST_DIV=2
 )(
-    input wire clk,reset,bus_reset,
+    input wire clk,reset,bus_reset,dma_map_enabled,
     input wire rk_request,rk_write,
     input wire [3:0] rk_address,
     input wire [1:0] rk_lanes,
@@ -104,6 +104,7 @@ module uj11_mmu_disk #(
         .iop_write(data_accept && csr_selected && de && ds[0] && !storage_enabled),
         .iop_address(da[6:2]),.iop_data(dw),.iop_rdata(csr_data),.iop_valid(),.enabled());
     uj11_mmu_iop_bus bridge(.clk(clk),.reset(reset),.bus_reset(bus_reset),.enabled(storage_enabled),
+        .dma_map_enabled(dma_map_enabled),
         .request(io_request),.write(rk_write),.address(io_address),.lanes(rk_lanes),.wdata(rk_wdata),
         .rdata(io_rdata),.ready(io_ready),.error(io_error),.irq(io_irq),.vector(io_vector),.irq_ack(io_irq_ack),
         .owner(owner),.want_sd(want_sd),.dma_unibus(software_unibus),.abort_dma(abort_dma),.working(working),

@@ -1,5 +1,6 @@
 `timescale 1ns/1ps
 module tb_iop_bus;
+    reg dma_map_enabled=0;
     reg clk=0,reset=1,bus_reset=0,enabled=1,request=0,write=0,irq_ack=0,iop_write=0;
     always #5 clk=~clk;
     reg [12:0] address=0;reg [1:0] lanes=3;reg [15:0] wdata=0;
@@ -21,7 +22,7 @@ module tb_iop_bus;
         get(0,9);get(1,{16'hab00,2'b10,1'b1,13'o17401});
         repeat(20)@(negedge clk);check(!ready,"CPU waits for SERV");
         put(2,16'h1234);check(ready && !error && rdata==16'h1234,"firmware response");
-        get(0,8);put(2,17'h1ffff);check(rdata==16'h1234 && !error,"no second response for held request");
+        get(0,8);dma_map_enabled=1;get(0,32'h10008);dma_map_enabled=0;put(2,17'h1ffff);check(rdata==16'h1234 && !error,"no second response for held request");
         request=0;@(negedge clk);request=1;put(2,17'h10000);check(ready && error,"firmware NXM");
         request=0;@(negedge clk);request=1;bus_reset=1;@(negedge clk);bus_reset=0;
         put(2,16'habcd);check(!ready && abort_dma,"reset rejects stale response and aborts DMA");

@@ -4,6 +4,7 @@
 struct controller *current;
 uint16_t *regs,boot_status;
 unsigned service_bank;
+union unibus_map ubmap;
 static uint16_t generation,cache_control;
 #define xp_drive scratch.live.xp
 static const uint8_t xp_reg[]= {3,14,15,13,6,5};
@@ -359,6 +360,9 @@ void poll_io(void)
 				controller_reset(b);
 			}
 		cache_control=0;
+		for(unsigned i=0; i<32; i++) {
+			ubmap.base[i]=0;
+		}
 		BUS_STATUS=6;
 		BUS_CONTROL=card_control|4;
 		return;
@@ -379,7 +383,20 @@ void poll_io(void)
 	}
 	u32 request=BUS_REQUEST,address=request&8191,writing=(request>>13)&1,lanes=(request>>14)&3,data=request>>16;
 	u32 result=0x10000;
-	if(address==017504) {
+	if((address&~0177u)==010200) {
+		unsigned i=(address>>1)&63;
+		result=ubmap.word[i];
+		if(writing) {
+			u32 mask=(lanes&1?255u:0)|(lanes&2?65280u:0);
+			ubmap.word[i]=((result&~mask)|(data&mask)) & (i&1?077:0177776);
+		}
+	} else if(address==017750) {
+		/* KDJ11-B, UNIBUS, boot ROM, BPOK; no FP accelerator. */
+		result=01045;
+	} else if(address==017752) {
+		/* Nonzero hit/miss distinguishes 11/8x from 11/73B. */
+		result=010;
+	} else if(address==017504) {
 		result=boot_status;
 	} else if(address==017506) {
 		result=!devices_ready?0:((u32)controllers[RK_BANK].present<<8)|controllers[RQ_BANK].present;

@@ -37,7 +37,7 @@ u32 rk05_command(struct sd_partition *p)
 	}
 	u32 wc=R(3),left=(-wc)&65535,ba=R(4)|((cs&060)<<12);
 	u32 lba=(cyl*2+head)*12+sec,errors=0;
-	DMA_MODE=(cs&0004000)?2:0;
+	dma_mode=(cs&0004000)?2:0;
 	while(left && active()) {
 		u32 count=left>256?256:left,error;
 		if(lba>=p->blocks) {

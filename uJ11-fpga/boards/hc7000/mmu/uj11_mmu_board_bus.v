@@ -39,35 +39,30 @@ module uj11_mmu_board_bus #(
     wire uart_selected=io_page && offset[12:3]==(13'o17560>>3);
     wire timer_selected=io_page && offset==13'o17546;
     wire panel_selected=io_page && offset==13'o06000;
-    wire maint_selected=io_page && offset==13'o17750;
+    wire maint_selected=!storage_enabled && io_page && offset==13'o17750;
     wire storage_enabled;
     wire sd_selected=io_page && offset[12:2]==(13'o17500>>2);
     wire rk_selected=!storage_enabled && io_page && offset[12:5]==(13'o17440>>5);
-    wire map_selected=storage_enabled && io_page && offset[12:7]==(13'o10200>>7);
     // All other peripheral addresses, including absent-device probes, go to
     // SERV. Controller identity, register semantics and NXM are firmware policy.
     wire iop_selected=storage_enabled && io_page && !(uart_selected || timer_selected ||
-        panel_selected || maint_selected || sd_selected || map_selected);
+        panel_selected || maint_selected || sd_selected);
     wire selected=ram_selected || rom_selected || uart_selected || timer_selected ||
-        panel_selected || maint_selected || sd_selected || rk_selected || iop_selected || map_selected;
-    wire dma_request,dma_write,dma_ready,dma_error,dma_unibus,ram_ready;
-    wire mapped_request,mapped_ready,map_ready;wire [21:0] mapped_address;wire [15:0] map_data;
+        panel_selected || maint_selected || sd_selected || rk_selected || iop_selected;
+    wire dma_request,dma_write,dma_ready,ram_ready;
     wire [21:0] dma_address;
     wire [15:0] dma_data,ram_data;
     wire memory_request,memory_write,memory_ready;
     wire [19:0] memory_address;
     wire [1:0] memory_lanes;
     wire [15:0] memory_data;
-    uj11_mmu_ubmap unibus_map(.clk(clk),.reset(rst),.enabled(storage_enabled && dma_map_enabled && dma_unibus),
-        .request(request && map_selected),.write(writing),.address(address[6:1]),.lanes(lanes),.wdata(write_data),
-        .rdata(map_data),.ready(map_ready),.dma_request(dma_request),.dma_address(dma_address),
-        .dma_ready(dma_ready),.dma_error(dma_error),.memory_request(mapped_request),
-        .memory_address(mapped_address),.memory_ready(mapped_ready));
+    // SERV translates UNIBUS addresses before submitting a physical DMA burst.
+    // The sector engine rejects accesses outside the installed 2 MiB SRAM.
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(rst),
         .cpu_request(request && ram_selected),.cpu_write(writing),.cpu_lock(cpu_lock),.cpu_address(address[20:1]),
         .cpu_lanes(lanes),.cpu_data(write_data),.cpu_ready(ram_ready),
-        .dma_request(mapped_request),.dma_write(dma_write),.dma_address(mapped_address),
-        .dma_data(dma_data),.dma_ready(mapped_ready),.request(memory_request),.write(memory_write),
+        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),
+        .dma_data(dma_data),.dma_ready(dma_ready),.request(memory_request),.write(memory_write),
         .address(memory_address),.lanes(memory_lanes),.data(memory_data),.ready(memory_ready));
     uj11_sram #(.CLEAR_WORDS(CLEAR_WORDS)) memory(.clk(clk),.power_on(power_on),.reset(rst),
         .initialized(memory_initialized),.request(memory_request),.write(memory_write),
@@ -79,7 +74,8 @@ module uj11_mmu_board_bus #(
     wire [15:0] rk_data,io_data,sd_data;
     wire [8:0] io_vector;
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV)) disk(
-        .clk(clk),.reset(reset),.bus_reset(peripheral_reset),.rk_request(request && rk_selected),.rk_write(writing),
+        .clk(clk),.reset(reset),.bus_reset(peripheral_reset),.dma_map_enabled(dma_map_enabled),
+        .rk_request(request && rk_selected),.rk_write(writing),
         .rk_address(address[4:1]),.rk_lanes(lanes),.rk_wdata(write_data),.rk_rdata(rk_data),
         .rk_ready(rk_ready),.rk_irq(rk_irq),.storage_enabled(storage_enabled),.rk_irq_ack(irq_ack && irq_priority==5 && !storage_enabled),
         .io_request(request && iop_selected),.io_address(offset),.io_rdata(io_data),.io_ready(io_ready),.io_error(io_error),
@@ -87,8 +83,8 @@ module uj11_mmu_board_bus #(
         .sd_request(request && sd_selected),.sd_write(writing),.sd_byte(byte_access),
         .sd_address(address[1:0]),.sd_wdata(write_data),.sd_rdata(sd_data),.sd_ready(sd_ready),.sd_error(sd_error),
         .sd_cs_n(sd_cs_n),.sd_sck(sd_sck),.sd_mosi(sd_mosi),.sd_miso(sd_miso),
-        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),.dma_data(dma_data),.dma_unibus(dma_unibus),
-        .dma_ready(dma_ready),.dma_error(dma_error),.dma_rdata(ram_data));
+        .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),.dma_data(dma_data),.dma_unibus(),
+        .dma_ready(dma_ready),.dma_error(1'b0),.dma_rdata(ram_data));
     wire rx_irq,tx_irq,uart_ready;
     wire [15:0] uart_data;
     wire uart_ack=irq_ack && irq_priority==4;
@@ -139,14 +135,14 @@ module uj11_mmu_board_bus #(
             end
         end
     end
-    // MAINT retains the established board identification. FP accelerator bit
-    // stays clear: the new profile implements FP instructions in microcode.
+    // Only the legacy MMU profile retains this fixed MAINT value. The storage
+    // profile obtains board identification and UNIBUS map CSRs from SERV.
     assign read_data=({16{ram_selected}} & ram_data) | ({16{rom_selected}} & rom_data) |
         ({16{uart_selected}} & uart_data) | ({16{sd_selected}} & sd_data) |
-        ({16{map_selected}} & map_data) | ({16{iop_selected}} & io_data) | ({16{rk_selected}} & rk_data) | ({16{panel_selected}} & panel_data) |
+        ({16{iop_selected}} & io_data) | ({16{rk_selected}} & rk_data) | ({16{panel_selected}} & panel_data) |
         ({16{timer_selected}} & {8'b0,timer_done,timer_ie,6'b0}) | ({16{maint_selected}} & 16'o31);
     assign ready=request && ((ram_selected && ram_ready) || (rom_selected && rom_phase==3) ||
-        (uart_selected && uart_ready) || (sd_selected && sd_ready) || (rk_selected && rk_ready) || (map_selected && map_ready) || (iop_selected && io_ready) ||
+        (uart_selected && uart_ready) || (sd_selected && sd_ready) || (rk_selected && rk_ready) || (iop_selected && io_ready) ||
         timer_selected || panel_selected || maint_selected || !selected);
     assign error=request && (!selected || (sd_selected && sd_ready && sd_error) || (iop_selected && io_ready && io_error));
 endmodule

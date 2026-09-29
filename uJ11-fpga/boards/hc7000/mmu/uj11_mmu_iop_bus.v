@@ -2,7 +2,7 @@
 // One blocking peripheral bus transaction, interpreted entirely by SERV.
 // The CPU holds address/data/lanes until ready. No controller CSRs live here.
 module uj11_mmu_iop_bus(
-    input wire clk,reset,bus_reset,enabled,
+    input wire clk,reset,bus_reset,enabled,dma_map_enabled,
     input wire request,write,
     input wire [12:0] address,
     input wire [1:0] lanes,
@@ -21,7 +21,7 @@ module uj11_mmu_iop_bus(
 );
     reg reset_pending,ack_pending;
     always @* case(iop_address)
-        0:iop_rdata={17'b0,vector[8:2],4'b0,owner,ack_pending,reset_pending,enabled && request && !ready};
+        0:iop_rdata={15'b0,dma_map_enabled,1'b0,vector[8:2],4'b0,owner,ack_pending,reset_pending,enabled && request && !ready};
         1:iop_rdata={wdata,lanes,write,address};
         default:iop_rdata=0;
     endcase

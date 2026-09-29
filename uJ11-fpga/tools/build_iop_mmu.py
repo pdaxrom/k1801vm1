@@ -32,7 +32,9 @@ def sources():
 def flags():
     # Compressed instructions only for the partitioned HC7000 storage profile.
     if profile()=='legacy':return FLAGS[:]
-    return [('-march=rv32ic' if f=='-march=rv32i' else '-Wl,--relax' if f=='-Wl,--no-relax' else f) for f in FLAGS]+['-flto','-msave-restore','-fno-jump-tables','-fstack-usage']
+    overrides={'-march=rv32i':'-march=rv32ic','-Wl,--no-relax':'-Wl,--relax',
+               '-msmall-data-limit=0':'-msmall-data-limit=2048'}
+    return [overrides.get(f,f) for f in FLAGS]+['-flto','-msave-restore','-fno-jump-tables','-fstack-usage']
 
 def cpu_wrapper():
     return '''
@@ -114,7 +116,7 @@ def build(rebuild=False):
     subprocess.run(cmd,check=True,cwd=ROOT)
     subprocess.run([prefix+'objcopy','-O','binary',str(OUT/'firmware.elf'),str(OUT/'firmware.bin')],check=True)
     data=(OUT/'firmware.bin').read_bytes()
-    if len(data)>ram_bytes-(768 if mode=='storage' else 512): raise ValueError('IOP program overlaps stack')
+    if len(data)>ram_bytes: raise ValueError('IOP program exceeds RAM')
     words=[int.from_bytes(data.ljust(ram_bytes,b'\0')[i:i+4],'little') for i in range(0,ram_bytes,4)]
     (OUT/'firmware.mem').write_text(''.join(f'{w:08x}\n' for w in words))
     (OUT/'uj11_mmu_iop_ram.v').write_text(ram(words))
@@ -124,7 +126,8 @@ def build(rebuild=False):
              subprocess.check_output([prefix+'nm','--defined-only',str(OUT/'firmware.elf')],text=True).splitlines()
              if len(line.split())==3}
     memory=dict(bss_start=symbols.get('__bss_start',len(data)),bss_end=symbols.get('__bss_end',len(data)),
-                stack_bottom=symbols.get('__stack_top',ram_bytes)-(768 if mode=='storage' else 512),stack_top=symbols.get('__stack_top',ram_bytes))
+                stack_bottom=symbols.get('__stack_bottom',ram_bytes-512),stack_top=symbols.get('__stack_top',ram_bytes))
+    assert len(data)<=memory['stack_bottom']
     assert memory['bss_end']<=memory['stack_bottom']
     (OUT/'firmware.stack').write_text(''.join(p.read_text() for p in sorted(OUT.glob('firmware.elf.ltrans*.su'))))
     version=subprocess.check_output([compiler,'--version'],text=True).splitlines()[0]

@@ -15,6 +15,7 @@ static void pause_ms(u32 delay)
 /* A write already clocks a byte. Reading SPI clocks another, so command output
  * uses plain writes; input uses reads which clock FF. */
 static u32 speed;
+u32 dma_mode;
 union storage_scratch scratch;
 #define sector scratch.sector
 static struct sd_label label;
@@ -256,29 +257,50 @@ static u32 write_sector(u32 lba)
  * its SD sector with a neighbour; read/modify/write preserves that neighbour. */
 u32 sector_io(u32 lba,u32 op,u32 count,u32 offset,u32 span)
 {
-	WINDOW=offset | ((offset+span)<<8);
-	DMA_COUNT=count;
+	u32 address=DMA_ADDR,end=offset+span,status=0;
 	if(op!=1 || span!=256) {
 		u32 error=fetch_sector(lba);
 		if(error) {
 			return error;
 		}
 	}
-	if(!active()) {
-		return DTE;
-	}
-	if(op==1) {
-		u32 status=transfer(LOAD);
-		if(status&2) {
-			return status&8 ? NXM : DTE;
-		}
+	while(count) {
 		if(!active()) {
 			return DTE;
 		}
-		return write_sector(lba);
+		u32 chunk=count,physical=address;
+		unsigned mapped=service_bank!=XP_BANK && service_bank!=RQ_BANK && (BUS_STATUS&BUS_MAP_ENABLED);
+		if(mapped) {
+			u32 page=(address>>13)&31,within=address&8191;
+			/* UNIBUS page 31 is I/O, never an alias of installed SRAM. */
+			if(page==31) {
+				return NXM;
+			}
+			physical=(ubmap.base[page]+within)&0x3fffff;
+			if(!(dma_mode&2) && chunk>(8192-within)/2) {
+				chunk=(8192-within)/2;
+			}
+		}
+		DMA_MODE=dma_mode|mapped;
+		DMA_ADDR=physical;
+		DMA_COUNT=chunk;
+		/* LOAD pads only the final fragment; earlier fragments must leave
+		 * the rest of this SD sector available to the next mapped page. */
+		WINDOW=offset|((chunk==count?end:offset+chunk)<<8);
+		status|=transfer(op==1?LOAD:op==2?COMPARE:STORE);
+		if(status&2) {
+			return status&8?NXM:DTE;
+		}
+		count-=chunk;
+		offset+=chunk;
+		if(!(dma_mode&2)) {
+			address+=2*chunk;
+		}
 	}
-	u32 result=transfer(op==2 ? COMPARE : STORE);
-	return result&2 ? (result&8 ? NXM : DTE) : result&4 ? DCK : 0;
+	if(!active()) {
+		return DTE;
+	}
+	return op==1?write_sector(lba):status&4?DCK:0;
 }
 struct sd_partition *find_drive(u32 kind,u32 unit)
 {
@@ -344,7 +366,7 @@ static u32 disks(struct sd_partition *p,u32 xp)
 	}
 	u32 ba=R(BA) | (xp ? R(20)<<16 : (R(CS1)&0001400)<<8);
 	u32 inhibit=xp && (R(CS2)&8);
-	DMA_MODE=xp | (inhibit<<1);
+	dma_mode=xp | (inhibit<<1);
 	while(left && active()) {
 		u32 count=left>256 ? 256 : left;
 		DMA_ADDR=ba;
@@ -469,7 +491,7 @@ static u32 rl_command(struct sd_partition *p)
 		left=maximum;
 	}
 	u32 ba=R(1)|(R(4)<<16),mp=R(3),original=R(2),done=0;
-	DMA_MODE=1;
+	dma_mode=1;
 	while(left && active()) {
 		u32 span=(sec&1)?128:256,count=left>span?span:left;
 		if(count<=128) {

@@ -137,7 +137,7 @@ static u32 rq_data(struct sd_partition *p,uint16_t *cmd,uint16_t *rsp)
 		}
 	}
 	u32 status=0;
-	DMA_MODE=1;
+	dma_mode=1;
 	while(done<bytes && active()) {
 		u32 chunk=bytes-done;
 		if(chunk>512) {

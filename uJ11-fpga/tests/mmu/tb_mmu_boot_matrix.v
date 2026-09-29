@@ -23,7 +23,8 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
-        .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete),.stopped(stopped));
+        .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete),.stopped(stopped),
+        .diagnostic_halt(),.diagnostic_wait(),.diagnostic_retire(),.diagnostic_mode());
     serv_memory_guard guard(.clk(clk),.reset(dut.bus.disk.iop_reset),
         .write(dut.bus.disk.data_accept && dut.bus.disk.memory_selected && dut.bus.disk.de),.address(dut.bus.disk.da));
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
@@ -70,6 +71,14 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
             for(integer i=0;i<command.len();i++)send_byte(command[i]);send_byte(13);
             wait(prompts>oldprompt);wait(serial_chars==bus_chars);repeat(1000)@(negedge clk);
         end
+    endtask
+    task dialogue(input string command,input string reply);
+        segment="";
+        for(integer i=0;i<command.len();i++)send_byte(command[i]);send_byte(13);
+        wait_text(reply);
+    endtask
+    task return_monitor;
+        segment="";send_byte(3);wait_text("\n.");
     endtask
     task settled_prompt;
         integer unchanged,last_chars;
@@ -152,6 +161,9 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
     initial begin
         if(!$value$plusargs("MONITOR=%s",monitor))monitor="fb";
         repeat(5)@(negedge clk);power_on=0;
+        if($test$plusargs("ENTER_BOOT"))begin
+            wait_text("other key=menu: ");repeat(CLOCK_HZ/100)@(negedge clk);send_byte(13);
+        end
         if(boot_case=="rsx-rq0")begin
             wait(stopped);wait(serial_chars==bus_chars);
             contains("THIS VOLUME DOES NOT CONTAIN A HARDWARE BOOTABLE SYSTEM");
@@ -159,7 +171,28 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
             check(dut.cpu.pc==16'o34,"original RQ0 HALT PC matches SIMH");
             $display("PASS MMU matrix RQ0: original nonbootable volume reaches HALT, PC=%o",dut.cpu.pc);$finish;
         end
-        if(boot_case=="rsx-rq1")begin
+        if(boot_case=="compilers")begin
+            wait_text("ASSIGN RK3: FOR:");settled_prompt();contains("RT-11XM");
+            check(!dut.cpu.fpp_enabled,"compiler qualification has FPP disabled");
+            phase=1;shell("SHOW CONFIGURATION");contains("PDP 11/84 Processor");
+            contains("2048KB of memory");contains("Floating Instruction Set (FIS)");
+            phase=2;dialogue("RUN BAS:BASIC","INDIVIDUAL)? ");dialogue("A","READY");
+            dialogue("PRINT 2+3","READY");contains(" 5 ");shell("BYE");
+            phase=3;dialogue("RUN PAS:XM","*");shell("VOL:CTPAS,VOL:CTPAS=VOL:ADDER");
+            phase=4;dialogue("R LINK","*");dialogue("VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS","*");return_monitor();
+            phase=5;segment="";
+            begin
+                string command;command="RUN VOL:CTPAS";
+                for(integer i=0;i<command.len();i++)send_byte(command[i]);send_byte(13);
+            end
+            repeat(CLOCK_HZ/2)@(negedge clk);
+            shell("2 3");contains("5.000000E+00");
+            phase=6;dialogue("RUN FOR:FORTRA","*");dialogue("VOL:CTFORT,VOL:CTFORT=VOL:CTFORT","*");
+            contains("CTFORT");return_monitor();
+            phase=7;dialogue("R LINK","*");dialogue("VOL:CTFORT,VOL:CTFORT=VOL:CTFORT,FOR:FORLIB","*");return_monitor();
+            phase=8;shell("RUN VOL:CTFORT");contains("FORTRAN OK");contains("STOP --");
+            check(mmu_fetches>1000,"compiler run uses memory management");
+        end else if(boot_case=="rsx-rq1")begin
             wait_text("[S]: ");contains("RSX-11M-PLUS V4.6  BL87");
             // The prompt write completes before AT queues its terminal read.
             // Give that QIO time to attach before sending the user's reply.

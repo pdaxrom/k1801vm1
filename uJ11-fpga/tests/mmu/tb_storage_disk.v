@@ -23,7 +23,7 @@ module tb_storage_disk;
     wire [12:0] io_address=metadata ? 13'o17504 : 13'o17440+{ra,1'b0};
     assign ready=io_ready && rr;assign irq=io_irq && io_vector==9'o210;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
-        .clk(clk),.reset(reset),.bus_reset(1'b0),.rk_request(1'b0),.rk_write(rw),
+        .clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(1'b0),.rk_request(1'b0),.rk_write(rw),
         .rk_address(ra),.rk_lanes(rl),.rk_wdata(wd),.rk_rdata(),.rk_ready(),.rk_irq(),.rk_irq_ack(1'b0),
         .storage_enabled(),.io_request(rr),.io_address(io_address),.io_rdata(rd),.io_ready(io_ready),.io_error(io_error),
         .io_irq(io_irq),.io_vector(io_vector),.io_irq_ack(irq_ack),

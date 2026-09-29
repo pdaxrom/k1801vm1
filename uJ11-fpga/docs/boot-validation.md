@@ -27,6 +27,49 @@ listed its three monitor files with `DIR RK0:RT11*.SYS`, and read
 include the complete six-partition layout, backups, verification hashes,
 and separate records of the initial menu-test script errors.
 
+## Physical SD: RT-11 XM compiler suite
+
+The same card now also has RH0/RH1 for the V5.03 system and storage disks,
+plus RK1/RK2/RK3 for BASIC, Pascal and FORTRAN. RK0 remains RT-11 V4.
+The copied system disk assigns `VOL:` to DM1, `BAS:` to RK1, `PAS:` to RK2
+and `FOR:` to RK3 in STARTX, STARTF and STARTS. Cancel the boot countdown,
+choose controller **2 (RH11/HK)** and unit **0**; default boot remains RL0.
+
+All five images passed physical SD readback, and all six prior partitions
+retained their hashes. SIMH without FPP passed the remapped XM boot, BASIC
+arithmetic, Pascal compilation/link/execution with LIBEIS, and a FORTRAN
+compile/link/run. A separate complete SIMH 11/40 run with FIS/MMU and no FPP
+also passed all three languages.
+
+On the physical HC7000 with the former JED `9DF6`, RH0 boot, all volume directory reads, BASIC and
+FORTRAN compile/link/run pass. Pascal XM fails directly from RK2 with
+`Ovly err 001070`, but the same executable copied to RH1 compiles and runs
+the test with LIBEIS. The stock RKX driver rejects DMA beyond 64 KiB on
+Q-bus before starting the controller; setting only RT-11's QBUS flag in
+SIMH 11/40 reproduces the failure. The SD retains the stock driver.
+See the [layout, evidence and installation record](../releases/hc7000-sd-compilers/README.md).
+
+The subsequent JED `7AE8` identifies the storage profile as 11/84/UNIBUS
+through SERV. The UNIBUS map table, CSR handling and DMA translation also
+move from FPGA logic into SERV. The full CPU/SERV/SD/SRAM RTL now passes
+direct Pascal XM execution from RK2, compilation of ADDER, linking with
+LIBEIS and the result `5.000000E+00` for `2 3`. BASIC and FORTRAN also pass
+with FPP disabled and FIS retained. No RKX or monitor patch is used.
+This 50 MHz build frees 406 LUT and one EBR compared with 9DF6. The
+[UNIBUS release record](../releases/hc7000-serv-unibus/README.md) contains
+the source-matched synthesis and regression results and the installation status.
+
+The complete 50 MHz RTL regression for 7AE8 passes: XM (6107 checks), V4
+(2816), 2.9BSD multiuser and RL/XP file I/O (24033), and RSX RQ1 (3346).
+RSX completes STARTUP, reports DU0/DU1 and lists the 1026-block
+`DU1:[1,54]RSX11M.SYS`. RQ0 retains its expected nonbootable result.
+These are RTL results. A subsequent physical session installed and verified
+7AE8, booted RH0 and passed BASIC, direct RK2 Pascal XM compile/link/run with
+LIBEIS, and FORTRAN compile/link/run with FORLIB. The stock disk drivers remain
+unchanged. The board was left at the RT-11 XM prompt with the UART released;
+the hardware session did not repeat the other OS boots. Its UART and programmer
+logs are included in the UNIBUS release record above.
+
 ## Reference results
 
 Both SIMH 11/73 and SIMH 11/70 boot RT-11 XM V5.03 and RT-11 SJ V04.00C.
@@ -46,7 +89,7 @@ FPP capability for the 11/73 model and rejects `SET CPU NOFPP`; the separate
 11/70 runs explicitly disable FPP. Neither reference CPU is presented as a
 substitute for executing the HC7000 RTL.
 
-## Current FPGA result
+## Initial 24 MHz FPGA qualification
 
 | Configuration | Result on HC7000 MMU / FPP off / SERV storage |
 |---|---|
@@ -91,13 +134,14 @@ The RTL runner uses the supplied SD menu and current hardware/firmware.
 It distinguishes a successful OS boot (`boot_passed`) from validation of the
 nonbootable RQ0 placeholder (`expected_nonbootable`). Original SIMH evidence is
 under `releases/hc7000-bsd/validation/boot-matrix/`; current shared-I/O RTL
-evidence is under `releases/hc7000-serv-io/validation/`.
+evidence for that stage is under `releases/hc7000-serv-io/validation/`.
 
 The MMU integer corrections are qualified again in
 `releases/hc7000-isa-fix/validation/`: XM, V4 and both RQ cases retain the
 results above. The accompanying 2.9BSD run passes 22108 checks, reaches
 multiuser root, and verifies RL/RP file writes, readback and sync. These are
-RTL results; the new JED has not been programmed onto the board.
+RTL results; at that qualification stage the JED had not yet been programmed
+onto the board.
 
 The subsequent C/header formatting preserves all SERV firmware bytes and
 generated memory contents used by these runs. `serv-format.json` records
@@ -121,5 +165,5 @@ The RSX console log includes `PIP DU1:[1,54]RSX11M.SYS/LI`,
 `RSX11M.SYS;1 1026. C`, and a total of 1026 blocks in one file.
 The separate RQ0 run validates the original nonbootable-volume message and
 HALT at PC `000034`; it is recorded as `expected_nonbootable`, not an OS boot.
-The current JED uses 4173 LUT, 1205 FF and 26 EBR; timing passes at 24 MHz.
-It has not been programmed onto the physical board.
+That JED uses 4173 LUT, 1205 FF and 26 EBR; timing passes at 24 MHz.
+At that qualification stage it had not yet been programmed onto the physical board.

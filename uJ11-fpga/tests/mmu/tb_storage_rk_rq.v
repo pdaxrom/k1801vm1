@@ -10,12 +10,12 @@ module tb_storage_rk_rq;
     wire ready,error,initialized,boot_complete,irq_valid;
     wire [15:0] read_data,irq_vector;
     wire [2:0] irq_priority;
-    reg irq_ack=0;
+    reg irq_ack=0,dma_map_enabled=0;
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     wire tx,cs,sck,mosi,miso;wire [7:0] pins;
     integer checks=0,n;
     uj11_mmu_board_bus #(.BOOT_ROM_ENABLE(0),.CLEAR_WORDS(1),.TICK_DIVISOR(1024),.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) dut(
-        .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.cpu_lock(1'b0),.dma_map_enabled(1'b0),
+        .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.cpu_lock(1'b0),.dma_map_enabled(dma_map_enabled),
         .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),
         .ready(ready),.error(error),.read_data(read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),
         .irq_vector(irq_vector),.irq_ack(irq_ack),.uart_rx(1'b1),.uart_tx(tx),
@@ -60,6 +60,10 @@ module tb_storage_rk_rq;
     endtask
     task rk_io(input [15:0] fn,input integer count,input integer addr,input [15:0] da);
         put(RK+6,-count);put(RK+8,addr);put(RK+10,da);put(RK+4,fn|((addr>>12)&16'o60));
+    endtask
+    localparam UBM=22'o17770200;
+    task map_page(input integer page,input [21:0] base);
+        put(UBM+4*page,base);put(UBM+4*page+2,base>>16);
     endtask
     task sa_wait(input [15:0] v);
         integer polls;
@@ -119,6 +123,52 @@ module tb_storage_rk_rq;
         rk_io(7,1,16'h8000,1);rk_done(1); // write-check mismatch is soft
         rk_io(5,1,16'ha400,1);rk_done(0);expect_word(RK+6,0);
         rk_io(5,1,16'ha400,12);rk_done(16'o40);put(RK+4,1);
+        // Identification and the complete CSR bank are served by real SERV.
+        expect_word(22'o17777750,16'o1045);expect_word(22'o17777752,16'o10);
+        put(22'o17777750,16'hffff);expect_word(22'o17777750,16'o1045);
+        for(integer page=0;page<32;page++)begin
+            expect_word(UBM+4*page,0);expect_word(UBM+4*page+2,0);
+            map_page(page,22'h3fffff);
+            expect_word(UBM+4*page,16'hfffe);expect_word(UBM+4*page+2,16'h3f);
+        end
+        bus(1,1,UBM,16'h0055,0);expect_word(UBM,16'hff54);
+        bus(1,1,UBM+1,16'hab00,0);expect_word(UBM,16'hab54);
+        bus(1,1,UBM+3,16'hff00,0);expect_word(UBM+2,16'h003f);
+        bus(1,1,UBM+2,16'h0085,0);expect_word(UBM+2,16'h0005);
+        // Disabled BME retains 18-bit RK DMA, even with nonidentity maps.
+        rk_io(5,1,'h18000,0);rk_done(0);
+        check(word_at('h18000)=={pattern(0,1),pattern(0,0)},"BME disabled uses physical 18-bit address");
+        map_page(8,22'h180002);map_page(9,22'h120000);map_page(10,22'h190000);
+        put('h11ff0,16'h5678);dma_map_enabled=1;
+        rk_io(5,16,'h11ff0,0);rk_done(0);
+        for(integer j=0;j<32;j+=2)begin
+            check(word_at(j<16?'h181ff2+j:'h120000+j-16)=={pattern(0,j+1),pattern(0,j)},"mapped RK crosses noncontiguous pages");
+        end
+        check(word_at('h11ff0)==16'h5678,"mapped DMA does not alias bus address");
+        expect_word(RK+8,16'h2010);expect_word(RK+6,0);
+        // A partial RK write preserves the tail of its SD sector across a map split.
+        rk_io(3,16,'h11ff0,2);rk_done(0);
+        rk_io(5,256,'h14000,2);rk_done(0);
+        for(integer j=0;j<512;j+=2)begin
+            check(word_at('h190000+j)=={pattern(j<32?0:2,j+1),pattern(j<32?0:2,j)},"mapped RK write preserves sector tail");
+        end
+        rk_io(7,16,'h11ff0,0);rk_done(0);
+        put('h181ff2,16'hbabe);rk_io(7,16,'h11ff0,0);rk_done(1); // mismatch in first fragment must survive second
+        rk_io(16'o4005,8,'h10000,0);rk_done(0);
+        check(word_at('h180002)=={pattern(0,15),pattern(0,14)},"mapped inhibited DMA stays on one word");
+        expect_word(RK+8,0);expect_word(RK+6,0);
+        put('h100,16'hcafe);map_page(10,22'h200000);
+        rk_io(5,1,'h14100,0);rk_done(16'o2000);put(RK+4,1);
+        check(word_at('h100)==16'hcafe,"mapped NXM never aliases low SRAM");
+        map_page(31,0);rk_io(5,1,'h3e100,0);rk_done(16'o2000);put(RK+4,1);
+        check(word_at('h100)==16'hcafe,"UNIBUS I/O page never aliases SRAM");
+        map_page(10,22'h3ffffe);rk_io(5,1,'h14004,0);rk_done(0);
+        check(word_at(2)=={pattern(0,1),pattern(0,0)},"map addition wraps at 22 bits");
+        @(negedge clk);peripheral_reset=1;@(negedge clk);peripheral_reset=0;
+        for(integer page=0;page<32;page++)begin
+            expect_word(UBM+4*page,0);expect_word(UBM+4*page+2,0);
+        end
+        // BME remains high here: RQ ring and data must bypass the zeroed map.
         // Full UQSSP handshake, 22-bit rings and data, two-slot wrap.
         rq_init;
         packet(4,0,0,0,0);dispatch(4,0);expect_word(RSP-2,8);

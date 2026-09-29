@@ -12,7 +12,7 @@ from iop_ebr import block
 
 BOARD=['boards/hc7000/mmu/'+n+'.v' for n in (
     'uj11_mmu_board','uj11_mmu_board_bus','uj11_mmu_disk','uj11_mmu_rk611',
-    'uj11_mmu_sector_engine','uj11_mmu_ubmap','uj11_mmu_sram_arbiter','uj11_mmu_iop_bus')]
+    'uj11_mmu_sector_engine','uj11_mmu_sram_arbiter','uj11_mmu_iop_bus')]
 BOARD+=['boards/hc7000/uj11_sram.v','boards/hc7000/uj11_hg_inputs.v','boards/hc7000/uj11_diagnostics.v',
     'boards/hc1200/uj11_tick.v','boards/hc1200/uj11_button.v','boards/hc1200/uj11_panel.v',
     'rtl/peripherals/spi_byte_service.v','rtl/peripherals/wbc_uart_xo2.v',

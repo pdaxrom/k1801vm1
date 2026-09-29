@@ -26,7 +26,7 @@ module tb_storage_rl_xp;
     assign ready=io_ready && rr;assign irq=io_irq && io_vector==9'o210;
     assign lrd=rd;assign xrd=rd;assign lready=io_ready && lr;assign xready=io_ready && xr;assign lirq=io_irq && io_vector==9'o160;assign xirq=io_irq && io_vector==9'o254;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
-        .clk(clk),.reset(reset),.bus_reset(bus_reset),.rk_request(1'b0),.rk_write(rw),
+        .clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(bus_reset),.rk_request(1'b0),.rk_write(rw),
         .rk_address(ra),.rk_lanes(rl),.rk_wdata(wd),.rk_rdata(),.rk_ready(),.rk_irq(),.rk_irq_ack(1'b0),
         .storage_enabled(),.io_request(rr || lr || xr),.io_address(io_address),.io_rdata(rd),.io_ready(io_ready),.io_error(),
         .io_irq(io_irq),.io_vector(io_vector),.io_irq_ack(irq_ack || lack || xack),
