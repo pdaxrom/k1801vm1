@@ -12,6 +12,21 @@ SIMH uses private copies; RTL uses fresh partitioned SD files with a read-only
 backing file and a RAM write overlay. Source hashes are checked after each run.
 No physical board or SD card is modified by these tests.
 
+## Physical SD: RT-11 V4 alongside BSD and RSX
+
+On 29 September 2026, the bench SD gained RK0 containing the unchanged
+`rt11v400.dsk` at LBA 1673216 (4872 sectors). All five existing BSD/RSX
+partitions and the menu were preserved and checked by SHA-256; default boot
+remains RL0. To select V4, cancel the five-second countdown with any key
+except Enter, choose controller **1 (RK11/RK05)**, then unit **0**.
+
+The physical HC7000 running JED `9DF6` booted `RT-11SJ V04.00C` from RK0,
+listed its three monitor files with `DIR RK0:RT11*.SYS`, and read
+`V4USER.TXT`. The board was left at the RT-11 prompt. The
+[installation record and UART logs](../releases/hc7000-sd-rt11v4/README.md)
+include the complete six-partition layout, backups, verification hashes,
+and separate records of the initial menu-test script errors.
+
 ## Reference results
 
 Both SIMH 11/73 and SIMH 11/70 boot RT-11 XM V5.03 and RT-11 SJ V04.00C.
