@@ -25,6 +25,29 @@ module tb_terminal;
     serv_memory_guard guard(.clk(clk),.reset(bus.disk.iop_reset),
         .write(bus.disk.data_accept && bus.disk.memory_selected && bus.disk.de),.address(bus.disk.da));
     integer accepted=0,received=0,stalls=0,checks=0;
+    integer scroll_steps=0,busy_clocks=0;
+    reg [7:0] previous_origin=0;
+    reg [31:0] held_instruction_address;
+    always @(posedge clk)begin
+        if(bus.disk.instruction_read)held_instruction_address<=bus.disk.ia;
+        if(!reset && bus.disk.instruction_fetch && bus.disk.ia!=held_instruction_address)
+            $fatal(1,"SERV changed its qualified instruction address before ACK");
+    end
+    always @(posedge vclk)begin
+        if(reset)previous_origin=0;
+        else if(bus.pal.video.vorigin!=previous_origin)begin
+            if(bus.pal.video.vorigin!=(previous_origin==232 ? 0 : previous_origin+8))
+                $fatal(1,"batched scroll %0d -> %0d",previous_origin,bus.pal.video.vorigin);
+            previous_origin=bus.pal.video.vorigin;scroll_steps++;
+        end
+    end
+    always @(posedge clk)begin
+        if(reset || !bus.pal.video.config_busy)busy_clocks=0;
+        else begin
+            busy_clocks++;
+            if(busy_clocks>1000010)$fatal(1,"PAL configuration missed 20-ms field boundary");
+        end
+    end
     reg [7:0] expected[0:4095],serial;
     always @(posedge clk)begin
         if(bus.mirror_push && bus.disk.terminal.fifo.enabled)begin
@@ -99,8 +122,9 @@ module tb_terminal;
         rendered();wait(received==accepted);
         if(bus.disk.terminal.fifo.count!=0)$fatal(1,"undrained console queue");
         if(bus.pal.video.vorigin!=48)$fatal(1,"ring scroll origin %0d",bus.pal.video.vorigin);
+        if(scroll_steps!=6)$fatal(1,"expected six visible linefeed steps, got %0d",scroll_steps);
         if(bus.pal.video.underruns)$fatal(1,"PAL underrun %0d",bus.pal.video.underruns);
-        $display("PASS PAL console mirror: %0d checks, %0d serial bytes, %0d backpressure clocks, 240 rows",checks,received,stalls);
+        $display("PASS PAL console mirror: %0d checks, %0d serial bytes, %0d backpressure clocks, 240 rows, %0d scroll steps",checks,received,stalls,scroll_steps);
         $finish;
     end
     initial begin #5000000000;$fatal(1,"mirror timeout PC=%h",bus.disk.ia);end

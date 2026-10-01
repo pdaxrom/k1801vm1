@@ -42,6 +42,9 @@ module uj11_pal_video #(parameter integer HEIGHT=200)(
     wire [10:0] half_line;
     wire [9:0] line_number;
     wire line_start,frame_start,field,sync,burst,active_line,active,v_alternate;
+    // The terminal can scroll at each 20-ms vertical blank. The standalone
+    // 200-row profile retains full-frame configuration commits (40 ms).
+    wire config_start=frame_start || (HEIGHT==240 && half_line==625 && x[10:0]==0);
     wire [7:0] row;
     localparam integer FIRST=56-(HEIGHT-200)/2, SECOND=369-(HEIGHT-200)/2;
     uj11_pal_timing #(.HEIGHT(HEIGHT)) timing(.clk(video_clk),.reset(vrst),.x(x),.half_line(half_line),
@@ -81,7 +84,7 @@ module uj11_pal_video #(parameter integer HEIGHT=200)(
         end else begin
             apply_sync<={apply_sync[0],apply_toggle};
             done_sync<={done_sync[0],line_done};
-            if(frame_start && apply_sync[1]!=config_ack) begin
+            if(config_start && apply_sync[1]!=config_ack) begin
                 // control/origin are held from request through ack (and the
                 // source waits another two clocks to observe this ack).
                 vcontrol<=control;vorigin<=origin;config_ack<=apply_sync[1];

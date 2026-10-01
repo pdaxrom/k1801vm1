@@ -58,6 +58,18 @@ module uj11_mmu_disk #(
     wire instruction_read=ic && !ia_ack && !instruction_pending && !(dc && memory_selected) &&
         (storage_enabled ? (ia[31:15]==0 && ia[14:10]<19) : ia[31:11]==0);
     wire memory_selected=storage_enabled ? (da[31:15]==0 && da[14:10]<19) : da[31:11]==0;
+    // Break the RV32C aligner carry -> address bounds -> EBR enable path.
+    // A held instruction request is qualified before issuing its RAM read;
+    // data RAM retains priority. Other board profiles keep their old latency.
+    localparam REGISTER_FETCH=CLOCK_HZ==50000000 && TERMINAL_ENABLE;
+    reg fetch_requested;
+    always @(posedge clk)begin
+        if(iop_reset)fetch_requested<=0;
+        else fetch_requested<=instruction_read;
+    end
+    // SERV holds the address through ACK, so its address bus needs no copy.
+    wire instruction_fetch=REGISTER_FETCH ? fetch_requested && ic && !instruction_pending &&
+        !ia_ack && !(dc && memory_selected) : instruction_read;
     wire io_selected=da[31:10]==22'h100000;
     wire csr_selected=io_selected && da[9:8]==0;
     wire spi_selected=io_selected && da[9:8]==1;
@@ -91,7 +103,7 @@ module uj11_mmu_disk #(
         .o_dbus_adr(da),.o_dbus_dat(dw),.o_dbus_sel(ds),.o_dbus_we(de),.o_dbus_cyc(dc),
         .i_dbus_rdt(dr),.i_dbus_ack(da_ack));
     uj11_mmu_iop_ram ram(.clk(clk),.reset(iop_reset),
-        .enable(!iop_reset && (instruction_read || (data_accept && memory_selected))),
+        .enable(!iop_reset && (instruction_fetch || (data_accept && memory_selected))),
         .address(dc && memory_selected ? da[14:2] : ia[14:2]),
         .write_enable(ds & {4{data_accept && memory_selected && de && !iop_reset}}),
         .write_data(dw),.data(mem_data),.storage_enabled(storage_enabled),.ready(mem_ready),
@@ -109,7 +121,7 @@ module uj11_mmu_disk #(
             // 50 MHz. An idle cycle after each ACK lets the aligner change
             // address for the second half of a straddling instruction.
             ia_ack<=CLOCK_HZ==50000000 ? instruction_pending : instruction_read && mem_ready;
-            instruction_pending<=CLOCK_HZ==50000000 && instruction_read && mem_ready;
+            instruction_pending<=CLOCK_HZ==50000000 && instruction_fetch && mem_ready;
             da_ack<=0;
             if(!dc)dseen<=0;
             if(data_accept && (!spi_selected || iop_spi_done) && (!memory_selected || mem_ready) &&

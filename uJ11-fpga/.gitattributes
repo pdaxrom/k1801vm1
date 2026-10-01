@@ -37,6 +37,7 @@ releases/hc7000-ebr-audit/** -whitespace
 releases/hc7000-pal-*/** -whitespace
 releases/hc7000-serv-*/** -whitespace
 releases/hc7000-terminal/** -whitespace
+releases/hc7000-terminal-*/** -whitespace
 # Consecutive ODT prompts in these raw captures resemble conflict markers.
 releases/hc7000-ebr-audit/**/tb_cpu.log binary
 releases/hc7000-pal-*/**/tb_cpu.log binary

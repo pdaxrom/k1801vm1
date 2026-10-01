@@ -19,12 +19,13 @@ static const uint16_t pixels4[16] = {
 
 /* Output-only console mirror. The host UART remains the input endpoint and
  * answers terminal queries. No competing device-identification reply is sent. */
-static uint8_t row, col, saved_row, saved_col, origin, applied_origin;
+static uint8_t row, col, saved_row, saved_col, origin, scroll_stage;
 static uint8_t fg, bg, reverse, underline, wrap, state, private_mode;
 static uint8_t graphics, graphics_g0, graphics_g1, charset, cursor, vt52;
 static uint8_t low[TERMINAL_ROWS], high[TERMINAL_ROWS];
 static uint16_t params[3];
 static uint8_t parameter;
+static uint16_t scroll_word;
 
 static unsigned disk_pending(void)
 {
@@ -47,6 +48,10 @@ static unsigned physical_row(unsigned y)
 static void dirty(unsigned y, unsigned x)
 {
 	unsigned n = physical_row(y);
+	if (low[n] == TERMINAL_COLS) {
+		low[n] = high[n] = x;
+		return;
+	}
 	if (low[n] > x) {
 		low[n] = x;
 	}
@@ -84,6 +89,10 @@ static void linefeed(void)
 			origin = 0;
 		}
 		erase(row, 0, TERMINAL_COLS - 1);
+		/* Pixel fill will clear the old row. Any text written by an automatic
+		 * wrap after this point must keep its own new dirty range. */
+		low[physical_row(row)] = TERMINAL_COLS;
+		scroll_stage = 1;
 	}
 }
 
@@ -280,7 +289,9 @@ static void put(unsigned ch)
 
 void terminal_input(void)
 {
-	if (disk_pending()) {
+	/* Keep the ring mapping stable until PAL has applied this linefeed and
+	 * the recycled row is clear. Disks continue through the main scheduler. */
+	if (scroll_stage || disk_pending()) {
 		return;
 	}
 	u32 byte = TERM_BYTE;
@@ -291,12 +302,52 @@ void terminal_input(void)
 
 void terminal_render(void)
 {
-	/* Disk register requests win. Parse continuously, render one cell per
-	 * scheduler turn; intermediate cursor positions coalesce in dirty ranges. */
-	if ((BUS_STATUS & 7) || (TERM_ENABLE & ~1u) || disk_pending()) {
+	/* Disk register requests win. One input byte and one painted cell per
+	 * scheduler turn keep a continuous output stream visible as it arrives. */
+	if ((BUS_STATUS & 7) || disk_pending()) {
+		return;
+	}
+	if (scroll_stage == 1) {
+		if (!(VIDEO(4) & 1)) {
+			VIDEO(3) = origin * 8u | 0x30000u;
+			VIDEO(4) = 0x30001u;
+			scroll_stage = 2;
+		}
+		return;
+	}
+	if (scroll_stage == 2) {
+		if (!(VIDEO(4) & 1)) {
+			scroll_stage = 3;
+			scroll_word = 0;
+		}
+	}
+	if (scroll_stage == 3) {
+		/* The former top row is now at the bottom. Clear its pixels before
+		 * parsing new text, rather than displaying new glyphs at the old top.
+		 * Uniform stores avoid 80 font lookups and resume after disk work. */
+		unsigned y = physical_row(TERMINAL_ROWS - 1);
+		u32 colour = bg | (bg << 4);
+		colour |= colour << 8;
+		colour |= colour << 16;
+		while (scroll_word < 8u * TERMINAL_COLS) {
+			if (!(scroll_word & 15u)) {
+				poll_io();
+				if (disk_pending()) {
+					return;
+				}
+			}
+			PIXEL(y * 8u * TERMINAL_COLS + scroll_word) = colour;
+			scroll_word++;
+		}
+		scroll_stage = 0;
 		return;
 	}
 	for (unsigned y = 0; y < TERMINAL_ROWS; y++) {
+		/* This physical row still contains the visible old top until ack.
+		 * Other pending cells can be painted during the vertical-blank wait. */
+		if (scroll_stage == 2 && y == physical_row(TERMINAL_ROWS - 1)) {
+			continue;
+		}
 		unsigned x = low[y];
 		if (x >= TERMINAL_COLS) {
 			continue;
@@ -330,11 +381,6 @@ void terminal_render(void)
 		}
 		low[y] = x == high[y] ? TERMINAL_COLS : x + 1;
 		return;
-	}
-	if (origin != applied_origin && !(VIDEO(4) & 1)) {
-		VIDEO(3) = origin * 8u | 0x30000u;
-		VIDEO(4) = 0x30001u;
-		applied_origin = origin;
 	}
 }
 

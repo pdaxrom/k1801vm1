@@ -46,6 +46,19 @@ module tb_terminal_dma;
     task done;
         do access(22'o17774400,0,0);while(!read_data[7]);
     endtask
+    task console(input string text);
+        for(integer i=0;i<text.len();i++)begin
+            do access(22'o17777564,0,0);while(!read_data[7]);
+            access(22'o17777566,1,{8'b0,text[i]});
+        end
+    endtask
+    task probe(input string phase);
+        put(0,16'o100);started=clocks;
+        wait(irq);check(vector==9'o160,{phase," RL probe interrupt vector"});
+        check(clocks-started<50000,{phase," RL NOP completes within one millisecond"});
+        $display("RL probe during %s: %0d clocks",phase,clocks-started);
+        put(0,0);done();wait(!irq);
+    endtask
     task transfer(input [15:0] command,input [21:0] destination);
         put(1,destination[15:0]);put(2,0);put(3,-2);put(4,destination[21:16]);
         put(0,command|((destination>>12)&16'o60));done();
@@ -56,6 +69,12 @@ module tb_terminal_dma;
         repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);reset=0;wait(cpu_start);
         do access(22'o17777504,0,0);while(!read_data[15]);
         check(!read_data[14],"SD initialized");
+        console("\033[30;1H\n");
+        wait(bus.pal.video.origin==8 && bus.pal.video.config_busy);
+        probe("scroll wait");
+        wait(bus.disk.data_accept && bus.disk.external_selected && bus.disk.de &&
+             bus.disk.da==32'h601ec000);
+        probe("row pixel fill");
         // A transfer straddling the boundary writes only its first word.
         before_dma=guest_dma;transfer(16'o14,22'h1e3ffe);
         check((read_data&16'o176000)==16'o120000,"RL reports NXM at reserve");

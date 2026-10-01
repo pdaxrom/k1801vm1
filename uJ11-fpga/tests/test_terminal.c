@@ -3,6 +3,7 @@
 #include "storage.h"
 #include "terminal.h"
 #include "terminal_test.h"
+#include "terminal_font.h"
 
 u32 terminal_test_byte, terminal_test_enable;
 u32 terminal_test_text[2400], terminal_test_pixels[19200];
@@ -11,12 +12,27 @@ void poll_io(void)
 {
 }
 static u32 video[8];
+static unsigned video_busy, pixel_writes;
+
+u32 terminal_test_pop(void)
+{
+	u32 byte = terminal_test_byte;
+	terminal_test_byte = 0;
+	return byte;
+}
+
+u32 *terminal_test_pixel(unsigned n)
+{
+	assert(n < 19200);
+	pixel_writes++;
+	return terminal_test_pixels + n;
+}
 
 u32 *terminal_test_video(unsigned n)
 {
 	assert(n < 8);
 	if (n == 4) {
-		video[n] = 0;
+		video[n] = video_busy;
 	}
 	return video + n;
 }
@@ -25,7 +41,14 @@ static void output(const char *text)
 {
 	while (*text) {
 		terminal_test_byte = 256u | (unsigned char)*text++;
-		terminal_input();
+		unsigned steps = 0;
+		while (terminal_test_byte) {
+			terminal_input();
+			if (terminal_test_byte) {
+				terminal_render();
+			}
+			assert(++steps < 2500);
+		}
 	}
 	terminal_test_byte = 0;
 }
@@ -51,6 +74,31 @@ int main(void)
 	output("\033[999;999HZ\r\n");
 	/* Scroll rotates physical rows instead of copying the 75-KiB bitmap. */
 	assert(letter(29, 79) == 'Z');
+	/* Publish immediately even with an entire dirty screen. Hold the next
+	 * byte and recycled-row writes until PAL acknowledges the new mapping. */
+	terminal_render();
+	assert((video[3] & 65535) == 8);
+	video_busy = 1;
+	terminal_test_byte = 256u | '!';
+	for (unsigned i = 0; i < 640; i++) {
+		terminal_test_pixels[i] = 0x11111111;
+	}
+	for (unsigned i = 0; i < 10; i++) {
+		terminal_input();
+		terminal_render();
+	}
+	assert(terminal_test_byte == (256u | '!'));
+	for (unsigned i = 0; i < 640; i++) {
+		assert(terminal_test_pixels[i] == 0x11111111);
+	}
+	video_busy = 0;
+	unsigned before = pixel_writes;
+	terminal_render();
+	assert(pixel_writes - before == 640);
+	for (unsigned i = 0; i < 640; i++) {
+		assert(terminal_test_pixels[i] == 0);
+	}
+	terminal_test_byte = 0;
 	for (unsigned i = 0; i < 2500; i++) {
 		terminal_render();
 	}
@@ -71,6 +119,33 @@ int main(void)
 		assert(terminal_test_pixels[(2 * 8 + scan) * 80 + 9] == 0);
 	}
 	assert(lit != 0);
-	puts("PASS terminal: CR/LF, erase, cursor, SGR, bounds, ring scroll, VT52 and graphics");
+	/* A clean row must forget the high bound left by a previous full erase. */
+	output("\033[H");
+	for (unsigned i = 0; i < 2500; i++) {
+		terminal_render();
+	}
+	before = pixel_writes;
+	output("X");
+	for (unsigned i = 0; i < 2500; i++) {
+		terminal_render();
+	}
+	assert(pixel_writes - before == 16);
+	/* The printable byte causing an automatic wrap belongs to the recycled
+	 * row and must survive its fast pixel clear. */
+	output("\033[30;80HZW");
+	for (unsigned i = 0; i < 2500; i++) {
+		terminal_render();
+	}
+	assert(letter(1, 0) == 'W');
+	for (unsigned scan = 0; scan < 8; scan++) {
+		u32 expected = 0;
+		for (unsigned bit = 0; bit < 8; bit++) {
+			if (terminal_font['W' - 32][scan] & (1u << bit)) {
+				expected |= 15u << (bit * 4);
+			}
+		}
+		assert(terminal_test_pixels[(8 + scan) * 80] == expected);
+	}
+	puts("PASS terminal: parser, ring scroll ordering/ack/clear, bounded redraw, VT52 and graphics");
 	return 0;
 }
