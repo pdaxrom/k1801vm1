@@ -9,6 +9,7 @@
 #define TERM_ENABLE MMIO(0x40000504u)
 #define VIDEO(n) MMIO(0x40000400u + 4u * (n))
 #define TEXT(n) MMIO(0x60000000u + TERMINAL_TEXT + 4u * (n))
+#define GLYPH(n) MMIO(0x60000000u + TERMINAL_GLYPHS + 4u * (n))
 #define PIXEL(n) MMIO(0x60000000u + TERMINAL_FRAME + 4u * (n))
 #endif
 #include "terminal_font.h"
@@ -22,6 +23,8 @@ static const uint16_t pixels4[16] = {
 static uint8_t row, col, saved_row, saved_col, origin, scroll_stage;
 static uint8_t fg, bg, reverse, underline, wrap, state, private_mode;
 static uint8_t graphics, graphics_g0, graphics_g1, charset, cursor, vt52;
+static uint8_t cursor_row, cursor_col, cursor_drawn;
+static uint8_t preempted;
 static uint8_t low[TERMINAL_ROWS], high[TERMINAL_ROWS];
 static uint16_t params[3];
 static uint8_t parameter;
@@ -39,15 +42,27 @@ static unsigned disk_pending(void)
 	return 0;
 }
 
+static unsigned terminal_poll(void)
+{
+	/* Only poll software controllers when the bridge signals an event.
+	 * Once a disk command starts, leave the paint batch at its next boundary. */
+	if (BUS_STATUS & 7) {
+		poll_io();
+		if (disk_pending()) {
+			preempted = 1;
+		}
+	}
+	return preempted;
+}
+
 static unsigned physical_row(unsigned y)
 {
 	unsigned n = origin + y;
 	return n >= TERMINAL_ROWS ? n - TERMINAL_ROWS : n;
 }
 
-static void dirty(unsigned y, unsigned x)
+static void dirty_physical(unsigned n, unsigned x)
 {
-	unsigned n = physical_row(y);
 	if (low[n] == TERMINAL_COLS) {
 		low[n] = high[n] = x;
 		return;
@@ -60,6 +75,11 @@ static void dirty(unsigned y, unsigned x)
 	}
 }
 
+static void dirty(unsigned y, unsigned x)
+{
+	dirty_physical(physical_row(y), x);
+}
+
 static u32 blank(void)
 {
 	return 32u | ((u32)fg << 8) | ((u32)bg << 12);
@@ -70,7 +90,7 @@ static void erase(unsigned y, unsigned first, unsigned last)
 	unsigned n = physical_row(y);
 	u32 cell = blank();
 	for (unsigned x = first; x <= last; x++) {
-		poll_io();
+		terminal_poll();
 		if (TEXT(n * TERMINAL_COLS + x) != cell) {
 			TEXT(n * TERMINAL_COLS + x) = cell;
 			dirty(y, x);
@@ -178,7 +198,12 @@ static void csi(unsigned ch)
 static void put(unsigned ch)
 {
 	ch &= 127;
-	dirty(row, col);
+	/* Remove only a cursor that actually reached the bitmap. Cursor travel
+	 * through TAB/CR/escape bytes does not change the intervening cells. */
+	if (cursor_drawn) {
+		dirty_physical(cursor_row, cursor_col);
+		cursor_drawn = 0;
+	}
 	if (ch == 27) {
 		state = 1;
 	} else if (state == 1) {
@@ -284,14 +309,14 @@ static void put(unsigned ch)
 			col++;
 		}
 	}
-	dirty(row, col);
 }
 
 void terminal_input(void)
 {
-	/* Keep the ring mapping stable until PAL has applied this linefeed and
-	 * the recycled row is clear. Disks continue through the main scheduler. */
-	if (scroll_stage || disk_pending()) {
+	/* Finish the current row before accepting more text. This also fences
+	 * CR/LF without popping a byte early: every field is visible as its line
+	 * advances, even if an erase or a disk request left earlier dirty work. */
+	if (scroll_stage || low[physical_row(row)] != TERMINAL_COLS || preempted) {
 		return;
 	}
 	u32 byte = TERM_BYTE;
@@ -304,7 +329,7 @@ void terminal_render(void)
 {
 	/* Disk register requests win. One input byte and one painted cell per
 	 * scheduler turn keep a continuous output stream visible as it arrives. */
-	if ((BUS_STATUS & 7) || disk_pending()) {
+	if (terminal_poll()) {
 		return;
 	}
 	if (scroll_stage == 1) {
@@ -331,8 +356,7 @@ void terminal_render(void)
 		colour |= colour << 16;
 		while (scroll_word < 8u * TERMINAL_COLS) {
 			if (!(scroll_word & 15u)) {
-				poll_io();
-				if (disk_pending()) {
+				if (terminal_poll()) {
 					return;
 				}
 			}
@@ -342,7 +366,10 @@ void terminal_render(void)
 		scroll_stage = 0;
 		return;
 	}
-	for (unsigned y = 0; y < TERMINAL_ROWS; y++) {
+	/* Service the row receiving text first, then sweep the rest of the ring.
+	 * A fixed physical-row order starves columns after clears and wrapping. */
+	unsigned y = physical_row(row);
+	for (unsigned n = 0; n < TERMINAL_ROWS; n++, y = y + 1 == TERMINAL_ROWS ? 0 : y + 1) {
 		/* This physical row still contains the visible old top until ack.
 		 * Other pending cells can be painted during the vertical-blank wait. */
 		if (scroll_stage == 2 && y == physical_row(TERMINAL_ROWS - 1)) {
@@ -368,19 +395,48 @@ void terminal_render(void)
 		back |= back << 8;
 		back |= back << 16;
 		for (unsigned scan = 0; scan < 8; scan++) {
-			poll_io();
-			if (disk_pending()) {
+			if (terminal_poll()) {
 				return;
 			}
-			unsigned bits = terminal_font[ch - 32][scan];
-			if (scan == 7 && ((cell & 131072u) || (cursor && y == physical_row(row) && x == col))) {
-				bits = 255;
+			u32 mask = GLYPH((ch - 32) * 8 + scan);
+			if (scan == 7 && (cell & 131072u)) {
+				mask = ~0u;
 			}
-			u32 mask = pixels4[bits & 15] | ((u32)pixels4[bits >> 4] << 16);
 			PIXEL((y * 8 + scan) * 80 + x) = back ^ ((front ^ back) & mask);
 		}
 		low[y] = x == high[y] ? TERMINAL_COLS : x + 1;
 		return;
+	}
+	/* Draw the final cursor once, after glyphs and queued bytes have drained.
+	 * A busy stream should spend its paint budget on text, not cursor trails. */
+	if (cursor && !cursor_drawn && !scroll_stage && !(TERM_ENABLE & ~1u)) {
+		unsigned y = physical_row(row);
+		u32 cell = TEXT(y * TERMINAL_COLS + col);
+		unsigned a = (cell >> ((cell & 65536u) ? 12 : 8)) & 15u;
+		u32 colour = a | (a << 4);
+		colour |= colour << 8;
+		colour |= colour << 16;
+		PIXEL((y * 8 + 7) * TERMINAL_COLS + col) = colour;
+		cursor_row = y;
+		cursor_col = col;
+		cursor_drawn = 1;
+	}
+}
+
+void terminal_service(void)
+{
+	if (disk_pending()) {
+		return;
+	}
+	preempted = 0;
+	/* Amortize the main scheduler's five controller scans. A bounded batch
+	 * still checks incoming I/O at every glyph scanline and each clear chunk. */
+	for (unsigned n = 0; n < 8; n++) {
+		if (terminal_poll()) {
+			return;
+		}
+		terminal_input();
+		terminal_render();
 	}
 }
 
@@ -391,6 +447,12 @@ void terminal_init(void)
 	cursor = 1;
 	for (unsigned i = 0; i < TERMINAL_COLS * TERMINAL_ROWS; i++) {
 		TEXT(i) = blank();
+	}
+	/* Expand the font once in the existing reserved SRAM. The bit-serial
+	 * renderer then loads one complete mask instead of unpacking each row. */
+	for (unsigned i = 0; i < 96u * 8; i++) {
+		unsigned bits = terminal_font[i / 8][i % 8];
+		GLYPH(i) = pixels4[bits & 15] | ((u32)pixels4[bits >> 4] << 16);
 	}
 	for (unsigned i = 0; i < 19200; i++) {
 		PIXEL(i) = 0;

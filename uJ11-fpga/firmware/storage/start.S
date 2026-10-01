@@ -14,8 +14,13 @@ _start:
     sw zero, 0(t0)
     addi t0, t0, 4
     j 1b
-2:  la t0, __cold_start
+2:  /* Tail-bank addresses are fixed and can lie outside gp +/- 2 KiB.
+     * Do not let relaxation estimate their range before shrinking code. */
+    .option push
+    .option norelax
+    la t0, __cold_start
     la t1, __cold_end
+    .option pop
 4:  bgeu t0, t1, 5f
     sw zero, 0(t0)
     addi t0, t0, 4

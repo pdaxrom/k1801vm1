@@ -26,6 +26,31 @@ module tb_terminal;
         .write(bus.disk.data_accept && bus.disk.memory_selected && bus.disk.de),.address(bus.disk.da));
     integer accepted=0,received=0,stalls=0,checks=0;
     integer scroll_steps=0,busy_clocks=0;
+    longint clocks=0,directory_started;
+    integer directory_ring=0,directory_lines=0;
+    bit checking_directory=0;
+    reg [7:0] font[0:767];
+    string font_path;
+    function [31:0] pixel_word(input integer a);
+        pixel_word={ram.memory[a+3],ram.memory[a+2],ram.memory[a+1],ram.memory[a]};
+    endfunction
+    task visible_directory_row(input integer y);
+        integer ch,a;
+        reg [31:0] expected_pixel;
+        for(integer x=0;x<80;x++)begin
+            ch=ram.memory['h1e4000+4*(y*80+x)]&127;
+            if(ch<32 || ch>=127)$fatal(1,"invalid directory text %0d",ch);
+            for(integer scan=0;scan<8;scan++)begin
+                expected_pixel=0;
+                for(integer b=0;b<8;b++)
+                    if(font[(ch-32)*8+scan][b])expected_pixel|=32'hf<<(4*b);
+                a='h1ec000+4*((y*8+scan)*80+x);
+                if(pixel_word(a)!=expected_pixel)
+                    $fatal(1,"incomplete continuous DIR row=%0d col=%0d ch=%c scan=%0d",y,x,ch,scan);
+                checks++;
+            end
+        end
+    endtask
     reg [7:0] previous_origin=0;
     reg [31:0] held_instruction_address;
     always @(posedge clk)begin
@@ -50,6 +75,14 @@ module tb_terminal;
     end
     reg [7:0] expected[0:4095],serial;
     always @(posedge clk)begin
+        clocks++;
+        // The previous line must already be painted when the real parser
+        // consumes CR. No idle drain is allowed before this assertion.
+        if(checking_directory && bus.disk.data_accept && bus.disk.terminal_selected &&
+           !bus.disk.de && !bus.disk.da[2] && bus.disk.terminal.fifo_data==32'h10d)begin
+            visible_directory_row((directory_ring+directory_lines)%30);
+            directory_lines++;
+        end
         if(bus.mirror_push && bus.disk.terminal.fifo.enabled)begin
             expected[accepted]=write_data[7:0];accepted++;
         end
@@ -87,6 +120,8 @@ module tb_terminal;
     endtask
     string out;integer f;
     initial begin
+        if(!$value$plusargs("FONT=%s",font_path))$fatal(1,"reference font required");
+        $readmemh(font_path,font);
         for(integer i=0;i<2097152;i++)ram.memory[i]=8'h5a;
         repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);reset=0;
         wait(cpu_start);
@@ -123,9 +158,22 @@ module tb_terminal;
         if(bus.disk.terminal.fifo.count!=0)$fatal(1,"undrained console queue");
         if(bus.pal.video.vorigin!=48)$fatal(1,"ring scroll origin %0d",bus.pal.video.vorigin);
         if(scroll_steps!=6)$fatal(1,"expected six visible linefeed steps, got %0d",scroll_steps);
+        text("\033[2J\033[H");
+        directory_ring=bus.pal.video.vorigin/8;
+        directory_started=clocks;checking_directory=1;
+        for(integer line=0;line<35;line++)
+            text("RT11XM.SYS\t111 20-Dec-85\tRT11FB.SYS\t86 20-Dec-85\r\n");
+        wait(directory_lines==35);
+        checking_directory=0;
+        $display("Continuous tabbed DIR: %0d lines, %0d clocks (%0d us), every column painted before CR",
+                 directory_lines,clocks-directory_started,(clocks-directory_started)/50);
+        wait(bus.disk.terminal.fifo.count==0);
+        wait(bus.pal.video.vorigin==96);
+        repeat(100000)@(negedge clk);
+        if(scroll_steps!=12)$fatal(1,"expected twelve independent total scroll steps, got %0d",scroll_steps);
         if(bus.pal.video.underruns)$fatal(1,"PAL underrun %0d",bus.pal.video.underruns);
         $display("PASS PAL console mirror: %0d checks, %0d serial bytes, %0d backpressure clocks, 240 rows, %0d scroll steps",checks,received,stalls,scroll_steps);
         $finish;
     end
-    initial begin #5000000000;$fatal(1,"mirror timeout PC=%h",bus.disk.ia);end
+    initial begin #8000000000;$fatal(1,"mirror timeout PC=%h",bus.disk.ia);end
 endmodule

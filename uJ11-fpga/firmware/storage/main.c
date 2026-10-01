@@ -558,7 +558,6 @@ void main(void)
 			close_card();
 			controller_finish(error);
 		}
-		terminal_input();
-		terminal_render();
+		terminal_service();
 	}
 }

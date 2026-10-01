@@ -7,6 +7,7 @@
 
 u32 terminal_test_byte, terminal_test_enable;
 u32 terminal_test_text[2400], terminal_test_pixels[19200];
+u32 terminal_test_glyphs[768];
 
 void poll_io(void)
 {
@@ -56,6 +57,41 @@ static void output(const char *text)
 static unsigned letter(unsigned y, unsigned x)
 {
 	return terminal_test_text[y * 80 + x] & 127;
+}
+
+static void streamed(const char *text)
+{
+	while (*text) {
+		terminal_test_byte = 256u | (unsigned char)*text++;
+		unsigned steps = 0;
+		do {
+			terminal_input();
+			terminal_render();
+			assert(++steps < 2500);
+		} while (terminal_test_byte);
+	}
+}
+
+static void row_visible(unsigned y)
+{
+	/* Inspect the bitmap before pausing input or allowing a deferred drain.
+	 * Tabs, CR and LF must not leave the directory's right columns pending. */
+	for (unsigned x = 0; x < 80; x++) {
+		unsigned ch = letter(y, x);
+		assert(ch >= 32 && ch < 127);
+		for (unsigned scan = 0; scan < 8; scan++) {
+			u32 expected = 0;
+			for (unsigned bit = 0; bit < 8; bit++) {
+				if (terminal_font[ch - 32][scan] & (1u << bit)) {
+					expected |= 15u << (bit * 4);
+				}
+			}
+			if (terminal_test_pixels[(y * 8 + scan) * 80 + x] != expected) {
+				fprintf(stderr, "Incomplete streamed directory: row=%u col=%u ch=%c scan=%u\n", y, x, ch, scan);
+				assert(0);
+			}
+		}
+	}
 }
 
 int main(void)
@@ -129,7 +165,7 @@ int main(void)
 	for (unsigned i = 0; i < 2500; i++) {
 		terminal_render();
 	}
-	assert(pixel_writes - before == 16);
+	assert(pixel_writes - before == 8);
 	/* The printable byte causing an automatic wrap belongs to the recycled
 	 * row and must survive its fast pixel clear. */
 	output("\033[30;80HZW");
@@ -146,6 +182,15 @@ int main(void)
 		}
 		assert(terminal_test_pixels[(8 + scan) * 80] == expected);
 	}
-	puts("PASS terminal: parser, ring scroll ordering/ack/clear, bounded redraw, VT52 and graphics");
+	output("\033[2J\033[H\033[?25l");
+	for (unsigned i = 0; i < 2500; i++) {
+		terminal_render();
+	}
+	unsigned start = (video[3] & 65535u) / 8;
+	for (unsigned i = 0; i < 3; i++) {
+		streamed("RT11XM.SYS\t111 20-Dec-85\tRT11FB.SYS\t86 20-Dec-85\r\n");
+		row_visible((start + i) % 30);
+	}
+	puts("PASS terminal: parser, ring scroll ordering/ack/clear, bounded redraw, streamed tabbed directory, VT52 and graphics");
 	return 0;
 }

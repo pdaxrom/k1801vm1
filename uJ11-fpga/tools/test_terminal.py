@@ -2,6 +2,7 @@
 """Validate the software parser and the real SERV/UART/PAL console mirror."""
 import argparse
 import json
+import re
 import subprocess
 from pathlib import Path
 from board_common import ROOT
@@ -29,7 +30,12 @@ def run(out):
                         '--top-module', 'tb_terminal', '-j', '4', '--Mdir', str(out / 'obj')] + inventory,
                        cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     with (out / 'simulation.log').open('w') as log:
-        subprocess.run([str(out / 'obj/Vtb_terminal'), f'+OUT={out}'] + memory_args(hw),
+        font = [int(value, 16) for value in re.findall(r'0x([0-9a-f]{2})',
+                (ROOT / 'firmware/storage/terminal_font.h').read_text())]
+        assert len(font) == 768
+        font_path = out / 'font.mem'
+        font_path.write_text(''.join(f'{value:02x}\n' for value in font))
+        subprocess.run([str(out / 'obj/Vtb_terminal'), f'+OUT={out}', f'+FONT={font_path}'] + memory_args(hw),
                        cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     result = (out / 'simulation.log').read_text()
     assert 'PASS PAL console mirror' in result
