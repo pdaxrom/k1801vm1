@@ -30,3 +30,14 @@ releases/hc7000-serv-*/**/*-uart.txt -whitespace
 releases/hc7000-serv-*/firmware/*.lst -whitespace
 releases/hc7000-serv-*/firmware/*.map -whitespace
 releases/hc7000-serv-*/menu/*.lst -whitespace
+# Preserve generated PLL and frozen qualification snapshots byte-for-byte.
+# Their exact bytes are checked by synthesis inputs and release SHA256SUMS.
+boards/hc7000/video/uj11_pal_pll.v -whitespace
+releases/hc7000-ebr-audit/** -whitespace
+releases/hc7000-pal-*/** -whitespace
+releases/hc7000-serv-*/** -whitespace
+releases/hc7000-terminal/** -whitespace
+# Consecutive ODT prompts in these raw captures resemble conflict markers.
+releases/hc7000-ebr-audit/**/tb_cpu.log binary
+releases/hc7000-pal-*/**/tb_cpu.log binary
+releases/hc7000-serv-*/**/tb_cpu.log binary

@@ -1,10 +1,11 @@
 `timescale 1ns/1ps
 // Full 2.9BSD multiuser boot using actual CPU, SERV, SRAM and UART waveforms.
-module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
+module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000,VIDEO_ENABLE=0,TERMINAL_ENABLE=0);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
-    reg clk=0,power_on=1,rx=1,halt_button=0;
+    reg clk=0,vclk=0,power_on=1,rx=1,halt_button=0;
+    always #7.8125 vclk=~vclk;
     localparam integer BIT_TICKS=(CLOCK_HZ+57600)/115200;
     always #(500000000.0/CLOCK_HZ) clk=~clk;
     wire initialized,tx,boot_complete,stopped;
@@ -16,12 +17,22 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
     reg [7:0] expected[0:65535],serial_value,previous_char=0;
     string segment="",uart_path,monitor;
     uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(CLOCK_HZ/50),
-        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
+        .VIDEO_ENABLE(VIDEO_ENABLE),.TERMINAL_ENABLE(TERMINAL_ENABLE),
+        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(
+        .video_clk(vclk),.video_reset(!VIDEO_ENABLE),.tvout(),.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete),.stopped(stopped),
         .diagnostic_halt(),.diagnostic_wait(),.diagnostic_retire(),.diagnostic_mode());
+    wire terminal_empty;
+    generate if(TERMINAL_ENABLE)begin: terminal_check
+        terminal_monitor monitor(.clk(clk),.reset(dut.bus.disk.iop_reset),
+            .push(dut.bus.mirror_push && dut.bus.disk.terminal.fifo.enabled),.written(dut.bus.write_data[7:0]),
+            .pop(dut.bus.disk.data_accept && dut.bus.disk.terminal_selected && !dut.bus.disk.de &&
+                !dut.bus.disk.da[2] && dut.bus.disk.terminal.fifo.count!=0),
+            .read(dut.bus.disk.terminal.fifo_data[7:0]),.empty(terminal_empty));
+    end else begin assign terminal_empty=1;end endgenerate
     serv_memory_guard guard(.clk(clk),.reset(dut.bus.disk.iop_reset),
         .write(dut.bus.disk.data_accept && dut.bus.disk.memory_selected && dut.bus.disk.de),.address(dut.bus.disk.da));
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
@@ -214,6 +225,11 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000);
         if(profile_enabled)for(integer i=0;i<3072;i++)
             if(profile_upc[i])$display("BSD_UPC %03x %0d",i,profile_upc[i]);
         check(mmu_fetches>1000 && dma_words>1000 && concurrent_fetches>100,"BSD MMU and autonomous IO");
+        wait(terminal_empty);
+        if(TERMINAL_ENABLE)begin
+            repeat(5000000)@(negedge clk);
+            check(dut.bus.pal.video.vcontrol==1 && !dut.bus.pal.video.underruns,"PAL terminal active without underruns");
+        end
         $display("PASS MMU BSD: %0d checks, %0d clocks, %0d DMA words, %0d mapped fetches",checks,clocks,dma_words,mmu_fetches);$finish;
     end
 endmodule

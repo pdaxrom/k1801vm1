@@ -5,6 +5,7 @@ The original RSX RQ0 placeholder is checked separately from bootable RQ1.
 Only fresh regular SD files are created; source disks are opened read-only.
 """
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 from pathlib import Path
@@ -50,25 +51,25 @@ def make_card(case, out, menu, boot_unit=0):
     return image, record
 
 
-def run(out, menu, selected):
+def run(out, menu, selected, jobs=1, enter_boot=False):
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     hardware = build()
     testbench = ROOT / 'tests/mmu/tb_mmu_boot_matrix.v'
     inventory = CORE + BOARD + [GUARD,str(testbench.relative_to(ROOT)),
-                               'tests/models/async_sram_model.v', 'tests/models/spi_sd_model.v']
+                               'tests/models/async_sram_model.v', 'tests/models/spi_sd_model.v', 'tests/models/terminal_monitor.v']
     files = {p: sha(ROOT / p) for p in inventory + ['tools/test_os_boot_rtl.py', 'tools/test_os_boot_simh.py','tools/serv_test.py']}
     with (out / 'build.log').open('w') as log:
         subprocess.run(['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD',
-                        '--top-module', 'tb_mmu_boot_matrix', f'-GCLOCK_HZ={hardware["clock_mhz"]*1000000}', '-j', '4', '--Mdir', str(out / 'obj')]
+                        '--top-module', 'tb_mmu_boot_matrix', f'-GCLOCK_HZ={hardware["clock_mhz"]*1000000}', f'-GVIDEO_ENABLE={int(hardware["video"])}', f'-GTERMINAL_ENABLE={int(hardware["terminal"])}', '-j', '4', '--Mdir', str(out / 'obj')]
                        + inventory, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
-    records = []
-    for case in selected:
+    def validate(case):
         source_case='rsx' if case.startswith('rsx') else case
         boot_unit=int(case[-1]) if case.startswith('rsx') else 0
         image, media = make_card(source_case, out / case, menu, boot_unit)
         args = [str(out / 'obj/Vtb_mmu_boot_matrix')]+memory_args(hardware)+[ f'+SD_IMAGE={image}',
                 f'+UART_LOG={out / case}/uart.txt', f'+CASE={case}', '+BOOT_MENU']
+        if enter_boot:args.append('+ENTER_BOOT')
         with (out / case / 'simulation.log').open('w') as log:
             subprocess.run(args, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
         log = (out / case / 'simulation.log').read_text()
@@ -76,12 +77,14 @@ def run(out, menu, selected):
         assert sha(image) == media['image_sha256']
         assert all(sha(ROOT.parent / 'lsi11/disks' / name) == digest for name, digest in media['sources'].items())
         result = dict(case=case, validation_completed=True, boot_passed=case!='rsx-rq0',
-                      expected_nonbootable=case=='rsx-rq0', all_devices_supported=True,
+                      expected_nonbootable=case=='rsx-rq0', enter_boot=enter_boot, all_devices_supported=True,
                       media=media, originals_unchanged=True)
         if case=='rsx-rq0':result['reason']='Original RQ0 contains a nonbootable placeholder, also confirmed in SIMH'
         (out / case / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
-        records.append(result)
         print(case + ': ' + log[log.index('PASS MMU matrix'):].splitlines()[0], flush=True)
+        return result
+    with ThreadPoolExecutor(max_workers=jobs) as pool:
+        records = list(pool.map(validate, selected))
     assert all(sha(ROOT / p) == digest for p, digest in files.items())
     record = dict(validation_completed=True, checks_passed=True, all_devices_supported=True,
                   hardware=hardware, files=files, cases=records)
@@ -92,6 +95,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--menu',type=Path,required=True)
+    parser.add_argument('--enter-boot',action='store_true',help='boot by Enter instead of waiting for the menu timeout')
+    parser.add_argument('--jobs',type=int,choices=(1,2,3,4),default=1)
     parser.add_argument('--case',action='append',choices=('rt11xm','rt11v4','rsx-rq0','rsx-rq1'))
     a=parser.parse_args()
-    run(a.out,a.menu.resolve(),a.case or ['rt11xm','rt11v4','rsx-rq0','rsx-rq1'])
+    run(a.out,a.menu.resolve(),a.case or ['rt11xm','rt11v4','rsx-rq0','rsx-rq1'],a.jobs,a.enter_boot)

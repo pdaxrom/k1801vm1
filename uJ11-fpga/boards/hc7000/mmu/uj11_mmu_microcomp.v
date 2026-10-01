@@ -1,7 +1,9 @@
 `timescale 1ns/1ps
 module uj11_mmu_microcomp #(
     parameter integer CLOCK_HZ=24000000,
-    parameter integer DIAGNOSTICS_ENABLE=0
+    parameter integer DIAGNOSTICS_ENABLE=0,
+    parameter integer VIDEO_ENABLE=0,
+    parameter integer TERMINAL_ENABLE=0
 )(
     input wire clk_ext, res, rx,
     output wire tx,
@@ -16,6 +18,12 @@ module uj11_mmu_microcomp #(
     output wire [5:0] tvout, output wire [1:0] audio
 );
     wire clk, locked;
+    wire video_clk,video_locked;
+    generate if(VIDEO_ENABLE)begin: pal_clock
+        uj11_pal_pll pll(.CLKI(clk_ext),.CLKOP(),.CLKOS(video_clk),.LOCK(video_locked));
+    end else begin: no_pal_clock
+        assign video_clk=1'b0,video_locked=1'b0;
+    end endgenerate
     generate if(CLOCK_HZ==50000000)begin: clock50
         uj11_hc7000_pll50 pll(.CLKI(clk_ext),.CLKOP(),.CLKOS(clk),.LOCK(locked));
     end else begin: clock24
@@ -37,8 +45,9 @@ module uj11_mmu_microcomp #(
     wire host_miso=panel_pins[6], host_miso_oe=panel_pins[7];
     assign hg_tdo=host_miso_oe ? host_miso : 1'bz;
     uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(CLOCK_HZ/50),
-        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000),.SD_FAST_DIV(2)) system(
+        .VIDEO_ENABLE(VIDEO_ENABLE),.TERMINAL_ENABLE(TERMINAL_ENABLE),.SD_SLOW_DIV((CLOCK_HZ+399999)/400000),.SD_FAST_DIV(2)) system(
         .clk(clk),.reset(CLOCK_HZ==50000000 ? system_reset : power_on[3] || hard_reset || !memory_initialized),
+        .video_clk(video_clk),.video_reset(!video_locked),.tvout(tvout),
         .power_on(power_on[3]),.memory_initialized(memory_initialized),
         .halt_button(halt_button),.uart_rx(rx),.uart_tx(tx),
         .panel_keys({1'b0,hg_tdi,hg_tck,hg_tms}),
@@ -57,5 +66,5 @@ module uj11_mmu_microcomp #(
     assign flash_cs_n=1'b1, flash_wp_n=1'b1, flash_hold_n=1'b1;
     assign flash_sck=1'b0, flash_mosi=1'b0;
     assign led_rgb=3'b111;
-    assign tvout=6'b0, audio=2'b0;
+    assign audio=2'b0;
 endmodule

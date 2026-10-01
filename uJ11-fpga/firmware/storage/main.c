@@ -1,4 +1,5 @@
 #include "storage.h"
+#include "terminal.h"
 /* SDHC service and scheduler for independent PDP-11 disk controllers. */
 
 static int elapsed(u32 start, u32 limit)
@@ -524,6 +525,8 @@ static u32 rl_command(struct sd_partition *p)
 }
 void main(void)
 {
+	terminal_init();
+	bootstrap();
 	u32 error=initialize();
 	if(error) {
 		controllers_init();
@@ -531,7 +534,8 @@ void main(void)
 		boot_status=0xc000u|error;
 	}
 	sd_ownership(0);
-	for(;;)for(unsigned bank=0; bank<NCONTROLLERS; bank++) {
+	for(;;) {
+		for(unsigned bank=0; bank<NCONTROLLERS; bank++) {
 			poll_io();
 			if(!controllers[bank].busy) {
 				continue;
@@ -554,4 +558,7 @@ void main(void)
 			close_card();
 			controller_finish(error);
 		}
+		terminal_input();
+		terminal_render();
+	}
 }

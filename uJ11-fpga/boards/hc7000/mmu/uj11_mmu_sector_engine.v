@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-// A 512-byte staging RAM and autonomous sector transfers. SPI commands/tokens
+// Autonomous sector transfers through a 512-byte staging RAM. SPI commands/tokens
 // belong to firmware. Operations: 1=SPI->buffer, 2=buffer->SPI,
 // 3=physical SRAM->buffer (zero-pad), 4=buffer->physical SRAM (stop at word count).
 module uj11_mmu_sector_engine(
@@ -17,7 +17,11 @@ module uj11_mmu_sector_engine(
     output wire [21:0] dma_address,
     output wire [15:0] dma_data,
     input wire dma_ready,dma_error,
-    input wire [15:0] dma_rdata
+    input wire [15:0] dma_rdata,
+    output wire buffer_request,buffer_write,
+    output wire [7:0] buffer_address,
+    output wire [15:0] buffer_input,
+    input wire [15:0] buffer_data
 );
     localparam IDLE=0, BUFFER_READ=1, BUFFER_WAIT=2, SPI_WAIT=3,
         SPI_GAP=4, DMA_WAIT=5, DMA_GAP=6, PAD=7;
@@ -32,12 +36,16 @@ module uj11_mmu_sector_engine(
     reg [8:0] count;
     reg [7:0] index,low;
     reg high,error,nxm;
-    wire [15:0] buffer_data;
-    wire buffer_write=(state==SPI_WAIT && spi_ready && mode==1 && high) ||
-                      (state==DMA_WAIT && dma_ready && !dma_error && mode==3) || state==PAD;
-    wire [15:0] buffer_input=state==PAD ? 16'b0 : mode==1 ? {spi_rdata,low} : dma_rdata;
-    uj11_sector_ram buffer(.clk(clk),.write(buffer_write),.address(index),
-        .write_data(buffer_input),.data(buffer_data));
+    // Commit received words in the existing gap cycle. This keeps the
+    // combinational DMA/SPI reply out of the shared EBR's address/enable mux.
+    // index is held through the gap; direct_data doubles as the receive latch.
+    assign buffer_write=(state==SPI_GAP && mode==1 && high) ||
+                      (state==DMA_GAP && mode==3) || state==PAD;
+    assign buffer_input=state==PAD ? 16'b0 : direct_data;
+    // Writes are accepted on this edge; reads are held after BUFFER_WAIT.
+    // The memory arbiter guarantees these slots without stalling SPI/DMA.
+    assign buffer_request=buffer_write || state==BUFFER_READ;
+    assign buffer_address=index;
     assign busy=state!=IDLE;
     assign spi_request=state==SPI_WAIT;
     assign spi_write=mode==2;
@@ -90,6 +98,7 @@ module uj11_mmu_sector_engine(
                 SPI_WAIT:if(spi_ready) begin
                     crc<=crc_byte(crc,mode==1 ? spi_rdata : spi_data);
                     if(!high)low<=spi_rdata;
+                    if(mode==1 && high)direct_data<={spi_rdata,low};
                     state<=SPI_GAP;
                 end
                 SPI_GAP:begin
@@ -99,7 +108,7 @@ module uj11_mmu_sector_engine(
                     else begin index<=index+1'b1;state<=mode==1 ? SPI_WAIT : BUFFER_READ;end
                 end
                 DMA_WAIT:if(dma_ready)begin
-                    if(mode==6 && !dma_error)direct_data<=dma_rdata;
+                    if((mode==3 || mode==6) && !dma_error)direct_data<=dma_rdata;
                     if(mode==5 && dma_rdata!=buffer_data)mismatch<=1;
                     if(dma_error)begin state<=IDLE;error<=1;nxm<=1;end
                     else state<=mode>=6 ? IDLE : DMA_GAP;

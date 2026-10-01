@@ -19,6 +19,10 @@ BOARD+=['boards/hc7000/uj11_sram.v','boards/hc7000/uj11_hg_inputs.v','boards/hc7
     'build/hc7000-mmu-hardware/uj11_mmu_rom.v','build/hc7000-mmu-hardware/uj11_mmu_boot_rom.v',
     'build/hc7000-mmu-iop/uj11_mmu_iop_ram.v','build/hc7000-mmu-iop/uj11_sector_ram.v']
 BOARD+=[p for p in sources('hc7000-lcd-sram')[1] if p.startswith('vendor/serv/')]
+VIDEO=['boards/hc7000/video/'+n+'.v' for n in (
+    'uj11_pal_video','uj11_pal_timing','uj11_pal_encoder','uj11_pal_ram','uj11_video_arbiter',
+    'uj11_console_fifo','uj11_serv_sram')]
+BOARD+=VIDEO
 TOP_TEMPLATE='boards/hc7000/mmu/uj11_mmu_microcomp.v'
 TOP='build/hc7000-mmu-hardware/uj11_mmu_microcomp.v'
 
@@ -30,8 +34,21 @@ def diagnostics_enabled():
         raise ValueError('UJ11_HC7000_DIAGNOSTICS must be 0 or 1')
     return value=='1'
 
+def video_enabled():
+    value=os.environ.get('UJ11_HC7000_VIDEO','0')
+    if value not in ('0','1'):raise ValueError('UJ11_HC7000_VIDEO must be 0 or 1')
+    if value=='1' and (iop_profile()!='storage' or clock_mhz()!=50 or fpp_mode()!='off'):
+        raise ValueError('PAL video requires MMU / storage / FPP off / 50 MHz')
+    return value=='1'
+
+def terminal_enabled():
+    value=os.environ.get('UJ11_HC7000_TERMINAL','0')
+    if value not in ('0','1'):raise ValueError('UJ11_HC7000_TERMINAL must be 0 or 1')
+    if value=='1' and not video_enabled():raise ValueError('Terminal mirror requires PAL video')
+    return value=='1'
+
 def build():
-    diagnostics=diagnostics_enabled()
+    diagnostics=diagnostics_enabled();video=video_enabled();terminal=terminal_enabled()
     if iop_profile()=='storage' and fpp_mode()!='off':
         raise ValueError('IOP=storage requires FPP=off: storage firmware requires the compact no-FPP microstore')
     cpu=cpu_build();iop=iop_build()
@@ -42,6 +59,10 @@ def build():
                     f'parameter integer DIAGNOSTICS_ENABLE={int(diagnostics)}')
     (ROOT/TOP).write_text(top.replace('parameter integer CLOCK_HZ=24000000',
                                     f'parameter integer CLOCK_HZ={clock_mhz()*1000000}'))
+    top_path=ROOT/TOP
+    top_path.write_text(top_path.read_text().replace('parameter integer VIDEO_ENABLE=0',
+                                                   f'parameter integer VIDEO_ENABLE={int(video)}').replace(
+        'parameter integer TERMINAL_ENABLE=0',f'parameter integer TERMINAL_ENABLE={int(terminal)}'))
     boot_source='firmware/boot/SDIOP.MAC' if iop_profile()=='storage' else 'firmware/boot/SDBASE.MAC'
     raw,symbols,assembly,directory=native(ROOT/boot_source)
     blob=raw[0o4000:symbols['IMEND']]
@@ -65,7 +86,7 @@ def build():
     record=dict(cpu=cpu,iop=iop,bootstrap=dict(assembly=assembly,directory=str(directory.relative_to(ROOT))),
         files={p:sha(ROOT/p) for p in CORE+BOARD+[TOP,TOP_TEMPLATE,'tools/build_mmu_board.py',boot_source]},
         scope='MMU board; physical-board qualification pending',fpp=cpu['fpp'],clock_mhz=clock_mhz(),
-        diagnostics=diagnostics,
+        diagnostics=diagnostics,video=video,terminal=terminal,
         fp_arithmetic=cpu['fpp']=='microcode',boot_pc_octal='004000',sram_bytes=2097152,dma_address_bits=22 if iop_profile()=='storage' else 18)
     (OUT/'board-inputs.json').write_text(json.dumps(record,indent=2)+'\n')
     return record

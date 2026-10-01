@@ -25,7 +25,7 @@ def fixture(path,menu,mode):
             # signature, and the controller ABI, then spins in guest code.
             words=[0o010037,0o1000,0o012737,0o12345+p.unit,0o1002,0o010137,0o1004,0o000777]
             f.seek(p.start*512);f.write(struct.pack('<8H',*words))
-    if mode!='direct':sdcard([str(path),'menu',str(menu)])
+    if mode not in ('direct','reset'):sdcard([str(path),'menu',str(menu)])
     if mode in ('bad-header','bad-payload','bad-size'):
         with path.open('r+b') as f:
             if mode=='bad-payload':f.seek(3*512+12);f.write(b'\xff')
@@ -37,14 +37,15 @@ def fixture(path,menu,mode):
                     hdr[510:512]=crc16(hdr[:510]).to_bytes(2,'big')
                 f.seek(2*512);f.write(hdr)
 
-CASES=('auto','rl-auto','xp-auto','rk-auto','rq-auto','enter','cancel','no-default','direct','bad-header','bad-payload','bad-size','bad-wire')
+CASES=('auto','rl-auto','xp-auto','rk-auto','rq-auto','enter','cancel','no-default','direct','reset','bad-header','bad-payload','bad-size','bad-wire')
 
 def run(out,only=None,assembler=None):
     record=build();out.mkdir(parents=True,exist_ok=True)
     record['menu']=build_menu(out/'menu',assembler)
     inventory=CORE+BOARD+['tests/mmu/tb_storage_menu.v','tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
     record['test_files']={p:sha(ROOT/p) for p in inventory+['tools/test_storage_menu.py','tools/sdcard.py','tools/storage_menu.py']}
-    cmd=['verilator','--binary','--timing','-Wno-WIDTH','-Wno-TIMESCALEMOD','--top-module','tb_storage_menu','-j','4','--Mdir',str(out/'obj')]+inventory
+    cmd=['verilator','--binary','--timing','-Wno-WIDTH','-Wno-TIMESCALEMOD','--top-module','tb_storage_menu',
+         f'-GCLOCK_HZ={record["clock_mhz"]*1000000}','-j','4','--Mdir',str(out/'obj')]+inventory
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     cases=[]
     for mode in ([only] if only else CASES):

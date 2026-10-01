@@ -1,10 +1,11 @@
 `timescale 1ns/1ps
-module tb_storage_rk_rq;
+module tb_storage_rk_rq #(parameter FAST_MEMORY=0);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
-    reg clk=0,reset=1,power_on=1,peripheral_reset=0;
-    always #20.833 clk=~clk;
+    reg clk=0,vclk=0,reset=1,power_on=1,peripheral_reset=0;
+    always #(FAST_MEMORY ? 10 : 20.833) clk=~clk;
+    always #7.8125 vclk=~vclk;
     reg request=0,writing=0,byte_access=0;
     reg [21:0] address=0;reg [15:0] write_data=0;
     wire ready,error,initialized,boot_complete,irq_valid;
@@ -14,14 +15,15 @@ module tb_storage_rk_rq;
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     wire tx,cs,sck,mosi,miso;wire [7:0] pins;
     integer checks=0,n;
-    uj11_mmu_board_bus #(.BOOT_ROM_ENABLE(0),.CLEAR_WORDS(1),.TICK_DIVISOR(1024),.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) dut(
+    uj11_mmu_board_bus #(.BOOT_ROM_ENABLE(0),.SRAM_FAST(FAST_MEMORY),.VIDEO_ENABLE(FAST_MEMORY),.CLEAR_WORDS(1),.TICK_DIVISOR(1024),.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) dut(
+        .video_clk(vclk),.video_reset(!FAST_MEMORY),.tvout(),
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.cpu_lock(1'b0),.dma_map_enabled(dma_map_enabled),
         .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),
         .ready(ready),.error(error),.read_data(read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),
         .irq_vector(irq_vector),.irq_ack(irq_ack),.uart_rx(1'b1),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.memory_initialized(initialized),
         .sram_address(sa),.sram_data(sd),.sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
-        .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete));
+        .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete),.cpu_start());
     serv_memory_guard guard(.clk(clk),.reset(dut.disk.iop_reset),
         .write(dut.disk.data_accept && dut.disk.memory_selected && dut.disk.de),.address(dut.disk.da));
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
@@ -38,7 +40,7 @@ module tb_storage_rk_rq;
         if(dut.disk.ic && dut.disk.ia_ack)begin
             trace_pc[trace_index%128]<=dut.disk.ia;trace_instruction[trace_index%128]<=dut.disk.mem_data;trace_index<=trace_index+1;
         end
-        if(dut.disk.ic && dut.disk.ia>=12288)begin
+        if(dut.disk.ic && dut.disk.ia>=13312)begin
             for(integer t=0;t<128;t++)$display("SERV %h %h",trace_pc[(trace_index+t)%128],trace_instruction[(trace_index+t)%128]);
             $fatal(1,"SERV fetch outside RAM: %h",dut.disk.ia);
         end
@@ -104,11 +106,18 @@ module tb_storage_rk_rq;
         check(irq_valid && irq_vector==16'o154,"RQ completion IRQ");acknowledge;
         ring_index=1-ring_index;
     endtask
+    task video_on;
+        if(FAST_MEMORY)begin
+            put(22'o17777204,16'h1e);put(22'o17777200,1);put(22'o17777210,1);
+            do bus(0,0,22'o17777216,0,0);while(value[0]);
+            check(!(value & 16'hff0c),"PAL video enabled without errors");
+        end
+    endtask
     initial begin
         repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);reset=0;
         do bus(0,0,22'o17777504,0,0);while(!value[15]);
         wait(!dut.disk.owner);
-        check(value==16'ha008,"RK0 boot metadata");
+        check(value==16'ha008,"RK0 boot metadata");video_on;
         expect_word(RK,16'o4720);expect_word(RK+4,16'o200);
         bus(0,0,22'o17774400,0,1);bus(0,0,22'o17777440,0,1); // absent controllers do not alias RK
         rk_io(16'o105,256,16'h8000,0);rk_done(0);
@@ -164,10 +173,14 @@ module tb_storage_rk_rq;
         check(word_at('h100)==16'hcafe,"UNIBUS I/O page never aliases SRAM");
         map_page(10,22'h3ffffe);rk_io(5,1,'h14004,0);rk_done(0);
         check(word_at(2)=={pattern(0,1),pattern(0,0)},"map addition wraps at 22 bits");
+        if(FAST_MEMORY)begin
+            bus(0,0,22'o17777216,0,0);check(!(value & 16'hff0c),"PAL no underrun during RK DMA");
+        end
         @(negedge clk);peripheral_reset=1;@(negedge clk);peripheral_reset=0;
         for(integer page=0;page<32;page++)begin
             expect_word(UBM+4*page,0);expect_word(UBM+4*page+2,0);
         end
+        video_on;
         // BME remains high here: RQ ring and data must bypass the zeroed map.
         // Full UQSSP handshake, 22-bit rings and data, two-slot wrap.
         rq_init;
@@ -193,6 +206,9 @@ module tb_storage_rk_rq;
         packet(8'o77,0,0,0,0);dispatch(8'o77,16'h0801);
         put(RQ,0);sa_wait(16'h0b40);check(!irq_valid,"RQ reset clears interrupt");
         rq_init;packet(8'o41,0,512,DATA,0);dispatch(8'o41,4); // reset makes units available, not online
+        if(FAST_MEMORY)begin
+            bus(0,0,22'o17777216,0,0);check(!(value & 16'hff0c),"PAL no underrun during RQ DMA");
+        end
         $display("PASS MMU RK/RQ service: %0d checks",checks);$finish;
     end
     initial begin #2000000000;$fatal(1,"global timeout SERV PC=%h",dut.disk.ia);end

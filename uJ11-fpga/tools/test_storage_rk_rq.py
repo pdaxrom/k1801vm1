@@ -23,7 +23,7 @@ def fixture(path):
                 f.write(bytes((((lba+offset)*17)^(j*3)^(j>>8))&255 for j in range(512)))
     return label
 
-def run(out,vendor=None):
+def run(out,vendor=None,fast_memory=False):
     if os.environ.get('UJ11_MMU_IOP')!='storage':raise ValueError('Set UJ11_MMU_IOP=storage and UJ11_MMU_FPP=off')
     record=build();out.mkdir(parents=True,exist_ok=True)
     inventory=CORE+BOARD+[GUARD,'tests/mmu/tb_storage_rk_rq.v','tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
@@ -35,6 +35,9 @@ def run(out,vendor=None):
     else:
         cmd=['verilator','--binary','--timing','-Wno-WIDTH','-Wno-TIMESCALEMOD','--top-module','tb_storage_rk_rq','-j','4','--Mdir',str(out/'obj')]+inventory
         sim=[str(out/'obj/Vtb_storage_rk_rq')]
+    if fast_memory:
+        cmd.append('-Ptb_storage_rk_rq.FAST_MEMORY=1' if vendor else '-GFAST_MEMORY=1')
+    record['fast_memory_with_pal']=fast_memory
     with (out/'build.log').open('w') as log:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
     path=out/'controllers.img';fixture(path);before=sha(path)
     with (out/'controllers.log').open('w') as log:
@@ -49,4 +52,5 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--out',type=Path,default=ROOT/'build/test-storage-rk-rq')
     p.add_argument('--vendor-library',type=Path)
-    a=p.parse_args();run(a.out.resolve(),a.vendor_library)
+    p.add_argument('--fast-memory',action='store_true',help='50 MHz SRAM fast-response, PAL arbiter and concurrent video during RQ DMA')
+    a=p.parse_args();run(a.out.resolve(),a.vendor_library,a.fast_memory)

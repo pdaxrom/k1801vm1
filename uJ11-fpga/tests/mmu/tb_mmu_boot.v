@@ -12,7 +12,8 @@ module tb_mmu_boot;
     integer dma_words=0,concurrent_fetches=0,mmu_fetches=0,uart_file,b;
     reg [7:0] expected[0:65535],serial_value,previous_char=0;
     string segment="",uart_path,monitor;
-    uj11_mmu_board dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
+    uj11_mmu_board dut(
+        .video_clk(1'b0),.video_reset(1'b1),.tvout(),.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),

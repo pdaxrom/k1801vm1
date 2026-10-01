@@ -18,6 +18,7 @@ typedef uint32_t u32;
 #define DMA_MODE MMIO(0x40000210u)
 #define DIRECT MMIO(0x40000214u)
 #define TIME MMIO(0x40000300u)
+#define CPU_START MMIO(0x40000304u)
 enum { RH_BANK,RL_BANK,XP_BANK,RK_BANK,RQ_BANK,NCONTROLLERS };
 struct controller {
 	uint16_t r[22],epoch;
@@ -35,6 +36,7 @@ union unibus_map {
 extern union unibus_map ubmap;
 #define R(n) regs[n]
 void poll_io(void);
+void bootstrap(void);
 int active(void);
 void controller_reset(unsigned bank);
 void controller_finish(u32 error);

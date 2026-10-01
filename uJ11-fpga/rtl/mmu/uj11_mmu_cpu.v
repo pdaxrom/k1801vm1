@@ -93,7 +93,10 @@ module uj11_mmu_cpu #(
             1:d=ir; 2:d=saved_psw; 3:d=mmr0; 4:d=mmr1;5:d=mmr2;6:d=mmr3;7:d=BOOT_PC;8:d=instruction_pc;
             default:begin end
         endcase
-        if(prepare_direct)d=mdr;
+        // The pipelined execution mux below selects live MDR for direct
+        // reads. Repeating that decode before prepared_d adds a ROM->decode
+        // timing path whose result is discarded in the execution stage.
+        if(prepare_direct && !pipeline_enabled)d=mdr;
     end
     reg [15:0] prepared_d;
     always @(posedge clk)prepared_d<=d;

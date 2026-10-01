@@ -23,7 +23,8 @@ module tb_storage_disk;
     wire [12:0] io_address=metadata ? 13'o17504 : 13'o17440+{ra,1'b0};
     assign ready=io_ready && rr;assign irq=io_irq && io_vector==9'o210;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
-        .clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(1'b0),.rk_request(1'b0),.rk_write(rw),
+        .video_reg_write(),.video_reg_address(),.video_reg_data(),.video_reg_lanes(),.video_reg_read(16'b0),
+        .mirror_push(1'b0),.mirror_data(8'b0),.mirror_ready(),.dma_lanes(),.dma_reserved(),.clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(1'b0),.rk_request(1'b0),.rk_write(rw),
         .rk_address(ra),.rk_lanes(rl),.rk_wdata(wd),.rk_rdata(),.rk_ready(),.rk_irq(),.rk_irq_ack(1'b0),
         .storage_enabled(),.io_request(rr),.io_address(io_address),.io_rdata(rd),.io_ready(io_ready),.io_error(io_error),
         .io_irq(io_irq),.io_vector(io_vector),.io_irq_ack(irq_ack),
@@ -31,7 +32,7 @@ module tb_storage_disk;
         .sd_rdata(srd),.sd_ready(sready),.sd_error(serror),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),
         .dma_request(dr),.dma_write(dw),.dma_unibus(),.dma_address(da),.dma_data(dd),
-        .dma_ready(dready),.dma_error(1'b0),.dma_rdata(mrd));
+        .dma_ready(dready),.dma_error(1'b0),.dma_rdata(mrd),.cpu_start());
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(reset),
         .cpu_lock(1'b0),.cpu_request(cr),.cpu_write(cw),.cpu_address(ca),.cpu_lanes(2'b11),.cpu_data(cd),.cpu_ready(cready),
         .dma_request(dr),.dma_write(dw),.dma_address(da),.dma_data(dd),.dma_ready(dready),
@@ -131,11 +132,11 @@ module tb_storage_disk;
             expect_reg(5,0,"bad label exposes no drive");
             put(0,16'o23);check(io_error,"bad label rejects controller access with NXM");
             repeat(10000)@(negedge clk);
-            check(card.writes==0 && dma_cycles==0,"invalid label cannot write or DMA");
+            check(card.writes==0 && dma_cycles==215,"invalid label permits only the SRAM bootstrap copy");
             $display("PASS MMU storage bad label: %0d checks",checks);$finish;
         end
         initialized_iop();
-        check(dma_cycles==0,"startup does not touch guest SRAM");
+        check(dma_cycles==215,"startup copies exactly the bootstrap into SRAM");
         expect_reg(5,16'o100701,"unit 0 present");
         put(4,7);expect_reg(5,16'o104701,"unit 7 write protected");
         put(4,1);expect_reg(5,0,"absent unit status");

@@ -19,14 +19,15 @@ module tb_mmu_disk;
     reg traffic=0;integer cpu_cycles=0,dma_cycles=0,checks=0;
     reg absent=0,fail_read=0,fail_write=0,stuck_busy=0;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
-        .clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(1'b0),.rk_request(rr),.rk_write(rw),
+        .video_reg_write(),.video_reg_address(),.video_reg_data(),.video_reg_lanes(),.video_reg_read(16'b0),
+        .mirror_push(1'b0),.mirror_data(8'b0),.mirror_ready(),.dma_lanes(),.dma_reserved(),.clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(1'b0),.rk_request(rr),.rk_write(rw),
         .rk_address(ra),.rk_lanes(rl),.rk_wdata(wd),.rk_rdata(rd),.rk_ready(ready),.rk_irq(irq),.rk_irq_ack(irq_ack),
         .storage_enabled(),.io_request(1'b0),.io_address(13'b0),.io_rdata(),.io_ready(),.io_error(),.io_irq(),.io_vector(),.io_irq_ack(1'b0),
         .sd_request(sr),.sd_write(sw),.sd_byte(1'b0),.sd_address(sa),.sd_wdata(sd),
         .sd_rdata(srd),.sd_ready(sready),.sd_error(serror),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),
         .dma_request(dr),.dma_write(dw),.dma_unibus(),.dma_address(da),.dma_data(dd),
-        .dma_ready(dready),.dma_error(1'b0),.dma_rdata(mrd));
+        .dma_ready(dready),.dma_error(1'b0),.dma_rdata(mrd),.cpu_start());
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(reset),
         .cpu_lock(1'b0),.cpu_request(cr),.cpu_write(cw),.cpu_address(ca),.cpu_lanes(2'b11),.cpu_data(cd),.cpu_ready(cready),
         .dma_request(dr),.dma_write(dw),.dma_address(da),.dma_data(dd),.dma_ready(dready),

@@ -1,9 +1,10 @@
 `timescale 1ns/1ps
 // Full SD bootstrap -> RT-11 using actual CPU, SERV, SRAM and UART waveforms.
-module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLOCK_HZ/50);
-    reg clk=0,power_on=1,rx=1,halt_button=0;
+module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLOCK_HZ/50,VIDEO_ENABLE=0,TERMINAL_ENABLE=0);
+    reg clk=0,vclk=0,power_on=1,rx=1,halt_button=0;
     localparam integer BIT_TICKS=(CLOCK_HZ+57600)/115200;
     always #(500000000.0/CLOCK_HZ) clk=~clk;
+    always #7.8125 vclk=~vclk;
     wire initialized,tx,boot_complete,stopped;
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     wire cs,sck,mosi,miso;wire [7:0] pins;
@@ -18,13 +19,22 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
     integer dma_words=0,concurrent_fetches=0,mmu_fetches=0,uart_file,b;
     reg [7:0] expected[0:65535],serial_value,previous_char=0;
     string segment="",uart_path,monitor;
-    uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(TICK_DIVISOR),
-        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
+    uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(TICK_DIVISOR),.VIDEO_ENABLE(VIDEO_ENABLE),.TERMINAL_ENABLE(TERMINAL_ENABLE),
+        .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(
+        .video_clk(vclk),.video_reset(!VIDEO_ENABLE),.tvout(),.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(boot_complete),.stopped(stopped),
         .diagnostic_halt(),.diagnostic_wait(),.diagnostic_retire(),.diagnostic_mode());
+    wire terminal_empty;
+    generate if(TERMINAL_ENABLE)begin: terminal_check
+        terminal_monitor monitor(.clk(clk),.reset(dut.bus.disk.iop_reset),
+            .push(dut.bus.mirror_push && dut.bus.disk.terminal.fifo.enabled),.written(dut.bus.write_data[7:0]),
+            .pop(dut.bus.disk.data_accept && dut.bus.disk.terminal_selected && !dut.bus.disk.de &&
+                !dut.bus.disk.da[2] && dut.bus.disk.terminal.fifo.count!=0),
+            .read(dut.bus.disk.terminal.fifo_data[7:0]),.empty(terminal_empty));
+    end else begin assign terminal_empty=1;end endgenerate
     serv_memory_guard guard(.clk(clk),.reset(dut.bus.disk.iop_reset),
         .write(dut.bus.disk.data_accept && dut.bus.disk.memory_selected && dut.bus.disk.de),.address(dut.bus.disk.da));
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
@@ -175,7 +185,7 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
             wait_text("ASSIGN RK3: FOR:");settled_prompt();contains("RT-11XM");
             check(!dut.cpu.fpp_enabled,"compiler qualification has FPP disabled");
             phase=1;shell("SHOW CONFIGURATION");contains("PDP 11/84 Processor");
-            contains("2048KB of memory");contains("Floating Instruction Set (FIS)");
+            contains(TERMINAL_ENABLE ? "1936KB of memory" : "2048KB of memory");contains("Floating Instruction Set (FIS)");
             phase=2;dialogue("RUN BAS:BASIC","INDIVIDUAL)? ");dialogue("A","READY");
             dialogue("PRINT 2+3","READY");contains(" 5 ");shell("BYE");
             phase=3;dialogue("RUN PAS:XM","*");shell("VOL:CTPAS,VOL:CTPAS=VOL:ADDER");
@@ -208,8 +218,8 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
                 contains("RK05, units: 0 1 2");
                 shell("SET SL OFF");
                 phase=1;shell("SHOW CONFIGURATION");contains("Booted from DM0:RT11XM");
-                contains("2048KB of memory");contains("22 bit addressing is on");
-                phase=2;shell("SHOW MEMORY");contains("10000000  MEMTOP");
+                contains(TERMINAL_ENABLE ? "1936KB of memory" : "2048KB of memory");contains("22 bit addressing is on");
+                phase=2;shell("SHOW MEMORY");contains(TERMINAL_ENABLE ? "07440000  MEMTOP" : "10000000  MEMTOP");
                 phase=3;shell("DIR DM1:");contains("ADDER");
                 phase=4;shell("DIR RK0:BASIC.SAV");contains("BASIC");
                 phase=5;shell("DIR RK1:XM.SAV");contains("XM");
@@ -221,6 +231,11 @@ module tb_mmu_boot_matrix #(parameter integer CLOCK_HZ=24000000,TICK_DIVISOR=CLO
             end
         end
         check(boot_complete && dma_words>1000,"bootstrap and autonomous disk DMA");
+        wait(terminal_empty);
+        if(TERMINAL_ENABLE)begin
+            repeat(5000000)@(negedge clk);
+            check(dut.bus.pal.video.vcontrol==1 && !dut.bus.pal.video.underruns,"PAL terminal active without underruns");
+        end
         $display("PASS MMU matrix %s: %0d checks, %0d clocks, %0d DMA words",boot_case,checks,clocks,dma_words);$finish;
     end
 endmodule

@@ -1,0 +1,222 @@
+        .TITLE PALDEM
+        .ASECT
+        .=020000
+; Standalone HC7000 only. Destroys both frame slots 1E0000..1FFFFF and
+; kernel MMU state. Start from ODT after stopping the OS, never under RT-11.
+; All numbers are octal unless followed by a decimal point.
+VCTRL=177200
+VBLO=177202
+VBHI=177204
+VY=177206
+VAPPLY=177210
+VPIDX=177212
+VPDATA=177214
+VSTAT=177216
+KPAR0=172340
+KPDR0=172300
+KPAR4=172350
+MMR0=177572
+MMR3=172516
+RCSR=177560
+RBUF=177562
+TCSR=177564
+TBUF=177566
+START:  RESET
+        SPL 7
+        MOV #016000,SP
+        MOV #KPAR0,R0
+        CLR R1
+        MOV #7,R2
+SETPAR: MOV R1,(R0)+
+        ADD #0200,R1
+        SOB R2,SETPAR
+        MOV #177600,(R0) ; 22-bit I/O page
+        MOV #KPDR0,R0
+        MOV #8.,R2
+SETPDR: MOV #077406,(R0)+
+        SOB R2,SETPDR
+        MOV #20,@#MMR3
+        MOV #1,@#MMR0
+        CLR @#VCTRL
+        JSR PC,APPLY
+        CLR R1
+PALSET: MOV R1,@#VPIDX
+        MOVB PAL16(R1),R0
+        BIC #177400,R0
+        MOV R0,@#VPDATA
+        INC R1
+        CMP R1,#16.
+        BLO PALSET
+        MOV #1,MODE
+        JSR PC,PAINT
+        MOV #HELLO,R5
+        JSR PC,PUTS
+GETKEY: TSTB @#RCSR
+        BPL GETKEY
+        MOV @#RBUF,R0
+        BIC #177600,R0
+        JSR PC,PUTC
+        CMP R0,#'1
+        BEQ HIRES
+        CMP R0,#'2
+        BEQ LORES
+        BIC #40,R0
+        CMP R0,#'S
+        BEQ SCROLL
+        CMP R0,#'P
+        BEQ PAGE
+        CMP R0,#'B
+        BEQ BARS
+        CMP R0,#'Q
+        BEQ QUIT
+        BR GETKEY
+HIRES:  MOV #1,MODE
+        BR REDRAW
+LORES:  MOV #3,MODE
+REDRAW: JSR PC,PAINT
+        BR GETKEY
+BARS:   MOV #5,@#VCTRL
+        JSR PC,APPLY
+        BR GETKEY
+PAGE:   MOV #02000,R0
+        XOR R0,CURPAR
+PSET:   MOV CURPAR,R0
+        ASH #-10.,R0
+        MOV R0,@#VBHI
+        MOV MODE,@#VCTRL
+        JSR PC,APPLY
+        BR GETKEY
+SCROLL: ; Clear the eight physical rows that become the new bottom row.
+        MOV ORIGIN,R0
+        ASH #6,R0
+        MOV R0,R1
+        ASL R1
+        ASL R1
+        ADD R1,R0           ; old origin * 320 bytes
+        MOV R0,R1
+        BIC #017777,R1
+        ASH #-6,R1
+        ADD CURPAR,R1
+        MOV R1,@#KPAR4
+        BIC #160000,R0
+        ADD #100000,R0
+        MOV R0,R4
+        MOV #1280.,R1
+        CLR R0
+SCLR:   JSR PC,PWORD
+        SOB R1,SCLR
+        ADD #8.,ORIGIN
+        CMP ORIGIN,#200.
+        BLO SVALID
+        CLR ORIGIN
+SVALID: MOV ORIGIN,@#VY
+        MOV MODE,@#VCTRL
+        JSR PC,APPLY
+        BR GETKEY
+QUIT:   CLR @#VCTRL
+        JSR PC,APPLY
+        CLR @#MMR0
+        HALT
+        BR QUIT
+
+; Paint both 64,000-byte pages, then show A. Character cells are 8x8;
+; the existing repository font is centred horizontally inside each cell.
+PAINT:  CLR @#VCTRL
+        JSR PC,APPLY
+        CLR ORIGIN
+        CLR @#VY
+        CLR @#VBLO
+        MOV #074000,CURPAR
+        MOVB #'A,TEXT+5
+        JSR PC,FRAME
+        MOV #076000,CURPAR
+        MOVB #'B,TEXT+5
+        JSR PC,FRAME
+        MOV #074000,CURPAR
+        MOV #36,@#VBHI
+        MOV MODE,@#VCTRL
+        JSR PC,APPLY
+        RTS PC
+FRAME:  MOV CURPAR,@#KPAR4
+        MOV #100000,R4
+        CLR LINE
+        MOV #TEXT,TXTROW
+ROW:    MOV LINE,FROW
+        BIC #177770,FROW
+        MOV TXTROW,R5
+        MOV #80.,R1
+        BIT #2,MODE
+        BEQ COL
+        MOV #40.,R1
+COL:    MOVB (R5)+,R0
+        BIC #177600,R0
+        ASH #3,R0
+        ADD #FONT,R0
+        ADD FROW,R0
+        MOVB (R0),R2
+        BIC #177400,R2
+        MOV #2,R3
+        BIT #2,MODE
+        BEQ PIX4
+        MOV #4,R3
+PIX8:   MOV R2,R0
+        BIC #177774,R0
+        ASL R0
+        MOV TAB8(R0),R0
+        JSR PC,PWORD
+        ASH #-2,R2
+        SOB R3,PIX8
+        BR CNEXT
+PIX4:   MOV R2,R0
+        BIC #177760,R0
+        ASL R0
+        MOV TAB4(R0),R0
+        JSR PC,PWORD
+        ASH #-4,R2
+        SOB R3,PIX4
+CNEXT:  SOB R1,COL
+        INC LINE
+        BIT #7,LINE
+        BNE RNEXT
+        ADD #80.,TXTROW
+RNEXT:  CMP LINE,#200.
+        BLO ROW
+        RTS PC
+PWORD:  MOV R0,(R4)+
+        CMP R4,#120000
+        BLO PWRET
+        MOV #100000,R4
+        ADD #0200,@#KPAR4
+PWRET:  RTS PC
+APPLY:  MOV #1,@#VAPPLY
+APWAIT: TST @#VAPPLY
+        BNE APWAIT
+        RTS PC
+PUTS:   MOVB (R5)+,R0
+        BEQ PSRET
+        JSR PC,PUTC
+        BR PUTS
+PSRET:  RTS PC
+PUTC:   TSTB @#TCSR
+        BPL PUTC
+        MOV R0,@#TBUF
+        RTS PC
+MODE:   .WORD 1
+CURPAR: .WORD 074000
+ORIGIN: .WORD 0
+LINE:   .WORD 0
+FROW:   .WORD 0
+TXTROW: .WORD TEXT
+HELLO:  .ASCII <15><12>/PAL demo: 1=640x200 2=320x200 S=scroll P=page B=bars Q=halt/<15><12><0>
+        .EVEN
+PAL16:  .BYTE 0,2,24,26,240,242,264,266,111,113,135,137,351,353,375,377
+TAB8:   .WORD 0,17,7400,7417
+TAB4:
+@@NIBBLES@@
+TEXT:
+@@TEXT@@
+FONT:
+@@FONT@@
+        .EVEN
+IMEND:
+        .END START

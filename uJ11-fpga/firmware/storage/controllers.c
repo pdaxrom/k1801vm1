@@ -1,4 +1,5 @@
 #include "storage.h"
+#include "terminal.h"
 /* Every PDP-11 register and its side effects live in SERV RAM. The FPGA only
  * holds the bus response, one interrupt vector and DMA/SD ownership controls. */
 struct controller *current;
@@ -390,6 +391,16 @@ void poll_io(void)
 			u32 mask=(lanes&1?255u:0)|(lanes&2?65280u:0);
 			ubmap.word[i]=((result&~mask)|(data&mask)) & (i&1?077:0177776);
 		}
+#ifdef UJ11_VIDEO_PAL
+	} else if((address&~017u)==017200) {
+		/* PAL control is forwarded by SERV; the FPGA has no PDP CSR decoder.
+		 * Embed PDP byte lanes in the low-level write command. */
+		volatile u32 *video=(volatile u32 *)(0x40000400u+((address&017u)<<1));
+		result=*video;
+		if(writing) {
+			*video=data|(lanes<<16);
+		}
+#endif
 	} else if(address==017750) {
 		/* KDJ11-B, UNIBUS, boot ROM, BPOK; no FP accelerator. */
 		result=01045;

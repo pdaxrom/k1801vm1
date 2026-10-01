@@ -15,13 +15,14 @@ module tb_mmu_bus;
     wire tx,cs,sck,mosi;wire [7:0] pins;
     integer checks=0,n;
     uj11_mmu_board_bus #(.CLEAR_WORDS(1),.TICK_DIVISOR(1024)) dut(
+        .video_clk(1'b0),.video_reset(1'b1),.tvout(),
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.cpu_lock(1'b0),.dma_map_enabled(1'b0),
         .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),
         .ready(ready),.error(error),.read_data(read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),
         .irq_vector(irq_vector),.irq_ack(irq_ack),.uart_rx(1'b1),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.memory_initialized(initialized),
         .sram_address(sa),.sram_data(sd),.sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
-        .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(1'b1),.boot_complete(boot_complete));
+        .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(1'b1),.boot_complete(boot_complete),.cpu_start());
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
     task check(input bit ok,input string why);
         begin if(!ok)$fatal(1,"%s address=%h data=%h",why,address,read_data);checks++;end

@@ -65,16 +65,15 @@ def rom(image,fpp='microcode',pipeline=False):
             block=re.sub(r'data\[(\d+)\]',lambda m:f'bank{bank}[{int(m[1])+(36 if lane>=4 else 0)}]',block)
             lines.append(block)
     lines += ['`else','reg [53:0] words[0:3071];reg [53:0] value;',
-        'initial $readmemh(IMAGE,words);','always @(posedge clk)if(enable)value<=words[address];',
+        'initial $readmemh(IMAGE,words);',"always @(posedge clk)if(enable)value<=address<3072 ? words[address] : 54'h0e80000000;",
         'assign data=value;','`endif','`undef UJ11_MMU_EBR','endmodule','']
     return '\n'.join(lines)
 
 def compact_rom(image,pipeline=False):
-    """Keep the dense first 1K in six EBRs, pack the sparse tail in three.
+    """Four dense x9 lanes and two tail x18 lanes; sparse flags in logic.
 
-    Logical microaddresses and every 54-bit word are unchanged. The only
-    folded region is 6F0..6FF -> physical 0F0..0FF, unused by page 4.
-    Validate the entire mapping, including STOP-filled holes, before emitting.
+    Physical storage changes only. Logical microaddresses, 54-bit words,
+    clock enable and one-cycle reads must reconstruct the assembled image.
     """
     stop=0x0e80000000
     def tail_valid(a):return 0x400<=a<0x480 or 0x500<=a<0x600 or 0x6f0<=a<0x700
@@ -83,12 +82,32 @@ def compact_rom(image,pipeline=False):
         if tail_valid(a):tail[a&511]=image[a]
     assert all(image[a]==(image[a] if a<1024 else tail[a&511] if tail_valid(a) else stop)
                for a in range(len(image))), 'microcode no longer fits compact ROM mapping'
-    # Reuse the established 9-bit lane emitter only for the dense bank.
-    dense=rom(image,'microcode')
-    blocks=re.findall(r'    DP8KC #\([\s\S]*?\n    \);',dense)[:6]
-    # Move sparse-region validity decode after the address register in the
-    # fast profile. The stored region and EBR word refer to the same clock;
-    # next-address -> ROM setup no longer includes the validity comparisons.
+    columns=[];mapping=[]
+    for bit in range(54):
+        values=tuple((w>>bit)&1 for w in image[:1024])
+        if len(set(values))==1:
+            mapping.append(('constant',values[0]))
+        else:
+            if values not in columns:columns.append(values)
+            mapping.append(('packed',columns.index(values)))
+    if len(columns)>39:
+        raise ValueError('Dense microcode exceeds 39 independent columns; revise ROM packing')
+    dense=[sum(column[a]<<bit for bit,column in enumerate(columns)) for a in range(1024)]
+    if sum(bool(w>>36) for w in dense)>32:
+        raise ValueError('Dense microcode exceeds sparse-flag logic budget; revise ROM packing')
+    for a,word in enumerate(image[:1024]):
+        restored=sum((v if kind=='constant' else (dense[a]>>v)&1)<<bit
+                     for bit,(kind,v) in enumerate(mapping))
+        assert restored==word,'Dense microcode packing lost bits'
+    if any(sum((w>>bit)&1 for w in tail)>128 for bit in range(36,54)):
+        raise ValueError('Tail microcode exceeds sparse-flag logic budget; revise ROM packing')
+    def flags(output,address,words,bits,width):
+        result=[]
+        for bit in bits:
+            locations=[a for a,w in enumerate(words) if (w>>bit)&1]
+            expression=' || '.join(f"{address}=={width}'h{a:x}" for a in locations) or "1'b0"
+            result.append(f'assign {output}[{bit}]={expression};')
+        return result
     control=(['reg [11:4] selected_region;',
         'always @(posedge clk)if(enable)selected_region<=address[11:4];',
         'wire dense_selected=selected_region[11:10]==0;',
@@ -96,15 +115,26 @@ def compact_rom(image,pipeline=False):
         'reg dense_selected,valid;',
         "wire tail_valid=(address[11:7]==5'h08 || address[11:8]==4'h5 || address[11:4]==8'h6f);",
         'always @(posedge clk)if(enable)begin dense_selected<=address[11:10]==0;valid<=address[11:10]==0 || tail_valid;end'])
-    lines=['// GENERATED compact MMU ROM: 1536 physical words, nine EBRs.',
+    lines=['// GENERATED MMU ROM: six EBRs, lossless 54-bit words; sparse flags in logic.',
         'module uj11_mmu_rom #(parameter IMAGE="build/hc7000-mmu-hardware/microcode.mem")(',
         'input wire clk,enable,input wire [11:0] address,output wire [53:0] data,output wire fpp_enabled,pipeline_enabled);',
-        "assign fpp_enabled=1'b0;",
-        f"assign pipeline_enabled=1'b{int(pipeline)};",
+        "assign fpp_enabled=1'b0;",f"assign pipeline_enabled=1'b{int(pipeline)};",
         '`ifdef SYNTHESIS','`define UJ11_MMU_EBR','`elsif UJ11_VENDOR_ROM','`define UJ11_MMU_EBR','`endif',
         '`ifdef UJ11_MMU_EBR','wire [53:0] bank0,tail;']+control+[
-        "assign data=!valid ? 54'h0e80000000 : dense_selected ? bank0 : tail;"]+blocks
-    for lane in range(3):
+        "assign data=!valid ? 54'h0e80000000 : dense_selected ? bank0 : tail;",
+        'reg [9:0] flag_address;always @(posedge clk)if(enable)flag_address<=address[9:0];',
+        'wire [38:0] packed_dense;']
+    for bit,(kind,value) in enumerate(mapping):
+        lines.append(f'assign bank0[{bit}]='+
+                     (f"1'b{value};" if kind=='constant' else f'packed_dense[{value}];'))
+    lines+=flags('packed_dense','flag_address',dense,range(36,39),10)
+    blocks=re.findall(r'    DP8KC #\([\s\S]*?\n    \);',generate([w&((1<<36)-1) for w in dense]))
+    assert len(blocks)==4
+    for lane,block in enumerate(blocks):
+        block=re.sub(r'lane_\d+',f'bank0_lane{lane}',block)
+        lines.append(re.sub(r'data\[(\d+)\]',lambda m:f'packed_dense[{m[1]}]',block))
+    lines+=flags('tail','flag_address[8:0]',tail,range(36,54),9)
+    for lane in range(2):
         lines+=['PDPW8KC #(.DATA_WIDTH_W(18),.DATA_WIDTH_R(18),.REGMODE("NOREG"),',
                 ' .CSDECODE_W("0b000"),.CSDECODE_R("0b000"),.GSR("DISABLED"),',
                 ' .RESETMODE("SYNC"),.ASYNC_RESET_RELEASE("SYNC"),.INIT_DATA("STATIC"),']
@@ -122,7 +152,8 @@ def compact_rom(image,pipeline=False):
         lines += [f' .{n}({v}){"," if i<len(ports)-1 else ""}' for i,(n,v) in enumerate(ports)]
         lines.append(');')
     lines += ['`else','reg [53:0] words[0:3071];reg [53:0] value;',
-        'initial $readmemh(IMAGE,words);','always @(posedge clk)if(enable)value<=words[address];',
+        'initial $readmemh(IMAGE,words);',
+        "always @(posedge clk)if(enable)value<=address<3072 ? words[address] : 54'h0e80000000;",
         'assign data=value;','`endif','`undef UJ11_MMU_EBR','endmodule','']
     return '\n'.join(lines)
 
@@ -139,7 +170,7 @@ def build(fpp=None):
     (OUT/'uj11_mmu_rom.v').write_text(rom(image,fpp,pipeline))
     record=dict(cpu='mmu',board='hc7000-lcd-sram',fpp=fpp,pipeline=pipeline,clock_mhz=clock_mhz(),scope='CPU microcode; board manifest is built separately',
         microcode_words=stats['used_words'],physical_words=3072 if fpp=='microcode' else 1536,
-        word_bits=54,microcode_ebr=18 if fpp=='microcode' else 9,
+        word_bits=54,microcode_ebr=18 if fpp=='microcode' else 6,
         files={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in SOURCES
                if p not in MICROCODE or p in microcode},
         outputs={p:hashlib.sha256((OUT/p).read_bytes()).hexdigest() for p in

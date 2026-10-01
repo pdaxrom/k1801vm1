@@ -7,7 +7,9 @@ FPP ?= microcode
 IOP ?= legacy
 MMU_CLOCK_MHZ ?= 24
 HC7000_DIAGNOSTICS ?= 0
-OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage)$(if $(filter 50,$(MMU_CLOCK_MHZ)),-50mhz)$(if $(filter 1,$(HC7000_DIAGNOSTICS)),-diagnostics))
+HC7000_VIDEO ?= 0
+HC7000_TERMINAL ?= 0
+OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage)$(if $(filter 50,$(MMU_CLOCK_MHZ)),-50mhz)$(if $(filter 1,$(HC7000_DIAGNOSTICS)),-diagnostics)$(if $(filter 1,$(HC7000_VIDEO)),-pal)$(if $(filter 1,$(HC7000_TERMINAL)),-terminal))
 HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
 SD_OUT ?= build/$(if $(filter mmu,$(CPU)),sd-hc7000,sd)
@@ -20,6 +22,14 @@ ifeq ($(filter $(CPU),mmuless mmu),)
 $(error Unknown CPU=$(CPU); expected mmuless or mmu)
 endif
 ifeq ($(CPU),mmu)
+ifeq ($(filter $(HC7000_VIDEO),0 1),)
+$(error Unknown HC7000_VIDEO=$(HC7000_VIDEO); expected 0 or 1)
+endif
+export UJ11_HC7000_VIDEO := $(HC7000_VIDEO)
+ifeq ($(filter $(HC7000_TERMINAL),0 1),)
+$(error Unknown HC7000_TERMINAL=$(HC7000_TERMINAL); expected 0 or 1)
+endif
+export UJ11_HC7000_TERMINAL := $(HC7000_TERMINAL)
 ifeq ($(filter $(HC7000_DIAGNOSTICS),0 1),)
 $(error Unknown HC7000_DIAGNOSTICS=$(HC7000_DIAGNOSTICS); expected 0 or 1)
 endif
@@ -51,10 +61,13 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and MAP/PAR/TRACE at the selected clock.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
+ifneq ($(HC7000_VIDEO),0)
+$(error HC7000_VIDEO is available only for CPU=mmu BOARD=hc7000-lcd-sram)
+endif
 ifneq ($(HC7000_DIAGNOSTICS),0)
 $(error HC7000_DIAGNOSTICS is available only for CPU=mmu BOARD=hc7000-lcd-sram)
 endif
@@ -247,6 +260,7 @@ test-storage-menu:
 
 test-storage:
 	$(PYTHON) -m unittest discover -s tests -p test_storage_label.py -q
+	$(PYTHON) tools/test_storage_ram.py
 	$(PYTHON) tools/test_storage.py
 
 bsd-image:
@@ -266,3 +280,14 @@ test-storage-controllers:
 test-mmu-fpp:
 	@test "$(FPP)" != off || { echo 'FPP tests require FPP=microcode'; exit 1; }
 	$(PYTHON) tools/test_mmu_fpp.py
+
+.PHONY: test-video
+test-video:
+	$(PYTHON) tools/test_pal_video.py
+
+.PHONY: pal-demo test-pal-demo
+pal-demo:
+	$(PYTHON) tools/build_pal_demo.py
+
+test-pal-demo:
+	$(PYTHON) tools/test_pal_demo.py

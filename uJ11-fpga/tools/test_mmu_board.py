@@ -11,7 +11,7 @@ from build_mmu_board import build,CORE,BOARD,sha
 def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False,profile=False):
     record=build();out.mkdir(parents=True,exist_ok=True)
     inventory=CORE+BOARD+[GUARD,'tests/mmu/'+name+'.v',
-        'tests/models/async_sram_model.v','tests/models/spi_sd_model.v']
+        'tests/models/async_sram_model.v','tests/models/spi_sd_model.v','tests/models/terminal_monitor.v']
     record['test_files']={p:sha(ROOT/p) for p in inventory+['tools/test_mmu_board.py','tools/serv_test.py']}
     extra=[]
     if vendor:
@@ -34,6 +34,9 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False,profile=Fal
     if name=='tb_mmu_bsd':
         hz=record['clock_mhz']*1000000
         cmd.append(f'-P{name}.CLOCK_HZ={hz}' if vendor else f'-GCLOCK_HZ={hz}')
+        for param in ('VIDEO_ENABLE','TERMINAL_ENABLE'):
+            value=int(record['video' if param=='VIDEO_ENABLE' else 'terminal'])
+            cmd.append(f'-P{name}.{param}={value}' if vendor else f'-G{param}={value}')
     if profile:
         assert name=='tb_mmu_bsd', 'profiling requires the BSD board test'
         sim.append('+PROFILE_BSD')
@@ -42,7 +45,7 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False,profile=Fal
     print((out/'simulation.log').read_text()[-3000:])
     if rc:raise SystemExit(rc)
     if name in ('tb_mmu_boot','tb_mmu_bsd','tb_storage_bus'):assert sha(image)==image_hash
-    assert 'PASS MMU' in (out/'simulation.log').read_text()
+    assert ('PASS PAL SERV bus' if name=='tb_pal_bus' else 'PASS MMU') in (out/'simulation.log').read_text()
     if profile:
         lines=(out/'simulation.log').read_text().splitlines()
         commands=[json.loads(s.removeprefix('BSD_PROFILE ')) for s in lines if s.startswith('BSD_PROFILE ')]
@@ -55,7 +58,7 @@ def run(out,name,vendor=None,image=None,monitor='fb',boot_menu=False,profile=Fal
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--out',type=Path,default=ROOT/'build/test-mmu-board')
-    p.add_argument('--name',choices=('tb_mmu_disk','tb_mmu_bus','tb_mmu_boot','tb_mmu_bsd','tb_storage_bus'),default='tb_mmu_disk')
+    p.add_argument('--name',choices=('tb_mmu_disk','tb_mmu_bus','tb_mmu_boot','tb_mmu_bsd','tb_storage_bus','tb_pal_bus'),default='tb_mmu_disk')
     p.add_argument('--vendor-library',type=Path)
     p.add_argument('--image',type=Path)
     p.add_argument('--monitor',choices=('fb','xm'),default='fb')

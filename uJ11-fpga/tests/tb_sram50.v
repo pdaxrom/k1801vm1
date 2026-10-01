@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Same functional/reset scenarios as tb_sram, with 50 MHz and the
 // conservative maximum FPGA pin delays used by the board timing contract.
-module tb_sram50 #(parameter integer PIN_DELAY=10,DQ_DELAY=15);
+module tb_sram50 #(parameter integer PIN_DELAY=10,DQ_DELAY=15,FAST_RESPONSE=0);
     reg clk=0, power_on=1, reset=1, request=0, writing=0;
     reg [19:0] address=0;
     reg [1:0] lanes=3;
@@ -11,7 +11,7 @@ module tb_sram50 #(parameter integer PIN_DELAY=10,DQ_DELAY=15);
     wire ready,initialized,ce,oe,we,lb,ub;
     integer i,before_writes,checks=0;
     always #10 clk=~clk;
-    uj11_sram #(.CLEAR_WORDS(16)) dut(clk,power_on,reset,request,writing,address,
+    uj11_sram #(.CLEAR_WORDS(16),.FAST_RESPONSE(FAST_RESPONSE)) dut(clk,power_on,reset,request,writing,address,
         lanes,data,result,ready,initialized,a,dq,ce,oe,we,lb,ub);
     wire [19:0] board_address;
     wire [15:0] board_data;
@@ -25,7 +25,8 @@ module tb_sram50 #(parameter integer PIN_DELAY=10,DQ_DELAY=15);
     task exchange(input bit wr,input [19:0] addr,input [1:0] be,input [15:0] value);
         begin
             @(negedge clk); request=1;writing=wr;address=addr;lanes=be;data=value;
-            wait(ready); @(negedge clk);
+            // A synchronous client consumes ready on the following rising edge.
+            wait(ready); @(posedge clk); @(negedge clk);
             before_writes=ram.writes;
             repeat(5)@(negedge clk);
             if(ram.writes!=before_writes)$fatal(1,"held request repeated write");

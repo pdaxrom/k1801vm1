@@ -12,8 +12,21 @@ Direct Python tools use `UJ11_MMU_FPP=off UJ11_MMU_IOP=storage`.
 The storage firmware uses RV32IC (compressed instructions) with the existing
 RISC-V cross compiler on Linux; the builder
 also accepts a source/hash-matched `build/hc7000-mmu-iop` cache on macOS.
-`IOP=storage` with microcoded FPP is rejected before building: the storage firmware currently reserves 12 KiB SERV RAM
-in twelve EBRs. Code, data and stack remain in EBR; PDP-11 keeps all 2 MiB SRAM.
+`IOP=storage` with microcoded FPP is rejected before building. The current source
+uses **19 KiB shared RAM in nineteen EBRs**: 18.5 KiB for SERV code/data/stack
+and 512 bytes reserved for the autonomous SD/DMA sector buffer. The former
+standalone J11 boot-ROM and sector-buffer EBRs are now part of this memory.
+The first 18 KiB support full-width 32-bit access; the last KiB uses two
+16-bit accesses per word and contains 512 bytes of optional cold data plus
+the sector buffer. Sector traffic only stalls SERV accesses to that final KiB.
+All ordinary code, BSS and the stack stay in the fast banks. SERV installs the bootstrap into ordinary SRAM
+before releasing J11, and repeats the copy on board reset. Guest `RESET` does
+not reinstall it. Code, data and stack remain in EBR; PDP-11 keeps all 2 MiB SRAM.
+This change has passed RTL and synthesis, but is not yet installed on the board;
+the installed 2AAE still uses 12 KiB and a separate boot ROM.
+See [19 KiB RAM, EBR allocation and validation](serv-19k.md), the intermediate
+[shared RAM checkpoint](serv-shared-ram.md), and
+[SERV bootstrap](serv-bootstrap.md).
 Legacy SERV remains RV32I. The verified intermediate compaction saves 1520 code
 bytes and three microstore EBRs; see
 [resource and regression results](../releases/hc7000-serv-compact/README.md).
@@ -371,7 +384,11 @@ against linker boundaries and report measured stack usage.
 
 An independent EBR check is available in `tests/tb_storage_ram.v`; compile with
 `UJ11_IOP_VENDOR_RAM` and Diamond's PDPW8KC/DP8KC/GSR/PUR models. It tests all
-3072 words, all byte lanes, bank isolation and consecutive bank selection.
+3584 words, all byte lanes, bank isolation, consecutive reads, shared CPU/sector
+collisions, padding bursts and reset. It verifies the sector's half-word view
+against the same memory accessed by SERV, including both halves of each word.
+`tools/test_storage_ram.py` also executes real RV32IC split fetches across the
+private/shared-bank boundary at 24 and 50 MHz.
 For full OS boot, pass a partitioned card image:
 
 ```
