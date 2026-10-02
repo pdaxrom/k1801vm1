@@ -1,0 +1,1921 @@
+; uJ11 MMU integer/EIS/FIS microcode. Independent 54-bit profile; no VM2 ABI.
+; Base integer routines preserve the tested ALU schedule; explicit MMU spaces below.
+; MMU encoding: private microflags, explicit memory spaces and 12-bit micro-PC.
+; T0=source value, T1=destination EA, T2=destination/result, T3=EA scratch/old destination.
+; Reset initializes the distributed RF through its single ordinary write port.
+.org $000
+RESET:
+    alu PASSA, pair=DA, d=ZERO, b=R0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R1, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R2, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R3, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R4, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R5, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R6, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=R7, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T1, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T3, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T4, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T6, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T7, dst=RF
+    alu PASSA, pair=DA, d=BOOT_PC, b=R7, dst=RF, seq=FETCH
+.org $020
+FETCH:
+    FETCH
+.org $080
+JMP:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu PASSA, a=T1, b=R7, dst=RF, seq=FETCH
+.org $088
+JSR:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu SUB, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    WRITE, a=R6, b=RS, target=JSR_LINK, prefetch=0
+JSR_LINK:
+    alu PASSA, a=R7, b=RS, dst=RF
+    alu PASSA, a=T1, b=R7, dst=RF, seq=FETCH
+.org $090
+RTS:
+    alu PASSA, a=RD, b=R7, dst=RF
+    READ, a=R6, target=RTS_POP, prefetch=0
+RTS_POP:
+    alu ADD, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    alu PASSA, pair=DA, d=MDR, b=RD, dst=RF, seq=FETCH
+.org $098
+SOB:
+    alu SUB, a=RS, b=RS, pair=AD, d=ONE, dst=RF, seq=FETCH_A1
+    alu SUB, a=R7, b=R7, pair=AD, d=DISP, dst=RF, seq=FETCH
+.org $110
+MOV_RR:
+    alu PASSA, a=RS, b=RD, dst=MOV, flags=NZV, seq=FETCH
+.org $120
+CMP_RR:
+    alu SUB, a=RS, b=RD, flags=NZVC, seq=FETCH
+.org $160
+ADD_RR:
+    alu ADD, a=RS, b=RD, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $180
+BR:
+    alu ADD, a=R7, b=R7, pair=AD, d=DISP, dst=RF, seq=FETCH
+.org $3ff
+UNSUPPORTED:
+    STOP
+
+; Source mode 0 is sampled AFTER destination EA updates, as on DCJ11.
+; Memory sources tail into destination EA after saving their operand.
+.org $1dd
+REGISTER_SOURCE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu PASSA, a=RS, b=T0, dst=RF, seq=RETURN
+
+.org $118
+MOV_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=MOV_DESTINATION, prefetch=0
+.org $128
+CMP_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=CMP_DESTINATION, prefetch=0
+.org $168
+ADD_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=ADD_DESTINATION, prefetch=0
+
+.org $200
+TWO_OPERAND_EA:
+    OR_MS, target=SOURCE_TABLE, prefetch=0
+.org $208
+SOURCE_TABLE:
+    JUMP, target=REGISTER_SOURCE_EA, prefetch=0
+    READ, a=RS, byte=IR, target=SOURCE_SAVE, prefetch=0
+    READ, a=RS, byte=IR, stream=1, target=SOURCE_2_INC, fault_inc=1, prefetch=0
+    READ, a=RS, stream=1, target=SOURCE_3_INC, fault_inc=1, prefetch=0
+    alu SUB, a=RS, b=RS, pair=AD, d=STEP, dst=RF, delta=1, seq=PAGE, next=SOURCE_4_CONT
+    alu SUB, a=RS, b=RS, pair=AD, d=TWO, dst=RF, delta=1, seq=PAGE, next=SOURCE_5_CONT
+    READ, a=R7, stream=1, target=SOURCE_6_INC, prefetch=0
+    READ, a=R7, stream=1, target=SOURCE_7_INC, prefetch=0
+.org $220
+SOURCE_DESTINATION:
+    ; Tail dispatch: DESTINATION returns directly to the two-operand caller.
+    OR_MD, target=DESTINATION_TABLE, prefetch=0
+.org $224
+SOURCE_2:
+    READ, a=RS, byte=IR, stream=1, target=SOURCE_2_INC, fault_inc=1, prefetch=0
+SOURCE_2_INC:
+    alu ADD, a=RS, b=RS, pair=AD, d=STEP, dst=RF, delta=1
+    JUMP, target=SOURCE_SAVE, prefetch=0
+.org $230
+SOURCE_3:
+    READ, a=RS, stream=1, target=SOURCE_3_INC, fault_inc=1, prefetch=0
+SOURCE_3_INC:
+    alu ADD, a=RS, b=RS, pair=AD, d=TWO, dst=RF, delta=1
+    JUMP, target=SOURCE_INDIRECT, prefetch=0
+.org $238
+SOURCE_4:
+    alu SUB, a=RS, b=RS, pair=AD, d=STEP, dst=RF, delta=1
+SOURCE_4_CONT:
+    READ, a=RS, byte=IR, target=SOURCE_SAVE, prefetch=0
+.org $240
+SOURCE_5:
+    alu SUB, a=RS, b=RS, pair=AD, d=TWO, dst=RF, delta=1
+SOURCE_5_CONT:
+    READ, a=RS, target=SOURCE_INDIRECT, prefetch=0
+.org $248
+SOURCE_6:
+    READ, a=R7, stream=1, target=SOURCE_6_INC, prefetch=0
+SOURCE_6_INC:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu ADD, a=RS, b=T3, pair=AD, d=MDR, dst=RF
+    READ, a=T3, byte=IR, target=SOURCE_SAVE, prefetch=0
+.org $250
+SOURCE_7:
+    READ, a=R7, stream=1, target=SOURCE_7_INC, prefetch=0
+SOURCE_7_INC:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu ADD, a=RS, b=T3, pair=AD, d=MDR, dst=RF
+    READ, a=T3, target=SOURCE_INDIRECT, prefetch=0
+SOURCE_INDIRECT:
+    alu PASSA, b=T3, pair=DA, d=MDR, dst=RF
+    READ, a=T3, byte=IR, target=SOURCE_SAVE, prefetch=0
+.org $260
+SOURCE_SAVE:
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF, seq=PAGE, next=SOURCE_DESTINATION
+
+; Dispatch slots issue their first EA operation directly, avoiding a JUMP.
+; Destination EA does not read the final operand. MOV must never read its
+; destination CSR. CMP/ADD read only in their execution routines below.
+.org $280
+DESTINATION_EA:
+    OR_MD, target=DESTINATION_TABLE, prefetch=0
+.org $288
+DESTINATION_TABLE:
+    RETURN ; source ready, destination is register: safe lookahead window
+    alu PASSA, a=RD, b=T1, dst=RF, seq=RETURN
+    alu PASSA, a=RD, b=T1, dst=RF, seq=PAGE, next=DESTINATION_2_CONT
+    READ, a=RD, stream=1, target=DESTINATION_3_INC, fault_inc=1, prefetch=0
+    alu SUB, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1, seq=PAGE, next=DESTINATION_4_CONT
+    alu SUB, a=RD, b=RD, pair=AD, d=TWO, dst=RF, delta=1, seq=PAGE, next=DESTINATION_5_CONT
+    READ, a=R7, stream=1, target=DESTINATION_6_INC, prefetch=0
+    READ, a=R7, stream=1, target=DESTINATION_7_INC, prefetch=0
+.org $2a0
+DESTINATION_1:
+    alu PASSA, a=RD, b=T1, dst=RF
+DESTINATION_1_CONT:
+    RETURN, prefetch=0
+.org $2a4
+DESTINATION_2:
+    alu PASSA, a=RD, b=T1, dst=RF
+DESTINATION_2_CONT:
+    alu ADD, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1, seq=RETURN
+.org $2a8
+DESTINATION_3:
+    READ, a=RD, stream=1, target=DESTINATION_3_INC, fault_inc=1, prefetch=0
+DESTINATION_3_INC:
+    alu ADD, a=RD, b=RD, pair=AD, d=TWO, dst=RF, delta=1
+    JUMP, target=DESTINATION_FROM_MDR, prefetch=0
+.org $2b0
+DESTINATION_4:
+    alu SUB, a=RD, b=RD, pair=AD, d=STEP, dst=RF, delta=1
+DESTINATION_4_CONT:
+    alu PASSA, a=RD, b=T1, dst=RF, seq=RETURN
+.org $2b4
+DESTINATION_5:
+    alu SUB, a=RD, b=RD, pair=AD, d=TWO, dst=RF, delta=1
+DESTINATION_5_CONT:
+    READ, a=RD, target=DESTINATION_FROM_MDR, prefetch=0
+.org $2b8
+DESTINATION_6:
+    READ, a=R7, stream=1, target=DESTINATION_6_INC, prefetch=0
+DESTINATION_6_INC:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu ADD, a=RD, b=T1, pair=AD, d=MDR, dst=RF, seq=RETURN
+.org $2c0
+DESTINATION_7:
+    READ, a=R7, stream=1, target=DESTINATION_7_INC, prefetch=0
+DESTINATION_7_INC:
+    alu ADD, a=R7, b=R7, pair=AD, d=TWO, dst=RF
+    alu ADD, a=RD, b=T1, pair=AD, d=MDR, dst=RF
+    READ, a=T1, target=DESTINATION_FROM_MDR, prefetch=0
+.org $2c8
+DESTINATION_FROM_MDR:
+    alu PASSA, b=T1, pair=DA, d=MDR, dst=RF, seq=RETURN
+
+.org $300
+MOV_DESTINATION:
+    alu PASSA, a=T0, b=RD, dst=MOV, flags=NZV, seq=FETCH
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+.org $310
+MOV_MEMORY:
+    WRITE, a=T1, byte=IR, b=T0, target=MOV_MEMORY_FLAGS, prefetch=0
+MOV_MEMORY_FLAGS:
+    alu PASSA, a=T0, flags=NZV, seq=FETCH
+.org $320
+CMP_DESTINATION:
+    alu SUB, a=T0, b=RD, flags=NZVC, seq=FETCH
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+.org $330
+CMP_MEMORY:
+    READ, a=T1, byte=IR, target=CMP_MEMORY_CAPTURE, prefetch=0
+CMP_MEMORY_CAPTURE:
+    alu SUB, a=T0, pair=AD, d=MDR, flags=NZVC, seq=FETCH
+.org $340
+ADD_DESTINATION:
+    alu ADD, a=T0, b=RD, dst=OPERAND, flags=NZVC, seq=FETCH
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+.org $350
+ADD_MEMORY:
+    READ, a=T1, byte=IR, target=ADD_MEMORY_CAPTURE, prefetch=0
+ADD_MEMORY_CAPTURE:
+    alu PASSA, b=T3, pair=DA, d=MDR, dst=RF
+    alu ADD, a=T0, b=T2, pair=AD, d=MDR, dst=RF
+    WRITE, a=T1, byte=IR, b=T2, target=ADD_MEMORY_FLAGS, prefetch=0
+ADD_MEMORY_FLAGS:
+    ; Recompute from saved old destination; flags commit only after write ACK.
+    alu ADD, a=T0, b=T3, flags=NZVC, seq=FETCH
+
+.org $130
+BIT_RR:
+    alu AND, a=RS, b=RD, pair=AB, flags=NZV, seq=FETCH
+.org $138
+BIT_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=BIT_DESTINATION, prefetch=0
+.org $360
+BIT_DESTINATION:
+    alu AND, a=T0, b=RD, pair=AB, flags=NZV, seq=FETCH
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+.org $370
+BIT_MEMORY:
+    READ, a=T1, byte=IR, target=BIT_MEMORY_CAPTURE, prefetch=0
+BIT_MEMORY_CAPTURE:
+    alu AND, a=T0, pair=AD, d=MDR, flags=NZV, seq=FETCH
+
+.org $140
+BIC_RR:
+    alu BIC, a=RS, b=RD, pair=BA, dst=OPERAND, flags=NZV, seq=FETCH
+.org $148
+BIC_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=BIC_DESTINATION, prefetch=0
+.org $380
+BIC_DESTINATION:
+    alu BIC, a=T0, b=RD, pair=BA, dst=OPERAND, flags=NZV, seq=FETCH
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+.org $390
+BIC_MEMORY:
+    READ, a=T1, byte=IR, target=BIC_MEMORY_CAPTURE, prefetch=0
+BIC_MEMORY_CAPTURE:
+    alu BIC, a=T0, b=T2, pair=DA, d=MDR, dst=RF
+    WRITE, a=T1, byte=IR, b=T2, target=BIC_MEMORY_FLAGS, prefetch=0
+BIC_MEMORY_FLAGS:
+    alu PASSA, a=T2, flags=NZV, seq=FETCH
+
+.org $150
+BIS_RR:
+    alu OR, a=RS, b=RD, pair=AB, dst=OPERAND, flags=NZV, seq=FETCH
+.org $158
+BIS_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=BIS_DESTINATION, prefetch=0
+.org $3a0
+BIS_DESTINATION:
+    alu OR, a=T0, b=RD, pair=AB, dst=OPERAND, flags=NZV, seq=FETCH
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+.org $3b0
+BIS_MEMORY:
+    READ, a=T1, byte=IR, target=BIS_MEMORY_CAPTURE, prefetch=0
+BIS_MEMORY_CAPTURE:
+    alu OR, a=T0, b=T2, pair=AD, d=MDR, dst=RF
+    WRITE, a=T1, byte=IR, b=T2, target=BIS_MEMORY_FLAGS, prefetch=0
+BIS_MEMORY_FLAGS:
+    alu PASSA, a=T2, flags=NZV, seq=FETCH
+
+.org $1e0
+SUB_RR:
+    alu SUB, a=RS, b=RD, pair=BA, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $1e8
+SUB_EA:
+    CALL, target=TWO_OPERAND_EA, prefetch=0
+    OR_MD, target=SUB_DESTINATION, prefetch=0
+.org $038
+SUB_DESTINATION:
+    alu SUB, a=T0, b=RD, pair=BA, dst=OPERAND, flags=NZVC, seq=FETCH
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+.org $3d0
+SUB_MEMORY:
+    READ, a=T1, byte=IR, target=SUB_MEMORY_CAPTURE, prefetch=0
+SUB_MEMORY_CAPTURE:
+    alu PASSA, b=T3, pair=DA, d=MDR, dst=RF
+    alu SUB, a=T0, b=T2, pair=DA, d=MDR, dst=RF
+    WRITE, a=T1, byte=IR, b=T2, target=SUB_MEMORY_FLAGS, prefetch=0
+SUB_MEMORY_FLAGS:
+    alu SUB, a=T0, b=T3, pair=BA, flags=NZVC, seq=FETCH
+
+.org $0a0
+CLR_REGISTER:
+    alu PASSA, a=RD, b=RD, pair=DA, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0a2
+CLR_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=CLR_SINGLE_MEMORY, prefetch=0
+
+.org $0a4
+COM_REGISTER:
+    alu NOTA, a=RD, b=RD, pair=AB, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0a6
+COM_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=COM_SINGLE_MEMORY, prefetch=0
+
+.org $0a8
+INC_REGISTER:
+    alu ADD, a=RD, b=RD, pair=AD, d=ONE, dst=OPERAND, flags=NZV, seq=FETCH
+.org $0aa
+INC_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=INC_SINGLE_MEMORY, prefetch=0
+
+.org $0ac
+DEC_REGISTER:
+    alu SUB, a=RD, b=RD, pair=AD, d=ONE, dst=OPERAND, flags=NZV, seq=FETCH
+.org $0ae
+DEC_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=DEC_SINGLE_MEMORY, prefetch=0
+
+.org $0b0
+NEG_REGISTER:
+    alu SUB, a=RD, b=RD, pair=DA, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0b2
+NEG_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=NEG_SINGLE_MEMORY, prefetch=0
+
+.org $0b4
+ADC_REGISTER:
+    alu ADC, a=RD, b=RD, pair=AD, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0b6
+ADC_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=ADC_SINGLE_MEMORY, prefetch=0
+
+.org $0b8
+SBC_REGISTER:
+    alu SBC, a=RD, b=RD, pair=AD, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0ba
+SBC_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=SBC_SINGLE_MEMORY, prefetch=0
+
+.org $0bc
+TST_REGISTER:
+    alu PASSA, a=RD, b=RD, pair=AB, d=ZERO, flags=NZVC, seq=FETCH
+.org $0be
+TST_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=TST_SINGLE_MEMORY, prefetch=0
+
+.org $0c0
+ROR_REGISTER:
+    alu ROR, a=RD, b=RD, pair=AB, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0c2
+ROR_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=ROR_SINGLE_MEMORY, prefetch=0
+
+.org $0c4
+ROL_REGISTER:
+    alu ROL, a=RD, b=RD, pair=AB, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0c6
+ROL_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=ROL_SINGLE_MEMORY, prefetch=0
+
+.org $0c8
+ASR_REGISTER:
+    alu ASR, a=RD, b=RD, pair=AB, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0ca
+ASR_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=ASR_SINGLE_MEMORY, prefetch=0
+
+.org $0cc
+ASL_REGISTER:
+    alu LSL, a=RD, b=RD, pair=AB, d=ZERO, dst=OPERAND, flags=NZVC, seq=FETCH
+.org $0ce
+ASL_SINGLE_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    JUMP, target=ASL_SINGLE_MEMORY, prefetch=0
+
+; Unary memory tails. READ preserves operand in MDR until the final flag commit.
+.org $0d0
+CLR_SINGLE_MEMORY:
+    alu PASSA, b=T2, pair=DA, d=ZERO, dst=RF
+    WRITE, a=T1, byte=IR, b=T2, target=CLR_SINGLE_FLAGS, prefetch=0
+CLR_SINGLE_FLAGS:
+    alu PASSA, pair=DA, d=ZERO, flags=NZVC, seq=FETCH
+COM_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=COM_SINGLE_OPERAND, prefetch=0
+COM_SINGLE_OPERAND:
+    alu NOTA, b=T2, pair=DA, d=MDR, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=COM_SINGLE_FLAGS, prefetch=0
+COM_SINGLE_FLAGS:
+    alu NOTA, b=T2, pair=DA, d=MDR, flags=NZVC, seq=FETCH
+INC_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=INC_SINGLE_OPERAND, prefetch=0
+INC_SINGLE_OPERAND:
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF
+    alu ADD, a=T0, b=T2, pair=AD, d=ONE, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=INC_SINGLE_FLAGS, prefetch=0
+INC_SINGLE_FLAGS:
+    alu ADD, a=T0, b=T2, pair=AD, d=ONE, flags=NZV, seq=FETCH
+DEC_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=DEC_SINGLE_OPERAND, prefetch=0
+DEC_SINGLE_OPERAND:
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF
+    alu SUB, a=T0, b=T2, pair=AD, d=ONE, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=DEC_SINGLE_FLAGS, prefetch=0
+DEC_SINGLE_FLAGS:
+    alu SUB, a=T0, b=T2, pair=AD, d=ONE, flags=NZV, seq=FETCH
+NEG_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=NEG_SINGLE_OPERAND, prefetch=0
+NEG_SINGLE_OPERAND:
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF
+    alu SUB, a=T0, b=T2, pair=DA, d=ZERO, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=NEG_SINGLE_FLAGS, prefetch=0
+NEG_SINGLE_FLAGS:
+    alu SUB, a=T0, b=T2, pair=DA, d=ZERO, flags=NZVC, seq=FETCH
+ADC_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=ADC_SINGLE_OPERAND, prefetch=0
+ADC_SINGLE_OPERAND:
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF
+    alu ADC, a=T0, b=T2, pair=AD, d=ZERO, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=ADC_SINGLE_FLAGS, prefetch=0
+ADC_SINGLE_FLAGS:
+    alu ADC, a=T0, b=T2, pair=AD, d=ZERO, flags=NZVC, seq=FETCH
+SBC_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=SBC_SINGLE_OPERAND, prefetch=0
+SBC_SINGLE_OPERAND:
+    alu PASSA, b=T0, pair=DA, d=MDR, dst=RF
+    alu SBC, a=T0, b=T2, pair=AD, d=ZERO, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=SBC_SINGLE_FLAGS, prefetch=0
+SBC_SINGLE_FLAGS:
+    alu SBC, a=T0, b=T2, pair=AD, d=ZERO, flags=NZVC, seq=FETCH
+TST_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=TST_SINGLE_OPERAND, prefetch=0
+TST_SINGLE_OPERAND:
+    alu PASSA, pair=DA, d=MDR, flags=NZVC, seq=FETCH
+ROR_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=ROR_SINGLE_OPERAND, prefetch=0
+ROR_SINGLE_OPERAND:
+    alu ROR, b=T2, pair=DA, d=MDR, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=ROR_SINGLE_FLAGS, prefetch=0
+ROR_SINGLE_FLAGS:
+    alu ROR, b=T2, pair=DA, d=MDR, flags=NZVC, seq=FETCH
+ROL_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=ROL_SINGLE_OPERAND, prefetch=0
+ROL_SINGLE_OPERAND:
+    alu ROL, b=T2, pair=DA, d=MDR, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=ROL_SINGLE_FLAGS, prefetch=0
+ROL_SINGLE_FLAGS:
+    alu ROL, b=T2, pair=DA, d=MDR, flags=NZVC, seq=FETCH
+ASR_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=ASR_SINGLE_OPERAND, prefetch=0
+ASR_SINGLE_OPERAND:
+    alu ASR, b=T2, pair=DA, d=MDR, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=ASR_SINGLE_FLAGS, prefetch=0
+ASR_SINGLE_FLAGS:
+    alu ASR, b=T2, pair=DA, d=MDR, flags=NZVC, seq=FETCH
+ASL_SINGLE_MEMORY:
+    READ, a=T1, byte=IR, target=ASL_SINGLE_OPERAND, prefetch=0
+ASL_SINGLE_OPERAND:
+    alu LSL, b=T2, pair=DA, d=MDR, dst=OPERAND
+    WRITE, a=T1, byte=IR, b=T2, target=ASL_SINGLE_FLAGS, prefetch=0
+ASL_SINGLE_FLAGS:
+    alu LSL, b=T2, pair=DA, d=MDR, flags=NZVC, seq=FETCH
+
+; Branch entry = $040 | {IR[15],IR[10:8]} << 2.
+; Only existing single-flag CJUMP predicates; no compound hardware decoder.
+; Pause speculation until the redirect decision, avoiding an abandoned FRAM word.
+.org $044
+BR_DIRECT:
+    alu ADD, a=R7, b=R7, pair=AD, d=DISP, dst=RF, seq=FETCH
+.org $048
+BNE:
+    CJUMP, cond=NOT_Z, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $04c
+BEQ:
+    CJUMP, cond=Z, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $050
+BGE:
+    CJUMP, cond=N, target=BR_N_EQ_V, prefetch=0
+    CJUMP, cond=NOT_V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $054
+BLT:
+    CJUMP, cond=N, target=BR_N_NE_V, prefetch=0
+    CJUMP, cond=V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $058
+BGT:
+    CJUMP, cond=Z, target=BR_NOT_TAKEN, prefetch=0
+    CJUMP, cond=N, target=BR_N_EQ_V, prefetch=0
+    CJUMP, cond=NOT_V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $05c
+BLE:
+    CJUMP, cond=Z, target=BR, prefetch=0
+    CJUMP, cond=N, target=BR_N_NE_V, prefetch=0
+    CJUMP, cond=V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $060
+BPL:
+    CJUMP, cond=NOT_N, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $064
+BMI:
+    CJUMP, cond=N, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $068
+BHI:
+    CJUMP, cond=C, target=BR_NOT_TAKEN, prefetch=0
+    CJUMP, cond=NOT_Z, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $06c
+BLOS:
+    CJUMP, cond=C, target=BR, prefetch=0
+    CJUMP, cond=Z, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $070
+BVC:
+    CJUMP, cond=NOT_V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $074
+BVS:
+    CJUMP, cond=V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $078
+BCC:
+    CJUMP, cond=NOT_C, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $07c
+BCS:
+    CJUMP, cond=C, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+.org $18f
+BR_NOT_TAKEN:
+    alu PASSA, seq=FETCH
+BR_N_EQ_V:
+    CJUMP, cond=V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+BR_N_NE_V:
+    CJUMP, cond=NOT_V, target=BR, prefetch=0
+    alu PASSA, seq=FETCH
+
+; Use existing RF/Q shifts. No byte-swap mux or new ALU operation.
+.org $1a0
+MARK:
+    alu ADD, a=R7, b=R6, pair=AD, d=DISP, dst=RF
+    alu PASSA, a=R5, b=R7, dst=RF
+    READ, a=R6, target=MARK_POP, prefetch=0
+MARK_POP:
+    alu ADD, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    alu PASSA, pair=DA, d=MDR, b=R5, dst=RF, seq=FETCH
+.org $1b0
+SXT_REGISTER:
+    CJUMP, cond=N, target=SXT_REGISTER_NEGATIVE, prefetch=0
+    alu PASSA, pair=DA, d=ZERO, b=RD, dst=RF, flags=NZV, seq=FETCH
+SXT_REGISTER_NEGATIVE:
+    alu NOTA, pair=DA, d=ZERO, b=RD, dst=RF, flags=NZV, seq=FETCH
+.org $1b4
+SXT_MEMORY:
+    CALL, target=DESTINATION_EA, prefetch=0
+    CJUMP, cond=N, target=SXT_MEMORY_NEGATIVE, prefetch=0
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+    JUMP, target=MOV_MEMORY, prefetch=0
+SXT_MEMORY_NEGATIVE:
+    alu NOTA, pair=DA, d=ZERO, b=T0, dst=RF
+    JUMP, target=MOV_MEMORY, prefetch=0
+.org $1c0
+SWAB_REGISTER:
+    alu PASSA, a=RD, b=T0, dst=RF
+    CALL, target=SWAB_COMMON, prefetch=0
+    alu PASSA, a=T2, b=RD, dst=RF
+    JUMP, target=SWAB_FLAGS, prefetch=0
+.org $1c8
+SWAB_MEMORY:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, target=SWAB_CAPTURE, prefetch=0
+SWAB_CAPTURE:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    CALL, target=SWAB_COMMON, prefetch=0
+    WRITE, a=T1, b=T2, target=SWAB_FLAGS, prefetch=0
+.org $1d0
+SWAB_FLAGS:
+    alu PASSA, pair=DA, d=IMM, imm=255, b=T3, dst=RF
+    alu NOTA, a=T3, b=T3, dst=RF
+    ; Old high byte is the new low byte: mask to FF00 for word N/Z, V=C=0.
+    alu AND, a=T0, b=T3, flags=NZVC, seq=FETCH
+.org $2d0
+SWAB_COMMON:
+    alu PASSA, a=T0, dst=Q
+    alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu PASSA, a=T2, b=T2, dst=RFQ_L
+    alu OR, a=T2, b=T2, pair=AQ, dst=RF, seq=RETURN
+
+
+; First software-trap gate: one kernel register set, T=0. No IRQ or mode exchange.
+; Existing v7 LOAD/KEEP operations stay word-sized even for EMT/TRAP opcodes.
+.org $024
+BPT:
+    alu PASSA, pair=DA, d=IMM, imm=12, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+.org $026
+IOT:
+    alu PASSA, pair=DA, d=IMM, imm=16, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+.org $028
+EMT:
+    alu PASSA, pair=DA, d=IMM, imm=24, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+.org $02a
+TRAP:
+    alu PASSA, pair=DA, d=IMM, imm=28, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+.org $031
+RTI:
+    READ, a=R6, target=RTI_PC, prefetch=0
+RTI_PC:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+    alu ADD, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    READ, a=R6, target=RTI_PSW, prefetch=0
+RTI_PSW:
+    alu ADD, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    alu PASSA, pair=DA, d=MDR, flags=LOAD
+    alu PASSA, a=T3, b=R7, dst=RF, seq=FETCH, trace=RETURN
+.org $3d6
+TRAP_ENTRY:
+    alu PASSA, pair=DA, d=PSW, b=T0, dst=RF
+    alu PASSA, a=R7, b=T1, dst=RF
+    alu ADD, a=T4, b=T4, pair=AD, d=TWO, dst=RF
+    READ, space=KERNEL, a=T4, target=TRAP_PSW, prefetch=0
+TRAP_PSW:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF
+    alu SUB, a=T4, b=T4, pair=AD, d=TWO, dst=RF
+    READ, space=KERNEL, a=T4, target=TRAP_PC, prefetch=0
+TRAP_PC:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+    alu PASSA, a=T2, flags=LOAD
+    alu SUB, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    WRITE, a=R6, b=T0, target=TRAP_PUSH_PC, prefetch=0
+TRAP_PUSH_PC:
+    alu SUB, a=R6, b=R6, pair=AD, d=TWO, dst=RF
+    WRITE, a=R6, b=T1, target=TRAP_COMMIT, prefetch=0
+TRAP_COMMIT:
+    alu PASSA, a=T3, b=R7, dst=RF, seq=FETCH
+
+
+; IRQ and WAIT, resolved vector captured in MDR at a boundary.
+.org 0x012
+WAIT_INSTRUCTION:
+    WAIT, prefetch=0
+IRQ_ENTRY:
+    alu PASSA, pair=DA, d=MDR, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+
+; SPL's low opcode bits select a constant, without an IR-to-PSW mux.
+.org 0x1f0
+SPL0:
+    alu PASSA, pair=DA, d=IMM, imm=0, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL1:
+    alu PASSA, pair=DA, d=IMM, imm=32, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL2:
+    alu PASSA, pair=DA, d=IMM, imm=64, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL3:
+    alu PASSA, pair=DA, d=IMM, imm=96, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL4:
+    alu PASSA, pair=DA, d=IMM, imm=128, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL5:
+    alu PASSA, pair=DA, d=IMM, imm=160, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL6:
+    alu PASSA, pair=DA, d=IMM, imm=192, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+SPL7:
+    alu PASSA, pair=DA, d=IMM, imm=224, b=T4, dst=RF
+    JUMP, target=SPL_APPLY, prefetch=0
+.org 0x3e4
+SPL_APPLY:
+    alu PASSA, pair=DA, d=IMM, imm=224, b=T5, dst=RF
+    alu NOTA, a=T5, b=T5, dst=RF
+    alu AND, pair=DB, d=PSW, b=T5, dst=RF
+    alu OR, a=T4, b=T5, flags=LOAD
+    alu PASSA, seq=FETCH
+
+
+; Invalid JMP register mode uses vector004 on DCJ11; reserved instructions,
+; including invalid JSR mode0, use vector010. Missing ISA also traps here.
+.org 0x040
+INVALID_JMP:
+    alu PASSA, pair=DA, d=IMM, imm=4, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+ILLEGAL_INSTRUCTION:
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+
+; A failed memory word has no datapath, flag, IR or MDR side effects.
+; Current architectural PC is stacked by the shared frame microcode.
+.org 0x015
+BUS_FAULT_ENTRY:
+    alu PASSA, pair=DA, d=MDR, b=T4, dst=RF
+    TRAP, target=TRAP_ENTRY, prefetch=0
+
+; Condition-code masks use direct IR[3:0] wiring into free page-one slots.
+; This preserves constant-zero dispatch[9]; OR_MD then selects clear/set.
+; IR[5:3] is 4/5 for clear, 6/7 for set. Mask bit 3 duplicates the ALU leaf.
+; T/IPL stay unchanged, so flags LOAD may retire on this same edge.
+.org $017
+MFPT:
+    alu PASSA, pair=DA, d=IMM, imm=5, b=R0, dst=RF, seq=FETCH
+.org $210
+CC_ROUTE_BASE:
+    STOP ; unreachable for CC: IR[5] is always one
+    STOP
+    STOP
+    STOP
+CC_CLEAR_LOW:
+    alu BIC, pair=DB, d=PSW, b=T4, flags=LOAD, seq=FETCH
+CC_CLEAR_HIGH:
+    alu BIC, pair=DB, d=PSW, b=T4, flags=LOAD, seq=FETCH
+CC_SET_LOW:
+    alu OR, pair=DB, d=PSW, b=T4, flags=LOAD, seq=FETCH
+CC_SET_HIGH:
+    alu OR, pair=DB, d=PSW, b=T4, flags=LOAD, seq=FETCH
+.org $104
+CC_MASK_0:
+    alu PASSA, pair=DA, d=IMM, imm=0, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $10c
+CC_MASK_1:
+    alu PASSA, pair=DA, d=IMM, imm=1, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $114
+CC_MASK_2:
+    alu PASSA, pair=DA, d=IMM, imm=2, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $11c
+CC_MASK_3:
+    alu PASSA, pair=DA, d=IMM, imm=3, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $124
+CC_MASK_4:
+    alu PASSA, pair=DA, d=IMM, imm=4, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $12c
+CC_MASK_5:
+    alu PASSA, pair=DA, d=IMM, imm=5, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $134
+CC_MASK_6:
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $13c
+CC_MASK_7:
+    alu PASSA, pair=DA, d=IMM, imm=7, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $144
+CC_MASK_8:
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $14c
+CC_MASK_9:
+    alu PASSA, pair=DA, d=IMM, imm=9, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $154
+CC_MASK_A:
+    alu PASSA, pair=DA, d=IMM, imm=10, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $15c
+CC_MASK_B:
+    alu PASSA, pair=DA, d=IMM, imm=11, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $164
+CC_MASK_C:
+    alu PASSA, pair=DA, d=IMM, imm=12, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $16c
+CC_MASK_D:
+    alu PASSA, pair=DA, d=IMM, imm=13, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $174
+CC_MASK_E:
+    alu PASSA, pair=DA, d=IMM, imm=14, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+.org $17c
+CC_MASK_F:
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T4, dst=RF
+    OR_MD, target=CC_ROUTE_BASE
+
+; MFPS is a MOVB of the pre-update PSW low byte. Memory flags follow WRITE ACK.
+.org $1d8
+MFPS_REGISTER:
+    alu PASSA, pair=DA, d=PSW, b=RD, dst=MOV, flags=NZV, seq=FETCH
+.org $1da
+MFPS_MEMORY:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu PASSA, pair=DA, d=PSW, b=T0, dst=RF
+    JUMP, target=MOV_MEMORY, prefetch=0
+; MTPS reads a byte operand, preserves T/high PSW, then exposes new IPL to IRQ.
+.org $1a8
+MTPS_REGISTER:
+    alu PASSA, a=RD, b=T2, dst=RF, seq=PAGE, next=MTPS_APPLY
+.org $1aa
+MTPS_MEMORY:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, byte=IR, target=MTPS_CAPTURE, prefetch=0
+MTPS_CAPTURE:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF, seq=PAGE, next=MTPS_APPLY
+.org $194
+MTPS_APPLY:
+    alu PASSA, pair=DA, d=IMM, imm=$ef, b=T4, dst=RF
+    alu AND, a=T4, b=T2, dst=RF
+    alu NOTA, a=T4, b=T4, dst=RF
+    alu AND, pair=DB, d=PSW, b=T4, dst=RF
+    alu OR, a=T2, b=T4, flags=LOAD
+    alu PASSA, seq=FETCH
+
+
+.org $021
+RESET_BUS:
+    JUMP, target=RESET_SETTLE, init=1, prefetch=0
+RESET_SETTLE:
+    alu PASSA
+    alu PASSA, seq=FETCH
+
+; ASH destination capture: count EA precedes the register read.
+; T4=value, T0=low-six-bit count, T6=sticky shift overflow. No new RTL state.
+.org $019
+ASH:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu PASSA, a=RS, b=T4, dst=RF
+    OR_MD, target=ASH_OPERAND, prefetch=0
+.org $218
+ASH_OPERAND:
+    alu PASSA, a=RD, b=T0, dst=RF, seq=PAGE, next=ASH_COUNT
+    READ, a=T1, target=ASH_MDR
+    READ, a=T1, target=ASH_MDR
+    READ, a=T1, target=ASH_MDR
+    READ, a=T1, target=ASH_MDR
+    READ, a=T1, target=ASH_MDR
+    READ, a=T1, target=ASH_MDR
+    READ, a=T1, target=ASH_MDR
+.org $262
+ASH_COUNT:
+    alu AND, a=T0, pair=AD, d=IMM, imm=63, b=T0, dst=RF, flags=NZVC
+    CJUMP, cond=Z, target=ASH_RIGHT_DONE
+    alu AND, a=T0, pair=AD, d=IMM, imm=32, flags=NZV
+    CJUMP, cond=Z, target=ASH_LEFT_INIT
+    alu SUB, a=T0, pair=DA, d=IMM, imm=64, b=T0, dst=RF
+ASH_RIGHT_LOOP:
+    alu ASR, a=T4, b=T4, dst=RF, flags=NZVC
+    alu SUB, a=T0, pair=AD, d=ONE, b=T0, dst=RF, flags=NZV
+    CJUMP, cond=NOT_Z, target=ASH_RIGHT_LOOP
+ASH_RIGHT_DONE:
+    alu PASSA, a=T4, b=RS, dst=RF, flags=NZV, seq=FETCH
+ASH_LEFT_INIT:
+    alu PASSA, pair=DA, d=ZERO, b=T6, dst=RF
+ASH_LEFT_LOOP:
+    alu LSL, a=T4, b=T4, dst=RF, flags=NZVC
+    alu OR, a=T6, pair=AD, d=PSW, b=T6, dst=RF
+    alu SUB, a=T0, pair=AD, d=ONE, b=T0, dst=RF, flags=NZV
+    CJUMP, cond=NOT_Z, target=ASH_LEFT_LOOP
+    alu PASSA, a=T4, flags=NZV
+    alu AND, a=T6, pair=AD, d=TWO, b=T6, dst=RF
+    alu OR, a=T6, pair=AD, d=PSW, flags=LOAD
+    alu PASSA, a=T4, b=RS, dst=RF, seq=FETCH
+.org $27f
+ASH_MDR:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF, seq=PAGE, next=ASH_COUNT
+
+; ASHC: capture both destination words after count operand EA.
+.org $01c
+ASHC:
+    CALL, target=DESTINATION_EA, prefetch=0
+    alu PASSA, a=RS, b=T4, dst=RF
+    alu PASSA, a=RS1, dst=Q
+    OR_MD, target=ASHC_OPERAND, prefetch=0
+.org $290
+ASHC_OPERAND:
+    alu PASSA, a=RD, b=T0, dst=RF, seq=PAGE, next=ASHC_COUNT
+    READ, a=T1, target=ASHC_MDR
+    READ, a=T1, target=ASHC_MDR
+    READ, a=T1, target=ASHC_MDR
+    READ, a=T1, target=ASHC_MDR
+    READ, a=T1, target=ASHC_MDR
+    READ, a=T1, target=ASHC_MDR
+    READ, a=T1, target=ASHC_MDR
+.org $2dc
+ASHC_COUNT:
+    alu PASSA, pair=DA, d=ZERO, b=T6, dst=RF
+    alu AND, a=T0, pair=AD, d=IMM, imm=63, b=T0, dst=RF, flags=NZVC
+    CJUMP, cond=Z, target=ASHC_COMMIT
+    alu AND, a=T0, pair=AD, d=IMM, imm=32, flags=NZV
+    CJUMP, cond=Z, target=ASHC_LEFT_LOOP
+    alu SUB, a=T0, pair=DA, d=IMM, imm=64, b=T0, dst=RF
+ASHC_RIGHT_LOOP:
+    alu PASSB, pair=ZQ, b=T5, dst=RF
+    alu LSR, a=T5, flags=NZVC
+    alu PASSA, a=T4, b=T4, dst=RFQ_R
+    alu SUB, a=T0, pair=AD, d=ONE, b=T0, dst=RF, flags=NZV
+    CJUMP, cond=NOT_Z, target=ASHC_RIGHT_LOOP
+    JUMP, target=ASHC_COMMIT
+ASHC_LEFT_LOOP:
+    alu LSL, a=T4, flags=NZVC
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    alu OR, a=T6, pair=AD, d=PSW, b=T6, dst=RF
+    alu SUB, a=T0, pair=AD, d=ONE, b=T0, dst=RF, flags=NZV
+    CJUMP, cond=NOT_Z, target=ASHC_LEFT_LOOP
+    alu AND, a=T6, pair=AD, d=TWO, b=T6, dst=RF
+ASHC_COMMIT:
+    alu PASSA, a=T4, b=RS, dst=RF
+    alu PASSB, pair=ZQ, b=RS1, dst=RF
+    ; NZ describe the shifted 32-bit value, before odd-Rs writeback aliases.
+    alu PASSA, a=T4, flags=NZV
+    alu PASSA, pair=DA, d=PSW, b=T7, dst=RF
+    alu OR, a=T4, pair=AQ, flags=NZV
+    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF
+    alu AND, a=T5, pair=AD, d=IMM, imm=4, b=T5, dst=RF
+    alu BIC, a=T7, pair=AD, d=IMM, imm=4, b=T7, dst=RF
+    alu OR, a=T5, b=T7, dst=RF
+    alu OR, a=T7, b=T6, flags=LOAD, seq=FETCH
+ASHC_MDR:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF, seq=PAGE, next=ASHC_COUNT
+
+; XOR: the source register is read after destination EA/read, as on J-11.
+; Register mode bypasses EA; memory NZV commit only after the successful WRITE.
+.org $02c
+XOR_RR:
+    alu XOR, a=RS, b=RD, dst=RF, flags=NZV, seq=FETCH
+.org $02e
+XOR_EA:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, target=XOR_MEMORY, prefetch=0
+.org $094
+XOR_MEMORY:
+    alu XOR, a=RS, pair=AD, d=MDR, b=T2, dst=RF
+    WRITE, a=T1, b=T2, target=BIS_MEMORY_FLAGS, prefetch=0
+
+; MUL: signed 16x16 -> T4:Q, no hardware multiply or new state.
+; Read the encoded S operand before the R operand (including EA side effects).
+.org $062
+MUL_REGISTER:
+    alu PASSA, a=RD, b=T2, dst=RF
+    JUMP, target=MUL_INIT
+.org $066
+MUL_MEMORY:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, target=MUL_MDR, prefetch=0
+.org $082
+MUL_MDR:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF
+    JUMP, target=MUL_INIT
+.org $312
+MUL_INIT:
+    alu PASSA, a=RS, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T4, dst=RF
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T1, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+    alu PASSA, a=T2, flags=NZVC
+    CJUMP, cond=NOT_N, target=MUL_LOOP
+    alu NOTA, pair=DA, d=ZERO, b=T5, dst=RF, seq=PAGE, next=MUL_LOOP
+.org $333
+MUL_LOOP:
+    ; Two bits per counter update; ADC carries only within each bit.
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    alu LSL, a=T0, b=T0, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_C, target=MUL_SECOND_BIT
+    alu ADD, a=T2, pair=AQ, dst=Q, flags=NZVC
+    alu ADC, a=T5, b=T4, dst=RF, seq=PAGE, next=MUL_SECOND_BIT
+.org $3e9
+MUL_SECOND_BIT:
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    alu LSL, a=T0, b=T0, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_C, target=MUL_NEXT_PAIR
+    alu ADD, a=T2, pair=AQ, dst=Q, flags=NZVC
+    alu ADC, a=T5, b=T4, dst=RF
+MUL_NEXT_PAIR:
+    alu SUB, a=T1, pair=AD, d=ONE, b=T1, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=MUL_LOOP
+    ; M * unsigned(R) - (R<0 ? M<<16 : 0), modulo 2^32.
+    ; RS is unchanged until MUL_COMMIT; no saved copy is needed.
+    alu PASSA, a=RS, flags=NZVC
+    CJUMP, cond=NOT_N, target=MUL_FLAGS
+    alu SUB, a=T2, b=T4, pair=BA, dst=RF, seq=PAGE, next=MUL_FLAGS
+.org $373
+MUL_FLAGS:
+    alu PASSB, pair=ZQ, b=T0, dst=RF, flags=NZVC
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+    CJUMP, cond=NOT_N, target=MUL_CARRY_COMPARE
+    alu NOTA, pair=DA, d=ZERO, b=T5, dst=RF
+MUL_CARRY_COMPARE:
+    alu SUB, a=T4, b=T5, flags=NZVC
+    alu PASSA, pair=DA, d=ZERO, b=T6, dst=RF
+    CJUMP, cond=Z, target=MUL_NZ
+    alu PASSA, pair=DA, d=ONE, b=T6, dst=RF
+MUL_NZ:
+    alu PASSA, a=T4, flags=NZVC
+    alu PASSA, pair=DA, d=PSW, b=T7, dst=RF
+    alu OR, a=T4, pair=AQ, flags=NZV
+    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF, seq=PAGE, next=MUL_COMMIT
+.org $395
+MUL_COMMIT:
+    alu AND, a=T5, pair=AD, d=IMM, imm=4, b=T5, dst=RF
+    alu BIC, a=T7, pair=AD, d=IMM, imm=4, b=T7, dst=RF
+    alu OR, a=T5, b=T7, dst=RF
+    alu OR, a=T6, b=T7, flags=LOAD
+    alu PASSA, a=T4, b=RS, dst=RF
+    alu PASSB, pair=ZQ, b=RS1, dst=RF, seq=FETCH
+
+; DIV: unsigned restoring loop in T4:Q; signed operands/results at edges.
+; T2=divisor magnitude, T0=dividend sign, T3=quotient sign, T1=count, T5=1.
+; Fetch S before R and R|1. No architectural writes until success.
+.org $072
+DIV_REGISTER:
+    alu PASSA, a=RD, b=T2, dst=RF
+    JUMP, target=DIV_INIT
+.org $076
+DIV_MEMORY:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, target=DIV_MDR, prefetch=0
+.org $07a
+DIV_MDR:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF
+    JUMP, target=DIV_INIT
+.org $181
+DIV_INIT:
+    alu PASSA, a=RS, b=T4, dst=RF
+    alu PASSA, a=RS1, dst=Q
+    alu PASSA, a=T4, b=T0, dst=RF
+    alu PASSA, a=T2, b=T3, dst=RF
+    alu XOR, a=T4, b=T3, dst=RF
+    alu PASSA, a=T2, flags=NZVC
+    CJUMP, cond=Z, target=DIV_ZERO
+    CJUMP, cond=NOT_N, target=DIV_MAGNITUDE
+    alu SUB, pair=ZB, b=T2, dst=RF
+    JUMP, target=DIV_MAGNITUDE
+.org $256
+DIV_MAGNITUDE:
+    alu PASSA, a=T4, flags=NZVC
+    CJUMP, cond=NOT_N, target=DIV_NORMALIZED
+    alu SUB, pair=ZQ, dst=Q, flags=NZVC
+    alu SBC, pair=ZB, b=T4, dst=RF
+DIV_NORMALIZED:
+    alu SUB, a=T4, b=T2, flags=NZVC
+    CJUMP, cond=NOT_C, target=DIV_OVERFLOW
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T1, dst=RF
+    alu PASSA, pair=DA, d=ONE, b=T5, dst=RF
+    JUMP, target=DIV_LOOP
+.org $3b5
+DIV_LOOP:
+    ; Two independent trial subtractions per counter update.
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    ; Trial subtraction leaves the remainder intact when it would borrow.
+    ; This removes the restore ADD on a zero quotient bit.
+    alu SUB, a=T2, b=T4, pair=BA, flags=NZVC
+    CJUMP, cond=C, target=DIV_SECOND_BIT
+    alu SUB, a=T2, b=T4, pair=BA, dst=RF
+    alu OR, a=T5, pair=AQ, dst=Q, seq=PAGE, next=DIV_SECOND_BIT
+DIV_SECOND_BIT:
+    alu PASSA, a=T4, b=T4, dst=RFQ_L
+    alu SUB, a=T2, b=T4, pair=BA, flags=NZVC
+    CJUMP, cond=C, target=DIV_NEXT_PAIR
+    alu SUB, a=T2, b=T4, pair=BA, dst=RF
+    alu OR, a=T5, pair=AQ, dst=Q
+DIV_NEXT_PAIR:
+    alu SUB, a=T1, pair=AD, d=ONE, b=T1, dst=RF, flags=NZVC
+    CJUMP, cond=NOT_Z, target=DIV_LOOP
+    alu PASSA, a=T3, flags=NZVC
+    CJUMP, cond=N, target=DIV_NEGATIVE_QUOTIENT
+    JUMP, target=DIV_POSITIVE_QUOTIENT
+.org $308
+DIV_NEGATIVE_QUOTIENT:
+    alu SUB, pair=ZQ, dst=Q, flags=NZVC
+    CJUMP, cond=N, target=DIV_REMAINDER
+    CJUMP, cond=Z, target=DIV_REMAINDER
+    JUMP, target=DIV_OVERFLOW
+DIV_POSITIVE_QUOTIENT:
+    alu PASSB, pair=ZQ, flags=NZVC
+    CJUMP, cond=N, target=DIV_OVERFLOW
+    JUMP, target=DIV_REMAINDER
+.org $328
+DIV_REMAINDER:
+    alu PASSA, a=T0, flags=NZVC
+    CJUMP, cond=NOT_N, target=DIV_COMMIT
+    alu SUB, pair=ZB, b=T4, dst=RF
+DIV_COMMIT:
+    alu PASSB, pair=ZQ, b=RS, dst=RF, flags=NZVC
+    ; R must be even per DEC. For odd R the explicit SIMH-style extension
+    ; leaves the remainder in the aliased R|1, flags still describe quotient.
+    alu PASSA, a=T4, b=RS1, dst=RF, seq=FETCH
+.org $348
+DIV_OVERFLOW:
+    alu PASSA, a=T3, flags=NZVC
+    alu PASSA, pair=DA, d=TWO, b=T5, dst=RF
+    CJUMP, cond=NOT_N, target=DIV_EXCEPTION_FLAGS
+    alu PASSA, pair=DA, d=IMM, imm=10, b=T5, dst=RF
+    JUMP, target=DIV_EXCEPTION_FLAGS
+DIV_ZERO:
+    alu PASSA, pair=DA, d=IMM, imm=7, b=T5, dst=RF
+    JUMP, target=DIV_EXCEPTION_FLAGS
+.org $368
+DIV_EXCEPTION_FLAGS:
+    alu PASSA, pair=DA, d=PSW, b=T6, dst=RF
+    alu BIC, a=T6, pair=AD, d=IMM, imm=15, b=T6, dst=RF
+    alu OR, a=T5, b=T6, flags=LOAD, seq=FETCH
+
+; Generated placement of microcode/fis.uasm. Edit the source, not this file.
+.org $011
+FIS_ENTRY:
+    READ, a=RD, target=FIS_B_HIGH, prefetch=0
+.org $045
+FIS_LINK_202:
+    alu ADD, a=RD, pair=AD, d=IMM, imm=4, b=T1, dst=RF
+.org $046
+    alu PASSB, pair=ZQ, b=T3, dst=RF
+.org $047
+    WRITE, a=T1, b=T0, target=FIS_STORE_LOW, prefetch=0
+.org $04a
+FIS_LINK_124:
+    alu PASSA, a=T5, dst=Q
+.org $04b
+    JUMP, target=FIS_NORMALIZE, prefetch=0
+.org $04e
+FIS_LINK_37:
+    alu OR, a=T2, pair=AD, d=IMM, imm=128, b=T2, dst=RF
+.org $04f
+    JUMP, target=FIS_SCALE, prefetch=0
+.org $07e
+FIS_LINK_221:
+    alu PASSA, pair=DA, d=IMM, imm=164, b=T4, dst=RF
+.org $07f
+    TRAP, target=TRAP_ENTRY, prefetch=0
+.org $084
+FIS_LINK_162:
+    CJUMP, cond=NOT_Z, target=FIS_ROUND, prefetch=0
+.org $085
+    alu PASSA, a=T0, b=T0, dst=RFQ_L
+.org $086
+    alu SUB, a=T4, pair=AD, d=ONE, b=T4, dst=RF
+.org $087
+    JUMP, target=FIS_NORMALIZE_LOOP, prefetch=0
+.org $08d
+FIS_LINK_97:
+    alu SBC, pair=ZB, b=T0, dst=RF
+.org $08e
+    alu OR, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+.org $08f
+    JUMP, target=FIS_NORMALIZE, prefetch=0
+.org $096
+FIS_STORE_LOW:
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+.org $097
+    WRITE, a=T1, b=T3, target=FIS_COMMIT, prefetch=0
+.org $09a
+FIS_LINK_119:
+    alu LSR, a=T1, b=T1, dst=RF, flags=NZVC
+.org $09b
+    alu ROR, a=T5, b=T5, dst=RF
+.org $09c
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $09d
+    CJUMP, cond=NOT_Z, target=FIS_MUL_LOOP, prefetch=0
+.org $09e
+    alu PASSA, a=T1, b=T0, dst=RF
+.org $09f
+    JUMP, target=FIS_LINK_124, prefetch=0
+.org $102
+FIS_OVERFLOW:
+    alu PASSA, pair=DA, d=TWO, b=T2, dst=RF
+.org $103
+    JUMP, target=FIS_ERROR, prefetch=0
+.org $106
+FIS_DIV_RESTORE:
+    alu ADD, a=T3, b=T1, dst=RF, flags=NZVC
+.org $107
+    alu ADC, a=T2, b=T0, dst=RF
+.org $108
+FIS_DIV_NEXT:
+    alu LSL, a=T1, b=T1, dst=RF, flags=NZVC
+.org $109
+    alu ROL, a=T0, b=T0, dst=RF
+.org $10a
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $10b
+    JUMP, target=FIS_LINK_147, prefetch=0
+.org $111
+FIS_DIVZERO:
+    alu PASSA, pair=DA, d=IMM, imm=11, b=T2, dst=RF
+.org $112
+FIS_ERROR:
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T1, dst=RF
+.org $113
+    JUMP, target=FIS_LINK_219, prefetch=0
+.org $121
+FIS_LINK_219:
+    alu BIC, a=T1, pair=DA, d=PSW, b=T4, dst=RF
+.org $122
+    alu OR, a=T2, b=T4, flags=LOAD
+.org $123
+    JUMP, target=FIS_LINK_221, prefetch=0
+.org $131
+FIS_UNDERFLOW:
+    alu PASSA, pair=DA, d=IMM, imm=32, b=T1, dst=RF
+.org $132
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+.org $133
+    JUMP, target=FIS_LINK_212, prefetch=0
+.org $141
+FIS_LINK_212:
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+.org $142
+    alu PASSA, pair=DA, d=IMM, imm=10, b=T2, dst=RF
+.org $143
+    JUMP, target=FIS_ERROR, prefetch=0
+.org $151
+FIS_B_HIGH:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF
+.org $152
+    alu ADD, a=RD, pair=AD, d=TWO, b=T1, dst=RF
+.org $153
+    READ, a=T1, target=FIS_B_LOW, prefetch=0
+.org $161
+FIS_B_LOW:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+.org $162
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+.org $163
+    READ, a=T1, target=FIS_A_HIGH, prefetch=0
+.org $16e
+FIS_LINK_147:
+    CJUMP, cond=NOT_Z, target=FIS_DIV_LOOP, prefetch=0
+.org $16f
+    alu PASSA, a=T5, b=T0, dst=RF
+.org $170
+FIS_NORMALIZE:
+    alu OR, a=T0, pair=AQ, flags=NZVC
+.org $171
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+.org $172
+    alu PASSA, pair=DA, d=IMM, imm=128, b=T1, dst=RF
+.org $173
+    JUMP, target=FIS_LINK_152, prefetch=0
+.org $176
+FIS_LINK_152:
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T7, dst=RF
+.org $177
+FIS_MASK_LOOP:
+    alu LSL, a=T1, b=T1, dst=RF
+.org $178
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $179
+    CJUMP, cond=NOT_Z, target=FIS_MASK_LOOP, prefetch=0
+.org $17a
+    alu LSL, a=T1, b=T2, dst=RF
+.org $17b
+    JUMP, target=FIS_LINK_157, prefetch=0
+.org $18b
+FIS_LINK_138:
+    alu SBC, a=T2, b=T0, pair=BA, dst=RF, flags=NZVC
+.org $18c
+    CJUMP, cond=C, target=FIS_DIV_RESTORE, prefetch=0
+.org $18d
+    alu OR, pair=DQ, d=ONE, dst=Q
+.org $18e
+    JUMP, target=FIS_DIV_NEXT, prefetch=0
+.org $19a
+FIS_LINK_157:
+    alu AND, a=T0, b=T2, flags=NZVC
+.org $19b
+    CJUMP, cond=Z, target=FIS_NORMALIZE_LOOP, prefetch=0
+.org $19c
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+.org $19d
+    alu ADD, a=T4, pair=AD, d=ONE, b=T4, dst=RF
+.org $19e
+FIS_NORMALIZE_LOOP:
+    alu AND, a=T0, b=T1, flags=NZVC
+.org $19f
+    JUMP, target=FIS_LINK_162, prefetch=0
+.org $1a5
+FIS_A_HIGH:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+.org $1a6
+    alu ADD, a=T1, pair=AD, d=TWO, b=T1, dst=RF
+.org $1a7
+    READ, a=T1, target=FIS_A_LOW, prefetch=0
+.org $1ad
+FIS_COMMIT:
+    alu ADD, a=RD, pair=AD, d=IMM, imm=4, b=RD, dst=RF
+.org $1ae
+    alu PASSA, a=T2, flags=LOAD
+.org $1af
+    alu PASSA, seq=FETCH
+.org $1ba
+FIS_A_LOW:
+    alu PASSA, pair=DA, d=MDR, dst=Q
+.org $1bb
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T1, dst=RF
+.org $1bc
+    alu AND, a=T1, pair=DA, d=PSW, b=T6, dst=RF
+.org $1bd
+    alu PASSA, a=T0, flags=NZVC
+.org $1be
+    CJUMP, cond=NOT_N, target=FIS_SIGN_B, prefetch=0
+.org $1bf
+    JUMP, target=FIS_LINK_15, prefetch=0
+.org $1c4
+FIS_ADD_TINY:
+    alu PASSA, a=T2, b=T0, dst=RF
+.org $1c5
+    alu PASSA, a=T3, dst=Q
+.org $1c6
+FIS_ADD_ABS:
+    alu BIC, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+.org $1c7
+    JUMP, target=FIS_LINK_94, prefetch=0
+.org $1d3
+FIS_DIV:
+    alu PASSA, a=T5, flags=NZVC
+.org $1d4
+    CJUMP, cond=Z, target=FIS_DIVZERO, prefetch=0
+.org $1d5
+    alu PASSA, a=T4, flags=NZVC
+.org $1d6
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+.org $1d7
+    JUMP, target=FIS_LINK_130, prefetch=0
+.org $1e1
+FIS_LINK_77:
+    alu SUB, a=T7, pair=AD, d=IMM, imm=31, flags=NZVC
+.org $1e2
+    CJUMP, cond=NOT_C, target=FIS_ADD_TINY, prefetch=0
+.org $1e3
+    alu PASSA, a=T7, flags=NZVC
+.org $1e4
+    CJUMP, cond=Z, target=FIS_ADD_COMBINE, prefetch=0
+.org $1e5
+FIS_ALIGN_LOOP:
+    CJUMP, cond=Q0, target=FIS_ALIGN_JAM, prefetch=0
+.org $1e6
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+.org $1e7
+    JUMP, target=FIS_ALIGN_NEXT, prefetch=0
+.org $1ec
+FIS_LINK_94:
+    alu PASSA, a=T0, flags=NZVC
+.org $1ed
+    CJUMP, cond=NOT_N, target=FIS_NORMALIZE, prefetch=0
+.org $1ee
+    alu SUB, pair=ZQ, dst=Q, flags=NZVC
+.org $1ef
+    JUMP, target=FIS_LINK_97, prefetch=0
+.org $201
+FIS_LINK_187:
+    alu OR, a=T4, b=T0, dst=RF
+.org $202
+    alu LSL, a=T0, b=T0, dst=RF
+.org $203
+    alu AND, a=T6, pair=AD, d=IMM, imm=32, flags=NZVC
+.org $204
+    CJUMP, cond=Z, target=FIS_PACK_SIGN, prefetch=0
+.org $205
+    alu NOTA, flags=NZVC
+.org $206
+FIS_PACK_SIGN:
+    alu ROR, a=T0, b=T0, dst=RF
+.org $207
+    JUMP, target=FIS_STORE, prefetch=0
+.org $227
+FIS_LINK_69:
+    alu PASSA, a=T3, dst=Q
+.org $228
+    alu PASSA, a=T1, b=T3, dst=RF
+.org $229
+    alu PASSA, a=T4, b=T1, dst=RF
+.org $22a
+    alu PASSA, a=T5, b=T4, dst=RF
+.org $22b
+    alu PASSA, a=T1, b=T5, dst=RF
+.org $22c
+FIS_ADD_SORTED:
+    alu SUB, a=T5, b=T4, dst=RF
+.org $22d
+    alu PASSA, a=T4, b=T7, dst=RF
+.org $22e
+    alu PASSA, a=T5, b=T4, dst=RF
+.org $22f
+    JUMP, target=FIS_LINK_77, prefetch=0
+.org $233
+FIS_LINK_130:
+    alu SUB, a=T5, b=T4, pair=BA, dst=RF
+.org $234
+    alu ADD, a=T4, pair=AD, d=IMM, imm=129, b=T4, dst=RF
+.org $235
+    alu PASSB, pair=ZQ, b=T1, dst=RF
+.org $236
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+.org $237
+    JUMP, target=FIS_LINK_134, prefetch=0
+.org $23a
+FIS_LINK_15:
+    alu OR, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+.org $23b
+FIS_SIGN_B:
+    alu PASSA, a=T2, flags=NZVC
+.org $23c
+    CJUMP, cond=NOT_N, target=FIS_EXPONENTS, prefetch=0
+.org $23d
+    alu OR, a=T6, pair=AD, d=IMM, imm=16, b=T6, dst=RF
+.org $23e
+FIS_EXPONENTS:
+    alu PASSA, a=T0, b=T4, dst=RF
+.org $23f
+    JUMP, target=FIS_LINK_20, prefetch=0
+.org $242
+FIS_LINK_20:
+    alu PASSA, a=T2, b=T5, dst=RF
+.org $243
+    alu PASSA, pair=DA, d=IMM, imm=7, b=T7, dst=RF
+.org $244
+FIS_EXP_SHIFT:
+    alu LSR, a=T4, b=T4, dst=RF
+.org $245
+    alu LSR, a=T5, b=T5, dst=RF
+.org $246
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $247
+    JUMP, target=FIS_LINK_25, prefetch=0
+.org $24c
+FIS_A_ZERO:
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+.org $24d
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+.org $24e
+    alu BIC, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+.org $24f
+    JUMP, target=FIS_LINK_34, prefetch=0
+.org $274
+FIS_LINK_50:
+    CJUMP, cond=NOT_Z, target=FIS_MULDIV, prefetch=0
+.org $275
+    alu PASSA, pair=DA, d=IMM, imm=16, b=T1, dst=RF
+.org $276
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+.org $277
+    CJUMP, cond=Z, target=FIS_ADD, prefetch=0
+.org $278
+    alu XOR, a=T6, pair=AD, d=IMM, imm=16, b=T6, dst=RF
+.org $279
+FIS_ADD:
+    alu AND, a=T6, pair=AD, d=IMM, imm=32, flags=NZVC
+.org $27a
+    CJUMP, cond=Z, target=FIS_ADD_SIGN_B, prefetch=0
+.org $27b
+    alu SUB, pair=ZQ, dst=Q, flags=NZVC
+.org $27c
+    alu SBC, pair=ZB, b=T0, dst=RF
+.org $27d
+FIS_ADD_SIGN_B:
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC
+.org $27e
+    JUMP, target=FIS_LINK_60, prefetch=0
+.org $281
+FIS_LINK_107:
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+.org $282
+    alu PASSA, a=T5, flags=NZVC
+.org $283
+    CJUMP, cond=Z, target=FIS_ZERO, prefetch=0
+.org $284
+    alu ADD, a=T5, b=T4, dst=RF
+.org $285
+    alu SUB, a=T4, pair=AD, d=IMM, imm=128, b=T4, dst=RF
+.org $286
+    alu PASSA, pair=DA, d=ZERO, b=T1, dst=RF
+.org $287
+    JUMP, target=FIS_LINK_113, prefetch=0
+.org $298
+FIS_ROUND:
+    alu ADD, pair=DQ, d=IMM, imm=32, dst=Q, flags=NZVC
+.org $299
+    alu ADC, a=T0, pair=AD, d=ZERO, b=T0, dst=RF
+.org $29a
+    alu AND, a=T0, b=T2, flags=NZVC
+.org $29b
+    CJUMP, cond=Z, target=FIS_RANGE, prefetch=0
+.org $29c
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+.org $29d
+    alu ADD, a=T4, pair=AD, d=ONE, b=T4, dst=RF
+.org $29e
+FIS_RANGE:
+    alu PASSA, a=T4, flags=NZVC
+.org $29f
+    JUMP, target=FIS_LINK_173, prefetch=0
+.org $2ab
+FIS_LINK_134:
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+.org $2ac
+    alu PASSA, pair=DA, d=IMM, imm=30, b=T7, dst=RF
+.org $2ad
+FIS_DIV_LOOP:
+    alu PASSA, a=T5, b=T5, dst=RFQ_L
+.org $2ae
+    alu SUB, a=T3, b=T1, pair=BA, dst=RF, flags=NZVC
+.org $2af
+    JUMP, target=FIS_LINK_138, prefetch=0
+.org $2bc
+FIS_UNPACK_B:
+FIS_LINK_34:
+    alu AND, a=T5, pair=AD, d=IMM, imm=255, b=T5, dst=RF, flags=NZVC
+.org $2bd
+    CJUMP, cond=Z, target=FIS_B_ZERO, prefetch=0
+.org $2be
+    alu AND, a=T2, pair=AD, d=IMM, imm=127, b=T2, dst=RF
+.org $2bf
+    JUMP, target=FIS_LINK_37, prefetch=0
+.org $2c4
+FIS_ALIGN_JAM:
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+.org $2c5
+    alu OR, pair=DQ, d=ONE, dst=Q
+.org $2c6
+FIS_ALIGN_NEXT:
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $2c7
+    JUMP, target=FIS_LINK_87, prefetch=0
+.org $2ca
+FIS_LINK_25:
+    CJUMP, cond=NOT_Z, target=FIS_EXP_SHIFT, prefetch=0
+.org $2cb
+    alu AND, a=T4, pair=AD, d=IMM, imm=255, b=T4, dst=RF, flags=NZVC
+.org $2cc
+    CJUMP, cond=Z, target=FIS_A_ZERO, prefetch=0
+.org $2cd
+    alu AND, a=T0, pair=AD, d=IMM, imm=127, b=T0, dst=RF
+.org $2ce
+    alu OR, a=T0, pair=AD, d=IMM, imm=128, b=T0, dst=RF
+.org $2cf
+    JUMP, target=FIS_UNPACK_B, prefetch=0
+.org $2f9
+FIS_LINK_113:
+    alu PASSA, pair=DA, d=ZERO, b=T5, dst=RF
+.org $2fa
+    alu PASSA, pair=DA, d=IMM, imm=30, b=T7, dst=RF
+.org $2fb
+FIS_MUL_LOOP:
+    CJUMP, cond=NOT_Q0, target=FIS_MUL_SHIFT, prefetch=0
+.org $2fc
+    alu ADD, a=T3, b=T5, dst=RF, flags=NZVC
+.org $2fd
+    alu ADC, a=T2, b=T1, dst=RF
+.org $2fe
+FIS_MUL_SHIFT:
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+.org $2ff
+    JUMP, target=FIS_LINK_119, prefetch=0
+.org $31c
+FIS_LINK_87:
+    CJUMP, cond=NOT_Z, target=FIS_ALIGN_LOOP, prefetch=0
+.org $31d
+FIS_ADD_COMBINE:
+    alu ADD, a=T3, pair=AQ, dst=Q, flags=NZVC
+.org $31e
+    alu ADC, a=T2, b=T0, dst=RF
+.org $31f
+    JUMP, target=FIS_ADD_ABS, prefetch=0
+.org $356
+FIS_LINK_60:
+    CJUMP, cond=Z, target=FIS_ADD_SORT, prefetch=0
+.org $357
+    alu SUB, pair=ZB, b=T3, dst=RF, flags=NZVC
+.org $358
+    alu SBC, pair=ZB, b=T2, dst=RF
+.org $359
+FIS_ADD_SORT:
+    alu SUB, a=T4, b=T5, flags=NZVC
+.org $35a
+    CJUMP, cond=C, target=FIS_ADD_SORTED, prefetch=0
+.org $35b
+    alu PASSA, a=T0, b=T1, dst=RF
+.org $35c
+    alu PASSA, a=T2, b=T0, dst=RF
+.org $35d
+    alu PASSA, a=T1, b=T2, dst=RF
+.org $35e
+    alu PASSB, pair=ZQ, b=T1, dst=RF
+.org $35f
+    JUMP, target=FIS_LINK_69, prefetch=0
+.org $36b
+FIS_ZERO:
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+.org $36c
+    alu PASSA, pair=DA, d=ZERO, dst=Q
+.org $36d
+FIS_STORE:
+    alu PASSA, a=T0, flags=NZVC
+.org $36e
+    alu PASSA, pair=DA, d=PSW, b=T2, dst=RF
+.org $36f
+    JUMP, target=FIS_LINK_198, prefetch=0
+.org $388
+FIS_LINK_173:
+    CJUMP, cond=N, target=FIS_UNDERFLOW, prefetch=0
+.org $389
+    CJUMP, cond=Z, target=FIS_UNDERFLOW, prefetch=0
+.org $38a
+    alu AND, a=T4, pair=AD, d=IMM, imm=255, b=T2, dst=RF
+.org $38b
+    alu SUB, a=T4, b=T2, flags=NZVC
+.org $38c
+    CJUMP, cond=NOT_Z, target=FIS_OVERFLOW, prefetch=0
+.org $38d
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T7, dst=RF
+.org $38e
+FIS_UNSCALE_LOOP:
+    alu PASSA, a=T0, b=T0, dst=RFQ_R
+.org $38f
+    JUMP, target=FIS_LINK_180, prefetch=0
+.org $39b
+FIS_LINK_198:
+    alu AND, a=T6, pair=AD, d=IMM, imm=15, b=T6, dst=RF
+.org $39c
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T1, dst=RF
+.org $39d
+    alu BIC, a=T1, pair=DA, d=PSW, b=T4, dst=RF
+.org $39e
+    alu OR, a=T6, b=T4, flags=LOAD
+.org $39f
+    JUMP, target=FIS_LINK_202, prefetch=0
+.org $3a8
+FIS_LINK_180:
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $3a9
+    CJUMP, cond=NOT_Z, target=FIS_UNSCALE_LOOP, prefetch=0
+.org $3aa
+    alu AND, a=T0, pair=AD, d=IMM, imm=127, b=T0, dst=RF
+.org $3ab
+    alu PASSA, pair=DA, d=IMM, imm=7, b=T7, dst=RF
+.org $3ac
+FIS_PACK_EXP_LOOP:
+    alu LSL, a=T4, b=T4, dst=RF
+.org $3ad
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $3ae
+    CJUMP, cond=NOT_Z, target=FIS_PACK_EXP_LOOP, prefetch=0
+.org $3af
+    JUMP, target=FIS_LINK_187, prefetch=0
+.org $3c8
+FIS_MULDIV:
+    alu AND, a=T6, pair=AD, d=IMM, imm=16, flags=NZVC
+.org $3c9
+    CJUMP, cond=Z, target=FIS_MULDIV_DISPATCH, prefetch=0
+.org $3ca
+    alu XOR, a=T6, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+.org $3cb
+FIS_MULDIV_DISPATCH:
+    alu PASSA, pair=DA, d=IMM, imm=16, b=T1, dst=RF
+.org $3cc
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+.org $3cd
+    CJUMP, cond=NOT_Z, target=FIS_DIV, prefetch=0
+.org $3ce
+    alu PASSA, a=T4, flags=NZVC
+.org $3cf
+    JUMP, target=FIS_LINK_107, prefetch=0
+.org $3f3
+FIS_B_ZERO:
+    alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
+.org $3f4
+    alu PASSA, pair=DA, d=ZERO, b=T3, dst=RF
+.org $3f5
+    alu BIC, a=T6, pair=AD, d=IMM, imm=16, b=T6, dst=RF
+.org $3f6
+FIS_SCALE:
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T7, dst=RF
+.org $3f7
+FIS_SCALE_LOOP:
+    alu PASSA, a=T0, b=T0, dst=RFQ_L
+.org $3f8
+    alu LSL, a=T3, b=T3, dst=RF, flags=NZVC
+.org $3f9
+    alu ROL, a=T2, b=T2, dst=RF
+.org $3fa
+    alu SUB, a=T7, pair=AD, d=ONE, b=T7, dst=RF, flags=NZVC
+.org $3fb
+    CJUMP, cond=NOT_Z, target=FIS_SCALE_LOOP, prefetch=0
+.org $3fc
+    alu PASSA, pair=DA, d=IMM, imm=32, b=T1, dst=RF
+.org $3fd
+    alu AND, a=T1, pair=DA, d=DISP, flags=NZVC
+.org $3fe
+    JUMP, target=FIS_LINK_50, prefetch=0
+
+
+.org $400
+MFPI:
+    CALL, target=DESTINATION_EA, prefetch=0
+    OR_MD, target=MFPI_SOURCE, prefetch=0
+.org $408
+MFPI_SOURCE:
+    alu PASSA, a=RD, b=T0, dst=RF, previous=1, seq=PAGE, next=MFPI_PUSH
+    JUMP, target=MFPI_MEMORY, prefetch=0
+    JUMP, target=MFPI_MEMORY, prefetch=0
+    JUMP, target=MFPI_MEMORY, prefetch=0
+    JUMP, target=MFPI_MEMORY, prefetch=0
+    JUMP, target=MFPI_MEMORY, prefetch=0
+    JUMP, target=MFPI_MEMORY, prefetch=0
+    JUMP, target=MFPI_MEMORY, prefetch=0
+MFPI_MEMORY:
+    READ, space=PREVIOUS_I, a=T1, target=MFPI_VALUE, prefetch=0
+MFPI_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+MFPI_PUSH:
+    alu SUB, a=R6, b=R6, pair=AD, d=TWO, dst=RF, delta=1
+    WRITE, a=R6, b=T0, target=MFPI_FLAGS, prefetch=0
+MFPI_FLAGS:
+    alu PASSA, a=T0, flags=NZV, seq=FETCH
+.org $420
+MTPI:
+    READ, a=R6, target=MTPI_POP, prefetch=0
+MTPI_POP:
+    alu ADD, a=R6, b=R6, pair=AD, d=TWO, dst=RF, delta=1
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    CALL, target=DESTINATION_EA, prefetch=0
+    OR_MD, target=MTPI_DESTINATION, prefetch=0
+.org $428
+MTPI_DESTINATION:
+    alu PASSA, a=T0, b=RD, dst=RF, previous=1, flags=NZV, seq=FETCH
+    JUMP, target=MTPI_MEMORY, prefetch=0
+    JUMP, target=MTPI_MEMORY, prefetch=0
+    JUMP, target=MTPI_MEMORY, prefetch=0
+    JUMP, target=MTPI_MEMORY, prefetch=0
+    JUMP, target=MTPI_MEMORY, prefetch=0
+    JUMP, target=MTPI_MEMORY, prefetch=0
+    JUMP, target=MTPI_MEMORY, prefetch=0
+MTPI_MEMORY:
+    WRITE, space=PREVIOUS_I, a=T1, b=T0, target=MFPI_FLAGS, prefetch=0
+
+; CSM uses the caller's SP value in supervisor D space. Save the frame before
+; changing either architectural SP or mode, so an aborted write retains the
+; caller context. The supervisor entry PC comes from supervisor I-space 010.
+.org $440
+CSM:
+    CALL, target=DESTINATION_EA, prefetch=0
+    OR_MD, target=CSM_SOURCE, prefetch=0
+.org $448
+CSM_SOURCE:
+    alu PASSA, a=RD, b=T0, dst=RF, seq=PAGE, next=CSM_FRAME
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+    JUMP, target=CSM_MEMORY, prefetch=0
+CSM_MEMORY:
+    READ, a=T1, target=CSM_VALUE, prefetch=0
+CSM_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+CSM_FRAME:
+    alu SUB, a=R6, pair=AD, d=TWO, b=T2, dst=RF
+    alu PASSA, pair=DA, d=PSW, b=T3, dst=RF
+    alu BIC, a=T3, pair=AD, d=IMM, imm=15, b=T3, dst=RF
+    WRITE, space=SUPERVISOR, a=T2, b=T3, target=CSM_PUSH_PC, prefetch=0
+CSM_PUSH_PC:
+    alu SUB, a=T2, pair=AD, d=TWO, b=T2, dst=RF
+    WRITE, space=SUPERVISOR, a=T2, b=R7, target=CSM_PUSH_ARG, prefetch=0
+CSM_PUSH_ARG:
+    alu SUB, a=T2, pair=AD, d=TWO, b=T2, dst=RF
+    WRITE, space=SUPERVISOR, a=T2, b=T0, target=CSM_MODE, prefetch=0
+CSM_MODE:
+    alu PASSA, pair=DA, d=PSW, b=T5, dst=RF
+    alu LSR, a=T5, b=T6, dst=RF
+    alu LSR, a=T6, b=T6, dst=RF
+    alu AND, a=T6, pair=AD, d=IMM, imm=0o030000, b=T6, dst=RF
+    alu BIC, a=T5, pair=AD, d=IMM, imm=0o170020, b=T5, dst=RF
+    alu OR, a=T5, pair=AD, d=IMM, imm=0o040000, b=T5, dst=RF
+    alu OR, a=T5, b=T6, flags=LOAD
+    alu PASSA, a=T2, b=R6, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=8, b=T4, dst=RF
+    READ, space=INSTRUCTION, a=T4, target=CSM_PC, prefetch=0
+CSM_PC:
+    alu PASSA, pair=DA, d=MDR, b=R7, dst=RF, seq=FETCH, trace=RETURN
+; Locked memory operations share the ordinary EA and ALU. Register forms
+; are rejected by dispatch, before evaluating any operand side effects.
+; R0 is loaded before TSTSET's store, and WRTLCK samples it after EA updates.
+; A failed kernel trap push still has the original PSW/PC in T0/T1.
+; Use physical 6/4 for the vector and physical 2/0 for its emergency frame.
+; The internal RF write selects kernel SP regardless of the vector's CM.
+.org $431
+RED_STACK:
+    alu PASSA, pair=DA, d=IMM, imm=6, b=T4, dst=RF
+    READ, space=PHYSICAL, a=T4, target=RED_PSW, prefetch=0
+RED_PSW:
+    alu PASSA, pair=DA, d=MDR, flags=LOAD
+    alu PASSA, pair=DA, d=TWO, b=T4, dst=RF
+    WRITE, space=PHYSICAL, a=T4, b=T0, target=RED_PC, prefetch=0
+RED_PC:
+    alu PASSA, pair=DA, d=ZERO, b=T4, dst=RF
+    WRITE, space=PHYSICAL, a=T4, b=T1, target=RED_SP, prefetch=0
+RED_SP:
+    WRITE, space=INTERNAL, address=$20, b=T4, target=RED_VECTOR, prefetch=0
+RED_VECTOR:
+    alu PASSA, pair=DA, d=IMM, imm=4, b=T4, dst=RF
+    READ, space=PHYSICAL, a=T4, target=RED_COMMIT, prefetch=0
+RED_COMMIT:
+    alu PASSA, pair=DA, d=MDR, b=R7, dst=RF, seq=FETCH
+.org $470
+TSTSET:
+    CALL, target=DESTINATION_EA, prefetch=0
+    READ, a=T1, target=TSTSET_VALUE, prefetch=0
+TSTSET_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=R0, dst=RF
+    alu OR, a=R0, pair=AD, d=ONE, b=T2, dst=RF
+    WRITE, a=T1, b=T2, target=TSTSET_FLAGS, prefetch=0
+TSTSET_FLAGS:
+    alu LSR, a=R0, flags=NZVC
+    alu PASSA, a=R0, flags=NZV, seq=FETCH
+.org $478
+WRTLCK:
+    CALL, target=DESTINATION_EA, prefetch=0
+    WRITE, a=T1, b=R0, target=WRTLCK_FLAGS, prefetch=0
+WRTLCK_FLAGS:
+    alu PASSA, a=R0, flags=NZV, seq=FETCH
+.org $7ff
+STOP:
+    STOP
+
+.org $0b9
+NOP:
+    alu PASSA, seq=FETCH

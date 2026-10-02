@@ -1,0 +1,121 @@
+uJ11 SD BOOT MENU
+Detected controllers:
+  1 - RK05, units: 0 1 2 
+  2 - RH11/HK, units: 0 1 
+Default: RH0 - boot in 5s, Enter=boot, other key=menu: Booting RH/HK bootstrap...
+
+RT-11XM  V05.03  
+
+.TYPE V5USER.TXT
+
+                              RT-11 V5.3
+
+       Installation of RT-11 Version 5.3 is complete and you are now
+    executing from the working volume    (provided you have used the
+    automatic installation procedure). DIGITAL recommends you verify
+    the correct  operation  of  your  system's  software  using  the
+    verification procedure.  To do this, enter the command:
+
+                             IND VERIFY
+
+        Note that VERIFY should be performed  only after the distri-
+    bution media have been backed up.  This was accomplished as part
+    of automatic installation on  all  RL02,  RX02,  TK50, and  RX50
+    based systems,   including the  MicroPDP-11 and the Professional
+    300.  If you have not completed automatic installation, you must
+    perform a manual backup before using VERIFY.  Note also,  VERIFY
+    is NOT supported on RX01 diskettes,    DECtape I or II,   or the
+    Professional 325.
+
+    DIGITAL also  recommends  you  read  the  file V5NOTE.TXT, which
+    contains information  formalized too late to be included  in the
+    Release Notes.  V5NOTE.TXT can be TYPED or PRINTED.
+
+
+.ASSIGN DM1: VOL:
+
+.ASSIGN RK0: BAS:
+
+.ASSIGN RK1: PAS:
+
+.ASSIGN RK2: FOR:
+
+.SET SL OFF
+[r[24H\
+.SHOW CONFIGURATION
+
+RT-11XM  V05.03  
+Booted from DM0:RT11XM
+22 bit addressing is on
+
+USR   is set NOSWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KEX
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/84 Processor
+1936KB of memory
+Floating Point Microcode
+Extended Instruction Set (EIS)
+Floating Instruction Set (FIS)
+Memory Management Unit
+Cache Memory
+PMI Memory
+60 Cycle System Clock                  
+
+Device I/O time-out support
+System job support
+FPU support
+
+
+.SHOW MEMORY
+
+------- Extended Memory --------
+Address   Module    Words   Type
+-------   ------    -----   ----
+17760000  IOPAGE     4096.   HDW 
+07440000  MEMTOP       
+01000000  VM       860160.   SHR 
+00166200  ......   100800.       
+00160000  SL         1600.   PVT 
+
+------ Low Memory -------
+Address   Module    Words
+-------   ------    -----
+155324    DM          662.       
+117602    RMON       7593.       
+106540    USR        2321.       
+001000    ..BG..    17840.       
+
+
+.DIR DM1:
+ 
+ADDER .PAS     1                 ADDER .OBJ     3           
+ADDER .LST     2                 ADDER .MAP     6           
+ 4 Files, 12 Blocks
+ 53644 Free blocks
+
+.DIR RK0:BASIC.SAV
+ 
+BASIC .SAV    53  04-Apr-83      
+ 1 Files, 53 Blocks
+ 4076 Free blocks
+
+.DIR RK1:XM.SAV
+ 
+XM    .SAV   474  07-Mar-85      
+ 1 Files, 474 Blocks
+ 1714 Free blocks
+
+.DIR RK2:FORTRA.SAV
+ 
+FORTRA.SAV   128                 
+ 1 Files, 128 Blocks
+ 4476 Free blocks
+
+.

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE ispXCF SYSTEM "IspXCF.dtd">
+<ispXCF version="3.14">
+  <Comment>uJ11 hc7000-lcd-sram RT-11 build</Comment>
+  <Chain>
+    <Comm>JTAG</Comm>
+    <Device>
+      <SelectedProg value="TRUE"/><Pos>1</Pos><Vendor>Lattice</Vendor>
+      <Family>MachXO2</Family><Name>LCMXO2-7000HC</Name>
+      <IDCode>0x012bd043</IDCode><Package>All</Package><PON>LCMXO2-7000HC</PON>
+      <Bypass><InstrLen>8</InstrLen><InstrVal>11111111</InstrVal><BScanLen>1</BScanLen><BScanVal>0</BScanVal></Bypass>
+      <File>/tmp/uj11-ps2-idle-20261002._kukrkll/build/hc7000-ps2-idle-02-20261002/impl1/hc7000-ps2-idle-02-20261002_impl1.jed</File><FileTime>10/02/26 14:38:55</FileTime>
+      <JedecChecksum>0x7CBA</JedecChecksum>
+      <Operation>SRAM Refresh</Operation>
+      <Option><SVFVendor>JTAG STANDARD</SVFVendor><IOState>HighZ</IOState>
+        <PreloadLength>664</PreloadLength>
+        <IOVectorData>0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</IOVectorData>
+        <TCKFrequency>1.000000 MHz</TCKFrequency><Usercode>0x00000000</Usercode>
+        <AccessMode>SRAM</AccessMode></Option>
+    </Device>
+  </Chain>
+  <ProjectOptions><Program>SEQUENTIAL</Program><Process>ENTIRED CHAIN</Process>
+    <OperationOverride>No Override</OperationOverride><StartTAP>TLR</StartTAP><EndTAP>TLR</EndTAP>
+    <VerifyUsercode value="FALSE"/><TCKDelay>30</TCKDelay></ProjectOptions>
+  <CableOptions><CableName>USB2</CableName><PortAdd>FTUSB-0</PortAdd>
+    <USBID>DUAL RS232 A Location 0000 Serial DUAL RS232 A</USBID></CableOptions>
+</ispXCF>

@@ -1,0 +1,13 @@
+{
+  "phase": "HC7000 PS2 keyboard hardware",
+  "port": "/dev/ttyUSB1",
+  "passed": false,
+  "commands": [],
+  "started_utc": "2026-10-02T10:43:37Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "uart_bytes": 5,
+  "scope": "Read-only stopped-CPU preflight",
+  "observed_state": "R 7 echoed without an ODT register reply; stopped CPU not confirmed",
+  "programmer_success": false,
+  "finished_utc": "2026-10-02T10:44:59Z"
+}

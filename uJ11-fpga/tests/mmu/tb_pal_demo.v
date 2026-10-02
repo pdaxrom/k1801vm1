@@ -15,6 +15,7 @@ module tb_pal_demo;
         .mmr0(),.mmr1(),.mmr2(),.mmr3(mmr3),.upc(),.uword(),.pc(pc),.debug_register_data(),.debug_register_address(5'd0));
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     uj11_mmu_board_bus #(.CLOCK_HZ(50000000),.CLEAR_WORDS(1),.VIDEO_ENABLE(1),.BOOT_ROM_ENABLE(0)) bus(
+        .ps2_clock(),.ps2_data(1'b1),
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),
         .dma_map_enabled(mmr3[5]),.video_clk(vclk),.video_reset(1'b0),.tvout(),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(cpu_lock),

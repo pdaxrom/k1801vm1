@@ -1,0 +1,1046 @@
+----------------------------------------------------------------------
+Report for cell uj11_mmu_microcomp.verilog
+
+Register bits: 2098 of 6864 (31%)
+PIC Latch:       0
+I/O cells:       89
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                                 BB       17       100.0
+                              CCU2D      342       100.0
+                              DP8KC        5       100.0
+                           DPR16X4C       63       100.0
+                            EHXPLLJ        2       100.0
+                            FD1P3AX      321       100.0
+                            FD1P3BX       10       100.0
+                            FD1P3DX       58       100.0
+                            FD1P3IX      853       100.0
+                            FD1P3JX       31       100.0
+                            FD1S3AX      229       100.0
+                            FD1S3AY       30       100.0
+                            FD1S3BX       11       100.0
+                            FD1S3DX        7       100.0
+                            FD1S3IX      494       100.0
+                            FD1S3JX        5       100.0
+                                GSR        1       100.0
+                                 IB        8       100.0
+                           IFS1P3BX        1       100.0
+                           IFS1P3IX        3       100.0
+                           IFS1P3JX        2       100.0
+                                INV       19       100.0
+                            L6MUX21       39       100.0
+                              MUX81       24       100.0
+                                 OB       63       100.0
+                                OBZ        1       100.0
+                           OFS1P3IX       42       100.0
+                           OFS1P3JX        1       100.0
+                           ORCALUT4     4678       100.0
+                            PDPW8KC       21       100.0
+                              PFUMX      356       100.0
+                                PUR        1       100.0
+                           SPR16X4C       32       100.0
+                                VHI       52       100.0
+                                VLO       52       100.0
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+                  serv_rf_ram_if_Z1        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+          serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1        1       100.0
+          spi_byte_service_125s_2s_7s        1       100.0
+                           uj11_alu        1       100.0
+          uj11_button_1000000s_100s_99s        1       100.0
+                  uj11_console_fifo        1       100.0
+          uj11_console_uart_50000000s_1s_434s_217s_9s        1       100.0
+          uj11_hc7000_diagnostics_50000000s_1s        1       100.0
+                  uj11_hc7000_pll50        1       100.0
+                     uj11_hg_inputs        1       100.0
+                           uj11_mmu        1       100.0
+                uj11_mmu_apr_decode        1       100.0
+                 uj11_mmu_apr_ram_1        1       100.0
+          uj11_mmu_board_50000000s_1000000s_125s_2s_1048576s_1s_1s_1s_Z4        1       100.0
+          uj11_mmu_board_bus_50000000s_1000000s_125s_2s_1048576s_1s_1s_1s_1s_1_Z3        1       100.0
+                       uj11_mmu_cpu        1       100.0
+                  uj11_mmu_datapath        1       100.0
+                    uj11_mmu_decode        1       100.0
+          uj11_mmu_disk_50000000s_125s_2s_1s_1s_1s_1_50000s        1       100.0
+                   uj11_mmu_iop_bus        1       100.0
+                   uj11_mmu_iop_ram        1       100.0
+                   uj11_mmu_regfile        1       100.0
+          uj11_mmu_rom_build/hc7000-mmu-hardware/microcode.mem        1       100.0
+             uj11_mmu_sector_engine        1       100.0
+               uj11_mmu_service_cpu        1       100.0
+          uj11_mmu_storage_rf_ram_2s_0s_512s        1       100.0
+          uj11_mmu_storage_rf_top_Z2        1       100.0
+                 uj11_mmu_translate        1       100.0
+                   uj11_pal_encoder        1       100.0
+                       uj11_pal_pll        1       100.0
+                       uj11_pal_ram        1       100.0
+          uj11_pal_timing_240s_36s_349s        1       100.0
+          uj11_pal_video_240s_36s_349s_0s_1s_2s_3s_4s        1       100.0
+                         uj11_panel        1       100.0
+          uj11_ps2_keyboard_50000000s_50s        1       100.0
+                     uj11_serv_sram        1       100.0
+          uj11_sram_1048576s_1s_0s_1s_2s_3s_4s_5s_6s        1       100.0
+          uj11_tick_1000000s_282397        1       100.0
+          uj11_tick_1000000s_282397_1        1       100.0
+          uj11_video_arbiter_1_0s_1s_2s_3s_4s        1       100.0
+                            
+                         TOTAL          7925           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_board_50000000s_1000000s_125s_2s_1048576s_1s_1s_1s_Z4.netlist
+     Instance path:  system
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D      324        94.7
+                              DP8KC        5       100.0
+                           DPR16X4C       63       100.0
+                            FD1P3AX      321       100.0
+                            FD1P3BX       10       100.0
+                            FD1P3DX       58       100.0
+                            FD1P3IX      852        99.9
+                            FD1P3JX       29        93.5
+                            FD1S3AX      213        93.0
+                            FD1S3AY       13        43.3
+                            FD1S3BX        7        63.6
+                            FD1S3DX        7       100.0
+                            FD1S3IX      430        87.0
+                            FD1S3JX        4        80.0
+                                INV       16        84.2
+                            L6MUX21       37        94.9
+                              MUX81       24       100.0
+                           ORCALUT4     4538        97.0
+                            PDPW8KC       21       100.0
+                              PFUMX      352        98.9
+                           SPR16X4C       32       100.0
+                                VHI       46        88.5
+                                VLO       46        88.5
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+                  serv_rf_ram_if_Z1        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+          serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1        1       100.0
+          spi_byte_service_125s_2s_7s        1       100.0
+                           uj11_alu        1       100.0
+                  uj11_console_fifo        1       100.0
+          uj11_console_uart_50000000s_1s_434s_217s_9s        1       100.0
+                     uj11_hg_inputs        1       100.0
+                           uj11_mmu        1       100.0
+                uj11_mmu_apr_decode        1       100.0
+                 uj11_mmu_apr_ram_1        1       100.0
+          uj11_mmu_board_bus_50000000s_1000000s_125s_2s_1048576s_1s_1s_1s_1s_1_Z3        1       100.0
+                       uj11_mmu_cpu        1       100.0
+                  uj11_mmu_datapath        1       100.0
+                    uj11_mmu_decode        1       100.0
+          uj11_mmu_disk_50000000s_125s_2s_1s_1s_1s_1_50000s        1       100.0
+                   uj11_mmu_iop_bus        1       100.0
+                   uj11_mmu_iop_ram        1       100.0
+                   uj11_mmu_regfile        1       100.0
+          uj11_mmu_rom_build/hc7000-mmu-hardware/microcode.mem        1       100.0
+             uj11_mmu_sector_engine        1       100.0
+               uj11_mmu_service_cpu        1       100.0
+          uj11_mmu_storage_rf_ram_2s_0s_512s        1       100.0
+          uj11_mmu_storage_rf_top_Z2        1       100.0
+                 uj11_mmu_translate        1       100.0
+                   uj11_pal_encoder        1       100.0
+                       uj11_pal_ram        1       100.0
+          uj11_pal_timing_240s_36s_349s        1       100.0
+          uj11_pal_video_240s_36s_349s_0s_1s_2s_3s_4s        1       100.0
+                         uj11_panel        1       100.0
+          uj11_ps2_keyboard_50000000s_50s        1       100.0
+                     uj11_serv_sram        1       100.0
+          uj11_sram_1048576s_1s_0s_1s_2s_3s_4s_5s_6s        1       100.0
+          uj11_tick_1000000s_282397_1        1       100.0
+          uj11_video_arbiter_1_0s_1s_2s_3s_4s        1       100.0
+                            
+                         TOTAL          7493           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_board_bus_50000000s_1000000s_125s_2s_1048576s_1s_1s_1s_1s_1_Z3.netlist
+     Instance path:  system.bus
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D      289        84.5
+                              DP8KC        1        20.0
+                           DPR16X4C       36        57.1
+                            FD1P3AX      194        60.4
+                            FD1P3BX       10       100.0
+                            FD1P3DX       58       100.0
+                            FD1P3IX      564        66.1
+                            FD1P3JX       20        64.5
+                            FD1S3AX      119        52.0
+                            FD1S3AY       12        40.0
+                            FD1S3BX        7        63.6
+                            FD1S3DX        7       100.0
+                            FD1S3IX      393        79.6
+                            FD1S3JX        4        80.0
+                                INV       13        68.4
+                            L6MUX21       34        87.2
+                              MUX81        8        33.3
+                           ORCALUT4     2550        54.5
+                            PDPW8KC       19        90.5
+                              PFUMX      199        55.9
+                                VHI       35        67.3
+                                VLO       35        67.3
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+                  serv_rf_ram_if_Z1        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+          serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1        1       100.0
+          spi_byte_service_125s_2s_7s        1       100.0
+                  uj11_console_fifo        1       100.0
+          uj11_console_uart_50000000s_1s_434s_217s_9s        1       100.0
+                     uj11_hg_inputs        1       100.0
+          uj11_mmu_disk_50000000s_125s_2s_1s_1s_1s_1_50000s        1       100.0
+                   uj11_mmu_iop_bus        1       100.0
+                   uj11_mmu_iop_ram        1       100.0
+             uj11_mmu_sector_engine        1       100.0
+               uj11_mmu_service_cpu        1       100.0
+          uj11_mmu_storage_rf_ram_2s_0s_512s        1       100.0
+          uj11_mmu_storage_rf_top_Z2        1       100.0
+                   uj11_pal_encoder        1       100.0
+                       uj11_pal_ram        1       100.0
+          uj11_pal_timing_240s_36s_349s        1       100.0
+          uj11_pal_video_240s_36s_349s_0s_1s_2s_3s_4s        1       100.0
+                         uj11_panel        1       100.0
+          uj11_ps2_keyboard_50000000s_50s        1       100.0
+                     uj11_serv_sram        1       100.0
+          uj11_sram_1048576s_1s_0s_1s_2s_3s_4s_5s_6s        1       100.0
+          uj11_tick_1000000s_282397_1        1       100.0
+          uj11_video_arbiter_1_0s_1s_2s_3s_4s        1       100.0
+                            
+                         TOTAL          4641           
+----------------------------------------------------------------------
+Report for cell uj11_sram_1048576s_1s_0s_1s_2s_3s_4s_5s_6s.netlist
+     Instance path:  system.bus.memory
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       11         3.2
+                            FD1P3IX       19         2.2
+                            FD1S3AX        7         3.1
+                            FD1S3AY        6        20.0
+                            FD1S3IX       21         4.3
+                                INV        1         5.3
+                           ORCALUT4       93         2.0
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           160           
+----------------------------------------------------------------------
+Report for cell uj11_tick_1000000s_282397_1.netlist
+  Original Cell name uj11_tick_1000000s_282397
+     Instance path:  system.bus.timer
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1S3IX       19         3.8
+                            FD1S3JX        1        20.0
+                           ORCALUT4        9         0.2
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            31           
+----------------------------------------------------------------------
+Report for cell uj11_panel.netlist
+     Instance path:  system.bus.panel
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX        6         0.7
+                            FD1P3JX        2         6.5
+                            FD1S3IX        6         1.2
+                                INV        1         5.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            17           
+----------------------------------------------------------------------
+Report for cell uj11_hg_inputs.netlist
+     Instance path:  system.bus.hg
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX        1         0.1
+                            FD1S3IX        1         0.2
+                           ORCALUT4        4         0.1
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             8           
+----------------------------------------------------------------------
+Report for cell uj11_console_uart_50000000s_1s_434s_217s_9s.netlist
+     Instance path:  system.bus.console
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       10         2.9
+                            FD1P3BX       10       100.0
+                            FD1P3DX       58       100.0
+                            FD1S3BX        1         9.1
+                            FD1S3DX        7       100.0
+                                INV        1         5.3
+                           ORCALUT4       83         1.8
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           172           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_disk_50000000s_125s_2s_1s_1s_1s_1_50000s.netlist
+     Instance path:  system.bus.disk
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D      131        38.3
+                           DPR16X4C       36        57.1
+                            FD1P3AX      194        60.4
+                            FD1P3IX      348        40.8
+                            FD1P3JX       15        48.4
+                            FD1S3AX       75        32.8
+                            FD1S3AY        4        13.3
+                            FD1S3IX      119        24.1
+                            FD1S3JX        2        40.0
+                                INV        5        26.3
+                            L6MUX21       34        87.2
+                              MUX81        8        33.3
+                           ORCALUT4     1610        34.4
+                            PDPW8KC       19        90.5
+                              PFUMX      190        53.4
+                                VHI       24        46.2
+                                VLO       24        46.2
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+                  serv_rf_ram_if_Z1        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+          serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1        1       100.0
+          spi_byte_service_125s_2s_7s        1       100.0
+                  uj11_console_fifo        1       100.0
+                   uj11_mmu_iop_bus        1       100.0
+                   uj11_mmu_iop_ram        1       100.0
+             uj11_mmu_sector_engine        1       100.0
+               uj11_mmu_service_cpu        1       100.0
+          uj11_mmu_storage_rf_ram_2s_0s_512s        1       100.0
+          uj11_mmu_storage_rf_top_Z2        1       100.0
+          uj11_ps2_keyboard_50000000s_50s        1       100.0
+                     uj11_serv_sram        1       100.0
+                            
+                         TOTAL          2861           
+----------------------------------------------------------------------
+Report for cell spi_byte_service_125s_2s_7s.netlist
+     Instance path:  system.bus.disk.spi
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        4         1.2
+                            FD1P3IX       19         2.2
+                            FD1P3JX        9        29.0
+                            FD1S3IX       12         2.4
+                           ORCALUT4       42         0.9
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            88           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_sector_engine.netlist
+     Instance path:  system.bus.disk.engine
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       77        22.5
+                            FD1P3IX       96        11.3
+                            FD1P3JX        1         3.2
+                            FD1S3AX        7         3.1
+                            FD1S3AY        1         3.3
+                            FD1S3IX        8         1.6
+                           ORCALUT4      266         5.7
+                              PFUMX        9         2.5
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           467           
+----------------------------------------------------------------------
+Report for cell uj11_serv_sram.netlist
+     Instance path:  system.bus.disk.terminal.external_ram
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX       88        10.3
+                            FD1S3AX        4         1.7
+                            FD1S3AY        1         3.3
+                           ORCALUT4       21         0.4
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           116           
+----------------------------------------------------------------------
+Report for cell uj11_console_fifo.netlist
+     Instance path:  system.bus.disk.terminal.fifo
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        3         0.9
+                           DPR16X4C        2         3.2
+                            FD1P3IX        1         0.1
+                            FD1S3IX       13         2.6
+                           ORCALUT4       26         0.6
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            47           
+----------------------------------------------------------------------
+Report for cell uj11_ps2_keyboard_50000000s_50s.netlist
+     Instance path:  system.bus.disk.keyboard.receiver
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       13         3.8
+                           DPR16X4C        2         3.2
+                            FD1P3AX        4         1.2
+                            FD1P3IX       11         1.3
+                            FD1P3JX        4        12.9
+                            FD1S3AX        3         1.3
+                            FD1S3IX       33         6.7
+                            FD1S3JX        2        40.0
+                                INV        1         5.3
+                           ORCALUT4       81         1.7
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           156           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_iop_bus.netlist
+     Instance path:  system.bus.disk.bridge
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX       30         3.5
+                           ORCALUT4       17         0.4
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            49           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_iop_ram.netlist
+     Instance path:  system.bus.disk.ram
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX       68        21.2
+                            FD1S3AX        4         1.7
+                            FD1S3AY        1         3.3
+                            FD1S3IX        1         0.2
+                            L6MUX21       32        82.1
+                           ORCALUT4      335         7.2
+                            PDPW8KC       19        90.5
+                              PFUMX       83        23.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           545           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_service_cpu.netlist
+     Instance path:  system.bus.disk.cpu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       16         4.7
+                           DPR16X4C       32        50.8
+                            FD1P3AX      122        38.0
+                            FD1P3IX       34         4.0
+                            FD1P3JX        1         3.2
+                            FD1S3AX       25        10.9
+                            FD1S3AY        1         3.3
+                            FD1S3IX       13         2.6
+                                INV        3        15.8
+                            L6MUX21        2         5.1
+                              MUX81        8        33.3
+                           ORCALUT4      810        17.3
+                              PFUMX       98        27.5
+                                VHI       16        30.8
+                                VLO       16        30.8
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+                  serv_rf_ram_if_Z1        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+          serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1        1       100.0
+          uj11_mmu_storage_rf_ram_2s_0s_512s        1       100.0
+          uj11_mmu_storage_rf_top_Z2        1       100.0
+                            
+                         TOTAL          1212           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_storage_rf_top_Z2.netlist
+     Instance path:  system.bus.disk.cpu.core
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       16         4.7
+                           DPR16X4C       32        50.8
+                            FD1P3AX      122        38.0
+                            FD1P3IX       34         4.0
+                            FD1P3JX        1         3.2
+                            FD1S3AX       25        10.9
+                            FD1S3AY        1         3.3
+                            FD1S3IX       13         2.6
+                                INV        3        15.8
+                            L6MUX21        2         5.1
+                              MUX81        8        33.3
+                           ORCALUT4      810        17.3
+                              PFUMX       98        27.5
+                                VHI       15        28.8
+                                VLO       15        28.8
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+                  serv_rf_ram_if_Z1        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+          serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1        1       100.0
+          uj11_mmu_storage_rf_ram_2s_0s_512s        1       100.0
+                            
+                         TOTAL          1209           
+----------------------------------------------------------------------
+Report for cell serv_top_0s_1s_0s_1s_MINI_0_0_0_1_1.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       16         4.7
+                            FD1P3AX      120        37.4
+                            FD1P3IX       34         4.0
+                            FD1P3JX        1         3.2
+                            FD1S3AX       16         7.0
+                            FD1S3AY        1         3.3
+                            FD1S3IX        7         1.4
+                                INV        1         5.3
+                            L6MUX21        2         5.1
+                           ORCALUT4      713        15.2
+                              PFUMX       96        27.0
+                                VHI       12        23.1
+                                VLO       12        23.1
+SUB MODULES 
+                       serv_aligner        1       100.0
+                     serv_alu_1s_0s        1       100.0
+                 serv_bufreg2_1s_0s        1       100.0
+                serv_bufreg_0_1s_0s        1       100.0
+                       serv_compdec        1       100.0
+          serv_ctrl_MINI_0_0s_1s_0s        1       100.0
+          serv_decode_18446744073709551615s_0        1       100.0
+                  serv_immdec_1s_1s        1       100.0
+                serv_mem_if_0_1s_0s        1       100.0
+                serv_rf_if_0s_1s_0s        1       100.0
+           serv_state_MINI_0_1_0_1s        1       100.0
+                            
+                         TOTAL          1042           
+----------------------------------------------------------------------
+Report for cell serv_mem_if_0_1s_0s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.mem_if
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX        1         0.3
+                           ORCALUT4        5         0.1
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             8           
+----------------------------------------------------------------------
+Report for cell serv_rf_if_0s_1s_0s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.rf_if
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           ORCALUT4        5         0.1
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             7           
+----------------------------------------------------------------------
+Report for cell serv_alu_1s_0s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.alu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX        1         0.3
+                            FD1S3AX        1         0.4
+                           ORCALUT4        9         0.2
+                              PFUMX        1         0.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            14           
+----------------------------------------------------------------------
+Report for cell serv_ctrl_MINI_0_0s_1s_0s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.ctrl
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX       32         3.8
+                            FD1S3IX        2         0.4
+                           ORCALUT4       11         0.2
+                              PFUMX        1         0.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            48           
+----------------------------------------------------------------------
+Report for cell serv_bufreg2_1s_0s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.bufreg2
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX       32        10.0
+                           ORCALUT4       55         1.2
+                              PFUMX        7         2.0
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            96           
+----------------------------------------------------------------------
+Report for cell serv_bufreg_0_1s_0s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.bufreg
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX       32        10.0
+                            FD1S3IX        1         0.2
+                           ORCALUT4        9         0.2
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            44           
+----------------------------------------------------------------------
+Report for cell serv_immdec_1s_1s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.immdec
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX       27         8.4
+                           ORCALUT4       37         0.8
+                              PFUMX        3         0.8
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            69           
+----------------------------------------------------------------------
+Report for cell serv_decode_18446744073709551615s_0.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.decode
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX       10         3.1
+                           ORCALUT4       24         0.5
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            36           
+----------------------------------------------------------------------
+Report for cell serv_state_MINI_0_1_0_1s.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.state
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX        2         0.2
+                            FD1P3JX        1         3.2
+                            FD1S3AX       15         6.6
+                            FD1S3AY        1         3.3
+                            FD1S3IX        3         0.6
+                                INV        1         5.3
+                           ORCALUT4       59         1.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            84           
+----------------------------------------------------------------------
+Report for cell serv_compdec.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.gen_compressed.compdec
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX        1         0.3
+                            L6MUX21        2         5.1
+                           ORCALUT4      161         3.4
+                              PFUMX       47        13.2
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           213           
+----------------------------------------------------------------------
+Report for cell serv_aligner.netlist
+     Instance path:  system.bus.disk.cpu.core.cpu.gen_align.align
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       16         4.7
+                            FD1P3AX       16         5.0
+                            FD1S3IX        1         0.2
+                           ORCALUT4      338         7.2
+                              PFUMX       37        10.4
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           410           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_storage_rf_ram_2s_0s_512s.netlist
+     Instance path:  system.bus.disk.cpu.core.rf_ram
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           DPR16X4C       32        50.8
+                            FD1S3AX        3         1.3
+                              MUX81        8        33.3
+                           ORCALUT4       71         1.5
+                              PFUMX        2         0.6
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           118           
+----------------------------------------------------------------------
+Report for cell serv_rf_ram_if_Z1.netlist
+     Instance path:  system.bus.disk.cpu.core.rf_ram_if
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX        2         0.6
+                            FD1S3AX        6         2.6
+                            FD1S3IX        6         1.2
+                                INV        2        10.5
+                           ORCALUT4       26         0.6
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            44           
+----------------------------------------------------------------------
+Report for cell uj11_pal_video_240s_36s_349s_0s_1s_2s_3s_4s.netlist
+     Instance path:  system.bus.pal.video
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D      137        40.1
+                              DP8KC        1        20.0
+                            FD1P3IX      148        17.4
+                            FD1S3AX       34        14.8
+                            FD1S3AY        1         3.3
+                            FD1S3BX        6        54.5
+                            FD1S3IX      227        46.0
+                            FD1S3JX        1        20.0
+                                INV        5        26.3
+                           ORCALUT4      539        11.5
+                              PFUMX        9         2.5
+                                VHI        4         7.7
+                                VLO        4         7.7
+SUB MODULES 
+                   uj11_pal_encoder        1       100.0
+                       uj11_pal_ram        1       100.0
+          uj11_pal_timing_240s_36s_349s        1       100.0
+                            
+                         TOTAL          1119           
+----------------------------------------------------------------------
+Report for cell uj11_pal_encoder.netlist
+     Instance path:  system.bus.pal.video.encoder
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       58        17.0
+                            FD1S3AX       10         4.4
+                            FD1S3IX      111        22.5
+                                INV        3        15.8
+                           ORCALUT4      150         3.2
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           334           
+----------------------------------------------------------------------
+Report for cell uj11_pal_ram.netlist
+     Instance path:  system.bus.pal.video.ram
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        1        20.0
+                           ORCALUT4        2         0.0
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             5           
+----------------------------------------------------------------------
+Report for cell uj11_pal_timing_240s_36s_349s.netlist
+     Instance path:  system.bus.pal.video.timing
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       18         5.3
+                            FD1S3IX       25         5.1
+                                INV        2        10.5
+                           ORCALUT4      194         4.1
+                              PFUMX        1         0.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           242           
+----------------------------------------------------------------------
+Report for cell uj11_video_arbiter_1_0s_1s_2s_3s_4s.netlist
+     Instance path:  system.bus.pal.arbiter
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3IX       40         4.7
+                            FD1P3JX        2         6.5
+                            FD1S3AX        3         1.3
+                            FD1S3AY        1         3.3
+                           ORCALUT4      111         2.4
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           159           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_cpu.netlist
+     Instance path:  system.cpu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       35        10.2
+                              DP8KC        4        80.0
+                           DPR16X4C       27        42.9
+                            FD1P3AX      127        39.6
+                            FD1P3IX      288        33.8
+                            FD1P3JX        9        29.0
+                            FD1S3AX       94        41.0
+                            FD1S3AY        1         3.3
+                            FD1S3IX       37         7.5
+                                INV        3        15.8
+                            L6MUX21        3         7.7
+                              MUX81       16        66.7
+                           ORCALUT4     1987        42.5
+                            PDPW8KC        2         9.5
+                              PFUMX      153        43.0
+                           SPR16X4C       32       100.0
+                                VHI       10        19.2
+                                VLO       10        19.2
+SUB MODULES 
+                           uj11_alu        1       100.0
+                           uj11_mmu        1       100.0
+                uj11_mmu_apr_decode        1       100.0
+                 uj11_mmu_apr_ram_1        1       100.0
+                  uj11_mmu_datapath        1       100.0
+                    uj11_mmu_decode        1       100.0
+                   uj11_mmu_regfile        1       100.0
+          uj11_mmu_rom_build/hc7000-mmu-hardware/microcode.mem        1       100.0
+                 uj11_mmu_translate        1       100.0
+                            
+                         TOTAL          2847           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_decode.netlist
+     Instance path:  system.cpu.decoder
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           ORCALUT4      140         3.0
+                              PFUMX        2         0.6
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           144           
+----------------------------------------------------------------------
+Report for cell uj11_mmu.netlist
+     Instance path:  system.cpu.mmu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       14         4.1
+                            FD1P3AX       90        28.0
+                            FD1P3IX      179        21.0
+                            FD1S3AX       10         4.4
+                            FD1S3AY        1         3.3
+                              MUX81       16        66.7
+                           ORCALUT4      435         9.3
+                              PFUMX       30         8.4
+                           SPR16X4C       32       100.0
+                                VHI        4         7.7
+                                VLO        4         7.7
+SUB MODULES 
+                uj11_mmu_apr_decode        1       100.0
+                 uj11_mmu_apr_ram_1        1       100.0
+                 uj11_mmu_translate        1       100.0
+                            
+                         TOTAL           818           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_translate.netlist
+     Instance path:  system.cpu.mmu.translate
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       14         4.1
+                           ORCALUT4        5         0.1
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            21           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr_ram_1.netlist
+  Original Cell name uj11_mmu_apr_ram
+     Instance path:  system.cpu.mmu.store
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1P3AX       16         5.0
+                              MUX81       16        66.7
+                           ORCALUT4       18         0.4
+                           SPR16X4C       32       100.0
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            84           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_apr_decode.netlist
+     Instance path:  system.cpu.mmu.decode
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           ORCALUT4        4         0.1
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             6           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_datapath.netlist
+     Instance path:  system.cpu.dp
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        9         2.6
+                           DPR16X4C       24        38.1
+                            FD1P3AX       16         5.0
+                            FD1P3IX       16         1.9
+                            FD1S3AX       32        14.0
+                            FD1S3IX        6         1.2
+                            L6MUX21        2         5.1
+                           ORCALUT4      553        11.8
+                              PFUMX       74        20.8
+                                VHI        3         5.8
+                                VLO        3         5.8
+SUB MODULES 
+                           uj11_alu        1       100.0
+                   uj11_mmu_regfile        1       100.0
+                            
+                         TOTAL           740           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_regfile.netlist
+     Instance path:  system.cpu.dp.rf
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                           DPR16X4C       24        38.1
+                            FD1P3AX       16         5.0
+                            FD1S3AX       32        14.0
+                            FD1S3IX        6         1.2
+                           ORCALUT4      110         2.4
+                              PFUMX        5         1.4
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           195           
+----------------------------------------------------------------------
+Report for cell uj11_alu.netlist
+     Instance path:  system.cpu.dp.alu
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        9         2.6
+                            L6MUX21        2         5.1
+                           ORCALUT4      292         6.2
+                              PFUMX       41        11.5
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           346           
+----------------------------------------------------------------------
+Report for cell uj11_mmu_rom_build/hc7000-mmu-hardware/microcode.mem.netlist
+     Instance path:  system.cpu.microstore
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              DP8KC        4        80.0
+                            FD1P3AX       12         3.7
+                                INV        1         5.3
+                            L6MUX21        1         2.6
+                           ORCALUT4      641        13.7
+                            PDPW8KC        2         9.5
+                              PFUMX       44        12.4
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           707           
+----------------------------------------------------------------------
+Report for cell uj11_hc7000_diagnostics_50000000s_1s.netlist
+     Instance path:  diagnostics
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D       14         4.1
+                            FD1S3AX       16         7.0
+                            FD1S3AY       16        53.3
+                            FD1S3IX       36         7.3
+                                INV        1         5.3
+                            L6MUX21        2         5.1
+                           ORCALUT4      114         2.4
+                              PFUMX        4         1.1
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL           205           
+----------------------------------------------------------------------
+Report for cell uj11_button_1000000s_100s_99s.netlist
+     Instance path:  button
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                              CCU2D        4         1.2
+                            FD1P3IX        1         0.1
+                            FD1P3JX        2         6.5
+                            FD1S3IX       28         5.7
+                            FD1S3JX        1        20.0
+                                INV        1         5.3
+                           ORCALUT4       26         0.6
+                                VHI        2         3.8
+                                VLO        2         3.8
+SUB MODULES 
+          uj11_tick_1000000s_282397        1       100.0
+                            
+                         TOTAL            68           
+----------------------------------------------------------------------
+Report for cell uj11_tick_1000000s_282397.netlist
+  Original Cell name uj11_tick_1000000s_282397
+     Instance path:  button.timebase
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            FD1S3IX       19         3.8
+                            FD1S3JX        1        20.0
+                           ORCALUT4       10         0.2
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL            32           
+----------------------------------------------------------------------
+Report for cell uj11_hc7000_pll50.netlist
+     Instance path:  clock50.pll
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            EHXPLLJ        1        50.0
+                                INV        1         5.3
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             4           
+----------------------------------------------------------------------
+Report for cell uj11_pal_pll.netlist
+     Instance path:  pal_clock.pll
+                                          Cell usage:
+                               cell       count    Res Usage(%)
+                            EHXPLLJ        1        50.0
+                                VHI        1         1.9
+                                VLO        1         1.9
+                            
+                         TOTAL             3           

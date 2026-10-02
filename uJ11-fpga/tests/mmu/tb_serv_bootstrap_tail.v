@@ -5,6 +5,7 @@ module tb_serv_bootstrap_tail #(parameter integer CLOCK_HZ=50000000, parameter i
     always #(500000000.0/CLOCK_HZ) clk=~clk;
     wire cpu_start;
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ)) dut(
+        .ps2_clock(),.ps2_data(1'b1),.local_valid(),.local_data(),.local_ready(1'b0),
         .mirror_push(1'b0),.mirror_data(8'b0),.mirror_ready(),.dma_lanes(),.dma_reserved(),.clk(clk),.reset(reset),.bus_reset(1'b0),.dma_map_enabled(1'b0),
         .video_reg_read(16'b0),.rk_request(1'b0),.rk_write(1'b0),.rk_address(4'b0),
         .rk_lanes(2'b0),.rk_wdata(16'b0),.rk_irq_ack(1'b0),.cpu_start(cpu_start),

@@ -1,0 +1,175 @@
+uJ11 SD BOOT MENU
+Detected controllers:
+  1 - RK05, units: 0 1 2 
+  2 - RH11/HK, units: 0 1 
+Default: RH0 - boot in 5s, Enter=boot, other key=menu: Booting RH/HK bootstrap...
+
+RT-11XM  V05.03  
+
+.TYPE V5USER.TXT
+
+                              RT-11 V5.3
+
+       Installation of RT-11 Version 5.3 is complete and you are now
+    executing from the working volume    (provided you have used the
+    automatic installation procedure). DIGITAL recommends you verify
+    the correct  operation  of  your  system's  software  using  the
+    verification procedure.  To do this, enter the command:
+
+                             IND VERIFY
+
+        Note that VERIFY should be performed  only after the distri-
+    bution media have been backed up.  This was accomplished as part
+    of automatic installation on  all  RL02,  RX02,  TK50, and  RX50
+    based systems,   including the  MicroPDP-11 and the Professional
+    300.  If you have not completed automatic installation, you must
+    perform a manual backup before using VERIFY.  Note also,  VERIFY
+    is NOT supported on RX01 diskettes,    DECtape I or II,   or the
+    Professional 325.
+
+    DIGITAL also  recommends  you  read  the  file V5NOTE.TXT, which
+    contains information  formalized too late to be included  in the
+    Release Notes.  V5NOTE.TXT can be TYPED or PRINTED.
+
+
+.ASSIGN DM1: VOL:
+
+.ASSIGN RK0: BAS:
+
+.ASSIGN RK1: PAS:
+
+.ASSIGN RK2: FOR:
+
+.dir
+ 
+SWAP  .SYS    27  20-Dec-85      RT11AI.SYS    80  20-Dec-85
+RT11PI.SYS    95  20-Dec-85      RT11BL.SYS    78  20-Dec-85
+RT11SJ.SYS    79  20-Dec-85      RT11FB.SYS    93  20-Dec-85
+RT11XM.SYS   106  20-Dec-85      CR    .SYS     3  20-Dec-85
+CT    .SYS     6  20-Dec-85      DD    .SYS     5  20-Dec-85
+DL    .SYS     4  20-Dec-85      DM    .SYS     5  20-Dec-85
+DP    .SYS     3  20-Dec-85      DS    .SYS     3  20-Dec-85
+DT    .SYS     3  20-Dec-85      DU    .SYS     8  20-Dec-85
+DW    .SYS     5  20-Dec-85      DX    .SYS     4  20-Dec-85
+DY    .SYS     4  20-Dec-85      DZ    .SYS     4  20-Dec-85
+PD    .SYS     3  20-Dec-85      RF    .SYS     3  20-Dec-85
+RK    .SYS     3  20-Dec-85      LD    .SYS     8  20-Dec-85
+LP    .SYS     2  20-Dec-85      LS    .SYS     5  20-Dec-85
+MM    .SYS     9  20-Dec-85      MS    .SYS    10  20-Dec-85
+MT    .SYS     9  20-Dec-85      NL    .SYS     2  20-Dec-85
+PC    .SYS     2  20-Dec-85      PI    .SYS    60  20-Dec-85
+SL    .SYS    14  20-Dec-85      SLMIN .SYS    12  20-Dec-85
+SP    .SYS     6  20-Dec-85      TT    .SYS     2  20-Dec-85
+VM    .SYS     3  20-Dec-85      XC    .SYS     4  20-Dec-85
+XL    .SYS     4  20-Dec-85      DDX   .SYS     5  20-Dec-85
+DLX   .SYS     5  20-Dec-85      DMX   .SYS     5  20-Dec-85
+DUX   .SYS     9  20-Dec-85      DWX   .SYS     5  20-Dec-85
+DXX   .SYS     4  20-Dec-85      DYX   .SYS     4  20-Dec-85
+DZX   .SYS     4  20-Dec-85      LDX   .SYS     8  20-Dec-85
+LPX   .SYS     2  20-Dec-85      LSX   .SYS     5  20-Dec-85
+MMX   .SYS    10  20-Dec-85      MSX   .SYS    11  20-Dec-85
+MTX   .SYS     9  20-Dec-85      NCX   .SYS     9  20-Dec-85
+NLX   .SYS     2  20-Dec-85      NQX   .SYS     7  20-Dec-85
+PIX   .SYS    68  20-Dec-85      RKX   .SYS     3  20-Dec-85
+SLX   .SYS    16  20-Dec-85      SPX   .SYS     6  20-Dec-85
+VMX   .SYS     3  20-Dec-85      XCX   .SYS     4  20-Dec-85
+XLX   .SYS     4  20-Dec-85      STARTA.COM    61  20-Dec-85
+DEFLTS.OBJ     1                 STARTS.BAK     1  20-Dec-85
+STARTX.BAK     8  20-Dec-85      PIP   .SAV    30  20-Dec-85
+DUP   .SAV    47  20-Dec-85      DIR   .SAV    19  20-Dec-85
+IND   .SAV    56  20-Dec-85      RESORC.SAV    25  20-Dec-85
+EDIT  .SAV    19  20-Dec-85      K52   .SAV    54  20-Dec-85
+KED   .SAV    58  20-Dec-85      KEX   .SAV    53  20-Dec-85
+MACRO .SAV    61  20-Dec-85      CREF  .SAV     6  20-Dec-85
+LINK  .SAV    49  20-Dec-85      LIBR  .SAV    24  20-Dec-85
+FILEX .SAV    22  20-Dec-85      SRCCOM.SAV    26  20-Dec-85
+BINCOM.SAV    24  20-Dec-85      SLP   .SAV    13  20-Dec-85
+DUMP  .SAV     9  20-Dec-85      SIPP  .SAV    21  20-Dec-85
+BUP   .SAV    50  20-Dec-85      PAT   .SAV    10  20-Dec-85
+HELP  .SAV   132  20-Dec-85      SYSMAC.SML    60  20-Dec-85
+BATCH .SAV    26  20-Dec-85      ERROUT.SAV    18  20-Dec-85
+QUEMAN.SAV    15  20-Dec-85      FORMAT.SAV    24  20-Dec-85
+SETUP .SAV    41  20-Dec-85      VTCOM .SAV    24  20-Dec-85
+SPEED .SAV     4  20-Dec-85      DATIME.SAV     4  20-Dec-85
+DATIME.COM     3  20-Dec-85      LET   .SAV     5  20-Dec-85
+SPLIT .SAV     3  20-Dec-85      UCL   .SAV    15  20-Dec-85
+VBGEXE.SAV    16  20-Dec-85      TERMID.SAV     3  20-Dec-85
+QUEUE .REL    14  20-Dec-85      RTMON .REL     8  20-Dec-85
+SPOOL .REL    11  20-Dec-85      VTCOM .REL    27  20-Dec-85
+TRANSF.SAV    16  20-Dec-85      TRANSF.TSK    76  20-Dec-85
+TRANSF.EXE    45  20-Dec-85      GIDIS .SAV    72  20-Dec-85
+ALPH00.FNT     9  20-Dec-85      ODT   .OBJ     8  20-Dec-85
+VDT   .OBJ     8  20-Dec-85      VTMAC .MAC     7  20-Dec-85
+VTHDLR.OBJ     8  20-Dec-85      SYSLIB.OBJ    54  20-Dec-85
+PUTSTR.FOR     2  20-Dec-85      GETSTR.FOR     2  20-Dec-85
+MDUP  .SAV    20  20-Dec-85      MBOOT .BOT     1  20-Dec-85
+MBOT16.BOT     1  20-Dec-85      MSBOOT.BOT     3  20-Dec-85
+MDUP  .MM     56  20-Dec-85      MDUP  .MS     56  20-Dec-85
+MDUP  .MT     56  20-Dec-85      DEMOBG.MAC     2  20-Dec-85
+DEMOFG.MAC     3  20-Dec-85      DEMOX1.MAC     3  20-Dec-85
+DEMOF1.FOR     2  20-Dec-85      DEMOED.TXT     1  20-Dec-85
+SAMPLE.KED     4  20-Dec-85      VERIFY.COM     3  20-Dec-85
+IVP   .COM    16  20-Dec-85      IVP   .MAC    25  20-Dec-85
+MTB   .COM    14  20-Dec-85      FB    .MAC     1  20-Dec-85
+SJ    .MAC     1  20-Dec-85      XM    .MAC     1  20-Dec-85
+BSTRAP.MAC    70  20-Dec-85      EDTGBL.MAC    33  20-Dec-85
+KMON  .MAC   122  20-Dec-85      KMOVLY.MAC   216  20-Dec-85
+MTTEMT.MAC    18  20-Dec-85      MTTINT.MAC    46  20-Dec-85
+RMONFB.MAC   149  20-Dec-85      RMONSJ.MAC    70  20-Dec-85
+TRMTBL.MAC    19  20-Dec-85      USR   .MAC    74  20-Dec-85
+XMSUBS.MAC    40  20-Dec-85      BA    .MAC    21  20-Dec-85
+CR    .MAC    15  20-Dec-85      CT    .MAC    33  20-Dec-85
+DD    .MAC    27  20-Dec-85      DL    .MAC    37  20-Dec-85
+DM    .MAC    27  20-Dec-85      DP    .MAC    11  20-Dec-85
+DS    .MAC    10  20-Dec-85      DT    .MAC     9  20-Dec-85
+DU    .MAC    94  20-Dec-85      DW    .MAC    43  20-Dec-85
+DX    .MAC    21  20-Dec-85      DY    .MAC    23  20-Dec-85
+DZ    .MAC    18  20-Dec-85      EL    .MAC    17  20-Dec-85
+LD    .MAC    47  20-Dec-85      LP    .MAC    14  20-Dec-85
+LS    .MAC    35  20-Dec-85      NC    .MAC    43  20-Dec-85
+NI    .MAC    22  20-Dec-85      NL    .MAC     3  20-Dec-85
+NQ    .MAC    26  20-Dec-85      PC    .MAC     5  20-Dec-85
+PD    .MAC    12  20-Dec-85      RF    .MAC     7  20-Dec-85
+RK    .MAC    12  20-Dec-85      SP    .MAC    43  20-Dec-85
+TJ    .MAC    32  20-Dec-85      TM    .MAC    27  20-Dec-85
+TS    .MAC    39  20-Dec-85      TT    .MAC     7  20-Dec-85
+VM    .MAC    21  20-Dec-85      XC    .MAC     1  20-Dec-85
+XL    .MAC    28  20-Dec-85      FSM   .MAC    32  20-Dec-85
+ELCOPY.MAC    15  20-Dec-85      ELINIT.MAC    16  20-Dec-85
+ELTASK.MAC     9  20-Dec-85      ERRTXT.MAC     6  20-Dec-85
+ERROUT.OBJ    15  20-Dec-85      RTBL  .MAP    22  20-Dec-85
+RTSJ  .MAP    22  20-Dec-85      RTFB  .MAP    30  20-Dec-85
+RTXM  .MAP    33  20-Dec-85      SYSGEN.COM   230  20-Dec-85
+BL    .ANS     9  20-Dec-85      SJFB  .ANS     9  20-Dec-85
+XM    .ANS     9  20-Dec-85      CONFIG.COM    27  20-Dec-85
+CONFIG.SAV     7  20-Dec-85      V5USER.TXT     3  20-Dec-85
+V5NOTE.TXT    41  20-Dec-85      CUSTOM.TXT     9  20-Dec-85
+CONSOL.MAC     6  20-Dec-85      NITEST.MAC    22  20-Dec-85
+STARTF.BAK     5                 STARTF.COM     5           
+STARTS.COM     1                 STARTX.COM     8           
+ADDER .SAV    22                 FORBLD.COM     1           
+FORTRA.SAV   128                 FORLIB.OBJ   157           
+ 214 Files, 5346 Blocks
+ 48310 Free blocks
+
+.SET SL OFF
+[r[24H\
+.SHOW
+TT  (Resident) 
+DM  (Resident) 
+    DM0 = DK , SY 
+    DM1 = VOL
+MQ  (Resident) 
+LD   
+RK   
+    RK0 = BAS
+    RK1 = PAS
+    RK2 = FOR
+SL   
+VM   
+SP   
+NL   
+20 free slots
+
+
+.

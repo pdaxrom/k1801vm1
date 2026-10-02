@@ -19,6 +19,7 @@ module tb_mmu_disk;
     reg traffic=0;integer cpu_cycles=0,dma_cycles=0,checks=0;
     reg absent=0,fail_read=0,fail_write=0,stuck_busy=0;
     uj11_mmu_disk #(.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) disk(
+        .ps2_clock(),.ps2_data(1'b1),.local_valid(),.local_data(),.local_ready(1'b0),
         .video_reg_write(),.video_reg_address(),.video_reg_data(),.video_reg_lanes(),.video_reg_read(16'b0),
         .mirror_push(1'b0),.mirror_data(8'b0),.mirror_ready(),.dma_lanes(),.dma_reserved(),.clk(clk),.reset(reset),.dma_map_enabled(1'b0),.bus_reset(1'b0),.rk_request(rr),.rk_write(rw),
         .rk_address(ra),.rk_lanes(rl),.rk_wdata(wd),.rk_rdata(rd),.rk_ready(ready),.rk_irq(irq),.rk_irq_ack(irq_ack),

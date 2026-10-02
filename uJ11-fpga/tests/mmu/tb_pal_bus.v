@@ -10,6 +10,7 @@ module tb_pal_bus;
     wire [19:0] sa;wire [15:0] sd;wire ce,oe,we,lb,ub;
     wire [5:0] tvout;
     uj11_mmu_board_bus #(.CLOCK_HZ(50000000),.CLEAR_WORDS(1),.VIDEO_ENABLE(1)) dut(
+        .ps2_clock(),.ps2_data(1'b1),
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),
         .dma_map_enabled(1'b0),.video_clk(vclk),.video_reset(1'b0),.tvout(tvout),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(1'b0),

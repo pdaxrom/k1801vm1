@@ -1,0 +1,17 @@
+# IS61WV102416BLL-10T at 50 MHz (20 ns period).
+# IDLE launches address, SETUP launches OE, ACCESS1 waits, ACCESS2 captures.
+# Capture is two cycles after OE: 10 ns output + 10 ns SRAM + 2 ns PCB.
+# Thus DQ is valid 40-22=18 ns before the capture edge. Hold stays at zero;
+# the extra read cycle does not relax any internal or hold constraint.
+# WE is low for two cycles: >=30 ns with 10 ns pin skew, versus tPWE >=8 ns.
+# DQ setup before WE rises >=45 ns (three cycles minus 15 ns output delay).
+# Address/control and DQ hold are >=10 and >=5 ns. OE has a full release cycle.
+# The 2 ns PCB budget is an assumption, not a measured board flight time.
+INPUT_SETUP PORT "sram_data[*]" 18 NS HOLD 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_address[*]" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_data[*]" MAX 15 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_ce_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_oe_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_we_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_lb_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_ub_n" MAX 10 NS MIN 0 NS CLKNET "clk";

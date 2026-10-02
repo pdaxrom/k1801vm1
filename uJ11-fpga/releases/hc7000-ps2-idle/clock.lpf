@@ -1,0 +1,231 @@
+# hardware-lcd SCH/BRD; Q1=12 MHz, PLL CLKOP=24 MHz.
+SYSCONFIG JTAG_PORT=DISABLE MUX_CONFIGURATION_PORTS=ENABLE ;
+IOBUF ALLPORTS IO_TYPE=LVCMOS33 ;
+LOCATE COMP "tvout[2]" SITE "1" ;
+IOBUF PORT "tvout[2]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "clk_ext" SITE "3" ;
+IOBUF PORT "clk_ext" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "flash_cs_n" SITE "17" ;
+IOBUF PORT "flash_cs_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "flash_wp_n" SITE "20" ;
+IOBUF PORT "flash_wp_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "audio[0]" SITE "21" ;
+IOBUF PORT "audio[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "audio[1]" SITE "22" ;
+IOBUF PORT "audio[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "flash_mosi" SITE "33" ;
+IOBUF PORT "flash_mosi" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "flash_sck" SITE "34" ;
+IOBUF PORT "flash_sck" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "flash_hold_n" SITE "35" ;
+IOBUF PORT "flash_hold_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "res" SITE "38" ;
+IOBUF PORT "res" IO_TYPE=LVCMOS33 PULLMODE=UP ;
+LOCATE COMP "led_rgb[0]" SITE "39" ;
+IOBUF PORT "led_rgb[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sd_cs_n" SITE "40" ;
+IOBUF PORT "sd_cs_n" IO_TYPE=LVCMOS33 PULLMODE=UP ;
+LOCATE COMP "led_rgb[1]" SITE "41" ;
+IOBUF PORT "led_rgb[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "led_rgb[2]" SITE "42" ;
+IOBUF PORT "led_rgb[2]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[4]" SITE "43" ;
+IOBUF PORT "sram_address[4]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sd_sck" SITE "44" ;
+IOBUF PORT "sd_sck" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sd_miso" SITE "45" ;
+IOBUF PORT "sd_miso" IO_TYPE=LVCMOS33 PULLMODE=UP ;
+LOCATE COMP "sram_address[3]" SITE "47" ;
+IOBUF PORT "sram_address[3]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[2]" SITE "48" ;
+IOBUF PORT "sram_address[2]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[1]" SITE "49" ;
+IOBUF PORT "sram_address[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[0]" SITE "50" ;
+IOBUF PORT "sram_address[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_ce_n" SITE "52" ;
+IOBUF PORT "sram_ce_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[0]" SITE "54" ;
+IOBUF PORT "sram_data[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[1]" SITE "55" ;
+IOBUF PORT "sram_data[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[2]" SITE "56" ;
+IOBUF PORT "sram_data[2]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[3]" SITE "57" ;
+IOBUF PORT "sram_data[3]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[4]" SITE "58" ;
+IOBUF PORT "sram_data[4]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[5]" SITE "59" ;
+IOBUF PORT "sram_data[5]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[6]" SITE "60" ;
+IOBUF PORT "sram_data[6]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[7]" SITE "61" ;
+IOBUF PORT "sram_data[7]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_we_n" SITE "62" ;
+IOBUF PORT "sram_we_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[19]" SITE "63" ;
+IOBUF PORT "sram_address[19]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[18]" SITE "65" ;
+IOBUF PORT "sram_address[18]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[17]" SITE "67" ;
+IOBUF PORT "sram_address[17]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[16]" SITE "68" ;
+IOBUF PORT "sram_address[16]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[15]" SITE "69" ;
+IOBUF PORT "sram_address[15]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sd_mosi" SITE "71" ;
+IOBUF PORT "sd_mosi" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[5]" SITE "73" ;
+IOBUF PORT "sram_address[5]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[6]" SITE "74" ;
+IOBUF PORT "sram_address[6]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[7]" SITE "75" ;
+IOBUF PORT "sram_address[7]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[8]" SITE "76" ;
+IOBUF PORT "sram_address[8]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_oe_n" SITE "77" ;
+IOBUF PORT "sram_oe_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_ub_n" SITE "78" ;
+IOBUF PORT "sram_ub_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_lb_n" SITE "81" ;
+IOBUF PORT "sram_lb_n" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[15]" SITE "82" ;
+IOBUF PORT "sram_data[15]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[14]" SITE "83" ;
+IOBUF PORT "sram_data[14]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[13]" SITE "84" ;
+IOBUF PORT "sram_data[13]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[12]" SITE "85" ;
+IOBUF PORT "sram_data[12]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[11]" SITE "86" ;
+IOBUF PORT "sram_data[11]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[10]" SITE "87" ;
+IOBUF PORT "sram_data[10]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[9]" SITE "89" ;
+IOBUF PORT "sram_data[9]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_data[8]" SITE "91" ;
+IOBUF PORT "sram_data[8]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[9]" SITE "92" ;
+IOBUF PORT "sram_address[9]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[10]" SITE "93" ;
+IOBUF PORT "sram_address[10]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[11]" SITE "94" ;
+IOBUF PORT "sram_address[11]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[12]" SITE "95" ;
+IOBUF PORT "sram_address[12]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[13]" SITE "96" ;
+IOBUF PORT "sram_address[13]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "sram_address[14]" SITE "97" ;
+IOBUF PORT "sram_address[14]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "seg_led_h[4]" SITE "98" ;
+IOBUF PORT "seg_led_h[4]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[3]" SITE "99" ;
+IOBUF PORT "seg_led_h[3]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[8]" SITE "100" ;
+IOBUF PORT "seg_led_h[8]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[2]" SITE "103" ;
+IOBUF PORT "seg_led_h[2]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[7]" SITE "104" ;
+IOBUF PORT "seg_led_h[7]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[4]" SITE "105" ;
+IOBUF PORT "seg_led_l[4]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[3]" SITE "106" ;
+IOBUF PORT "seg_led_l[3]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[8]" SITE "107" ;
+IOBUF PORT "seg_led_l[8]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[2]" SITE "111" ;
+IOBUF PORT "seg_led_l[2]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[7]" SITE "112" ;
+IOBUF PORT "seg_led_l[7]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[6]" SITE "113" ;
+IOBUF PORT "seg_led_h[6]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[5]" SITE "114" ;
+IOBUF PORT "seg_led_h[5]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[0]" SITE "115" ;
+IOBUF PORT "seg_led_h[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_h[1]" SITE "117" ;
+IOBUF PORT "seg_led_h[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[6]" SITE "121" ;
+IOBUF PORT "seg_led_l[6]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[5]" SITE "122" ;
+IOBUF PORT "seg_led_l[5]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[0]" SITE "127" ;
+IOBUF PORT "seg_led_l[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "seg_led_l[1]" SITE "128" ;
+IOBUF PORT "seg_led_l[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "hg_tms" SITE "130" ;
+IOBUF PORT "hg_tms" IO_TYPE=LVCMOS33 PULLMODE=DOWN ;
+LOCATE COMP "hg_tck" SITE "131" ;
+IOBUF PORT "hg_tck" IO_TYPE=LVCMOS33 PULLMODE=DOWN ;
+LOCATE COMP "tx" SITE "132" ;
+IOBUF PORT "tx" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "rx" SITE "133" ;
+IOBUF PORT "rx" IO_TYPE=LVCMOS33 PULLMODE=UP ;
+LOCATE COMP "hg_tdi" SITE "136" ;
+IOBUF PORT "hg_tdi" IO_TYPE=LVCMOS33 PULLMODE=DOWN ;
+LOCATE COMP "hg_tdo" SITE "137" ;
+IOBUF PORT "hg_tdo" IO_TYPE=LVCMOS33 PULLMODE=DOWN ;
+LOCATE COMP "tvout[5]" SITE "139" ;
+IOBUF PORT "tvout[5]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "tvout[4]" SITE "140" ;
+IOBUF PORT "tvout[4]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "tvout[3]" SITE "141" ;
+IOBUF PORT "tvout[3]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "tvout[0]" SITE "142" ;
+IOBUF PORT "tvout[0]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+LOCATE COMP "tvout[1]" SITE "143" ;
+IOBUF PORT "tvout[1]" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+FREQUENCY PORT "clk_ext" 12 MHz ;
+FREQUENCY NET "clk" 50 MHz ;
+
+# IS61WV102416BLL-10T at 50 MHz (20 ns period).
+# IDLE launches address, SETUP launches OE, ACCESS1 waits, ACCESS2 captures.
+# Capture is two cycles after OE: 10 ns output + 10 ns SRAM + 2 ns PCB.
+# Thus DQ is valid 40-22=18 ns before the capture edge. Hold stays at zero;
+# the extra read cycle does not relax any internal or hold constraint.
+# WE is low for two cycles: >=30 ns with 10 ns pin skew, versus tPWE >=8 ns.
+# DQ setup before WE rises >=45 ns (three cycles minus 15 ns output delay).
+# Address/control and DQ hold are >=10 and >=5 ns. OE has a full release cycle.
+# The 2 ns PCB budget is an assumption, not a measured board flight time.
+INPUT_SETUP PORT "sram_data[*]" 18 NS HOLD 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_address[*]" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_data[*]" MAX 15 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_ce_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_oe_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_we_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_lb_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+CLOCK_TO_OUT PORT "sram_ub_n" MAX 10 NS MIN 0 NS CLKNET "clk";
+
+# hardware-lcd PS/2: connector pin 5 CLOCK / pin 1 DATA, 10K pull-ups to +3V3.
+LOCATE COMP "ps2_clock" SITE "2" ;
+IOBUF PORT "ps2_clock" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "ps2_data" SITE "138" ;
+IOBUF PORT "ps2_data" IO_TYPE=LVCMOS33 PULLMODE=NONE ;
+
+# The second PLL derives 64 MHz from the same 12 MHz crystal. Its phase
+# relative to the CPU PLL is unspecified. Only explicit CDC mailbox paths
+# below are asynchronous; all video logic is still scored at 64 MHz.
+FREQUENCY NET "video_clk" 64 MHz ;
+
+# Asynchronous reset assertion propagates through LSR->Q in TRACE. Release
+# is clocked through three stages; the pipe->consumer paths remain timed.
+BLOCK PATH FROM CELL "system_reset" TO CELL "system/bus/pal.video/*" ;
+BLOCK PATH FROM CELL "system/cpu/peripheral_reset" TO CELL "system/bus/pal.video/*" ;
+# Only stage zero is asynchronous. The two synchronizer stages must meet
+# the destination period, as must every path from stage one to consumers.
+BLOCK PATH FROM CELL "system/bus/pal.video/apply_toggle" TO CELL "system/bus/pal.video/apply_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/config_ack" TO CELL "system/bus/pal.video/ack_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/line_toggle" TO CELL "system/bus/pal.video/line_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/line_done" TO CELL "system/bus/pal.video/done_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/underrun_toggle" TO CELL "system/bus/pal.video/underrun_sync[0]" ;
+# Bundled data is held until acknowledgement. Capture is enabled only after
+# two full destination cycles (>=31.25 ns config, >=40 ns line descriptor).
+# Bound routing/logic delay explicitly instead of false-pathing these buses.
+MAXDELAY FROM CELL "system/bus/pal.video/control[*]" TO CELL "system/bus/pal.video/vcontrol[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "system/bus/pal.video/origin[*]" TO CELL "system/bus/pal.video/vorigin[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "system/bus/pal.video/fill_row[*]" TO CELL "system/bus/pal.video/dma_address[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "system/bus/pal.video/fill_bank" TO CELL "system/bus/pal.video/fill_address[*]" 25 NS DATAPATH_ONLY ;
+
+# Synplify packs DAC registers into I/O cells and flattens their names.
+BLOCK PATH FROM CELL "system_reset" TO CELL "system_bus_pal.video_encoder_dacio[*]" ;
+BLOCK PATH FROM CELL "system/cpu/peripheral_reset" TO CELL "system_bus_pal.video_encoder_dacio[*]" ;

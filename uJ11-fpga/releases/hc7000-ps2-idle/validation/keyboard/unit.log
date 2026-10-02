@@ -1,0 +1,2 @@
+PASS PS2 framing/filter/parity/timeout/FIFO/inhibit/reset checks=24
+tests/mmu/tb_ps2_keyboard.v:52: $finish called at 22003080000 (1ps)

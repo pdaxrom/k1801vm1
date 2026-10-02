@@ -1,0 +1,24 @@
+			Lattice Semiconductor Corporation.
+			Lattice Programmer Diamond (64-bit) 3.14.0.75.2 Command Line (Database V3.11.1)
+
+
+
+System Information:
+-----------------------------------------------------
+Linux sashz-ubuntu 6.8.0-142-generic #142-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:24:27 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Board with FTDI USB Host Chip detected.
+
+
+Frequency setting= 200000 Hz
+Check configuration setup: Start.
+JTAG Chain Verification. No Errors.
+Check configuration setup: Successful.
+Device1 LCMXO2-7000HC: FLASH Erase,Program,Verify
+
+Total erase time: 2520 ms.
+
+Number of Loop = 252/3000
+Execution time: 00 min : 58 sec
+Operation Done. No errors.
+Elapsed time: 00 min : 58 sec
+Operation: successful.

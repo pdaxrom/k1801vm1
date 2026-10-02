@@ -16,6 +16,7 @@ module tb_storage_menu #(parameter integer CLOCK_HZ=24000000);
     // Accelerate only the 50 Hz timer by 100x, retaining real CPU/UART/SPI clocks.
     uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(CLOCK_HZ/5000),
         .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(
+        .ps2_clock(),.ps2_data(1'b1),
         .video_clk(1'b0),.video_reset(1'b1),.tvout(),.clk(clk),.reset(power_on || hard_reset || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),

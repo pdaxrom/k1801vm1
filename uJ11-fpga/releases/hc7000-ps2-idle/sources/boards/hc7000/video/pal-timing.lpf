@@ -1,0 +1,27 @@
+# The second PLL derives 64 MHz from the same 12 MHz crystal. Its phase
+# relative to the CPU PLL is unspecified. Only explicit CDC mailbox paths
+# below are asynchronous; all video logic is still scored at 64 MHz.
+FREQUENCY NET "video_clk" 64 MHz ;
+
+# Asynchronous reset assertion propagates through LSR->Q in TRACE. Release
+# is clocked through three stages; the pipe->consumer paths remain timed.
+BLOCK PATH FROM CELL "system_reset" TO CELL "system/bus/pal.video/*" ;
+BLOCK PATH FROM CELL "system/cpu/peripheral_reset" TO CELL "system/bus/pal.video/*" ;
+# Only stage zero is asynchronous. The two synchronizer stages must meet
+# the destination period, as must every path from stage one to consumers.
+BLOCK PATH FROM CELL "system/bus/pal.video/apply_toggle" TO CELL "system/bus/pal.video/apply_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/config_ack" TO CELL "system/bus/pal.video/ack_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/line_toggle" TO CELL "system/bus/pal.video/line_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/line_done" TO CELL "system/bus/pal.video/done_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/pal.video/underrun_toggle" TO CELL "system/bus/pal.video/underrun_sync[0]" ;
+# Bundled data is held until acknowledgement. Capture is enabled only after
+# two full destination cycles (>=31.25 ns config, >=40 ns line descriptor).
+# Bound routing/logic delay explicitly instead of false-pathing these buses.
+MAXDELAY FROM CELL "system/bus/pal.video/control[*]" TO CELL "system/bus/pal.video/vcontrol[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "system/bus/pal.video/origin[*]" TO CELL "system/bus/pal.video/vorigin[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "system/bus/pal.video/fill_row[*]" TO CELL "system/bus/pal.video/dma_address[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "system/bus/pal.video/fill_bank" TO CELL "system/bus/pal.video/fill_address[*]" 25 NS DATAPATH_ONLY ;
+
+# Synplify packs DAC registers into I/O cells and flattens their names.
+BLOCK PATH FROM CELL "system_reset" TO CELL "system_bus_pal.video_encoder_dacio[*]" ;
+BLOCK PATH FROM CELL "system/cpu/peripheral_reset" TO CELL "system_bus_pal.video_encoder_dacio[*]" ;

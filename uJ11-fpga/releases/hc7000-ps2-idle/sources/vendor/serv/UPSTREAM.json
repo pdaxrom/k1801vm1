@@ -1,0 +1,28 @@
+{
+  "repository": "https://github.com/olofk/serv",
+  "revision": "f200eb2ed7b69ac1c6b8eddd47654522aeee5ce8",
+  "license": "ISC",
+  "files": {
+    "LICENSE": "d9a1bd691f04280a8369a4aa69b6be20c0e2ee6d164a17ad8a8ef49da8ea0ea9",
+    "README.md": "a2a5ee34268479dd1a5a0bf18e1fcce5e12fb068ea6149d4ec75a8ae8221c16c",
+    "rtl/serv_aligner.v": "adeff8f442db6c93f48e551721146b40c398ab14dcb5b22339746329e7a24f3b",
+    "rtl/serv_alu.v": "2e0c31b5b992618e514083aacf10cb38c2229b68b3b1e93d6663104f32143332",
+    "rtl/serv_bufreg.v": "76404174ec92c6cf68e0042798dede84d77c5e454c7f428afc7b9f612a3c52d4",
+    "rtl/serv_bufreg2.v": "6586c95a64a064ff6f4d001996d33f15e0f6d452e01ebb4da6120db06ddd0a51",
+    "rtl/serv_compdec.v": "b1799ad9c5f10756fc336788d4bf871c5a6d4181c2f62568fad1b3bbe86504ae",
+    "rtl/serv_csr.v": "2dd7167ed44817d921318a5d463281b43820c25e476039a604e95948be567e62",
+    "rtl/serv_ctrl.v": "eb198ba7594f918da2784f9b6f8c82de1b95e3ffdd3383f2f533872999e9dab5",
+    "rtl/serv_debug.v": "815a6b0da1a49d41faa72edd8f397f89ec79334b292b94991f60002b0776082f",
+    "rtl/serv_decode.v": "eac5b2097ebd1f4587d2aa27aba130897d057dd8a28ba678edce0f2a3c9f640a",
+    "rtl/serv_immdec.v": "80ec5a265194eb40f3413742fc9da0a23ed78f8bdf5add3e58b45fa1850b2bd5",
+    "rtl/serv_mem_if.v": "a4fbd74579447710ed43e81dd80b4ea9415da0a3425a447f29446f9bd7a9aa6f",
+    "rtl/serv_rf_if.v": "63fd0d2ec2f89201b20690c467ebbcae964a85b4570254a95154f832cf0dcb2e",
+    "rtl/serv_rf_ram.v": "779ad3243dfa648f276240d260ff4ac1a1e83cc1364afb93d40c586905ce4338",
+    "rtl/serv_rf_ram_if.v": "abb39b6bdf4d335bd2f90f75ddb1a410500a1a51a3e9f170453cb491d98d8697",
+    "rtl/serv_rf_top.v": "89faedf7530c34305bfbffd261732d95016bf5627f10b7bbafaa8e1fd6cd49c9",
+    "rtl/serv_state.v": "f7f981a28ed92243d812b3e6d723a77ec9278c7690eb4a530edc136aed5319b3",
+    "rtl/serv_synth_wrapper.v": "ca429e8f6867acb12d702c9c7d1b592dbb81982c7915b75b6eed2962833ccdff",
+    "rtl/serv_top.v": "c35b88bed5732309069203b2d04421622eaae108d5bf5daef3de273daf43388e",
+    "serv.core": "5a6b465868c29d3d9d030b239a81f5e805333a3e44f5f23404dbfd7611a4708c"
+  }
+}

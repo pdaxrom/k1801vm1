@@ -9,7 +9,8 @@ MMU_CLOCK_MHZ ?= 24
 HC7000_DIAGNOSTICS ?= 0
 HC7000_VIDEO ?= 0
 HC7000_TERMINAL ?= 0
-OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage)$(if $(filter 50,$(MMU_CLOCK_MHZ)),-50mhz)$(if $(filter 1,$(HC7000_DIAGNOSTICS)),-diagnostics)$(if $(filter 1,$(HC7000_VIDEO)),-pal)$(if $(filter 1,$(HC7000_TERMINAL)),-terminal))
+HC7000_KEYBOARD ?= 0
+OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage)$(if $(filter 50,$(MMU_CLOCK_MHZ)),-50mhz)$(if $(filter 1,$(HC7000_DIAGNOSTICS)),-diagnostics)$(if $(filter 1,$(HC7000_VIDEO)),-pal)$(if $(filter 1,$(HC7000_TERMINAL)),-terminal)$(if $(filter 1,$(HC7000_KEYBOARD)),-keyboard))
 HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
 SD_OUT ?= build/$(if $(filter mmu,$(CPU)),sd-hc7000,sd)
@@ -30,6 +31,15 @@ ifeq ($(filter $(HC7000_TERMINAL),0 1),)
 $(error Unknown HC7000_TERMINAL=$(HC7000_TERMINAL); expected 0 or 1)
 endif
 export UJ11_HC7000_TERMINAL := $(HC7000_TERMINAL)
+ifeq ($(filter $(HC7000_KEYBOARD),0 1),)
+$(error Unknown HC7000_KEYBOARD=$(HC7000_KEYBOARD); expected 0 or 1)
+endif
+export UJ11_HC7000_KEYBOARD := $(HC7000_KEYBOARD)
+ifeq ($(HC7000_KEYBOARD),1)
+ifneq ($(BOARD)/$(CPU)/$(FPP)/$(IOP)/$(HC7000_TERMINAL),hc7000-lcd-sram/mmu/off/storage/1)
+$(error HC7000_KEYBOARD requires HC7000 MMU, FPP=off, IOP=storage and HC7000_TERMINAL=1)
+endif
+endif
 ifeq ($(filter $(HC7000_DIAGNOSTICS),0 1),)
 $(error Unknown HC7000_DIAGNOSTICS=$(HC7000_DIAGNOSTICS); expected 0 or 1)
 endif
@@ -61,7 +71,7 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and MAP/PAR/TRACE at the selected clock.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
@@ -84,6 +94,11 @@ endif
 
 # Runners share generated ROM/module inputs and validate their hashes.
 .NOTPARALLEL:
+
+.PHONY: test-keyboard
+test-keyboard:
+	@test "$(HC7000_KEYBOARD)" = 1 || { echo 'Use HC7000_KEYBOARD=1 for the PS/2 integration test'; exit 1; }
+	$(PYTHON) tools/test_keyboard.py --out $(OUT)-test-keyboard
 
 .PHONY: all hardware software hg test-hg-time sd-image test-sd-image test test-python test-rtl test-modules test-fpp test-fpp-full test-odt test-rt11 test-basic test-configuration test-reboot verify synthesis prepare-synthesis export clean
 ifeq ($(CPU),mmu)
@@ -251,7 +266,7 @@ else
 	$(PYTHON) tools/test_mmu_board.py --name tb_mmu_disk --out build/test-mmu-disk
 endif
 
-.PHONY: test-storage test-storage-controllers bsd-image test-bsd storage-menu test-storage-menu
+.PHONY: test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu
 storage-menu:
 	$(PYTHON) tools/build_storage_menu.py
 test-storage-menu:

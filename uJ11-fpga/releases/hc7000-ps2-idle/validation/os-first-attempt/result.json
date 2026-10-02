@@ -1,0 +1,10 @@
+{
+  "passed": false,
+  "ps2_full_dir_observed": true,
+  "files": 214,
+  "blocks": 5346,
+  "error": "Phase 1 expected Booted from DM0:RT11XM; received SHOW without CONFIGURATION argument",
+  "interpretation": "Follow-up UART command was truncated; retry paces bytes against DL11 RBUF readiness",
+  "full_boot_matrix_verified": false,
+  "firmware_program_bytes": 16451
+}

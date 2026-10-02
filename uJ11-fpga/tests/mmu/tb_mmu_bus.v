@@ -15,6 +15,7 @@ module tb_mmu_bus;
     wire tx,cs,sck,mosi;wire [7:0] pins;
     integer checks=0,n;
     uj11_mmu_board_bus #(.CLEAR_WORDS(1),.TICK_DIVISOR(1024)) dut(
+        .ps2_clock(),.ps2_data(1'b1),
         .video_clk(1'b0),.video_reset(1'b1),.tvout(),
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.cpu_lock(1'b0),.dma_map_enabled(1'b0),
         .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),

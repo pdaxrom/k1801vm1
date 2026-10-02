@@ -19,6 +19,7 @@ module tb_mmu_bsd #(parameter integer CLOCK_HZ=24000000,VIDEO_ENABLE=0,TERMINAL_
     uj11_mmu_board #(.CLOCK_HZ(CLOCK_HZ),.TICK_DIVISOR(CLOCK_HZ/50),
         .VIDEO_ENABLE(VIDEO_ENABLE),.TERMINAL_ENABLE(TERMINAL_ENABLE),
         .SD_SLOW_DIV((CLOCK_HZ+399999)/400000)) dut(
+        .ps2_clock(),.ps2_data(1'b1),
         .video_clk(vclk),.video_reset(!VIDEO_ENABLE),.tvout(),.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),

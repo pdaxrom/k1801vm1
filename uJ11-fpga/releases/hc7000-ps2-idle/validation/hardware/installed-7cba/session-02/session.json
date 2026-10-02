@@ -1,0 +1,251 @@
+{
+  "phase": "HC7000 PS2 keyboard hardware",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "DIR",
+      "offset": 0,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 6690,
+      "response": "DIR\r\n \r\nSWAP  .SYS    27  20-Dec-85      RT11AI.SYS    80  20-Dec-85\r\nRT11PI.SYS    95  20-Dec-85      RT11BL.SYS    78  20-Dec-85\r\nRT11SJ.SYS    79  20-Dec-85      RT11FB.SYS    93  20-Dec-85\r\nRT11XM.SYS   106  20-Dec-85      CR    .SYS     3  20-Dec-85\r\nCT    .SYS     6  20-Dec-85      DD    .SYS     5  20-Dec-85\r\nDL    .SYS     4  20-Dec-85      DM    .SYS     5  20-Dec-85\r\nDP    .SYS     3  20-Dec-85      DS    .SYS     3  20-Dec-85\r\nDT    .SYS     3  20-Dec-85      DU    .SYS     8  20-Dec-85\r\nDW    .SYS     5  20-Dec-85      DX    .SYS     4  20-Dec-85\r\nDY    .SYS     4  20-Dec-85      DZ    .SYS     4  20-Dec-85\r\nPD    .SYS     3  20-Dec-85      RF    .SYS     3  20-Dec-85\r\nRK    .SYS     3  20-Dec-85      LD    .SYS     8  20-Dec-85\r\nLP    .SYS     2  20-Dec-85      LS    .SYS     5  20-Dec-85\r\nMM    .SYS     9  20-Dec-85      MS    .SYS    10  20-Dec-85\r\nMT    .SYS     9  20-Dec-85      NL    .SYS     2  20-Dec-85\r\nPC    .SYS     2  20-Dec-85      PI    .SYS    60  20-Dec-85\r\nSL    .SYS    14  20-Dec-85      SLMIN .SYS    12  20-Dec-85\r\nSP    .SYS     6  20-Dec-85      TT    .SYS     2  20-Dec-85\r\nVM    .SYS     3  20-Dec-85      XC    .SYS     4  20-Dec-85\r\nXL    .SYS     4  20-Dec-85      DDX   .SYS     5  20-Dec-85\r\nDLX   .SYS     5  20-Dec-85      DMX   .SYS     5  20-Dec-85\r\nDUX   .SYS     9  20-Dec-85      DWX   .SYS     5  20-Dec-85\r\nDXX   .SYS     4  20-Dec-85      DYX   .SYS     4  20-Dec-85\r\nDZX   .SYS     4  20-Dec-85      LDX   .SYS     8  20-Dec-85\r\nLPX   .SYS     2  20-Dec-85      LSX   .SYS     5  20-Dec-85\r\nMMX   .SYS    10  20-Dec-85      MSX   .SYS    11  20-Dec-85\r\nMTX   .SYS     9  20-Dec-85      NCX   .SYS     9  20-Dec-85\r\nNLX   .SYS     2  20-Dec-85      NQX   .SYS     7  20-Dec-85\r\nPIX   .SYS    68  20-Dec-85      RKX   .SYS     3  20-Dec-85\r\nSLX   .SYS    16  20-Dec-85      SPX   .SYS     6  20-Dec-85\r\nVMX   .SYS     3  20-Dec-85      XCX   .SYS     4  20-Dec-85\r\nXLX   .SYS     4  20-Dec-85      STARTA.COM    61  20-Dec-85\r\nDEFLTS.OBJ     1                 STARTS.BAK     1  20-Dec-85\r\nSTARTX.BAK     8  20-Dec-85      PIP   .SAV    30  20-Dec-85\r\nDUP   .SAV    47  20-Dec-85      DIR   .SAV    19  20-Dec-85\r\nIND   .SAV    56  20-Dec-85      RESORC.SAV    25  20-Dec-85\r\nEDIT  .SAV    19  20-Dec-85      K52   .SAV    54  20-Dec-85\r\nKED   .SAV    58  20-Dec-85      KEX   .SAV    53  20-Dec-85\r\nMACRO .SAV    61  20-Dec-85      CREF  .SAV     6  20-Dec-85\r\nLINK  .SAV    49  20-Dec-85      LIBR  .SAV    24  20-Dec-85\r\nFILEX .SAV    22  20-Dec-85      SRCCOM.SAV    26  20-Dec-85\r\nBINCOM.SAV    24  20-Dec-85      SLP   .SAV    13  20-Dec-85\r\nDUMP  .SAV     9  20-Dec-85      SIPP  .SAV    21  20-Dec-85\r\nBUP   .SAV    50  20-Dec-85      PAT   .SAV    10  20-Dec-85\r\nHELP  .SAV   132  20-Dec-85      SYSMAC.SML    60  20-Dec-85\r\nBATCH .SAV    26  20-Dec-85      ERROUT.SAV    18  20-Dec-85\r\nQUEMAN.SAV    15  20-Dec-85      FORMAT.SAV    24  20-Dec-85\r\nSETUP .SAV    41  20-Dec-85      VTCOM .SAV    24  20-Dec-85\r\nSPEED .SAV     4  20-Dec-85      DATIME.SAV     4  20-Dec-85\r\nDATIME.COM     3  20-Dec-85      LET   .SAV     5  20-Dec-85\r\nSPLIT .SAV     3  20-Dec-85      UCL   .SAV    15  20-Dec-85\r\nVBGEXE.SAV    16  20-Dec-85      TERMID.SAV     3  20-Dec-85\r\nQUEUE .REL    14  20-Dec-85      RTMON .REL     8  20-Dec-85\r\nSPOOL .REL    11  20-Dec-85      VTCOM .REL    27  20-Dec-85\r\nTRANSF.SAV    16  20-Dec-85      TRANSF.TSK    76  20-Dec-85\r\nTRANSF.EXE    45  20-Dec-85      GIDIS .SAV    72  20-Dec-85\r\nALPH00.FNT     9  20-Dec-85      ODT   .OBJ     8  20-Dec-85\r\nVDT   .OBJ     8  20-Dec-85      VTMAC .MAC     7  20-Dec-85\r\nVTHDLR.OBJ     8  20-Dec-85      SYSLIB.OBJ    54  20-Dec-85\r\nPUTSTR.FOR     2  20-Dec-85      GETSTR.FOR     2  20-Dec-85\r\nMDUP  .SAV    20  20-Dec-85      MBOOT .BOT     1  20-Dec-85\r\nMBOT16.BOT     1  20-Dec-85      MSBOOT.BOT     3  20-Dec-85\r\nMDUP  .MM     56  20-Dec-85      MDUP  .MS     56  20-Dec-85\r\nMDUP  .MT     56  20-Dec-85      DEMOBG.MAC     2  20-Dec-85\r\nDEMOFG.MAC     3  20-Dec-85      DEMOX1.MAC     3  20-Dec-85\r\nDEMOF1.FOR     2  20-Dec-85      DEMOED.TXT     1  20-Dec-85\r\nSAMPLE.KED     4  20-Dec-85      VERIFY.COM     3  20-Dec-85\r\nIVP   .COM    16  20-Dec-85      IVP   .MAC    25  20-Dec-85\r\nMTB   .COM    14  20-Dec-85      FB    .MAC     1  20-Dec-85\r\nSJ    .MAC     1  20-Dec-85      XM    .MAC     1  20-Dec-85\r\nBSTRAP.MAC    70  20-Dec-85      EDTGBL.MAC    33  20-Dec-85\r\nKMON  .MAC   122  20-Dec-85      KMOVLY.MAC   216  20-Dec-85\r\nMTTEMT.MAC    18  20-Dec-85      MTTINT.MAC    46  20-Dec-85\r\nRMONFB.MAC   149  20-Dec-85      RMONSJ.MAC    70  20-Dec-85\r\nTRMTBL.MAC    19  20-Dec-85      USR   .MAC    74  20-Dec-85\r\nXMSUBS.MAC    40  20-Dec-85      BA    .MAC    21  20-Dec-85\r\nCR    .MAC    15  20-Dec-85      CT    .MAC    33  20-Dec-85\r\nDD    .MAC    27  20-Dec-85      DL    .MAC    37  20-Dec-85\r\nDM    .MAC    27  20-Dec-85      DP    .MAC    11  20-Dec-85\r\nDS    .MAC    10  20-Dec-85      DT    .MAC     9  20-Dec-85\r\nDU    .MAC    94  20-Dec-85      DW    .MAC    43  20-Dec-85\r\nDX    .MAC    21  20-Dec-85      DY    .MAC    23  20-Dec-85\r\nDZ    .MAC    18  20-Dec-85      EL    .MAC    17  20-Dec-85\r\nLD    .MAC    47  20-Dec-85      LP    .MAC    14  20-Dec-85\r\nLS    .MAC    35  20-Dec-85      NC    .MAC    43  20-Dec-85\r\nNI    .MAC    22  20-Dec-85      NL    .MAC     3  20-Dec-85\r\nNQ    .MAC    26  20-Dec-85      PC    .MAC     5  20-Dec-85\r\nPD    .MAC    12  20-Dec-85      RF    .MAC     7  20-Dec-85\r\nRK    .MAC    12  20-Dec-85      SP    .MAC    43  20-Dec-85\r\nTJ    .MAC    32  20-Dec-85      TM    .MAC    27  20-Dec-85\r\nTS    .MAC    39  20-Dec-85      TT    .MAC     7  20-Dec-85\r\nVM    .MAC    21  20-Dec-85      XC    .MAC     1  20-Dec-85\r\nXL    .MAC    28  20-Dec-85      FSM   .MAC    32  20-Dec-85\r\nELCOPY.MAC    15  20-Dec-85      ELINIT.MAC    16  20-Dec-85\r\nELTASK.MAC     9  20-Dec-85      ERRTXT.MAC     6  20-Dec-85\r\nERROUT.OBJ    15  20-Dec-85      RTBL  .MAP    22  20-Dec-85\r\nRTSJ  .MAP    22  20-Dec-85      RTFB  .MAP    30  20-Dec-85\r\nRTXM  .MAP    33  20-Dec-85      SYSGEN.COM   230  20-Dec-85\r\nBL    .ANS     9  20-Dec-85      SJFB  .ANS     9  20-Dec-85\r\nXM    .ANS     9  20-Dec-85      CONFIG.COM    27  20-Dec-85\r\nCONFIG.SAV     7  20-Dec-85      V5USER.TXT     3  20-Dec-85\r\nV5NOTE.TXT    41  20-Dec-85      CUSTOM.TXT     9  20-Dec-85\r\nCONSOL.MAC     6  20-Dec-85      NITEST.MAC    22  20-Dec-85\r\nSTARTF.BAK     5                 STARTF.COM     5           \r\nSTARTS.COM     1                 STARTX.COM     8           \r\nADDER .SAV    22                 FORBLD.COM     1           \r\nFORTRA.SAV   128                 FORLIB.OBJ   157           \r\n 214 Files, 5346 Blocks\r\n 48310 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 7.415757498005405
+    },
+    {
+      "command": "DIR",
+      "offset": 7654,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 10995,
+      "response": "DIR\r\n \r\nSWAP  .SYS    25  01-Feb-82      RT11BL.SYS    65  01-Feb-82\r\nRT11SJ.SYS    67  01-Feb-82      RT11FB.SYS    80  01-Feb-82\r\nTT    .SYS     2  01-Feb-82      DT    .SYS     3  01-Feb-82\r\nDP    .SYS     3  01-Feb-82      DX    .SYS     3  01-Feb-82\r\nDY    .SYS     4  01-Feb-82      RF    .SYS     3  01-Feb-82\r\nRK    .SYS     3  01-Feb-82      DL    .SYS     4  01-Feb-82\r\nDM    .SYS     5  01-Feb-82      DS    .SYS     3  01-Feb-82\r\nDD    .SYS     5  01-Feb-82      MT    .SYS     9  01-Feb-82\r\nMM    .SYS     9  01-Feb-82      MS    .SYS    10  01-Feb-82\r\nLP    .SYS     2  01-Feb-82      LS    .SYS     2  01-Feb-82\r\nCR    .SYS     3  01-Feb-82      NL    .SYS     2  01-Feb-82\r\nPC    .SYS     2  01-Feb-82      PD    .SYS     3  01-Feb-82\r\nCT    .SYS     6  01-Feb-82      BA    .SYS     7  01-Feb-82\r\nPIP   .SAV    23  01-Feb-82      DUP   .SAV    41  01-Feb-82\r\nDIR   .SAV    17  01-Feb-82      FORMAT.SAV    19  01-Feb-82\r\nSLP   .SAV     9  01-Feb-82      SIPP  .SAV    20  01-Feb-82\r\nSTARTS.COM     1  01-Feb-82      STARTF.COM     1  01-Feb-82\r\nV4USER.TXT     1  01-Feb-82      CREF  .SAV     6  01-Feb-82\r\nDUMP  .SAV     8  01-Feb-82      MBOT16.BOT     1  01-Feb-82\r\nRESORC.SAV    15  01-Feb-82      SYSMAC.SML    42  01-Feb-82\r\nEDIT  .SAV    19  01-Feb-82      KED   .SAV    60  01-Feb-82\r\nK52   .SAV    55  01-Feb-82      TECO  .SAV    50  01-Feb-82\r\nMACRO .SAV    51  01-Feb-82      MAC8K .SAV    56  01-Feb-82\r\nLINK  .SAV    41  01-Feb-82      LIBR  .SAV    22  01-Feb-82\r\nFILEX .SAV    18  01-Feb-82      SRCCOM.SAV    13  01-Feb-82\r\nBINCOM.SAV    10  01-Feb-82      MTHD  .SYS     4  01-Feb-82\r\nMMHD  .SYS     4  01-Feb-82      MSHD  .SYS     5  01-Feb-82\r\nPATCH .SAV    10  01-Feb-82      PAT   .SAV     8  01-Feb-82\r\nHELP  .SAV   107  01-Feb-82      HELP  .EXE     7  01-Feb-82\r\nHELP  .MLB    98  01-Feb-82      ERROUT.SAV    17  01-Feb-82\r\nSYSGEN.SAV    39  01-Feb-82      SYSGEN.CND   134  01-Feb-82\r\nSYSTBL.CND    23  01-Feb-82      BATCH .SAV    26  01-Feb-82\r\nQUEMAN.SAV    13  01-Feb-82      QUEUE .REL    14  01-Feb-82\r\nSYSLIB.OBJ    47  01-Feb-82      MDUP  .SAV    18  01-Feb-82\r\nMDUP  .MM     48  01-Feb-82      MDUP  .MT     48  01-Feb-82\r\nMDUP  .MS     48  01-Feb-82      MBOOT .BOT     1  01-Feb-82\r\nMSBOOT.BOT     3  01-Feb-82      DEMOF1.FOR     2  01-Feb-82\r\nDEMOED.TXT     1  01-Feb-82      README.TXT    36  01-Feb-82\r\nVT52  .TEC     5  01-Feb-82      VEG   .TEC     4  01-Feb-82\r\nEDIT  .TEC     1  01-Feb-82      INSERT.TEC     2  01-Feb-82\r\nLOCAL .TEC     3  01-Feb-82      SORT  .TEC     3  01-Feb-82\r\nVTEDIT.TEC    32  01-Feb-82      TECO  .TC     23  01-Feb-82\r\nSEARCH.TEC     3  01-Feb-82      SQU   .TEC    13  01-Feb-82\r\nTYPE  .TEC    12  01-Feb-82      TECO  .INI    15  01-Feb-82\r\nODT   .OBJ     9  01-Feb-82      VDT   .OBJ     9  01-Feb-82\r\nVTHDLR.OBJ     9  01-Feb-82      PLOT55.OBJ     3  01-Feb-82\r\nTEST55.FOR     5  01-Feb-82      GETSTR.FOR     2  01-Feb-82\r\nPUTSTR.FOR     2  01-Feb-82      SPEED .SAV     4  01-Feb-82\r\nSYCND .BL      3  01-Feb-82      SYSTBL.BL      4  01-Feb-82\r\nSYCND .DIS     5  01-Feb-82      SYCND .HD      5  01-Feb-82\r\nSYSTBL.DIS     4  01-Feb-82      RTBL  .MAP    16  01-Feb-82\r\nRTSJ  .MAP    16  01-Feb-82      RTFB  .MAP    23  01-Feb-82\r\nDISMT1.COM     9  01-Feb-82      DISMT2.COM     8  01-Feb-82\r\n 106 Files, 1942 Blocks\r\n 2820 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 4.008206787984818
+    },
+    {
+      "command": "DIR RK0:RT11*.SYS",
+      "offset": 10995,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 11158,
+      "response": "DIR RK0:RT11*.SYS\r\n \r\nRT11BL.SYS    65  01-Feb-82      RT11SJ.SYS    67  01-Feb-82\r\nRT11FB.SYS    80  01-Feb-82      \r\n 3 Files, 212 Blocks\r\n 2820 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 2.4055230879457667
+    },
+    {
+      "command": "TYPE V4USER.TXT",
+      "offset": 11158,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 11615,
+      "response": "TYPE V4USER.TXT\r\nWelcome to RT-11 Version 4. RT-11 V04 provides new hardware support\r\nand some major enhancements over Version 3B.\r\n\r\nPlease use the HELP command;  it describes the new options in many\r\nof the utilities.\r\n\r\nIf you are using a terminal that requires fill characters,\r\nmodify location 56 with a Deposit command before proceeding with\r\nsystem installation. LA36 DECwriter II and VT52 DECscope terminals\r\ndo NOT require such modification.\r\n\r\n\r\n.",
+      "elapsed_seconds": 2.605762491002679
+    },
+    {
+      "command": "DIR",
+      "offset": 11615,
+      "expected": "\\r\\n\\.",
+      "complete": true,
+      "end": 14956,
+      "response": "DIR\r\n \r\nSWAP  .SYS    25  01-Feb-82      RT11BL.SYS    65  01-Feb-82\r\nRT11SJ.SYS    67  01-Feb-82      RT11FB.SYS    80  01-Feb-82\r\nTT    .SYS     2  01-Feb-82      DT    .SYS     3  01-Feb-82\r\nDP    .SYS     3  01-Feb-82      DX    .SYS     3  01-Feb-82\r\nDY    .SYS     4  01-Feb-82      RF    .SYS     3  01-Feb-82\r\nRK    .SYS     3  01-Feb-82      DL    .SYS     4  01-Feb-82\r\nDM    .SYS     5  01-Feb-82      DS    .SYS     3  01-Feb-82\r\nDD    .SYS     5  01-Feb-82      MT    .SYS     9  01-Feb-82\r\nMM    .SYS     9  01-Feb-82      MS    .SYS    10  01-Feb-82\r\nLP    .SYS     2  01-Feb-82      LS    .SYS     2  01-Feb-82\r\nCR    .SYS     3  01-Feb-82      NL    .SYS     2  01-Feb-82\r\nPC    .SYS     2  01-Feb-82      PD    .SYS     3  01-Feb-82\r\nCT    .SYS     6  01-Feb-82      BA    .SYS     7  01-Feb-82\r\nPIP   .SAV    23  01-Feb-82      DUP   .SAV    41  01-Feb-82\r\nDIR   .SAV    17  01-Feb-82      FORMAT.SAV    19  01-Feb-82\r\nSLP   .SAV     9  01-Feb-82      SIPP  .SAV    20  01-Feb-82\r\nSTARTS.COM     1  01-Feb-82      STARTF.COM     1  01-Feb-82\r\nV4USER.TXT     1  01-Feb-82      CREF  .SAV     6  01-Feb-82\r\nDUMP  .SAV     8  01-Feb-82      MBOT16.BOT     1  01-Feb-82\r\nRESORC.SAV    15  01-Feb-82      SYSMAC.SML    42  01-Feb-82\r\nEDIT  .SAV    19  01-Feb-82      KED   .SAV    60  01-Feb-82\r\nK52   .SAV    55  01-Feb-82      TECO  .SAV    50  01-Feb-82\r\nMACRO .SAV    51  01-Feb-82      MAC8K .SAV    56  01-Feb-82\r\nLINK  .SAV    41  01-Feb-82      LIBR  .SAV    22  01-Feb-82\r\nFILEX .SAV    18  01-Feb-82      SRCCOM.SAV    13  01-Feb-82\r\nBINCOM.SAV    10  01-Feb-82      MTHD  .SYS     4  01-Feb-82\r\nMMHD  .SYS     4  01-Feb-82      MSHD  .SYS     5  01-Feb-82\r\nPATCH .SAV    10  01-Feb-82      PAT   .SAV     8  01-Feb-82\r\nHELP  .SAV   107  01-Feb-82      HELP  .EXE     7  01-Feb-82\r\nHELP  .MLB    98  01-Feb-82      ERROUT.SAV    17  01-Feb-82\r\nSYSGEN.SAV    39  01-Feb-82      SYSGEN.CND   134  01-Feb-82\r\nSYSTBL.CND    23  01-Feb-82      BATCH .SAV    26  01-Feb-82\r\nQUEMAN.SAV    13  01-Feb-82      QUEUE .REL    14  01-Feb-82\r\nSYSLIB.OBJ    47  01-Feb-82      MDUP  .SAV    18  01-Feb-82\r\nMDUP  .MM     48  01-Feb-82      MDUP  .MT     48  01-Feb-82\r\nMDUP  .MS     48  01-Feb-82      MBOOT .BOT     1  01-Feb-82\r\nMSBOOT.BOT     3  01-Feb-82      DEMOF1.FOR     2  01-Feb-82\r\nDEMOED.TXT     1  01-Feb-82      README.TXT    36  01-Feb-82\r\nVT52  .TEC     5  01-Feb-82      VEG   .TEC     4  01-Feb-82\r\nEDIT  .TEC     1  01-Feb-82      INSERT.TEC     2  01-Feb-82\r\nLOCAL .TEC     3  01-Feb-82      SORT  .TEC     3  01-Feb-82\r\nVTEDIT.TEC    32  01-Feb-82      TECO  .TC     23  01-Feb-82\r\nSEARCH.TEC     3  01-Feb-82      SQU   .TEC    13  01-Feb-82\r\nTYPE  .TEC    12  01-Feb-82      TECO  .INI    15  01-Feb-82\r\nODT   .OBJ     9  01-Feb-82      VDT   .OBJ     9  01-Feb-82\r\nVTHDLR.OBJ     9  01-Feb-82      PLOT55.OBJ     3  01-Feb-82\r\nTEST55.FOR     5  01-Feb-82      GETSTR.FOR     2  01-Feb-82\r\nPUTSTR.FOR     2  01-Feb-82      SPEED .SAV     4  01-Feb-82\r\nSYCND .BL      3  01-Feb-82      SYSTBL.BL      4  01-Feb-82\r\nSYCND .DIS     5  01-Feb-82      SYCND .HD      5  01-Feb-82\r\nSYSTBL.DIS     4  01-Feb-82      RTBL  .MAP    16  01-Feb-82\r\nRTSJ  .MAP    16  01-Feb-82      RTFB  .MAP    23  01-Feb-82\r\nDISMT1.COM     9  01-Feb-82      DISMT2.COM     8  01-Feb-82\r\n 106 Files, 1942 Blocks\r\n 2820 Free blocks\r\n\r\n.",
+      "elapsed_seconds": 4.007684456999414
+    },
+    {
+      "command": "12:00 02-OCT-1999",
+      "offset": 18052,
+      "expected": "QUE BAP0:/BATCH",
+      "complete": true,
+      "end": 18518,
+      "response": "12:00 02-OCT-1999\r\n\r>TIME 12:00 02-OCT-1999\r\n\r>ACS SY:/BLKS=1024.\r\n\r>CON ONLINE ALL\r\n\r>ELI /LOG/LIM\r\n\r>CLI /INIT=DCL/CTRLC/DPR=\"<15><12>/$ /\"\r\n\r>INS LB:[1,1]RMSRESAB.TSK/RON=YES/PAR=GEN\r\n\r>INS LB:[1,1]RMSLBL.TSK/RON=YES/PAR=GEN\r\n\r>INS LB:[1,1]RMSLBM.TSK/RON=YES/PAR=GEN\r\n\r>INS $QMGCLI\r\n\r>INS $QMGCLI/TASK=...PRI\r\n\r>INS $QMGCLI/TASK=...SUB\r\n\r>QUE /START:QMG\r\n\r>INS $QMGPRT/TASK=PRT.../SLV=NO\r\n\r>QUE LP0:/CR/NM\r\n\r>START/ACCOUNTING\r\n\r>CON ESTAT LP0:\r\n\r>QUE BAP0:/BATCH\r",
+      "elapsed_seconds": 12.02935566008091
+    },
+    {
+      "command": "DEV DU:",
+      "offset": 18518,
+      "expected": "\\n\\r?\\r?\\n?>",
+      "complete": true,
+      "end": 18702,
+      "response": "\n\r>QUE BAP0:/AS:BATCH\r\n\r>@ <EOF>\r\r\n>DEV DU:\r\nDU0:\t Loaded Type=RD54  \r\nDU1:\t Public Mounted Loaded Label=RSX11MPBL87 Type=RD54  \r\nDU2:\t Loaded Type=RD54  \r\nDU3:\t Loaded Type=RD54  \r\r\n>",
+      "elapsed_seconds": 1.4031958190025762
+    },
+    {
+      "command": "PIP DU1:[1,54]RSX11M.SYS/LI",
+      "offset": 18702,
+      "expected": "\\n\\r?\\r?\\n?>",
+      "complete": true,
+      "end": 18867,
+      "response": "PIP DU1:[1,54]RSX11M.SYS/LI\r\r\n\n\nDirectory DU1:[1,54]\r\n2-OCT-99 12:00\r\n\r\nRSX11M.SYS;1        1026.   C  03-NOV-99 18:01\r\n\r\nTotal of 1026./1026. blocks in 1. file\r\n\r\n>",
+      "elapsed_seconds": 3.6084988390794024
+    },
+    {
+      "command": "RUN LB:[3,54]SHUTUP",
+      "offset": 18867,
+      "expected": "Enter minutes to wait before shutdown:",
+      "complete": true,
+      "end": 18962,
+      "response": "RUN LB:[3,54]SHUTUP\r\n\r\nRSX-11M-PLUS Shut down program\n\r\nEnter minutes to wait before shutdown: ",
+      "elapsed_seconds": 2.906902190996334
+    },
+    {
+      "command": "0",
+      "offset": 18962,
+      "expected": "Reason for shutdown",
+      "complete": true,
+      "end": 19002,
+      "response": "0\r\n\rReason for shutdown (<CR> for none):",
+      "elapsed_seconds": 0.5008669830858707
+    },
+    {
+      "command": "7CBA PS2 FIFO boot validation",
+      "offset": 19002,
+      "expected": "OK to shutdown\\? \\[Y/N\\]:",
+      "complete": true,
+      "end": 19057,
+      "response": "7CBA PS2 FIFO boot validation\r\n\rOK to shutdown? [Y/N]: ",
+      "elapsed_seconds": 3.30804495094344
+    },
+    {
+      "command": "Y",
+      "offset": 19057,
+      "expected": "SHUTUP operation complete",
+      "complete": true,
+      "end": 19634,
+      "response": "Y\r\n\r\u0007All further logins are disabled\u0007\r\n\r\n\u00072-OCT-99 12:01    System is now shutting down -- RSXMPL\n\rReason for shutdown: 7CBA PS2 FIFO boot validation\n\r\r\nQUE /STO:QMG\r\r\r\n>\nSTOP/ACCOUNTING SHUTUP \r\r\n12:01:50  SYSLOG -- \u000047. Exiting\r\r\n>\n@LB:[1,2]SHUTUP\r\r\n\r>VCP DISCONNECT /ALL\r\n\r>@ <EOF>\r\r\n>\nELI /NOLOG\r\r\r\n>\nACS DU1:/BLKS=0.\r\r\nACS -- Checkpoint file now inactive\r\r\n>\nDMO DU1:/DEV/LOCK=V\r\r\n\rDMO -- System disk being dismounted\u0000\r\n\rDMO -- SYSTEM  dismounted from DU1:    *** Final dismount initiated ***\u0000\r\r\n>\n\u0000\r12:01:52  *** DU1:  -- Dismount complete\r\r\n\rSHUTUP operation complete\n\r>",
+      "elapsed_seconds": 19.850592172006145
+    },
+    {
+      "command": "ls /dev/*rl* /dev/*xp*",
+      "offset": 20336,
+      "expected": "# ",
+      "complete": true,
+      "end": 20505,
+      "response": "ls /dev/*rl* /dev/*xp*\r\n/dev/rl0    /dev/rl1    /dev/rrl0   /dev/rrl1   /dev/rxp0a  /dev/rxp0b\r\n/dev/rxp0c  /dev/rxp0h  /dev/xp0a   /dev/xp0b   /dev/xp0c   /dev/xp0h\r\n# ",
+      "elapsed_seconds": 4.009356809896417
+    },
+    {
+      "command": "sync",
+      "offset": 20505,
+      "expected": "# ",
+      "complete": true,
+      "end": 20513,
+      "response": "sync\r\n# ",
+      "elapsed_seconds": 1.2024799840291962
+    },
+    {
+      "command": "root",
+      "offset": 20872,
+      "expected": "# ",
+      "complete": true,
+      "end": 20931,
+      "response": "root\r\n\r\nWelcome to the 2.9BSD (Berkeley) UNIX system.\r\n\r\n# ",
+      "elapsed_seconds": 5.112248016055673
+    },
+    {
+      "command": "stty nl0 cr0",
+      "offset": 20931,
+      "expected": "# ",
+      "complete": true,
+      "end": 20947,
+      "response": "stty nl0 cr0\r\n# ",
+      "elapsed_seconds": 2.0044022409711033
+    },
+    {
+      "command": "cat /etc/fstab",
+      "offset": 20947,
+      "expected": "# ",
+      "complete": true,
+      "end": 21030,
+      "response": "cat /etc/fstab\r\n/dev/rl0:/:rw:7:1\r\n/dev/xp0h:/usr:rw:7:2\r\n/dev/rl1:swap:sw:0::0\r\n# ",
+      "elapsed_seconds": 2.1047848539892584
+    },
+    {
+      "command": "ls /usr",
+      "offset": 21030,
+      "expected": "# ",
+      "complete": true,
+      "end": 21289,
+      "response": "ls /usr\r\n70          dict        include     lost+found  preserve    sys\r\nadm         doc         ingres      man         public      tmp\r\nbin         games       lib         msgs        spool       ucb\r\ncontrib     hack        local       net         src\r\n# ",
+      "elapsed_seconds": 1.5031237700022757
+    },
+    {
+      "command": "ls /bin/dd /usr/bin/dd",
+      "offset": 21289,
+      "expected": "# ",
+      "complete": true,
+      "end": 21347,
+      "response": "ls /bin/dd /usr/bin/dd\r\n/usr/bin/dd not found\r\n/bin/dd\r\n# ",
+      "elapsed_seconds": 2.906646948074922
+    },
+    {
+      "command": "dd if=/dev/rrl0 of=/dev/null bs=512 count=2048",
+      "offset": 21347,
+      "expected": "2048\\+0 records out",
+      "complete": true,
+      "end": 21436,
+      "response": "dd if=/dev/rrl0 of=/dev/null bs=512 count=2048\r\n2048+0 records in\r\n2048+0 records out\r\n# ",
+      "elapsed_seconds": 26.166465119924396
+    },
+    {
+      "command": "dd if=/dev/rrl1 of=/dev/null bs=512 count=2048",
+      "offset": 21436,
+      "expected": "2048\\+0 records out",
+      "complete": true,
+      "end": 21525,
+      "response": "dd if=/dev/rrl1 of=/dev/null bs=512 count=2048\r\n2048+0 records in\r\n2048+0 records out\r\n# ",
+      "elapsed_seconds": 25.86538719793316
+    },
+    {
+      "command": "dd if=/dev/rxp0h of=/dev/null bs=512 count=2048",
+      "offset": 21525,
+      "expected": "2048\\+0 records out",
+      "complete": true,
+      "end": 21615,
+      "response": "dd if=/dev/rxp0h of=/dev/null bs=512 count=2048\r\n2048+0 records in\r\n2048+0 records out\r\n# ",
+      "elapsed_seconds": 37.39462871104479
+    },
+    {
+      "command": "dd if=/dev/rrl0 of=/dev/null bs=8192 count=256",
+      "offset": 21615,
+      "expected": "256\\+0 records out",
+      "complete": true,
+      "end": 21702,
+      "response": "dd if=/dev/rrl0 of=/dev/null bs=8192 count=256\r\n256+0 records in\r\n256+0 records out\r\n# ",
+      "elapsed_seconds": 16.541451264056377
+    }
+  ],
+  "started_utc": "2026-10-02T11:32:35Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "preflash_mode": "rsx_shutdown",
+  "scope": "7CBA installed SD RT11 V4 RK0, RSX RQ1, BSD RL0/XP0 validation",
+  "uart_bytes": 23904,
+  "preflash_state": "RSX SHUTUP complete; DU1 dismounted; quiescent UART",
+  "jed_sha256": "7c8b22259826c3e927d84927f401ddb2d8f38405046bc4f6b415f11c2632b294",
+  "refresh_success": true,
+  "build": "hc7000-ps2-idle-02-20261002",
+  "jed_checksum": "7CBA",
+  "fresh_boot_menu": true,
+  "autoboot_cancelled": true,
+  "rt11v4_boot_verified": true,
+  "rt11v4_directory_verified": true,
+  "rt11v4_text_verified": true,
+  "rsx_rq1_boot_verified": true,
+  "rsx_rq1_directory_verified": true,
+  "rsx_shutdown_verified": true,
+  "boot_matrix_passed": true,
+  "bsd_boot_verified": true,
+  "bsd_multiuser_root_verified": true,
+  "bsd_usr_mount_verified": true,
+  "bsd_raw_read_rl0_1m_verified": true,
+  "bsd_raw_read_rl1_1m_verified": true,
+  "bsd_raw_read_xp0h_1m_verified": true,
+  "bsd_raw_read_rl0_2m_verified": true,
+  "physical_ps2_bsd_echo_pending": false,
+  "physical_ps2_bsd_user_confirmed": true,
+  "physical_ps2_bsd_captured_commands": [
+    "ls -l /",
+    "cc -v hello.c -o hello",
+    "./hello"
+  ],
+  "physical_ps2_bsd_program_output": "hello",
+  "physical_ps2_bsd_disk_read_overlap_verified": false,
+  "physical_ps2_bsd_scope": "User entered commands from keyboard after disk-read test; concurrent FIFO saturation not observed",
+  "finished_utc": "2026-10-02T11:56:24Z"
+}

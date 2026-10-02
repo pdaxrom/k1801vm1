@@ -16,6 +16,7 @@ module tb_storage_rk_rq #(parameter FAST_MEMORY=0);
     wire tx,cs,sck,mosi,miso;wire [7:0] pins;
     integer checks=0,n;
     uj11_mmu_board_bus #(.BOOT_ROM_ENABLE(0),.SRAM_FAST(FAST_MEMORY),.VIDEO_ENABLE(FAST_MEMORY),.CLEAR_WORDS(1),.TICK_DIVISOR(1024),.CLOCK_HZ(240000),.SD_SLOW_DIV(4),.SD_FAST_DIV(2)) dut(
+        .ps2_clock(),.ps2_data(1'b1),
         .video_clk(vclk),.video_reset(!FAST_MEMORY),.tvout(),
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.cpu_lock(1'b0),.dma_map_enabled(dma_map_enabled),
         .request(request),.writing(writing),.byte_access(byte_access),.address(address),.write_data(write_data),
@@ -34,13 +35,15 @@ module tb_storage_rk_rq #(parameter FAST_MEMORY=0);
     endtask
     localparam RK=22'o17777400,RQ=22'o17772150,COMM=22'h12000;
     localparam CMD=22'h13004,RSP=22'h13104,DATA=22'h180000;
+    integer code_limit;
+    initial if(!$value$plusargs("IOP_BSS_START=%h",code_limit))$fatal(1,"SERV ELF code bounds required");
     integer ring_index=0;
     reg [31:0] trace_pc[0:127],trace_instruction[0:127];integer trace_index=0;
     always @(posedge clk)if(!reset)begin
         if(dut.disk.ic && dut.disk.ia_ack)begin
             trace_pc[trace_index%128]<=dut.disk.ia;trace_instruction[trace_index%128]<=dut.disk.mem_data;trace_index<=trace_index+1;
         end
-        if(dut.disk.ic && dut.disk.ia>=13312)begin
+        if(dut.disk.ic && dut.disk.ia>=code_limit)begin
             for(integer t=0;t<128;t++)$display("SERV %h %h",trace_pc[(trace_index+t)%128],trace_instruction[(trace_index+t)%128]);
             $fatal(1,"SERV fetch outside RAM: %h",dut.disk.ia);
         end

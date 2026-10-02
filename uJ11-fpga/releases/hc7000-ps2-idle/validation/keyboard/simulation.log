@@ -1,0 +1,6 @@
+PASS SERV PS2/DL11/UART: checks=39 bytes=39 inhibited=3396350
+- tests/mmu/tb_keyboard.v:107: Verilog $finish
+SERV stack writes: 240 / 640 reserved bytes
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 476ms; walltime 29.395 s; speed 16.208 ms/s
+- Verilator: cpu 29.358 s on 1 threads; allocated 4 MB

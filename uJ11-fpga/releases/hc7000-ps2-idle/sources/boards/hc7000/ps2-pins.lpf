@@ -1,0 +1,5 @@
+# hardware-lcd PS/2: connector pin 5 CLOCK / pin 1 DATA, 10K pull-ups to +3V3.
+LOCATE COMP "ps2_clock" SITE "2" ;
+IOBUF PORT "ps2_clock" IO_TYPE=LVCMOS33 PULLMODE=NONE DRIVE=4 SLEWRATE=SLOW ;
+LOCATE COMP "ps2_data" SITE "138" ;
+IOBUF PORT "ps2_data" IO_TYPE=LVCMOS33 PULLMODE=NONE ;

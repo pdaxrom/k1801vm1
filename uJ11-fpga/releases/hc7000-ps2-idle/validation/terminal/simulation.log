@@ -1,0 +1,7 @@
+Continuous tabbed DIR: 35 lines, 51165949 clocks (1023318 us), every column painted before CR
+PASS PAL console mirror: 157759 checks, 2187 serial bytes, 67926563 backpressure clocks, 240 rows, 12 scroll steps
+- tests/mmu/tb_terminal.v:179: Verilog $finish
+SERV stack writes: 240 / 640 reserved bytes
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 3s; walltime 173.499 s; speed 17.880 ms/s
+- Verilator: cpu 173.325 s on 1 threads; allocated 4 MB

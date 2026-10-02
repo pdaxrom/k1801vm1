@@ -1,0 +1,10 @@
+SD image: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/ps2-idle-dma-order-20261002/sd.img (1048576 sectors), read-only backing, 256-sector RAM overlay
+RL probe during scroll wait: 22101 clocks
+RL probe during row pixel fill: 27379 clocks
+PASS keyboard disk scheduling: 24 queued keys, 5120 DMA words, inhibited=2031785
+PASS terminal DMA: 2475473 checks, reserve crossing/read/write and RL probe latency 26619 clocks
+- tests/mmu/tb_terminal_dma.v:146: Verilog $finish
+SERV stack writes: 336 / 640 reserved bytes
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 570ms; walltime 39.580 s; speed 14.402 ms/s
+- Verilator: cpu 39.512 s on 1 threads; allocated 4 MB

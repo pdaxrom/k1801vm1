@@ -1,0 +1,208 @@
+; Microcoded console; no architectural GPR/PSW scratch and no RAM allocation.
+; R <raw RF slot or 40=PSW>, F <FP state word>, P <physical address>, V <virtual address>, M <mode/I-D>,
+; W <word> deposit to the last selection, C continue, S step. Numbers octal.
+.org $500
+ODT_ENTRY:
+    JUMP, console=ENTER, target=ODT_PROMPT, prefetch=0
+ODT_PROMPT:
+    alu PASSA, pair=DA, d=IMM, imm=62, b=T4, dst=RF
+    CALL, target=ODT_PUTC, prefetch=0
+ODT_COMMAND:
+    CALL, target=ODT_GETC, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=13, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_COMMAND, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=10, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_COMMAND, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_COMMAND, prefetch=0
+    alu BIC, a=T3, pair=AD, d=IMM, imm=32, b=T6, dst=RF
+    alu SUB, a=T6, pair=AD, d=IMM, imm=67, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_CONTINUE, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=83, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_STEP, prefetch=0
+    alu PASSA, pair=DA, d=ZERO, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T1, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T7, dst=RF
+ODT_NUMBER:
+    CALL, target=ODT_GETC, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=13, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_PARSED, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=10, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_PARSED, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_NUMBER, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=48, b=T3, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=C, uflags=1, target=ODT_ERROR, prefetch=0
+    alu SUB, a=T3, pair=AD, d=IMM, imm=8, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_C, uflags=1, target=ODT_ERROR, prefetch=0
+    alu BIC, a=T1, pair=AD, d=IMM, imm=7, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=ODT_ERROR, prefetch=0
+    alu LSL, a=T0, b=T0, dst=RF, flags=NZVC, uflags=1
+    alu ROL, a=T1, b=T1, dst=RF, flags=NZVC, uflags=1
+    alu LSL, a=T0, b=T0, dst=RF, flags=NZVC, uflags=1
+    alu ROL, a=T1, b=T1, dst=RF, flags=NZVC, uflags=1
+    alu LSL, a=T0, b=T0, dst=RF, flags=NZVC, uflags=1
+    alu ROL, a=T1, b=T1, dst=RF, flags=NZVC, uflags=1
+    alu OR, a=T3, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ONE, b=T7, dst=RF
+    JUMP, target=ODT_NUMBER, prefetch=0
+ODT_PARSED:
+    alu PASSA, a=T7, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_ERROR, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=80, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_PHYSICAL, prefetch=0
+    alu PASSA, a=T1, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=ODT_ERROR, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=82, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_REGISTER, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=70, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_FP, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=86, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_VIRTUAL, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=77, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_MODE, prefetch=0
+    alu SUB, a=T6, pair=AD, d=IMM, imm=87, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_DEPOSIT, prefetch=0
+    JUMP, target=ODT_ERROR, prefetch=0
+ODT_REGISTER:
+    alu SUB, a=T0, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_REG_VALID, prefetch=0
+    alu SUB, a=T0, pair=AD, d=IMM, imm=24, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_C, uflags=1, target=ODT_ERROR, prefetch=0
+ODT_REG_VALID:
+    alu LSL, a=T0, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
+    JUMP, target=ODT_SELECT, prefetch=0
+ODT_FP:
+    READ, space=INTERNAL, address=0x005a, b=T2, load=1, target=ODT_FP_PRESENT, prefetch=0
+ODT_FP_PRESENT:
+    alu PASSA, a=T2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_ERROR, prefetch=0
+    alu SUB, a=T0, pair=AD, d=IMM, imm=32, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_C, uflags=1, target=ODT_ERROR, prefetch=0
+    alu LSL, a=T0, b=T0, dst=RF
+    alu ADD, a=T0, pair=AD, d=IMM, imm=128, b=T0, dst=RF
+    alu PASSA, pair=DA, d=ZERO, b=T2, dst=RF
+    JUMP, target=ODT_SELECT, prefetch=0
+ODT_PHYSICAL:
+    alu PASSA, pair=DA, d=ONE, b=T2, dst=RF
+    JUMP, target=ODT_SELECT, prefetch=0
+ODT_VIRTUAL:
+    alu PASSA, pair=DA, d=TWO, b=T2, dst=RF
+ODT_SELECT:
+    alu PASSA, pair=DA, d=IMM, imm=80, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=ODT_SELECT_HIGH, prefetch=0
+ODT_SELECT_HIGH:
+    alu ADD, a=T5, b=T5, pair=AD, d=TWO, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T1, target=ODT_SELECT_KIND, prefetch=0
+ODT_SELECT_KIND:
+    alu ADD, a=T5, b=T5, pair=AD, d=TWO, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T2, target=ODT_SHOW, prefetch=0
+ODT_SHOW:
+    CALL, target=ODT_ADDRESS, prefetch=0
+    alu PASSA, a=T2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_READ_REGISTER, prefetch=0
+    alu SUB, a=T2, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_READ_PHYSICAL, prefetch=0
+    READ, space=CONSOLE, a=T0, target=ODT_VALUE, prefetch=0
+ODT_READ_REGISTER:
+    READ, space=INTERNAL, a=T0, target=ODT_VALUE, prefetch=0
+ODT_READ_PHYSICAL:
+    READ, space=PHYSICAL, a=T0, target=ODT_VALUE, prefetch=0
+ODT_VALUE:
+    alu PASSA, pair=DA, d=MDR, b=T1, dst=RF
+    ; Six octal digits: the first digit contains only bit 15.
+    alu PASSA, a=T1, b=T4, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=15, b=T7, dst=RF
+    CALL, target=ODT_DIGIT, prefetch=0
+    alu LSL, a=T1, b=T1, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=5, b=T2, dst=RF
+ODT_OCTAL:
+    alu PASSA, a=T1, b=T4, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=13, b=T7, dst=RF
+    CALL, target=ODT_DIGIT, prefetch=0
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu LSL, a=T1, b=T1, dst=RF
+    alu SUB, a=T2, pair=AD, d=ONE, b=T2, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=ODT_OCTAL, prefetch=0
+    JUMP, target=ODT_NEWLINE, prefetch=0
+ODT_DIGIT:
+    alu LSR, a=T4, b=T4, dst=RF
+    alu SUB, a=T7, b=T7, pair=AD, d=ONE, dst=RF, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_Z, uflags=1, target=ODT_DIGIT, prefetch=0
+    alu ADD, a=T4, b=T4, pair=AD, d=IMM, imm=48, dst=RF
+    CALL, target=ODT_PUTC, prefetch=0
+    RETURN, prefetch=0
+ODT_MODE:
+    alu SUB, a=T0, pair=AD, d=IMM, imm=8, flags=NZVC, uflags=1
+    CJUMP, cond=NOT_C, uflags=1, target=ODT_ERROR, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=68, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T0, target=ODT_NEWLINE, prefetch=0
+ODT_DEPOSIT:
+    alu PASSA, a=T0, b=T6, dst=RF
+    CALL, target=ODT_ADDRESS, prefetch=0
+    alu PASSA, a=T2, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_WRITE_REGISTER, prefetch=0
+    alu SUB, a=T2, pair=AD, d=ONE, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_WRITE_PHYSICAL, prefetch=0
+    WRITE, space=CONSOLE, a=T0, b=T6, target=ODT_SHOW, prefetch=0
+ODT_WRITE_REGISTER:
+    WRITE, space=INTERNAL, a=T0, b=T6, target=ODT_SHOW, prefetch=0
+ODT_WRITE_PHYSICAL:
+    WRITE, space=PHYSICAL, a=T0, b=T6, target=ODT_SHOW, prefetch=0
+ODT_ADDRESS:
+    alu PASSA, pair=DA, d=IMM, imm=80, b=T5, dst=RF
+    READ, space=INTERNAL, a=T5, target=ODT_ADDRESS_LOW, prefetch=0
+ODT_ADDRESS_LOW:
+    alu PASSA, pair=DA, d=MDR, b=T0, dst=RF
+    alu ADD, a=T5, b=T5, pair=AD, d=TWO, dst=RF
+    READ, space=INTERNAL, a=T5, target=ODT_ADDRESS_HIGH, prefetch=0
+ODT_ADDRESS_HIGH:
+    alu PASSA, pair=DA, d=MDR, b=T1, dst=RF
+    alu PASSA, pair=DA, d=IMM, imm=66, b=T5, dst=RF
+    WRITE, space=INTERNAL, a=T5, b=T1, target=ODT_ADDRESS_TYPE, prefetch=0
+ODT_ADDRESS_TYPE:
+    alu PASSA, pair=DA, d=IMM, imm=84, b=T5, dst=RF
+    READ, space=INTERNAL, a=T5, target=ODT_ADDRESS_DONE, prefetch=0
+ODT_ADDRESS_DONE:
+    alu PASSA, pair=DA, d=MDR, b=T2, dst=RF
+    RETURN, prefetch=0
+ODT_GETC:
+    alu PASSA, pair=DA, d=IMM, imm=0xff70, b=T5, dst=RF
+    READ, space=PHYSICAL, io=1, a=T5, target=ODT_RX_READY, prefetch=0
+ODT_RX_READY:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+    alu AND, a=T3, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_GETC, prefetch=0
+    alu ADD, a=T5, b=T5, pair=AD, d=TWO, dst=RF
+    READ, space=PHYSICAL, io=1, a=T5, target=ODT_GOTC, prefetch=0
+ODT_GOTC:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+    RETURN, prefetch=0
+ODT_PUTC:
+    alu PASSA, pair=DA, d=IMM, imm=0xff74, b=T5, dst=RF
+    READ, space=PHYSICAL, io=1, a=T5, target=ODT_TX_READY, prefetch=0
+ODT_TX_READY:
+    alu PASSA, pair=DA, d=MDR, b=T3, dst=RF
+    alu AND, a=T3, pair=AD, d=IMM, imm=128, flags=NZVC, uflags=1
+    CJUMP, cond=Z, uflags=1, target=ODT_PUTC, prefetch=0
+    alu ADD, a=T5, b=T5, pair=AD, d=TWO, dst=RF
+    WRITE, space=PHYSICAL, io=1, a=T5, b=T4, target=ODT_PUTC_DONE, prefetch=0
+ODT_PUTC_DONE:
+    RETURN, prefetch=0
+ODT_CONTINUE:
+    JUMP, console=LEAVE, target=FETCH, prefetch=0
+ODT_STEP:
+    JUMP, console=STEP, target=FETCH, prefetch=0
+ODT_NEWLINE:
+    alu PASSA, pair=DA, d=IMM, imm=13, b=T4, dst=RF
+    CALL, target=ODT_PUTC, prefetch=0
+    alu PASSA, pair=DA, d=IMM, imm=10, b=T4, dst=RF
+    CALL, target=ODT_PUTC, prefetch=0
+    JUMP, target=ODT_PROMPT, prefetch=0
+.org $6f0
+ODT_ERROR:
+    alu PASSA, pair=DA, d=IMM, imm=63, b=T4, dst=RF
+    CALL, target=ODT_PUTC, prefetch=0
+    JUMP, target=ODT_NEWLINE, prefetch=0

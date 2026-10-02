@@ -13,6 +13,7 @@ module tb_mmu_boot;
     reg [7:0] expected[0:65535],serial_value,previous_char=0;
     string segment="",uart_path,monitor;
     uj11_mmu_board dut(
+        .ps2_clock(),.ps2_data(1'b1),
         .video_clk(1'b0),.video_reset(1'b1),.tvout(),.clk(clk),.reset(power_on || !initialized),.power_on(power_on),
         .uart_rx(rx),.halt_button(halt_button),.memory_initialized(initialized),.uart_tx(tx),
         .panel_keys(4'b0),.panel_pins(pins),.sram_address(sa),.sram_data(sd),
