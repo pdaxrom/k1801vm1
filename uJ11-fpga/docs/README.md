@@ -22,6 +22,7 @@ HG TIME и foreground CLOCK установлены; [текущий компле
 | Убрать задержки вывода консоли 2.9BSD | [Настройка терминала BSD](bsd-console.md) |
 | Ускорить HC7000 MMU и сравнить ресурсы | [Кэш PAR/PDR и микрокод](hc7000-cpu-performance.md) |
 | Спланировать PAL framebuffer и экранный терминал HC7000 | [Ресурсы и план видео](hc7000-video-plan.md) |
+| Подключить графику к BASIC и Pascal | [План библиотек и интерфейса SERV](hc7000-video-plan.md#план-графики-для-basic-и-pascal) |
 | Дублировать системную консоль UART на PAL 640×240 | [Терминал SERV: реализация и проверки](hc7000-terminal.md) |
 | Собрать PAL 640×200/16 и 320×200/256, запустить автономное демо | [PAL framebuffer](hc7000-pal.md) |
 | Ускорить SRAM и снизить влияние PAL на CPU | [SRAM/PAL 2AAE: изменения и измерения](hc7000-pal-performance.md) |
