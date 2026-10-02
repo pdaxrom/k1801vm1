@@ -1,0 +1,202 @@
+
+PDP-11 simulator V3.12-3
+Disabling XQ
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/sd-hc7000-multi-20261002-02/validation/simh/rt11xm/test.ini> set lp disable
+Non-existent device
+CPU, 11/40, FIS, MMU, autoconfiguration enabled, idle disabled, 248KB
+
+RT-11XM  V05.03  
+
+.TYPE V5USER.TXT
+
+                              RT-11 V5.3
+
+       Installation of RT-11 Version 5.3 is complete and you are now
+    executing from the working volume    (provided you have used the
+    automatic installation procedure). DIGITAL recommends you verify
+    the correct  operation  of  your  system's  software  using  the
+    verification procedure.  To do this, enter the command:
+
+                             IND VERIFY
+
+        Note that VERIFY should be performed  only after the distri-
+    bution media have been backed up.  This was accomplished as part
+    of automatic installation on  all  RL02,  RX02,  TK50, and  RX50
+    based systems,   including the  MicroPDP-11 and the Professional
+    300.  If you have not completed automatic installation, you must
+    perform a manual backup before using VERIFY.  Note also,  VERIFY
+    is NOT supported on RX01 diskettes,    DECtape I or II,   or the
+    Professional 325.
+
+    DIGITAL also  recommends  you  read  the  file V5NOTE.TXT, which
+    contains information  formalized too late to be included  in the
+    Release Notes.  V5NOTE.TXT can be TYPED or PRINTED.
+
+
+.ASSIGN DM1: VOL:
+
+.ASSIGN RK1: BAS:
+
+.ASSIGN RK2: PAS:
+
+.ASSIGN RK3: FOR:
+
+.SET SL OFF
+[r[24H\
+.SHOW CONFIGURATION
+
+RT-11XM  V05.03  
+Booted from DM0:RT11XM
+
+USR   is set NOSWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KEX
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/35,40 Processor
+248KB of memory
+Extended Instruction Set (EIS)
+Floating Instruction Set (FIS)
+Memory Management Unit
+60 Cycle System Clock                  
+
+Device I/O time-out support
+System job support
+FPU support
+
+
+.SHOW MEMORY
+
+------- Extended Memory --------
+Address   Module    Words   Type
+-------   ------    -----   ----
+17760000  IOPAGE     4096.   HDW 
+00760000  MEMTOP       
+00166200  ......    96704.       
+00160000  SL         1600.   PVT 
+
+------ Low Memory -------
+Address   Module    Words
+-------   ------    -----
+155324    DM          662.       
+117602    RMON       7593.       
+106540    USR        2321.       
+001000    ..BG..    17840.       
+
+
+.DIR VOL:
+ 
+ADDER .PAS     1                 ADDER .OBJ     3           
+ADDER .LST     2                 ADDER .MAP     6           
+ 4 Files, 12 Blocks
+ 53644 Free blocks
+
+.DIR BAS:BASIC.SAV
+ 
+BASIC .SAV    53  04-Apr-83      
+ 1 Files, 53 Blocks
+ 4076 Free blocks
+
+.DIR PAS:XM.SAV
+ 
+XM    .SAV   474  07-Mar-85      
+ 1 Files, 474 Blocks
+ 1714 Free blocks
+
+.DIR FOR:FORTRA.SAV
+ 
+FORTRA.SAV   128                 
+ 1 Files, 128 Blocks
+ 4476 Free blocks
+
+.DIR SY:HGX.SYS
+ 
+HGX   .SYS     3    -BAD-        
+ 1 Files, 3 Blocks
+ 48296 Free blocks
+
+.DIR SY:HGTIME.SAV
+ 
+HGTIME.SAV     3    -BAD-        
+ 1 Files, 3 Blocks
+ 48296 Free blocks
+
+.TYPE SY:SDHELP.TXT
+uJ11 HC7000: BSD, RSX and RT-11 SD suite -- 02-Oct-2026
+
+Boot menu:
+  Wait 5 seconds or press Enter: BSD from RL0.
+  Any other key cancels the timer. Select controller, then unit:
+    5, 0 = 2.9BSD
+    2, 0 = RT-11 XM V5.03
+    1, 0 = RT-11 SJ V04.00C
+    4, 1 = RSX-11M-PLUS V4.6 BL87
+  RQ0 contains an original nonbootable system volume; use RQ1.
+
+BSD:
+  At 70Boot enter rl(0,0)rlunix
+  At the single-user # press Ctrl+D, then log in as root.
+  /usr is on XP0; RL1 is swap. For fast console output: stty nl0 cr0
+
+RT-11 XM volumes:
+  SY: = DM0: system       VOL: = DM1: storage
+  BAS: = RK1: BASIC       PAS: = RK2: Pascal       FOR: = RK3: FORTRAN
+  RK0 contains RT-11 V4.
+  @XMCHK shows configuration and memory.
+  RUN BAS:BASIC, select A, then PRINT 2+3. BYE exits BASIC.
+
+Pascal without FPP:
+  RUN PAS:XM
+  At * enter VOL:CTPAS,VOL:CTPAS=VOL:ADDER
+  R LINK
+  At * enter VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS
+  Ctrl+C, then RUN VOL:CTPAS and enter 2 3.
+  This creates a fresh program on VOL:. The stock SY:ADDER.SAV requires FPP.
+  Running stock ADDER without FPP can corrupt the monitor return at address 0;
+  reset RT-11 before using an editor after that failure.
+  EDIT VOL:HELLO.PAS selects KEX in XM. Terminal replies still come from UART.
+
+Host file exchange and date/time:
+  HGX.SYS, HGTIME.SAV and TMRATE.SAV are installed on SY:.
+  With the HG daemon running on the Linux host, enter @HGSYNC.
+  Use DATE, TIME and DIR HG: to check. Host synchronization is not automatic.
+
+Current FPGA profile: MMU, FIS, no FPP, SERV storage, PAL and PS/2.
+CPU 50 MHz, PAL 64 MHz. The guest has 1936 KiB of the 2 MiB SRAM.
+Short button press enters ODT; long press resets and returns to the boot menu.
+
+This SD suite starts from clean distribution disks, not a backup of user files.
+
+
+.RUN BAS:BASIC
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+PRINT 2+3
+ 5 
+
+READY
+BYE
+
+.RUN PAS:XM
+*VOL:CTPAS,VOL:CTPAS=VOL:ADDER
+
+.R LINK
+*VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS
+*^C
+
+.RUN VOL:CTPAS
+2 3
+ inputs and answer: 
+ 2.000000E+00 3.000000E+00 5.000000E+00
+
+.
+Simulation stopped, PC: 143104 (ADD PC,R4)
+sim> quit
+Goodbye

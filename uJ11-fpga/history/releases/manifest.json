@@ -439,7 +439,7 @@
     "history/releases/hc7000-pal-preview/README.md": {
       "original": "releases/hc7000-pal-preview/README.md",
       "original_sha256": "0d0afdfb30286aa188b698274529c6245cd46cbcfcee6465a5e8c9441cbb38b3",
-      "retained_sha256": "0c47330b5308ba1ab24a78e6fedfe6db4eeeb9d5eb819807a9105fb60be0d2a7"
+      "retained_sha256": "ee7304b36b4f8acf5865f4fdc492728fdc3f64d4d284479aed65720b1a2305b6"
     },
     "history/releases/hc7000-pal-preview/demo/text-80x25.png": {
       "original": "releases/hc7000-pal-preview/demo/text-80x25.png",
@@ -951,13 +951,16 @@
     "fixtures": "Moved JSON files are byte-for-byte identical to their archived originals",
     "retained_release_checksums": "PASS hc7000-ps2-idle/SHA256SUMS, sd-hc7000/checksums.json and image SHA256, sd-hc7000-multi/files.json and SHA256SUMS",
     "hg_build_dependency": "Pinned HGX/HGTIME/TMRATE files and native sources match the retained manifest",
-    "local_document_links": "Checked in prepared tree",
+    "local_document_links": 702,
     "git_diff_check": "PASS",
-    "installed_jed_sha256": "7c8b22259826c3e927d84927f401ddb2d8f38405046bc4f6b415f11c2632b294"
+    "installed_jed_sha256": "7c8b22259826c3e927d84927f401ddb2d8f38405046bc4f6b415f11c2632b294",
+    "multi_os_gzip_sha256": "aea2d6619367889773a7305bf7cc76c7139da5b539f01c2942400310d5d3fde1"
   },
   "offline_backup": {
     "path": "build/git-release-purge-20261002-01/k1801vm1-before-release-purge.bundle",
     "scope": "Complete old branch history; local only, not pushed",
-    "history_removed_from_remotes": true
+    "history_removed_from_remotes": true,
+    "sha256": "4f5d18dde2fc4e1f8b9d0471b196a17ad366250709de90c5c6bf7257048f95e1",
+    "bytes": 459005494
   }
 }

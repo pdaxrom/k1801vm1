@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "firmware_label_c_sha256": "8c7f776a1e23d44a96a92cdd2a0f5b3d1d4d260236ceb242941cf3f421146ad8",
+  "label_copies_match": true,
+  "firmware_accepts_1gib_image": true,
+  "firmware_accepts_larger_card": true,
+  "partition_layout_matches_installed_card": true,
+  "count": 11
+}

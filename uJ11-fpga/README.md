@@ -1,24 +1,33 @@
 # uJ11
 
-Микрокодный PDP-11/J‑11 для **Lattice MachXO2 LCMXO2-1200HC**.
-Рабочий компьютер: 128 КиБ SPI FRAM с отдельными USER/HALT банками,
-RT-11FB, SD/RK611, UART, HG и пульт HDSP/20 клавиш.
-FIS исполняется микрокодом, FPP J‑11 и ODT — программами в HALT FRAM.
-MMU в рабочую сборку не входит.
+Микрокодный PDP-11/J‑11 для **Lattice MachXO2 HC1200 и HC7000**.
+Профиль по умолчанию — HC1200/MMU-less: 128 КиБ SPI FRAM с отдельными
+USER/HALT банками, RT-11FB, SD/RK611, UART, HG и пульт HDSP/20 клавиш.
+В нём FIS исполняется микрокодом, FPP J‑11 и ODT — программами в HALT FRAM.
+
+На HC7000 установлена **7CBA, 2026-10-02**: MMU, микрокодные FIS/ODT,
+FPP выключен, SERV обслуживает диски и экранный терминал PAL 640×240,
+PS/2 вводит в системную консоль. CPU/PAL работают на 50/64 МГц;
+из 2 МиБ SRAM гостевой ОС доступны 1936 КиБ.
+[Текущие ресурсы](docs/synthesis.md#hc7000-установленная-7cba),
+[загрузочное меню и диски](docs/boot-validation.md),
+[терминал](docs/hc7000-terminal.md), [клавиатура](docs/hc7000-ps2.md).
+Готовый [единый SD-образ HC7000](releases/sd-hc7000-multi/README.md)
+содержит BSD, RSX, RT-11 V4/XM, компиляторы и HG; после распаковки — 1 ГиБ.
 
 ## Структура
 
 | Каталог | Содержание |
 |---|---|
 | `rtl/` | Действующий CPU, микросеквенсор, ALU/RF и UART/SPI primitives |
-| `boards/hc1200/` | Полный компьютер, FRAM, периферия, RESET и назначение выводов |
-| `microcode/` | Единая рабочая микропрограмма `uj11.uasm`, 36 бит |
+| `boards/hc1200/`, `boards/hc7000/` | Платы, память, периферия, RESET и назначение выводов |
+| `microcode/` | MMU-less `uj11.uasm` (36 бит) и MMU `uj11-mmu.uasm` (54 бита) |
 | `microasm/` | Проверяющий microassembler uJ11 |
-| `firmware/` | Исходники bootstrap/resident, UJMOD, ODT и FPP на MACRO-11 |
+| `firmware/` | MACRO-11 bootstrap/модули и C-прошивки SERV, включая `storage/` |
 | `tools/` | Сборка, генерация ROM, тестовые runners, synthesis и UART-инструменты |
 | `tests/` | Тестбенчи, независимые эталоны, модели памяти и baseline |
 | `demos/rt11/` | BASIC-тесты, FISABI, примеры пульта и HG |
-| `releases/` | Проверенный JED и текущие BIN/SAV/REL, manifests и отчёт FPGA |
+| [releases/](releases/README.md) | Актуальные JED, SD-комплекты, BIN/SAV/REL и отчёты FPGA |
 | `docs/` | Руководства по эксплуатации, устройству и разработке |
 | `history/` | Как восстановить прежние эксперименты и их отчёты из Git |
 | `build/` | Только результаты сборки; исключены из Git |
@@ -28,7 +37,8 @@ MMU в рабочую сборку не входит.
 
 ## Сборка и тесты
 
-Из каталога `uJ11-fpga`:
+Из каталога `uJ11-fpga`; команды ниже используют HC1200/MMU-less по умолчанию.
+Выбор HC7000/MMU описан в [руководстве профиля](docs/hc7000-mmu.md).
 
 ```sh
 make                    # ROM, ODT, SDBOOT, UJMOD, UJBOOT и FPP

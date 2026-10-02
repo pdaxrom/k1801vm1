@@ -1,0 +1,19 @@
+{
+  "format": {
+    "blocks": 6,
+    "entry_octal": "100000",
+    "crc16": "84ce"
+  },
+  "program_bytes": 2944,
+  "sources": {
+    "../microasm11/microasm11.c": "0d8972d9781b235688df85ca7228d6a4bb1f721f410c6ae3990b1dce1db411dd",
+    "firmware/boot/SDMENU.asm": "abfe4ab4689b95b298d9ec042520add48ea03a1e8e2e988778a9cdbbf0a16846",
+    "tools/build_storage_menu.py": "079fe78b9be71726f9e30e43d2b14c27ab643615afa5e5cacdc7bdde0962e4bd",
+    "tools/storage_menu.py": "4884d43ac682a03a3f55be0e1a991b8853e18d324241a9d2d9e01e96e8c4a624"
+  },
+  "outputs": {
+    "menu.bin": "6a47f58e23e2620bea2940e0f155fd741bcef070b039939127f268ebdc944d3f",
+    "menu.img": "8ac74e9fa2a0d5e7b2a64ad4b73649217fa013f617c548439db157266c249f0f",
+    "menu.lst": "0036595589533045082d82dc182c31c385dce81aa4775efcf2de837d363ba89c"
+  }
+}

@@ -1,0 +1,3 @@
+# These are packaged boot-menu artifacts, not disposable build outputs.
+!menu/menu.bin
+!menu/menu.lst

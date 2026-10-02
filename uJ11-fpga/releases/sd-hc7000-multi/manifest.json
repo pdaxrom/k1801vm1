@@ -1,0 +1,426 @@
+{
+  "board": "hc7000-lcd-sram",
+  "cpu": "mmu",
+  "fpp": "off",
+  "iop": "storage",
+  "format": "UJ11SD v1; duplicate labels, SD menu, 11 disk partitions",
+  "default_boot": "rl0",
+  "boot_command": "rl(0,0)rlunix",
+  "partitions": [
+    {
+      "kind": 5,
+      "controller": 0,
+      "unit": 0,
+      "media": 7,
+      "flags": 1,
+      "mode": 0,
+      "start": 2048,
+      "blocks": 20480,
+      "used": 10485760,
+      "label": "bsd-root",
+      "source_bytes": 10478080,
+      "zero_padding": 7680,
+      "payload_sha256": "c1f7af16ccab19bd7daf8261eaa32d363b7e992ce8fe11a8271ea7814b9ba89d",
+      "partition_sha256": "abb27f7b86eb0fef6047e324671b567c88383cf2abfeab1a3a02a6e3c4d825a1"
+    },
+    {
+      "kind": 5,
+      "controller": 0,
+      "unit": 1,
+      "media": 7,
+      "flags": 0,
+      "mode": 0,
+      "start": 22528,
+      "blocks": 20480,
+      "used": 10485760,
+      "label": "bsd-swap",
+      "source_bytes": 10478080,
+      "zero_padding": 7680,
+      "payload_sha256": "598d4020222791a1d5bf32da43b6e03d50360a5f7320e86d7986ab64650578b0",
+      "partition_sha256": "47f5eae03839c9b0a4b140b711f08ec5318e8ce5337d2395cbe154cd05ce5936"
+    },
+    {
+      "kind": 3,
+      "controller": 0,
+      "unit": 0,
+      "media": 4,
+      "flags": 0,
+      "mode": 0,
+      "start": 43008,
+      "blocks": 500384,
+      "used": 256196608,
+      "label": "bsd-usr",
+      "source_bytes": 256185344,
+      "zero_padding": 11264,
+      "payload_sha256": "6a01a06acfb6e745d1f61312076821af928eb5b07d5a68600e0d5b29d639d50f",
+      "partition_sha256": "94c01448752a2c974309fe00b9e87b67a1bd15fcdb73c03fe827b3c75b065478"
+    },
+    {
+      "kind": 4,
+      "controller": 0,
+      "unit": 0,
+      "media": 5,
+      "flags": 0,
+      "mode": 0,
+      "start": 1048576,
+      "blocks": 311300,
+      "used": 159385600,
+      "label": "RSX-SYS",
+      "source_bytes": 159385600,
+      "zero_padding": 0,
+      "payload_sha256": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950",
+      "partition_sha256": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950"
+    },
+    {
+      "kind": 4,
+      "controller": 0,
+      "unit": 1,
+      "media": 5,
+      "flags": 0,
+      "mode": 0,
+      "start": 1361920,
+      "blocks": 311232,
+      "used": 159350784,
+      "label": "RSX-PBL",
+      "source_bytes": 159350784,
+      "zero_padding": 0,
+      "payload_sha256": "0ab0866bc2a53bf484e2c9367a0c79e77407853a72df07b58d8e7f30c61787e5",
+      "partition_sha256": "0ab0866bc2a53bf484e2c9367a0c79e77407853a72df07b58d8e7f30c61787e5"
+    },
+    {
+      "kind": 1,
+      "controller": 0,
+      "unit": 0,
+      "media": 1,
+      "flags": 0,
+      "mode": 0,
+      "start": 1673216,
+      "blocks": 4872,
+      "used": 2494464,
+      "label": "RT11V4",
+      "source_bytes": 2494464,
+      "zero_padding": 0,
+      "payload_sha256": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb",
+      "partition_sha256": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb"
+    },
+    {
+      "kind": 2,
+      "controller": 0,
+      "unit": 0,
+      "media": 3,
+      "flags": 0,
+      "mode": 0,
+      "start": 1679360,
+      "blocks": 53790,
+      "used": 27540480,
+      "label": "RT11XM",
+      "source_bytes": 27540480,
+      "zero_padding": 0,
+      "payload_sha256": "58ca2340998ec8ec3ec2d445d1880ecf4a59ab3c40d37854a5593920019d9324",
+      "partition_sha256": "58ca2340998ec8ec3ec2d445d1880ecf4a59ab3c40d37854a5593920019d9324"
+    },
+    {
+      "kind": 2,
+      "controller": 0,
+      "unit": 1,
+      "media": 3,
+      "flags": 0,
+      "mode": 0,
+      "start": 1734656,
+      "blocks": 53790,
+      "used": 27540480,
+      "label": "RT11VOL",
+      "source_bytes": 27540480,
+      "zero_padding": 0,
+      "payload_sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad",
+      "partition_sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad"
+    },
+    {
+      "kind": 1,
+      "controller": 0,
+      "unit": 1,
+      "media": 1,
+      "flags": 0,
+      "mode": 0,
+      "start": 1789952,
+      "blocks": 4872,
+      "used": 2494464,
+      "label": "BASIC",
+      "source_bytes": 2494464,
+      "zero_padding": 0,
+      "payload_sha256": "fedc049af6aed808e7bef965ad7cf90f721f5d23f1c9e21196b3f7ab8e02ba74",
+      "partition_sha256": "fedc049af6aed808e7bef965ad7cf90f721f5d23f1c9e21196b3f7ab8e02ba74"
+    },
+    {
+      "kind": 1,
+      "controller": 0,
+      "unit": 2,
+      "media": 1,
+      "flags": 0,
+      "mode": 0,
+      "start": 1796096,
+      "blocks": 4872,
+      "used": 2494464,
+      "label": "PASCAL",
+      "source_bytes": 2494464,
+      "zero_padding": 0,
+      "payload_sha256": "5c9426278bf162eef78586ce1d2d421288b4bb2d8a0f72c9d3ea153edd3c8ed4",
+      "partition_sha256": "5c9426278bf162eef78586ce1d2d421288b4bb2d8a0f72c9d3ea153edd3c8ed4"
+    },
+    {
+      "kind": 1,
+      "controller": 0,
+      "unit": 3,
+      "media": 1,
+      "flags": 0,
+      "mode": 0,
+      "start": 1802240,
+      "blocks": 4872,
+      "used": 2494464,
+      "label": "FORTRAN",
+      "source_bytes": 2494464,
+      "zero_padding": 0,
+      "payload_sha256": "1dab4662ea5bf777841b768f56a14a102843cb3d6341814c3c6dcb51f25b55e1",
+      "partition_sha256": "1dab4662ea5bf777841b768f56a14a102843cb3d6341814c3c6dcb51f25b55e1"
+    }
+  ],
+  "sources": {
+    "lsi11/disks/rt11v5.3/system.dsk": {
+      "bytes": 27540480,
+      "sha256": "9350c62f50e2713f56904b7222f2d829f6bf020cd67e28562e3252a48b6993dd"
+    },
+    "lsi11/disks/rt11v5.3/storage.dsk": {
+      "bytes": 27540480,
+      "sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad"
+    },
+    "lsi11/disks/rt11v5.3/basic.dsk": {
+      "bytes": 370688,
+      "sha256": "f68488b0da8106153a95fc1178198d687c227c1521b6506d07054207daf06b11"
+    },
+    "lsi11/disks/rt11v5.3/pascal.dsk": {
+      "bytes": 1580032,
+      "sha256": "a9700b5adf54cb26590a249711cad6f6c23bd9915d87683b6b6622465e2938d0"
+    },
+    "lsi11/disks/rt11v5.3/fortran.dsk": {
+      "bytes": 165888,
+      "sha256": "40ebef26169047a2a71b481b0cffa4a49f3f734d931782df1e91f66cff0ef994"
+    },
+    "lsi11/disks/bsd2.9/2.9BSD-root.rl02": {
+      "bytes": 10478080,
+      "sha256": "c1f7af16ccab19bd7daf8261eaa32d363b7e992ce8fe11a8271ea7814b9ba89d"
+    },
+    "lsi11/disks/bsd2.9/swap.rl02": {
+      "bytes": 10478080,
+      "sha256": "598d4020222791a1d5bf32da43b6e03d50360a5f7320e86d7986ab64650578b0"
+    },
+    "lsi11/disks/bsd2.9/2.9BSD-usr.rm05": {
+      "bytes": 256185344,
+      "sha256": "6a01a06acfb6e745d1f61312076821af928eb5b07d5a68600e0d5b29d639d50f"
+    },
+    "lsi11/disks/rsx11/rsxm11sys.dsk": {
+      "bytes": 159385600,
+      "sha256": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950"
+    },
+    "lsi11/disks/rsx11/rsx11mpbl87.dsk": {
+      "bytes": 159350784,
+      "sha256": "0ab0866bc2a53bf484e2c9367a0c79e77407853a72df07b58d8e7f30c61787e5"
+    },
+    "lsi11/disks/rt11v400.dsk": {
+      "bytes": 2494464,
+      "sha256": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb"
+    }
+  },
+  "compiler_preparation": {
+    "passed": true,
+    "scope": "Private media preparation; not a physical SD write",
+    "boot_controller": "rh",
+    "boot_unit": 0,
+    "startup": {
+      "STARTX.COM": {
+        "start_block": 5102,
+        "blocks": 8,
+        "before_sha256": "057f67d0340175b5fdf002f8538183986e78fe041cba7ec86e5f1cbc7fe67a2e",
+        "after_sha256": "09c8308c6f073670bf3412ca3fe5ef1f8711d8c342a5d6caa657ba8d06c98d6e"
+      },
+      "STARTF.COM": {
+        "start_block": 5096,
+        "blocks": 5,
+        "before_sha256": "ecf11eb001f914a6a6f142030d8d291a628ccee0f9e45eec46ea8abec424e822",
+        "after_sha256": "2cda45f598129f3c9a120d78da7af67250726c2b19f2eb665626e99c11b4b786"
+      },
+      "STARTS.COM": {
+        "start_block": 5101,
+        "blocks": 1,
+        "before_sha256": "796d55fab84451bb52322470b15d61887ef8011fd0b9b4f073c83c9630d308ef",
+        "after_sha256": "56994bf90fed0240dd2c8901d7bbc1c6beccc6a0273d2b25358253392686e63f"
+      }
+    },
+    "disks": [
+      {
+        "name": "system",
+        "file": "system.dsk",
+        "media": "rk07",
+        "unit": 0,
+        "rt_device": "DM0",
+        "logical": "SY",
+        "blocks": 53790,
+        "bytes": 27540480,
+        "sha256": "6a7759d784c1321fcb05ccf7ea341c32417f34616eaf4993d442d6033470ad2f",
+        "source": "lsi11/disks/rt11v5.3/system.dsk",
+        "source_bytes": 27540480,
+        "source_sha256": "9350c62f50e2713f56904b7222f2d829f6bf020cd67e28562e3252a48b6993dd"
+      },
+      {
+        "name": "storage",
+        "file": "storage.dsk",
+        "media": "rk07",
+        "unit": 1,
+        "rt_device": "DM1",
+        "logical": "VOL",
+        "blocks": 53790,
+        "bytes": 27540480,
+        "sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad",
+        "source": "lsi11/disks/rt11v5.3/storage.dsk",
+        "source_bytes": 27540480,
+        "source_sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad"
+      },
+      {
+        "name": "basic",
+        "file": "basic.dsk",
+        "media": "rk05",
+        "unit": 1,
+        "rt_device": "RK1",
+        "logical": "BAS",
+        "blocks": 4872,
+        "bytes": 2494464,
+        "sha256": "fedc049af6aed808e7bef965ad7cf90f721f5d23f1c9e21196b3f7ab8e02ba74",
+        "source": "lsi11/disks/rt11v5.3/basic.dsk",
+        "source_bytes": 370688,
+        "source_sha256": "f68488b0da8106153a95fc1178198d687c227c1521b6506d07054207daf06b11"
+      },
+      {
+        "name": "pascal",
+        "file": "pascal.dsk",
+        "media": "rk05",
+        "unit": 2,
+        "rt_device": "RK2",
+        "logical": "PAS",
+        "blocks": 4872,
+        "bytes": 2494464,
+        "sha256": "5c9426278bf162eef78586ce1d2d421288b4bb2d8a0f72c9d3ea153edd3c8ed4",
+        "source": "lsi11/disks/rt11v5.3/pascal.dsk",
+        "source_bytes": 1580032,
+        "source_sha256": "a9700b5adf54cb26590a249711cad6f6c23bd9915d87683b6b6622465e2938d0"
+      },
+      {
+        "name": "fortran",
+        "file": "fortran.dsk",
+        "media": "rk05",
+        "unit": 3,
+        "rt_device": "RK3",
+        "logical": "FOR",
+        "blocks": 4872,
+        "bytes": 2494464,
+        "sha256": "1dab4662ea5bf777841b768f56a14a102843cb3d6341814c3c6dcb51f25b55e1",
+        "source": "lsi11/disks/rt11v5.3/fortran.dsk",
+        "source_bytes": 165888,
+        "source_sha256": "40ebef26169047a2a71b481b0cffa4a49f3f734d931782df1e91f66cff0ef994"
+      }
+    ],
+    "system_changed_bytes": 9,
+    "source_disks_unchanged": true,
+    "rk05_padding": "Zero extension to the fixed 4872-sector geometry",
+    "builder_sha256": "e0aede14ab17a2cebc1d8926b337c9e52c5d0ca86df2ea4f0a288eefc051d488"
+  },
+  "system_utilities": {
+    "inputs": {
+      "releases/sd-hc7000/software/manifest.json": "d4a0b94c49f6b46e97914fc6446433ba19c5e917533c0ede6a688eda97768ab4",
+      "demos/rt11/hostdisk/HGX.MAC": "4d3d9d5945ce2b965817dc3ac1ce2c6cd33ebb6c0c5596e2a0107329bc17c7bb",
+      "demos/rt11/hostdisk/HGTIME.MAC": "8519d6cf1ded7d458cdc6b2c63e114786c7016f933e72b590965a2652ff44fcf",
+      "demos/rt11/panel/TMDRV.MAC": "16814dae24222d11f85556309da64437f986f896786a4dfd3cb451b9260d2a96",
+      "demos/rt11/panel/TMRATE.MAC": "64a992ed3bbb22d6936c23b99395fd880e22d83daccfe01cd2ecdf57bc5d5878",
+      "releases/sd-hc7000/software/HGX.SYS": "8da61b185d4095683b046296921b63c791f3bfa16bd0e5deec84828f8a8f2f30",
+      "releases/sd-hc7000/software/HGTIME.SAV": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c",
+      "releases/sd-hc7000/software/TMRATE.SAV": "078fc88865523ee677e654e0efe24dbb388b664525bb6974d6bfe12160306c5b",
+      "demos/rt11/sd-hc7000/HGSYNC.COM": "84483e3faf21bffea1b4c85ac02bec2a1a3758be60ea236b64a13b708d5c954e",
+      "demos/rt11/sd-hc7000/XMCHK.COM": "79f0368e7423126bfaa117a82177fc4cc9a200e1df52414b0da7aceab8c6f816",
+      "demos/rt11/sd-hc7000-multi/SDHELP.TXT": "11866c8349d124937eb20914a90c71c057d25e6d51d34f55c6a4713cc131660e"
+    },
+    "files": {
+      "HGX.SYS": {
+        "bytes": 1536,
+        "blocks": 3,
+        "sha256": "8da61b185d4095683b046296921b63c791f3bfa16bd0e5deec84828f8a8f2f30"
+      },
+      "HGTIME.SAV": {
+        "bytes": 1536,
+        "blocks": 3,
+        "sha256": "44d49a904d7451964ce245ca4f5b21f0258d6380a24e0445fb504e7bdb39a67c"
+      },
+      "TMRATE.SAV": {
+        "bytes": 1024,
+        "blocks": 2,
+        "sha256": "078fc88865523ee677e654e0efe24dbb388b664525bb6974d6bfe12160306c5b"
+      },
+      "HGSYNC.COM": {
+        "bytes": 21,
+        "blocks": 1,
+        "sha256": "ffecc8628761630dc3867dde98770719a5cde72102659f2d85e4f088f0116c0c"
+      },
+      "XMCHK.COM": {
+        "bytes": 33,
+        "blocks": 1,
+        "sha256": "11ed77a8fddd22fb579717ef3b03e58b4497cef5be43c38486829e55f9900099"
+      },
+      "SDHELP.TXT": {
+        "bytes": 1826,
+        "blocks": 4,
+        "sha256": "a0c55e1b2c50806fbed555501b9e3916106c5bf66c6992a2ff982b32b5e0610b"
+      }
+    },
+    "release_date": "2026-10-02",
+    "tool_sha256": "3a5ed375f9f95f21bffbd58838d970e4cb0935e0dbafb64bc09b542a3fc9136f",
+    "stock_files_preserved": true,
+    "boot_blocks_preserved": true
+  },
+  "menu": {
+    "format": {
+      "blocks": 6,
+      "entry_octal": "100000",
+      "crc16": "84ce"
+    },
+    "program_bytes": 2944,
+    "sources": {
+      "../microasm11/microasm11.c": "0d8972d9781b235688df85ca7228d6a4bb1f721f410c6ae3990b1dce1db411dd",
+      "firmware/boot/SDMENU.asm": "abfe4ab4689b95b298d9ec042520add48ea03a1e8e2e988778a9cdbbf0a16846",
+      "tools/build_storage_menu.py": "079fe78b9be71726f9e30e43d2b14c27ab643615afa5e5cacdc7bdde0962e4bd",
+      "tools/storage_menu.py": "4884d43ac682a03a3f55be0e1a991b8853e18d324241a9d2d9e01e96e8c4a624"
+    },
+    "outputs": {
+      "menu.bin": "6a47f58e23e2620bea2940e0f155fd741bcef070b039939127f268ebdc944d3f",
+      "menu.img": "8ac74e9fa2a0d5e7b2a64ad4b73649217fa013f617c548439db157266c249f0f",
+      "menu.lst": "0036595589533045082d82dc182c31c385dce81aa4775efcf2de837d363ba89c"
+    }
+  },
+  "image": {
+    "name": "uj11-hc7000-multi-os.img",
+    "bytes": 1073741824,
+    "sha256": "0b7bca1e87544edb7457d3e90d854768e072502b1398ec0ae79294ad8015cfb7"
+  },
+  "builder_sha256": "79c555a34893e43e79da0c1a32f548ead4edb53dcdcad84411b9cee207c9f41b",
+  "verification": {
+    "label_copies_match": true,
+    "menu_crc_and_readback": true,
+    "partition_payloads_match": true,
+    "geometry_padding_zero": true,
+    "default_boot_rl0": true,
+    "originals_unchanged": true,
+    "gzip_roundtrip": true
+  },
+  "scope": "Fresh distribution image; not a backup of mutable physical SD or a new OS boot test",
+  "compressed": {
+    "name": "uj11-hc7000-multi-os.img.gz",
+    "bytes": 48344475,
+    "sha256": "aea2d6619367889773a7305bf7cc76c7139da5b539f01c2942400310d5d3fde1"
+  }
+}

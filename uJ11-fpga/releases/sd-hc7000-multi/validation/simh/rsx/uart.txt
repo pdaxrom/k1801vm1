@@ -1,0 +1,66 @@
+
+PDP-11 simulator V3.12-3
+Disabling XQ
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/sd-hc7000-multi-20261002-02/validation/simh-02/rsx/test.ini> set lp disable
+Non-existent device
+CPU, 11/70, NOFPP, autoconfiguration enabled, idle disabled, 2048KB
+
+
+
+RSX-11M-PLUS V4.6  BL87   1024.KW  System:"RSXMPL"
+>RED DU1:=SY:
+>RED DU1:=LB:
+>RED DU1:=SP:
+>MOU DU1:"RSX11MPBL87"
+>@DU1:[1,2]STARTUP
+>; 			PLEASE NOTE
+>;
+>;	If you have not yet read the system release notes, please do so
+>;	now before attempting to perform a SYSGEN or to utilize the new
+>;	features of this system.
+>;
+>;Z[c
+SET -- Inquire cannot determine terminal type 
+>;
+>; Please ignore any random characters that may have printed on your
+>; terminal just now.  They came from a SET /INQUIRE=TI: command.
+>; Evidently your terminal does not recognize escape sequences.
+>; This will not affect the running of this command file.
+>;
+>* Please enter time and date (HH:MM DD-MMM-YYYY) [S]: 12:00 02-OCT-1999
+>TIME 12:00 02-OCT-1999
+>ACS SY:/BLKS=1024.
+>CON ONLINE ALL
+>ELI /LOG/LIM
+>CLI /INIT=DCL/CTRLC/DPR="<15><12>/$ /"
+>INS LB:[1,1]RMSRESAB.TSK/RON=YES/PAR=GEN
+>INS LB:[1,1]RMSLBL.TSK/RON=YES/PAR=GEN
+>INS LB:[1,1]RMSLBM.TSK/RON=YES/PAR=GEN
+>INS $QMGCLI
+>INS $QMGCLI/TASK=...PRI
+>INS $QMGCLI/TASK=...SUB
+>QUE /START:QMG
+>INS $QMGPRT/TASK=PRT.../SLV=NO
+>QUE LP0:/CR/NM
+>START/ACCOUNTING
+>CON ESTAT LP0:
+>QUE BAP0:/BATCH
+DEV DU:
+DU0:	 Loaded Type=RD54  
+DU1:	 Public Mounted Loaded Label=RSX11MPBL87 Type=RD54  
+DU2:	 Loaded Type=RD54  
+DU3:	 Loaded Type=RX50  
+>PIP DU1:[1,54]RSX11M.SYS/LI
+
+
+Directory DU1:[1,54]
+2-OCT-99 12:00
+
+RSX11M.SYS;1        1026.   C  03-NOV-99 18:01
+
+Total of 1026./1026. blocks in 1. file
+
+>
+Simulation stopped, PC: 020432 (BR 20400)
+sim> quit
+Goodbye

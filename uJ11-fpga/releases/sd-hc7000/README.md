@@ -1,8 +1,13 @@
 # uJ11 HC7000 — RT-11XM SD kit
 
+Это прежний raw-комплект для `IOP=legacy` с микрокодным FPP. Для установленной
+7CBA (SERV storage, FPP off) использовать [полную SD с несколькими ОС](../sd-hc7000-multi/README.md).
+Каталог сохранён также ради проверенных HGX/HGTIME/TMRATE в `software/`:
+их использует сборщик полного комплекта. Проверки ниже относятся к старому профилю.
+
 2026-09-27. Готовый образ для `hc7000-lcd-sram`, профиль `CPU=mmu`,
 SRAM 2 МиБ, система 24 МГц. Требуется исправленная прошивка
-[`mmu-trap-modes-08`](../../history/releases/hc7000-mmu-trap-fix/README.md) или совместимая новая.
+[`mmu-trap-modes-08`](../../history/releases/hc7000-mmu-trap-fix/README.md) с FPP и legacy IOP.
 
 Файл: [`uj11-hc7000-rt11xm.img.gz`](uj11-hc7000-rt11xm.img.gz), 559 657 байт.
 Распакованный raw RK07 — 27 540 480 байт / 53 790 секторов. Загружается

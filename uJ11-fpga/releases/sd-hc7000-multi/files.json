@@ -1,0 +1,28 @@
+{
+  "files": {
+    ".gitattributes": "6fee4b081d28bef9ccb1640ce3fd8edbf16e8f222f893ee02bbe507a0dd281bd",
+    ".gitignore": "991d8d8288fa9cd95d0d905e2efe904cb759a3e1c7f997d771860b5201018e01",
+    "README.md": "bd0baac9539812816ade61fe040624a10219d8b14a79620cbd07be7221c97cac",
+    "SDHELP.TXT": "a54e021c2f17f8099634613faca40997d569cd10ef9eb3d0550cfe1d13495443",
+    "manifest.json": "6881d375a486c45c8cff5e703410475bd94a6937c02b161d8fff720e4ed33d4d",
+    "menu/menu.bin": "6a47f58e23e2620bea2940e0f155fd741bcef070b039939127f268ebdc944d3f",
+    "menu/menu.img": "8ac74e9fa2a0d5e7b2a64ad4b73649217fa013f617c548439db157266c249f0f",
+    "menu/menu.lst": "0036595589533045082d82dc182c31c385dce81aa4775efcf2de837d363ba89c",
+    "menu/result.json": "4ba5ac59d4f755082a89dfb10dc2df664d49ecd764653d40e2dac10f0e620453",
+    "startup/STARTF.COM": "d756d5e7264158db20d3d70e94294a4494e254015d67fef37521973bc99c8b2a",
+    "startup/STARTS.COM": "472a18320b1fadd6c56a02fdcc7a950fa8c940616e37b4072e4a264ecb5e6248",
+    "startup/STARTX.COM": "36ca1d8fcfcdb8168a39aa81c9a0a3dabc10561daaec043bf4c9ee55e36228fe",
+    "uj11-hc7000-multi-os.img.gz": "aea2d6619367889773a7305bf7cc76c7139da5b539f01c2942400310d5d3fde1",
+    "validation/attempt-v4-sl/result.json": "d9294297a837330692aa5d5a9268bf815ca724097fda3bbcc853becf0d646af6",
+    "validation/attempt-v4-sl/rt11v4/uart.txt": "350c4df0c101ee52eb4b70a3161e71b0d8789f6d907a1748f0cbd4635507bc48",
+    "validation/attempt-v4-sl/rt11xm/uart.txt": "1b4c07ba48b8a5daeeeae49975e08858bd197f5d4adf3fc2b8076dc20beeb13d",
+    "validation/reproducible.json": "4a2f1397142c273fb14ee72ad40889b6422fc06ae90f0e0ef93f5bf01c721e96",
+    "validation/sd-label.json": "43355543db28d9f28baa8cd8bbe85772150860abb2c1025588799f6a49e8d73c",
+    "validation/simh/bsd/uart.txt": "79acf3b0fed4b1461947f8393cb237bb250d16eb6448fe7c4ddcd8be56d2f351",
+    "validation/simh/result.json": "4561c876f2159faf27bcdb6bed2a243772e684fcc34d2bb3b46ff5adc7bb9548",
+    "validation/simh/rsx/uart.txt": "7c3bcabb6ed58c0ac88482fe5e5c5b4959e1065ce29a0e3fc54b7045ba4939cc",
+    "validation/simh/rt11v4/uart.txt": "4f9b145d62213ebdf79e87b31a2da04f9704268b894d309bf9cde21eb794c701",
+    "validation/simh/rt11xm/uart.txt": "fb590c7ba404950531ce698fec09e33c9d79ae485f063626c81f21f12cb636db",
+    "validation/simh/runner.py": "e3bf057f01dc21ce5192c780bdd6320308556321553b3677e12d80d967e12293"
+  }
+}

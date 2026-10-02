@@ -1,0 +1,44 @@
+uJ11 HC7000: BSD, RSX and RT-11 SD suite -- 02-Oct-2026
+
+Boot menu:
+  Wait 5 seconds or press Enter: BSD from RL0.
+  Any other key cancels the timer. Select controller, then unit:
+    5, 0 = 2.9BSD
+    2, 0 = RT-11 XM V5.03
+    1, 0 = RT-11 SJ V04.00C
+    4, 1 = RSX-11M-PLUS V4.6 BL87
+  RQ0 contains an original nonbootable system volume; use RQ1.
+
+BSD:
+  At 70Boot enter rl(0,0)rlunix
+  At the single-user # press Ctrl+D, then log in as root.
+  /usr is on XP0; RL1 is swap. For fast console output: stty nl0 cr0
+
+RT-11 XM volumes:
+  SY: = DM0: system       VOL: = DM1: storage
+  BAS: = RK1: BASIC       PAS: = RK2: Pascal       FOR: = RK3: FORTRAN
+  RK0 contains RT-11 V4.
+  @XMCHK shows configuration and memory.
+  RUN BAS:BASIC, select A, then PRINT 2+3. BYE exits BASIC.
+
+Pascal without FPP:
+  RUN PAS:XM
+  At * enter VOL:CTPAS,VOL:CTPAS=VOL:ADDER
+  R LINK
+  At * enter VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS
+  Ctrl+C, then RUN VOL:CTPAS and enter 2 3.
+  This creates a fresh program on VOL:. The stock SY:ADDER.SAV requires FPP.
+  Running stock ADDER without FPP can corrupt the monitor return at address 0;
+  reset RT-11 before using an editor after that failure.
+  EDIT VOL:HELLO.PAS selects KEX in XM. Terminal replies still come from UART.
+
+Host file exchange and date/time:
+  HGX.SYS, HGTIME.SAV and TMRATE.SAV are installed on SY:.
+  With the HG daemon running on the Linux host, enter @HGSYNC.
+  Use DATE, TIME and DIR HG: to check. Host synchronization is not automatic.
+
+Current FPGA profile: MMU, FIS, no FPP, SERV storage, PAL and PS/2.
+CPU 50 MHz, PAL 64 MHz. The guest has 1936 KiB of the 2 MiB SRAM.
+Short button press enters ODT; long press resets and returns to the boot menu.
+
+This SD suite starts from clean distribution disks, not a backup of user files.

@@ -1,5 +1,33 @@
 # HC7000 storage boot validation
 
+## Installed board and SD, 2 October 2026
+
+The current JED is **7CBA**, MMU / FPP off / FIS / SERV storage /
+PAL terminal / PS/2, CPU/PAL 50/64 MHz. Physical boots of all four systems
+below passed in the [7CBA installation record](../releases/hc7000-ps2-idle/README.md).
+The terminal reserves 112 KiB SRAM; the guest sees 1936 KiB.
+The [complete distribution SD image](../releases/sd-hc7000-multi/README.md)
+now packages all 11 partitions, the boot menu, corrected XM assignments and
+HG utilities. It starts from clean source disks; it is not a backup of the
+mutable physical card. Its own extracted-disk boot checks are linked there.
+
+| System | Boot menu controller | Unit | Other installed media |
+|---|---|---:|---|
+| 2.9BSD, default after five seconds | **5 — RL11** | **0** | RL1 swap, XP0 `/usr` |
+| RT-11 XM V5.03 | **2 — RH11/HK** | **0** | RH1 storage, RK1 BASIC, RK2 Pascal, RK3 FORTRAN |
+| RT-11 SJ V04.00C | **1 — RK11/RK05** | **0** | — |
+| RSX-11M-PLUS V4.6 BL87 | **4 — RQ/MSCP** | **1** | RQ0 is present but not hardware bootable |
+
+Cancel the countdown with any key except Enter, then select the controller
+and unit. Enter during the countdown boots the default RL0 immediately.
+RT-11 XM assigns `VOL:` to DM1, `BAS:` to RK1, `PAS:` to RK2 and `FOR:` to RK3.
+The mapping differs from the isolated test matrix below because RK0 on the
+physical card is reserved for RT-11 V4. Pascal without FPP needs freshly
+compiled code linked with LIBEIS; the original FPP ADDER executable is not
+a valid check of this configuration. [ADDER/KED diagnosis](hc7000-terminal.md#rt-11-xm-ked-после-аварийного-pascal).
+
+## Original isolated test matrix
+
 The requested configurations use the original files in `lsi11/disks`:
 
 | Case | Attachments | Requested boot |
@@ -133,8 +161,10 @@ UJ11_MMU_FPP=off UJ11_MMU_IOP=storage python3 tools/test_os_boot_rtl.py --out bu
 The RTL runner uses the supplied SD menu and current hardware/firmware.
 It distinguishes a successful OS boot (`boot_passed`) from validation of the
 nonbootable RQ0 placeholder (`expected_nonbootable`). Original SIMH evidence is
-under `releases/hc7000-bsd/validation/boot-matrix/`; current shared-I/O RTL
+under `releases/hc7000-bsd/validation/boot-matrix/`; shared-I/O RTL
 evidence for that stage is under `releases/hc7000-serv-io/validation/`.
+These complete historical paths are preserved in the local Git archive `31549d1`;
+[recovery instructions](../history/releases/README.md).
 
 The MMU integer corrections are qualified again in
 `releases/hc7000-isa-fix/validation/`: XM, V4 and both RQ cases retain the

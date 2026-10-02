@@ -1,0 +1,168 @@
+{
+  "passed": false,
+  "scope": "SIMH reference on extracted private disks; not FPGA/PAL qualification",
+  "image_sha256": "0b7bca1e87544edb7457d3e90d854768e072502b1398ec0ae79294ad8015cfb7",
+  "menu": {
+    "blocks": 6,
+    "entry_octal": "100000",
+    "crc16": "84ce"
+  },
+  "partitions": [
+    {
+      "kind": 5,
+      "unit": 0,
+      "bytes": 10485760,
+      "sha256": "abb27f7b86eb0fef6047e324671b567c88383cf2abfeab1a3a02a6e3c4d825a1"
+    },
+    {
+      "kind": 5,
+      "unit": 1,
+      "bytes": 10485760,
+      "sha256": "47f5eae03839c9b0a4b140b711f08ec5318e8ce5337d2395cbe154cd05ce5936"
+    },
+    {
+      "kind": 3,
+      "unit": 0,
+      "bytes": 256196608,
+      "sha256": "94c01448752a2c974309fe00b9e87b67a1bd15fcdb73c03fe827b3c75b065478"
+    },
+    {
+      "kind": 4,
+      "unit": 0,
+      "bytes": 159385600,
+      "sha256": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950"
+    },
+    {
+      "kind": 4,
+      "unit": 1,
+      "bytes": 159350784,
+      "sha256": "0ab0866bc2a53bf484e2c9367a0c79e77407853a72df07b58d8e7f30c61787e5"
+    },
+    {
+      "kind": 1,
+      "unit": 0,
+      "bytes": 2494464,
+      "sha256": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb"
+    },
+    {
+      "kind": 2,
+      "unit": 0,
+      "bytes": 27540480,
+      "sha256": "58ca2340998ec8ec3ec2d445d1880ecf4a59ab3c40d37854a5593920019d9324"
+    },
+    {
+      "kind": 2,
+      "unit": 1,
+      "bytes": 27540480,
+      "sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad"
+    },
+    {
+      "kind": 1,
+      "unit": 1,
+      "bytes": 2494464,
+      "sha256": "fedc049af6aed808e7bef965ad7cf90f721f5d23f1c9e21196b3f7ab8e02ba74"
+    },
+    {
+      "kind": 1,
+      "unit": 2,
+      "bytes": 2494464,
+      "sha256": "5c9426278bf162eef78586ce1d2d421288b4bb2d8a0f72c9d3ea153edd3c8ed4"
+    },
+    {
+      "kind": 1,
+      "unit": 3,
+      "bytes": 2494464,
+      "sha256": "1dab4662ea5bf777841b768f56a14a102843cb3d6341814c3c6dcb51f25b55e1"
+    }
+  ],
+  "simulator": "/opt/homebrew/Cellar/open-simh/3.12-3/bin/pdp11",
+  "simulator_sha256": "7df21d89d49a323caeef67a3172521d08c30e4d3accb99c29735806f5dbcd635",
+  "driver_sha256": "6ae85559c4ec6bd4c7756658d09dfa2b25fb9c237164881b28047d59d6119970",
+  "cases": [
+    {
+      "case": "rt11xm",
+      "cpu": "11/40",
+      "memory": "256k",
+      "fpp": false,
+      "fis": true,
+      "boot": "hk0",
+      "passed": true,
+      "commands": [
+        {
+          "command": "SET SL OFF",
+          "output": "\u001b[r\u001b[24H\u001b\\\r\n."
+        },
+        {
+          "command": "SHOW CONFIGURATION",
+          "output": "\r\nRT-11XM  V05.03  \r\nBooted from DM0:RT11XM\r\n\r\nUSR   is set NOSWAP\r\nEXIT  is set SWAP\r\nKMON  is set NOIND\r\nTT    is set NOQUIET\r\nERROR is set ERROR\r\nSL    is set OFF\r\nEDIT  is set KEX\r\nKMON nesting depth is 3\r\nGlobal .SCCA flag is disabled\r\n\r\nPDP 11/35,40 Processor\r\n248KB of memory\r\nExtended Instruction Set (EIS)\r\nFloating Instruction Set (FIS)\r\nMemory Management Unit\r\n60 Cycle System Clock                  \r\n\r\nDevice I/O time-out support\r\nSystem job support\r\nFPU support\r\n\r\n\r\n."
+        },
+        {
+          "command": "SHOW MEMORY",
+          "output": "\r\n------- Extended Memory --------\r\nAddress   Module    Words   Type\r\n-------   ------    -----   ----\r\n17760000  IOPAGE     4096.   HDW \r\n00760000  MEMTOP       \r\n00166200  ......    96704.       \r\n00160000  SL         1600.   PVT \r\n\r\n------ Low Memory -------\r\nAddress   Module    Words\r\n-------   ------    -----\r\n155324    DM          662.       \r\n117602    RMON       7593.       \r\n106540    USR        2321.       \r\n001000    ..BG..    17840.       \r\n\r\n\r\n."
+        },
+        {
+          "command": "DIR VOL:",
+          "output": " \r\nADDER .PAS     1                 ADDER .OBJ     3           \r\nADDER .LST     2                 ADDER .MAP     6           \r\n 4 Files, 12 Blocks\r\n 53644 Free blocks\r\n\r\n."
+        },
+        {
+          "command": "DIR BAS:BASIC.SAV",
+          "output": " \r\nBASIC .SAV    53  04-Apr-83      \r\n 1 Files, 53 Blocks\r\n 4076 Free blocks\r\n\r\n."
+        },
+        {
+          "command": "DIR PAS:XM.SAV",
+          "output": " \r\nXM    .SAV   474  07-Mar-85      \r\n 1 Files, 474 Blocks\r\n 1714 Free blocks\r\n\r\n."
+        },
+        {
+          "command": "DIR FOR:FORTRA.SAV",
+          "output": " \r\nFORTRA.SAV   128                 \r\n 1 Files, 128 Blocks\r\n 4476 Free blocks\r\n\r\n."
+        },
+        {
+          "command": "DIR SY:HGX.SYS",
+          "output": " \r\nHGX   .SYS     3    -BAD-        \r\n 1 Files, 3 Blocks\r\n 48296 Free blocks\r\n\r\n."
+        },
+        {
+          "command": "DIR SY:HGTIME.SAV",
+          "output": " \r\nHGTIME.SAV     3    -BAD-        \r\n 1 Files, 3 Blocks\r\n 48296 Free blocks\r\n\r\n."
+        },
+        {
+          "command": "TYPE SY:SDHELP.TXT",
+          "output": "uJ11 HC7000: BSD, RSX and RT-11 SD suite -- 02-Oct-2026\r\n\r\nBoot menu:\r\n  Wait 5 seconds or press Enter: BSD from RL0.\r\n  Any other key cancels the timer. Select controller, then unit:\r\n    5, 0 = 2.9BSD\r\n    2, 0 = RT-11 XM V5.03\r\n    1, 0 = RT-11 SJ V04.00C\r\n    4, 1 = RSX-11M-PLUS V4.6 BL87\r\n  RQ0 contains an original nonbootable system volume; use RQ1.\r\n\r\nBSD:\r\n  At 70Boot enter rl(0,0)rlunix\r\n  At the single-user # press Ctrl+D, then log in as root.\r\n  /usr is on XP0; RL1 is swap. For fast console output: stty nl0 cr0\r\n\r\nRT-11 XM volumes:\r\n  SY: = DM0: system       VOL: = DM1: storage\r\n  BAS: = RK1: BASIC       PAS: = RK2: Pascal       FOR: = RK3: FORTRAN\r\n  RK0 contains RT-11 V4.\r\n  @XMCHK shows configuration and memory.\r\n  RUN BAS:BASIC, select A, then PRINT 2+3. BYE exits BASIC.\r\n\r\nPascal without FPP:\r\n  RUN PAS:XM\r\n  At * enter VOL:CTPAS,VOL:CTPAS=VOL:ADDER\r\n  R LINK\r\n  At * enter VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS\r\n  Ctrl+C, then RUN VOL:CTPAS and enter 2 3.\r\n  This creates a fresh program on VOL:. The stock SY:ADDER.SAV requires FPP.\r\n  Running stock ADDER without FPP can corrupt the monitor return at address 0;\r\n  reset RT-11 before using an editor after that failure.\r\n  EDIT VOL:HELLO.PAS selects KEX in XM. Terminal replies still come from UART.\r\n\r\nHost file exchange and date/time:\r\n  HGX.SYS, HGTIME.SAV and TMRATE.SAV are installed on SY:.\r\n  With the HG daemon running on the Linux host, enter @HGSYNC.\r\n  Use DATE, TIME and DIR HG: to check. Host synchronization is not automatic.\r\n\r\nCurrent FPGA profile: MMU, FIS, no FPP, SERV storage, PAL and PS/2.\r\nCPU 50 MHz, PAL 64 MHz. The guest has 1936 KiB of the 2 MiB SRAM.\r\nShort button press enters ODT; long press resets and returns to the boot menu.\r\n\r\nThis SD suite starts from clean distribution disks, not a backup of user files.\r\n\r\n\r\n."
+        },
+        {
+          "command": "PRINT 2+3",
+          "output": " 5 \r\n\r\nREADY"
+        },
+        {
+          "command": "BYE",
+          "output": "\r\n."
+        },
+        {
+          "command": "VOL:CTPAS,VOL:CTPAS=VOL:ADDER",
+          "output": "\r\n."
+        },
+        {
+          "command": "VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS",
+          "output": "*"
+        },
+        {
+          "command": "2 3",
+          "output": " inputs and answer: \r\n 2.000000E+00 3.000000E+00 5.000000E+00\r\n\r\n."
+        }
+      ],
+      "boot_output": "\r\nPDP-11 simulator V3.12-3\r\nDisabling XQ\r\n/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/sd-hc7000-multi-20261002-02/validation/simh/rt11xm/test.ini> set lp disable\r\nNon-existent device\r\nCPU, 11/40, FIS, MMU, autoconfiguration enabled, idle disabled, 248KB\r\n\r\nRT-11XM  V05.03  \r\n\r\n.TYPE V5USER.TXT\r\n\r\n                              RT-11 V5.3\r\n\r\n       Installation of RT-11 Version 5.3 is complete and you are now\r\n    executing from the working volume    (provided you have used the\r\n    automatic installation procedure). DIGITAL recommends you verify\r\n    the correct  operation  of  your  system's  software  using  the\r\n    verification procedure.  To do this, enter the command:\r\n\r\n                             IND VERIFY\r\n\r\n        Note that VERIFY should be performed  only after the distri-\r\n    bution media have been backed up.  This was accomplished as part\r\n    of automatic installation on  all  RL02,  RX02,  TK50, and  RX50\r\n    based systems,   including the  MicroPDP-11 and the Professional\r\n    300.  If you have not completed automatic installation, you must\r\n    perform a manual backup before using VERIFY.  Note also,  VERIFY\r\n    is NOT supported on RX01 diskettes,    DECtape I or II,   or the\r\n    Professional 325.\r\n\r\n    DIGITAL also  recommends  you  read  the  file V5NOTE.TXT, which\r\n    contains information  formalized too late to be included  in the\r\n    Release Notes.  V5NOTE.TXT can be TYPED or PRINTED.\r\n\r\n\r\n.ASSIGN DM1: VOL:\r\n\r\n.ASSIGN RK1: BAS:\r\n\r\n.ASSIGN RK2: PAS:\r\n\r\n.ASSIGN RK3: FOR:\r\n\r\n."
+    },
+    {
+      "case": "rt11v4",
+      "cpu": "11/40",
+      "memory": "256k",
+      "fpp": false,
+      "fis": true,
+      "boot": "rk0",
+      "passed": false,
+      "commands": [],
+      "boot_output": "\r\nPDP-11 simulator V3.12-3\r\nDisabling XQ\r\n/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/sd-hc7000-multi-20261002-02/validation/simh/rt11v4/test.ini> set lp disable\r\nNon-existent device\r\nCPU, 11/40, FIS, MMU, autoconfiguration enabled, idle disabled, 248KB\r\n\r\nRT-11SJ  V04.00C \r\n\r\n.D 56=5015\r\n\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\n.TYPE V4USER.TXT\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nWelcome to RT-11 Version 4. RT-11 V04 provides new hardware support\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nand some major enhancements over Version 3B.\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\n\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nPlease use the HELP command;  it describes the new options in many\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nof the utilities.\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\n\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nIf you are using a terminal that requires fill characters,\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nmodify location 56 with a Deposit command before proceeding with\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\nsystem installation. LA36 DECwriter II and VT52 DECscope terminals\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\ndo NOT require such modification.\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\n\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\n\r\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\n.D 56=0\r\n\r\n."
+    }
+  ],
+  "error": "AssertionError(('SET SL OFF', b'?KMON-F-File not found SY:SL.SYS\\r\\n\\r\\n.'))",
+  "image_unchanged": true
+}

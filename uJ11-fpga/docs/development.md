@@ -1,8 +1,11 @@
 # Сборка и разработка
 
-Все команды ниже выполняются из `uJ11-fpga`. Исходники этого дерева —
-рабочая MMU-less версия компьютера. Нет выбора между десятками `cp*`:
-список RTL задаёт [board_common.py](../tools/board_common.py).
+Все команды ниже выполняются из `uJ11-fpga`. Дерево содержит два профиля:
+`CPU=mmuless` (HC1200 по умолчанию, также HC7000) и `CPU=mmu` (HC7000).
+Ниже описаны команды HC1200/MMU-less; параметры установленной HC7000/7CBA,
+SERV, PAL и PS/2 приведены в [MMU-руководстве](hc7000-mmu.md#сборка).
+Нет выбора между десятками `cp*`: список RTL задаёт
+[board_common.py](../tools/board_common.py), MMU — `tools/build_mmu_board.py`.
 Изменения в `build/` будут потеряны; редактировать нужно `rtl/`, `boards/`,
 `microcode/` или `firmware/`.
 
@@ -16,6 +19,7 @@
 | Native PDP-11 сборка | SIMH `pdp11`, `../lsi11/rt11tool`, `../lsi11-fpga/images/rt11v503.dsk` |
 | BASIC из оригинальной библиотеки | Дополнительно `../lsi11/disks/rt11v5.3/basic.dsk` |
 | HC1200 synthesis | Linux Diamond 3.14/Synplify и лицензия |
+| HC7000 MMU/SERV | Те же synthesis tools, `riscv64-unknown-elf-gcc`/binutils либо проверяемый кэш firmware |
 | Vendor simulation | DP8KC/GSR/PUR/ODDRXE модели Diamond в `.cache/vendor/` |
 | UART и прошивка | Linux host, pyserial не нужен; Diamond Programmer и FTDI |
 

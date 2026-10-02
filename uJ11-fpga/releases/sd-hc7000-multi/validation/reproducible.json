@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "image_sha256": "0b7bca1e87544edb7457d3e90d854768e072502b1398ec0ae79294ad8015cfb7",
+  "gzip_sha256": "aea2d6619367889773a7305bf7cc76c7139da5b539f01c2942400310d5d3fde1",
+  "raw_bytes": 1073741824,
+  "gzip_bytes": 48344475,
+  "independent_builds": 2,
+  "deterministic_file_dates": "2026-10-02"
+}

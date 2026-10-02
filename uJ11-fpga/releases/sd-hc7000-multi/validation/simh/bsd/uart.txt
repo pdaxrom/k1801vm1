@@ -1,0 +1,54 @@
+
+PDP-11 simulator V3.12-3
+Disabling XQ
+/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/sd-hc7000-multi-20261002-02/validation/simh-02/bsd/test.ini> set lp disable
+Non-existent device
+CPU, 11/70, NOFPP, autoconfiguration enabled, idle disabled, 2048KB
+:boot
+
+70Boot
+: rl(0,0)rlunix
+
+Berkeley UNIX (Rev. 2.9.1) Sun Nov 20 14:55:50 PST 1983
+mem = 1979072
+
+CONFIGURE SYSTEM:
+xp 0 csr 176700 vector 254 attached
+rl 0 csr 174400 vector 160 attached
+tm 0 csr 172520 vector 224 skipped:  No CSR
+dz ? csr 160100 vector 300 skipped:  No CSR
+lp 0 csr 177514 vector 200 attached
+Erase=^?, kill=^U, intr=^C
+# Wed Dec 31 23:18:00 PST 1969
+Mounted /usr on /dev/xp0h  
+init: /dev/tty07: cannot open
+init: /dev/tty06: cannot open
+init: /dev/tty05: cannot open
+init: /dev/tty04: cannot open
+init: /dev/tty03: cannot open
+init: /dev/tty02: cannot open
+init: /dev/tty01: cannot open
+init: /dev/tty00: cannot open
+
+
+Berkeley Unix 2.9BSD
+
+:login: root
+
+Welcome to the 2.9BSD (Berkeley) UNIX system.
+
+# stty nl0 cr0
+# ls /usr
+70          dict        include     lost+found  preserve    sys
+adm         doc         ingres      man         public      tmp
+bin         games       lib         msgs        spool       ucb
+contrib     hack        local       net         src
+# cat /etc/fstab
+/dev/rl0:/:rw:7:1
+/dev/xp0h:/usr:rw:7:2
+/dev/rl1:swap:sw:0::0
+# sync
+# 
+Simulation stopped, PC: 004632 (MOV (SP)+,177776)
+sim> quit
+Goodbye

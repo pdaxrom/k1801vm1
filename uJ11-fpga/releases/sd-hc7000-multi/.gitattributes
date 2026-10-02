@@ -1,0 +1,6 @@
+# Release hashes cover exact bytes, including RT-11 CRLF text and UART logs.
+* -text
+SDHELP.TXT whitespace=cr-at-eol
+startup/*.COM whitespace=cr-at-eol
+menu/*.lst -diff
+validation/**/uart.txt -diff

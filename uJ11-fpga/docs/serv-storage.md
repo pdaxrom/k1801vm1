@@ -21,9 +21,17 @@ The first 18 KiB support full-width 32-bit access; the last KiB uses two
 the sector buffer. Sector traffic only stalls SERV accesses to that final KiB.
 All ordinary code, BSS and the stack stay in the fast banks. SERV installs the bootstrap into ordinary SRAM
 before releasing J11, and repeats the copy on board reset. Guest `RESET` does
-not reinstall it. Code, data and stack remain in EBR; PDP-11 keeps all 2 MiB SRAM.
-This change has passed RTL and synthesis, but is not yet installed on the board;
-the installed 2AAE still uses 12 KiB and a separate boot ROM.
+not reinstall it. Code, data and stack remain in EBR. Without the terminal,
+PDP-11 has all 2 MiB SRAM; the terminal reserves 112 KiB, leaving 1936 KiB.
+The installed build is **7CBA, 2 October 2026**, with PAL/terminal and PS/2
+at CPU/PAL 50/64 MHz. It passed RTL, synthesis, FLASH Verify and physical
+RT-11 XM/V4, RSX and BSD boot checks. SERV code/constants use 16451 bytes,
+BSS 1080 bytes, with 260 bytes before the 640-byte stack reserve and a
+separate unused 512-byte cold bank.
+[Current resources and qualification](synthesis.md#hc7000-установленная-7cba).
+The [complete multi-OS SD release](../releases/sd-hc7000-multi/README.md)
+includes BSD, RSX, V4, XM compilers and HG utilities; rebuild it with
+`python3 tools/build_sd_suite.py --out build/sd-suite-new`.
 See [19 KiB RAM, EBR allocation and validation](serv-19k.md), the intermediate
 [shared RAM checkpoint](serv-shared-ram.md), and
 [SERV bootstrap](serv-bootstrap.md).
@@ -334,14 +342,15 @@ The original `/etc/ttys` is retained for future display/keyboard terminals;
 until DZ is implemented, init reports that tty00..tty07 cannot open. Wait about
 two seconds at `login:` before typing, as this getty clears early input after
 its initial delay.
-The earlier `releases/hc7000-bsd` contains the SD archive and matching JED. Its RTL and
+The earlier SD archive and matching JED from `releases/hc7000-bsd` are preserved
+in the local Git archive `31549d1`; see [historical releases and recovery](../history/releases/README.md). Its RTL and
 SIMH boots pass through multiuser root login, RL/RP file writes/readback and
 `sync`; that release's RTL run has 18926 checks. Its 24 MHz MAP/PAR/TRACE build uses
 5435 LUT4, 2137 FF and 25/26 EBR, with Fmax 25.539 MHz. The old partitioned
 RH7 RT-11XM image also boots on that RTL. See its README and manifests for
 exact checksums, source inputs and UART logs. The replacement shared-I/O
-implementation and its qualification are preserved separately in
-`releases/hc7000-serv-io`; it has not yet been installed on the physical board.
+implementation and its qualification are archived in the same Git revision at
+`releases/hc7000-serv-io`; at that stage it had not yet been installed on the physical board.
 
 The additional [OS boot matrix](boot-validation.md) covers the original
 five-disk RT-11 XM setup, RT-11 V4 on RK0, and both RSX RQ images. The software

@@ -187,8 +187,11 @@ UJ11_MMU_FPP=off python3 tools/test_mmu.py --out build/mmu-new --vendor-library 
 Требуются Python, Icarus Verilog и vvp. Сборка FPGA и её сгенерированные файлы
 не изменяются. `result.json` сохраняет хеши эталона, RTL, микрокода, FP11 и
 самого инструмента; `dispatch.txt` — все коды и фактические адреса входа.
-Исторический результат до исправлений сохранён в `releases/hc7000-serv-io/validation/isa-audit/`;
+Исторический результат до исправлений сохранён в локальном Git-архиве `31549d1` по пути
+`releases/hc7000-serv-io/validation/isa-audit/`;
 результат первого этапа — в
 [`releases/hc7000-isa-fix/`](../history/releases/hc7000-isa-fix/README.md).
-Текущая сборка с CPUERR/PIRQ и защитой стека, её исходники и проверки — в
-[`releases/hc7000-cpu-events/`](../history/releases/hc7000-cpu-events/README.md).
+Первое подтверждение CPUERR/PIRQ и защиты стека — в
+[исторической записи CPU-events](../history/releases/hc7000-cpu-events/README.md).
+Текущая установленная сборка — [7CBA](../releases/hc7000-ps2-idle/README.md);
+[восстановление старых исходников и полных проверок](../history/releases/README.md).
