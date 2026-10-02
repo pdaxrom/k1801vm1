@@ -2,7 +2,7 @@
 
 2026-09-27. Готовый образ для `hc7000-lcd-sram`, профиль `CPU=mmu`,
 SRAM 2 МиБ, система 24 МГц. Требуется исправленная прошивка
-[`mmu-trap-modes-08`](../hc7000-mmu-trap-fix/README.md) или совместимая новая.
+[`mmu-trap-modes-08`](../../history/releases/hc7000-mmu-trap-fix/README.md) или совместимая новая.
 
 Файл: [`uj11-hc7000-rt11xm.img.gz`](uj11-hc7000-rt11xm.img.gz), 559 657 байт.
 Распакованный raw RK07 — 27 540 480 байт / 53 790 секторов. Загружается

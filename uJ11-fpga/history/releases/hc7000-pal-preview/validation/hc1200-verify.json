@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "command": "make -C uJ11-fpga BOARD=hc1200 verify",
+  "observed_exit_code": 0,
+  "date": "2026-09-30",
+  "scope": "HC1200 production RTL/EBR identity, software rebuild and production JED verification; no HC1200 production source changed"
+}

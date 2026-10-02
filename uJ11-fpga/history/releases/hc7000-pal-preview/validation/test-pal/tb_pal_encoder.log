@@ -1,0 +1,2 @@
+PASS PAL encoder: 33834 samples, all RGB332 codes/both V phases, max error 1.846 DAC codes
+tests/tb_pal_encoder.v:46: $finish called at 528830718 (1ps)

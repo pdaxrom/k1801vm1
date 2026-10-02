@@ -1,0 +1,161 @@
+{
+  "phase": "serv-unibus-7ae8-hardware",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "",
+      "offset": 0,
+      "complete": false,
+      "response": ""
+    },
+    {
+      "command": "R 7",
+      "offset": 0,
+      "complete": true,
+      "response": "143120\r\n>"
+    },
+    {
+      "command": "SHOW CONFIGURATION",
+      "offset": 1598,
+      "complete": true,
+      "response": "SHOW CONFIGURATION\r\n\r\nRT-11XM  V05.03  \r\nBooted from DM0:RT11XM\r\n22 bit addressing is on\r\n\r\nUSR   is set NOSWAP\r\nEXIT  is set SWAP\r\nKMON  is set NOIND\r\nTT    is set NOQUIET\r\nERROR is set ERROR\r\nSL    is set OFF\r\nEDIT  is set KEX\r\nKMON nesting depth is 3\r\nGlobal .SCCA flag is disabled\r\n\r\nPDP 11/84 Processor\r\n2048KB of memory\r\nFloating Point Microcode\r\nExtended Instruction Set (EIS)\r\nFloating Instruction Set (FIS)\r\nMemory Management Unit\r\nCache Memory\r\nPMI Memory\r\n60 Cycle System Clock                  \r\n\r\nDevice I/O time-out support\r\nSystem job support\r\nFPU support\r\n\r\n\r\n."
+    },
+    {
+      "command": "DIR VOL:",
+      "offset": 2175,
+      "complete": true,
+      "response": "DIR VOL:\r\n \r\nADDER .PAS     1                 ADDER .OBJ     3           \r\nADDER .LST     2                 ADDER .MAP     6           \r\nPTEMP .SAV   474  07-Mar-85      CTPAS .OBJ     3           \r\nCTPAS .LST     2                 CTPAS .MAP     6           \r\nCTFORT.FOR     1                 CTFORT.LST     1           \r\nCTFORT.SAV    14                 CTPAS .SAV    24           \r\nCTFORT.OBJ     5                 CTFORT.MAP     5           \r\n 14 Files, 547 Blocks\r\n 53109 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "DIR BAS:BASIC.SAV",
+      "offset": 2668,
+      "complete": true,
+      "response": "DIR BAS:BASIC.SAV\r\n \r\nBASIC .SAV    53  04-Apr-83      \r\n 1 Files, 53 Blocks\r\n 4076 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "DIR PAS:XM.SAV",
+      "offset": 2768,
+      "complete": true,
+      "response": "DIR PAS:XM.SAV\r\n \r\nXM    .SAV   474  07-Mar-85      \r\n 1 Files, 474 Blocks\r\n 1714 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "DIR FOR:FORTRA.SAV",
+      "offset": 2866,
+      "complete": true,
+      "response": "DIR FOR:FORTRA.SAV\r\n \r\nFORTRA.SAV   128                 \r\n 1 Files, 128 Blocks\r\n 4476 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "RUN BAS:BASIC",
+      "offset": 2968,
+      "complete": true,
+      "response": "RUN BAS:BASIC\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? "
+    },
+    {
+      "command": "A",
+      "offset": 3054,
+      "complete": true,
+      "response": "A\r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "PRINT 2+3",
+      "offset": 3066,
+      "complete": true,
+      "response": "PRINT 2+3\r\n 5 \r\n\r\nREADY\r\n"
+    },
+    {
+      "command": "BYE",
+      "offset": 3091,
+      "complete": true,
+      "response": "BYE\r\n\r\n."
+    },
+    {
+      "command": "RUN PAS:XM",
+      "offset": 3099,
+      "complete": true,
+      "response": "RUN PAS:XM\r\n*"
+    },
+    {
+      "command": "VOL:CTPAS,VOL:CTPAS=VOL:ADDER",
+      "offset": 3112,
+      "complete": true,
+      "response": "VOL:CTPAS,VOL:CTPAS=VOL:ADDER\r\n\r\n."
+    },
+    {
+      "command": "R LINK",
+      "offset": 3146,
+      "complete": true,
+      "response": "R LINK\r\n*"
+    },
+    {
+      "command": "VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS",
+      "offset": 3155,
+      "complete": true,
+      "response": "VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS\r\n*"
+    },
+    {
+      "command": "RUN VOL:CTPAS",
+      "offset": 3205,
+      "complete": false,
+      "response": "RUN VOL:CTPAS\r\n"
+    },
+    {
+      "command": "2 3",
+      "offset": 3220,
+      "complete": true,
+      "response": "2 3\r\n inputs and answer: \r\n 2.000000E+00 3.000000E+00 5.000000E+00\r\n\r\n."
+    },
+    {
+      "command": "RUN FOR:FORTRA",
+      "offset": 3291,
+      "complete": true,
+      "response": "RUN FOR:FORTRA\r\n*"
+    },
+    {
+      "command": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT",
+      "offset": 3308,
+      "complete": true,
+      "response": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT\r\nCTFORT\r\n*"
+    },
+    {
+      "command": "R LINK",
+      "offset": 3358,
+      "complete": true,
+      "response": "R LINK\r\n*"
+    },
+    {
+      "command": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT,FOR:FORLIB",
+      "offset": 3367,
+      "complete": true,
+      "response": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT,FOR:FORLIB\r\n*"
+    },
+    {
+      "command": "RUN VOL:CTFORT",
+      "offset": 3420,
+      "complete": true,
+      "response": "RUN VOL:CTFORT\r\nFORTRAN OK\r\r\nSTOP -- \r\n\r\n."
+    }
+  ],
+  "started_utc": "2026-09-29T19:51:13Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "uart_bytes": 3462,
+  "jed_sha256": "dbf2190d161a168611bcee6e8f0903b4dbb2dffab97cb380bfeb3dd87dba6a1b",
+  "jed_checksum": "7AE8",
+  "post_program_uart_offset": 9,
+  "programmer_exit_code": 0,
+  "flash_verified": true,
+  "default_autoboot_cancelled": true,
+  "qualification": {
+    "cpu_identification": "PDP 11/84",
+    "memory_kib": 2048,
+    "boot": "RH0",
+    "fpp": "off in verified synthesis inputs",
+    "fis": "retained; reported by RT-11",
+    "stock_rkx": true,
+    "basic": "PRINT 2+3 = 5",
+    "pascal": "Direct RK2 XM; ADDER compilation, LIBEIS link, 2 3 = 5.000000E+00",
+    "fortran": "RK3 compile, FORLIB link, FORTRAN OK and STOP",
+    "final_state": "RT-11 XM monitor; UART released"
+  },
+  "finished_utc": "2026-09-29T19:56:31Z"
+}

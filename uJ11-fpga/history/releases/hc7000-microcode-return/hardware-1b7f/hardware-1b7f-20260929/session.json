@@ -1,0 +1,156 @@
+{
+  "phase": "1B7F-flash-bsd",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "",
+      "offset": 0,
+      "complete": true,
+      "response": "\n\r\r\n>"
+    },
+    {
+      "command": "RUN LB:[3,54]SHUTUP",
+      "offset": 5,
+      "complete": true,
+      "response": "RUN LB:[3,54]SHUTUP\r\n\r\nRSX-11M-PLUS Shut down program\n\r\nEnter minutes to wait before shutdown: "
+    },
+    {
+      "command": "0",
+      "offset": 100,
+      "complete": true,
+      "response": "0\r\n\rReason for shutdown (<CR> for none):"
+    },
+    {
+      "command": "FPGA update 1B7F",
+      "offset": 140,
+      "complete": true,
+      "response": "FPGA update 1B7F\r\n\rOK to shutdown? [Y/N]: "
+    },
+    {
+      "command": "Y",
+      "offset": 182,
+      "complete": true,
+      "response": "Y\r\n\r\u0007All further logins are disabled\u0007\r\n\r\n\u000728-SEP-99 12:07   System is now shutting down -- RSXMPL\n\rReason for shutdown: FPGA update 1B7F\n\r\r\nQUE /STO:QMG\r\r\r\n>\nSTOP/ACCOUNTING SHUTUP \r\r\n12:07:13  SYSLOG -- \u000047. Exiting\r\r\n>\n@LB:[1,2]SHUTUP\r\r\n\r>VCP DISCONNECT /ALL\r\n\r>@ <EOF>\r\r\n>\nELI /NOLOG\r\r\r\n>\nACS DU1:/BLKS=0.\r\r\nACS -- Checkpoint file now inactive\r\r\n>\nDMO DU1:/DEV/LOCK=V\r\r\n\rDMO -- System disk being dismounted\u0000\r\n\rDMO -- SYSTEM  dismounted from DU1:    *** Final dismount initiated ***\u0000\r\r\n>\n\u0000\r12:07:15  *** DU1:  -- Dismount complete\r\r\n\rSHUTUP operation complete\n\r>"
+    },
+    {
+      "command": "rl(0,0)rlunix",
+      "offset": 975,
+      "complete": true,
+      "response": "rl(0,0)rlunix\n\r\n\rBerkeley UNIX (Rev. 2.9.1) Sun Nov 20 14:55:50 PST 1983\n\rmem = 1979072\n\r\r\r\nCONFIGURE SYSTEM:\r\nxp 0 csr 176700 vector 254 attached\r\nrl 0 csr 174400 vector 160 attached\r\ntm 0 csr 172520 vector 224 skipped:  No CSR\r\ndz ? csr 160100 vector 300 skipped:  No CSR\r\nlp ? csr 177514 vector 200 skipped:  No CSR\r\nErase=^?, kill=^U, intr=^C\r\n# "
+    },
+    {
+      "command": "ls",
+      "offset": 1336,
+      "complete": true,
+      "response": "ls\r\n.cshrc        bin           genallsys.sh  rkunix        usr\r\n.login        boot          hkunix        rlunix        xpunix\r\n.msgsrc       core          lib           root\r\n.profile      dev           lost+found    rpunix\r\n2.9stamp      devgeneric    mdec          tmp\r\nREAD_ME       etc           mnt           unix\r\n# "
+    },
+    {
+      "command": "sync",
+      "offset": 1660,
+      "complete": true,
+      "response": "sync\r\n# "
+    },
+    {
+      "command": "stty nl0 cr0",
+      "offset": 1668,
+      "complete": true,
+      "response": "stty nl0 cr0\r\n# "
+    },
+    {
+      "command": "root",
+      "offset": 2043,
+      "complete": true,
+      "response": "root\r\n\r\nWelcome to the 2.9BSD (Berkeley) UNIX system.\r\n\r\n# "
+    },
+    {
+      "command": "stty nl0 cr0",
+      "offset": 2102,
+      "complete": true,
+      "response": "stty nl0 cr0\r\n# "
+    },
+    {
+      "command": "ls /usr",
+      "offset": 2118,
+      "complete": true,
+      "response": "ls /usr\r\n70          dict        include     lost+found  preserve    sys\r\nadm         doc         ingres      man         public      tmp\r\nbin         games       lib         msgs        spool       ucb\r\ncontrib     hack        local       net         src\r\n# "
+    },
+    {
+      "command": "cat /etc/fstab",
+      "offset": 2377,
+      "complete": true,
+      "response": "cat /etc/fstab\r\n/dev/rl0:/:rw:7:1\r\n/dev/xp0h:/usr:rw:7:2\r\n/dev/rl1:swap:sw:0::0\r\n# "
+    },
+    {
+      "command": "mkdir /tmp/u1b7f",
+      "offset": 2460,
+      "complete": true,
+      "response": "mkdir /tmp/u1b7f\r\n# "
+    },
+    {
+      "command": "mkdir /usr/tmp/u1b7f",
+      "offset": 2480,
+      "complete": true,
+      "response": "mkdir /usr/tmp/u1b7f\r\n# "
+    },
+    {
+      "command": "echo HC7000-RL-1B7F > /tmp/u1b7f/check",
+      "offset": 2504,
+      "complete": true,
+      "response": "echo HC7000-RL-1B7F > /tmp/u1b7f/check\r\n# "
+    },
+    {
+      "command": "cat /tmp/u1b7f/check",
+      "offset": 2546,
+      "complete": true,
+      "response": "cat /tmp/u1b7f/check\r\nHC7000-RL-1B7F\r\n# "
+    },
+    {
+      "command": "echo HC7000-RP-1B7F > /usr/tmp/u1b7f/check",
+      "offset": 2586,
+      "complete": true,
+      "response": "echo HC7000-RP-1B7F > /usr/tmp/u1b7f/check\r\n# "
+    },
+    {
+      "command": "cat /usr/tmp/u1b7f/check",
+      "offset": 2632,
+      "complete": true,
+      "response": "cat /usr/tmp/u1b7f/check\r\nHC7000-RP-1B7F\r\n# "
+    },
+    {
+      "command": "rm /tmp/u1b7f/check /usr/tmp/u1b7f/check",
+      "offset": 2676,
+      "complete": true,
+      "response": "rm /tmp/u1b7f/check /usr/tmp/u1b7f/check\r\n# "
+    },
+    {
+      "command": "rmdir /tmp/u1b7f /usr/tmp/u1b7f",
+      "offset": 2720,
+      "complete": true,
+      "response": "rmdir /tmp/u1b7f /usr/tmp/u1b7f\r\n# "
+    },
+    {
+      "command": "sync",
+      "offset": 2755,
+      "complete": true,
+      "response": "sync\r\n# "
+    }
+  ],
+  "started_utc": "2026-09-29T03:49:28Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "jed_sha256": "1cfce5454efa6001b2ff75086af04b47849f71bfba311663cb92be8e6b75863a",
+  "jed_checksum": "1B7F",
+  "clock_mhz": 50,
+  "oscillator_mhz": 12,
+  "uart_bytes": 2763,
+  "pre_flash_rsx_shutdown": true,
+  "post_program_uart_offset": 746,
+  "programmer_exit_code": 0,
+  "flash_verified": true,
+  "fresh_sd_boot_menu": true,
+  "bsd_single_user_boot": true,
+  "bsd_multiuser_login": true,
+  "bsd_rl_xp_read_write": true,
+  "temporary_files_removed": true,
+  "finished_utc": "2026-09-29T03:51:43Z"
+}

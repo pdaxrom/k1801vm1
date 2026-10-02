@@ -1,0 +1,29 @@
+{
+  "phase": "7123-physical-rsx",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [
+    {
+      "command": "DEV DU:",
+      "offset": 1501,
+      "elapsed_seconds": 0.20231324300402775,
+      "response": "DEV DU:\r\nDU0:\t Loaded Type=RD54  \r\nDU1:\t Public Mounted Loaded Label=RSX11MPBL87 Type=RD54  \r\nDU2:\t Loaded Type=RD54  \r\nDU3:\t Loaded Type=RD54  \r\r\n>"
+    },
+    {
+      "command": "PIP DU1:[1,54]RSX11M.SYS/LI",
+      "offset": 1649,
+      "elapsed_seconds": 0.3236459039908368,
+      "response": "PIP DU1:[1,54]RSX11M.SYS/LI\r\r\n\n\nDirectory DU1:[1,54]\r\n28-SEP-99 12:00\r\n\r\nRSX11M.SYS;1        1026.   C  03-NOV-99 18:01\r\n\r\nTotal of 1026./1026. blocks in 1. file\r\n\r\n>"
+    }
+  ],
+  "started_utc": "2026-09-29T03:36:43Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "armed": true,
+  "uart_bytes": 1815,
+  "cold_boot": true,
+  "boot_unit": "rq1",
+  "startup_completed": true,
+  "du0_du1": true,
+  "directory_read": true,
+  "finished_utc": "2026-09-29T03:41:18Z"
+}

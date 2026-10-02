@@ -3,7 +3,7 @@
 Готовый образ: [`uj11-hc7000-rt11xm.img.gz`](../releases/sd-hc7000/uj11-hc7000-rt11xm.img.gz).
 Это отдельный комплект для `BOARD=hc7000-lcd-sram CPU=mmu`: SRAM 2 МиБ,
 генератор 12 МГц, система 24 МГц. Нужна прошивка с исправлением режима
-TRAP, например [сборка 08](../releases/hc7000-mmu-trap-fix/README.md).
+TRAP, например [сборка 08](../history/releases/hc7000-mmu-trap-fix/README.md).
 
 Образ сразу загружает `DM0:RT11XM (S) V05.03`. Состав:
 

@@ -1,0 +1,82 @@
+{
+  "case": "rt11xm",
+  "validation_completed": true,
+  "boot_passed": true,
+  "expected_nonbootable": false,
+  "all_devices_supported": true,
+  "media": {
+    "case": "rt11xm",
+    "sources": {
+      "rt11v5.3/system.dsk": "9350c62f50e2713f56904b7222f2d829f6bf020cd67e28562e3252a48b6993dd",
+      "rt11v5.3/storage.dsk": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad",
+      "rt11v5.3/basic.dsk": "f68488b0da8106153a95fc1178198d687c227c1521b6506d07054207daf06b11",
+      "rt11v5.3/pascal.dsk": "a9700b5adf54cb26590a249711cad6f6c23bd9915d87683b6b6622465e2938d0",
+      "rt11v5.3/fortran.dsk": "40ebef26169047a2a71b481b0cffa4a49f3f734d931782df1e91f66cff0ef994"
+    },
+    "image_sha256": "1ff0957285a9b369729aedef503274fa5156cc0c2f2a97560afcea91114eaea8",
+    "partitions": [
+      {
+        "kind": 2,
+        "controller": 0,
+        "unit": 0,
+        "media": 3,
+        "flags": 1,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 53790,
+        "used": 27540480,
+        "label": "hk0"
+      },
+      {
+        "kind": 2,
+        "controller": 0,
+        "unit": 1,
+        "media": 3,
+        "flags": 0,
+        "mode": 0,
+        "start": 57344,
+        "blocks": 53790,
+        "used": 27540480,
+        "label": "hk1"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 0,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 112640,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "rk0"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 1,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 118784,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "rk1"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 2,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 124928,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "rk2"
+      }
+    ],
+    "menu_sha256": "8ac74e9fa2a0d5e7b2a64ad4b73649217fa013f617c548439db157266c249f0f"
+  },
+  "originals_unchanged": true
+}

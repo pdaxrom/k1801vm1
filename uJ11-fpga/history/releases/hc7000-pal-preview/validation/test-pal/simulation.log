@@ -1,0 +1,5 @@
+PASS PAL framebuffer: 13 frames 11507200 pixels, CPU=1021642 disk=1020742 video=575680, max line 39980.0 ns
+- tests/tb_pal_video.v:160: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 524ms; walltime 35.396 s; speed 14.793 ms/s
+- Verilator: cpu 35.374 s on 1 threads; allocated 4 MB

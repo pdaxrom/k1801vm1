@@ -189,6 +189,6 @@ UJ11_MMU_FPP=off python3 tools/test_mmu.py --out build/mmu-new --vendor-library 
 самого инструмента; `dispatch.txt` — все коды и фактические адреса входа.
 Исторический результат до исправлений сохранён в `releases/hc7000-serv-io/validation/isa-audit/`;
 результат первого этапа — в
-[`releases/hc7000-isa-fix/`](../releases/hc7000-isa-fix/README.md).
+[`releases/hc7000-isa-fix/`](../history/releases/hc7000-isa-fix/README.md).
 Текущая сборка с CPUERR/PIRQ и защитой стека, её исходники и проверки — в
-[`releases/hc7000-cpu-events/`](../releases/hc7000-cpu-events/README.md).
+[`releases/hc7000-cpu-events/`](../history/releases/hc7000-cpu-events/README.md).

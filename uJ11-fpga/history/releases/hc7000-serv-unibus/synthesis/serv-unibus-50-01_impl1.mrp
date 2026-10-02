@@ -1,0 +1,2052 @@
+
+      Lattice Mapping Report File for Design Module 'uj11_mmu_microcomp'
+
+
+Design Information
+------------------
+
+Command line:   map -a MachXO2 -p LCMXO2-7000HC -t TQFP144 -s 4 -oc Commercial
+     serv-unibus-50-01_impl1.ngd -o serv-unibus-50-01_impl1_map.ncd -pr
+     serv-unibus-50-01_impl1.prf -mp serv-unibus-50-01_impl1.mrp -lpf /home/sash
+     /Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/serv-unibus-50-01/imp
+     l1/serv-unibus-50-01_impl1_synplify.lpf -lpf /home/sash/Work/FPGA/uj11-serv
+     -compact-20260928/uJ11-fpga/build/serv-unibus-50-01/clock.lpf -c 0 -pe 
+Target Vendor:  LATTICE
+Target Device:  LCMXO2-7000HCTQFP144
+Target Performance:   4
+Mapper:  xo2c00,  version:  Diamond (64-bit) 3.14.0.75.2
+Mapped on:  09/29/26  20:31:20
+
+Design Summary
+--------------
+
+   Number of registers:   1342 out of  7209 (19%)
+      PFU registers:         1302 out of  6864 (19%)
+      PIO registers:           40 out of   345 (12%)
+   Number of SLICEs:      1995 out of  3432 (58%)
+      SLICEs as Logic/ROM:   1914 out of  3432 (56%)
+      SLICEs as RAM:           81 out of  2574 (3%)
+      SLICEs as Carry:        189 out of  3432 (6%)
+   Number of LUT4s:        3979 out of  6864 (58%)
+      Number used as logic LUTs:        3439
+      Number used as distributed RAM:   162
+      Number used as ripple logic:      378
+      Number used as shift registers:     0
+   Number of PIO sites used: 87 + 1(JTAGENB) out of 115 (77%)
+   Number of block RAMs:  25 out of 26 (96%)
+   Number of GSRs:        1 out of 1 (100%)
+   EFB used :        No
+   JTAG used :       No
+   Readback used :   No
+   Oscillator used : No
+   Startup used :    No
+   POR :             On
+   Bandgap :         On
+   Number of Power Controller:  0 out of 1 (0%)
+   Number of Dynamic Bank Controller (BCINRD):  0 out of 6 (0%)
+   Number of Dynamic Bank Controller (BCLVDSO):  0 out of 1 (0%)
+   Number of DCCA:  0 out of 8 (0%)
+   Number of DCMA:  0 out of 2 (0%)
+   Number of PLLs:  1 out of 2 (50%)
+   Number of DQSDLLs:  0 out of 2 (0%)
+   Number of CLKDIVC:  0 out of 4 (0%)
+   Number of ECLKSYNCA:  0 out of 4 (0%)
+   Number of ECLKBRIDGECS:  0 out of 2 (0%)
+   Notes:-
+      1. Total number of LUT4s = (Number of logic LUT4s) + 2*(Number of
+     distributed RAMs) + 2*(Number of ripple logic)
+      2. Number of logic LUT4s does not include count of distributed RAM and
+     ripple logic.
+   Number of clocks:  2
+     Net clk_ext_c: 1 loads, 1 rising, 0 falling (Driver: PIO clk_ext )
+     Net clk: 918 loads, 918 rising, 0 falling (Driver: clock50.pll/PLLInst_0 )
+
+                                    Page 1
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Design Summary (cont)
+---------------------
+   Number of Clock Enables:  157
+     Net system.bus.memory.N_105_i: 37 loads, 1 LSLICEs
+     Net system/peripheral_reset: 7 loads, 7 LSLICEs
+     Net system/bus/memory/cancelled_RNO_0: 1 loads, 1 LSLICEs
+     Net system/bus/memory/un1_ready_1_sqmuxa_0: 1 loads, 1 LSLICEs
+     Net system/bus/memory/read_data_0_sqmuxa: 8 loads, 8 LSLICEs
+     Net system/bus/un1_rom_phase_1: 1 loads, 0 LSLICEs
+     Net system/bus/un1_request_5: 3 loads, 3 LSLICEs
+     Net system/bus/un1_byte_access_1_RNIL9A5C: 1 loads, 1 LSLICEs
+     Net system/bus/hg/active_en: 1 loads, 1 LSLICEs
+     Net system/bus/console/un1_rx_busy21_i: 3 loads, 3 LSLICEs
+     Net system/bus/console/tx_ready_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/console/un1_tx_timer18_1_i: 2 loads, 2 LSLICEs
+     Net system/bus/console/un1_rx_busy24_i: 5 loads, 5 LSLICEs
+     Net system/bus/console/rx_csr_write: 1 loads, 1 LSLICEs
+     Net system/bus/console/rx_full_1_sqmuxa_i: 2 loads, 2 LSLICEs
+     Net system/bus/console/tx_buffer_write: 4 loads, 4 LSLICEs
+     Net system/bus/console/un1_rx_busy20_4_i: 5 loads, 5 LSLICEs
+     Net system/bus/console/un1_tx_timer18_i: 5 loads, 5 LSLICEs
+     Net system/bus/console/un1_tx_bits_0_sqmuxa_i: 5 loads, 5 LSLICEs
+     Net system/bus/console/un1_tx_ack_i_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/console/tx_csr_write: 1 loads, 1 LSLICEs
+     Net system/bus/console/rx_busy23: 4 loads, 4 LSLICEs
+     Net system/bus/console/un1_rx_full8_1_i: 1 loads, 1 LSLICEs
+     Net system.bus.disk.spi.ready_0_sqmuxa_1: 5 loads, 4 LSLICEs
+     Net system/bus/disk/spi/ready_2_sqmuxa_1_0_RNIEGM5M: 4 loads, 4 LSLICEs
+     Net system/bus/disk/spi/busy_RNO: 1 loads, 1 LSLICEs
+     Net system/bus/disk/spi/sck_RNO: 1 loads, 1 LSLICEs
+     Net system/bus/disk/spi/seen_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/spi/un1_divider20_i: 4 loads, 4 LSLICEs
+     Net system/bus/disk/spi/control_1_sqmuxa: 2 loads, 2 LSLICEs
+     Net system/bus/disk/engine/buffer/buffer_write_i: 1 loads, 0 LSLICEs
+     Net system/bus/disk/engine/buffer_write: 1 loads, 0 LSLICEs
+     Net system/bus/disk/engine/inhibit_1_sqmuxa: 2 loads, 2 LSLICEs
+     Net system/bus/disk/engine/count_1_sqmuxa: 5 loads, 5 LSLICEs
+     Net system/bus/disk/engine/base_0_sqmuxa: 11 loads, 11 LSLICEs
+     Net system/bus/disk/engine/crc_1_sqmuxa: 2 loads, 2 LSLICEs
+     Net system/bus/disk/engine/limit_1_sqmuxa: 9 loads, 9 LSLICEs
+     Net system/bus/disk/engine/mismatch_0_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/engine/low_0_sqmuxa: 4 loads, 4 LSLICEs
+     Net system/bus/disk/engine/high_0_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/engine/error_0_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/engine/direct_data_0_sqmuxa_1_i: 8 loads, 8 LSLICEs
+     Net system/bus/disk/engine/crc_0_sqmuxa_i: 9 loads, 9 LSLICEs
+     Net system/bus/disk/owner_en: 1 loads, 1 LSLICEs
+     Net system/bus/disk/bridge/abort_dma_1_sqmuxa: 1 loads, 1 LSLICEs
+     Net system/bus/disk/bridge/abort_dma_RNO: 1 loads, 1 LSLICEs
+     Net system/bus/disk/bridge/irq_1_sqmuxa_1: 4 loads, 4 LSLICEs
+     Net system/bus/disk/bridge/reset_pending_en: 1 loads, 1 LSLICEs
+     Net system/bus/disk/bridge/error_1_sqmuxa: 9 loads, 9 LSLICEs
+     Net system/bus/disk/bridge/ready_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/bridge/irq_1_sqmuxa_2_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/bridge/ack_pending_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/disk/ram/read_bank4: 2 loads, 2 LSLICEs
+     Net system/bus/disk/ram/un1_bank4_enable_1: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank4_enable: 1 loads, 0 LSLICEs
+
+                                    Page 2
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Design Summary (cont)
+---------------------
+     Net system/bus/disk/ram/un1_bank2_enable_1: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank2_enable: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank1_enable_1: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank1_enable: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank0_enable_1: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank0_enable: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank0_enable_2: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank0_enable_3: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank1_enable_2: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank2_enable_2: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank2_enable_3: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank3_enable: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank3_enable_1: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank3_enable_2: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank3_enable_3: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank4_enable_2: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank4_enable_3: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank5_enable: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank5_enable_1: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank5_enable_2: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank5_enable_3: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ram/un1_bank1_enable_3: 1 loads, 0 LSLICEs
+     Net system/bus/disk/ia_ack: 8 loads, 8 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/mem_if/dat_valid: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cnt_lsb[0]: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/bufreg_en: 16 loads, 16 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/ctrl/o_ibus_adr8: 16 loads, 16 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/bufreg2/dlo9: 12 loads, 12 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/bufreg2/dhi13: 8 loads, 8 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/bufreg/data26: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/immdec/imm76: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cpu/core/rf_rreq: 11 loads, 11 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/immdec/imm30_2517: 3 loads, 3 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/immdec/imm24_209: 3 loads, 3 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/immdec/imm19_12_2016: 5 loads, 5 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/immdec/imm11_79: 3 loads, 3 LSLICEs
+     Net system/bus/disk/data_accept_RNIQBJSP: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/state/N_148_i: 2 loads, 2 LSLICEs
+     Net system/bus/disk/cpu/core/cpu/state/ibus_cyc3: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cpu/core/rcnt[0]: 1 loads, 1 LSLICEs
+     Net system/bus/disk/cpu/core/wen: 1 loads, 0 LSLICEs
+     Net system/bus/disk/cpu/core/rf_ram_if/rtrig1: 1 loads, 1 LSLICEs
+     Net system/bus/arbiter/N_37_i: 1 loads, 1 LSLICEs
+     Net system/N_1147_i: 7 loads, 7 LSLICEs
+     Net system/bus/timer_pending_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/timer_ie5: 1 loads, 1 LSLICEs
+     Net system/bus/timer_done_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/bus/release_armed_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/step: 1 loads, 1 LSLICEs
+     Net system/cpu/event_active_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/mmu/ram_enable: 4 loads, 0 LSLICEs
+     Net system/cpu/mmu/cache_i_valid_1_sqmuxa: 19 loads, 19 LSLICEs
+     Net system/cpu/mmu/cache_d_valid_1_sqmuxa: 19 loads, 19 LSLICEs
+     Net system/cpu/mmu/mmr3_1_sqmuxa: 3 loads, 3 LSLICEs
+     Net system/cpu/mmu/mmr0_1_RNO[0]: 1 loads, 1 LSLICEs
+     Net system/cpu/mmu/N_224_i: 23 loads, 23 LSLICEs
+
+                                    Page 3
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Design Summary (cont)
+---------------------
+     Net system/cpu/mmu/ready_en: 1 loads, 1 LSLICEs
+     Net system/cpu/mmu/un1_state_1_sqmuxa_0: 11 loads, 11 LSLICEs
+     Net system/cpu/mmu/un1_state_21: 8 loads, 8 LSLICEs
+     Net system/cpu/mmu/un1_state_13_i: 13 loads, 13 LSLICEs
+     Net system/cpu/mmu/old_par_0_sqmuxa: 8 loads, 8 LSLICEs
+     Net system/cpu/mmu/un1_mmr111_i[0]: 8 loads, 8 LSLICEs
+     Net system/cpu/mmu/mmr0_1ce[1]: 3 loads, 3 LSLICEs
+     Net system/cpu/mmu/un1_state_19_i: 3 loads, 3 LSLICEs
+     Net system/cpu/mmu/fault_3_sqmuxa_1: 8 loads, 8 LSLICEs
+     Net system/cpu/mmu/fault_2_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/cpu/mmu/un1_cache_d_par_1_sqmuxa: 1 loads, 1 LSLICEs
+     Net system/cpu/mmu/un1_cache_d_par_0_sqmuxa: 1 loads, 1 LSLICEs
+     Net system/cpu/instruction_pc6: 8 loads, 8 LSLICEs
+     Net system/cpu/un1_mapped_request_1_0: 1 loads, 1 LSLICEs
+     Net system/cpu/un1_mapped_request_1_0dup: 3 loads, 3 LSLICEs
+     Net system/cpu/dp/rf/un1_initialized10_5: 8 loads, 8 LSLICEs
+     Net system/cpu/un1_psw_0_sqmuxa_1_i: 7 loads, 7 LSLICEs
+     Net system/cpu/un1_step_2_i: 2 loads, 2 LSLICEs
+     Net system/cpu/dp/un1_q20_i: 9 loads, 9 LSLICEs
+     Net system/cpu/operands_valid6: 21 loads, 6 LSLICEs
+     Net system/cpu/ir_0_sqmuxa: 9 loads, 9 LSLICEs
+     Net system/cpu/link_sp_2_sqmuxa_2: 7 loads, 7 LSLICEs
+     Net system/cpu/explicit_psw_0_sqmuxa: 1 loads, 1 LSLICEs
+     Net system/cpu/console_halt_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/console_wait_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/mem_lock_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/un1_red_fault_RNIBHFB91: 1 loads, 1 LSLICEs
+     Net system/cpu/un1_next_5_i: 1 loads, 1 LSLICEs
+     Net system/cpu/mdr_2_sqmuxa_2_i: 12 loads, 12 LSLICEs
+     Net system/cpu/console_halt_0_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/cpu/halt_pending_2_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/console_high_1_sqmuxa: 3 loads, 3 LSLICEs
+     Net system/cpu/console_space_1_sqmuxa: 2 loads, 2 LSLICEs
+     Net system/cpu/console_address_1_sqmuxa: 8 loads, 8 LSLICEs
+     Net system/cpu/console_kind_1_sqmuxa: 1 loads, 1 LSLICEs
+     Net system/cpu/physical_high_1_sqmuxa: 3 loads, 3 LSLICEs
+     Net system/cpu/single_step_1_sqmuxa_i: 1 loads, 1 LSLICEs
+     Net system/cpu/stack_active_RNO: 1 loads, 1 LSLICEs
+     Net system/cpu/console_active_0_sqmuxa: 1 loads, 1 LSLICEs
+     Net system/cpu/explicit_psw_RNO: 1 loads, 1 LSLICEs
+     Net system/cpu/delta_recorded_RNO: 1 loads, 1 LSLICEs
+     Net system/cpu/yellow_pending_0_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net system/cpu/un1_request_0: 1 loads, 1 LSLICEs
+     Net button/N_21: 1 loads, 1 LSLICEs
+     Net button/N_39_i: 1 loads, 1 LSLICEs
+     Net button/pressed_0_sqmuxa: 1 loads, 1 LSLICEs
+   Number of local set/reset loads for net rstdupdup merged into GSR:  77
+   Number of LSRs:  26
+     Net power_on[3]: 68 loads, 47 LSLICEs
+     Net system_reset: 236 loads, 235 LSLICEs
+     Net rstdupdup: 95 loads, 94 LSLICEs
+     Net state_RNINE27C[0]: 16 loads, 0 LSLICEs
+     Net system/bus/timer/state12: 10 loads, 10 LSLICEs
+     Net system/bus/timer/state[19]: 1 loads, 1 LSLICEs
+     Net system/mem_request_idupdupdup: 1 loads, 1 LSLICEs
+     Net system/bus/disk/spi/un1_rst: 1 loads, 1 LSLICEs
+
+                                    Page 4
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Design Summary (cont)
+---------------------
+     Net system/bus/disk/spi/un1_divider20_RNIB38R8: 3 loads, 3 LSLICEs
+     Net system/bus/disk/spi/rdata_0_sqmuxadupdup_RNIGM5QG: 4 loads, 4 LSLICEs
+     Net system/bus/disk/engine/crc_0_sqmuxa_RNI5DQ6H: 9 loads, 9 LSLICEs
+     Net system/bus/disk/cnt_lsb[0]: 2 loads, 2 LSLICEs
+     Net system/bus/disk/cpu/core/rf_ram_if/N_90_1_i: 3 loads, 3 LSLICEs
+     Net system/bus/disk/N_58_1_i: 3 loads, 3 LSLICEs
+     Net system/cpu/mmu/mmr118dup_RNI4GU5L: 7 loads, 7 LSLICEs
+     Net system/cpu/mmu/state_RNIU3MFB[0]: 4 loads, 4 LSLICEs
+     Net system/cpu/d_4_m[9]: 4 loads, 4 LSLICEs
+     Net system/cpu/operands_valid6: 1 loads, 1 LSLICEs
+     Net system/cpu/mdr_2_sqmuxa_RNISIR0E: 8 loads, 8 LSLICEs
+     Net system/cpu/instruction_i[35]: 5 loads, 5 LSLICEs
+     Net system/cpu/valid_i: 8 loads, 8 LSLICEs
+     Net system/cpu/peripheral_reset_RNIU1Q5A: 3 loads, 3 LSLICEs
+     Net diagnostics/N_9_1_i: 3 loads, 3 LSLICEs
+     Net button/timebase/state12: 10 loads, 10 LSLICEs
+     Net button/timebase/state[19]: 1 loads, 1 LSLICEs
+     Net clock50.pll/locked: 2 loads, 2 LSLICEs
+   Number of nets driven by tri-state buffers:  0
+   Top 10 highest fanout non-clock nets:
+     Net system_reset: 319 loads
+     Net rstdupdup: 111 loads
+     Net power_on[3]: 98 loads
+     Net system/bus/disk/ram/read_bank[2]: 96 loads
+     Net system/bus/disk/ram/read_bank[0]: 64 loads
+     Net system/cpu/internal_access: 62 loads
+     Net system/cpu/fetching: 53 loads
+     Net system/bus/disk/cpu/core/cpu/ctrl_misal: 51 loads
+     Net system/address[1]: 49 loads
+     Net system/bus/disk/da[2]: 49 loads
+
+
+
+
+   Number of warnings:  3
+   Number of errors:    0
+     
+
+Design Errors/Warnings
+----------------------
+
+WARNING - map: The JTAG port has been disabled in this project and JTAG pins
+     will be configured as General Purpose IO.  You have to use JTAGENB pin in
+     hardware to change the personality of the port from JTAG pins to general
+     purpose IO.  Reference MachXO2 Handbook for details on dual function JTAG
+     port.
+WARNING - map: All configuration ports of the design have been disabled.
+     Reference MachXO2 Handbook for information on the Configuration Ports of
+     MachXO2
+WARNING - map: Using local reset signal 'rstdupdup' to infer global GSR net.
+
+IO (PIO) Attributes
+-------------------
+
++---------------------+-----------+-----------+------------+
+| IO Name             | Direction | Levelmode | IO         |
+
+                                    Page 5
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+IO (PIO) Attributes (cont)
+--------------------------
+|                     |           |  IO_TYPE  | Register   |
++---------------------+-----------+-----------+------------+
+| sram_data[0]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| hg_tdo              | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tx                  | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| clk_ext             | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| audio[1]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| audio[0]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[5]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[4]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[3]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[2]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[1]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[0]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[8]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[7]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[6]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[5]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[4]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[3]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[2]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[1]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[0]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[8]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[7]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[6]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[5]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[4]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[3]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+
+                                    Page 6
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+IO (PIO) Attributes (cont)
+--------------------------
+| seg_led_h[2]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[1]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[0]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| led_rgb[2]          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| led_rgb[1]          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| led_rgb[0]          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_mosi          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_sck           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_hold_n        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_wp_n          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_cs_n          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| hg_tdi              | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| hg_tck              | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| hg_tms              | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| sd_miso             | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| sd_mosi             | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_sck              | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_cs_n             | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_ub_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_lb_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_we_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_oe_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_ce_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_data[15]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[14]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[13]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[12]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[11]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+
+                                    Page 7
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+IO (PIO) Attributes (cont)
+--------------------------
+| sram_data[10]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[9]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[8]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[7]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[6]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[5]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[4]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[3]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[2]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[1]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[19]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[18]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[17]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[16]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[15]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[14]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[13]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[12]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[11]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[10]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[9]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[8]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[7]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[6]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[5]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[4]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[3]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[2]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+
+                                    Page 8
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+IO (PIO) Attributes (cont)
+--------------------------
+| sram_address[1]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[0]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| rx                  | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| res                 | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+
+Removed logic
+-------------
+
+Block clock50.pll/VCC undriven or does not drive anything - clipped.
+Block button/VCC undriven or does not drive anything - clipped.
+Block button/timebase/GND undriven or does not drive anything - clipped.
+Block button/timebase/VCC undriven or does not drive anything - clipped.
+Block system/GND undriven or does not drive anything - clipped.
+Block system/VCC undriven or does not drive anything - clipped.
+Block system/cpu/dp/VCC undriven or does not drive anything - clipped.
+Block system/cpu/dp/GND undriven or does not drive anything - clipped.
+Block system/cpu/dp/alu/VCC undriven or does not drive anything - clipped.
+Block system/cpu/dp/rf/VCC undriven or does not drive anything - clipped.
+Block system/cpu/dp/rf/GND undriven or does not drive anything - clipped.
+Block system/cpu/mmu/VCC undriven or does not drive anything - clipped.
+Block system/cpu/mmu/GND undriven or does not drive anything - clipped.
+Block system/cpu/decoder/VCC undriven or does not drive anything - clipped.
+Block system/cpu/decoder/GND undriven or does not drive anything - clipped.
+Block system/bus/VCC undriven or does not drive anything - clipped.
+Block system/bus/GND undriven or does not drive anything - clipped.
+Block system/bus/arbiter/VCC undriven or does not drive anything - clipped.
+Block system/bus/arbiter/GND undriven or does not drive anything - clipped.
+Block system/bus/disk/cpu/GND undriven or does not drive anything - clipped.
+Block system/bus/disk/cpu/VCC undriven or does not drive anything - clipped.
+Block system/bus/disk/cpu/core/GND undriven or does not drive anything -
+     clipped.
+Block system/bus/disk/cpu/core/VCC undriven or does not drive anything -
+     clipped.
+Block system/bus/disk/cpu/core/rf_ram_if/VCC undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/rf_ram_if/GND undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/GND undriven or does not drive anything -
+     clipped.
+Block system/bus/disk/cpu/core/cpu/VCC undriven or does not drive anything -
+     clipped.
+Block system/bus/disk/cpu/core/cpu/gen_align.align/VCC undriven or does not
+     drive anything - clipped.
+Block system/bus/disk/cpu/core/cpu/gen_compressed.compdec/GND undriven or does
+     not drive anything - clipped.
+Block system/bus/disk/cpu/core/cpu/gen_compressed.compdec/VCC undriven or does
+     not drive anything - clipped.
+Block system/bus/disk/cpu/core/cpu/state/VCC undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/state/GND undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/decode/GND undriven or does not drive
+
+                                    Page 9
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/decode/VCC undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/immdec/GND undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/immdec/VCC undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/bufreg/GND undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/bufreg/VCC undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/bufreg2/GND undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/bufreg2/VCC undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/ctrl/VCC undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/ctrl/GND undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/alu/GND undriven or does not drive anything -
+     clipped.
+Block system/bus/disk/cpu/core/cpu/alu/VCC undriven or does not drive anything -
+     clipped.
+Block system/bus/disk/cpu/core/cpu/rf_if/VCC undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/rf_if/GND undriven or does not drive anything
+     - clipped.
+Block system/bus/disk/cpu/core/cpu/mem_if/GND undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/cpu/core/cpu/mem_if/VCC undriven or does not drive
+     anything - clipped.
+Block system/bus/disk/bridge/VCC undriven or does not drive anything - clipped.
+Block system/bus/disk/bridge/GND undriven or does not drive anything - clipped.
+Block system/bus/disk/spi/VCC undriven or does not drive anything - clipped.
+Block system/bus/hg/GND undriven or does not drive anything - clipped.
+Block system/bus/hg/VCC undriven or does not drive anything - clipped.
+Block system/bus/panel/GND undriven or does not drive anything - clipped.
+Block system/bus/panel/VCC undriven or does not drive anything - clipped.
+Block system/bus/timer/GND undriven or does not drive anything - clipped.
+Block system/bus/timer/VCC undriven or does not drive anything - clipped.
+Block system/bus/memory/VCC undriven or does not drive anything - clipped.
+Signal locked_i was merged into signal clock50.pll/locked
+Signal system/cpu/peripheral_reset_i was merged into signal
+     system/peripheral_reset
+Signal system/bus/disk/cpu/core/cpu/cnt_lsb_i[0] was merged into signal
+     system/bus/disk/cnt_lsb[0]
+Signal panel_pins_i[7] was merged into signal system/bus/panel_pins[7]
+Signal drive_data_i was merged into signal system/bus/memory/drive_data
+Signal clock50.pll/GND undriven or does not drive anything - clipped.
+Signal button/GND undriven or does not drive anything - clipped.
+Signal diagnostics/GND undriven or does not drive anything - clipped.
+Signal system/cpu/GND undriven or does not drive anything - clipped.
+Signal system/cpu/microstore/VCC undriven or does not drive anything - clipped.
+Signal system/cpu/microstore/GND undriven or does not drive anything - clipped.
+Signal system/cpu/dp/alu/GND undriven or does not drive anything - clipped.
+Signal system/cpu/mmu/store/GND undriven or does not drive anything - clipped.
+
+                                   Page 10
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/cpu/mmu/translate/GND undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/GND undriven or does not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/GND undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/cpu/core/rf_ram/VCC undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/cpu/core/cpu/gen_align.align/GND undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/ram/GND undriven or does not drive anything - clipped.
+Signal system/bus/disk/ram/VCC undriven or does not drive anything - clipped.
+Signal system/bus/disk/engine/GND undriven or does not drive anything - clipped.
+     
+Signal system/bus/disk/engine/buffer/VCC undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/buffer/GND undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/spi/GND undriven or does not drive anything - clipped.
+Signal system/bus/console/GND undriven or does not drive anything - clipped.
+Signal system/bus/boot/VCC undriven or does not drive anything - clipped.
+Signal system/bus/boot/GND undriven or does not drive anything - clipped.
+Signal system/bus/memory/GND undriven or does not drive anything - clipped.
+Signal clock50.pll/CLKINTFB undriven or does not drive anything - clipped.
+Signal clock50.pll/DPHSRC undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLACK undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO0 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO1 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO2 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO3 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO4 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO5 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO6 undriven or does not drive anything - clipped.
+Signal clock50.pll/PLLDATO7 undriven or does not drive anything - clipped.
+Signal clock50.pll/REFCLK undriven or does not drive anything - clipped.
+Signal clock50.pll/INTLOCK undriven or does not drive anything - clipped.
+Signal clock50.pll/CLKOS3 undriven or does not drive anything - clipped.
+Signal clock50.pll/CLKOS2 undriven or does not drive anything - clipped.
+Signal button/un1_duration_1_cry_5_0_COUT undriven or does not drive anything -
+     clipped.
+Signal button/un1_duration_1_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal button/N_1 undriven or does not drive anything - clipped.
+Signal diagnostics/disk_hold_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal diagnostics/disk_hold_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal diagnostics/N_1 undriven or does not drive anything - clipped.
+Signal diagnostics/disk_hold_cry_5_0_COUT undriven or does not drive anything -
+     clipped.
+Signal diagnostics/cpu_hold_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal diagnostics/cpu_hold_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal diagnostics/N_2 undriven or does not drive anything - clipped.
+Signal diagnostics/cpu_hold_cry_5_0_COUT undriven or does not drive anything -
+     clipped.
+
+                                   Page 11
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal diagnostics/un4_divider_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal diagnostics/un4_divider_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal diagnostics/N_3 undriven or does not drive anything - clipped.
+Signal diagnostics/un4_divider_cry_9_0_COUT undriven or does not drive anything
+     - clipped.
+Signal system/cpu/un5_next_1_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un5_next_1_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/N_1 undriven or does not drive anything - clipped.
+Signal system/cpu/un5_next_1_s_11_0_S1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un5_next_1_s_11_0_COUT undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/N_2 undriven or does not drive anything - clipped.
+Signal system/cpu/un1_read_a_17_cry_1_0_S1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_1_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_3_0_S1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_3_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_5_0_S1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_5_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_7_0_S0 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/un1_read_a_17_cry_7_0_COUT undriven or does not drive anything
+     - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB8 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB7 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB6 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB5 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB4 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB3 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB2 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane4_DOB0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB8 undriven or does not drive
+
+                                   Page 12
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB7 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB6 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB5 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB4 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB3 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB2 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane3_DOB0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB8 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB7 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB6 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB5 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB4 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB3 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB2 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane2_DOB0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB8 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB7 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB6 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB5 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB4 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB3 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB2 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane1_DOB0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB8 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB7 undriven or does not drive
+
+                                   Page 13
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB6 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB5 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB4 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB3 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB2 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane0_DOB0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB8 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB7 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB6 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB5 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB4 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB3 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB2 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/microstore/bank0_lane5_DOB0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/dp/alu/un1_arithmetic_b_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/dp/alu/N_39 undriven or does not drive anything - clipped.
+Signal system/cpu/dp/alu/un1_arithmetic_b_cry_15_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/cpu/mmu/store/memory_DOB8 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/mmu/store/memory_DOA8 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/mmu/translate/un1_par_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/mmu/translate/un1_par_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/mmu/translate/N_1 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/mmu/translate/un1_par_s_15_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/cpu/mmu/translate/un1_par_s_15_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/cpu/mmu/translate/un1_virtual_address_cry_0_0_S1 undriven or does
+     not drive anything - clipped.
+Signal system/cpu/mmu/translate/un1_virtual_address_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+
+                                   Page 14
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/cpu/mmu/translate/N_2 undriven or does not drive anything -
+     clipped.
+Signal system/cpu/mmu/translate/un1_virtual_address_s_7_0_S1 undriven or does
+     not drive anything - clipped.
+Signal system/cpu/mmu/translate/un1_virtual_address_s_7_0_COUT undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/un1_milliseconds_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/N_1 undriven or does not drive anything - clipped.
+Signal system/bus/disk/un1_milliseconds_s_15_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/un1_milliseconds_s_15_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/un5_ms_divider_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/un5_ms_divider_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/N_2 undriven or does not drive anything - clipped.
+Signal system/bus/disk/un5_ms_divider_s_15_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/un5_ms_divider_s_15_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO17 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO16 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO15 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO14 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO13 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO12 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO11 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO8 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO7 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO6 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO5 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO4 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO3 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO2 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO1 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/rf_ram/memory_memory_0_0_DO0 undriven or does
+     not drive anything - clipped.
+Signal system/bus/disk/cpu/core/cpu/gen_align.align/o_wb_ibus_adr_1_cry_0_0_S0
+     undriven or does not drive anything - clipped.
+
+                                   Page 15
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/bus/disk/cpu/core/cpu/gen_align.align/N_5 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/cpu/core/cpu/gen_align.align/o_wb_ibus_adr_1_s_29_0_S1
+     undriven or does not drive anything - clipped.
+Signal system/bus/disk/cpu/core/cpu/gen_align.align/o_wb_ibus_adr_1_s_29_0_COUT
+     undriven or does not drive anything - clipped.
+Signal system/bus/disk/ram/b5h1_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b5h1_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b5h0_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b5h0_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b4h1_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b4h1_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b4h0_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b4h0_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b3h1_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b3h1_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b3h0_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b3h0_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b2h1_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b2h1_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b2h0_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b2h0_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b1h1_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b1h1_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b1h0_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b1h0_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b0h1_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b0h1_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b0h0_DO17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/ram/b0h0_DO8 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/dma_address_2_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+
+                                   Page 16
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/bus/disk/engine/dma_address_2_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/N_1 undriven or does not drive anything - clipped.
+     
+Signal system/bus/disk/engine/dma_address_2_s_19_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/dma_address_2_s_19_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_offset_1_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_offset_1_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_2 undriven or does not drive anything - clipped.
+     
+Signal system/bus/disk/engine/un1_offset_1_cry_7_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_index_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_index_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/N_3 undriven or does not drive anything - clipped.
+     
+Signal system/bus/disk/engine/un1_dma_index_cry_1_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_index_cry_1_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_index_cry_3_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_index_cry_15_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un136_state_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un136_state_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_4 undriven or does not drive anything - clipped.
+     
+Signal system/bus/disk/engine/un136_state_cry_7_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_base_2_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_base_2_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_13 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_base_2_cry_20_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_base_2_cry_20_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_index_1_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_1_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_14 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_index_1_s_7_0_S1 undriven or does not drive
+     anything - clipped.
+
+                                   Page 17
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/bus/disk/engine/un1_index_1_s_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_offset_2_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_offset_2_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_15 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_offset_2_s_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_offset_2_s_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_16 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un141_state_cry_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_3_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_5_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_5_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_7_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_8_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un141_state_cry_8_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_17 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_limit_cry_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_3_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_5_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_5_0_S0 undriven or does not drive
+     anything - clipped.
+
+                                   Page 18
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/bus/disk/engine/un1_limit_cry_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_7_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_8_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_limit_cry_8_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_1_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_1_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/N_18 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_9_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_9_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_27_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_27_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_33_0_S1 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_33_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_21_0_S0 undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_dma_rdata_0_I_21_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_19 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_21_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_27_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_index_2_0_I_27_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/N_20 undriven or does not drive anything -
+     clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_9_0_S1 undriven or does not drive
+     anything - clipped.
+
+                                   Page 19
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Signal system/bus/disk/engine/un1_state_5_0_I_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_21_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_27_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/un1_state_5_0_I_27_0_COUT undriven or does not
+     drive anything - clipped.
+Signal system/bus/disk/engine/buffer/ram_DO17 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/engine/buffer/ram_DO8 undriven or does not drive anything
+     - clipped.
+Signal system/bus/disk/spi/un1_divider_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/disk/spi/N_1 undriven or does not drive anything - clipped.
+Signal system/bus/disk/spi/un1_divider_cry_5_0_COUT undriven or does not drive
+     anything - clipped.
+Signal system/bus/console/tx_timer_cry_0_S0[0] undriven or does not drive
+     anything - clipped.
+Signal system/bus/console/N_1 undriven or does not drive anything - clipped.
+Signal system/bus/console/tx_timer_cry_0_COUT[7] undriven or does not drive
+     anything - clipped.
+Signal system/bus/console/rx_timer_cry_0_S0[0] undriven or does not drive
+     anything - clipped.
+Signal system/bus/console/N_2 undriven or does not drive anything - clipped.
+Signal system/bus/console/rx_timer_cry_0_COUT[7] undriven or does not drive
+     anything - clipped.
+Signal system/bus/boot/boot_DO17 undriven or does not drive anything - clipped.
+Signal system/bus/boot/boot_DO8 undriven or does not drive anything - clipped.
+Signal system/bus/memory/un1_clear_address_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal system/bus/memory/N_1 undriven or does not drive anything - clipped.
+Signal system/bus/memory/un1_clear_address_s_19_0_S1 undriven or does not drive
+     anything - clipped.
+Signal system/bus/memory/un1_clear_address_s_19_0_COUT undriven or does not
+     drive anything - clipped.
+Block clock50.pll/PLLInst_0_RNIAICQ7 was optimized away.
+Block system/cpu/peripheral_reset_RNINKC97 was optimized away.
+Block system/bus/disk/cpu/core/cpu/state/gen_cnt_w_eq_1.cnt_lsb_RNIAVC72[0] was
+     optimized away.
+Block system/bus/panel/pins_RNII6QT4[7] was optimized away.
+Block system/bus/memory/drive_data_RNI5A9B3 was optimized away.
+Block clock50.pll/GND was optimized away.
+Block button/GND was optimized away.
+Block diagnostics/GND was optimized away.
+Block system/cpu/GND was optimized away.
+Block system/cpu/microstore/VCC was optimized away.
+Block system/cpu/microstore/GND was optimized away.
+Block system/cpu/dp/alu/GND was optimized away.
+Block system/cpu/mmu/store/GND was optimized away.
+Block system/cpu/mmu/translate/GND was optimized away.
+Block system/bus/disk/GND was optimized away.
+Block system/bus/disk/cpu/core/rf_ram/GND was optimized away.
+Block system/bus/disk/cpu/core/rf_ram/VCC was optimized away.
+
+                                   Page 20
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Removed logic (cont)
+--------------------
+Block system/bus/disk/cpu/core/cpu/gen_align.align/GND was optimized away.
+Block system/bus/disk/ram/GND was optimized away.
+Block system/bus/disk/ram/VCC was optimized away.
+Block system/bus/disk/engine/GND was optimized away.
+Block system/bus/disk/engine/buffer/VCC was optimized away.
+Block system/bus/disk/engine/buffer/GND was optimized away.
+Block system/bus/disk/spi/GND was optimized away.
+Block system/bus/console/GND was optimized away.
+Block system/bus/boot/VCC was optimized away.
+Block system/bus/boot/GND was optimized away.
+Block system/bus/memory/GND was optimized away.
+
+Memory Usage
+------------
+
+/system/bus/boot:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR boot:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 256,  Depth_W=
+         256,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+/system/bus/disk/cpu/core/rf_ram:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 4
+    PFU Registers: 2
+    -Contains EBR memory_memory_0_0:  TYPE= PDPW8KC,  Width= 2,  Depth_R= 512,
+         Depth_W= 512,  REGMODE= NOREG,  RESETMODE= SYNC,  GSR= DISABLED
+/system/bus/disk/engine/buffer:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR ram:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 256,  Depth_W= 256,
+         REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,  GSR=
+         DISABLED
+/system/bus/disk/ram:
+    EBRs: 12
+    RAM SLICEs: 0
+    Logic SLICEs: 32
+    PFU Registers: 1
+    -Contains EBR b0h0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b0h1:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b1h0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b1h1:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b2h0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+
+                                   Page 21
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Memory Usage (cont)
+-------------------
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b2h1:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b3h0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b3h1:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b4h0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b4h1:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b5h0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+    -Contains EBR b5h1:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 512,  Depth_W=
+         512,  REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,
+         GSR= DISABLED
+/system/cpu:
+    EBRs: 0
+    RAM SLICEs: 5
+    Logic SLICEs: 333
+    PFU Registers: 299
+/system/cpu/dp/rf/words_1_ram:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_0:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_1:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_2:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_3:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_4:
+    EBRs: 0
+    RAM SLICEs: 3
+
+                                   Page 22
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Memory Usage (cont)
+-------------------
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_5:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_1_ram_6:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_0:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_1:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_2:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_3:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_4:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_5:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_2_ram_6:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+
+                                   Page 23
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Memory Usage (cont)
+-------------------
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_0:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_1:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_2:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_3:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_4:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_5:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/dp/rf/words_ram_6:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/links_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/links_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/links_ram_1:
+    EBRs: 0
+    RAM SLICEs: 2
+    Logic SLICEs: 0
+    PFU Registers: 0
+/system/cpu/microstore:
+    EBRs: 9
+    RAM SLICEs: 0
+    Logic SLICEs: 100
+    PFU Registers: 0
+
+                                   Page 24
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+Memory Usage (cont)
+-------------------
+    -Contains EBR tail_lane2:  TYPE= PDPW8KC,  Width= 18,  Depth_R= 512,
+         REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,  GSR=
+         DISABLED
+    -Contains EBR bank0_lane5:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,
+         REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+    -Contains EBR bank0_lane0:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,
+         REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+    -Contains EBR bank0_lane1:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,
+         REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+    -Contains EBR bank0_lane2:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,
+         REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+    -Contains EBR bank0_lane3:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,
+         REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+    -Contains EBR bank0_lane4:  TYPE= DP8KC,  Width_A= 9,  Depth_A= 1024,
+         REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+    -Contains EBR tail_lane0:  TYPE= PDPW8KC,  Width= 18,  Depth_R= 512,
+         REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,  GSR=
+         DISABLED
+    -Contains EBR tail_lane1:  TYPE= PDPW8KC,  Width= 18,  Depth_R= 512,
+         REGMODE= NOREG,  RESETMODE= SYNC,  ASYNC_RESET_RELEASE= SYNC,  GSR=
+         DISABLED
+/system/cpu/mmu/store:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR memory:  TYPE= DP8KC,  Width_A= 8,  Width_B= 8,  Depth_A= 128,
+         Depth_B= 128,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= NORMAL,  WRITEMODE_B= NORMAL,
+         GSR= DISABLED
+
+     
+
+PLL/DLL Summary
+---------------
+
+PLL 1:                                     Pin/Node Value
+  PLL Instance Name:                                clock50.pll/PLLInst_0
+  PLL Type:                                         EHXPLLJ
+  Input Clock:                             PIN      clk_ext_c
+  Output Clock(P):                         NODE     clock50.pll/CLKOP
+  Output Clock(S):                         NODE     clk
+  Output Clock(S2):                                 NONE
+  Output Clock(S3):                                 NONE
+
+                                   Page 25
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+PLL/DLL Summary (cont)
+----------------------
+  Feedback Signal:                         NODE     clock50.pll/CLKOP
+  Reset Signal:                                     NONE
+  M Divider Reset Signal:                           NONE
+  C Divider Reset Signal:                           NONE
+  D Divider Reset Signal:                           NONE
+  Standby Signal:                                   NONE
+  PLL LOCK signal:                         NODE     clock50.pll/locked
+  PLL Data bus CLK Signal:                          NONE
+  PLL Data bus Strobe Signal:                       NONE
+  PLL Data bus Reset Signal:                        NONE
+  PLL Data bus Write Enable Signal:                 NONE
+  PLL Data bus Address0:                            NONE
+  PLL Data bus Address1:                            NONE
+  PLL Data bus Address2:                            NONE
+  PLL Data bus Address3:                            NONE
+  PLL Data bus Address4:                            NONE
+  PLL Data In bus Data0:                            NONE
+  PLL Data In bus Data1:                            NONE
+  PLL Data In bus Data2:                            NONE
+  PLL Data In bus Data3:                            NONE
+  PLL Data In bus Data4:                            NONE
+  PLL Data In bus Data5:                            NONE
+  PLL Data In bus Data6:                            NONE
+  PLL Data In bus Data7:                            NONE
+  PLL Data bus Acknowledge:                         NONE
+  PLL Data Out bus Data0:                           NONE
+  PLL Data Out bus Data1:                           NONE
+  PLL Data Out bus Data2:                           NONE
+  PLL Data Out bus Data3:                           NONE
+  PLL Data Out bus Data4:                           NONE
+  PLL Data Out bus Data5:                           NONE
+  PLL Data Out bus Data6:                           NONE
+  PLL Data Out bus Data7:                           NONE
+  Input Clock Frequency (MHz):                      12.0000
+  Output Clock(P) Frequency (MHz):                  60.0000
+  Output Clock(S) Frequency (MHz):                  50.0000
+  Output Clock(S2) Frequency (MHz):                 NA
+  Output Clock(S3) Frequency (MHz):                 NA
+  CLKOP Post Divider A Input:                       DIVA
+  CLKOS Post Divider B Input:                       DIVB
+  CLKOS2 Post Divider C Input:                      DIVC
+  CLKOS3 Post Divider D Input:                      DIVD
+  Pre Divider A Input:                              VCO_PHASE
+  Pre Divider B Input:                              VCO_PHASE
+  Pre Divider C Input:                              VCO_PHASE
+  Pre Divider D Input:                              VCO_PHASE
+  VCO Bypass A Input:                               VCO_PHASE
+  VCO Bypass B Input:                               VCO_PHASE
+  VCO Bypass C Input:                               VCO_PHASE
+  VCO Bypass D Input:                               VCO_PHASE
+  FB_MODE:                                          CLKOP
+  CLKI Divider:                                     1
+  CLKFB Divider:                                    5
+  CLKOP Divider:                                    10
+  CLKOS Divider:                                    12
+  CLKOS2 Divider:                                   1
+
+                                   Page 26
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+PLL/DLL Summary (cont)
+----------------------
+  CLKOS3 Divider:                                   1
+  Fractional N Divider:                             0
+  CLKOP Desired Phase Shift(degree):                0
+  CLKOP Trim Option Rising/Falling:                 FALLING
+  CLKOP Trim Option Delay:                          0
+  CLKOS Desired Phase Shift(degree):                0
+  CLKOS Trim Option Rising/Falling:                 FALLING
+  CLKOS Trim Option Delay:                          0
+  CLKOS2 Desired Phase Shift(degree):               0
+  CLKOS3 Desired Phase Shift(degree):               0
+
+ASIC Components
+---------------
+
+Instance Name: system/bus/boot/boot
+         Type: PDPW8KC
+Instance Name: system/bus/disk/engine/buffer/ram
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b0h0
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b0h1
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b1h0
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b1h1
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b2h0
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b2h1
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b3h0
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b3h1
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b4h0
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b4h1
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b5h0
+         Type: PDPW8KC
+Instance Name: system/bus/disk/ram/b5h1
+         Type: PDPW8KC
+Instance Name: system/bus/disk/cpu/core/rf_ram/memory_memory_0_0
+         Type: PDPW8KC
+Instance Name: system/cpu/mmu/store/memory
+         Type: DP8KC
+Instance Name: system/cpu/microstore/tail_lane2
+         Type: PDPW8KC
+Instance Name: system/cpu/microstore/bank0_lane5
+         Type: DP8KC
+Instance Name: system/cpu/microstore/bank0_lane0
+         Type: DP8KC
+Instance Name: system/cpu/microstore/bank0_lane1
+         Type: DP8KC
+Instance Name: system/cpu/microstore/bank0_lane2
+         Type: DP8KC
+
+                                   Page 27
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+ASIC Components (cont)
+----------------------
+Instance Name: system/cpu/microstore/bank0_lane3
+         Type: DP8KC
+Instance Name: system/cpu/microstore/bank0_lane4
+         Type: DP8KC
+Instance Name: system/cpu/microstore/tail_lane0
+         Type: PDPW8KC
+Instance Name: system/cpu/microstore/tail_lane1
+         Type: PDPW8KC
+Instance Name: clock50.pll/PLLInst_0
+         Type: EHXPLLJ
+
+GSR Usage
+---------
+
+GSR Component:
+   The local reset signal 'rstdupdup' of the design has been inferred as Global
+        Set Reset (GSR). The reset signal used for GSR control is 'rstdupdup'.
+        
+
+     GSR Property:
+   The design components with GSR property set to ENABLED will respond to global
+        set reset while the components with GSR property set to DISABLED will
+        not.
+        
+
+     Components on inferred reset domain with GSR Property disabled
+--------------------------------------------------------------
+
+     These components have the GSR property set to DISABLED and are on the
+     inferred reset domain. The components will respond to the reset signal
+     'rstdupdup' via the local reset on the component and not the GSR component.
+     
+
+     Type and number of components of the type: 
+   Register = 158 
+
+     Type and instance name of component: 
+   Register : system_bus_hg_select_syncio[0]
+   Register : system/cpu/mmu/byte_op
+   Register : system/cpu/mmu/cache_d_valid
+   Register : system/cpu/mmu/cache_data
+   Register : system/cpu/mmu/cache_i_valid
+   Register : system/cpu/mmu/cached
+   Register : system/cpu/mmu/data[15]
+   Register : system/cpu/mmu/data[14]
+   Register : system/cpu/mmu/data[13]
+   Register : system/cpu/mmu/data[12]
+   Register : system/cpu/mmu/data[11]
+   Register : system/cpu/mmu/data[10]
+   Register : system/cpu/mmu/data[9]
+   Register : system/cpu/mmu/data[8]
+   Register : system/cpu/mmu/debug_access
+   Register : system/cpu/mmu/entry[5]
+   Register : system/cpu/mmu/entry[4]
+   Register : system/cpu/mmu/entry[3]
+   Register : system/cpu/mmu/entry[2]
+
+                                   Page 28
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+GSR Usage (cont)
+----------------
+   Register : system/cpu/mmu/entry[1]
+   Register : system/cpu/mmu/entry[0]
+   Register : system/cpu/mmu/hit_pdr[15]
+   Register : system/cpu/mmu/hit_pdr[14]
+   Register : system/cpu/mmu/hit_pdr[13]
+   Register : system/cpu/mmu/hit_pdr[12]
+   Register : system/cpu/mmu/hit_pdr[11]
+   Register : system/cpu/mmu/hit_pdr[10]
+   Register : system/cpu/mmu/hit_pdr[9]
+   Register : system/cpu/mmu/hit_pdr[8]
+   Register : system/cpu/mmu/hit_pdr[7]
+   Register : system/cpu/mmu/hit_pdr[5]
+   Register : system/cpu/mmu/hit_pdr[4]
+   Register : system/cpu/mmu/hit_pdr[3]
+   Register : system/cpu/mmu/hit_pdr[2]
+   Register : system/cpu/mmu/hit_pdr[1]
+   Register : system/cpu/mmu/hit_pdr[0]
+   Register : system/cpu/mmu/mmr0_1[15]
+   Register : system/cpu/mmu/mmr0_1[14]
+   Register : system/cpu/mmu/mmr0_1[13]
+   Register : system/cpu/mmu/mmr0_1[6]
+   Register : system/cpu/mmu/mmr0_1[5]
+   Register : system/cpu/mmu/mmr0_1[4]
+   Register : system/cpu/mmu/mmr0_1[3]
+   Register : system/cpu/mmu/mmr0_1[2]
+   Register : system/cpu/mmu/mmr0_1[1]
+   Register : system/cpu/mmu/mmr0_1[0]
+   Register : system/cpu/mmu/mmr3_1[5]
+   Register : system/cpu/mmu/mmr3_1[4]
+   Register : system/cpu/mmu/mmr3_1[3]
+   Register : system/cpu/mmu/mmr3_1[2]
+   Register : system/cpu/mmu/mmr3_1[1]
+   Register : system/cpu/mmu/mmr3_1[0]
+   Register : system/cpu/mmu/old_par[15]
+   Register : system/cpu/mmu/old_par[14]
+   Register : system/cpu/mmu/old_par[13]
+   Register : system/cpu/mmu/old_par[12]
+   Register : system/cpu/mmu/old_par[11]
+   Register : system/cpu/mmu/old_par[10]
+   Register : system/cpu/mmu/old_par[9]
+   Register : system/cpu/mmu/old_par[8]
+   Register : system/cpu/mmu/old_par[7]
+   Register : system/cpu/mmu/old_par[6]
+   Register : system/cpu/mmu/old_par[5]
+   Register : system/cpu/mmu/old_par[4]
+   Register : system/cpu/mmu/old_par[3]
+   Register : system/cpu/mmu/old_par[2]
+   Register : system/cpu/mmu/old_par[1]
+   Register : system/cpu/mmu/old_par[0]
+   Register : system/cpu/mmu/opcode_fetch
+   Register : system/cpu/mmu/pa[21]
+   Register : system/cpu/mmu/pa[20]
+   Register : system/cpu/mmu/pa[19]
+   Register : system/cpu/mmu/pa[18]
+   Register : system/cpu/mmu/pa[17]
+   Register : system/cpu/mmu/pa[16]
+
+                                   Page 29
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+GSR Usage (cont)
+----------------
+   Register : system/cpu/mmu/par[15]
+   Register : system/cpu/mmu/pa[15]
+   Register : system/cpu/mmu/pa[14]
+   Register : system/cpu/mmu/par[14]
+   Register : system/cpu/mmu/par[13]
+   Register : system/cpu/mmu/pa[13]
+   Register : system/cpu/mmu/pa[12]
+   Register : system/cpu/mmu/par[12]
+   Register : system/cpu/mmu/par[11]
+   Register : system/cpu/mmu/pa[11]
+   Register : system/cpu/mmu/pa[10]
+   Register : system/cpu/mmu/par[10]
+   Register : system/cpu/mmu/pa[9]
+   Register : system/cpu/mmu/par[9]
+   Register : system/cpu/mmu/pa[8]
+   Register : system/cpu/mmu/par[8]
+   Register : system/cpu/mmu/pa[7]
+   Register : system/cpu/mmu/par[7]
+   Register : system/cpu/mmu/pa[6]
+   Register : system/cpu/mmu/par[6]
+   Register : system/cpu/mmu/par[5]
+   Register : system/cpu/mmu/pa[5]
+   Register : system/cpu/mmu/par[4]
+   Register : system/cpu/mmu/pa[4]
+   Register : system/cpu/mmu/pa[3]
+   Register : system/cpu/mmu/par[3]
+   Register : system/cpu/mmu/par[2]
+   Register : system/cpu/mmu/pa[2]
+   Register : system/cpu/mmu/pa[1]
+   Register : system/cpu/mmu/par[1]
+   Register : system/cpu/mmu/pa[0]
+   Register : system/cpu/mmu/par[0]
+   Register : system/cpu/mmu/read_data[15]
+   Register : system/cpu/mmu/read_data[14]
+   Register : system/cpu/mmu/read_data[13]
+   Register : system/cpu/mmu/read_data[12]
+   Register : system/cpu/mmu/read_data[11]
+   Register : system/cpu/mmu/read_data[10]
+   Register : system/cpu/mmu/read_data[9]
+   Register : system/cpu/mmu/read_data[8]
+   Register : system/cpu/mmu/read_data[7]
+   Register : system/cpu/mmu/read_data[6]
+   Register : system/cpu/mmu/read_data[5]
+   Register : system/cpu/mmu/read_data[4]
+   Register : system/cpu/mmu/read_data[3]
+   Register : system/cpu/mmu/read_data[2]
+   Register : system/cpu/mmu/read_data[1]
+   Register : system/cpu/mmu/read_data[0]
+   Register : system/cpu/mmu/ready
+   Register : system/cpu/mmu/va[12]
+   Register : system/cpu/mmu/va[11]
+   Register : system/cpu/mmu/va[10]
+   Register : system/cpu/mmu/va[9]
+   Register : system/cpu/mmu/va[8]
+   Register : system/cpu/mmu/va[7]
+   Register : system/cpu/mmu/va[6]
+
+                                   Page 30
+
+
+
+
+Design:  uj11_mmu_microcomp                            Date:  09/29/26  20:31:20
+
+GSR Usage (cont)
+----------------
+   Register : system/cpu/mmu/va[5]
+   Register : system/cpu/mmu/va[4]
+   Register : system/cpu/mmu/va[3]
+   Register : system/cpu/mmu/va[2]
+   Register : system/cpu/mmu/va[1]
+   Register : system/cpu/mmu/va[0]
+   Register : system/cpu/mmu/wr
+   Register : system/bus/timer_done
+   Register : system/bus/timer_ie
+   Register : system/bus/timer_pending
+   Register : system/bus/arbiter/last_dma
+   Register : system/bus/hg/active
+   Register : system/bus/hg/select_sync[1]
+   Register : system/bus/panel/pins[7]
+   Register : system/bus/panel/pins[6]
+   Register : system/bus/panel/pins[5]
+   Register : system/bus/panel/pins[4]
+   Register : system/bus/panel/pins[3]
+   Register : system/bus/panel/pins[2]
+   Register : system/bus/panel/pins[1]
+   Register : system/bus/panel/pins[0]
+   Register : system/bus/panel/rows_meta[2]
+   Register : system/bus/panel/rows_meta[1]
+   Register : system/bus/panel/rows_meta[0]
+   Register : system/bus/panel/rows_sync[2]
+   Register : system/bus/panel/rows_sync[1]
+   Register : system/bus/panel/rows_sync[0]
+
+Run Time and Memory Usage
+-------------------------
+
+   Total CPU Time: 0 secs  
+   Total REAL Time: 0 secs  
+   Peak Memory Usage: 215 MB
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                   Page 31
+
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+     Copyright (c) 1995 AT&T Corp.   All rights reserved.
+     Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+     Copyright (c) 2001 Agere Systems   All rights reserved.
+     Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights
+     reserved.

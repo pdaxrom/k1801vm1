@@ -1,0 +1,6 @@
+PASS PAL SERV bus: 15 checks
+- tests/mmu/tb_pal_bus.v:57: Verilog $finish
+SERV stack writes: 208 / 640 reserved bytes
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 41ms; walltime 1.944 s; speed 21.263 ms/s
+- Verilator: cpu 1.943 s on 1 threads; allocated 4 MB

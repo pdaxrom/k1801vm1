@@ -88,7 +88,7 @@ The existing compact microstore contains 1189 used words. SERV remains the
 same 10515-byte RV32IC firmware.
 
 The source snapshots, checksummed JED, timing reports and validation records
-are saved in [the CPU-events release](../releases/hc7000-cpu-events/README.md).
+are saved in [the CPU-events release](../history/releases/hc7000-cpu-events/README.md).
 
 This is RTL/synthesis qualification, not physical-board qualification. It
 does not add FPP or claim exhaustive conformance to every J11 corner case.

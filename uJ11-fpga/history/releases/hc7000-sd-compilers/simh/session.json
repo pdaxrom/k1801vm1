@@ -1,0 +1,102 @@
+{
+  "scope": "SIMH 11/70 without FPP; private copies of the remapped media",
+  "commands": [
+    {
+      "command": "COPY TT: VOL:CTFORT.FOR",
+      "response": "COPY TT: VOL:CTFORT.FOR\r\n Files copied:\r\n^"
+    },
+    {
+      "command": "      PROGRAM CTFORT\r      WRITE(7,10)\r   10 FORMAT('FORTRAN OK')\r      END\r\u001a",
+      "response": "      PROGRAM CTFORT\r\n      WRITE(7,10)\r\n   10 FORMAT('FORTRAN OK')\r\n      END\r\n^ZTT:            to VOL:CTFORT.FOR\r\n\r\n."
+    },
+    {
+      "command": "RUN FOR:FORTRA",
+      "response": "RUN FOR:FORTRA\r\n*"
+    },
+    {
+      "command": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT",
+      "response": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT\r\nCTFORT\r\n*"
+    },
+    {
+      "command": "\u0003",
+      "response": "^C\r\n\r\n."
+    },
+    {
+      "command": "R LINK",
+      "response": "R LINK\r\n*"
+    },
+    {
+      "command": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT,FOR:FORLIB",
+      "response": "VOL:CTFORT,VOL:CTFORT=VOL:CTFORT,FOR:FORLIB\r\n*"
+    },
+    {
+      "command": "\u0003",
+      "response": "^C\r\n\r\n."
+    },
+    {
+      "command": "RUN VOL:CTFORT",
+      "response": "RUN VOL:CTFORT\r\nORTRAN OK\r\r\nSTOP -- \r\n\r\n."
+    },
+    {
+      "command": "RUN PAS:XM",
+      "response": "RUN PAS:XM\r\n*"
+    },
+    {
+      "command": "VOL:CTPAS,VOL:CTPAS=VOL:ADDER",
+      "response": "VOL:CTPAS,VOL:CTPAS=VOL:ADDER\r\n\r\n."
+    },
+    {
+      "command": "R LINK",
+      "response": "R LINK\r\n*"
+    },
+    {
+      "command": "VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS",
+      "response": "VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS\r\n*"
+    },
+    {
+      "command": "\u0003",
+      "response": "^C\r\n\r\n."
+    },
+    {
+      "command": "RUN VOL:CTPAS",
+      "response": "RUN VOL:CTPAS\r\n"
+    },
+    {
+      "command": "2 3",
+      "response": "2 3\r\n inputs and answer: \r\n 2.000000E+00 3.000000E+00 5.000000E+00\r\n\r\n."
+    },
+    {
+      "command": "SHOW CONFIGURATION",
+      "response": "SHOW CONFIGURATION\r\n\r\nRT-11XM  V05.03  \r\nBooted from DM0:RT11XM\r\n22 bit addressing is on\r\n\r\nUSR   is set NOSWAP\r\nEXIT  is set SWAP\r\nKMON  is set NOIND\r\nTT    is set NOQUIET\r\nERROR is set ERROR\r\nSL    is set OFF\r\nEDIT  is set KEX\r\nKMON nesting depth is 3\r\nGlobal .SCCA flag is disabled\r\n\r\nPDP 11/70 Processor\r\n2048KB of memory\r\nExtended Instruction Set (EIS)\r\nMemory Management Unit\r\nCache Memory\r\n60 Cycle System Clock                  \r\n\r\nDevice I/O time-out support\r\nSystem job support\r\nFPU support\r\n\r\n\r\n."
+    },
+    {
+      "command": "DIR BAS:BASIC.SAV",
+      "response": "DIR BAS:BASIC.SAV\r\n \r\nBASIC .SAV    53  04-Apr-83      \r\n 1 Files, 53 Blocks\r\n 4076 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "DIR PAS:XM.SAV",
+      "response": "DIR PAS:XM.SAV\r\n \r\nXM    .SAV   474  07-Mar-85      \r\n 1 Files, 474 Blocks\r\n 1714 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "DIR FOR:FORTRA.SAV",
+      "response": "DIR FOR:FORTRA.SAV\r\n \r\nFORTRA.SAV   128                 \r\n 1 Files, 128 Blocks\r\n 4476 Free blocks\r\n\r\n."
+    },
+    {
+      "command": "RUN BAS:BASIC",
+      "response": "RUN BAS:BASIC\r\nBASIC-11/RT-11 V2.1   \r\nOPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? "
+    },
+    {
+      "command": "A",
+      "response": "A\r\n\r\nREADY"
+    },
+    {
+      "command": "PRINT 2+3",
+      "response": "\r\nPRINT 2+3\r\n 5 \r\n\r\nREADY"
+    },
+    {
+      "command": "BYE",
+      "response": "\r\nBYE\r\n\r\n."
+    }
+  ],
+  "passed": true
+}

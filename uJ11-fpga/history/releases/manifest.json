@@ -1,0 +1,963 @@
+{
+  "date": "2026-10-02",
+  "archived_revision": "31549d1378faa4546b66cc8dd50f325cea6a26ad",
+  "removed_versions": 33,
+  "removed_files": 5176,
+  "removed_logical_bytes": 139290711,
+  "removed_disk_bytes": 151584768,
+  "removed": [
+    {
+      "path": "releases/hc7000",
+      "files": 73,
+      "bytes": 2736510,
+      "git_tree_sha1": "6ed3917bf530e9e585c66ce2d06e4ce1733850f5"
+    },
+    {
+      "path": "releases/hc7000-50mhz",
+      "files": 240,
+      "bytes": 5654452,
+      "git_tree_sha1": "00c8fac671b4feb3b576992581c1f2dbec3913e0"
+    },
+    {
+      "path": "releases/hc7000-50mhz-hardware",
+      "files": 18,
+      "bytes": 27797,
+      "git_tree_sha1": "8e1b8208c21c3e077c2c05143f3e723e1db4a9f5"
+    },
+    {
+      "path": "releases/hc7000-bsd",
+      "files": 189,
+      "bytes": 18266298,
+      "git_tree_sha1": "2ed5ac7ef119bd000ad6dd2d1dd2be80c1a17555"
+    },
+    {
+      "path": "releases/hc7000-cpu-events",
+      "files": 203,
+      "bytes": 3496308,
+      "git_tree_sha1": "0da6e9c0f447a33dee6c73121d39f03cb24c0821"
+    },
+    {
+      "path": "releases/hc7000-cpu-events-hardware",
+      "files": 14,
+      "bytes": 13910,
+      "git_tree_sha1": "be4fdc200dea15d24588bd666219dd40d64a6d43"
+    },
+    {
+      "path": "releases/hc7000-diagnostics",
+      "files": 72,
+      "bytes": 2062676,
+      "git_tree_sha1": "22725ed1097f3ab677c35ecef43a2dcd6aaa6ad7"
+    },
+    {
+      "path": "releases/hc7000-ebr-audit",
+      "files": 247,
+      "bytes": 8122183,
+      "git_tree_sha1": "0e4a1dc8c2ce7e09f19b7df39015737ae58357a3"
+    },
+    {
+      "path": "releases/hc7000-isa-fix",
+      "files": 124,
+      "bytes": 3114459,
+      "git_tree_sha1": "03c8e4b0689a584144859919bbbde80bfd051d65"
+    },
+    {
+      "path": "releases/hc7000-microcode-fast",
+      "files": 258,
+      "bytes": 4001894,
+      "git_tree_sha1": "99d9bf6a9630ed23747a1933b854290e42439d0f"
+    },
+    {
+      "path": "releases/hc7000-microcode-return",
+      "files": 323,
+      "bytes": 5022559,
+      "git_tree_sha1": "c752071e3627b2a6526e6ecf528edd193ac11702"
+    },
+    {
+      "path": "releases/hc7000-mmu-microcoded",
+      "files": 88,
+      "bytes": 2381532,
+      "git_tree_sha1": "2235db70aed34f73361bee9d70953d562c81ad97"
+    },
+    {
+      "path": "releases/hc7000-mmu-nofpp",
+      "files": 76,
+      "bytes": 2437606,
+      "git_tree_sha1": "01b779171efde60b5c58c945d9f70039fe1b2573"
+    },
+    {
+      "path": "releases/hc7000-mmu-trap-fix",
+      "files": 50,
+      "bytes": 5475281,
+      "git_tree_sha1": "8e91de5b1cac075d6b7f776a9ed784eb5806ee98"
+    },
+    {
+      "path": "releases/hc7000-pal-fast",
+      "files": 226,
+      "bytes": 3440256,
+      "git_tree_sha1": "c12b5379a0970dff2876b6984ccb4157cd6f9b77"
+    },
+    {
+      "path": "releases/hc7000-pal-preview",
+      "files": 150,
+      "bytes": 3433581,
+      "git_tree_sha1": "a46d4a674ecfdb75d14b749d28d1ab8b32f6751b"
+    },
+    {
+      "path": "releases/hc7000-par-pdr-cache",
+      "files": 215,
+      "bytes": 7206550,
+      "git_tree_sha1": "873cf64a56c1b703b3d49c3e5f4ada1952849c57"
+    },
+    {
+      "path": "releases/hc7000-ps2",
+      "files": 176,
+      "bytes": 4043705,
+      "git_tree_sha1": "a48f3f4a00c4ea52edfc9e15d47510498236c02f"
+    },
+    {
+      "path": "releases/hc7000-sd-compilers",
+      "files": 27,
+      "bytes": 89265,
+      "git_tree_sha1": "d36df9f73c24b46a2cbc8f3c887f49c75da440c5"
+    },
+    {
+      "path": "releases/hc7000-sd-rt11v4",
+      "files": 16,
+      "bytes": 30100,
+      "git_tree_sha1": "a13f9b1573625b6de24670b8c320a0afb36405a1"
+    },
+    {
+      "path": "releases/hc7000-serv",
+      "files": 96,
+      "bytes": 2824722,
+      "git_tree_sha1": "04a06566bcbc006fa3d87b18c6bf8f8c025dbcd7"
+    },
+    {
+      "path": "releases/hc7000-serv-19k",
+      "files": 339,
+      "bytes": 10903382,
+      "git_tree_sha1": "8b7912bbc78f590bc1b1b641d8bbeb569169dc81"
+    },
+    {
+      "path": "releases/hc7000-serv-bootstrap",
+      "files": 172,
+      "bytes": 2106661,
+      "git_tree_sha1": "3dfb441905f163ddd279dfcd14fff7f25b9a52ba"
+    },
+    {
+      "path": "releases/hc7000-serv-compact",
+      "files": 66,
+      "bytes": 1010114,
+      "git_tree_sha1": "d7837dc88b18a7b411b694033f32f6343842f8ec"
+    },
+    {
+      "path": "releases/hc7000-serv-io",
+      "files": 126,
+      "bytes": 3062290,
+      "git_tree_sha1": "5fd6e02e09230bbfebdf759b745ff5a3d41302f5"
+    },
+    {
+      "path": "releases/hc7000-serv-menu",
+      "files": 121,
+      "bytes": 11638697,
+      "git_tree_sha1": "0d9196870b8253938b4c8e14f6acdec07403de4f"
+    },
+    {
+      "path": "releases/hc7000-serv-shared",
+      "files": 190,
+      "bytes": 2314087,
+      "git_tree_sha1": "4e3d595659296074ccea90f13b01ed8074e1f61f"
+    },
+    {
+      "path": "releases/hc7000-serv-storage",
+      "files": 50,
+      "bytes": 2454605,
+      "git_tree_sha1": "ac324462347182649baed846b86e0a366e130101"
+    },
+    {
+      "path": "releases/hc7000-serv-unibus",
+      "files": 143,
+      "bytes": 2896588,
+      "git_tree_sha1": "8d6f55ada4f2f609b1cfecd1e8ad466d2c5fcc1b"
+    },
+    {
+      "path": "releases/hc7000-terminal",
+      "files": 599,
+      "bytes": 7398991,
+      "git_tree_sha1": "2b8431090f54d44f445997cea0a23ccf27338d31"
+    },
+    {
+      "path": "releases/hc7000-terminal-scroll",
+      "files": 168,
+      "bytes": 4093506,
+      "git_tree_sha1": "37b95223bfdf3e1580099ec757fcfa89a74a8004"
+    },
+    {
+      "path": "releases/hc7000-terminal-throughput",
+      "files": 184,
+      "bytes": 4260319,
+      "git_tree_sha1": "bba2702f79d55b8dfac781d9c737a5709cad558d"
+    },
+    {
+      "path": "releases/hc7000-terminal-vt52",
+      "files": 137,
+      "bytes": 3269827,
+      "git_tree_sha1": "111558f53ddd18a3b6b30f50753095f7f8eb2799"
+    }
+  ],
+  "retained_releases": [
+    "basic",
+    "hc1200",
+    "hc7000-ps2-idle",
+    "hg",
+    "sd",
+    "sd-hc7000",
+    "sd-hc7000-multi",
+    "software"
+  ],
+  "test_fixtures": {
+    "tests/baseline/hc1200-serv.json": {
+      "original": "releases/hc7000-serv/validation/hc1200-unchanged.json",
+      "sha256": "2138514945ed24bcb5411a2ae17b7163950d076b19d505e3906813e6436169ca"
+    },
+    "tests/baseline/pal-cpu-perf.json": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-cpu-perf/result.json",
+      "sha256": "567877dd0661b6a4b14e51d1a25836eae7edbf43c409b93964d1d505ade96d90"
+    }
+  },
+  "historical_records": {
+    "history/releases/hc7000/README.md": {
+      "original": "releases/hc7000/README.md",
+      "original_sha256": "d4dfc3ac374d5ccbe6f2f1e28b7a5c38efa68be9e87e95230c4759878fcab006",
+      "retained_sha256": "b763826fa20a9e08f77fe6c7502ea36019ed98839bd757970b08bee8c8d85edf"
+    },
+    "history/releases/hc7000-50mhz/README.md": {
+      "original": "releases/hc7000-50mhz/README.md",
+      "original_sha256": "bbf785b32f3cdcbce37d81a67d7c101f946fae5bf0eca12f0dc4af2a5c8705b5",
+      "retained_sha256": "9ad94e35de413cc6588c973f29c61f49d088b9ae172613e6eeff8cc2cbaf59ed"
+    },
+    "history/releases/hc7000-50mhz-hardware/README.md": {
+      "original": "releases/hc7000-50mhz-hardware/README.md",
+      "original_sha256": "6c7fcff3d3b1f1876a596dd3147fe61284d7b6aa44bd3ee9af3686a4f15ec22b",
+      "retained_sha256": "dafd472ba65564bc54161652557967d4ee73bc3c9d7b30bc4e66adcc0e4a377f"
+    },
+    "history/releases/hc7000-bsd/README.md": {
+      "original": "releases/hc7000-bsd/README.md",
+      "original_sha256": "3b2453351474170060f7eae84dc59e602ddea8e90afc9f13736d9b9dc4650933",
+      "retained_sha256": "2296912c26ceb4cbdbd5e8623b8d84602d19bb840cf750cce0e7d31a1a4e0b10"
+    },
+    "history/releases/hc7000-cpu-events/README.md": {
+      "original": "releases/hc7000-cpu-events/README.md",
+      "original_sha256": "8655fc4a09533db1527d7016a06c1293756eac8607c910d8fada9f95fe90188d",
+      "retained_sha256": "4b2622ca6f8173d858fae6f0aa3c75c7bcf514fd75c29858cba83fa76e63d98e"
+    },
+    "history/releases/hc7000-cpu-events-hardware/README.md": {
+      "original": "releases/hc7000-cpu-events-hardware/README.md",
+      "original_sha256": "a5a6753a26a341724b6292583d832a8b282ae1cd20bf8eedfdc060670e9cfd22",
+      "retained_sha256": "8a2683687f8bc84ecb5bdc7e52b6f72469c99e7971c944a0f231459e622cc192"
+    },
+    "history/releases/hc7000-diagnostics/README.md": {
+      "original": "releases/hc7000-diagnostics/README.md",
+      "original_sha256": "a42f9ac6da1b8bc7631160981338d1f3d611128deebebfa8c0d2e76b484d556f",
+      "retained_sha256": "e4b33dff51b5553602f8b96d5a38cb5db68b22fb25e8a6343e1c1759025bc2d8"
+    },
+    "history/releases/hc7000-ebr-audit/README.md": {
+      "original": "releases/hc7000-ebr-audit/README.md",
+      "original_sha256": "cd0fad84ab06c0c134941fedb29340ef8e938bf5ed5bb03771f77b7717c8ac9f",
+      "retained_sha256": "add0a056348da804100e57fd0872dbae304d98bf32a20b11511c027b220d9990"
+    },
+    "history/releases/hc7000-isa-fix/README.md": {
+      "original": "releases/hc7000-isa-fix/README.md",
+      "original_sha256": "04ce35e6962f0ea8ad869bf1864118d54294bf3c3d53e3572449978c61fc4304",
+      "retained_sha256": "1b3865dca8a3decbe41a7d1a6849c57da918dd3fa040fc48340872c45ba8f1b5"
+    },
+    "history/releases/hc7000-microcode-fast/README.md": {
+      "original": "releases/hc7000-microcode-fast/README.md",
+      "original_sha256": "eda5b8e4e1affcf8936d6a642a95122efb1fdbaf317b81e4d6edd857fd41ed3c",
+      "retained_sha256": "fd45a331655fc99107dfcc770b8bb6b1bf3214677fcd0ce14329fa00c70d9926"
+    },
+    "history/releases/hc7000-microcode-return/README.md": {
+      "original": "releases/hc7000-microcode-return/README.md",
+      "original_sha256": "9f682fcf32c4ff383acd90640823b6bd523b1df5ccd001806fe7c949ba56b5fb",
+      "retained_sha256": "5d10537fd3fe1fbc21df6475cf11d7f78d534756edbe9d5f72ff333caf634ea9"
+    },
+    "history/releases/hc7000-microcode-return/baseline-physical-7123/rsx/README.md": {
+      "original": "releases/hc7000-microcode-return/baseline-physical-7123/rsx/README.md",
+      "original_sha256": "263383cca7bebfe7493f8a974902ef16b28b808fcc1b0f2a0e92ded7cf0d2b03",
+      "retained_sha256": "7485ce8d221d027f27989fb2964df8b22b9e757483810cbf34be8d10c7d94c39"
+    },
+    "history/releases/hc7000-microcode-return/baseline-physical-7123/rsx/rsx-7123-20260929-menu/session.json": {
+      "original": "releases/hc7000-microcode-return/baseline-physical-7123/rsx/rsx-7123-20260929-menu/session.json",
+      "original_sha256": "da530d620cd7c03d156e6e4c6662cf37c86027afe397b2ad8db0c8cd3b17d22a",
+      "retained_sha256": "da530d620cd7c03d156e6e4c6662cf37c86027afe397b2ad8db0c8cd3b17d22a"
+    },
+    "history/releases/hc7000-microcode-return/baseline-physical-7123/rsx/rsx-7123-20260929-menu/uart.txt": {
+      "original": "releases/hc7000-microcode-return/baseline-physical-7123/rsx/rsx-7123-20260929-menu/uart.txt",
+      "original_sha256": "b5851cad94af4d62715b8858b3fba683fa31ce04425686dd9ec765f9264999bf",
+      "retained_sha256": "b5851cad94af4d62715b8858b3fba683fa31ce04425686dd9ec765f9264999bf"
+    },
+    "history/releases/hc7000-microcode-return/baseline-physical-7123/rsx/sd-rq-20260929/result.json": {
+      "original": "releases/hc7000-microcode-return/baseline-physical-7123/rsx/sd-rq-20260929/result.json",
+      "original_sha256": "5749ed073b35003e108ed164cb9d464aaa484d59468fa0fe86c4251fad028397",
+      "retained_sha256": "5749ed073b35003e108ed164cb9d464aaa484d59468fa0fe86c4251fad028397"
+    },
+    "history/releases/hc7000-microcode-return/hardware-1b7f/README.md": {
+      "original": "releases/hc7000-microcode-return/hardware-1b7f/README.md",
+      "original_sha256": "d678900453b1f764fb25496f0a137067018e3514088847cb9a9411446dd83c44",
+      "retained_sha256": "00d6816625bbdb3eaa4495356901679b2e5fab4605b93dd384d63aab1e2e0d4e"
+    },
+    "history/releases/hc7000-microcode-return/hardware-1b7f/hardware-1b7f-20260929/programmer-stdout.log": {
+      "original": "releases/hc7000-microcode-return/hardware-1b7f/hardware-1b7f-20260929/programmer-stdout.log",
+      "original_sha256": "f66c75f37ff515c75886c36bd3e39947c039f6d671a254f6e88b21b930e6f3ec",
+      "retained_sha256": "f66c75f37ff515c75886c36bd3e39947c039f6d671a254f6e88b21b930e6f3ec"
+    },
+    "history/releases/hc7000-microcode-return/hardware-1b7f/hardware-1b7f-20260929/session.json": {
+      "original": "releases/hc7000-microcode-return/hardware-1b7f/hardware-1b7f-20260929/session.json",
+      "original_sha256": "649ef8938436645687ea193af895cb8e948412f01bb6ce4c168a544c5043d866",
+      "retained_sha256": "649ef8938436645687ea193af895cb8e948412f01bb6ce4c168a544c5043d866"
+    },
+    "history/releases/hc7000-microcode-return/hardware-1b7f/hardware-1b7f-20260929/uart.txt": {
+      "original": "releases/hc7000-microcode-return/hardware-1b7f/hardware-1b7f-20260929/uart.txt",
+      "original_sha256": "5b13e2f6dafba2a0ccab913985916ba943b3c099d48c216ba6ecf1297f1f20b1",
+      "retained_sha256": "5b13e2f6dafba2a0ccab913985916ba943b3c099d48c216ba6ecf1297f1f20b1"
+    },
+    "history/releases/hc7000-mmu-microcoded/README.md": {
+      "original": "releases/hc7000-mmu-microcoded/README.md",
+      "original_sha256": "7edb43af4c8a1aa8475f294edc5bb9065c15b83732910344199865a0cf70d38e",
+      "retained_sha256": "c1d6b6ce17d08dd5b8f992c5babbf9a0ffa3e5a44059f77e4811baf2011e879d"
+    },
+    "history/releases/hc7000-mmu-nofpp/README.md": {
+      "original": "releases/hc7000-mmu-nofpp/README.md",
+      "original_sha256": "bf07518b1be291a8ada8b4b8342cb5bb323565d15ba55d26f9cf0d5c26583dff",
+      "retained_sha256": "beb3cbc97e4e1e7944d79209127356e1fd905d03b4c784eda261f104e98cf954"
+    },
+    "history/releases/hc7000-mmu-trap-fix/README.md": {
+      "original": "releases/hc7000-mmu-trap-fix/README.md",
+      "original_sha256": "b16fbc3e4b287e5df34e668350542ec78ebe903086b5d686d03580f63cd97937",
+      "retained_sha256": "de3e4777330e64a2bcba098893ce29cbb960168654a326e6c7b8d1ff519e7efb"
+    },
+    "history/releases/hc7000-pal-fast/README.md": {
+      "original": "releases/hc7000-pal-fast/README.md",
+      "original_sha256": "d082f0d31d6016369a558ab83f072f6ec12d24e3ad11f3c7166d5dcbed0d0a8a",
+      "retained_sha256": "f9ce3e8912cbfa2e5f47c97d7fb5f648ef6bffbb162417393b0e759370501d52"
+    },
+    "history/releases/hc7000-pal-fast/synthesis/jed.json": {
+      "original": "releases/hc7000-pal-fast/synthesis/jed.json",
+      "original_sha256": "ac2bd6efb3f58e595727882c4e3de5351064881ed0ae040b14b4db836bba1b6e",
+      "retained_sha256": "ac2bd6efb3f58e595727882c4e3de5351064881ed0ae040b14b4db836bba1b6e"
+    },
+    "history/releases/hc7000-pal-fast/synthesis/pal-fast-50-03_impl1.twr": {
+      "original": "releases/hc7000-pal-fast/synthesis/pal-fast-50-03_impl1.twr",
+      "original_sha256": "7bc9546a893f8ba9933b532091cef0d2aade11da45fb6cde7dd1df1d89e69e9a",
+      "retained_sha256": "7bc9546a893f8ba9933b532091cef0d2aade11da45fb6cde7dd1df1d89e69e9a"
+    },
+    "history/releases/hc7000-pal-fast/synthesis/result.json": {
+      "original": "releases/hc7000-pal-fast/synthesis/result.json",
+      "original_sha256": "62df9135590b714feef033c265495ac052ae64d77d84fbac57c4296331782b6e",
+      "retained_sha256": "62df9135590b714feef033c265495ac052ae64d77d84fbac57c4296331782b6e"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/README.md": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/README.md",
+      "original_sha256": "79da03e9cbcf717218ca8e2140e97346008fa6cc858ecb66bca446a87e2d5791",
+      "retained_sha256": "11fbdcbb888455356e4bbff65e30ae0eabe825694072dbace26ab7dc3c2b9cc4"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/odt-byte-reproducer/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/odt-byte-reproducer/result.json",
+      "original_sha256": "84b270e00c4318963d2dd118e0dab141a93f51740b19435e57356fb2eee0addf",
+      "retained_sha256": "84b270e00c4318963d2dd118e0dab141a93f51740b19435e57356fb2eee0addf"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/result.json",
+      "original_sha256": "9b7864af26e746ca90703f09369d9f294a4ce1193d68a0e1dad1971a02e6b09d",
+      "retained_sha256": "9b7864af26e746ca90703f09369d9f294a4ce1193d68a0e1dad1971a02e6b09d"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/session-02/program.xcf": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/session-02/program.xcf",
+      "original_sha256": "b9cf4bc0bbb95e38a2737d25dbfd60c1bd88e41bf42fb616ae6d78ab1e3ad14f",
+      "retained_sha256": "b9cf4bc0bbb95e38a2737d25dbfd60c1bd88e41bf42fb616ae6d78ab1e3ad14f"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/session-02/programmer-stdout.log": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/session-02/programmer-stdout.log",
+      "original_sha256": "c3791a1f014724a296c574e9891db3448e5914832cd24beaaff64e306186e98b",
+      "retained_sha256": "c3791a1f014724a296c574e9891db3448e5914832cd24beaaff64e306186e98b"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/session-04/session.json": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/session-04/session.json",
+      "original_sha256": "4434ee7c66042f13c04a8c5c8e923c003215aca8cd89661005751e17b9d1dc33",
+      "retained_sha256": "4434ee7c66042f13c04a8c5c8e923c003215aca8cd89661005751e17b9d1dc33"
+    },
+    "history/releases/hc7000-pal-fast/validation/hardware-20260930/session-05/session.json": {
+      "original": "releases/hc7000-pal-fast/validation/hardware-20260930/session-05/session.json",
+      "original_sha256": "de1684cf8b5490af45e983f965701bf5cbbc521739739ff677798898feb46253",
+      "retained_sha256": "de1684cf8b5490af45e983f965701bf5cbbc521739739ff677798898feb46253"
+    },
+    "history/releases/hc7000-pal-fast/validation/hc1200-verify.log": {
+      "original": "releases/hc7000-pal-fast/validation/hc1200-verify.log",
+      "original_sha256": "1887ce97c89968ce0ba8801305a2183389151655396daac455f00941cafbd5ca",
+      "retained_sha256": "1887ce97c89968ce0ba8801305a2183389151655396daac455f00941cafbd5ca"
+    },
+    "history/releases/hc7000-pal-fast/validation/pal-fast-boot-v4-02/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/pal-fast-boot-v4-02/result.json",
+      "original_sha256": "beaaf4352fdc3bd34af8e3cc69be393dfe8fc96780c92ad5ff547f0fdc8ef548",
+      "retained_sha256": "beaaf4352fdc3bd34af8e3cc69be393dfe8fc96780c92ad5ff547f0fdc8ef548"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-pal/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-pal/result.json",
+      "original_sha256": "51108f1312c51f7e11d7f5c2680514db900d92ef3ea0ad1f8bbec2500c5b02c4",
+      "retained_sha256": "51108f1312c51f7e11d7f5c2680514db900d92ef3ea0ad1f8bbec2500c5b02c4"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-pal-cpu-perf/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-pal-cpu-perf/result.json",
+      "original_sha256": "a77b19b33effbcd39eda99f81434ffff31b3fcdb7025d99a3b112c858500664e",
+      "retained_sha256": "a77b19b33effbcd39eda99f81434ffff31b3fcdb7025d99a3b112c858500664e"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-pal-demo/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-pal-demo/result.json",
+      "original_sha256": "95c6640501ffe783531e1567f379f2099895e56b31a7d6cd7de82b2a0df46de3",
+      "retained_sha256": "95c6640501ffe783531e1567f379f2099895e56b31a7d6cd7de82b2a0df46de3"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-pal-fast-mmu24/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-pal-fast-mmu24/result.json",
+      "original_sha256": "bae581d6315288b10e1720539431997938f987ff13bd3f84eacbd498858173c9",
+      "retained_sha256": "bae581d6315288b10e1720539431997938f987ff13bd3f84eacbd498858173c9"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-pal-fast-mmu50/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-pal-fast-mmu50/result.json",
+      "original_sha256": "d8d3714db50b51f597c41ace2df3ad841b6a19ead80d29ae34d4e968c0fb1829",
+      "retained_sha256": "d8d3714db50b51f597c41ace2df3ad841b6a19ead80d29ae34d4e968c0fb1829"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-pal-fast-rk-rq/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-pal-fast-rk-rq/result.json",
+      "original_sha256": "6135f9c2a10ed3eacaa06bdbdbe32b2700c5fced07e7bf00044674a1991bd3a9",
+      "retained_sha256": "6135f9c2a10ed3eacaa06bdbdbe32b2700c5fced07e7bf00044674a1991bd3a9"
+    },
+    "history/releases/hc7000-pal-fast/validation/test-sram-fast/result.json": {
+      "original": "releases/hc7000-pal-fast/validation/test-sram-fast/result.json",
+      "original_sha256": "d4e1152206dc7538126986ffafb6229e14f3f876d1eaf354eb8a1d206e66a30a",
+      "retained_sha256": "d4e1152206dc7538126986ffafb6229e14f3f876d1eaf354eb8a1d206e66a30a"
+    },
+    "history/releases/hc7000-pal-preview/README.md": {
+      "original": "releases/hc7000-pal-preview/README.md",
+      "original_sha256": "0d0afdfb30286aa188b698274529c6245cd46cbcfcee6465a5e8c9441cbb38b3",
+      "retained_sha256": "0c47330b5308ba1ab24a78e6fedfe6db4eeeb9d5eb819807a9105fb60be0d2a7"
+    },
+    "history/releases/hc7000-pal-preview/demo/text-80x25.png": {
+      "original": "releases/hc7000-pal-preview/demo/text-80x25.png",
+      "original_sha256": "b8f50c042340140b9f6aacb0e9f4138b3c6bb5d659bc16e6cf8947df3c08964d",
+      "retained_sha256": "b8f50c042340140b9f6aacb0e9f4138b3c6bb5d659bc16e6cf8947df3c08964d"
+    },
+    "history/releases/hc7000-pal-preview/synthesis/jed.json": {
+      "original": "releases/hc7000-pal-preview/synthesis/jed.json",
+      "original_sha256": "9e566cddff3f2df8b934ce5c9dc685b0eb177dabe3541bab95fb14d1709f93a7",
+      "retained_sha256": "9e566cddff3f2df8b934ce5c9dc685b0eb177dabe3541bab95fb14d1709f93a7"
+    },
+    "history/releases/hc7000-pal-preview/synthesis/pal-50-07_impl1.twr": {
+      "original": "releases/hc7000-pal-preview/synthesis/pal-50-07_impl1.twr",
+      "original_sha256": "93d32fefca324e0ab74ee93b01fc4f75fc1ee885619fbf92dec19834dc376682",
+      "retained_sha256": "93d32fefca324e0ab74ee93b01fc4f75fc1ee885619fbf92dec19834dc376682"
+    },
+    "history/releases/hc7000-pal-preview/synthesis/result.json": {
+      "original": "releases/hc7000-pal-preview/synthesis/result.json",
+      "original_sha256": "f8f72b6a9fe800e947b4fa5f8fd1ca58d73a644d7a77c3b1d97267006be0b5e0",
+      "retained_sha256": "f8f72b6a9fe800e947b4fa5f8fd1ca58d73a644d7a77c3b1d97267006be0b5e0"
+    },
+    "history/releases/hc7000-pal-preview/validation/hc1200-verify.json": {
+      "original": "releases/hc7000-pal-preview/validation/hc1200-verify.json",
+      "original_sha256": "5fdfde3e1d9ba1a2c152517b1006d952cc8d9450607285eb493cb42705623ef3",
+      "retained_sha256": "5fdfde3e1d9ba1a2c152517b1006d952cc8d9450607285eb493cb42705623ef3"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal/simulation.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal/simulation.log",
+      "original_sha256": "a0275a22df1dfea5013784b3a52d9ca7bd46e1ad117dc9640f5bdc15034be2ad",
+      "retained_sha256": "a0275a22df1dfea5013784b3a52d9ca7bd46e1ad117dc9640f5bdc15034be2ad"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal/tb_pal_encoder.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal/tb_pal_encoder.log",
+      "original_sha256": "a1c25cf84ff80fcf9a536d1d8d4701c570c1e628fc71dce691080375c9d090cc",
+      "retained_sha256": "a1c25cf84ff80fcf9a536d1d8d4701c570c1e628fc71dce691080375c9d090cc"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal-bus/simulation.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-bus/simulation.log",
+      "original_sha256": "090a41aadecb6b68c2c9979ac000ae1f4454be7dd5ddd8917742e254c2bb3022",
+      "retained_sha256": "090a41aadecb6b68c2c9979ac000ae1f4454be7dd5ddd8917742e254c2bb3022"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal-cpu-perf/result.json": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-cpu-perf/result.json",
+      "original_sha256": "567877dd0661b6a4b14e51d1a25836eae7edbf43c409b93964d1d505ade96d90",
+      "retained_sha256": "567877dd0661b6a4b14e51d1a25836eae7edbf43c409b93964d1d505ade96d90"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal-demo/simulation.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-demo/simulation.log",
+      "original_sha256": "e568f494af93aa06545481b2fa31907aa6ff73a0b703b09aa1b78284e62f5425",
+      "retained_sha256": "e568f494af93aa06545481b2fa31907aa6ff73a0b703b09aa1b78284e62f5425"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal-rh/primary.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-rh/primary.log",
+      "original_sha256": "2e05ef804091abddf489f5d16d2fbe9f4f3333aab8eab19d1f05934a15b495f5",
+      "retained_sha256": "2e05ef804091abddf489f5d16d2fbe9f4f3333aab8eab19d1f05934a15b495f5"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal-rk-rq/controllers.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-rk-rq/controllers.log",
+      "original_sha256": "1d75638486d9474d843730125c4ae337dc5fa87d804ec3de94bf7d190bfe1a99",
+      "retained_sha256": "1d75638486d9474d843730125c4ae337dc5fa87d804ec3de94bf7d190bfe1a99"
+    },
+    "history/releases/hc7000-pal-preview/validation/test-pal-rl-xp/controllers.log": {
+      "original": "releases/hc7000-pal-preview/validation/test-pal-rl-xp/controllers.log",
+      "original_sha256": "a32619f33f48b895248b267d1170125187ac163984a202aa7a97c33f7ad23640",
+      "retained_sha256": "a32619f33f48b895248b267d1170125187ac163984a202aa7a97c33f7ad23640"
+    },
+    "history/releases/hc7000-pal-preview/validation/vendor-ram.log": {
+      "original": "releases/hc7000-pal-preview/validation/vendor-ram.log",
+      "original_sha256": "15c5d6130d40775d7b82efbf2d48b5e78f1bc39db72e1a61b128992b44e23c4f",
+      "retained_sha256": "15c5d6130d40775d7b82efbf2d48b5e78f1bc39db72e1a61b128992b44e23c4f"
+    },
+    "history/releases/hc7000-pal-preview/validation/video-off-firmware.json": {
+      "original": "releases/hc7000-pal-preview/validation/video-off-firmware.json",
+      "original_sha256": "388b161e292615eae05fcf8edbb6b8bcbc5e75a83ac1bddadd05a16dfc9c7352",
+      "retained_sha256": "388b161e292615eae05fcf8edbb6b8bcbc5e75a83ac1bddadd05a16dfc9c7352"
+    },
+    "history/releases/hc7000-pal-preview/validation/video-off-synthesis.json": {
+      "original": "releases/hc7000-pal-preview/validation/video-off-synthesis.json",
+      "original_sha256": "7340b21bbeda248b46e1d91e3e2b33a5c4621ad65f6a097e171af9aa4dc8ef81",
+      "retained_sha256": "7340b21bbeda248b46e1d91e3e2b33a5c4621ad65f6a097e171af9aa4dc8ef81"
+    },
+    "history/releases/hc7000-par-pdr-cache/README.md": {
+      "original": "releases/hc7000-par-pdr-cache/README.md",
+      "original_sha256": "12b5f22fc150b7dfc4dabb76c186cb8ccbb1905c9fe27dc245c957dd91ed27ba",
+      "retained_sha256": "ed8cd91881bcc6e0bbcbe63343075d86b0ebf2796239382e6d64ffeac91b6adf"
+    },
+    "history/releases/hc7000-ps2/README.md": {
+      "original": "releases/hc7000-ps2/README.md",
+      "original_sha256": "b59f49de155dd2ac49ecd22879ac9c01a375b3c522b8db9b8cd52da8e9278e4d",
+      "retained_sha256": "c55b9f1b4c772d074dcd0ba6ea3f5677b8208f1fd1bb684f72ae826a837b3ea5"
+    },
+    "history/releases/hc7000-sd-compilers/README.md": {
+      "original": "releases/hc7000-sd-compilers/README.md",
+      "original_sha256": "1de1748a63474fa5b5083c01a0b016e4e25b20bf40e53038b004dea3cea3617b",
+      "retained_sha256": "ea802e9b1fc62ab3aecc7780440d15d005759fef7de6779ecf1e5def6be19f48"
+    },
+    "history/releases/hc7000-sd-compilers/card.json": {
+      "original": "releases/hc7000-sd-compilers/card.json",
+      "original_sha256": "b710b84c310fcc0451c7cae8f29e326a50bdc8eb50a2f62e0441e58f598e3649",
+      "retained_sha256": "b710b84c310fcc0451c7cae8f29e326a50bdc8eb50a2f62e0441e58f598e3649"
+    },
+    "history/releases/hc7000-sd-compilers/hardware-boot/uart.txt": {
+      "original": "releases/hc7000-sd-compilers/hardware-boot/uart.txt",
+      "original_sha256": "da60d0d244434cf795f7ecc62f07c7eddac7eb59da0425af909f3fdb0fa5d74d",
+      "retained_sha256": "da60d0d244434cf795f7ecc62f07c7eddac7eb59da0425af909f3fdb0fa5d74d"
+    },
+    "history/releases/hc7000-sd-compilers/hardware-diagnostics/uart.txt": {
+      "original": "releases/hc7000-sd-compilers/hardware-diagnostics/uart.txt",
+      "original_sha256": "f0a5e599e9e2d5d6ba5abe1dd917e71062213e2990c94b3d44e77d86df3af01b",
+      "retained_sha256": "f0a5e599e9e2d5d6ba5abe1dd917e71062213e2990c94b3d44e77d86df3af01b"
+    },
+    "history/releases/hc7000-sd-compilers/media/manifest.json": {
+      "original": "releases/hc7000-sd-compilers/media/manifest.json",
+      "original_sha256": "c48d60cc0ed4fa716a3e2e7865cffad5cedfb9a0d3983d07a37b1358fa6616ed",
+      "retained_sha256": "c48d60cc0ed4fa716a3e2e7865cffad5cedfb9a0d3983d07a37b1358fa6616ed"
+    },
+    "history/releases/hc7000-sd-compilers/simh/session.json": {
+      "original": "releases/hc7000-sd-compilers/simh/session.json",
+      "original_sha256": "25333bb71b9928ce857eb5ba989d80887c2ddb4a06b360a6a1e8cecf156f71c4",
+      "retained_sha256": "25333bb71b9928ce857eb5ba989d80887c2ddb4a06b360a6a1e8cecf156f71c4"
+    },
+    "history/releases/hc7000-sd-compilers/simh/uart.txt": {
+      "original": "releases/hc7000-sd-compilers/simh/uart.txt",
+      "original_sha256": "00e71f1d45a5acf7b973013307e278eb0c232555b49a7c87a4b8b55e8f6dd224",
+      "retained_sha256": "00e71f1d45a5acf7b973013307e278eb0c232555b49a7c87a4b8b55e8f6dd224"
+    },
+    "history/releases/hc7000-sd-compilers/simh-fis/session.json": {
+      "original": "releases/hc7000-sd-compilers/simh-fis/session.json",
+      "original_sha256": "f573eff6cb6819db73bb5d45010d4db97162e471d1e346324139b88ee70bfb4d",
+      "retained_sha256": "f573eff6cb6819db73bb5d45010d4db97162e471d1e346324139b88ee70bfb4d"
+    },
+    "history/releases/hc7000-sd-compilers/simh-fis/uart.txt": {
+      "original": "releases/hc7000-sd-compilers/simh-fis/uart.txt",
+      "original_sha256": "ca62fc0e2b65d724463ec7e52d277ceaa7633497988b5fbb9f4f47ead972a04c",
+      "retained_sha256": "ca62fc0e2b65d724463ec7e52d277ceaa7633497988b5fbb9f4f47ead972a04c"
+    },
+    "history/releases/hc7000-sd-compilers/simh-qbus-diagnosis/uart.txt": {
+      "original": "releases/hc7000-sd-compilers/simh-qbus-diagnosis/uart.txt",
+      "original_sha256": "a98d9b83bb5874f67c5d115c59f3b4b1bb74abc63c7537f54d6bbf97d0ab79d5",
+      "retained_sha256": "a98d9b83bb5874f67c5d115c59f3b4b1bb74abc63c7537f54d6bbf97d0ab79d5"
+    },
+    "history/releases/hc7000-sd-rt11v4/README.md": {
+      "original": "releases/hc7000-sd-rt11v4/README.md",
+      "original_sha256": "9b171020ade8bcc90d1a914cdc2d91b02579ebf168dd50c916f01be99c1d9ab5",
+      "retained_sha256": "bd114030232c4b7f0ab446adac3c74a562212fc90ec56d60cf7d05e9f9ffd2b2"
+    },
+    "history/releases/hc7000-sd-rt11v4/card.json": {
+      "original": "releases/hc7000-sd-rt11v4/card.json",
+      "original_sha256": "a5340816320e0a179cc018587f7139c79427c467a473cb912105f56bb7e7ec0e",
+      "retained_sha256": "a5340816320e0a179cc018587f7139c79427c467a473cb912105f56bb7e7ec0e"
+    },
+    "history/releases/hc7000-sd-rt11v4/hardware/session.json": {
+      "original": "releases/hc7000-sd-rt11v4/hardware/session.json",
+      "original_sha256": "8476341f6be52c4dd0807c47f08193c3654a2ff0868dcb223b01967360deae41",
+      "retained_sha256": "8476341f6be52c4dd0807c47f08193c3654a2ff0868dcb223b01967360deae41"
+    },
+    "history/releases/hc7000-sd-rt11v4/hardware/uart.txt": {
+      "original": "releases/hc7000-sd-rt11v4/hardware/uart.txt",
+      "original_sha256": "b0f21343d43d24ac25db7dc89018ab4b5bcd4fe311fc7d40d49474f66d6dd403",
+      "retained_sha256": "b0f21343d43d24ac25db7dc89018ab4b5bcd4fe311fc7d40d49474f66d6dd403"
+    },
+    "history/releases/hc7000-serv/README.md": {
+      "original": "releases/hc7000-serv/README.md",
+      "original_sha256": "21c84fe7190c1b41b457a7d755d7a45ce92ac5d6252f9fa043ba2b2989723d79",
+      "retained_sha256": "d65b0643ea2bca132424d945512cb88c416726245f7dce9076877fc1aaf6df12"
+    },
+    "history/releases/hc7000-serv-19k/README.md": {
+      "original": "releases/hc7000-serv-19k/README.md",
+      "original_sha256": "7468487bcfabaaabf15d5ad2f4e54fd4f2bf004816e8a80b256bef92395ee26d",
+      "retained_sha256": "bbe428f5758d80ad059415f5f7d27f42be5fc928cea005ee2ea9203635c78ed2"
+    },
+    "history/releases/hc7000-serv-19k/firmware/build.json": {
+      "original": "releases/hc7000-serv-19k/firmware/build.json",
+      "original_sha256": "287348de73c92a3bb4e457c1c3c57706423f9a07e0692aa557b6bb27103b9679",
+      "retained_sha256": "287348de73c92a3bb4e457c1c3c57706423f9a07e0692aa557b6bb27103b9679"
+    },
+    "history/releases/hc7000-serv-19k/menu/result.json": {
+      "original": "releases/hc7000-serv-19k/menu/result.json",
+      "original_sha256": "4ba5ac59d4f755082a89dfb10dc2df664d49ecd764653d40e2dac10f0e620453",
+      "retained_sha256": "4ba5ac59d4f755082a89dfb10dc2df664d49ecd764653d40e2dac10f0e620453"
+    },
+    "history/releases/hc7000-serv-19k/synthesis/result.json": {
+      "original": "releases/hc7000-serv-19k/synthesis/result.json",
+      "original_sha256": "f3d14f8aa8838d95f4a67493d6bdd659d11fa494dd4bbce4f588997d61df779c",
+      "retained_sha256": "f3d14f8aa8838d95f4a67493d6bdd659d11fa494dd4bbce4f588997d61df779c"
+    },
+    "history/releases/hc7000-serv-19k/validation/bsd/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/bsd/result.json",
+      "original_sha256": "dff2d0676188f59381f0e57ebdd31751cdb6e067b97fccccdb41501bb0d1d397",
+      "retained_sha256": "dff2d0676188f59381f0e57ebdd31751cdb6e067b97fccccdb41501bb0d1d397"
+    },
+    "history/releases/hc7000-serv-19k/validation/ea-eis/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/ea-eis/result.json",
+      "original_sha256": "44a276b74237cc99a00d925584baf9d744da342447331e46c573194d80490ddd",
+      "retained_sha256": "44a276b74237cc99a00d925584baf9d744da342447331e46c573194d80490ddd"
+    },
+    "history/releases/hc7000-serv-19k/validation/hc1200.json": {
+      "original": "releases/hc7000-serv-19k/validation/hc1200.json",
+      "original_sha256": "2a5719c54c79584ba3cf25ab5de903f700ab857420c9026b57bdae9e3dbba6b4",
+      "retained_sha256": "2a5719c54c79584ba3cf25ab5de903f700ab857420c9026b57bdae9e3dbba6b4"
+    },
+    "history/releases/hc7000-serv-19k/validation/integer/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/integer/result.json",
+      "original_sha256": "ad3f45380b37fcf88ed2e6cea30ff7233938f66f82914d05973a21dca17d458c",
+      "retained_sha256": "ad3f45380b37fcf88ed2e6cea30ff7233938f66f82914d05973a21dca17d458c"
+    },
+    "history/releases/hc7000-serv-19k/validation/legacy/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/legacy/result.json",
+      "original_sha256": "02af0393a7bac06bb822ff30d9b0c914515a51f5f61e37af1cbf59d8316a30ce",
+      "retained_sha256": "02af0393a7bac06bb822ff30d9b0c914515a51f5f61e37af1cbf59d8316a30ce"
+    },
+    "history/releases/hc7000-serv-19k/validation/menu/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/menu/result.json",
+      "original_sha256": "f9c11b833b5b0d5c315b3c7c08712a37ecf54a9453dc69c486361c0402676b91",
+      "retained_sha256": "f9c11b833b5b0d5c315b3c7c08712a37ecf54a9453dc69c486361c0402676b91"
+    },
+    "history/releases/hc7000-serv-19k/validation/mmu/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/mmu/result.json",
+      "original_sha256": "c7e7847dafbdd4cb516724532bd19255a07f15868fc63ba13d55f0129da2e344",
+      "retained_sha256": "c7e7847dafbdd4cb516724532bd19255a07f15868fc63ba13d55f0129da2e344"
+    },
+    "history/releases/hc7000-serv-19k/validation/no-pal/firmware/build.json": {
+      "original": "releases/hc7000-serv-19k/validation/no-pal/firmware/build.json",
+      "original_sha256": "f1a2c3b6e4d6dd4da71fc674e5136dc424a74056ad03607d0e23579c0b2852e9",
+      "retained_sha256": "f1a2c3b6e4d6dd4da71fc674e5136dc424a74056ad03607d0e23579c0b2852e9"
+    },
+    "history/releases/hc7000-serv-19k/validation/os/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/os/result.json",
+      "original_sha256": "21b49c7c6ed92652e5729e4ab7cbd84a51e40dde7ccbf4f37c758905b674d737",
+      "retained_sha256": "21b49c7c6ed92652e5729e4ab7cbd84a51e40dde7ccbf4f37c758905b674d737"
+    },
+    "history/releases/hc7000-serv-19k/validation/os/rsx-rq0/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/os/rsx-rq0/result.json",
+      "original_sha256": "48ad4ac913c8be3fa3ac94dacf8ac2deea2487bddf178da7f9a62bcb2a17abf8",
+      "retained_sha256": "48ad4ac913c8be3fa3ac94dacf8ac2deea2487bddf178da7f9a62bcb2a17abf8"
+    },
+    "history/releases/hc7000-serv-19k/validation/os/rsx-rq1/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/os/rsx-rq1/result.json",
+      "original_sha256": "efb693fd91a1a0b241a670a452c9ea6ca5e05eeb56d042774844f47a640a4622",
+      "retained_sha256": "efb693fd91a1a0b241a670a452c9ea6ca5e05eeb56d042774844f47a640a4622"
+    },
+    "history/releases/hc7000-serv-19k/validation/os/rt11v4/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/os/rt11v4/result.json",
+      "original_sha256": "2534b29e3148d6851a1edc8968b2b59aeac0a14a0a36c81c64e4130981fb5a0a",
+      "retained_sha256": "2534b29e3148d6851a1edc8968b2b59aeac0a14a0a36c81c64e4130981fb5a0a"
+    },
+    "history/releases/hc7000-serv-19k/validation/os/rt11xm/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/os/rt11xm/result.json",
+      "original_sha256": "6c0869de3f4e0dcacfd24d0bb87d29857bce847eb8b3aed28bbc099dcdd7fe71",
+      "retained_sha256": "6c0869de3f4e0dcacfd24d0bb87d29857bce847eb8b3aed28bbc099dcdd7fe71"
+    },
+    "history/releases/hc7000-serv-19k/validation/ram/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/ram/result.json",
+      "original_sha256": "7c10191dcaaa0f141512a159922f5d8748e76af445fd8a9f29d1d2bd2c06bc3e",
+      "retained_sha256": "7c10191dcaaa0f141512a159922f5d8748e76af445fd8a9f29d1d2bd2c06bc3e"
+    },
+    "history/releases/hc7000-serv-19k/validation/rh/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/rh/result.json",
+      "original_sha256": "52d7c6a85bd82e593ee4975dccb1769279477f5642dce5b5c58726f749d7a96d",
+      "retained_sha256": "52d7c6a85bd82e593ee4975dccb1769279477f5642dce5b5c58726f749d7a96d"
+    },
+    "history/releases/hc7000-serv-19k/validation/rk-rq/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/rk-rq/result.json",
+      "original_sha256": "5303805eed80f6b7cd8f88d55c4f8308571225aa1ab40919a6fe566053596a54",
+      "retained_sha256": "5303805eed80f6b7cd8f88d55c4f8308571225aa1ab40919a6fe566053596a54"
+    },
+    "history/releases/hc7000-serv-19k/validation/rl-xp/result.json": {
+      "original": "releases/hc7000-serv-19k/validation/rl-xp/result.json",
+      "original_sha256": "7d9e43090df4c366d750fc9c40a6e118e4ccb4c53e66dae9ac6b2bc474cae68e",
+      "retained_sha256": "7d9e43090df4c366d750fc9c40a6e118e4ccb4c53e66dae9ac6b2bc474cae68e"
+    },
+    "history/releases/hc7000-serv-bootstrap/README.md": {
+      "original": "releases/hc7000-serv-bootstrap/README.md",
+      "original_sha256": "28e4ccce9bbfef863d8b0e0b114d396979fe453a303015ce94eb3602865d5151",
+      "retained_sha256": "742cac0c918e09da71eb8fc6ed558dc2810f74b4b7b16144c4619b9ec249aa8a"
+    },
+    "history/releases/hc7000-serv-bootstrap/synthesis/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/synthesis/result.json",
+      "original_sha256": "46cbe7ef1183dcd46d1d5c854ede1f51d3cc434e122df7fcca20f8fab6cd632b",
+      "retained_sha256": "46cbe7ef1183dcd46d1d5c854ede1f51d3cc434e122df7fcca20f8fab6cd632b"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/hc1200.log": {
+      "original": "releases/hc7000-serv-bootstrap/validation/hc1200.log",
+      "original_sha256": "0b5ad46039895ddf44d83886eaba3b132363e1e2fa36a280d19efc82656b5837",
+      "retained_sha256": "0b5ad46039895ddf44d83886eaba3b132363e1e2fa36a280d19efc82656b5837"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/ram/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/ram/result.json",
+      "original_sha256": "d73c4ec629eb7b28373c43eeb79f2c9f9707fa8cfb3bbefb0d576535380f2059",
+      "retained_sha256": "d73c4ec629eb7b28373c43eeb79f2c9f9707fa8cfb3bbefb0d576535380f2059"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/rt11v4/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/rt11v4/result.json",
+      "original_sha256": "9d95fc51ec704ce39087781bbda9a932403b8dbf42fcc2844b74140958a1ece7",
+      "retained_sha256": "9d95fc51ec704ce39087781bbda9a932403b8dbf42fcc2844b74140958a1ece7"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/test-pal-demo/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/test-pal-demo/result.json",
+      "original_sha256": "6e874dfd68ed3bf73808a417c20e5de23d312e7355e1c24a3265cd91ca4a0e86",
+      "retained_sha256": "6e874dfd68ed3bf73808a417c20e5de23d312e7355e1c24a3265cd91ca4a0e86"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-menu50/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-menu50/result.json",
+      "original_sha256": "8880594a43971d1a8202818950746016cee053e8b2ae532de5af581fbbb89919",
+      "retained_sha256": "8880594a43971d1a8202818950746016cee053e8b2ae532de5af581fbbb89919"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-rk-rq/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-rk-rq/result.json",
+      "original_sha256": "9a391c613253b26af98d8f3cdd193bdf35a0f1a6885065f973a5983e6d02ec0e",
+      "retained_sha256": "9a391c613253b26af98d8f3cdd193bdf35a0f1a6885065f973a5983e6d02ec0e"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-rl-xp/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-rl-xp/result.json",
+      "original_sha256": "a9fa12369ea84f17110f0eaf4be8b7cd1769952d70f270e4771aa7e62ccd8ef4",
+      "retained_sha256": "a9fa12369ea84f17110f0eaf4be8b7cd1769952d70f270e4771aa7e62ccd8ef4"
+    },
+    "history/releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-storage/result.json": {
+      "original": "releases/hc7000-serv-bootstrap/validation/test-serv-bootstrap-storage/result.json",
+      "original_sha256": "e3ae0d15ae8fb606b8565d76105dd6e4e21659c478f63aa9a4ec551b27e689a1",
+      "retained_sha256": "e3ae0d15ae8fb606b8565d76105dd6e4e21659c478f63aa9a4ec551b27e689a1"
+    },
+    "history/releases/hc7000-serv-compact/README.md": {
+      "original": "releases/hc7000-serv-compact/README.md",
+      "original_sha256": "414597aa67e73e5d1b908e7f3fdcc88a22afcffcbbc950625e75bf1ff685c19a",
+      "retained_sha256": "6283c1289b1a2dcacf867cbefd9bd70248be2962f68a19713913150478cc70c5"
+    },
+    "history/releases/hc7000-serv-io/README.md": {
+      "original": "releases/hc7000-serv-io/README.md",
+      "original_sha256": "8c2bd98b9d5f6c6decf8b92f00c5b587f0eaefefc1d33bd60e456f36b81c4780",
+      "retained_sha256": "e2195ff9708b8003e81c21e50cf2b0f53319167ad2b0d4141ca1f1e6251f995d"
+    },
+    "history/releases/hc7000-serv-menu/README.md": {
+      "original": "releases/hc7000-serv-menu/README.md",
+      "original_sha256": "9163da90c58b137bcfbdc605e250e6323ae60b4b4bbc64d458e20f2cdc329e2d",
+      "retained_sha256": "91ac851f0c6ceed060fd5ae86b4c114b31e11935f6c5edf6d4bd6cfb29bc4e33"
+    },
+    "history/releases/hc7000-serv-shared/README.md": {
+      "original": "releases/hc7000-serv-shared/README.md",
+      "original_sha256": "984ceefcc83427c90de785617102f45bb255d8078a7e65c244f40df9f623153c",
+      "retained_sha256": "c7afd7917093da7df05372d19fa08108048d3b1298af9dbf7ab4cf26a38f68e1"
+    },
+    "history/releases/hc7000-serv-shared/synthesis/result.json": {
+      "original": "releases/hc7000-serv-shared/synthesis/result.json",
+      "original_sha256": "1c5c2b5d57689f5353de916c84055dd1a2f562ab6f7bcbc4fb9698e1a50bd73c",
+      "retained_sha256": "1c5c2b5d57689f5353de916c84055dd1a2f562ab6f7bcbc4fb9698e1a50bd73c"
+    },
+    "history/releases/hc7000-serv-shared/validation/hc1200.log": {
+      "original": "releases/hc7000-serv-shared/validation/hc1200.log",
+      "original_sha256": "0b5ad46039895ddf44d83886eaba3b132363e1e2fa36a280d19efc82656b5837",
+      "retained_sha256": "0b5ad46039895ddf44d83886eaba3b132363e1e2fa36a280d19efc82656b5837"
+    },
+    "history/releases/hc7000-serv-shared/validation/legacy/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/legacy/result.json",
+      "original_sha256": "5872bf1e19fdd8ac3f8088bef23454e9dd728251b9ed1dfafbc154d8b5fcf67f",
+      "retained_sha256": "5872bf1e19fdd8ac3f8088bef23454e9dd728251b9ed1dfafbc154d8b5fcf67f"
+    },
+    "history/releases/hc7000-serv-shared/validation/menu/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/menu/result.json",
+      "original_sha256": "90c6bae62a68fb1c49f323ea865b2cdf145b1af3b6c2e90591513c83a4f0fe8d",
+      "retained_sha256": "90c6bae62a68fb1c49f323ea865b2cdf145b1af3b6c2e90591513c83a4f0fe8d"
+    },
+    "history/releases/hc7000-serv-shared/validation/no-pal/firmware/build.json": {
+      "original": "releases/hc7000-serv-shared/validation/no-pal/firmware/build.json",
+      "original_sha256": "fdc19f3b181e236e945376eab73166891744819ab25b04885d87cbdcadaf4468",
+      "retained_sha256": "fdc19f3b181e236e945376eab73166891744819ab25b04885d87cbdcadaf4468"
+    },
+    "history/releases/hc7000-serv-shared/validation/ram/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/ram/result.json",
+      "original_sha256": "19edae3a335135aeb92a03819d3ed7856da988918a818473bb83e8c0fabe5749",
+      "retained_sha256": "19edae3a335135aeb92a03819d3ed7856da988918a818473bb83e8c0fabe5749"
+    },
+    "history/releases/hc7000-serv-shared/validation/rk-rq/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/rk-rq/result.json",
+      "original_sha256": "a90840ecac7d78daa3743a14b36a723ac03151418e260c66805b229ba148739f",
+      "retained_sha256": "a90840ecac7d78daa3743a14b36a723ac03151418e260c66805b229ba148739f"
+    },
+    "history/releases/hc7000-serv-shared/validation/rl-xp/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/rl-xp/result.json",
+      "original_sha256": "25cdd7b114d39b90062dbc1f559fd28729f9f9385ed11e6937913faab30394be",
+      "retained_sha256": "25cdd7b114d39b90062dbc1f559fd28729f9f9385ed11e6937913faab30394be"
+    },
+    "history/releases/hc7000-serv-shared/validation/rt11v4/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/rt11v4/result.json",
+      "original_sha256": "9d95fc51ec704ce39087781bbda9a932403b8dbf42fcc2844b74140958a1ece7",
+      "retained_sha256": "9d95fc51ec704ce39087781bbda9a932403b8dbf42fcc2844b74140958a1ece7"
+    },
+    "history/releases/hc7000-serv-shared/validation/storage/result.json": {
+      "original": "releases/hc7000-serv-shared/validation/storage/result.json",
+      "original_sha256": "2977f7011fa8fc9e726ee6906e0d1b2d7d7aaa5f7702d41927d55209dbd4bb78",
+      "retained_sha256": "2977f7011fa8fc9e726ee6906e0d1b2d7d7aaa5f7702d41927d55209dbd4bb78"
+    },
+    "history/releases/hc7000-serv-storage/README.md": {
+      "original": "releases/hc7000-serv-storage/README.md",
+      "original_sha256": "3a65228f65d8ae209dd959c9611de0434f4bfb3e5070f13f04b5f7817bdca2ed",
+      "retained_sha256": "c193550b48e94a146a121a9e9ebb56bf84bc6199042415e573f29430668250be"
+    },
+    "history/releases/hc7000-serv-unibus/README.md": {
+      "original": "releases/hc7000-serv-unibus/README.md",
+      "original_sha256": "750b351bfcced2ac8b2cc397072edf6b2b8eff167517a2d5ecda3bd7af1ecb3b",
+      "retained_sha256": "c9942f4ff5c43961ef3ddf19126de088f5549144019d67bcd8230ed5ef494b32"
+    },
+    "history/releases/hc7000-serv-unibus/synthesis/result.json": {
+      "original": "releases/hc7000-serv-unibus/synthesis/result.json",
+      "original_sha256": "3d513d6f28bc89a52c0dd41b1833c946406f3a434f5bde35cb4fbaea028bd779",
+      "retained_sha256": "3d513d6f28bc89a52c0dd41b1833c946406f3a434f5bde35cb4fbaea028bd779"
+    },
+    "history/releases/hc7000-serv-unibus/synthesis/serv-unibus-50-01_impl1.mrp": {
+      "original": "releases/hc7000-serv-unibus/synthesis/serv-unibus-50-01_impl1.mrp",
+      "original_sha256": "cdc68e375a9cb7b50748373ed5eda89933115eb63b94128266f78c14081ba3ce",
+      "retained_sha256": "cdc68e375a9cb7b50748373ed5eda89933115eb63b94128266f78c14081ba3ce"
+    },
+    "history/releases/hc7000-serv-unibus/validation/hardware/session.json": {
+      "original": "releases/hc7000-serv-unibus/validation/hardware/session.json",
+      "original_sha256": "78ddc78eb51b65363a5973c55e933d03c79513d6b394f23dcc233c95bdb7fbbd",
+      "retained_sha256": "78ddc78eb51b65363a5973c55e933d03c79513d6b394f23dcc233c95bdb7fbbd"
+    },
+    "history/releases/hc7000-serv-unibus/validation/hardware/uart.txt": {
+      "original": "releases/hc7000-serv-unibus/validation/hardware/uart.txt",
+      "original_sha256": "7a937921e4f84d555b16e91a6ff6c1407ed4bbc17124ef55738f59453618c822",
+      "retained_sha256": "7a937921e4f84d555b16e91a6ff6c1407ed4bbc17124ef55738f59453618c822"
+    },
+    "history/releases/hc7000-terminal/README.md": {
+      "original": "releases/hc7000-terminal/README.md",
+      "original_sha256": "df1b68f3c2463e349889901df42876d339b88cf1503875104ba79bfde4df67f0",
+      "retained_sha256": "af742ce9a687bdfe10579061cfc4ff096afbc15d7e17a617c2c8bf8e73033842"
+    },
+    "history/releases/hc7000-terminal/validation/hardware-20261001/README.md": {
+      "original": "releases/hc7000-terminal/validation/hardware-20261001/README.md",
+      "original_sha256": "7e6e1f4b165930b0a2c950fdf7ebdd2e8dde53a0276ea71f0ddd98a8e4f3d302",
+      "retained_sha256": "623d9fe424295a308cb3de6a83e67b736c39302353cf4390a990bf42f4dbfaac"
+    },
+    "history/releases/hc7000-terminal/validation/uart-pal/frame.png": {
+      "original": "releases/hc7000-terminal/validation/uart-pal/frame.png",
+      "original_sha256": "2df831c5b54e8eb0a834d313128f05fbeb3de4ab9d10dd92d675d62cb6426217",
+      "retained_sha256": "2df831c5b54e8eb0a834d313128f05fbeb3de4ab9d10dd92d675d62cb6426217"
+    },
+    "history/releases/hc7000-terminal-scroll/README.md": {
+      "original": "releases/hc7000-terminal-scroll/README.md",
+      "original_sha256": "2c5de7937079af86ca9d821037f98684f0e195b8015fe8f9a1782dd8f0748dce",
+      "retained_sha256": "ed53830c19d2ab1b6dea21a66b24324c6b865601a2579978dbc3654b8a778e9f"
+    },
+    "history/releases/hc7000-terminal-scroll/architecture.md": {
+      "original": "releases/hc7000-terminal-scroll/architecture.md",
+      "original_sha256": "527966abad07fb0ba9d4f2ebdc4a3f67a70fdd615bb323d189410b6550ee4fcf",
+      "retained_sha256": "56b4fad4e03f39afd5cbfd125a24ba8d5f661346dae4f2a82f33e69c9e03d2bf"
+    },
+    "history/releases/hc7000-terminal-scroll/validation/hardware-20261001/README.md": {
+      "original": "releases/hc7000-terminal-scroll/validation/hardware-20261001/README.md",
+      "original_sha256": "78787741219d9af8cd4b0fb99069d4fa641a002b4553dec175a9c57c20ea4acd",
+      "retained_sha256": "3bbaecece6054b599f63948ffdcca3146176c7ce61b96ec41a95113135c0d9d1"
+    },
+    "history/releases/hc7000-terminal-throughput/README.md": {
+      "original": "releases/hc7000-terminal-throughput/README.md",
+      "original_sha256": "188d86e1fb0d221af40ef209850bbca21a01668936953f9904eeee61a33a78d4",
+      "retained_sha256": "d6fc4be7a6c73b216029d1d92f990d02eab55216fd519ea81849b3fc4c471348"
+    },
+    "history/releases/hc7000-terminal-throughput/architecture.md": {
+      "original": "releases/hc7000-terminal-throughput/architecture.md",
+      "original_sha256": "7f54966d9116b7a4b39f02d0c6d09b43980ff9bb2488c59f5d34198be1370802",
+      "retained_sha256": "e243d38d8819a6dcfd24e029dd134a541a8e5c81c88f7c00e0318379d9800c85"
+    },
+    "history/releases/hc7000-terminal-throughput/validation/hardware-20261001/README.md": {
+      "original": "releases/hc7000-terminal-throughput/validation/hardware-20261001/README.md",
+      "original_sha256": "5560aec9d711d59711848287c9a6404ffb2a04fc59ca2a16a005416fdf71f25c",
+      "retained_sha256": "fabc8fc4d6d7829d274dffc8d81cc5158104369079f9eaa46d10a7fe29359ce8"
+    },
+    "history/releases/hc7000-terminal-throughput/validation/hardware-20261001/result.json": {
+      "original": "releases/hc7000-terminal-throughput/validation/hardware-20261001/result.json",
+      "original_sha256": "c1b8996b969e7a0ada482ea74d97f7d8b63b4e5c8733ce1ea74f5242584d846c",
+      "retained_sha256": "c1b8996b969e7a0ada482ea74d97f7d8b63b4e5c8733ce1ea74f5242584d846c"
+    },
+    "history/releases/hc7000-terminal-vt52/README.md": {
+      "original": "releases/hc7000-terminal-vt52/README.md",
+      "original_sha256": "e5d56b73bb0e3da17821c3bef72f546316ed5246a5b53e2362fdd662b3666a55",
+      "retained_sha256": "425ea5f8cb4441ad1510b3445ecb601ae86bf62fb36e33e12100030be25a5449"
+    }
+  },
+  "edited_link_documents": [
+    "docs/hc7000-diagnostics.md",
+    "docs/cpu-events.md",
+    "docs/boot-validation.md",
+    "docs/hc7000-video-plan.md",
+    "docs/hc7000-ps2.md",
+    "docs/hc7000-pal-performance.md",
+    "docs/hc7000-cpu-performance.md",
+    "docs/hc7000-mmu.md",
+    "docs/hc7000-terminal.md",
+    "docs/hc7000-50mhz.md",
+    "docs/hc7000-rk611-iop.md",
+    "docs/hc7000-pal.md",
+    "docs/sd-image-hc7000.md",
+    "docs/j11-isa-audit.md",
+    "docs/serv-shared-ram.md",
+    "docs/serv-19k.md",
+    "docs/hc7000-ebr-optimization.md",
+    "docs/serv-storage.md",
+    "docs/serv-bootstrap.md",
+    "releases/hc7000-ps2-idle/README.md",
+    "releases/sd-hc7000/README.md",
+    "releases/sd-hc7000-multi/README.md"
+  ],
+  "verification": {
+    "production": "PASS make verify: HC1200 RTL/EBR tokens, exact ROMs, rebuilt software, BASIC and JED",
+    "python_tests": {
+      "board_profiles_and_clock": 8,
+      "mmuless_sources_unchanged": 1,
+      "passed": true
+    },
+    "fixtures": "Moved JSON files are byte-for-byte identical to their archived originals",
+    "retained_release_checksums": "PASS hc7000-ps2-idle/SHA256SUMS, sd-hc7000/checksums.json and image SHA256, sd-hc7000-multi/files.json and SHA256SUMS",
+    "hg_build_dependency": "Pinned HGX/HGTIME/TMRATE files and native sources match the retained manifest",
+    "local_document_links": "Checked in prepared tree",
+    "git_diff_check": "PASS",
+    "installed_jed_sha256": "7c8b22259826c3e927d84927f401ddb2d8f38405046bc4f6b415f11c2632b294"
+  },
+  "offline_backup": {
+    "path": "build/git-release-purge-20261002-01/k1801vm1-before-release-purge.bundle",
+    "scope": "Complete old branch history; local only, not pushed",
+    "history_removed_from_remotes": true
+  }
+}

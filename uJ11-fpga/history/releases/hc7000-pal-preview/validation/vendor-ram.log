@@ -1,0 +1,2 @@
+PASS PAL 1024x9 EBR address/byte/latency/gating
+tb_pal_ram.v:26: $finish called at 36761165 (1ps)

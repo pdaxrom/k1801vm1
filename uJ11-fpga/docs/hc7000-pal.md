@@ -12,11 +12,11 @@ Flash Verify и загрузка RT-11 XM прошли, DIR ускорился �
 Читаемость текста PAL подтверждена на предыдущей JED 3428; на 54D2 обнаружены
 пропуски колонок при непрерывном DIR. Исправление C3DA проверено в RTL;
 визуальное подтверждение полноты полей на физическом PAL пока ожидается.
-PS/2 ещё не подключена. [Предыдущая JED 2AAE и отчёты](../releases/hc7000-pal-fast/README.md):
+PS/2 ещё не подключена. [Предыдущая JED 2AAE и отчёты](../history/releases/hc7000-pal-fast/README.md):
 **установлена на плату 2026-09-30**, PAL-демо запущено после полного обратного
 чтения его 3798 байт. Пользователь подтвердил работу изображения на экране;
 измерения уровней аналогового сигнала ещё не проводились.
-[Аппаратный запуск и обнаруженное ограничение ODT](../releases/hc7000-pal-fast/validation/hardware-20260930/README.md).
+[Аппаратный запуск и обнаруженное ограничение ODT](../history/releases/hc7000-pal-fast/validation/hardware-20260930/README.md).
 
 ## Изображение и память
 
@@ -160,7 +160,7 @@ UJ11_HC7000_VIDEO=1 UJ11_HC7000_DIAGNOSTICS=1 UJ11_MMU_CLOCK_MHZ=50 \
   UJ11_MMU_FPP=off UJ11_MMU_IOP=storage python3 tools/test_pal_cpu_perf.py
 ```
 
-[Результаты, хеши и параметры](../releases/hc7000-pal-preview/validation/test-pal-cpu-perf/result.json)
+[Результаты, хеши и параметры](../history/releases/hc7000-pal-preview/validation/test-pal-cpu-perf/result.json)
 и журналы `mode-0.log`…`mode-3.log` сохранены с проверочной сборкой.
 
 Переходы между 50/64 МГц используют toggle/ack mailbox и EBR. Поля mailbox
@@ -191,7 +191,7 @@ make BOARD=hc7000-lcd-sram CPU=mmu FPP=off IOP=storage \
 Имя каталога синтеза должно быть новым для каждого прогона. Экспорт допускается
 только при совпадении исходников и отчётов, полном маршруте, исправных внешних
 таймингах SRAM и частотах не ниже 50/64 МГц. Фактические ресурсы и Fmax
-сохранены в [отчёте текущей сборки](../releases/hc7000-pal-fast/README.md).
+сохранены в [отчёте текущей сборки](../history/releases/hc7000-pal-fast/README.md).
 
 | Ресурс | PAL 2AAE | Всего | Осталось |
 |---|---:|---:|---:|
@@ -256,7 +256,7 @@ make BOARD=hc7000-lcd-sram CPU=mmu FPP=off IOP=storage \
 | Q | выключение изображения/MMU и HALT |
 
 Шрифт взят из `pico-lsi11/pico-vt100/src/font5x7.c`, размещён в ячейках 8×8.
-[Цифровой кадр RTL-теста](../releases/hc7000-pal-preview/demo/text-80x25.png)
+[Цифровой кадр RTL-теста](../history/releases/hc7000-pal-preview/demo/text-80x25.png)
 показывает содержимое framebuffer; это **не снимок с телевизора**.
 
 Следующая проверка на плате: PAL-захват/телевизор на RCA, синхронизация и цвет,

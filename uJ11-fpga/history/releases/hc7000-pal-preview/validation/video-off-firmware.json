@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "comparison": "VIDEO=0 firmware.bin byte-for-byte with saved released storage firmware",
+  "bytes": 10647,
+  "sha256": "43b6f4945681078fe480fe2c604a5a531e3aefd2a770ae851199b3081f110f48"
+}

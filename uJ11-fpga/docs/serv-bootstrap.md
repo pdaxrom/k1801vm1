@@ -68,7 +68,7 @@ Fmax CPU **50,994 МГц**, PAL **64,990 МГц**, отрицательного 
 ## Проверки
 
 Отчёты и исходные данные сохраняются в
-[`releases/hc7000-serv-bootstrap`](../releases/hc7000-serv-bootstrap/README.md).
+[`releases/hc7000-serv-bootstrap`](../history/releases/hc7000-serv-bootstrap/README.md).
 Проверки охватывают модель памяти и официальные примитивы Lattice,
 порядок разрешения старта J11, восстановление после аппаратного RESET,
 сохранение памяти при гостевом RESET, меню SD и дисковые контроллеры.

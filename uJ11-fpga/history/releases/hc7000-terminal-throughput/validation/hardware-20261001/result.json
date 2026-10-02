@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "scope": "Saved Flash Verify, fresh menu, RT-11 XM RH0 boot, complete UART DIR comparison",
+  "jed_checksum": "C3DA",
+  "jed_sha256": "4ece4b79769e475eb0eea458c40343241ee0ee4031798aed32eee2bb48d90659",
+  "old_jed_checksum": "54D2",
+  "old_dir_seconds": 16.033362967020366,
+  "old_preflash_dir_seconds": 16.033321143011563,
+  "new_dir_seconds": [
+    7.415634106029756,
+    7.415709053981118
+  ],
+  "speed_ratio": 2.1621027598952614,
+  "uart_dir_byte_identical": true,
+  "files": 214,
+  "blocks": 5346,
+  "free_blocks": 48310,
+  "uart_closed": true,
+  "visual_confirmation": {
+    "status": "pending",
+    "reason": "Physical PAL screen is not available to the UART capture; user observation requested."
+  },
+  "timing_method": "Same UART.command helper: 0.1 s per input byte, polling, 0.3 s after monitor prompt.",
+  "inputs": {
+    "approved.json": "fda12c13176b088b80d75ba94a2c999cb5a5aefc2e8e0958657662b6949d8047",
+    "session-01/session.json": "ad481f657be2633ea1048d8c288e455fb0395338d2be79703fba3bfade5ec009",
+    "session-01/uart.bin": "386e5e17b0de4795330455f9737e57729f0b9e1b4269866746bccc9ee67afdd7",
+    "session-01/uart.txt": "15642fe3060f8e6e48722e9e90f1b4a1d3fadffa5494f21fba9f3d5e53b87d05",
+    "session-02/program.xcf": "070b56f6a24bfbeaa11f752f561e6bab15586d26c3aa1c819c19840fd5baedd3",
+    "session-02/programmer-old.log": "a2f39dcf652e56463ef179a7c7e9cbcb08ef0b7c5e173081664a0c4a69fb7b4e",
+    "session-02/programmer-stdout.log": "93c54379b617c0d03b7040de695bbb89762e9e121d99f6c1e2248f9f0caad538",
+    "session-02/programmer.log": "9f7559bd69274c7e74a5b06f5c41fcd2b765ea35e2bf2fed0a58343a446edbb3",
+    "session-02/session.json": "8fb56b7f415b6195d85c50c989d16f6a07d7a2cb59388791775e23d464a7f774",
+    "session-02/uart.bin": "b58ca2e1efc2194426c4e175da3ab9e38001c76f4b24dbb311003e76914c1ce3",
+    "session-02/uart.txt": "7cf37263d4eba4484cf1bf2275a7454d24dfac29a095d8cb2a64136b699c138b",
+    "session-rt11.py": "59f6a63b2fe7a685f368c0841c510357323cf5ac9360a9a209c8313b34bc9267",
+    "session.py": "55c009e7d8282e4bc2a0e8519e0bff5dc908a5b00bcb7b412193e502797088fe",
+    "tools/hardware_modules.py": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+    "tools/make_programmer_xcf.py": "7b6c258941f3afe1b4fb3ed7e2b5064882798059e467709780bfb2ea7651a3cf",
+    "validate.py": "f3f30c25a77ccd9752d77c08e8a60f79cc51b4af52f9bb92933751c1b2ce92a0"
+  }
+}

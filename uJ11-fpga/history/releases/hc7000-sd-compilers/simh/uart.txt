@@ -1,0 +1,135 @@
+
+PDP-11 simulator V3.12-3
+Disabling XQ
+CPU, 11/70, NOFPP, autoconfiguration enabled, idle disabled, 2048KB
+
+RT-11XM  V05.03  
+
+.TYPE V5USER.TXT
+
+                              RT-11 V5.3
+
+       Installation of RT-11 Version 5.3 is complete and you are now
+    executing from the working volume    (provided you have used the
+    automatic installation procedure). DIGITAL recommends you verify
+    the correct  operation  of  your  system's  software  using  the
+    verification procedure.  To do this, enter the command:
+
+                             IND VERIFY
+
+        Note that VERIFY should be performed  only after the distri-
+    bution media have been backed up.  This was accomplished as part
+    of automatic installation on  all  RL02,  RX02,  TK50, and  RX50
+    based systems,   including the  MicroPDP-11 and the Professional
+    300.  If you have not completed automatic installation, you must
+    perform a manual backup before using VERIFY.  Note also,  VERIFY
+    is NOT supported on RX01 diskettes,    DECtape I or II,   or the
+    Professional 325.
+
+    DIGITAL also  recommends  you  read  the  file V5NOTE.TXT, which
+    contains information  formalized too late to be included  in the
+    Release Notes.  V5NOTE.TXT can be TYPED or PRINTED.
+
+
+.ASSIGN DM1: VOL:
+
+.ASSIGN RK1: BAS:
+
+.ASSIGN RK2: PAS:
+
+.ASSIGN RK3: FOR:
+
+.COPY TT: VOL:CTFORT.FOR
+ Files copied:
+^      PROGRAM CTFORT
+      WRITE(7,10)
+   10 FORMAT('FORTRAN OK')
+      END
+^ZTT:            to VOL:CTFORT.FOR
+
+.RUN FOR:FORTRA
+*VOL:CTFORT,VOL:CTFORT=VOL:CTFORT
+CTFORT
+*^C
+
+.R LINK
+*VOL:CTFORT,VOL:CTFORT=VOL:CTFORT,FOR:FORLIB
+*^C
+
+.RUN VOL:CTFORT
+ORTRAN OK
+STOP -- 
+
+.RUN PAS:XM
+*VOL:CTPAS,VOL:CTPAS=VOL:ADDER
+
+.R LINK
+*VOL:CTPAS,VOL:CTPAS=VOL:CTPAS,PAS:LIBEIS
+*^C
+
+.RUN VOL:CTPAS
+2 3
+ inputs and answer: 
+ 2.000000E+00 3.000000E+00 5.000000E+00
+
+.SHOW CONFIGURATION
+
+RT-11XM  V05.03  
+Booted from DM0:RT11XM
+22 bit addressing is on
+
+USR   is set NOSWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KEX
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/70 Processor
+2048KB of memory
+Extended Instruction Set (EIS)
+Memory Management Unit
+Cache Memory
+60 Cycle System Clock                  
+
+Device I/O time-out support
+System job support
+FPU support
+
+
+.DIR BAS:BASIC.SAV
+ 
+BASIC .SAV    53  04-Apr-83      
+ 1 Files, 53 Blocks
+ 4076 Free blocks
+
+.DIR PAS:XM.SAV
+ 
+XM    .SAV   474  07-Mar-85      
+ 1 Files, 474 Blocks
+ 1714 Free blocks
+
+.DIR FOR:FORTRA.SAV
+ 
+FORTRA.SAV   128                 
+ 1 Files, 128 Blocks
+ 4476 Free blocks
+
+.RUN BAS:BASIC
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+PRINT 2+3
+ 5 
+
+READY
+BYE
+
+.
+Simulation stopped, PC: 143064 (CLR 142714)
+sim> quit
+Goodbye

@@ -29,7 +29,7 @@ See [19 KiB RAM, EBR allocation and validation](serv-19k.md), the intermediate
 [SERV bootstrap](serv-bootstrap.md).
 Legacy SERV remains RV32I. The verified intermediate compaction saves 1520 code
 bytes and three microstore EBRs; see
-[resource and regression results](../releases/hc7000-serv-compact/README.md).
+[resource and regression results](../history/releases/hc7000-serv-compact/README.md).
 
 ## Shared peripheral interface
 
@@ -111,7 +111,7 @@ controller command. With the UNIBUS identity it uses 18-bit DMA and the map.
 preparation modifies only the three startup command files to assign RK1/2/3
 to BAS/PAS/FOR and preserves DM1 as VOL.
 
-The [7AE8 release record](../releases/hc7000-serv-unibus/README.md) includes
+The [7AE8 release record](../history/releases/hc7000-serv-unibus/README.md) includes
 source-matched integration tests and the 50 MHz synthesis: 3979 LUT4 and
 25 EBR, saving 406 LUT4 and one EBR relative to 9DF6. Its compiler test
 boots the remapped media, runs Pascal XM directly from RK2, and compiles,

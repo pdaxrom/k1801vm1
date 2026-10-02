@@ -23,7 +23,7 @@ except Enter, choose controller **1 (RK11/RK05)**, then unit **0**.
 The physical HC7000 running JED `9DF6` booted `RT-11SJ V04.00C` from RK0,
 listed its three monitor files with `DIR RK0:RT11*.SYS`, and read
 `V4USER.TXT`. The board was left at the RT-11 prompt. The
-[installation record and UART logs](../releases/hc7000-sd-rt11v4/README.md)
+[installation record and UART logs](../history/releases/hc7000-sd-rt11v4/README.md)
 include the complete six-partition layout, backups, verification hashes,
 and separate records of the initial menu-test script errors.
 
@@ -47,7 +47,7 @@ FORTRAN compile/link/run pass. Pascal XM fails directly from RK2 with
 the test with LIBEIS. The stock RKX driver rejects DMA beyond 64 KiB on
 Q-bus before starting the controller; setting only RT-11's QBUS flag in
 SIMH 11/40 reproduces the failure. The SD retains the stock driver.
-See the [layout, evidence and installation record](../releases/hc7000-sd-compilers/README.md).
+See the [layout, evidence and installation record](../history/releases/hc7000-sd-compilers/README.md).
 
 The subsequent JED `7AE8` identifies the storage profile as 11/84/UNIBUS
 through SERV. The UNIBUS map table, CSR handling and DMA translation also
@@ -56,7 +56,7 @@ direct Pascal XM execution from RK2, compilation of ADDER, linking with
 LIBEIS and the result `5.000000E+00` for `2 3`. BASIC and FORTRAN also pass
 with FPP disabled and FIS retained. No RKX or monitor patch is used.
 This 50 MHz build frees 406 LUT and one EBR compared with 9DF6. The
-[UNIBUS release record](../releases/hc7000-serv-unibus/README.md) contains
+[UNIBUS release record](../history/releases/hc7000-serv-unibus/README.md) contains
 the source-matched synthesis and regression results and the installation status.
 
 The complete 50 MHz RTL regression for 7AE8 passes: XM (6107 checks), V4
@@ -151,7 +151,7 @@ profiles and the passing HG host tests.
 ## CPU-event regression
 
 The CPUERR/PIRQ and fixed-limit stack implementation is qualified separately
-in [`releases/hc7000-cpu-events/`](../releases/hc7000-cpu-events/README.md).
+in [`releases/hc7000-cpu-events/`](../history/releases/hc7000-cpu-events/README.md).
 These runs use the current processor RTL and the unchanged SERV firmware:
 
 | Case | Checks | Clocks | DMA words | Result |

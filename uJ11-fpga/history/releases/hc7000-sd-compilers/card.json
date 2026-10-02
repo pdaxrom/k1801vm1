@@ -1,0 +1,318 @@
+{
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "resolved": "/dev/sdf",
+  "diskseq": "104",
+  "physical_bytes": 7988051968,
+  "before": {
+    "blocks": 15601664,
+    "partitions": [
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 0,
+        "media": 7,
+        "flags": 1,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-root"
+      },
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 1,
+        "media": 7,
+        "flags": 0,
+        "mode": 0,
+        "start": 22528,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-swap"
+      },
+      {
+        "kind": 3,
+        "controller": 0,
+        "unit": 0,
+        "media": 4,
+        "flags": 0,
+        "mode": 0,
+        "start": 43008,
+        "blocks": 500384,
+        "used": 256196608,
+        "label": "bsd-usr"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 0,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 1048576,
+        "blocks": 311300,
+        "used": 159385600,
+        "label": "RSX-SYS"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 1,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 1361920,
+        "blocks": 311232,
+        "used": 159350784,
+        "label": "RSX-PBL"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 0,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 1673216,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "RT11V4"
+      }
+    ],
+    "sequence": 6,
+    "reserved": 2048,
+    "features": 1
+  },
+  "after": {
+    "blocks": 15601664,
+    "partitions": [
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 0,
+        "media": 7,
+        "flags": 1,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-root"
+      },
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 1,
+        "media": 7,
+        "flags": 0,
+        "mode": 0,
+        "start": 22528,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-swap"
+      },
+      {
+        "kind": 3,
+        "controller": 0,
+        "unit": 0,
+        "media": 4,
+        "flags": 0,
+        "mode": 0,
+        "start": 43008,
+        "blocks": 500384,
+        "used": 256196608,
+        "label": "bsd-usr"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 0,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 1048576,
+        "blocks": 311300,
+        "used": 159385600,
+        "label": "RSX-SYS"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 1,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 1361920,
+        "blocks": 311232,
+        "used": 159350784,
+        "label": "RSX-PBL"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 0,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 1673216,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "RT11V4"
+      },
+      {
+        "kind": 2,
+        "controller": 0,
+        "unit": 0,
+        "media": 3,
+        "flags": 0,
+        "mode": 0,
+        "start": 1679360,
+        "blocks": 53790,
+        "used": 27540480,
+        "label": "RT11XM"
+      },
+      {
+        "kind": 2,
+        "controller": 0,
+        "unit": 1,
+        "media": 3,
+        "flags": 0,
+        "mode": 0,
+        "start": 1734656,
+        "blocks": 53790,
+        "used": 27540480,
+        "label": "RT11VOL"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 1,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 1789952,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "BASIC"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 2,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 1796096,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "PASCAL"
+      },
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 3,
+        "media": 1,
+        "flags": 0,
+        "mode": 0,
+        "start": 1802240,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "FORTRAN"
+      }
+    ],
+    "sequence": 11,
+    "reserved": 2048,
+    "features": 1
+  },
+  "menu": {
+    "blocks": 6,
+    "entry_octal": "100000",
+    "crc16": "5bb3"
+  },
+  "sources": [
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/sd-rt11-compilers-20260929/media/system.dsk",
+      "bytes": 27540480,
+      "sha256": "6a7759d784c1321fcb05ccf7ea341c32417f34616eaf4993d442d6033470ad2f"
+    },
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/sd-rt11-compilers-20260929/media/storage.dsk",
+      "bytes": 27540480,
+      "sha256": "40a1c0af7671e7726fab45081e569dccceaca0b5a888aa6095d4ad3415be54ad"
+    },
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/sd-rt11-compilers-20260929/media/basic.dsk",
+      "bytes": 2494464,
+      "sha256": "fedc049af6aed808e7bef965ad7cf90f721f5d23f1c9e21196b3f7ab8e02ba74"
+    },
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/sd-rt11-compilers-20260929/media/pascal.dsk",
+      "bytes": 2494464,
+      "sha256": "5c9426278bf162eef78586ce1d2d421288b4bb2d8a0f72c9d3ea153edd3c8ed4"
+    },
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/sd-rt11-compilers-20260929/media/fortran.dsk",
+      "bytes": 2494464,
+      "sha256": "1dab4662ea5bf777841b768f56a14a102843cb3d6341814c3c6dcb51f25b55e1"
+    }
+  ],
+  "passed": true,
+  "backups": [
+    {
+      "file": "original-prefix.img.gz",
+      "offset": 0,
+      "bytes": 1048576,
+      "sha256": "afc083e4dab16502d191d81b1ff93174b4083dbe425259503002d5da7ba11668"
+    },
+    {
+      "file": "original-new0-range.img.gz",
+      "offset": 859832320,
+      "bytes": 27540480,
+      "sha256": "726c18a6b1e96ef8aee5a73cac21edfcb210b46f7fca1e75b86599cd38d5745a"
+    },
+    {
+      "file": "original-new1-range.img.gz",
+      "offset": 888143872,
+      "bytes": 27540480,
+      "sha256": "d6e39b4fe0dc33a1a3cfd6491ffc71f80f3754f430bff94b7b6d6af8520511c8"
+    },
+    {
+      "file": "original-new2-range.img.gz",
+      "offset": 916455424,
+      "bytes": 2494464,
+      "sha256": "f015f2d68ce7efb18cdab22ef36c0b30a4bfd21f4bf59cc04a82e6cf8bf08ae3"
+    },
+    {
+      "file": "original-new3-range.img.gz",
+      "offset": 919601152,
+      "bytes": 2494464,
+      "sha256": "f015f2d68ce7efb18cdab22ef36c0b30a4bfd21f4bf59cc04a82e6cf8bf08ae3"
+    },
+    {
+      "file": "original-new4-range.img.gz",
+      "offset": 922746880,
+      "bytes": 2494464,
+      "sha256": "f015f2d68ce7efb18cdab22ef36c0b30a4bfd21f4bf59cc04a82e6cf8bf08ae3"
+    }
+  ],
+  "existing_before": {
+    "5:0": "04ccfe54c3bd6b836d3a392724e6df90ec6e8ff48b8c0f2e8abef986d533704b",
+    "5:1": "47f5eae03839c9b0a4b140b711f08ec5318e8ce5337d2395cbe154cd05ce5936",
+    "3:0": "dc041a1c78ad67a3f0bc4b24a99b0b06c6391bf611d9e44f2d7434818dc46f83",
+    "4:0": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950",
+    "4:1": "a0119f34abdd974cfb93fbe0b846a5351b98f6ce06493f60810f2746cc95b9af",
+    "1:0": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb"
+  },
+  "reserved_before": "a76b727e7e3d7b85863eebea10dbe7bd39f6b5c9be20eb18fcf45f32f476c9de",
+  "existing_after": {
+    "5:0": "04ccfe54c3bd6b836d3a392724e6df90ec6e8ff48b8c0f2e8abef986d533704b",
+    "5:1": "47f5eae03839c9b0a4b140b711f08ec5318e8ce5337d2395cbe154cd05ce5936",
+    "3:0": "dc041a1c78ad67a3f0bc4b24a99b0b06c6391bf611d9e44f2d7434818dc46f83",
+    "4:0": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950",
+    "4:1": "a0119f34abdd974cfb93fbe0b846a5351b98f6ce06493f60810f2746cc95b9af",
+    "1:0": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb"
+  },
+  "all_existing_preserved": true,
+  "all_new_payloads_verified": true,
+  "menu_preserved": true,
+  "default_boot": "rl0"
+}

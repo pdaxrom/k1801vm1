@@ -1,0 +1,53 @@
+uJ11 SD BOOT MENU
+Detected controllers:
+  1 - RK11 (rk0..rk7)
+  3 - XP/RP, units: 0 
+  4 - RQ (MSCP) (rq0..rq3)
+  5 - RL11, units: 0 1 
+Default: RL0 - boot in 5s, Enter=boot, other key=menu: 
+Select controller [1/2/3/4/5/6]: 1
+Select unit [0..7]: 0
+Booting RK bootstrap...
+
+RT-11SJ  V04.00C 
+
+.D 56=5015
+
+.TYPE V4USER.TXT
+Welcome to RT-11 Version 4. RT-11 V04 provides new hardware support
+and some major enhancements over Version 3B.
+
+Please use the HELP command;  it describes the new options in many
+of the utilities.
+
+If you are using a terminal that requires fill characters,
+modify location 56 with a Deposit command before proceeding with
+system installation. LA36 DECwriter II and VT52 DECscope terminals
+do NOT require such modification.
+
+
+.D 56=0
+
+.D 56=0
+
+.DIR RK0:RT11*.SYS
+ 
+RT11BL.SYS    65  01-Feb-82      RT11SJ.SYS    67  01-Feb-82
+RT11FB.SYS    80  01-Feb-82      
+ 3 Files, 212 Blocks
+ 2820 Free blocks
+
+.TYPE V4USER.TXT
+Welcome to RT-11 Version 4. RT-11 V04 provides new hardware support
+and some major enhancements over Version 3B.
+
+Please use the HELP command;  it describes the new options in many
+of the utilities.
+
+If you are using a terminal that requires fill characters,
+modify location 56 with a Deposit command before proceeding with
+system installation. LA36 DECwriter II and VT52 DECscope terminals
+do NOT require such modification.
+
+
+.

@@ -1,0 +1,14 @@
+{
+  "reproduced": true,
+  "scope": "diagnostic only: force retained IR to TSTB while stopped in ODT",
+  "symptom": "P 20000 -> ?, P 17777572 -> two errors",
+  "cause": "byte_operation inherits byte_instruction during console ALU operations",
+  "workaround": "execute HALT before ODT numeric upload",
+  "jed": "2AAE",
+  "files": {
+    "rtl/mmu/uj11_mmu_cpu.v": "f97cc2790eda7d4fc1a448a93fac7e4791a94d1aecf34672fe1ae83cc8f45244",
+    "microcode/mmu/odt.uasm": "3b826ec15ddd725afd27083d686b68aab18fbca073ee944a0f43d4f7b224db4a",
+    "build/pal-odt-debug/tb_pal_demo.v": "911ed423936f333737e34144407c12e21c9c0845d4cb32c79f7ed192048a50f8",
+    "build/pal-odt-debug/run.py": "d3aa9782fd0f178a76fde9ff703c1d0e4436013bdb9c357487b5bf38115a0e02"
+  }
+}

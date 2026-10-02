@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "pipeline": false,
+  "clock_profile_mhz": 24,
+  "files": {
+    "rtl/uj11_alu.v": "a2ee1fff687eabbd4058028c95c5bc1f637e503a0aa584965a78aaba78c164d7",
+    "rtl/uj11_decode.v": "8f789b5b8a802f4d2a712dc6f9e17ee6d889af5be7b87c2a2407228356bb87c9",
+    "rtl/mmu/uj11_mmu_cpu.v": "f97cc2790eda7d4fc1a448a93fac7e4791a94d1aecf34672fe1ae83cc8f45244",
+    "rtl/mmu/uj11_mmu_decode.v": "d861e014892e171aa9dd56bb67615f2c6461eba3021f9897434d7cf2dba68293",
+    "rtl/mmu/uj11_mmu_fp_state.v": "b4a3bfef414b410e39ec1ba442d4224244431f5c9609150cdaf700362e7575a8",
+    "rtl/mmu/uj11_mmu_fp_datapath.v": "c5849b710b2e2f26f2e51d63a38110e000b07d9153d178a33ba0a9b80f7b2f3d",
+    "rtl/mmu/uj11_mmu_datapath.v": "bfb11f3c5298e9902416a9b6100b94957a59374873188e4c2ae86ab931fbc909",
+    "rtl/mmu/uj11_mmu_regfile.v": "fe1918e4c45cefd21b69421a659eaa2d7548089ee3505a25008df5672f8db032",
+    "rtl/mmu/uj11_mmu.v": "096d35f013c600357fc3e41e5d337ab34af5a1eb4f774d1d790a00633a035797",
+    "rtl/mmu/uj11_mmu_translate.v": "f300fe3da7d501b937009880029dfbf3fcfd0cb06a6222f1773190bf4baee6a0",
+    "rtl/mmu/uj11_mmu_apr_ram.v": "b9488880ab2d20a50bf3b168c9654e631382a3b4d6b0c7422b4b01efe68ae3d5",
+    "rtl/mmu/uj11_mmu_apr_decode.v": "ff954e3f2cf724e4e8fb0677f239e59e69918df84b8db8184b29c6e2d023ce87",
+    "boards/hc7000/mmu/uj11_mmu_sram_arbiter.v": "4768e4027e0432331f955c14a9deeb6d2af93a7467d8e3e595acfc9f5b3cb559",
+    "tools/build_mmu.py": "4027336c416254b9a0be86595cec05211d02920c674cd44ed57ff7f09a986ae5",
+    "tests/mmu/tb_decode.v": "a3b6e30ecc44d3dabf2a4f15d441e6b92802dd4cedb0f50c06258bc0c4b9a72d",
+    "tests/mmu/tb_rom.v": "eb87d85189a1e1b71701a44b9e4a842c61a9b4286dfdb05374a32f852d31ca28",
+    "tests/mmu/tb_translate.v": "3a68a798f24b3cd1b8eb4910e1d82d792fa6bb106abf7708358bb061b0fa498d",
+    "tests/mmu/tb_mmu.v": "32cb2c59f8be222956ebc499224f96ffbcc8668c5a04760000689bcbf1d16304",
+    "tests/mmu/tb_mmu_cache.v": "a7a595e6e774d60a2d9a949bf1043de9171b60091a36bdcfb5570e493130377a",
+    "tests/mmu/tb_cpu.v": "056d865b7907c29faf19eb8e0f596a5abc8329c99ac1a192d2247132c3f2e028",
+    "tests/mmu/tb_csm.v": "20ea280fc11dd0b2ccfc5ac96cfbe7a60b862d2d8e73508c901b7d0d71c4b553",
+    "tests/mmu/tb_locked.v": "93fd43bd32be8b556d77728959e4c4f397930c8b0037b3755c78c5017b0b635c",
+    "tests/mmu/tb_cpu_events.v": "9e7bae55cc13cd8b4f8582cb40213824c5c0cdc0d20433303791b9425f6f6e38"
+  },
+  "microcode_sha256": "4ff5c0a8c7042cf8e7c5824463f740a17553a1a6058f4c8309cc0c639450990e",
+  "rom_sha256": "1022df49df7cf2b8f455597c0b25490740dcc6e90053cf21b1fe06b96b87289e",
+  "tests": [
+    "tb_decode",
+    "tb_rom",
+    "tb_translate",
+    "tb_mmu",
+    "tb_mmu_cache",
+    "tb_cpu",
+    "tb_csm",
+    "tb_locked",
+    "tb_cpu_events"
+  ]
+}

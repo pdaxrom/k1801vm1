@@ -36,7 +36,7 @@ def run():
         return rows
     with ThreadPoolExecutor(max_workers=2) as pool:
         rows=list(pool.map(sample,range(4)))
-    baseline=json.loads((ROOT/'releases/hc7000-pal-preview/validation/test-pal-cpu-perf/result.json').read_text())
+    baseline=json.loads((ROOT/'tests/baseline/pal-cpu-perf.json').read_text())
     names=['register arithmetic','memory read/modify/write','EIS MUL/DIV/ASH','memory copy']
     comparisons=[]
     for n,name in enumerate(names):

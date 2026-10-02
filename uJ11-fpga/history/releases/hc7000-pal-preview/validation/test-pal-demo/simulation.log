@@ -1,0 +1,9 @@
+
+PAL demo: 1=640x200 2=320x200 S=scroll P=page B=bars Q=halt
+SP2BQ
+PASS PAL PDP-11 demo: text 80/40 columns, two pages, ring scroll, pattern and HALT
+- tests/mmu/tb_pal_demo.v:68: Verilog $finish
+SERV stack writes: 208 / 640 reserved bytes
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 2s; walltime 131.438 s; speed 14.304 ms/s
+- Verilator: cpu 131.413 s on 1 threads; allocated 4 MB

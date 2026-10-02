@@ -186,8 +186,8 @@ J11 (`177566`, восьмеричный адрес) в очередь терми
 
 ### Свободные ресурсы до добавления PAL
 
-Фактические данные из [MAP](../releases/hc7000-serv-unibus/synthesis/serv-unibus-50-01_impl1.mrp)
-и [результата синтеза](../releases/hc7000-serv-unibus/synthesis/result.json):
+Фактические данные из [MAP](../history/releases/hc7000-serv-unibus/synthesis/serv-unibus-50-01_impl1.mrp)
+и [результата синтеза](../history/releases/hc7000-serv-unibus/synthesis/result.json):
 
 | Ресурс | Занято | Всего | Свободно |
 |---|---:|---:|---:|

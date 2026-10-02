@@ -1,0 +1,44 @@
+{
+  "case": "rsx-rq1",
+  "validation_completed": true,
+  "boot_passed": true,
+  "expected_nonbootable": false,
+  "all_devices_supported": true,
+  "media": {
+    "case": "rsx",
+    "sources": {
+      "rsx11/rsxm11sys.dsk": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950",
+      "rsx11/rsx11mpbl87.dsk": "0ab0866bc2a53bf484e2c9367a0c79e77407853a72df07b58d8e7f30c61787e5"
+    },
+    "image_sha256": "d898aca292d07d93fe03993f3c9a07ca4fba42203b06dc5b74a850bae76a42c0",
+    "partitions": [
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 0,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 311300,
+        "used": 159385600,
+        "label": "rq0"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 1,
+        "media": 5,
+        "flags": 1,
+        "mode": 0,
+        "start": 315392,
+        "blocks": 311232,
+        "used": 159350784,
+        "label": "rq1"
+      }
+    ],
+    "menu_sha256": "8ac74e9fa2a0d5e7b2a64ad4b73649217fa013f617c548439db157266c249f0f"
+  },
+  "originals_unchanged": true,
+  "boot_trigger": "Enter"
+}

@@ -1,0 +1,30 @@
+{
+  "case": "rt11v4",
+  "validation_completed": true,
+  "boot_passed": true,
+  "expected_nonbootable": false,
+  "all_devices_supported": true,
+  "media": {
+    "case": "rt11v4",
+    "sources": {
+      "rt11v400.dsk": "a859f496d4708e61a8fef1d24131255f308fd3e2d7cdde08f28035ec18c396bb"
+    },
+    "image_sha256": "2ace61e3422a2e8be7e20a5921da0281f6653b8a94ec91cd7027931ddfd1c50e",
+    "partitions": [
+      {
+        "kind": 1,
+        "controller": 0,
+        "unit": 0,
+        "media": 1,
+        "flags": 1,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 4872,
+        "used": 2494464,
+        "label": "rk0"
+      }
+    ],
+    "menu_sha256": "8ac74e9fa2a0d5e7b2a64ad4b73649217fa013f617c548439db157266c249f0f"
+  },
+  "originals_unchanged": true
+}

@@ -101,7 +101,7 @@ MAP/PAR/TRACE `mmu-nofpp-01` (генератор 12 МГц, системный `
 | Fmax системного clk | 24.754 МГц | 26.183 МГц | — |
 
 Свободны 3628 LUT и 8 EBR. Отчёты и JED находятся в
-[hc7000-mmu-nofpp](../releases/hc7000-mmu-nofpp/README.md).
+[hc7000-mmu-nofpp](../history/releases/hc7000-mmu-nofpp/README.md).
 Повторная сборка включённого варианта `mmu-fpp-switch-01` также проходит
 24 МГц: 5682 LUT, 25 EBR, Fmax 24.915 МГц. Таблица выше сравнивает отключение
 с ранее выпущенной прошивкой, а не с этой повторной сборкой.
@@ -283,11 +283,11 @@ SIMH дополнительно объявляет Cache Memory и имеет у
 User→User/User→Supervisor и RTI), весь дифференциальный FPP, полный RTL
 BASIC и повтор на плате. В обоих BASIC ошибки возвращают READY, затем
 `2+2` даёт 4. PSW по 177776₈ уже был реализован и не являлся причиной.
-Подробности и прошитый JED: [исправление TRAP](../releases/hc7000-mmu-trap-fix/README.md).
+Подробности и прошитый JED: [исправление TRAP](../history/releases/hc7000-mmu-trap-fix/README.md).
 
 Остаётся расширение покрытия редких особенностей CPU: стековые ограничения,
 сочетания trace/IRQ и другие специфические случаи DCJ11. Факт запуска XM
 не заменяет эти проверки.
 
 Сохранённая база для сравнения с будущим отдельным FPU:
-[`releases/hc7000-mmu-microcoded`](../releases/hc7000-mmu-microcoded/README.md).
+[`releases/hc7000-mmu-microcoded`](../history/releases/hc7000-mmu-microcoded/README.md).

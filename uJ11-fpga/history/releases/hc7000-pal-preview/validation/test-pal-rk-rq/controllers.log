@@ -1,0 +1,7 @@
+SD image: /Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/build/test-pal-rk-rq/controllers.img (1048576 sectors), read-only backing, 256-sector RAM overlay
+PASS MMU RK/RQ service: 915310 checks
+- tests/mmu/tb_storage_rk_rq.v:197: Verilog $finish
+SERV stack writes: 320 / 640 reserved bytes
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 1s; walltime 12.736 s; speed 86.875 ms/s
+- Verilator: cpu 12.734 s on 1 threads; allocated 5 MB

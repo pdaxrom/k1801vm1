@@ -1,0 +1,20 @@
+{
+  "programmed_jed": "2AAE",
+  "jed_sha256": "bbd928a12c26510053a42ad600baa9f9786c0d40d58da792bf66608a7ec1816a",
+  "flash_verified": true,
+  "demo_started": true,
+  "demo_bytes": 3798,
+  "demo_sha256": "338ad523a4f12a734707721bb8f011e3c2431783786dc0e3ae40db038f144573",
+  "full_readback_verified": true,
+  "start_octal": "020000",
+  "mode": "640x200 4bpp, text 80x25",
+  "uart_released": true,
+  "picocom_resumed": true,
+  "sd_modified_by_this_task": false,
+  "visual_pal_confirmed": true,
+  "known_issue": "ODT inherits byte width after byte instruction; HALT workaround used, RTL reproducer saved",
+  "started_utc": "2026-09-30T19:15:36Z",
+  "finished_utc": "2026-09-30T19:17:36Z",
+  "visual_confirmation_source": "User: работает",
+  "analog_measurements_performed": false
+}

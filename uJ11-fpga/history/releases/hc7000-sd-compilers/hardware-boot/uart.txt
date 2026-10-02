@@ -1,0 +1,121 @@
+uJ11 SD BOOT MENU
+Detected controllers:
+  1 - RK11 (rk0..rk7)
+  2 - RH11/HK, units: 0 1 
+  3 - XP/RP, units: 0 
+  4 - RQ (MSCP) (rq0..rq3)
+  5 - RL11, units: 0 1 
+Default: RL0 - boot in 5s, Enter=boot, other key=menu: 
+Select controller [1/2/3/4/5/6]: 2
+Select unit [0..7]: 0
+Booting RH/HK bootstrap...
+
+RT-11XM  V05.03  
+
+.TYPE V5USER.TXT
+
+                              RT-11 V5.3
+
+       Installation of RT-11 Version 5.3 is complete and you are now
+    executing from the working volume    (provided you have used the
+    automatic installation procedure). DIGITAL recommends you verify
+    the correct  operation  of  your  system's  software  using  the
+    verification procedure.  To do this, enter the command:
+
+                             IND VERIFY
+
+        Note that VERIFY should be performed  only after the distri-
+    bution media have been backed up.  This was accomplished as part
+    of automatic installation on  all  RL02,  RX02,  TK50, and  RX50
+    based systems,   including the  MicroPDP-11 and the Professional
+    300.  If you have not completed automatic installation, you must
+    perform a manual backup before using VERIFY.  Note also,  VERIFY
+    is NOT supported on RX01 diskettes,    DECtape I or II,   or the
+    Professional 325.
+
+    DIGITAL also  recommends  you  read  the  file V5NOTE.TXT, which
+    contains information  formalized too late to be included  in the
+    Release Notes.  V5NOTE.TXT can be TYPED or PRINTED.
+
+
+.ASSIGN DM1: VOL:
+
+.ASSIGN RK1: BAS:
+
+.ASSIGN RK2: PAS:
+
+.ASSIGN RK3: FOR:
+
+.SET SL OFF
+[r[24H\
+.SHOW CONFIGURATION
+
+RT-11XM  V05.03  
+Booted from DM0:RT11XM
+22 bit addressing is on
+
+USR   is set NOSWAP
+EXIT  is set SWAP
+KMON  is set NOIND
+TT    is set NOQUIET
+ERROR is set ERROR
+SL    is set OFF
+EDIT  is set KEX
+KMON nesting depth is 3
+Global .SCCA flag is disabled
+
+PDP 11/73A Processor
+2048KB of memory
+Floating Point Microcode
+Extended Instruction Set (EIS)
+Floating Instruction Set (FIS)
+Memory Management Unit
+Cache Memory
+60 Cycle System Clock                  
+
+Device I/O time-out support
+System job support
+FPU support
+
+
+.DIR VOL:
+ 
+ADDER .PAS     1                 ADDER .OBJ     3           
+ADDER .LST     2                 ADDER .MAP     6           
+ 4 Files, 12 Blocks
+ 53644 Free blocks
+
+.DIR BAS:BASIC.SAV
+ 
+BASIC .SAV    53  04-Apr-83      
+ 1 Files, 53 Blocks
+ 4076 Free blocks
+
+.DIR PAS:XM.SAV
+ 
+XM    .SAV   474  07-Mar-85      
+ 1 Files, 474 Blocks
+ 1714 Free blocks
+
+.DIR FOR:FORTRA.SAV
+ 
+FORTRA.SAV   128                 
+ 1 Files, 128 Blocks
+ 4476 Free blocks
+
+.RUN BAS:BASIC
+BASIC-11/RT-11 V2.1   
+OPTIONAL FUNCTIONS (ALL, NONE, OR INDIVIDUAL)? A
+
+READY
+PRINT 2+3
+ 5 
+
+READY
+BYE
+
+.RUN PAS:XM
+
+?MON-F-Ovly err 001070
+
+.

@@ -96,4 +96,4 @@ RK05/RQ с активным PAL, RL/XP и RH, ошибки CRC и разметк
 `TYPE V4USER.TXT` выполнены: 2816 проверок, 63885 слов DMA. Исходный образ
 диска не изменён. Это проверка в RTL-симуляции, не на физической плате.
 
-Исходники, отчёты и результаты: [hc7000-serv-shared](../releases/hc7000-serv-shared/README.md).
+Исходники, отчёты и результаты: [hc7000-serv-shared](../history/releases/hc7000-serv-shared/README.md).

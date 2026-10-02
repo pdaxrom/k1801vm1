@@ -82,7 +82,7 @@ class Profiles(unittest.TestCase):
             with self.assertRaises(ValueError):clock_mhz()
 
     def test_mmuless_sources_unchanged(self):
-        baseline=json.loads((ROOT/'releases/hc7000-serv/validation/hc1200-unchanged.json').read_text())
+        baseline=json.loads((ROOT/'tests/baseline/hc1200-serv.json').read_text())
         for path,digest in baseline['unchanged_sources'].items():
             with self.subTest(path=path):
                 self.assertEqual(hashlib.sha256((ROOT.parent/path).read_bytes()).hexdigest(),digest)

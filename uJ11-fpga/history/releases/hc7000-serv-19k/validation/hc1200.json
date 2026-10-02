@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "command": "python3 tools/verify_production.py",
+  "result": "PASS production: RTL/EBR token identity, three exact ROM images, rebuilt software, released BASIC and JED",
+  "log_scope": "Summary of the completed verification in this task; the full console transcript was not retained.",
+  "inputs": {
+    "tools/verify_production.py": "10e3b0a95275687587cf9e6eebf9b3ceaad38b0eb66da7f43fb869132f8454f0",
+    "tests/baseline/production.json": "8ed43f822054eb0809713d006409104550f0d8c3067f46844a65a625c97dcbf1",
+    "releases/hc1200/inputs.json": "6d03a22776872a44fa8f99fba7630eb8743a71b8eb46675b0371fd99d4157b69",
+    "releases/software/manifest.json": "1d7d58b2fbaec5299573342bfc0bf10821c2d2b109137de68a31236d5072d1b3"
+  }
+}

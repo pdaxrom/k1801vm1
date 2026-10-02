@@ -1,0 +1,164 @@
+{
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "resolved": "/dev/sdf",
+  "diskseq": "100",
+  "physical_bytes": 7988051968,
+  "before": {
+    "blocks": 1048576,
+    "partitions": [
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 0,
+        "media": 7,
+        "flags": 1,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-root"
+      },
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 1,
+        "media": 7,
+        "flags": 0,
+        "mode": 0,
+        "start": 22528,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-swap"
+      },
+      {
+        "kind": 3,
+        "controller": 0,
+        "unit": 0,
+        "media": 4,
+        "flags": 0,
+        "mode": 0,
+        "start": 43008,
+        "blocks": 500384,
+        "used": 256196608,
+        "label": "bsd-usr"
+      }
+    ],
+    "sequence": 3,
+    "reserved": 2048,
+    "features": 1
+  },
+  "after": {
+    "blocks": 15601664,
+    "partitions": [
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 0,
+        "media": 7,
+        "flags": 1,
+        "mode": 0,
+        "start": 2048,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-root"
+      },
+      {
+        "kind": 5,
+        "controller": 0,
+        "unit": 1,
+        "media": 7,
+        "flags": 0,
+        "mode": 0,
+        "start": 22528,
+        "blocks": 20480,
+        "used": 10485760,
+        "label": "bsd-swap"
+      },
+      {
+        "kind": 3,
+        "controller": 0,
+        "unit": 0,
+        "media": 4,
+        "flags": 0,
+        "mode": 0,
+        "start": 43008,
+        "blocks": 500384,
+        "used": 256196608,
+        "label": "bsd-usr"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 0,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 1048576,
+        "blocks": 311300,
+        "used": 159385600,
+        "label": "RSX-SYS"
+      },
+      {
+        "kind": 4,
+        "controller": 0,
+        "unit": 1,
+        "media": 5,
+        "flags": 0,
+        "mode": 0,
+        "start": 1361920,
+        "blocks": 311232,
+        "used": 159350784,
+        "label": "RSX-PBL"
+      }
+    ],
+    "sequence": 5,
+    "reserved": 2048,
+    "features": 1
+  },
+  "sources": [
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/cpu-next/rsx-disks/rsxm11sys.dsk",
+      "bytes": 159385600,
+      "sha256": "223d1e4d0f4845df127a702fd3fde1469561cdac92c3146ed7c196b40e687950"
+    },
+    {
+      "file": "/home/sash/Work/FPGA/uj11-serv-compact-20260928/uJ11-fpga/build/cpu-next/rsx-disks/rsx11mpbl87.dsk",
+      "bytes": 159350784,
+      "sha256": "0ab0866bc2a53bf484e2c9367a0c79e77407853a72df07b58d8e7f30c61787e5"
+    }
+  ],
+  "passed": true,
+  "backups": [
+    {
+      "file": "original-prefix.img.gz",
+      "offset": 0,
+      "bytes": 1048576,
+      "sha256": "cc0023343e9fce04e4f2bb32cf925b5f8a67393faf8c677ae5bc8f56ed493a2b"
+    },
+    {
+      "file": "original-rq0-range.img.gz",
+      "offset": 536870912,
+      "bytes": 159385600,
+      "sha256": "2bea8a690cf42a327ce98bdb0210b53c93ec7783eec0df027074acb9b122d19c"
+    },
+    {
+      "file": "original-rq1-range.img.gz",
+      "offset": 697303040,
+      "bytes": 159350784,
+      "sha256": "2fea59ba42a0c30677d9207486e69cc0ef5e90470bab7b73bb0307b2542ecbe3"
+    }
+  ],
+  "bsd_before": {
+    "5:0": "20c376bb086499ef4dd5218a0c31613922d38f2bfb012f5066a91bde601097bb",
+    "5:1": "47f5eae03839c9b0a4b140b711f08ec5318e8ce5337d2395cbe154cd05ce5936",
+    "3:0": "43593cf2323e2383a2f0b38696a038d2b37c2bc9c72dad4cb3d5e208a9a21065"
+  },
+  "bsd_after": {
+    "5:0": "20c376bb086499ef4dd5218a0c31613922d38f2bfb012f5066a91bde601097bb",
+    "5:1": "47f5eae03839c9b0a4b140b711f08ec5318e8ce5337d2395cbe154cd05ce5936",
+    "3:0": "43593cf2323e2383a2f0b38696a038d2b37c2bc9c72dad4cb3d5e208a9a21065"
+  },
+  "bsd_preserved": true,
+  "rq_payloads_verified": true,
+  "default_boot": "rl0"
+}

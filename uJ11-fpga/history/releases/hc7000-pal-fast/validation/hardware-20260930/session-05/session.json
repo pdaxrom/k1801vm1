@@ -1,0 +1,16 @@
+{
+  "phase": "PAL demo 2AAE",
+  "port": "/dev/ttyUSB1",
+  "passed": true,
+  "commands": [],
+  "started_utc": "2026-09-30T19:15:36Z",
+  "driver_sha256": "0e429b4cee507e035700b6315d7329268d8e333cf43391a4f2e1335cf924afc7",
+  "initial_pc": "000002",
+  "initial_psw": "000340",
+  "demo_sha256": "338ad523a4f12a734707721bb8f011e3c2431783786dc0e3ae40db038f144573",
+  "demo_bytes": 3798,
+  "full_readback_verified": true,
+  "demo_banner_seen": true,
+  "uart_bytes": 51399,
+  "finished_utc": "2026-09-30T19:17:36Z"
+}
