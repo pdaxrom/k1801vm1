@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-06",
+  "primary_references": [
+    {
+      "url": "https://gid.pdp-11.net/books/Zaltsman.html",
+      "section": "Прерывания: СТОП, отсутствующий регистр 177676, вектор 4 и признак 177716[2]."
+    },
+    {
+      "url": "https://github.com/nzeemin/bkbtl/blob/master/emulator/emubase/Processor.cpp",
+      "saved": "bkbtl-Processor.cpp",
+      "sha256": "6ca831fbcc71332b982ee49574d246bfc08480542d18a47e2ffd9367f7d64964"
+    }
+  ],
+  "cause": "BK console-save registers 177674/177676 were falsely acknowledged by the default unmapped bus response. Native IRQ1 therefore loaded the wrong console vector rather than timing out into BK vector 4. Level-held STOP additionally needs one accepted event per press.",
+  "scope": "Native VM1 remains upstream; wrapper models missing console bus reply, STOP acknowledgement and read-to-clear system flag."
+}

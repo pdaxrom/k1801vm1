@@ -28,7 +28,7 @@ CORE_OBJS := $(BUILD_DIR)/core/core.o $(BUILD_DIR)/core/disas.o \
 	$(BUILD_DIR)/core/hardware.o
 # Object files for the emulator. X11 GUI objects are added only when the X11
 # backend is selected.
-OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/bk_hw.o $(BUILD_DIR)/bk_tape.o \
+OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/bk_hw.o $(BUILD_DIR)/bk_roms.o $(BUILD_DIR)/bk_fdd.o $(BUILD_DIR)/bk_tape.o \
 	$(BUILD_DIR)/bk_timing.o $(CORE_OBJS) $(X11_OBJS)
 DEPS := $(OBJS:.o=.d)
 

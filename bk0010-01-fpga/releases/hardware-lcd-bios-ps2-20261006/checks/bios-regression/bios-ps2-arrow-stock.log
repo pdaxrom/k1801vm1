@@ -1,0 +1,11 @@
+BIOS PS2 stage=01 time_ms=17 reads=0
+BIOS PS2 stage=02 time_ms=29 reads=0
+BIOS PS2 stage=03 time_ms=160 reads=2
+BIOS PS2 stage=10 time_ms=298 reads=4
+BIOS PS2 stage=11 time_ms=538 reads=4
+PASS saved model 3: physical Backspace opens BIOS
+PASS stock 3 MHz BIOS: physical menu entry and Left/Right; no SD writes
+- tests/tb_bios_keyboard.v:94: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 1s; walltime 215.926 s; speed 6.683 ms/s
+- Verilator: cpu 215.700 s on 1 threads; allocated 2 MB

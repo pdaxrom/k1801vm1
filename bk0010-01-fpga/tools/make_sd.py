@@ -11,6 +11,8 @@ import stat
 import struct
 import zlib
 
+from models import settings
+
 ROOT = Path(__file__).resolve().parents[1]
 SECTOR = 512
 ALIGN = 2048
@@ -95,7 +97,7 @@ def build(loader, monitor, basic):
     image[510:512] = b'\x55\xaa'
     struct.pack_into('<B3sB3sII', image, 446, 0, b'\xfe\xff\xff', 0x06,
                      b'\xfe\xff\xff', ALIGN, BOOT_SECTORS)
-    image[ALIGN*SECTOR:] = fat16({'LOADERBK.BIN': loader, 'BK0010.ROM': rom})
+    image[ALIGN*SECTOR:] = fat16({'LOADERBK.BIN': loader, 'BK0010.ROM': rom, 'BK.SET': settings()})
     return bytes(image)
 
 

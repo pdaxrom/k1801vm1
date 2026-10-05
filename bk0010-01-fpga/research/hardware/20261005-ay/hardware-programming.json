@@ -1,0 +1,47 @@
+{
+  "flash_program_verified": true,
+  "programmed_to": "FLASH",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "ef60ab649605631f65b948b4ab9ebc8b9a1ba9f349953b190572ebc1da5cd257",
+    "checksum": "EC40",
+    "transmission_checksum": "F3C1",
+    "fuses": 1441280
+  },
+  "device": "LCMXO2-7000HC",
+  "boot_stages": [
+    "01",
+    "02",
+    "03",
+    "10",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "boot_errors": [],
+  "uart_bootstrap_verified": true,
+  "uart_released": true,
+  "audio_on_board_verified": true,
+  "disk_shell_on_board_verified": false,
+  "sd_written_in_this_session": false,
+  "operator_sd_returned_to_board": true,
+  "logs": {
+    "flash-session/01-verify-id.log": "25d739c0e580aee87c7982612a246b9952bcd09bc5b11dbf7b6816201472c5f5",
+    "flash-session/session.json": "5d68bc813804e2f8d02a9ce053d0f0c33e771e91a585d815f7d4b79a01b826ca",
+    "flash-session/01-verify-id-stdout.log": "a50650a061f0b5fae630ea8e19ef05dc8354a75de2076c81723a2d7cb2ef24bb",
+    "flash-session/01-verify-id.xcf": "6af519305a0ce3be4a00bb040a35a99da193fde24d93e13dd90b10edcbb56a13",
+    "flash-session/02-program-stdout.log": "6067dbb8b26f613a155e8581e92d944cfebab8f8e549011580ebef426bd4349f",
+    "flash-session/uart.bin": "623038dda760d90365574281e7fa798d0b075391749f0c9bce9c83b719bdb7eb",
+    "flash-session/programmer-old.log": "a2f39dcf652e56463ef179a7c7e9cbcb08ef0b7c5e173081664a0c4a69fb7b4e",
+    "flash-session/02-program.xcf": "9081e4bbff001418bf0a79bc1a8e5a9b329d9909e7bb7540d44e9b6a23740665",
+    "flash-session/02-program.log": "1233f02db6f234411c2034f1b8ff63f92a893af5d1dad50733e8a034654bba09"
+  },
+  "audio_connector_verified": false,
+  "operator_feedback": {
+    "report": "operator-feedback.json",
+    "sha256": "a5c450d43d5d7bffe14d83bb9062ac9f9e955e87f5f2538bae3167c2851907f1",
+    "scope": "Audible AY music confirmed on flashed hardware. Connector/contact fault remains under diagnosis; no confirmation of DOS shell, beeper, all models or all CPU frequencies."
+  }
+}

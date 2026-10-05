@@ -1,0 +1,295 @@
+{
+  "physical_board_verified": false,
+  "device": "LCMXO2-7000HC-4TG144I",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "6ef462a6bb1d1eac4a542fbbb48e8e71a9ea08befd867e4476395dbcac7aedf0",
+    "checksum": "D43E",
+    "transmission_checksum": "90B4",
+    "fuses": 1441280
+  },
+  "sd_files": {
+    "LOADERBK.BIN": {
+      "bytes": 664,
+      "sha256": "d843da39a8692de8179073f63661a1b5c95002feea903d3eca81655101640776"
+    },
+    "BK00.ROM": {
+      "bytes": 37376,
+      "sha256": "bb8d6d2b26ef35769cb9c8297ecb9db195b92933d886c19ffb6f3f2ed06a05e3"
+    },
+    "BK01.ROM": {
+      "bytes": 49536,
+      "sha256": "8e474077ec082d138ee0853360709205d6569ffbeb5ab251982470a871de29cc"
+    },
+    "BK02.ROM": {
+      "bytes": 33280,
+      "sha256": "8abbdb79e264c2e7741956bb0f7e831d016d6e0846b6c62d7effd2856b958fd3"
+    },
+    "BK03.ROM": {
+      "bytes": 45568,
+      "sha256": "aafec6a6007ef31632ed5523ffd49b3b3adebbf61521d11eeb085b6d7f1f1e7f"
+    },
+    "BK04.ROM": {
+      "bytes": 49664,
+      "sha256": "12c6bc7e46f8f978471b7c7cae602e7bdda5e91df6974bb5e79e7ea3b22cb9a5"
+    },
+    "BK.SET": {
+      "bytes": 16,
+      "sha256": "3492cd5045d9bc61537d666063d42101e817464bc8eeb3cc1f4320e7e8db8f6c"
+    }
+  },
+  "checks": {
+    "models": {
+      "passed": true,
+      "report_sha256": "4a25db8cc8876338ce7f36702d9a739accc268bee3083b342319401f08b83c72",
+      "logs": {
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "models-format.log": "27c4a39d34ece4cbc66cc59cb0870c7abe4cc0a5f009205bdd0ea06a93f8b3ac",
+        "compile-models-c.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "models-c.log": "a473569721855e02f52d68637ac4bcfbf2882a8765ad307da75d9a4663c94624",
+        "compile-models.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "models.log": "a98d34909f42a41417928e01e87ee58642c15cd72920d3597eff59bc85f71061"
+      }
+    },
+    "fast": {
+      "passed": true,
+      "report_sha256": "f6e4bf85705e53d0a54176f27c3737f1b010ffe2a9d7db1199f97b2e38f1f28b",
+      "logs": {
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-sd_host.log": "585b4a13865923803161ff94275646e88fbe1f94d83b008d5b5d48a02828d24e",
+        "sd-host-sdhc.log": "2e4760722f4f7a656daf3033110489637dd9438b252086c49943783617da7a4b",
+        "sd-host-sdsc.log": "5089e878e6259afa48915402d6e384421d6334816e6f52876fb78a2439a0cfa1",
+        "sd-host-write-error.log": "442a3d3ff283d50f2e68b5f5ed99d266b3277c5dd1aacebb2f180b552fed113d",
+        "sd-host-read-crc.log": "d5c74fdccbe6da54f890e71f1a24b99f302f39d24f2afe51ffb14e3cb082d25a",
+        "compile-sd_partitions.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sd_partitions.log": "690235fc185363d85687da67f48e307b7933cb8422ab561e824db8b93b5a0cf4",
+        "compile-fdd_track.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "fdd_track.log": "7a98e8020cc4a12edb44131f227c0dcfb81cd58ab96185fe860187729261b1de",
+        "compile-clock_stall.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "clock_stall.log": "aac5266e1fd87e65b8c9062e756ff7f3bfc059a14e24497562784403377dd8b4",
+        "compile-clock_mailbox.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "clock_mailbox.log": "dcc0fc6278e00fd90b7523cfc51d65df5a30b437932b02efc68e301e9eb2033f",
+        "compile-panel.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "panel.log": "e60785cfe274ee44d9f1b8ff536e75a40783832f5610c017b90ded7e3ee9785b",
+        "compile-cdc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "cdc.log": "010cfc24c471037c5500275e6841e9855527243d5d0a03834bd78f09781f5253",
+        "compile-keyboard.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "keyboard.log": "0716c68541f266fdfa76207aeb8f4841316e04abc1ce9de0910aa79dfb086dc6",
+        "compile-uart.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "uart.log": "1387896f791828af3b48fd2cb69a2e0fba9fd651e4a7903303b7023ab0337184",
+        "compile-pal_encoder.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "pal_encoder.log": "7968620652e7a964bec05e05eba21ee710a4a83db667b468998e9770933f87a4",
+        "compile-memory.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "memory.log": "5b5e1aaa8a7e12a848072769f0047672da91dff086c04683ae4da272c1ddbc4e",
+        "lint-soc.log": "57fa27cbf79d7f13cef6274064dbf879a54bfbae9a7eeebac1008b6b36c074c8",
+        "compile-video.log": "61cf89c1832a52ec6f5f4ece4d4fa0a6c524c3fdc3d0d4f972fe31a588067925",
+        "video-mono-colour.log": "f5bcbe9c6a5ba2264f447492e73a6b6f132f35a3db66712e151c6f5c2022c71e"
+      }
+    },
+    "reference": {
+      "passed": true,
+      "report_sha256": "8f945d2f57b33adc3917a7eb26d6dce387c9aa829cb791300d457183eb1ee3ee",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-reference-c.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "reference-c.log": "d89aa023231f426f21e86bba0346e483e3e508929bfccd3f614189a16aa2d4af"
+      }
+    },
+    "fdd": {
+      "passed": true,
+      "report_sha256": "5f814c955df814b0dc91f228252f58aad1c1d17e30f1bfaa4bad306788f8ecdb",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-fdd-reference.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "fdd-reference.log": "1fb590506ab1549dbf4475932e0f07f8466f2108a1e58881e0c7dbffbfa7004a",
+        "fdd-reference-a16m.log": "b6876ff807328be151df848215d364b448467350610d862acfdc9263cc8bc7f4",
+        "assemble-fdd-test.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-fdd_native.log": "1542934d305c51efbc8ae4ff74a321e181eb2130ca0f8f91b76dd3dcb0a3f0a5",
+        "fdd-native-3MHz.log": "a273464270abab353861a87529882a5e8f9cde77e1d49d0c39c2ea18c9ba2499",
+        "fdd-native-a16m-3MHz.log": "b5d6041165db7595ce0920d92f1aa92eafa9db9b06a6d74e0af3429b7a499c9a",
+        "fdd-native-4MHz.log": "d93f8d5a9decf625c48a8a837d7e0abb9473a93face188447768c30d01e608ce",
+        "fdd-native-a16m-4MHz.log": "b2e07f3c0da8a0f549a46eeb98fb1f414d1a5680891276cc14de7665bec2db1b",
+        "fdd-native-6MHz.log": "ef21b585e8b5737f74a6d55d5a80a3a63392b826ebf0064e639ab940d58cc782",
+        "fdd-native-a16m-6MHz.log": "1083a542d3cfa76852eaeb8a091a8578ea8729e77cddc5c55adfc6cb90ebe9c2",
+        "fdd-native-8MHz.log": "ff4635fe6c0220cf74e36ed3a55461a740a41f9c98c1272c1945b7d436e83fb2",
+        "fdd-native-a16m-8MHz.log": "795daf2ce58a9ffb710355f6c949f799c0553e87637c0a67b4e0a7d1ad0ba663",
+        "fdd-native-12MHz.log": "f6225cc067d1786092ae8fa343c3126db8afcc6cdb45f99455ac123de72a706c",
+        "fdd-native-a16m-12MHz.log": "1baf4db41ee6782ce17f9763294bfdc7725e45307dfbfaae37cd7b93de65c80c",
+        "fdd-native-16MHz.log": "3e6278a6e585e91355af7a31350a6faa0974d7e2ffdd21f94a8f042fa72e3f95",
+        "fdd-native-a16m-16MHz.log": "b34e80fcbbed1ceb14917494bad5c1118b4ab96b912f498c8fe7f5686e364895",
+        "fdd-native-24MHz.log": "26b98608555bed128dfb579ddf9d8d8ecd9ab9674c76d8ff62a93d4e85791465",
+        "fdd-native-a16m-24MHz.log": "3099323407a1e95232721ddc1252d3cc1dc97fd38f207f115169758fe53c8a1d"
+      }
+    },
+    "storage": {
+      "passed": true,
+      "report_sha256": "6f33eefa8e1f8e443e8186c60bdae9d3a651f3c8d41c4d8167ba8422d8192e78",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "assemble-fdd-test.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-fdd_sd.log": "5547b8ed78b39c34cf91d4ed5847a4d7c8f0997a0c2232fc16d8186af7847297",
+        "fdd-sd-327-sdhc.log": "a653ea1768b2002009f42481bebc95eb0aee08a15eb74d66b46aabd53f4bd447",
+        "fdd-sd-a16m-sdsc.log": "be65167edbd9a4d8d642134e40defc7af19b425c3af1330aff1f95accda712ef"
+      }
+    },
+    "profiles": {
+      "passed": true,
+      "report_sha256": "c6007d27edc5fe191a4a2ae04726ee606ab60aec3a4eba257e68d4a95c0147c2",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-model-boot-c.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "model-boot-c.log": "f31af589d4110d0c57bdf9d0828ae1d79b06d87d0702439e5f6a96fd7045d726",
+        "compile-sd_boot.log": "28bfbf752d99bd21acb179ed12bacdb4eacb12c435cd8b811fb761d5e9dac803",
+        "native-profile-1.log": "325327dcc01f4b44a084e643eb3f401c13c3b40c5f96467b84d8efaa80a49bd2",
+        "native-profile-2.log": "deef30e743ec6b640c39f7a064e00d12cc461fc54f8ba1f025a9a6158d527fde",
+        "native-profile-3.log": "bb5d2abd1d2cdf3b7709783dc6d8b5eb5d15ed681c6439539bf6a9886598df38",
+        "native-profile-4.log": "4ed89c9267eaeacd0b642221028c8f37701101e70124dd9157ca43409c474544",
+        "native-profile-0.log": "57dc8025d334b4060127605af252c25c174866f6820493b9bbdc1c3c38f3099e",
+        "native-profile-1-sd.log": "24554c0cadad53da03b812950c2d5076c6584bc4e723aacb41c09674a4ab45c7",
+        "native-profile-2-sd.log": "5efb29eace74719c8c05cc3759bb60853efda129c459fea53aca3bb89cba69ac",
+        "native-profile-0-sd.log": "37e46b5a294e6f7009bc8c8a927c083ee4c48a0c283cfef5c645b1655723b9ee",
+        "native-profile-4-sd.log": "c827c9a669cdeac53d43212ecf83844db08486b8e1afe841ea1f3da20a18eedb",
+        "native-profile-3-sd.log": "b91a811251f5608cfcb5207b1fcf17003bf86244afbbd8b1672dbf8163dc8972"
+      }
+    },
+    "bios": {
+      "passed": true,
+      "report_sha256": "4ace89141fb44be7708d59d49556a9c892d682ecfd647f930602e1135ca2a961",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-sd_boot.log": "28bfbf752d99bd21acb179ed12bacdb4eacb12c435cd8b811fb761d5e9dac803",
+        "bios-existing.log": "70f76e5eba7551280201f64964b279af3d47aef62a57d7b031a1ed7ce7a8d2cf",
+        "bios-create.log": "7f47eba26f4f99475548fcc26e5392f0702c7e4f489fc44dd86c3bd25536a0b2",
+        "bios-temporary.log": "569dfcd1ec73634635d03ee6d655fb36e104969d276071b5912fed5b2153b82b",
+        "bios-readonly.log": "48616fa67dcce8f92aded709af9e32f4b98fd6d1be2f32a16e041559e0077211",
+        "bios-metadata.log": "efbd6d7f455b45a20d1dd1674e2322b68a1c75a51ee105326d7c802214260fa1",
+        "bios-full.log": "18a94fc78e373c85d1671282205ee5646c8cd6e9d3a03603f0709edf6cecade5",
+        "bios-write-fail.log": "9d8927a71006a880dc7cce28fe41894635938948690a7ea953a74d70f43acc57",
+        "bios-readback-fail.log": "5336344590af0c339f76ab0487dbd4c9f28e268f775f0ded9bd3efee7d9ed60e",
+        "bios-root-full.log": "895fb04385c55141295ddac7ebeb359a966a6e3a739d3a2cd024ea9e87bf63a6",
+        "bios-model-drive.log": "c5f0ea4ca353d26bc453d01f60daff7e5c6393ea89e22ba79ca204462e0d5791"
+      }
+    },
+    "soc": {
+      "passed": true,
+      "report_sha256": "5a605ea4ded75d5bba4e76711ea515686f10a06963135a3e5ee5eaf967215c46",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-computer.log": "6b7aa619918a6bb507a306c9301e12cc529b285f46e5c2fb918ca89fe5863356",
+        "computer.log": "6730fd5e598b62828928da091708133cbcc46ecf94157732e6517b950a5d7d89"
+      }
+    },
+    "plm": {
+      "passed": true,
+      "report_sha256": "1418dfa5424905e14c68f37573d7db20f7d6964e66a4c4ef509a8b5bf27a3ea0",
+      "logs": {
+        "assemble-boot.log": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+        "assemble-loader.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "compile-plm.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "plm-equivalence.log": "a9b4309f2f7acd51e8ba60be52ce6a9c873a0aea6d219d02b7a163b9ba597d37"
+      }
+    },
+    "mapped-ebr": {
+      "passed": true,
+      "report_sha256": "e0c934b763a8510d3c8c7064313389537532a21ccc8e7438506b88f38d97b740",
+      "logs": {}
+    },
+    "mapped-buffers": {
+      "passed": true,
+      "report_sha256": "8e0f2c42e61d546bea7947852c5c7f1ed6af8ce21a2f378d891886cdfe7e8f32",
+      "logs": {}
+    }
+  },
+  "boot_files": {
+    "boot.bin": {
+      "bytes": 7048,
+      "sha256": "d898914511698c92dffd6bf810475a7ace6737e1c8a84d9bd044fbd31f4575dc"
+    },
+    "boot.hex": {
+      "bytes": 20480,
+      "sha256": "1b457f00a461011be1394de48be08743684b3144b7584de1e5f5bd12c93ad294"
+    }
+  },
+  "omitted_build_logs": [
+    {
+      "group": "models",
+      "name": "assemble-boot",
+      "expected_sha256": "c80806f465fec305772ff22488c47a62278ab43415e97156d28adb77c097ec3e",
+      "current_sha256": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+      "reason": "Shared build log regenerated after this run; original report retained."
+    },
+    {
+      "group": "fast",
+      "name": "assemble-boot",
+      "expected_sha256": "c80806f465fec305772ff22488c47a62278ab43415e97156d28adb77c097ec3e",
+      "current_sha256": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+      "reason": "Shared build log regenerated after this run; original report retained."
+    }
+  ],
+  "routed_sources": {
+    "rtl/bk_boot_rom.v": "8d330fe0766963a0ec04adb426aba9712e43a7bd69e9553ed96405e8e7333690",
+    "rtl/bk_boot_uart.v": "d8757f034913f0f6e041a8aea109d32ed6302b8d4852905c5189290a788ce2f8",
+    "rtl/bk_clock_mailbox.v": "8af22e7da6abfcd36f2339f9a3784f6db3921b5ac0bfb8b81f930642934e1f7c",
+    "rtl/bk_computer.v": "1cb51b04b2924dc8e40a1ded6aec6b7496d4e8b98de842af26623e19d7a1c6d0",
+    "rtl/bk_cpu.v": "781bed84621cf26331ba72d3a2e14508bb6f28ef13bf53e4ede66e87cf93d223",
+    "rtl/bk_cpu_clock.v": "e50a9b2399414079d3c1d150439f485461c1265c1d4031172b1dcf08fa832750",
+    "rtl/bk_crc16_word.v": "eafa89d9003e4e9f38a1887c904b3749bf8bfea6ebc783ea1f34cd01af409147",
+    "rtl/bk_fdd.v": "84f0667447b3e80544c448c18bece8ca60fcaa0eae6e5b32923c72c391970809",
+    "rtl/bk_fdd_track.v": "6d3a874cc35a88fa8e9f4fec1310c8c64a18538491138c3e3ee0e230de8dcedf",
+    "rtl/bk_frequency_display.v": "154cb644bc92bb02916fcc3d1aff8f2dcabcc2e41d4362e6cb426b90f2129db9",
+    "rtl/bk_keymap.v": "eca0573c5fcea084d08eeb08a0669e54a3536bb2b8f274242f97114ddaa83bd2",
+    "rtl/bk_memory_map.v": "125ff8ede36b9aba3c3b558ed8ec2f2f1a3a9901b409c82201d96bf34b77dbea",
+    "rtl/bk_pal_encoder.v": "2c04624e84e4e400aa2d792db034716165b6d4dcf0c74530bbadb9d397d81151",
+    "rtl/bk_pal_video.v": "4288375c9b209eabbe313495eb04e8ca4c347564e4711ee62ed91343c9daff7d",
+    "rtl/bk_panel.v": "6ba39848b744d789a484c562740b47ed37aebf5bde8642fbf99cb61b035e55e4",
+    "rtl/bk_sd_host.v": "0932a8ea1604ac1bc47a21134188a8f1349a13b2290a33a122d560a437b56e00",
+    "rtl/bk_sd_partitions.v": "abd690c4265a7f6803d49a4b7ac92aaf99ff3e8f90c62c0a28e82312fa32fdfe",
+    "rtl/bk_sram_arbiter.v": "755fc350cecfd2c6ccfb58d8fc882df9aa4464f27d3eda843f315b4a56f10446",
+    "rtl/bk_system_bus.v": "a9b18645173648bb09b1e5b07997fdbffc3583d2b0a58b648f2899b4496f990f",
+    "rtl/bk_wb_cdc.v": "4026673190adf3f80bec454e69b15ae22403a1af91ab2c99f5c127592026ced1",
+    "vendor/cpu11/vm1_wb.v": "26863becbebd6c19caebdad4aa73a3007ce673a57a327259f69c24f467a18f47",
+    "build/vm1_plm_masked.v": "5d870516f2095ec5d9b0d930a00b2c4e88323cc4ec494c68114c7ed87cb00ffe",
+    "build/vm1_reg_block.v": "6ecb9340de71ad5ab8991c6494492950cb1b330b18f93c15db39cc1cf79f84b7",
+    "vendor/cpu11/vm1_tve.v": "50a4a9f3fb9150651bb73ab8f9a6d94454b4867b4e8c4861ee032f209ffcce4e",
+    "vendor/uj11/uj11_ps2_keyboard.v": "6420c91a162b05e7f4dccead47ba027bb10ce64b7a394cd81b49f1cde3a6265d",
+    "vendor/uj11/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "vendor/uj11/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+    "vendor/uj11/uj11_pal_encoder.v": "0b5c15577ad3df217f42a2dcb3c2ba1b5e1a7bd23fd28b5a7f8ac83b0da3058b",
+    "vendor/uj11/uj11_pal_timing.v": "e7765556359196292a6171c3549c55965b94ac8025af556afa8fc11fa29b1767",
+    "vendor/uj11/uj11_sram.v": "6a923c4a82bcb3630a62e4c4af05a5646de61720213b39661d1ef6561147560d",
+    "vendor/pyldin/spi_byte_master.v": "010008193cee3823c7a3d54d598c12295157f295fdcd0740d4447f02d692d89d",
+    "vendor/pyldin/sd_spi_block.v": "46449cd18e9a7684aa6b6a52beadcaa4b22e880241788063305c10b0550f54b0",
+    "vendor/pyldin/boot_spi_registers.v": "381ccc4df0916ed230251798e89e3aab7e14fa5beacccd9621dfe23a48cc8cd1",
+    "boards/hardware-lcd/bk_hardware_lcd.v": "4a5ebe919c217f7ea91c7d387e9b6d6138fef98e4b520876d0bf5016cb4f9170",
+    "boards/hardware-lcd/bk_main_pll.v": "2fc7ecb9ddfe5f3a9aedac031ab8157901f5b41f8e715f707941582a34b24f3b",
+    "boards/hardware-lcd/bk_video_pll.v": "1c00b18c2db83dbbc50b9f8a3a1933872c5c9429374dd27cfe34a0c6b59e0ad9",
+    "build/boot.hex": "1b457f00a461011be1394de48be08743684b3144b7584de1e5f5bd12c93ad294",
+    "boards/hardware-lcd/pins.lpf": "e7a33b3594a529bfb0d7d492fc4a3860b6cb5bb4dfcc14f8e45ccbc7f928bd66",
+    "boards/hardware-lcd/cdc.lpf": "3ab938962aadff4a76b2744130f32f016002b1752e898ea13abb9a45d6ef73b6",
+    "boards/hardware-lcd/synthesis.sty": "4eb5e813286759028222501080add4f23c87e447bb486aadc750541ee12a4897",
+    "vendor/manifest.json": "34acdb11b1507864c6f42230dd53b9e2ea78f9f6870d9e8262a4819e82083205",
+    "vendor/cpu11/license.md": "059ccd0c2de1d4bd229c5d933520cc60da4b62eb192f3bc7e396df47bd392a02",
+    "boards/hardware-lcd/clocks.fdc": "f30b1db555675a213c28a4ad6a4fa390bf8f5608d534bbf99467d7e6f67bee54",
+    "tools/diamond_report.py": "dd1ad59c769d8a0719143390bd62712f1384765ac5199d48d450f1680c5e7391",
+    "tools/diamond_project.py": "230d98dc7a44e3f3f216c84af580bfdd0842fe43dd9aafc2ee5ba5b2dcb0fd37",
+    "rtl/bk_model_layout.vh": "a24920e6b539d5d1dfdb7e43d914f972117002d5ce212ebc87980aec0008cabc",
+    "rtl/bk_palettes.vh": "e4ee1c4270704a5b8ed0c56efbc51664b13d4a14dc5db57c242e4d0ba2dcf849",
+    "rtl/bk_rgb_index.vh": "088ba8822c40b81471877f02dc2d9e14c8f67a42e5cac6220d3b7a1563b07a2a",
+    "rtl/bk_palette_index.vh": "b603c05e89eed2acc989984e77376ab1f1fa4b0940524be7504b7b3a498470c9",
+    "build/pal_samples.hex": "b1ad6b44af1abd3e3ec6a3d8a85d754eb3cf71142b7b564d00604a17607682ee",
+    "clock.lpf": "3bd6f95072d55cc855ce91ad20357c10ea76372e6e12995a381731f08ad9241f"
+  },
+  "validation_note": "The final BIOS drive-mask byte is generated from the shared contract; its model/video/A-B save path is validated separately in bios-model-drive.log. Other test reports retain their original source snapshots.",
+  "pending": [
+    "physical five-model boot and BIOS save",
+    "raw SD partitions and BK disk OS on board",
+    "all seven frequencies on board",
+    "PAL voltage/speed calibration"
+  ]
+}

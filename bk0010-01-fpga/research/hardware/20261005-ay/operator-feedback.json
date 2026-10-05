@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-05",
+  "source": "operator report in chat",
+  "operator_report": "музончик звучит классно, но работает, когда я не полностью втыкаю штекер в аудиогнездо",
+  "plug": "TRS, two insulating rings, confirmed by operator",
+  "ay_music_audible": true,
+  "full_insertion_audio_verified": false,
+  "disk_shell_verified": false,
+  "scope": "Audible AY music confirmed on flashed hardware. Connector/contact fault remains under diagnosis; no confirmation of DOS shell, beeper, all models or all CPU frequencies."
+}

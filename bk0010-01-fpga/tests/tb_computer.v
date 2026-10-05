@@ -18,9 +18,10 @@ module tb_computer;
     wire [8:0] high_digit, low_digit;
     integer reads, polls = 0, screen_writes = 0, cycles = 0, previous_reads;
     reg [7:0] previous_stage = 0;
-    // Accelerate only the physical button debounce/display timebase.
-    // CPU, SRAM, PAL, SPI, UART and PS/2 clocks retain their hardware rates.
-    bk_computer #(.PANEL_CLOCK_HZ(32000)) computer(
+    // Accelerate the button/BIOS timebases. The test also requests 24 MHz
+    // during resident BIOS, then restores its original 3 MHz before checking
+    // the seven real runtime frequencies. Peripheral clocks stay unchanged.
+    bk_computer #(.PANEL_CLOCK_HZ(32000),.BIOS_CLOCK_HZ(32000)) computer(
         clk,clk48,video_clk,power_on,button_n,ps2_clock,ps2_data,
         sram_address,sram_data,ce,oe,we,lb,ub,sd_cs,sd_sck,sd_mosi,sd_miso,
         tvout,audio,tx,high_digit,low_digit,initialized,locked,error,underrun,stage);
@@ -71,21 +72,42 @@ module tb_computer;
     endtask
     integer i;
     initial begin
-        for(i=0;i<32768;i=i+1) ram.memory[i] = 16'ha5a5;
+        // Run BIOS at the board's 24 MHz turbo rate to keep this PAL/SRAM/PS2
+        // integration test bounded. tb_sd_boot separately tests BIOS/ROM at
+        // native stock clocks; normal clock selection resumes at ROM commit.
+        if(!$test$plusargs("native-bios")) force computer.clock_request = 3'd6;
+        for(i=0;i<131072;i=i+1) ram.memory[i] = 16'ha5a5;
         #300; power_on = 0;
         wait(!computer.hard_reset);
-        short_press(); short_press(); short_press();
-        if(computer.active_mode != 3) $fatal(1,"Startup frequency");
+        wait(locked);
+        $display("ROM committed: panel=%0d clock=%0d",computer.requested_mode,computer.active_mode);$fflush();
+        // The simulator collapses this wire into the mailbox's output register:
+        // release alone retains the forced value until its next assignment.
+        // Restore the original zero before releasing the test acceleration.
+        if(!$test$plusargs("native-bios")) force computer.clock_request = 3'd0;
+        repeat(4) @(posedge clk48);
+        release computer.clock_request;
+        wait(computer.active_mode == 0);
+        $display("PASS BIOS committed stock 3 MHz");$fflush();
+        for(i=1;i<=6;i=i+1) begin
+            short_press();
+            if(computer.active_mode != i) $fatal(1,"Seven-step frequency cycle %0d",i);
+            $display("PASS frequency mode=%0d",i);$fflush();
+        end
         wait(polls == 30);
         $writememh("build/computer-boot-vram.hex",ram.memory,8192,16383);
         $display("PASS full computer cold boot: 24 MHz, SD sectors=%0d",reads);
         previous_reads = reads;
         button_n = 0; wait(computer.hard_reset);
         repeat(1000) @(negedge clk); button_n = 1;
-        wait(!computer.hard_reset); polls = 0;
+        if(!locked || reads != previous_reads || computer.requested_mode != 0)
+            $fatal(1,"Warm reset did not retain ROM and restore stock clock");
+        wait(!computer.hard_reset);
+        wait(computer.active_mode == 0); polls = 0;
+        repeat(6) short_press();
         wait(polls == 30);
-        if(!locked || reads != previous_reads || computer.active_mode != 3) $fatal(1,"Warm reset lost ROM/frequency");
-        $display("PASS full computer long-button warm reset: retained ROM and 24 MHz");
+        if(!locked || reads != previous_reads || computer.active_mode != 6) $fatal(1,"Warm reset lost ROM/frequency");
+        $display("PASS full computer warm reset: retained ROM, restored 3 MHz, resumed 24 MHz");
         scan(8'h12); // Shift for PRINT.
         short_press(); key(8'h4d);
         short_press(); key(8'h2d);
@@ -98,11 +120,27 @@ module tb_computer;
         polls = 0; wait(polls == 100);
         repeat(500000) @(negedge clk);
         $writememh("build/computer-print-vram.hex",ram.memory,8192,16383);
-        $writememh("build/computer-rom.hex",ram.memory,16384,32767);
+        $writememh("build/computer-rom.hex",ram.memory,65536,81919);
         if(reads != previous_reads || !locked || underrun) $fatal(1,"Runtime invariants");
-        $display("PASS full computer physical PS/2 PRINT 2+2, live 3/6/12/24 MHz, PAL without underruns");
+        $display("PASS full computer physical PS/2 PRINT 2+2, seven live frequencies, PAL without underruns");
+        // The ten-second gesture drains storage and returns to native BIOS.
+        button_n = 0; wait(computer.full_reset);
+        wait(!locked);
+        if(!$test$plusargs("native-bios")) force computer.clock_request = 3'd6;
+        button_n = 1;
+        wait(!computer.hard_reset);
+        wait(stage == 8'h10);
+        key(8'h66); // Backspace opens BIOS through the physical PS/2 path.
+        wait(stage == 8'h11);
+        if(!$test$plusargs("native-bios")) force computer.clock_request = 3'd0;
+        repeat(4) @(posedge clk48);
+        release computer.clock_request;
+        wait(computer.active_mode == 0);
+        if(locked || reads <= previous_reads)
+            $fatal(1,"Full reset did not return to BIOS");
+        $display("PASS full computer full reset and Backspace BIOS menu: retained shared SD files");
         $finish;
     end
-    initial begin #10000000000; $fatal(1,"Computer timeout stage=%h addr=%06o ir=%06o",stage,
+    initial begin #80000000000; $fatal(1,"Computer timeout stage=%h addr=%06o ir=%06o",stage,
                                       computer.cpu_address,computer.cpu.core.ir); end
 endmodule

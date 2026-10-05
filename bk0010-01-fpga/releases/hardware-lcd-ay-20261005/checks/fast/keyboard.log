@@ -1,0 +1,2 @@
+PASS physical PS/2: make/break, Shift/Caps/Ctrl/Alt, arrows, STOP, Pause, bad parity, backpressure
+tests/tb_keyboard.v:76: $finish called at 59962000000 (1ps)

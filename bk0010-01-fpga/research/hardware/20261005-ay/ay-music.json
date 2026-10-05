@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "cpu_mhz": 24,
+  "ay_master_hz": 1773400,
+  "sample_rate": 48000,
+  "samples": 48000,
+  "register_writes": 554,
+  "pcm_min": 0,
+  "pcm_max": 293,
+  "distinct_pcm_levels": 52,
+  "simulation_recording": true,
+  "physical_board_verified": false,
+  "files": {
+    "ay-music-pcm.txt": "9b914574621c2c99aa3913fe59f842ca47aebaf83f35d7fa6948f101b0be7b1c",
+    "ay-music-registers.txt": "f3b9a2a0a900a63b0021e61466740c593b0cfc9508c553c9f5841b6f10293283",
+    "ay-music-native.log": "6ea3aa4a948e155df39352a0d78b13ee805b598098ee6c007a319e5a4d486f2e",
+    "ay-music.wav": "5071c09e2dfb83c81292cf59d5482fb8132bed935cdcc2497726944ecbf60dd3"
+  },
+  "simulation_sd_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+  "native_executable_sha256": "713aad89b87fa2a98581b480c2af6b4df941052f602b3e8ea1d393e09d3e1bf7",
+  "native_bus_snapshot_sha256": "1e543014ff9bc4dee8c1ee985dc3ac1e312d6e567a9546bdaca4f3ccb01410b5",
+  "native_compile_log_sha256": "2f8f01d65b3c3b7b3eec8219c396cd706f57d9c4358b3e834fb3abe65d813d5c",
+  "audio_sources": {
+    "rtl/bk_ay.v": "6a921553e89e8b9bfe1a9bf5bccb4e1dd8322765fa403b25affb8877a7cfdade",
+    "rtl/bk_audio.v": "9b4db2aed9e56c750b5597173efa2fa01c35d4f5c17a50ab9c2cba9bda896f81",
+    "rtl/bk_cpu.v": "781bed84621cf26331ba72d3a2e14508bb6f28ef13bf53e4ede66e87cf93d223",
+    "tests/tb_sd_boot.v": "b422d204f9bdaa4b777b2e04c5c4203fa60784aebf5723093536841b5b9ee0ca"
+  }
+}

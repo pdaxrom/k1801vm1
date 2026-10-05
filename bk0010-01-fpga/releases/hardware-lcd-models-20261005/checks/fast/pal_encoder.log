@@ -1,0 +1,2 @@
+PASS PAL table: all 14 BK RGB332 colours, phase/alternation, all active/burst/sync combinations, identical 5-clock DAC pipeline
+tests/tb_pal_encoder.v:35: $finish called at 4200393808 (1ps)

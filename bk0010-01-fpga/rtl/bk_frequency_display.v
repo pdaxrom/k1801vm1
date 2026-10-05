@@ -2,7 +2,7 @@
 // Adapted from uJ11 HC7000 diagnostics: one segment across both digits.
 module bk_frequency_display #(parameter integer CLOCK_HZ = 24000000) (
     input wire clk, power_on,
-    input wire [1:0] mode,
+    input wire [2:0] mode,
     output reg [8:0] seg_led_h = 9'h0ff, seg_led_l = 9'h0ff
 );
     localparam integer DIVISOR = CLOCK_HZ < 32000 ? 1 : CLOCK_HZ / 32000;
@@ -31,8 +31,10 @@ module bk_frequency_display #(parameter integer CLOCK_HZ = 24000000) (
             endcase
         end
     endfunction
-    wire [3:0] tens = mode == 3 ? 4'd2 : mode == 2 ? 4'd1 : 4'd0;
-    wire [3:0] units = mode == 3 ? 4'd4 : mode == 2 ? 4'd2 : mode == 1 ? 4'd6 : 4'd3;
+    wire [3:0] tens = mode == 6 ? 4'd2 : mode >= 4 ? 4'd1 : 4'd0;
+    wire [3:0] units = mode == 6 || mode == 1 ? 4'd4 :
+                       mode == 5 || mode == 2 ? 4'd6 :
+                       mode == 4 ? 4'd2 : mode == 3 ? 4'd8 : 4'd3;
     always @(posedge clk) begin
         if (power_on) begin
             divider <= 0; phase <= 0; slot <= 0; frame <= 0;

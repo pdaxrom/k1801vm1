@@ -1,0 +1,11 @@
+PASS rate=0: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+PASS rate=1: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+PASS rate=2: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+PASS rate=3: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+PASS rate=4: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+PASS rate=5: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+PASS rate=6: STOP inside IRQ100, 120 ms hold, short press, HALT, vector 4, reason flag, RTI stack
+- tests/tb_stop.v:85: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 842ms; walltime 21.079 s; speed 39.944 ms/s
+- Verilator: cpu 21.027 s on 1 threads; allocated 2 MB

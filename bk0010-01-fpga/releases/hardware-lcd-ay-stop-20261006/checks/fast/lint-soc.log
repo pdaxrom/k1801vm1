@@ -1,0 +1,187 @@
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:33:22: Operator VAR 'FIRST_ROW' expects 8 bits on the Initial value, but Initial value's VARREF 'FIRST' generates 32 bits.
+                                             : ... note: In instance 'bk_computer.video'
+   33 |     localparam [7:0] FIRST_ROW = FIRST, SECOND_ROW = SECOND;
+      |                      ^~~~~~~~~
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.050
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:33:41: Operator VAR 'SECOND_ROW' expects 8 bits on the Initial value, but Initial value's VARREF 'SECOND' generates 32 bits.
+                                             : ... note: In instance 'bk_computer.video'
+   33 |     localparam [7:0] FIRST_ROW = FIRST, SECOND_ROW = SECOND;
+      |                                         ^~~~~~~~~~
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:34:22: Operator VAR 'FIRST_PREFETCH' expects 8 bits on the Initial value, but Initial value's SUB generates 32 bits.
+                                             : ... note: In instance 'bk_computer.video'
+   34 |     localparam [7:0] FIRST_PREFETCH = FIRST - 1, SECOND_PREFETCH = SECOND - 1;
+      |                      ^~~~~~~~~~~~~~
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:34:50: Operator VAR 'SECOND_PREFETCH' expects 8 bits on the Initial value, but Initial value's SUB generates 32 bits.
+                                             : ... note: In instance 'bk_computer.video'
+   34 |     localparam [7:0] FIRST_PREFETCH = FIRST - 1, SECOND_PREFETCH = SECOND - 1;
+      |                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:33:36: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'bk_computer.video.timing'
+   33 |     assign active_line=(line_number>=FIRST && line_number<FIRST+HEIGHT) ||
+      |                                    ^~
+                      ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.050
+                      ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:33:58: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'bk_computer.video.timing'
+   33 |     assign active_line=(line_number>=FIRST && line_number<FIRST+HEIGHT) ||
+      |                                                          ^
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:34:21: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'bk_computer.video.timing'
+   34 |         (line_number>=SECOND && line_number<SECOND+HEIGHT);
+      |                     ^~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:34:44: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'bk_computer.video.timing'
+   34 |         (line_number>=SECOND && line_number<SECOND+HEIGHT);
+      |                                            ^
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:35:35: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'bk_computer.video.timing'
+   35 |     assign row=field ? line_number-SECOND : line_number-FIRST;
+      |                                   ^
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:35:56: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'bk_computer.video.timing'
+   35 |     assign row=field ? line_number-SECOND : line_number-FIRST;
+      |                                                        ^
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_pal_timing.v:35:15: Operator ASSIGNW expects 8 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                        : ... note: In instance 'bk_computer.video.timing'
+   35 |     assign row=field ? line_number-SECOND : line_number-FIRST;
+      |               ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:37:44: Operator ADD expects 5 bits on the RHS, but RHS's REPLICATE generates 3 bits.
+                                                  : ... note: In instance 'bk_computer.bus.disk_partitions'
+   37 |     wire [4:0] bank_end=bank==4?5'd30:5'd22+{bank[1:0],1'b0};
+      |                                            ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:38:33: Operator ADD expects 5 bits on the RHS, but RHS's REPLICATE generates 3 bits.
+                                                  : ... note: In instance 'bk_computer.bus.disk_partitions'
+   38 |     wire [4:0] current_end=5'd22+{checked_drive,1'b0};
+      |                                 ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:39:31: Operator ADD expects 5 bits on the RHS, but RHS's REPLICATE generates 3 bits.
+                                                  : ... note: In instance 'bk_computer.bus.disk_partitions'
+   39 |     wire [4:0] other_end=5'd22+{other_drive,1'b0};
+      |                               ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:128:55: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  128 |                 invalid_drive<=bad_boot||!base_nonzero[checked_drive]||short_extent[checked_drive]||overflow[checked_drive];
+      |                                                       ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:128:84: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  128 |                 invalid_drive<=bad_boot||!base_nonzero[checked_drive]||short_extent[checked_drive]||overflow[checked_drive];
+      |                                                                                    ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:128:109: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                    : ... note: In instance 'bk_computer.bus.disk_partitions'
+  128 |                 invalid_drive<=bad_boot||!base_nonzero[checked_drive]||short_extent[checked_drive]||overflow[checked_drive];
+      |                                                                                                             ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:133:17: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  133 |                 compare32({checked_drive,2'b0},30,FAT_FIRST);
+      |                 ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:142:47: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  142 |                 else if(overflow[other_drive])compare32({other_drive,2'b0},current_end,OTHER_SECOND);
+      |                                               ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:143:22: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  143 |                 else compare32({checked_drive,2'b0},other_end,OTHER_FIRST);
+      |                      ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:142:33: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  142 |                 else if(overflow[other_drive])compare32({other_drive,2'b0},current_end,OTHER_SECOND);
+      |                                 ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:141:63: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  141 |                 if(other_drive==checked_drive||!length_nonzero[other_drive])state<=OTHER_NEXT;
+      |                                                               ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:146:35: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'bk_computer.bus.disk_partitions'
+  146 |                 if(compare_result)compare32({other_drive,2'b0},current_end,OTHER_SECOND);
+      |                                   ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_fdd.v:85:28: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'word_counter' generates 11 bits.
+                                        : ... note: In instance 'bk_computer.bus.disk_controller'
+   85 |             if(word_counter==WORD_CYCLES-1)begin
+      |                            ^~
+%Warning-WIDTHTRUNC: rtl/bk_fdd.v:113:54: Operator ASSIGNDLY expects 8 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_CYCLES' generates 32 bits.
+                                        : ... note: In instance 'bk_computer.bus.disk_controller'
+  113 |                 if(!write&&!data_port)begin csr_delay<=CSR_CYCLES;ready<=0;end
+      |                                                      ^~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_ps2_keyboard.v:12:22: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'divider' generates 5 bits.
+                                                           : ... note: In instance 'bk_computer.transport'
+   12 |     wire tick=divider==US_DIV-1;
+      |                      ^~
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_sram.v:27:37: Logical operator LOGNOT expects 1 bit on the LHS, but LHS's VARREF 'FAST_RESPONSE' generates 32 bits.
+                                                  : ... note: In instance 'bk_computer.sram'
+   27 |     assign ready=response_valid && (!FAST_RESPONSE || request);
+      |                                     ^
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_sram.v:67:34: Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'FAST_RESPONSE' generates 32 bits.
+                                                  : ... note: In instance 'bk_computer.sram'
+   67 |                 if(FAST_RESPONSE && initialized && !cancelled && !reset)response_valid<=1;
+      |                                  ^~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_sram.v:76:37: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'clear_address' generates 20 bits.
+                                                   : ... note: In instance 'bk_computer.sram'
+   76 |                     if(clear_address==CLEAR_WORDS-1) initialized<=1;
+      |                                     ^~
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_sram.v:80:39: Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'FAST_RESPONSE' generates 32 bits.
+                                                  : ... note: In instance 'bk_computer.sram'
+   80 |                 else if(FAST_RESPONSE && !request)begin response_valid<=0;state<=IDLE;end
+      |                                       ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:41:39: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   41 |     assign active_line = (line_number >= FIRST && line_number < FIRST + 256) ||
+      |                                       ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:41:63: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   41 |     assign active_line = (line_number >= FIRST && line_number < FIRST + 256) ||
+      |                                                               ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:42:39: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   42 |                          (line_number >= SECOND && line_number < SECOND + 256);
+      |                                       ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:42:64: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   42 |                          (line_number >= SECOND && line_number < SECOND + 256);
+      |                                                                ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:44:38: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'x' generates 12 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   44 |     assign active = active_line && x >= H_START && x < H_START + 3200;
+      |                                      ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:44:54: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'x' generates 12 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   44 |     assign active = active_line && x >= H_START && x < H_START + 3200;
+      |                                                      ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:71:34: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   71 |     wire prefetch = (line_number >= FIRST - 1 && line_number < FIRST + 255) ||
+      |                                  ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:71:62: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   71 |     wire prefetch = (line_number >= FIRST - 1 && line_number < FIRST + 255) ||
+      |                                                              ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:72:34: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   72 |                     (line_number >= SECOND - 1 && line_number < SECOND + 255);
+      |                                  ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:72:63: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'bk_computer.video'
+   72 |                     (line_number >= SECOND - 1 && line_number < SECOND + 255);
+      |                                                               ^
+%Warning-WIDTHEXPAND: rtl/bk_cpu.v:30:42: Operator EQ expects 16 bits on the LHS, but LHS's SEL generates 14 bits.
+                                        : ... note: In instance 'bk_computer.cpu'
+   30 |     wire missing_console = address[15:2] == (16'o177674 >> 2);
+      |                                          ^~
+%Warning-MULTIDRIVEN: vendor/cpu11/vm1_wb.v:88:16: Signal has multiple driving blocks with different clocking: 'bk_computer.cpu.core.mj'
+                      vendor/cpu11/vm1_wb.v:1120:10: ... Location of first driving block
+ 1120 |          mj[11] <= psw[4];
+      |          ^~
+                      vendor/cpu11/vm1_wb.v:1101:7: ... Location of other driving block
+ 1101 |       mj[6:1] <= 6'b111111;
+      |       ^~
+                      ... For warning description see https://verilator.org/warn/MULTIDRIVEN?v=5.050
+                      ... Use "/* verilator lint_off MULTIDRIVEN */" and lint_on around source to disable this message.
+%Warning-MULTIDRIVEN: vendor/cpu11/vm1_wb.v:121:16: Signal has multiple driving blocks with different clocking: 'bk_computer.cpu.core.plir'
+                      vendor/cpu11/vm1_wb.v:842:7: ... Location of first driving block
+  842 |       plir[1] <= pli[6];
+      |       ^~~~
+                      vendor/cpu11/vm1_wb.v:832:7: ... Location of other driving block
+  832 |       plir[0] <= 1'b0;
+      |       ^~~~
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 4.981 MB sources in 42 modules, into 1.401 MB in 4 C++ files needing 0.000 MB
+- Verilator: Walltime 0.227 s (elab=0.036, cvt=0.140, bld=0.000); cpu 0.227 s on 1 threads; allocated 55.016 MB

@@ -80,6 +80,21 @@
       "path": "roms/BASIC10.ROM",
       "source": "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/ROM/BASIC10.ROM",
       "sha256": "24be347356715352fcab480ed1559302d47d598255980a32150eba1431b462b8"
+    },
+    {
+      "path": "vendor/pyldin/sd_spi_block.v",
+      "source": "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/rtl/sd_spi_block.v",
+      "sha256": "46449cd18e9a7684aa6b6a52beadcaa4b22e880241788063305c10b0550f54b0"
+    },
+    {
+      "path": "vendor/uj11/terminal_font.h",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/firmware/storage/terminal_font.h",
+      "sha256": "0fd7885f0b6f498b30365e14bf6d56403350a622df244f8b163d5e7592455a51"
+    },
+    {
+      "path": "roms/DISK_A16M_v2.41.rom",
+      "source": "https://gid.pdp-11.net/f/3.14.2510.10760/BK_v3.14_x86.7z:Release/Rom/DISK_A16M_v2.41.rom",
+      "sha256": "b49d881ae36de1b9490d178ade891be16cb59d37c092c0a86e9dc313c7a602dc"
     }
   ],
   "derived": {

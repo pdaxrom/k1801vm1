@@ -1,0 +1,16 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=772233 address=177612 reads=2
+BOOT stage=10 cycle=1466878 address=177612 reads=4
+BOOT stage=04 cycle=4778077 address=177612 reads=8
+BOOT stage=05 cycle=6145372 address=177612 reads=10
+BOOT stage=06 cycle=129258785 address=177612 reads=202
+BOOT stage=07 cycle=134416745 address=177612 reads=202
+BOOT stage=ff cycle=135812809 address=177636 reads=202
+PASS native model 4 boot: VRAM matches C reference                            , cycles=152812827
+WARM model=4 cpu_bank=000000 SD reads=202
+PASS native model 4 warm reset
+- tests/tb_sd_boot.v:182: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 3s; walltime 396.310 s; speed 8.570 ms/s
+- Verilator: cpu 395.460 s on 1 threads; allocated 2 MB

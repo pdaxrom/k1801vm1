@@ -1,0 +1,91 @@
+Model 3 instructions=0 PC=140004 PSW=000340 bank=000000 video=040000 reads=0 error=0
+SD read 1: LBA=40960 disk sector=0
+SD read 2: LBA=40961 disk sector=1
+SD read 3: LBA=40962 disk sector=2
+SD read 4: LBA=40963 disk sector=3
+SD read 5: LBA=40964 disk sector=4
+SD read 6: LBA=40965 disk sector=5
+SD read 7: LBA=40966 disk sector=6
+SD read 8: LBA=40967 disk sector=7
+SD read 9: LBA=40968 disk sector=8
+SD read 10: LBA=40969 disk sector=9
+SD read 11: LBA=40980 disk sector=20
+SD read 12: LBA=40981 disk sector=21
+SD read 13: LBA=40982 disk sector=22
+SD read 14: LBA=40983 disk sector=23
+SD read 15: LBA=40984 disk sector=24
+SD read 16: LBA=40985 disk sector=25
+SD read 17: LBA=40986 disk sector=26
+SD read 18: LBA=40987 disk sector=27
+SD read 19: LBA=40988 disk sector=28
+SD read 20: LBA=40989 disk sector=29
+SD read 100: LBA=41019 disk sector=59
+Model 3 instructions=1000000 PC=162520 PSW=002204 bank=056200 video=042400 reads=150 error=0
+SD read 200: LBA=40989 disk sector=29
+SD read 300: LBA=41189 disk sector=229
+SD read 400: LBA=41229 disk sector=269
+SD read 500: LBA=41029 disk sector=69
+SD read 600: LBA=41109 disk sector=149
+SD read 700: LBA=41309 disk sector=349
+SD read 800: LBA=41509 disk sector=549
+SD read 900: LBA=41699 disk sector=739
+Model 3 instructions=2000000 PC=001470 PSW=002000 bank=000000 video=040000 reads=950 error=0
+SD read 1000: LBA=41629 disk sector=669
+SD read 1100: LBA=41429 disk sector=469
+SD read 1200: LBA=41229 disk sector=269
+SD read 1300: LBA=41029 disk sector=69
+SD read 1400: LBA=41099 disk sector=139
+SD read 1500: LBA=41299 disk sector=339
+SD read 1600: LBA=41499 disk sector=539
+SD read 1700: LBA=41699 disk sector=739
+SD read 1800: LBA=41589 disk sector=629
+SD read 1900: LBA=41389 disk sector=429
+SD read 2000: LBA=41189 disk sector=229
+SD read 2100: LBA=40989 disk sector=29
+SD read 2200: LBA=41139 disk sector=179
+SD read 2300: LBA=41339 disk sector=379
+SD read 2400: LBA=41189 disk sector=229
+SD read 2500: LBA=40989 disk sector=29
+SD read 2600: LBA=41149 disk sector=189
+Model 3 instructions=3000000 PC=162744 PSW=000201 bank=016200 video=047400 reads=2610 error=0
+SD read 2700: LBA=41349 disk sector=389
+SD read 2800: LBA=41149 disk sector=189
+SD read 2900: LBA=40989 disk sector=29
+SD read 3000: LBA=41189 disk sector=229
+SD read 3100: LBA=41379 disk sector=419
+SD read 3200: LBA=41189 disk sector=229
+SD read 3300: LBA=40989 disk sector=29
+SD read 3400: LBA=41149 disk sector=189
+SD read 3500: LBA=41149 disk sector=189
+SD read 3600: LBA=40979 disk sector=19
+SD read 3700: LBA=41179 disk sector=219
+SD read 3800: LBA=41309 disk sector=349
+SD read 3900: LBA=41109 disk sector=149
+SD read 4000: LBA=41019 disk sector=59
+Model 3 instructions=4000000 PC=162744 PSW=100201 bank=016200 video=041400 reads=4060 error=0
+SD read 4100: LBA=41219 disk sector=259
+SD read 4200: LBA=41109 disk sector=149
+SD read 4300: LBA=41029 disk sector=69
+SD read 4400: LBA=41229 disk sector=269
+SD read 4500: LBA=41269 disk sector=309
+SD read 4600: LBA=41069 disk sector=109
+SD read 4700: LBA=41069 disk sector=109
+SD read 4800: LBA=41269 disk sector=309
+SD read 4900: LBA=41229 disk sector=269
+SD read 5000: LBA=41029 disk sector=69
+Model 3 instructions=5000000 PC=125400 PSW=100204 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=6000000 PC=120534 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=7000000 PC=120510 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=8000000 PC=120436 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=9000000 PC=120746 PSW=100001 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=10000000 PC=120654 PSW=100005 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=11000000 PC=120602 PSW=100000 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=12000000 PC=120264 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=13000000 PC=120440 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=14000000 PC=120356 PSW=100001 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=15000000 PC=120722 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=16000000 PC=120616 PSW=100000 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=17000000 PC=120540 PSW=100004 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=18000000 PC=120524 PSW=100000 bank=016200 video=041400 reads=5030 error=0
+Model 3 instructions=19000000 PC=120502 PSW=100010 bank=016200 video=041400 reads=5030 error=0
+Disk OS run finished: model=3 PC=120722 bank=016200 reads=5030 unique=780 controller_error=0

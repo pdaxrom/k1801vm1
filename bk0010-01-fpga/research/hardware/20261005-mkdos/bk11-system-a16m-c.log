@@ -1,0 +1,43 @@
+Model 0 instructions=0 PC=164102 PSW=000340 bank=000000 video=040000 reads=0 error=0
+SD read 1: LBA=40960 disk sector=0
+SD read 2: LBA=40961 disk sector=1
+SD read 3: LBA=40962 disk sector=2
+SD read 4: LBA=40963 disk sector=3
+SD read 5: LBA=40964 disk sector=4
+SD read 6: LBA=40965 disk sector=5
+SD read 7: LBA=40966 disk sector=6
+SD read 8: LBA=40967 disk sector=7
+SD read 9: LBA=40968 disk sector=8
+SD read 10: LBA=40969 disk sector=9
+SD read 11: LBA=40980 disk sector=20
+SD read 12: LBA=40981 disk sector=21
+SD read 13: LBA=40982 disk sector=22
+SD read 14: LBA=40983 disk sector=23
+SD read 15: LBA=40984 disk sector=24
+SD read 16: LBA=40985 disk sector=25
+SD read 17: LBA=40986 disk sector=26
+SD read 18: LBA=40987 disk sector=27
+SD read 19: LBA=40988 disk sector=28
+SD read 20: LBA=40989 disk sector=29
+SD read 100: LBA=41019 disk sector=59
+Model 0 instructions=1000000 PC=101024 PSW=000004 bank=000000 video=040000 reads=100 error=0
+Model 0 instructions=2000000 PC=101024 PSW=000004 bank=000000 video=040000 reads=100 error=0
+Model 0 instructions=3000000 PC=101024 PSW=000004 bank=000000 video=040000 reads=100 error=0
+Model 0 instructions=4000000 PC=101024 PSW=000004 bank=000000 video=040000 reads=100 error=0
+Model 0 instructions=5000000 PC=101024 PSW=000004 bank=000000 video=040000 reads=100 error=0
+SD read 200: LBA=40979 disk sector=19
+Model 0 instructions=6000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=7000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=8000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=9000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=10000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=11000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=12000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=13000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=14000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=15000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=16000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=17000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=18000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Model 0 instructions=19000000 PC=101020 PSW=000004 bank=000000 video=040000 reads=220 error=0
+Disk OS run finished: model=0 PC=101120 bank=000000 reads=220 unique=70 controller_error=0

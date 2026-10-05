@@ -1,0 +1,17 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=772233 address=177612 reads=2
+BOOT stage=10 cycle=1466691 address=177612 reads=4
+BOOT stage=04 cycle=4783432 address=177612 reads=8
+BOOT stage=05 cycle=6150778 address=177612 reads=10
+BOOT stage=06 cycle=98485640 address=177612 reads=154
+BOOT stage=07 cycle=102354456 address=177612 reads=154
+PASS switched native runtime to model 0 stock clock
+BOOT stage=ff cycle=103750520 address=177636 reads=154
+PASS native model 0 boot: VRAM matches C reference except timer frequency text, cycles=114735126
+WARM model=0 cpu_bank=000000 SD reads=154
+PASS native model 0 warm reset
+- tests/tb_sd_boot.v:180: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 6s; walltime 602.755 s; speed 9.647 ms/s
+- Verilator: cpu 601.378 s on 1 threads; allocated 2 MB

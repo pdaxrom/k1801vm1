@@ -1,0 +1,9 @@
+SPI FDD stage=001111 CPU mode=6 cycles=4178802 writes=0
+SPI FDD stage=002222 CPU mode=6 cycles=5839503 writes=0
+SPI FDD stage=003333 CPU mode=6 cycles=6095014 writes=10
+SPI FDD stage=004444 CPU mode=6 cycles=8556766 writes=10
+PASS native DISK 327 through system bus/raw partitions/SPI SDHC: mode=6 reads=30 writes=20
+- tests/tb_fdd_sd.v:63: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 809ms; walltime 22.343 s; speed 36.200 ms/s
+- Verilator: cpu 22.329 s on 1 threads; allocated 2 MB

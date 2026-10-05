@@ -1,0 +1,38 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=1435165 address=177612 reads=4
+BOOT stage=10 cycle=2139636 address=177612 reads=6
+BOOT stage=04 cycle=5467376 address=177612 reads=10
+BOOT stage=05 cycle=6840553 address=177612 reads=12
+BOOT stage=06 cycle=119695078 address=177612 reads=188
+BOOT stage=07 cycle=124423637 address=177612 reads=188
+BOOT stage=ff cycle=125819699 address=177636 reads=188
+PASS switched native runtime to model 3 frequency index=6
+OS progress cycles=0 CPU mode=6 address=177636 bank=000000 video=040000 SD reads=188 writes=0 error=0
+OS CPU PC=000406 PSW=000340
+OS progress cycles=20000000 CPU mode=6 address=163110 bank=054002 video=047400 SD reads=198 writes=0 error=0
+OS CPU PC=163112 PSW=000350
+OS progress cycles=40000000 CPU mode=6 address=177130 bank=054002 video=047400 SD reads=258 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+OS progress cycles=60000000 CPU mode=6 address=177130 bank=016000 video=041400 SD reads=278 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+OS progress cycles=80000000 CPU mode=6 address=177130 bank=016000 video=041400 SD reads=308 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+OS progress cycles=100000000 CPU mode=6 address=177130 bank=016200 video=042400 SD reads=358 writes=0 error=0
+OS CPU PC=163104 PSW=000200
+OS progress cycles=120000000 CPU mode=6 address=162744 bank=016200 video=042400 SD reads=404 writes=0 error=0
+OS CPU PC=162746 PSW=000201
+OS progress cycles=140000000 CPU mode=6 address=177130 bank=016200 video=042400 SD reads=468 writes=0 error=0
+OS CPU PC=163104 PSW=000340
+OS progress cycles=160000000 CPU mode=6 address=177130 bank=016200 video=042400 SD reads=478 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+AY player first data command: time=8580284758000 register=10
+OS progress cycles=180000000 CPU mode=6 address=001336 bank=016200 video=000000 SD reads=498 writes=0 error=0
+OS CPU PC=001340 PSW=000012
+OS progress cycles=200000000 CPU mode=6 address=002214 bank=016200 video=000000 SD reads=498 writes=0 error=0
+OS CPU PC=002214 PSW=000004
+PASS native VM1 system disk AY music: writes=554 samples=48000 range=0..293
+- tests/tb_sd_boot.v:101: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 10s; walltime 1125.141 s; speed 8.515 ms/s
+- Verilator: cpu 1123.765 s on 1 threads; allocated 2 MB

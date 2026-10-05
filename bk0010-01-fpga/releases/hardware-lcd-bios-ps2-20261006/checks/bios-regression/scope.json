@@ -1,0 +1,17 @@
+{
+  "changed_routed_inputs": [
+    "build/boot.hex"
+  ],
+  "previous_jed_sha256": "5f189d09b86a77379d26f3ea36be526d1f41d77f9fb60212ee91372a33d5d250",
+  "bios_bytes": 7780,
+  "unchanged_sd_files": {
+    "BK01.ROM": "8e474077ec082d138ee0853360709205d6569ffbeb5ab251982470a871de29cc",
+    "BK00.ROM": "bb8d6d2b26ef35769cb9c8297ecb9db195b92933d886c19ffb6f3f2ed06a05e3",
+    "BK02.ROM": "8abbdb79e264c2e7741956bb0f7e831d016d6e0846b6c62d7effd2856b958fd3",
+    "BK03.ROM": "aafec6a6007ef31632ed5523ffd49b3b3adebbf61521d11eeb085b6d7f1f1e7f",
+    "BK04.ROM": "12c6bc7e46f8f978471b7c7cae602e7bdda5e91df6974bb5e79e7ea3b22cb9a5",
+    "LOADERBK.BIN": "d843da39a8692de8179073f63661a1b5c95002feea903d3eca81655101640776"
+  },
+  "routed_cpu_sha256": "23242c4cc2fdfd1b32096ec0b1c5b74d73efc1ecf82015cb4877b6b6cf01e46d",
+  "routed_keymap_sha256": "a51964980bcdaaf4d373d82d681ae544c5323e08156bb9fd8aae9a3acc80d015"
+}

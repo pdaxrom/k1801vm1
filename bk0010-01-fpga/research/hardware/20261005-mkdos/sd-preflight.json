@@ -1,0 +1,174 @@
+{
+  "started_utc": "2026-10-05T16:30:10.818351+00:00",
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "resolved_device": "/dev/sdf",
+  "written": false,
+  "preparation": {
+    "partition": 4,
+    "start_lba": 40960,
+    "sectors": 7744,
+    "card_sectors": 15601664,
+    "partitions": [
+      {
+        "index": 1,
+        "type": 6,
+        "start": 2048,
+        "length": 32768
+      },
+      {
+        "index": 2,
+        "type": 1,
+        "start": 34816,
+        "length": 1440
+      },
+      {
+        "index": 3,
+        "type": 1,
+        "start": 36864,
+        "length": 2880
+      },
+      {
+        "index": 4,
+        "type": 15,
+        "start": 40960,
+        "length": 7744
+      },
+      {
+        "index": 5,
+        "type": 218,
+        "start": 43008,
+        "length": 1600
+      },
+      {
+        "index": 6,
+        "type": 218,
+        "start": 47104,
+        "length": 1600
+      }
+    ],
+    "regions": [
+      {
+        "name": "bk-disk-5.bin",
+        "start_lba": 43008,
+        "sectors": 1600,
+        "kind": "disk"
+      },
+      {
+        "name": "bk-disk-6.bin",
+        "start_lba": 47104,
+        "sectors": 1600,
+        "kind": "disk"
+      },
+      {
+        "name": "ebr-1.bin",
+        "start_lba": 40960,
+        "sectors": 1,
+        "kind": "ebr"
+      },
+      {
+        "name": "ebr-2.bin",
+        "start_lba": 45056,
+        "sectors": 1,
+        "kind": "ebr"
+      }
+    ],
+    "settings": {
+      "model": 3,
+      "frequency": 4,
+      "color": 0,
+      "drives": [
+        6,
+        5,
+        0,
+        0
+      ],
+      "readonly": 3
+    },
+    "mbr_before_sha256": "1d9790531763f1899689594b94329336f02f2c09d092128e483817f5de5fe4ae",
+    "fat16_before_sha256": "643cbbc1c820238392c9b04835a646d0897ccd3ad44a7083537769ae8adfd5bf",
+    "payloads": {
+      "mbr-after.bin": "7f7cf1df1d4d93043477560937bef45aa34eff774ad173441b084d3b536f83c6",
+      "fat16-after.bin": "540fe819a5f0d38a104f1f2ea18bc90e6f5a2ba05669f5d28c01ff7cdc1719ac",
+      "bk-disk-5.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+      "bk-disk-6.bin": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a",
+      "ebr-1.bin": "641267ce0d65e92c7293dd06468e0236e8cbcf7be2a03407a5614fae637182a5",
+      "ebr-2.bin": "8ad1fd5a2c1b5917dc2d0f91c1d07ca0fd5b2dff5136cd75c7c63e07fb58fd9c",
+      "simulation-sd.img": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b"
+    },
+    "preserved_files": {
+      "P601.ROM": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f",
+      "LOADER.BIN": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea",
+      "P601.CFG": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d",
+      "P601A.ROM": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1",
+      "P601.SET": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809",
+      "BK0010.ROM": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+    },
+    "loader_backup": "LDRBKOLD.BAK",
+    "device_written": false
+  },
+  "validation_sha256": "5d40e1dc04924db758a5399d0261e4508f24a08fdf64573d7ee6e6b554a75e99",
+  "validation_record": {
+    "passed": true,
+    "disks": {
+      "bk-disk-5.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+      "bk-disk-6.bin": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a"
+    },
+    "simulation_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+    "native_log_sha256": "5d40e1dc04924db758a5399d0261e4508f24a08fdf64573d7ee6e6b554a75e99",
+    "boot_hex_sha256": "fe7292404de2fe8b790ccc6230b60f9e4d2bfb848bcc6cdbd39105cdbe2fe253",
+    "checks": {
+      "mkdos": {
+        "passed": true,
+        "registers": {
+          "model": 3,
+          "frequency_index": 6,
+          "video": 19200,
+          "scroll": 728,
+          "reads": 428,
+          "writes": 0
+        },
+        "active_vram_bytes": 16384,
+        "active_vram_sha256": "fba539be811c6dd10cc420d9b12ea8f5f04e6fec1ce2f56a92ba44ef96fff63c",
+        "native_log_sha256": "441b22b4ba4fcc4b67ae14d136b831e014ce631ada08e55450d869f9490fc144"
+      },
+      "system": {
+        "passed": true,
+        "registers": {
+          "model": 3,
+          "frequency_index": 6,
+          "video": 17152,
+          "scroll": 734,
+          "reads": 1598,
+          "writes": 0
+        },
+        "active_vram_bytes": 16384,
+        "active_vram_sha256": "1cee183af1bff3233828af5a7c1978f930dca9f59f182641eeee91a9d9622080",
+        "native_log_sha256": "baa2b581a6438a9e4b6251b248f302ce6ffccbf047389cf341b875aeebf015d3"
+      }
+    },
+    "cpu_mhz": 24,
+    "disk_mechanics_speedup": 1,
+    "system_music_stop_pressed": true,
+    "physical_board_verified": false
+  },
+  "prepared_directory": "two-disks-final-prepared",
+  "fpga_programmed": false,
+  "physical_boot_verified": false,
+  "backup_directory": ".",
+  "protected_partitions": {
+    "2": {
+      "start": 34816,
+      "sectors": 1440,
+      "before_sha256": "6bd3dfd13fa1e6ad279c787cfc3499a05927e06376dc515ef1d05c875f66abff"
+    },
+    "3": {
+      "start": 36864,
+      "sectors": 2880,
+      "before_sha256": "d7f81f7b1fa653a8ef6276f042b8e1097e9ee3980905635f338bcb9d8e6b970c"
+    }
+  },
+  "completed_actions": [],
+  "preflight_verified": true,
+  "changed_boot_sectors": 432,
+  "finished_utc": "2026-10-05T16:30:11.863023+00:00"
+}

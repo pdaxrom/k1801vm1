@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 module tb_keyboard;
-    reg clk = 0, reset = 1, clock_low = 0, serial_data = 1, ready = 1;
+    reg clk = 0, reset = 1, clock_low = 0, serial_data = 1, ready = 1, bios_mode = 0;
     always #20.833333 clk = !clk;
     tri1 ps2_clock;
     assign ps2_clock = clock_low ? 1'b0 : 1'bz;
@@ -10,7 +10,7 @@ module tb_keyboard;
     reg [7:0] received[0:63];
     integer count = 0, previous, i;
     uj11_ps2_keyboard #(.CLOCK_HZ(24000000)) transport(clk,reset,ps2_clock,serial_data,pop,scan);
-    bk_keymap map(clk,reset,scan[8],scan[7:0],pop,valid,code,ready,held,stop);
+    bk_keymap map(clk,reset,scan[8],scan[7:0],pop,valid,code,ready,held,stop,bios_mode);
     always @(posedge clk) if(!reset && valid && ready) begin received[count] = code; count = count + 1; end
     task bit_send(input value);
         begin
@@ -43,6 +43,12 @@ module tb_keyboard;
         release_key(8'h1c); if(held) $fatal(1,"Break held");
         send(8'h12,0); if(held) $fatal(1,"Shift repeats previous character");
         send(8'h1c,0); expect_key("A"); release_key(8'h1c);
+        send(8'h1c,0); expect_key("A"); send(8'h32,0); expect_key("B");
+        release_key(8'h1c); if(!held) $fatal(1,"Another key's break cleared last key hold");
+        release_key(8'h32); if(held) $fatal(1,"Last key's break retained repeat");
+        send(8'h1c,0); expect_key("A"); send(8'h32,0); expect_key("B");
+        release_key(8'h32); if(held) $fatal(1,"Older held key repeats the last released character");
+        release_key(8'h1c);
         send(8'h55,0); expect_key("+"); release_key(8'h55); release_key(8'h12);
         send(8'h58,0); send(8'h58,0); release_key(8'h58);
         send(8'h1c,0); expect_key("A"); release_key(8'h1c);
@@ -61,13 +67,32 @@ module tb_keyboard;
         send(8'h12,0); send(8'h1c,1); // Fault marker clears modifiers and held state.
         if(held) $fatal(1,"Parity fault retained held state");
         send(8'h1c,0); expect_key("A"); release_key(8'h1c);
+        bios_mode = 1;
         ready = 0; send(8'h21,0); send(8'h23,0);
         if(!valid || code != "C" || count != previous) $fatal(1,"Backpressure changed pending key");
         #100000; ready = 1; #100000;
         if(count != previous+2 || received[previous] != "C" || received[previous+1] != "D")
             $fatal(1,"Buffered scan order");
-        $display("PASS physical PS/2: make/break, Shift/Caps/Ctrl/Alt, arrows, STOP, Pause, bad parity, backpressure");
+        // Music and games may leave 177662 unread indefinitely. They must not
+        // inhibit the keyboard, queue stale characters or block STOP/breaks.
+        @(negedge clk); reset = 1;
+        repeat(5) @(negedge clk);
+        reset = 0; bios_mode = 0; ready = 0; previous = count;
+        send(8'h12,0);
+        for(i=0;i<20;i=i+1) begin
+            send(8'h1c,0); release_key(8'h1c);
+        end
+        release_key(8'h12);
+        if(valid || held || map.modifiers || scan[8] || transport.inhibit || count != previous)
+            $fatal(1,"Unread guest character blocked breaks/modifiers or retained stale input");
+        send(8'h76,0); if(!stop) $fatal(1,"Unread guest character blocked STOP make");
+        release_key(8'h76); if(stop) $fatal(1,"Unread guest character blocked STOP break");
+        ready = 1; #100000;
+        if(count != previous || valid) $fatal(1,"Unread guest accumulated characters for later delivery");
+        send(8'h32,0); expect_key("b"); release_key(8'h32);
+        $display("PASS physical PS/2: make/break, Shift/Caps/Ctrl/Alt, arrows, STOP, Pause, bad parity, BIOS backpressure");
+        $display("PASS unread guest register: 20 keys drain, STOP and break/modifier release survive, no stale input");
         $finish;
     end
-    initial begin #100000000; $fatal(1,"Keyboard timeout"); end
+    initial begin #200000000; $fatal(1,"Keyboard timeout"); end
 endmodule

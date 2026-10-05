@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-06",
+  "jed_sha256": "f183c0a11f2f16e8ea7fa492c49c623e1abfc9db0113f7f5f6eeba694a7f6bc6",
+  "operator_report": "При нажатии Esc зависает: звук остаётся на одной частоте, бегущая строка останавливается.",
+  "physical_stop_reaches_guest": true,
+  "physical_dos_shell_verified": false,
+  "status": "Investigating STOP while IRQ100 AY player is active."
+}

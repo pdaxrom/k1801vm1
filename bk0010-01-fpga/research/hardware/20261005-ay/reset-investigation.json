@@ -1,0 +1,27 @@
+{
+  "cause": "Guest RESET disabled IRQ100 by restoring 177662 to 040000; native music loop ran without calling its AY interrupt player.",
+  "references": [
+    {
+      "url": "https://github.com/nzeemin/bkbtl/blob/master/emulator/emubase/Board.cpp",
+      "local": "bkbtl-board.cpp",
+      "sha256": "eec0f0b217640d462ebcff2a9b8af556e4b36e1af8e9b85c7209890ec4f14997",
+      "function": "CMotherboard::ResetDevices",
+      "preserved": "177662 and 177664; AY and pending IRQs reset"
+    },
+    {
+      "url": "https://github.com/3cky/bkemu-android/blob/master/lib/src/main/java/su/comp/bk/arch/io/VideoController.java",
+      "local": "bkemu-video.java",
+      "sha256": "768ac07226ff786b83aa5d6341b314f14ee65180ba6f7208bb5d691887526396",
+      "function": "VideoController.init",
+      "preserved": "Video state unchanged"
+    },
+    {
+      "path": "/Users/sash/Work/tmp/PICO-BK/soft/EmuAPP/src/Overlays/Emu/CPU_e.c",
+      "sha256": "72ba326ca3b35253731f5c868bd5724a8877b03344047c319285072e2fd1a97d",
+      "function": "RESET opcode",
+      "behavior": "Timing only; video registers unchanged"
+    }
+  ],
+  "regression": "tb_reset: video/scroll retained, pending IRQ withdrawn, new IRQ100 arrives; hardware reset restores defaults",
+  "negative_control_passed": true
+}

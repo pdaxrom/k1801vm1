@@ -1,0 +1,9 @@
+FDD stage=001111 CPU mode=5 cycles=3087581 writes=0
+FDD stage=002222 CPU mode=5 cycles=4280160 writes=0
+FDD stage=003333 CPU mode=5 cycles=4370115 writes=10
+FDD stage=004444 CPU mode=5 cycles=6189969 writes=10
+PASS cpu11 native     A16M read/write/RO/format: CPU mode=5 reads=30 writes=20
+- tests/tb_fdd_native.v:102: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 801ms; walltime 13.289 s; speed 60.263 ms/s
+- Verilator: cpu 13.285 s on 1 threads; allocated 4 MB

@@ -1,0 +1,2 @@
+PASS clock mailbox: all 49 transitions, idle barrier, queued replacement
+tests/tb_clock_mailbox.v:40: $finish called at 74477000 (1ps)

@@ -1,0 +1,3 @@
+PASS physical PS/2: make/break, Shift/Caps/Ctrl/Alt, arrows, STOP, Pause, bad parity, BIOS backpressure
+PASS unread guest register: 20 keys drain, STOP and break/modifier release survive, no stale input
+tests/tb_keyboard.v:95: $finish called at 109742248922 (1ps)

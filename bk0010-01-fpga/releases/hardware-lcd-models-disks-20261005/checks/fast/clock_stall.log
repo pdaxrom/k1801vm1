@@ -1,0 +1,2 @@
+PASS disk clock wait: all 7 frequencies, 70 asynchronous phase offsets, queued frequency, minimum widths
+tests/tb_clock_stall.v:33: $finish called at 246370000 (1ps)

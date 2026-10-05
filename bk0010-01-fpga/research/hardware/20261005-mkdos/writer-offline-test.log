@@ -1,0 +1,157 @@
+{
+  "started_utc": "2026-10-05T16:01:07.519907+00:00",
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "resolved_device": "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01-fpga/build/write-sd-offline/card-sparse.bin",
+  "written": true,
+  "preparation": {
+    "partition": 4,
+    "start_lba": 40960,
+    "sectors": 7744,
+    "card_sectors": 15601664,
+    "partitions": [
+      {
+        "index": 1,
+        "type": 6,
+        "start": 2048,
+        "length": 32768
+      },
+      {
+        "index": 2,
+        "type": 1,
+        "start": 34816,
+        "length": 1440
+      },
+      {
+        "index": 3,
+        "type": 1,
+        "start": 36864,
+        "length": 2880
+      },
+      {
+        "index": 4,
+        "type": 15,
+        "start": 40960,
+        "length": 7744
+      },
+      {
+        "index": 5,
+        "type": 218,
+        "start": 43008,
+        "length": 1600
+      },
+      {
+        "index": 6,
+        "type": 218,
+        "start": 47104,
+        "length": 1600
+      }
+    ],
+    "regions": [
+      {
+        "name": "bk-disk-5.bin",
+        "start_lba": 43008,
+        "sectors": 1600,
+        "kind": "disk"
+      },
+      {
+        "name": "bk-disk-6.bin",
+        "start_lba": 47104,
+        "sectors": 1600,
+        "kind": "disk"
+      },
+      {
+        "name": "ebr-1.bin",
+        "start_lba": 40960,
+        "sectors": 1,
+        "kind": "ebr"
+      },
+      {
+        "name": "ebr-2.bin",
+        "start_lba": 45056,
+        "sectors": 1,
+        "kind": "ebr"
+      }
+    ],
+    "settings": {
+      "model": 3,
+      "frequency": 4,
+      "color": 0,
+      "drives": [
+        6,
+        5,
+        0,
+        0
+      ],
+      "readonly": 3
+    },
+    "mbr_before_sha256": "1d9790531763f1899689594b94329336f02f2c09d092128e483817f5de5fe4ae",
+    "fat16_before_sha256": "643cbbc1c820238392c9b04835a646d0897ccd3ad44a7083537769ae8adfd5bf",
+    "payloads": {
+      "mbr-after.bin": "7f7cf1df1d4d93043477560937bef45aa34eff774ad173441b084d3b536f83c6",
+      "fat16-after.bin": "540fe819a5f0d38a104f1f2ea18bc90e6f5a2ba05669f5d28c01ff7cdc1719ac",
+      "bk-disk-5.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+      "bk-disk-6.bin": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a",
+      "ebr-1.bin": "641267ce0d65e92c7293dd06468e0236e8cbcf7be2a03407a5614fae637182a5",
+      "ebr-2.bin": "8ad1fd5a2c1b5917dc2d0f91c1d07ca0fd5b2dff5136cd75c7c63e07fb58fd9c",
+      "simulation-sd.img": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b"
+    },
+    "preserved_files": {
+      "P601.ROM": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f",
+      "LOADER.BIN": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea",
+      "P601.CFG": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d",
+      "P601A.ROM": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1",
+      "P601.SET": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809",
+      "BK0010.ROM": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+    },
+    "loader_backup": "LDRBKOLD.BAK",
+    "device_written": false
+  },
+  "validation_sha256": "c64c10bcd3d2b260e5eb6a1a322f945fb46144e8e78eaaf50a269a9434c5fa60",
+  "validation_record": {
+    "passed": true,
+    "disks": {
+      "bk-disk-5.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+      "bk-disk-6.bin": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a"
+    },
+    "simulation_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+    "native_log_sha256": "c64c10bcd3d2b260e5eb6a1a322f945fb46144e8e78eaaf50a269a9434c5fa60"
+  },
+  "prepared_directory": "build/two-disks-final-prepared",
+  "fpga_programmed": false,
+  "physical_boot_verified": false,
+  "backup_directory": "build/write-sd-offline",
+  "protected_partitions": {
+    "2": {
+      "start": 34816,
+      "sectors": 1440,
+      "before_sha256": "6bd3dfd13fa1e6ad279c787cfc3499a05927e06376dc515ef1d05c875f66abff",
+      "after_sha256": "6bd3dfd13fa1e6ad279c787cfc3499a05927e06376dc515ef1d05c875f66abff"
+    },
+    "3": {
+      "start": 36864,
+      "sectors": 2880,
+      "before_sha256": "d7f81f7b1fa653a8ef6276f042b8e1097e9ee3980905635f338bcb9d8e6b970c",
+      "after_sha256": "d7f81f7b1fa653a8ef6276f042b8e1097e9ee3980905635f338bcb9d8e6b970c"
+    }
+  },
+  "completed_actions": [
+    "bk-disk-5.bin-and-readback",
+    "bk-disk-6.bin-and-readback",
+    "ebr-1.bin-and-readback",
+    "ebr-2.bin-and-readback",
+    "file-data",
+    "fat-copies",
+    "directory",
+    "mbr-and-readback"
+  ],
+  "boot_changed_sectors": 432,
+  "mbr_sha256": "7f7cf1df1d4d93043477560937bef45aa34eff774ad173441b084d3b536f83c6",
+  "fat16_sha256": "540fe819a5f0d38a104f1f2ea18bc90e6f5a2ba05669f5d28c01ff7cdc1719ac",
+  "extent_sha256": "eaa491e5b95f2397cb12d6f6f4b0f59d8cc065d6d7865cd72d2f1d17d7654f5c",
+  "disk_sha256s": {
+    "bk-disk-5.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+    "bk-disk-6.bin": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a"
+  },
+  "finished_utc": "2026-10-05T16:01:07.571481+00:00"
+}
+PASS offline SD writer: exact prepared bytes; all other first-24-MiB bytes unchanged; physical SD never opened

@@ -1,0 +1,2 @@
+PASS UART pin decoding: 8N1, CR/LF, coalesced stages and same-stage error
+tests/tb_uart.v:31: $finish called at 18265000 (1ps)

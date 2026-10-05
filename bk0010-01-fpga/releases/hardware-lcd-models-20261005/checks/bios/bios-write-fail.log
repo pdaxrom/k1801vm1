@@ -1,0 +1,10 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=772233 address=177612 reads=2
+BOOT stage=10 cycle=1466742 address=177612 reads=4
+BOOT stage=11 cycle=2718503 address=177612 reads=4
+PASS native BIOS refused save: error=52 SD writes=1
+- tests/tb_sd_boot.v:261: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 385ms; walltime 40.533 s; speed 9.510 ms/s
+- Verilator: cpu 40.493 s on 1 threads; allocated 2 MB

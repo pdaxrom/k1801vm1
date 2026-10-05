@@ -1,0 +1,2257 @@
+#Build: Synplify Pro (R) V-2023.09L-2, Build 349R, Sep 17 2024
+#install: /home/sash/.local/lscc/diamond/3.14/synpbase
+#OS: Linux 
+#Hostname: sashz-ubuntu
+
+# Tue Oct  6 01:46:08 2026
+
+#Implementation: impl1
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys HDL Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Verilog Compiler, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/pmi_def.v" (library work)
+@I::"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/vlog/hypermods.v" (library __hyper__lib__)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_rom.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_clock_mailbox.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_cpu.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_cpu_clock.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_crc16_word.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_keymap.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v" (library work)
+@I:"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_model_layout.vh" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_encoder.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v" (library work)
+@I:"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_palette_index.vh" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_panel.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_host.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sram_arbiter.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v" (library work)
+@W: CG1249 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":127:52:127:58|Redeclaration of implicit signal byte_rx
+@W: CG1249 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":128:19:128:27|Redeclaration of implicit signal byte_busy
+@W: CG1249 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":128:30:128:38|Redeclaration of implicit signal byte_done
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v" (library work)
+@N: CG334 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":286:12:286:24|Read directive translate_off.
+@N: CG333 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":292:12:292:23|Read directive translate_on.
+@N: CG334 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1819:12:1819:24|Read directive translate_off.
+@N: CG333 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1837:12:1837:23|Read directive translate_on.
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_reg_block.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_tve.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_ps2_keyboard.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_tick.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_button.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_pal_encoder.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_pal_timing.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/spi_byte_master.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/sd_spi_block.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_main_pll.v" (library work)
+@I::"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_video_pll.v" (library work)
+@N|stack limit increased to max
+Verilog syntax check successful!
+Selecting top level module bk_hardware_lcd
+@N: CG364 :"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v":1124:7:1124:9|Synthesizing module VLO in library work.
+Running optimization stage 1 on VLO .......
+Finished optimization stage 1 on VLO (CPU Time 0h:00m:00s, Memory Used current: 203MB peak: 203MB)
+@N: CG364 :"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v":1730:7:1730:13|Synthesizing module EHXPLLJ in library work.
+Running optimization stage 1 on EHXPLLJ .......
+Finished optimization stage 1 on EHXPLLJ (CPU Time 0h:00m:00s, Memory Used current: 203MB peak: 203MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_main_pll.v":4:7:4:17|Synthesizing module bk_main_pll in library work.
+Running optimization stage 1 on bk_main_pll .......
+Finished optimization stage 1 on bk_main_pll (CPU Time 0h:00m:00s, Memory Used current: 203MB peak: 203MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_video_pll.v":3:7:3:18|Synthesizing module bk_video_pll in library work.
+Running optimization stage 1 on bk_video_pll .......
+Finished optimization stage 1 on bk_video_pll (CPU Time 0h:00m:00s, Memory Used current: 203MB peak: 203MB)
+@N: CG364 :"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v":1535:7:1535:10|Synthesizing module DCCA in library work.
+Running optimization stage 1 on DCCA .......
+Finished optimization stage 1 on DCCA (CPU Time 0h:00m:00s, Memory Used current: 203MB peak: 203MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_clock_mailbox.v":3:7:3:22|Synthesizing module bk_clock_mailbox in library work.
+Running optimization stage 1 on bk_clock_mailbox .......
+Finished optimization stage 1 on bk_clock_mailbox (CPU Time 0h:00m:00s, Memory Used current: 204MB peak: 204MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_tick.v":5:7:5:15|Synthesizing module uj11_tick in library work.
+
+	DIVISOR=32'b00000000000001110101001100000000
+	LAST=20'b10000001101111001110
+   Generated name = uj11_tick_480000s_531406
+Running optimization stage 1 on uj11_tick_480000s_531406 .......
+Finished optimization stage 1 on uj11_tick_480000s_531406 (CPU Time 0h:00m:00s, Memory Used current: 205MB peak: 205MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":3:7:3:26|Synthesizing module bk_frequency_display in library work.
+
+	CLOCK_HZ=32'b00000001011011100011011000000000
+	DIVISOR=32'b00000000000000000000001011101110
+	WIDTH=32'b00000000000000000000000000001010
+	LIMIT=32'b00000000000000000000001011101101
+   Generated name = bk_frequency_display_24000000s_750s_10s_749s
+Running optimization stage 1 on bk_frequency_display_24000000s_750s_10s_749s .......
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":38:4:38:9|Register bit frame[7] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":38:4:38:9|Register bit frame[15] is always 0.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":38:4:38:9|Pruning register bit 15 of frame[15:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":38:4:38:9|Pruning register bit 7 of frame[15:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+Finished optimization stage 1 on bk_frequency_display_24000000s_750s_10s_749s (CPU Time 0h:00m:00s, Memory Used current: 205MB peak: 205MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_panel.v":2:7:2:14|Synthesizing module bk_panel in library work.
+
+	CLOCK_HZ=32'b00000001011011100011011000000000
+   Generated name = bk_panel_24000000s
+Running optimization stage 1 on bk_panel_24000000s .......
+Finished optimization stage 1 on bk_panel_24000000s (CPU Time 0h:00m:00s, Memory Used current: 206MB peak: 206MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_cpu_clock.v":4:7:4:18|Synthesizing module bk_cpu_clock in library work.
+Running optimization stage 1 on bk_cpu_clock .......
+Finished optimization stage 1 on bk_cpu_clock (CPU Time 0h:00m:00s, Memory Used current: 206MB peak: 206MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_tve.v":7:7:7:15|Synthesizing module vm1_timer in library work.
+@W: CG532 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_tve.v":63:0:63:6|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+Running optimization stage 1 on vm1_timer .......
+Finished optimization stage 1 on vm1_timer (CPU Time 0h:00m:00s, Memory Used current: 206MB peak: 206MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":1770:7:1770:14|Synthesizing module vm1g_pli in library work.
+Running optimization stage 1 on vm1g_pli .......
+Finished optimization stage 1 on vm1g_pli (CPU Time 0h:00m:00s, Memory Used current: 206MB peak: 206MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":1680:7:1680:14|Synthesizing module vm1a_pli in library work.
+Running optimization stage 1 on vm1a_pli .......
+Finished optimization stage 1 on vm1a_pli (CPU Time 0h:00m:00s, Memory Used current: 206MB peak: 206MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":853:7:853:14|Synthesizing module vm1g_plm in library work.
+Running optimization stage 1 on vm1g_plm .......
+Finished optimization stage 1 on vm1g_plm (CPU Time 0h:00m:00s, Memory Used current: 212MB peak: 212MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":140:7:140:14|Synthesizing module vm1a_plm in library work.
+Running optimization stage 1 on vm1a_plm .......
+Finished optimization stage 1 on vm1a_plm (CPU Time 0h:00m:00s, Memory Used current: 214MB peak: 214MB)
+@N: CG364 :"/home/sash/.local/lscc/diamond/3.14/synpbase/lib/lucent/machxo2.v":1291:7:1291:11|Synthesizing module DP8KC in library work.
+Running optimization stage 1 on DP8KC .......
+Finished optimization stage 1 on DP8KC (CPU Time 0h:00m:00s, Memory Used current: 214MB peak: 214MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_reg_block.v":3:7:3:15|Synthesizing module vm1_vcram in library work.
+Running optimization stage 1 on vm1_vcram .......
+Finished optimization stage 1 on vm1_vcram (CPU Time 0h:00m:00s, Memory Used current: 214MB peak: 214MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1844:7:1844:17|Synthesizing module vm1_reg_ram in library work.
+Running optimization stage 1 on vm1_reg_ram .......
+Finished optimization stage 1 on vm1_reg_ram (CPU Time 0h:00m:00s, Memory Used current: 214MB peak: 214MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1556:9:1556:16|Synthesizing module vm1_vgen in library work.
+Running optimization stage 1 on vm1_vgen .......
+Finished optimization stage 1 on vm1_vgen (CPU Time 0h:00m:00s, Memory Used current: 214MB peak: 214MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1654:7:1654:16|Synthesizing module vm1_reg_ff in library work.
+Running optimization stage 1 on vm1_reg_ff .......
+Finished optimization stage 1 on vm1_reg_ff (CPU Time 0h:00m:00s, Memory Used current: 215MB peak: 215MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":11:7:11:12|Synthesizing module vm1_wb in library work.
+
+	VM1_CORE_REG_USES_RAM=32'b00000000000000000000000000000001
+	VM1_CORE_MULG_VERSION=32'b00000000000000000000000000000000
+   Generated name = vm1_wb_1s_0s
+Running optimization stage 1 on vm1_wb_1s_0s .......
+@W: CL168 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1227:11:1227:17|Removing instance vreg_ff because it does not drive other instances. To preserve this instance, use the syn_noprune synthesis directive.
+@W: CL168 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":997:10:997:21|Removing instance plm_matrix_g because it does not drive other instances. To preserve this instance, use the syn_noprune synthesis directive.
+@W: CL168 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":783:10:783:21|Removing instance pli_matrix_g because it does not drive other instances. To preserve this instance, use the syn_noprune synthesis directive.
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":691:0:691:5|Removing unused bit 2 of exc_dbl_14[3:0]. Either assign all bits or reduce the width of the signal.
+@A: CL291 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1153:0:1153:5|Register psw with asynchronous load is being synthesized in compatability mode. A synthesis/simulation mismatch is possible.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":786:0:786:5|Register bit rq[5] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":786:0:786:5|Register bit rq[6] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":786:0:786:5|Register bit rq[7] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":691:0:691:5|Register bit reg_err[5] is always 1.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":691:0:691:5|Pruning register bit 5 of reg_err[7:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":786:0:786:5|Pruning register bits 7 to 5 of rq[19:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+Finished optimization stage 1 on vm1_wb_1s_0s (CPU Time 0h:00m:00s, Memory Used current: 217MB peak: 217MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_cpu.v":3:7:3:12|Synthesizing module bk_cpu in library work.
+Running optimization stage 1 on bk_cpu .......
+Finished optimization stage 1 on bk_cpu (CPU Time 0h:00m:00s, Memory Used current: 217MB peak: 217MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":4:7:4:15|Synthesizing module bk_wb_cdc in library work.
+Running optimization stage 1 on bk_wb_cdc .......
+Finished optimization stage 1 on bk_wb_cdc (CPU Time 0h:00m:00s, Memory Used current: 217MB peak: 217MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_rom.v":2:7:2:17|Synthesizing module bk_boot_rom in library work.
+Opening data file build/boot.hex from directory /home/sash/Work/FPGA/diamond-bios-ps2-20261006/build
+@W: CG532 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_rom.v":8:4:8:10|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+Running optimization stage 1 on bk_boot_rom .......
+Finished optimization stage 1 on bk_boot_rom (CPU Time 0h:00m:00s, Memory Used current: 228MB peak: 228MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_ps2_keyboard.v":3:7:3:23|Synthesizing module uj11_ps2_keyboard in library work.
+
+	CLOCK_HZ=32'b00000001011011100011011000000000
+	US_DIV=32'b00000000000000000000000000011000
+   Generated name = uj11_ps2_keyboard_24000000s_24s
+Running optimization stage 1 on uj11_ps2_keyboard_24000000s_24s .......
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_ps2_keyboard.v":34:4:34:9|Found RAM fifo, depth=16, width=8
+Finished optimization stage 1 on uj11_ps2_keyboard_24000000s_24s (CPU Time 0h:00m:00s, Memory Used current: 228MB peak: 228MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_keymap.v":3:7:3:15|Synthesizing module bk_keymap in library work.
+Opening data file bk_keymap_normal_rom_378254_initial_block from directory .
+Opening data file bk_keymap_shift_rom_378254_initial_block from directory .
+@W: CG532 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_keymap.v":142:4:142:10|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+Running optimization stage 1 on bk_keymap .......
+Finished optimization stage 1 on bk_keymap (CPU Time 0h:00m:00s, Memory Used current: 231MB peak: 231MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_crc16_word.v":3:7:3:19|Synthesizing module bk_crc16_word in library work.
+Running optimization stage 1 on bk_crc16_word .......
+Finished optimization stage 1 on bk_crc16_word (CPU Time 0h:00m:00s, Memory Used current: 231MB peak: 231MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":4:7:4:18|Synthesizing module bk_fdd_track in library work.
+Running optimization stage 1 on bk_fdd_track .......
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":64:4:64:9|Found RAM words, depth=4096, width=17
+Finished optimization stage 1 on bk_fdd_track (CPU Time 0h:00m:00s, Memory Used current: 232MB peak: 232MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd.v":4:7:4:12|Synthesizing module bk_fdd in library work.
+
+	CLOCK_HZ=32'b00000001011011100011011000000000
+	WORD_CYCLES=32'b00000000000000000000011000000000
+	CSR_CYCLES=32'b00000000000000000000000011000000
+   Generated name = bk_fdd_24000000s_1536s_192s
+Running optimization stage 1 on bk_fdd_24000000s_1536s_192s .......
+Finished optimization stage 1 on bk_fdd_24000000s_1536s_192s (CPU Time 0h:00m:00s, Memory Used current: 233MB peak: 233MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_host.v":5:7:5:16|Synthesizing module bk_sd_host in library work.
+Running optimization stage 1 on bk_sd_host .......
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_host.v":39:4:39:9|Found RAM buffer, depth=512, width=8
+Finished optimization stage 1 on bk_sd_host (CPU Time 0h:00m:00s, Memory Used current: 233MB peak: 233MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":4:7:4:22|Synthesizing module bk_sd_partitions in library work.
+Running optimization stage 1 on bk_sd_partitions .......
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":42:4:42:9|Found RAM words, depth=32, width=16
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":42:4:42:9|Found RAM words, depth=32, width=16
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[1] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[2] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[3] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[4] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[5] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[6] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[7] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[12] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[13] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit control[14] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit compare_left[0] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit compare_left[1] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit compare_return[4] is always 0.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Pruning register bit 4 of compare_return[4:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Pruning register bits 1 to 0 of compare_left[4:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Pruning register bits 14 to 12 of control[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Pruning register bits 7 to 1 of control[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+Finished optimization stage 1 on bk_sd_partitions (CPU Time 0h:00m:00s, Memory Used current: 233MB peak: 233MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":4:7:4:19|Synthesizing module bk_memory_map in library work.
+Running optimization stage 1 on bk_memory_map .......
+Finished optimization stage 1 on bk_memory_map (CPU Time 0h:00m:00s, Memory Used current: 233MB peak: 233MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":4:7:4:24|Synthesizing module boot_spi_registers in library work.
+Running optimization stage 1 on boot_spi_registers .......
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Pruning unused bits 7 to 6 of control[7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Pruning unused bits 3 to 2 of control[7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Register bit pout[2] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Register bit pout[3] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Register bit pout[4] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Register bit pout[5] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Register bit pout[6] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Register bit pout[7] is always 0.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":33:4:33:9|Pruning register bits 7 to 2 of pout[7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+Finished optimization stage 1 on boot_spi_registers (CPU Time 0h:00m:00s, Memory Used current: 233MB peak: 233MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/spi_byte_master.v":3:7:3:21|Synthesizing module spi_byte_master in library work.
+Running optimization stage 1 on spi_byte_master .......
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/spi_byte_master.v":13:4:13:9|Removing unused bit 7 of tx[7:0]. Either assign all bits or reduce the width of the signal.
+Finished optimization stage 1 on spi_byte_master (CPU Time 0h:00m:00s, Memory Used current: 233MB peak: 233MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":3:7:3:19|Synthesizing module bk_system_bus in library work.
+
+	CLOCK_HZ=32'b00000001011011100011011000000000
+	BIOS_CLOCK_HZ=32'b00000001011011100011011000000000
+	IDLE=32'b00000000000000000000000000000000
+	MEMORY=32'b00000000000000000000000000000001
+	ROM=32'b00000000000000000000000000000010
+	COMPLETE=32'b00000000000000000000000000000011
+	UNMAPPED=32'b00000000000000000000000000000100
+	FDD=32'b00000000000000000000000000000101
+	CRC_BITS=32'b00000000000000000000000000000110
+   Generated name = bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1
+Running optimization stage 1 on bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1 .......
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[8] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[10] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[11] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[12] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[13] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[14] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit scroll[15] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[0] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[1] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[2] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[3] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[4] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[5] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[6] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[7] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[12] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Register bit video_register[13] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[0] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[1] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[8] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[9] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[10] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[11] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[12] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[13] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[14] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit granted_vector[15] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit a16_phase[1] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit a16_mode[0] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit a16_mode[1] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Register bit mem_address[19] is always 0.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Pruning register bit 19 of mem_address[19:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Pruning register bit 1 of a16_phase[1:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Pruning register bits 1 to 0 of a16_mode[6:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Pruning register bits 15 to 8 of granted_vector[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Pruning register bits 1 to 0 of granted_vector[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Pruning register bits 13 to 12 of video_register[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Pruning register bits 7 to 0 of video_register[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Pruning register bits 15 to 10 of scroll[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":164:4:164:9|Pruning register bit 8 of scroll[15:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+Finished optimization stage 1 on bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1 (CPU Time 0h:00m:00s, Memory Used current: 243MB peak: 243MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_pal_timing.v":6:7:6:21|Synthesizing module uj11_pal_timing in library work.
+
+	HEIGHT=32'b00000000000000000000000100000000
+	FIRST=32'b00000000000000000000000000011100
+	SECOND=32'b00000000000000000000000101010101
+   Generated name = uj11_pal_timing_256s_28s_341s
+Running optimization stage 1 on uj11_pal_timing_256s_28s_341s .......
+Finished optimization stage 1 on uj11_pal_timing_256s_28s_341s (CPU Time 0h:00m:00s, Memory Used current: 243MB peak: 243MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_encoder.v":4:7:4:20|Synthesizing module bk_pal_encoder in library work.
+Opening data file build/pal_samples.hex from directory /home/sash/Work/FPGA/diamond-bios-ps2-20261006/build
+@W: CG532 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_encoder.v":11:4:11:10|Within an initial block, only Verilog force statements and memory initialization statements and initialization of entire variable are recognized, and all other content is ignored. Simulation mismatch may occur
+Running optimization stage 1 on bk_pal_encoder .......
+Finished optimization stage 1 on bk_pal_encoder (CPU Time 0h:00m:00s, Memory Used current: 245MB peak: 245MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":3:7:3:18|Synthesizing module bk_pal_video in library work.
+
+	COLOR=32'b00000000000000000000000000000000
+	H_START=32'b00000000000000000000001011001110
+	V_START=32'b00000000000000000000000000100000
+	FIRST=32'b00000000000000000000000000100000
+	SECOND=32'b00000000000000000000000101011001
+	FIRST_ROW=8'b00100000
+	SECOND_ROW=8'b01011001
+	FIRST_PREFETCH=8'b00011111
+	SECOND_PREFETCH=8'b01011000
+	IDLE=32'b00000000000000000000000000000000
+	READ=32'b00000000000000000000000000000001
+	GAP=32'b00000000000000000000000000000010
+	COMPLETE=32'b00000000000000000000000000000011
+	BK_WHITE_INDEX=4'b1101
+   Generated name = bk_pal_video_Z2
+Running optimization stage 1 on bk_pal_video_Z2 .......
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Pruning unused bits 15 to 10 of vscroll[15:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Removing unused bit 8 of vscroll[15:0]. Either assign all bits or reduce the width of the signal.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":52:4:52:9|Pruning unused bits 15 to 10 of held_config[22:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":52:4:52:9|Removing unused bit 8 of held_config[22:0]. Either assign all bits or reduce the width of the signal.
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Found RAM line_ram, depth=64, width=16
+Finished optimization stage 1 on bk_pal_video_Z2 (CPU Time 0h:00m:00s, Memory Used current: 245MB peak: 245MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sram_arbiter.v":3:7:3:21|Synthesizing module bk_sram_arbiter in library work.
+Running optimization stage 1 on bk_sram_arbiter .......
+Finished optimization stage 1 on bk_sram_arbiter (CPU Time 0h:00m:00s, Memory Used current: 245MB peak: 245MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Synthesizing module uj11_sram in library work.
+
+	CLEAR_WORDS=32'b00000000000000010000000000000000
+	FAST_RESPONSE=32'b00000000000000000000000000000000
+	IDLE=32'b00000000000000000000000000000000
+	SETUP=32'b00000000000000000000000000000001
+	ACCESS1=32'b00000000000000000000000000000010
+	ACCESS2=32'b00000000000000000000000000000011
+	HOLD=32'b00000000000000000000000000000100
+	RELEASE=32'b00000000000000000000000000000101
+	DONE=32'b00000000000000000000000000000110
+   Generated name = uj11_sram_65536s_0s_0s_1s_2s_3s_4s_5s_6s
+Running optimization stage 1 on uj11_sram_65536s_0s_0s_1s_2s_3s_4s_5s_6s .......
+Finished optimization stage 1 on uj11_sram_65536s_0s_0s_1s_2s_3s_4s_5s_6s (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":4:7:4:11|Synthesizing module bk_ay in library work.
+Running optimization stage 1 on bk_ay .......
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 4 of registers[1][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 4 of registers[3][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 4 of registers[5][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 5 of registers[6][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 6 of registers[7][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 5 of registers[8][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 5 of registers[9][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 5 of registers[10][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Pruning unused bits 7 to 4 of registers[13][7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":59:4:59:9|Removing unused bit 2 of registers[13][7:0]. Either assign all bits or reduce the width of the signal.
+Finished optimization stage 1 on bk_ay (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":5:7:5:14|Synthesizing module bk_audio in library work.
+Running optimization stage 1 on bk_audio .......
+@A: CL282 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Feedback mux created for signal commands[3][8:0]. It is possible a set/reset assignment for this is signal missing. To improve timing and area, specify a set/reset value.
+@A: CL282 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Feedback mux created for signal commands[2][8:0]. It is possible a set/reset assignment for this is signal missing. To improve timing and area, specify a set/reset value.
+@A: CL282 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Feedback mux created for signal commands[1][8:0]. It is possible a set/reset assignment for this is signal missing. To improve timing and area, specify a set/reset value.
+@A: CL282 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Feedback mux created for signal commands[0][8:0]. It is possible a set/reset assignment for this is signal missing. To improve timing and area, specify a set/reset value.
+Finished optimization stage 1 on bk_audio (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":3:7:3:18|Synthesizing module bk_boot_uart in library work.
+Running optimization stage 1 on bk_boot_uart .......
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":39:4:39:9|Removing unused bit 0 of shift[9:0]. Either assign all bits or reduce the width of the signal.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":39:4:39:9|Register bit shift[9] is always 1.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":39:4:39:9|Pruning register bit 9 of shift[9:1]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+Finished optimization stage 1 on bk_boot_uart (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Synthesizing module bk_computer in library work.
+Running optimization stage 1 on bk_computer .......
+@W: CL169 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Pruning unused register ext_output[15:0]. Make sure that there are no unused intermediate registers.
+@W: CL265 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing unused bit 7 of sys_output[7:0]. Either assign all bits or reduce the width of the signal.
+@W: CL271 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Pruning unused bits 5 to 0 of sys_output[7:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@W: CL113 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Feedback mux created for signal sys_input[7:7]. To avoid the feedback mux, assign values explicitly under all conditions of conditional assignment statements.
+@W: CL113 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Feedback mux created for signal sys_input[5:3]. To avoid the feedback mux, assign values explicitly under all conditions of conditional assignment statements.
+@W: CL113 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Feedback mux created for signal sys_input[1:0]. To avoid the feedback mux, assign values explicitly under all conditions of conditional assignment statements.
+@W: CL251 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|All reachable assignments to sys_input[7] assign 1, register removed by optimization
+@W: CL251 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|All reachable assignments to sys_input[5:3] assign 1, register removed by optimization
+@W: CL250 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|All reachable assignments to sys_input[1:0] assign 0, register removed by optimization
+Finished optimization stage 1 on bk_computer (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+@N: CG364 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Synthesizing module bk_hardware_lcd in library work.
+Running optimization stage 1 on bk_hardware_lcd .......
+Finished optimization stage 1 on bk_hardware_lcd (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+Running optimization stage 2 on bk_hardware_lcd .......
+Finished optimization stage 2 on bk_hardware_lcd (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+Running optimization stage 2 on bk_computer .......
+Finished optimization stage 2 on bk_computer (CPU Time 0h:00m:00s, Memory Used current: 246MB peak: 246MB)
+Running optimization stage 2 on bk_boot_uart .......
+Finished optimization stage 2 on bk_boot_uart (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on bk_audio .......
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Found RAM commands, depth=4, width=9
+Finished optimization stage 2 on bk_audio (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on bk_ay .......
+Finished optimization stage 2 on bk_ay (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on uj11_sram_65536s_0s_0s_1s_2s_3s_4s_5s_6s .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":33:4:33:9|Trying to extract state machine for register state.
+Extracted state machine for register state
+State machine has 7 reachable states with original encodings of:
+   000
+   001
+   010
+   011
+   100
+   101
+   110
+Finished optimization stage 2 on uj11_sram_65536s_0s_0s_1s_2s_3s_4s_5s_6s (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on bk_sram_arbiter .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sram_arbiter.v":26:4:26:9|Trying to extract state machine for register owner.
+Extracted state machine for register owner
+State machine has 4 reachable states with original encodings of:
+   00
+   01
+   10
+   11
+Finished optimization stage 2 on bk_sram_arbiter (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on bk_pal_video_Z2 .......
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Register bit dma_address[16] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Register bit dma_address[17] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Register bit dma_address[18] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Register bit dma_address[19] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Register bit tag0[0] is always 0.
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":150:4:150:9|Register bit pixel_phase[5] is always 0.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":150:4:150:9|Pruning register bit 5 of pixel_phase[5:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Pruning register bit 0 of tag0[7:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Pruning register bits 19 to 16 of dma_address[19:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|Trying to extract state machine for register dma_state.
+Extracted state machine for register dma_state
+State machine has 4 reachable states with original encodings of:
+   00
+   01
+   10
+   11
+Finished optimization stage 2 on bk_pal_video_Z2 (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on bk_pal_encoder .......
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_encoder.v":13:4:13:9|Register bit phase[0] is always 0.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_encoder.v":13:4:13:9|Pruning register bit 0 of phase[31:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+Finished optimization stage 2 on bk_pal_encoder (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on uj11_pal_timing_256s_28s_341s .......
+Finished optimization stage 2 on uj11_pal_timing_256s_28s_341s (CPU Time 0h:00m:00s, Memory Used current: 247MB peak: 247MB)
+Running optimization stage 2 on bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1 .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Trying to extract state machine for register state.
+Extracted state machine for register state
+State machine has 7 reachable states with original encodings of:
+   000
+   001
+   010
+   011
+   100
+   101
+   110
+Finished optimization stage 2 on bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1 (CPU Time 0h:00m:00s, Memory Used current: 249MB peak: 249MB)
+Running optimization stage 2 on spi_byte_master .......
+Finished optimization stage 2 on spi_byte_master (CPU Time 0h:00m:00s, Memory Used current: 249MB peak: 249MB)
+Running optimization stage 2 on boot_spi_registers .......
+@N: CL159 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/boot_spi_registers.v":12:15:12:23|Input byte_busy is unused.
+Finished optimization stage 2 on boot_spi_registers (CPU Time 0h:00m:00s, Memory Used current: 250MB peak: 250MB)
+Running optimization stage 2 on bk_memory_map .......
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":6:22:6:34|Input port bit 15 of bank_register[15:0] is unused
+
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":6:22:6:34|Input port bit 11 of bank_register[15:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":6:22:6:34|Input port bits 7 to 5 of bank_register[15:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":6:22:6:34|Input port bit 2 of bank_register[15:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_memory_map.v":7:21:7:28|Input port bits 2 to 0 of a16_mode[6:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on bk_memory_map (CPU Time 0h:00m:00s, Memory Used current: 250MB peak: 250MB)
+Running optimization stage 2 on bk_sd_partitions .......
+@N: CL189 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Register bit compare_right[0] is always 0.
+@W: CL260 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Pruning register bit 0 of compare_right[4:0]. If this is not the intended behavior, drive the input with valid values, or an input from the top level.
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Trying to extract state machine for register state.
+Extracted state machine for register state
+State machine has 22 reachable states with original encodings of:
+   00000
+   00001
+   00010
+   00011
+   00100
+   00101
+   00110
+   00111
+   01000
+   01001
+   01010
+   01011
+   01100
+   01101
+   01110
+   01111
+   10000
+   10001
+   10010
+   10011
+   10100
+   10101
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Found RAM overflow, depth=4, width=1
+@N: CL134 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Found RAM overflow, depth=4, width=1
+Finished optimization stage 2 on bk_sd_partitions (CPU Time 0h:00m:00s, Memory Used current: 250MB peak: 250MB)
+Running optimization stage 2 on bk_sd_host .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_host.v":75:4:75:9|Trying to extract state machine for register state.
+Extracted state machine for register state
+State machine has 17 reachable states with original encodings of:
+   00000
+   00001
+   00010
+   00011
+   00100
+   00101
+   00110
+   00111
+   01000
+   01001
+   01010
+   01011
+   01100
+   01101
+   01110
+   01111
+   10000
+@N: CL159 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_host.v":19:15:19:23|Input byte_busy is unused.
+Finished optimization stage 2 on bk_sd_host (CPU Time 0h:00m:00s, Memory Used current: 250MB peak: 250MB)
+Running optimization stage 2 on bk_fdd_24000000s_1536s_192s .......
+Finished optimization stage 2 on bk_fdd_24000000s_1536s_192s (CPU Time 0h:00m:00s, Memory Used current: 253MB peak: 253MB)
+Running optimization stage 2 on bk_fdd_track .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":87:4:87:9|Trying to extract state machine for register state.
+Extracted state machine for register state
+State machine has 23 reachable states with original encodings of:
+   00000
+   00001
+   00010
+   00011
+   00100
+   00101
+   00110
+   00111
+   01000
+   01001
+   01010
+   01011
+   01100
+   01101
+   01110
+   01111
+   10000
+   10001
+   10010
+   10011
+   10100
+   10101
+   10110
+Finished optimization stage 2 on bk_fdd_track (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on bk_crc16_word .......
+Finished optimization stage 2 on bk_crc16_word (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on bk_keymap .......
+Finished optimization stage 2 on bk_keymap (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on uj11_ps2_keyboard_24000000s_24s .......
+Finished optimization stage 2 on uj11_ps2_keyboard_24000000s_24s (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on bk_boot_rom .......
+Finished optimization stage 2 on bk_boot_rom (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on bk_wb_cdc .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":74:4:74:9|Trying to extract state machine for register sys_state.
+Extracted state machine for register sys_state
+State machine has 3 reachable states with original encodings of:
+   00
+   01
+   10
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Trying to extract state machine for register cpu_state.
+Extracted state machine for register cpu_state
+State machine has 4 reachable states with original encodings of:
+   00
+   01
+   10
+   11
+Finished optimization stage 2 on bk_wb_cdc (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on bk_cpu .......
+Finished optimization stage 2 on bk_cpu (CPU Time 0h:00m:00s, Memory Used current: 254MB peak: 254MB)
+Running optimization stage 2 on vm1_wb_1s_0s .......
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":973:0:973:5|Trying to extract state machine for register init_out.
+@N: CL201 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":542:0:542:5|Trying to extract state machine for register bus_aseq.
+Extracted state machine for register bus_aseq
+State machine has 3 reachable states with original encodings of:
+   00
+   01
+   11
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":70:18:70:26|Input port bit 0 of wbs_adr_i[3:0] is unused
+
+Finished optimization stage 2 on vm1_wb_1s_0s (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1_reg_ff .......
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1659:18:1659:20|Input port bit 29 of plr[33:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1659:18:1659:20|Input port bits 24 to 21 of plr[33:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1659:18:1659:20|Input port bits 19 to 15 of plr[33:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1659:18:1659:20|Input port bit 12 of plr[33:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1659:18:1659:20|Input port bits 10 to 0 of plr[33:0] are unused. Assign logic for all port bits or change the input port size.
+@N: CL159 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1656:18:1656:22|Input clk_p is unused.
+@N: CL159 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1658:18:1658:22|Input reset is unused.
+Finished optimization stage 2 on vm1_reg_ff (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1_vgen .......
+Finished optimization stage 2 on vm1_vgen (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1_reg_ram .......
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1849:18:1849:20|Input port bit 29 of plr[33:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1849:18:1849:20|Input port bits 24 to 21 of plr[33:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1849:18:1849:20|Input port bits 19 to 15 of plr[33:0] are unused. Assign logic for all port bits or change the input port size.
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1849:18:1849:20|Input port bit 12 of plr[33:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1849:18:1849:20|Input port bits 10 to 0 of plr[33:0] are unused. Assign logic for all port bits or change the input port size.
+@N: CL159 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1846:18:1846:22|Input clk_p is unused.
+@N: CL159 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1848:18:1848:22|Input reset is unused.
+Finished optimization stage 2 on vm1_reg_ram (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1_vcram .......
+Finished optimization stage 2 on vm1_vcram (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on DP8KC .......
+Finished optimization stage 2 on DP8KC (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1a_plm .......
+Finished optimization stage 2 on vm1a_plm (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1g_plm .......
+Finished optimization stage 2 on vm1g_plm (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1a_pli .......
+@W: CL247 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":1682:18:1682:19|Input port bit 19 of rq[19:0] is unused
+
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":1682:18:1682:19|Input port bits 7 to 5 of rq[19:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on vm1a_pli (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1g_pli .......
+@W: CL246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_plm_masked.v":1772:18:1772:19|Input port bits 7 to 5 of rq[19:0] are unused. Assign logic for all port bits or change the input port size.
+Finished optimization stage 2 on vm1g_pli (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on vm1_timer .......
+Finished optimization stage 2 on vm1_timer (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on bk_cpu_clock .......
+Finished optimization stage 2 on bk_cpu_clock (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on bk_panel_24000000s .......
+Finished optimization stage 2 on bk_panel_24000000s (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on bk_frequency_display_24000000s_750s_10s_749s .......
+@W: CL279 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":38:4:38:9|Pruning register bits 4 to 3 of frame[6:0]. If this is not the intended behavior, drive the inputs with valid values, or inputs from the top level.
+Finished optimization stage 2 on bk_frequency_display_24000000s_750s_10s_749s (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on uj11_tick_480000s_531406 .......
+Finished optimization stage 2 on uj11_tick_480000s_531406 (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on bk_clock_mailbox .......
+Finished optimization stage 2 on bk_clock_mailbox (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on DCCA .......
+Finished optimization stage 2 on DCCA (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on bk_video_pll .......
+Finished optimization stage 2 on bk_video_pll (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on bk_main_pll .......
+Finished optimization stage 2 on bk_main_pll (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on EHXPLLJ .......
+Finished optimization stage 2 on EHXPLLJ (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+Running optimization stage 2 on VLO .......
+Finished optimization stage 2 on VLO (CPU Time 0h:00m:00s, Memory Used current: 265MB peak: 265MB)
+
+For a summary of runtime per design unit, please see file:
+==========================================================
+@L: /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/synwork/layer0.duruntime
+
+
+
+At c_ver Exit (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 265MB peak: 265MB)
+
+Process took 0h:00m:02s realtime, 0h:00m:02s cputime
+
+Process completed successfully.
+# Tue Oct  6 01:46:10 2026
+
+###########################################################]
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Synopsys Netlist Linker, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+
+At syn_nfilter Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 206MB peak: 206MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Tue Oct  6 01:46:10 2026
+
+###########################################################]
+
+For a summary of runtime and memory usage for all design units, please see file:
+==========================================================
+@L: /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/synwork/bk0010_impl1_comp.rt.csv
+
+@END
+
+At c_hdl Exit (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 41MB peak: 41MB)
+
+Process took 0h:00m:02s realtime, 0h:00m:02s cputime
+
+Process completed successfully.
+# Tue Oct  6 01:46:10 2026
+
+###########################################################]
+###########################################################[
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Synopsys Netlist Linker, Version comp202309synp1, Build 349R, Built Sep 17 2024 08:30:48, @5637152
+
+@N|Running in 64-bit mode
+
+At syn_nfilter Exit (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 208MB peak: 208MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+
+Process completed successfully.
+# Tue Oct  6 01:46:12 2026
+
+###########################################################]
+Premap Report
+
+# Tue Oct  6 01:46:12 2026
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Lattice Technology Pre-mapping, Version map202309lat, Build 191R, Built Sep 17 2024 09:08:23, @5637152
+
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 440MB peak: 440MB)
+
+
+Done reading skeleton netlist (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+Reading constraint file: /home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/clocks.fdc
+@L: /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/bk0010_impl1_scck.rpt 
+See clock summary report "/home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/bk0010_impl1_scck.rpt"
+@N: MF916 |Option synthesis_strategy=base is enabled. 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 461MB peak: 461MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 461MB peak: 461MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 474MB peak: 474MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 477MB peak: 477MB)
+
+NConnInternalConnection caching is on
+@N: FX493 |Applying initial value "00" on instance ack_sync[1:0].
+@W: FX474 |User-specified initial value defined for some sequential elements which can prevent optimum synthesis results from being achieved. 
+@N: FX493 |Applying initial value "00" on instance request_sync[1:0].
+@N: FX493 |Applying initial value "000" on instance held[2:0].
+@N: FX493 |Applying initial value "0" on instance toggle.
+@N: FX493 |Applying initial value "0" on instance ack.
+@N: FX493 |Applying initial value "000" on instance confirmed[2:0].
+@N: FX493 |Applying initial value "000" on instance target[2:0].
+@N: FX493 |Applying initial value "00" on instance frame[6:5].
+@N: FX493 |Applying initial value "000" on instance frame[2:0].
+@N: FX493 |Applying initial value "0000000" on instance frame[14:8].
+@N: FX493 |Applying initial value "011111111" on instance seg_led_h[8:0].
+@N: FX493 |Applying initial value "011111111" on instance seg_led_l[8:0].
+@N: FX493 |Applying initial value "0" on instance previous.
+@N: FX493 |Applying initial value "00" on instance sync[1:0].
+@N: FX493 |Applying initial value "1" on instance pressed.
+@N: FX493 |Applying initial value "0" on instance full_reset.
+@N: FX493 |Applying initial value "1" on instance hard_reset.
+@N: FX493 |Applying initial value "00" on instance stall_sync[1:0].
+@N: FX493 |Applying initial value "0" on instance clk_p.
+@N: FX493 |Applying initial value "000" on instance active_mode[2:0].
+@N: FX493 |Applying initial value "0000000000000000" on instance tve_limit[15:0].
+@N: FX493 |Applying initial value "00" on instance cross_a[1:0].
+@N: FX493 |Applying initial value "00" on instance cross_b[1:0].
+@N: FX493 |Applying initial value "0" on instance stop_previous.
+@N: FX493 |Applying initial value "0" on instance halt_flag.
+@N: FX493 |Applying initial value "0" on instance stop_pending.
+@N: FX493 |Applying initial value "0" on instance system_active.
+@N: FX493 |Applying initial value "0" on instance system_flag.
+@N: FX493 |Applying initial value "00" on instance response_sync[1:0].
+@N: FX493 |Applying initial value "00" on instance request_sync[1:0].
+@N: FX493 |Applying initial value "00" on instance valid_sync[1:0].
+@N: FX493 |Applying initial value "111" on instance cpu_reset_pipe[2:0].
+@N: FX493 |Applying initial value "111" on instance sys_reset_pipe[2:0].
+@N: FX493 |Applying initial value "0" on instance cancelled.
+@N: FX493 |Applying initial value "0" on instance held_write.
+@N: FX493 |Applying initial value "0" on instance request_toggle.
+@N: FX493 |Applying initial value "0" on instance valid.
+@N: FX493 |Applying initial value "00" on instance held_lanes[1:0].
+@N: FX493 |Applying initial value "0000000000000000" on instance held_address[15:0].
+@N: FX493 |Applying initial value "0000000000000000" on instance held_data[15:0].
+@N: FX493 |Applying initial value "0000000000000000" on instance held_map[15:0].
+@N: FX493 |Applying initial value "0000000000000000" on instance held_read[15:0].
+@N: FX493 |Applying initial value "0" on instance response_seen.
+@N: FX493 |Applying initial value "0" on instance request_seen.
+@N: FX493 |Applying initial value "0" on instance response_toggle.
+@N: FX493 |Applying initial value "0000000000000000" on instance cpu_read[15:0].
+@N: FX493 |Applying initial value "0" on instance cpu_ack.
+@N: FX493 |Applying initial value "0" on instance extended.
+@N: FX493 |Applying initial value "0" on instance released.
+@N: FX493 |Applying initial value "0" on instance caps.
+@N: FX493 |Applying initial value "0" on instance caps_down.
+@N: FX493 |Applying initial value "000000" on instance modifiers[5:0].
+@N: FX493 |Applying initial value "0" on instance stop.
+@N: FX493 |Applying initial value "000000000" on instance last_key[8:0].
+@N: FX493 |Applying initial value "0" on instance held.
+@N: FX493 |Applying initial value "0" on instance valid.
+@N: FX493 |Applying initial value "00000000" on instance code[7:0].
+@N: FX493 |Applying initial value "00000000" on instance high_byte[7:0].
+@N: FX493 |Applying initial value "0" on instance buffer_write.
+@N: FX493 |Applying initial value "00000000" on instance buffer_data[7:0].
+@N: FX493 |Applying initial value "0" on instance store.
+@N: FX493 |Applying initial value "0" on instance sector_request.
+@N: FX493 |Applying initial value "0" on instance dirty.
+@N: FX493 |Applying initial value "0000000000000000" on instance pending_word[15:0].
+@N: FX493 |Applying initial value "00" on instance cached_drive[1:0].
+@N: FX493 |Applying initial value "00" on instance sector_drive[1:0].
+@N: FX493 |Applying initial value "0" on instance sector_write.
+@N: FX493 |Applying initial value "0" on instance header_ok.
+@N: FX493 |Applying initial value "0" on instance cached.
+@N: FX493 |Applying initial value "1111111111111111" on instance crc[15:0].
+@N: FX493 |Applying initial value "00000000000000000" on instance store_value[16:0].
+@N: FX493 |Applying initial value "0" on instance error.
+@N: FX493 |Applying initial value "0000" on instance header_sector[3:0].
+@N: FX493 |Applying initial value "00" on instance frame[1:0].
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":87:4:87:9|Initial value on register sector[3:0] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@N: FX493 |Applying initial value "0001" on instance sector[3:0].
+@N: FX493 |Applying initial value "000000000000" on instance store_address[11:0].
+@N: FX493 |Applying initial value "0" on instance reset_pending.
+@N: FX493 |Applying initial value "0" on instance bus_active.
+@N: FX493 |Applying initial value "0000000000000000" on instance last_written[15:0].
+@N: FX493 |Applying initial value "0000000000000000" on instance data_latch[15:0].
+@N: FX493 |Applying initial value "0" on instance writing.
+@N: FX493 |Applying initial value "0000000000000000" on instance read_data[15:0].
+@N: FX493 |Applying initial value "0" on instance control_wait.
+@N: FX493 |Applying initial value "00" on instance drive[1:0].
+@N: FX493 |Applying initial value "0" on instance side.
+@N: FX493 |Applying initial value "0" on instance motor.
+@N: FX493 |Applying initial value "0" on instance selected.
+@N: FX493 |Applying initial value "1111111111111111" on instance read_crc[15:0].
+@N: FX493 |Applying initial value "1111111111111111" on instance write_crc[15:0].
+@N: FX493 |Applying initial value "0" on instance found.
+@N: FX493 |Applying initial value "0" on instance ready.
+@N: FX493 |Applying initial value "0" on instance search.
+@N: FX493 |Applying initial value "0" on instance word_write.
+@N: FX493 |Applying initial value "0" on instance crc_ok.
+@N: FX493 |Applying initial value "00000000000000000" on instance word_value[16:0].
+@N: FX493 |Applying initial value "0" on instance data_ready.
+@N: FX493 |Applying initial value "0" on instance block_addressing.
+@N: FX493 |Applying initial value "0" on instance done.
+@N: FX493 |Applying initial value "00000000" on instance received_crc[7:0].
+@N: FX493 |Applying initial value "0" on instance byte_start.
+
+Only the first 100 messages of id 'FX493' are reported. To see all messages use 'report_messages -log /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/synlog/bk0010_impl1_premap.srr -id FX493' in the Tcl shell. To see all messages in future runs, use the command 'message_override -limit {FX493} -count unlimited' in the Tcl shell.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Initial value on register pointer[15:0] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[7:0] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@W: BN287 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Register model_meta[2:0] with reset has an initial value of 1. Ignoring initial value.  
+@W: BN287 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Register vector_meta[15:0] with reset has an initial value of 1. Ignoring initial value.  
+@W: BN287 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Register model_sync[2:0] with reset has an initial value of 1. Ignoring initial value.  
+@W: BN287 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Register vector_sync[15:0] with reset has an initial value of 1. Ignoring initial value.  
+@W: BN287 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Register sys_input[6:5] with reset has an initial value of 1. Ignoring initial value.  
+
+Starting HSTDM IP insertion (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 529MB peak: 529MB)
+
+
+Finished HSTDM IP insertion (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 529MB peak: 529MB)
+
+
+Started DisTri Cleanup (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 529MB peak: 529MB)
+
+
+Finished DisTri Cleanup (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 529MB peak: 529MB)
+
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":786:0:786:5|Removing sequential instance rq[19] (in view: work.vm1_wb_1s_0s(verilog)) of type view:PrimLib.dff(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":876:0:876:5|Removing sequential instance irq2 (in view: work.vm1_wb_1s_0s(verilog)) of type view:PrimLib.sdffr(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":876:0:876:5|Removing sequential instance irq3 (in view: work.vm1_wb_1s_0s(verilog)) of type view:PrimLib.sdffr(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1326:0:1326:5|Removing sequential instance wb_ios (in view: work.vm1_wb_1s_0s(verilog)) of type view:PrimLib.dffe(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance held_map[2] (in view: work.bk_wb_cdc(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance held_map[5] (in view: work.bk_wb_cdc(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance held_map[6] (in view: work.bk_wb_cdc(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance held_map[7] (in view: work.bk_wb_cdc(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance held_map[11] (in view: work.bk_wb_cdc(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance held_map[15] (in view: work.bk_wb_cdc(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance cpu_bank[2] (in view: work.bk_computer(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance cpu_bank[5] (in view: work.bk_computer(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance cpu_bank[6] (in view: work.bk_computer(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance cpu_bank[7] (in view: work.bk_computer(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance cpu_bank[11] (in view: work.bk_computer(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance cpu_bank[15] (in view: work.bk_computer(verilog)) of type view:PrimLib.dffre(prim) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1352:0:1352:5|Removing sequential instance wb_wcnt[9:0] (in view: work.vm1_wb_1s_0s(verilog)) of type view:PrimLib.sdffr(prim) because it does not drive other instances.
+Encoding state machine bus_aseq[2:0] (in view: work.vm1_wb_1s_0s(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   11 -> 10
+Encoding state machine sys_state[2:0] (in view: work.bk_wb_cdc(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   10 -> 10
+Encoding state machine cpu_state[3:0] (in view: work.bk_wb_cdc(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   10 -> 10
+   11 -> 11
+@N: MO225 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|There are no possible illegal states for state machine cpu_state[3:0] (in view: work.bk_wb_cdc(verilog)); safe FSM implementation is not required.
+Encoding state machine state[22:0] (in view: work.bk_fdd_track(verilog))
+original code -> new code
+   00000 -> 00000000000000000000001
+   00001 -> 00000000000000000000010
+   00010 -> 00000000000000000000100
+   00011 -> 00000000000000000001000
+   00100 -> 00000000000000000010000
+   00101 -> 00000000000000000100000
+   00110 -> 00000000000000001000000
+   00111 -> 00000000000000010000000
+   01000 -> 00000000000000100000000
+   01001 -> 00000000000001000000000
+   01010 -> 00000000000010000000000
+   01011 -> 00000000000100000000000
+   01100 -> 00000000001000000000000
+   01101 -> 00000000010000000000000
+   01110 -> 00000000100000000000000
+   01111 -> 00000001000000000000000
+   10000 -> 00000010000000000000000
+   10001 -> 00000100000000000000000
+   10010 -> 00001000000000000000000
+   10011 -> 00010000000000000000000
+   10100 -> 00100000000000000000000
+   10101 -> 01000000000000000000000
+   10110 -> 10000000000000000000000
+Encoding state machine state[16:0] (in view: work.bk_sd_host(verilog))
+original code -> new code
+   00000 -> 00000000000000001
+   00001 -> 00000000000000010
+   00010 -> 00000000000000100
+   00011 -> 00000000000001000
+   00100 -> 00000000000010000
+   00101 -> 00000000000100000
+   00110 -> 00000000001000000
+   00111 -> 00000000010000000
+   01000 -> 00000000100000000
+   01001 -> 00000001000000000
+   01010 -> 00000010000000000
+   01011 -> 00000100000000000
+   01100 -> 00001000000000000
+   01101 -> 00010000000000000
+   01110 -> 00100000000000000
+   01111 -> 01000000000000000
+   10000 -> 10000000000000000
+Encoding state machine state[21:0] (in view: work.bk_sd_partitions(verilog))
+original code -> new code
+   00000 -> 0000000000000000000001
+   00001 -> 0000000000000000000010
+   00010 -> 0000000000000000000100
+   00011 -> 0000000000000000001000
+   00100 -> 0000000000000000010000
+   00101 -> 0000000000000000100000
+   00110 -> 0000000000000001000000
+   00111 -> 0000000000000010000000
+   01000 -> 0000000000000100000000
+   01001 -> 0000000000001000000000
+   01010 -> 0000000000010000000000
+   01011 -> 0000000000100000000000
+   01100 -> 0000000001000000000000
+   01101 -> 0000000010000000000000
+   01110 -> 0000000100000000000000
+   01111 -> 0000001000000000000000
+   10000 -> 0000010000000000000000
+   10001 -> 0000100000000000000000
+   10010 -> 0001000000000000000000
+   10011 -> 0010000000000000000000
+   10100 -> 0100000000000000000000
+   10101 -> 1000000000000000000000
+Encoding state machine state[6:0] (in view: work.bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1(verilog))
+original code -> new code
+   000 -> 0000001
+   001 -> 0000010
+   010 -> 0000100
+   011 -> 0001000
+   100 -> 0010000
+   101 -> 0100000
+   110 -> 1000000
+Encoding state machine dma_state[3:0] (in view: work.bk_pal_video_Z2(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   10 -> 10
+   11 -> 11
+@N: MO225 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":118:4:118:9|There are no possible illegal states for state machine dma_state[3:0] (in view: work.bk_pal_video_Z2(verilog)); safe FSM implementation is not required.
+Encoding state machine owner[3:0] (in view: work.bk_sram_arbiter(verilog))
+original code -> new code
+   00 -> 00
+   01 -> 01
+   10 -> 10
+   11 -> 11
+@N: MO225 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sram_arbiter.v":26:4:26:9|There are no possible illegal states for state machine owner[3:0] (in view: work.bk_sram_arbiter(verilog)); safe FSM implementation is not required.
+Encoding state machine state[6:0] (in view: work.uj11_sram_65536s_0s_0s_1s_2s_3s_4s_5s_6s(verilog))
+original code -> new code
+   000 -> 0000001
+   001 -> 0000010
+   010 -> 0000100
+   011 -> 0001000
+   100 -> 0010000
+   101 -> 0100000
+   110 -> 1000000
+
+Starting clock optimization phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 540MB peak: 540MB)
+
+
+mixed edge conversion for GCC is OFF
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1352:0:1352:5|Removing sequential instance wb_swait (in view: work.vm1_wb_1s_0s(verilog)) of type view:PrimLib.sdffre(prim) because it does not drive other instances.
+@W: BZ204 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_main_pll.v":62:12:62:20|GCC unable to propagate clocks through gate main_pll.PLLInst_0; all outputs will be treated as enables regardless of whether any inputs are clocks
+@W: BZ240 :|GCC encountered Inferred Clock constraint on net GCC considers to be data main_pll.CLKOP; this will likely lead to failure to convert
+@W: BZ240 :|GCC encountered Inferred Clock constraint on net GCC considers to be data main_pll.CLKOS; this will likely lead to failure to convert
+@W: BZ204 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_video_pll.v":62:12:62:20|GCC unable to propagate clocks through gate video_pll.PLLInst_0; all outputs will be treated as enables regardless of whether any inputs are clocks
+@W: BZ240 :|GCC encountered Inferred Clock constraint on net GCC considers to be data video_pll.CLKOS; this will likely lead to failure to convert
+
+Finished clock optimization phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 545MB peak: 545MB)
+
+@W: MT688 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/clocks.fdc":4:0:4:0|No path from master pin (-source) to source of clock system due to black box main_pll.PLLInst_0 
+@W: MT688 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/clocks.fdc":5:0:5:0|No path from master pin (-source) to source of clock divider due to black box main_pll.PLLInst_0 
+@W: MT688 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/clocks.fdc":6:0:6:0|No path from master pin (-source) to source of clock pal due to black box video_pll.PLLInst_0 
+@W: MT688 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/clocks.fdc":7:0:7:0|No path from master pin (-source) to source of clock vm1 due to black box machine.cpu_positive 
+
+Starting clock optimization report phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 545MB peak: 545MB)
+
+
+Finished clock optimization report phase (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:01s; Memory used current: 545MB peak: 545MB)
+
+@N: FX1184 |Applying syn_allowed_resources blockrams=26 on top level netlist bk_hardware_lcd 
+
+Finished netlist restructuring (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:01s; Memory used current: 545MB peak: 545MB)
+
+
+
+Clock Summary
+******************
+
+          Start         Requested     Requested     Clock                        Clock                Clock
+Level     Clock         Frequency     Period        Type                         Group                Load 
+-----------------------------------------------------------------------------------------------------------
+0 -       crystal       12.0 MHz      83.333        declared                     default_clkgroup     0    
+1 .         system      24.0 MHz      41.667        generated (from crystal)     default_clkgroup     1784 
+1 .         divider     48.0 MHz      20.833        generated (from crystal)     default_clkgroup     243  
+2 ..          vm1       24.0 MHz      41.667        generated (from crystal)     default_clkgroup     620  
+1 .         pal         64.0 MHz      15.625        generated (from crystal)     default_clkgroup     182  
+                                                                                                           
+0 -       System        1.0 MHz       1000.000      system                       system_clkgroup      0    
+===========================================================================================================
+
+
+
+Clock Load Summary
+***********************
+
+            Clock     Source                                 Clock Pin                             Non-clock Pin     Non-clock Pin          
+Clock       Load      Pin                                    Seq Example                           Seq Example       Comb Example           
+--------------------------------------------------------------------------------------------------------------------------------------------
+crystal     0         clk_ext(port)                          -                                     -                 -                      
+system      1784      main_pll.PLLInst_0.CLKOP(EHXPLLJ)      power_on[0].C                         -                 clk.I[0](keepbuf)      
+divider     243       main_pll.PLLInst_0.CLKOS(EHXPLLJ)      machine.sound.selected[3:0].C         -                 clk48.I[0](keepbuf)    
+vm1         620       machine.cpu_positive.CLKO(DCCA)        machine.model_meta[2:0].C             -                 machine.cpu_n.I[0](inv)
+pal         182       video_pll.PLLInst_0.CLKOS(EHXPLLJ)     machine.video.packed_word[15:0].C     -                 video_clk.I[0](keepbuf)
+                                                                                                                                            
+System      0         -                                      -                                     -                 -                      
+============================================================================================================================================
+
+ICG Latch Removal Summary:
+Number of ICG latches removed: 0
+Number of ICG latches not removed:	0
+
+
+@S |Clock Optimization Summary
+
+
+
+#### START OF PREMAP CLOCK OPTIMIZATION REPORT #####[
+
+0 non-gated/non-generated clock tree(s) driving 0 clock pin(s) of sequential element(s)
+4 gated/generated clock tree(s) driving 2746 clock pin(s) of sequential element(s)
+0 instances converted, 2746 sequential instances remain driven by gated/generated clocks
+
+==================================================================================================== Gated/Generated Clocks =====================================================================================================
+Clock Tree ID     Driving Element               Drive Element Type     Unconverted Fanout     Sample Instance                                   Explanation                                                                      
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+@KP:ckid0_0       main_pll.CLKOP                bk_main_pll            1709                   power_on[3]                                       Gated clock propagation blocked by synkeep buffer                                
+@KP:ckid0_1       main_pll.CLKOS                bk_main_pll            243                    machine.sound.beeper_sync[1:0]                    Gated clock propagation blocked by synkeep buffer                                
+@KP:ckid0_2       machine.cpu_positive.CLKO     DCCA                   612                    machine.cpu.core.vreg_rm.vm1_vcram_reg.lane_0     Synplify Pro Clock optimization on technology cells not supported in this product
+@KP:ckid0_3       video_pll.CLKOS               bk_video_pll           182                    machine.video.display_bank                        Gated clock propagation blocked by synkeep buffer                                
+=================================================================================================================================================================================================================================
+
+
+##### END OF CLOCK OPTIMIZATION REPORT ######
+
+
+Summary of user generated gated clocks:
+0 user generated gated/generated clock tree(s) driving 0 clock pin(s) of sequential element(s)
+
+@N: FX1143 |Skipping assigning INTERNAL_VREF to iobanks, because the table of mapping from pin to iobank is not initialized.
+Finished Pre Mapping Phase.
+
+Starting constraint checker (Real Time elapsed 0h:00m:01s; CPU Time elapsed 0h:00m:01s; Memory used current: 545MB peak: 545MB)
+
+
+Finished constraint checker preprocessing (Real Time elapsed 0h:00m:01s; CPU Time elapsed 0h:00m:01s; Memory used current: 545MB peak: 545MB)
+
+@W: MF511 |Found issues with constraints. Please check constraint checker report "/home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/bk0010_impl1_cck.rpt" .
+
+Finished constraint checker (Real Time elapsed 0h:00m:01s; CPU Time elapsed 0h:00m:01s; Memory used current: 546MB peak: 546MB)
+
+Pre-mapping successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:01s; CPU Time elapsed 0h:00m:01s; Memory used current: 457MB peak: 546MB)
+
+Process took 0h:00m:01s realtime, 0h:00m:01s cputime
+# Tue Oct  6 01:46:13 2026
+
+###########################################################]
+Map & Optimize Report
+
+# Tue Oct  6 01:46:13 2026
+
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+Synopsys Lattice Technology Mapper, Version map202309lat, Build 191R, Built Sep 17 2024 09:08:23, @5637152
+
+
+Mapper Startup Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 440MB peak: 440MB)
+
+@N: MF916 |Option synthesis_strategy=base is enabled. 
+@N: MF248 |Running in 64-bit mode.
+@N: MF666 |Clock conversion enabled. (Command "set_option -fix_gated_and_generated_clocks 1" in the project file.)
+
+Design Input Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+
+Mapper Initialization Complete (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 453MB peak: 454MB)
+
+
+Start loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 456MB peak: 456MB)
+
+
+Finished loading timing files (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 464MB peak: 464MB)
+
+
+
+Starting Optimization and Mapping (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:00s; Memory used current: 527MB peak: 527MB)
+
+
+Available hyper_sources - for debug and ip models
+	None Found
+
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":19:12:19:15|ROM digit_5[6:0] (in view: work.bk_frequency_display_24000000s_750s_10s_749s(verilog)) mapped in logic.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":19:12:19:15|ROM digit_5[6:0] (in view: work.bk_frequency_display_24000000s_750s_10s_749s(verilog)) mapped in logic.
+@N: MO106 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":19:12:19:15|Found ROM digit_5[6:0] (in view: work.bk_frequency_display_24000000s_750s_10s_749s(verilog)) with 10 words by 7 bits.
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_ps2_keyboard.v":3:7:3:23|Net ps2_clock has multiple drivers .
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|ROM amplitude[6:0] (in view: work.bk_ay(verilog)) mapped in logic.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|ROM amplitude_5[6:0] (in view: work.bk_ay(verilog)) mapped in logic.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|ROM amplitude_3[6:0] (in view: work.bk_ay(verilog)) mapped in logic.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|ROM amplitude[6:0] (in view: work.bk_ay(verilog)) mapped in logic.
+@N: MO106 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|Found ROM amplitude[6:0] (in view: work.bk_ay(verilog)) with 16 words by 7 bits.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|ROM amplitude_5[6:0] (in view: work.bk_ay(verilog)) mapped in logic.
+@N: MO106 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|Found ROM amplitude_5[6:0] (in view: work.bk_ay(verilog)) with 16 words by 7 bits.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|ROM amplitude_3[6:0] (in view: work.bk_ay(verilog)) mapped in logic.
+@N: MO106 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_ay.v":28:12:28:15|Found ROM amplitude_3[6:0] (in view: work.bk_ay(verilog)) with 16 words by 7 bits.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":21:14:21:17|ROM hex_3[6:0] (in view: work.bk_boot_uart(verilog)) mapped in logic.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":21:14:21:17|ROM hex_5[6:0] (in view: work.bk_boot_uart(verilog)) mapped in logic.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":21:14:21:17|ROM hex_3[6:0] (in view: work.bk_boot_uart(verilog)) mapped in logic.
+@N: MO106 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":21:14:21:17|Found ROM hex_3[6:0] (in view: work.bk_boot_uart(verilog)) with 15 words by 7 bits.
+@N: BZ173 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":21:14:21:17|ROM hex_5[6:0] (in view: work.bk_boot_uart(verilog)) mapped in logic.
+@N: MO106 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":21:14:21:17|Found ROM hex_5[6:0] (in view: work.bk_boot_uart(verilog)) with 15 words by 7 bits.
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[0] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[1] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[2] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[3] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[4] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[5] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[6] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[7] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[8] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[9] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[10] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[11] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[12] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[13] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[14] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":7:7:7:15|Net sram_data[15] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net ps2_clock has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[0] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[1] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[2] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[3] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[4] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[5] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[6] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[7] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[8] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[9] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[10] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[11] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[12] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[13] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[14] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":3:7:3:17|Net sram_data[15] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net ps2_clock has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[0] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[1] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[2] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[3] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[4] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[5] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[6] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[7] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[8] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[9] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[10] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[11] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[12] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[13] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[14] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net sram_data[15] has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net un1_main_pll has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net un1_main_pll_1 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net un1_video_pll_1 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net clk has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net clk48 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net video_clk has multiple drivers .
+
+Finished RTL optimizations (Real Time elapsed 0h:00m:00s; CPU Time elapsed 0h:00m:01s; Memory used current: 551MB peak: 551MB)
+
+@N: FX493 |Applying initial value "1" on instance power_on[0].
+@W: FX474 |User-specified initial value defined for some sequential elements which can prevent optimum synthesis results from being achieved. 
+@N: FX493 |Applying initial value "1" on instance power_on[1].
+@N: FX493 |Applying initial value "1" on instance power_on[2].
+@N: FX493 |Applying initial value "1" on instance power_on[3].
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[15] because it is equivalent to instance machine.vector_meta[14]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[14] because it is equivalent to instance machine.vector_meta[13]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[13] because it is equivalent to instance machine.vector_meta[12]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[12] because it is equivalent to instance machine.vector_meta[11]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[11] because it is equivalent to instance machine.vector_meta[10]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[9] because it is equivalent to instance machine.vector_meta[10]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[8] because it is equivalent to instance machine.vector_meta[10]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[1] because it is equivalent to instance machine.vector_meta[10]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_meta[10] because it is equivalent to instance machine.vector_meta[0]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[8] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[9] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[11] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[13] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[15] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[14] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[12] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[10] because it is equivalent to instance machine.vector_sync[1]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Removing sequential instance machine.vector_sync[1] because it is equivalent to instance machine.vector_sync[0]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@W: MO129 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":79:4:79:9|Sequential instance machine.vector_meta[0] is reduced to a combinational gate by constant propagation.
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_cpu.v":16:4:16:9|Found counter in view:work.bk_computer(verilog) instance cpu.release_count[5:0] 
+@N: FX493 |Applying initial value "0" on instance ack_previous.
+@N: FX493 |Applying initial value "0" on instance cpu_locked.
+@N: FX493 |Applying initial value "0" on instance locked_meta.
+@N: FX493 |Applying initial value "0" on instance held_sync[0].
+@N: FX493 |Applying initial value "0" on instance held_sync[1].
+@N: FX493 |Applying initial value "0" on instance stop_sync[0].
+@N: FX493 |Applying initial value "0" on instance stop_sync[1].
+@N: FX493 |Applying initial value "0" on instance irq_sync[0].
+@N: FX493 |Applying initial value "0" on instance irq_sync[1].
+@N: FX493 |Applying initial value "0" on instance irq_sync[2].
+@N: FX493 |Applying initial value "1" on instance cpu_reset_pipe[0].
+@N: FX493 |Applying initial value "1" on instance cpu_reset_pipe[1].
+@N: FX493 |Applying initial value "1" on instance cpu_reset_pipe[2].
+@N: FX493 |Applying initial value "0" on instance cpu.stop_previous.
+@N: FX493 |Applying initial value "0" on instance cpu.halt_flag.
+@N: FX493 |Applying initial value "0" on instance cpu.stop_pending.
+@N: FX493 |Applying initial value "0" on instance cpu.system_active.
+@N: FX493 |Applying initial value "0" on instance locked_seen.
+@N: FX493 |Applying initial value "0" on instance ack_seen.
+@N: FX493 |Applying initial value "0" on instance ack_sync[0].
+@N: FX493 |Applying initial value "0" on instance ack_sync[1].
+@N: FX493 |Applying initial value "0" on instance init_sync[0].
+@N: FX493 |Applying initial value "0" on instance init_sync[1].
+@N: FX493 |Applying initial value "0" on instance full_reset.
+@N: FX493 |Applying initial value "0" on instance full_pending.
+@N: FX493 |Applying initial value "1" on instance warm_reset.
+@N: FX493 |Applying initial value "0" on instance ack_sync[0].
+@N: FX493 |Applying initial value "0" on instance ack_sync[1].
+@N: FX493 |Applying initial value "0" on instance request_sync[0].
+@N: FX493 |Applying initial value "0" on instance request_sync[1].
+@N: FX493 |Applying initial value "0" on instance held[0].
+@N: FX493 |Applying initial value "0" on instance held[1].
+@N: FX493 |Applying initial value "0" on instance held[2].
+@N: FX493 |Applying initial value "0" on instance toggle.
+@N: FX493 |Applying initial value "0" on instance ack.
+@N: FX493 |Applying initial value "0" on instance confirmed[0].
+@N: FX493 |Applying initial value "0" on instance confirmed[1].
+@N: FX493 |Applying initial value "0" on instance confirmed[2].
+@N: FX493 |Applying initial value "0" on instance target[0].
+@N: FX493 |Applying initial value "0" on instance target[1].
+@N: FX493 |Applying initial value "0" on instance target[2].
+@N: FX493 |Applying initial value "0" on instance previous.
+@N: FX493 |Applying initial value "0" on instance sync[0].
+@N: FX493 |Applying initial value "0" on instance sync[1].
+@N: FX493 |Applying initial value "1" on instance pressed.
+@N: FX493 |Applying initial value "0" on instance full_reset.
+@N: FX493 |Applying initial value "1" on instance hard_reset.
+@N: FX493 |Applying initial value "0" on instance requested_mode[0].
+@N: FX493 |Applying initial value "0" on instance requested_mode[1].
+@N: FX493 |Applying initial value "0" on instance requested_mode[2].
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_frequency_display.v":38:4:38:9|Found counter in view:work.bk_frequency_display_24000000s_750s_10s_749s(verilog) instance slot[3:0] 
+@N: FX493 |Applying initial value "0" on instance frame[5].
+@N: FX493 |Applying initial value "0" on instance frame[6].
+@N: FX493 |Applying initial value "0" on instance frame[0].
+@N: FX493 |Applying initial value "0" on instance frame[1].
+@N: FX493 |Applying initial value "0" on instance frame[2].
+@N: FX493 |Applying initial value "0" on instance frame[8].
+@N: FX493 |Applying initial value "0" on instance frame[9].
+@N: FX493 |Applying initial value "0" on instance frame[10].
+@N: FX493 |Applying initial value "0" on instance frame[11].
+@N: FX493 |Applying initial value "0" on instance frame[12].
+@N: FX493 |Applying initial value "0" on instance frame[13].
+@N: FX493 |Applying initial value "0" on instance frame[14].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[0].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[1].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[2].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[3].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[4].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[5].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[6].
+@N: FX493 |Applying initial value "1" on instance seg_led_h[7].
+@N: FX493 |Applying initial value "0" on instance seg_led_h[8].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[0].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[1].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[2].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[3].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[4].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[5].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[6].
+@N: FX493 |Applying initial value "1" on instance seg_led_l[7].
+@N: FX493 |Applying initial value "0" on instance seg_led_l[8].
+@N: FX493 |Applying initial value "0" on instance slot[0].
+@N: FX493 |Applying initial value "0" on instance slot[1].
+@N: FX493 |Applying initial value "0" on instance slot[2].
+@N: FX493 |Applying initial value "0" on instance slot[3].
+@N: FX493 |Applying initial value "0" on instance phase[0].
+@N: FX493 |Applying initial value "0" on instance phase[1].
+@N: FX493 |Applying initial value "0" on instance stall_sync[0].
+@N: FX493 |Applying initial value "0" on instance stall_sync[1].
+@N: FX493 |Applying initial value "0" on instance clk_p.
+@N: FX493 |Applying initial value "0" on instance active_mode[0].
+@N: FX493 |Applying initial value "0" on instance active_mode[1].
+@N: FX493 |Applying initial value "0" on instance active_mode[2].
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[29] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[24] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[19] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[15] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[9] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[5] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1059:0:1059:5|Removing sequential instance plm[0] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[29] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[24] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[19] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[15] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[9] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[5] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[3] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[2] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[1] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1054:0:1054:5|Removing sequential instance plr[0] (in view: work.vm1_wb_1s_0s(verilog)) because it does not drive other instances.
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":640:0:640:5|Found counter in view:work.vm1_wb_1s_0s(verilog) instance bus_timer[5:0] 
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_tve.v":225:0:225:5|Found counter in view:work.vm1_timer(verilog) instance tve_count[15:0] 
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_tve.v":81:0:81:5|Found counter in view:work.vm1_timer(verilog) instance tve_div[5:0] 
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_tve.v":81:0:81:5|Found counter in view:work.vm1_timer(verilog) instance tve_pre[6:0] 
+@N: FX493 |Applying initial value "0" on instance vm1_vcram_reg.cross_a[0].
+@N: FX493 |Applying initial value "0" on instance vm1_vcram_reg.cross_a[1].
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/build/vm1_reg_block.v":16:15:16:36|Found 6 by 6 bit equality operator ('==') vm1_vcram_reg.un3_cross_a (in view: work.vm1_reg_ram(verilog))
+@N: FX493 |Applying initial value "0" on instance response_sync[0].
+@N: FX493 |Applying initial value "0" on instance response_sync[1].
+
+Only the first 100 messages of id 'FX493' are reported. To see all messages use 'report_messages -log /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/synlog/bk0010_impl1_fpga_mapper.srr -id FX493' in the Tcl shell. To see all messages in future runs, use the command 'message_override -limit {FX493} -count unlimited' in the Tcl shell.
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_ps2_keyboard.v":34:4:34:9|Found counter in view:work.uj11_ps2_keyboard_24000000s_24s(verilog) instance bit_count[3:0] 
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_keymap.v":216:35:216:54|Found 9 by 9 bit equality operator ('==') un1_scan_code_19 (in view: work.bk_keymap(verilog))
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":177:4:177:9|Initial value on register pointer[15] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":333:45:333:64|Found 32 by 32 bit equality operator ('==') un1_crc_1 (in view: work.bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1(verilog))
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":332:55:332:86|Found 17 by 17 bit equality operator ('==') un1_expected_size (in view: work.bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1(verilog))
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_system_bus.v":332:89:332:121|Found 17 by 17 bit equality operator ('==') un1_expected_size_1 (in view: work.bk_system_bus_24000000s_24000000s_0s_1s_2s_3s_4s_5s_6s_Z1(verilog))
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":87:4:87:9|Initial value on register sector[0] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":87:4:87:9|Initial value on register sector[1] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":87:4:87:9|Initial value on register sector[2] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":87:4:87:9|Initial value on register sector[3] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":168:48:168:103|Found 16 by 16 bit equality operator ('==') header_ok_2 (in view: work.bk_fdd_track(verilog))
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":57:60:57:82|Found 7 by 7 bit equality operator ('==') un1_track (in view: work.bk_fdd_track(verilog))
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_fdd_track.v":178:27:178:50|Found 16 by 16 bit equality operator ('==') un1_read_word_4 (in view: work.bk_fdd_track(verilog))
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_host.v":123:24:123:50|Found 16 by 16 bit equality operator ('==') un1_byte_rx_10 (in view: work.bk_sd_host(verilog))
+@N: MF135 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|RAM machine.bus.disk_partitions.overflow_1 is 4 words by 1 bits.
+@N: MF135 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|RAM machine.bus.disk_partitions.overflow is 4 words by 1 bits.
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":72:4:72:9|Found counter in view:work.bk_sd_partitions(verilog) instance clear_index[4:0] 
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sd_partitions.v":161:70:161:85|Found 16 by 16 bit equality operator ('==') compare_high_equal_2 (in view: work.bk_sd_partitions(verilog))
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[0] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[1] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[2] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[3] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[4] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[5] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[6] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@A: FX681 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":76:4:76:9|Initial value on register vscroll[7] is non-zero which can prevent the register from being packed into a block RAM or DSP.
+@N: MF179 :|Found 8 by 8 bit equality operator ('==') un11_display_valid (in view: work.bk_pal_video_Z2(verilog))
+@N: MF179 :|Found 8 by 8 bit equality operator ('==') un10_display_valid (in view: work.bk_pal_video_Z2(verilog))
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_pal_video.v":58:47:58:73|Found 16 by 16 bit equality operator ('==') un1_scroll (in view: work.bk_pal_video_Z2(verilog))
+@N: MO231 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_pal_timing.v":37:4:37:9|Found counter in view:work.uj11_pal_timing_256s_28s_341s(verilog) instance x[11:0] 
+@W: BN132 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Removing instance machine.sound.write_pointer[2] because it is equivalent to instance machine.sound.write_gray[2]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+@N: MF179 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_boot_uart.v":61:15:61:29|Found 8 by 8 bit equality operator ('==') un1_stage (in view: work.bk_boot_uart(verilog))
+@N: MF794 |RAM words[15:0] required 8 registers during mapping 
+
+Starting factoring (Real Time elapsed 0h:00m:02s; CPU Time elapsed 0h:00m:02s; Memory used current: 554MB peak: 554MB)
+
+@W: BN132 :|Removing instance machine.bus.disk_partitions.compare_return[3] because it is equivalent to instance machine.bus.disk_partitions.compare_right[4]. To keep the instance, apply constraint syn_preserve=1 on the instance.
+
+Finished factoring (Real Time elapsed 0h:00m:04s; CPU Time elapsed 0h:00m:04s; Memory used current: 598MB peak: 598MB)
+
+NConnInternalConnection caching is on
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_wb_cdc.v":42:4:42:9|Removing sequential instance machine.bridge.held_address[0] (in view: work.bk_hardware_lcd(verilog)) because it does not drive other instances.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/cpu11/vm1_wb.v":1326:0:1326:5|Removing sequential instance machine.cpu.core.wb_adr[0] (in view: work.bk_hardware_lcd(verilog)) because it does not drive other instances.
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.cpu_p has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_3 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_21 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_41 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_47 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.cpu.N_3 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.cpu.N_7 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.cpu.N_9 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.cpu.N_17 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_208 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_209 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_210 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_211 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_212 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_213 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_214 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_215 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_216 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_217 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_218 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_219 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_220 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.N_221 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_6 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_36 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_75 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_76 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_77 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_78 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_79 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_80 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_81 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_82 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_83 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_84 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_85 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_86 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_87 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_88 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_89 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_90 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_91 has multiple drivers .
+@W: BN161 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_hardware_lcd.v":2:7:2:21|Net machine.sram.N_92 has multiple drivers .
+
+Only the first 100 messages of id 'BN161' are reported. To see all messages use 'report_messages -log /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/synlog/bk0010_impl1_fpga_mapper.srr -id BN161' in the Tcl shell. To see all messages in future runs, use the command 'message_override -limit {BN161} -count unlimited' in the Tcl shell.
+@N: BN362 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_sram_arbiter.v":26:4:26:9|Removing sequential instance machine.arbiter.address[19] (in view: work.bk_hardware_lcd(verilog)) because it does not drive other instances.
+
+Finished generic timing optimizations - Pass 1 (Real Time elapsed 0h:00m:06s; CPU Time elapsed 0h:00m:06s; Memory used current: 643MB peak: 648MB)
+
+
+Starting Early Timing Optimization (Real Time elapsed 0h:00m:07s; CPU Time elapsed 0h:00m:07s; Memory used current: 643MB peak: 648MB)
+
+
+Finished Early Timing Optimization (Real Time elapsed 0h:00m:08s; CPU Time elapsed 0h:00m:08s; Memory used current: 643MB peak: 648MB)
+
+
+Finished generic timing optimizations - Pass 2 (Real Time elapsed 0h:00m:08s; CPU Time elapsed 0h:00m:08s; Memory used current: 643MB peak: 648MB)
+
+@N: FX211 |Packed ROM machine.bootrom.data_2_0[15:0] (12 input, 16 output) to Block SelectRAM 
+@N: FX211 |Packed ROM machine.video.encoder.sample1_2_0[5:0] (10 input, 6 output) to Block SelectRAM 
+@N: FX211 |Packed ROM machine.keymap.shifted_symbol_2_0[7:0] (8 input, 8 output) to Block SelectRAM 
+@N: FO126 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_ps2_keyboard.v":34:4:34:9|Generating RAM machine.transport.fifo[7:0]
+@N: FO126 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_audio.v":39:4:39:9|Generating RAM machine.sound.commands[8:0]
+@N: FX214 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_palette_index.vh":6:10:6:13|Generating ROM machine.video.bk_palette_index_3_0_0[3:0] (in view: work.bk_hardware_lcd(verilog)).
+@N: FX214 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_keymap.v":147:17:147:38|Generating ROM machine.keymap.decoded_2[8:0] (in view: work.bk_hardware_lcd(verilog)).
+
+Finished preparing to map (Real Time elapsed 0h:00m:10s; CPU Time elapsed 0h:00m:10s; Memory used current: 643MB peak: 648MB)
+
+
+Finished technology mapping (Real Time elapsed 0h:00m:13s; CPU Time elapsed 0h:00m:13s; Memory used current: 681MB peak: 681MB)
+
+Pass		 CPU time		Worst Slack		Luts / Registers
+------------------------------------------------------------
+   1		0h:00m:13s		     0.04ns		5836 /      2590
+   2		0h:00m:13s		     0.05ns		5783 /      2590
+
+Finished technology timing optimizations and critical path resynthesis (Real Time elapsed 0h:00m:13s; CPU Time elapsed 0h:00m:13s; Memory used current: 681MB peak: 681MB)
+
+@N: BN362 :|Removing sequential instance machine.panel.display.seg_led_l[7] (in view: work.bk_hardware_lcd(verilog)) because it does not drive other instances.
+@A: BN291 :|Boundary register machine.panel.display.seg_led_l[7] (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@N: BN362 :|Removing sequential instance machine.panel.display.seg_led_h[7] (in view: work.bk_hardware_lcd(verilog)) because it does not drive other instances.
+@A: BN291 :|Boundary register machine.panel.display.seg_led_h[7] (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@N: FX164 |The option to pack registers in the IOB has not been specified. Please set syn_useioff attribute.  
+@A: BN291 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/spi_byte_master.v":13:4:13:9|Boundary register machine.bus.shifter.sck.fb (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/pyldin/spi_byte_master.v":13:4:13:9|Boundary register machine.bus.shifter.mosi.fb (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":33:4:33:9|Boundary register machine.sram.sram_address_19_.fb (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":33:4:33:9|Boundary register machine.sram.sram_address_17_.fb (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+@A: BN291 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/vendor/uj11/uj11_sram.v":33:4:33:9|Boundary register machine.sram.sram_address_15_.fb (in view: work.bk_hardware_lcd(verilog)) is packed into a complex cell. To disable register packing, set syn_keep=1 on the net between the register and the complex cell. 
+
+Finished restoring hierarchy (Real Time elapsed 0h:00m:15s; CPU Time elapsed 0h:00m:15s; Memory used current: 681MB peak: 681MB)
+
+
+Starting CDBProcessSetClockGroups... (Real Time elapsed 0h:00m:15s; CPU Time elapsed 0h:00m:15s; Memory used current: 681MB peak: 681MB)
+
+
+Finished with CDBProcessSetClockGroups (Real Time elapsed 0h:00m:15s; CPU Time elapsed 0h:00m:15s; Memory used current: 681MB peak: 681MB)
+
+
+Start Writing Netlists (Real Time elapsed 0h:00m:15s; CPU Time elapsed 0h:00m:15s; Memory used current: 681MB peak: 681MB)
+
+Writing Analyst data base /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/synwork/bk0010_impl1_m.srm
+
+Finished Writing Netlist Databases (Real Time elapsed 0h:00m:15s; CPU Time elapsed 0h:00m:15s; Memory used current: 681MB peak: 681MB)
+
+Writing EDIF Netlist and constraint files
+@N: FX1056 |Writing EDF file: /home/sash/Work/FPGA/diamond-bios-ps2-20261006/impl1/bk0010_impl1.edi
+@N: BW106 |Synplicity Constraint File capacitance units using default value of 1pF 
+
+Finished Writing EDIF Netlist and constraint files (Real Time elapsed 0h:00m:16s; CPU Time elapsed 0h:00m:16s; Memory used current: 681MB peak: 681MB)
+
+
+Finished Writing Netlists (Real Time elapsed 0h:00m:16s; CPU Time elapsed 0h:00m:16s; Memory used current: 681MB peak: 681MB)
+
+
+Start final timing analysis (Real Time elapsed 0h:00m:16s; CPU Time elapsed 0h:00m:16s; Memory used current: 681MB peak: 681MB)
+
+@W: MT246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/rtl/bk_computer.v":22:9:22:20|Blackbox DCCA is missing a user supplied timing model. This may have a negative effect on timing analysis and optimizations (Quality of Results)
+@W: MT246 :"/home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/bk_video_pll.v":62:12:62:20|Blackbox EHXPLLJ is missing a user supplied timing model. This may have a negative effect on timing analysis and optimizations (Quality of Results)
+@N: MT615 |Found clock crystal with period 83.33ns 
+@N: MT615 |Found clock system with period 41.67ns 
+@N: MT615 |Found clock divider with period 20.83ns 
+@N: MT615 |Found clock pal with period 15.62ns 
+@N: MT615 |Found clock vm1 with period 41.67ns 
+
+
+##### START OF TIMING REPORT #####[
+# Timing report written on Tue Oct  6 01:46:30 2026
+#
+
+
+Top view:               bk_hardware_lcd
+Requested Frequency:    12.0 MHz
+Wire load mode:         top
+Paths requested:        5
+Constraint File(s):    /home/sash/Work/FPGA/diamond-bios-ps2-20261006/boards/hardware-lcd/clocks.fdc
+                       
+@N: MT320 |This timing report is an estimate of place and route data. For final timing results, use the FPGA vendor place and route report.
+
+@N: MT322 |Clock constraints include only register-to-register paths associated with each individual clock.
+
+
+
+Performance Summary
+*******************
+
+
+Worst slack in design: 0.162
+
+@N: MT286 |System clock period 0.000 stretches to negative invalid value -- ignoring stretching.
+                   Requested     Estimated     Requested     Estimated                  Clock                        Clock           
+Starting Clock     Frequency     Frequency     Period        Period        Slack        Type                         Group           
+-------------------------------------------------------------------------------------------------------------------------------------
+crystal            12.0 MHz      NA            83.333        NA            NA           declared                     default_clkgroup
+divider            48.0 MHz      68.4 MHz      20.833        14.612        6.221        generated (from crystal)     default_clkgroup
+pal                64.0 MHz      66.1 MHz      15.625        15.140        2.207        generated (from crystal)     default_clkgroup
+system             24.0 MHz      24.8 MHz      41.667        40.373        0.162        generated (from crystal)     default_clkgroup
+vm1                24.0 MHz      38.0 MHz      41.667        26.320        12.441       generated (from crystal)     default_clkgroup
+System             1.0 MHz       NA            1000.000      0.000         1000.000     system                       system_clkgroup 
+=====================================================================================================================================
+Estimated period and frequency reported as NA means no slack depends directly on the clock waveform
+
+
+
+
+
+Clock Relationships
+*******************
+
+Clocks             |    rise  to  rise      |    fall  to  fall    |    rise  to  fall    |    fall  to  rise  
+---------------------------------------------------------------------------------------------------------------
+Starting  Ending   |  constraint  slack     |  constraint  slack   |  constraint  slack   |  constraint  slack 
+---------------------------------------------------------------------------------------------------------------
+System    System   |  1000.000    1000.000  |  No paths    -       |  No paths    -       |  No paths    -     
+system    system   |  41.667      22.018    |  No paths    -       |  No paths    -       |  No paths    -     
+system    divider  |  20.833      17.092    |  No paths    -       |  No paths    -       |  No paths    -     
+system    pal      |  5.208       0.162     |  No paths    -       |  No paths    -       |  No paths    -     
+system    vm1      |  41.667      40.171    |  No paths    -       |  No paths    -       |  No paths    -     
+divider   System   |  20.833      19.630    |  No paths    -       |  No paths    -       |  No paths    -     
+divider   system   |  20.833      19.198    |  No paths    -       |  No paths    -       |  No paths    -     
+divider   divider  |  20.833      6.221     |  No paths    -       |  No paths    -       |  No paths    -     
+divider   vm1      |  20.833      19.620    |  No paths    -       |  No paths    -       |  No paths    -     
+pal       system   |  5.208       2.484     |  No paths    -       |  No paths    -       |  No paths    -     
+pal       pal      |  15.625      2.207     |  No paths    -       |  No paths    -       |  No paths    -     
+vm1       system   |  41.667      27.468    |  No paths    -       |  No paths    -       |  No paths    -     
+vm1       divider  |  20.833      12.441    |  No paths    -       |  No paths    -       |  No paths    -     
+vm1       vm1      |  41.667      26.816    |  41.667      15.346  |  20.833      13.599  |  20.833      14.798
+===============================================================================================================
+ Note: 'No paths' indicates there are no paths in the design for that pair of clock edges.
+       'Diff grp' indicates that paths exist but the starting clock and ending clock are in different clock groups.
+
+
+
+Interface Information 
+*********************
+
+No IO constraint found
+
+
+
+====================================
+Detailed Report for Clock: divider
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                                        Starting                                                Arrival          
+Instance                                Reference     Type        Pin     Net                   Time        Slack
+                                        Clock                                                                    
+-----------------------------------------------------------------------------------------------------------------
+machine.sound.psg.envelope_count[0]     divider       FD1P3AX     Q       envelope_count[0]     1.044       6.221
+machine.sound.psg.envelope_count[1]     divider       FD1P3AX     Q       envelope_count[1]     0.972       6.436
+machine.sound.psg.envelope_count[2]     divider       FD1P3AX     Q       envelope_count[2]     0.972       6.436
+machine.sound.psg.envelope_count[3]     divider       FD1P3AX     Q       envelope_count[3]     0.972       6.579
+machine.sound.psg.envelope_count[4]     divider       FD1P3AX     Q       envelope_count[4]     0.972       6.579
+machine.sound.psg.envelope_count[5]     divider       FD1P3AX     Q       envelope_count[5]     0.972       6.721
+machine.sound.psg.envelope_count[6]     divider       FD1P3AX     Q       envelope_count[6]     0.972       6.721
+machine.sound.psg.envelope_count[7]     divider       FD1P3AX     Q       envelope_count[7]     0.972       6.864
+machine.sound.psg.envelope_count[8]     divider       FD1P3AX     Q       envelope_count[8]     0.972       6.864
+machine.sound.psg.envelope_count[9]     divider       FD1P3AX     Q       envelope_count[9]     0.972       7.007
+=================================================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                                       Starting                                          Required          
+Instance                               Reference     Type        Pin     Net             Time         Slack
+                                       Clock                                                               
+-----------------------------------------------------------------------------------------------------------
+machine.sound.psg.envelope_step[3]     divider       FD1S3AX     D       N_15979_0       20.922       6.221
+machine.sound.psg.envelope_step[1]     divider       FD1S3AX     D       N_15975_0       20.922       6.364
+machine.sound.psg.envelope_step[2]     divider       FD1S3AX     D       N_15977_0       20.922       6.364
+machine.sound.psg.envelope_step[0]     divider       FD1S3AX     D       N_15973_0       20.922       8.302
+machine.sound.phase[19]                divider       FD1S3IX     D       phase_rst19     20.728       8.318
+machine.sound.phase[20]                divider       FD1S3IX     D       phase_rst20     20.728       8.318
+machine.sound.phase[17]                divider       FD1S3IX     D       phase_rst17     20.728       8.460
+machine.sound.phase[18]                divider       FD1S3IX     D       phase_rst18     20.728       8.460
+machine.sound.phase[15]                divider       FD1S3IX     D       phase_rst15     20.728       8.603
+machine.sound.phase[16]                divider       FD1S3IX     D       phase_rst16     20.728       8.603
+===========================================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      20.833
+    - Setup time:                            -0.089
+    + Clock delay at ending point:           0.000 (ideal)
+    = Required time:                         20.922
+
+    - Propagation time:                      14.701
+    - Clock delay at starting point:         0.000 (ideal)
+    = Slack (non-critical) :                 6.221
+
+    Number of logic level(s):                17
+    Starting point:                          machine.sound.psg.envelope_count[0] / Q
+    Ending point:                            machine.sound.psg.envelope_step[3] / D
+    The start point is clocked by            divider [rising] (rise=0.000 fall=10.417 period=20.833) on pin CK
+    The end   point is clocked by            divider [rising] (rise=0.000 fall=10.417 period=20.833) on pin CK
+
+Instance / Net                                                     Pin      Pin               Arrival      No. of    
+Name                                                  Type         Name     Dir     Delay     Time         Fan Out(s)
+---------------------------------------------------------------------------------------------------------------------
+machine.sound.psg.envelope_count[0]                   FD1P3AX      Q        Out     1.044     1.044 r      -         
+envelope_count[0]                                     Net          -        -       -         -            2         
+machine.sound.psg.un1_envelope_count_cry_0_0          CCU2D        A1       In      0.000     1.044 r      -         
+machine.sound.psg.un1_envelope_count_cry_0_0          CCU2D        COUT     Out     1.544     2.588 r      -         
+un1_envelope_count_cry_0                              Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_cry_1_0          CCU2D        CIN      In      0.000     2.588 r      -         
+machine.sound.psg.un1_envelope_count_cry_1_0          CCU2D        S0       Out     1.621     4.209 r      -         
+un1_envelope_count_cry_1_0_S0                         Net          -        -       -         -            2         
+machine.sound.psg.un1_envelope_count_1_cry_1_0        CCU2D        B1       In      0.000     4.209 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_1_0        CCU2D        COUT     Out     1.544     5.754 r      -         
+un1_envelope_count_1_cry_1                            Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_2_0        CCU2D        CIN      In      0.000     5.754 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_2_0        CCU2D        COUT     Out     0.143     5.897 r      -         
+un1_envelope_count_1_cry_3                            Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_4_0        CCU2D        CIN      In      0.000     5.897 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_4_0        CCU2D        COUT     Out     0.143     6.039 r      -         
+un1_envelope_count_1_cry_5                            Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_6_0        CCU2D        CIN      In      0.000     6.039 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_6_0        CCU2D        COUT     Out     0.143     6.182 r      -         
+un1_envelope_count_1_cry_7                            Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_8_0        CCU2D        CIN      In      0.000     6.182 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_8_0        CCU2D        COUT     Out     0.143     6.325 r      -         
+un1_envelope_count_1_cry_9                            Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_10_0       CCU2D        CIN      In      0.000     6.325 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_10_0       CCU2D        COUT     Out     0.143     6.468 r      -         
+un1_envelope_count_1_cry_11                           Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_12_0       CCU2D        CIN      In      0.000     6.468 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_12_0       CCU2D        COUT     Out     0.143     6.611 r      -         
+un1_envelope_count_1_cry_13                           Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_14_0       CCU2D        CIN      In      0.000     6.611 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_14_0       CCU2D        COUT     Out     0.143     6.753 r      -         
+un1_envelope_count_1_cry_15                           Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_count_1_cry_16_0       CCU2D        CIN      In      0.000     6.753 r      -         
+machine.sound.psg.un1_envelope_count_1_cry_16_0       CCU2D        S1       Out     1.853     8.606 r      -         
+un1_envelope_count_1_cry_16_i                         Net          -        -       -         -            19        
+machine.sound.psg.envelope_step_0_sqmuxa_0_a3_i_1     ORCALUT4     B        In      0.000     8.606 r      -         
+machine.sound.psg.envelope_step_0_sqmuxa_0_a3_i_1     ORCALUT4     Z        Out     1.225     9.831 f      -         
+envelope_step_0_sqmuxa_0_a3_i_1                       Net          -        -       -         -            5         
+machine.sound.psg.un1_envelope_step_5_cry_0_0         CCU2D        B1       In      0.000     9.831 f      -         
+machine.sound.psg.un1_envelope_step_5_cry_0_0         CCU2D        COUT     Out     1.544     11.376 r     -         
+un1_envelope_step_5_cry_0                             Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_step_5_cry_1_0         CCU2D        CIN      In      0.000     11.376 r     -         
+machine.sound.psg.un1_envelope_step_5_cry_1_0         CCU2D        COUT     Out     0.143     11.518 r     -         
+un1_envelope_step_5_cry_2                             Net          -        -       -         -            1         
+machine.sound.psg.un1_envelope_step_5_s_3_0           CCU2D        CIN      In      0.000     11.518 r     -         
+machine.sound.psg.un1_envelope_step_5_s_3_0           CCU2D        S0       Out     1.549     13.068 r     -         
+un1_envelope_step_5_s_3_0_S0                          Net          -        -       -         -            1         
+machine.sound.psg.envelope_step_rst3_0_0_a2           ORCALUT4     A        In      0.000     13.068 r     -         
+machine.sound.psg.envelope_step_rst3_0_0_a2           ORCALUT4     Z        Out     1.017     14.084 r     -         
+N_725                                                 Net          -        -       -         -            1         
+machine.sound.psg.envelope_step_RNO[3]                ORCALUT4     B        In      0.000     14.084 r     -         
+machine.sound.psg.envelope_step_RNO[3]                ORCALUT4     Z        Out     0.617     14.701 r     -         
+N_15979_0                                             Net          -        -       -         -            1         
+machine.sound.psg.envelope_step[3]                    FD1S3AX      D        In      0.000     14.701 r     -         
+=====================================================================================================================
+
+
+
+
+====================================
+Detailed Report for Clock: pal
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                                        Starting                                               Arrival          
+Instance                                Reference     Type        Pin      Net                 Time        Slack
+                                        Clock                                                                   
+----------------------------------------------------------------------------------------------------------------
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO0      packed_word[9]      8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO1      packed_word[10]     8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO2      packed_word[11]     8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO4      packed_word[13]     8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO5      packed_word[14]     8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO6      packed_word[15]     8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO10     packed_word[1]      8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO11     packed_word[2]      8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO12     packed_word[3]      8.778       2.207
+machine.video.line_ram_line_ram_0_0     pal           PDPW8KC     DO14     packed_word[5]      8.778       2.207
+================================================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                                     Starting                                              Required          
+Instance                             Reference     Type        Pin     Net                 Time         Slack
+                                     Clock                                                                   
+-------------------------------------------------------------------------------------------------------------
+machine.video.encoder.address[0]     pal           FD1S3AX     D       N_92_i              15.714       2.207
+machine.video.encoder.address[1]     pal           FD1S3AX     D       N_460_i             15.714       2.207
+machine.video.encoder.address[2]     pal           FD1S3AX     D       N_94_i              15.714       2.207
+machine.video.encoder.address[3]     pal           FD1S3AX     D       N_96_i              15.714       2.207
+machine.video.dma_address_1[13]      pal           FD1S3AX     D       N_292_i             5.297        2.484
+machine.video.dma_address_1[14]      pal           FD1S3AX     D       N_291_i             5.297        2.484
+machine.video.dma_address_1[11]      pal           FD1S3AX     D       N_160_i             5.297        2.556
+machine.video.dma_address_1[12]      pal           FD1S3AX     D       N_51_i              5.297        2.556
+machine.video.ack_sync[0]            pal           FD1S3AX     D       ack_sync_r_0[0]     5.297        3.533
+machine.video.dma_bank               pal           FD1S3AX     D       dma_bank_0          5.297        3.533
+=============================================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      15.625
+    - Setup time:                            -0.089
+    + Clock delay at ending point:           0.000 (ideal)
+    = Required time:                         15.714
+
+    - Propagation time:                      13.507
+    - Clock delay at starting point:         0.000 (ideal)
+    = Slack (non-critical) :                 2.207
+
+    Number of logic level(s):                6
+    Starting point:                          machine.video.line_ram_line_ram_0_0 / DO0
+    Ending point:                            machine.video.encoder.address[3] / D
+    The start point is clocked by            pal [rising] (rise=0.000 fall=7.812 period=15.625) on pin CLKR
+    The end   point is clocked by            pal [rising] (rise=0.000 fall=7.812 period=15.625) on pin CK
+
+Instance / Net                                           Pin      Pin               Arrival      No. of    
+Name                                        Type         Name     Dir     Delay     Time         Fan Out(s)
+-----------------------------------------------------------------------------------------------------------
+machine.video.line_ram_line_ram_0_0         PDPW8KC      DO0      Out     8.778     8.778 r      -         
+packed_word[9]                              Net          -        -       -         -            1         
+machine.video.shifted_53_0_m2_1_i_m2_am     ORCALUT4     C        In      0.000     8.778 r      -         
+machine.video.shifted_53_0_m2_1_i_m2_am     ORCALUT4     Z        Out     1.017     9.795 r      -         
+shifted_53_0_m2_1_i_m2_am                   Net          -        -       -         -            1         
+machine.video.shifted_53_0_m2_1_i_m2        PFUMX        BLUT     In      0.000     9.795 r      -         
+machine.video.shifted_53_0_m2_1_i_m2        PFUMX        Z        Out     0.286     10.081 r     -         
+N_427                                       Net          -        -       -         -            2         
+machine.video.shifted_53_0_0_RNO            ORCALUT4     B        In      0.000     10.081 r     -         
+machine.video.shifted_53_0_0_RNO            ORCALUT4     Z        Out     1.017     11.098 r     -         
+N_424                                       Net          -        -       -         -            1         
+machine.video.shifted_53_0_0                ORCALUT4     A        In      0.000     11.098 r     -         
+machine.video.shifted_53_0_0                ORCALUT4     Z        Out     1.193     12.290 r     -         
+shifted[1]                                  Net          -        -       -         -            4         
+machine.video.bk_palette_index_3_0_01_0     ROM64X1A     AD1      In      0.000     12.290 r     -         
+machine.video.bk_palette_index_3_0_01_0     ROM64X1A     DO0      Out     0.599     12.890 r     -         
+bk_palette_index_3_i[3]                     Net          -        -       -         -            1         
+machine.video.encoder.address_RNO[3]        ORCALUT4     C        In      0.000     12.890 r     -         
+machine.video.encoder.address_RNO[3]        ORCALUT4     Z        Out     0.617     13.507 f     -         
+N_96_i                                      Net          -        -       -         -            1         
+machine.video.encoder.address[3]            FD1S3AX      D        In      0.000     13.507 f     -         
+===========================================================================================================
+
+
+
+
+====================================
+Detailed Report for Clock: system
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                                Starting                                            Arrival          
+Instance                        Reference     Type        Pin     Net               Time        Slack
+                                Clock                                                                
+-----------------------------------------------------------------------------------------------------
+machine.video.dma_state[1]      system        FD1S3AX     Q       dma_state[1]      1.260       0.162
+machine.arbiter.owner[0]        system        FD1S3AX     Q       owner[0]          1.256       0.166
+machine.video.dma_state[0]      system        FD1S3AX     Q       dma_state[0]      1.236       0.186
+machine.sram.response_valid     system        FD1P3IX     Q       mem_ready         1.204       0.218
+machine.video.srst_pipe[2]      system        FD1S3BX     Q       srst_pipe[2]      1.377       1.061
+machine.arbiter.owner[1]        system        FD1S3AX     Q       owner[1]          1.252       1.187
+machine.video.word_index[0]     system        FD1S3AX     Q       word_index[0]     1.228       2.298
+machine.sram.read_data[5]       system        FD1P3IX     Q       mem_read[5]       1.148       2.308
+machine.sram.read_data[13]      system        FD1P3IX     Q       mem_read[13]      1.148       2.308
+machine.video.word_index[1]     system        FD1S3AX     Q       word_index[1]     1.204       2.322
+=====================================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                                        Starting                                                  Required          
+Instance                                Reference     Type        Pin      Net                    Time         Slack
+                                        Clock                                                                       
+--------------------------------------------------------------------------------------------------------------------
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     CEW      dma_state_2_sqmuxa     3.455        0.162
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     ADW0     word_index[0]          3.526        2.298
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     DI5      mem_read[5]            3.456        2.308
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     DI13     mem_read[13]           3.456        2.308
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     ADW1     word_index[1]          3.526        2.322
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     ADW2     word_index[2]          3.526        2.338
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     ADW3     word_index[3]          3.526        2.346
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     DI0      mem_read[0]            3.456        2.348
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     DI1      mem_read[1]            3.456        2.348
+machine.video.line_ram_line_ram_0_0     system        PDPW8KC     DI2      mem_read[2]            3.456        2.348
+====================================================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      5.208
+    - Setup time:                            1.753
+    + Clock delay at ending point:           0.000 (ideal)
+    = Required time:                         3.455
+
+    - Propagation time:                      3.293
+    - Clock delay at starting point:         0.000 (ideal)
+    = Slack (critical) :                     0.162
+
+    Number of logic level(s):                2
+    Starting point:                          machine.video.dma_state[1] / Q
+    Ending point:                            machine.video.line_ram_line_ram_0_0 / CEW
+    The start point is clocked by            system [rising] (rise=0.000 fall=20.833 period=41.667) on pin CK
+    The end   point is clocked by            pal [rising] (rise=0.000 fall=7.812 period=15.625) on pin CLKR
+
+Instance / Net                                             Pin      Pin               Arrival     No. of    
+Name                                          Type         Name     Dir     Delay     Time        Fan Out(s)
+------------------------------------------------------------------------------------------------------------
+machine.video.dma_state[1]                    FD1S3AX      Q        Out     1.260     1.260 r     -         
+dma_state[1]                                  Net          -        -       -         -           15        
+machine.video.line_ram_line_ram_0_0_RNO_6     ORCALUT4     B        In      0.000     1.260 r     -         
+machine.video.line_ram_line_ram_0_0_RNO_6     ORCALUT4     Z        Out     1.017     2.277 f     -         
+m5_0_a2_0                                     Net          -        -       -         -           1         
+machine.video.line_ram_line_ram_0_0_RNO_4     ORCALUT4     B        In      0.000     2.277 f     -         
+machine.video.line_ram_line_ram_0_0_RNO_4     ORCALUT4     Z        Out     1.017     3.293 f     -         
+dma_state_2_sqmuxa                            Net          -        -       -         -           1         
+machine.video.line_ram_line_ram_0_0           PDPW8KC      CEW      In      0.000     3.293 f     -         
+============================================================================================================
+
+
+
+
+====================================
+Detailed Report for Clock: vm1
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                                Starting                                              Arrival           
+Instance                        Reference     Type        Pin     Net                 Time        Slack 
+                                Clock                                                                   
+--------------------------------------------------------------------------------------------------------
+machine.cpu.core.wb_adr[4]      vm1           FD1P3AX     Q       cpu_address[4]      1.148       12.441
+machine.cpu.core.wb_adr[5]      vm1           FD1P3AX     Q       cpu_address[5]      1.148       12.441
+machine.cpu.core.wb_adr[6]      vm1           FD1P3AX     Q       cpu_address[6]      1.148       12.441
+machine.cpu.core.wb_adr[7]      vm1           FD1P3AX     Q       cpu_address[7]      1.148       12.441
+machine.cpu.core.wb_adr[8]      vm1           FD1P3AX     Q       cpu_address[8]      1.044       13.286
+machine.cpu.core.wb_adr[9]      vm1           FD1P3AX     Q       cpu_address[9]      1.044       13.286
+machine.cpu.core.wb_adr[3]      vm1           FD1P3AX     Q       cpu_address[3]      1.309       13.297
+machine.cpu.core.wb_adr[2]      vm1           FD1P3AX     Q       cpu_address[2]      1.280       13.325
+machine.cpu.core.wb_adr[10]     vm1           FD1P3AX     Q       cpu_address[10]     1.108       13.425
+machine.cpu.core.wb_adr[11]     vm1           FD1P3AX     Q       cpu_address[11]     1.108       13.425
+========================================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                                  Starting                                               Required           
+Instance                          Reference     Type        Pin     Net                  Time         Slack 
+                                  Clock                                                                     
+------------------------------------------------------------------------------------------------------------
+machine.clocks.active_mode[0]     vm1           FD1S3AX     D       active_mode_r[0]     20.922       12.441
+machine.clocks.active_mode[1]     vm1           FD1S3AX     D       active_mode_r[1]     20.922       12.441
+machine.clocks.active_mode[2]     vm1           FD1S3AX     D       active_mode_r[2]     20.922       12.441
+machine.cpu.core.bus_timer[5]     vm1           FD1P3AX     D       bus_timer_s[5]       20.728       13.599
+machine.cpu.core.bus_timer[3]     vm1           FD1P3AX     D       bus_timer_s[3]       20.728       13.742
+machine.cpu.core.bus_timer[4]     vm1           FD1P3AX     D       bus_timer_s[4]       20.728       13.742
+machine.cpu.core.bus_timer[1]     vm1           FD1P3AX     D       bus_timer_s[1]       20.728       13.885
+machine.cpu.core.bus_timer[2]     vm1           FD1P3AX     D       bus_timer_s[2]       20.728       13.885
+machine.cpu.core.ir_stb2          vm1           FD1P3DX     SP      un3_ir_clr_2_i       20.362       14.798
+machine.cpu.core.ir_stop          vm1           FD1P3DX     SP      N_662_i              20.362       14.798
+============================================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      20.833
+    - Setup time:                            -0.089
+    + Clock delay at ending point:           0.000 (ideal)
+    = Required time:                         20.922
+
+    - Propagation time:                      8.481
+    - Clock delay at starting point:         0.000 (ideal)
+    = Slack (non-critical) :                 12.441
+
+    Number of logic level(s):                7
+    Starting point:                          machine.cpu.core.wb_adr[4] / Q
+    Ending point:                            machine.clocks.active_mode[0] / D
+    The start point is clocked by            vm1 [rising] (rise=0.000 fall=20.833 period=41.667) on pin CK
+    The end   point is clocked by            divider [rising] (rise=0.000 fall=10.417 period=20.833) on pin CK
+
+Instance / Net                                         Pin      Pin               Arrival     No. of    
+Name                                      Type         Name     Dir     Delay     Time        Fan Out(s)
+--------------------------------------------------------------------------------------------------------
+machine.cpu.core.wb_adr[4]                FD1P3AX      Q        Out     1.148     1.148 r     -         
+cpu_address[4]                            Net          -        -       -         -           4         
+machine.cpu.missing_console_2_0           ORCALUT4     A        In      0.000     1.148 r     -         
+machine.cpu.missing_console_2_0           ORCALUT4     Z        Out     1.017     2.165 r     -         
+missing_console_2                         Net          -        -       -         -           1         
+machine.cpu.missing_console_5             ORCALUT4     A        In      0.000     2.165 r     -         
+machine.cpu.missing_console_5             ORCALUT4     Z        Out     1.017     3.181 r     -         
+missing_console_5                         Net          -        -       -         -           1         
+machine.cpu.missing_console               ORCALUT4     D        In      0.000     3.181 r     -         
+machine.cpu.missing_console               ORCALUT4     Z        Out     1.193     4.374 r     -         
+missing_console                           Net          -        -       -         -           4         
+machine.cpu.cycle                         ORCALUT4     A        In      0.000     4.374 r     -         
+machine.cpu.cycle                         ORCALUT4     Z        Out     1.249     5.623 f     -         
+cycle                                     Net          -        -       -         -           7         
+machine.cpu.full_reset7_2                 ORCALUT4     C        In      0.000     5.623 f     -         
+machine.cpu.full_reset7_2                 ORCALUT4     Z        Out     1.089     6.712 r     -         
+full_reset7_2                             Net          -        -       -         -           2         
+machine.clocks.un1_count15_2_RNI6PPSO     ORCALUT4     B        In      0.000     6.712 r     -         
+machine.clocks.un1_count15_2_RNI6PPSO     ORCALUT4     Z        Out     1.153     7.865 r     -         
+un1_count15_i                             Net          -        -       -         -           3         
+machine.clocks.active_mode_r[0]           ORCALUT4     C        In      0.000     7.865 r     -         
+machine.clocks.active_mode_r[0]           ORCALUT4     Z        Out     0.617     8.481 r     -         
+active_mode_r[0]                          Net          -        -       -         -           1         
+machine.clocks.active_mode[0]             FD1S3AX      D        In      0.000     8.481 r     -         
+========================================================================================================
+
+
+
+
+====================================
+Detailed Report for Clock: System
+====================================
+
+
+
+Starting Points with Worst Slack
+********************************
+
+                        Starting                                      Arrival             
+Instance                Reference     Type        Pin       Net       Time        Slack   
+                        Clock                                                             
+------------------------------------------------------------------------------------------
+video_pll.PLLInst_0     System        EHXPLLJ     CLKOP     CLKOP     0.000       1000.000
+==========================================================================================
+
+
+Ending Points with Worst Slack
+******************************
+
+                        Starting                                      Required             
+Instance                Reference     Type        Pin       Net       Time         Slack   
+                        Clock                                                              
+-------------------------------------------------------------------------------------------
+video_pll.PLLInst_0     System        EHXPLLJ     CLKFB     CLKOP     1000.000     1000.000
+===========================================================================================
+
+
+
+Worst Path Information
+***********************
+
+
+Path information for path number 1: 
+      Requested Period:                      1000.000
+    - Setup time:                            0.000
+    + Clock delay at ending point:           0.000 (ideal)
+    + Estimated clock delay at ending point: 0.000
+    = Required time:                         1000.000
+
+    - Propagation time:                      0.000
+    - Clock delay at starting point:         0.000 (ideal)
+    - Estimated clock delay at start point:  -0.000
+    = Slack (non-critical) :                 1000.000
+
+    Number of logic level(s):                0
+    Starting point:                          video_pll.PLLInst_0 / CLKOP
+    Ending point:                            video_pll.PLLInst_0 / CLKFB
+    The start point is clocked by            System [rising]
+    The end   point is clocked by            System [rising]
+
+Instance / Net                      Pin       Pin               Arrival     No. of    
+Name                    Type        Name      Dir     Delay     Time        Fan Out(s)
+--------------------------------------------------------------------------------------
+video_pll.PLLInst_0     EHXPLLJ     CLKOP     Out     0.000     0.000 r     -         
+CLKOP                   Net         -         -       -         -           1         
+video_pll.PLLInst_0     EHXPLLJ     CLKFB     In      0.000     0.000 r     -         
+======================================================================================
+
+
+
+##### END OF TIMING REPORT #####]
+
+Timing exceptions that could not be applied
+
+Finished final timing analysis (Real Time elapsed 0h:00m:16s; CPU Time elapsed 0h:00m:16s; Memory used current: 681MB peak: 681MB)
+
+
+Finished timing report (Real Time elapsed 0h:00m:16s; CPU Time elapsed 0h:00m:16s; Memory used current: 681MB peak: 681MB)
+
+---------------------------------------
+Resource Usage Report
+Part: lcmxo2_7000hc-4
+
+Register bits: 2588 of 6864 (38%)
+PIC Latch:       0
+I/O cells:       84
+Block Rams : 25 of 26 (96%)
+
+
+Details:
+BB:             17
+CCU2D:          434
+DCCA:           1
+DP8KC:          11
+DPR16X4C:       5
+EHXPLLJ:        2
+FD1P3AX:        471
+FD1P3AY:        8
+FD1P3BX:        7
+FD1P3DX:        139
+FD1P3IX:        352
+FD1P3JX:        14
+FD1S3AX:        924
+FD1S3AY:        161
+FD1S3BX:        29
+FD1S3DX:        58
+FD1S3IX:        362
+FD1S3JX:        14
+GSR:            1
+IB:             4
+IFS1P3IX:       1
+IFS1P3JX:       2
+INV:            25
+L6MUX21:        1
+OB:             63
+OFS1P3BX:       1
+OFS1P3DX:       24
+OFS1P3IX:       19
+OFS1P3JX:       2
+ORCALUT4:       5735
+PDPW8KC:        4
+PFUMX:          112
+PUR:            1
+ROM256X1A:      9
+ROM64X1A:       4
+SP8KC:          10
+VHI:            38
+VLO:            38
+Mapper successful!
+
+At Mapper Exit (Real Time elapsed 0h:00m:16s; CPU Time elapsed 0h:00m:16s; Memory used current: 576MB peak: 681MB)
+
+Process took 0h:00m:16s realtime, 0h:00m:16s cputime
+# Tue Oct  6 01:46:30 2026
+
+###########################################################]

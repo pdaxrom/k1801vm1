@@ -1,0 +1,8 @@
+{
+  "passed": false,
+  "complete": false,
+  "disk_mechanics_speedup": 16,
+  "reason": "At 4 us/word the accelerated disk test made no progress beyond the first track. Stopped; not a production timing test.",
+  "source": "build/bk_system_bus-fast16-disk-test.v",
+  "disk_clock_parameter": 1838235
+}

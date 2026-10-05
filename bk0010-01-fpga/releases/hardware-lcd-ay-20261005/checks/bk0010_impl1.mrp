@@ -1,0 +1,2778 @@
+
+       Lattice Mapping Report File for Design Module 'bk_hardware_lcd'
+
+
+Design Information
+------------------
+
+Command line:   map -a MachXO2 -p LCMXO2-7000HC -t TQFP144 -s 4 -oc Industrial
+     bk0010_impl1.ngd -o bk0010_impl1_map.ncd -pr bk0010_impl1.prf -mp
+     bk0010_impl1.mrp /home/sash/Work/FPGA/diamond-ay-final-20261005/clock.lpf
+     -c 0 -pe 
+Target Vendor:  LATTICE
+Target Device:  LCMXO2-7000HCTQFP144
+Target Performance:   4
+Mapper:  xo2c00,  version:  Diamond (64-bit) 3.14.0.75.2
+Mapped on:  10/05/26  23:15:48
+
+Design Summary
+--------------
+
+   Number of registers:   2584 out of  7209 (36%)
+      PFU registers:         2536 out of  6864 (37%)
+      PIO registers:           48 out of   345 (14%)
+   Number of SLICEs:      3410 out of  3432 (99%)
+      SLICEs as Logic/ROM:   3395 out of  3432 (99%)
+      SLICEs as RAM:           15 out of  2574 (1%)
+      SLICEs as Carry:        434 out of  3432 (13%)
+   Number of LUT4s:        6758 out of  6864 (98%)
+      Number used as logic LUTs:        5860
+      Number used as distributed RAM:    30
+      Number used as ripple logic:      868
+      Number used as shift registers:     0
+   Number of PIO sites used: 84 + 1(JTAGENB) out of 115 (74%)
+   Number of block RAMs:  25 out of 26 (96%)
+   Number of GSRs:        1 out of 1 (100%)
+   EFB used :        No
+   JTAG used :       No
+   Readback used :   No
+   Oscillator used : No
+   Startup used :    No
+   POR :             On
+   Bandgap :         On
+   Number of Power Controller:  0 out of 1 (0%)
+   Number of Dynamic Bank Controller (BCINRD):  0 out of 6 (0%)
+   Number of Dynamic Bank Controller (BCLVDSO):  0 out of 1 (0%)
+   Number of DCCA:  1 out of 8 (12%)
+   Number of DCMA:  0 out of 2 (0%)
+   Number of PLLs:  2 out of 2 (100%)
+   Number of DQSDLLs:  0 out of 2 (0%)
+   Number of CLKDIVC:  0 out of 4 (0%)
+   Number of ECLKSYNCA:  0 out of 4 (0%)
+   Number of ECLKBRIDGECS:  0 out of 2 (0%)
+   Notes:-
+      1. Total number of LUT4s = (Number of logic LUT4s) + 2*(Number of
+     distributed RAMs) + 2*(Number of ripple logic)
+      2. Number of logic LUT4s does not include count of distributed RAM and
+     ripple logic.
+   Number of clocks:  6
+     Net clk_ext_c: 2 loads, 2 rising, 0 falling (Driver: PIO clk_ext )
+     Net clk: 983 loads, 983 rising, 0 falling (Driver: main_pll/PLLInst_0 )
+     Net machine/cpu_p: 354 loads, 252 rising, 102 falling (Driver:
+     machine/cpu_positive )
+
+                                    Page 1
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Design Summary (cont)
+---------------------
+     Net clk48: 137 loads, 137 rising, 0 falling (Driver: main_pll/PLLInst_0 )
+     Net video_clk: 99 loads, 99 rising, 0 falling (Driver: video_pll/PLLInst_0
+     )
+     Net machine/raw_cpu_p: 1 loads, 1 rising, 0 falling (Driver:
+     machine/clocks/clk_p )
+   Number of Clock Enables:  142
+     Net machine.bus.shifter.mosi_eena: 1 loads, 0 LSLICEs
+     Net machine.sram.writing_eena: 37 loads, 1 LSLICEs
+     Net machine.bus.shifter.rx_eena: 5 loads, 4 LSLICEs
+     Net machine.sram.initialized_eena: 2 loads, 1 LSLICEs
+     Net machine/cpu_bank_0_sqmuxa: 5 loads, 5 LSLICEs
+     Net machine/sram/response_valid_eena: 1 loads, 1 LSLICEs
+     Net machine/sram/read_data_eena: 8 loads, 8 LSLICEs
+     Net machine/sram/cancelled_eena: 1 loads, 1 LSLICEs
+     Net machine/sound/psg/registers[10]_eena: 3 loads, 3 LSLICEs
+     Net machine/sound/psg/registers[6]_eena: 3 loads, 3 LSLICEs
+     Net machine/sound/psg/registers[4]_eena: 4 loads, 4 LSLICEs
+     Net machine/sound/psg/N_303_i: 21 loads, 21 LSLICEs
+     Net machine/sound/psg/registers[9]_eena: 3 loads, 3 LSLICEs
+     Net machine/sound/psg/registers[8]_eena: 3 loads, 3 LSLICEs
+     Net machine/sound/psg/registers[7]_eena: 3 loads, 3 LSLICEs
+     Net machine/sound/psg/registers[5]_eena: 2 loads, 2 LSLICEs
+     Net machine/sound/psg/registers[3]_eena: 2 loads, 2 LSLICEs
+     Net machine/sound/psg/registers[2]_eena: 4 loads, 4 LSLICEs
+     Net machine/sound/psg/registers[1]_eena: 2 loads, 2 LSLICEs
+     Net machine/sound/psg/registers[13]_eena: 2 loads, 2 LSLICEs
+     Net machine/sound/psg/registers[12]_eena: 4 loads, 4 LSLICEs
+     Net machine/sound/psg/registers[11]_eena: 4 loads, 4 LSLICEs
+     Net machine/sound/psg/registers[0]_eena: 4 loads, 4 LSLICEs
+     Net machine/sound/psg/envelope_count_eena: 9 loads, 9 LSLICEs
+     Net machine/sound/write_pointer_0_sqmuxa: 3 loads, 3 LSLICEs
+     Net machine/sound/N_23: 2 loads, 2 LSLICEs
+     Net machine/dma_state_2_sqmuxa: 1 loads, 0 LSLICEs
+     Net machine/video/vcolor_eena: 1 loads, 1 LSLICEs
+     Net machine/video/tag0_eena: 4 loads, 4 LSLICEs
+     Net machine/video/tag1_eena: 4 loads, 4 LSLICEs
+     Net machine/video/fill_row_eena: 5 loads, 5 LSLICEs
+     Net machine/video/bit_index_eena: 5 loads, 5 LSLICEs
+     Net machine/bus/shifter/sck_eena: 1 loads, 1 LSLICEs
+     Net machine/bus/shifter/rx_data_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/shifter/tx_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/spi_regs/rx_high_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/spi_regs/rx_low_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/spi_regs/active_eena: 1 loads, 1 LSLICEs
+     Net machine/bus/spi_regs/word_pending_eena: 1 loads, 1 LSLICEs
+     Net machine/bus/spi_regs/tx_low_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/spi_regs/tx_high_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/spi_regs/pout_eena: 1 loads, 1 LSLICEs
+     Net machine/bus/spi_regs/high_pending_eena: 1 loads, 1 LSLICEs
+     Net machine/bus/spi_regs/start_5_sqmuxa0: 5 loads, 5 LSLICEs
+     Net machine/bus/spi_regs/control_eena: 2 loads, 2 LSLICEs
+     Net machine/bus/spi_regs/byte_tx_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/irq_disabled_1_sqmuxa_1_i: 1 loads, 1 LSLICEs
+     Net machine/bus/disk_partitions/clear_indexe: 3 loads, 3 LSLICEs
+     Net machine/bus/disk_partitions/bases[0]_eena: 8 loads, 8 LSLICEs
+     Net machine/bus/disk_partitions/overflow_2_eena: 1 loads, 1 LSLICEs
+
+                                    Page 2
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Design Summary (cont)
+---------------------
+     Net machine/bus/disk_partitions/un1_state_7_i_a2_RNILL28Q: 8 loads, 8
+     LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_1_RNI8I4LR: 9 loads, 9
+     LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_2_RNI9I4LR: 8 loads, 8
+     LSLICEs
+     Net machine/bus/read_data_18_sqmuxa: 8 loads, 8 LSLICEs
+     Net machine/bus/disk_partitions/un1_clearing11_40_i: 4 loads, 4 LSLICEs
+     Net machine/bus/disk_partitions/carry_eena: 1 loads, 1 LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_3_RNIAI4LR: 8 loads, 8
+     LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_3_RNIAI4LR_0: 8 loads, 8
+     LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_2_RNI9I4LR_0: 8 loads, 8
+     LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_1_RNI8I4LR_0: 8 loads, 8
+     LSLICEs
+     Net machine/bus/disk_partitions/short_extent_dec_0_RNI7I4LR: 8 loads, 8
+     LSLICEs
+     Net machine/bus/disk_partitions/un1_config_store_4_g: 2 loads, 0 LSLICEs
+     Net machine/bus/disk_host/waiting_0_sqmuxa_1_i: 5 loads, 5 LSLICEs
+     Net machine/bus/disk_host/un1_receive_store_g: 1 loads, 0 LSLICEs
+     Net machine/bus/disk_controller/cache/cached_side_eena: 5 loads, 5 LSLICEs
+     Net machine/bus/disk_controller/cache/N_573_i: 15 loads, 15 LSLICEs
+     Net machine/bus/disk_controller/cache/N_672_i: 6 loads, 6 LSLICEs
+     Net machine/bus/disk_controller/cache/frame_1_sqmuxa_1_i: 1 loads, 1
+     LSLICEs
+     Net machine/bus/disk_controller/last_position_eena: 6 loads, 6 LSLICEs
+     Net machine/bus/disk_controller/heads[3]_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/disk_controller/heads[2]_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/disk_controller/un1_power_on_i: 15 loads, 15 LSLICEs
+     Net machine/bus/disk_controller/heads[1]_eena: 4 loads, 4 LSLICEs
+     Net machine/bus/disk_controller/heads[0]_eena: 4 loads, 4 LSLICEs
+     Net machine/transport/filtered_eena: 1 loads, 1 LSLICEs
+     Net machine/transport/N_687_i: 1 loads, 1 LSLICEs
+     Net machine/transport/N_695_i: 2 loads, 2 LSLICEs
+     Net machine/transport/N_558_i: 4 loads, 4 LSLICEs
+     Net machine/transport/N_135_i: 1 loads, 1 LSLICEs
+     Net machine/transport/bit_counte: 3 loads, 3 LSLICEs
+     Net machine/bridge/m8_i_a3: 9 loads, 9 LSLICEs
+     Net machine/bridge/held_address_0_sqmuxa: 22 loads, 22 LSLICEs
+     Net machine/bridge/cpu_ack_RNO_0: 1 loads, 1 LSLICEs
+     Net machine/bridge/N_136_i: 1 loads, 1 LSLICEs
+     Net machine/bridge/N_141_i: 1 loads, 1 LSLICEs
+     Net machine/bridge/N_134_i: 1 loads, 1 LSLICEs
+     Net machine/bridge/request_seen_0_sqmuxa_i_i_a3: 1 loads, 1 LSLICEs
+     Net machine/bridge/cpu_state_1_sqmuxa: 9 loads, 9 LSLICEs
+     Net machine/cpu/system_active7: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/plm_stb_rc: 17 loads, 17 LSLICEs
+     Net machine/cpu/core/acok_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/aclo_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/au_alsl: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/psw30: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/psw41: 4 loads, 4 LSLICEs
+     Net machine/cpu/core/plm_ena: 4 loads, 4 LSLICEs
+     Net machine/cpu/core/N_83_i: 1 loads, 1 LSLICEs
+
+                                    Page 3
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Design Summary (cont)
+---------------------
+     Net machine/cpu/core/plm_ena_fc: 14 loads, 14 LSLICEs
+     Net machine/cpu/core/un1_plm_ena_1: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/bus_tovf: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/ivto_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/ir_stb2: 8 loads, 8 LSLICEs
+     Net machine/cpu/core/un1_wb_idone_1: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/abort_rc_i_o2: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un2_wb_rdone_1: 8 loads, 8 LSLICEs
+     Net machine/cpu/core/pli_req: 3 loads, 3 LSLICEs
+     Net machine/cpu/core/timer/wbs_d_9_0_iv_0_a2_10_RNI7SR2R[1]: 8 loads, 8
+     LSLICEs
+     Net machine/selected[1]: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/timer/N_773_i: 3 loads, 3 LSLICEs
+     Net machine/cpu/core/timer/tve_tclk4: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/timer/N_939_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/timer/tve_dive: 4 loads, 4 LSLICEs
+     Net machine/cpu/core/timer/tve_counte: 9 loads, 9 LSLICEs
+     Net machine/cpu/core/N_662_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un3_ir_clr_2_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/wsel_00: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/exc_err7_i_i_o2: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/wb_uplr: 9 loads, 9 LSLICEs
+     Net machine/cpu/core/uop_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/i1_i: 8 loads, 8 LSLICEs
+     Net machine/cpu/core/wb_sel_eena_i_a4_i_o2_RNI45ELI: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/N_97_i: 8 loads, 8 LSLICEs
+     Net machine/cpu/core/N_943_i: 8 loads, 8 LSLICEs
+     Net machine/cpu/core/wb_stb_eena: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/wb_cyc_eena: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un1_pli_req: 4 loads, 4 LSLICEs
+     Net machine/cpu/core/N_756_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/start_irq_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/sop_out_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un2_au_qstbx_1_i: 12 loads, 12 LSLICEs
+     Net machine/cpu/core/qbto_erst: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un3_plm_stb_rc: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/mjce[7]: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/mjce[8]: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/N_892_i: 4 loads, 4 LSLICEs
+     Net machine/cpu/core/N_84: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un1_dout_req_i_0: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un1_ustb1_h_1: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un1_ustb1: 1 loads, 1 LSLICEs
+     Net machine/cpu/un1_release_count_1_i: 4 loads, 4 LSLICEs
+     Net machine/sys_output_1_sqmuxa: 1 loads, 1 LSLICEs
+     Net machine/panel/display/slote: 2 loads, 2 LSLICEs
+   Number of local set/reset loads for net machine/bridge/cpu_reset_pipe[2]
+     merged into GSR:  69
+   Number of LSRs:  58
+     Net locked_i: 2 loads, 2 LSLICEs
+     Net power_on[3]: 46 loads, 31 LSLICEs
+     Net machine.bus.un1_reset_1: 15 loads, 13 LSLICEs
+     Net rx_eena_RNIN97PG: 5 loads, 4 LSLICEs
+     Net machine/cpu_reset_pipe[2]: 30 loads, 30 LSLICEs
+     Net state_RNIVH7SU[0]: 16 loads, 0 LSLICEs
+     Net machine/reset: 10 loads, 10 LSLICEs
+
+                                    Page 4
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Design Summary (cont)
+---------------------
+     Net machine/sound/audio_reset_pipe[2]: 63 loads, 63 LSLICEs
+     Net machine/sound/psg/tone_count[2]2_RNIJK5HF: 7 loads, 7 LSLICEs
+     Net machine/sound/psg/tone_count[1]2_RNIH2CT9: 7 loads, 7 LSLICEs
+     Net machine/sound/psg/tone_count[0]2_RNIFGI9C: 7 loads, 7 LSLICEs
+     Net machine/peripheral_reset: 17 loads, 17 LSLICEs
+     Net machine/video/vrst_pipe[2]: 23 loads, 23 LSLICEs
+     Net machine/video/active_line_RNICJU39: 5 loads, 5 LSLICEs
+     Net machine/bus/mosis_2: 103 loads, 103 LSLICEs
+     Net machine/bus/scroll27: 30 loads, 30 LSLICEs
+     Net machine/bus/written_count_rst0_1_i: 9 loads, 9 LSLICEs
+     Net machine/bus/verified_count_rst0_1_i: 9 loads, 9 LSLICEs
+     Net machine/bus/bios_timebase/state12: 10 loads, 10 LSLICEs
+     Net machine/bus/bios_timebase/state0_17: 1 loads, 1 LSLICEs
+     Net machine/bus/disk_host/timeout_count_rst0_1_i: 9 loads, 9 LSLICEs
+     Net machine/bus/disk_controller/cache/buffer_address_1_sqmuxa_RNIFJ7FU: 4
+     loads, 4 LSLICEs
+     Net machine/bus/disk_controller/position_0_sqmuxa_RNI5UH89: 2 loads, 2
+     LSLICEs
+     Net machine/bus/disk_controller/accept_RNI1P23G: 4 loads, 4 LSLICEs
+     Net machine/transport/timeout_rst0_1_i: 6 loads, 6 LSLICEs
+     Net machine/transport/held_us_rst1_i_0: 4 loads, 4 LSLICEs
+     Net machine/core_cycle: 1 loads, 1 LSLICEs
+     Net machine/bridge/sys_reset_pipe[2]: 13 loads, 13 LSLICEs
+     Net machine/cpu_address[1]: 1 loads, 1 LSLICEs
+     Net machine/cpu_address[2]: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/mjres: 27 loads, 27 LSLICEs
+     Net machine/cpu/core/plr[14]: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/reset: 14 loads, 14 LSLICEs
+     Net machine/cpu/core/N_551_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un1_au_qstbd: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/plr[17]: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/alu_busy_rp: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/un3_plm_ena_fc_i: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/plm_ena_fc_i: 3 loads, 3 LSLICEs
+     Net machine/cpu/core/alu_e_fc: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un3_cl_fc: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un5_alu_e_fc: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/dclo: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/abort: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/wbi_stb_o_0_a2_RNILCR1F: 5 loads, 5 LSLICEs
+     Net machine/cpu/core/N_775_i: 4 loads, 4 LSLICEs
+     Net machine/cpu/un1_internal_select_i: 2 loads, 2 LSLICEs
+     Net machine/cpu/core/wbs_ac_i_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/ustb_h: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/sop_outs_0: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un2_sop_up: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/plm23_ichk: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/un3_plm1x_fc_i: 1 loads, 1 LSLICEs
+     Net machine/cpu/core/alu_ss: 1 loads, 1 LSLICEs
+     Net machine/panel/previous_RNIEKOQ4: 5 loads, 5 LSLICEs
+     Net machine/panel/display/divider_rst9_1_i: 5 loads, 5 LSLICEs
+     Net machine/panel/timebase/state12: 10 loads, 10 LSLICEs
+     Net machine/panel/timebase/state0_17: 1 loads, 1 LSLICEs
+   Number of nets driven by tri-state buffers:  0
+   Top 10 highest fanout non-clock nets:
+     Net machine/bus/mosis_2: 560 loads
+
+                                    Page 5
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Design Summary (cont)
+---------------------
+     Net power_on[3]: 337 loads
+     Net machine/bus/scroll27: 164 loads
+     Net machine/sound/audio_reset_pipe[2]: 157 loads
+     Net machine/full_reset: 154 loads
+     Net machine/video/vrst_pipe[2]: 119 loads
+     Net machine/reset: 80 loads
+     Net machine/rom_locked: 78 loads
+     Net machine/scan_value[1]: 78 loads
+     Net machine/external_address[1]: 76 loads
+
+
+
+
+   Number of warnings:  3
+   Number of errors:    0
+     
+
+Design Errors/Warnings
+----------------------
+
+WARNING - map: The JTAG port has been disabled in this project and JTAG pins
+     will be configured as General Purpose IO.  You have to use JTAGENB pin in
+     hardware to change the personality of the port from JTAG pins to general
+     purpose IO.  Reference MachXO2 Handbook for details on dual function JTAG
+     port.
+WARNING - map: All configuration ports of the design have been disabled.
+     Reference MachXO2 Handbook for information on the Configuration Ports of
+     MachXO2
+WARNING - map: Using local reset signal 'machine/bridge/cpu_reset_pipe[2]' to
+     infer global GSR net.
+
+IO (PIO) Attributes
+-------------------
+
++---------------------+-----------+-----------+------------+
+| IO Name             | Direction | Levelmode | IO         |
+|                     |           |  IO_TYPE  | Register   |
++---------------------+-----------+-----------+------------+
+| ps2_clock           | BIDIR     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| tx                  | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| clk_ext             | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| audio[1]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| audio[0]            | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| tvout[5]            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| tvout[4]            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| tvout[3]            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| tvout[2]            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+
+                                    Page 6
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+IO (PIO) Attributes (cont)
+--------------------------
+| tvout[1]            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| tvout[0]            | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| seg_led_l[8]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[7]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[6]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[5]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[4]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[3]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[2]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[1]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_l[0]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[8]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[7]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[6]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[5]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[4]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[3]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[2]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[1]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| seg_led_h[0]        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| led_rgb[2]          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| led_rgb[1]          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| led_rgb[0]          | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| flash_mosi          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_sck           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_hold_n        | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_wp_n          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| flash_cs_n          | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+
+                                    Page 7
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+IO (PIO) Attributes (cont)
+--------------------------
+| sd_miso             | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| sd_mosi             | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sd_sck              | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sd_cs_n             | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_ub_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_lb_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_we_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_oe_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_ce_n           | OUTPUT    | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+| sram_data[15]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[14]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[13]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[12]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[11]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[10]       | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[9]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[8]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[7]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[6]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[5]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[4]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[3]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[2]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[1]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_data[0]        | BIDIR     | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[19]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[18]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[17]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+
+                                    Page 8
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+IO (PIO) Attributes (cont)
+--------------------------
+| sram_address[16]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[15]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[14]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[13]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[12]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[11]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[10]    | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[9]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[8]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[7]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[6]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[5]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[4]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[3]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[2]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[1]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| sram_address[0]     | OUTPUT    | LVCMOS33  | OUT        |
++---------------------+-----------+-----------+------------+
+| ps2_data            | INPUT     | LVCMOS33  | IN         |
++---------------------+-----------+-----------+------------+
+| res                 | INPUT     | LVCMOS33  |            |
++---------------------+-----------+-----------+------------+
+
+Removed logic
+-------------
+
+Block main_pll/VCC undriven or does not drive anything - clipped.
+Block video_pll/VCC undriven or does not drive anything - clipped.
+Block machine/frequency_mailbox/GND undriven or does not drive anything -
+     clipped.
+Block machine/frequency_mailbox/VCC undriven or does not drive anything -
+     clipped.
+Block machine/panel/VCC undriven or does not drive anything - clipped.
+Block machine/panel/timebase/GND undriven or does not drive anything - clipped.
+Block machine/panel/timebase/VCC undriven or does not drive anything - clipped.
+Block machine/clocks/GND undriven or does not drive anything - clipped.
+Block machine/clocks/VCC undriven or does not drive anything - clipped.
+Block machine/cpu/core/VCC undriven or does not drive anything - clipped.
+Block machine/cpu/core/pli_matrix_a/VCC undriven or does not drive anything -
+     clipped.
+
+                                    Page 9
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Block machine/cpu/core/pli_matrix_a/GND undriven or does not drive anything -
+     clipped.
+Block machine/cpu/core/plm_matrix_a/VCC undriven or does not drive anything -
+     clipped.
+Block machine/cpu/core/plm_matrix_a/GND undriven or does not drive anything -
+     clipped.
+Block machine/cpu/core/vreg_rm/VCC undriven or does not drive anything -
+     clipped.
+Block machine/cpu/core/vreg_rm/GND undriven or does not drive anything -
+     clipped.
+Block machine/bridge/VCC undriven or does not drive anything - clipped.
+Block machine/transport/VCC undriven or does not drive anything - clipped.
+Block machine/bus/disk_controller/crc_datapath/VCC undriven or does not drive
+     anything - clipped.
+Block machine/bus/disk_controller/crc_datapath/GND undriven or does not drive
+     anything - clipped.
+Block machine/bus/bios_timebase/VCC undriven or does not drive anything -
+     clipped.
+Block machine/bus/bios_timebase/GND undriven or does not drive anything -
+     clipped.
+Block machine/bus/mapper/VCC undriven or does not drive anything - clipped.
+Block machine/bus/mapper/GND undriven or does not drive anything - clipped.
+Block machine/bus/spi_regs/VCC undriven or does not drive anything - clipped.
+Block machine/bus/spi_regs/GND undriven or does not drive anything - clipped.
+Block machine/bus/shifter/VCC undriven or does not drive anything - clipped.
+Block machine/video/timing/VCC undriven or does not drive anything - clipped.
+Block machine/arbiter/VCC undriven or does not drive anything - clipped.
+Block machine/arbiter/GND undriven or does not drive anything - clipped.
+Block machine/sound/VCC undriven or does not drive anything - clipped.
+Block machine/sound/commands_ram_1/RAM1 undriven or does not drive anything -
+     clipped.
+Block machine/uart/VCC undriven or does not drive anything - clipped.
+Block machine/sram/VCC undriven or does not drive anything - clipped.
+Signal machine/cpu/core/bus_tovf_i was merged into signal
+     machine/cpu/core/bus_tovf
+Signal machine/cpu/core/alu_busy_rp_i was merged into signal
+     machine/cpu/core/alu_busy_rp
+Signal machine/cpu/core/plr_i[17] was merged into signal
+     machine/cpu/core/plr[17]
+Signal machine/cpu/core/cpu_p_i_0 was merged into signal machine/cpu_p
+Signal inhibit_i was merged into signal machine/transport/inhibit
+Signal drive_data_i was merged into signal machine/sram/drive_data
+Signal main_pll/GND undriven or does not drive anything - clipped.
+Signal video_pll/GND undriven or does not drive anything - clipped.
+Signal machine/VCC undriven or does not drive anything - clipped.
+Signal machine/GND undriven or does not drive anything - clipped.
+Signal machine/panel/GND undriven or does not drive anything - clipped.
+Signal machine/panel/display/GND undriven or does not drive anything - clipped.
+Signal machine/cpu/GND undriven or does not drive anything - clipped.
+Signal machine/cpu/core/GND undriven or does not drive anything - clipped.
+Signal machine/cpu/core/timer/GND undriven or does not drive anything - clipped.
+     
+Signal machine/cpu/core/vreg_rm/vm1_vcram_reg/GND undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/vreg_rm/vm1_vcram_reg/VCC undriven or does not drive
+     anything - clipped.
+
+                                   Page 10
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bridge/GND undriven or does not drive anything - clipped.
+Signal machine/bootrom/VCC undriven or does not drive anything - clipped.
+Signal machine/bootrom/GND undriven or does not drive anything - clipped.
+Signal machine/transport/GND undriven or does not drive anything - clipped.
+Signal machine/keymap/GND undriven or does not drive anything - clipped.
+Signal machine/bus/GND undriven or does not drive anything - clipped.
+Signal machine/bus/disk_controller/GND undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/cache/GND undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_host/VCC undriven or does not drive anything - clipped.
+Signal machine/bus/disk_host/GND undriven or does not drive anything - clipped.
+Signal machine/bus/disk_partitions/GND undriven or does not drive anything -
+     clipped.
+Signal machine/bus/shifter/GND undriven or does not drive anything - clipped.
+Signal machine/video/GND undriven or does not drive anything - clipped.
+Signal machine/video/timing/GND undriven or does not drive anything - clipped.
+Signal machine/video/encoder/GND undriven or does not drive anything - clipped.
+Signal machine/video/encoder/VCC undriven or does not drive anything - clipped.
+Signal machine/sound/GND undriven or does not drive anything - clipped.
+Signal machine/sound/psg/GND undriven or does not drive anything - clipped.
+Signal machine/uart/GND undriven or does not drive anything - clipped.
+Signal machine/sram/GND undriven or does not drive anything - clipped.
+Signal main_pll/CLKINTFB undriven or does not drive anything - clipped.
+Signal main_pll/DPHSRC undriven or does not drive anything - clipped.
+Signal main_pll/PLLACK undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO0 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO1 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO2 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO3 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO4 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO5 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO6 undriven or does not drive anything - clipped.
+Signal main_pll/PLLDATO7 undriven or does not drive anything - clipped.
+Signal main_pll/REFCLK undriven or does not drive anything - clipped.
+Signal main_pll/INTLOCK undriven or does not drive anything - clipped.
+Signal main_pll/CLKOS3 undriven or does not drive anything - clipped.
+Signal main_pll/CLKOS2 undriven or does not drive anything - clipped.
+Signal video_pll/CLKINTFB_0 undriven or does not drive anything - clipped.
+Signal video_pll/DPHSRC_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLACK_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO0_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO1_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO2_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO3_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO4_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO5_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO6_0 undriven or does not drive anything - clipped.
+Signal video_pll/PLLDATO7_0 undriven or does not drive anything - clipped.
+Signal video_pll/REFCLK_0 undriven or does not drive anything - clipped.
+Signal video_pll/INTLOCK_0 undriven or does not drive anything - clipped.
+Signal video_pll/CLKOS3_0 undriven or does not drive anything - clipped.
+Signal video_pll/CLKOS2_0 undriven or does not drive anything - clipped.
+Signal machine/panel/un1_duration_5_cry_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/panel/display/un4_divider_cry_0_0_S1 undriven or does not drive
+
+                                   Page 11
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/panel/display/un4_divider_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/panel/display/N_3 undriven or does not drive anything - clipped.
+Signal machine/panel/display/un4_divider_s_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/panel/display/un4_divider_s_9_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/panel/un1_duration_5_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/panel/N_3 undriven or does not drive anything - clipped.
+Signal machine/cpu/release_count_cry_0_S0[0] undriven or does not drive anything
+     - clipped.
+Signal machine/cpu/N_1 undriven or does not drive anything - clipped.
+Signal machine/cpu/release_count_s_0_S1[5] undriven or does not drive anything -
+     clipped.
+Signal machine/cpu/release_count_s_0_COUT[5] undriven or does not drive anything
+     - clipped.
+Signal machine/cpu/core/bus_timer_cry_0_S0[0] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/N_1 undriven or does not drive anything - clipped.
+Signal machine/cpu/core/bus_timer_s_0_S1[5] undriven or does not drive anything
+     - clipped.
+Signal machine/cpu/core/bus_timer_s_0_COUT[5] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/tve_pre_cry_0_S0[0] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/N_3 undriven or does not drive anything - clipped.
+     
+Signal machine/cpu/core/timer/tve_pre_cry_0_COUT[5] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/tve_div_cry_0_S0[0] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/N_4 undriven or does not drive anything - clipped.
+     
+Signal machine/cpu/core/timer/tve_div_s_0_S1[5] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/tve_div_s_0_COUT[5] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/tve_count_cry_0_S0[0] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/N_5 undriven or does not drive anything - clipped.
+     
+Signal machine/cpu/core/timer/tve_count_s_0_S1[15] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/timer/tve_count_s_0_COUT[15] undriven or does not drive
+     anything - clipped.
+Signal machine/cpu/core/vreg_rm/vm1_vcram_reg/lane_1_DOB8 undriven or does not
+     drive anything - clipped.
+Signal machine/cpu/core/vreg_rm/vm1_vcram_reg/lane_1_DOA8 undriven or does not
+     drive anything - clipped.
+Signal machine/cpu/core/vreg_rm/vm1_vcram_reg/lane_0_DOB8 undriven or does not
+     drive anything - clipped.
+Signal machine/cpu/core/vreg_rm/vm1_vcram_reg/lane_0_DOA8 undriven or does not
+     drive anything - clipped.
+Signal machine/bootrom/data_2_0_6_DO8 undriven or does not drive anything -
+
+                                   Page 12
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     clipped.
+Signal machine/bootrom/data_2_0_6_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_6_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_6_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_6_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_6_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_6_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO8 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_5_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO8 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_4_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO8 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_3_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO8 undriven or does not drive anything -
+
+                                   Page 13
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_2_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO8 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_1_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO8 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_0_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO8 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO7 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO6 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO5 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO4 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/bootrom/data_2_0_7_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/transport/un1_held_us_cry_0_0_S0 undriven or does not drive
+
+                                   Page 14
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/transport/N_1 undriven or does not drive anything - clipped.
+Signal machine/transport/un1_held_us_cry_5_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/transport/un1_timeout_2_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/transport/N_2 undriven or does not drive anything - clipped.
+Signal machine/transport/un1_timeout_2_s_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/transport/un1_timeout_2_s_9_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/transport/un1_level_9_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/transport/un1_level_9_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/transport/N_3 undriven or does not drive anything - clipped.
+Signal machine/transport/un1_level_9_cry_3_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/N_2 undriven or does not drive anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_21_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_27_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/un1_scan_code_19_0_I_27_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/keymap/shifted_symbol_2_0_0_DO8 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un31_pointer_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un31_pointer_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/N_2 undriven or does not drive anything - clipped.
+Signal machine/bus/un31_pointer_s_15_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un31_pointer_s_15_0_COUT undriven or does not drive anything
+     - clipped.
+Signal machine/bus/un1_crc_bits_3_cry_0_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/un1_crc_bits_3_cry_0_0_S0 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/N_3 undriven or does not drive anything - clipped.
+Signal machine/bus/un1_crc_bits_3_s_3_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_bits_3_s_3_0_COUT undriven or does not drive anything
+     - clipped.
+Signal machine/bus/un1_verified_count_cry_0_0_S0 undriven or does not drive
+
+                                   Page 15
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/bus/N_4 undriven or does not drive anything - clipped.
+Signal machine/bus/un1_verified_count_cry_15_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_written_count_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/N_5 undriven or does not drive anything - clipped.
+Signal machine/bus/un1_written_count_cry_15_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/N_6 undriven or does not drive anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_21_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_45_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_45_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_15_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_15_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_33_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_33_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_51_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_1_0_I_51_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/N_7 undriven or does not drive anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_21_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_45_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_45_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_15_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_15_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_33_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_33_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_51_0_S1 undriven or does not drive
+
+                                   Page 16
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/bus/un1_expected_size_0_I_51_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/bus/un1_crc_1_0_I_1_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_1_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/N_8 undriven or does not drive anything - clipped.
+Signal machine/bus/un1_crc_1_0_I_9_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_9_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_51_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_51_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_33_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_33_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_27_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_27_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_57_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_57_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_21_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_21_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_81_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_81_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_45_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/un1_crc_1_0_I_45_0_COUT undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/word_address_14_0_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/N_1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/word_address_14_0_s_11_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/word_address_14_0_s_11_0_COUT undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/un1_csr_delay_10_cry_0_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/un1_csr_delay_10_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/N_2 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/un1_csr_delay_10_s_7_0_S1 undriven or does
+     not drive anything - clipped.
+
+                                   Page 17
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/un1_csr_delay_10_s_7_0_COUT undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/un1_heads[0]_20_cry_0_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/un1_heads[0]_20_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/N_3 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/un1_heads[0]_20_cry_5_0_COUT undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/un1_position_1_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/N_4 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/un1_position_1_s_11_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_controller/un1_position_1_s_11_0_COUT undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/un5_word_counter_cry_0_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/un5_word_counter_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/N_5 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_controller/un5_word_counter_cry_9_0_COUT undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_buffer_address_cry_0_0_S0 undriven
+     or does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_1 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/un1_buffer_address_cry_7_0_COUT
+     undriven or does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_count_9_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_2 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/un1_count_9_cry_7_0_COUT undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_index_cry_0_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_index_cry_0_0_S0_0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_3 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/un1_index_s_11_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_index_s_11_0_COUT undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/disk_sector_offset_i_i[0] undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_cry_0_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_4 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_cry_9_0_COUT undriven or
+     does not drive anything - clipped.
+
+                                   Page 18
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/sector_offset_4_cry_1_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_4_cry_1_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_5 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_4_s_10_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_4_s_10_0_COUT undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/cached_track_i[0] undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_5_cry_2_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_6 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/sector_offset_5_cry_9_0_COUT undriven
+     or does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_1110_i undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_1_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_7 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_9_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_9_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_27_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_27_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_33_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_33_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_21_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/un1_read_word_4_0_I_21_0_COUT undriven
+     or does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_40_i undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_1_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/N_8 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_9_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_9_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_27_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_27_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_33_0_S1 undriven or
+     does not drive anything - clipped.
+
+                                   Page 19
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_33_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_21_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/header_ok_2_0_I_21_0_COUT undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_7_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOB0 undriven or does
+     not drive anything - clipped.
+
+                                   Page 20
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_6_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_5_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB4 undriven or does
+     not drive anything - clipped.
+
+                                   Page 21
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_4_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_3_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB8 undriven or does
+     not drive anything - clipped.
+
+                                   Page 22
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_2_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA5 undriven or does
+     not drive anything - clipped.
+
+                                   Page 23
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_1_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOB0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_0_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOB0 undriven or does
+     not drive anything - clipped.
+
+                                   Page 24
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA8 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA7 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA6 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA5 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA4 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA3 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA2 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_controller/cache/words_words_0_8_DOA1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO17 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO8 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO7 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO6 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO5 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO4 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO3 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO2 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/buffer_buffer_0_0_DO0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/un1_timeout_count_14_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_host/N_2 undriven or does not drive anything - clipped.
+Signal machine/bus/disk_host/un1_timeout_count_14_s_15_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_timeout_count_14_s_15_0_COUT undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_host/un1_index_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/N_3 undriven or does not drive anything - clipped.
+Signal machine/bus/disk_host/un1_index_cry_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_1_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_1_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/N_4 undriven or does not drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_9_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_9_0_S0 undriven or does not
+
+                                   Page 25
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_27_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_27_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_33_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_33_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_21_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_host/un1_byte_rx_10_0_I_21_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/words_1_words_1_0_0_DO8 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/words_1_words_1_0_0_DO7 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/words_words_0_0_DO8 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/words_words_0_0_DO7 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/clear_index_cry_0_S0[0] undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/N_1 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/clear_index_cry_0_COUT[3] undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_partitions/un1_bank_4_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/un1_bank_4_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/N_2 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/un1_bank_4_cry_3_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/un49_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_partitions/un49_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_partitions/N_3 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/un49_cry_3_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/bus/disk_partitions/un1_bases[0]_1_cry_0_0_S1 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_partitions/un1_bases[0]_1_cry_0_0_S0 undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_partitions/N_4 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/un1_bases[0]_1_cry_31_0_COUT undriven or does
+     not drive anything - clipped.
+Signal machine/bus/disk_partitions/un2_right_q_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/bus/disk_partitions/N_5 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/un2_right_q_cry_15_0_COUT undriven or does
+
+                                   Page 26
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_0_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_0_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/N_6 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_1_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_1_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_3_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_3_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_5_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_5_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_7_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_7_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_9_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_9_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_11_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_11_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_13_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_13_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_15_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_less_2_cry_15_0_COUT undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_1_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_1_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/N_7 undriven or does not drive anything -
+     clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_9_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_9_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_27_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_27_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_33_0_S1 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_33_0_S0 undriven or
+
+                                   Page 27
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_21_0_S0 undriven or
+     does not drive anything - clipped.
+Signal machine/bus/disk_partitions/compare_high_equal_2_0_I_21_0_COUT undriven
+     or does not drive anything - clipped.
+Signal machine/bus/shifter/count_6_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/shifter/count_6_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/bus/shifter/N_1 undriven or does not drive anything - clipped.
+Signal machine/bus/shifter/count_6_s_7_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/bus/shifter/count_6_s_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/un1_line_number_8_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un1_line_number_8_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/N_2 undriven or does not drive anything - clipped.
+Signal machine/video/un1_line_number_8_s_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un1_line_number_8_s_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/row_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/video/row_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/video/N_3 undriven or does not drive anything - clipped.
+Signal machine/video/row_cry_1_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/video/row_cry_1_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/video/row_cry_3_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/video/row_cry_3_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/video/row_cry_5_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/video/row_s_7_0_S1 undriven or does not drive anything - clipped.
+     
+Signal machine/video/row_s_7_0_COUT undriven or does not drive anything -
+     clipped.
+Signal machine/video/un1_bit_index_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un1_bit_index_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/N_5 undriven or does not drive anything - clipped.
+Signal machine/video/un1_bit_index_cry_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/un11_display_valid_a_5_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/video/un11_display_valid_a_5_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/video/N_6 undriven or does not drive anything - clipped.
+Signal machine/video/un11_display_valid_a_5_s_7_0_S1 undriven or does not drive
+     anything - clipped.
+
+                                   Page 28
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/video/un11_display_valid_a_5_s_7_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/video/un10_display_valid_a_5_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/video/un10_display_valid_a_5_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/video/N_7 undriven or does not drive anything - clipped.
+Signal machine/video/un10_display_valid_a_5_s_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un10_display_valid_a_5_s_7_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/video/un1_vscroll_cry_0_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_vscroll_cry_0_0_S0 undriven or does not drive anything
+     - clipped.
+Signal machine/video/N_8 undriven or does not drive anything - clipped.
+Signal machine/video/un1_vscroll_s_7_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/video/un1_vscroll_s_7_0_COUT undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_vscroll_4_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un1_vscroll_4_cry_3_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/N_9 undriven or does not drive anything - clipped.
+Signal machine/video/un1_vscroll_4_cry_6_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/un1_scroll_0_I_1_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/video/un1_scroll_0_I_1_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/video/N_10 undriven or does not drive anything - clipped.
+Signal machine/video/un1_scroll_0_I_9_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/video/un1_scroll_0_I_9_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/video/un1_scroll_0_I_27_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_scroll_0_I_27_0_S0 undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_scroll_0_I_33_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_scroll_0_I_33_0_S0 undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_scroll_0_I_21_0_S0 undriven or does not drive anything
+     - clipped.
+Signal machine/video/un1_scroll_0_I_21_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/un10_display_valid_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un10_display_valid_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/N_11 undriven or does not drive anything - clipped.
+Signal machine/video/un10_display_valid_0_I_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un10_display_valid_0_I_9_0_S0 undriven or does not drive
+
+                                   Page 29
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/video/un10_display_valid_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un10_display_valid_0_I_21_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/un11_display_valid_0_I_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un11_display_valid_0_I_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/N_12 undriven or does not drive anything - clipped.
+Signal machine/video/un11_display_valid_0_I_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un11_display_valid_0_I_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un11_display_valid_0_I_21_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/un11_display_valid_0_I_21_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/timing/x_cry_0_S0[0] undriven or does not drive anything -
+     clipped.
+Signal machine/video/timing/N_1 undriven or does not drive anything - clipped.
+Signal machine/video/timing/x_s_0_S1[11] undriven or does not drive anything -
+     clipped.
+Signal machine/video/timing/x_s_0_COUT[11] undriven or does not drive anything -
+     clipped.
+Signal machine/video/timing/un1_half_line_27_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/video/timing/N_2 undriven or does not drive anything - clipped.
+Signal machine/video/timing/un1_half_line_27_cry_9_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/video/encoder/un2_phase_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/video/encoder/un2_phase_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/video/encoder/N_1 undriven or does not drive anything - clipped.
+Signal machine/video/encoder/un2_phase_cry_29_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/video/encoder/sample1_2_0_0_DO8 undriven or does not drive
+     anything - clipped.
+Signal machine/video/encoder/sample1_2_0_0_DO7 undriven or does not drive
+     anything - clipped.
+Signal machine/video/encoder/sample1_2_0_0_DO6 undriven or does not drive
+     anything - clipped.
+Signal machine/video/line_ram_line_ram_0_0_DO8 undriven or does not drive
+     anything - clipped.
+Signal machine/video/line_ram_line_ram_0_0_DO7 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/commands_ram_1_DO2 undriven or does not drive anything -
+     clipped.
+Signal machine/sound/commands_ram_1_DO3 undriven or does not drive anything -
+     clipped.
+Signal machine/sound/commands_ram_1_DO1 undriven or does not drive anything -
+     clipped.
+Signal machine/sound/un2_accumulator_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/un2_accumulator_cry_0_0_S0 undriven or does not drive
+
+                                   Page 30
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/sound/N_1 undriven or does not drive anything - clipped.
+Signal machine/sound/un2_accumulator_cry_8_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/un2_accumulator_cry_8_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/un1_phase_1_cry_0_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/sound/un1_phase_1_cry_0_0_S0 undriven or does not drive anything
+     - clipped.
+Signal machine/sound/N_2 undriven or does not drive anything - clipped.
+Signal machine/sound/un1_phase_1_cry_19_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/N_1 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_cry_15_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_0_0_S1_0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_0_0_S0_0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_2 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/tone_count[0]_s_11_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_s_11_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_0_0_S1_0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_0_0_S0_0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_3 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/tone_count[1]_s_11_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_s_11_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_0_0_S1_0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_0_0_S0_0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_4 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/tone_count[2]_s_11_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_s_11_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_envelope_step_5_cry_0_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_step_5_cry_0_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/N_6 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_step_5_s_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_envelope_step_5_s_3_0_COUT undriven or does not
+     drive anything - clipped.
+
+                                   Page 31
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/sound/psg/pcm_0_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/sound/psg/N_7 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/pcm_0_cry_7_0_COUT undriven or does not drive anything
+     - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_1_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_1_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/N_8 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_2_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_2_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_4_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_4_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_6_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_6_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_8_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_8_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_10_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_10_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_12_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_12_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_14_0_S1 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_14_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_16_0_S0 undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/un1_envelope_count_1_cry_16_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_9 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_3_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_5_0_S1 undriven or does not drive
+
+                                   Page 32
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_5_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_7_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_11_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[0]_cry_11_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_10 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_3_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_5_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_5_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_7_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_11_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[2]_cry_11_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_12 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_3_0_S0 undriven or does not drive
+
+                                   Page 33
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_5_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_5_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_7_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_7_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_9_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_9_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_11_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/tone_count[1]_cry_11_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/N_13 undriven or does not drive anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_1_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_1_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_3_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_3_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_4_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sound/psg/un1_noise_count_1_cry_4_0_COUT undriven or does not
+     drive anything - clipped.
+Signal machine/uart/un1_bits_5_cry_0_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_bits_5_cry_0_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/N_1 undriven or does not drive anything - clipped.
+Signal machine/uart/un1_bits_5_s_3_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_bits_5_s_3_0_COUT undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_divider_11_cry_0_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/uart/un1_divider_11_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/uart/N_2 undriven or does not drive anything - clipped.
+Signal machine/uart/un1_divider_11_s_7_0_S1 undriven or does not drive anything
+     - clipped.
+Signal machine/uart/un1_divider_11_s_7_0_COUT undriven or does not drive
+     anything - clipped.
+Signal machine/uart/un1_stage_0_I_1_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_stage_0_I_1_0_S0 undriven or does not drive anything -
+     clipped.
+
+                                   Page 34
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Removed logic (cont)
+--------------------
+Signal machine/uart/N_3 undriven or does not drive anything - clipped.
+Signal machine/uart/un1_stage_0_I_9_0_S1 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_stage_0_I_9_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_stage_0_I_21_0_S0 undriven or does not drive anything -
+     clipped.
+Signal machine/uart/un1_stage_0_I_21_0_COUT undriven or does not drive anything
+     - clipped.
+Signal machine/sram/un1_clear_address_4_cry_0_0_S0 undriven or does not drive
+     anything - clipped.
+Signal machine/sram/N_1 undriven or does not drive anything - clipped.
+Signal machine/sram/un1_clear_address_4_s_19_0_S1 undriven or does not drive
+     anything - clipped.
+Signal machine/sram/un1_clear_address_4_s_19_0_COUT undriven or does not drive
+     anything - clipped.
+Block machine/cpu/core/exc_dbl_RNO[1] was optimized away.
+Block machine/cpu/core/alu_busy_rp_RNILF9B was optimized away.
+Block machine/cpu/core/alu_b_RNO_0 was optimized away.
+Block machine/cpu/core/vreg_rm/vm1_vcram_reg/cross_a_1_.CN was optimized away.
+Block machine/transport/inhibit_RNI5JG was optimized away.
+Block machine/sram/drive_data_RNIN91O was optimized away.
+Block main_pll/GND was optimized away.
+Block video_pll/GND was optimized away.
+Block machine/VCC was optimized away.
+Block machine/GND was optimized away.
+Block machine/panel/GND was optimized away.
+Block machine/panel/display/GND was optimized away.
+Block machine/cpu/GND was optimized away.
+Block machine/cpu/core/GND was optimized away.
+Block machine/cpu/core/timer/GND was optimized away.
+Block machine/cpu/core/vreg_rm/vm1_vcram_reg/GND was optimized away.
+Block machine/cpu/core/vreg_rm/vm1_vcram_reg/VCC was optimized away.
+Block machine/bridge/GND was optimized away.
+Block machine/bootrom/VCC was optimized away.
+Block machine/bootrom/GND was optimized away.
+Block machine/transport/GND was optimized away.
+Block machine/keymap/GND was optimized away.
+Block machine/bus/GND was optimized away.
+Block machine/bus/disk_controller/GND was optimized away.
+Block machine/bus/disk_controller/cache/GND was optimized away.
+Block machine/bus/disk_host/VCC was optimized away.
+Block machine/bus/disk_host/GND was optimized away.
+Block machine/bus/disk_partitions/GND was optimized away.
+Block machine/bus/shifter/GND was optimized away.
+Block machine/video/GND was optimized away.
+Block machine/video/timing/GND was optimized away.
+Block machine/video/encoder/GND was optimized away.
+Block machine/video/encoder/VCC was optimized away.
+Block machine/sound/GND was optimized away.
+Block machine/sound/psg/GND was optimized away.
+Block machine/uart/GND was optimized away.
+Block machine/sram/GND was optimized away.
+
+
+
+
+                                   Page 35
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Memory Usage
+------------
+
+/machine:
+    EBRs: 0
+    RAM SLICEs: 2
+    Logic SLICEs: 132
+    PFU Registers: 178
+/machine/bootrom:
+    EBRs: 8
+    RAM SLICEs: 0
+    Logic SLICEs: 0
+    PFU Registers: 0
+    -Contains EBR data_2_0_7:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_0:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_1:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_2:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_3:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_4:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_5:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+    -Contains EBR data_2_0_6:  TYPE= SP8KC,  Width= 2,  Depth= 4096,  REGMODE=
+         NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+/machine/bus/disk_controller/cache:
+    EBRs: 9
+    RAM SLICEs: 0
+    Logic SLICEs: 252
+    PFU Registers: 163
+    -Contains EBR words_words_0_8:  TYPE= DP8KC,  Width_A= 1,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_0:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_1:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_2:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_3:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_4:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_5:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+    -Contains EBR words_words_0_6:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+
+                                   Page 36
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Memory Usage (cont)
+-------------------
+    -Contains EBR words_words_0_7:  TYPE= DP8KC,  Width_A= 2,  Depth_A= 4096,
+         Depth_B= 4096,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         WRITEMODE_A= WRITETHROUGH,  WRITEMODE_B= WRITETHROUGH,  GSR= DISABLED
+/machine/bus/disk_host:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 193
+    PFU Registers: 115
+    -Contains EBR buffer_buffer_0_0:  TYPE= PDPW8KC,  Width= 8,  Depth_R= 512,
+         Depth_W= 512,  REGMODE= NOREG,  RESETMODE= SYNC,  GSR= DISABLED
+/machine/bus/disk_partitions:
+    EBRs: 2
+    RAM SLICEs: 0
+    Logic SLICEs: 252
+    PFU Registers: 234
+    -Contains EBR words_words_0_0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 32,
+         Depth_W= 32,  REGMODE= NOREG,  RESETMODE= SYNC,  GSR= DISABLED
+    -Contains EBR words_1_words_1_0_0:  TYPE= PDPW8KC,  Width= 16,  Depth_R= 32,
+         Depth_W= 32,  REGMODE= NOREG,  RESETMODE= SYNC,  GSR= DISABLED
+/machine/cpu/core/vreg_rm/vm1_vcram_reg:
+    EBRs: 2
+    RAM SLICEs: 0
+    Logic SLICEs: 1
+    PFU Registers: 2
+    -Contains EBR lane_0:  TYPE= DP8KC,  Width_A= 8,  Width_B= 8,  Depth_A= 16,
+         Depth_B= 64,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= READBEFOREWRITE,  WRITEMODE_B=
+         READBEFOREWRITE,  GSR= DISABLED
+    -Contains EBR lane_1:  TYPE= DP8KC,  Width_A= 8,  Width_B= 8,  Depth_A= 16,
+         Depth_B= 64,  REGMODE_A= NOREG,  REGMODE_B= NOREG,  RESETMODE= SYNC,
+         ASYNC_RESET_RELEASE= SYNC,  WRITEMODE_A= READBEFOREWRITE,  WRITEMODE_B=
+         READBEFOREWRITE,  GSR= DISABLED
+/machine/keymap:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 119
+    PFU Registers: 43
+    -Contains EBR shifted_symbol_2_0_0:  TYPE= SP8KC,  Width= 8,  Depth= 256,
+         REGMODE= OUTREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+/machine/sound:
+    EBRs: 0
+    RAM SLICEs: 4
+    Logic SLICEs: 48
+    PFU Registers: 74
+/machine/sound/commands_ram:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/machine/sound/commands_ram_0:
+    EBRs: 0
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/machine/sound/commands_ram_1:
+    EBRs: 0
+
+                                   Page 37
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+Memory Usage (cont)
+-------------------
+    RAM SLICEs: 1
+    Logic SLICEs: 0
+    PFU Registers: 0
+/machine/transport/fifo_ram:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/machine/transport/fifo_ram_0:
+    EBRs: 0
+    RAM SLICEs: 3
+    Logic SLICEs: 0
+    PFU Registers: 0
+/machine/video:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 170
+    PFU Registers: 121
+    -Contains EBR line_ram_line_ram_0_0:  TYPE= PDPW8KC,  Width= 16,  Depth_R=
+         64,  Depth_W= 64,  REGMODE= NOREG,  RESETMODE= SYNC,  GSR= DISABLED
+/machine/video/encoder:
+    EBRs: 1
+    RAM SLICEs: 0
+    Logic SLICEs: 34
+    PFU Registers: 57
+    -Contains EBR sample1_2_0_0:  TYPE= SP8KC,  Width= 6,  Depth= 1024,
+         REGMODE= NOREG,  RESETMODE= SYNC,  WRITEMODE= NORMAL,  GSR= DISABLED
+
+     
+
+PLL/DLL Summary
+---------------
+
+PLL 1:                                     Pin/Node Value
+  PLL Instance Name:                                video_pll/PLLInst_0
+  PLL Type:                                         EHXPLLJ
+  Input Clock:                             PIN      clk_ext_c
+  Output Clock(P):                         NODE     video_pll/CLKOP
+  Output Clock(S):                         NODE     video_clk
+  Output Clock(S2):                                 NONE
+  Output Clock(S3):                                 NONE
+  Feedback Signal:                         NODE     video_pll/CLKOP
+  Reset Signal:                                     NONE
+  M Divider Reset Signal:                           NONE
+  C Divider Reset Signal:                           NONE
+  D Divider Reset Signal:                           NONE
+  Standby Signal:                                   NONE
+  PLL LOCK signal:                         NODE     video_lock
+  PLL Data bus CLK Signal:                          NONE
+  PLL Data bus Strobe Signal:                       NONE
+  PLL Data bus Reset Signal:                        NONE
+  PLL Data bus Write Enable Signal:                 NONE
+  PLL Data bus Address0:                            NONE
+  PLL Data bus Address1:                            NONE
+  PLL Data bus Address2:                            NONE
+  PLL Data bus Address3:                            NONE
+
+                                   Page 38
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+PLL/DLL Summary (cont)
+----------------------
+  PLL Data bus Address4:                            NONE
+  PLL Data In bus Data0:                            NONE
+  PLL Data In bus Data1:                            NONE
+  PLL Data In bus Data2:                            NONE
+  PLL Data In bus Data3:                            NONE
+  PLL Data In bus Data4:                            NONE
+  PLL Data In bus Data5:                            NONE
+  PLL Data In bus Data6:                            NONE
+  PLL Data In bus Data7:                            NONE
+  PLL Data bus Acknowledge:                         NONE
+  PLL Data Out bus Data0:                           NONE
+  PLL Data Out bus Data1:                           NONE
+  PLL Data Out bus Data2:                           NONE
+  PLL Data Out bus Data3:                           NONE
+  PLL Data Out bus Data4:                           NONE
+  PLL Data Out bus Data5:                           NONE
+  PLL Data Out bus Data6:                           NONE
+  PLL Data Out bus Data7:                           NONE
+  Input Clock Frequency (MHz):                      12.0000
+  Output Clock(P) Frequency (MHz):                  24.0000
+  Output Clock(S) Frequency (MHz):                  64.0000
+  Output Clock(S2) Frequency (MHz):                 NA
+  Output Clock(S3) Frequency (MHz):                 NA
+  CLKOP Post Divider A Input:                       DIVA
+  CLKOS Post Divider B Input:                       DIVB
+  CLKOS2 Post Divider C Input:                      DIVC
+  CLKOS3 Post Divider D Input:                      DIVD
+  Pre Divider A Input:                              VCO_PHASE
+  Pre Divider B Input:                              VCO_PHASE
+  Pre Divider C Input:                              VCO_PHASE
+  Pre Divider D Input:                              VCO_PHASE
+  VCO Bypass A Input:                               VCO_PHASE
+  VCO Bypass B Input:                               VCO_PHASE
+  VCO Bypass C Input:                               VCO_PHASE
+  VCO Bypass D Input:                               VCO_PHASE
+  FB_MODE:                                          CLKOP
+  CLKI Divider:                                     1
+  CLKFB Divider:                                    2
+  CLKOP Divider:                                    24
+  CLKOS Divider:                                    9
+  CLKOS2 Divider:                                   1
+  CLKOS3 Divider:                                   1
+  Fractional N Divider:                             0
+  CLKOP Desired Phase Shift(degree):                0
+  CLKOP Trim Option Rising/Falling:                 FALLING
+  CLKOP Trim Option Delay:                          0
+  CLKOS Desired Phase Shift(degree):                0
+  CLKOS Trim Option Rising/Falling:                 FALLING
+  CLKOS Trim Option Delay:                          0
+  CLKOS2 Desired Phase Shift(degree):               0
+  CLKOS3 Desired Phase Shift(degree):               0
+PLL 2:                                     Pin/Node Value
+  PLL Instance Name:                                main_pll/PLLInst_0
+  PLL Type:                                         EHXPLLJ
+  Input Clock:                             PIN      clk_ext_c
+  Output Clock(P):                         NODE     clk
+
+                                   Page 39
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+PLL/DLL Summary (cont)
+----------------------
+  Output Clock(S):                         NODE     clk48
+  Output Clock(S2):                                 NONE
+  Output Clock(S3):                                 NONE
+  Feedback Signal:                         NODE     clk
+  Reset Signal:                                     NONE
+  M Divider Reset Signal:                           NONE
+  C Divider Reset Signal:                           NONE
+  D Divider Reset Signal:                           NONE
+  Standby Signal:                                   NONE
+  PLL LOCK signal:                         NODE     main_pll/main_lock
+  PLL Data bus CLK Signal:                          NONE
+  PLL Data bus Strobe Signal:                       NONE
+  PLL Data bus Reset Signal:                        NONE
+  PLL Data bus Write Enable Signal:                 NONE
+  PLL Data bus Address0:                            NONE
+  PLL Data bus Address1:                            NONE
+  PLL Data bus Address2:                            NONE
+  PLL Data bus Address3:                            NONE
+  PLL Data bus Address4:                            NONE
+  PLL Data In bus Data0:                            NONE
+  PLL Data In bus Data1:                            NONE
+  PLL Data In bus Data2:                            NONE
+  PLL Data In bus Data3:                            NONE
+  PLL Data In bus Data4:                            NONE
+  PLL Data In bus Data5:                            NONE
+  PLL Data In bus Data6:                            NONE
+  PLL Data In bus Data7:                            NONE
+  PLL Data bus Acknowledge:                         NONE
+  PLL Data Out bus Data0:                           NONE
+  PLL Data Out bus Data1:                           NONE
+  PLL Data Out bus Data2:                           NONE
+  PLL Data Out bus Data3:                           NONE
+  PLL Data Out bus Data4:                           NONE
+  PLL Data Out bus Data5:                           NONE
+  PLL Data Out bus Data6:                           NONE
+  PLL Data Out bus Data7:                           NONE
+  Input Clock Frequency (MHz):                      12.0000
+  Output Clock(P) Frequency (MHz):                  24.0000
+  Output Clock(S) Frequency (MHz):                  48.0000
+  Output Clock(S2) Frequency (MHz):                 NA
+  Output Clock(S3) Frequency (MHz):                 NA
+  CLKOP Post Divider A Input:                       DIVA
+  CLKOS Post Divider B Input:                       DIVB
+  CLKOS2 Post Divider C Input:                      DIVC
+  CLKOS3 Post Divider D Input:                      DIVD
+  Pre Divider A Input:                              VCO_PHASE
+  Pre Divider B Input:                              VCO_PHASE
+  Pre Divider C Input:                              VCO_PHASE
+  Pre Divider D Input:                              VCO_PHASE
+  VCO Bypass A Input:                               VCO_PHASE
+  VCO Bypass B Input:                               VCO_PHASE
+  VCO Bypass C Input:                               VCO_PHASE
+  VCO Bypass D Input:                               VCO_PHASE
+  FB_MODE:                                          CLKOP
+  CLKI Divider:                                     1
+  CLKFB Divider:                                    2
+
+                                   Page 40
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+PLL/DLL Summary (cont)
+----------------------
+  CLKOP Divider:                                    20
+  CLKOS Divider:                                    10
+  CLKOS2 Divider:                                   1
+  CLKOS3 Divider:                                   1
+  Fractional N Divider:                             0
+  CLKOP Desired Phase Shift(degree):                0
+  CLKOP Trim Option Rising/Falling:                 FALLING
+  CLKOP Trim Option Delay:                          0
+  CLKOS Desired Phase Shift(degree):                0
+  CLKOS Trim Option Rising/Falling:                 FALLING
+  CLKOS Trim Option Delay:                          0
+  CLKOS2 Desired Phase Shift(degree):               0
+  CLKOS3 Desired Phase Shift(degree):               0
+
+DCC Summary
+-----------
+
+DCC 1:                                     Pin/Node Value
+  DCC Instance Name:                                machine/cpu_positive
+  DCC Type:                                         DCCA
+  Clock Input:                             NODE     machine/raw_cpu_p
+  Clock Enable Input:                               NONE
+  Clock Output:                            NODE     machine/cpu_p
+
+ASIC Components
+---------------
+
+Instance Name: machine/video/line_ram_line_ram_0_0
+         Type: PDPW8KC
+Instance Name: machine/video/encoder/sample1_2_0_0
+         Type: SP8KC
+Instance Name: machine/bus/disk_partitions/words_words_0_0
+         Type: PDPW8KC
+Instance Name: machine/bus/disk_partitions/words_1_words_1_0_0
+         Type: PDPW8KC
+Instance Name: machine/bus/disk_host/buffer_buffer_0_0
+         Type: PDPW8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_8
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_0
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_1
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_2
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_3
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_4
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_5
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_6
+         Type: DP8KC
+Instance Name: machine/bus/disk_controller/cache/words_words_0_7
+         Type: DP8KC
+Instance Name: machine/keymap/shifted_symbol_2_0_0
+
+                                   Page 41
+
+
+
+
+Design:  bk_hardware_lcd                               Date:  10/05/26  23:15:48
+
+ASIC Components (cont)
+----------------------
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_7
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_0
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_1
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_2
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_3
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_4
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_5
+         Type: SP8KC
+Instance Name: machine/bootrom/data_2_0_6
+         Type: SP8KC
+Instance Name: machine/cpu/core/vreg_rm/vm1_vcram_reg/lane_0
+         Type: DP8KC
+Instance Name: machine/cpu/core/vreg_rm/vm1_vcram_reg/lane_1
+         Type: DP8KC
+Instance Name: machine/cpu_positive
+         Type: DCCA
+Instance Name: video_pll/PLLInst_0
+         Type: EHXPLLJ
+Instance Name: main_pll/PLLInst_0
+         Type: EHXPLLJ
+
+GSR Usage
+---------
+
+GSR Component:
+   The local reset signal 'machine/bridge/cpu_reset_pipe[2]' of the design has
+        been inferred as Global Set Reset (GSR). The reset signal used for GSR
+        control is 'machine/bridge/cpu_reset_pipe[2]'.
+        
+
+     GSR Property:
+   The design components with GSR property set to ENABLED will respond to global
+        set reset while the components with GSR property set to DISABLED will
+        not.
+        
+
+Run Time and Memory Usage
+-------------------------
+
+   Total CPU Time: 1 secs  
+   Total REAL Time: 0 secs  
+   Peak Memory Usage: 237 MB
+        
+
+
+
+
+
+
+
+                                   Page 42
+
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+     Copyright (c) 1995 AT&T Corp.   All rights reserved.
+     Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+     Copyright (c) 2001 Agere Systems   All rights reserved.
+     Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights
+     reserved.

@@ -1,0 +1,19 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=775786 address=177612 reads=2
+BOOT stage=10 cycle=1470295 address=177612 reads=4
+BOOT stage=11 cycle=2722056 address=177612 reads=4
+BOOT stage=04 cycle=18850116 address=177612 reads=11
+BOOT stage=05 cycle=20219111 address=177612 reads=13
+BOOT stage=06 cycle=133073636 address=177612 reads=189
+BOOT stage=07 cycle=137802195 address=177612 reads=189
+BOOT stage=ff cycle=139198257 address=177636 reads=189
+PASS switched native runtime to model 3 stock clock
+PASS native model 3 boot: VRAM matches C reference                            , cycles=146270008
+PASS native BIOS      save: model=3 frequency index=1 color=1 raw drives=3 SD writes=1
+WARM model=3 cpu_bank=000000 SD reads=189
+PASS native model 3 warm reset
+- tests/tb_sd_boot.v:182: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 5s; walltime 500.712 s; speed 9.159 ms/s
+- Verilator: cpu 499.570 s on 1 threads; allocated 2 MB

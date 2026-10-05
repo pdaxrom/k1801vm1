@@ -1,0 +1,24 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=777860 address=177612 reads=2
+BOOT stage=10 cycle=1479679 address=177612 reads=4
+BOOT stage=04 cycle=4806637 address=177612 reads=8
+BOOT stage=05 cycle=6179814 address=177612 reads=10
+BOOT stage=06 cycle=119034339 address=177612 reads=186
+BOOT stage=07 cycle=123762898 address=177612 reads=186
+PASS switched native runtime to model 3 frequency index=6
+BOOT stage=ff cycle=125158960 address=177636 reads=186
+OS progress cycles=0 CPU mode=6 PC=177636 bank=000000 video=040000 SD reads=186 writes=0 error=0
+OS progress cycles=20000000 CPU mode=6 PC=177130 bank=054002 video=047400 SD reads=196 writes=0 error=0
+OS progress cycles=40000000 CPU mode=6 PC=177130 bank=016000 video=040000 SD reads=216 writes=0 error=0
+OS progress cycles=60000000 CPU mode=6 PC=130570 bank=016000 video=045400 SD reads=236 writes=0 error=0
+OS progress cycles=80000000 CPU mode=6 PC=162134 bank=016000 video=045400 SD reads=296 writes=0 error=0
+OS progress cycles=100000000 CPU mode=6 PC=177130 bank=016000 video=045400 SD reads=356 writes=0 error=0
+OS progress cycles=120000000 CPU mode=6 PC=177130 bank=016000 video=045400 SD reads=386 writes=0 error=0
+OS progress cycles=140000000 CPU mode=6 PC=162520 bank=016000 video=145400 SD reads=406 writes=0 error=0
+PASS native model 3 boot: VRAM matches C reference                            , cycles=186550892
+PASS disk OS cold boot: native CPU/BIOS/ROM/KNGMD/raw partition/SPI; VRAM matches C; reads=426 writes=0 page=5 scroll=001330
+- tests/tb_sd_boot.v:304: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 8s; walltime 820.613 s; speed 9.431 ms/s
+- Verilator: cpu 819.722 s on 1 threads; allocated 2 MB

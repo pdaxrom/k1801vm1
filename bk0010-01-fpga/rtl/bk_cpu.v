@@ -24,8 +24,34 @@ module bk_cpu (
     wire [2:1] selected;
     wire internal_select = address[15:4] == 12'hffc;
     wire core_cycle, core_strobe;
-    assign cycle = core_cycle && !internal_select;
-    assign strobe = core_strobe && !internal_select;
+    // BK has no console save registers at 177674/177676. IRQ1 and HALT
+    // attempt to save PSW there; the real bus timeout redirects them to
+    // vector 4. Keep this unanswered cycle out of the external bridge.
+    wire missing_console = address[15:2] == (16'o177674 >> 2);
+    wire console_save = missing_console && core_cycle && core_strobe && write;
+    reg stop_previous = 0, stop_pending = 0, halt_flag = 0;
+    always @(posedge clk_p) begin
+        if(reset) begin stop_previous <= 0; stop_pending <= 0; halt_flag <= 0; end
+        else begin
+            stop_previous <= stop;
+            if(stop && !stop_previous) stop_pending <= 1;
+            else if(console_save) stop_pending <= 0;
+            if(console_save) halt_flag <= 1;
+            else if(reading_system) halt_flag <= 0;
+        end
+    end
+    wire reading_system = internal_select && core_strobe && !write && address[3:1] == 3'b111;
+    reg system_active = 0, system_flag = 0;
+    always @(posedge clk_p) begin
+        if(reset || !reading_system) system_active <= 0;
+        else if(!system_active) begin system_active <= 1; system_flag <= system_input[2] || halt_flag; end
+    end
+    // 177716 bit 2 is cleared by its read side effect. The VM1 slave samples
+    // reg16 repeatedly while STB is held, so retain the pre-read flag until
+    // the transfer ends, as the physical input latch does.
+    wire [15:0] reg16 = {system_input[15:3],system_active ? system_flag : system_input[2] || halt_flag,system_input[1:0]};
+    assign cycle = core_cycle && !internal_select && !missing_console;
+    assign strobe = core_strobe && !internal_select && !missing_console;
     assign core_read = internal_select ? internal_data : read_data;
     assign system_write = selected[1] && write;
     assign system_read = selected[1] && !write;
@@ -35,14 +61,14 @@ module bk_cpu (
         .vm_clk_p(clk_p), .vm_clk_n(clk_n), .vm_clk_ena(1'b1), .vm_clk_tve(1'b1),
         .vm_clk_sp(1'b0), .vm_clk_slow(1'b0), .vm_pa(2'b0), .vm_init_in(1'b0),
         .vm_init_out(peripheral_reset), .vm_dclo(dclo), .vm_aclo(aclo),
-        .vm_irq({2'b0, stop}), .vm_virq(virq), .wbm_gnt_i(1'b1), .wbm_ios_o(),
+        .vm_irq({2'b0, stop_pending}), .vm_virq(virq), .wbm_gnt_i(1'b1), .wbm_ios_o(),
         .wbm_adr_o(address), .wbm_dat_o(write_data), .wbm_dat_i(core_read),
         .wbm_cyc_o(core_cycle), .wbm_we_o(write), .wbm_sel_o(lanes),
-        .wbm_stb_o(core_strobe), .wbm_ack_i(internal_select ? internal_ack : acknowledge),
+        .wbm_stb_o(core_strobe), .wbm_ack_i(!missing_console && (internal_select ? internal_ack : acknowledge)),
         .wbi_dat_i(irq_vector), .wbi_stb_o(irq_ack), .wbi_ack_i(irq_ack),
         .wbs_adr_i(address[3:0]), .wbs_dat_i(write_data), .wbs_dat_o(internal_data),
         .wbs_cyc_i(core_cycle && internal_select), .wbs_we_i(write),
         .wbs_stb_i(core_strobe && internal_select), .wbs_ack_o(internal_ack),
-        .vm_reg14(external_input), .vm_reg16(system_input), .vm_sel(selected)
+        .vm_reg14(external_input), .vm_reg16(reg16), .vm_sel(selected)
     );
 endmodule

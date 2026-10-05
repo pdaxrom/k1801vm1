@@ -20,7 +20,9 @@ def prepare(output, device):
                      'boards/hardware-lcd/bk_main_pll.v', 'boards/hardware-lcd/bk_video_pll.v']
     extras = ['build/boot.hex', 'boards/hardware-lcd/pins.lpf', 'boards/hardware-lcd/cdc.lpf',
               'boards/hardware-lcd/synthesis.sty', 'vendor/manifest.json', 'vendor/cpu11/license.md',
-              'boards/hardware-lcd/clocks.fdc', 'tools/diamond_report.py', 'tools/diamond_project.py']
+              'boards/hardware-lcd/clocks.fdc', 'tools/diamond_report.py', 'tools/diamond_project.py',
+              'rtl/bk_model_layout.vh', 'rtl/bk_palettes.vh', 'rtl/bk_rgb_index.vh',
+              'rtl/bk_palette_index.vh', 'build/pal_samples.hex']
     for item in sources + extras:
         source = ROOT/item
         if not source.is_file():

@@ -1,0 +1,32 @@
+{
+  "started_utc": "2026-10-05T21:40:45.492322+00:00",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "5f189d09b86a77379d26f3ea36be526d1f41d77f9fb60212ee91372a33d5d250",
+    "checksum": "2752",
+    "transmission_checksum": "EE8F",
+    "fuses": 1441280
+  },
+  "driver_sha256": "2bae2f91649a90dbb9c5205d6d69622c8df92237d6ff4a19f7675a83bebd1921",
+  "uart_port": "/dev/ttyUSB1",
+  "actions": [
+    {
+      "action": "read",
+      "utc": "2026-10-05T21:40:56.755105+00:00",
+      "uart_offset": 0,
+      "passed": true
+    },
+    {
+      "action": "close",
+      "utc": "2026-10-05T21:41:44.871332+00:00",
+      "uart_offset": 0,
+      "passed": true
+    }
+  ],
+  "programmed_to": "FLASH",
+  "flash_modified": false,
+  "physical_board_verified": false,
+  "uart_bytes": 0,
+  "boot_stages": [],
+  "boot_errors": []
+}

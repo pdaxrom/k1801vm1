@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-06",
+  "source": "operator in chat",
+  "report": "чувак, у нас проблемы - ps/2 клава перестала работать",
+  "stop_attempt_confirmed": false,
+  "bios_keyboard_test_confirmed": false,
+  "note": "Operator asked which physical key maps to STOP. Explained Esc; no hardware test result has arrived yet."
+}

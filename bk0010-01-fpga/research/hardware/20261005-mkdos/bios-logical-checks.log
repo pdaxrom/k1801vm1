@@ -1,0 +1,6 @@
+bios-logical-default ...
+bios-logical-default: PASS (526.495 s)
+bios-logical-default: shared files and SD metadata verified
+bios-logical-edit ...
+bios-logical-edit: PASS (558.647 s)
+bios-logical-edit: shared files and SD metadata verified

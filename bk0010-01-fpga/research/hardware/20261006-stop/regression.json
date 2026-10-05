@@ -1,0 +1,70 @@
+{
+  "before_failed": true,
+  "before_log": "stop-native-before.log",
+  "before_log_sha256": "855c9eeaad951b9a3d274371e1d1e7f4887b095ea4a3f10f64e1ac9c5bc863a8",
+  "after_passed": true,
+  "after_log": "stop-native-all-rates.log",
+  "after_log_sha256": "d9290b52053d8df0b38c7f54386a87f2bffa333fca9529ec9961c7cf6efe959a",
+  "cpu_frequencies_mhz": [
+    3,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24
+  ],
+  "cases": [
+    "STOP during IRQ100 at PSW=340",
+    "120 ms physical-level hold produces one event",
+    "short 1 us pulse is accepted",
+    "HALT redirects through missing console timeout",
+    "177716[2] read-to-clear",
+    "RTI restores stack"
+  ],
+  "native_system_disk_pending": false,
+  "physical_board_pending": true,
+  "live_ay_before": {
+    "reproduced": true,
+    "log": "system-stop-before.log",
+    "log_sha256": "f382d4f1d164b1e3886551ebd3b3784f0911e987e18df804567a1e3cc9e0b5ec",
+    "ay_writes_after_400ms": 110,
+    "sd_reads_after_400ms": 498,
+    "sd_writes": 0,
+    "pc_octal": "001102",
+    "psw_octal": "000000",
+    "stop_released": true,
+    "diagnostic_seconds_after_release": 0.4
+  },
+  "live_ay_after": {
+    "passed": true,
+    "trigger": "After >=100 real AY writes: PS/2 A/B make/break, then Esc held 120 ms and released",
+    "cpu_mhz": 24,
+    "cpu_frequency_cases_mhz": [
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24
+    ],
+    "disk_mechanics_speedup": 1,
+    "registers": {
+      "model": 3,
+      "frequency_index": 6,
+      "video": 17152,
+      "scroll": 734,
+      "reads": 1598,
+      "writes": 0
+    },
+    "vram_bytes": 16384,
+    "vram_sha256": "1cee183af1bff3233828af5a7c1978f930dca9f59f182641eeee91a9d9622080",
+    "log": "system-stop-after.log",
+    "log_sha256": "b452ca5edbe21f1d0ae6dc64de0bd62347e7b4fba0a286ac10fd929533a3acf6",
+    "simulation_sd_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+    "native_cpu_source_sha256": "23242c4cc2fdfd1b32096ec0b1c5b74d73efc1ecf82015cb4877b6b6cf01e46d",
+    "native_test_source_sha256": "1be289161d6cdd45b1537fe98f7c1a9e752a210a56ca1cafec4be41d4a9cb5de",
+    "physical_stop_verified": false
+  }
+}

@@ -1,0 +1,7 @@
+BIOS PS2 stage=01 time_ms=17 reads=0
+BIOS PS2 stage=02 time_ms=29 reads=0
+BIOS PS2 stage=03 time_ms=160 reads=2
+BIOS PS2 stage=10 time_ms=298 reads=4
+BIOS PS2 stage=11 time_ms=538 reads=4
+PASS saved model 3: physical Backspace opens BIOS
+PASS physical Left/Right: all five models, wrap and stock frequency

@@ -1,0 +1,6 @@
+PASS model=0: occupied keyboard CSR, PS/2 burst, STOP/breaks, no stale keys, IRQ274 recovery
+PASS model=1: occupied keyboard CSR, PS/2 burst, STOP/breaks, no stale keys, IRQ274 recovery
+PASS model=2: occupied keyboard CSR, PS/2 burst, STOP/breaks, no stale keys, IRQ274 recovery
+PASS model=3: occupied keyboard CSR, PS/2 burst, STOP/breaks, no stale keys, IRQ274 recovery
+PASS model=4: occupied keyboard CSR, PS/2 burst, STOP/breaks, no stale keys, IRQ274 recovery
+tests/tb_keyboard_guest.v:85: $finish called at 277704119163 (1ps)

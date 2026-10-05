@@ -1,0 +1,44 @@
+{
+  "passed": true,
+  "disks": {
+    "bk-disk-5.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+    "bk-disk-6.bin": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a"
+  },
+  "simulation_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+  "native_log_sha256": "5d40e1dc04924db758a5399d0261e4508f24a08fdf64573d7ee6e6b554a75e99",
+  "boot_hex_sha256": "fe7292404de2fe8b790ccc6230b60f9e4d2bfb848bcc6cdbd39105cdbe2fe253",
+  "checks": {
+    "mkdos": {
+      "passed": true,
+      "registers": {
+        "model": 3,
+        "frequency_index": 6,
+        "video": 19200,
+        "scroll": 728,
+        "reads": 428,
+        "writes": 0
+      },
+      "active_vram_bytes": 16384,
+      "active_vram_sha256": "fba539be811c6dd10cc420d9b12ea8f5f04e6fec1ce2f56a92ba44ef96fff63c",
+      "native_log_sha256": "441b22b4ba4fcc4b67ae14d136b831e014ce631ada08e55450d869f9490fc144"
+    },
+    "system": {
+      "passed": true,
+      "registers": {
+        "model": 3,
+        "frequency_index": 6,
+        "video": 17152,
+        "scroll": 734,
+        "reads": 1598,
+        "writes": 0
+      },
+      "active_vram_bytes": 16384,
+      "active_vram_sha256": "1cee183af1bff3233828af5a7c1978f930dca9f59f182641eeee91a9d9622080",
+      "native_log_sha256": "baa2b581a6438a9e4b6251b248f302ce6ffccbf047389cf341b875aeebf015d3"
+    }
+  },
+  "cpu_mhz": 24,
+  "disk_mechanics_speedup": 1,
+  "system_music_stop_pressed": true,
+  "physical_board_verified": false
+}

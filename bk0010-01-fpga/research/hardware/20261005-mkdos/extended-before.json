@@ -1,0 +1,7 @@
+{
+  "start_lba": 40960,
+  "sectors": 7744,
+  "sha256": "000d7925fb12cf985457332f165a2a1ec2fbd93e7f500a2b04cf6b71b48cbd78",
+  "contains_old_data": true,
+  "overwrite_authorized": true
+}

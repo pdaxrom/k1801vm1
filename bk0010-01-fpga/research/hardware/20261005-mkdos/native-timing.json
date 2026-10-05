@@ -1,0 +1,11 @@
+{
+  "cpu_mhz": 24,
+  "sys_clock_hz": 29411764,
+  "disk_word_microseconds": 64,
+  "disk_csr_microseconds": 8,
+  "disk_mechanics_speedup": 1,
+  "boot_cpu_accelerated": true,
+  "stop_used_for_system_music_intro": true,
+  "final_boot_hex_sha256": "fe7292404de2fe8b790ccc6230b60f9e4d2bfb848bcc6cdbd39105cdbe2fe253",
+  "tb_sha256": "d0bd91edf230cb00757cca221c749c8be8cf3492c552e995b1c7c1b577222e49"
+}

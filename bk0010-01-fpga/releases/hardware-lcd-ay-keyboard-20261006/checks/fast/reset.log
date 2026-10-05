@@ -1,0 +1,3 @@
+PASS guest RESET preserves video/scroll, withdraws IRQ and resumes IRQ100; hardware reset restores defaults
+PASS video/scroll byte CSR masks and model/lock gates for all five models
+tests/tb_reset.v:76: $finish called at 40159000000 (1ps)

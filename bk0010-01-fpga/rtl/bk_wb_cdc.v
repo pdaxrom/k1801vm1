@@ -13,7 +13,9 @@ module bk_wb_cdc (
     output wire [15:0] address, write_data,
     output wire [1:0] lanes,
     input wire ready,
-    input wire [15:0] read_data
+    input wire [15:0] read_data,
+    input wire [15:0] cpu_map_register,
+    output wire [15:0] map_register
 );
     reg [2:0] cpu_reset_pipe = 7, sys_reset_pipe = 7 /* synthesis syn_preserve=1 */;
     always @(posedge cpu_clk or posedge reset)
@@ -23,6 +25,7 @@ module bk_wb_cdc (
     wire cpu_reset = cpu_reset_pipe[2], sys_reset = sys_reset_pipe[2];
     reg request_toggle = 0, response_toggle = 0;
     reg [15:0] held_address = 0, held_data = 0, held_read = 0;
+    reg [15:0] held_map = 0;
     reg [1:0] held_lanes = 0;
     reg held_write = 0;
     reg valid = 0, cancelled = 0;
@@ -31,6 +34,7 @@ module bk_wb_cdc (
     reg response_seen = 0, request_seen = 0;
     assign cpu_busy = cpu_state != 0;
     assign address = held_address;
+    assign map_register = held_map;
     assign write_data = held_data;
     assign lanes = held_lanes;
     assign write = held_write;
@@ -41,11 +45,13 @@ module bk_wb_cdc (
             request_toggle <= 0; response_sync <= 0; response_seen <= 0;
             valid <= 0; cancelled <= 0;
             held_address <= 0; held_data <= 0; held_lanes <= 0; held_write <= 0;
+            held_map <= 0;
         end else begin
             response_sync <= {response_sync[0], response_toggle};
             case (cpu_state)
                 0: if (cpu_cycle && cpu_strobe) begin
                     held_address <= cpu_address; held_data <= cpu_data;
+                    held_map <= cpu_map_register;
                     held_lanes <= cpu_lanes; held_write <= cpu_write;
                     valid <= 1; cancelled <= 0;
                     request_toggle <= !request_toggle; cpu_state <= 1;

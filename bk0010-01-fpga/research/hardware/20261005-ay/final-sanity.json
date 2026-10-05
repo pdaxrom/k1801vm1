@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "verified_files": 212,
+  "passed_groups": 14,
+  "native_music_passed": true,
+  "wav_seconds": 1,
+  "jed_sha256": "ef60ab649605631f65b948b4ab9ebc8b9a1ba9f349953b190572ebc1da5cd257",
+  "sd_unchanged_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+  "physical_board_verified": false
+}

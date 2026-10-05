@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "rom_words": 4096,
+  "line_words": 64,
+  "gsr_retention": true,
+  "scope": "Official primitive models with synthesized parameters/ROM INITVALs; no post-route SDF simulation",
+  "edif_sha256": "0322554398b97976bca8d47b34d4bf7264be937ace0fb584df998ac87b2a2d85",
+  "boot_hex_sha256": "d448cb40837c00de676c2b0c5cd32efe2284715e15700fa8b16c0152bc07580e",
+  "test_sha256": "c6fd6f07be5c3337ba4161651938cfec2e6d5c8cce2995ff7cf15b82e52d5641",
+  "generated_test_sha256": "8d0f9e398c865df6996e14c33da0220ed155f7964406633a8fa665f3a309f26b",
+  "models": {
+    "SP8KC.v": "f181f0730005bdbd3e015b37bf399b82e29b543c5cba790309fa0d297c8700f4",
+    "PDPW8KC.v": "c9b8f52e48917769995546f38cab32aab777a179a5959294f1b89ccac42982e5",
+    "DP8KC.v": "97d08937610d1ca8c4701e4090f5f81a27578a335825db2c1b688e9b9d9dee45",
+    "GSR.v": "bf608b1cc6752e06ac1c6358108e080bc08408c31253022a0d768d40e50d299a",
+    "PUR.v": "8af61f64a41d2f5b552a68f2b00e3876d56ba2839af096dc5dee9e95764a06f4"
+  },
+  "compile_command": [
+    "iverilog",
+    "-g2012",
+    "-s",
+    "tb_mapped_ebr",
+    "-o",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01-fpga/build/mapped-ebr.vvp",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01-fpga/build/tb_mapped_ebr.v",
+    "build/lattice-models/SP8KC.v",
+    "build/lattice-models/PDPW8KC.v",
+    "build/lattice-models/DP8KC.v",
+    "build/lattice-models/GSR.v",
+    "build/lattice-models/PUR.v"
+  ]
+}

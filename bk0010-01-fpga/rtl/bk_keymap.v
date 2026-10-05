@@ -9,16 +9,21 @@ module bk_keymap (
     output reg [7:0] code = 0,
     input wire ready,
     output wire key_held,
-    output reg stop = 0
+    output reg stop = 0,
+    input wire bios_mode
 );
     reg extended = 0, released = 0;
     reg [2:0] pause_left = 0;
     reg [5:0] modifiers = 0;
     reg caps = 0;
-    reg [511:0] down = 0;
-    wire [8:0] key_index = {extended, scan_code};
-    assign key_held = |{down[511:89],down[87:0]}; // Caps/Shift/Ctrl/Alt do not repeat the previous character.
-    assign scan_pop = scan_valid && (!valid || ready);
+    // Physical key state keeps advancing even when the guest leaves its single
+    // character register unread. STOP and break codes must never wait for it.
+    reg held=0,caps_down=0;
+    reg [8:0] last_key=0;
+    reg [1:0] decode_stage=0;
+    wire [8:0] key_index={extended,scan_code};
+    assign key_held=held;
+    assign scan_pop = scan_valid && decode_stage==2 && (!bios_mode || !valid || ready);
     function [8:0] normal_key;
         input [7:0] scan;
         begin case(scan)
@@ -129,6 +134,19 @@ module bk_keymap (
             default: shift_symbol = ch;
         endcase end
     endfunction
+    (* syn_ramstyle="block_ram" *) reg [8:0] normal_rom[0:255];
+    (* syn_ramstyle="block_ram" *) reg [7:0] shift_rom[0:255];
+    reg [8:0] decoded;
+    reg [7:0] shifted_symbol;
+    integer rom_index;
+    initial for(rom_index=0;rom_index<256;rom_index=rom_index+1)begin
+        normal_rom[rom_index]=normal_key(rom_index[7:0]);
+        shift_rom[rom_index]=shift_symbol(rom_index[7:0]);
+    end
+    always @(posedge clk)begin
+        decoded<=normal_rom[scan_code];
+        shifted_symbol<=shift_rom[decoded[7:0]];
+    end
     reg [8:0] mapped;
     reg [5:0] modifier_mask;
     always @* begin
@@ -149,11 +167,20 @@ module bk_keymap (
                 8'h4a: mapped = 9'h12f;
                 default: mapped = 0;
             endcase
-        end else mapped = normal_key(scan_code);
+        end else mapped = decoded;
+        if(bios_mode && extended) begin
+            case(scan_code)
+                8'h6b: mapped = 9'h111;
+                8'h74: mapped = 9'h112;
+                8'h75: mapped = 9'h113;
+                8'h72: mapped = 9'h114;
+                default: begin end
+            endcase
+        end
         if(mapped[8]) begin
             if(mapped[7:0] >= "a" && mapped[7:0] <= "z") begin
                 if((|modifiers[1:0]) ^ caps) mapped[7:0] = mapped[7:0] - 8'd32;
-            end else if(|modifiers[1:0] && scan_code < 8'h69) mapped[7:0] = shift_symbol(mapped[7:0]);
+            end else if(|modifiers[1:0] && scan_code < 8'h69) mapped[7:0] = shifted_symbol;
             if(|modifiers[3:2]) begin
                 case(scan_code)
                     8'h34: mapped = 9'o407;
@@ -171,27 +198,40 @@ module bk_keymap (
     always @(posedge clk) begin
         if(reset) begin
             extended <= 0; released <= 0; pause_left <= 0;
-            modifiers <= 0; caps <= 0; down <= 0; stop <= 0; valid <= 0; code <= 0;
+            modifiers <= 0; caps <= 0; held <= 0; caps_down <= 0; last_key <= 0; decode_stage <= 0; stop <= 0; valid <= 0; code <= 0;
         end else begin
-            if(valid && ready) valid <= 0;
+            if(valid && (ready || !bios_mode)) valid <= 0;
+            if(!scan_valid || scan_pop)decode_stage<=0;
+            else if(decode_stage!=2)decode_stage<=decode_stage+1'b1;
             if(scan_pop) begin
                 if(scan_code == 0 || scan_code == 8'haa || scan_code == 8'hff) begin
                     modifiers <= 0; extended <= 0; released <= 0; pause_left <= 0;
-                    down <= 0; stop <= 0;
+                    held <= 0; caps_down <= 0; stop <= 0;
                 end else if(pause_left != 0) pause_left <= pause_left - 1'b1;
                 else if(scan_code == 8'he1) begin pause_left <= 7; extended <= 0; released <= 0; end
                 else if(scan_code == 8'he0) extended <= 1;
                 else if(scan_code == 8'hf0) released <= 1;
                 else begin
                     extended <= 0; released <= 0;
-                    if(modifier_mask == 0 && (mapped[8] || (!extended && (scan_code == 8'h58 || scan_code == 8'h76))))
-                        down[key_index] <= !released;
+                    if(released && key_index==last_key)held<=0;
                     if(modifier_mask != 0)
                         modifiers <= released ? modifiers & ~modifier_mask : modifiers | modifier_mask;
                     else if(!extended && scan_code == 8'h58) begin
-                        if(!released && !down[key_index]) caps <= !caps;
-                    end else if(!extended && scan_code == 8'h76) stop <= !released;
-                    else if(!released && mapped[8]) begin code <= mapped[7:0]; valid <= 1; end
+                        caps_down<=!released;
+                        if(!released && !caps_down) caps <= !caps;
+                    end else if(!extended && scan_code == 8'h76) begin
+                        if(bios_mode) begin
+                            stop <= 0;
+                            if(!released) begin code <= 8'h1b; valid <= 1; end
+                        end else stop <= !released;
+                    end
+                    else if(!released && mapped[8]) begin
+                        held<=1; last_key<=key_index;
+                        // Native BK has one character latch, not a terminal FIFO.
+                        // Drop extra characters while occupied; retain BIOS input
+                        // ordering through its existing ready/valid handshake.
+                        if(bios_mode || ready) begin code <= mapped[7:0]; valid <= 1; end
+                    end
                 end
             end
         end

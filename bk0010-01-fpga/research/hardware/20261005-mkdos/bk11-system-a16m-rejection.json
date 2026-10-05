@@ -1,0 +1,15 @@
+{
+  "model": 0,
+  "computer": "BK-0010-01",
+  "controller": "A16M 2.41",
+  "frequency_hz": 3000000,
+  "source_sha256": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a",
+  "instructions": 20000000,
+  "reads": 220,
+  "unique_sectors": 70,
+  "controller_error": false,
+  "compatible": false,
+  "on_screen_message": "TYPE MISMASH ERROR - REQUIRES BK-0011(M)",
+  "test_exit_code": 134,
+  "note": "The full OS boot assertion fails as expected; screenshot shows the disk loader rejecting BK-0010-01."
+}

@@ -1,0 +1,64 @@
+{
+  "started_utc": "2026-10-05T20:18:49.923223+00:00",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "f183c0a11f2f16e8ea7fa492c49c623e1abfc9db0113f7f5f6eeba694a7f6bc6",
+    "checksum": "46F3",
+    "transmission_checksum": "F20E",
+    "fuses": 1441280
+  },
+  "driver_sha256": "2bae2f91649a90dbb9c5205d6d69622c8df92237d6ff4a19f7675a83bebd1921",
+  "uart_port": "/dev/ttyUSB1",
+  "actions": [
+    {
+      "action": "verify-id",
+      "utc": "2026-10-05T20:19:41.907623+00:00",
+      "uart_offset": 0,
+      "passed": true,
+      "exit_code": 0,
+      "operation": "FLASH Verify ID",
+      "stdout": "01-verify-id-stdout.log",
+      "config": "01-verify-id.xcf"
+    },
+    {
+      "action": "program",
+      "utc": "2026-10-05T20:20:22.359739+00:00",
+      "uart_offset": 0,
+      "passed": true,
+      "exit_code": 0,
+      "operation": "FLASH Erase,Program,Verify",
+      "stdout": "02-program-stdout.log",
+      "config": "02-program.xcf"
+    },
+    {
+      "action": "read",
+      "utc": "2026-10-05T20:21:48.281059+00:00",
+      "uart_offset": 25,
+      "passed": true
+    },
+    {
+      "action": "close",
+      "utc": "2026-10-05T20:22:47.910546+00:00",
+      "uart_offset": 55,
+      "passed": true
+    }
+  ],
+  "programmed_to": "FLASH",
+  "flash_modified": true,
+  "physical_board_verified": false,
+  "uart_bytes": 55,
+  "boot_stages": [
+    "01",
+    "02",
+    "03",
+    "10",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "boot_errors": [],
+  "id_verified": true,
+  "flash_program_verified": true
+}

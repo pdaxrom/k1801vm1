@@ -31,6 +31,15 @@ CLUSTER_SECTOR equ 01050
 POSITION equ 01052
 CHAIN_COUNT equ 01054
 TEMP equ 01056
+TRY_OPEN equ 01060
+ROOT_REL equ 01062
+ROOT_ENTRY equ 01064
+FILE_ATTR equ 01066
+FAT_SIZE equ 01070
+FAT_COPIES equ 01072
+ROOT_FOUND equ 01074
+
+INCLUDE "defs.inc"
 
 .org 100000
         jmp @#cold_start             ; 100000 cold entry
@@ -39,18 +48,23 @@ TEMP equ 01056
         jmp @#fail                   ; 100014 R0=error code
         jmp @#handoff                ; 100020 verified ROM handoff
         jmp @#show_stage             ; 100024 R0=stage/error, preserves R0..R5
+        jmp @#try_open_file          ; 100030 optional OPEN, R0=0 when absent
+        jmp @#bios_header_contract   ; 100034 R1=header, validate model segment map
 
 cold_start:
         mov #STACK, sp
         mov #0340, r0
         mtps r0
         clr @#BOOT_STATUS
+        clr @#TRY_OPEN
+        jsr pc, bios_defaults
         jsr pc, splash
         mov #1, r0
         jsr pc, show_stage
         clr @#SDHC
         clr @#V2
         jsr pc, sd_init
+        jsr pc, sd_capacity
         mov #2, r0
         jsr pc, show_stage
         clr @#SECTOR_LO
@@ -67,10 +81,18 @@ mbr_signature_ok:
         beq partition_type_ok
         jmp bad_mbr
 partition_type_ok:
-        mov @#BUFFER+454., @#PART_LO
-        mov @#BUFFER+456., @#PART_HI
-        mov @#BUFFER+458., @#PART_SIZE_LO
-        mov @#BUFFER+460., @#PART_SIZE_HI
+        mov #BUFFER+446., r1
+        mov #BIOS_MBR, r2
+        mov #32., r3
+bios_copy_mbr:
+        mov (r1)+, (r2)+
+        sob r3, bios_copy_mbr
+        jsr pc, bios_check_mbr
+        mov @#BIOS_MBR+8., @#PART_LO
+        mov @#BIOS_MBR+10., @#PART_HI
+        mov @#BIOS_MBR+12., @#PART_SIZE_LO
+        mov @#BIOS_MBR+14., @#PART_SIZE_HI
+        jsr pc, bios_read_logical
         mov @#PART_LO, r0
         bis @#PART_HI, r0
         bne partition_nonzero
@@ -80,7 +102,9 @@ partition_nonzero:
         jsr pc, relative_sector
         jsr pc, read_sector
         cmp @#BUFFER+510., #0xaa55
-        bne bad_bpb_jump
+        beq bios_far_0
+        jmp bad_bpb_jump
+bios_far_0:
         mov #BUFFER+11., r0
         jsr pc, little_word
         cmp r0, #512.
@@ -130,7 +154,10 @@ partition_size_ok:
         cmp r0, #256.
         bhi bad_bpb_jump
         mov r0, @#TEMP
+        mov r0, @#FAT_SIZE
         movb @#BUFFER+16., r1
+        bic #177400, r1
+        mov r1, @#FAT_COPIES
         cmpb r1, #1
         beq one_fat
         cmpb r1, #2
@@ -175,6 +202,10 @@ bad_bpb_jump:
 bpb_valid:
         mov #3, r0
         jsr pc, show_stage
+        mov #1, @#BIOS_SD_READY
+        jsr pc, bios_setup
+bios_load_loader:
+        clr @#TRY_OPEN
         mov #loader_name, r0
         jsr pc, open_file
         cmp r0, #4096.
@@ -426,6 +457,13 @@ sd_copy_loop:
         rts pc
 
 ; Root 8.3 lookup. Files are limited to 1..65535 bytes.
+try_open_file:
+        mov #1, @#TRY_OPEN
+        jsr pc, open_file
+        mov r0, -(sp)
+        clr @#TRY_OPEN
+        mov (sp)+, r0
+        rts pc
 open_file:
         mov r1, -(sp)
         mov r2, -(sp)
@@ -433,6 +471,7 @@ open_file:
         mov r4, -(sp)
         mov r5, -(sp)
         mov r0, @#NAME_PTR
+        clr @#ROOT_FOUND
         clr @#ROOT_INDEX
 open_sector:
         mov @#ROOT_INDEX, r0
@@ -457,8 +496,19 @@ open_name:
         cmpb (r0)+, (r2)+
         bne open_next
         sob r3, open_name
+        mov #1, @#ROOT_FOUND
+        mov @#ROOT_INDEX, @#ROOT_REL
+        add @#ROOT_START, @#ROOT_REL
+        mov r1, @#ROOT_ENTRY
+        sub #BUFFER, @#ROOT_ENTRY
+        movb 11.(r1), @#FILE_ATTR
         mov 26.(r1), r0
-        jsr pc, validate_cluster
+        cmp r0, #2
+        bcs file_bad
+        mov @#CLUSTERS, r4
+        add #2, r4
+        cmp r0, r4
+        bcc file_bad
         mov r0, @#CLUSTER
         tst 30.(r1)
         bne file_bad
@@ -476,10 +526,23 @@ open_name:
         rts pc
 open_next:
         add #32., r1
-        sob r5, open_entry
+        dec r5
+        beq open_entry_done
+        jmp open_entry
+open_entry_done:
         inc @#ROOT_INDEX
         jmp open_sector
 file_bad:
+        tst @#TRY_OPEN
+        beq file_required_bad
+        clr r0
+        mov (sp)+, r5
+        mov (sp)+, r4
+        mov (sp)+, r3
+        mov (sp)+, r2
+        mov (sp)+, r1
+        rts pc
+file_required_bad:
         mov #0x31, r0
         jmp fail
 validate_cluster:
@@ -563,6 +626,32 @@ handoff:
         mov #177636, @#0404
         mov #000137, @#0406
         mov #100000, @#0410
+        cmpb @#BIOS_CFG+9., #3
+        bcs handoff_entry_ok
+        mov #140000, @#0410
+handoff_entry_ok:
+        tstb @#BIOS_CFG+9.
+        bne handoff_jump
+        mov #164400, @#0410
+handoff_jump:
+        ; MONIT/BOS must see cold RAM, not BIOS settings, FAT buffers or stack.
+        ; Keep only the RAM commit trampoline at 0400..0411.
+        clr r0
+        mov #0200, r1
+handoff_clear_low:
+        clr (r0)+
+        sob r1, handoff_clear_low
+        mov #0412, r0
+        mov #037573, r1
+handoff_clear_rest:
+        clr (r0)+
+        sob r1, handoff_clear_rest
+        clr r1
+        clr r2
+        clr r3
+        clr r4
+        clr r5
+        clr sp
         mov #0340, r0
         mtps r0
         jmp @#0400
@@ -570,8 +659,16 @@ fail:
         bis #0xe000, r0
         jsr pc, show_stage
         mov #0x23, @#SPI_CTRL
-fail_loop:
-        br fail_loop
+        bic #177400, r0
+        mov r0, @#BIOS_ERROR
+        mov #STACK, sp
+        jsr pc, bios_menu
+        clr @#BOOT_STATUS
+        tst @#BIOS_SD_READY
+        beq bios_retry_cold
+        jmp bios_load_loader
+bios_retry_cold:
+        jmp cold_start
 loader_name:
         db "LOADERBKBIN"
         even
@@ -653,3 +750,9 @@ splash_rows:
         db 0x10,0x11,0x00,0x09,0x11,0x11
         db 0x0f,0x0f,0x00,0x11,0x0e,0x11
         db 0x00,0x00,0x00,0x00,0x00,0x00
+
+INCLUDE "sd-info.inc"
+INCLUDE "ebr.inc"
+INCLUDE "bios.inc"
+INCLUDE "font.inc"
+INCLUDE "../../build/model-contract.inc"

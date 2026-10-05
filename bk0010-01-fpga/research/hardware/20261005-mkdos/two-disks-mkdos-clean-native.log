@@ -1,0 +1,33 @@
+BOOT stage=01 cycle=7500 address=177612 reads=0
+BOOT stage=02 cycle=110606 address=177612 reads=0
+BOOT stage=03 cycle=1435165 address=177612 reads=4
+BOOT stage=10 cycle=2139636 address=177612 reads=6
+BOOT stage=11 cycle=3391499 address=177612 reads=6
+BOOT stage=04 cycle=21881896 address=177612 reads=10
+BOOT stage=05 cycle=23255073 address=177612 reads=12
+BOOT stage=06 cycle=136109598 address=177612 reads=188
+BOOT stage=07 cycle=140838157 address=177612 reads=188
+PASS switched native runtime to model 3 frequency index=6
+BOOT stage=ff cycle=142234219 address=177636 reads=188
+OS progress cycles=0 CPU mode=6 address=177636 bank=000000 video=040000 SD reads=188 writes=0 error=0
+OS CPU PC=000406 PSW=000340
+OS progress cycles=20000000 CPU mode=6 address=177130 bank=016000 video=040000 SD reads=208 writes=0 error=0
+OS CPU PC=163110 PSW=000340
+OS progress cycles=40000000 CPU mode=6 address=162744 bank=016000 video=040000 SD reads=228 writes=0 error=0
+OS CPU PC=162744 PSW=000341
+OS progress cycles=60000000 CPU mode=6 address=177130 bank=016000 video=045400 SD reads=258 writes=0 error=0
+OS CPU PC=162174 PSW=000200
+OS progress cycles=80000000 CPU mode=6 address=177130 bank=016000 video=045400 SD reads=298 writes=0 error=0
+OS CPU PC=163104 PSW=000200
+OS progress cycles=100000000 CPU mode=6 address=177130 bank=016000 video=045400 SD reads=358 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+OS progress cycles=120000000 CPU mode=6 address=177130 bank=016000 video=045400 SD reads=388 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+OS progress cycles=140000000 CPU mode=6 address=177130 bank=016000 video=145400 SD reads=428 writes=0 error=0
+OS CPU PC=161622 PSW=000340
+PASS native model 3 boot: VRAM matches C reference                            , cycles=202821847
+PASS disk OS cold boot: native CPU/BIOS/ROM/KNGMD/raw partition/SPI; VRAM matches C; reads=428 writes=0 page=5 scroll=001330
+- tests/tb_sd_boot.v:333: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 8s; walltime 915.256 s; speed 8.680 ms/s
+- Verilator: cpu 913.603 s on 1 threads; allocated 2 MB

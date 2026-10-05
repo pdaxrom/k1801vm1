@@ -1,0 +1,3 @@
+PASS AY CPU protocol/FIFO and fixed pitch at all seven CPU frequencies
+PASS AY runs through disk wait, bounded mixing, sigma delta and reset
+tests/tb_audio.v:82: $finish called at 8119343144 (1ps)

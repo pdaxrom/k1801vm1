@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "release_files_verified": 139,
+  "physical_sd_readback_verified": true,
+  "p601_partitions_unchanged": true,
+  "physical_board_verified": false,
+  "fsck_note": "Read-only check: only the existing P601 BOOT label mismatch; no filesystem changes."
+}

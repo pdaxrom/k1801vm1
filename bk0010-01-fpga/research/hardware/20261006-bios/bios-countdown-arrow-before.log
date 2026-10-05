@@ -1,0 +1,7 @@
+BIOS PS2 stage=01 time_ms=16 reads=0
+BIOS PS2 stage=02 time_ms=19 reads=0
+BIOS PS2 stage=03 time_ms=44 reads=2
+BIOS PS2 stage=10 time_ms=69 reads=4
+[121385808000] %Fatal: tb_bios_keyboard.v:80: Assertion failed in tb_bios_keyboard: BIOS consumed physical arrow but ignored it during countdown
+%Error: tests/tb_bios_keyboard.v:80: Verilog $stop
+Aborting...

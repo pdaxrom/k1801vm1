@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "trigger": "After >=100 real AY writes: PS/2 A/B make/break, then Esc held 120 ms and released",
+  "cpu_mhz": 24,
+  "cpu_frequency_cases_mhz": [
+    3,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24
+  ],
+  "disk_mechanics_speedup": 1,
+  "registers": {
+    "model": 3,
+    "frequency_index": 6,
+    "video": 17152,
+    "scroll": 734,
+    "reads": 1598,
+    "writes": 0
+  },
+  "vram_bytes": 16384,
+  "vram_sha256": "1cee183af1bff3233828af5a7c1978f930dca9f59f182641eeee91a9d9622080",
+  "log": "system-stop-after.log",
+  "log_sha256": "b452ca5edbe21f1d0ae6dc64de0bd62347e7b4fba0a286ac10fd929533a3acf6",
+  "simulation_sd_sha256": "ca330263d2d41b071872289d42ee35454c147e8bad85149ae45453068e75d09b",
+  "native_cpu_source_sha256": "23242c4cc2fdfd1b32096ec0b1c5b74d73efc1ecf82015cb4877b6b6cf01e46d",
+  "native_test_source_sha256": "1be289161d6cdd45b1537fe98f7c1a9e752a210a56ca1cafec4be41d4a9cb5de",
+  "physical_stop_verified": false
+}

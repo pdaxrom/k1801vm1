@@ -1,0 +1,57 @@
+// Generated from config/video.json by tools/prepare_pal.py.
+localparam [3:0] BK_WHITE_INDEX = 4'd13;
+function [3:0] bk_palette_index;
+    input [3:0] palette;
+    input [1:0] pixel;
+    begin case({palette,pixel})
+        6'h01: bk_palette_index = 4'd1;
+        6'h02: bk_palette_index = 4'd2;
+        6'h03: bk_palette_index = 4'd10;
+        6'h05: bk_palette_index = 4'd12;
+        6'h06: bk_palette_index = 4'd11;
+        6'h07: bk_palette_index = 4'd10;
+        6'h09: bk_palette_index = 4'd3;
+        6'h0a: bk_palette_index = 4'd1;
+        6'h0b: bk_palette_index = 4'd11;
+        6'h0d: bk_palette_index = 4'd2;
+        6'h0e: bk_palette_index = 4'd3;
+        6'h0f: bk_palette_index = 4'd12;
+        6'h11: bk_palette_index = 4'd11;
+        6'h12: bk_palette_index = 4'd3;
+        6'h13: bk_palette_index = 4'd13;
+        6'h15: bk_palette_index = 4'd13;
+        6'h16: bk_palette_index = 4'd13;
+        6'h17: bk_palette_index = 4'd13;
+        6'h19: bk_palette_index = 4'd7;
+        6'h1a: bk_palette_index = 4'd5;
+        6'h1b: bk_palette_index = 4'd10;
+        6'h1d: bk_palette_index = 4'd9;
+        6'h1e: bk_palette_index = 4'd4;
+        6'h1f: bk_palette_index = 4'd12;
+        6'h21: bk_palette_index = 4'd8;
+        6'h22: bk_palette_index = 4'd6;
+        6'h23: bk_palette_index = 4'd11;
+        6'h25: bk_palette_index = 4'd4;
+        6'h26: bk_palette_index = 4'd6;
+        6'h27: bk_palette_index = 4'd5;
+        6'h29: bk_palette_index = 4'd9;
+        6'h2a: bk_palette_index = 4'd8;
+        6'h2b: bk_palette_index = 4'd7;
+        6'h2d: bk_palette_index = 4'd3;
+        6'h2e: bk_palette_index = 4'd12;
+        6'h2f: bk_palette_index = 4'd10;
+        6'h31: bk_palette_index = 4'd10;
+        6'h32: bk_palette_index = 4'd2;
+        6'h33: bk_palette_index = 4'd3;
+        6'h35: bk_palette_index = 4'd3;
+        6'h36: bk_palette_index = 4'd12;
+        6'h37: bk_palette_index = 4'd13;
+        6'h39: bk_palette_index = 4'd12;
+        6'h3a: bk_palette_index = 4'd2;
+        6'h3b: bk_palette_index = 4'd13;
+        6'h3d: bk_palette_index = 4'd3;
+        6'h3e: bk_palette_index = 4'd2;
+        6'h3f: bk_palette_index = 4'd13;
+        default: bk_palette_index = 0;
+    endcase end
+endfunction

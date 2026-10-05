@@ -1,0 +1,634 @@
+{
+  "research_date": "2026-10-05",
+  "status": "implemented_and_verified_in_simulation",
+  "implementation_started": true,
+  "scope": [
+    "bk0010-01-fpga",
+    "bk0010-01 C reference"
+  ],
+  "current_model_id": 2,
+  "sources": {
+    "PICO-BK": {
+      "root": "/Users/sash/Work/tmp/PICO-BK",
+      "revision": "8c0e735a19ec67201b74ca97219c7cdd2da88fb6",
+      "tracked_changes": [],
+      "files": [
+        {
+          "path": "src/config_em.h",
+          "bytes": 876,
+          "sha256": "19e11b3e8368a97fe680e3e35f2b73f8d87da52cc9f86940414d94e6712c91ae"
+        },
+        {
+          "path": "src/fdd.c",
+          "bytes": 19289,
+          "sha256": "88da11593282f12b0435f46e2ae7144f956b9583456eb7afb96abf198b278c48"
+        },
+        {
+          "path": "src/fdd.h",
+          "bytes": 5644,
+          "sha256": "af4423970a7a421ef6625f0ba22b48e421d38a823dd70f83408025576225e9ca"
+        },
+        {
+          "path": "CMakeLists.txt",
+          "bytes": 11649,
+          "sha256": "f3349f984964781ed6161dcd5995aad12db5b94f96b2ae6473e26ecda4a72983"
+        },
+        {
+          "path": "soft/EmuAPP/src/CPU.h",
+          "bytes": 14279,
+          "sha256": "18610b84b8ffe93d8cc65ca39d01658e13581bef0ed2fde109ab6faca6e7e860"
+        },
+        {
+          "path": "soft/EmuAPP/src/Overlays/Init/CPU_i.c",
+          "bytes": 8074,
+          "sha256": "8e1f320b1e6faee60e0cefd63ca3ce209decfa713a9b03980d0eeb1406e43b68"
+        },
+        {
+          "path": "soft/EmuAPP/src/Overlays/EmuFfs/CPU_ef.c",
+          "bytes": 27444,
+          "sha256": "a6eed31952892bb3cf4437290dd8dd36957391e859a28a7ce2bcadad41da007f"
+        },
+        {
+          "path": "soft/EmuAPP/src/Overlays/Emu/CPU_e.c",
+          "bytes": 52787,
+          "sha256": "72ba326ca3b35253731f5c868bd5724a8877b03344047c319285072e2fd1a97d"
+        }
+      ],
+      "roms": [
+        {
+          "path": "soft/EmuAPP/ROM/BK0010.rom",
+          "bytes": 32640,
+          "sha256": "cccc9d015b51b831490c272cbeaadcacee6ba3ce96f3a09ab9b77138f22552d1"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/DISK_326.rom",
+          "bytes": 4096,
+          "sha256": "afbff0792d9822853887ecc2aac037b6863e57c5eb0f17eade7535bdbb1908ae"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/DISK_326v12.ROM",
+          "bytes": 4096,
+          "sha256": "2879521f48f8f799d2e91908878187bcb223dcfa9149c5d5158ea79c0c5bd671"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/DISK_327.ROM",
+          "bytes": 4096,
+          "sha256": "2879521f48f8f799d2e91908878187bcb223dcfa9149c5d5158ea79c0c5bd671"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/Focal.rom",
+          "bytes": 8192,
+          "sha256": "3e30d6222ee93d86cc0d4d9e16e461f287199a3d109222ecdbb69d746a897565"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/Tests.rom",
+          "bytes": 8064,
+          "sha256": "64217ca4dea5b0b8b6bf8fa2a41ab991ee8d1a3afec10a65d2b1c3da37a7a95b"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/basic10.rom",
+          "bytes": 24576,
+          "sha256": "24be347356715352fcab480ed1559302d47d598255980a32150eba1431b462b8"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk10_018_focal.rom",
+          "bytes": 8192,
+          "sha256": "3e30d6222ee93d86cc0d4d9e16e461f287199a3d109222ecdbb69d746a897565"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk10_084_focal.rom",
+          "bytes": 8192,
+          "sha256": "de1359ff6e33bfa984b18bb7f7094fbea5cc01c889bbaf07113c7b38bb3bbddd"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk11m_324_bos.rom",
+          "bytes": 8192,
+          "sha256": "c001943dc7dc693db9aed04e12c274919805c02db3659d65d4ac43d64269fc89"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk11m_325_ext.rom",
+          "bytes": 8192,
+          "sha256": "4f796684c72a64f49bcb3594518f206f9f6060902711e2045eb09ccd95ee7b27"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk11m_327_basic1.rom",
+          "bytes": 8192,
+          "sha256": "56f2e1bd7397c71528fd3c6df41239480f3c9ee3af460584bd41a4060c35a5fc"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk11m_328_basic2.rom",
+          "bytes": 8192,
+          "sha256": "baff0964e836e0f2d824b551d47378c1b3e37a7644cb0472953ab38e35d08ac7"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk11m_329_basic3.rom",
+          "bytes": 8192,
+          "sha256": "0557dea0d489a9eac266c32bb318cb0534836eed5361399e2dc37bb3c3636af9"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/bk11m_330_mstd.rom",
+          "bytes": 8192,
+          "sha256": "8cb6b882879dee18942fbff15f450b8c3e906c915bd644e5e291dce25987e1dd"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/fdd.rom",
+          "bytes": 8192,
+          "sha256": "d51168e2f58e6937b6d171a832390adedc0fbec42ac549541af11b4bb634adc7"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/monit10.rom",
+          "bytes": 8192,
+          "sha256": "c93f3e7d3342f747f6c55a3b5ebb8c1840d3d118e80dc5d274f645dc2b393688"
+        },
+        {
+          "path": "soft/EmuAPP/ROM/smk512.rom",
+          "bytes": 4096,
+          "sha256": "15be331b5f5fe5b9795003bb1bd29612d37e21bd5985904cb28130af1e9677bf"
+        }
+      ]
+    },
+    "bk-emulator": {
+      "root": "/Users/sash/Work/tmp/bk-emulator",
+      "revision": "798fecbbffd25a0d8b8e406e659fc0542b97a329",
+      "tracked_changes": [],
+      "files": [
+        {
+          "path": "disk.c",
+          "bytes": 8824,
+          "sha256": "5f2834693093e9745498809d9df8bfecd68c5ff62c6a9c9b6a122ac2c213f629"
+        },
+        {
+          "path": "main.c",
+          "bytes": 19418,
+          "sha256": "0f26579c1a9266bbb0d0a47778bd89f665faa2d2be5a2139b7d8bc8cdf5f961f"
+        },
+        {
+          "path": "access.c",
+          "bytes": 12111,
+          "sha256": "edb25b43cf75ea8979b4cdaca9def92fcfa227cbf56a9ecc24457420c02b70c9"
+        },
+        {
+          "path": "boot.c",
+          "bytes": 3819,
+          "sha256": "60fb759642cd20bcbde785cc5ff7c7422559ec488d926b56f19454280b7ca4ea"
+        },
+        {
+          "path": "io.c",
+          "bytes": 3873,
+          "sha256": "eceb90c8c7561c4c6c0449b1ea1cb64f5ee42108203b59c87e2f6c518ba2080c"
+        },
+        {
+          "path": "tty.c",
+          "bytes": 9429,
+          "sha256": "3a6d6ad3265981c13eaf12775b561185d5bf679eb3d5949cdef95e08e5339f9a"
+        },
+        {
+          "path": "scr.c",
+          "bytes": 13043,
+          "sha256": "5cc3778b2e6b90c07b53a084ca507143807b5420bc6a0c0e847978ec4ece2bdc"
+        },
+        {
+          "path": "README.md",
+          "bytes": 4615,
+          "sha256": "1b0179a6b0257a75f5602a1a4ee98cce5f4ea362d6f23c0a1a7f222ecf4dcb60"
+        }
+      ],
+      "roms": [
+        {
+          "path": "Rom/B11M_BOS.ROM",
+          "bytes": 8192,
+          "sha256": "c001943dc7dc693db9aed04e12c274919805c02db3659d65d4ac43d64269fc89",
+          "pico_equal_files": [
+            "soft/EmuAPP/ROM/bk11m_324_bos.rom"
+          ],
+          "parts_8k": []
+        },
+        {
+          "path": "Rom/B11M_EXT.ROM",
+          "bytes": 8192,
+          "sha256": "4f796684c72a64f49bcb3594518f206f9f6060902711e2045eb09ccd95ee7b27",
+          "pico_equal_files": [
+            "soft/EmuAPP/ROM/bk11m_325_ext.rom"
+          ],
+          "parts_8k": []
+        },
+        {
+          "path": "Rom/BAS11M_0.ROM",
+          "bytes": 16384,
+          "sha256": "eefb7deff07ee7134edd9de068bf92d58481d45ee38c283a923a5b55c7f51809",
+          "pico_equal_files": [],
+          "parts_8k": [
+            {
+              "offset": 0,
+              "bytes": 8192,
+              "sha256": "baff0964e836e0f2d824b551d47378c1b3e37a7644cb0472953ab38e35d08ac7",
+              "pico_equal_files": [
+                "soft/EmuAPP/ROM/bk11m_328_basic2.rom"
+              ]
+            },
+            {
+              "offset": 8192,
+              "bytes": 8192,
+              "sha256": "0557dea0d489a9eac266c32bb318cb0534836eed5361399e2dc37bb3c3636af9",
+              "pico_equal_files": [
+                "soft/EmuAPP/ROM/bk11m_329_basic3.rom"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "Rom/BAS11M_1.ROM",
+          "bytes": 8192,
+          "sha256": "56f2e1bd7397c71528fd3c6df41239480f3c9ee3af460584bd41a4060c35a5fc",
+          "pico_equal_files": [
+            "soft/EmuAPP/ROM/bk11m_327_basic1.rom"
+          ],
+          "parts_8k": []
+        },
+        {
+          "path": "Rom/BASIC10.ROM",
+          "bytes": 24576,
+          "sha256": "24be347356715352fcab480ed1559302d47d598255980a32150eba1431b462b8",
+          "pico_equal_files": [
+            "soft/EmuAPP/ROM/basic10.rom"
+          ],
+          "parts_8k": []
+        },
+        {
+          "path": "Rom/DISK_327.ROM",
+          "bytes": 4096,
+          "sha256": "2879521f48f8f799d2e91908878187bcb223dcfa9149c5d5158ea79c0c5bd671",
+          "pico_equal_files": [
+            "soft/EmuAPP/ROM/DISK_326v12.ROM",
+            "soft/EmuAPP/ROM/DISK_327.ROM"
+          ],
+          "parts_8k": []
+        },
+        {
+          "path": "Rom/FOCAL10.ROM",
+          "bytes": 24576,
+          "sha256": "bc0817b0bee227c83132c6b28bbeb64b02a4787461fc8c9d082674fe578e7e24",
+          "pico_equal_files": [],
+          "parts_8k": [
+            {
+              "offset": 0,
+              "bytes": 8192,
+              "sha256": "3e30d6222ee93d86cc0d4d9e16e461f287199a3d109222ecdbb69d746a897565",
+              "pico_equal_files": [
+                "soft/EmuAPP/ROM/Focal.rom",
+                "soft/EmuAPP/ROM/bk10_018_focal.rom"
+              ]
+            },
+            {
+              "offset": 8192,
+              "bytes": 8192,
+              "sha256": "3e30d6222ee93d86cc0d4d9e16e461f287199a3d109222ecdbb69d746a897565",
+              "pico_equal_files": [
+                "soft/EmuAPP/ROM/Focal.rom",
+                "soft/EmuAPP/ROM/bk10_018_focal.rom"
+              ]
+            },
+            {
+              "offset": 16384,
+              "bytes": 8192,
+              "sha256": "98bf40cf5c5c39788e69f0a1fb4bd5aa13847cfc2a02913845c270bff369fd6c",
+              "pico_equal_files": []
+            }
+          ],
+          "last_part_tests_8064_equal": true,
+          "last_128_bytes_zero": true
+        },
+        {
+          "path": "Rom/MONIT10.ROM",
+          "bytes": 8192,
+          "sha256": "c93f3e7d3342f747f6c55a3b5ebb8c1840d3d118e80dc5d274f645dc2b393688",
+          "pico_equal_files": [
+            "soft/EmuAPP/ROM/monit10.rom"
+          ],
+          "parts_8k": []
+        }
+      ]
+    },
+    "pyldin601-fpga": {
+      "root": "/Users/sash/Work/P601/pyldin601/pyldin601-fpga",
+      "revision": "7808116ba0a9e16f3faf05dfe7e6af4b1dcf2412",
+      "files": [
+        {
+          "path": "audit/BIOS-SETUP.md",
+          "bytes": 17836,
+          "sha256": "0f9ac425a16ae28566b2d860b6f932e78bc198bde5b5c223175f72b3fcfb76ed"
+        },
+        {
+          "path": "firmware/boot.asm",
+          "bytes": 21734,
+          "sha256": "c0248e1cfe9b00b862168be0ff3a85eab0c925de77c593082f52e1a39cf1af30"
+        },
+        {
+          "path": "firmware/setup.asm",
+          "bytes": 19175,
+          "sha256": "8db22dda788ea25fdf926fdc09950731cd0552a7d5a7d3728f58ce3c19f387e2"
+        },
+        {
+          "path": "rtl/sd_spi_block.v",
+          "bytes": 10640,
+          "sha256": "46449cd18e9a7684aa6b6a52beadcaa4b22e880241788063305c10b0550f54b0"
+        },
+        {
+          "path": "rtl/classic_system.v",
+          "bytes": 14540,
+          "sha256": "2c8bec3dcd0b3a64380e23898a6a2b40f02c489a8899e4461336babc75328000"
+        },
+        {
+          "path": "SD-card.md",
+          "bytes": 12198,
+          "sha256": "4c350dbf2ab1fa6925aca9a3ebd6cb60fd0561ac25a900d7873307bdf5a5a07c"
+        },
+        {
+          "path": "SD-registers.md",
+          "bytes": 7966,
+          "sha256": "b22e838738b865fc9cdcce48ecf98381a76e9f05478e3e019548826cbcbdf33e"
+        },
+        {
+          "path": "rtl/classic_fdc.v",
+          "bytes": 9616,
+          "sha256": "3b755dcd71e707d9f8209b5e44a73a036894c678dd6a37e810f4c98d58a9cb77"
+        },
+        {
+          "path": "rtl/chs_to_lba.v",
+          "bytes": 1559,
+          "sha256": "9a397d434258cd717eabe1d6d01cbafed2c6cce215d04a9fe9a10d8b0f12860a"
+        }
+      ]
+    },
+    "BkEmu-Android": {
+      "revision": "109ec5571b7e668b1ca3cd661716280a516e1db2",
+      "files": [
+        {
+          "path": "lib/src/main/java/su/comp/bk/arch/io/disk/FloppyController.java",
+          "bytes": 51911,
+          "sha256": "a25f43fd360f0920b28b0ccffc8d74d7c01e321ac1a54836174d81a759c6b4a3"
+        },
+        {
+          "path": "lib/src/test/java/su/comp/bk/arch/io/disk/FloppyControllerTest.java",
+          "bytes": 16840,
+          "sha256": "38a1728c71901fa130eaed0b88d165a9313ec30f95b999d180b38329082c8f44"
+        }
+      ]
+    },
+    "current_fpga_release": {
+      "revision": "3d70c089e1097fc024eb6c78227f400cd178ca2c",
+      "resources": {
+        "ff": {
+          "used": 1940,
+          "capacity": 7209
+        },
+        "slices": {
+          "used": 2935,
+          "capacity": 3432
+        },
+        "lut4": {
+          "used": 5834,
+          "capacity": 6864
+        },
+        "ebr": {
+          "used": 9,
+          "capacity": 26
+        }
+      },
+      "free_resources": {
+        "ff": 5269,
+        "slices": 497,
+        "lut4": 1030,
+        "ebr": 17
+      },
+      "boot_code_bytes": 1828
+    },
+    "A16M": {
+      "url": "https://gid.pdp-11.net/f/3.14.2510.10760/BK_v3.14_x86.7z",
+      "member": "Release/Rom/DISK_A16M_v2.41.rom",
+      "bytes": 4096,
+      "sha256": "b49d881ae36de1b9490d178ade891be16cb59d37c092c0a86e9dc313c7a602dc",
+      "model_version_octal": "175041",
+      "startup_octal": "164400",
+      "accepted_by_user": "2026-10-05"
+    }
+  },
+  "primary_documentation": [
+    {
+      "title": "БК-0010-01. Руководство системного программиста",
+      "url": "https://gid.pdp-11.net/books/00001-01.32.03.html",
+      "use": "external MSTD on rear system-bus connector, onboard BASIC disable, ROM map and Focal/MSTD gaps"
+    },
+    {
+      "title": "БК-0011М. Руководство системного программиста",
+      "url": "https://gid.pdp-11.net/books/00015-01.32.01.html",
+      "use": "bank switching, palette/video pages, timer enable"
+    },
+    {
+      "title": "БК-0011. Руководство системного программиста",
+      "url": "https://gid.pdp-11.net/books/00008-01.32.01.html",
+      "sections": [
+        "1.3.6.1",
+        "3.6"
+      ],
+      "use": "KNGMD registers and original ROM entry points; not BK0011 video/system registers"
+    },
+    {
+      "title": "К1801ВП1-128 technical description, transcription",
+      "url": "https://emuverse.ru/wiki/%D0%9A1801%D0%92%D0%9F1-128",
+      "use": "word exchange, TR/GDR, A1 missing-clock markers, CRC polynomial, 64 us; contains apparent transcription errors"
+    },
+    {
+      "title": "АльтПро А16/А16М technical description",
+      "url": "https://www.tiffe.de/robotron/PDP-VAX/russisch/Elektronika-BK/doc/bk-a16tech.htm",
+      "use": "A16 compatibility with BK0010 and BK0010-01, memory modes and onboard BASIC selection, 6/CODE/0 sequence, ROM model word"
+    }
+  ],
+  "verified_findings": {
+    "pico_bos_disk_header_bytes": 12288,
+    "pico_bos_disk_second_4k_pointer_offset": 12288,
+    "pico_fdd_rom": "DISK_326 first 4096 bytes, followed by 4096 zero bytes",
+    "pico_active_disk_io": "PC hook calls EmulateFDD, register controller unfinished",
+    "bk_emulator_default_fake_disk": true,
+    "bk_emulator_active_disk_io": "PC hooks at 0160250 and 0160372",
+    "bk_emulator_register_io_limitations": [
+      "disk data writes only logged",
+      "track/head changes not fully implemented",
+      "index period 100 ms"
+    ],
+    "focal_018_gap": "PICO-BK and original memory diagram leave 0140000..0157777 empty; bk-emulator duplicates Focal there",
+    "a16_firmware": "User accepted A16M; verified A16M v2.41 dump from GID distribution, mapping and drive count changed accordingly"
+  },
+  "proposed_models": [
+    {
+      "id": 0,
+      "name": "БК-0010-01 + КНГМД А16М",
+      "base_machine": "БК-0010-01",
+      "expansion": "external A16M controller on system bus",
+      "ram_bytes": 32768,
+      "controller_ram_bytes": 16384,
+      "default_mhz": 3,
+      "bundle": "BK00.ROM",
+      "roms": [
+        "monit10.rom",
+        "basic10.rom",
+        "DISK_A16M_v2.41.rom"
+      ],
+      "onboard_basic_mapping": "A16M bit 3 selects BASIC; bit 2 disables FDD register reads independently; startup 0164400, RAM modes per A16M table"
+    },
+    {
+      "id": 1,
+      "name": "БК-0010-01 + Фокал (внешний блок МСТД)",
+      "base_machine": "БК-0010-01",
+      "expansion": "external MSTD module with Focal 018 and tests on system bus",
+      "ram_bytes": 32768,
+      "default_mhz": 3,
+      "bundle": "BK01.ROM",
+      "roms": [
+        "monit10.rom",
+        "basic10.rom",
+        "bk10_018_focal.rom",
+        "Tests.rom"
+      ],
+      "onboard_basic_mapping": "physically present as a separate ROM segment, disabled while external MSTD is connected; 0140000..0157777 has no bus responder"
+    },
+    {
+      "id": 2,
+      "name": "БК-0010-01 + Вильнюс Бейсик 86",
+      "base_machine": "БК-0010-01",
+      "expansion": "none",
+      "ram_bytes": 32768,
+      "default_mhz": 3,
+      "bundle": "BK02.ROM",
+      "roms": [
+        "monit10.rom",
+        "basic10.rom"
+      ],
+      "legacy_bundle": "BK0010.ROM"
+    },
+    {
+      "id": 3,
+      "name": "БК-0011М + Бейсик Экситон + КНГМД",
+      "base_machine": "БК-0011М",
+      "ram_bytes": 131072,
+      "default_mhz": 4,
+      "bundle": "BK03.ROM",
+      "roms": [
+        "bk11m_324_bos.rom",
+        "bk11m_325_ext.rom",
+        "bk11m_327_basic1.rom",
+        "bk11m_328_basic2.rom",
+        "bk11m_329_basic3.rom",
+        "DISK_327.ROM"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "БК-0011М + МСТД",
+      "base_machine": "БК-0011М",
+      "ram_bytes": 131072,
+      "default_mhz": 4,
+      "bundle": "BK04.ROM",
+      "roms": [
+        "bk11m_324_bos.rom",
+        "bk11m_325_ext.rom",
+        "bk11m_327_basic1.rom",
+        "bk11m_328_basic2.rom",
+        "bk11m_329_basic3.rom",
+        "bk11m_330_mstd.rom"
+      ]
+    }
+  ],
+  "proposed_storage": {
+    "loader": "LOADERBK.BIN",
+    "settings": "BK.SET",
+    "settings_record_bytes": 16,
+    "filesystem": "FAT16 first MBR partition for loader, ROM bundles and settings only",
+    "disk_access": "direct SD sector read/write through verified partition descriptors",
+    "default_drive_partitions": {
+      "A": 2,
+      "B": 3,
+      "C": 0,
+      "D": 0
+    },
+    "allowed_disk_partition_indices": [
+      2,
+      3,
+      4
+    ],
+    "max_simultaneously_attached_partitions": 3,
+    "partition_4": "optional third disk partition",
+    "drive_mapping": "four MBR partition nibbles in two bytes; 0 disables a drive; duplicate mappings rejected",
+    "disk_sector_count": 1600,
+    "disk_capacity_bytes": 819200,
+    "disk_geometry": [
+      80,
+      2,
+      10,
+      512
+    ],
+    "sector_translation": "partition_base_lba + ((track * 2 + side) * 10) + (sector - 1)",
+    "partition_bounds": "validate MBR signature, SD capacity, non-overlap, minimum size, geometry, LBA addition overflow and every backend request",
+    "runtime_disk_image_files": false,
+    "runtime_fat_chain_lookup": false,
+    "runtime_disk_writes": "selected disk partition geometry range only; MBR, FAT16 and other partitions unchanged"
+  },
+  "not_yet_verified": [
+    "physical multi-model boot and BIOS save",
+    "raw SD partitions and BK disk OS on board",
+    "seven frequencies on board",
+    "PAL voltage and CPU speed calibration",
+    "full routed SDF simulation"
+  ],
+  "implementation_checks_executed": true,
+  "user_constraints": {
+    "base_machine_modes_0_1_2": "БК-0010-01",
+    "bios_entry_key": "Backspace",
+    "bios_entry_ps2_set2_scan": "0x66",
+    "disk_storage": "direct sectors in dedicated SD MBR partitions, same scheme as pyldin601-fpga",
+    "runtime_disk_image_files": false
+  },
+  "proposed_bios": {
+    "entry_key": "Backspace",
+    "early_key_preserved": true,
+    "runtime_backspace_bk_code": "030 octal"
+  },
+  "remaining_unknowns": [],
+  "implementation": {
+    "model_contract": "config/machines.json",
+    "models": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "bios": "native resident VM1, Backspace entry, countdown/save/create/temporary settings",
+    "rom_loader": "LOADERBK.BIN; per-segment and SRAM CRC32, exact model contract",
+    "runtime_fdd": "177130/177132, native ROM read/write/RO/format, no PC hooks",
+    "runtime_storage": "bounded primary MBR partitions 2..4 through SPI CMD17/CMD24",
+    "frequencies_mhz": [
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24
+    ],
+    "bios_bytes": 7048,
+    "secondary_loader_bytes": 664,
+    "diamond": {
+      "device": "LCMXO2-7000HC-4TG144I",
+      "lut4": 6310,
+      "slices": 3190,
+      "ebr": 25,
+      "setup_errors": 0,
+      "hold_errors": 0,
+      "physical_board_verified": false
+    },
+    "checks": "build/results-*.json; packaged reports in releases/hardware-lcd-models-20261005/checks",
+    "preparation": "tools/prepare_sd_files.py copies only BK-owned loader/ROM files, preserves existing BK.SET/P601 files",
+    "bios_drive_masks": "generated from config/machines.json; native BIOS model/video/A-B save path verified"
+  }
+}

@@ -1,0 +1,2 @@
+PASS raw SD partitions: all 1600 LBAs, RO, absent, bounds, overlap, FAT protection, lock
+tests/tb_sd_partitions.v:68: $finish called at 28681000 (1ps)

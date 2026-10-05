@@ -1,0 +1,2 @@
+PASS panel: 3/4/6/8/12/16/24 MHz periods/phases, applied digits, wrap, warm/full reset
+tests/tb_panel.v:109: $finish called at 9928580000 (1ps)

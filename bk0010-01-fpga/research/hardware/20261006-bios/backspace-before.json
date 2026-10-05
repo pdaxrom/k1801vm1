@@ -1,0 +1,6 @@
+{
+  "completed": false,
+  "scope": "Original firmware stock 3 MHz: reached BIOS via PS/2 Backspace and selected all five models with physical Left/Right. Remaining old-firmware checks superseded by fixed-firmware regression.",
+  "bios_sha256": "810bd1af4962e656791bd3bdd73e4cc7efc2c8feeeedb1008460aafe30af802e",
+  "log_sha256": "d0112fce53241d839dbd4c82951354d16390b1695e627cef23b04ecabea591d0"
+}

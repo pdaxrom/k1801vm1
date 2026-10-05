@@ -1,0 +1,25 @@
+{
+  "cause": "Native guest leaves 177662 unread; keymap retains a second character and stops consuming PS/2 scan FIFO, blocking STOP and break codes.",
+  "negative_control_passed": true,
+  "before_jed_sha256": "ef60ab649605631f65b948b4ab9ebc8b9a1ba9f349953b190572ebc1da5cd257",
+  "fix": "Always consume native scan frames and update physical state; discard extra character makes when the BK register is occupied. Preserve BIOS ordered ready/valid input.",
+  "reference": "../20261005-ay/bkbtl-board.cpp: CMotherboard::KeyboardEvent processes STOP/release independently and ignores characters while the ready bit is set.",
+  "runs": [
+    {
+      "label": "before",
+      "passed": false,
+      "expected_pass": false,
+      "keymap_sha256": "eca0573c5fcea084d08eeb08a0669e54a3536bb2b8f274242f97114ddaa83bd2",
+      "log": "blocked-stop-before.log",
+      "log_sha256": "ad803ad644c5736da064335b38e5d241ad49b4b56f384db471b868869c268667"
+    },
+    {
+      "label": "after",
+      "passed": true,
+      "expected_pass": true,
+      "keymap_sha256": "a51964980bcdaaf4d373d82d681ae544c5323e08156bb9fd8aae9a3acc80d015",
+      "log": "blocked-stop-after.log",
+      "log_sha256": "343cb757465f31e8bc9d390b011f5af07ea5a794d2fbdca585bcfcceb8d2fcea"
+    }
+  ]
+}

@@ -83,7 +83,8 @@ def check(out):
         used, capacity = map(int, match.groups())
         require(0 < used <= capacity, f'Resources do not fit: {key}')
         resources[key] = {'used': used, 'capacity': capacity}
-    require(resources['ebr']['used'] == 9, 'Expected eight bootstrap EBRs and one line buffer EBR')
+    require(resources['ebr']['used'] == 25,
+            'Expected 8 bootstrap, 2 VM1, 1 video line, 1 PAL, 1 keyboard, 9 track, 2 partition and 1 SD buffer EBRs')
     sections = re.split(r'(?=^Preference:)', timing, flags=re.M)
     # Synplify's generated-clock pass can name the PLL secondary output
     # CLKOS_i_0. Accept this alias only with its explicit physical PLL source.
@@ -135,7 +136,7 @@ def check(out):
                     re.search(r'20\.83[34]ns delay constraint', p) for p in phase_paths),
                 f'Missing CPU phase direction/budget {direction}')
     unconstrained = re.findall(r'Unconstrained Preference:\s*\n\s*([^\n]+)', timing)
-    allowed_outputs = re.compile(r'CLOCK_TO_OUT PORT "(?:audio\[\d\]|led_rgb\[\d\]|seg_led_[hl]\[\d\]|tvout\[\d\]|tx|ps2_clock)" CLKNET "(?:clk|video_clk|machine/cpu_p)"\s*$')
+    allowed_outputs = re.compile(r'CLOCK_TO_OUT PORT "(?:audio\[\d\]|led_rgb\[\d\]|seg_led_[hl]\[\d\]|tvout\[\d\]|tx|ps2_clock)" CLKNET "(?:clk|clk48|CLKOS_i_0|video_clk|machine/cpu_p)"\s*$')
     require(all(allowed_outputs.fullmatch(line) for line in unconstrained), 'Unexpected unconstrained path')
     require('0 unconstrained paths found' in timing, 'Unconstrained check did not run')
     constraint_check = (out/'impl1/bk0010_impl1_cck.rpt').read_text()

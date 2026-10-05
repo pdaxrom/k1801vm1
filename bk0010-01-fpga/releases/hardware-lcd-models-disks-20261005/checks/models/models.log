@@ -1,0 +1,2 @@
+PASS C/RTL model map: 54536 vectors
+tests/tb_models.v:27: $finish called at 54536000 (1ps)

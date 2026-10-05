@@ -1,0 +1,325 @@
+{
+  "date": "2026-10-05",
+  "status": "implemented_and_verified_in_simulation",
+  "release": "releases/hardware-lcd-models-20261005",
+  "manifest_sha256": "3b750f24219b3e447dead1547799f4424f058ab4d7c00324320ab6aa1450d66a",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "6ef462a6bb1d1eac4a542fbbb48e8e71a9ea08befd867e4476395dbcac7aedf0",
+    "checksum": "D43E",
+    "transmission_checksum": "90B4",
+    "fuses": 1441280
+  },
+  "boot_hex_sha256": "1b457f00a461011be1394de48be08743684b3144b7584de1e5f5bd12c93ad294",
+  "models": [
+    {
+      "id": 0,
+      "name": "БК-0010-01 + КНГМД А16М",
+      "default_mhz": 3,
+      "entry": 59648,
+      "drive_mask": 3,
+      "segments": [
+        [
+          "MONIT10.ROM",
+          131072,
+          8192
+        ],
+        [
+          "BASIC10.ROM",
+          139264,
+          24576
+        ],
+        [
+          "DISK_A16M_v2.41.rom",
+          163840,
+          4096
+        ]
+      ]
+    },
+    {
+      "id": 1,
+      "name": "БК-0010-01 + Фокал (внешний МСТД)",
+      "default_mhz": 3,
+      "entry": 32768,
+      "drive_mask": 0,
+      "segments": [
+        [
+          "MONIT10.ROM",
+          131072,
+          8192
+        ],
+        [
+          "BASIC10.ROM",
+          139264,
+          24576
+        ],
+        [
+          "bk10_018_focal.rom",
+          163840,
+          8192
+        ],
+        [
+          "Tests.rom",
+          172032,
+          8064
+        ]
+      ]
+    },
+    {
+      "id": 2,
+      "name": "БК-0010-01 + Вильнюс Бейсик 86",
+      "default_mhz": 3,
+      "entry": 32768,
+      "drive_mask": 0,
+      "segments": [
+        [
+          "MONIT10.ROM",
+          131072,
+          8192
+        ],
+        [
+          "BASIC10.ROM",
+          139264,
+          24576
+        ]
+      ]
+    },
+    {
+      "id": 3,
+      "name": "БК-0011М + Бейсик Экситон + КНГМД",
+      "default_mhz": 4,
+      "entry": 49152,
+      "drive_mask": 15,
+      "segments": [
+        [
+          "bk11m_328_basic2.rom",
+          131072,
+          8192
+        ],
+        [
+          "bk11m_329_basic3.rom",
+          139264,
+          8192
+        ],
+        [
+          "bk11m_327_basic1.rom",
+          147456,
+          8192
+        ],
+        [
+          "bk11m_325_ext.rom",
+          155648,
+          8192
+        ],
+        [
+          "bk11m_324_bos.rom",
+          163840,
+          8192
+        ],
+        [
+          "DISK_327.ROM",
+          172032,
+          4096
+        ]
+      ]
+    },
+    {
+      "id": 4,
+      "name": "БК-0011М + МСТД",
+      "default_mhz": 4,
+      "entry": 49152,
+      "drive_mask": 0,
+      "segments": [
+        [
+          "bk11m_328_basic2.rom",
+          131072,
+          8192
+        ],
+        [
+          "bk11m_329_basic3.rom",
+          139264,
+          8192
+        ],
+        [
+          "bk11m_327_basic1.rom",
+          147456,
+          8192
+        ],
+        [
+          "bk11m_325_ext.rom",
+          155648,
+          8192
+        ],
+        [
+          "bk11m_324_bos.rom",
+          163840,
+          8192
+        ],
+        [
+          "bk11m_330_mstd.rom",
+          172032,
+          8192
+        ]
+      ]
+    }
+  ],
+  "checks": {
+    "models": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-models.json",
+      "sha256": "4a25db8cc8876338ce7f36702d9a739accc268bee3083b342319401f08b83c72",
+      "checks": 7,
+      "additional_checks": []
+    },
+    "fast": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-fast.json",
+      "sha256": "f6e4bf85705e53d0a54176f27c3737f1b010ffe2a9d7db1199f97b2e38f1f28b",
+      "checks": 30,
+      "additional_checks": []
+    },
+    "reference": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-reference.json",
+      "sha256": "8f945d2f57b33adc3917a7eb26d6dce387c9aa829cb791300d457183eb1ee3ee",
+      "checks": 6,
+      "additional_checks": []
+    },
+    "fdd": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-fdd.json",
+      "sha256": "5f814c955df814b0dc91f228252f58aad1c1d17e30f1bfaa4bad306788f8ecdb",
+      "checks": 21,
+      "additional_checks": []
+    },
+    "storage": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-storage.json",
+      "sha256": "6f33eefa8e1f8e443e8186c60bdae9d3a651f3c8d41c4d8167ba8422d8192e78",
+      "checks": 6,
+      "additional_checks": []
+    },
+    "profiles": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-profiles.json",
+      "sha256": "c6007d27edc5fe191a4a2ae04726ee606ab60aec3a4eba257e68d4a95c0147c2",
+      "checks": 15,
+      "additional_checks": []
+    },
+    "bios": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-bios.json",
+      "sha256": "4ace89141fb44be7708d59d49556a9c892d682ecfd647f930602e1135ca2a961",
+      "checks": 11,
+      "additional_checks": [
+        "bios-root-full",
+        "bios-model-drive"
+      ]
+    },
+    "soc": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-soc.json",
+      "sha256": "5a605ea4ded75d5bba4e76711ea515686f10a06963135a3e5ee5eaf967215c46",
+      "checks": 7,
+      "additional_checks": []
+    },
+    "plm": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-plm.json",
+      "sha256": "1418dfa5424905e14c68f37573d7db20f7d6964e66a4c4ef509a8b5bf27a3ea0",
+      "checks": 4,
+      "additional_checks": []
+    },
+    "mapped-ebr": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-mapped-ebr.json",
+      "sha256": "e0c934b763a8510d3c8c7064313389537532a21ccc8e7438506b88f38d97b740",
+      "checks": 0,
+      "additional_checks": []
+    },
+    "mapped-buffers": {
+      "passed": true,
+      "report": "releases/hardware-lcd-models-20261005/checks/results-mapped-buffers.json",
+      "sha256": "8e0f2c42e61d546bea7947852c5c7f1ed6af8ce21a2f378d891886cdfe7e8f32",
+      "checks": 0,
+      "additional_checks": []
+    }
+  },
+  "diamond": {
+    "device": "LCMXO2-7000HC-4TG144I",
+    "fully_routed": true,
+    "setup_errors": 0,
+    "hold_errors": 0,
+    "resources": {
+      "ff": {
+        "used": 2345,
+        "capacity": 7209
+      },
+      "slices": {
+        "used": 3190,
+        "capacity": 3432
+      },
+      "lut4": {
+        "used": 6310,
+        "capacity": 6864
+      },
+      "ebr": {
+        "used": 25,
+        "capacity": 26
+      }
+    },
+    "clocks": {
+      "clk": {
+        "required_mhz": 24,
+        "fmax_mhz": 31.505,
+        "physical_net": "clk"
+      },
+      "clk48": {
+        "required_mhz": 48,
+        "fmax_mhz": 63.662,
+        "physical_net": "clk48"
+      },
+      "video_clk": {
+        "required_mhz": 64,
+        "fmax_mhz": 67.76,
+        "physical_net": "video_clk"
+      },
+      "machine/cpu_p": {
+        "required_mhz": 24,
+        "fmax_mhz": 29.807,
+        "physical_net": "machine/cpu_p"
+      }
+    }
+  },
+  "validation_note": "The final BIOS drive-mask byte is generated from the shared contract; its model/video/A-B save path is validated separately in bios-model-drive.log. Other test reports retain their original source snapshots.",
+  "omitted_build_logs": [
+    {
+      "group": "models",
+      "name": "assemble-boot",
+      "expected_sha256": "c80806f465fec305772ff22488c47a62278ab43415e97156d28adb77c097ec3e",
+      "current_sha256": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+      "reason": "Shared build log regenerated after this run; original report retained."
+    },
+    {
+      "group": "fast",
+      "name": "assemble-boot",
+      "expected_sha256": "c80806f465fec305772ff22488c47a62278ab43415e97156d28adb77c097ec3e",
+      "current_sha256": "cab33ed5da357491257cfa7e5faf54c43695730aec5bd521fddc68b5398e0c0f",
+      "reason": "Shared build log regenerated after this run; original report retained."
+    }
+  ],
+  "physical_board_verified": false,
+  "pending": [
+    "physical five-model boot and BIOS save",
+    "raw SD partitions and BK disk OS on board",
+    "all seven frequencies on board",
+    "PAL voltage/speed calibration"
+  ],
+  "additional_local_checks": [
+    "SDL C frontend build",
+    "C/header formatting with astyle K&R tabs=8 braces max=120",
+    "Python compile",
+    "Verilator tb_sd_boot lint",
+    "git diff --check"
+  ]
+}

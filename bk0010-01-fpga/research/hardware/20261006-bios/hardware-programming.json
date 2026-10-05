@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-06",
+  "flash_program_verified": true,
+  "programmed_to": "FLASH",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "a305c323a39e677e398c1ac0abd9a09e5d1c2d7c5f24a92373fde2fa357364ce",
+    "checksum": "216A",
+    "transmission_checksum": "EEC6",
+    "fuses": 1441280
+  },
+  "device": "LCMXO2-7000HC",
+  "boot_stages": [
+    "01",
+    "02",
+    "03",
+    "10",
+    "11",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "boot_errors": [],
+  "uart_bootstrap_verified": true,
+  "uart_bios_menu_verified": true,
+  "uart_released": true,
+  "sd_written_in_programming_session": false,
+  "physical_bios_navigation_verified": true,
+  "physical_selected_basic_boot_verified": true,
+  "physical_five_model_boot_verified": false,
+  "operator_report": "operator-report.json",
+  "logs": {
+    "flash-session/01-verify-id.log": "25d739c0e580aee87c7982612a246b9952bcd09bc5b11dbf7b6816201472c5f5",
+    "flash-session/session.json": "6f350bc889f88d76f6f4ac4a567104105ac5b5f37b03e05784a96ea4ed0dbc55",
+    "flash-session/01-verify-id-stdout.log": "f3cbb4da7947ddd8c295545c9c4afb8e871f8294d3ddc7cd856f6a78fdba4167",
+    "flash-session/01-verify-id.xcf": "ecc7188f177d14d11285b97a63aeaa8c87cbc38221f77dfbd97d6ffd96e6d204",
+    "flash-session/02-program-stdout.log": "a95632d0dcb01f2d018a11b5bab7f9f4586aabbc85c41fe604c9049f363cdec7",
+    "flash-session/uart.bin": "cc0262a5ee246312d087d98076bcff8ea1b50fbaf1e75cfd6137ca6b5814c013",
+    "flash-session/programmer-old.log": "a2f39dcf652e56463ef179a7c7e9cbcb08ef0b7c5e173081664a0c4a69fb7b4e",
+    "flash-session/02-program.xcf": "bdf424bd25141ae666c0f2efe8e8ab3d0fe175586f50edbec292ba74f0c939c0",
+    "flash-session/02-program.log": "a855d9db6ea82fc643d726a0b48d64a36e8dcb9be94b124948410cd2d484e27d"
+  }
+}

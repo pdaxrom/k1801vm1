@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-06",
+  "flash_program_verified": true,
+  "programmed_to": "FLASH",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "5f189d09b86a77379d26f3ea36be526d1f41d77f9fb60212ee91372a33d5d250",
+    "checksum": "2752",
+    "transmission_checksum": "EE8F",
+    "fuses": 1441280
+  },
+  "device": "LCMXO2-7000HC",
+  "boot_stages": [
+    "01",
+    "02",
+    "03",
+    "10",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "boot_errors": [],
+  "uart_bootstrap_verified": true,
+  "uart_released": true,
+  "sd_written_in_this_session": false,
+  "physical_stop_verified": false,
+  "disk_shell_on_board_verified": false,
+  "logs": {
+    "flash-session/01-verify-id.log": "43cd4f964968f66a1e880dd8be57be9d85a90d64c26e5be209c7f7a1ade9d295",
+    "flash-session/session.json": "c813e7aee4929d217d076d93a318d8a0aab168258e9a12397310e06ae0cec88b",
+    "flash-session/01-verify-id-stdout.log": "2b84bea9de4f3c8be540d3df47a0b1035b89eb623159b7f686e8697acae8a167",
+    "flash-session/01-verify-id.xcf": "7d45526cfe11a0d006c4bb845463e3bd02bd31b112849bd85f5fdcaa099430dd",
+    "flash-session/02-program-stdout.log": "9c083e440b204124cf091f6f7d5602139155b9bc0875de3a8c1252fb712cfd3a",
+    "flash-session/uart.bin": "623038dda760d90365574281e7fa798d0b075391749f0c9bce9c83b719bdb7eb",
+    "flash-session/programmer-old.log": "a2f39dcf652e56463ef179a7c7e9cbcb08ef0b7c5e173081664a0c4a69fb7b4e",
+    "flash-session/02-program.xcf": "167e398aa73c7317719485101373fb8853c1875c49d5267a1132f02ae7f823c1",
+    "flash-session/02-program.log": "4c02423efdba198657d31a1447d7ca84b903e2066c66f07e5ea77efba203e26f"
+  }
+}

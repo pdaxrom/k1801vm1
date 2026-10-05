@@ -1,0 +1,1 @@
+PASS native A16M: read CHS boundaries at seven frequencies, write, RO, format; raw SD reads=11830 writes=140

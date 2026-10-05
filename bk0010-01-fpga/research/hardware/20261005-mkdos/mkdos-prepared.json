@@ -1,0 +1,36 @@
+{
+  "partition": 4,
+  "start_lba": 40960,
+  "sectors": 1600,
+  "card_sectors": 15601664,
+  "settings": {
+    "model": 3,
+    "frequency": 4,
+    "color": 0,
+    "drives": [
+      4,
+      0,
+      0,
+      0
+    ],
+    "readonly": 1
+  },
+  "mbr_before_sha256": "1d9790531763f1899689594b94329336f02f2c09d092128e483817f5de5fe4ae",
+  "fat16_before_sha256": "643cbbc1c820238392c9b04835a646d0897ccd3ad44a7083537769ae8adfd5bf",
+  "payloads": {
+    "mbr-after.bin": "50ae18c35747596257617c23fd0b8d6f462c7863661eac93a0269b4bc4b538ed",
+    "fat16-after.bin": "41e4ac32fc1b6bfc3edfc9eaca466c193399f5b6dd0601d21ab2cd848ba2c7eb",
+    "bk-disk.bin": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd",
+    "simulation-sd.img": "597fbe93652121dcb049f2f96ab250f3ee9860224a2919f39bcf0e40e204e4a7"
+  },
+  "preserved_files": {
+    "P601.ROM": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f",
+    "LOADER.BIN": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea",
+    "P601.CFG": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d",
+    "P601A.ROM": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1",
+    "P601.SET": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809",
+    "BK0010.ROM": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+  },
+  "loader_backup": "LDRBKOLD.BAK",
+  "device_written": false
+}

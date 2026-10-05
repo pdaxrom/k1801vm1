@@ -1,0 +1,2 @@
+PASS PLM equivalence: 44768 input pairs, both VM1A and VM1G
+tests/tb_plm_equivalence.v:23: $finish called at 44768000 (1ps)

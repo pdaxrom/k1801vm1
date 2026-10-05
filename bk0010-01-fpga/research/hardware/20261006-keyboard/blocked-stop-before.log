@@ -1,0 +1,2 @@
+FATAL: build/tb_keyboard_blocked_stop.v:46: STOP blocked behind unread character: valid=1 ready=0 scan=132 fifo= 4
+       Time: 3602000000  Scope: tb_keyboard_blocked_stop

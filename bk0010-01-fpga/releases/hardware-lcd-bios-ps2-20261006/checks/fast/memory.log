@@ -1,0 +1,2 @@
+PASS four-state SRAM pins: clear, byte lanes, boundary, concurrent DMA, reset during WE, retention
+tests/tb_memory.v:59: $finish called at 18478871 (1ps)

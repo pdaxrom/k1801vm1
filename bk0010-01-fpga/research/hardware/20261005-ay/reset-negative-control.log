@@ -1,0 +1,2 @@
+FATAL: tests/tb_reset.v:38: INIT changed video state or retained pending IRQ
+       Time: 20009000000  Scope: tb_reset

@@ -1,0 +1,6 @@
+fsck.fat 4.2 (2021-01-31)
+Label in boot sector is 'P601 BOOT', but there is no volume label in root directory.
+  Auto-removing label from boot sector.
+
+Leaving filesystem unchanged.
+/home/sash/Work/FPGA/bk-mkdos-sd-20261005/mkdos-prepared/fat16-after.bin: 14 files, 1800/32479 clusters

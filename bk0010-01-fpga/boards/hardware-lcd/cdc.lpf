@@ -5,7 +5,7 @@ BLOCK RESETPATHS ;
 # Only the pipe itself is excluded; its clocked outputs/consumers are timed.
 BLOCK PATH FROM CELL "power_on[3]" TO CELL "machine/video/vrst_pipe[*]" ;
 BLOCK PATH FROM CELL "machine/sram/initialized" TO CELL "machine/video/vrst_pipe[*]" ;
-BLOCK PATH FROM CELL "machine/panel/button/hard_reset" TO CELL "machine/video/vrst_pipe[*]" ;
+BLOCK PATH FROM CELL "machine/warm_reset" TO CELL "machine/video/vrst_pipe[*]" ;
 # Only the first synchronizer stage is asynchronous. Later stages stay timed.
 BLOCK PATH FROM CELL "machine/bridge/request_toggle" TO CELL "machine/bridge/request_sync[0]" ;
 BLOCK PATH FROM CELL "machine/bridge/response_toggle" TO CELL "machine/bridge/response_sync[0]" ;
@@ -15,16 +15,15 @@ BLOCK PATH FROM CELL "machine/video/config_ack" TO CELL "machine/video/ack_sync[
 BLOCK PATH FROM CELL "machine/video/line_toggle" TO CELL "machine/video/line_sync[0]" ;
 BLOCK PATH FROM CELL "machine/video/line_done" TO CELL "machine/video/done_sync[0]" ;
 BLOCK PATH FROM CELL "machine/ack_toggle" TO CELL "machine/ack_sync[0]" ;
-BLOCK PATH FROM CELL "machine/bus/irq_pending" TO CELL "machine/irq_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bus/irq_granted" TO CELL "machine/irq_sync[0]" ;
 BLOCK PATH FROM CELL "machine/cpu/core/init_out[*]" TO CELL "machine/init_sync[0]" ;
 BLOCK PATH FROM CELL "machine/cpu/release_count[*]" TO CELL "machine/init_sync[0]" ;
 BLOCK PATH FROM CELL "machine/cpu_reset_pipe[*]" TO CELL "machine/init_sync[0]" ;
-BLOCK PATH FROM CELL "machine/bus/irq_disabled" TO CELL "machine/irq_sync[0]" ;
-BLOCK PATH FROM CELL "machine/bus/key_latch[7]" TO CELL "machine/alt_sync[0]" ;
-BLOCK PATH FROM CELL "machine/keymap/down[*]" TO CELL "machine/held_sync[0]" ;
+BLOCK PATH FROM CELL "machine/keymap/held" TO CELL "machine/held_sync[0]" ;
 BLOCK PATH FROM CELL "machine/keymap/stop" TO CELL "machine/stop_sync[0]" ;
-BLOCK PATH FROM CELL "machine/requested_gray[*]" TO CELL "machine/request_meta[*]" ;
-BLOCK PATH FROM CELL "machine/active_gray[*]" TO CELL "machine/active_meta[*]" ;
+BLOCK PATH FROM CELL "machine/frequency_mailbox/toggle" TO CELL "machine/frequency_mailbox/request_sync[0]" ;
+BLOCK PATH FROM CELL "machine/frequency_mailbox/ack" TO CELL "machine/frequency_mailbox/ack_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bus/locked" TO CELL "machine/locked_meta" ;
 
 # Mailbox payloads are held through the acknowledgement. Do not false-path them.
 MAXDELAY FROM CELL "machine/bridge/held_address[*]" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
@@ -33,9 +32,33 @@ MAXDELAY FROM CELL "machine/bridge/held_lanes[*]" TO CELL "machine/bus/*" 25 NS 
 MAXDELAY FROM CELL "machine/bridge/held_write" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
 MAXDELAY FROM CELL "machine/bridge/held_read[*]" TO CELL "machine/bridge/cpu_read[*]" 25 NS DATAPATH_ONLY ;
 MAXDELAY FROM CELL "machine/video/held_config[*]" TO CELL "machine/video/vscroll[*]" 20 NS DATAPATH_ONLY ;
-MAXDELAY FROM CELL "machine/video/fill_row[*]" TO CELL "machine/video/dma_address[*]" 25 NS DATAPATH_ONLY ;
-MAXDELAY FROM CELL "machine/video/full_screen*" TO CELL "machine/video/dma_address[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/held_config[*]" TO CELL "machine/video/vpalette[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/held_config[*]" TO CELL "machine/video/vmodel11" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/held_config[*]" TO CELL "machine/video/vcolor" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/held_config[*]" TO CELL "machine/video/vpage" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/fill_row[*]" TO CELL "machine/video/dma_address*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/full_screen*" TO CELL "machine/video/dma_address*" 25 NS DATAPATH_ONLY ;
 MAXDELAY FROM CELL "machine/video/fill_bank" TO CELL "machine/video/dma_bank" 25 NS DATAPATH_ONLY ;
 
 # Both CPU phases use cpu_p; the negative phase maps to inverted clock pins.
 # FREQUENCY cpu_p checks full-period and half-period paths plus hold timing.
+
+# New memory-bank, clock, IRQ and model payloads remain held until consumed.
+MAXDELAY FROM CELL "machine/bridge/held_map[*]" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/frequency_mailbox/held[*]" TO CELL "machine/frequency_mailbox/target[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/frequency_mailbox/held[*]" TO CELL "machine/frequency_mailbox/ack" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/bus/granted_vector[*]" TO CELL "machine/vector_meta[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/bus/model[*]" TO CELL "machine/model_meta[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/fill_model11" TO CELL "machine/video/dma_address*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/fill_page" TO CELL "machine/video/dma_address*" 25 NS DATAPATH_ONLY ;
+# Disk wait request crosses to the 48 MHz phase generator. Only stage zero
+# is asynchronous; stage one and the minimum-width clock logic stay timed.
+BLOCK PATH FROM CELL "machine/bus/state[*]" TO CELL "machine/clocks/stall_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bus/disk_controller/ready" TO CELL "machine/clocks/stall_sync[0]" ;
+# AY command FIFO: Gray pointers may cross independently; their propagation
+# is bounded to one 48 MHz period so successive pointer bits cannot overtake.
+# Payload is held until the synchronized write pointer makes it visible.
+MAXDELAY FROM CELL "machine/sound/write_gray[*]" TO CELL "machine/sound/write_meta[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/sound/read_gray[*]" TO CELL "machine/sound/read_meta[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/sound/commands*" TO CELL "machine/sound/*" 20 NS DATAPATH_ONLY ;
+BLOCK PATH FROM CELL "machine/sys_output[6]" TO CELL "machine/sound/beeper_sync[0]" ;

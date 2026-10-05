@@ -1,0 +1,15 @@
+{
+  "system_clock_hz": 29411764,
+  "cpu_frequency_hz": 24000000,
+  "c_reference_frequency_hz": 4000000,
+  "disk_mechanics_speedup": 4,
+  "disk_controller_clock_parameter": 7352941,
+  "modified_source": "build/bk_system_bus-fast-disk-test.v",
+  "modification": "Only bk_fdd CLOCK_HZ parameter: CLOCK_HZ -> 7352941",
+  "derived_source_sha256": "745d405bf9f4f53af40dca8a1796f29c735d933d069b20aba37d1d733e689997",
+  "production_rtl_modified_for_test": false,
+  "native_clock_generator": true,
+  "real_rom_and_os_code": true,
+  "spi_transfers_accelerated": false,
+  "frame_interrupts_accelerated": false
+}

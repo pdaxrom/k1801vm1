@@ -1,0 +1,2 @@
+PASS CDC asynchronous byte lanes, CYC-preserving RMW, held ACK, timeout and reset
+tests/tb_cdc.v:65: $finish called at 6069000 (1ps)

@@ -1,0 +1,31 @@
+COMPUTER stage=01 sys_cycles=399852 reads=0
+COMPUTER stage=02 sys_cycles=474960 reads=0
+COMPUTER stage=03 sys_cycles=1057908 reads=2
+COMPUTER stage=10 sys_cycles=1669279 reads=4
+COMPUTER stage=04 sys_cycles=5004197 reads=8
+COMPUTER stage=05 sys_cycles=6532238 reads=11
+COMPUTER stage=06 sys_cycles=81818638 reads=139
+COMPUTER stage=07 sys_cycles=85386955 reads=139
+ROM committed: panel=0 clock=6
+COMPUTER stage=ff sys_cycles=86688649 reads=139
+PASS BIOS committed stock 3 MHz
+PASS frequency mode=1
+PASS frequency mode=2
+PASS frequency mode=3
+PASS frequency mode=4
+PASS frequency mode=5
+PASS frequency mode=6
+PASS full computer cold boot: 24 MHz, SD sectors=139
+PASS full computer warm reset: retained ROM, restored 3 MHz, resumed 24 MHz
+PASS full computer physical PS/2 PRINT 2+2, seven live frequencies, PAL without underruns
+COMPUTER stage=00 sys_cycles=108478730 reads=139
+COMPUTER stage=01 sys_cycles=108486637 reads=139
+COMPUTER stage=02 sys_cycles=108561745 reads=139
+COMPUTER stage=03 sys_cycles=109144694 reads=141
+COMPUTER stage=10 sys_cycles=109756091 reads=143
+COMPUTER stage=11 sys_cycles=110898633 reads=143
+PASS full computer full reset and Backspace BIOS menu: retained shared SD files
+- tests/tb_computer.v:141: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 5s; walltime 702.012 s; speed 6.588 ms/s
+- Verilator: cpu 701.495 s on 1 threads; allocated 2 MB

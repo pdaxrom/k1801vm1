@@ -1,0 +1,247 @@
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:33:22: Operator VAR 'FIRST_ROW' expects 8 bits on the Initial value, but Initial value's VARREF 'FIRST' generates 32 bits.
+                                             : ... note: In instance 'tb_computer.computer.video'
+   33 |     localparam [7:0] FIRST_ROW = FIRST, SECOND_ROW = SECOND;
+      |                      ^~~~~~~~~
+                     ... For warning description see https://verilator.org/warn/WIDTHTRUNC?v=5.050
+                     ... Use "/* verilator lint_off WIDTHTRUNC */" and lint_on around source to disable this message.
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:33:41: Operator VAR 'SECOND_ROW' expects 8 bits on the Initial value, but Initial value's VARREF 'SECOND' generates 32 bits.
+                                             : ... note: In instance 'tb_computer.computer.video'
+   33 |     localparam [7:0] FIRST_ROW = FIRST, SECOND_ROW = SECOND;
+      |                                         ^~~~~~~~~~
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:34:22: Operator VAR 'FIRST_PREFETCH' expects 8 bits on the Initial value, but Initial value's SUB generates 32 bits.
+                                             : ... note: In instance 'tb_computer.computer.video'
+   34 |     localparam [7:0] FIRST_PREFETCH = FIRST - 1, SECOND_PREFETCH = SECOND - 1;
+      |                      ^~~~~~~~~~~~~~
+%Warning-WIDTHTRUNC: rtl/bk_pal_video.v:34:50: Operator VAR 'SECOND_PREFETCH' expects 8 bits on the Initial value, but Initial value's SUB generates 32 bits.
+                                             : ... note: In instance 'tb_computer.computer.video'
+   34 |     localparam [7:0] FIRST_PREFETCH = FIRST - 1, SECOND_PREFETCH = SECOND - 1;
+      |                                                  ^~~~~~~~~~~~~~~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:33:36: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'tb_computer.computer.video.timing'
+   33 |     assign active_line=(line_number>=FIRST && line_number<FIRST+HEIGHT) ||
+      |                                    ^~
+                      ... For warning description see https://verilator.org/warn/WIDTHEXPAND?v=5.050
+                      ... Use "/* verilator lint_off WIDTHEXPAND */" and lint_on around source to disable this message.
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:33:58: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'tb_computer.computer.video.timing'
+   33 |     assign active_line=(line_number>=FIRST && line_number<FIRST+HEIGHT) ||
+      |                                                          ^
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:34:21: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'tb_computer.computer.video.timing'
+   34 |         (line_number>=SECOND && line_number<SECOND+HEIGHT);
+      |                     ^~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:34:44: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'tb_computer.computer.video.timing'
+   34 |         (line_number>=SECOND && line_number<SECOND+HEIGHT);
+      |                                            ^
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:35:35: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'tb_computer.computer.video.timing'
+   35 |     assign row=field ? line_number-SECOND : line_number-FIRST;
+      |                                   ^
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_pal_timing.v:35:56: Operator SUB expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                                         : ... note: In instance 'tb_computer.computer.video.timing'
+   35 |     assign row=field ? line_number-SECOND : line_number-FIRST;
+      |                                                        ^
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_pal_timing.v:35:15: Operator ASSIGNW expects 8 bits on the Assign RHS, but Assign RHS's COND generates 32 bits.
+                                                        : ... note: In instance 'tb_computer.computer.video.timing'
+   35 |     assign row=field ? line_number-SECOND : line_number-FIRST;
+      |               ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:37:44: Operator ADD expects 5 bits on the RHS, but RHS's REPLICATE generates 3 bits.
+                                                  : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+   37 |     wire [4:0] bank_end=bank==4?5'd30:5'd22+{bank[1:0],1'b0};
+      |                                            ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:38:33: Operator ADD expects 5 bits on the RHS, but RHS's REPLICATE generates 3 bits.
+                                                  : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+   38 |     wire [4:0] current_end=5'd22+{checked_drive,1'b0};
+      |                                 ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:39:31: Operator ADD expects 5 bits on the RHS, but RHS's REPLICATE generates 3 bits.
+                                                  : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+   39 |     wire [4:0] other_end=5'd22+{other_drive,1'b0};
+      |                               ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:128:55: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  128 |                 invalid_drive<=bad_boot||!base_nonzero[checked_drive]||short_extent[checked_drive]||overflow[checked_drive];
+      |                                                       ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:128:84: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  128 |                 invalid_drive<=bad_boot||!base_nonzero[checked_drive]||short_extent[checked_drive]||overflow[checked_drive];
+      |                                                                                    ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:128:109: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                    : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  128 |                 invalid_drive<=bad_boot||!base_nonzero[checked_drive]||short_extent[checked_drive]||overflow[checked_drive];
+      |                                                                                                             ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:133:17: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  133 |                 compare32({checked_drive,2'b0},30,FAT_FIRST);
+      |                 ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:142:47: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  142 |                 else if(overflow[other_drive])compare32({other_drive,2'b0},current_end,OTHER_SECOND);
+      |                                               ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:143:22: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  143 |                 else compare32({checked_drive,2'b0},other_end,OTHER_FIRST);
+      |                      ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:142:33: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  142 |                 else if(overflow[other_drive])compare32({other_drive,2'b0},current_end,OTHER_SECOND);
+      |                                 ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:141:63: Bit extraction of var[4:0] requires 3 bit index, not 2 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  141 |                 if(other_drive==checked_drive||!length_nonzero[other_drive])state<=OTHER_NEXT;
+      |                                                               ^
+%Warning-WIDTHEXPAND: rtl/bk_sd_partitions.v:146:35: Operator TASKREF 'compare32' expects 5 bits on the Function Argument, but Function Argument's REPLICATE generates 4 bits.
+                                                   : ... note: In instance 'tb_computer.computer.bus.disk_partitions'
+  146 |                 if(compare_result)compare32({other_drive,2'b0},current_end,OTHER_SECOND);
+      |                                   ^~~~~~~~~
+%Warning-WIDTHEXPAND: rtl/bk_fdd.v:85:28: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'word_counter' generates 11 bits.
+                                        : ... note: In instance 'tb_computer.computer.bus.disk_controller'
+   85 |             if(word_counter==WORD_CYCLES-1)begin
+      |                            ^~
+%Warning-WIDTHTRUNC: rtl/bk_fdd.v:113:54: Operator ASSIGNDLY expects 8 bits on the Assign RHS, but Assign RHS's VARREF 'CSR_CYCLES' generates 32 bits.
+                                        : ... note: In instance 'tb_computer.computer.bus.disk_controller'
+  113 |                 if(!write&&!data_port)begin csr_delay<=CSR_CYCLES;ready<=0;end
+      |                                                      ^~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_ps2_keyboard.v:12:22: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'divider' generates 5 bits.
+                                                           : ... note: In instance 'tb_computer.computer.transport'
+   12 |     wire tick=divider==US_DIV-1;
+      |                      ^~
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_sram.v:27:37: Logical operator LOGNOT expects 1 bit on the LHS, but LHS's VARREF 'FAST_RESPONSE' generates 32 bits.
+                                                  : ... note: In instance 'tb_computer.computer.sram'
+   27 |     assign ready=response_valid && (!FAST_RESPONSE || request);
+      |                                     ^
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_sram.v:67:34: Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'FAST_RESPONSE' generates 32 bits.
+                                                  : ... note: In instance 'tb_computer.computer.sram'
+   67 |                 if(FAST_RESPONSE && initialized && !cancelled && !reset)response_valid<=1;
+      |                                  ^~
+%Warning-WIDTHEXPAND: vendor/uj11/uj11_sram.v:76:37: Operator EQ expects 32 bits on the LHS, but LHS's VARREF 'clear_address' generates 20 bits.
+                                                   : ... note: In instance 'tb_computer.computer.sram'
+   76 |                     if(clear_address==CLEAR_WORDS-1) initialized<=1;
+      |                                     ^~
+%Warning-WIDTHTRUNC: vendor/uj11/uj11_sram.v:80:39: Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'FAST_RESPONSE' generates 32 bits.
+                                                  : ... note: In instance 'tb_computer.computer.sram'
+   80 |                 else if(FAST_RESPONSE && !request)begin response_valid<=0;state<=IDLE;end
+      |                                       ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:41:39: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   41 |     assign active_line = (line_number >= FIRST && line_number < FIRST + 256) ||
+      |                                       ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:41:63: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   41 |     assign active_line = (line_number >= FIRST && line_number < FIRST + 256) ||
+      |                                                               ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:42:39: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   42 |                          (line_number >= SECOND && line_number < SECOND + 256);
+      |                                       ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:42:64: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   42 |                          (line_number >= SECOND && line_number < SECOND + 256);
+      |                                                                ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:44:38: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'x' generates 12 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   44 |     assign active = active_line && x >= H_START && x < H_START + 3200;
+      |                                      ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:44:54: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'x' generates 12 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   44 |     assign active = active_line && x >= H_START && x < H_START + 3200;
+      |                                                      ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:71:34: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   71 |     wire prefetch = (line_number >= FIRST - 1 && line_number < FIRST + 255) ||
+      |                                  ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:71:62: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   71 |     wire prefetch = (line_number >= FIRST - 1 && line_number < FIRST + 255) ||
+      |                                                              ^
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:72:34: Operator GTE expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   72 |                     (line_number >= SECOND - 1 && line_number < SECOND + 255);
+      |                                  ^~
+%Warning-WIDTHEXPAND: rtl/bk_pal_video.v:72:63: Operator LT expects 32 bits on the LHS, but LHS's VARREF 'line_number' generates 10 bits.
+                                              : ... note: In instance 'tb_computer.computer.video'
+   72 |                     (line_number >= SECOND - 1 && line_number < SECOND + 255);
+      |                                                               ^
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:44:37: Logical operator COND expects 1 bit on the Conditional Test, but Conditional Test's VARREF 'version2' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   44 |                     append(version2 ? 1 : 5);
+      |                                     ^
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:45:21: Logical operator IF expects 1 bit on the If, but If's VARREF 'version2' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   45 |                     if(version2) begin append(0);append(0);append(1);append(8'haa);end
+      |                     ^~
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:53:64: Logical operator COND expects 1 bit on the Conditional Test, but Conditional Test's VARREF 'high_capacity' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   53 |                     append(idle ? 1 : 0); append(high_capacity ? 8'hc0 : 8'h80);
+      |                                                                ^
+%Warning-WIDTHEXPAND: tests/sd_spi_model.v:61:31: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SEL generates 6 bits.
+                                                : ... note: In instance 'tb_computer.card'
+   61 |                         csd[7]=csd_size[21:16]; csd[8]=csd_size[15:8]; csd[9]=csd_size[7:0];
+      |                               ^
+%Warning-WIDTHEXPAND: tests/sd_spi_model.v:64:41: Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's SEL generates 2 bits.
+                                                : ... note: In instance 'tb_computer.card'
+   64 |                         csd[5]=9; csd[6]=csd_size[11:10]; csd[7]=csd_size[9:2];
+      |                                         ^
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:58:21: Logical operator IF expects 1 bit on the If, but If's VARREF 'high_capacity' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   58 |                     if(high_capacity) begin
+      |                     ^~
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:72:41: Logical operator COND expects 1 bit on the Conditional Test, but Conditional Test's VARREF 'high_capacity' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   72 |                     lba = high_capacity ? argument : argument >> 9;
+      |                                         ^
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:77:48: Logical operator LOGNOT expects 1 bit on the LHS, but LHS's VARREF 'high_capacity' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   77 |                     if(lba >= card_sectors || (!high_capacity && argument[8:0] != 0)) append(8'h20);
+      |                                                ^
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:82:41: Logical operator COND expects 1 bit on the Conditional Test, but Conditional Test's VARREF 'high_capacity' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   82 |                     lba = high_capacity ? argument : argument >> 9;
+      |                                         ^
+%Warning-WIDTHTRUNC: tests/sd_spi_model.v:85:41: Logical operator LOGNOT expects 1 bit on the LHS, but LHS's VARREF 'high_capacity' generates 32 bits.
+                                               : ... note: In instance 'tb_computer.card'
+   85 |                     if(count != 512 || (!high_capacity && argument[8:0] != 0)) append(8'h20);
+      |                                         ^
+%Warning-WIDTHEXPAND: tests/sd_spi_model.v:101:20: Operator ASSIGN expects 1024 bits on the Assign RHS, but Assign RHS's VARREF 'IMAGE' generates 152 bits.
+                                                 : ... note: In instance 'tb_computer.card'
+  101 |         image_name = IMAGE;
+      |                    ^
+%Warning-WIDTHEXPAND: tests/tb_computer.v:93:37: Operator NEQ expects 32 bits on the LHS, but LHS's VARXREF 'active_mode' generates 3 bits.
+                                               : ... note: In instance 'tb_computer'
+   93 |             if(computer.active_mode != i) $fatal(1,"Seven-step frequency cycle %0d",i);
+      |                                     ^~
+%Warning-MULTIDRIVEN: vendor/cpu11/vm1_wb.v:88:16: Signal has multiple driving blocks with different clocking: 'tb_computer.computer.cpu.core.mj'
+                      vendor/cpu11/vm1_wb.v:1120:10: ... Location of first driving block
+ 1120 |          mj[11] <= psw[4];
+      |          ^~
+                      vendor/cpu11/vm1_wb.v:1101:7: ... Location of other driving block
+ 1101 |       mj[6:1] <= 6'b111111;
+      |       ^~
+                      ... For warning description see https://verilator.org/warn/MULTIDRIVEN?v=5.050
+                      ... Use "/* verilator lint_off MULTIDRIVEN */" and lint_on around source to disable this message.
+%Warning-MULTIDRIVEN: vendor/cpu11/vm1_wb.v:121:16: Signal has multiple driving blocks with different clocking: 'tb_computer.computer.cpu.core.plir'
+                      vendor/cpu11/vm1_wb.v:842:7: ... Location of first driving block
+  842 |       plir[1] <= pli[6];
+      |       ^~~~
+                      vendor/cpu11/vm1_wb.v:832:7: ... Location of other driving block
+  832 |       plir[0] <= 1'b0;
+      |       ^~~~
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated.o /opt/homebrew/Cellar/verilator/5.050/share/verilator/include/verilated.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_timing.o /opt/homebrew/Cellar/verilator/5.050/share/verilator/include/verilated_timing.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_threads.o /opt/homebrew/Cellar/verilator/5.050/share/verilator/include/verilated_threads.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -x c++-header Vtb_computer__pch.h -o Vtb_computer__pch.h.fast.gch
+c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -x c++-header Vtb_computer__pch.h -o Vtb_computer__pch.h.slow.gch
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.fast.gch -c Vtb_computer.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.fast.gch -c Vtb_computer___024root__0.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.fast.gch -c Vtb_computer___024root__1.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.fast.gch -c Vtb_computer___024root__2.cpp
+c++ -Os  -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.fast.gch -c Vtb_computer__main.cpp
+c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.slow.gch -c Vtb_computer__ConstPool__0__Slow.cpp
+c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.slow.gch -c Vtb_computer___024root__Slow.cpp
+c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.slow.gch -c Vtb_computer___024root__0__Slow.cpp
+c++   -I.  -MMD -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include -I/opt/homebrew/Cellar/verilator/5.050/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=0 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=0 -DVM_TRACE_SAIF=0 -DVM_VPI=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unnecessary-virtual-specifier -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable -Wno-vla-cxx-extension    -O3 -DVL_TIME_CONTEXT   -std=gnu++20 -include-pch Vtb_computer__pch.h.slow.gch -c Vtb_computer__Syms__Slow.cpp
+c++  -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv,-U,_vlog_startup_routines   verilated.o verilated_timing.o verilated_threads.o Vtb_computer__ALL.a    -pthread -lpthread   -o Vtb_computer
+rm Vtb_computer__ALL.verilator_deplist.tmp
+- V e r i l a t i o n   R e p o r t: Verilator 5.050 2026-07-01 rev vUNKNOWN-built20260701
+- Verilator: Built from 5.524 MB sources in 43 modules, into 2.036 MB in 9 C++ files needing 0.004 MB
+- Verilator: Walltime 5.272 s (elab=0.039, cvt=0.171, bld=5.010); cpu 0.275 s on 2 threads; allocated 59.406 MB

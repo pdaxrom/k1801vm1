@@ -7,3 +7,10 @@ __pycache__/
 !/releases/**/*.log
 !/research/hardware/**/*.log
 !/research/hardware/**/uart.bin
+!/releases/**/boot.bin
+!/releases/**/boot.hex
+!/releases/**/uart.bin
+!/releases/**/checks/native-stop/*.bin
+!/research/hardware/**/*-vram.bin
+!/research/hardware/**/initial-ay-timeout-memory.bin
+!/research/hardware/**/system-stop-*-memory.hex

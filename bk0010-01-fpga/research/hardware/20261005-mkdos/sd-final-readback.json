@@ -1,0 +1,42 @@
+{
+  "partitions": [
+    {
+      "index": 1,
+      "type": 6,
+      "start": 2048,
+      "sectors": 32768
+    },
+    {
+      "index": 2,
+      "type": 1,
+      "start": 34816,
+      "sectors": 1440
+    },
+    {
+      "index": 3,
+      "type": 1,
+      "start": 36864,
+      "sectors": 2880
+    },
+    {
+      "index": 4,
+      "type": 15,
+      "start": 40960,
+      "sectors": 7744
+    },
+    {
+      "index": 5,
+      "type": 218,
+      "start": 43008,
+      "sectors": 1600
+    },
+    {
+      "index": 6,
+      "type": 218,
+      "start": 47104,
+      "sectors": 1600
+    }
+  ],
+  "fat16_sha256": "540fe819a5f0d38a104f1f2ea18bc90e6f5a2ba05669f5d28c01ff7cdc1719ac",
+  "mbr_sha256": "7f7cf1df1d4d93043477560937bef45aa34eff774ad173441b084d3b536f83c6"
+}

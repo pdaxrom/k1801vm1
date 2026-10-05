@@ -14,7 +14,7 @@ module tb_cdc;
     reg [15:0] memory[0:255];
     integer i, delay = 0, transfers = 0;
     bk_wb_cdc bridge(cpu_clk, sys_clk, reset, cycle, strobe, writing, address, data, lanes,
-                     ack, result, busy, request, bus_write, bus_address, bus_data, bus_lanes, ready, response);
+                     ack, result, busy, request, bus_write, bus_address, bus_data, bus_lanes, ready, response,16'b0,);
     always @(posedge sys_clk) begin
         if(reset || !request) begin ready <= 0; delay <= 0; end
         else if(enable && !ready) begin

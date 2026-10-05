@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-06",
+  "flashed_jed_sha256": "5f189d09b86a77379d26f3ea36be526d1f41d77f9fb60212ee91372a33d5d250",
+  "operator_message": "работает. но BIOS не работает. запускает только БК0011М basic + fdd. на кнопки не реагирует вообще",
+  "stop_exit_confirmed": true,
+  "bios_mode_selection_reported_failed": true,
+  "physical_five_model_boot_verified": false,
+  "fixed_jed_sha256": "a305c323a39e677e398c1ac0abd9a09e5d1c2d7c5f24a92373fde2fa357364ce",
+  "verification_question": "Новый BIOS прошит, UART подтвердил вход в меню. Стрелки теперь меняют строки и модель? Для проверки выберите режим 2, затем строку BOOT WITHOUT SAVE и нажмите Enter — должен загрузиться Вильнюс BASIC.",
+  "verification_answer": "Меню работает, BASIC загрузился",
+  "physical_bios_navigation_verified": true,
+  "physical_bios_selected_basic_boot_verified": true
+}

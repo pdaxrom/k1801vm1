@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "physical_sd_opened": false,
+  "fixture_sparse_bytes": 7988051968,
+  "checked_bytes": 25165824,
+  "writer_sha256": "49b395430c7db81b14b7835c0e7de4c047c74d0170cd90bce6835bceee3b363b",
+  "preserved": "All bytes outside prepared MBR/FAT16/disk/EBR regions in first 24 MiB",
+  "after_sha256": "33ba5875e432f2e195e3ce4e896251524df0812ad3ab23ea38e41f7626df5a8a"
+}

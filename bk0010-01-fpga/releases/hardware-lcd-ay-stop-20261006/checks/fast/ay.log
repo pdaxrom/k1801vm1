@@ -1,0 +1,2 @@
+PASS AY independent PCM oracle: 213520 cycles, tones/noise/mixer/all envelopes
+tests/tb_ay.v:21: $finish called at 2135200000 (1ps)

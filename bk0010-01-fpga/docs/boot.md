@@ -1,96 +1,134 @@
 # Native VM1 SD bootstrap
 
-Все адреса регистров ниже восьмеричные. Payload ПЗУ содержит 32 КиБ,
-включая последние 128 байт, скрытые штатными CSR. Bootstrap пишет/читает
-эту область через физические порты SRAM и проверяет её полностью.
+Адреса регистров восьмеричные; offsets заголовков десятичные.
+Сам ВМ1 выполняет resident BIOS, FAT16 и второй этап. Первичный BIOS
+занимает 7048 байт в 8 КиБ EBR; второй этап LOADERBK.BIN — 664 байта,
+RAM 020000…027777. Меню и BK.SET описаны в [bios.md](bios.md).
 
 ## Этапы
 
-| Код | Действие |
+| Hex | Действие |
 |---|---|
-| 01 | Инициализация SD на ≤400 кГц |
-| 02 | MBR/BPB, геометрия FAT16 |
-| 03 | Загрузка LOADERBK.BIN в RAM 020000 |
-| 04 | Открытие BK0010.ROM, проверка заголовка |
-| 05 | Поток в SRAM, CRC32 |
-| 06 | Независимое чтение SRAM, CRC32 |
-| 07 | Подготовка перехода |
-| FF | ROM lock установлен, запуск MONIT |
+| 01 | SD initialization ≤400 кГц, CSD capacity |
+| 02 | MBR/BPB и FAT16 |
+| 03 | LOADERBK.BIN в RAM 020000 |
+| 10 | BIOS countdown |
+| 11 | BIOS setup |
+| 04 | BK00…04.ROM, заголовок и контракт модели |
+| 05 | Сегменты в физическую SRAM, CRC32 каждого |
+| 06 | Независимое чтение всех сегментов SRAM, общая CRC32 |
+| 07 | Подготовка RAM-трамплина |
+| FF | ROM lock, DCLO/ACLO, запуск выбранного ПЗУ |
 
-До lock resident ROM виден в `100000..117777`, его служебные вызовы:
-`100004` open (R0→11 байт имени, R0=size), `100010` get byte (R0=byte),
-`100014` fail (R0=code), `100020` handoff, `100024` показать этап.
+До lock resident ROM виден в 100000…117777, scratch — ниже 010000,
+SD buffer — 02000, ROM header — 03000, save buffer — 04000,
+stack начинается с 010000 и растёт вниз. Служебные вызовы:
+100004 open, 100010 get byte, 100014 fail, 100020 handoff,
+100024 stage, 100030 try-open, 100034 проверить контракт сегментов.
 Get byte сохраняет R1–R5, show stage — R0–R5.
 
-Рабочие переменные находятся в `01000..01056`, буфер SD в `02000`,
-заголовок в `03000`, stack начинается с `010000` и растёт вниз.
-Максимальный размер второго этапа — 4096 байт (`020000..027777`).
-Перед lock создаётся RAM-трамплин в `0400`, который записывает commit
-и прыгает на `100000`. Таким образом, CPU не исполняет исчезающий resident ROM.
+RAM-трамплин в 0400 устанавливает commit, не исполняя исчезающий resident
+ROM. Top-level после handoff сбрасывает CPU по последовательности DCLO/ACLO.
+Entry: 100000 для режимов 1/2, 140000 для 3/4, 164400 для А16М.
 
-## Заголовок BK0010.ROM
+## ROM bundle v2
 
-Little-endian, 512 байт, за ним 32768 байт MONIT10+BASIC10.
+Little-endian, заголовок 512 байт, за ним последовательные ROM segments.
+Имена BK00.ROM…BK04.ROM выбираются по ID настроек.
 
-| Offset decimal | Размер | Значение |
+| Offset | Размер | Значение |
 |---|---|---|
-| 0 | 8 | `BK0010\0\0` |
-| 8 | 2 | version=1 |
+| 0 | 8 | `BKROM2\0\0` |
+| 8 | 2 | версия 2 |
 | 10 | 2 | header bytes=512 |
-| 12 | 4 | payload bytes=32768 |
-| 16 | 4 | base=0x8000 |
-| 20 | 2 | entry=0x8000 |
-| 22 | 2 | reserved=0 |
-| 24 | 4 | payload CRC32 |
-| 28 | 4 | header CRC32; собственное поле обнулено при расчёте |
-| 32–511 | 480 | reserved, входит в header CRC32 |
+| 12 | 2 | ID модели 0…4 |
+| 14 | 2 | число сегментов 1…6 |
+| 16 | 4 | CPU entry |
+| 20 | 4 | общая длина payload |
+| 24 | 4 | общая CRC32 payload |
+| 28 | 4 | CRC32 header, это поле обнулено при расчёте |
+| 32 | 16 × count | дескрипторы сегментов |
+| после дескрипторов | до 512 | нули |
 
-CRC32: reflected polynomial `EDB88320`, init `FFFFFFFF`, final XOR `FFFFFFFF`,
-совместим с `zlib.crc32`.
+Дескриптор: физический байтовый адрес SRAM, длина, offset в payload,
+CRC32 сегмента — четыре uint32. ID/entry/count/адреса/размеры/offset
+должны точно совпадать с [контрактом](../config/machines.json).
+Пустые CPU-окна и CSR не становятся ПЗУ из-за padding файла.
+
+CRC32: reflected `EDB88320`, init `FFFFFFFF`, final XOR `FFFFFFFF`,
+совместимо с zlib.crc32. Проверяются header, поток каждого сегмента и
+полное независимое чтение SRAM. В аппаратуре CRC обрабатывает байт
+за восемь тактов; подтверждение шины выдаётся после завершения.
+
+Старый BK0010.ROM v1 допускается только как fallback режима 2:
+magic `BK0010\0\0`, header 512, payload 32768, base/entry 8000h,
+payload CRC32 по offset 24, header CRC32 по 28. Payload содержит
+MONIT10 8192 и BASIC10 24576. Адреса последних CSR скрыты от CPU,
+но их физические байты ПЗУ также проверяются.
 
 ## Регистры bootstrap
 
-Доступны только до lock. Word и low-byte операции, если не указано иначе.
+Доступны только до lock. Word и low-byte операции, кроме disk config,
+для которого требуются полные word-записи.
 
 | Адрес | Назначение |
 |---|---|
-| 177600 | SPI low data: запись запускает byte; чтение принятого byte |
-| 177602 | SPI control/READY, ABI Пълдина: 0x21 selected / 0x23 deselected |
-| 177604 | SPI half-period divider: 29 для 400 кГц, 1 для 6 МГц при system 24 МГц |
-| 177606 | SPI high data, зарезервирован для 16-bit ABI |
-| 177610 | BOOT_STATUS; запись 0 очищает незавершённую загрузку |
-| 177612 | Stage, запись с bit15 устанавливает boot_error |
-| 177614 | Физический байтовый адрес SRAM, начальный 0x8000 |
-| 177616 | Запись low byte в SRAM, pointer++, CRC и written_count++ |
-| 177620 | Чтение byte из SRAM, pointer++, CRC и verified_count++ |
-| 177622 | Подать byte в CRC (проверка заголовка) |
+| 177600 | SPI low data, запись запускает byte |
+| 177602 | SPI control/READY: 21h selected / 23h deselected |
+| 177604 | SPI half-period divider: 29 → 400 кГц, 1 → 6 МГц при system 24 МГц |
+| 177606 | SPI high data, резерв 16-bit ABI |
+| 177610 | BOOT_STATUS; запись 0 очищает счётчики/CRC незавершённой загрузки |
+| 177612 | Stage; запись bit15 устанавливает boot_error |
+| 177614 | SRAM pointer low word |
+| 177616 | Запись low byte в SRAM, pointer++, written_count++, CRC |
+| 177620 | Чтение byte SRAM, pointer++, verified_count++, CRC |
+| 177622 | Подать byte в CRC для header |
 | 177624 | Reset CRC и verified_count |
-| 177626 / 177630 | Final CRC low/high word |
-| 177632 / 177634 | Expected CRC low/high word |
-| 177636 | Commit=0xA55A; разрешён только после 32768 записей, 32768 чтений, CRC match и без ошибки |
+| 177626 / 177630 | Final CRC low/high |
+| 177632 / 177634 | Expected CRC low/high |
+| 177636 | Commit A55Ah после exact written/read counts и CRC match |
+| 177640 | SRAM pointer high nibble; включает физическую адресацию |
+| 177642 | Ожидаемое число загруженных байт; 0 означает 65536 |
+| 177644 | ID модели 0…4 |
+| 177646 | Индекс частоты 0…6, bit3 COLOR |
+| 177650 | BIOS tick50 pending; чтение очищает, новый tick имеет приоритет |
+| 177652 | Disk config: bit0 SDHC, RO bits8…11, bit15 seal |
+| 177654 | Указатель слова таблицы дисковых дескрипторов |
+| 177656 | Data word, auto-increment при записи |
 
-После commit все порты bootstrap скрыты, SPI CS отпущен, штатные записи
-CPU в ПЗУ не подтверждаются. Lock сбрасывается только `power_on`;
-тёплый reset сохраняет его и содержимое SRAM. Peripheral RESET очищает
-клавиатуру/прокрутку, сохраняя ПЗУ.
+Disk table words 0…15: A/B/C/D, по четыре слова start low/high и length
+low/high. Words16…19 — границы FAT;20…21 — число секторов SD. Seal запускает
+проверку bounds/overflow/overlap; чтение bit15 возвращает готовность
+только после завершения. Valid drive mask и базы фиксируются до полного
+возврата BIOS. Runtime LBA дополнительно ограничен offset<1600 и RO.
 
-## Ошибки
+Физические stream-порты разрешают только ROM 20000h…2FFFFh.
+Commit проверяет отсутствие boot_error, exact общий written_count,
+verified_count и общую CRC32. После него bootstrap-порты скрыты,
+записи CPU в ROM не подтверждаются, SD принадлежит runtime controller.
+Тёплый reset сохраняет ROM/model/дескрипторы; полный десятисекундный
+reset или power-on возвращает BIOS. Peripheral RESET очищает интерфейсы,
+завершая dirty-дорожку без потери данных. Инструкция RESET сохраняет
+банки памяти, видеорегистр 177662 и прокрутку 177664; ожидающие прерывания
+снимаются, но разрешение кадрового IRQ100 сохраняется.
+
+## Ошибки загрузки
 
 | Hex | Причина |
 |---|---|
-| 11 | MBR, тип/начало раздела или переполнение абсолютного LBA |
+| 11 | MBR/раздел/границы/переполнение LBA |
 | 12 | BPB/геометрия FAT16 |
-| 13 | Размер LOADERBK.BIN превышает 4096 байт |
-| 21 | Timeout ожидания SPI READY |
-| 22 | SD не передала R1 response за 512 байт ожидания |
-| 23 | SD initialization timeout / invalid response |
-| 24 | Ошибка CMD17/data token/адреса SDSC |
-| 31 | Файл отсутствует, неправильный размер/cluster, повреждённая FAT chain |
-| 41 | Заголовок, параметры или CRC заголовка |
-| 42 | CRC потока ПЗУ |
-| 43 | CRC чтения SRAM |
+| 13 | LOADERBK.BIN больше 4096 байт |
+| 21 | Timeout SPI READY |
+| 22 | Нет R1 response за 512 байт |
+| 23 | SD initialization timeout/response |
+| 24 | CMD17/token/адрес SDSC |
+| 31 | Файл отсутствует, size/cluster/FAT chain |
+| 41 | ROM header/модель/контракт/CRC |
+| 42 | CRC потока ROM segment |
+| 43 | Общая CRC чтения SRAM |
+| 44 | ROM bundle выбранной модели отсутствует |
 
-После ошибки CPU остаётся в resident bootstrap, PAL показывает `SD ROM xx`,
-UART передаёт `E:xx`. Новое длинное нажатие сбрасывает CPU и повторяет
-незавершённую холодную загрузку. Проверки повреждений в `tb_sd_boot.v`
-требуют именно ожидаемый error code и отсутствие ROM lock.
+Отказ до handoff не устанавливает ROM lock. UART передаёт E:xx,
+PAL показывает код; RESET позволяет повторить загрузку. Ошибки сохранения
+BIOS 50…56 возвращают меню и описаны отдельно в bios.md.

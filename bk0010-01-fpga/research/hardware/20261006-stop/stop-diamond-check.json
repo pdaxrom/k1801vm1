@@ -1,0 +1,45 @@
+{
+  "device": "LCMXO2-7000HC-4TG144I",
+  "setup_errors": 0,
+  "hold_errors": 0,
+  "resources": {
+    "ff": {
+      "used": 2588,
+      "capacity": 7209
+    },
+    "slices": {
+      "used": 3410,
+      "capacity": 3432
+    },
+    "lut4": {
+      "used": 6747,
+      "capacity": 6864
+    },
+    "ebr": {
+      "used": 25,
+      "capacity": 26
+    }
+  },
+  "clocks": {
+    "clk": {
+      "required_mhz": 24,
+      "fmax_mhz": 33.278,
+      "physical_net": "clk"
+    },
+    "clk48": {
+      "required_mhz": 48,
+      "fmax_mhz": 59.074,
+      "physical_net": "clk48"
+    },
+    "video_clk": {
+      "required_mhz": 64,
+      "fmax_mhz": 70.577,
+      "physical_net": "video_clk"
+    },
+    "machine/cpu_p": {
+      "required_mhz": 24,
+      "fmax_mhz": 31.176,
+      "physical_net": "machine/cpu_p"
+    }
+  }
+}

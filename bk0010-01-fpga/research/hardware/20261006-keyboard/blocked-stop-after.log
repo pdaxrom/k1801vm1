@@ -1,0 +1,2 @@
+PASS STOP remains independent of character register backpressure
+build/tb_keyboard_blocked_stop.v:48: $finish called at 3602000000 (1ps)
