@@ -1,0 +1,175 @@
+{
+  "scope": "PAL viewport: current fast/EBR tests, Diamond timing, physical Flash/SD boot and LCD edges; prior boot/full SoC evidence retained",
+  "groups": [
+    {
+      "group": "fast",
+      "passed": true,
+      "checks": [
+        "assemble-boot",
+        "assemble-loader",
+        "compile-panel",
+        "panel",
+        "compile-cdc",
+        "cdc",
+        "compile-keyboard",
+        "keyboard",
+        "compile-uart",
+        "uart",
+        "compile-memory",
+        "memory",
+        "lint-soc",
+        "compile-video",
+        "video-mono-colour"
+      ],
+      "report": "releases/hardware-lcd-pal-20261005/functional/fast.json",
+      "report_sha256": "ab7fef03c5b7931d2c7012b5472390f3c60f1fff53c25f766a97c59fe65e75b3"
+    },
+    {
+      "group": "boot",
+      "passed": true,
+      "checks": [
+        "assemble-boot",
+        "assemble-loader",
+        "compile-reference-c",
+        "reference-c",
+        "c-boot-vram",
+        "c-print-vram",
+        "compile-reference_boot",
+        "reference-boot",
+        "reference-boot-vram",
+        "reference-print-vram",
+        "compile-sd_boot",
+        "bad-mbr",
+        "bad-bpb",
+        "bad-header",
+        "bad-payload",
+        "bad-chain",
+        "missing-bk-loader",
+        "bad-sram",
+        "boot-sdhc",
+        "sdhc-rom",
+        "sdhc-vram",
+        "boot-sdsc-v1",
+        "sdsc-v1-rom",
+        "sdsc-v1-vram",
+        "boot-fragmented",
+        "fragmented-rom",
+        "fragmented-vram",
+        "boot-coexist-loader",
+        "coexist-loader-rom",
+        "coexist-loader-vram"
+      ],
+      "report": "releases/hardware-lcd-loaderbk-20261004/functional/boot.json",
+      "report_sha256": "ed11ead7d04ba75f42e52f5fb9b0711693d33da1ee56031e1462675e0fc17e47"
+    }
+  ],
+  "plm": "releases/hardware-lcd-loaderbk-20261004/functional/plm-equivalence.json",
+  "mapped_ebr": "releases/hardware-lcd-pal-20261005/functional/mapped-ebr.json",
+  "diamond": {
+    "report": "releases/hardware-lcd-pal-20261005/result.json",
+    "jed": {
+      "bytes": 1456106,
+      "sha256": "64f4e157355c0d4a16a874aaf23e5651dfb25d8546bae57dcb243c900d0120e9",
+      "checksum": "6086",
+      "transmission_checksum": "EED1",
+      "fuses": 1441280
+    },
+    "setup_errors": 0,
+    "hold_errors": 0,
+    "resources": {
+      "ff": {
+        "used": 1940,
+        "capacity": 7209
+      },
+      "slices": {
+        "used": 2935,
+        "capacity": 3432
+      },
+      "lut4": {
+        "used": 5834,
+        "capacity": 6864
+      },
+      "ebr": {
+        "used": 9,
+        "capacity": 26
+      }
+    },
+    "clocks": {
+      "clk": {
+        "required_mhz": 24,
+        "fmax_mhz": 28.661,
+        "physical_net": "clk"
+      },
+      "clk48": {
+        "required_mhz": 48,
+        "fmax_mhz": 57.006,
+        "physical_net": "clk48"
+      },
+      "video_clk": {
+        "required_mhz": 64,
+        "fmax_mhz": 68.833,
+        "physical_net": "video_clk"
+      },
+      "machine/cpu_p": {
+        "required_mhz": 24,
+        "fmax_mhz": 27.911,
+        "physical_net": "machine/cpu_p"
+      }
+    }
+  },
+  "hardware": {
+    "functional_board_boot_verified": true,
+    "visual_edges_user_confirmed": true,
+    "report": "research/hardware/20261005-pal/result.json",
+    "report_sha256": "25b4411aa9162e8a45cc23aa35dfc9db3e3e729e9c5db480a2beb932513b104f"
+  },
+  "artifact_integrity": "releases/hardware-lcd-pal-20261005/verification.json",
+  "artifacts": {
+    "boot.bin": {
+      "bytes": 1828,
+      "sha256": "3533b6b26b79f4a602da914c7da3fd34c7bd52257bb840ae73c875fbded57a33"
+    },
+    "LOADERBK.BIN": {
+      "bytes": 337,
+      "sha256": "994400a6d25086558f531962a3f40129d6f011c794cc05e372662b756c9969fe"
+    },
+    "boot.hex": {
+      "bytes": 20480,
+      "sha256": "0bd6a66e306a18a8f506205bea84c05eb6879414802df3a0871a765afdb40f72"
+    },
+    "BK0010.ROM": {
+      "bytes": 33280,
+      "sha256": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+    },
+    "bk0010-sd.img": {
+      "bytes": 17825792,
+      "sha256": "321e73777d82a56d2ea4629d083d6a835edb8a6e91bc1437703de68339781f6c"
+    }
+  },
+  "current_tested_boot_source_hashes_match": true,
+  "remaining": [
+    "PAL waveform/amplitude and absolute CPU clock measurements",
+    "3 MHz performance calibration against original BK"
+  ],
+  "prior_full_soc": "releases/hardware-lcd-loaderbk-20261004/functional/baseline-soc-diamond.json",
+  "prior_fast": "releases/hardware-lcd-loaderbk-20261004/functional/baseline-fast.json",
+  "viewport": {
+    "horizontal_clocks": [
+      718,
+      3917
+    ],
+    "first_field_lines": [
+      32,
+      287
+    ],
+    "second_field_lines": [
+      345,
+      600
+    ],
+    "width_pixels": 512,
+    "height_lines": 256,
+    "shift_mono_pixels_left": 8,
+    "shift_lines_down": 4
+  },
+  "current_fast_source_hashes_match": true
+}

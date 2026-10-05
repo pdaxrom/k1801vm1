@@ -1,0 +1,85 @@
+{
+  "started_utc": "2026-10-04T13:55:55.176457+00:00",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "93aad47380391be38ab09874a7e598cc9d5f943542f16bbec8d5d19ba7881836",
+    "checksum": "069B",
+    "transmission_checksum": "EA61",
+    "fuses": 1441280
+  },
+  "driver_sha256": "2bae2f91649a90dbb9c5205d6d69622c8df92237d6ff4a19f7675a83bebd1921",
+  "uart_port": "/dev/ttyUSB1",
+  "actions": [
+    {
+      "action": "verify-id",
+      "utc": "2026-10-04T13:56:09.752965+00:00",
+      "uart_offset": 0,
+      "passed": true,
+      "exit_code": 0,
+      "operation": "FLASH Verify ID",
+      "stdout": "01-verify-id-stdout.log",
+      "config": "01-verify-id.xcf"
+    },
+    {
+      "action": "program",
+      "utc": "2026-10-04T13:56:23.785743+00:00",
+      "uart_offset": 0,
+      "passed": true,
+      "exit_code": 0,
+      "operation": "FLASH Erase,Program,Verify",
+      "stdout": "02-program-stdout.log",
+      "config": "02-program.xcf"
+    },
+    {
+      "action": "read",
+      "utc": "2026-10-04T14:02:01.577437+00:00",
+      "uart_offset": 13,
+      "passed": true
+    },
+    {
+      "action": "read",
+      "utc": "2026-10-04T14:03:02.486028+00:00",
+      "uart_offset": 13,
+      "passed": true
+    },
+    {
+      "action": "read",
+      "utc": "2026-10-04T14:04:27.936765+00:00",
+      "uart_offset": 67,
+      "passed": true
+    },
+    {
+      "action": "read",
+      "utc": "2026-10-04T14:07:00.487513+00:00",
+      "uart_offset": 67,
+      "passed": true
+    },
+    {
+      "action": "close",
+      "utc": "2026-10-04T14:09:24.996467+00:00",
+      "uart_offset": 67,
+      "passed": true
+    }
+  ],
+  "programmed_to": "FLASH",
+  "flash_modified": true,
+  "physical_board_verified": false,
+  "uart_bytes": 67,
+  "boot_stages": [
+    "01",
+    "22",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "boot_errors": [
+    "22"
+  ],
+  "id_verified": true,
+  "flash_program_verified": true
+}

@@ -1,0 +1,42 @@
+{
+  "date_local": "2026-10-04",
+  "timezone": "Asia/Yerevan",
+  "host": "sash@192.168.1.108",
+  "board": "Z-pdaXrom-TV hardware-lcd",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "a74dfb81c832517571c26a56085d270402f5bb41b25b31b5b68daf568074b6c1",
+    "checksum": "070B",
+    "transmission_checksum": "EA61",
+    "fuses": 1441280
+  },
+  "flash_program_verify_passed": true,
+  "native_boot_passed": true,
+  "uart_offset": 19,
+  "boot_stages": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "rom_stream_and_sram_readback_crc32_passed": true,
+  "user_observation": {
+    "source": "user",
+    "message": "загрузился в BASIC!",
+    "basic_started": true
+  },
+  "original_p601_loader_restored": true,
+  "p601_filename": "LOADER.BIN",
+  "bk_filename": "LOADERBK.BIN",
+  "sd_write_readback_passed": true,
+  "uart_closed": true,
+  "functional_board_boot_verified": true,
+  "first_no_card_error": "E:22 while SD was in reader; retry with card has no errors",
+  "previous_keyboard_display_frequencies_reset_checks": "../20261004/result.json",
+  "scope": "New loader-name Flash/SD boot verified; unchanged RTL manual checks retained from initial session",
+  "analog_pal_and_absolute_cpu_speed_measured": false
+}

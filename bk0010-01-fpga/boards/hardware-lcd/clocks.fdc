@@ -1,0 +1,7 @@
+# Synthesis clocks. Physical timing/CDC/I/O constraints live in clock.lpf.
+# Keep LPF export disabled: only one combined, audited LPF is active.
+create_clock -name crystal -period 83.333333333 [get_ports {clk_ext}]
+create_generated_clock -name system -source [get_ports {clk_ext}] -multiply_by 2 [get_nets {main_pll.CLKOP}]
+create_generated_clock -name divider -source [get_ports {clk_ext}] -multiply_by 4 [get_nets {main_pll.CLKOS}]
+create_generated_clock -name pal -source [get_ports {clk_ext}] -multiply_by 16 -divide_by 3 [get_nets {video_pll.CLKOS}]
+create_generated_clock -name vm1 -source [get_nets {main_pll.CLKOS}] -divide_by 2 [get_nets {machine.cpu_p}]

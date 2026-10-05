@@ -1,0 +1,128 @@
+{
+  "utc": "2026-10-04T02:39:26.178851+00:00",
+  "host": "sash@192.168.1.108",
+  "diamond_version": "3.14",
+  "remote_directory": "/home/sash/Work/FPGA/bk0010-20261004-stable-9agkSL",
+  "device": "LCMXO2-7000HC-4TG144I",
+  "physical_board_verified": false,
+  "files": {
+    "README.md": {
+      "bytes": 5197,
+      "sha256": "5ab7210b81e69b295b94d819dc3df484f129b81e56a7078a25fef9f47a21146a"
+    },
+    "design.jed": {
+      "bytes": 1456106,
+      "sha256": "93aad47380391be38ab09874a7e598cc9d5f943542f16bbec8d5d19ba7881836"
+    },
+    "functional/boot.json": {
+      "bytes": 14112,
+      "sha256": "d2cbdbca7e69e79433a69be9124c2c0d45495d889d8f3dced1894c9bcd4688dd"
+    },
+    "functional/fast.json": {
+      "bytes": 12278,
+      "sha256": "2cb8fc904cafee799a7ea7be181e213253074c450bb7d4c0a18b2faeb90e51e5"
+    },
+    "functional/mapped-ebr.json": {
+      "bytes": 1396,
+      "sha256": "338d030eac177dfa0b284f1ce7200a41bee396e1b8781ca97904ba61c9723171"
+    },
+    "functional/mapped-ebr.log": {
+      "bytes": 191,
+      "sha256": "dacf5ae43e44be97e74b9079a5841a94a041feda9e5847c405616441ac040b54"
+    },
+    "functional/plm-equivalence.json": {
+      "bytes": 696,
+      "sha256": "924e0a4262b228b8487e0605f451c0e9fef764d820b511f5db3ba278fe26643d"
+    },
+    "functional/soc-diamond.json": {
+      "bytes": 9642,
+      "sha256": "64e1eea5a99d692990e09c7731b567ec4f155ab64351f1c9c3804795181c25b6"
+    },
+    "functional/soc-diamond.log": {
+      "bytes": 800,
+      "sha256": "1f0c1ae1696e9a6a9a25aabfee7b598e07117f4de0c16b61d0b56fe2a4599279"
+    },
+    "functional/tb_mapped_ebr.v": {
+      "bytes": 35825,
+      "sha256": "3c933da2f58c3ce9b03e44898618d3ab726360a162c19156569c1c3a75ce9bac"
+    },
+    "inputs.json": {
+      "bytes": 4388,
+      "sha256": "6502f5b4eb4d25fa123d98c41b34e1d8ea30785806eacd79ae96da3c86bf1b18"
+    },
+    "reports/build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "reports/design.mrp": {
+      "bytes": 72847,
+      "sha256": "ac38c2a250853350d81b26e1a468e11c0d3f905bce55a910407c1b7d525d6e9b"
+    },
+    "reports/design.par": {
+      "bytes": 17406,
+      "sha256": "9dc72a7ea4354be3661d187a04dc72efe1c17cbfa4161c1214f599d8f9f4faf9"
+    },
+    "reports/design.prf": {
+      "bytes": 7756,
+      "sha256": "3e5b1308b472b139d2f2bc3831e66acd5e1203719e6c685ef407c03e3b32fddc"
+    },
+    "reports/design.srr": {
+      "bytes": 230848,
+      "sha256": "f487f9f636d1e981f040ebff8c71ed1b638cbaccef637c4c0111f8b02571e791"
+    },
+    "reports/design.twr": {
+      "bytes": 796536,
+      "sha256": "d97485ce08bb3352ec9d0aa429fdc9a2a647245106e11ebe7122f62223b0a9c7"
+    },
+    "reports/export.log": {
+      "bytes": 4730,
+      "sha256": "7dea1be1164ab8cd976f7ac84bd66626cfe213b639300198b1916a761b80ef12"
+    },
+    "reports/phase.log": {
+      "bytes": 3557,
+      "sha256": "f6f9d7cb33f23023b9b3750160661773b36dd3eef4bdb57c8ef7eb29f91729f9"
+    },
+    "reports/phase.prf": {
+      "bytes": 8015,
+      "sha256": "8ace458cd2508e354306d55bf0219cbf208b3fa92098542c8aa976e1b3143fd8"
+    },
+    "reports/phase.twr": {
+      "bytes": 844493,
+      "sha256": "15b1e06671a55baaccc8840b582f0cc74e9839c9befd8d318c85f1e858fcc494"
+    },
+    "reports/synthesis-constraints.rpt": {
+      "bytes": 7345,
+      "sha256": "e93ee11ad3abea45f08bc3504ea0bd3bb2ca9c8201a37268b5a45dc1c9fb5895"
+    },
+    "reports/synthesis.edi.gz": {
+      "bytes": 347008,
+      "sha256": "fb77a1e6e5affea16c35d3be5e31166a4a9955e1b9054510d72bccad3282d2aa"
+    },
+    "result.json": {
+      "bytes": 13746,
+      "sha256": "ae3c8cb514a2e286660f6f5805d81cb0d61ce7615e6a271fd375e429045aeb5f"
+    },
+    "sd-image.img.gz": {
+      "bytes": 44415,
+      "sha256": "b47fb23f3b965ca6696255947ebfc1ddb24c0ee5d14bb886d5feff34fb47f464"
+    },
+    "sources.tar.gz": {
+      "bytes": 75737,
+      "sha256": "8bd0858c8c1c95bd306b8ca1c5264d2af510a42e8d4d051b17765dff7d50ecc4"
+    },
+    "verification.json": {
+      "bytes": 9765,
+      "sha256": "131b924fc1462cf18dc0b9c8db8398997225567671e89641a4d868ba9794d80a"
+    }
+  },
+  "external_ebr_verifier": {
+    "path": "../../tools/test_mapped_ebr.py",
+    "bytes": 7254,
+    "sha256": "c6fd6f07be5c3337ba4161651938cfec2e6d5c8cce2995ff7cf15b82e52d5641"
+  },
+  "ncd_sha256": "b550a5a3005f07c91cd4506195f65e6e9928a1639afb6e96ba53d12e93053606",
+  "sd_image_uncompressed": {
+    "bytes": 17825792,
+    "sha256": "4a73ca8c8babc5080c4a656a1f63d29f863c4d514af37ad0e143af2b14df885b"
+  }
+}

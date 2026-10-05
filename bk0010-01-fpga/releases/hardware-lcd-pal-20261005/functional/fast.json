@@ -1,0 +1,323 @@
+{
+  "utc": "2026-10-05T05:11:41.449922+00:00",
+  "passed": true,
+  "group": "fast",
+  "results": [
+    {
+      "name": "assemble-boot",
+      "passed": true,
+      "command": [
+        "/Users/sash/Work/PROJECTS/k1801vm1/microasm11/microasm11",
+        "--cpu",
+        "vm1",
+        "-binary",
+        "--list",
+        "build/boot.lst",
+        "firmware/boot/boot.asm",
+        "build/boot.bin"
+      ],
+      "seconds": 0.021,
+      "log": "build/assemble-boot.log"
+    },
+    {
+      "name": "assemble-loader",
+      "passed": true,
+      "command": [
+        "/Users/sash/Work/PROJECTS/k1801vm1/microasm11/microasm11",
+        "--cpu",
+        "vm1",
+        "-binary",
+        "--list",
+        "build/loader.lst",
+        "firmware/loader/loader.asm",
+        "build/LOADERBK.BIN"
+      ],
+      "seconds": 0.005,
+      "log": "build/assemble-loader.log"
+    },
+    {
+      "name": "compile-panel",
+      "passed": true,
+      "command": [
+        "iverilog",
+        "-g2012",
+        "-s",
+        "tb_panel",
+        "-o",
+        "build/panel.vvp",
+        "tests/tb_panel.v",
+        "rtl/bk_cpu_clock.v",
+        "rtl/bk_panel.v",
+        "rtl/bk_frequency_display.v",
+        "vendor/uj11/uj11_button.v",
+        "vendor/uj11/uj11_tick.v"
+      ],
+      "seconds": 0.041,
+      "log": "build/compile-panel.log"
+    },
+    {
+      "name": "panel",
+      "passed": true,
+      "command": [
+        "vvp",
+        "build/panel.vvp"
+      ],
+      "seconds": 0.677,
+      "log": "build/panel.log"
+    },
+    {
+      "name": "compile-cdc",
+      "passed": true,
+      "command": [
+        "iverilog",
+        "-g2012",
+        "-s",
+        "tb_cdc",
+        "-o",
+        "build/cdc.vvp",
+        "tests/tb_cdc.v",
+        "rtl/bk_wb_cdc.v"
+      ],
+      "seconds": 0.02,
+      "log": "build/compile-cdc.log"
+    },
+    {
+      "name": "cdc",
+      "passed": true,
+      "command": [
+        "vvp",
+        "build/cdc.vvp"
+      ],
+      "seconds": 0.011,
+      "log": "build/cdc.log"
+    },
+    {
+      "name": "compile-keyboard",
+      "passed": true,
+      "command": [
+        "iverilog",
+        "-g2012",
+        "-s",
+        "tb_keyboard",
+        "-o",
+        "build/keyboard.vvp",
+        "tests/tb_keyboard.v",
+        "rtl/bk_keymap.v",
+        "vendor/uj11/uj11_ps2_keyboard.v"
+      ],
+      "seconds": 0.021,
+      "log": "build/compile-keyboard.log"
+    },
+    {
+      "name": "keyboard",
+      "passed": true,
+      "command": [
+        "vvp",
+        "build/keyboard.vvp"
+      ],
+      "seconds": 1.884,
+      "log": "build/keyboard.log"
+    },
+    {
+      "name": "compile-uart",
+      "passed": true,
+      "command": [
+        "iverilog",
+        "-g2012",
+        "-s",
+        "tb_uart",
+        "-o",
+        "build/uart.vvp",
+        "tests/tb_uart.v",
+        "rtl/bk_boot_uart.v"
+      ],
+      "seconds": 0.021,
+      "log": "build/compile-uart.log"
+    },
+    {
+      "name": "uart",
+      "passed": true,
+      "command": [
+        "vvp",
+        "build/uart.vvp"
+      ],
+      "seconds": 0.011,
+      "log": "build/uart.log"
+    },
+    {
+      "name": "compile-memory",
+      "passed": true,
+      "command": [
+        "iverilog",
+        "-g2012",
+        "-s",
+        "tb_memory",
+        "-o",
+        "build/memory.vvp",
+        "tests/tb_memory.v",
+        "rtl/bk_sram_arbiter.v",
+        "vendor/uj11/uj11_sram.v",
+        "tests/sram_model.v"
+      ],
+      "seconds": 0.019,
+      "log": "build/compile-memory.log"
+    },
+    {
+      "name": "memory",
+      "passed": true,
+      "command": [
+        "vvp",
+        "build/memory.vvp"
+      ],
+      "seconds": 0.021,
+      "log": "build/memory.log"
+    },
+    {
+      "name": "lint-soc",
+      "passed": true,
+      "command": [
+        "verilator",
+        "--lint-only",
+        "--timing",
+        "-Wno-fatal",
+        "--top-module",
+        "bk_computer",
+        "rtl/bk_boot_rom.v",
+        "rtl/bk_boot_uart.v",
+        "rtl/bk_computer.v",
+        "rtl/bk_cpu.v",
+        "rtl/bk_cpu_clock.v",
+        "rtl/bk_frequency_display.v",
+        "rtl/bk_keymap.v",
+        "rtl/bk_pal_video.v",
+        "rtl/bk_panel.v",
+        "rtl/bk_sram_arbiter.v",
+        "rtl/bk_system_bus.v",
+        "rtl/bk_wb_cdc.v",
+        "vendor/cpu11/vm1_wb.v",
+        "build/vm1_plm_masked.v",
+        "vendor/cpu11/vm1_reg.v",
+        "vendor/cpu11/vm1_tve.v",
+        "vendor/uj11/uj11_ps2_keyboard.v",
+        "vendor/uj11/uj11_tick.v",
+        "vendor/uj11/uj11_button.v",
+        "vendor/uj11/uj11_pal_encoder.v",
+        "vendor/uj11/uj11_pal_timing.v",
+        "vendor/uj11/uj11_sram.v",
+        "vendor/pyldin/boot_spi_registers.v",
+        "vendor/pyldin/spi_byte_master.v"
+      ],
+      "seconds": 0.298,
+      "log": "build/lint-soc.log"
+    },
+    {
+      "name": "compile-video",
+      "passed": true,
+      "command": [
+        "verilator",
+        "--binary",
+        "--timing",
+        "-j",
+        "2",
+        "-Wno-fatal",
+        "-CFLAGS",
+        "-O3",
+        "--top-module",
+        "tb_video",
+        "--Mdir",
+        "build/verilated-video",
+        "tests/tb_video.v",
+        "rtl/bk_pal_video.v",
+        "rtl/bk_sram_arbiter.v",
+        "vendor/uj11/uj11_sram.v",
+        "vendor/uj11/uj11_pal_timing.v",
+        "vendor/uj11/uj11_pal_encoder.v",
+        "tests/sram_model.v"
+      ],
+      "seconds": 2.636,
+      "log": "build/compile-video.log"
+    },
+    {
+      "name": "video-mono-colour",
+      "passed": true,
+      "command": [
+        "build/verilated-video/Vtb_video"
+      ],
+      "seconds": 3.194,
+      "log": "build/video-mono-colour.log"
+    }
+  ],
+  "sources": {
+    "../bk0010-01/bk_hw.c": "82b2919b9818c7de6a7a1568fa06044c04732e0ebd01a6888379979966b09fcd",
+    "../bk0010-01/bk_hw.h": "ded27528da36663c12103b743e24031e54be1383ef53b97be5d19a1afbfbf884",
+    "../bk0010-01/bk_tape.c": "bf72744b0b4dd182ea22bed7656276da9be17f059e7fb5f84c0e938e8dd74c06",
+    "../bk0010-01/bk_tape.h": "1f708ac1a4e1e2c100b60f5e86aaf6817b8a23fd71955bc4036da8fccd1cbcf3",
+    "../bk0010-01/bk_timing.c": "e7f9962a19ad5e4ca7920aaca2f71d7a68e8241650a5b3190d0ffcf549e7d2eb",
+    "../bk0010-01/bk_timing.h": "d8ee272bb45118cdf32c1d954d2a8490c1a7fc74d6e018fb41ce80bb73a398cf",
+    "boards/hardware-lcd/bk_hardware_lcd.v": "4a5ebe919c217f7ea91c7d387e9b6d6138fef98e4b520876d0bf5016cb4f9170",
+    "boards/hardware-lcd/bk_main_pll.v": "2fc7ecb9ddfe5f3a9aedac031ab8157901f5b41f8e715f707941582a34b24f3b",
+    "boards/hardware-lcd/bk_video_pll.v": "1c00b18c2db83dbbc50b9f8a3a1933872c5c9429374dd27cfe34a0c6b59e0ad9",
+    "boards/hardware-lcd/cdc.lpf": "ee33c84432b61f58d53ff723da7f47483b69ddb6daed1c71fea5e6c047c6f7b5",
+    "boards/hardware-lcd/clocks.fdc": "f30b1db555675a213c28a4ad6a4fa390bf8f5608d534bbf99467d7e6f67bee54",
+    "boards/hardware-lcd/pins.lpf": "e7a33b3594a529bfb0d7d492fc4a3860b6cb5bb4dfcc14f8e45ccbc7f928bd66",
+    "boards/hardware-lcd/synthesis.sty": "a062d87e40fb377eb400d31210d41a2b81aa33dfe338e52afa243af5fcf5a1aa",
+    "firmware/boot/boot.asm": "eb0c346a05841f230ad9c185359a297d381cb8b6425c466404e7517c71689abe",
+    "firmware/loader/loader.asm": "a96e4537434f8e921ac2d5883cd67b4cbfa413d9310332a0316447b4e4419780",
+    "roms/BASIC10.ROM": "24be347356715352fcab480ed1559302d47d598255980a32150eba1431b462b8",
+    "roms/MONIT10.ROM": "c93f3e7d3342f747f6c55a3b5ebb8c1840d3d118e80dc5d274f645dc2b393688",
+    "rtl/bk_boot_rom.v": "8d330fe0766963a0ec04adb426aba9712e43a7bd69e9553ed96405e8e7333690",
+    "rtl/bk_boot_uart.v": "63136cd7b3f730fe219d63479921a3b666439842dd13b42b2afc63008112c5d9",
+    "rtl/bk_computer.v": "c538f3e93bba27fdeb2f39a3ce3051b9b70db0f559a3c6bcb47cca844f6f9965",
+    "rtl/bk_cpu.v": "632d0486a18814d56de6157f8d9850d12df0c18aba6af4867b37c10c7cd06c7e",
+    "rtl/bk_cpu_clock.v": "7b89e4a7e3aac833f417c47ddf22192031e8ceca48371ce9fd233507679b755c",
+    "rtl/bk_frequency_display.v": "94f285403597b10ba12197412e4423a0f50a5e136f8190e6daa096ad683b497d",
+    "rtl/bk_keymap.v": "6ef992f6675dab864b202d5b78654d37687b40896d704d03bf45cefc5369b290",
+    "rtl/bk_pal_video.v": "2e8740b72597ef9a1db45ba74c80fdff56b7ba32ff993e453e8515224a43a8f8",
+    "rtl/bk_panel.v": "2eb7c5bafc1cf03e94be526d7247c73c0577ae0ac7fb83030b2a810d74e91480",
+    "rtl/bk_sram_arbiter.v": "755fc350cecfd2c6ccfb58d8fc882df9aa4464f27d3eda843f315b4a56f10446",
+    "rtl/bk_system_bus.v": "5aa67cc4327a698d4c548ee4e9e26847a4f621b3dd490bac4766bd7771e0e271",
+    "rtl/bk_wb_cdc.v": "1215441d823197327ca1e4d6b22961888fa06105ab0bd345cb57441f485d91fe",
+    "tests/golden-boot-vram.bin": "66cfea1bfc32e0e361e35a6e71da6a2903e81b50bd2dfbe20094cc4c90ba42cc",
+    "tests/golden-print-vram.bin": "6229be6017fe79add4a3da39e4e982735b6c825037ada668ce27247b5d403523",
+    "tests/reference.c": "a94d79e0f7397901bc9fe2879d3cec54a80e23dc259431765ec85d614a99bd01",
+    "tests/sd_spi_model.v": "aa2c980b86fa169f7bd2f4c5f875245117a79cac6ca373f2325690c742eb15f7",
+    "tests/sram_model.v": "e7754de9dec5ec845336725e5ae0099b17ad3722c68f8f5740b72c18f38de1aa",
+    "tests/tb_cdc.v": "945a1a59332b002ad1c97c778d44bdb20188c36e9f3a11e9ea39b53f5bd72b3c",
+    "tests/tb_computer.v": "16990dc74ace3f08ee47096f79c89e71c403802a5a420050e8374a4f96844ea6",
+    "tests/tb_keyboard.v": "a0839461d2d80160e65230c9125390b1134651b36673446a3beeab80ac5bf913",
+    "tests/tb_memory.v": "d26b803920214f9237df05478778dd3eb3206316e96e0ef513bf5ba9a185c24e",
+    "tests/tb_panel.v": "ffd5471affb376784a8ad4df5219733b4f50cc4968d612ee74ed93bd33a72bdb",
+    "tests/tb_plm_equivalence.v": "5aff471bcd162c7ab57316605a4d73b7a17bd7f81bcdc4ad82da350868c01d0d",
+    "tests/tb_reference_boot.v": "9c8f273dd276b991d2a4000a46f9e945968299359c8b0c07bc85cd20935dbe39",
+    "tests/tb_sd_boot.v": "6ae27862d61d119d0f045ed9f11f23c6258398bed396ca7e16ba3beeb2338f7d",
+    "tests/tb_uart.v": "189cfb5c466adba1af5739e21ff96badfe179711ea7f1ef780021faf2fce6ed3",
+    "tests/tb_video.v": "3c81e0982a22e9c06a572ff59d54e3dbcbe617ffb8877616b780e0b97e77a9c9",
+    "tools/build.py": "5290cad1c97e6bad46f27301780261c4d796fab592a3420ca53f9df50d6feaaf",
+    "tools/diamond_project.py": "a11ad8601d97ace36dc49bf74561c38b58deee2e4654c339644ee64432703c1a",
+    "tools/diamond_report.py": "c01cf731af83d87c65d4bddae4d93365785c88f5fda5510a3c399e510251c30f",
+    "tools/hardware_board.py": "2bae2f91649a90dbb9c5205d6d69622c8df92237d6ff4a19f7675a83bebd1921",
+    "tools/make_sd.py": "480a0bc0372fa2765f3e4fd8e2ba3ebe526c6c2b0d3a53f441c673a447f7e3c4",
+    "tools/prepare_cpu11.py": "8e5d03b50e88a24d340a881aed4b3c0aa48caa2fd7a650704d41bdb4c8586596",
+    "tools/test_mapped_ebr.py": "c6fd6f07be5c3337ba4161651938cfec2e6d5c8cce2995ff7cf15b82e52d5641",
+    "vendor/cpu11/license.md": "059ccd0c2de1d4bd229c5d933520cc60da4b62eb192f3bc7e396df47bd392a02",
+    "vendor/cpu11/vm1_plm.v": "39925815269fcef50be5ccc7cd7198478cdd1287e770fe4b06b83e4901f0e593",
+    "vendor/cpu11/vm1_reg.v": "2934be8e6a4ffe2bfff4166be27bbdd357e4d0b7ba2570c50217993f39ef57d5",
+    "vendor/cpu11/vm1_tve.v": "50a4a9f3fb9150651bb73ab8f9a6d94454b4867b4e8c4861ee032f209ffcce4e",
+    "vendor/cpu11/vm1_wb.v": "26863becbebd6c19caebdad4aa73a3007ce673a57a327259f69c24f467a18f47",
+    "vendor/manifest.json": "b538323bb825b314e5c2b1102d7f2f7948fd8e8fb074ffcbe6d7cb08bf3b4c11",
+    "vendor/pyldin/boot_spi_registers.v": "381ccc4df0916ed230251798e89e3aab7e14fa5beacccd9621dfe23a48cc8cd1",
+    "vendor/pyldin/spi_byte_master.v": "010008193cee3823c7a3d54d598c12295157f295fdcd0740d4447f02d692d89d",
+    "vendor/uj11/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+    "vendor/uj11/uj11_pal_encoder.v": "0b5c15577ad3df217f42a2dcb3c2ba1b5e1a7bd23fd28b5a7f8ac83b0da3058b",
+    "vendor/uj11/uj11_pal_timing.v": "e7765556359196292a6171c3549c55965b94ac8025af556afa8fc11fa29b1767",
+    "vendor/uj11/uj11_ps2_keyboard.v": "6420c91a162b05e7f4dccead47ba027bb10ce64b7a394cd81b49f1cde3a6265d",
+    "vendor/uj11/uj11_sram.v": "6a923c4a82bcb3630a62e4c4af05a5646de61720213b39661d1ef6561147560d",
+    "vendor/uj11/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "../core/core.c": "a88a7bc7251338030e728b5e22518078575a59591a78591ee975b4a45889ded1",
+    "../core/core.h": "1f2b12f1b0d1913afc1e075c204895916ab75fbbbd85b7d0e4a19c34e3407379",
+    "../core/disas.c": "c36c87d6fe447732bf862ab9489d813b71eefd7b373c04a7f57149bf6e1ef1a4",
+    "../core/hardware.c": "95774cc0c6e00213f6c75525dfec80b72326aa88d26a600c91e8cf71b7acca5f",
+    "../core/hardware.h": "131f25c510c146a4cf4d765ebf49ac0b36e4455993607bc1f6fc2a4b58a7d057"
+  },
+  "dcca_model": null
+}

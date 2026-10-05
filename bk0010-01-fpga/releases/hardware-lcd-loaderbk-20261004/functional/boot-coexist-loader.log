@@ -1,0 +1,14 @@
+BOOT stage=01 cycle=6157 address=177612 reads=0
+BOOT stage=02 cycle=89678 address=177612 reads=0
+BOOT stage=03 cycle=742636 address=177612 reads=2
+BOOT stage=04 cycle=1785805 address=177612 reads=4
+BOOT stage=05 cycle=3120431 address=177612 reads=6
+BOOT stage=06 cycle=84823835 address=177612 reads=134
+BOOT stage=07 cycle=87798106 address=177612 reads=134
+BOOT stage=ff cycle=87801455 address=177636 reads=134
+PASS native SD cold boot: SDHC=1 VERSION2=1 sectors=134 cycles=94278291
+PASS warm reset: ROM lock retained, no SD reads
+- tests/tb_sd_boot.v:78: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 2s; walltime 72.885 s; speed 27.648 ms/s
+- Verilator: cpu 72.791 s on 1 threads; allocated 2 MB

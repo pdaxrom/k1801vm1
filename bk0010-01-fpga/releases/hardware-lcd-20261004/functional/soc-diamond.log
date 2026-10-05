@@ -1,0 +1,15 @@
+COMPUTER stage=01 sys_cycles=103731 reads=0
+COMPUTER stage=02 sys_cycles=161717 reads=0
+COMPUTER stage=03 sys_cycles=736834 reads=2
+COMPUTER stage=04 sys_cycles=1679009 reads=4
+COMPUTER stage=05 sys_cycles=2913583 reads=6
+COMPUTER stage=06 sys_cycles=77984529 reads=134
+COMPUTER stage=07 sys_cycles=81332176 reads=134
+COMPUTER stage=ff sys_cycles=81335134 reads=134
+PASS full computer cold boot: 24 MHz, SD sectors=134
+PASS full computer long-button warm reset: retained ROM and 24 MHz
+PASS full computer physical PS/2 PRINT 2+2, live 3/6/12/24 MHz, PAL without underruns
+- tests/tb_computer.v:104: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 4s; walltime 532.938 s; speed 7.866 ms/s
+- Verilator: cpu 532.824 s on 1 threads; allocated 2 MB

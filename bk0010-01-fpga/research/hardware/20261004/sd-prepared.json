@@ -1,0 +1,36 @@
+{
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "resolved_device": "/dev/sdf",
+  "bytes_per_sector": 512,
+  "sectors_per_cluster": 1,
+  "partition_type": 6,
+  "start_lba": 2048,
+  "sectors": 32768,
+  "root_entries": 512,
+  "clusters": 32479,
+  "mbr_sha256": "1d9790531763f1899689594b94329336f02f2c09d092128e483817f5de5fe4ae",
+  "before_sha256": "cb14259203e0e37483593d3a3c4c4532f7fca6682a3678f8828c712726539096",
+  "prepared_sha256": "fc44e8ce73e08d5069cd249b46af72c749f5e28ebd533f9363c8fb4ef51dcad3",
+  "preserved_original_files": {
+    "P601.SET": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809",
+    "P601A.ROM": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1",
+    "P601.CFG": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d",
+    "LOADER.BIN": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea",
+    "P601.ROM": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f"
+  },
+  "original_loader_preserved_as": "LDRP601.BAK",
+  "prepared_files": {
+    "P601.SET": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809",
+    "P601A.ROM": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1",
+    "LDRP601.BAK": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea",
+    "P601.CFG": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d",
+    "LOADER.BIN": "994400a6d25086558f531962a3f40129d6f011c794cc05e372662b756c9969fe",
+    "P601.ROM": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f",
+    "BK0010.ROM": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+  },
+  "fsck_before_after_exit_codes": [
+    1,
+    1
+  ],
+  "fsck_existing_label_mismatch_unchanged": true
+}

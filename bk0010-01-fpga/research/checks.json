@@ -1,0 +1,179 @@
+{
+  "date": "2026-10-04",
+  "scope": "Source audit and planning only; no BK FPGA top-level, SD port, synthesis, programming or physical SD write.",
+  "cpu11": {
+    "repository": "https://github.com/1801BM1/cpu11",
+    "commit": "e0576637a35f0378f85673213a808098b9535526",
+    "variant": "vm1_wb, VM1_CORE_MULG_VERSION=0, default generic register RAM"
+  },
+  "rom_loading": "User-selected Pyldin scheme: VM1 resident EBR bootstrap -> FAT16 LOADER.BIN -> ROM payload in SRAM -> stream/readback CRC32 -> retained lock -> native MONIT10.",
+  "checks": [
+    {
+      "name": "Eagle SCH/BRD pinout consistency",
+      "status": "passed",
+      "result": "Verified 3 SCH/BRD pairs, 432 FPGA pins; 10 files up to date.",
+      "command": "python3 /Users/sash/Work/FPGA/Z-pdaXrom-TV/docs/hardware/tools/export_pinout.py --check"
+    },
+    {
+      "name": "vm1_wb Icarus elaboration",
+      "status": "passed",
+      "result": "All four upstream WBC RTL files elaborate."
+    },
+    {
+      "name": "vm1_wb register MOV stream",
+      "status": "passed",
+      "result": "Icarus executes 20 consecutive MOV R0,R1 fetches from 100000; steady interval is 6 vm_clk_p periods with immediate memory ACK. This is not a BK 3 MHz validation."
+    },
+    {
+      "name": "uJ11 PS/2 transport",
+      "status": "passed",
+      "result": "24 checks: framing/filter/parity/timeout/FIFO/inhibit/reset",
+      "test": "uJ11-fpga/tests/mmu/tb_ps2_keyboard.v"
+    },
+    {
+      "name": "uJ11 SRAM controller",
+      "status": "passed",
+      "result": "37 checks: byte lanes, banks, 2MiB boundary, retention, power-on and handshake",
+      "test": "uJ11-fpga/tests/tb_sram.v"
+    },
+    {
+      "name": "uJ11 PAL encoder",
+      "status": "passed",
+      "result": "33834 samples; all RGB332 codes/both V phases; max error 1.846 DAC codes",
+      "test": "uJ11-fpga/tests/tb_pal_encoder.v"
+    },
+    {
+      "name": "uJ11 generic PAL EBR model",
+      "status": "passed",
+      "result": "1024 addresses, byte data, read latency and gating; vendor DP8KC model not run",
+      "test": "uJ11-fpga/tests/tb_pal_ram.v"
+    },
+    {
+      "name": "Reference C emulator headless ROM boot and keyboard input",
+      "status": "passed",
+      "result": "Boot: PC 101064, PSW 000004, SHIFT 001330. PRINT 2+2 produces 4 and returns to Ok; screen dumps visually inspected.",
+      "limitations": "Calls bk_hw_handle_key directly, without PS/2 transport; no tape or hardware clocks; temporary harness compiled original sources without modifying them."
+    },
+    {
+      "name": "Pyldin SPI ABI",
+      "status": "passed",
+      "result": "Reset, active-low CS, READY, 8/16-bit transfers",
+      "test": "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/tests/tb_spi_registers.v"
+    },
+    {
+      "name": "Pyldin FAT16 image generator",
+      "status": "passed",
+      "result": "test_fat16_roundtrip and test_reject_invalid_geometry_and_fat; 2 tests",
+      "test": "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/tests/test_sd.py"
+    },
+    {
+      "name": "Experimental standalone VM1 ROM smoke in Verilator",
+      "status": "superseded",
+      "result": "No Wishbone transactions in timeout window; reset/two-phase model and temporary harness need investigation. Not evidence of a core defect. Full RTL ROM boot remains unverified.",
+      "historical_status": "not_passed",
+      "resolution": "Resident/full MONIT+BASIC boot now passes with explicit PLM masks; see tests/tb_plm_equivalence.v, tests/tb_reference_boot.v and build/results-boot.json. Historical result retained."
+    },
+    {
+      "name": "Experimental Icarus full ROM smoke",
+      "status": "superseded",
+      "result": "Stopped long-running temporary audit simulation; no ROM boot result claimed.",
+      "historical_status": "incomplete",
+      "resolution": "Resident/full MONIT+BASIC boot now passes with explicit PLM masks; see tests/tb_plm_equivalence.v, tests/tb_reference_boot.v and build/results-boot.json. Historical result retained."
+    },
+    {
+      "name": "New BK SD bootstrap, BK video, synthesis and board",
+      "status": "functional_simulation_passed",
+      "result": "Implemented native two-stage SD/FAT16, CPU/system bridge, SRAM/PAL/PS2/clock/panel, full cold and warm boot plus physical PS/2 PRINT 2+2. ROM/VRAM byte-exact. See build/results-*.json. Diamond and physical board pending."
+    },
+    {
+      "name": "uJ11 board button controller",
+      "status": "passed",
+      "result": "28 checks, HOLD=100: boot release, bounce, one short release event, long hold/reset/release, held power-on and all seven sample phases.",
+      "test": "uJ11-fpga/tests/tb_button.v",
+      "historical_limitations": "Unmodified uJ11 short event is HALT. BK frequency selection and warm-reset rate retention are not implemented or tested.",
+      "follow_up": "BK-specific frequency/panel and full integration now pass in simulation; physical timing/board remains pending."
+    },
+    {
+      "name": "uJ11 HC7000 single-segment scanner",
+      "status": "passed",
+      "result": "Three accelerated CLOCK_HZ cases (32000, 768000, 1600000), 48 frame/duty checks and 192 reset phases; continuous one-segment, polarity and blank-interval assertions.",
+      "test": "uJ11-fpga/tests/tb_hc7000_diagnostics.v",
+      "historical_limitations": "Tests uJ11 diagnostic glyphs and activity dots; BK decimal frequency glyphs, clock switching, synthesis and physical LED currents remain unverified.",
+      "follow_up": "BK-specific frequency/panel and full integration now pass in simulation; physical timing/board remains pending."
+    }
+  ],
+  "files": {
+    "/Users/sash/Work/FPGA/Z-pdaXrom-TV/hardware-lcd/main.brd": "ef3f1eb7b178ca95fb3518a8b232e2ccb85945d22b8ea326e65ddce3a4411732",
+    "/Users/sash/Work/FPGA/Z-pdaXrom-TV/hardware-lcd/main.sch": "a0e15d571768c10c9998e8be0c558d36f9ea9a88c1705d8b951ca29629e8560b",
+    "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/firmware/boot.asm": "8f77a3c30ea74f91ef57df9df6978ceb6b0772f85c27f90eb05ec3c08ce6bb00",
+    "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/firmware/loader.asm": "e26d96f53b610352fc7d4f41bfb53537a349a3dd9bd3480c2bd2967e95955a3c",
+    "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/rtl/boot_spi_registers.v": "381ccc4df0916ed230251798e89e3aab7e14fa5beacccd9621dfe23a48cc8cd1",
+    "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/rtl/classic_boot_ports.v": "3458a8201c248b91cf2b197e12eed8e8979cbaecf89d568caa75b27cc880a2eb",
+    "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/rtl/spi_byte_master.v": "010008193cee3823c7a3d54d598c12295157f295fdcd0740d4447f02d692d89d",
+    "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/tools/make_sd.py": "36348789f97de5a12b4fab02dd0ca89b793dd8f6117cdb414c43322bd1dcdaaf",
+    "/Users/sash/Work/PROJECTS/k1801vm1/AGENTS.md": "9bef1a94e22f6ddf25777559c3856d8fb99fc155afc5d2bdaeffd937b1ddecd7",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/ROM/BASIC10.ROM": "24be347356715352fcab480ed1559302d47d598255980a32150eba1431b462b8",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/ROM/MONIT10.ROM": "c93f3e7d3342f747f6c55a3b5ebb8c1840d3d118e80dc5d274f645dc2b393688",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/bk_hw.c": "82b2919b9818c7de6a7a1568fa06044c04732e0ebd01a6888379979966b09fcd",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/bk_hw.h": "ded27528da36663c12103b743e24031e54be1383ef53b97be5d19a1afbfbf884",
+    "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/main.c": "0aa440cb8adcca2cc7849f59317aac04775329ccad36b30a60bb7ee70c6a6149",
+    "/Users/sash/Work/PROJECTS/k1801vm1/core/core.c": "a88a7bc7251338030e728b5e22518078575a59591a78591ee975b4a45889ded1",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/uj11_ps2_keyboard.v": "6420c91a162b05e7f4dccead47ba027bb10ce64b7a394cd81b49f1cde3a6265d",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/uj11_sram.v": "6a923c4a82bcb3630a62e4c4af05a5646de61720213b39661d1ef6561147560d",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/video/uj11_pal_encoder.v": "0b5c15577ad3df217f42a2dcb3c2ba1b5e1a7bd23fd28b5a7f8ac83b0da3058b",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/video/uj11_pal_ram.v": "2cf10399e9421692294b315be4eb42c2f156c18c09a7ad34e396baa06d1ef6a5",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/video/uj11_pal_timing.v": "e7765556359196292a6171c3549c55965b94ac8025af556afa8fc11fa29b1767",
+    "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_plm.v": "39925815269fcef50be5ccc7cd7198478cdd1287e770fe4b06b83e4901f0e593",
+    "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_reg.v": "2934be8e6a4ffe2bfff4166be27bbdd357e4d0b7ba2570c50217993f39ef57d5",
+    "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_tve.v": "50a4a9f3fb9150651bb73ab8f9a6d94454b4867b4e8c4861ee032f209ffcce4e",
+    "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_wb.v": "26863becbebd6c19caebdad4aa73a3007ce673a57a327259f69c24f467a18f47",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc1200/uj11_button.v": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc1200/uj11_tick.v": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/uj11_diagnostics.v": "bcdeab8ded05e78b9e08ff7c9e09c809d3bca974dcd2520c17c476be0334c1d9",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/pins.lpf": "31516b3fad2b2e41711ab499a6738826dcb382efa465abf912b6d34b8ad04c17",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/docs/hc7000-diagnostics.md": "decaa3e1d68d133860ba8fa8af5300a8a09adcfb3bf857c6c0df0418cc232d8e",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tests/tb_button.v": "3757f8346e61f34cd3f5feb1958285b6a51736c4b1427fa652aec2ec031df69b",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tests/tb_hc7000_diagnostics.v": "c8c5d42f7f39740098b8aacca68e8773c9c8f3b18be5a45d106d5fc590faf775",
+    "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/tools/test_diagnostics.py": "ba7f2648456012c09ccf7272cff415066c33b43c21610db2106707e7fff94159",
+    "/Users/sash/Work/FPGA/Z-pdaXrom-TV/docs/hardware/generated/hardware-lcd.md": "0bdf46f45549e56069b5321b6c4a9cd311c157c01bf8cd289a6301ba95c2adc3"
+  },
+  "rom": {
+    "MONIT10.ROM": {
+      "bytes": 8192,
+      "base_octal": "100000"
+    },
+    "BASIC10.ROM": {
+      "bytes": 24576,
+      "base_octal": "120000",
+      "note": "Last 128 bytes are masked by native CSR window 177600..177777."
+    }
+  },
+  "artifacts": {
+    "reference-boot.png": {
+      "sha256": "afdfa3e3d4ad6a200b1620e759efbf891994ccd3fcbd2f39719e322e31c15e9c",
+      "description": "Rendered from reference framebuffer; vertical pixels doubled for viewing, not a physical PAL capture."
+    },
+    "reference-print.png": {
+      "sha256": "2f010c25b71e7dab6d4ac3db6026cfd0c8b265607202d966a6f3038de4f871ea",
+      "description": "Rendered from reference framebuffer; vertical pixels doubled for viewing, not a physical PAL capture."
+    }
+  },
+  "cpu_frequency_control": {
+    "requirement": "One short button release advances CPU frequency; a two-digit seven-segment display shows the applied frequency in decimal MHz, using the uJ11 single-segment scanner.",
+    "startup_mhz": 3,
+    "long_press": "Approximately 2 seconds: warm reset, no short event on release; preserves selected frequency.",
+    "status": "Implemented and functionally simulated at 3/6/12/24 MHz; Diamond and physical qualification pending",
+    "frequencies_mhz": [
+      3,
+      6,
+      12,
+      24
+    ],
+    "selection": "Explicitly selected by the user on 2026-10-04"
+  },
+  "implementation_reports": [
+    "build/results-fast.json",
+    "build/results-boot.json",
+    "build/results-soc.json"
+  ]
+}

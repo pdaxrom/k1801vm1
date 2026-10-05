@@ -1,0 +1,20 @@
+{
+  "written": true,
+  "files": {
+    "P601.SET": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809",
+    "P601A.ROM": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1",
+    "LOADERBK.BIN": "994400a6d25086558f531962a3f40129d6f011c794cc05e372662b756c9969fe",
+    "P601.CFG": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d",
+    "LOADER.BIN": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea",
+    "P601.ROM": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f",
+    "BK0010.ROM": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+  },
+  "mbr_unchanged": true,
+  "partition_readback_sha256": "643cbbc1c820238392c9b04835a646d0897ccd3ad44a7083537769ae8adfd5bf",
+  "original_p601_loader_restored": true,
+  "bk_loader_filename": "LOADERBK.BIN",
+  "p601_loader_bytes": 481,
+  "bk_loader_bytes": 337,
+  "before_partition_sha256": "fc44e8ce73e08d5069cd249b46af72c749f5e28ebd533f9363c8fb4ef51dcad3",
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2"
+}

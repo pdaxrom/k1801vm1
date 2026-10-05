@@ -1,0 +1,84 @@
+{
+  "files": {
+    "README.md": {
+      "bytes": 4254,
+      "sha256": "108922531cc7d900655e2ca4181573be2278dc6b3e17df911f0bfd6c74c16f1d"
+    },
+    "baseline.json": {
+      "bytes": 132,
+      "sha256": "95b60303a884b11b9581112ad9d8a9b9bc2c22a0e998758895adcaffa48fa82d"
+    },
+    "flash-session-02/01-verify-id-stdout.log": {
+      "bytes": 624,
+      "sha256": "94e298ce8b74e34e95ab103137cdcec53e369a5fefe88b552984d8e8c204d0b8"
+    },
+    "flash-session-02/01-verify-id.log": {
+      "bytes": 658,
+      "sha256": "25d739c0e580aee87c7982612a246b9952bcd09bc5b11dbf7b6816201472c5f5"
+    },
+    "flash-session-02/01-verify-id.xcf": {
+      "bytes": 1560,
+      "sha256": "a88cabb3015e84f10cc83b51ca35f556b4d15c9d0fefdff93d90e0c0c5a4b8fd"
+    },
+    "flash-session-02/02-program-stdout.log": {
+      "bytes": 633,
+      "sha256": "a1530766a33b2a3088f7041462cbeacee4754ed623c17368331d198bd3536165"
+    },
+    "flash-session-02/02-program.log": {
+      "bytes": 724,
+      "sha256": "8ba6c7f1c25da19fba705ccd610be4f501dd4656b52d997dc03fcd69351b5f25"
+    },
+    "flash-session-02/02-program.xcf": {
+      "bytes": 1571,
+      "sha256": "33d4cc43ddd8cf577fad888c95837b1cac628ad086482ef5774c1e84970befe7"
+    },
+    "flash-session-02/programmer-old.log": {
+      "bytes": 295,
+      "sha256": "a2f39dcf652e56463ef179a7c7e9cbcb08ef0b7c5e173081664a0c4a69fb7b4e"
+    },
+    "flash-session-02/session.json": {
+      "bytes": 1934,
+      "sha256": "da4a95903f3bbb881ddc0f5872939e39b13b39a59ee1a9639a83cf6dab5e4584"
+    },
+    "flash-session-02/uart.bin": {
+      "bytes": 67,
+      "sha256": "9aadfada5d2c6e32e7518bb58b93e556f60602fbaf42ad6eef3d4f9b2fb5b61c"
+    },
+    "result.json": {
+      "bytes": 2605,
+      "sha256": "6952879e488b15987b71d9f8deab913d0ae3c45bf746083255849a8563f65bb2"
+    },
+    "sd-backup.json": {
+      "bytes": 447,
+      "sha256": "e4b9d63bc5e48e152d2e03784664bc0fca9b5ee8718e479d43516172ce001343"
+    },
+    "sd-before-fat16.img.fsck.log": {
+      "bytes": 281,
+      "sha256": "d7219d5c85a0e3bd7b1e383c404cee328f3837ffd44c5bb6948c8715b4953f1c"
+    },
+    "sd-prepared.json": {
+      "bytes": 1770,
+      "sha256": "04affa3a674dd6b3ac690368dbb1b80d743996051e3aee85e9deaf9130e58e81"
+    },
+    "sd-working-fat16.img.fsck.log": {
+      "bytes": 282,
+      "sha256": "1047b0a4155a6f7d5beb4837323956cbd49390ebb30fb3375b6f019c9aad307e"
+    },
+    "sd-written.json": {
+      "bytes": 1913,
+      "sha256": "94b52bf6b96b67ff42592d23cba255d40b382b223aee6f18c92b395b1e3e15d3"
+    },
+    "tools/hardware_board.py": {
+      "bytes": 8320,
+      "sha256": "2bae2f91649a90dbb9c5205d6d69622c8df92237d6ff4a19f7675a83bebd1921"
+    },
+    "verify-id.log": {
+      "bytes": 658,
+      "sha256": "25d739c0e580aee87c7982612a246b9952bcd09bc5b11dbf7b6816201472c5f5"
+    },
+    "verify-id.xcf": {
+      "bytes": 1638,
+      "sha256": "0e943f96a10a6ab38a4a36719893c39f773e282ddca85578e404808228847ba9"
+    }
+  }
+}

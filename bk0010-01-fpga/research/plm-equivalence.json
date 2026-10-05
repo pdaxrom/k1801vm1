@@ -1,0 +1,14 @@
+{
+  "command": [
+    "iverilog -g2012 -s tb_plm_equivalence -o build/plm.vvp tests/tb_plm_equivalence.v vendor/cpu11/vm1_plm.v build/vm1_plm_equivalence.v",
+    "vvp build/plm.vvp"
+  ],
+  "status": "passed",
+  "result": "44768 known-input pairs, both VM1A and VM1G",
+  "scope": "Preserved result from initial implementation run, before native boot. PLM files have not changed.",
+  "sha256": {
+    "vendor/cpu11/vm1_plm.v": "39925815269fcef50be5ccc7cd7198478cdd1287e770fe4b06b83e4901f0e593",
+    "build/vm1_plm_masked.v": "6c05fd10f180d5be8c30b9d2c85b98c3a7a6b75fe4108af9314522338d4cb989",
+    "tests/tb_plm_equivalence.v": "5aff471bcd162c7ab57316605a4d73b7a17bd7f81bcdc4ad82da350868c01d0d"
+  }
+}

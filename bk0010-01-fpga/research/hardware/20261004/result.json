@@ -1,0 +1,82 @@
+{
+  "date_local": "2026-10-04",
+  "timezone": "Asia/Yerevan",
+  "host": "sash@192.168.1.108",
+  "remote_directory": "/home/sash/Work/FPGA/bk0010-hardware-20261004-01",
+  "board": "Z-pdaXrom-TV hardware-lcd",
+  "jtag_device": "LCMXO2-7000HC",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "93aad47380391be38ab09874a7e598cc9d5f943542f16bbec8d5d19ba7881836",
+    "checksum": "069B",
+    "transmission_checksum": "EA61",
+    "fuses": 1441280
+  },
+  "flash_program_verify_passed": true,
+  "uart_port": "/dev/ttyUSB1",
+  "sd_write_readback_passed": true,
+  "first_boot_without_card": {
+    "stage": "01",
+    "error": "22",
+    "interpretation": "Expected SD R1 response timeout; card was in reader"
+  },
+  "native_boot_with_card": {
+    "passed": true,
+    "uart_offset": 19,
+    "stages": [
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "FF"
+    ],
+    "rom_stream_crc32_passed": true,
+    "sram_rom_readback_crc32_passed": true,
+    "rom_lock_and_monitor_handoff": true
+  },
+  "manual_observations": [
+    {
+      "source": "user",
+      "message": "sd rom 02, потом загрузился в бейсик",
+      "checks": {
+        "pal_boot_progress": true,
+        "basic_started": true
+      }
+    },
+    {
+      "source": "user",
+      "message": "да работает",
+      "prompt_scope": "PS/2 PRINT 2+2 => 4; short RESET 03/06/12/24/03 with PRINT at each rate and stable image; long RESET returns BASIC",
+      "checks": {
+        "ps2_print_2_plus_2": true,
+        "display_03_06_12_24": true,
+        "live_frequency_cycle": true,
+        "basic_at_all_four_modes": true,
+        "pal_image_stable": true,
+        "long_button_warm_reset": true
+      }
+    }
+  ],
+  "functional_board_verified": true,
+  "uart_closed": true,
+  "physical_measurements_not_performed": [
+    "PAL waveform/amplitude under 75-ohm load",
+    "FPGA speed/temperature marking and crystal frequency measurement",
+    "3 MHz performance calibration against original BK"
+  ],
+  "notes": [
+    "Manual frequency checks confirm mode labels and working BASIC; no measured absolute CPU frequency",
+    "Observed E:22 belongs to first boot with card absent; subsequent native boot has no errors",
+    "session.json physical_board_verified=false is a conservative driver default; manual evidence is recorded here"
+  ],
+  "sd_backups": {
+    "directory": "/home/sash/Work/FPGA/bk0010-hardware-20261004-01",
+    "mbr": "sd-before.mbr",
+    "partition": "sd-before-fat16.img",
+    "original_loader_on_card": "LDRP601.BAK"
+  },
+  "updated_utc": "2026-10-04T14:10:57.182603+00:00"
+}

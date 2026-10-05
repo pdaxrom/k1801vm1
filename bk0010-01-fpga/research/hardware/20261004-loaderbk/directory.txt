@@ -1,0 +1,14 @@
+ Volume in drive : has no label
+ Volume Serial Number is 0000-0601
+Directory for ::/
+
+P601     ROM    334336 1980-00-00   0:00 
+LOADER   BIN       481 1980-00-00   0:00 
+P601     CFG       614 1980-00-00   0:00 
+P601A    ROM    334336 1980-00-00   0:00 
+P601     SET        16 1980-00-00   0:00 
+LOADERBK BIN       337 2026-10-04  18:00 
+BK0010   ROM     33280 2026-10-04  18:00 
+        7 files             703 400 bytes
+                         15 924 736 bytes free
+

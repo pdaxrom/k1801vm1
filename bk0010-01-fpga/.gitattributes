@@ -1,0 +1,10 @@
+*.bin binary
+*.ROM binary
+*.jed binary
+*.gz binary
+# Preserve frozen source snapshots and hashed tool/board evidence byte-for-byte.
+vendor/** -whitespace
+releases/** -whitespace
+research/hardware/** -whitespace
+boards/hardware-lcd/bk_main_pll.v -whitespace
+boards/hardware-lcd/bk_video_pll.v -whitespace

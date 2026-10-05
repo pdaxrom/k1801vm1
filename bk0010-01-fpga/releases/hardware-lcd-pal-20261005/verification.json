@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "workspace_and_packaged_input_hashes_match": true,
+  "jed_fuse_and_transmission_checksums_match": true,
+  "reports_and_ncd_hashes_match": true,
+  "fast_checks_passed": 15,
+  "pal_all_pixels_and_edges_passed": true,
+  "mono_dac_five_stage_latency_passed": true,
+  "official_ebr_parameters_contents_verified": true,
+  "sd_image_unchanged": true,
+  "prior_boot_checks": "../hardware-lcd-loaderbk-20261004/functional/boot.json",
+  "prior_full_soc_checks": "../hardware-lcd-loaderbk-20261004/functional/baseline-soc-diamond.json",
+  "full_soc_rerun": false,
+  "changed_rtl": [
+    "rtl/bk_pal_video.v"
+  ],
+  "viewport": {
+    "horizontal_clocks": [
+      718,
+      3917
+    ],
+    "first_field_lines": [
+      32,
+      287
+    ],
+    "second_field_lines": [
+      345,
+      600
+    ],
+    "width_pixels": 512,
+    "height_lines": 256,
+    "shift_mono_pixels_left": 8,
+    "shift_lines_down": 4
+  },
+  "physical_flash_and_sd_boot_passed": true,
+  "visual_edges_user_confirmed": true
+}

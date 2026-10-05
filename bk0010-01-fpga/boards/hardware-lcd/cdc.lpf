@@ -1,0 +1,41 @@
+# Assertion can propagate through LSR->Q. The clocked release pipes and
+# all their consumer paths remain timed in the destination domain.
+BLOCK RESETPATHS ;
+# Reset recovery/removal at the asynchronous pipe is not clock related.
+# Only the pipe itself is excluded; its clocked outputs/consumers are timed.
+BLOCK PATH FROM CELL "power_on[3]" TO CELL "machine/video/vrst_pipe[*]" ;
+BLOCK PATH FROM CELL "machine/sram/initialized" TO CELL "machine/video/vrst_pipe[*]" ;
+BLOCK PATH FROM CELL "machine/panel/button/hard_reset" TO CELL "machine/video/vrst_pipe[*]" ;
+# Only the first synchronizer stage is asynchronous. Later stages stay timed.
+BLOCK PATH FROM CELL "machine/bridge/request_toggle" TO CELL "machine/bridge/request_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bridge/response_toggle" TO CELL "machine/bridge/response_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bridge/valid" TO CELL "machine/bridge/valid_sync[0]" ;
+BLOCK PATH FROM CELL "machine/video/config_toggle" TO CELL "machine/video/config_sync[0]" ;
+BLOCK PATH FROM CELL "machine/video/config_ack" TO CELL "machine/video/ack_sync[0]" ;
+BLOCK PATH FROM CELL "machine/video/line_toggle" TO CELL "machine/video/line_sync[0]" ;
+BLOCK PATH FROM CELL "machine/video/line_done" TO CELL "machine/video/done_sync[0]" ;
+BLOCK PATH FROM CELL "machine/ack_toggle" TO CELL "machine/ack_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bus/irq_pending" TO CELL "machine/irq_sync[0]" ;
+BLOCK PATH FROM CELL "machine/cpu/core/init_out[*]" TO CELL "machine/init_sync[0]" ;
+BLOCK PATH FROM CELL "machine/cpu/release_count[*]" TO CELL "machine/init_sync[0]" ;
+BLOCK PATH FROM CELL "machine/cpu_reset_pipe[*]" TO CELL "machine/init_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bus/irq_disabled" TO CELL "machine/irq_sync[0]" ;
+BLOCK PATH FROM CELL "machine/bus/key_latch[7]" TO CELL "machine/alt_sync[0]" ;
+BLOCK PATH FROM CELL "machine/keymap/down[*]" TO CELL "machine/held_sync[0]" ;
+BLOCK PATH FROM CELL "machine/keymap/stop" TO CELL "machine/stop_sync[0]" ;
+BLOCK PATH FROM CELL "machine/requested_gray[*]" TO CELL "machine/request_meta[*]" ;
+BLOCK PATH FROM CELL "machine/active_gray[*]" TO CELL "machine/active_meta[*]" ;
+
+# Mailbox payloads are held through the acknowledgement. Do not false-path them.
+MAXDELAY FROM CELL "machine/bridge/held_address[*]" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/bridge/held_data[*]" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/bridge/held_lanes[*]" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/bridge/held_write" TO CELL "machine/bus/*" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/bridge/held_read[*]" TO CELL "machine/bridge/cpu_read[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/held_config[*]" TO CELL "machine/video/vscroll[*]" 20 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/fill_row[*]" TO CELL "machine/video/dma_address[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/full_screen*" TO CELL "machine/video/dma_address[*]" 25 NS DATAPATH_ONLY ;
+MAXDELAY FROM CELL "machine/video/fill_bank" TO CELL "machine/video/dma_bank" 25 NS DATAPATH_ONLY ;
+
+# Both CPU phases use cpu_p; the negative phase maps to inverted clock pins.
+# FREQUENCY cpu_p checks full-period and half-period paths plus hold timing.

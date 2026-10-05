@@ -1,0 +1,9 @@
+/build/
+__pycache__/
+*.pyc
+!tests/golden-boot-vram.bin
+!tests/golden-print-vram.bin
+# Keep release and physical-board evidence referenced by SHA-256 manifests.
+!/releases/**/*.log
+!/research/hardware/**/*.log
+!/research/hardware/**/uart.bin

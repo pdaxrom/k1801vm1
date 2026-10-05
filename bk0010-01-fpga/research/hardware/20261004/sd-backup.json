@@ -1,0 +1,13 @@
+{
+  "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "resolved_device": "/dev/sdf",
+  "bytes_per_sector": 512,
+  "sectors_per_cluster": 1,
+  "partition_type": 6,
+  "start_lba": 2048,
+  "sectors": 32768,
+  "root_entries": 512,
+  "clusters": 32479,
+  "mbr_sha256": "1d9790531763f1899689594b94329336f02f2c09d092128e483817f5de5fe4ae",
+  "before_sha256": "cb14259203e0e37483593d3a3c4c4532f7fca6682a3678f8828c712726539096"
+}

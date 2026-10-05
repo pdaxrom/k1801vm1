@@ -1,0 +1,127 @@
+{
+  "files": {
+    "README.md": {
+      "bytes": 3031,
+      "sha256": "c5d55f6c0ec5a66a4772fef00a7b8fb6b4c71de0e085567b4ec89df545294cc2"
+    },
+    "design.jed": {
+      "bytes": 1456106,
+      "sha256": "a74dfb81c832517571c26a56085d270402f5bb41b25b31b5b68daf568074b6c1"
+    },
+    "functional/baseline-fast.json": {
+      "bytes": 12278,
+      "sha256": "2cb8fc904cafee799a7ea7be181e213253074c450bb7d4c0a18b2faeb90e51e5"
+    },
+    "functional/baseline-soc-diamond.json": {
+      "bytes": 9642,
+      "sha256": "64e1eea5a99d692990e09c7731b567ec4f155ab64351f1c9c3804795181c25b6"
+    },
+    "functional/boot-coexist-loader.log": {
+      "bytes": 756,
+      "sha256": "16c52f1387fe40b1664462b602b3162ed8d4b38574abb154cb4caa2ff8006695"
+    },
+    "functional/boot.json": {
+      "bytes": 15254,
+      "sha256": "ed11ead7d04ba75f42e52f5fb9b0711693d33da1ee56031e1462675e0fc17e47"
+    },
+    "functional/mapped-ebr.json": {
+      "bytes": 1396,
+      "sha256": "7d081903577d5a26da4dd13ae0cfe5dcfeb0ea8e98ecbb779d8094edb177b76f"
+    },
+    "functional/mapped-ebr.log": {
+      "bytes": 191,
+      "sha256": "dacf5ae43e44be97e74b9079a5841a94a041feda9e5847c405616441ac040b54"
+    },
+    "functional/missing-bk-loader.log": {
+      "bytes": 482,
+      "sha256": "c56a0f9cb701923f75eb1d36101babab721ed54b343bd361720d44173fe4ffbf"
+    },
+    "functional/plm-equivalence.json": {
+      "bytes": 696,
+      "sha256": "924e0a4262b228b8487e0605f451c0e9fef764d820b511f5db3ba278fe26643d"
+    },
+    "functional/tb_mapped_ebr.v": {
+      "bytes": 35825,
+      "sha256": "be8ac2360b195222a7efae3cea2b69425ad5fa1fff5c896d3357e23faa52b709"
+    },
+    "inputs.json": {
+      "bytes": 4388,
+      "sha256": "9b68293580fa4836cff4089d1e5a036535169c447371082b7445ef1f70f53cec"
+    },
+    "reports/build.exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "reports/design.mrp": {
+      "bytes": 72845,
+      "sha256": "4e13d8e0ab7ee37c8565a1b2845d077c14bdbdb47a963e26288b98b01831e715"
+    },
+    "reports/design.par": {
+      "bytes": 17406,
+      "sha256": "70844900cd70be6cf9599f0ede50d2d650e1ac88dc2ed35b797373f2cbd34b6a"
+    },
+    "reports/design.prf": {
+      "bytes": 7756,
+      "sha256": "c926d25c865b906333395fab1162d4cf179352456cff57cf12cb4722c9485fdf"
+    },
+    "reports/design.srr": {
+      "bytes": 229586,
+      "sha256": "2f6c97a515f62c46b9e49c587879c467125dd46bbdefdf9912b8e9b20ba619f0"
+    },
+    "reports/design.twr": {
+      "bytes": 796536,
+      "sha256": "5c1da21435349d07bf2fab12b6cc83192ac5a0116ea15c1c45bb295f7ea39e8e"
+    },
+    "reports/export.log": {
+      "bytes": 4730,
+      "sha256": "7dea1be1164ab8cd976f7ac84bd66626cfe213b639300198b1916a761b80ef12"
+    },
+    "reports/phase.log": {
+      "bytes": 3557,
+      "sha256": "391108fcf4d7d2e02e99fa380f807f1902a4ac137f77529050f35d0ea5fcb548"
+    },
+    "reports/phase.prf": {
+      "bytes": 8015,
+      "sha256": "3946c50de8d7cdd9ec49421241563d2adcc1060b4397f36073100a2d9f6fbe63"
+    },
+    "reports/phase.twr": {
+      "bytes": 844493,
+      "sha256": "d441b8b60d49e465bef857f030c3a1f3a741731bfb01e08c31da1706c696f1b9"
+    },
+    "reports/synthesis.edi.gz": {
+      "bytes": 317823,
+      "sha256": "5c279f663dc2fe2969bd75c8b598ec7b0341674ca3e09382bfbbce00df203993"
+    },
+    "result.json": {
+      "bytes": 13746,
+      "sha256": "32b17be1a8b8908307657931f1059bcf1e7d59cb12b71ec300cf876738319514"
+    },
+    "sd-image.img.gz": {
+      "bytes": 44415,
+      "sha256": "ba95b33334704506b89701e1028295170c96f5d1c05dd0a44f7d4e06d1a72753"
+    },
+    "sources.tar.gz": {
+      "bytes": 78019,
+      "sha256": "eeb8eccd0af0b5f5ec5a638fc4cc6c143739752aac5fe7b8f07aaa3c89f00f4f"
+    },
+    "verification.json": {
+      "bytes": 3392,
+      "sha256": "783495fb347361399feba7f0467a5a7007fbfcba54e934ef72e0c1b6fada3957"
+    }
+  },
+  "device": "LCMXO2-7000HC-4TG144I",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "a74dfb81c832517571c26a56085d270402f5bb41b25b31b5b68daf568074b6c1",
+    "checksum": "070B",
+    "transmission_checksum": "EA61",
+    "fuses": 1441280
+  },
+  "sd_image_uncompressed": {
+    "bytes": 17825792,
+    "sha256": "321e73777d82a56d2ea4629d083d6a835edb8a6e91bc1437703de68339781f6c"
+  },
+  "physical_flash_and_boot_verified": true,
+  "host": "sash@192.168.1.108",
+  "diamond_version": "3.14"
+}

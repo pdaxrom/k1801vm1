@@ -1,0 +1,21 @@
+Lattice Programmer Diamond (64-bit) 3.14.0.75.2 Command Line
+Argument check - OK
+Loading Programmer Device Database... Done.
+Writing log file to /home/sash/Work/FPGA/bk0010-loaderbk-hardware-20261004-01/flash-session/02-program.log
+Opening XCF file... Done.
+Programming XCF Contents... INFO - Check configuration setup: Start.
+
+INFO - JTAG Chain Verification. No Errors.
+
+INFO - Check configuration setup: Successful.
+
+INFO - Device1 LCMXO2-7000HC: FLASH Erase,Program,Verify
+
+INFO - Operation Done. No errors.
+
+INFO - Elapsed time: 00 min : 54 sec
+
+INFO - Operation: successful.
+
+Done.
+Lattice Diamond Programmer has exited successfully.

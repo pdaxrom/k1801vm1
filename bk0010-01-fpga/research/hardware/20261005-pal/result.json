@@ -1,0 +1,58 @@
+{
+  "date_local": "2026-10-05",
+  "timezone": "Asia/Yerevan",
+  "host": "sash@192.168.1.108",
+  "board": "Z-pdaXrom-TV hardware-lcd",
+  "jed": {
+    "bytes": 1456106,
+    "sha256": "64f4e157355c0d4a16a874aaf23e5651dfb25d8546bae57dcb243c900d0120e9",
+    "checksum": "6086",
+    "transmission_checksum": "EED1",
+    "fuses": 1441280
+  },
+  "flash_program_verify_passed": true,
+  "native_boot_passed": true,
+  "boot_stages": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "FF"
+  ],
+  "boot_errors": [],
+  "rom_stream_and_sram_readback_crc32_passed": true,
+  "uart_closed": true,
+  "functional_board_boot_verified": true,
+  "visual_edges_user_confirmed": true,
+  "user_observation": {
+    "source": "user",
+    "message": "Всё помещается",
+    "loader_top_and_basic_right_edges_fit": true
+  },
+  "viewport": {
+    "horizontal_clocks": [
+      718,
+      3917
+    ],
+    "first_field_lines": [
+      32,
+      287
+    ],
+    "second_field_lines": [
+      345,
+      600
+    ],
+    "width_pixels": 512,
+    "height_lines": 256,
+    "shift_mono_pixels_left": 8,
+    "shift_lines_down": 4
+  },
+  "sd_changed": false,
+  "bk_filename": "LOADERBK.BIN",
+  "previous_keyboard_display_frequencies_reset_checks": "../20261004/result.json",
+  "scope": "Current PAL placement: Flash verify, physical SD/ROM boot and user LCD edge observation",
+  "analog_pal_and_absolute_cpu_speed_measured": false
+}

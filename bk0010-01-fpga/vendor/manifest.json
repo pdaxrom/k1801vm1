@@ -1,0 +1,92 @@
+{
+  "cpu11": {
+    "url": "https://github.com/1801BM1/cpu11",
+    "commit": "e0576637a35f0378f85673213a808098b9535526",
+    "author": "1801BM1@gmail.com",
+    "license": "CC-BY-3.0"
+  },
+  "files": [
+    {
+      "path": "vendor/cpu11/vm1_wb.v",
+      "source": "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_wb.v",
+      "sha256": "26863becbebd6c19caebdad4aa73a3007ce673a57a327259f69c24f467a18f47"
+    },
+    {
+      "path": "vendor/cpu11/vm1_plm.v",
+      "source": "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_plm.v",
+      "sha256": "39925815269fcef50be5ccc7cd7198478cdd1287e770fe4b06b83e4901f0e593"
+    },
+    {
+      "path": "vendor/cpu11/vm1_reg.v",
+      "source": "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_reg.v",
+      "sha256": "2934be8e6a4ffe2bfff4166be27bbdd357e4d0b7ba2570c50217993f39ef57d5"
+    },
+    {
+      "path": "vendor/cpu11/vm1_tve.v",
+      "source": "/private/tmp/bk0010-01-cpu11-audit/vm1/hdl/wbc/rtl/vm1_tve.v",
+      "sha256": "50a4a9f3fb9150651bb73ab8f9a6d94454b4867b4e8c4861ee032f209ffcce4e"
+    },
+    {
+      "path": "vendor/cpu11/license.md",
+      "source": "/private/tmp/bk0010-01-cpu11-audit/license.md",
+      "sha256": "059ccd0c2de1d4bd229c5d933520cc60da4b62eb192f3bc7e396df47bd392a02"
+    },
+    {
+      "path": "vendor/uj11/uj11_button.v",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc1200/uj11_button.v",
+      "sha256": "6db308900382fbe4c8f7b709e29438b1c522aec77f6435a2661f304392e303c0"
+    },
+    {
+      "path": "vendor/uj11/uj11_tick.v",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc1200/uj11_tick.v",
+      "sha256": "c6af112eccfcf224aa82385b9165a4e36a2c63e9b3ed36570d13489e0edaeed4"
+    },
+    {
+      "path": "vendor/uj11/uj11_sram.v",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/uj11_sram.v",
+      "sha256": "6a923c4a82bcb3630a62e4c4af05a5646de61720213b39661d1ef6561147560d"
+    },
+    {
+      "path": "vendor/uj11/uj11_ps2_keyboard.v",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/uj11_ps2_keyboard.v",
+      "sha256": "6420c91a162b05e7f4dccead47ba027bb10ce64b7a394cd81b49f1cde3a6265d"
+    },
+    {
+      "path": "vendor/uj11/uj11_pal_timing.v",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/video/uj11_pal_timing.v",
+      "sha256": "e7765556359196292a6171c3549c55965b94ac8025af556afa8fc11fa29b1767"
+    },
+    {
+      "path": "vendor/uj11/uj11_pal_encoder.v",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/uJ11-fpga/boards/hc7000/video/uj11_pal_encoder.v",
+      "sha256": "0b5c15577ad3df217f42a2dcb3c2ba1b5e1a7bd23fd28b5a7f8ac83b0da3058b"
+    },
+    {
+      "path": "vendor/pyldin/boot_spi_registers.v",
+      "source": "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/rtl/boot_spi_registers.v",
+      "sha256": "381ccc4df0916ed230251798e89e3aab7e14fa5beacccd9621dfe23a48cc8cd1"
+    },
+    {
+      "path": "vendor/pyldin/spi_byte_master.v",
+      "source": "/Users/sash/Work/P601/pyldin601/pyldin601-fpga/rtl/spi_byte_master.v",
+      "sha256": "010008193cee3823c7a3d54d598c12295157f295fdcd0740d4447f02d692d89d"
+    },
+    {
+      "path": "roms/MONIT10.ROM",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/ROM/MONIT10.ROM",
+      "sha256": "c93f3e7d3342f747f6c55a3b5ebb8c1840d3d118e80dc5d274f645dc2b393688"
+    },
+    {
+      "path": "roms/BASIC10.ROM",
+      "source": "/Users/sash/Work/PROJECTS/k1801vm1/bk0010-01/ROM/BASIC10.ROM",
+      "sha256": "24be347356715352fcab480ed1559302d47d598255980a32150eba1431b462b8"
+    }
+  ],
+  "derived": {
+    "cpu11_plm": "tools/prepare_cpu11.py: 497 explicit wildcard masks; originals unchanged",
+    "sd_image": "tools/make_sd.py, adapted from /Users/sash/Work/P601/pyldin601/pyldin601-fpga/tools/make_sd.py",
+    "boot_protocol": "Native VM1 adaptation of pyldin601 firmware/boot.asm and firmware/loader.asm",
+    "board_plls": "Adapted from uJ11-fpga/boards/hc7000/uj11_pll.v and video/uj11_pal_pll.v",
+    "golden_vram": "Headless reference core with original bk0010-01/bk_hw.c; boot and PRINT 2+2, see research/checks.json"
+  }
+}

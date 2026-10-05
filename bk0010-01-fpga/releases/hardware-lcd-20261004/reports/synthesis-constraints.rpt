@@ -1,0 +1,195 @@
+
+Copyright (C) 1994-2023 Synopsys, Inc.
+This Synopsys software and all associated documentation are proprietary to Synopsys, Inc.
+and may only be used pursuant to the terms and conditions of a written license agreement
+with Synopsys, Inc. All other use, reproduction, modification, or distribution of the
+Synopsys software or the associated documentation is strictly prohibited.
+Tool: Synplify Pro (R)
+Build: V-2023.09L-2
+Install: /home/sash/.local/lscc/diamond/3.14/synpbase
+OS: Ubuntu 24.04.5 LTS
+Hostname: sashz-ubuntu
+max virtual memory: unlimited (bytes)
+max user processes: 512759
+max stack size: 8388608 (bytes)
+
+
+Implementation : impl1
+
+# Written on Sun Oct  4 06:16:18 2026
+
+##### DESIGN INFO #######################################################
+
+Top View:                "bk_hardware_lcd"
+Constraint File(s):      "/home/sash/Work/FPGA/bk0010-20261004-stable-9agkSL/boards/hardware-lcd/clocks.fdc"
+
+
+
+
+##### SUMMARY ############################################################
+
+Found 4 issues in 4 out of 5 constraints
+
+
+##### DETAILS ############################################################
+
+
+
+Clock Relationships
+*******************
+
+Starting     Ending      |     rise to rise     |     fall to fall     |     rise to fall     |     fall to rise                     
+------------------------------------------------------------------------------------------------------------------------------------
+System       System      |     15.625           |     No paths         |     No paths         |     No paths                         
+System       system      |     41.667           |     No paths         |     No paths         |     No paths                         
+system       system      |     41.667           |     No paths         |     No paths         |     No paths                         
+system       divider     |     20.833           |     No paths         |     No paths         |     No paths                         
+system       pal         |     5.208            |     No paths         |     No paths         |     No paths                         
+system       vm1         |     41.667           |     No paths         |     No paths         |     No paths                         
+divider      System      |     20.833           |     No paths         |     No paths         |     No paths                         
+divider      system      |     20.833           |     No paths         |     No paths         |     No paths                         
+divider      divider     |     20.833           |     No paths         |     No paths         |     No paths                         
+pal          system      |     5.208            |     No paths         |     No paths         |     No paths                         
+pal          pal         |     15.625           |     No paths         |     No paths         |     No paths                         
+vm1          system      |     41.667           |     No paths         |     No paths         |     No paths                         
+vm1          divider     |     20.833           |     No paths         |     No paths         |     No paths                         
+vm1          vm1         |     41.667           |     41.667           |     20.833           |     20.833                           
+====================================================================================================================================
+ Note: 'No paths' indicates there are no paths in the design for that pair of clock edges.
+       'Diff grp' indicates that paths exist but the starting clock and ending clock are in different clock groups.
+
+
+Unconstrained Start/End Points
+******************************
+
+p:audio[0]
+p:audio[1]
+p:flash_cs_n
+p:flash_hold_n
+p:flash_mosi
+p:flash_sck
+p:flash_wp_n
+p:led_rgb[0]
+p:led_rgb[1]
+p:led_rgb[2]
+p:ps2_clock (bidir end point)
+p:ps2_clock (bidir start point)
+p:ps2_data
+p:res
+p:sd_cs_n
+p:sd_miso
+p:sd_mosi
+p:sd_sck
+p:seg_led_h[0]
+p:seg_led_h[1]
+p:seg_led_h[2]
+p:seg_led_h[3]
+p:seg_led_h[4]
+p:seg_led_h[5]
+p:seg_led_h[6]
+p:seg_led_h[7]
+p:seg_led_h[8]
+p:seg_led_l[0]
+p:seg_led_l[1]
+p:seg_led_l[2]
+p:seg_led_l[3]
+p:seg_led_l[4]
+p:seg_led_l[5]
+p:seg_led_l[6]
+p:seg_led_l[7]
+p:seg_led_l[8]
+p:sram_address[0]
+p:sram_address[1]
+p:sram_address[2]
+p:sram_address[3]
+p:sram_address[4]
+p:sram_address[5]
+p:sram_address[6]
+p:sram_address[7]
+p:sram_address[8]
+p:sram_address[9]
+p:sram_address[10]
+p:sram_address[11]
+p:sram_address[12]
+p:sram_address[13]
+p:sram_address[14]
+p:sram_address[15]
+p:sram_address[16]
+p:sram_address[17]
+p:sram_address[18]
+p:sram_address[19]
+p:sram_ce_n
+p:sram_data[0] (bidir end point)
+p:sram_data[0] (bidir start point)
+p:sram_data[1] (bidir end point)
+p:sram_data[1] (bidir start point)
+p:sram_data[2] (bidir end point)
+p:sram_data[2] (bidir start point)
+p:sram_data[3] (bidir end point)
+p:sram_data[3] (bidir start point)
+p:sram_data[4] (bidir end point)
+p:sram_data[4] (bidir start point)
+p:sram_data[5] (bidir end point)
+p:sram_data[5] (bidir start point)
+p:sram_data[6] (bidir end point)
+p:sram_data[6] (bidir start point)
+p:sram_data[7] (bidir end point)
+p:sram_data[7] (bidir start point)
+p:sram_data[8] (bidir end point)
+p:sram_data[8] (bidir start point)
+p:sram_data[9] (bidir end point)
+p:sram_data[9] (bidir start point)
+p:sram_data[10] (bidir end point)
+p:sram_data[10] (bidir start point)
+p:sram_data[11] (bidir end point)
+p:sram_data[11] (bidir start point)
+p:sram_data[12] (bidir end point)
+p:sram_data[12] (bidir start point)
+p:sram_data[13] (bidir end point)
+p:sram_data[13] (bidir start point)
+p:sram_data[14] (bidir end point)
+p:sram_data[14] (bidir start point)
+p:sram_data[15] (bidir end point)
+p:sram_data[15] (bidir start point)
+p:sram_lb_n
+p:sram_oe_n
+p:sram_ub_n
+p:sram_we_n
+p:tvout[0]
+p:tvout[1]
+p:tvout[2]
+p:tvout[3]
+p:tvout[4]
+p:tvout[5]
+p:tx
+
+
+Inapplicable constraints
+************************
+
+(none)
+
+
+Applicable constraints with issues
+**********************************
+
+create_generated_clock -name divider -source [get_ports clk_ext] -multiply_by 4 [get_nets main_pll.CLKOS]
+	@W:MT688:"/home/sash/Work/FPGA/bk0010-20261004-stable-9agkSL/boards/hardware-lcd/clocks.fdc":5:0:5:0|No path from master pin (-source) to source of clock divider due to black box main_pll.PLLInst_0
+create_generated_clock -name pal -source [get_ports clk_ext] -multiply_by 16 -divide_by 3 [get_nets video_pll.CLKOS]
+	@W:MT688:"/home/sash/Work/FPGA/bk0010-20261004-stable-9agkSL/boards/hardware-lcd/clocks.fdc":6:0:6:0|No path from master pin (-source) to source of clock pal due to black box video_pll.PLLInst_0
+create_generated_clock -name system -source [get_ports clk_ext] -multiply_by 2 [get_nets main_pll.CLKOP]
+	@W:MT688:"/home/sash/Work/FPGA/bk0010-20261004-stable-9agkSL/boards/hardware-lcd/clocks.fdc":4:0:4:0|No path from master pin (-source) to source of clock system due to black box main_pll.PLLInst_0
+create_generated_clock -name vm1 -source [get_nets main_pll.CLKOS] -divide_by 2 [get_nets machine.cpu_p]
+	@W:MT688:"/home/sash/Work/FPGA/bk0010-20261004-stable-9agkSL/boards/hardware-lcd/clocks.fdc":7:0:7:0|No path from master pin (-source) to source of clock vm1 due to black box machine.cpu_positive
+
+Constraints with matching wildcard expressions
+**********************************************
+
+(none)
+
+
+Library Report
+**************
+
+
+# End of Constraint Checker Report
