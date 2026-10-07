@@ -5,7 +5,10 @@
 /* Common UJ11SD partitions; geometry and sector status live within each floppy. */
 #define QX(n) MMIO(0x40000800u + 4u * (n))
 #define QBUF(n) QX(64u + (n))
-volatile uint8_t *const sector = (volatile uint8_t *)18944;
+#ifndef UJ11_TERAK_IOP_RAM_BYTES
+#define UJ11_TERAK_IOP_RAM_BYTES 19456u
+#endif
+volatile uint8_t *const sector = (volatile uint8_t *)(UJ11_TERAK_IOP_RAM_BYTES - 512u);
 static u32 speed;
 
 unsigned terminal_keymode(void)

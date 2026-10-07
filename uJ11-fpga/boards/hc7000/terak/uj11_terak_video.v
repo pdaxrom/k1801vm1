@@ -8,6 +8,7 @@ module uj11_terak_video #(
     input wire clk,video_clk,reset,
     input wire [15:0] gar,vir,vcr,
     output wire memory_request,
+    output wire memory_display,memory_font,
     output reg [19:0] memory_address,
     input wire memory_ready,
     input wire [15:0] memory_data,
@@ -74,6 +75,8 @@ module uj11_terak_video #(
     end
     localparam IDLE=0,GRAPH=1,PAGE=2,FONT=3,PACK=4,GAP=5,COMPLETE=6,SETUP=7,DIVIDE=8;
     reg [3:0] state,next_state;
+    assign memory_display=state==PAGE || state==FONT;
+    assign memory_font=state==FONT;
     reg [7:0] current_row /* synthesis syn_preserve=1 */;
     reg current_bank /* synthesis syn_preserve=1 */;
     reg [8:0] remainder;

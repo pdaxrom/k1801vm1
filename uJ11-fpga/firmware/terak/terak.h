@@ -1,6 +1,9 @@
 #ifndef UJ11_TERAK_H
 #define UJ11_TERAK_H
 #include "../storage/storage.h"
+#ifndef UJ11_TERAK_DMA_BYTES
+#define UJ11_TERAK_DMA_BYTES 57344u
+#endif
 struct terak_media {
 	u32 start, blocks;
 	uint8_t heads, readonly, format;

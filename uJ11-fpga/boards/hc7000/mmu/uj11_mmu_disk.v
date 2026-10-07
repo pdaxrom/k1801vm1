@@ -2,7 +2,7 @@
 // HC7000 SERV and shared peripheral bus. The legacy MMU profile retains RK611.
 module uj11_mmu_disk #(
     parameter integer CLOCK_HZ=24000000, SD_SLOW_DIV=60, SD_FAST_DIV=2, VIDEO_ENABLE=0, TERMINAL_ENABLE=0,KEYBOARD_ENABLE=0,
-    parameter TERAK_ENABLE=0
+    parameter TERAK_ENABLE=0,IOP_RAM_KIB=19
 )(
     input wire clk,reset,bus_reset,dma_map_enabled,
     inout wire ps2_clock,
@@ -66,8 +66,8 @@ module uj11_mmu_disk #(
     reg [31:0] instruction_data;
     always @(posedge clk)instruction_data<=mem_data;
     wire instruction_read=ic && !ia_ack && !instruction_pending && !(dc && memory_selected) &&
-        (storage_enabled ? (ia[31:15]==0 && ia[14:10]<19) : ia[31:11]==0);
-    wire memory_selected=storage_enabled ? (da[31:15]==0 && da[14:10]<19) : da[31:11]==0;
+        (storage_enabled ? (ia[31:15]==0 && ia[14:10]<IOP_RAM_KIB) : ia[31:11]==0);
+    wire memory_selected=storage_enabled ? (da[31:15]==0 && da[14:10]<IOP_RAM_KIB) : da[31:11]==0;
     // Break the RV32C aligner carry -> address bounds -> EBR enable path.
     // A held instruction request is qualified before issuing its RAM read;
     // data RAM retains priority. Other board profiles keep their old latency.

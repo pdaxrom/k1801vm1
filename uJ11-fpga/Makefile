@@ -11,7 +11,22 @@ IOP ?= storage
 MMU_CLOCK_MHZ ?= 50
 HC7000_VIDEO ?= 1
 HC7000_KEYBOARD ?= 1
-OUT ?= build/hc7000-terak
+TERAK_RAM_KIB ?= 56
+ifeq ($(filter $(TERAK_RAM_KIB),56 128 256),)
+$(error TERAK_RAM_KIB must be 56, 128 or 256)
+endif
+TERAK_DISPLAY ?= $(if $(filter 56,$(TERAK_RAM_KIB)),sram,ebr)
+ifeq ($(filter $(TERAK_DISPLAY),sram ebr),)
+$(error TERAK_DISPLAY must be sram or ebr)
+endif
+export UJ11_TERAK_DISPLAY := $(TERAK_DISPLAY)
+ifneq ($(TERAK_RAM_KIB),56)
+ifneq ($(TERAK_DISPLAY),ebr)
+$(error Extended TERAK RAM requires TERAK_DISPLAY=ebr)
+endif
+endif
+export UJ11_TERAK_RAM_KIB := $(TERAK_RAM_KIB)
+OUT ?= build/hc7000-terak$(if $(filter 56,$(TERAK_RAM_KIB)),$(if $(filter ebr,$(TERAK_DISPLAY)),-ebr),-$(TERAK_RAM_KIB)k)
 TERAK_SYNTHESIS ?= $(notdir $(OUT))-mbr-synthesis
 ifneq ($(BOARD)/$(CPU)/$(FPP)/$(IOP)/$(MMU_CLOCK_MHZ),hc7000-lcd-sram/mmu/off/storage/50)
 $(error MACHINE=terak requires HC7000 / CPU=mmu / FPP=off / IOP=storage / 50 MHz)
@@ -287,7 +302,7 @@ else
 endif
 clean:
 ifeq ($(MACHINE),terak)
-	$(PYTHON) -c "import shutil; [shutil.rmtree('build/'+p, ignore_errors=True) for p in ('hc7000-terak','hc7000-terak-synthesis','hc7000-terak-mbr-synthesis')]"
+	$(PYTHON) -c "import shutil; [shutil.rmtree('build/'+p, ignore_errors=True) for p in ('$(notdir $(OUT))','$(notdir $(OUT))-synthesis','$(notdir $(OUT))-mbr-synthesis')]"
 else
 ifeq ($(CPU),mmu)
 	$(PYTHON) -c "import shutil; [shutil.rmtree('build/'+p, ignore_errors=True) for p in ('hc7000-mmu-hardware','hc7000-mmu-iop','test-mmu','test-mmu-bus','test-mmu-disk')]"

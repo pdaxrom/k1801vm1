@@ -142,7 +142,10 @@ static int valid(void)
  * DMA. Odd addresses/counts retain neighboring RAM and sector bytes. */
 static int memory_byte(unsigned address, unsigned offset, unsigned write)
 {
-	if (address >= 57344 || !valid()) {
+#if UJ11_TERAK_DMA_BYTES == 65536
+	address &= 65535u;
+#endif
+	if (address >= UJ11_TERAK_DMA_BYTES || !valid()) {
 		return 0;
 	}
 	DMA_ADDR = address & ~1u;
@@ -161,9 +164,13 @@ static int memory_byte(unsigned address, unsigned offset, unsigned write)
 	return valid();
 }
 
+#if UJ11_TERAK_DMA_BYTES == 65536
+static int dma_linear(unsigned offset, unsigned count, unsigned to_memory)
+#else
 static int dma(unsigned offset, unsigned count, unsigned to_memory)
+#endif
 {
-	if (dma_address + count > 57344 || !valid()) {
+	if (dma_address + count > UJ11_TERAK_DMA_BYTES || !valid()) {
 		return 0;
 	}
 	while (count && ((dma_address | offset) & 1)) {
@@ -194,6 +201,25 @@ static int dma(unsigned offset, unsigned count, unsigned to_memory)
 	}
 	return 1;
 }
+
+#if UJ11_TERAK_DMA_BYTES == 65536
+static int dma(unsigned offset, unsigned count, unsigned to_memory)
+{
+	/* QBBA is a 16-bit counter even on an LSI-11/23 system. Split bulk
+	 * transfers at its wrap; DMA must never spill into the next RAM bank. */
+	while (count) {
+		dma_address &= 65535u;
+		unsigned chunk = count < 65536u - dma_address ? count : 65536u - dma_address;
+		if (!dma_linear(offset, chunk, to_memory)) {
+			return 0;
+		}
+		dma_address &= 65535u;
+		offset += chunk;
+		count -= chunk;
+	}
+	return valid();
+}
+#endif
 
 static void finish(unsigned st0, unsigned st1, unsigned st2, unsigned c, unsigned h, unsigned r, unsigned n)
 {

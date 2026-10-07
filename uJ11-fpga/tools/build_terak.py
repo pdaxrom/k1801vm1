@@ -12,17 +12,31 @@ from build_mmu import CORE, build as build_cpu
 from build_iop_mmu import ram
 from iop_ebr import sector_ram
 
-OUT = ROOT/'build/hc7000-terak'
+GUEST_RAM_KIB = int(os.environ.get('UJ11_TERAK_RAM_KIB', '56'))
+if GUEST_RAM_KIB not in (56, 128, 256):
+    raise ValueError('UJ11_TERAK_RAM_KIB must be 56, 128 or 256')
+DISPLAY = os.environ.get('UJ11_TERAK_DISPLAY', 'sram' if GUEST_RAM_KIB == 56 else 'ebr')
+if DISPLAY not in ('sram', 'ebr'):
+    raise ValueError('UJ11_TERAK_DISPLAY must be sram or ebr')
+if GUEST_RAM_KIB != 56 and DISPLAY != 'ebr':
+    raise ValueError('Extended TERAK RAM requires separate EBR display memory')
+# The early LSI-11/23 has an 18-bit Q-bus; its top 8 KiB is I/O.
+GUEST_RAM_BYTES = 248*1024 if GUEST_RAM_KIB == 256 else GUEST_RAM_KIB*1024
+OUT = ROOT/('build/hc7000-terak-'+str(GUEST_RAM_KIB)+'k' if GUEST_RAM_KIB != 56 else
+            'build/hc7000-terak-ebr' if DISPLAY == 'ebr' else 'build/hc7000-terak')
+LINK = 'firmware/terak/link-ebr.ld' if DISPLAY == 'ebr' else 'firmware/storage/link.ld'
+RAM_BYTES = 15360 if DISPLAY == 'ebr' else 19456
 CPU_OUT = OUT/'cpu'
 IOP_OUT = OUT/'iop'
 TOP = str((OUT/'uj11_terak_microcomp.v').relative_to(ROOT))
 FIRMWARE = ['firmware/storage/start.S', 'firmware/terak/main.c', 'firmware/terak/qb.c', 'firmware/terak/media.c', 'firmware/terak/mbr.c', 'firmware/storage/label.c', 'firmware/storage/keyboard.c']
 HEADERS = ['firmware/terak/terak.h', 'firmware/storage/storage.h', 'firmware/storage/label.h', 'firmware/storage/keyboard.h',
-           'firmware/storage/terminal.h', 'firmware/storage/link.ld', 'firmware/terak/boot.mem',
+           'firmware/storage/terminal.h', LINK, 'firmware/terak/boot.mem',
            'firmware/terak/boot.json', 'firmware/terak/qb_boot.asm', 'firmware/terak/qb_boot.mem',
            'firmware/terak/qb_boot.json']
 BOARD = ['boards/hc7000/terak/'+p+'.v' for p in
-         ('uj11_terak_board', 'uj11_terak_bus', 'uj11_terak_qx', 'uj11_terak_console', 'uj11_terak_video', 'uj11_terak_timing')]
+         ('uj11_terak_board', 'uj11_terak_bus', 'uj11_terak_qx', 'uj11_terak_console', 'uj11_terak_video',
+          'uj11_terak_timing', 'uj11_terak_display_ram')]
 BOARD += ['boards/hc7000/mmu/'+p+'.v' for p in
           ('uj11_mmu_disk', 'uj11_mmu_rk611', 'uj11_mmu_iop_bus', 'uj11_mmu_sector_engine')]
 BOARD += ['boards/hc7000/uj11_sram.v', 'boards/hc7000/uj11_ps2_keyboard.v',
@@ -46,6 +60,10 @@ def firmware(rebuild=False):
     base_flags = ['-march=rv32ic', '-mabi=ilp32', '-Os', '-ffreestanding', '-fno-builtin',
                   '-ffunction-sections', '-fdata-sections', '-msmall-data-limit=0',
                   '-Wall', '-Wextra', '-Werror', '-DUJ11_TERAK', '-DUJ11_KEYBOARD']
+    if DISPLAY == 'ebr':
+        base_flags.append(f'-DUJ11_TERAK_IOP_RAM_BYTES={RAM_BYTES}')
+    if GUEST_RAM_KIB != 56:
+        base_flags.append('-DUJ11_TERAK_DMA_BYTES=65536')
     record_path = IOP_OUT/'build.json'
     if record_path.exists() and not rebuild and not os.environ.get('RISCV_CC'):
         record = json.loads(record_path.read_text())
@@ -83,7 +101,7 @@ def firmware(rebuild=False):
     elf = IOP_OUT/'firmware.elf'
     ldflags = ['-fuse-ld=lld'] if clang else ['-lgcc']
     subprocess.run([cc]+flags+['-nostdlib', '-nostartfiles', '-Wl,--gc-sections', '-Wl,--relax',
-                   '-T', str(ROOT/'firmware/storage/link.ld'), '-Wl,-Map='+str(IOP_OUT/'firmware.map')]+
+                   '-T', str(ROOT/LINK), '-Wl,-Map='+str(IOP_OUT/'firmware.map')]+
                    objects+ldflags+['-o', str(elf)], check=True)
     prefix = os.environ.get('RISCV_PREFIX', str(cc).removesuffix('gcc'))
     def binary_tool(name):
@@ -101,14 +119,16 @@ def firmware(rebuild=False):
                'cold_limit', 'sector_start', 'sector_end')}
     if len(data) > memory['stack_bottom'] or memory['bss_end'] > memory['stack_bottom']:
         raise ValueError('Terak firmware overlaps its reserved stack')
-    words = [int.from_bytes(data.ljust(19456, b'\0')[i:i+4], 'little') for i in range(0, 19456, 4)]
+    if memory['sector_start'] != RAM_BYTES-512 or memory['sector_end'] != RAM_BYTES:
+        raise ValueError('Terak firmware/sector engine RAM layouts differ')
+    words = [int.from_bytes(data.ljust(RAM_BYTES, b'\0')[i:i+4], 'little') for i in range(0, RAM_BYTES, 4)]
     (IOP_OUT/'firmware.mem').write_text(''.join(f'{w:08x}\n' for w in words))
     (IOP_OUT/'uj11_mmu_iop_ram.v').write_text(ram(words).replace(
         'build/hc7000-mmu-iop/firmware.mem', str((IOP_OUT/'firmware.mem').relative_to(ROOT))))
     (IOP_OUT/'uj11_sector_ram.v').write_text(sector_ram())
     (IOP_OUT/'firmware.lst').write_bytes(subprocess.check_output([binary_tool('objdump'), '-d', str(elf)]))
-    record = dict(inputs=inputs, flags=flags, compiler=version, program_bytes=len(data), ram_bytes=19456,
-                  ebr=19, profile='terak', memory=memory,
+    record = dict(inputs=inputs, flags=flags, compiler=version, program_bytes=len(data), ram_bytes=RAM_BYTES,
+                  ebr=RAM_BYTES//1024, profile='terak', memory=memory,
                   outputs={p.name: sha(p) for p in IOP_OUT.iterdir() if p.suffix in ('.elf', '.bin', '.mem', '.map', '.lst', '.v')})
     record_path.write_text(json.dumps(record, indent=2)+'\n')
     return record
@@ -147,19 +167,27 @@ def build(rebuild=False):
     if diagnostics not in (0, 1):
         raise ValueError('UJ11_HC7000_DIAGNOSTICS must be 0 or 1')
     top = top.replace('DIAGNOSTICS_ENABLE=0', f'DIAGNOSTICS_ENABLE={diagnostics}')
+    top = top.replace('uj11_terak_board #(', 'uj11_terak_board #(\n'+
+                      f'        .DISPLAY_EBR({int(DISPLAY == "ebr")}),\n'+
+                      f'        .RAM_BYTES({GUEST_RAM_BYTES}),\n'+
+                      f'        .MICROCODE("{CPU_OUT.relative_to(ROOT)}/microcode.mem"),')
     top = top.replace('    assign audio=2\'b0;\n', '')
     (ROOT/TOP).write_text(top)
     inventory = CORE+BOARD+GENERATED+[TOP]
     inputs = set(inventory+FIRMWARE+HEADERS+['tools/build_terak.py', 'tools/terak_image.py', 'tools/terak_mbr.py',
                                           'boards/hc7000/mmu/uj11_mmu_microcomp.v'])
     record = dict(machine='terak', board='hc7000-lcd-sram', cpu=cpu, iop=iop, fpp='off', clock_mhz=50,
-                  boot_pc_octal='173000', guest_ram_bytes=57344, expected_ebr=26, diagnostics=diagnostics,
+                  boot_pc_octal='173000', guest_ram_bytes=GUEST_RAM_BYTES,
+                  memory_configuration_kib=GUEST_RAM_KIB, physical_address_bits=18,
+                  expected_ebr=26, diagnostics=diagnostics,
+                  display_storage=DISPLAY, display_ebr=4 if DISPLAY == 'ebr' else 0,
                   video='native Terak compositor; monochrome PAL-60 525/60 presentation', bevent_hz=60,
                   video_field_hz=60,video_lines=525,bevent_source='video field start, toggle CDC',
                   inventory=inventory, top=TOP, files={p: sha(ROOT/p) for p in sorted(inputs)},
                   scope='simulation/build inputs; FPGA qualification requires MAP/PAR/TRACE')
     (OUT/'board-inputs.json').write_text(json.dumps(record, indent=2)+'\n')
-    print(f"Terak: SERV {iop['program_bytes']} bytes, BSS through {iop['memory']['bss_end']}, 56 KiB guest RAM")
+    print(f"Terak: SERV {iop['program_bytes']} bytes, BSS through {iop['memory']['bss_end']}, "
+          f"{GUEST_RAM_BYTES//1024} KiB usable guest RAM ({GUEST_RAM_KIB} KiB configuration)")
     return record
 
 

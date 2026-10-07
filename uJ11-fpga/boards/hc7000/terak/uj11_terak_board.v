@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 module uj11_terak_board #(
     parameter integer CLOCK_HZ=50000000,TICK_DIVISOR=833333,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,
-    parameter VIDEO_ENABLE=1,TERMINAL_ENABLE=0,KEYBOARD_ENABLE=1
+    parameter VIDEO_ENABLE=1,TERMINAL_ENABLE=0,KEYBOARD_ENABLE=1,DISPLAY_EBR=0,RAM_BYTES=57344,
+    parameter MICROCODE="build/hc7000-terak/cpu/microcode.mem"
 )(
     input wire clk,reset,power_on,uart_rx,halt_button,video_clk,video_reset,
     inout wire ps2_clock,
@@ -26,14 +27,15 @@ module uj11_terak_board #(
     assign diagnostic_mode=psw[15:14];
     assign uart_tx=1'b1,panel_pins=0;
     uj11_mmu_cpu #(.BOOT_PC(16'o173000),.REGISTER_MICROCODE(1),
-        .MICROCODE("build/hc7000-terak/cpu/microcode.mem")) cpu(.clk(clk),.reset(reset || !cpu_start),.halt_button(halt_button),
+        .MICROCODE(MICROCODE)) cpu(.clk(clk),.reset(reset || !cpu_start),.halt_button(halt_button),
         .irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),.irq_ack(irq_ack),
         .peripheral_reset(peripheral_reset),.mem_request(request),.mem_write(writing),.mem_byte(byte_access),.mem_lock(cpu_lock),
         .mem_address(address),.mem_write_data(write_data),.mem_ready(ready),.mem_error(error),.mem_read_data(read_data),
         .console_active(stopped),.console_halt(diagnostic_halt),.wait_active(diagnostic_wait),.waiting(),
         .retire(diagnostic_retire),.psw(psw),.ir(),.mmr0(),.mmr1(),.mmr2(),.mmr3(),.upc(),.uword(),.pc(),
         .debug_register_data(),.debug_register_address(5'b0));
-    uj11_terak_bus #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),.CLEAR_WORDS(CLEAR_WORDS)) bus(
+    uj11_terak_bus #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),
+        .CLEAR_WORDS(CLEAR_WORDS),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES)) bus(
         .clk(clk),.reset(reset),.power_on(power_on),.peripheral_reset(peripheral_reset),.video_clk(video_clk),.video_reset(video_reset),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(cpu_lock),.address(address),.write_data(write_data),
         .ready(ready),.error(error),.read_data(read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),.irq_ack(irq_ack),

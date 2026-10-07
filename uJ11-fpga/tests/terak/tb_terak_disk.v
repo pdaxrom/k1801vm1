@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // Real SERV and SD card, with an independent bus master checking 128-byte RMW.
-module tb_terak_disk;
+module tb_terak_disk #(parameter DISPLAY_EBR=0,RAM_BYTES=57344);
     reg clk=0,vclk=0,reset=1,power_on=1,peripheral_reset=0,request=0,writing=0,byte_access=0,irq_ack=0;
     always #10 clk=~clk;
     always #7.8125 vclk=~vclk;
@@ -13,7 +13,7 @@ module tb_terak_disk;
     wire [15:0] sd;
     wire ce,oe,we,lb,ub,cs,sck,mosi,miso;
     tri1 ps2_clock;
-    uj11_terak_bus #(.CLEAR_WORDS(1)) bus(.clk(clk),.reset(reset),.power_on(power_on),
+    uj11_terak_bus #(.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),.CLEAR_WORDS(1)) bus(.clk(clk),.reset(reset),.power_on(power_on),
         .peripheral_reset(peripheral_reset),.video_clk(vclk),.video_reset(1'b0),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(1'b0),.address(address),.write_data(wd),
         .ready(ready),.error(error),.read_data(rd),.irq_valid(irq_valid),.irq_priority(priority_level),.irq_vector(vector),.irq_ack(irq_ack),
@@ -35,7 +35,7 @@ module tb_terak_disk;
         last_writes=card.write_commands;
     end
     serv_memory_guard guard(.clk(clk),.reset(bus.disk.iop_reset),
-        .write(bus.disk.data_accept && bus.disk.memory_selected && bus.disk.de && bus.disk.da<18944),.address(bus.disk.da));
+        .write(bus.disk.data_accept && bus.disk.memory_selected && bus.disk.de && bus.disk.da<(DISPLAY_EBR ? 14848 : 18944)),.address(bus.disk.da));
     reg [15:0] result;
     integer readonly_test;
     task access(input [21:0] a,input bit w,input [15:0] data);

@@ -16,7 +16,7 @@ class TerakProfiles(unittest.TestCase):
         env = {k: v for k, v in os.environ.items() if not k.startswith('UJ11_') and k not in
                ('MAKEFLAGS', 'MFLAGS', 'MAKEOVERRIDES', 'MAKELEVEL', 'MACHINE', 'BOARD', 'CPU',
                 'FPP', 'IOP', 'OUT', 'MMU_CLOCK_MHZ', 'HC7000_VIDEO', 'HC7000_TERMINAL',
-                'HC7000_KEYBOARD', 'HC7000_DIAGNOSTICS')}
+                'HC7000_KEYBOARD', 'HC7000_DIAGNOSTICS', 'TERAK_DISPLAY', 'TERAK_RAM_KIB')}
         return subprocess.run(['make', '-n', *args], cwd=ROOT, env=env, capture_output=True, text=True)
 
     def test_native_targets_and_default(self):
@@ -50,3 +50,12 @@ class TerakProfiles(unittest.TestCase):
             self.assertIn(str(target.relative_to(ROOT)/'microcode.mem'),
                           (target/'uj11_mmu_rom.v').read_text())
         self.assertEqual(before, {p: p.read_bytes() for p in OUT.glob('*') if p.is_file()})
+
+    def test_extended_memory_profiles(self):
+        for size in (128, 256):
+            result = self.make('MACHINE=terak', f'TERAK_RAM_KIB={size}', 'export')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn(f'hc7000-terak-{size}k-mbr-synthesis', result.stdout)
+            self.assertNotEqual(self.make('MACHINE=terak', f'TERAK_RAM_KIB={size}',
+                                          'TERAK_DISPLAY=sram').returncode, 0)
+        self.assertNotEqual(self.make('MACHINE=terak', 'TERAK_RAM_KIB=512').returncode, 0)

@@ -73,17 +73,19 @@ endmodule
 
 def ram(words):
     shared=len(words)>512
-    banks=9 if shared else 1
-    assert len(words)==(4864 if shared else 512)
-    lines=[f'// Generated {len(words)*4} byte RAM; {19 if shared else 2} EBRs.',
+    banks=(len(words)-256)//512 if shared else 1
+    assert banks in (7,9) if shared else len(words)==512
+    assert not shared or len(words)==banks*512+256
+    tail_base=banks*512
+    lines=[f'// Generated {len(words)*4} byte RAM; {2*banks+1 if shared else 2} EBRs.',
         'module uj11_mmu_iop_ram(input wire clk, reset, enable, input wire [12:0] address,',
         ' input wire [3:0] write_enable, input wire [31:0] write_data, output wire [31:0] data,',
         ' input wire sector_request, sector_write, input wire [7:0] sector_address,',
         ' input wire [15:0] sector_write_data, output wire [15:0] sector_read_data,',
         ' output wire storage_enabled, ready);',f"assign storage_enabled=1'b{int(shared)};"]
     if shared:
-        lines += ["wire tail_selected=address[12:8]==5'd18;",
-            '// First 18 KiB are full-width. SD owns only the upper half of the 16-bit tail.',
+        lines += [f"wire tail_selected=address[12:8]==5'd{2*banks};",
+            f'// First {2*banks} KiB are full-width. SD owns only the upper half of the 16-bit tail.',
             'wire sector_access=sector_request && !reset;',
             'reg [2:0] phase;reg [15:0] low;reg [31:0] tail_data;',
             'wire cpu_tail=enable && tail_selected && !reset;',
@@ -138,7 +140,7 @@ def ram(words):
                             .replace('enable &&',f'bank{bank}_enable &&')]
     if shared:
         lines += [block('tail','tail_address','tail_wd','tail_we','tail_read',
-                        [half for w in words[4608:] for half in (w&65535,w>>16)])
+                        [half for w in words[tail_base:] for half in (w&65535,w>>16)])
                   .replace('enable &&','tail_enable &&')]
     lines += ['`else',f'reg [31:0] words[0:{len(words)-1}];',
         f'reg [31:0] bank_value[0:{banks-1}];',
@@ -156,9 +158,9 @@ def ram(words):
     if shared:
         lines += ['reg [15:0] tail_value;assign tail_read=tail_value;',
             'always @(posedge clk)if(tail_enable)begin',
-            ' if(!(|tail_we))tail_value<=words[4608+tail_address[8:1]][16*tail_address[0]+:16];',
-            ' if(tail_we[0])words[4608+tail_address[8:1]][16*tail_address[0]+:8]<=tail_wd[7:0];',
-            ' if(tail_we[1])words[4608+tail_address[8:1]][16*tail_address[0]+8+:8]<=tail_wd[15:8];',
+            f' if(!(|tail_we))tail_value<=words[{tail_base}+tail_address[8:1]][16*tail_address[0]+:16];',
+            f' if(tail_we[0])words[{tail_base}+tail_address[8:1]][16*tail_address[0]+:8]<=tail_wd[7:0];',
+            f' if(tail_we[1])words[{tail_base}+tail_address[8:1]][16*tail_address[0]+8+:8]<=tail_wd[15:8];',
             'end']
     lines += ['`endif','wire [31:0] base_data='+('bank0_data;' if not shared else
         ''.join(f'read_bank=={b} ? bank{b}_data : ' for b in range(banks))+"32'b0;"),

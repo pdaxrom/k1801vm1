@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 module uj11_terak_bus #(
-    parameter integer CLOCK_HZ=50000000,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576
+    parameter integer CLOCK_HZ=50000000,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,DISPLAY_EBR=0,
+    parameter integer RAM_BYTES=57344
 )(
     input wire clk,reset,power_on,peripheral_reset,video_clk,video_reset,
     input wire request,writing,byte_access,cpu_lock,
@@ -27,7 +28,7 @@ module uj11_terak_bus #(
     wire [1:0] lanes=byte_access ? address[0] ? 2'b10 : 2'b01 : 2'b11;
     wire [12:0] offset={address[12:1],1'b0};
     wire io_page=&address[21:13];
-    wire ram_selected=address<22'o160000;
+    wire ram_selected=address<RAM_BYTES;
     wire aperture=io_page && !offset[12];
     wire rom_selected=io_page && offset[12:9]==(13'o13000>>9);
     wire qx_selected=io_page && offset[12:2]==(13'o17000>>2);
@@ -42,6 +43,23 @@ module uj11_terak_bus #(
     wire [1:0] memory_lanes;
     wire [15:0] memory_data,ram_data;
     wire video_request;
+    wire video_display,video_font,display_ready,display_initialized,sram_initialized;
+    wire display_video_ready;
+    wire [15:0] display_data,display_video_data;
+    wire display_selected=DISPLAY_EBR && aperture;
+    wire video_display_selected=DISPLAY_EBR && video_display;
+    assign memory_initialized=sram_initialized && display_initialized;
+    generate if(DISPLAY_EBR)begin: display_ebr
+        uj11_terak_display_ram memory(.clk(clk),.reset(reset || peripheral_reset),.power_on(power_on),
+            .initialized(display_initialized),.cpu_request(request && aperture && !bad_aperture),
+            .cpu_write(writing),.cpu_font(vcr[7]),.cpu_address(address[11:0]),.cpu_data(write_data),
+            .cpu_ready(display_ready),.cpu_read_data(display_data),
+            .video_request(video_request && video_display),.video_font(video_font),
+            .video_address({video_address[10:0],1'b0}),.video_ready(display_video_ready),.video_data(display_video_data));
+    end else begin: display_sram
+        assign display_initialized=1'b1,display_ready=1'b0,display_video_ready=1'b0;
+        assign display_data=16'b0,display_video_data=16'b0;
+    end endgenerate
     wire dma_request,dma_write,dma_ready,arb_dma_ready;
     wire [21:0] dma_address;
     wire [15:0] dma_data,qb_data;
@@ -57,22 +75,22 @@ module uj11_terak_bus #(
         if(reset || peripheral_reset)begin dma_latched<=0;dma_error<=0;dma_target<=0;end
         else if(!dma_request)dma_latched<=0;
         else if(!dma_latched)begin
-            dma_latched<=1;dma_target<=dma_address;dma_error<=dma_address>=22'o160000;
+            dma_latched<=1;dma_target<=dma_address;dma_error<=dma_address>=RAM_BYTES;
         end
     end
     assign dma_ready=dma_request && dma_latched && (dma_error || arb_dma_ready);
     wire [19:0] cpu_address=aperture ? (vcr[7] ? 20'h08800 : 20'h08000)+{9'b0,address[11:1]} : address[20:1];
     uj11_video_arbiter #(.FAST_TURNAROUND(CLOCK_HZ==50000000)) arbiter(
         .clk(clk),.reset(reset || peripheral_reset),
-        .cpu_request(request && (ram_selected || (aperture && !bad_aperture))),.cpu_write(writing),
+        .cpu_request(request && (ram_selected || (!DISPLAY_EBR && aperture && !bad_aperture))),.cpu_write(writing),
         .cpu_lock(cpu_lock),.cpu_address(cpu_address),.cpu_lanes(lanes),.cpu_data(write_data),.cpu_ready(cpu_ready),
         .dma_request(dma_request && dma_latched && !dma_error),.dma_write(dma_write),.dma_address(dma_target),
         .dma_data(dma_data),.dma_lanes(dma_lanes),.dma_ready(arb_dma_ready),
-        .video_request(video_request),.video_address(video_address),.video_ready(video_ready),
+        .video_request(video_request && !video_display_selected),.video_address(video_address),.video_ready(video_ready),
         .request(memory_request),.write(memory_write),.address(memory_address),.lanes(memory_lanes),
         .data(memory_data),.ready(memory_ready));
     uj11_sram #(.CLEAR_WORDS(CLEAR_WORDS),.FAST_RESPONSE(CLOCK_HZ==50000000)) memory(
-        .clk(clk),.power_on(power_on),.reset(reset || peripheral_reset),.initialized(memory_initialized),
+        .clk(clk),.power_on(power_on),.reset(reset || peripheral_reset),.initialized(sram_initialized),
         .request(memory_request),.write(memory_write),.address(memory_address),.byte_enable(memory_lanes),
         .write_data(memory_data),.read_data(ram_data),.ready(memory_ready),
         .sram_address(sram_address),.sram_data(sram_data),.sram_ce_n(sram_ce_n),.sram_oe_n(sram_oe_n),
@@ -81,7 +99,10 @@ module uj11_terak_bus #(
     wire field_toggle;
     uj11_terak_video video(.clk(clk),.video_clk(video_clk),.reset(reset || video_reset),
         .gar(gar),.vir(vir),.vcr(vcr),.memory_request(video_request),.memory_address(video_address),
-        .memory_ready(video_ready),.memory_data(ram_data),.dac(tvout),.underruns(underruns),.field_toggle(field_toggle));
+        .memory_display(video_display),.memory_font(video_font),
+        .memory_ready(video_display_selected ? display_video_ready : video_ready),
+        .memory_data(video_display_selected ? display_video_data : ram_data),
+        .dac(tvout),.underruns(underruns),.field_toggle(field_toggle));
     wire service_write;
     wire [6:0] service_address;
     wire [31:0] service_data,service_read;
@@ -126,7 +147,7 @@ module uj11_terak_bus #(
     assign irq_priority=clock_pending ? 3'd6 : 3'd4;
     assign irq_vector=clock_pending ? 16'o100 : qx_irq ? 16'o250 : qb_irq ? {7'b0,qb_vector} : console_vector;
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),
-        .TERAK_ENABLE(1),.KEYBOARD_ENABLE(1)) disk(
+        .TERAK_ENABLE(1),.KEYBOARD_ENABLE(1),.IOP_RAM_KIB(DISPLAY_EBR ? 15 : 19)) disk(
         .clk(clk),.reset(reset),.bus_reset(peripheral_reset),.dma_map_enabled(1'b0),
         .ps2_clock(ps2_clock),.ps2_data(ps2_data),
         .video_reg_write(),.video_reg_address(),.video_reg_data(),.video_reg_lanes(),.video_reg_read(16'b0),
@@ -145,9 +166,10 @@ module uj11_terak_bus #(
         .service_write(service_write),.service_address(service_address),.service_data(service_data),.service_read(service_read));
     wire [15:0] rom_data;
     uj11_terak_boot_rom boot(.address(address[8:1]),.qb(boot_qb),.data(rom_data));
-    assign read_data=ram_selected || aperture ? ram_data : rom_selected ? rom_data :
+    assign read_data=display_selected ? display_data : ram_selected || aperture ? ram_data : rom_selected ? rom_data :
         qx_selected ? qx_data : qb_selected ? qb_data : console_data;
-    assign ready=request && ((ram_selected || aperture && !bad_aperture) ? cpu_ready :
+    assign ready=request && (display_selected && !bad_aperture ? display_ready :
+        (ram_selected || aperture && !bad_aperture) ? cpu_ready :
         qx_selected ? qx_ready : qb_selected ? qb_ready : 1'b1);
     assign error=request && (bad_aperture || bad_register || (rom_selected && (writing || qx_busy)) ||
         (qx_selected && qx_error) || (qb_selected && qb_error) ||

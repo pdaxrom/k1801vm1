@@ -8,7 +8,7 @@ import subprocess
 import sys
 from pathlib import Path
 from board_common import ROOT
-from build_terak import build, CORE, BOARD, GENERATED
+from build_terak import build, CORE, BOARD, GENERATED, CPU_OUT
 from build_terak_card import build as build_card
 from serv_test import GUARD, memory_args
 from terak_image import card
@@ -16,12 +16,15 @@ from terak_mbr import create as mbr_card
 from render_terak_screen import render
 
 
-def run(out, image=None, skip_boot=False, vendor=None, boot_only=False):
+def run(out, image=None, skip_boot=False, vendor=None, boot_only=False, cases_filter=None):
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     (out/'result.json').unlink(missing_ok=True)
     hardware = build()
-    tests = ['tests/terak/tb_terak_'+n+'.v' for n in ('qx', 'console', 'timing', 'video', 'bevnt', 'disk', 'qb', 'boot')]
+    rtl_parameters = [f"-GRAM_BYTES={hardware['guest_ram_bytes']}"]
+    if hardware['display_storage'] == 'ebr':
+        rtl_parameters.append('-GDISPLAY_EBR=1')
+    tests = ['tests/terak/tb_terak_'+n+'.v' for n in ('qx', 'console', 'timing', 'video', 'display_ram', 'memory', 'bevnt', 'disk', 'qb', 'boot')]
     inputs = set(hardware['files']) | set(tests) | {GUARD, 'tests/models/async_sram_model.v',
               'tests/models/spi_sd_model.v', 'tests/terak/test_keyboard.c', 'tests/keyboard_test.h',
               'tests/test_terak_image.py', 'tests/test_terak_mbr.py', 'tests/terak/test_media.c',
@@ -45,7 +48,7 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False):
             '-DUJ11_KEYBOARD', '-DUJ11_KEYBOARD_TEST', '-Itests', '-Ifirmware/storage',
             'tests/terak/test_keyboard.c', 'firmware/storage/keyboard.c', '-o', str(out/'keyboard')])
     print(execute('keyboard', [str(out/'keyboard')]).strip())
-    for name in ('qx', 'console', 'timing', 'video'):
+    for name in ('qx', 'console', 'timing', 'video', 'display_ram'):
         top = 'tb_terak_'+name
         inventory = ['tests/terak/'+top+'.v', 'boards/hc7000/terak/uj11_terak_'+name+'.v']
         if name == 'video':
@@ -61,10 +64,19 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False):
                 'boards/hc7000/terak/uj11_terak_video.v', 'boards/hc7000/terak/uj11_terak_timing.v',
                 'boards/hc7000/video/uj11_pal_ram.v']+[str(p) for p in files])
         print(execute('video-vendor', ['vvp', str(out/'video-vendor')]).strip())
+        execute('display-vendor-build', ['iverilog', '-g2012', '-DUJ11_VIDEO_VENDOR_RAM',
+                '-s', 'tb_terak_display_ram', '-o', str(out/'display-vendor'),
+                'tests/terak/tb_terak_display_ram.v', 'boards/hc7000/terak/uj11_terak_display_ram.v']+
+                [str(p) for p in files])
+        print(execute('display-vendor', ['vvp', str(out/'display-vendor')]).strip())
     execute('bevnt-build', ['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD',
             '-Wno-PINMISSING', '--top-module', 'tb_terak_bevnt', '-j', '4', '--Mdir', str(out/'bevnt-obj')]+
-            CORE+BOARD+GENERATED+['tests/terak/tb_terak_bevnt.v', 'tests/models/async_sram_model.v'])
+            rtl_parameters+CORE+BOARD+GENERATED+['tests/terak/tb_terak_bevnt.v', 'tests/models/async_sram_model.v'])
     print(execute('bevnt', [str(out/'bevnt-obj/Vtb_terak_bevnt')]+memory_args(hardware)).strip())
+    execute('memory-build', ['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD',
+            '-Wno-PINMISSING', '--top-module', 'tb_terak_memory', '-j', '4', '--Mdir', str(out/'memory-obj')]+
+            rtl_parameters+CORE+BOARD+GENERATED+['tests/terak/tb_terak_memory.v', 'tests/models/async_sram_model.v'])
+    print(execute('memory', [str(out/'memory-obj/Vtb_terak_memory')]).strip())
     sys.path.insert(0, str(ROOT/'tests'))
     from test_terak_image import fixture, double_fixture, boot_fixture
     (out/'fixture.IMD').write_bytes(fixture())
@@ -108,6 +120,11 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False):
         # This UCSD setup accesses unit 1 during startup; keep its complete media set.
         cases.append(('boot-raw', mbr('boot-raw', [('sssd', disk) for disk in system], [0], True),
                       [f'+SCREEN_MEMORY={out}/screen-raw.hex']))
+    if cases_filter:
+        missing = set(cases_filter)-{name for name, _, _ in cases}
+        if missing:
+            raise ValueError('Unavailable disk cases: '+', '.join(sorted(missing)))
+        cases = [case for case in cases if case[0] in cases_filter]
     built, results = set(), []
     for name, disk, arguments in cases:
         before = hashlib.sha256(disk.read_bytes()).hexdigest()
@@ -116,6 +133,7 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False):
         if kind not in built:
             execute(kind+'-build', ['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD',
                     '-Wno-PINMISSING', '--top-module', top, '-j', '4', '--Mdir', str(out/(kind+'-obj'))]+
+                    rtl_parameters+([f'-GMICROCODE="{CPU_OUT.relative_to(ROOT)}/microcode.mem"'] if kind == 'boot' else [])+
                     CORE+BOARD+GENERATED+['tests/terak/'+top+'.v', GUARD,
                                         'tests/models/async_sram_model.v', 'tests/models/spi_sd_model.v'])
             built.add(kind)
@@ -138,7 +156,8 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False):
             render(out/('screen'+suffix+'.hex'), *map(int, registers.groups()), out/('screen'+suffix+'.png'))
     if any(hashlib.sha256((ROOT/p).read_bytes()).hexdigest() != digest for p, digest in hashes.items()):
         raise AssertionError('Source changed during qualification')
-    (out/'result.json').write_text(json.dumps(dict(passed=True, boot=not skip_boot, boot_only=boot_only,
+    (out/'result.json').write_text(json.dumps(dict(passed=True, boot=any(c['name'].startswith('boot') for c in results),
+                                                boot_only=boot_only, selected_cases=cases_filter,
                                                 hardware=hardware, files=hashes, vendor_video=vendor_hashes,
                                                 cases=results), indent=2)+'\n')
 
@@ -151,5 +170,6 @@ if __name__ == '__main__':
     group.add_argument('--skip-boot', action='store_true')
     group.add_argument('--boot-only', action='store_true', help='Only the four cold disk/CPU scenarios; retain unit checks')
     parser.add_argument('--vendor-library', type=Path)
+    parser.add_argument('--case', action='append', help='Select named disk scenarios; unit and memory checks always run')
     args = parser.parse_args()
-    run(args.out, args.card, args.skip_boot, args.vendor_library, args.boot_only)
+    run(args.out, args.card, args.skip_boot, args.vendor_library, args.boot_only, args.case)

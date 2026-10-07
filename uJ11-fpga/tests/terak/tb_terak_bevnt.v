@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 // Exercise the actual native bus/video CDC and interrupt latch at 50/64 MHz.
-module tb_terak_bevnt;
+module tb_terak_bevnt #(parameter DISPLAY_EBR=0,RAM_BYTES=57344);
     reg clk=0,vclk=0,video_running=1,reset=1,power_on=1,peripheral_reset=0,video_reset=0,irq_ack=0;
     always #10 clk=~clk;
     always #7.8125 if(video_running)vclk=~vclk;
@@ -11,7 +11,7 @@ module tb_terak_bevnt;
     wire [15:0] sd;
     wire ce,oe,we,lb,ub,initialized;
     tri1 ps2_clock;
-    uj11_terak_bus #(.CLEAR_WORDS(1)) bus(.clk(clk),.reset(reset),.power_on(power_on),
+    uj11_terak_bus #(.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),.CLEAR_WORDS(1)) bus(.clk(clk),.reset(reset),.power_on(power_on),
         .peripheral_reset(peripheral_reset),.video_clk(vclk),.video_reset(video_reset),
         .request(1'b0),.writing(1'b0),.byte_access(1'b0),.cpu_lock(1'b0),.address(22'b0),.write_data(16'b0),
         .ready(),.error(),.read_data(),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),
