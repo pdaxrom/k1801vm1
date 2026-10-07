@@ -14,7 +14,7 @@ from render_terak_screen import render
 
 
 def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
-        profile='fd', discard_status=False, menu_only=False):
+        profile='fd', discard_status=False, menu_only=False, build_fb=False):
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     hardware = build()
@@ -26,7 +26,10 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
     (out/'result.json').unlink(missing_ok=True)
     image = out/'card.img'
     image.unlink(missing_ok=True)
-    card = create([(profile, p) for p in disks], image, list(range(len(disks))), discard_status=discard_status)
+    if build_fb and len(disks) != 2:
+        raise ValueError('FB preparation requires a source and a writable clone')
+    card = create([(profile, p) for p in disks], image,
+                  [0] if build_fb else list(range(len(disks))), discard_status=discard_status)
     bios_args = []
     if hardware['boot_mode'] == 'bios':
         # Reuse the shared-card FAT16 writer also used by the BK preparation.
@@ -35,7 +38,7 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         from prepare_disk_sd import Fat16
         data = bytearray(image.read_bytes())
         volume = Fat16(data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512])
-        choice = 1 if system == 'ucsd' else 2
+        choice = 1 if system == 'ucsd' else 3 if system == 'rt11fb' else 2
         volume.put(f'TERAK{choice}.CFG', card['config'].encode())
         volume.put('TERAK.CFG', b'version=1\ndrive0=off\ndrive1=off\ndrive2=off\ndrive3=off\n')
         volume.put('TBIOS.BIN', (OUT/'bios/TBIOS.BIN').read_bytes())
@@ -49,11 +52,17 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
                               [0]+[int(b, 16) for b in re.findall(r'0x[0-9a-f]{2}', g)]+[0])
         assert len(expected_font) == 960
         (out/'bios-font.hex').write_text(''.join(f'{b:02x}\n' for b in expected_font))
-        bios_args = ['+BIOS_BAD_CHOICE', f'+BIOS_CHOICE={choice}', f'+BIOS_FONT={out}/bios-font.hex',
+        bios_args = ([] if choice == 3 else ['+BIOS_BAD_CHOICE']) + [f'+BIOS_CHOICE={choice}', f'+BIOS_FONT={out}/bios-font.hex',
                      f'+BIOS_SCREEN_MEMORY={out}/bios-screen.hex']
     elif selection_only or menu_only:
         raise ValueError('BIOS menu/selection checks require UJ11_TERAK_BOOT=bios')
     boot_args = ([] if system == 'ucsd' else ['+RT11'])
+    if system == 'rt11fb':
+        boot_args.append('+RT11_FB')
+    if build_fb:
+        target = card['disks'][1]
+        boot_args += ['+RT11_BUILD_FB', f'+SD_OVERLAY={out}/overlay.hex',
+                      f'+DATA_BASE={target["start"]}', f'+DATA_BLOCKS={target["blocks"]}']
     if selection_only:
         boot_args.append('+BIOS_ONLY')
     if menu_only:
@@ -77,7 +86,8 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         text = (out/(name+'.log')).read_text()
         if result.returncode:
             raise RuntimeError(text[-8000:])
-    expected = ('PASS primary BIOS font and menu' if menu_only else 'PASS BIOS selection' if selection_only
+    expected = ('PASS native RT-11 FB disk preparation' if build_fb else
+                'PASS primary BIOS font and menu' if menu_only else 'PASS BIOS selection' if selection_only
                 else 'PASS Terak cold ROM/SD UCSD' if system == 'ucsd'
                 else 'PASS native TERAK RT-11')
     if expected not in text or hashlib.sha256(image.read_bytes()).hexdigest() != before:
@@ -90,7 +100,7 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         if not registers:
             raise AssertionError('Missing BIOS display snapshot')
         render(out/'bios-screen.hex', *map(int, registers.groups()), out/'bios-screen.png')
-    if not selection_only and not menu_only:
+    if not selection_only and not menu_only and not build_fb:
         import re
         registers = re.search(r'SCREEN GAR=(\d+) VIR=(\d+) VCR=(\d+)', text)
         if not registers:
@@ -98,18 +108,20 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         render(out/'screen.hex', *map(int, registers.groups()), out/'screen.png')
     record = dict(passed=True, system=system, selection_only=selection_only, menu_only=menu_only,
                   mechanical_speedup=mechanical_speedup, hardware=hardware,
-                  media_profile=profile, discard_status=discard_status,
+                  media_profile=profile, discard_status=discard_status, build_fb=build_fb,
                   files=hashes, image_sha256=before, card=card,
                   log_sha256=hashlib.sha256((out/'boot.log').read_bytes()).hexdigest())
     (out/'result.json').write_text(json.dumps(record, indent=2)+'\n')
     print(text[-5000:])
+    return record
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--disk', type=Path, action='append', required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--system', choices=('rt11', 'ucsd'), default='rt11')
+    parser.add_argument('--system', choices=('rt11', 'rt11fb', 'ucsd'), default='rt11')
+    parser.add_argument('--build-fb', action='store_true', help='Run native PIP to prepare a separate FB clone')
     parser.add_argument('--selection-only', action='store_true', help='Stop after verified native ROM handoff')
     parser.add_argument('--menu-only', action='store_true', help='Verify and render all 960 native BIOS font bytes')
     parser.add_argument('--mechanical-speedup', type=int, choices=(1, 100), default=1,
@@ -118,4 +130,4 @@ if __name__ == '__main__':
     parser.add_argument('--discard-status', action='store_true', help='Explicitly permit IMD status loss in raw media')
     args = parser.parse_args()
     run(args.disk, args.out, args.system, args.selection_only, args.mechanical_speedup, args.profile,
-        args.discard_status, args.menu_only)
+        args.discard_status, args.menu_only, args.build_fb)

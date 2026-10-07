@@ -150,6 +150,73 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
         end
         key_data=1;#40000;
     endtask
+    task type_command(input string command);
+        reg [7:0] scan;
+        for(integer i=0;i<command.len();i++)begin
+            case(command[i])
+                "A":scan='h1c; "B":scan='h32; "C":scan='h21; "D":scan='h23;
+                "E":scan='h24; "F":scan='h2b; "G":scan='h34; "H":scan='h33;
+                "I":scan='h43; "J":scan='h3b; "K":scan='h42; "L":scan='h4b;
+                "M":scan='h3a; "N":scan='h31; "O":scan='h44; "P":scan='h4d;
+                "Q":scan='h15; "R":scan='h2d; "S":scan='h1b; "T":scan='h2c;
+                "U":scan='h3c; "V":scan='h2a; "W":scan='h1d; "X":scan='h22;
+                "Y":scan='h35; "Z":scan='h1a;
+                "0":scan='h45; "1":scan='h16; "2":scan='h1e; "3":scan='h26;
+                "4":scan='h25; "5":scan='h2e; "6":scan='h36; "7":scan='h3d;
+                "8":scan='h3e; "9":scan='h46;
+                " ":scan='h29; ".":scan='h49; "/":scan='h4a; ":":scan='h4c;
+                default:$fatal(1,"unsupported command character %c",command[i]);
+            endcase
+            if(command[i]==":")ps2_byte('h12);
+            ps2_byte(scan);
+            if(command[i]==":")begin ps2_byte('hf0);ps2_byte('h12);end
+            #2000000;
+            wait(!dut.bus.console.key_done);
+            if(i%8==0)begin $display("RT11_TYPED %0d %c",i,command[i]);$fflush();end
+        end
+        ps2_byte('h5a);
+    endtask
+    task run_command(input string command,input string confirmation="");
+        bit done,answered;
+        done=0;answered=0;
+        $display("RT11_COMMAND %s",command);$fflush();
+        type_command(command);
+        for(integer n=0;n<200;n++)begin
+            #50000000;
+            if(n%20==0)begin screen();$fflush();end
+            if(confirmation.len() && !answered && has_text(confirmation))begin
+                type_command("Y");answered=1;
+            end
+            if(rt11_prompt() && storage_idle)begin done=1;break;end
+        end
+        screen();$fflush();
+        if(!done || has_text("PIP-E-") || has_text("PIP-F-") || has_text("KMON-F-"))
+            $fatal(1,"RT-11 command failed: %s",command);
+    endtask
+    task build_fb_disk;
+        integer fd;
+        string filename;
+        // Build a separate writable clone using the original RT-11 PIP.
+        // Neither the monitor nor the guest registers are patched by the host.
+        run_command("DELETE DK1:QXMNSJ.SYS/SYS","DK1:QXMNSJ.SYS?");
+        run_command("DELETE DK1:QXMNSJ.SGM","DK1:QXMNSJ.SGM?");
+        run_command("DELETE DK1:QXMNFB.FGM","DK1:QXMNFB.FGM?");
+        run_command("COPY QXMNFB.FTM DK1:QXMNFB.SYS/SYS");
+        run_command("COPY/BOOT DK1:QXMNFB.SYS DK1:");
+        run_command("DIR DK1:");
+        if(!has_text("QXMNFB.SYS"))$fatal(1,"FB monitor missing from target directory");
+        if(!$value$plusargs("SD_OVERLAY=%s",filename))$fatal(1,"overlay destination required");
+        fd=$fopen(filename,"w");
+        if(!fd || !card.dirty_count)$fatal(1,"missing RT-11 disk writes");
+        for(integer i=0;i<card.dirty_count;i++)begin
+            $fwrite(fd,"%08x ",card.dirty_lba[i]);
+            for(integer j=0;j<512;j++)$fwrite(fd,"%02x",card.memory[i*512+j]);
+            $fwrite(fd,"\n");
+        end
+        $fclose(fd);
+        $display("PASS native RT-11 FB disk preparation, overlay sectors=%0d",card.dirty_count);
+        $finish;
+    endtask
     task check_resets(input bit rt11);
         integer fonts_before,rom_before;
         reg [3:0] present_before;
@@ -180,7 +247,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
         end
         if(!dut.bus.boot_menu || !has_text("SELECT BOOT"))$fatal(1,"long reset did not return to BIOS");
         check_bios_font();
-        $display("PASS BIOS menu, rejected configuration, selection, short/medium/long Reset and preserved media");
+        $display("PASS BIOS menu, selection, short/medium/long Reset and preserved media");
     endtask
     string snapshot;
     reg passed=0;
@@ -205,6 +272,8 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
                 $display("PASS primary BIOS font and menu");$finish;
             end
             screen();$fflush();
+            // Let the guest finish printing and reach its keyboard poll.
+            #20000000;
             if($test$plusargs("BIOS_BAD_CHOICE"))begin
                 ps2_byte(8'h26); // 3, intentionally absent TERAK3.CFG
                 // A shared FAT root can contain many more files than the
@@ -216,8 +285,8 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
                 if(!has_text("UNAVAILABLE") || !dut.bus.boot_menu)$fatal(1,"bad BIOS configuration escaped the menu");
             end
             ps2_byte(choice==1 ? 8'h16 : choice==2 ? 8'h1e : choice==3 ? 8'h26 : 8'h25);
+            #200000000;
             if($test$plusargs("BIOS_ONLY"))begin
-                #200000000;
                 $display("BIOS PC=%o menu=%b request=%b/%b addr=%o ready/error=%b/%b SERV ia=%h da=%h pending=%b",
                     dut.cpu.pc,dut.bus.boot_menu,dut.request,dut.writing,dut.address,dut.ready,dut.error,
                     dut.bus.disk.ia,dut.bus.disk.da,dut.bus.disk.bridge.reset_pending);
@@ -251,9 +320,15 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
                     screen();$fflush();
                 end
                 if((has_text("RT-11SJ") || has_text("RT-11FB")) && rt11_prompt())begin
+                    if($test$plusargs("RT11_FB") && !has_text("RT-11FB"))
+                        $fatal(1,"expected the FB monitor, got SJ");
                     if(font_writes<(BOOT_BIOS ? 2880 : 1920))$fatal(1,"RT-11 skipped native CHRSET.SYS loading");
                     #20000000;
                     screen();
+                    if($test$plusargs("RT11_BUILD_FB"))begin
+                        run_command("DIR");
+                        build_fb_disk();
+                    end
                     ps2_byte(8'h23);ps2_byte(8'h43);ps2_byte(8'h2d);ps2_byte(8'h5a); // DIR <return>
                     for(integer k=0;k<200;k++)begin
                         #50000000;

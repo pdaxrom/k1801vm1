@@ -183,7 +183,9 @@ def create(disks, output, readonly=(), logical=False, config=True, discard_statu
     return result
 
 
-def partitions(stream):
+def partitions(stream, maximum=16):
+    if maximum not in (12, 16):
+        raise ValueError("Partition limit must be 12 or 16")
     stream.seek(0, 2)
     capacity = stream.tell()//512
     def read(lba):
@@ -211,7 +213,7 @@ def partitions(stream):
     if container and container['type'] in (5, 15, 133):
         base, end = container['start'], container['start']+container['blocks']
         current = base
-        for n in range(5, 13):
+        for n in range(5, maximum+1):
             data = read(current)
             p, link = entry(data, 0, current, end), entry(data, 1, base, end)
             if not p or p['type'] in (5, 15, 133) or any(data[478:510]):
@@ -219,7 +221,7 @@ def partitions(stream):
             result[n] = p
             if not link:
                 break
-            if link['type'] not in (5, 15, 133) or link['start'] < p['start']+p['blocks'] or n == 12:
+            if link['type'] not in (5, 15, 133) or link['start'] < p['start']+p['blocks'] or n == maximum:
                 raise ValueError('Invalid or excessive extended chain')
             current = link['start']
     return result

@@ -24,14 +24,17 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def prepare(source, bios, disks, out, capacity):
+def prepare(source, bios, disks, out, capacity, profile=2):
     if not stat.S_ISREG(source.stat().st_mode):
         raise ValueError('Use a regular backup image, never a physical device')
     before = source.read_bytes()
     table = partitions(io.BytesIO(before))
     logical = sorted(n for n in table if n >= 5)
-    if not logical or not 1 <= len(disks) <= 12-logical[-1]:
-        raise ValueError('Need an existing extended chain with enough free partition numbers (maximum 12)')
+    maximum = 16 if profile == 3 else 12
+    if profile not in (2, 3) or not logical or not 1 <= len(disks) <= maximum-logical[-1]:
+        raise ValueError(f'Need an existing extended chain with enough free partition numbers (maximum {maximum})')
+    if profile == 3 and len(disks) != 1:
+        raise ValueError('FB requires one separately prepared boot disk')
     if not table[1] or table[1]['type'] not in (6, 14):
         raise ValueError('Partition 1 must be FAT16')
     boot = bios.read_bytes()
@@ -95,19 +98,28 @@ def prepare(source, bios, disks, out, capacity):
     fat = table[1]
     volume = Fat16(before[fat['start']*512:(fat['start']+fat['blocks'])*512])
     old_files = volume.files()
-    if 'TERAK.CFG' not in old_files or any(name in old_files for name in ('TBIOS.BIN', 'TERAK1.CFG',
-                                                                        'TERAK2.CFG', 'TERAK4.CFG')):
-        raise ValueError('Expected the direct-boot card without existing primary BIOS profiles')
-    configs = {'TERAK1.CFG': old_files['TERAK.CFG'][2]}
-    lines = ['version=1']
-    for u in range(4):
-        lines.append(f'drive{u}={additions[u]["partition"]},fd,rw' if u < len(additions) else f'drive{u}=off')
-    configs['TERAK2.CFG'] = ('\n'.join(lines)+'\n').encode()
-    # The existing independent memory-test disk remains in its own partition.
-    if not table.get(9) or table[9]['type'] != 218 or table[9]['blocks']*512 < raw_size('terak-dsdd'):
-        raise ValueError('Expected the existing TERAK memory-test partition 9')
-    configs['TERAK4.CFG'] = b'version=1\ndrive0=9,raw,terak-dsdd,ro\ndrive1=off\ndrive2=off\ndrive3=off\n'
-    volume.put('TBIOS.BIN', boot)
+    if profile == 2:
+        if 'TERAK.CFG' not in old_files or any(name in old_files for name in ('TBIOS.BIN', 'TERAK1.CFG',
+                                                                            'TERAK2.CFG', 'TERAK4.CFG')):
+            raise ValueError('Expected the direct-boot card without existing primary BIOS profiles')
+        configs = {'TERAK1.CFG': old_files['TERAK.CFG'][2]}
+        lines = ['version=1']
+        for u in range(4):
+            lines.append(f'drive{u}={additions[u]["partition"]},fd,rw' if u < len(additions) else f'drive{u}=off')
+        configs['TERAK2.CFG'] = ('\n'.join(lines)+'\n').encode()
+        # The existing independent memory-test disk remains in its own partition.
+        if not table.get(9) or table[9]['type'] != 218 or table[9]['blocks']*512 < raw_size('terak-dsdd'):
+            raise ValueError('Expected the existing TERAK memory-test partition 9')
+        configs['TERAK4.CFG'] = b'version=1\ndrive0=9,raw,terak-dsdd,ro\ndrive1=off\ndrive2=off\ndrive3=off\n'
+        volume.put('TBIOS.BIN', boot)
+    else:
+        if any(name not in old_files for name in ('TBIOS.BIN', 'TERAK1.CFG', 'TERAK2.CFG', 'TERAK4.CFG')) or \
+                'TERAK3.CFG' in old_files or old_files['TBIOS.BIN'][2] != boot:
+            raise ValueError('Expected the existing BIOS card with matching TBIOS.BIN and no FB profile')
+        if any(not table.get(n) or table[n]['type'] != 218 for n in (11, 12)):
+            raise ValueError('Expected RT-11 System Pgms and Extra Files in partitions 11/12')
+        configs = {'TERAK3.CFG': (f'version=1\ndrive0={additions[0]["partition"]},fd,rw\n'
+                                 'drive1=11,fd,rw\ndrive2=12,fd,rw\ndrive3=off\n').encode()}
     for name, data in configs.items():
         volume.put(name, data)
     new_files = volume.files()
@@ -146,7 +158,9 @@ if __name__ == '__main__':
     parser.add_argument('--disk', type=Path, action='append', required=True)
     parser.add_argument('--card-sectors', type=int, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--profile', type=int, choices=(2, 3), default=2,
+                        help='2: add initial SJ/BIOS profiles; 3: append a separate FB boot disk')
     args = parser.parse_args()
-    result = prepare(args.source, args.bios, args.disk, args.out, args.card_sectors)
+    result = prepare(args.source, args.bios, args.disk, args.out, args.card_sectors, args.profile)
     print(json.dumps(dict(partitions=result['partitions'], source_sha256=result['source_sha256'],
                          preserved_files=len(result['preserved_files'])), indent=2))

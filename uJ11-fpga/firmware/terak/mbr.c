@@ -2,7 +2,11 @@
  * No runtime FAT accesses or writes to partition/configuration metadata. */
 #include "terak.h"
 
+#ifdef UJ11_TERAK_BIOS
+#define PARTS 16
+#else
 #define PARTS 12
+#endif
 struct partition {
 	u32 start, blocks;
 	uint8_t type;

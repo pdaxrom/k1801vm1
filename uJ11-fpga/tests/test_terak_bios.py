@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
 sys.path.insert(0, str(ROOT.parent/'bk0010-01-fpga/tools'))
 from prepare_disk_sd import Fat16
-from terak_mbr import create, ALIGN, FAT_BLOCKS
+from terak_mbr import create, ALIGN, FAT_BLOCKS, put_entry, align, partitions
+import io
 from test_terak_image import fixture
 
 
@@ -44,8 +45,8 @@ class TerakBiosTests(unittest.TestCase):
         f.put('TERAK1.CFG', f'version=1\ndrive0={nums[3]},fd,ro\ndrive1={nums[0]},fd,rw\n'.encode())
         return f
 
-    def check(self, volume, profile=1):
-        data = bytearray(self.data)
+    def check(self, volume, profile=1, image=None):
+        data = bytearray(self.data if image is None else image)
         data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512] = volume.data
         path = self.root/'check.img'
         path.write_bytes(data)
@@ -53,6 +54,55 @@ class TerakBiosTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(path.read_bytes(), data)
         return json.loads(result.stdout)
+
+    def chain(self, last):
+        data = bytearray(self.data)
+        final = self.info['disks'][-1]
+        extent = self.data[final['start']*512:(final['start']+final['blocks'])*512]
+        base = self.info['disks'][0]['ebr']
+        previous = final['ebr']
+        cursor = final['start']+final['blocks']
+        for number in range(9, last+1):
+            at, start = align(cursor), align(cursor)+ALIGN
+            cursor = start+final['blocks']
+            data.extend(bytes(max(0, align(cursor)*512-len(data))))
+            sector = bytearray(512)
+            put_entry(sector, 0, 218, start-at, final['blocks'])
+            data[at*512:(at+1)*512] = sector
+            data[start*512:start*512+len(extent)] = extent
+            sector = bytearray(data[previous*512:(previous+1)*512])
+            put_entry(sector, 1, 15, at-base, cursor-at)
+            data[previous*512:(previous+1)*512] = sector
+            previous = at
+        struct.pack_into('<I', data, 506, cursor-base)
+        return data, start, previous
+
+    def test_extended_bios_partition_limit_and_fb_profile(self):
+        for last in (12, 13, 16):
+            with self.subTest(last=last):
+                image, start, _ = self.chain(last)
+                f = self.volume()
+                f.put('TERAK3.CFG', f'version=1\ndrive0={last},fd,ro\ndrive1=off\n'.encode())
+                r = self.check(f, 3, image)
+                self.assertEqual(r['selected'], 1)
+                self.assertEqual(r['drives'], [start, 0, 0, 0])
+                self.assertEqual(partitions(io.BytesIO(image))[last]['start'], start)
+        image, _, _ = self.chain(17)
+        self.assertEqual(self.check(self.volume(), 1, image)['selected'], 0)
+        with self.assertRaises(ValueError):
+            partitions(io.BytesIO(image))
+
+    def test_extended_chain_rejects_cycles_and_overlap(self):
+        image, _, final = self.chain(13)
+        for relative in (1, self.info['disks'][0]['ebr']-self.info['disks'][0]['ebr'],
+                         final-self.info['disks'][0]['ebr']):
+            changed = bytearray(image)
+            sector = bytearray(changed[final*512:(final+1)*512])
+            put_entry(sector, 1, 15, relative, 1)
+            changed[final*512:(final+1)*512] = sector
+            self.assertEqual(self.check(self.volume(), 1, changed)['selected'], 0)
+            with self.assertRaises(ValueError):
+                partitions(io.BytesIO(changed))
 
     def test_config_selection_and_multicluster_bios(self):
         r = self.check(self.volume())

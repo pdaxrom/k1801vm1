@@ -14,8 +14,10 @@ SECTIONS {
         *(.bss*) *(.sbss*) *(COMMON)
         . = ALIGN(4); __bss_end = .;
     } > ram
-    /* Both the constant tables before BSS and all live data fit +/-2 KiB. */
-    __global_pointer$ = __bss_start;
+    /* BIOS cold tables extend toward the tail; leave signed GP offsets
+     * for both their last fields and the constant tables before BSS.
+     * Direct profiles have no cold state and keep their original GP. */
+    __global_pointer$ = __bss_start + (SIZEOF(.cold_bss) ? 128 : 0);
     __stack_top = ORIGIN(ram) + LENGTH(ram);
     __stack_bottom = __stack_top - 640;
     /* Optional zero-initialized cold data in the serialized 16-bit tail.
