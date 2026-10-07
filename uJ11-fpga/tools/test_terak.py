@@ -21,13 +21,19 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False, cases_fi
     out.mkdir(parents=True, exist_ok=True)
     (out/'result.json').unlink(missing_ok=True)
     hardware = build()
+    if hardware['boot_mode'] == 'bios':
+        if image or skip_boot or vendor or boot_only or cases_filter:
+            raise ValueError('BIOS uses its dedicated menu/reset qualification; use tools/test_terak_bios.py')
+        from test_terak_bios import run as bios_run
+        return bios_run(out)
     rtl_parameters = [f"-GRAM_BYTES={hardware['guest_ram_bytes']}"]
     if hardware['display_storage'] == 'ebr':
         rtl_parameters.append('-GDISPLAY_EBR=1')
-    tests = ['tests/terak/tb_terak_'+n+'.v' for n in ('qx', 'console', 'timing', 'video', 'display_ram', 'memory', 'bevnt', 'disk', 'qb', 'boot')]
+    tests = ['tests/terak/tb_terak_'+n+'.v' for n in ('qx', 'console', 'timing', 'video', 'display_ram', 'memory', 'bevnt', 'disk', 'qb', 'boot', 'button')]
     inputs = set(hardware['files']) | set(tests) | {GUARD, 'tests/models/async_sram_model.v',
               'tests/models/spi_sd_model.v', 'tests/terak/test_keyboard.c', 'tests/keyboard_test.h',
               'tests/test_terak_image.py', 'tests/test_terak_mbr.py', 'tests/terak/test_media.c',
+              'tests/test_terak_bios.py', 'tests/terak/test_bios_media.c',
               'tests/terak/qb_boot_fixture.asm', 'tests/terak/qb_boot_fixture.mem',
               'tools/test_terak.py', 'tools/serv_test.py',
               'tools/render_terak_screen.py'}
@@ -44,11 +50,12 @@ def run(out, image=None, skip_boot=False, vendor=None, boot_only=False, cases_fi
 
     execute('image', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_terak_image.py', '-v'])
     execute('mbr', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_terak_mbr.py', '-v'])
+    execute('bios-media', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', 'test_terak_bios.py', '-v'])
     execute('keyboard-build', ['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-DUJ11_TERAK',
             '-DUJ11_KEYBOARD', '-DUJ11_KEYBOARD_TEST', '-Itests', '-Ifirmware/storage',
             'tests/terak/test_keyboard.c', 'firmware/storage/keyboard.c', '-o', str(out/'keyboard')])
     print(execute('keyboard', [str(out/'keyboard')]).strip())
-    for name in ('qx', 'console', 'timing', 'video', 'display_ram'):
+    for name in ('qx', 'console', 'timing', 'video', 'display_ram', 'button'):
         top = 'tb_terak_'+name
         inventory = ['tests/terak/'+top+'.v', 'boards/hc7000/terak/uj11_terak_'+name+'.v']
         if name == 'video':

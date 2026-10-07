@@ -87,6 +87,10 @@ module tb_terak_memory #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
         access(22'o160000,0,1,1,16'h0041,0);
         access(22'o160000,0,0,1,0,0);
         if(last_pa!=22'o17760000 || result[7:0]!=8'h41)$fatal(1,"18-bit I/O page relocation");
+        // Original RT-11 bootstrap detects the video buffer with a word TST.
+        access(22'o160000,0,0,0,0,0);
+        access(22'o160000,0,0,1,0,0);
+        if(result[7:0]!=8'h41)$fatal(1,"word presence probe changed page RAM");
         if(RAM_BYTES>57344)begin
             access(22'o160000,1,0,0,0,0);
             if(result!=pattern(57344))$fatal(1,"text aperture aliases main RAM");

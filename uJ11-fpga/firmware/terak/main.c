@@ -22,6 +22,21 @@ void poll_io(void)
 	qb_poll();
 }
 
+#ifdef UJ11_TERAK_BIOS
+void publish_media(unsigned menu)
+{
+	u32 present = 0, readonly = 0;
+	for (unsigned i = 0; i < 4; i++) {
+		if (media[i].start) {
+			present |= 1u << i;
+			readonly |= media[i].readonly << i;
+		}
+	}
+	unsigned qb_boot = media[0].start && track_load(0, 1, 0) && track_meta[6];
+	QX(3) = present | (readonly << 4) | (qb_boot << 8) | (menu << 9);
+}
+#endif
+
 static int elapsed(u32 start, u32 limit)
 {
 	return ((TIME - start) & 65535u) >= limit;
@@ -205,6 +220,10 @@ static int initialize(void)
 	u32 size = ((u32)(csd[7] & 63) << 16) | ((u32)csd[8] << 8) | csd[9];
 	u32 capacity = size == 0x3fffff ? 0xffffffffu : (size + 1) << 10;
 	if (media_mount(capacity)) {
+#ifdef UJ11_TERAK_BIOS
+		publish_media(0);
+		return 1;
+#else
 		u32 present = 0, readonly = 0;
 		for (unsigned i = 0; i < 4; i++) {
 			if (media[i].start) {
@@ -215,6 +234,7 @@ static int initialize(void)
 		unsigned qb_boot = media[0].start && track_load(0, 1, 0) && track_meta[6];
 		QX(3) = present | (readonly << 4) | (qb_boot << 8);
 		return present != 0;
+#endif
 	}
 	return 0;
 }
@@ -281,6 +301,17 @@ void main(void)
 	keyboard_reset();
 	(void)initialize();
 	close_card();
+#ifdef UJ11_TERAK_BIOS
+	/* A corrupt/missing BIOS never releases the CPU into a partial image. */
+	while (BUS_STATUS & 2) {
+		poll_io();
+	}
+	if (!bios_load()) {
+		for (;;) {
+			poll_io();
+		}
+	}
+#endif
 	/* An absent/invalid card leaves empty drives; the boot ROM waits for READY. */
 	CPU_START = 1;
 	for (;;) {

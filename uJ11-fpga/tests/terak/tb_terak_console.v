@@ -33,7 +33,10 @@ module tb_terak_console;
         access(13'o17740,1,16'o20000);access(13'o17742,1,16'h1809);access(13'o17744,1,16'o377);
         if(gar!=16'o20000 || vir!=16'h1809 || vcr!=16'o377)$fatal(1,"video registers");
         bus_reset=1;@(negedge clk);bus_reset=0;
-        if(irq || vcr || vir || gar || !key_ready)$fatal(1,"RESET");
+        if(irq || vcr!=16'o377 || vir!=16'h1809 || gar!=16'o20000 || !key_ready)
+            $fatal(1,"INIT lost video latches or retained device state");
+        reset=1;@(negedge clk);reset=0;
+        if(vcr || vir || gar)$fatal(1,"board reset did not initialize video latches");
         $display("PASS native console latch, EDBA, 480 us IRQ, keyboard, video CSRs, RESET");$finish;
     end
     initial begin #2000000;$fatal(1,"console timeout");end

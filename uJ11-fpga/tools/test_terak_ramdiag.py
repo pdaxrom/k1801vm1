@@ -9,7 +9,7 @@ import re
 import subprocess
 import sys
 from board_common import ROOT
-from build_terak import build, CORE, BOARD, GENERATED, CPU_OUT
+from build_terak import build, CORE, BOARD, GENERATED, CPU_OUT, OUT
 from render_terak_screen import render
 from serv_test import GUARD, memory_args
 from terak_image import decode_imd
@@ -49,11 +49,21 @@ def run(out):
     image = out/'ramdiag-card.img'
     image.unlink(missing_ok=True)
     mbr_card([('terak-dsdd', disk)], image, [0], logical=True)
-    extent = json.loads(image.with_suffix('.json').read_text())['disks'][0]
+    card = json.loads(image.with_suffix('.json').read_text())
+    extent = card['disks'][0]
     raw = out/'ramdiag.raw'
     with image.open('rb') as stream:
         stream.seek(extent['start']*512)
         raw.write_bytes(stream.read(1177344))
+    if hardware['boot_mode'] == 'bios':
+        sys.path.insert(0, str(ROOT.parent/'bk0010-01-fpga/tools'))
+        from prepare_disk_sd import Fat16
+        data = bytearray(image.read_bytes())
+        volume = Fat16(data[2048*512:(2048+32768)*512])
+        volume.put('TERAK4.CFG', card['config'].encode())
+        volume.put('TBIOS.BIN', (OUT/'bios/TBIOS.BIN').read_bytes())
+        data[2048*512:(2048+32768)*512] = volume.data
+        image.write_bytes(data)
     template = ROOT/'tests/terak/tb_terak_boot.v'
     text = template.read_text()
     text = text[:text.index('    initial begin: boot_test')]+'''    integer high_reads=0,high_writes=0;
@@ -62,8 +72,16 @@ def run(out):
         if(dut.writing)high_writes++;else high_reads++;
     end
     initial begin: boot_test
-        repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);reset=0;
+        repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);initial_reset=0;
         wait(dut.cpu_start);
+        if(BOOT_BIOS)begin
+            for(integer n=0;n<100;n++)begin
+                #1000000;
+                if(has_text("PRESS 1-4"))break;
+            end
+            if(!dut.bus.boot_menu || !has_text("SELECT BOOT"))$fatal(1,"RAM test missed primary BIOS");
+            ps2_byte(8'h25); // Select TERAK4.CFG with the real keyboard path.
+        end
         for(integer n=0;n<400;n++)begin
             #50000000;
             if(n%20==0)begin
@@ -97,6 +115,7 @@ endmodule
     hashes = {p: sha(ROOT/p) for p in sorted(inputs)}
     command = ['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD', '-Wno-PINMISSING',
                '--top-module', 'tb_terak_boot', '-GDISPLAY_EBR=1', '-GRAM_BYTES=253952',
+               f"-GBOOT_BIOS={int(hardware['boot_mode'] == 'bios')}",
                f'-GMICROCODE="{CPU_OUT.relative_to(ROOT)}/microcode.mem"', '-j', '4', '--Mdir', str(out/'obj')]
     command += CORE+BOARD+GENERATED+[str(tb.relative_to(ROOT)), GUARD,
                                     'tests/models/async_sram_model.v', 'tests/models/spi_sd_model.v']

@@ -7,7 +7,13 @@ struct partition {
 	u32 start, blocks;
 	uint8_t type;
 };
+#ifdef UJ11_TERAK_BIOS
+static struct partition partitions[PARTS] TERAK_COLD;
+static unsigned profile_number;
+static u32 card_capacity;
+#else
 static struct partition partitions[PARTS];
+#endif
 static uint8_t selected[4], formats[4], readonly[4];
 
 static unsigned half(unsigned p)
@@ -209,6 +215,18 @@ static int config(unsigned size)
  * Validate its allocation in every FAT copy; only the first data sector is read. */
 static int fat_config(void)
 {
+#ifdef UJ11_TERAK_BIOS
+	char name[] = "TERAK   CFG";
+	if (profile_number) {
+		name[5] = '0' + profile_number;
+	}
+	int found = fat_open(name, partitions[0].start, partitions[0].blocks, 512);
+	if (found != 1) {
+		return profile_number ? -1 : found;
+	}
+	int size = fat_read();
+	return size > 0 && config(size) ? 1 : -1;
+#else
 	struct partition *boot = partitions;
 	if (!fetch(boot->start) || half(510) != 0xaa55 || half(11) != 512) {
 		return -1;
@@ -263,10 +281,14 @@ static int fat_config(void)
 		return -1;
 	}
 	return config(size) ? 1 : -1;
+#endif
 }
 
 int mbr_mount(u32 capacity)
 {
+#ifdef UJ11_TERAK_BIOS
+	card_capacity = capacity;
+#endif
 	if (!table(capacity)) {
 		return 0;
 	}
@@ -301,3 +323,30 @@ int mbr_mount(u32 capacity)
 	}
 	return mounted != 0;
 }
+
+#ifdef UJ11_TERAK_BIOS
+int mbr_select(unsigned profile)
+{
+	if (profile < 1 || profile > 4) {
+		return 0;
+	}
+	struct terak_media saved[4];
+	for (unsigned i = 0; i < 4; i++) {
+		saved[i] = media[i];
+		media[i].start = 0;
+	}
+	profile_number = profile;
+	int ok = mbr_mount(card_capacity) && media[0].start;
+	if (!ok) {
+		for (unsigned i = 0; i < 4; i++) {
+			media[i] = saved[i];
+		}
+	}
+	return ok;
+}
+
+int mbr_bios(void)
+{
+	return partitions[0].type && fat_open("TBIOS   BIN", partitions[0].start, partitions[0].blocks, 4112) == 1;
+}
+#endif

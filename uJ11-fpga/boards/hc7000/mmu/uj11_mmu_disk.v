@@ -19,7 +19,7 @@ module uj11_mmu_disk #(
     output wire [15:0] rk_rdata,
     output wire rk_ready,rk_irq,
     input wire rk_irq_ack,
-    output wire storage_enabled,cpu_start,
+    output wire storage_enabled,cpu_start,storage_idle,
     input wire io_request,
     input wire [12:0] io_address,
     output wire [15:0] io_rdata,
@@ -111,6 +111,9 @@ module uj11_mmu_disk #(
     wire [7:0] engine_spi_data;
     wire [15:0] spi_rdata;
     wire spi_ready,spi_error,spi_busy;
+    // Include the firmware's whole operation, including gaps between SPI
+    // bytes/sectors and the SD card's internal write-busy period.
+    assign storage_idle=bootstrap_ready && !working && !engine_busy && !spi_busy && sd_cs_n;
     wire iop_spi_req=data_accept && spi_selected && owner && !engine_busy;
     wire iop_spi_done=owner && !engine_busy && spi_ready;
     wire engine_spi_done=owner && engine_busy && spi_ready;

@@ -1,13 +1,13 @@
 `timescale 1ns/1ps
 // Terak 8510 QX (500021, sections 6.2/6.3). The guest uses PIO, never DMA.
 // SERV sees only a physical sector request and the 64-word transfer buffer.
-module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000)(
+module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000,MECHANICAL_SPEEDUP=1)(
     input wire clk,reset,bus_reset,request,writing,
     input wire data_register,
     input wire [15:0] write_data,
     output wire [15:0] read_data,
     output wire ready,error,busy,
-    output reg boot_qb,
+    output reg boot_qb,boot_menu,
     input wire irq_ack,
     output reg irq,
     input wire service_write,
@@ -45,13 +45,13 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000)(
     assign service_read=service_address[6] ? {16'b0,buffer[service_address[5:0]]} :
         service_address==0 ? {31'b0,backend} :
         service_address==1 ? {generation,7'b0,function_code,unit,track[unit],sector} :
-        service_address==3 ? {23'b0,boot_qb,readonly,present} : 0;
+        service_address==3 ? {22'b0,boot_menu,boot_qb,readonly,present} : 0;
     integer i;
     always @(posedge clk)begin
         if(reset)begin
             control<=0;errors<=0;done<=1;seen<=0;irq<=0;index<=0;bus_error<=0;response<=0;
             delay_cycles<=0;window_cycles<=0;id_valid<=0;backend<=0;
-            sector<=1;rotation<=1;function_code<=0;generation<=0;present<=0;readonly<=0;boot_qb<=0;
+            sector<=1;rotation<=1;function_code<=0;generation<=0;present<=0;readonly<=0;boot_qb<=0;boot_menu<=0;
             for(i=0;i<4;i=i+1)track[i]<=0;
         end else begin
             if(!request)seen<=0;
@@ -68,7 +68,10 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000)(
                 end
             end
             if(service_write)begin
-                if(service_address==3)begin present<=service_data[3:0];readonly<=service_data[7:4];boot_qb<=service_data[8];end
+                if(service_address==3)begin
+                    present<=service_data[3:0];readonly<=service_data[7:4];
+                    boot_qb<=service_data[8];boot_menu<=service_data[9];
+                end
                 else if(service_address==2 && backend && generation==service_data[31:24])begin
                     errors<=service_data[15:0]&16'hfc00;backend<=0;done<=1;
                     if(control[6])irq<=1;
@@ -91,9 +94,9 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000)(
                                 function_code<=write_data[3:1];done<=0;id_valid<=0;window_cycles<=0;
                                 delay_cycles<=CLOCK_HZ/1000000;
                                 case(write_data[3:1])
-                                    1:delay_cycles<=CLOCK_HZ/500; // 2 ms, including absent media
+                                    1:delay_cycles<=CLOCK_HZ/500/MECHANICAL_SPEEDUP; // 2 ms, including absent media
                                     2,3:begin
-                                        delay_cycles<=CLOCK_HZ/1000*6;
+                                        delay_cycles<=CLOCK_HZ/1000*6/MECHANICAL_SPEEDUP;
                                         if(write_data[3:1]==2 && track[write_data[9:8]]<76)
                                             track[write_data[9:8]]<=track[write_data[9:8]]+1'b1;
                                         if(write_data[3:1]==3 && track[write_data[9:8]]!=0)

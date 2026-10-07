@@ -44,7 +44,13 @@ module uj11_terak_console #(parameter integer CLOCK_HZ=50000000)(
         if(reset || bus_reset)begin
             seen<=0;key_done<=0;key_ie<=0;output_done<=1;output_ie<=0;
             key_irq<=0;printer_irq<=0;emulator_irq<=0;key_latch<=0;output_latch<=0;
-            printer_delay<=0;gar<=0;vir<=0;vcr<=0;tone_divider<=0;tone<=0;
+            printer_delay<=0;tone_divider<=0;tone<=0;
+            // Do not impose zero on the video latches during bus INIT.
+            // Native RT-11 sets VCR=7 before its monitor executes RESET at
+            // 146720, then its resident TK handler saves/restores that value.
+            // The hardware guide leaves these bits indeterminate on reset;
+            // retain them on INIT, and choose zero on board/power reset only.
+            if(reset)begin gar<=0;vir<=0;vcr<=0;end
         end else begin
             if(!request)seen<=0;
             if(request)seen<=1;

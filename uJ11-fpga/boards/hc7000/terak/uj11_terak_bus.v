@@ -1,9 +1,9 @@
 `timescale 1ns/1ps
 module uj11_terak_bus #(
-    parameter integer CLOCK_HZ=50000000,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,DISPLAY_EBR=0,
-    parameter integer RAM_BYTES=57344
+    parameter integer CLOCK_HZ=50000000,QX_MECHANICAL_SPEEDUP=1,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,DISPLAY_EBR=0,
+    parameter integer RAM_BYTES=57344,BOOT_BIOS=0
 )(
-    input wire clk,reset,power_on,peripheral_reset,video_clk,video_reset,
+    input wire clk,reset,cold_reset,power_on,peripheral_reset,video_clk,video_reset,
     input wire request,writing,byte_access,cpu_lock,
     input wire [21:0] address,
     input wire [15:0] write_data,
@@ -17,7 +17,7 @@ module uj11_terak_bus #(
     input wire ps2_data,
     output wire [5:0] tvout,
     output wire [1:0] audio,
-    output wire memory_initialized,cpu_start,
+    output wire memory_initialized,cpu_start,storage_idle,
     output reg boot_complete,
     output wire [19:0] sram_address,
     inout wire [15:0] sram_data,
@@ -32,10 +32,14 @@ module uj11_terak_bus #(
     wire aperture=io_page && !offset[12];
     wire rom_selected=io_page && offset[12:9]==(13'o13000>>9);
     wire qx_selected=io_page && offset[12:2]==(13'o17000>>2);
-    wire qb_selected=io_page && offset[12:4]==(13'o11000>>4);
+    wire qb_selected=io_page && (offset[12:4]==(13'o11000>>4) || BOOT_BIOS && offset==13'o11020);
+    wire service_reset=BOOT_BIOS ? cold_reset : reset;
+    wire guest_bus_reset=peripheral_reset || (BOOT_BIOS && reset);
     wire console_selected=io_page && (offset[12:3]==(13'o17560>>3) ||
         offset==13'o17740 || offset==13'o17742 || offset==13'o17744 || offset==13'o17746);
-    wire bad_aperture=aperture && !byte_access;
+    // RT-11's original bootstrap probes the page buffer with TST @#160000
+    // before loading CHRSET.SYS. DATI must respond even on this byte aperture.
+    wire bad_aperture=aperture && writing && !byte_access;
     wire bad_register=console_selected && byte_access && (offset==13'o17740 || offset==13'o17742);
     wire [15:0] gar,vir,vcr;
     wire memory_request,memory_write,memory_ready,cpu_ready,video_ready;
@@ -106,11 +110,12 @@ module uj11_terak_bus #(
     wire service_write;
     wire [6:0] service_address;
     wire [31:0] service_data,service_read;
-    wire qx_ready,qx_error,qx_busy,qx_irq,boot_qb;
+    wire qx_ready,qx_error,qx_busy,qx_irq,boot_qb,boot_menu,disk_idle;
+    assign storage_idle=disk_idle && !qx_busy;
     wire [15:0] qx_data;
-    uj11_terak_qx #(.CLOCK_HZ(CLOCK_HZ)) qx(.clk(clk),.reset(reset),.bus_reset(peripheral_reset),
+    uj11_terak_qx #(.CLOCK_HZ(CLOCK_HZ),.MECHANICAL_SPEEDUP(QX_MECHANICAL_SPEEDUP)) qx(.clk(clk),.reset(service_reset),.bus_reset(guest_bus_reset),
         .request(request && qx_selected),.writing(writing),.data_register(address[1]),
-        .write_data(write_data),.read_data(qx_data),.ready(qx_ready),.error(qx_error),.busy(qx_busy),.boot_qb(boot_qb),
+        .write_data(write_data),.read_data(qx_data),.ready(qx_ready),.error(qx_error),.busy(qx_busy),.boot_qb(boot_qb),.boot_menu(boot_menu),
         .irq_ack(irq_ack && irq_priority==4 && qx_irq),.irq(qx_irq),
         .service_write(service_write),.service_address(service_address),.service_data(service_data),.service_read(service_read));
     wire key_valid,key_ready,console_irq;
@@ -148,11 +153,11 @@ module uj11_terak_bus #(
     assign irq_vector=clock_pending ? 16'o100 : qx_irq ? 16'o250 : qb_irq ? {7'b0,qb_vector} : console_vector;
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),
         .TERAK_ENABLE(1),.KEYBOARD_ENABLE(1),.IOP_RAM_KIB(DISPLAY_EBR ? 15 : 19)) disk(
-        .clk(clk),.reset(reset),.bus_reset(peripheral_reset),.dma_map_enabled(1'b0),
+        .clk(clk),.reset(service_reset),.bus_reset(guest_bus_reset),.dma_map_enabled(1'b0),
         .ps2_clock(ps2_clock),.ps2_data(ps2_data),
         .video_reg_write(),.video_reg_address(),.video_reg_data(),.video_reg_lanes(),.video_reg_read(16'b0),
         .rk_request(1'b0),.rk_write(writing),.rk_address(4'b0),.rk_lanes(lanes),.rk_wdata(write_data),.rk_rdata(),
-        .rk_ready(),.rk_irq(),.rk_irq_ack(1'b0),.storage_enabled(),.cpu_start(cpu_start),
+        .rk_ready(),.rk_irq(),.rk_irq_ack(1'b0),.storage_enabled(),.cpu_start(cpu_start),.storage_idle(disk_idle),
         .io_request(request && qb_selected),.io_address(offset),.io_rdata(qb_data),.io_ready(qb_ready),
         .io_error(qb_error),.io_irq(qb_irq),.io_vector(qb_vector),
         .io_irq_ack(irq_ack && irq_priority==4 && !qx_irq && qb_irq),
@@ -165,12 +170,27 @@ module uj11_terak_bus #(
         .local_valid(key_valid),.local_data(key_data),.local_ready(key_ready),
         .service_write(service_write),.service_address(service_address),.service_data(service_data),.service_read(service_read));
     wire [15:0] rom_data;
-    uj11_terak_boot_rom boot(.address(address[8:1]),.qb(boot_qb),.data(rom_data));
-    assign read_data=display_selected ? display_data : ram_selected || aperture ? ram_data : rom_selected ? rom_data :
+    uj11_terak_boot_rom boot(.address(address[8:1]),.qb(boot_qb),.menu(boot_menu),.data(rom_data));
+    wire [15:0] rom_response;
+    wire rom_ready;
+    generate if(BOOT_BIOS)begin: registered_rom
+        reg valid;
+        reg [15:0] data;
+        // The dynamic BIOS/native-ROM entry otherwise extends address -> ROM
+        // -> instruction decode -> microstore into one 50 MHz timing path.
+        always @(posedge clk)begin
+            if(reset || peripheral_reset || !request || !rom_selected)valid<=0;
+            else if(!valid)begin data<=rom_data;valid<=1;end
+        end
+        assign rom_response=data,rom_ready=valid;
+    end else begin: direct_rom
+        assign rom_response=rom_data,rom_ready=1'b1;
+    end endgenerate
+    assign read_data=display_selected ? display_data : ram_selected || aperture ? ram_data : rom_selected ? rom_response :
         qx_selected ? qx_data : qb_selected ? qb_data : console_data;
     assign ready=request && (display_selected && !bad_aperture ? display_ready :
         (ram_selected || aperture && !bad_aperture) ? cpu_ready :
-        qx_selected ? qx_ready : qb_selected ? qb_ready : 1'b1);
+        qx_selected ? qx_ready : qb_selected ? qb_ready : rom_selected ? rom_ready : 1'b1);
     assign error=request && (bad_aperture || bad_register || (rom_selected && (writing || qx_busy)) ||
         (qx_selected && qx_error) || (qb_selected && qb_error) ||
         !(ram_selected || aperture || rom_selected || qx_selected || qb_selected || console_selected));

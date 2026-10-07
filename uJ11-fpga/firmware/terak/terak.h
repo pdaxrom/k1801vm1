@@ -23,6 +23,20 @@ int track_format(unsigned unit, unsigned cylinder, unsigned head);
 int media_open(unsigned unit, u32 start, u32 blocks, unsigned format, unsigned readonly);
 int media_mount(u32 capacity);
 int mbr_mount(u32 capacity);
+#ifdef UJ11_TERAK_BIOS
+#ifdef __riscv
+#define TERAK_COLD __attribute__((section(".cold_bss")))
+#else
+#define TERAK_COLD
+#endif
+int mbr_select(unsigned profile);
+int mbr_bios(void);
+int fat_open(const char *name, u32 start, u32 blocks, unsigned limit);
+int fat_read(void);
+int bios_load(void);
+int bios_poll(void);
+void publish_media(unsigned menu);
+#endif
 void qb_poll(void);
 void qb_service(void);
 #endif

@@ -26,7 +26,17 @@ $(error Extended TERAK RAM requires TERAK_DISPLAY=ebr)
 endif
 endif
 export UJ11_TERAK_RAM_KIB := $(TERAK_RAM_KIB)
-OUT ?= build/hc7000-terak$(if $(filter 56,$(TERAK_RAM_KIB)),$(if $(filter ebr,$(TERAK_DISPLAY)),-ebr),-$(TERAK_RAM_KIB)k)
+TERAK_BOOT ?= direct
+ifeq ($(filter $(TERAK_BOOT),direct bios),)
+$(error TERAK_BOOT must be direct or bios)
+endif
+ifeq ($(TERAK_BOOT),bios)
+ifneq ($(TERAK_DISPLAY),ebr)
+$(error TERAK BIOS requires TERAK_DISPLAY=ebr)
+endif
+endif
+export UJ11_TERAK_BOOT := $(TERAK_BOOT)
+OUT ?= build/hc7000-terak$(if $(filter 56,$(TERAK_RAM_KIB)),$(if $(filter ebr,$(TERAK_DISPLAY)),-ebr),-$(TERAK_RAM_KIB)k)$(if $(filter bios,$(TERAK_BOOT)),-bios)
 TERAK_SYNTHESIS ?= $(notdir $(OUT))-mbr-synthesis
 ifneq ($(BOARD)/$(CPU)/$(FPP)/$(IOP)/$(MMU_CLOCK_MHZ),hc7000-lcd-sram/mmu/off/storage/50)
 $(error MACHINE=terak requires HC7000 / CPU=mmu / FPP=off / IOP=storage / 50 MHz)

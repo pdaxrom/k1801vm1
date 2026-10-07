@@ -76,6 +76,13 @@ void qb_poll(void)
 	if (!(status & 1)) {
 		return;
 	}
+#ifdef UJ11_TERAK_BIOS
+	/* Dispatch after observing a held request. A second independent poll
+	 * could otherwise miss a new BIOS request which QB would reject. */
+	if (bios_poll()) {
+		return;
+	}
+#endif
 	u32 request = BUS_REQUEST, address = request & 017776;
 	unsigned write = (request >> 13) & 1, value = request >> 16;
 	u32 reply = 0;
