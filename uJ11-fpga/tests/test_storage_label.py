@@ -55,10 +55,10 @@ class StorageLabel(unittest.TestCase):
         a=add_partition(Label(262144),'rk07',0,boot=True,name='RT11XM')
         return add_partition(a,'rk07',7,readonly=True)
     def test_roundtrip_all_media_and_rh70(self):
-        a=Label(1000000)
-        for m,u,b in [('rk05',0,None),('rk06',0,None),('rk07',7,None),('rm05',0,None),('mscp',3,50000),('rl01',0,None),('rl02',3,None),('tk50',7,50000)]:
+        a=Label(1200000)
+        for m,u,b in [('rk05',0,None),('rk06',0,None),('rk07',7,None),('rm05',0,None),('mscp',3,50000),('rl01',0,None),('rl02',3,None),('tk50',7,50000),('terak-ss',0,None),('terak-ds',3,None)]:
             a=add_partition(a,m,u,blocks=b,mode=int(m in ('rk06','rk07')))
-        self.assertTrue(self.accepted(a.pack()))
+        self.assertTrue(self.accepted(a.pack(),capacity=1200000))
         self.assertEqual(Label.unpack(a.pack()),a)
     def test_menu_feature_in_c_decoder(self):
         label=replace(self.label(),features=1)

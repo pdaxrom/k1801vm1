@@ -1,0 +1,20 @@
+{
+  "source": "https://sourceforge.net/code-snapshots/cvs/b/bk/bk-terak-emu.zip",
+  "source_path": "Rom/TERAK.ROM",
+  "source_sha256": "a8cf685bd1c60ed722b956ae0d203da546c4249fe89639c44f2f294a4651ab34",
+  "image_sha256": "fbf7578cd42ba0b2698c34f6f2db07644499d105f7108217a4630599df63e0fa",
+  "changes": [
+    {
+      "address_octal": "173064",
+      "emulator_octal": "000001",
+      "restored_octal": "002310"
+    },
+    {
+      "address_octal": "173104",
+      "emulator_octal": "000001",
+      "restored_octal": "023734"
+    }
+  ],
+  "reference": "https://www.bitsavers.org/pdf/terak/terak.8510.description.pdf",
+  "note": "Reconstructed hardware-delay variant; not asserted to be an independently dumped ROM."
+}

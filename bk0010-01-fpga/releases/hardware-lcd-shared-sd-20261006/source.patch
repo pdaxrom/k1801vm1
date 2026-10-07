@@ -1,0 +1,215 @@
+diff --git a/bk0010-01-fpga/docs/bios.md b/bk0010-01-fpga/docs/bios.md
+index 17b67a4..40a704a 100644
+--- a/bk0010-01-fpga/docs/bios.md
++++ b/bk0010-01-fpga/docs/bios.md
+@@ -50,8 +50,10 @@ BK.SET — 16 байт, little-endian:
+ На карте с двумя логическими дисками модель 0 получает A=5/B=6 RO,
+ модель 3 — A=6/B=5 RO. Настройки не содержат LBA: границы берутся
+ из MBR, EBR и CSD карты. Расширенный раздел допускается только в записи 4
+-с типом 05/0F/85; максимум два EBR. Проверяются подписи, длины, переполнения,
+-границы контейнера и движение цепочки за предыдущий диск; циклы запрещены.
++с типом 05/0F/85. BIOS читает первые два EBR и допускает корректную ссылку
++после второго на разделы других компьютеров, например TERAK 7/8.
++Проверяются подписи прочитанных EBR, длины, переполнения, границы контейнера
++и движение ссылок за предыдущий диск; ссылки назад запрещены.
+ 
+ Загрузочный раздел 1 — FAT16 06/0E. В его корне `LOADERBK.BIN`,
+ `BK00.ROM`…`BK04.ROM`, `BK.SET`; `LOADER.BIN/P601.SET` принадлежат Пълдину.
+diff --git a/bk0010-01-fpga/docs/boot.md b/bk0010-01-fpga/docs/boot.md
+index 8d6f97c..0e54e2b 100644
+--- a/bk0010-01-fpga/docs/boot.md
++++ b/bk0010-01-fpga/docs/boot.md
+@@ -2,7 +2,7 @@
+ 
+ Адреса регистров восьмеричные; offsets заголовков десятичные.
+ Сам ВМ1 выполняет resident BIOS, FAT16 и второй этап. Первичный BIOS
+-занимает 7048 байт в 8 КиБ EBR; второй этап LOADERBK.BIN — 664 байта,
++занимает 7778 байт в 8 КиБ EBR; второй этап LOADERBK.BIN — 664 байта,
+ RAM 020000…027777. Меню и BK.SET описаны в [bios.md](bios.md).
+ 
+ ## Этапы
+@@ -102,6 +102,13 @@ low/high. Words16…19 — границы FAT;20…21 — число секто
+ только после завершения. Valid drive mask и базы фиксируются до полного
+ возврата BIOS. Runtime LBA дополнительно ограничен offset<1600 и RO.
+ 
++В расширенном разделе 4 BIOS отображает первые два логических раздела
++как диски 5/6. После второго раздела допускается корректная ссылка на
++продолжение цепочки: последующие разделы могут использовать TERAK и
++другие компьютеры. Их BIOS БК не читает и не предлагает в меню.
++Границы первых двух дисков и обе ссылки проверяются; ссылка назад,
++пересечение с данными или выход за контейнер приводят к ошибке 11.
++
+ Физические stream-порты разрешают только ROM 20000h…2FFFFh.
+ Commit проверяет отсутствие boot_error, exact общий written_count,
+ verified_count и общую CRC32. После него bootstrap-порты скрыты,
+diff --git a/bk0010-01-fpga/firmware/boot/ebr.inc b/bk0010-01-fpga/firmware/boot/ebr.inc
+index a8a671c..a35a7ac 100644
+--- a/bk0010-01-fpga/firmware/boot/ebr.inc
++++ b/bk0010-01-fpga/firmware/boot/ebr.inc
+@@ -1,5 +1,5 @@
+-; Two logical disks in primary partition 4. All extents stay inside its
+-; validated bounds; the chain moves beyond each preceding data extent.
++; The first two logical disks in primary partition 4 belong to BK.
++; Validate their bounds and links; leave any later disks to other machines.
+ bios_read_logical:
+         mov #BIOS_LOGICAL, r1
+         mov #16., r2
+@@ -172,7 +172,7 @@ bios_ebr_guard_24:
+         add #16., r5
+         cmp r5, #BIOS_LOGICAL+32.
+         bcs bios_ebr_guard_25
+-        jmp bios_ebr_bad
++        rts pc
+ bios_ebr_guard_25:
+         jmp bios_logical_read
+ bios_ebr_bound:
+diff --git a/bk0010-01-fpga/tests/test_bios.py b/bk0010-01-fpga/tests/test_bios.py
+index cdb45b0..f245cbd 100644
+--- a/bk0010-01-fpga/tests/test_bios.py
++++ b/bk0010-01-fpga/tests/test_bios.py
+@@ -57,6 +57,8 @@ def run_checks(executable, run, only=None):
+         ('model-drive',3,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime']),
+         ('logical-default',3,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime',
+                               '+logical-bios','+disk-base=47104','+second-base=43008']),
++        ('logical-shared',3,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime',
++                             '+logical-bios','+disk-base=47104','+second-base=43008']),
+         ('logical-edit',5,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime',
+                            '+logical-bios','+disk-base=36864','+second-base=43008']),
+         ('existing',1,0,[]), ('create',1,0,[]), ('temporary',2,0,[]),
+@@ -68,10 +70,10 @@ def run_checks(executable, run, only=None):
+         selected = dict(files)
+         if name in ('create','full','root-full'):
+             del selected['BK.SET']
+-        if name in ('model-drive','logical-default','logical-edit'):
++        if name == 'model-drive' or name.startswith('logical-'):
+             selected['BK03.ROM']=(BUILD/'BK03.ROM').read_bytes()
+         before = bytearray(original)
+-        if name in ('model-drive','logical-default','logical-edit'):
++        if name == 'model-drive' or name.startswith('logical-'):
+             before.extend(b'\xa5'*(38912*512-len(before)))
+             for index,start in enumerate((34816,36864),1):
+                 struct.pack_into('<B3sB3sII',before,446+index*16,0,b'\xfe\xff\xff',0xda,b'\xfe\xff\xff',start,1600)
+@@ -87,6 +89,20 @@ def run_checks(executable, run, only=None):
+                     struct.pack_into('<B3sB3sII',before,offset+462,0,b'\xfe\xff\xff',0x0f,b'\xfe\xff\xff',4096,3648)
+             if name == 'logical-edit':
+                 selected['BK.SET']=settings(model=3,drives=(6,5,0,0),readonly=3)
++            if name == 'logical-shared':
++                before.extend(b'\xa5'*(57344*512-len(before)))
++                struct.pack_into('<I',before,506,14837)
++                for lba,next_lba,blocks in ((40960,45056,1600),(45056,49152,1600),
++                                            (49152,53248,501),(53248,None,501)):
++                    offset=lba*512
++                    before[offset:offset+512]=bytes(512)
++                    before[offset+510:offset+512]=b'\x55\xaa'
++                    struct.pack_into('<B3sB3sII',before,offset+446,0,b'\xfe\xff\xff',0xda,
++                                     b'\xfe\xff\xff',2048,blocks)
++                    if next_lba is not None:
++                        struct.pack_into('<B3sB3sII',before,offset+462,0,b'\xfe\xff\xff',0x0f,
++                                         b'\xfe\xff\xff',next_lba-40960,55797-next_lba)
++                selected['TERAK.CFG']=b'version=1\ndrive0=7,raw,sssd,rw\ndrive1=8,raw,sssd,rw\ndrive2=off\ndrive3=off\n'
+ 
+         before[2048*512:(2048+32768)*512] = fat16(selected)
+         fat, root, data, spf, _, entries = layout(before)
+@@ -124,11 +140,12 @@ def run_checks(executable, run, only=None):
+             targets = {
+                 'model-drive':dict(model=3,frequency=4,color=1,drives=(2,3,0,0),readonly=0),
+                 'logical-default':dict(model=3,frequency=4,color=1,drives=(6,5,0,0),readonly=3),
++                'logical-shared':dict(model=3,frequency=4,color=1,drives=(6,5,0,0),readonly=3),
+                 'logical-edit':dict(model=3,frequency=4,color=0,drives=(3,5,0,0),readonly=3)}
+             target = targets.get(name,dict(model=2,frequency=16,color=0,drives=(0,0,0,0),readonly=0))
+             assert config == target, config
+             assert after[fat:fat+spf*512] == after[fat+spf*512:fat+2*spf*512], 'FAT copies disagree'
+-            if name in ('existing','model-drive','logical-default','logical-edit'):
++            if name in ('existing','model-drive') or name.startswith('logical-'):
+                 offset = data+(entries_before['BK.SET'][1]-2)*512
+                 expected = bytearray(before)
+                 expected[offset:offset+16] = settings(**target)
+diff --git a/bk0010-01-fpga/tests/test_ebr_boot.py b/bk0010-01-fpga/tests/test_ebr_boot.py
+index 3c47c16..160a1a6 100644
+--- a/bk0010-01-fpga/tests/test_ebr_boot.py
++++ b/bk0010-01-fpga/tests/test_ebr_boot.py
+@@ -27,7 +27,23 @@ def run_checks(executable, run):
+              ('overlap-link',first+470,struct.pack('<I',2048)),
+              ('link-type',first+466,b'\xda'),('extra-entry',first+478,b'\x80'),
+              ('boot-flag',first+446,b'\x01'),
+-             ('too-many',second+462,image[first+462:first+478])]
++             ('backward-second-link',second+462,image[first+462:first+478])]
++    shared = bytearray(image)
++    shared.extend(bytes(57344*512-len(shared)))
++    struct.pack_into('<I',shared,506,14837)
++    struct.pack_into('<B3sB3sII',shared,second+462,0,b'\xfe\xff\xff',0x0f,b'\xfe\xff\xff',8192,6645)
++    for label,offset,value in (
++        ('second-link-flag',second+462,b'\x80'),
++        ('second-link-type',second+466,b'\xda'),
++        ('second-link-overlap',second+470,struct.pack('<I',4096)),
++        ('second-link-empty',second+474,struct.pack('<I',0)),
++        ('second-link-outside',second+474,struct.pack('<I',7000))):
++        changed = bytearray(shared)
++        changed[offset:offset+len(value)] = value
++        path = ROOT/f'build/ebr-bad-{label}.img'
++        path.write_bytes(changed)
++        run(f'ebr-bad-{label}',[executable,f'+image={path}','+error=11','+no-dump'])
++        assert path.read_bytes() == changed, 'Rejected EBR test modified its media'
+     for label,offset,value in cases:
+         changed = bytearray(image)
+         changed[offset:offset+len(value)] = value
+diff --git a/bk0010-01-fpga/tests/test_models.py b/bk0010-01-fpga/tests/test_models.py
+index d7e7b1b..cbd38b7 100644
+--- a/bk0010-01-fpga/tests/test_models.py
++++ b/bk0010-01-fpga/tests/test_models.py
+@@ -96,6 +96,19 @@ class Models(unittest.TestCase):
+             with self.assertRaises(ValueError):
+                 partitions(mbr,50000,changed.__getitem__)
+ 
++        # A valid continuation belongs to other machines; BK still maps only 5/6.
++        shared = bytearray(mbr)
++        struct.pack_into('<I',shared,506,14837)
++        tail = {key:bytearray(value) for key,value in ebrs.items()}
++        struct.pack_into('<B3sB3sII',tail[45056],462,0,bytes(3),15,bytes(3),8192,6645)
++        self.assertEqual(partitions(shared,60000,tail.__getitem__)[4:],desc[4:])
++        for offset,fmt,value in ((462,'B',0x80),(466,'B',0xda),(470,'I',4096),
++                                 (474,'I',0),(474,'I',7000)):
++            changed = {key:bytearray(value) for key,value in tail.items()}
++            struct.pack_into('<'+fmt,changed[45056],offset,value)
++            with self.assertRaises(ValueError):
++                partitions(shared,60000,changed.__getitem__)
++
+ 
+ 
+ if __name__ == '__main__':
+diff --git a/bk0010-01-fpga/tools/build.py b/bk0010-01-fpga/tools/build.py
+index 45bd8df..10909f9 100644
+--- a/bk0010-01-fpga/tools/build.py
++++ b/bk0010-01-fpga/tools/build.py
+@@ -367,7 +367,7 @@ def test(group, dcca_model=None, disk=None, disk_speedup=1, disk_a16m=False, sec
+         sys.path.insert(0, str(ROOT/'tests'))
+         from test_bios import run_checks
+         executable = verilate('sd_boot', CPU+SD+['tests/sd_spi_model.v'])
+-        run_checks(executable, run,only=['logical-default','logical-edit'] if group == 'bios-logical' else None)
++        run_checks(executable, run,only=['logical-default','logical-shared','logical-edit'] if group == 'bios-logical' else None)
+     if group == 'ebr-bios':
+         import sys
+         sys.path.insert(0,str(ROOT/'tests'))
+diff --git a/bk0010-01-fpga/tools/models.py b/bk0010-01-fpga/tools/models.py
+index b0f301d..fec1ab2 100644
+--- a/bk0010-01-fpga/tools/models.py
++++ b/bk0010-01-fpga/tools/models.py
+@@ -111,6 +111,7 @@ def parse_bundle(data, model=None):
+ 
+ 
+ def partitions(mbr, card_sectors, read_sector=None):
++    """Map primary partitions and the first two logical disks, as the BK BIOS does."""
+     if len(mbr) != 512 or mbr[510:] != b'\x55\xaa' or not 0 < card_sectors <= 0xffffffff:
+         raise ValueError('Invalid MBR or SD capacity')
+     result = []
+@@ -152,8 +153,8 @@ def partitions(mbr, card_sectors, read_sector=None):
+                 result.extend([None]*(1-index))
+                 break
+             following = base+relative
+-            if index == 1 or link[0] or kind not in (5,0x0f,0x85) or not relative or not length or following < start+result[-1]['length'] or following+length > end:
+-                raise ValueError('Invalid, overlapping or excessive EBR chain')
++            if link[0] or kind not in (5,0x0f,0x85) or not relative or not length or following < start+result[-1]['length'] or following+length > end:
++                raise ValueError('Invalid or overlapping EBR chain')
+             current = following
+     return result
+ 

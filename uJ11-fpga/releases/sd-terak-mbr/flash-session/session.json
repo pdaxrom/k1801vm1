@@ -1,0 +1,58 @@
+{
+  "started_utc": "2026-10-07T06:01:06.020474+00:00",
+  "jed": {
+    "bytes": 1456160,
+    "sha256": "b419e870c3dca9918887d015bd01cf4eedadf875b19f40123ba56accc7090754",
+    "checksum": "AE82",
+    "transmission_checksum": "7788",
+    "fuses": 1441280
+  },
+  "driver_sha256": "2bae2f91649a90dbb9c5205d6d69622c8df92237d6ff4a19f7675a83bebd1921",
+  "uart_port": "/dev/serial/by-id/usb-FTDI_Dual_RS232-if01-port0",
+  "actions": [
+    {
+      "action": "verify-id",
+      "utc": "2026-10-07T06:01:30.340458+00:00",
+      "uart_offset": 0,
+      "passed": true,
+      "exit_code": 0,
+      "operation": "FLASH Verify ID",
+      "stdout": "01-verify-id-stdout.log",
+      "config": "01-verify-id.xcf"
+    },
+    {
+      "action": "program",
+      "utc": "2026-10-07T06:02:20.239417+00:00",
+      "uart_offset": 0,
+      "passed": true,
+      "exit_code": 0,
+      "operation": "FLASH Erase,Program,Verify",
+      "stdout": "02-program-stdout.log",
+      "config": "02-program.xcf"
+    },
+    {
+      "action": "read",
+      "utc": "2026-10-07T06:04:37.941047+00:00",
+      "uart_offset": 1,
+      "passed": true
+    },
+    {
+      "action": "close",
+      "utc": "2026-10-07T06:04:45.978048+00:00",
+      "uart_offset": 1,
+      "passed": true
+    }
+  ],
+  "programmed_to": "FLASH",
+  "flash_modified": true,
+  "physical_board_verified": true,
+  "uart_bytes": 1,
+  "boot_stages": [],
+  "boot_errors": [],
+  "id_verified": true,
+  "flash_program_verified": true,
+  "operator_confirmation_utc": "2026-10-07T06:06:15.982582+00:00",
+  "operator_confirmation": "Upper Command menu fully visible; F opens file menu",
+  "UCSD_menu_visible": true,
+  "UCSD_file_menu_F_verified": true
+}

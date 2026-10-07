@@ -1,0 +1,5 @@
+# Critical-source anchors from the qualified 50 MHz Terak 7C74 placement.
+# Leave other control registers free for carry-chain packing; the gate
+# verifies both fixed sites in the routed NCD.
+LOCATE COMP "system/cpu/prepared_control[3]" SITE "R14C21A" ;
+LOCATE COMP "system/bus/disk/bootstrap_ready" SITE "R12C28C" ;

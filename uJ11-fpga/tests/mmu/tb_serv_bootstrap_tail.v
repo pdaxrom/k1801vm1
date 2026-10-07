@@ -11,7 +11,8 @@ module tb_serv_bootstrap_tail #(parameter integer CLOCK_HZ=50000000, parameter i
         .rk_lanes(2'b0),.rk_wdata(16'b0),.rk_irq_ack(1'b0),.cpu_start(cpu_start),
         .io_request(1'b0),.io_address(13'b0),.io_irq_ack(1'b0),
         .sd_request(1'b0),.sd_write(1'b0),.sd_byte(1'b0),.sd_address(2'b0),.sd_wdata(16'b0),
-        .sd_miso(1'b1),.dma_ready(1'b0),.dma_error(1'b0),.dma_rdata(16'b0));
+        .sd_miso(1'b1),.dma_ready(1'b0),.dma_error(1'b0),.dma_rdata(16'b0),
+        .service_write(),.service_address(),.service_data(),.service_read(32'b0));
     reg [31:0] program_words[0:8];
     initial begin
         repeat(5)@(negedge clk);

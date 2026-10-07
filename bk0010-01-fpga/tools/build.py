@@ -367,7 +367,7 @@ def test(group, dcca_model=None, disk=None, disk_speedup=1, disk_a16m=False, sec
         sys.path.insert(0, str(ROOT/'tests'))
         from test_bios import run_checks
         executable = verilate('sd_boot', CPU+SD+['tests/sd_spi_model.v'])
-        run_checks(executable, run,only=['logical-default','logical-edit'] if group == 'bios-logical' else None)
+        run_checks(executable, run,only=['logical-default','logical-shared','logical-edit'] if group == 'bios-logical' else None)
     if group == 'ebr-bios':
         import sys
         sys.path.insert(0,str(ROOT/'tests'))

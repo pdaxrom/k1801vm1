@@ -1,0 +1,6 @@
+checks/*.mrp -whitespace
+checks/*.par -whitespace
+checks/*.srr -whitespace
+checks/*.twr -whitespace
+checks/*.prf -whitespace
+flash-session/*.log -whitespace

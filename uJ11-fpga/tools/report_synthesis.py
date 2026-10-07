@@ -33,9 +33,10 @@ def extract(map_text, timing_text, par_text, *, clock=None):
     return result
 
 
-def check_clock(result, timing_text, requested_mhz):
+def check_clock(result, timing_text, requested_mhz, *, clock='clk'):
     """A passing nominal OSCH TRACE must not satisfy a faster requested gate."""
-    clocks=sorted({float(x) for x in re.findall(r'Preference:\s+FREQUENCY NET "clk"\s+([\d.]+) MHz',timing_text)})
+    clocks=sorted({float(x) for x in re.findall(r'Preference:\s+FREQUENCY NET "'+re.escape(clock)+
+                                             r'"\s+([\d.]+) MHz',timing_text)})
     matched=len(clocks)==1 and abs(clocks[0]-requested_mhz)<0.001
     result.update(applied_clock_mhz=clocks[0] if len(clocks)==1 else None,
                   requested_clock_mhz=requested_mhz,constraint_matched=matched,

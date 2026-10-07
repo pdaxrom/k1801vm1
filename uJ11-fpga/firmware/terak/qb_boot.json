@@ -1,0 +1,10 @@
+{
+  "source": "uJ11 QB bootstrap, original implementation of TERAK E5 protocol",
+  "reference": "https://www.threedee.com/jcm/terak/docs/50-0010-001%20Terak%20Variable%20Density%20Disk%20Drive%20Controller%20Ref%20Guide.pdf",
+  "assembler": "microasm11 -binary firmware/terak/qb_boot.asm qb_boot.bin",
+  "asm_sha256": "7a0ea3c79c0dbc74e2569a6f053a09d885d8ac3e94e32323e454dbed80dc8086",
+  "image_sha256": "94cb113c1535dc6f39e21d05a217ba5e017c257c066cd4d63835414848b1dfc8",
+  "words": 256,
+  "vector_octal": "234",
+  "note": "Not an original TERAK ROM dump; guest ROH and cold mixed-density boot are tested separately."
+}

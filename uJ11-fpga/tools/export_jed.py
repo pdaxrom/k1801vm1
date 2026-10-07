@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export a JED only from a complete, source-matched HC1200 MAP/PAR/TRACE gate."""
+"""Export a JED only from a complete, source-matched MachXO2 MAP/PAR/TRACE gate."""
 import argparse, hashlib, json, os, re, subprocess
 from pathlib import Path
 from board_common import ROOT
@@ -15,6 +15,8 @@ def main():
     expected={'hc1200':'LCMXO2-1200HC-4SG32C','hc7000-lcd-sram':'LCMXO2-7000HC-4TG144C'}
     assert result['device']==expected[result['inputs'].get('board','hc1200')]
     assert result['diamond_returncode']==0 and result['fully_routed'] and result['timing_pass']
+    if 'expected_ebr' in result:
+        assert result['ebr']==result['expected_ebr'], 'MAP resource count differs from the qualified profile'
     prefix=out/'impl1'/(a.name+'_impl1')
     for name,want in result['inputs']['files'].items():
         if name.startswith('generated:'):

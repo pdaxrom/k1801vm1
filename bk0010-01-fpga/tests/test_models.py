@@ -96,6 +96,19 @@ class Models(unittest.TestCase):
             with self.assertRaises(ValueError):
                 partitions(mbr,50000,changed.__getitem__)
 
+        # A valid continuation belongs to other machines; BK still maps only 5/6.
+        shared = bytearray(mbr)
+        struct.pack_into('<I',shared,506,14837)
+        tail = {key:bytearray(value) for key,value in ebrs.items()}
+        struct.pack_into('<B3sB3sII',tail[45056],462,0,bytes(3),15,bytes(3),8192,6645)
+        self.assertEqual(partitions(shared,60000,tail.__getitem__)[4:],desc[4:])
+        for offset,fmt,value in ((462,'B',0x80),(466,'B',0xda),(470,'I',4096),
+                                 (474,'I',0),(474,'I',7000)):
+            changed = {key:bytearray(value) for key,value in tail.items()}
+            struct.pack_into('<'+fmt,changed[45056],offset,value)
+            with self.assertRaises(ValueError):
+                partitions(shared,60000,changed.__getitem__)
+
 
 
 if __name__ == '__main__':

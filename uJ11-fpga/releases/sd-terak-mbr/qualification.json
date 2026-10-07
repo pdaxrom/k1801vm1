@@ -1,0 +1,60 @@
+{
+  "passed": true,
+  "fpga_gate_passed": true,
+  "source_matched": true,
+  "physical_program_verified": true,
+  "physical_picture_verified": true,
+  "device": "LCMXO2-7000HC-4TG144C",
+  "lut4": 6546,
+  "ff": 1954,
+  "ebr": 26,
+  "clock_mhz": 50,
+  "video_mhz": 64,
+  "cpu_fmax_mhz": 50.426,
+  "video_fmax_mhz": 78.04,
+  "field_hz": 60,
+  "frame_lines": 525,
+  "native_picture": [
+    640,
+    240
+  ],
+  "horizontal_first_clock": 695,
+  "horizontal_clocks": 3180,
+  "pixel_drop": false,
+  "jed": {
+    "path": "terak-ae82.jed",
+    "sha256": "b419e870c3dca9918887d015bd01cf4eedadf875b19f40123ba56accc7090754",
+    "checksum": "AE82"
+  },
+  "input_revision_sha256": "4a71d344a5cea69a411caaf58064ca2ccb6f19145dbe49d249d2f0d28dd006a1",
+  "fpga_reports_sha256": "d429559cabb919b00f33460828e66ddfa483a6ce6bf2c6d0d99731caaf8a31f1",
+  "rollback_checksum": "06B6",
+  "rollback_sha256": "168a1ace600c7653059bfa2e1a4a814f8810cd2c5024bd5f18af7cfbbe631d7b",
+  "display_firmware_patched_sha256": "19c96c015a7173c87a08ffce8ff77256188b31287b1eac0b8101aa04d3ce3c92",
+  "display_capture_height_verified": 240,
+  "display_native_borders_verified_with_diagnostic": true,
+  "linux_vendor_video_result": "checks/vendor-video-result.json",
+  "scope": "Source-matched FPGA and functional qualification; FLASH program/verify and operator UCSD menu/F check passed on HC7000",
+  "functional_qualification": {
+    "path": "checks/functional-result.json",
+    "sha256": "3e489e1b77c0a6499dd50dd11ebd0797005c381e9a79d62295657cdce7870442",
+    "UCSD_MBR_and_raw_menu_PS2_F_verified": true,
+    "mixed_density_QB_boot_verified": true
+  },
+  "firmware_bytes": 11292,
+  "firmware_sha256": "593510dc7a9d0f286c6d2b9638b3d8c224605a8b88940648a4f3fb6ec0c02e2f",
+  "physical_board_tested": true,
+  "physical_session": {
+    "path": "flash-session/session.json",
+    "sha256": "16e57e65a3905ecaa3d6f44610279f140202a99797c7551103e0d56eee39ee0d"
+  },
+  "physical_USB_connection": "1:61; operator connected HC7000 and removed display programmer",
+  "operator_confirmation_utc": "2026-10-07T06:06:15.982582+00:00",
+  "UCSD_menu_visible": true,
+  "UCSD_file_menu_F_verified": true,
+  "physical_native_picture": [
+    640,
+    240
+  ],
+  "double_density_OS_physically_tested": false
+}

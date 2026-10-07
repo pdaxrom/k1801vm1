@@ -27,7 +27,23 @@ def run_checks(executable, run):
              ('overlap-link',first+470,struct.pack('<I',2048)),
              ('link-type',first+466,b'\xda'),('extra-entry',first+478,b'\x80'),
              ('boot-flag',first+446,b'\x01'),
-             ('too-many',second+462,image[first+462:first+478])]
+             ('backward-second-link',second+462,image[first+462:first+478])]
+    shared = bytearray(image)
+    shared.extend(bytes(57344*512-len(shared)))
+    struct.pack_into('<I',shared,506,14837)
+    struct.pack_into('<B3sB3sII',shared,second+462,0,b'\xfe\xff\xff',0x0f,b'\xfe\xff\xff',8192,6645)
+    for label,offset,value in (
+        ('second-link-flag',second+462,b'\x80'),
+        ('second-link-type',second+466,b'\xda'),
+        ('second-link-overlap',second+470,struct.pack('<I',4096)),
+        ('second-link-empty',second+474,struct.pack('<I',0)),
+        ('second-link-outside',second+474,struct.pack('<I',7000))):
+        changed = bytearray(shared)
+        changed[offset:offset+len(value)] = value
+        path = ROOT/f'build/ebr-bad-{label}.img'
+        path.write_bytes(changed)
+        run(f'ebr-bad-{label}',[executable,f'+image={path}','+error=11','+no-dump'])
+        assert path.read_bytes() == changed, 'Rejected EBR test modified its media'
     for label,offset,value in cases:
         changed = bytearray(image)
         changed[offset:offset+len(value)] = value

@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // A real CPU TSTSET competes with DMA through the production SRAM arbiter.
 // Check the read/write gap and release after either completion or bus abort.
-module tb_locked;
+module tb_locked #(parameter REGISTER_MICROCODE=0);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
@@ -12,7 +12,7 @@ module tb_locked;
     reg ack=0,seen=0,started=0,completed=0,wrote=0;
     reg [15:0] rd=0,ram[0:32767];integer delay_count=0,scenario,checks=0,i,cycles=0;
     wire failed=scenario==1 && cw && ca=='o1000;
-    uj11_mmu_cpu cpu(.clk(clk),.reset(reset),.halt_button(1'b0),.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(16'b0),
+    uj11_mmu_cpu #(.REGISTER_MICROCODE(REGISTER_MICROCODE)) cpu(.clk(clk),.reset(reset),.halt_button(1'b0),.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(16'b0),
         .mem_request(cr),.mem_write(cw),.mem_byte(cb),.mem_lock(lock),.mem_address(ca),.mem_write_data(cd),
         .mem_ready(cready),.mem_error(failed),.mem_read_data(rd),.waiting(waiting),.pc(pc),.psw(psw),.debug_register_address(5'b0));
     uj11_mmu_sram_arbiter arbiter(.clk(clk),.reset(reset),.cpu_request(cr),.cpu_write(cw),.cpu_lock(lock),

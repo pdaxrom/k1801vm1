@@ -123,7 +123,8 @@ module uj11_mmu_board_bus #(
         .dma_request(dma_request),.dma_write(dma_write),.dma_address(dma_address),.dma_data(dma_data),.dma_unibus(),
         .dma_lanes(dma_lanes),.dma_reserved(dma_reserved),.mirror_push(mirror_push),.mirror_data(write_data[7:0]),.mirror_ready(mirror_ready),
         .local_valid(local_valid),.local_data(local_data),.local_ready(local_ready),
-        .dma_ready(dma_ready || dma_nxm),.dma_error(dma_nxm),.dma_rdata(ram_data));
+        .dma_ready(dma_ready || dma_nxm),.dma_error(dma_nxm),.dma_rdata(ram_data),
+        .service_write(),.service_address(),.service_data(),.service_read(32'b0));
     wire rx_irq,tx_irq,uart_ready;
     wire [15:0] uart_data;
     wire uart_ack=irq_ack && irq_priority==4;

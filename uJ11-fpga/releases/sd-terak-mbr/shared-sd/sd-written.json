@@ -1,0 +1,388 @@
+{
+  "passed": true,
+  "device_written": true,
+  "offline_file_written": false,
+  "target": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+  "identity": {
+    "name": "sdf",
+    "path": "/dev/sdf",
+    "size": 7988051968,
+    "model": "MassStorageClass",
+    "tran": "usb",
+    "rm": true,
+    "ro": false,
+    "type": "disk",
+    "mountpoints": [
+      null
+    ],
+    "serial": "000000001210",
+    "children": [
+      {
+        "name": "sdf1",
+        "path": "/dev/sdf1",
+        "size": 16777216,
+        "model": null,
+        "tran": null,
+        "rm": true,
+        "ro": false,
+        "type": "part",
+        "mountpoints": [
+          null
+        ],
+        "serial": null
+      },
+      {
+        "name": "sdf2",
+        "path": "/dev/sdf2",
+        "size": 737280,
+        "model": null,
+        "tran": null,
+        "rm": true,
+        "ro": false,
+        "type": "part",
+        "mountpoints": [
+          null
+        ],
+        "serial": null
+      },
+      {
+        "name": "sdf3",
+        "path": "/dev/sdf3",
+        "size": 1474560,
+        "model": null,
+        "tran": null,
+        "rm": true,
+        "ro": false,
+        "type": "part",
+        "mountpoints": [
+          null
+        ],
+        "serial": null
+      },
+      {
+        "name": "sdf4",
+        "path": "/dev/sdf4",
+        "size": 1024,
+        "model": null,
+        "tran": null,
+        "rm": true,
+        "ro": false,
+        "type": "part",
+        "mountpoints": [
+          null
+        ],
+        "serial": null
+      },
+      {
+        "name": "sdf5",
+        "path": "/dev/sdf5",
+        "size": 819200,
+        "model": null,
+        "tran": null,
+        "rm": true,
+        "ro": false,
+        "type": "part",
+        "mountpoints": [
+          null
+        ],
+        "serial": null
+      },
+      {
+        "name": "sdf6",
+        "path": "/dev/sdf6",
+        "size": 819200,
+        "model": null,
+        "tran": null,
+        "rm": true,
+        "ro": false,
+        "type": "part",
+        "mountpoints": [
+          null
+        ],
+        "serial": null
+      }
+    ]
+  },
+  "before_sha256": "1cedc84d7319e8aa7eaec0c9d49be271f137f81867ac737d75c0cd2458a3fcfc",
+  "after_sha256": "300bed46bb0ddcab2b2ef0ed046f86f6c8ad28709c1f722c026ef31cbc9e3a32",
+  "verified_bytes": 33554432,
+  "direct_readback": true,
+  "written_regions": [
+    {
+      "start": 51200,
+      "blocks": 501,
+      "kind": "new raw disk 7",
+      "sha256": "d14f91e44a834770f77b624f18b578cbfa59b1534b311e12e206bf638ebfe26c"
+    },
+    {
+      "start": 55296,
+      "blocks": 501,
+      "kind": "new raw disk 8",
+      "sha256": "7bbbc6c2ac51f6b26696e2baf242855a05895a939a2ae808e4f5dd0b845b4298"
+    },
+    {
+      "start": 53248,
+      "blocks": 1,
+      "kind": "new EBR 8",
+      "sha256": "5c75b3a015779dd5a783fb9fc450918452c5bd2cc8e74490c64d3562c423c19f"
+    },
+    {
+      "start": 49152,
+      "blocks": 1,
+      "kind": "new EBR 7",
+      "sha256": "c6fd2e6c06d7ab8821cba2ac6a072f4ad29aff439e7166f5d361e4d269455039"
+    },
+    {
+      "start": 4137,
+      "blocks": 1,
+      "kind": "new config data",
+      "sha256": "9f0d261713306ebc2f290a2d4fbe95bc4f5d181354fa7003b7b0edd61c4e373f"
+    },
+    {
+      "start": 2056,
+      "blocks": 1,
+      "kind": "config FAT allocation",
+      "sha256": "657035b4bffaaae4c87d1cb3bb6d52ea72a730f8f8965b6d9085df8e9597c8e6"
+    },
+    {
+      "start": 2184,
+      "blocks": 1,
+      "kind": "config FAT allocation",
+      "sha256": "657035b4bffaaae4c87d1cb3bb6d52ea72a730f8f8965b6d9085df8e9597c8e6"
+    },
+    {
+      "start": 2305,
+      "blocks": 1,
+      "kind": "config root entry",
+      "sha256": "8cd78b98c8e2cff3f9abdcef09d9bc584ed1ebe5fb93437c643ba0082deabd18"
+    },
+    {
+      "start": 45056,
+      "blocks": 1,
+      "kind": "existing EBR link",
+      "sha256": "c21601a5492d25ad4152fd29ebecd610a20a8b25019a6fc05bed919605623f6c"
+    },
+    {
+      "start": 40960,
+      "blocks": 1,
+      "kind": "existing EBR link",
+      "sha256": "b8359cb1ce93ca64513e4d9c7e34633cd0d5bddd93266ecb4b73ad34b44976a9"
+    },
+    {
+      "start": 0,
+      "blocks": 1,
+      "kind": "publish MBR extended bounds",
+      "sha256": "f55a35d9407388aa707ea6b8217a60e78566d3ed1564f29ba0241b0e1e550f66"
+    }
+  ],
+  "preserved_disk_partitions": {
+    "2": {
+      "type": 1,
+      "start": 34816,
+      "blocks": 1440,
+      "sha256": "6bd3dfd13fa1e6ad279c787cfc3499a05927e06376dc515ef1d05c875f66abff"
+    },
+    "3": {
+      "type": 1,
+      "start": 36864,
+      "blocks": 2880,
+      "sha256": "d7f81f7b1fa653a8ef6276f042b8e1097e9ee3980905635f338bcb9d8e6b970c"
+    },
+    "5": {
+      "type": 218,
+      "start": 43008,
+      "blocks": 1600,
+      "sha256": "f597efd480bd5978ab9645b3b890d5a9a96beafcd26030d157544958593e58cd"
+    },
+    "6": {
+      "type": 218,
+      "start": 47104,
+      "blocks": 1600,
+      "sha256": "38679b571f3131fbd1240359cdd02eab25bfa54bc950fec59178951bd0e1640a"
+    }
+  },
+  "preserved_fat16_files": {
+    "P601.ROM": {
+      "directory_entry_sha256": "26435c1d80b329ad80dda83cecbfe7f9f7cb570c66229276265e0bfffb96d33b",
+      "bytes": 334336,
+      "sha256": "ccb4f707a01c0269230ddacbfe4ab8d6576ff9cd48ce924d3467e147e894c68f"
+    },
+    "LOADER.BIN": {
+      "directory_entry_sha256": "ad9f0c21edc5d2a5f3b1ab27304469bcc50f924bf67705205566f618495c5722",
+      "bytes": 481,
+      "sha256": "4f93274293c4dd7326a94d39378646a2be8e6bfc79f81b203e153fda664e5dea"
+    },
+    "P601.CFG": {
+      "directory_entry_sha256": "ed5e884f75da0b219f2b959663bebd0abe4e13b3044f4855f2e6dec79628006b",
+      "bytes": 614,
+      "sha256": "b2150effd7e84f7c3929c4a483ba0cc10ae170c8c812e37c8488540d63d1739d"
+    },
+    "P601A.ROM": {
+      "directory_entry_sha256": "6d29aff0651ed4bc9365cc84f407b9f10234e2edce1ae8f3233960936db7a741",
+      "bytes": 334336,
+      "sha256": "9b275b91c5efcf00888eb654c2f08ae0a59111c5e4d075ef656fd3535b4167d1"
+    },
+    "P601.SET": {
+      "directory_entry_sha256": "92b7e59c295eaf80d1b332f97a8e81c6e40ea887797ade31a5da54580214338e",
+      "bytes": 16,
+      "sha256": "f9b168bf36fb1bfd503a214315542f1b8dd148139857d775219f9ede624d0809"
+    },
+    "LOADERBK.BIN": {
+      "directory_entry_sha256": "7ab21c5dd2fa8db2c7e5739b99aea56aba29bdd9046a206b0dee051629c4e7c3",
+      "bytes": 664,
+      "sha256": "d843da39a8692de8179073f63661a1b5c95002feea903d3eca81655101640776"
+    },
+    "BK0010.ROM": {
+      "directory_entry_sha256": "c2ebaccc98a044f760628a7fdb29de90f67bf2f137976b077cb3134699473bd3",
+      "bytes": 33280,
+      "sha256": "3d7b55f661db72619a91efa747908da7d45e02bb1cb36d8abf625a303cc7da8b"
+    },
+    "LDRBKOLD.BAK": {
+      "directory_entry_sha256": "b3c9ffee42c6524abfdf81708ac7341c381f064a18b59095226772aa0a5df971",
+      "bytes": 337,
+      "sha256": "994400a6d25086558f531962a3f40129d6f011c794cc05e372662b756c9969fe"
+    },
+    "BK00.ROM": {
+      "directory_entry_sha256": "197bed436fc8a3974d2cd1c364b92f982135eb16640ca223f570fca1fc2ca6ee",
+      "bytes": 37376,
+      "sha256": "bb8d6d2b26ef35769cb9c8297ecb9db195b92933d886c19ffb6f3f2ed06a05e3"
+    },
+    "BK01.ROM": {
+      "directory_entry_sha256": "000882ccfb3142d811b1f0fc235ac8a9a7690068905d964b88eb649dc2b02934",
+      "bytes": 49536,
+      "sha256": "8e474077ec082d138ee0853360709205d6569ffbeb5ab251982470a871de29cc"
+    },
+    "BK02.ROM": {
+      "directory_entry_sha256": "2f4ce02190f2dcd2e545920fb20f7cf46078217b6de6da401e8b5792d4648d4d",
+      "bytes": 33280,
+      "sha256": "8abbdb79e264c2e7741956bb0f7e831d016d6e0846b6c62d7effd2856b958fd3"
+    },
+    "BK03.ROM": {
+      "directory_entry_sha256": "0060b49cf031918fb0223260726cc04311b194623fe582271a6f6f0b751c3b9c",
+      "bytes": 45568,
+      "sha256": "aafec6a6007ef31632ed5523ffd49b3b3adebbf61521d11eeb085b6d7f1f1e7f"
+    },
+    "BK04.ROM": {
+      "directory_entry_sha256": "4b49023cfe158f287c6a540de2b993101a1fb11bdc3a4aba20e26ecb5512356f",
+      "bytes": 49664,
+      "sha256": "12c6bc7e46f8f978471b7c7cae602e7bdda5e91df6974bb5e79e7ea3b22cb9a5"
+    },
+    "BK.SET": {
+      "directory_entry_sha256": "b35a5d27ada835bb78db086772e8ae31dee666299c14c0ca69c656af82021b52",
+      "bytes": 16,
+      "sha256": "fbf0615c7db25141adf82fc2ece79e103f3796f6354e86e97e67a94eb8d6469a"
+    }
+  },
+  "backup": {
+    "device": "/dev/disk/by-id/usb-Generic_MassStorageClass_000000001210-0:2",
+    "resolved": "/dev/sdf",
+    "card_bytes": 7988051968,
+    "identity": {
+      "name": "sdf",
+      "path": "/dev/sdf",
+      "size": 7988051968,
+      "model": "MassStorageClass",
+      "tran": "usb",
+      "rm": true,
+      "ro": false,
+      "type": "disk",
+      "mountpoints": [
+        null
+      ],
+      "serial": "000000001210",
+      "children": [
+        {
+          "name": "sdf1",
+          "path": "/dev/sdf1",
+          "size": 16777216,
+          "model": null,
+          "tran": null,
+          "rm": true,
+          "ro": false,
+          "type": "part",
+          "mountpoints": [
+            null
+          ],
+          "serial": null
+        },
+        {
+          "name": "sdf2",
+          "path": "/dev/sdf2",
+          "size": 737280,
+          "model": null,
+          "tran": null,
+          "rm": true,
+          "ro": false,
+          "type": "part",
+          "mountpoints": [
+            null
+          ],
+          "serial": null
+        },
+        {
+          "name": "sdf3",
+          "path": "/dev/sdf3",
+          "size": 1474560,
+          "model": null,
+          "tran": null,
+          "rm": true,
+          "ro": false,
+          "type": "part",
+          "mountpoints": [
+            null
+          ],
+          "serial": null
+        },
+        {
+          "name": "sdf4",
+          "path": "/dev/sdf4",
+          "size": 1024,
+          "model": null,
+          "tran": null,
+          "rm": true,
+          "ro": false,
+          "type": "part",
+          "mountpoints": [
+            null
+          ],
+          "serial": null
+        },
+        {
+          "name": "sdf5",
+          "path": "/dev/sdf5",
+          "size": 819200,
+          "model": null,
+          "tran": null,
+          "rm": true,
+          "ro": false,
+          "type": "part",
+          "mountpoints": [
+            null
+          ],
+          "serial": null
+        },
+        {
+          "name": "sdf6",
+          "path": "/dev/sdf6",
+          "size": 819200,
+          "model": null,
+          "tran": null,
+          "rm": true,
+          "ro": false,
+          "type": "part",
+          "mountpoints": [
+            null
+          ],
+          "serial": null
+        }
+      ]
+    },
+    "backup": "card-before-32MiB.img",
+    "backup_bytes": 33554432,
+    "backup_sha256": "1cedc84d7319e8aa7eaec0c9d49be271f137f81867ac737d75c0cd2458a3fcfc",
+    "captured_at": "2026-10-06T13:19:00Z",
+    "device_written": false
+  },
+  "bk_firmware_update_required": true,
+  "completed_at": "2026-10-06T14:13:43Z"
+}

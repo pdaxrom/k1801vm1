@@ -111,6 +111,7 @@ def parse_bundle(data, model=None):
 
 
 def partitions(mbr, card_sectors, read_sector=None):
+    """Map primary partitions and the first two logical disks, as the BK BIOS does."""
     if len(mbr) != 512 or mbr[510:] != b'\x55\xaa' or not 0 < card_sectors <= 0xffffffff:
         raise ValueError('Invalid MBR or SD capacity')
     result = []
@@ -152,8 +153,8 @@ def partitions(mbr, card_sectors, read_sector=None):
                 result.extend([None]*(1-index))
                 break
             following = base+relative
-            if index == 1 or link[0] or kind not in (5,0x0f,0x85) or not relative or not length or following < start+result[-1]['length'] or following+length > end:
-                raise ValueError('Invalid, overlapping or excessive EBR chain')
+            if link[0] or kind not in (5,0x0f,0x85) or not relative or not length or following < start+result[-1]['length'] or following+length > end:
+                raise ValueError('Invalid or overlapping EBR chain')
             current = following
     return result
 

@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "scope": "Exact shared-card copy: native VM1 BIOS accepted MBR/EBR, loaded operating ROM, verified SRAM CRC and handed off. The run was stopped after handoff; OS execution and warm reset are covered by the separate targeted fixture.",
+  "completed_boot_stages": [
+    "01",
+    "02",
+    "03",
+    "10",
+    "04",
+    "05",
+    "06",
+    "07",
+    "ff"
+  ],
+  "image_sha256": "300bed46bb0ddcab2b2ef0ed046f86f6c8ad28709c1f722c026ef31cbc9e3a32",
+  "image_unchanged": true,
+  "boot_hex_sha256": "8e68edccf555f1441ab7076d7da58ab8fa7389f7908e99626a69b261eee52acd",
+  "fixture": {
+    "source": "tests/tb_sd_boot.v",
+    "source_sha256": "1be289161d6cdd45b1537fe98f7c1a9e752a210a56ca1cafec4be41d4a9cb5de",
+    "derived_sha256": "ca92db715316f70ae6d40eb6ea906f099bec0e2b1d40e8f58a41163635ecba3b",
+    "card_sha256": "300bed46bb0ddcab2b2ef0ed046f86f6c8ad28709c1f722c026ef31cbc9e3a32"
+  },
+  "log_sha256": "5741a22e34caf763bbea0e78853dc07e858b77c43af8bb37eaafbaf0e9966728",
+  "binary_sha256": "9fbd076564c100c6ba4df4c4bb9e6e9c3ab489bc8772511a782984699be7d9ff",
+  "disk_mapping_checked_by": "shared-bios-check.json"
+}

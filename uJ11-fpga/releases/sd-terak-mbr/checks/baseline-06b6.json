@@ -1,0 +1,91 @@
+{
+  "passed": true,
+  "machine": "terak",
+  "scope": "Combined source-matched PAL-60 MBR/raw FPGA and functional qualification",
+  "device": "LCMXO2-7000HC-4TG144C",
+  "clock_mhz": 50,
+  "video_mhz": 64,
+  "video_lines": 525,
+  "video_field_hz": 60,
+  "bevent_hz": 60,
+  "bevent_source": "video field start, toggle CDC",
+  "lut4": 6592,
+  "ff": 1955,
+  "ebr": 26,
+  "fmax_mhz": 50.208,
+  "video_fmax_mhz": 72.406,
+  "jed": {
+    "path": "build/hc7000-terak-mbr-synthesis/impl1/hc7000-terak-mbr-synthesis_impl1.jed",
+    "sha256": "168a1ace600c7653059bfa2e1a4a814f8810cd2c5024bd5f18af7cfbbe631d7b",
+    "checksum": "06B6"
+  },
+  "fpga": {
+    "path": "build/hc7000-terak-mbr-synthesis/result.json",
+    "sha256": "18f519df32726fd20ba62e4c67ae27390acd3a73cccb3a65d6aad32be94f380e"
+  },
+  "tests": {
+    "path": "build/hc7000-terak/test-mbr-final/result.json",
+    "sha256": "e835e561fcbfa90d258a854b386a1ad6efdea7c174c014944dc147efd6712e9c"
+  },
+  "cpu_storage_regressions": [
+    {
+      "path": "build/test-terak-default-vendor/result.json",
+      "sha256": "cb4398a3872b3f77f4562d21bae7341d48e18efe363917cd38dc4c0ee5a9d5d7"
+    },
+    {
+      "path": "build/test-terak-registered-final-vendor/result.json",
+      "sha256": "bab404caf73f8b88e8b111f413543edebd979a1b412375372aebb8012d060b4e"
+    },
+    {
+      "path": "build/test-terak-legacy-storage-final/result.json",
+      "sha256": "7274f5ce7fa4bbad57daeb4661a577f6b5684f273ac216c7a5b5694fe1c88210"
+    }
+  ],
+  "physical_board_tested": false,
+  "double_density_os_tested": false,
+  "double_density_test": "Independent mixed-density DSDD fixture, native QB ROM/DMA and guest BPT handler, UJ11SD/container and MBR/raw",
+  "fat16_check": {
+    "path": "build/hc7000-terak/fsck-fat16.json",
+    "sha256": "8c4bd0963a74daa2576cda1be05a83bcc513a52311e9ba50057a0e425ee81346"
+  },
+  "media_formats": [
+    "UJ11SD/UJ11FD1",
+    "MBR/UJ11FD1",
+    "MBR/raw"
+  ],
+  "legacy_ucsd_log": {
+    "path": "build/hc7000-terak/test-mbr-raw/boot.log",
+    "sha256": "e96b740e57d98de2b844a4d2e87e5f629b4a716d519ecef088aceae4c940a74a"
+  },
+  "legacy_ucsd_hardware": {
+    "path": "build/hc7000-terak/legacy-ucsd-hardware.json",
+    "sha256": "77b9b02df5e3341a57347cf1a1a933055eea6bb27ccacda74f83edabefff8f2c"
+  },
+  "raw_profiles": [
+    "sssd",
+    "dssd",
+    "ssdd",
+    "dsdd",
+    "terak-ssdd",
+    "terak-dsdd"
+  ],
+  "firmware_bytes": 11292,
+  "firmware_bss_end": 12352,
+  "system_card": {
+    "path": "build/hc7000-terak/card.img",
+    "sha256": "548f5cdcc9c6027129d7b544cfa88c259850f6d677b16feb651cd92fa16a4239"
+  },
+  "mbr_card": {
+    "path": "build/hc7000-terak/card-mbr.img",
+    "sha256": "cd318474b099d7a12568c99098632edd77c3424b4d106daf26d44305222cbc11"
+  },
+  "system_screen": "build/hc7000-terak/test-mbr-final/screen.png",
+  "raw_screen": "build/hc7000-terak/test-mbr-final/screen-raw.png",
+  "auxiliary_sources": {
+    "Makefile": "571a2cc88b3fa80bf512da311de65c3d35026f62f416f04dbb2b5bb5975fcd0d",
+    "README.md": "6eb6262e78bc5e77784fb80016b3d4daf3c3fe5cb20a5dc2b4e387cd0a9bc8ba",
+    "docs/terak.md": "9e490cc3b308788bd30c1b2504d1c1b86737cf33c833dc04453c0d73ef1c55f4",
+    "tools/build_terak_card.py": "f5faf20876e49a0971045f5b8a9dac0db80b960870a503ae68c97f3ba3c6606f",
+    "tests/test_terak_profiles.py": "ddb25b07cec0bf377e10f919aad1b6daf429015d416ee2789658961a809b3158"
+  }
+}

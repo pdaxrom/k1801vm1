@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 // HC7000 SERV and shared peripheral bus. The legacy MMU profile retains RK611.
 module uj11_mmu_disk #(
-    parameter integer CLOCK_HZ=24000000, SD_SLOW_DIV=60, SD_FAST_DIV=2, VIDEO_ENABLE=0, TERMINAL_ENABLE=0,KEYBOARD_ENABLE=0
+    parameter integer CLOCK_HZ=24000000, SD_SLOW_DIV=60, SD_FAST_DIV=2, VIDEO_ENABLE=0, TERMINAL_ENABLE=0,KEYBOARD_ENABLE=0,
+    parameter TERAK_ENABLE=0
 )(
     input wire clk,reset,bus_reset,dma_map_enabled,
     inout wire ps2_clock,
@@ -44,7 +45,11 @@ module uj11_mmu_disk #(
     output wire [21:0] dma_address,
     output wire [15:0] dma_data,
     input wire dma_ready,dma_error,
-    input wire [15:0] dma_rdata
+    input wire [15:0] dma_rdata,
+    output wire service_write,
+    output wire [6:0] service_address,
+    output wire [31:0] service_data,
+    input wire [31:0] service_read
 );
     wire rk_busy,cancel;
     wire local_reset=reset || (bus_reset && !storage_enabled);
@@ -89,6 +94,10 @@ module uj11_mmu_disk #(
     wire external_done;
     wire [31:0] external_data,terminal_data;
     wire video_selected=VIDEO_ENABLE && da[31:5]==27'h2000020;
+    wire service_selected=TERAK_ENABLE && da[31:9]==23'h200004;
+    assign service_write=service_selected && data_accept && de && !iop_reset;
+    assign service_address=da[8:2];
+    assign service_data=dw;
     assign video_reg_write=video_selected && data_accept && de && !iop_reset;
     assign video_reg_address=da[4:2];
     assign video_reg_data=dw[15:0];
@@ -152,7 +161,8 @@ module uj11_mmu_disk #(
         ({32{terminal_selected}} & terminal_data) |
         ({32{keyboard_selected}} & keyboard_data) |
         ({32{external_selected}} & external_data) |
-        ({32{video_selected}} & {16'b0,video_reg_read});
+        ({32{video_selected}} & {16'b0,video_reg_read}) |
+        ({32{service_selected}} & service_read);
     // Constant storage_enabled from the generated RAM prunes this entire legacy
     // register front end in the storage build, including its decode and muxes.
     uj11_mmu_rk611 registers(.clk(clk),.reset(local_reset),.bus_reset(bus_reset),.storage_enabled(1'b0),.storage_status(),

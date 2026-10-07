@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Execute guest instructions against the real CPU/MMU with a stalled bus.
 // Fault injection covers errors a RAM-only C fixture cannot generate.
-module tb_cpu_events;
+module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
@@ -14,7 +14,7 @@ module tb_cpu_events;
     reg ack=0,error=0,seen=0;reg [15:0] data=0;
     reg inject=0,emergency_error=0;reg [21:0] bad_address=0;
     integer delay_count=0,cycles=0,acks=0,checks=0,pos,i,p,e,k,stop_pc,sp;
-    uj11_mmu_cpu dut(.clk(clk),.reset(reset),.halt_button(1'b0),
+    uj11_mmu_cpu #(.REGISTER_MICROCODE(REGISTER_MICROCODE)) dut(.clk(clk),.reset(reset),.halt_button(1'b0),
         .irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(16'o120),.irq_ack(irq_ack),
         .mem_request(request),.mem_write(writing),.mem_byte(byte_access),
         .mem_address(address),.mem_write_data(wdata),.mem_ready(ack),.mem_error(error),.mem_read_data(data),

@@ -1,0 +1,8 @@
+FREQUENCY NET "video_clk" 64 MHz ;
+BLOCK PATH FROM CELL "system_reset" TO CELL "system/bus/video/*" ;
+BLOCK PATH FROM CELL "system/bus/video/line_toggle" TO CELL "system/bus/video/line_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/video/line_done" TO CELL "system/bus/video/done_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/video/underrun_toggle" TO CELL "system/bus/video/underrun_sync[0]" ;
+BLOCK PATH FROM CELL "system/bus/video/field_toggle" TO CELL "system/bus/field_sync[0]" ;
+# Synplify shares fill_bank with fill_row[0]; constrain the complete held bundle.
+MAXDELAY FROM CELL "system/bus/video/fill_*" TO CELL "system/bus/video/current_*" 25 NS DATAPATH_ONLY ;

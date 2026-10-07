@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "method": "Operator observed DOS-Shell after installing the written SD and rebooting BK",
+  "operator_report": "да, появился",
+  "firmware_checksum": "2A29",
+  "uart_capture_available": false,
+  "uart_note": "FTDI disconnected during power cycle; stale UART descriptor returned EIO. No UART boot trace was collected.",
+  "expected_readonly_drives": [
+    6,
+    5
+  ]
+}

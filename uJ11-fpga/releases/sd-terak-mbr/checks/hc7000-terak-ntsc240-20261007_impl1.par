@@ -1,0 +1,349 @@
+PAR: Place And Route Diamond (64-bit) 3.14.0.75.2.
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.
+Wed Oct  7 08:54:37 2026
+
+/home/sash/.local/lscc/diamond/3.14/ispfpga/bin/lin64/par -f
+hc7000-terak-ntsc240-20261007_impl1.p2t
+hc7000-terak-ntsc240-20261007_impl1_map.ncd
+hc7000-terak-ntsc240-20261007_impl1.dir hc7000-terak-ntsc240-20261007_impl1.prf
+
+
+Preference file: hc7000-terak-ntsc240-20261007_impl1.prf.
+
+Level/       Number       Worst        Timing       Worst        Timing       Run          NCD
+Cost [ncd]   Unrouted     Slack        Score        Slack(hold)  Score(hold)  Time         Status
+----------   --------     -----        ------       -----------  -----------  ----         ------
+5_10  *      0            0.169        0            0.139        0            33           Completed
+5_6          0            -0.028       28           0.181        0            32           Completed
+5_1          0            -0.116       254          0.142        0            34           Completed
+5_3          0            -0.564       1549         0.142        0            41           Completed
+5_9          0            -0.645       10763        0.215        0            35           Completed
+5_2          0            -1.473       80421        0.182        0            34           Completed
+5_5          0            -1.520       115896       0.179        0            35           Completed
+5_4          0            -1.648       97425        0.143        0            30           Completed
+5_8          0            -1.805       82249        0.145        0            36           Completed
+5_7          0            -2.314       2202843      0.143        0            38           Completed
+
+* : Design saved.
+
+Total (real) run time for 10-seed: 5 mins 49 secs 
+
+par done!
+
+Note: user must run 'Trace' for timing closure signoff.
+
+Lattice Place and Route Report for Design "hc7000-terak-ntsc240-20261007_impl1_map.ncd"
+Wed Oct  7 08:59:52 2026
+
+PAR: Place And Route Diamond (64-bit) 3.14.0.75.2.
+Command Line: par -w -l 5 -i 6 -t 10 -c 0 -e 0 -stopzero -exp parUseNBR=1:parCDP=0:parCDR=0:parPathBased=OFF:parASE=0 hc7000-terak-ntsc240-20261007_impl1_map.ncd hc7000-terak-ntsc240-20261007_impl1.dir/5_10.ncd hc7000-terak-ntsc240-20261007_impl1.prf
+Preference file: hc7000-terak-ntsc240-20261007_impl1.prf.
+Placement level-cost: 5-10.
+Routing Iterations: 6
+
+Loading design for application par from file /tmp/neo_XVzx5n.
+Design name: uj11_terak_microcomp
+NCD version: 3.3
+Vendor:      LATTICE
+Device:      LCMXO2-7000HC
+Package:     TQFP144
+Performance: 4
+Package Status:                     Final          Version 1.39.
+Performance Hardware Data Status:   Final          Version 36.4.
+Device utilization summary:
+
+   PIO (prelim)   85+1(JTAGENB)/336 26% used
+                  85+1(JTAGENB)/115 75% bonded
+   IOLOGIC           43/336          12% used
+
+   SLICE           3283/3432         95% used
+
+   GSR                1/1           100% used
+   EBR               26/26          100% used
+   PLL                2/2           100% used
+
+
+INFO: Design contains pre-loadable EBR during configuration that has a requirement: Since the GSR is disabled for the EBR, make sure write enable and chip enable are inactive during wake-up, so that the pre-loaded initialization values will not be corrupted during wake-up state.
+Number of Signals: 9181
+Number of Connections: 29711
+WARNING - par: The JTAG Port has been disabled in this project, and JTAG pins will be configured as General Purpose IO. You must use JTAGENB pin in hardware to change the personality of the port from JTAG pins to general purpose IO. This mux control pin is dedicated to the selection of JTAG pins for GPIO use by the user design.  Refer to the MachXO2 Handbook for details on dual-function JTAG ports.
+
+Pin Constraint Summary:
+   85 out of 85 pins locked (100% locked).
+
+WARNING - par: According to the connectivity, it is better to place PLL comp "pal_clock.pll/PLLInst_0" on site "LPLL"; however, this site has been occupied or prohibited.
+WARNING - par: According to the connectivity, it is better to place PLL comp "pal_clock.pll/PLLInst_0" on site "LPLL"; however, this site has been occupied or prohibited.
+WARNING - par: According to the connectivity, it is better to place PLL comp "pal_clock.pll/PLLInst_0" on site "LPLL"; however, this site has been occupied or prohibited.
+WARNING - par: RPLL must be put in reset state during background Flash programming. System design must take this into consideration when PLL is used during background Flash programming. Please see TN1204 MachXO2 Programming and Configuration Usage Guide for detailed information.
+WARNING - par: PIO driver comp "clk_ext" of PLL "pal_clock.pll/PLLInst_0" CLKI input will be placed on a non-dedicated PIO site "3/PL4A"; therefore, general routing has to be used.
+The following 4 signals are selected to use the primary clock routing resources:
+    clock50.pll/CLKOP (driver: clock50.pll/PLLInst_0, clk load #: 0)
+    pal_clock.pll/CLKOP (driver: pal_clock.pll/PLLInst_0, clk load #: 0)
+    clk (driver: clock50.pll/PLLInst_0, clk load #: 1347)
+    video_clk (driver: pal_clock.pll/PLLInst_0, clk load #: 72)
+
+
+The following 8 signals are selected to use the secondary clock routing resources:
+    system_reset (driver: system/SLICE_1704, clk load #: 0, sr load #: 171, ce load #: 0)
+    N_1261_0 (driver: system/bus/SLICE_2408, clk load #: 0, sr load #: 117, ce load #: 0)
+    system/un1_resetdup (driver: system/SLICE_2926, clk load #: 0, sr load #: 85, ce load #: 0)
+    system/cpu/mmu/fault_9_0_154_i_0dupdup (driver: system/cpu/mmu/SLICE_2934, clk load #: 0, sr load #: 76, ce load #: 0)
+    power_on[3] (driver: SLICE_3424, clk load #: 0, sr load #: 52, ce load #: 0)
+    system.bus.video.vp[2] (driver: system/SLICE_2316, clk load #: 0, sr load #: 44, ce load #: 0)
+    system/bus/video/sp[2] (driver: system/bus/video/SLICE_2300, clk load #: 0, sr load #: 39, ce load #: 0)
+    system.bus.memory.N_106_i (driver: system/bus/memory/SLICE_2409, clk load #: 0, sr load #: 0, ce load #: 37)
+
+Signal system/bus/event_reset8 is selected as Global Set/Reset.
+Starting Placer Phase 0.
+..........
+Finished Placer Phase 0.  REAL time: 4 secs 
+
+Starting Placer Phase 1.
+.........................
+Placer score = 2491023.
+Finished Placer Phase 1.  REAL time: 11 secs 
+
+Starting Placer Phase 2.
+.
+Placer score =  2431654
+Finished Placer Phase 2.  REAL time: 12 secs 
+
+
+------------------ Clock Report ------------------
+
+Global Clock Resources:
+  CLK_PIN    : 0 out of 8 (0%)
+  PLL        : 2 out of 2 (100%)
+  DCM        : 0 out of 2 (0%)
+  DCC        : 0 out of 8 (0%)
+
+Global Clocks:
+  PRIMARY "clock50.pll/CLKOP" from CLKOP on comp "clock50.pll/PLLInst_0" on PLL site "LPLL", clk load = 0
+  PRIMARY "pal_clock.pll/CLKOP" from CLKOP on comp "pal_clock.pll/PLLInst_0" on PLL site "RPLL", clk load = 0
+  PRIMARY "clk" from CLKOS on comp "clock50.pll/PLLInst_0" on PLL site "LPLL", clk load = 1347
+  PRIMARY "video_clk" from CLKOS on comp "pal_clock.pll/PLLInst_0" on PLL site "RPLL", clk load = 72
+  SECONDARY "system_reset" from Q0 on comp "system/SLICE_1704" on site "R14C18A", clk load = 0, ce load = 0, sr load = 171
+  SECONDARY "N_1261_0" from F1 on comp "system/bus/SLICE_2408" on site "R14C20D", clk load = 0, ce load = 0, sr load = 117
+  SECONDARY "system/un1_resetdup" from F1 on comp "system/SLICE_2926" on site "R14C17B", clk load = 0, ce load = 0, sr load = 85
+  SECONDARY "system/cpu/mmu/fault_9_0_154_i_0dupdup" from F1 on comp "system/cpu/mmu/SLICE_2934" on site "R2C36A", clk load = 0, ce load = 0, sr load = 76
+  SECONDARY "power_on[3]" from Q1 on comp "SLICE_3424" on site "R21C20A", clk load = 0, ce load = 0, sr load = 52
+  SECONDARY "system.bus.video.vp[2]" from Q0 on comp "system/SLICE_2316" on site "R11C2C", clk load = 0, ce load = 0, sr load = 44
+  SECONDARY "system/bus/video/sp[2]" from Q0 on comp "system/bus/video/SLICE_2300" on site "R14C18B", clk load = 0, ce load = 0, sr load = 39
+  SECONDARY "system.bus.memory.N_106_i" from F0 on comp "system/bus/memory/SLICE_2409" on site "R21C20C", clk load = 0, ce load = 37, sr load = 0
+
+  PRIMARY  : 4 out of 8 (50%)
+  SECONDARY: 8 out of 8 (100%)
+
+Edge Clocks:
+  No edge clock selected.
+
+--------------- End of Clock Report ---------------
+
+
+I/O Usage Summary (final):
+   85 + 1(JTAGENB) out of 336 (25.6%) PIO sites used.
+   85 + 1(JTAGENB) out of 115 (74.8%) bonded PIO sites used.
+   Number of PIO comps: 85; differential: 0.
+   Number of Vref pins used: 0.
+
+I/O Bank Usage Summary:
++----------+----------------+------------+-----------+
+| I/O Bank | Usage          | Bank Vccio | Bank Vref |
++----------+----------------+------------+-----------+
+| 0        | 18 / 28 ( 64%) | 3.3V       | -         |
+| 1        | 29 / 29 (100%) | 3.3V       | -         |
+| 2        | 28 / 29 ( 96%) | 3.3V       | -         |
+| 3        | 3 / 9 ( 33%)   | 3.3V       | -         |
+| 4        | 4 / 10 ( 40%)  | 3.3V       | -         |
+| 5        | 3 / 10 ( 30%)  | 3.3V       | -         |
++----------+----------------+------------+-----------+
+
+Total placer CPU time: 11 secs 
+
+Dumping design to file hc7000-terak-ntsc240-20261007_impl1.dir/5_10.ncd.
+
+0 connections routed; 29711 unrouted.
+Starting router resource preassignment
+WARNING - par: Unable to route net (PIO to PLL_CLKI) with dedicated resource for net clk_ext_c.
+
+
+Completed router resource preassignment. Real time: 14 secs 
+
+Start NBR router at Wed Oct 07 09:00:06 +04 2026
+
+*****************************************************************
+Info: NBR allows conflicts(one node used by more than one signal)
+      in the earlier iterations. In each iteration, it tries to  
+      solve the conflicts while keeping the critical connections 
+      routed as short as possible. The routing process is said to
+      be completed when no conflicts exist and all connections   
+      are routed.                                                
+Note: NBR uses a different method to calculate timing slacks. The
+      worst slack and total negative slack may not be the same as
+      that in TRCE report. You should always run TRCE to verify  
+      your design.                                               
+*****************************************************************
+
+Start NBR special constraint process at Wed Oct 07 09:00:06 +04 2026
+
+Start NBR section for initial routing at Wed Oct 07 09:00:07 +04 2026
+Level 1, iteration 1
+368(0.10%) conflicts; 23331(78.53%) untouched conns; 12976 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -0.728ns/-12.977ns; real time: 19 secs 
+Level 2, iteration 1
+20(0.01%) conflicts; 23217(78.14%) untouched conns; 43136 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -1.005ns/-43.136ns; real time: 19 secs 
+Level 3, iteration 1
+186(0.05%) conflicts; 18597(62.59%) untouched conns; 36758 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -1.180ns/-36.759ns; real time: 20 secs 
+Level 4, iteration 1
+1092(0.29%) conflicts; 1(0.00%) untouched conn; 17285 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -0.442ns/-17.285ns; real time: 23 secs 
+Level 4, iteration 2
+500(0.13%) conflicts; 0(0.00%) untouched conn; 6791 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -0.406ns/-6.791ns; real time: 24 secs 
+
+Info: Initial congestion level at 75% usage is 2
+Info: Initial congestion area  at 75% usage is 94 (9.40%)
+
+Start NBR section for normal routing at Wed Oct 07 09:00:16 +04 2026
+Level 1, iteration 1
+302(0.08%) conflicts; 423(1.42%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.329ns/0.000ns; real time: 25 secs 
+Level 1, iteration 2
+139(0.04%) conflicts; 714(2.40%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 25 secs 
+Level 2, iteration 1
+99(0.03%) conflicts; 768(2.58%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 26 secs 
+Level 2, iteration 2
+42(0.01%) conflicts; 844(2.84%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 26 secs 
+Level 2, iteration 3
+30(0.01%) conflicts; 852(2.87%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 26 secs 
+Level 2, iteration 4
+19(0.01%) conflicts; 896(3.02%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 26 secs 
+Level 2, iteration 5
+15(0.00%) conflicts; 916(3.08%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 26 secs 
+Level 2, iteration 6
+7(0.00%) conflicts; 918(3.09%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.386ns/0.000ns; real time: 26 secs 
+Level 2, iteration 7
+6(0.00%) conflicts; 919(3.09%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.032ns/0.000ns; real time: 27 secs 
+Level 2, iteration 8
+8(0.00%) conflicts; 919(3.09%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.032ns/0.000ns; real time: 27 secs 
+Level 2, iteration 9
+2(0.00%) conflicts; 934(3.14%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.070ns/0.000ns; real time: 27 secs 
+Level 2, iteration 10
+2(0.00%) conflicts; 935(3.15%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.070ns/0.000ns; real time: 27 secs 
+Level 2, iteration 11
+1(0.00%) conflict; 935(3.15%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.110ns/0.000ns; real time: 27 secs 
+Level 3, iteration 1
+55(0.01%) conflicts; 784(2.64%) untouched conns; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.162ns/0.000ns; real time: 27 secs 
+Level 4, iteration 1
+202(0.05%) conflicts; 0(0.00%) untouched conn; 209 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -0.021ns/-0.210ns; real time: 28 secs 
+Level 4, iteration 2
+93(0.02%) conflicts; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.166ns/0.000ns; real time: 28 secs 
+Level 4, iteration 3
+51(0.01%) conflicts; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.157ns/0.000ns; real time: 29 secs 
+Level 4, iteration 4
+28(0.01%) conflicts; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.157ns/0.000ns; real time: 29 secs 
+Level 4, iteration 5
+11(0.00%) conflicts; 0(0.00%) untouched conn; 209 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -0.021ns/-0.210ns; real time: 29 secs 
+Level 4, iteration 6
+10(0.00%) conflicts; 0(0.00%) untouched conn; 209 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: -0.021ns/-0.210ns; real time: 29 secs 
+Level 4, iteration 7
+5(0.00%) conflicts; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 29 secs 
+Level 4, iteration 8
+2(0.00%) conflicts; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 29 secs 
+Level 4, iteration 9
+2(0.00%) conflicts; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 29 secs 
+Level 4, iteration 10
+1(0.00%) conflict; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 29 secs 
+Level 4, iteration 11
+1(0.00%) conflict; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 30 secs 
+Level 4, iteration 12
+0(0.00%) conflict; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 30 secs 
+
+Start NBR section for setup/hold timing optimization with effort level 3 at Wed Oct 07 09:00:22 +04 2026
+
+Start NBR section for re-routing at Wed Oct 07 09:00:22 +04 2026
+Level 4, iteration 1
+0(0.00%) conflict; 0(0.00%) untouched conn; 0 (nbr) score; 
+Estimated worst slack/total negative slack<setup>: 0.169ns/0.000ns; real time: 31 secs 
+
+Start NBR section for post-routing at Wed Oct 07 09:00:23 +04 2026
+
+End NBR router with 0 unrouted connection
+
+NBR Summary
+-----------
+  Number of unrouted connections : 0 (0.00%)
+  Number of connections with timing violations : 0 (0.00%)
+  Estimated worst slack<setup> : 0.169ns
+  Timing score<setup> : 0
+-----------
+Notes: The timing info is calculated for SETUP only and all PAR_ADJs are ignored.
+
+
+
+Total CPU time 32 secs 
+Total REAL time: 33 secs 
+Completely routed.
+End of route.  29711 routed (100.00%); 0 unrouted.
+
+Hold time timing score: 0, hold timing errors: 0
+
+Timing score: 0 
+
+Dumping design to file hc7000-terak-ntsc240-20261007_impl1.dir/5_10.ncd.
+
+
+All signals are completely routed.
+
+
+PAR_SUMMARY::Run status = Completed
+PAR_SUMMARY::Number of unrouted conns = 0
+PAR_SUMMARY::Worst  slack<setup/<ns>> = 0.169
+PAR_SUMMARY::Timing score<setup/<ns>> = 0.000
+PAR_SUMMARY::Worst  slack<hold /<ns>> = 0.139
+PAR_SUMMARY::Timing score<hold /<ns>> = 0.000
+PAR_SUMMARY::Number of errors = 0
+
+Total CPU  time to completion: 33 secs 
+Total REAL time to completion: 34 secs 
+
+par done!
+
+Note: user must run 'Trace' for timing closure signoff.
+
+Copyright (c) 1991-1994 by NeoCAD Inc. All rights reserved.
+Copyright (c) 1995 AT&T Corp.   All rights reserved.
+Copyright (c) 1995-2001 Lucent Technologies Inc.  All rights reserved.
+Copyright (c) 2001 Agere Systems   All rights reserved.
+Copyright (c) 2002-2024 Lattice Semiconductor Corporation,  All rights reserved.

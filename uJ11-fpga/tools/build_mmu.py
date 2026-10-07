@@ -157,25 +157,27 @@ def compact_rom(image,pipeline=False):
         'assign data=value;','`endif','`undef UJ11_MMU_EBR','endmodule','']
     return '\n'.join(lines)
 
-def build(fpp=None):
+def build(fpp=None,out=None):
+    target=Path(out) if out is not None else OUT
     fpp=fpp_mode(fpp)
     microcode=MICROCODE if fpp=='microcode' else MICROCODE[:2]
-    OUT.mkdir(parents=True,exist_ok=True)
+    target.mkdir(parents=True,exist_ok=True)
     image,listing,labels,stats=assemble('\n'.join((ROOT/p).read_text() for p in microcode))
-    (OUT/'microcode.mem').write_text(''.join(f'{w:014x}\n' for w in image))
-    (OUT/'microcode.lst').write_text(listing)
-    (OUT/'labels.json').write_text(json.dumps(labels,indent=2)+'\n')
-    (OUT/'stats.json').write_text(json.dumps(stats,indent=2)+'\n')
+    (target/'microcode.mem').write_text(''.join(f'{w:014x}\n' for w in image))
+    (target/'microcode.lst').write_text(listing)
+    (target/'labels.json').write_text(json.dumps(labels,indent=2)+'\n')
+    (target/'stats.json').write_text(json.dumps(stats,indent=2)+'\n')
     pipeline=pipeline_mode()
-    (OUT/'uj11_mmu_rom.v').write_text(rom(image,fpp,pipeline))
+    (target/'uj11_mmu_rom.v').write_text(rom(image,fpp,pipeline).replace('build/hc7000-mmu-hardware/microcode.mem',
+        str(target.relative_to(ROOT)/'microcode.mem')))
     record=dict(cpu='mmu',board='hc7000-lcd-sram',fpp=fpp,pipeline=pipeline,clock_mhz=clock_mhz(),scope='CPU microcode; board manifest is built separately',
         microcode_words=stats['used_words'],physical_words=3072 if fpp=='microcode' else 1536,
         word_bits=54,microcode_ebr=18 if fpp=='microcode' else 6,
         files={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in SOURCES
                if p not in MICROCODE or p in microcode},
-        outputs={p:hashlib.sha256((OUT/p).read_bytes()).hexdigest() for p in
+        outputs={p:hashlib.sha256((target/p).read_bytes()).hexdigest() for p in
                  ('microcode.mem','microcode.lst','labels.json','stats.json','uj11_mmu_rom.v')})
-    (OUT/'inputs.json').write_text(json.dumps(record,indent=2)+'\n')
+    (target/'inputs.json').write_text(json.dumps(record,indent=2)+'\n')
     return record
 
 if __name__=='__main__':

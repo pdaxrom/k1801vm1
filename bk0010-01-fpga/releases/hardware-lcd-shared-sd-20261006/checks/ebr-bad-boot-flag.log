@@ -1,0 +1,8 @@
+BOOT stage=01 cycle=7573 address=177612 reads=0
+BOOT stage=02 cycle=110674 address=177612 reads=0
+BOOT stage=11 cycle=776724 address=177612 reads=2
+PASS rejected SD/SRAM image: error=11 ROM remains unlocked
+- tests/tb_sd_boot.v:220: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.050 2026-07-01
+- Verilator: $finish at 16ms; walltime 1.997 s; speed 7.780 ms/s
+- Verilator: cpu 1.995 s on 1 threads; allocated 2 MB

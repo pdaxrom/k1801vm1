@@ -17,6 +17,14 @@ class BoardClock(unittest.TestCase):
     def test_actual_constrained_pass(self):
         self.assertTrue(check_clock(copy.deepcopy(self.report),self.trace,31.824)['timing_pass'])
 
+    def test_video_clock_checked_independently(self):
+        text='Preference: FREQUENCY NET "clk" 50 MHz ;\nPreference: FREQUENCY NET "video_clk" 64 MHz ;\n'
+        report=dict(timing_pass=True, fmax_mhz=65)
+        self.assertTrue(check_clock(copy.deepcopy(report),text,64,clock='video_clk')['timing_pass'])
+        self.assertFalse(check_clock(copy.deepcopy(report),text,64)['timing_pass'])
+        self.assertFalse(check_clock(copy.deepcopy(report),text.replace('64 MHz','63 MHz'),64,
+                                     clock='video_clk')['timing_pass'])
+
     def test_map_substitution_rejected(self):
         nominal=self.trace.replace('31.824000 MHz','29.560000 MHz')
         self.assertNotEqual(nominal,self.trace)

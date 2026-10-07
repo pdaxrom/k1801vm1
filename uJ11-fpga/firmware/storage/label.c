@@ -10,8 +10,8 @@ static unsigned get16(const uint8_t *p)
 int sd_label_decode(const uint8_t raw[512], uint32_t capacity, struct sd_label *out)
 {
 	static const uint8_t magic[8]= {'U','J','1','1','S','D',0,0};
-	static const uint8_t kinds[8]= {1,2,2,3,4,5,5,6};
-	static const uint32_t sizes[8]= {4872,27126,53790,500384,0,10240,20480,0};
+	static const uint8_t kinds[10]= {1,2,2,3,4,5,5,6,7,7};
+	static const uint32_t sizes[10]= {4872,27126,53790,500384,0,10240,20480,0,2542,5083};
 	uint32_t crc=~0u, blocks=get32(raw+24), reserved=get32(raw+28);
 	unsigned count=get16(raw+14), boots=0;
 	for(unsigned i=0; i<8; i++)if(raw[i]!=magic[i]) {
@@ -47,8 +47,8 @@ int sd_label_decode(const uint8_t raw[512], uint32_t capacity, struct sd_label *
 		q->mode=p[6];
 		q->start=get32(p+8);
 		q->blocks=get32(p+12);
-		if(p[1] || p[5] || p[7] || q->media<1 || q->media>8 ||
-		                kinds[q->media-1]!=q->kind || q->unit>=((q->kind==4 || q->kind==5)?4:8) ||
+		if(p[1] || p[5] || p[7] || q->media<1 || q->media>10 ||
+		                kinds[q->media-1]!=q->kind || q->unit>=((q->kind==4 || q->kind==5 || q->kind==7)?4:8) ||
 		                q->flags&~3u || q->mode>(q->kind==2?1:0) ||
 		                !q->blocks || q->start<reserved || q->start>=blocks || q->blocks>blocks-q->start ||
 		                (sizes[q->media-1] && sizes[q->media-1]!=q->blocks)) {

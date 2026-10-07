@@ -1,5 +1,5 @@
-; Two logical disks in primary partition 4. All extents stay inside its
-; validated bounds; the chain moves beyond each preceding data extent.
+; The first two logical disks in primary partition 4 belong to BK.
+; Validate their bounds and links; leave any later disks to other machines.
 bios_read_logical:
         mov #BIOS_LOGICAL, r1
         mov #16., r2
@@ -172,7 +172,7 @@ bios_ebr_guard_24:
         add #16., r5
         cmp r5, #BIOS_LOGICAL+32.
         bcs bios_ebr_guard_25
-        jmp bios_ebr_bad
+        rts pc
 bios_ebr_guard_25:
         jmp bios_logical_read
 bios_ebr_bound:

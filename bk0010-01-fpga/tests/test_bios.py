@@ -57,6 +57,8 @@ def run_checks(executable, run, only=None):
         ('model-drive',3,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime']),
         ('logical-default',3,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime',
                               '+logical-bios','+disk-base=47104','+second-base=43008']),
+        ('logical-shared',3,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime',
+                             '+logical-bios','+disk-base=47104','+second-base=43008']),
         ('logical-edit',5,0,['+expected-model=3','+screen=build/model-3-screen.hex','+native-runtime',
                            '+logical-bios','+disk-base=36864','+second-base=43008']),
         ('existing',1,0,[]), ('create',1,0,[]), ('temporary',2,0,[]),
@@ -68,10 +70,10 @@ def run_checks(executable, run, only=None):
         selected = dict(files)
         if name in ('create','full','root-full'):
             del selected['BK.SET']
-        if name in ('model-drive','logical-default','logical-edit'):
+        if name == 'model-drive' or name.startswith('logical-'):
             selected['BK03.ROM']=(BUILD/'BK03.ROM').read_bytes()
         before = bytearray(original)
-        if name in ('model-drive','logical-default','logical-edit'):
+        if name == 'model-drive' or name.startswith('logical-'):
             before.extend(b'\xa5'*(38912*512-len(before)))
             for index,start in enumerate((34816,36864),1):
                 struct.pack_into('<B3sB3sII',before,446+index*16,0,b'\xfe\xff\xff',0xda,b'\xfe\xff\xff',start,1600)
@@ -87,6 +89,20 @@ def run_checks(executable, run, only=None):
                     struct.pack_into('<B3sB3sII',before,offset+462,0,b'\xfe\xff\xff',0x0f,b'\xfe\xff\xff',4096,3648)
             if name == 'logical-edit':
                 selected['BK.SET']=settings(model=3,drives=(6,5,0,0),readonly=3)
+            if name == 'logical-shared':
+                before.extend(b'\xa5'*(57344*512-len(before)))
+                struct.pack_into('<I',before,506,14837)
+                for lba,next_lba,blocks in ((40960,45056,1600),(45056,49152,1600),
+                                            (49152,53248,501),(53248,None,501)):
+                    offset=lba*512
+                    before[offset:offset+512]=bytes(512)
+                    before[offset+510:offset+512]=b'\x55\xaa'
+                    struct.pack_into('<B3sB3sII',before,offset+446,0,b'\xfe\xff\xff',0xda,
+                                     b'\xfe\xff\xff',2048,blocks)
+                    if next_lba is not None:
+                        struct.pack_into('<B3sB3sII',before,offset+462,0,b'\xfe\xff\xff',0x0f,
+                                         b'\xfe\xff\xff',next_lba-40960,55797-next_lba)
+                selected['TERAK.CFG']=b'version=1\ndrive0=7,raw,sssd,rw\ndrive1=8,raw,sssd,rw\ndrive2=off\ndrive3=off\n'
 
         before[2048*512:(2048+32768)*512] = fat16(selected)
         fat, root, data, spf, _, entries = layout(before)
@@ -124,11 +140,12 @@ def run_checks(executable, run, only=None):
             targets = {
                 'model-drive':dict(model=3,frequency=4,color=1,drives=(2,3,0,0),readonly=0),
                 'logical-default':dict(model=3,frequency=4,color=1,drives=(6,5,0,0),readonly=3),
+                'logical-shared':dict(model=3,frequency=4,color=1,drives=(6,5,0,0),readonly=3),
                 'logical-edit':dict(model=3,frequency=4,color=0,drives=(3,5,0,0),readonly=3)}
             target = targets.get(name,dict(model=2,frequency=16,color=0,drives=(0,0,0,0),readonly=0))
             assert config == target, config
             assert after[fat:fat+spf*512] == after[fat+spf*512:fat+2*spf*512], 'FAT copies disagree'
-            if name in ('existing','model-drive','logical-default','logical-edit'):
+            if name in ('existing','model-drive') or name.startswith('logical-'):
                 offset = data+(entries_before['BK.SET'][1]-2)*512
                 expected = bytearray(before)
                 expected[offset:offset+16] = settings(**target)

@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // CSM integration: real microcode/MMU, distinct supervisor I/D mappings,
 // caller-stack selection, RTI, disabled/kernel rejection and a protected stack.
-module tb_csm;
+module tb_csm #(parameter REGISTER_MICROCODE=0);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
@@ -14,7 +14,7 @@ module tb_csm;
     reg ack=0;reg [15:0] value=0;
     assign ready=ack;assign error=address>=22'h200000;
     assign rdata=value;
-    uj11_mmu_cpu dut(.clk(clk),.reset(reset),.halt_button(1'b0),.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(16'b0),
+    uj11_mmu_cpu #(.REGISTER_MICROCODE(REGISTER_MICROCODE)) dut(.clk(clk),.reset(reset),.halt_button(1'b0),.irq_valid(1'b0),.irq_priority(3'b0),.irq_vector(16'b0),
         .mem_request(request),.mem_write(writing),.mem_byte(byte_access),.mem_address(address),.mem_write_data(wdata),
         .mem_ready(ready),.mem_error(error),.mem_read_data(rdata),.console_active(console_active),
         .pc(pc),.psw(psw),.mmr0(mmr0),.mmr1(mmr1),.mmr2(mmr2),.mmr3(mmr3),.debug_register_address(regno),.debug_register_data(regdata));

@@ -3,6 +3,7 @@
 // instantiated: VM2 services and bank-select pins do not exist in this core.
 module uj11_mmu_cpu #(
     parameter MICROCODE="build/hc7000-mmu-hardware/microcode.mem",
+    parameter REGISTER_MICROCODE=0,
     parameter [15:0] BOOT_PC=16'o004000
 )(
     input wire clk, reset, halt_button,
@@ -30,12 +31,21 @@ module uj11_mmu_cpu #(
     output wire [15:0] debug_register_data,
     input wire [4:0] debug_register_address
 );
-    wire [53:0] instruction;
+    wire [53:0] instruction,rom_instruction;
+    generate if(REGISTER_MICROCODE)begin:registered_rom
+        // Optional output stage for dense board profiles. The operand-ready
+        // sequence below waits for this extra cycle before executing.
+        reg [53:0] value;
+        always @(posedge clk)value<=rom_instruction;
+        assign instruction=value;
+    end else begin:direct_rom
+        assign instruction=rom_instruction;
+    end endgenerate
     // The generated ROM supplies a build-time constant so the decoder and
     // synthesized FPP hardware always match the selected microcode image.
     wire fpp_enabled,pipeline_enabled;
     uj11_mmu_rom #(.IMAGE(MICROCODE)) microstore(.clk(clk),.enable(reset || advance),
-        .address(next),.data(instruction),.fpp_enabled(fpp_enabled),.pipeline_enabled(pipeline_enabled));
+        .address(next),.data(rom_instruction),.fpp_enabled(fpp_enabled),.pipeline_enabled(pipeline_enabled));
     reg [53:0] execution_word;
     always @(posedge clk)execution_word<=instruction;
     assign uword=pipeline_enabled ? execution_word : instruction;
@@ -110,11 +120,11 @@ module uj11_mmu_cpu #(
     // The fast-clock profile separates RF address/read from execution. Only
     // the first cycle of each microinstruction prepares operands; memory
     // transactions still use their existing ready/abort handshake.
-    reg operands_valid;
+    reg operands_valid,rom_arrived;
     wire operands_ready=!pipeline_enabled || operands_valid;
     always @(posedge clk)begin
-        if(reset || advance)operands_valid<=0;
-        else if(initialized)operands_valid<=1;
+        if(reset || advance)begin operands_valid<=0;rom_arrived<=0;end
+        else if(initialized)begin rom_arrived<=1;operands_valid<=!REGISTER_MICROCODE || rom_arrived;end
     end
     // Direct internal loads use MDR as a pipeline register. Otherwise the
     // path RF address -> internal register mux -> ALU -> RF/MMR crosses

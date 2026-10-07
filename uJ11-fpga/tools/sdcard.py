@@ -18,11 +18,12 @@ RESERVED = 2048
 BOOT, READONLY = 1, 2
 MENU = 1
 # Kind numbers match lsi11/demo/boot_menu.asm. Media IDs are specific to v1.
-KINDS = {'rk': 1, 'rh': 2, 'xp': 3, 'rq': 4, 'rl': 5, 'tq': 6}
+KINDS = {'rk': 1, 'rh': 2, 'xp': 3, 'rq': 4, 'rl': 5, 'tq': 6, 'qb': 7}
 MEDIA = {'rk05': (1, 1, 4872), 'rk06': (2, 2, 27126),
          'rk07': (2, 3, 53790), 'rm05': (3, 4, 500384),
          'mscp': (4, 5, 0), 'rl01': (5, 6, 10240),
-         'rl02': (5, 7, 20480), 'tk50': (6, 8, 0)}
+         'rl02': (5, 7, 20480), 'tk50': (6, 8, 0),
+         'terak-ss': (7, 9, 2542), 'terak-ds': (7, 10, 5083)}
 
 @dataclass(frozen=True)
 class Partition:
@@ -60,7 +61,7 @@ class Label:
             geometry = next((v for v in MEDIA.values() if v[1] == p.media), None)
             if geometry is None or geometry[0] != p.kind:
                 raise ValueError('invalid controller/media combination')
-            if p.controller != 0 or not 0 <= p.unit < (4 if p.kind in (4, 5) else 8):
+            if p.controller != 0 or not 0 <= p.unit < (4 if p.kind in (4, 5, 7) else 8):
                 raise ValueError('v1 supports controller 0 and units 0..3 or 0..7')
             if p.mode not in ((0, 1) if p.kind == 2 else (0,)):
                 raise ValueError('mode RH70 is valid only for RH')

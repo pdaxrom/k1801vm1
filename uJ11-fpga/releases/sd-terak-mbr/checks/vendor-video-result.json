@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "scope": "Linux Lattice DP8KC simulation: all 640 serialized DAC columns per field and 480 line deadlines",
+  "files": {
+    "boards/hc7000/terak/uj11_terak_video.v": "f8d5362314d9f4e4ef14aa587a2877395b91493924cc835522cf604150095900",
+    "boards/hc7000/terak/uj11_terak_timing.v": "cc392029fd27906ec5e9a9aa48ece9b4dab189dd63c000aa8b24c888351fd8c3",
+    "boards/hc7000/video/uj11_pal_ram.v": "2cf10399e9421692294b315be4eb42c2f156c18c09a7ad34e396baa06d1ef6a5",
+    "tests/terak/tb_terak_video.v": "21a8b0700fb3e4a6ed486b541c0cc86b0716b04033c7f458a5666b8251fb574b"
+  },
+  "vendor_log": {
+    "path": "video-vendor-linux.log",
+    "sha256": "334b7d245054cb1e2c220993f7c0e0bc6c08c2a8a0cb0c255395d470c80ca9e2"
+  },
+  "firmware_changed": false
+}

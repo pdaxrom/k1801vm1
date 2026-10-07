@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "baseline": "releases/hardware-lcd-bios-ps2-20261006",
+  "changed_synthesis_inputs": [
+    "build/boot.hex"
+  ],
+  "boot_bytes": 7778,
+  "boot_capacity": 8192,
+  "boot_hex_sha256": "8e68edccf555f1441ab7076d7da58ab8fa7389f7908e99626a69b261eee52acd",
+  "unchanged_sd_files": {
+    "LOADERBK.BIN": "d843da39a8692de8179073f63661a1b5c95002feea903d3eca81655101640776",
+    "BK00.ROM": "bb8d6d2b26ef35769cb9c8297ecb9db195b92933d886c19ffb6f3f2ed06a05e3",
+    "BK01.ROM": "8e474077ec082d138ee0853360709205d6569ffbeb5ab251982470a871de29cc",
+    "BK02.ROM": "8abbdb79e264c2e7741956bb0f7e831d016d6e0846b6c62d7effd2856b958fd3",
+    "BK03.ROM": "aafec6a6007ef31632ed5523ffd49b3b3adebbf61521d11eeb085b6d7f1f1e7f",
+    "BK04.ROM": "12c6bc7e46f8f978471b7c7cae602e7bdda5e91df6974bb5e79e7ea3b22cb9a5"
+  },
+  "resources": {
+    "ff": {
+      "used": 2588,
+      "capacity": 7209
+    },
+    "slices": {
+      "used": 3410,
+      "capacity": 3432
+    },
+    "lut4": {
+      "used": 6747,
+      "capacity": 6864
+    },
+    "ebr": {
+      "used": 25,
+      "capacity": 26
+    }
+  }
+}

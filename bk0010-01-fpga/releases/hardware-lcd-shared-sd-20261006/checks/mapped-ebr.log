@@ -1,0 +1,2 @@
+PASS mapped EBR: 4096 ROM words, 64 dual-clock line words, retained through GSR
+/home/sash/Work/FPGA/diamond-bk-shared-sd-20261006/build/tb_mapped_ebr.v:392: $finish called at 346313225 (1ps)

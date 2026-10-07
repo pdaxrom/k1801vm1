@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module tb_cpu;
+module tb_cpu #(parameter REGISTER_MICROCODE=0);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
@@ -13,7 +13,7 @@ module tb_cpu;
     wire [15:0] psw,ir,pc,mmr0,mmr1,mmr2,mmr3,debug_register_data;
     wire [11:0] upc;wire [53:0] uword;
     reg [4:0] debug_register_address=0;
-    uj11_mmu_cpu dut(.*);
+    uj11_mmu_cpu #(.REGISTER_MICROCODE(REGISTER_MICROCODE)) dut(.*);
     reg [15:0] ram[0:1048575];
     reg seen=0;integer delay_count=0,prompts=0,checks=0,cycles=0,i,pos,next_prompt,fp_error_pc;
     reg [7:0] rx=0;
@@ -277,7 +277,7 @@ module tb_cpu;
         @(negedge clk);halt_button=1;@(negedge clk);halt_button=0;wait_prompt(next_prompt);
         check(!console_halt,"button console stop is not HALT");
         saved_pc=pc;rx="C";wait(!console_active);repeat(100)@(negedge clk);
-        check(waiting && pc==saved_pc,"ODT CONTINUE restores WAIT");
+        check(wait_active && pc==saved_pc,"ODT CONTINUE restores WAIT");
         check(!console_halt,"CONTINUE clears console stop reason");
         @(negedge clk);irq_priority=6;irq_vector='o100;irq_valid=1;
         // Hold the interrupt through the rising edge that accepts the grant.

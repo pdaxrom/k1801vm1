@@ -1,6 +1,27 @@
 PYTHON ?= python3
+.DEFAULT_GOAL := all
 IVERILOG ?= iverilog
 VVP ?= vvp
+MACHINE ?= pdp11
+ifeq ($(MACHINE),terak)
+BOARD ?= hc7000-lcd-sram
+CPU ?= mmu
+FPP ?= off
+IOP ?= storage
+MMU_CLOCK_MHZ ?= 50
+HC7000_VIDEO ?= 1
+HC7000_KEYBOARD ?= 1
+OUT ?= build/hc7000-terak
+TERAK_SYNTHESIS ?= $(notdir $(OUT))-mbr-synthesis
+ifneq ($(BOARD)/$(CPU)/$(FPP)/$(IOP)/$(MMU_CLOCK_MHZ),hc7000-lcd-sram/mmu/off/storage/50)
+$(error MACHINE=terak requires HC7000 / CPU=mmu / FPP=off / IOP=storage / 50 MHz)
+endif
+ifneq ($(HC7000_VIDEO)/$(HC7000_KEYBOARD),1/1)
+$(error MACHINE=terak requires HC7000_VIDEO=1 and HC7000_KEYBOARD=1)
+endif
+else ifneq ($(MACHINE),pdp11)
+$(error Unknown MACHINE=$(MACHINE); expected pdp11 or terak)
+endif
 BOARD ?= hc1200
 CPU ?= mmuless
 FPP ?= microcode
@@ -10,6 +31,14 @@ HC7000_DIAGNOSTICS ?= 0
 HC7000_VIDEO ?= 0
 HC7000_TERMINAL ?= 0
 HC7000_KEYBOARD ?= 0
+ifeq ($(MACHINE),terak)
+ifneq ($(HC7000_TERMINAL),0)
+$(error MACHINE=terak uses the native console; HC7000_TERMINAL must be 0)
+endif
+ifneq ($(filter-out all hardware sd-image sd-image-mbr test prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+$(error Target is unavailable for MACHINE=terak; use test for native Terak qualification)
+endif
+endif
 OUT ?= build/$(BOARD)$(if $(filter mmu,$(CPU)),-mmu$(if $(filter off,$(FPP)),-nofpp)$(if $(filter storage,$(IOP)),-storage)$(if $(filter 50,$(MMU_CLOCK_MHZ)),-50mhz)$(if $(filter 1,$(HC7000_DIAGNOSTICS)),-diagnostics)$(if $(filter 1,$(HC7000_VIDEO)),-pal)$(if $(filter 1,$(HC7000_TERMINAL)),-terminal)$(if $(filter 1,$(HC7000_KEYBOARD)),-keyboard))
 HG_OUT ?= build/$(if $(filter mmu,$(CPU)),hgx,hg)
 HG_TEST_OUT ?= build/$(if $(filter mmu,$(CPU)),test-hgx,test-hg)
@@ -36,8 +65,10 @@ $(error Unknown HC7000_KEYBOARD=$(HC7000_KEYBOARD); expected 0 or 1)
 endif
 export UJ11_HC7000_KEYBOARD := $(HC7000_KEYBOARD)
 ifeq ($(HC7000_KEYBOARD),1)
+ifneq ($(MACHINE),terak)
 ifneq ($(BOARD)/$(CPU)/$(FPP)/$(IOP)/$(HC7000_TERMINAL),hc7000-lcd-sram/mmu/off/storage/1)
 $(error HC7000_KEYBOARD requires HC7000 MMU, FPP=off, IOP=storage and HC7000_TERMINAL=1)
+endif
 endif
 endif
 ifeq ($(filter $(HC7000_DIAGNOSTICS),0 1),)
@@ -71,7 +102,7 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and MAP/PAR/TRACE at the selected clock.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image sd-image-mbr test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
@@ -100,7 +131,7 @@ test-keyboard:
 	@test "$(HC7000_KEYBOARD)" = 1 || { echo 'Use HC7000_KEYBOARD=1 for the PS/2 integration test'; exit 1; }
 	$(PYTHON) tools/test_keyboard.py --out $(OUT)-test-keyboard
 
-.PHONY: all hardware software hg test-hg-time sd-image test-sd-image test test-python test-rtl test-modules test-fpp test-fpp-full test-odt test-rt11 test-basic test-configuration test-reboot verify synthesis prepare-synthesis export clean
+.PHONY: all hardware software hg test-hg-time sd-image sd-image-mbr test-sd-image test test-python test-rtl test-modules test-fpp test-fpp-full test-odt test-rt11 test-basic test-configuration test-reboot verify synthesis prepare-synthesis export clean
 ifeq ($(CPU),mmu)
 all: hardware
 else
@@ -110,10 +141,14 @@ endif
 test-diagnostics:
 	$(PYTHON) tools/test_diagnostics.py
 hardware:
+ifeq ($(MACHINE),terak)
+	$(PYTHON) tools/build_terak.py
+else
 ifeq ($(CPU),mmu)
 	$(PYTHON) tools/build_mmu_board.py
 else
 	$(if $(filter hc7000-lcd-sram,$(BOARD)),$(PYTHON) tools/build_hc7000.py,$(PYTHON) tools/build_hardware.py)
+endif
 endif
 software: hardware
 	$(PYTHON) tools/build_software.py
@@ -133,11 +168,18 @@ ifeq ($(CPU),mmu)
 else
 	$(PYTHON) tools/test_hg_time.py --out $(HG_TEST_OUT)
 endif
+sd-image-mbr:
+	@test "$(MACHINE)" = terak || { echo 'Use MACHINE=terak for the MBR raw card.'; exit 1; }
+	$(PYTHON) tools/build_terak_card.py --mbr --out $(OUT)/card-mbr.img
 sd-image:
+ifeq ($(MACHINE),terak)
+	$(PYTHON) tools/build_terak_card.py --out $(OUT)/card.img
+else
 ifeq ($(CPU),mmu)
 	$(PYTHON) tools/build_sd_mmu.py --out $(SD_OUT)
 else
 	$(PYTHON) tools/build_sd_image.py --out $(SD_OUT)
+endif
 endif
 test-sd-image:
 ifeq ($(CPU),mmu)
@@ -148,7 +190,10 @@ endif
 verify: all
 	$(PYTHON) tools/verify_production.py
 
-ifeq ($(CPU),mmu)
+ifeq ($(MACHINE),terak)
+test:
+	$(PYTHON) tools/test_terak.py --out $(OUT)/test
+else ifeq ($(CPU),mmu)
 ifeq ($(FPP),off)
 test: test-mmu test-mmu-board
 else
@@ -215,24 +260,40 @@ test-configuration:
 	@test "$(BOARD)" = hc1200 || { echo 'The retained FRAM configuration simulation is HC1200-only.'; exit 1; }
 	$(PYTHON) tools/run_basic.py --configuration --out $(OUT)
 prepare-synthesis:
+ifeq ($(MACHINE),terak)
+	$(PYTHON) tools/synthesis_terak.py $(TERAK_SYNTHESIS) --prepare-only --seeds 50
+else
 ifeq ($(CPU),mmu)
 	$(PYTHON) tools/synthesis_mmu.py $(notdir $(OUT)) --prepare-only
 else
 	$(PYTHON) tools/synthesis.py $(notdir $(OUT)) --board $(BOARD) --prepare-only
 endif
+endif
 synthesis:
+ifeq ($(MACHINE),terak)
+	$(PYTHON) tools/synthesis_terak.py $(TERAK_SYNTHESIS) --seeds 50
+else
 ifeq ($(CPU),mmu)
 	$(PYTHON) tools/synthesis_mmu.py $(notdir $(OUT))
 else
 	$(PYTHON) tools/synthesis.py $(notdir $(OUT)) --board $(BOARD)
 endif
+endif
 export:
+ifeq ($(MACHINE),terak)
+	$(PYTHON) tools/export_jed.py $(TERAK_SYNTHESIS)
+else
 	$(PYTHON) tools/export_jed.py $(notdir $(OUT))
+endif
 clean:
+ifeq ($(MACHINE),terak)
+	$(PYTHON) -c "import shutil; [shutil.rmtree('build/'+p, ignore_errors=True) for p in ('hc7000-terak','hc7000-terak-synthesis','hc7000-terak-mbr-synthesis')]"
+else
 ifeq ($(CPU),mmu)
 	$(PYTHON) -c "import shutil; [shutil.rmtree('build/'+p, ignore_errors=True) for p in ('hc7000-mmu-hardware','hc7000-mmu-iop','test-mmu','test-mmu-bus','test-mmu-disk')]"
 else
 	$(PYTHON) -c "import shutil; shutil.rmtree('build', ignore_errors=True)"
+endif
 endif
 
 .PHONY: test-sram test-hc7000-hg

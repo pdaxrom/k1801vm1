@@ -2,6 +2,11 @@
 #include "terminal.h"
 #include "keyboard.h"
 #ifdef UJ11_KEYBOARD
+#ifdef UJ11_TERAK
+#define KEYMODE() 0u
+#else
+#define KEYMODE() terminal_keymode()
+#endif
 #ifdef UJ11_KEYBOARD_TEST
 #include "keyboard_test.h"
 #else
@@ -94,8 +99,8 @@ static void translate(unsigned code)
 	unsigned ch = 0, suffix = 0, number = 0;
 	if (!ext && (code == 5 || code == 6 || code == 4 || code == 12)) {
 		suffix = code == 5 ? 'P' : code == 6 ? 'Q' : code == 4 ? 'R' : 'S';
-		pending = terminal_keymode() & 1 ? 27u | (suffix << 8) : 27u | ('O' << 8) | (suffix << 16);
-		keyboard_output_pending = terminal_keymode() & 1 ? 2 : 3;
+		pending = KEYMODE() & 1 ? 27u | (suffix << 8) : 27u | ('O' << 8) | (suffix << 16);
+		keyboard_output_pending = KEYMODE() & 1 ? 2 : 3;
 		return;
 	}
 	/* Shift temporarily reverses Num Lock for keypad cursor/navigation keys. */
@@ -144,7 +149,14 @@ static void translate(unsigned code)
 				return;
 			}
 			if (suffix || number) {
-				unsigned mode = terminal_keymode();
+#ifdef UJ11_TERAK
+				/* Terak's cursor keys send ASCII controls, not VT escape sequences. */
+				pending = suffix == 'A' ? 032 : suffix == 'B' ? 014 : suffix == 'C' ? 013 :
+				          suffix == 'D' ? 027 : suffix == 'H' ? 1 : 27;
+				keyboard_output_pending = 1;
+				return;
+#endif
+				unsigned mode = KEYMODE();
 				pending = 27;
 				keyboard_output_pending = 1;
 				if (!(mode & 1) || number) {
@@ -160,6 +172,11 @@ static void translate(unsigned code)
 		}
 	} else if (code < 128) {
 		ch = normal[code];
+#ifdef UJ11_TERAK
+		if (code == 0x66) {
+			ch = 8;
+		}
+#endif
 		if (!ch) {
 			return;
 		}

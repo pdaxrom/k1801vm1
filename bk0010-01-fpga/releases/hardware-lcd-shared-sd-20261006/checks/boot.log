@@ -1,0 +1,10 @@
+BOOT stage=01 cycle=7573 address=177612 reads=0
+BOOT stage=02 cycle=110674 address=177612 reads=0
+BOOT stage=03 cycle=1436236 address=177612 reads=4
+BOOT stage=10 cycle=2140707 address=177612 reads=6
+BOOT stage=04 cycle=5468515 address=177612 reads=10
+BOOT stage=05 cycle=6841692 address=177612 reads=12
+BOOT stage=06 cycle=119696217 address=177612 reads=188
+BOOT stage=07 cycle=124424776 address=177612 reads=188
+BOOT stage=ff cycle=125820838 address=177636 reads=188
+PASS switched native runtime to model 3 frequency index=1
