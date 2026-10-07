@@ -39,7 +39,8 @@ module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
                         if(!byte_access || address[0])ram[address>>1][15:8]<=wdata[15:8];
                     end
                 end
-                if({address[21:1],1'b0}==22'o17777766 || {address[21:1],1'b0}==22'o17777772)
+                if({address[21:1],1'b0}==22'o17777766 || {address[21:1],1'b0}==22'o17777772 ||
+                    {address[21:1],1'b0}==22'o17777750)
                     $fatal(1,"internal CPU CSR escaped onto peripheral bus");
             end else delay_count<=delay_count+1;
         end
@@ -75,6 +76,16 @@ module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
     endtask
     initial begin
         for(i=0;i<1048576;i++)ram[i]=0;
+        // RT-11 XM probes the read-only J11 CMR after MFPT. Word and both
+        // byte-lane writes must remain local and leave the reset value intact.
+        prepare();
+        word('o13700);word('o177750);
+        mov('o65432,'o177750);word('o13701);word('o177750);
+        word('o112737);word('o345);word('o177750);
+        word('o112737);word('o123);word('o177751);
+        word('o13702);word('o177750);stop_pc=pos;word(1);
+        seek(stop_pc);
+        for(k=0;k<3;k++)begin regno=k;#1;check(regdata=='o1045,"CMR reads reset value and ignores writes");end
         // Software IRQ arbitration: higher external levels preempt PIRQ;
         // equal levels choose PIRQ and must not acknowledge the device.
         for(p=1;p<=7;p++)for(e=1;e<=7;e++)begin
@@ -113,11 +124,12 @@ module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
         end
         // Opcode fetches from internal registers raise ADR without invoking
         // the peripheral bus. Ordinary data reads remain legal.
-        for(k=0;k<7;k++)begin
+        for(k=0;k<8;k++)begin
             prepare();
             case(k)
                 0:stop_pc='o177776;1:stop_pc='o177772;2:stop_pc='o177766;
                 3:stop_pc='o177572;4:stop_pc='o172300;5:stop_pc='o172516;6:stop_pc='o177752;
+                7:stop_pc='o177750;
             endcase
             regset(7,stop_pc);seek('o6000);
             check(dut.cpuerr=='o100 && ram['o1774/2]==stop_pc,"internal opcode fetch raises ADR");

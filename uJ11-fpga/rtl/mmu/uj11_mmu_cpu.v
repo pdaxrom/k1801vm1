@@ -266,7 +266,8 @@ module uj11_mmu_cpu #(
     wire psw_selected={mapped_address[21:1],1'b0}==22'o17777776;
     wire cpuerr_selected={mapped_address[21:1],1'b0}==22'o17777766;
     wire pirq_selected={mapped_address[21:1],1'b0}==22'o17777772;
-    wire cpu_csr_selected=psw_selected || cpuerr_selected || pirq_selected;
+    wire cmr_selected={mapped_address[21:1],1'b0}==22'o17777750;
+    wire cpu_csr_selected=psw_selected || cpuerr_selected || pirq_selected || cmr_selected;
     reg [7:2] cpu_errors;
     reg [7:1] pirq_requests;
     wire [15:0] cpuerr={8'b0,cpu_errors,2'b0};
@@ -281,7 +282,10 @@ module uj11_mmu_cpu #(
     assign mem_write_data=mapped_write_data;
     assign mapped_ready=cpu_csr_selected ? mapped_request : mem_ready;
     assign mapped_error=!cpu_csr_selected && mem_error;
-    assign mapped_data=psw_selected ? psw : cpuerr_selected ? cpuerr : pirq_selected ? pirq : mem_read_data;
+    // J11 CMR is read-only; 001045 identifies the reset CPU configuration.
+    // RT-11 probes it after MFPT when selecting the extended-memory monitor.
+    assign mapped_data=psw_selected ? psw : cpuerr_selected ? cpuerr : pirq_selected ? pirq :
+        cmr_selected ? 16'o001045 : mem_read_data;
     // Internal CPU CSRs acknowledge locally in the request cycle. Do not
     // route the unrelated external-peripheral ready mux into PSW writes.
     wire psw_write=mapped_request && mapped_write && psw_selected;

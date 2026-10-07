@@ -85,7 +85,7 @@ module uj11_mmu #(parameter CACHE_ENABLE=1) (
     wire mmr_selected=csr_mmr0 || csr_mmr1 || csr_mmr2 || csr_mmr3;
     wire cpu_internal={pa[21:1],1'b0}==22'o17777776 ||
         {pa[21:1],1'b0}==22'o17777772 || {pa[21:1],1'b0}==22'o17777766 ||
-        {pa[21:1],1'b0}==22'o17777752;
+        {pa[21:1],1'b0}==22'o17777752 || {pa[21:1],1'b0}==22'o17777750;
     reg opcode_fetch;
     wire [15:0] mmr_value=csr_mmr0 ? mmr0 : csr_mmr1 ? mmr1 : csr_mmr2 ? mmr2 : mmr3;
     wire [15:0] mmr_merged=(mmr_value & ~mask) | (data & mask);
