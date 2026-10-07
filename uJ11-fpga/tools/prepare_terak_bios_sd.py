@@ -30,11 +30,13 @@ def prepare(source, bios, disks, out, capacity, profile=2):
     before = source.read_bytes()
     table = partitions(io.BytesIO(before))
     logical = sorted(n for n in table if n >= 5)
-    maximum = 16 if profile == 3 else 12
-    if profile not in (2, 3) or not logical or not 1 <= len(disks) <= maximum-logical[-1]:
+    maximum = 16 if profile in (3, 5) else 12
+    if profile not in (2, 3, 5) or not logical or not 1 <= len(disks) <= maximum-logical[-1]:
         raise ValueError(f'Need an existing extended chain with enough free partition numbers (maximum {maximum})')
     if profile == 3 and len(disks) != 1:
         raise ValueError('FB requires one separately prepared boot disk')
+    if profile == 5 and len(disks) != 2:
+        raise ValueError('XM requires an RL01 system disk and an RL02 source disk')
     if not table[1] or table[1]['type'] not in (6, 14):
         raise ValueError('Partition 1 must be FAT16')
     boot = bios.read_bytes()
@@ -57,8 +59,8 @@ def prepare(source, bios, disks, out, capacity, profile=2):
         raise ValueError('Backup prefix must contain every existing disk')
     cursor = table[4]['start']+table[4]['blocks']
     additions = []
-    for path in disks:
-        data = payload(path, 'fd')
+    for i, path in enumerate(disks):
+        data = payload(path, ('rl01', 'rl02')[i] if profile == 5 else 'fd')
         at, start = align(cursor), align(cursor)+2048
         blocks = len(data)//512
         additions.append(dict(partition=logical[-1]+1+len(additions), ebr=at, start=start,
@@ -112,7 +114,7 @@ def prepare(source, bios, disks, out, capacity, profile=2):
             raise ValueError('Expected the existing TERAK memory-test partition 9')
         configs['TERAK4.CFG'] = b'version=1\ndrive0=9,raw,terak-dsdd,ro\ndrive1=off\ndrive2=off\ndrive3=off\n'
         volume.put('TBIOS.BIN', boot)
-    else:
+    elif profile == 3:
         if any(name not in old_files for name in ('TBIOS.BIN', 'TERAK1.CFG', 'TERAK2.CFG', 'TERAK4.CFG')) or \
                 'TERAK3.CFG' in old_files or old_files['TBIOS.BIN'][2] != boot:
             raise ValueError('Expected the existing BIOS card with matching TBIOS.BIN and no FB profile')
@@ -120,11 +122,27 @@ def prepare(source, bios, disks, out, capacity, profile=2):
             raise ValueError('Expected RT-11 System Pgms and Extra Files in partitions 11/12')
         configs = {'TERAK3.CFG': (f'version=1\ndrive0={additions[0]["partition"]},fd,rw\n'
                                  'drive1=11,fd,rw\ndrive2=12,fd,rw\ndrive3=off\n').encode()}
+    else:
+        if any(name not in old_files for name in ('TBIOS.BIN', 'TERAK1.CFG', 'TERAK2.CFG',
+                                                 'TERAK3.CFG', 'TERAK4.CFG')) or \
+                any(name in old_files for name in ('TERAK5.CFG', 'TBIOS.OLD')):
+            raise ValueError('Expected the existing SJ/FB BIOS card without an XM profile')
+        if b'5  RT-11' not in boot:
+            raise ValueError('XM requires the generated RL BIOS with menu choice 5')
+        configs = {'TERAK5.CFG': ('version=1\ndrive0=off\ndrive1=off\ndrive2=off\ndrive3=off\n'
+                                 f'rl0={additions[0]["partition"]},raw,rl01,rw\n'
+                                 f'rl1={additions[1]["partition"]},raw,rl02,ro\n'
+                                 'rl2=off\nrl3=off\n').encode()}
+        volume.put('TBIOS.OLD', old_files['TBIOS.BIN'][2])
+        volume.put('TBIOS.BIN', boot)
     for name, data in configs.items():
         volume.put(name, data)
     new_files = volume.files()
-    if any(new_files[name] != value for name, value in old_files.items()):
+    preserved = {name:value for name,value in old_files.items() if profile != 5 or name != 'TBIOS.BIN'}
+    if any(new_files[name] != value for name, value in preserved.items()):
         raise AssertionError('Existing FAT file or its directory metadata changed')
+    if profile == 5 and new_files['TBIOS.OLD'][2] != old_files['TBIOS.BIN'][2]:
+        raise AssertionError('Previous BIOS backup changed')
     region('fat16.bin', fat['start'], volume.data)
     checked = partitions(io.BytesIO(after))
     for n, p in table.items():
@@ -144,7 +162,8 @@ def prepare(source, bios, disks, out, capacity, profile=2):
         (out/r['name']).write_bytes(after[r['start_lba']*512:(r['start_lba']+r['sectors'])*512])
     record = dict(source=str(source.resolve()), source_bytes=len(before), source_sha256=digest(before),
                   card_sectors=capacity, candidate_sha256=digest(after), bios_sha256=digest(boot),
-                  preserved_files={name:digest(v[2]) for name,v in old_files.items()},
+                  preserved_files={name:digest(v[2]) for name,v in preserved.items()},
+                  replaced_files={'TBIOS.BIN':digest(old_files['TBIOS.BIN'][2])} if profile == 5 else {},
                   old_partitions=table, partitions=checked, regions=regions,
                   configurations={name:data.decode() for name,data in configs.items()})
     (out/'plan.json').write_text(json.dumps(record, indent=2)+'\n')
@@ -158,8 +177,8 @@ if __name__ == '__main__':
     parser.add_argument('--disk', type=Path, action='append', required=True)
     parser.add_argument('--card-sectors', type=int, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--profile', type=int, choices=(2, 3), default=2,
-                        help='2: add initial SJ/BIOS profiles; 3: append a separate FB boot disk')
+    parser.add_argument('--profile', type=int, choices=(2, 3, 5), default=2,
+                        help='2: add SJ/BIOS; 3: append FB; 5: append RL01/RL02 and upgrade BIOS for XM')
     args = parser.parse_args()
     result = prepare(args.source, args.bios, args.disk, args.out, args.card_sectors, args.profile)
     print(json.dumps(dict(partitions=result['partitions'], source_sha256=result['source_sha256'],

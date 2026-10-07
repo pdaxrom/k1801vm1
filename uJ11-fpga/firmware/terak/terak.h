@@ -8,7 +8,12 @@ struct terak_media {
 	u32 start, blocks;
 	uint8_t heads, readonly, format;
 };
-enum { MEDIA_FD, RAW_SSSD, RAW_DSSD, RAW_SSDD, RAW_DSDD, RAW_TERAK_SSDD, RAW_TERAK_DSDD };
+enum { MEDIA_FD, RAW_SSSD, RAW_DSSD, RAW_SSDD, RAW_DSDD, RAW_TERAK_SSDD, RAW_TERAK_DSDD, RAW_RL01, RAW_RL02 };
+#ifdef UJ11_TERAK_RL
+#define TERAK_UNITS 8
+#else
+#define TERAK_UNITS 4
+#endif
 extern struct terak_media media[4];
 extern volatile uint8_t *const sector;
 extern uint8_t track_meta[512];
@@ -39,4 +44,13 @@ void publish_media(unsigned menu);
 #endif
 void qb_poll(void);
 void qb_service(void);
+#ifdef UJ11_TERAK_RL
+extern struct terak_media rl_media[4];
+extern unsigned rl_irq;
+void disk_irq(unsigned qb_irq);
+void qb_publish(void);
+void rl_reset(void);
+int rl_poll(u32 request);
+void rl_service(void);
+#endif
 #endif

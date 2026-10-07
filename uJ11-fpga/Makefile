@@ -36,8 +36,20 @@ $(error TERAK BIOS requires TERAK_DISPLAY=ebr)
 endif
 endif
 export UJ11_TERAK_BOOT := $(TERAK_BOOT)
-OUT ?= build/hc7000-terak$(if $(filter 56,$(TERAK_RAM_KIB)),$(if $(filter ebr,$(TERAK_DISPLAY)),-ebr),-$(TERAK_RAM_KIB)k)$(if $(filter bios,$(TERAK_BOOT)),-bios)
+TERAK_HD ?= none
+ifeq ($(filter $(TERAK_HD),none rl),)
+$(error TERAK_HD must be none or rl)
+endif
+ifeq ($(TERAK_HD),rl)
+ifneq ($(TERAK_BOOT),bios)
+$(error TERAK_HD=rl requires TERAK_BOOT=bios)
+endif
+endif
+export UJ11_TERAK_HD := $(TERAK_HD)
+OUT ?= build/hc7000-terak$(if $(filter 56,$(TERAK_RAM_KIB)),$(if $(filter ebr,$(TERAK_DISPLAY)),-ebr),-$(TERAK_RAM_KIB)k)$(if $(filter bios,$(TERAK_BOOT)),-bios)$(if $(filter rl,$(TERAK_HD)),-rl)
 TERAK_SYNTHESIS ?= $(notdir $(OUT))-mbr-synthesis
+TERAK_RT11_DIR ?= build/terak-rt11-v57
+TERAK_RT11_ARCHIVE ?= build/terak-media/RT11DV50.ISO.zip
 ifneq ($(BOARD)/$(CPU)/$(FPP)/$(IOP)/$(MMU_CLOCK_MHZ),hc7000-lcd-sram/mmu/off/storage/50)
 $(error MACHINE=terak requires HC7000 / CPU=mmu / FPP=off / IOP=storage / 50 MHz)
 endif
@@ -60,7 +72,7 @@ ifeq ($(MACHINE),terak)
 ifneq ($(HC7000_TERMINAL),0)
 $(error MACHINE=terak uses the native console; HC7000_TERMINAL must be 0)
 endif
-ifneq ($(filter-out all hardware sd-image sd-image-mbr test prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware sd-image sd-image-mbr rt11-xm-image test prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for MACHINE=terak; use test for native Terak qualification)
 endif
 endif
@@ -127,7 +139,7 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and MAP/PAR/TRACE at the selected clock.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image sd-image-mbr test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image sd-image-mbr rt11-xm-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
@@ -216,8 +228,17 @@ verify: all
 	$(PYTHON) tools/verify_production.py
 
 ifeq ($(MACHINE),terak)
+.PHONY: rt11-xm-image
+rt11-xm-image:
+	$(PYTHON) tools/build_terak_rt11_xm.py --archive $(TERAK_RT11_ARCHIVE) --out $(TERAK_RT11_DIR)
+ifeq ($(TERAK_HD),rl)
+test: rt11-xm-image
+	$(PYTHON) tools/test_terak_rl.py --out $(OUT)/test-rl
+	$(PYTHON) tools/test_terak_rt11.py --system rt11xm --disk $(TERAK_RT11_DIR)/RT11XM57.rl01 --disk $(TERAK_RT11_DIR)/RT11KIT.rl02 --out $(OUT)/test-xm
+else
 test:
 	$(PYTHON) tools/test_terak.py --out $(OUT)/test
+endif
 else ifeq ($(CPU),mmu)
 ifeq ($(FPP),off)
 test: test-mmu test-mmu-board

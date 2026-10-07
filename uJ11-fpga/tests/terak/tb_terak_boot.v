@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Cold reset -> real ROM -> J11 microcode -> SERV -> wire-level SDHC -> UCSD.
 // No guest PC/register patching and no host disk handler is used.
-module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHANICAL_SPEEDUP=1,
+module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,MECHANICAL_SPEEDUP=1,
     parameter MICROCODE="build/hc7000-terak/cpu/microcode.mem");
     reg clk=0,vclk=0,initial_reset=1,power_on=1,button_n=1;
     wire button_reset,button_cold,storage_idle;
@@ -22,7 +22,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
     // Optional acceleration changes only QX mechanical waits. CPU, SPI,
     // SERV timers, BEVNT and video retain their real rates.
     uj11_terak_board #(.QX_MECHANICAL_SPEEDUP(MECHANICAL_SPEEDUP),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),
-        .BOOT_BIOS(BOOT_BIOS),.MICROCODE(MICROCODE),.CLEAR_WORDS(36864)) dut(
+        .BOOT_BIOS(BOOT_BIOS),.RL_ENABLE(RL_ENABLE),.MICROCODE(MICROCODE),.CLEAR_WORDS(36864)) dut(
         .clk(clk),.reset(reset),.cold_reset(initial_reset || (BOOT_BIOS && button_cold)),.storage_idle(storage_idle),.power_on(power_on),
         .uart_rx(1'b1),.halt_button(1'b0),.video_clk(vclk),.video_reset(1'b0),
         .ps2_clock(ps2_clock),.ps2_data(key_data),.tvout(dac),.audio(),.memory_initialized(initialized),
@@ -52,6 +52,16 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
     integer white_pixels=0;
     always @(posedge vclk)if(!reset && dac==50)white_pixels++;
     reg key_consumed=0;
+    reg [15:0] history_pc[0:63],history_psw[0:63];
+    integer history_index=0;
+    always @(posedge clk)if($test$plusargs("RT11_XM") && !reset && !dut.bus.boot_menu && dut.cpu.retire)begin
+        history_pc[history_index]=dut.cpu.pc;history_psw[history_index]=dut.cpu.psw;
+        history_index=(history_index+1)%64;
+    end
+    always @(posedge clk)if($test$plusargs("RT11_XM") && !reset && !dut.bus.boot_menu && dut.stopped)begin
+        for(integer i=0;i<64;i++)$display("HISTORY %o %o",history_pc[(history_index+i)%64],history_psw[(history_index+i)%64]);
+        $fatal(1,"RT-11 XM unexpectedly halted");
+    end
     always @(posedge clk)if(!reset)begin
         if(dut.request && dut.ready && !dut.writing && dut.bus.console_selected &&
             dut.bus.offset==13'o17562 && dut.read_data==16'h66)key_consumed<=1;
@@ -219,6 +229,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
     endtask
     task check_resets(input bit rt11);
         integer fonts_before,rom_before;
+        bit monitor_seen;
         reg [3:0] present_before;
         present_before=dut.bus.qx.present;
         rom_before=rom_fetches;
@@ -231,19 +242,21 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
         repeat(80)@(negedge clk);
         if(reset || !dut.cpu_start || dut.bus.boot_menu || dut.bus.qx.present!=present_before)
             $fatal(1,"medium reset lost selected media or restarted SERV");
+        monitor_seen=0;
         for(integer n=0;n<400;n++)begin
             #50000000;
-            if(font_writes>fonts_before && rom_fetches>rom_before &&
-                (rt11 ? rt11_prompt() && (has_text("RT-11SJ") || has_text("RT-11FB")) :
+            if(has_text("RT-11SJ") || has_text("RT-11FB") || has_text("RT-11XM"))monitor_seen=1;
+            if(($test$plusargs("RT11_XM") || font_writes>fonts_before) && rom_fetches>rom_before &&
+                (rt11 ? rt11_prompt() && monitor_seen :
                         font_writes>=fonts_before+1920 && has_text("COMMAND:")))break;
         end
-        if(font_writes<=fonts_before || !(rt11 ? rt11_prompt() : has_text("COMMAND:")))
+        if((!$test$plusargs("RT11_XM") && font_writes<=fonts_before) || !(rt11 ? rt11_prompt() : has_text("COMMAND:")))
             $fatal(1,"warm guest reboot failed");
         fonts_before=font_writes;
         button_n=0;repeat(240)@(negedge clk);button_n=1;
         for(integer n=0;n<400;n++)begin
             #1000000;
-            if(dut.bus.boot_menu && font_writes>fonts_before && has_text("PRESS 1-4"))break;
+            if(dut.bus.boot_menu && font_writes>fonts_before && has_text(RL_ENABLE ? "PRESS 1-5" : "PRESS 1-4"))break;
         end
         if(!dut.bus.boot_menu || !has_text("SELECT BOOT"))$fatal(1,"long reset did not return to BIOS");
         check_bios_font();
@@ -260,7 +273,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
             if($value$plusargs("BIOS_CHOICE=%d",choice))begin end
             for(integer n=0;n<100;n++)begin
                 #1000000;
-                if(has_text("PRESS 1-4"))break;
+                if(has_text(RL_ENABLE ? "PRESS 1-5" : "PRESS 1-4"))break;
             end
             if(!has_text("SELECT BOOT") || !dut.bus.boot_menu)$fatal(1,"primary BIOS did not reach native menu");
             check_bios_font();
@@ -284,7 +297,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
                 end
                 if(!has_text("UNAVAILABLE") || !dut.bus.boot_menu)$fatal(1,"bad BIOS configuration escaped the menu");
             end
-            ps2_byte(choice==1 ? 8'h16 : choice==2 ? 8'h1e : choice==3 ? 8'h26 : 8'h25);
+            ps2_byte(choice==1 ? 8'h16 : choice==2 ? 8'h1e : choice==3 ? 8'h26 : choice==4 ? 8'h25 : 8'h2e);
             #200000000;
             if($test$plusargs("BIOS_ONLY"))begin
                 $display("BIOS PC=%o menu=%b request=%b/%b addr=%o ready/error=%b/%b SERV ia=%h da=%h pending=%b",
@@ -313,26 +326,37 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
                     dut.cpu.dp.rf.words[0],dut.cpu.dp.rf.words[1],dut.cpu.dp.rf.words[2],dut.cpu.dp.rf.words[3]);
             end
         end else if($test$plusargs("RT11"))begin
+            bit monitor_seen;
+            monitor_seen=0;
             for(integer n=0;n<400;n++)begin
                 #50000000;
                 if(n%20==0)begin
-                    $display("RT11 PC=%o PSW=%o font=%0d reads=%0d",dut.cpu.pc,dut.cpu.psw,font_writes,card.read_count);
+                    $display("RT11 PC=%o PSW=%o font=%0d reads=%0d boot_rl=%b RAM0=%h/%h R0/R1=%o/%o",dut.cpu.pc,dut.cpu.psw,font_writes,card.read_count,
+                        dut.bus.boot_rl,ram.memory[0],ram.memory[1],dut.cpu.dp.rf.words[0],dut.cpu.dp.rf.words[1]);
                     screen();$fflush();
                 end
-                if((has_text("RT-11SJ") || has_text("RT-11FB")) && rt11_prompt())begin
+                if(has_text("RT-11SJ") || has_text("RT-11FB") || has_text("RT-11XM"))monitor_seen=1;
+                if(monitor_seen && rt11_prompt() && storage_idle)begin
                     if($test$plusargs("RT11_FB") && !has_text("RT-11FB"))
                         $fatal(1,"expected the FB monitor, got SJ");
-                    if(font_writes<(BOOT_BIOS ? 2880 : 1920))$fatal(1,"RT-11 skipped native CHRSET.SYS loading");
+                    if(font_writes<($test$plusargs("RT11_XM") ? 960 : BOOT_BIOS ? 2880 : 1920))$fatal(1,"RT-11 skipped native font loading");
                     #20000000;
                     screen();
                     if($test$plusargs("RT11_BUILD_FB"))begin
                         run_command("DIR");
                         build_fb_disk();
                     end
-                    ps2_byte(8'h23);ps2_byte(8'h43);ps2_byte(8'h2d);ps2_byte(8'h5a); // DIR <return>
-                    for(integer k=0;k<200;k++)begin
-                        #50000000;
-                        if(has_text("FREE BLOCKS"))begin passed=1;break;end
+                    if($test$plusargs("RT11_XM"))begin
+                        // Free-block output precedes the return to KMON. Wait
+                        // for its prompt before sending the following command.
+                        run_command("DIR");
+                        passed=has_text("FREE BLOCKS");
+                    end else begin
+                        ps2_byte(8'h23);ps2_byte(8'h43);ps2_byte(8'h2d);ps2_byte(8'h5a); // DIR <return>
+                        for(integer k=0;k<200;k++)begin
+                            #50000000;
+                            if(has_text("FREE BLOCKS"))begin passed=1;break;end
+                        end
                     end
                     break;
                 end
@@ -340,6 +364,18 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,MECHA
             screen();
             if(!passed)$fatal(1,"native TERAK RT-11 boot/DIR failed PC=%o PSW=%o",dut.cpu.pc,dut.cpu.psw);
             if(!rom_fetches || !card.read_count)$fatal(1,"RT-11 bypassed ROM/SD path");
+            if($test$plusargs("RT11_XM"))begin
+                if(!has_text("RT11XM.SYS") || !has_text("MACRO"))$fatal(1,"XM directory contents missing");
+                run_command("SHOW MEMORY");
+                if(!has_text("EXTENDED MEMORY") || !has_text("00760000  MEMTOP"))
+                    $fatal(1,"XM did not discover the physical 248 KiB RAM limit");
+                run_command("COPY STRTXM.COM RLTEST.COM");
+                run_command("TYPE RLTEST.COM");
+                if(!has_text("SET TT NOSCOPE"))$fatal(1,"RL file write/read mismatch");
+                run_command("DELETE RLTEST.COM","RLTEST.COM?");
+                run_command("DIR DL1:RMON.MAC");
+                if(!has_text("RMON"))$fatal(1,"second RL/source disk inaccessible");
+            end
             // The resident TK handler blanks text while updating a row.
             // Capture only after it restores display enable; never force VCR.
             wait(dut.bus.vcr[2:0]!=0 && !dut.bus.vcr[7]);

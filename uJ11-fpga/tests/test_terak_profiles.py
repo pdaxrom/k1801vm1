@@ -16,7 +16,7 @@ class TerakProfiles(unittest.TestCase):
         env = {k: v for k, v in os.environ.items() if not k.startswith('UJ11_') and k not in
                ('MAKEFLAGS', 'MFLAGS', 'MAKEOVERRIDES', 'MAKELEVEL', 'MACHINE', 'BOARD', 'CPU',
                 'FPP', 'IOP', 'OUT', 'MMU_CLOCK_MHZ', 'HC7000_VIDEO', 'HC7000_TERMINAL',
-                'HC7000_KEYBOARD', 'HC7000_DIAGNOSTICS', 'TERAK_DISPLAY', 'TERAK_RAM_KIB', 'TERAK_BOOT')}
+                'HC7000_KEYBOARD', 'HC7000_DIAGNOSTICS', 'TERAK_DISPLAY', 'TERAK_RAM_KIB', 'TERAK_BOOT', 'TERAK_HD')}
         return subprocess.run(['make', '-n', *args], cwd=ROOT, env=env, capture_output=True, text=True)
 
     def test_native_targets_and_default(self):
@@ -39,6 +39,17 @@ class TerakProfiles(unittest.TestCase):
                        'MMU_CLOCK_MHZ=24', 'HC7000_VIDEO=0', 'HC7000_KEYBOARD=0',
                        'HC7000_TERMINAL=1', 'test-rt11', 'test-storage', 'software'):
             self.assertNotEqual(self.make('MACHINE=terak', choice).returncode, 0, choice)
+
+    def test_rl_profile_has_separate_outputs_and_native_xm_qualification(self):
+        args = ('MACHINE=terak', 'TERAK_RAM_KIB=256', 'TERAK_BOOT=bios', 'TERAK_HD=rl')
+        result = self.make(*args, 'test')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for name in ('build_terak_rt11_xm.py', 'test_terak_rl.py', '--system rt11xm',
+                     'hc7000-terak-256k-bios-rl'):
+            self.assertIn(name, result.stdout)
+        self.assertNotIn('test_mmu_board.py', result.stdout)
+        self.assertNotEqual(self.make('MACHINE=terak', 'TERAK_HD=rl', 'hardware').returncode, 0)
+        self.assertNotEqual(self.make(*args, 'TERAK_HD=unknown', 'hardware').returncode, 0)
 
     def test_isolated_cpu_generation(self):
         before = {p: p.read_bytes() for p in OUT.glob('*') if p.is_file()}

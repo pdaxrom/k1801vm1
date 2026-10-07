@@ -15,6 +15,9 @@ from iop_ebr import sector_ram
 BOOT = os.environ.get('UJ11_TERAK_BOOT', 'direct')
 if BOOT not in ('direct', 'bios'):
     raise ValueError('UJ11_TERAK_BOOT must be direct or bios')
+HD = os.environ.get('UJ11_TERAK_HD', 'none')
+if HD not in ('none', 'rl') or HD == 'rl' and BOOT != 'bios':
+    raise ValueError('UJ11_TERAK_HD must be none, or rl with BIOS boot')
 GUEST_RAM_KIB = int(os.environ.get('UJ11_TERAK_RAM_KIB', '56'))
 if GUEST_RAM_KIB not in (56, 128, 256):
     raise ValueError('UJ11_TERAK_RAM_KIB must be 56, 128 or 256')
@@ -31,6 +34,8 @@ if BOOT == 'bios':
     if DISPLAY != 'ebr':
         raise ValueError('TERAK BIOS requires the EBR display profile')
     OUT = OUT.with_name(OUT.name+'-bios')
+if HD == 'rl':
+    OUT = OUT.with_name(OUT.name+'-rl')
 LINK = 'firmware/terak/link-ebr.ld' if DISPLAY == 'ebr' else 'firmware/storage/link.ld'
 RAM_BYTES = 15360 if DISPLAY == 'ebr' else 19456
 CPU_OUT = OUT/'cpu'
@@ -39,6 +44,8 @@ TOP = str((OUT/'uj11_terak_microcomp.v').relative_to(ROOT))
 FIRMWARE = ['firmware/storage/start.S', 'firmware/terak/main.c', 'firmware/terak/qb.c', 'firmware/terak/media.c', 'firmware/terak/mbr.c', 'firmware/storage/label.c', 'firmware/storage/keyboard.c']
 if BOOT == 'bios':
     FIRMWARE += ['firmware/terak/bios.c', 'firmware/terak/fat.c']
+if HD == 'rl':
+    FIRMWARE += ['firmware/terak/rl.c']
 HEADERS = ['firmware/terak/terak.h', 'firmware/storage/storage.h', 'firmware/storage/label.h', 'firmware/storage/keyboard.h',
            'firmware/storage/terminal.h', LINK, 'firmware/terak/boot.mem',
            'firmware/terak/boot.json', 'firmware/terak/qb_boot.asm', 'firmware/terak/qb_boot.mem',
@@ -77,6 +84,8 @@ def firmware(rebuild=False):
         base_flags.append('-DUJ11_TERAK_DMA_BYTES=65536')
     if BOOT == 'bios':
         base_flags.append('-DUJ11_TERAK_BIOS')
+    if HD == 'rl':
+        base_flags += ['-DUJ11_TERAK_RL', '-flto']
     record_path = IOP_OUT/'build.json'
     if record_path.exists() and not rebuild and not os.environ.get('RISCV_CC'):
         record = json.loads(record_path.read_text())
@@ -157,7 +166,16 @@ def build(rebuild=False):
     bios = None
     if BOOT == 'bios':
         from build_terak_bios import build as build_bios
-        bios = build_bios(OUT/'bios')
+        bios = build_bios(OUT/'bios', hard_disk=HD == 'rl')
+    rl_words = []
+    if HD == 'rl':
+        assembler = os.environ.get('MICROASM11', str(ROOT.parent/'microasm11/microasm11'))
+        subprocess.run([assembler, '-binary', str(ROOT/'firmware/terak/rl_boot.asm'),
+                        str(OUT/'rl_boot.bin')], check=True)
+        image = (OUT/'rl_boot.bin').read_bytes()
+        if len(image) > 508 or len(image) % 2:
+            raise ValueError('RL bootstrap must fit below the BIOS ROM entry')
+        rl_words = [int.from_bytes(image[i:i+2], 'little') for i in range(0, len(image), 2)]
     words = [int(line, 16) for line in (ROOT/'firmware/terak/boot.mem').read_text().splitlines()]
     if len(words) != 64:
         raise ValueError('Terak bootstrap must be 64 words')
@@ -171,14 +189,32 @@ def build(rebuild=False):
         raise ValueError('QB bootstrap source/image mismatch; run tools/build_terak_boot.py')
     (OUT/'uj11_terak_boot_rom.v').write_text(
         '// QX reconstruction / uJ11 QB bootstrap: see docs/terak.md.\n'
-        'module uj11_terak_boot_rom(input wire [7:0] address,input wire qb,menu,\n'
+        'module uj11_terak_boot_rom(input wire [7:0] address,input wire qb,menu,rl,\n'
         'output reg [15:0] data /* synthesis syn_romstyle="logic" */);\n'+
         ('always @* if(address==254)data=16\'o137;\n'
          'else if(address==255)data=menu ? 16\'o0 : 16\'o173000;\n'
-         'else case({qb,address})\n' if BOOT == 'bios' else 'always @*case({qb,address})\n')+
-        ''.join(f"9'd{i}:data=16'h{word:04x};\n" for i, word in enumerate(words))+
-        ''.join(f"9'd{i+256}:data=16'h{word:04x};\n" for i, word in enumerate(qb_words))+
+         'else case('+('{rl,rl ? 1\'b0 : qb,address}' if HD == 'rl' else '{qb,address}')+')\n'
+         if BOOT == 'bios' else 'always @*case({qb,address})\n')+
+        ''.join(f"{10 if HD == 'rl' else 9}'d{i}:data=16'h{word:04x};\n" for i, word in enumerate(words))+
+        ''.join(f"{10 if HD == 'rl' else 9}'d{i+256}:data=16'h{word:04x};\n" for i, word in enumerate(qb_words))+
+        ''.join(f"10'd{i+512}:data=16'h{word:04x};\n" for i, word in enumerate(rl_words))+
         "default:data=0;endcase\nendmodule\n")
+    if HD == 'rl':
+        # Keep the existing two-bank ROM's decoder independent of RL. A
+        # third bit on every QX/QB case arm prevents efficient LUT packing.
+        rom = ('// Independent legacy and RLV11 logic ROM decoders.\n'
+               'module uj11_terak_boot_rom(input wire [7:0] address,input wire qb,menu,rl,\n'
+               'output wire [15:0] data);\n'
+               'reg [15:0] legacy,hard_disk;\n'
+               'always @* case({qb,address})\n')
+        rom += ''.join(f"9'd{i}:legacy=16'h{word:04x};\n" for i, word in enumerate(words))
+        rom += ''.join(f"9'd{i+256}:legacy=16'h{word:04x};\n" for i, word in enumerate(qb_words))
+        rom += 'default:legacy=0;endcase\nalways @* case(address)\n'
+        rom += ''.join(f"8'd{i}:hard_disk=16'h{word:04x};\n" for i, word in enumerate(rl_words))
+        rom += ("default:hard_disk=0;endcase\n"
+                "assign data=address==254 ? 16'o137 : address==255 ? (menu ? 16'o0 : 16'o173000) :\n"
+                'rl ? hard_disk : legacy;\nendmodule\n')
+        (OUT/'uj11_terak_boot_rom.v').write_text(rom)
     top = (ROOT/'boards/hc7000/mmu/uj11_mmu_microcomp.v').read_text()
     top = top.replace('uj11_mmu_microcomp', 'uj11_terak_microcomp').replace('uj11_mmu_board #', 'uj11_terak_board #')
     top = top.replace('CLOCK_HZ=24000000', 'CLOCK_HZ=50000000').replace('VIDEO_ENABLE=0', 'VIDEO_ENABLE=1')
@@ -188,6 +224,7 @@ def build(rebuild=False):
         raise ValueError('UJ11_HC7000_DIAGNOSTICS must be 0 or 1')
     top = top.replace('DIAGNOSTICS_ENABLE=0', f'DIAGNOSTICS_ENABLE={diagnostics}')
     top = top.replace('uj11_terak_board #(', 'uj11_terak_board #(\n'+
+                      f'        .RL_ENABLE({int(HD == "rl")}),\n'+
                       f'        .BOOT_BIOS({int(BOOT == "bios")}),\n'+
                       f'        .DISPLAY_EBR({int(DISPLAY == "ebr")}),\n'+
                       f'        .RAM_BYTES({GUEST_RAM_BYTES}),\n'+
@@ -214,8 +251,11 @@ def build(rebuild=False):
     inventory = CORE+BOARD+GENERATED+[TOP]
     inputs = set(inventory+FIRMWARE+HEADERS+['tools/build_terak.py', 'tools/terak_image.py', 'tools/terak_mbr.py',
                                           'boards/hc7000/mmu/uj11_mmu_microcomp.v'])
+    if HD == 'rl':
+        inputs.add('firmware/terak/rl_boot.asm')
     record = dict(machine='terak', board='hc7000-lcd-sram', cpu=cpu, iop=iop, fpp='off', clock_mhz=50,
                   boot_pc_octal='173774' if BOOT == 'bios' else '173000', boot_mode=BOOT, bios=bios,
+                  hard_disk=HD,
                   guest_ram_bytes=GUEST_RAM_BYTES,
                   memory_configuration_kib=GUEST_RAM_KIB, physical_address_bits=18,
                   expected_ebr=26, diagnostics=diagnostics,

@@ -14,6 +14,7 @@ from pathlib import Path
 from terak_image import decode_imd, floppy, MAGIC
 
 PROFILES = ('sssd', 'dssd', 'ssdd', 'dsdd', 'terak-ssdd', 'terak-dsdd')
+HD_PROFILES = ('rl01', 'rl02')
 ALIGN, FAT_BLOCKS = 2048, 32768
 
 
@@ -30,6 +31,8 @@ def heads(profile):
 
 
 def raw_size(profile):
+    if profile in HD_PROFILES:
+        return (256 if profile == 'rl01' else 512)*2*40*256
     return sum(count * (128 << n) for c in range(77) for h in range(heads(profile))
                for count, n, _ in [geometry(profile, c, h)])
 
@@ -114,16 +117,24 @@ def align(value):
     return (value+ALIGN-1)//ALIGN*ALIGN
 
 
-def create(disks, output, readonly=(), logical=False, config=True, discard_status=False):
-    if not 1 <= len(disks) <= 4 or any(u not in range(len(disks)) for u in readonly):
-        raise ValueError('Provide 1..4 disks and valid readonly drive numbers')
+def create(disks, output, readonly=(), logical=False, config=True, discard_status=False,
+           hard_disks=(), hd_readonly=()):
+    if not 0 <= len(disks) <= 4 or not 0 <= len(hard_disks) <= 4 or not disks and not hard_disks or \
+            any(u not in range(len(disks)) for u in readonly) or \
+            any(u not in range(len(hard_disks)) for u in hd_readonly) or \
+            any(p not in HD_PROFILES for p, _ in hard_disks):
+        raise ValueError('Provide up to four floppies/four RL disks and valid readonly unit numbers')
+    floppies = len(disks)
+    units = [('drive', u, u in readonly) for u in range(floppies)] + \
+            [('rl', u, u in hd_readonly) for u in range(len(hard_disks))]
+    disks = list(disks)+list(hard_disks)
     images = [payload(path, profile, discard_status) for profile, path in disks]
     mbr, regions, records = bytearray(512), [], []
     put_entry(mbr, 0, 6, ALIGN, FAT_BLOCKS)
     cursor = ALIGN+FAT_BLOCKS
     extended_start = 0
     for u, ((profile, path), data) in enumerate(zip(disks, images)):
-        is_logical = logical or u >= 2 and len(disks) == 4
+        is_logical = logical or u >= 2 and len(disks) >= 4
         if is_logical:
             ebr = bytearray(512)
             at, start = align(cursor), align(cursor)+ALIGN
@@ -144,9 +155,12 @@ def create(disks, output, readonly=(), logical=False, config=True, discard_statu
             put_entry(ebr, 0, 0xda, start-at, blocks)
         else:
             put_entry(mbr, u+1, 0xda, start, blocks)
-        record = dict(unit=u, partition=number, start=start, blocks=blocks, bytes=len(data),
-                      format=profile, readonly=u in readonly, source=str(Path(path).resolve()),
+        bank, unit, ro = units[u]
+        record = dict(unit=unit, partition=number, start=start, blocks=blocks, bytes=len(data),
+                      format=profile, readonly=ro, source=str(Path(path).resolve()),
                       payload_sha256=hashlib.sha256(data).hexdigest())
+        if bank == 'rl':
+            record['controller'] = bank
         if is_logical:
             record['ebr'] = at
         records.append(record)
@@ -161,9 +175,12 @@ def create(disks, output, readonly=(), logical=False, config=True, discard_statu
     lines = ['version=1']
     for r in records:
         form = 'fd' if r['format'] == 'fd' else 'raw,'+r['format']
-        lines.append(f"drive{r['unit']}={r['partition']},{form},{'ro' if r['readonly'] else 'rw'}")
-    for u in range(len(records), 4):
+        lines.append(f"{r.get('controller', 'drive')}{r['unit']}={r['partition']},{form},{'ro' if r['readonly'] else 'rw'}")
+    for u in range(floppies, 4):
         lines.append(f'drive{u}=off')
+    if hard_disks:
+        for u in range(len(hard_disks), 4):
+            lines.append(f'rl{u}=off')
     if not config and any(p != 'fd' for p, _ in disks):
         raise ValueError('Raw media requires TERAK.CFG')
     volume = fat16('\n'.join(lines)+'\n' if config else None)
@@ -231,9 +248,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     new = sub.add_parser('create')
-    new.add_argument('--disk', action='append', required=True, metavar='PROFILE:FILE')
+    new.add_argument('--disk', action='append', default=[], metavar='PROFILE:FILE')
+    new.add_argument('--rl', action='append', default=[], metavar='RL01|RL02:FILE')
     new.add_argument('--out', type=Path, required=True)
     new.add_argument('--readonly', type=int, action='append', default=[])
+    new.add_argument('--rl-readonly', type=int, action='append', default=[])
     new.add_argument('--logical', action='store_true')
     new.add_argument('--no-config', action='store_true')
     new.add_argument('--discard-status', action='store_true')
@@ -242,14 +261,18 @@ def main():
         p.add_argument('image', type=Path)
         if name != 'list':
             p.add_argument('--partition', type=int, required=True)
-            p.add_argument('--profile', choices=('fd',)+PROFILES, required=True)
+            p.add_argument('--profile', choices=('fd',)+PROFILES+HD_PROFILES, required=True)
             p.add_argument('--file', type=Path, required=True)
     args = parser.parse_args()
     if args.command == 'create':
         disks = [item.split(':', 1) for item in args.disk]
+        hard_disks = [item.split(':', 1) for item in args.rl]
         if any(len(d) != 2 or d[0] not in ('fd',)+PROFILES for d in disks):
             parser.error('Disk must be PROFILE:FILE; profiles: fd, '+', '.join(PROFILES))
-        print(json.dumps(create(disks, args.out, args.readonly, args.logical, not args.no_config, args.discard_status), indent=2))
+        if any(len(d) != 2 or d[0] not in HD_PROFILES for d in hard_disks):
+            parser.error('RL disk must be RL01|RL02:FILE')
+        print(json.dumps(create(disks, args.out, args.readonly, args.logical, not args.no_config,
+                                args.discard_status, hard_disks, args.rl_readonly), indent=2))
         return
     with args.image.open('r+b' if args.command == 'import' else 'rb') as stream:
         if not stat.S_ISREG(__import__('os').fstat(stream.fileno()).st_mode):

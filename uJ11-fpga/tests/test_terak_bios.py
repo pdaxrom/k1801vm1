@@ -27,6 +27,12 @@ class TerakBiosTests(unittest.TestCase):
                         str(ROOT/'firmware/terak/media.c'), str(ROOT/'firmware/terak/mbr.c'),
                         str(ROOT/'firmware/terak/fat.c'), str(ROOT/'firmware/storage/label.c'),
                         '-o', str(cls.exe)], check=True)
+        cls.rl_exe = cls.root/'bios-rl-media'
+        subprocess.run(['cc', '-std=c11', '-Wall', '-Wextra', '-Werror', '-DUJ11_TERAK_BIOS',
+                        '-DUJ11_TERAK_RL', '-fsanitize=address,undefined',
+                        str(ROOT/'tests/terak/test_bios_media.c'), str(ROOT/'firmware/terak/media.c'),
+                        str(ROOT/'firmware/terak/mbr.c'), str(ROOT/'firmware/terak/fat.c'),
+                        '-o', str(cls.rl_exe)], check=True)
         disk = cls.root/'fixture.IMD'
         disk.write_bytes(fixture())
         image = cls.root/'source.img'
@@ -45,15 +51,47 @@ class TerakBiosTests(unittest.TestCase):
         f.put('TERAK1.CFG', f'version=1\ndrive0={nums[3]},fd,ro\ndrive1={nums[0]},fd,rw\n'.encode())
         return f
 
-    def check(self, volume, profile=1, image=None):
+    def check(self, volume, profile=1, image=None, rl=False):
         data = bytearray(self.data if image is None else image)
         data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512] = volume.data
         path = self.root/'check.img'
         path.write_bytes(data)
-        result = subprocess.run([str(self.exe), str(path), str(profile)], capture_output=True, text=True)
+        result = subprocess.run([str(self.rl_exe if rl else self.exe), str(path), str(profile)],
+                                capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(path.read_bytes(), data)
         return json.loads(result.stdout)
+
+    def test_rl_banks_selection_and_failed_selection_rollback(self):
+        rl01, rl02 = self.root/'rl01.raw', self.root/'rl02.raw'
+        rl01.write_bytes(bytes(5242880)); rl02.write_bytes(bytes(10485760))
+        image = self.root/'rl-card.img'
+        image.unlink(missing_ok=True)
+        info = create([('fd', self.root/'fixture.IMD')]*4, image,
+                      hard_disks=[('rl01', rl01), ('rl02', rl02)], hd_readonly=[1])
+        data = image.read_bytes()
+        f = Fat16(data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512])
+        f.put('TBIOS.BIN', self.payload)
+        system, source = info['disks'][4:]
+        f.put('TERAK5.CFG', ('version=1\n'
+                            f'rl0={source["partition"]},raw,rl02,ro\n'
+                            f'rl1={system["partition"]},raw,rl01,rw\n').encode())
+        r = self.check(f, 5, data, rl=True)
+        self.assertEqual((r['mounted'], r['selected']), (1, 1))
+        self.assertEqual(r['drives'], [0]*4+[source['start'], system['start'], 0, 0])
+        old = [p['start'] for p in info['disks']]+[0, 0]
+        for config in (f'version=1\ndrive0={system["partition"]},raw,rl01,rw\n',
+                       'version=1\nrl0=2,fd,rw\n',
+                       f'version=1\nrl0={system["partition"]},raw,rl02,rw\n',
+                       f'version=1\nrl0={system["partition"]},raw,rl01,rw\n'
+                       f'rl1={system["partition"]},raw,rl01,ro\n',
+                       'version=1\nrl0=1,raw,rl01,rw\n',
+                       f'version=1\nrl1={system["partition"]},raw,rl01,rw\n'):
+            with self.subTest(config=config):
+                f.put('TERAK5.CFG', config.encode())
+                r = self.check(f, 5, data, rl=True)
+                self.assertEqual(r['selected'], 0)
+                self.assertEqual(r['drives'], old)
 
     def chain(self, last):
         data = bytearray(self.data)

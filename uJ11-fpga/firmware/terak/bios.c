@@ -5,6 +5,10 @@
 static unsigned menu_active, selecting, selection_status;
 
 /* Freestanding GCC may lower structure assignments to memcpy. */
+__attribute__((used))
+#ifndef __clang__
+__attribute__((externally_visible))
+#endif
 void *memcpy(void *dest, const void *source, unsigned bytes)
 {
 	uint8_t *to = dest;

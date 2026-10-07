@@ -2,9 +2,15 @@
  * Raw images contain C,H,R ascending payload only; synthesize their IDs. */
 #include "terak.h"
 
+#ifdef UJ11_TERAK_RL
+struct terak_media media[4] TERAK_COLD;
+#else
 struct terak_media media[4];
+#endif
 uint8_t track_meta[512];
+#ifndef UJ11_TERAK_RL
 static struct sd_label sd_label;
+#endif
 
 u32 word(unsigned offset)
 {
@@ -55,6 +61,18 @@ u32 track_data(unsigned unit, unsigned cylinder, unsigned head)
 
 int media_open(unsigned unit, u32 start, u32 blocks, unsigned format, unsigned readonly)
 {
+#ifdef UJ11_TERAK_RL
+	if (format == RAW_RL01 || format == RAW_RL02) {
+		unsigned size = format == RAW_RL01 ? 10240 : 20480;
+		if (unit < 4 || unit >= 8 || !start || blocks < size) {
+			return 0;
+		}
+		rl_media[unit - 4] = (struct terak_media) {
+			start, size, format - RAW_RL01 + 1, !!readonly, format
+		};
+		return 1;
+	}
+#endif
 	if (unit >= 4 || !start || !blocks || format > RAW_TERAK_DSDD) {
 		return 0;
 	}
@@ -170,7 +188,15 @@ int media_mount(u32 capacity)
 	int result = 0;
 	for (unsigned i = 0; i < 4; i++) {
 		media[i].start = 0;
+#ifdef UJ11_TERAK_RL
+		rl_media[i].start = 0;
+#endif
 	}
+#ifdef UJ11_TERAK_RL
+	/* The independent hard-disk build uses the shared MBR/FAT16 layout.
+	 * Keep the legacy UJ11SD-label reader in the preserved floppy builds. */
+	result = mbr_mount(capacity);
+#else
 	/* A newly written MBR may coexist with a stale UJ11SD backup at LBA 1.
 	 * Its partition table takes precedence over that obsolete backup. */
 	if (fetch(0) && sector[510] == 0x55 && sector[511] == 0xaa) {
@@ -195,9 +221,13 @@ int media_mount(u32 capacity)
 	}
 	result = mbr_mount(capacity);
 complete:
+#endif
 	if (!result) {
 		for (unsigned i = 0; i < 4; i++) {
 			media[i].start = 0;
+#ifdef UJ11_TERAK_RL
+			rl_media[i].start = 0;
+#endif
 		}
 	}
 	return result;

@@ -34,6 +34,9 @@ void publish_media(unsigned menu)
 	}
 	unsigned qb_boot = media[0].start && track_load(0, 1, 0) && track_meta[6];
 	QX(3) = present | (readonly << 4) | (qb_boot << 8) | (menu << 9);
+#ifdef UJ11_TERAK_RL
+	QX(3) |= (rl_media[0].start != 0) << 10;
+#endif
 }
 #endif
 
@@ -299,6 +302,9 @@ static u32 service(u32 descriptor)
 void main(void)
 {
 	keyboard_reset();
+#ifdef UJ11_TERAK_RL
+	rl_reset();
+#endif
 	(void)initialize();
 	close_card();
 #ifdef UJ11_TERAK_BIOS
@@ -317,6 +323,10 @@ void main(void)
 	for (;;) {
 		poll_io();
 		qb_service();
+#ifdef UJ11_TERAK_RL
+		rl_service();
+		qb_publish();
+#endif
 		if (QX(0) & 1) {
 			u32 descriptor = QX(1);
 			u32 error = service(descriptor);

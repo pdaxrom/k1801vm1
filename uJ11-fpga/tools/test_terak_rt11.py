@@ -28,8 +28,13 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
     image.unlink(missing_ok=True)
     if build_fb and len(disks) != 2:
         raise ValueError('FB preparation requires a source and a writable clone')
-    card = create([(profile, p) for p in disks], image,
-                  [0] if build_fb else list(range(len(disks))), discard_status=discard_status)
+    if system == 'rt11xm':
+        if hardware['hard_disk'] != 'rl' or len(disks) != 2:
+            raise ValueError('XM qualification requires the RL build, an RL01 system and an RL02 source disk')
+        card = create([], image, hard_disks=[('rl01', disks[0]), ('rl02', disks[1])], hd_readonly=[1])
+    else:
+        card = create([(profile, p) for p in disks], image,
+                      [0] if build_fb else list(range(len(disks))), discard_status=discard_status)
     bios_args = []
     if hardware['boot_mode'] == 'bios':
         # Reuse the shared-card FAT16 writer also used by the BK preparation.
@@ -38,7 +43,7 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         from prepare_disk_sd import Fat16
         data = bytearray(image.read_bytes())
         volume = Fat16(data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512])
-        choice = 1 if system == 'ucsd' else 3 if system == 'rt11fb' else 2
+        choice = 1 if system == 'ucsd' else 3 if system == 'rt11fb' else 5 if system == 'rt11xm' else 2
         volume.put(f'TERAK{choice}.CFG', card['config'].encode())
         volume.put('TERAK.CFG', b'version=1\ndrive0=off\ndrive1=off\ndrive2=off\ndrive3=off\n')
         volume.put('TBIOS.BIN', (OUT/'bios/TBIOS.BIN').read_bytes())
@@ -59,6 +64,10 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
     boot_args = ([] if system == 'ucsd' else ['+RT11'])
     if system == 'rt11fb':
         boot_args.append('+RT11_FB')
+    if system == 'rt11xm':
+        boot_args.append('+RT11_XM')
+        target = card['disks'][0]
+        boot_args += [f'+DATA_BASE={target["start"]}', f'+DATA_BLOCKS={target["blocks"]}']
     if build_fb:
         target = card['disks'][1]
         boot_args += ['+RT11_BUILD_FB', f'+SD_OVERLAY={out}/overlay.hex',
@@ -73,6 +82,7 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
                    f"-GRAM_BYTES={hardware['guest_ram_bytes']}",
                    f"-GDISPLAY_EBR={int(hardware['display_storage'] == 'ebr')}",
                    f"-GBOOT_BIOS={int(hardware['boot_mode'] == 'bios')}",
+                   f"-GRL_ENABLE={int(hardware['hard_disk'] == 'rl')}",
                    f'-GMECHANICAL_SPEEDUP={mechanical_speedup}',
                    f'-GMICROCODE="{CPU_OUT.relative_to(ROOT)}/microcode.mem"']+
                    CORE+BOARD+GENERATED+['tests/terak/tb_terak_boot.v', GUARD,
@@ -120,7 +130,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--disk', type=Path, action='append', required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--system', choices=('rt11', 'rt11fb', 'ucsd'), default='rt11')
+    parser.add_argument('--system', choices=('rt11', 'rt11fb', 'rt11xm', 'ucsd'), default='rt11')
     parser.add_argument('--build-fb', action='store_true', help='Run native PIP to prepare a separate FB clone')
     parser.add_argument('--selection-only', action='store_true', help='Stop after verified native ROM handoff')
     parser.add_argument('--menu-only', action='store_true', help='Verify and render all 960 native BIOS font bytes')

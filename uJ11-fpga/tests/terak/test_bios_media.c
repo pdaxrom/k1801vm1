@@ -7,6 +7,9 @@
 static uint8_t buffer[512], *card;
 static u32 blocks;
 volatile uint8_t *const sector = buffer;
+#ifdef UJ11_TERAK_RL
+struct terak_media rl_media[4];
+#endif
 
 int fetch(u32 lba)
 {
@@ -37,8 +40,14 @@ int main(int argc, char **argv)
 	fclose(f);
 	int mounted = media_mount(blocks), selected = mbr_select(atoi(argv[2]));
 	printf("{\"mounted\":%d,\"selected\":%d,\"drives\":[", mounted, selected);
-	for (unsigned i = 0; i < 4; i++) {
-		printf("%s%u", i ? "," : "", media[i].start);
+	for (unsigned i = 0; i < TERAK_UNITS; i++) {
+		struct terak_media *m = media + (i & 3);
+#ifdef UJ11_TERAK_RL
+		if (i >= 4) {
+			m = rl_media + i - 4;
+		}
+#endif
+		printf("%s%u", i ? "," : "", m->start);
 	}
 	printf("],\"bios\":\"");
 	int valid = mbr_bios(), count = 0;

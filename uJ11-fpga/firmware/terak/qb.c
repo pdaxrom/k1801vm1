@@ -4,14 +4,34 @@
 
 static uint8_t command[9], result[7], positions[4], seek_status[4], id_index[4];
 static unsigned received, needed, results, next_result, pending, interrupt, seeking;
+#ifdef UJ11_TERAK_RL
+static unsigned dma_control TERAK_COLD, dma_count TERAK_COLD, dma_address TERAK_COLD;
+static unsigned count_high TERAK_COLD, address_high TERAK_COLD, non_dma TERAK_COLD;
+#else
 static unsigned dma_control, dma_count, dma_address, count_high, address_high, non_dma;
+#endif
 static u32 epoch, running;
 
 static void publish_irq(void)
 {
 	/* Original RT-11 QB.SYS header: vector 234, PSW 340 (BR4). */
+#ifdef UJ11_TERAK_RL
+	disk_irq(interrupt && !(dma_control & 8));
+#else
 	BUS_IRQ = interrupt && !(dma_control & 8) ? 0x10000u | 0234 : 0;
+#endif
 }
+
+#ifdef UJ11_TERAK_RL
+void disk_irq(unsigned qb_irq)
+{
+	BUS_IRQ = rl_irq ? 0x10000u | 0160 : qb_irq ? 0x10000u | 0234 : 0;
+}
+void qb_publish(void)
+{
+	publish_irq();
+}
+#endif
 
 static void reset_controller(void)
 {
@@ -65,11 +85,22 @@ void qb_poll(void)
 {
 	u32 status = BUS_STATUS;
 	if (status & 2) {
+#ifdef UJ11_TERAK_RL
+		rl_reset();
+#endif
 		reset_controller();
 		BUS_STATUS = 2;
 	}
 	if (status & 4) {
+#ifdef UJ11_TERAK_RL
+		if (((status >> 8) & 127) == 0160 / 4) {
+			rl_irq = 0;
+		} else {
+			interrupt = 0;
+		}
+#else
 		interrupt = 0;
+#endif
 		BUS_STATUS = 4;
 		publish_irq();
 	}
@@ -84,6 +115,12 @@ void qb_poll(void)
 	}
 #endif
 	u32 request = BUS_REQUEST, address = request & 017776;
+#ifdef UJ11_TERAK_RL
+	if (rl_poll(request)) {
+		publish_irq();
+		return;
+	}
+#endif
 	unsigned write = (request >> 13) & 1, value = request >> 16;
 	u32 reply = 0;
 	if (address != 011000 && address != 011002 && address != 011012 &&

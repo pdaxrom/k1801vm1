@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module uj11_terak_board #(
     parameter integer CLOCK_HZ=50000000,QX_MECHANICAL_SPEEDUP=1,TICK_DIVISOR=833333,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,
-    parameter VIDEO_ENABLE=1,TERMINAL_ENABLE=0,KEYBOARD_ENABLE=1,DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,
+    parameter VIDEO_ENABLE=1,TERMINAL_ENABLE=0,KEYBOARD_ENABLE=1,DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,
     parameter MICROCODE="build/hc7000-terak/cpu/microcode.mem"
 )(
     input wire clk,reset,cold_reset,power_on,uart_rx,halt_button,video_clk,video_reset,
@@ -61,7 +61,7 @@ module uj11_terak_board #(
         .retire(diagnostic_retire),.psw(psw),.ir(),.mmr0(),.mmr1(),.mmr2(),.mmr3(),.upc(),.uword(),.pc(),
         .debug_register_data(),.debug_register_address(5'b0));
     uj11_terak_bus #(.CLOCK_HZ(CLOCK_HZ),.QX_MECHANICAL_SPEEDUP(QX_MECHANICAL_SPEEDUP),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),
-        .CLEAR_WORDS(CLEAR_WORDS),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),.BOOT_BIOS(BOOT_BIOS)) bus(
+        .CLEAR_WORDS(CLEAR_WORDS),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),.BOOT_BIOS(BOOT_BIOS),.RL_ENABLE(RL_ENABLE)) bus(
         .clk(clk),.reset(reset),.cold_reset(cold_reset),.storage_idle(storage_idle),.power_on(power_on),
         .peripheral_reset(peripheral_reset),.video_clk(video_clk),.video_reset(video_reset),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(cpu_lock),.address(address),.write_data(write_data),

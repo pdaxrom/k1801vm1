@@ -7,7 +7,7 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000,MECHANICAL_SPEEDUP=1)
     input wire [15:0] write_data,
     output wire [15:0] read_data,
     output wire ready,error,busy,
-    output reg boot_qb,boot_menu,
+    output reg boot_qb,boot_menu,boot_rl,
     input wire irq_ack,
     output reg irq,
     input wire service_write,
@@ -45,13 +45,13 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000,MECHANICAL_SPEEDUP=1)
     assign service_read=service_address[6] ? {16'b0,buffer[service_address[5:0]]} :
         service_address==0 ? {31'b0,backend} :
         service_address==1 ? {generation,7'b0,function_code,unit,track[unit],sector} :
-        service_address==3 ? {22'b0,boot_menu,boot_qb,readonly,present} : 0;
+        service_address==3 ? {21'b0,boot_rl,boot_menu,boot_qb,readonly,present} : 0;
     integer i;
     always @(posedge clk)begin
         if(reset)begin
             control<=0;errors<=0;done<=1;seen<=0;irq<=0;index<=0;bus_error<=0;response<=0;
             delay_cycles<=0;window_cycles<=0;id_valid<=0;backend<=0;
-            sector<=1;rotation<=1;function_code<=0;generation<=0;present<=0;readonly<=0;boot_qb<=0;boot_menu<=0;
+            sector<=1;rotation<=1;function_code<=0;generation<=0;present<=0;readonly<=0;boot_qb<=0;boot_menu<=0;boot_rl<=0;
             for(i=0;i<4;i=i+1)track[i]<=0;
         end else begin
             if(!request)seen<=0;
@@ -70,7 +70,7 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000,MECHANICAL_SPEEDUP=1)
             if(service_write)begin
                 if(service_address==3)begin
                     present<=service_data[3:0];readonly<=service_data[7:4];
-                    boot_qb<=service_data[8];boot_menu<=service_data[9];
+                    boot_qb<=service_data[8];boot_menu<=service_data[9];boot_rl<=service_data[10];
                 end
                 else if(service_address==2 && backend && generation==service_data[31:24])begin
                     errors<=service_data[15:0]&16'hfc00;backend<=0;done<=1;

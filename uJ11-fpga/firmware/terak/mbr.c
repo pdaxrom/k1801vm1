@@ -18,7 +18,11 @@ static u32 card_capacity;
 #else
 static struct partition partitions[PARTS];
 #endif
-static uint8_t selected[4], formats[4], readonly[4];
+#ifdef UJ11_TERAK_RL
+static uint8_t selected[TERAK_UNITS] TERAK_COLD, formats[TERAK_UNITS] TERAK_COLD, readonly[TERAK_UNITS] TERAK_COLD;
+#else
+static uint8_t selected[TERAK_UNITS], formats[TERAK_UNITS], readonly[TERAK_UNITS];
+#endif
 
 static unsigned half(unsigned p)
 {
@@ -136,8 +140,12 @@ static int token(unsigned *p, unsigned c, unsigned end)
 static int config(unsigned size)
 {
 	unsigned p = 0, version = 0, drives = 0;
-	static const char *const names[] = {"sssd", "dssd", "ssdd", "dsdd", "terak-ssdd", "terak-dsdd"};
-	for (unsigned i = 0; i < 4; i++) {
+	static const char *const names[] = {"sssd", "dssd", "ssdd", "dsdd", "terak-ssdd", "terak-dsdd"
+#ifdef UJ11_TERAK_RL
+	                                    , "rl01", "rl02"
+#endif
+	                                   };
+	for (unsigned i = 0; i < TERAK_UNITS; i++) {
 		selected[i] = 0;
 	}
 	while (p < size) {
@@ -160,10 +168,21 @@ static int config(unsigned size)
 				}
 				version = 1;
 			} else {
-				if (!match(&p, "drive", end) || p == end || sector[p] < '0' || sector[p] > '3') {
+				unsigned bank = 0;
+				int named = match(&p, "drive", end);
+#ifdef UJ11_TERAK_RL
+				if (!named && match(&p, "rl", end)) {
+					bank = 4;
+					named = 1;
+				}
+#endif
+				if (!named) {
 					return 0;
 				}
-				unsigned u = sector[p++] - '0';
+				if (p == end || sector[p] < '0' || sector[p] > '3') {
+					return 0;
+				}
+				unsigned u = sector[p++] - '0' + bank;
 				if ((drives & (1u << u)) || !token(&p, '=', end)) {
 					return 0;
 				}
@@ -186,17 +205,17 @@ static int config(unsigned size)
 							return 0;
 						}
 						unsigned f;
-						for (f = 0; f < 6; f++) {
+						for (f = 0; f < sizeof(names) / sizeof(names[0]); f++) {
 							if (match(&p, names[f], end)) {
 								break;
 							}
 						}
-						if (f == 6) {
+						if (f == sizeof(names) / sizeof(names[0])) {
 							return 0;
 						}
 						formats[u] = f + 1;
 					}
-					if (!token(&p, ',', end)) {
+					if ((u >= 4) != (formats[u] >= RAW_RL01) || !token(&p, ',', end)) {
 						return 0;
 					}
 					readonly[u] = match(&p, "ro", end);
@@ -309,7 +328,7 @@ int mbr_mount(u32 capacity)
 			}
 		}
 	} else {
-		for (unsigned u = 0; u < 4; u++) {
+		for (unsigned u = 0; u < TERAK_UNITS; u++) {
 			if (!selected[u]) {
 				continue;
 			}
@@ -331,19 +350,37 @@ int mbr_mount(u32 capacity)
 #ifdef UJ11_TERAK_BIOS
 int mbr_select(unsigned profile)
 {
-	if (profile < 1 || profile > 4) {
+	if (profile < 1 || profile > (TERAK_UNITS == 8 ? 5 : 4)) {
 		return 0;
 	}
-	struct terak_media saved[4];
-	for (unsigned i = 0; i < 4; i++) {
-		saved[i] = media[i];
-		media[i].start = 0;
+	struct terak_media saved[TERAK_UNITS];
+	for (unsigned i = 0; i < TERAK_UNITS; i++) {
+		struct terak_media *m = media + (i & 3);
+#ifdef UJ11_TERAK_RL
+		if (i >= 4) {
+			m = rl_media + i - 4;
+		}
+#endif
+		saved[i] = *m;
+		m->start = 0;
 	}
 	profile_number = profile;
-	int ok = mbr_mount(card_capacity) && media[0].start;
+	int ok = mbr_mount(card_capacity) && (profile == 5 ?
+#ifdef UJ11_TERAK_RL
+	                                      rl_media[0].start :
+#else
+	                                      0 :
+#endif
+	                                      media[0].start);
 	if (!ok) {
-		for (unsigned i = 0; i < 4; i++) {
-			media[i] = saved[i];
+		for (unsigned i = 0; i < TERAK_UNITS; i++) {
+			struct terak_media *m = media + (i & 3);
+#ifdef UJ11_TERAK_RL
+			if (i >= 4) {
+				m = rl_media + i - 4;
+			}
+#endif
+			*m = saved[i];
 		}
 	}
 	return ok;
