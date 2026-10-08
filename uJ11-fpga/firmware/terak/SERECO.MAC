@@ -1,0 +1,29 @@
+; RT-11 test of the external TERAK asynchronous unit 1.
+; Poll native registers, echo eight-bit bytes; ESC from serial host returns.
+
+	.MCALL	.PRINT,.EXIT
+RSR	=	177520
+RDB	=	177522
+XSR	=	177524
+XDB	=	177526
+	.PSECT	CODE
+START:	CLR	@#RSR
+	CLR	@#XSR
+	.PRINT	#HELLO
+10$:	TSTB	@#RSR
+	BPL	10$
+	MOVB	@#RDB,R0
+	CMPB	R0,#33
+	BEQ	30$
+20$:	TSTB	@#XSR
+	BPL	20$
+	MOVB	R0,@#XDB
+	BR	10$
+30$:	TSTB	@#XSR
+	BPL	30$
+	.PRINT	#BYE
+	.EXIT
+HELLO:	.ASCIZ	/SERECO READY - SERIAL UNIT 1, ESC TO EXIT/
+BYE:	.ASCIZ	/SERECO DONE/
+	.EVEN
+	.END	START

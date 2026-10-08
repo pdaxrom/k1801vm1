@@ -46,6 +46,8 @@ $(error TERAK_HD=rl requires TERAK_BOOT=bios)
 endif
 endif
 export UJ11_TERAK_HD := $(TERAK_HD)
+TERAK_UART_BAUD ?= 19200
+export UJ11_TERAK_UART_BAUD := $(TERAK_UART_BAUD)
 OUT ?= build/hc7000-terak$(if $(filter 56,$(TERAK_RAM_KIB)),$(if $(filter ebr,$(TERAK_DISPLAY)),-ebr),-$(TERAK_RAM_KIB)k)$(if $(filter bios,$(TERAK_BOOT)),-bios)$(if $(filter rl,$(TERAK_HD)),-rl)
 TERAK_SYNTHESIS ?= $(notdir $(OUT))-mbr-synthesis
 TERAK_RT11_DIR ?= build/terak-rt11-v57
@@ -72,7 +74,7 @@ ifeq ($(MACHINE),terak)
 ifneq ($(HC7000_TERMINAL),0)
 $(error MACHINE=terak uses the native console; HC7000_TERMINAL must be 0)
 endif
-ifneq ($(filter-out all hardware sd-image sd-image-mbr rt11-xm-image test prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware sd-image sd-image-mbr rt11-xm-image test test-terak-uart prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for MACHINE=terak; use test for native Terak qualification)
 endif
 endif
@@ -139,7 +141,7 @@ $(error CPU=mmu requires BOARD=hc7000-lcd-sram)
 endif
 # Explicit inventory: never route MMU requests into a legacy HALT runner.
 # Export validates source hashes and MAP/PAR/TRACE at the selected clock.
-ifneq ($(filter-out all hardware hg test-hg-time sd-image sd-image-mbr rt11-xm-image test-sd-image test test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
+ifneq ($(filter-out all hardware hg test-hg-time sd-image sd-image-mbr rt11-xm-image test-sd-image test test-terak-uart test-mmu test-mmu-fpp test-mmu-board test-diagnostics test-video pal-demo test-pal-demo test-storage test-storage-controllers test-keyboard bsd-image test-bsd storage-menu test-storage-menu test-python test-rt11 prepare-synthesis synthesis export clean,$(MAKECMDGOALS)),)
 $(error Target is unavailable for experimental CPU=mmu; HALT software belongs to CPU=mmuless)
 endif
 else
@@ -228,6 +230,10 @@ verify: all
 	$(PYTHON) tools/verify_production.py
 
 ifeq ($(MACHINE),terak)
+.PHONY: test-terak-uart
+test: test-terak-uart
+test-terak-uart:
+	$(PYTHON) tools/test_terak_uart.py --out $(OUT)/test-uart
 .PHONY: rt11-xm-image
 rt11-xm-image:
 	$(PYTHON) tools/build_terak_rt11_xm.py --archive $(TERAK_RT11_ARCHIVE) --out $(TERAK_RT11_DIR)

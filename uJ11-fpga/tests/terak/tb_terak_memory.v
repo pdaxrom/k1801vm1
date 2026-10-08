@@ -28,7 +28,7 @@ module tb_terak_memory #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
         .video_clk(vclk),.video_reset(1'b0),.request(bus_request),.writing(bus_write),
         .byte_access(bus_byte),.cpu_lock(1'b0),.address(bus_address),.write_data(bus_data),
         .ready(bus_ready),.error(bus_error),.read_data(bus_read_data),.irq_valid(),.irq_priority(),
-        .irq_vector(),.irq_ack(1'b0),.ps2_clock(ps2_clock),.ps2_data(1'b1),.tvout(),.audio(),
+        .irq_vector(),.irq_ack(1'b0),.uart_rx(1'b1),.uart_tx(),.ps2_clock(ps2_clock),.ps2_data(1'b1),.tvout(),.audio(),
         .memory_initialized(initialized),.cpu_start(),.boot_complete(),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
         .sd_cs_n(),.sd_sck(),.sd_mosi(),.sd_miso(1'b1));

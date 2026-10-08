@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Cold reset -> real ROM -> J11 microcode -> SERV -> wire-level SDHC -> UCSD.
 // No guest PC/register patching and no host disk handler is used.
-module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,MECHANICAL_SPEEDUP=1,
+module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,MECHANICAL_SPEEDUP=1,UART_BAUD=19200,
     parameter MICROCODE="build/hc7000-terak/cpu/microcode.mem");
     reg clk=0,vclk=0,initial_reset=1,power_on=1,button_n=1;
     wire button_reset,button_cold,storage_idle;
@@ -12,7 +12,8 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
     always #10 clk=~clk;
     always #7.8125 vclk=~vclk;
     tri1 ps2_clock;
-    reg key_clock=1,key_data=1;
+    reg key_clock=1,key_data=1,uart_rx=1;
+    wire uart_tx;
     assign ps2_clock=key_clock ? 1'bz : 1'b0;
     wire initialized;
     wire [5:0] dac;
@@ -22,11 +23,11 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
     // Optional acceleration changes only QX mechanical waits. CPU, SPI,
     // SERV timers, BEVNT and video retain their real rates.
     uj11_terak_board #(.QX_MECHANICAL_SPEEDUP(MECHANICAL_SPEEDUP),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),
-        .BOOT_BIOS(BOOT_BIOS),.RL_ENABLE(RL_ENABLE),.MICROCODE(MICROCODE),.CLEAR_WORDS(36864)) dut(
+        .BOOT_BIOS(BOOT_BIOS),.RL_ENABLE(RL_ENABLE),.UART_BAUD(UART_BAUD),.MICROCODE(MICROCODE),.CLEAR_WORDS(36864)) dut(
         .clk(clk),.reset(reset),.cold_reset(initial_reset || (BOOT_BIOS && button_cold)),.storage_idle(storage_idle),.power_on(power_on),
-        .uart_rx(1'b1),.halt_button(1'b0),.video_clk(vclk),.video_reset(1'b0),
+        .uart_rx(uart_rx),.uart_tx(uart_tx),.halt_button(1'b0),.video_clk(vclk),.video_reset(1'b0),
         .ps2_clock(ps2_clock),.ps2_data(key_data),.tvout(dac),.audio(),.memory_initialized(initialized),
-        .uart_tx(),.panel_keys(4'b0),.panel_pins(),.sram_address(sa),.sram_data(sd),
+        .panel_keys(4'b0),.panel_pins(),.sram_address(sa),.sram_data(sd),
         .sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso),.boot_complete(),.stopped(),
         .diagnostic_halt(),.diagnostic_wait(),.diagnostic_retire(),.diagnostic_mode());
@@ -213,6 +214,41 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
         screen();$fflush();
         if(!done || has_text("PIP-E-") || has_text("PIP-F-") || has_text("KMON-F-"))
             $fatal(1,"RT-11 command failed: %s",command);
+    endtask
+    task uart_send(input [7:0] value);
+        localparam BIT_TICKS=(50000000+UART_BAUD/2)/UART_BAUD;
+        @(negedge clk);uart_rx=0;repeat(BIT_TICKS)@(negedge clk);
+        for(integer i=0;i<8;i++)begin uart_rx=value[i];repeat(BIT_TICKS)@(negedge clk);end
+        uart_rx=1;repeat(BIT_TICKS)@(negedge clk);
+    endtask
+    task uart_expect(input [7:0] value);
+        localparam BIT_TICKS=(50000000+UART_BAUD/2)/UART_BAUD;
+        @(negedge uart_tx);repeat(BIT_TICKS/2)@(negedge clk);
+        if(uart_tx!==0)$fatal(1,"guest UART start bit");
+        for(integer i=0;i<8;i++)begin
+            repeat(BIT_TICKS)@(negedge clk);
+            if(uart_tx!==value[i])$fatal(1,"guest UART echo %h bit %0d",value,i);
+        end
+        repeat(BIT_TICKS)@(negedge clk);
+        if(uart_tx!==1)$fatal(1,"guest UART stop bit");
+        repeat(BIT_TICKS)@(negedge clk);
+    endtask
+    task test_uart_echo;
+        reg [7:0] value;
+        type_command("R SERECO");
+        for(integer n=0;n<200 && !has_text("SERECO READY");n++)#50000000;
+        if(!has_text("SERECO READY"))$fatal(1,"SERECO did not start");
+        for(integer n=0;n<8;n++)begin
+            case(n)
+                0:value=0;1:value=1;2:value=8'ha5;3:value=8'hff;
+                4:value=8'h55;5:value=8'h80;6:value=13;7:value=10;
+            endcase
+            fork uart_send(value);uart_expect(value);join
+        end
+        uart_send(27);
+        for(integer n=0;n<200 && !rt11_prompt();n++)#50000000;
+        if(!rt11_prompt() || !has_text("SERECO DONE"))$fatal(1,"SERECO did not return to RT-11");
+        $display("PASS RT-11 SERECO native CPU/bus/UART round trip, 8 bytes including 8-bit data and ESC exit");
     endtask
     task build_fb_disk;
         integer fd;
@@ -495,6 +531,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
                 run_command("DELETE RLTEST.COM","RLTEST.COM?");
                 run_command("DIR DL1:RMON.MAC");
                 if(!has_text("RMON"))$fatal(1,"second RL/source disk inaccessible");
+                if($test$plusargs("UART_ECHO"))test_uart_echo;
             end
             // The resident TK handler blanks text while updating a row.
             // Capture only after it restores display enable; never force VCR.

@@ -17,7 +17,7 @@ module tb_terak_qb #(parameter DISPLAY_EBR=0,RAM_BYTES=57344);
         .peripheral_reset(peripheral_reset),.video_clk(vclk),.video_reset(1'b0),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(1'b0),.address(address),.write_data(wd),
         .ready(ready),.error(error),.read_data(rd),.irq_valid(irq_valid),.irq_priority(priority_level),.irq_vector(vector),.irq_ack(irq_ack),
-        .ps2_clock(ps2_clock),.ps2_data(1'b1),.tvout(),.audio(),.memory_initialized(initialized),.cpu_start(cpu_start),
+        .uart_rx(1'b1),.uart_tx(),.ps2_clock(ps2_clock),.ps2_data(1'b1),.tvout(),.audio(),.memory_initialized(initialized),.cpu_start(cpu_start),
         .boot_complete(),.sram_address(sa),.sram_data(sd),.sram_ce_n(ce),.sram_oe_n(oe),.sram_we_n(we),.sram_lb_n(lb),.sram_ub_n(ub),
         .sd_cs_n(cs),.sd_sck(sck),.sd_mosi(mosi),.sd_miso(miso));
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));

@@ -19,6 +19,9 @@ HD = os.environ.get('UJ11_TERAK_HD', 'none')
 if HD not in ('none', 'rl') or HD == 'rl' and BOOT != 'bios':
     raise ValueError('UJ11_TERAK_HD must be none, or rl with BIOS boot')
 GUEST_RAM_KIB = int(os.environ.get('UJ11_TERAK_RAM_KIB', '56'))
+UART_BAUD = int(os.environ.get('UJ11_TERAK_UART_BAUD', '19200'))
+if UART_BAUD not in (300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200):
+    raise ValueError('Unsupported UJ11_TERAK_UART_BAUD')
 if GUEST_RAM_KIB not in (56, 128, 256, 2048):
     raise ValueError('UJ11_TERAK_RAM_KIB must be 56, 128, 256 or 2048')
 DISPLAY = os.environ.get('UJ11_TERAK_DISPLAY', 'sram' if GUEST_RAM_KIB == 56 else 'ebr')
@@ -56,7 +59,7 @@ if BOOT == 'bios':
     HEADERS += ['firmware/terak/bios.asm', 'firmware/storage/terminal_font.h', 'tools/build_terak_bios.py']
 BOARD = ['boards/hc7000/terak/'+p+'.v' for p in
          ('uj11_terak_board', 'uj11_terak_bus', 'uj11_terak_qx', 'uj11_terak_console', 'uj11_terak_video',
-          'uj11_terak_timing', 'uj11_terak_display_ram', 'uj11_terak_button')]
+          'uj11_terak_timing', 'uj11_terak_display_ram', 'uj11_terak_button', 'uj11_terak_uart')]
 BOARD += ['boards/hc7000/mmu/'+p+'.v' for p in
           ('uj11_mmu_disk', 'uj11_mmu_rk611', 'uj11_mmu_iop_bus', 'uj11_mmu_sector_engine')]
 BOARD += ['boards/hc7000/uj11_sram.v', 'boards/hc7000/uj11_ps2_keyboard.v',
@@ -211,8 +214,11 @@ def build(rebuild=False):
         rom = ('// Independent legacy and RLV11 logic ROM decoders.\n'
                'module uj11_terak_boot_rom(input wire [7:0] address,input wire qb,menu,rl,\n'
                'output wire [15:0] data);\n'
-               'reg [15:0] legacy,hard_disk;\n'
+               'reg [15:0] legacy /* synthesis syn_romstyle="distributed" */;\n'
+               'reg [15:0] hard_disk /* synthesis syn_romstyle="distributed" */;\n'
                'always @* case({qb,address})\n')
+        # All EBRs belong to CPU/SERV/video. Keep the immutable bootstrap
+        # tables in distributed ROM even when synthesis can absorb a register.
         rom += ''.join(f"9'd{i}:legacy=16'h{word:04x};\n" for i, word in enumerate(words))
         rom += ''.join(f"9'd{i+256}:legacy=16'h{word:04x};\n" for i, word in enumerate(qb_words))
         rom += 'default:legacy=0;endcase\nalways @* case(address)\n'
@@ -230,6 +236,7 @@ def build(rebuild=False):
         raise ValueError('UJ11_HC7000_DIAGNOSTICS must be 0 or 1')
     top = top.replace('DIAGNOSTICS_ENABLE=0', f'DIAGNOSTICS_ENABLE={diagnostics}')
     top = top.replace('uj11_terak_board #(', 'uj11_terak_board #(\n'+
+                      f'        .UART_BAUD({UART_BAUD}),\n'+
                       f'        .RL_ENABLE({int(HD == "rl")}),\n'+
                       f'        .BOOT_BIOS({int(BOOT == "bios")}),\n'+
                       f'        .DISPLAY_EBR({int(DISPLAY == "ebr")}),\n'+
@@ -261,7 +268,9 @@ def build(rebuild=False):
         inputs.add('firmware/terak/rl_boot.asm')
     record = dict(machine='terak', board='hc7000-lcd-sram', cpu=cpu, iop=iop, fpp='off', clock_mhz=50,
                   boot_pc_octal='173774' if BOOT == 'bios' else '173000', boot_mode=BOOT, bios=bios,
-                  hard_disk=HD,
+                  hard_disk=HD, uart=dict(unit=1, baud=UART_BAUD, format='8N1',
+                      registers_octal=['177520', '177522', '177524', '177526'],
+                      vectors_octal=['120', '124'], priority=4),
                   guest_ram_bytes=GUEST_RAM_BYTES,
                   memory_configuration_kib=GUEST_RAM_KIB, physical_address_bits=22 if GUEST_RAM_KIB == 2048 else 18,
                   rl_controller='rlv12' if HD == 'rl' and GUEST_RAM_KIB == 2048 else 'rlv11' if HD == 'rl' else None,

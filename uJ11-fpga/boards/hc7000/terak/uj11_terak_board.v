@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 module uj11_terak_board #(
     parameter integer CLOCK_HZ=50000000,QX_MECHANICAL_SPEEDUP=1,TICK_DIVISOR=833333,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,
-    parameter VIDEO_ENABLE=1,TERMINAL_ENABLE=0,KEYBOARD_ENABLE=1,DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,
+    parameter VIDEO_ENABLE=1,TERMINAL_ENABLE=0,KEYBOARD_ENABLE=1,DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,UART_BAUD=19200,
     parameter MICROCODE="build/hc7000-terak/cpu/microcode.mem"
 )(
     input wire clk,reset,cold_reset,power_on,uart_rx,halt_button,video_clk,video_reset,
@@ -27,7 +27,7 @@ module uj11_terak_board #(
     wire [15:0] bus_read_data;
     wire [2:0] irq_priority;
     assign diagnostic_mode=psw[15:14];
-    assign uart_tx=1'b1,panel_pins=0;
+    assign panel_pins=0;
     wire cpu_reset;
     generate if(BOOT_BIOS)begin: registered_start
         reg held;
@@ -62,9 +62,9 @@ module uj11_terak_board #(
         .retire(diagnostic_retire),.psw(psw),.ir(),.mmr0(),.mmr1(),.mmr2(),.mmr3(),.upc(),.uword(),.pc(),
         .debug_register_data(),.debug_register_address(5'b0));
     uj11_terak_bus #(.CLOCK_HZ(CLOCK_HZ),.QX_MECHANICAL_SPEEDUP(QX_MECHANICAL_SPEEDUP),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),
-        .CLEAR_WORDS(CLEAR_WORDS),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),.BOOT_BIOS(BOOT_BIOS),.RL_ENABLE(RL_ENABLE)) bus(
+        .CLEAR_WORDS(CLEAR_WORDS),.DISPLAY_EBR(DISPLAY_EBR),.RAM_BYTES(RAM_BYTES),.BOOT_BIOS(BOOT_BIOS),.RL_ENABLE(RL_ENABLE),.UART_BAUD(UART_BAUD)) bus(
         .clk(clk),.reset(reset),.cold_reset(cold_reset),.storage_idle(storage_idle),.power_on(power_on),
-        .peripheral_reset(peripheral_reset),.video_clk(video_clk),.video_reset(video_reset),
+        .peripheral_reset(peripheral_reset),.video_clk(video_clk),.video_reset(video_reset),.uart_rx(uart_rx),.uart_tx(uart_tx),
         .request(request),.writing(writing),.byte_access(byte_access),.cpu_lock(cpu_lock),.address(address),.write_data(write_data),
         .ready(bus_ready),.error(bus_error),.read_data(bus_read_data),.irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),.irq_ack(irq_ack),
         .ps2_clock(ps2_clock),.ps2_data(ps2_data),.tvout(tvout),.audio(audio),.memory_initialized(memory_initialized),

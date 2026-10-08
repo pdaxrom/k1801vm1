@@ -18,7 +18,10 @@ module uj11_terak_qx #(parameter integer CLOCK_HZ=50000000,MECHANICAL_SPEEDUP=1)
     localparam integer ID_WINDOW=(CLOCK_HZ/1000000)*300;
     reg [15:0] control,errors;
     reg done,seen,id_valid,backend;
-    reg [31:0] delay_cycles,window_cycles;
+    // Maximum mechanical wait is 6 ms; the sector-ID window is 300 us.
+    // Size these countdowns to their reload limits, preserving every cycle.
+    reg [$clog2(CLOCK_HZ/1000*6+1)-1:0] delay_cycles;
+    reg [$clog2(ID_WINDOW+1)-1:0] window_cycles;
     reg [2:0] function_code;
     reg [6:0] track[0:3];
     reg [4:0] rotation,sector;

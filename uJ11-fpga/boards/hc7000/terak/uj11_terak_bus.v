@@ -1,10 +1,11 @@
 `timescale 1ns/1ps
 module uj11_terak_bus #(
     parameter integer CLOCK_HZ=50000000,QX_MECHANICAL_SPEEDUP=1,SD_SLOW_DIV=125,SD_FAST_DIV=2,CLEAR_WORDS=1048576,DISPLAY_EBR=0,
-    parameter integer RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0
+    parameter integer RAM_BYTES=57344,BOOT_BIOS=0,RL_ENABLE=0,UART_BAUD=19200
 )(
     input wire clk,reset,cold_reset,power_on,peripheral_reset,video_clk,video_reset,
-    input wire request,writing,byte_access,cpu_lock,
+    input wire request,writing,byte_access,cpu_lock,uart_rx,
+    output wire uart_tx,
     input wire [21:0] address,
     input wire [15:0] write_data,
     output wire ready,error,
@@ -42,6 +43,8 @@ module uj11_terak_bus #(
     wire guest_bus_reset=peripheral_reset || (BOOT_BIOS && reset);
     wire console_selected=io_page && (offset[12:3]==(13'o17560>>3) ||
         offset==13'o17740 || offset==13'o17742 || offset==13'o17744 || offset==13'o17746);
+    // External 8512 asynchronous unit 1, independent of keyboard/display unit 0.
+    wire uart_selected=io_page && offset[12:3]==(13'o17520>>3);
     // RT-11's original bootstrap probes the page buffer with TST @#160000
     // before loading CHRSET.SYS. DATI must respond even on this byte aperture.
     wire bad_aperture=aperture && writing && !byte_access;
@@ -144,6 +147,22 @@ module uj11_terak_bus #(
         .lanes(lanes),.write_data(write_data),.read_data(console_data),.gar(gar),.vir(vir),.vcr(vcr),
         .key_valid(key_valid),.key_data(key_data),.key_ready(key_ready),.irq(console_irq),.vector(console_vector),
         .irq_ack(irq_ack && irq_priority==4 && !qx_irq && !qb_irq),.audio(audio));
+    wire uart_rx_irq,uart_tx_irq;
+    wire [15:0] uart_data;
+    reg uart_seen;
+    // The CPU holds its request through the registered response. Present one
+    // strobe only: a held RDB read must not consume a later received character.
+    always @(posedge clk)begin
+        if(reset || peripheral_reset || !request || !uart_selected)uart_seen<=0;
+        else uart_seen<=1;
+    end
+    wire uart_ack=irq_ack && irq_priority==4 && !qx_irq && !qb_irq && !console_irq;
+    uj11_terak_uart #(.CLOCK_HZ(CLOCK_HZ),.BAUD(UART_BAUD)) serial(
+        .clk(clk),.reset(reset || peripheral_reset),.address(address[2:0]),
+        .write_data(write_data),.read_data(uart_data),.writing(writing),
+        .request(request && uart_selected && !uart_seen),.tx(uart_tx),.rx(uart_rx),
+        .rx_irq(uart_rx_irq),.rx_ack(uart_ack && uart_rx_irq),
+        .tx_irq(uart_tx_irq),.tx_ack(uart_ack && !uart_rx_irq));
     // Native BEVNT follows the 60 Hz video field, with a two-FF toggle CDC.
     // Peripheral RESET clears the IRQ latch while continuing to track fields.
     reg [2:0] event_reset;
@@ -166,11 +185,12 @@ module uj11_terak_bus #(
             end
         end
     end
-    assign irq_valid=clock_pending || qx_irq || qb_irq || console_irq;
+    assign irq_valid=clock_pending || qx_irq || qb_irq || console_irq || uart_rx_irq || uart_tx_irq;
     wire rl_interrupt=RL_ENABLE && qb_irq && qb_vector==9'o160;
     assign irq_priority=clock_pending ? 3'd6 : rl_interrupt ? 3'd5 : 3'd4;
     assign irq_vector=clock_pending ? 16'o100 : rl_interrupt ? 16'o160 :
-        qx_irq ? 16'o250 : qb_irq ? {7'b0,qb_vector} : console_vector;
+        qx_irq ? 16'o250 : qb_irq ? {7'b0,qb_vector} : console_irq ? console_vector :
+        uart_rx_irq ? 16'o120 : 16'o124;
     uj11_mmu_disk #(.CLOCK_HZ(CLOCK_HZ),.SD_SLOW_DIV(SD_SLOW_DIV),.SD_FAST_DIV(SD_FAST_DIV),
         .TERAK_ENABLE(1),.KEYBOARD_ENABLE(1),.IOP_RAM_KIB(DISPLAY_EBR ? 15 : 19)) disk(
         .clk(clk),.reset(service_reset),.bus_reset(guest_bus_reset),.dma_map_enabled(1'b0),
@@ -207,13 +227,13 @@ module uj11_terak_bus #(
         assign rom_response=rom_data,rom_ready=1'b1;
     end endgenerate
     assign read_data=display_selected ? display_data : ram_selected || aperture ? ram_data : rom_selected ? rom_response :
-        qx_selected ? qx_data : service_selected ? qb_data : console_data;
+        qx_selected ? qx_data : service_selected ? qb_data : uart_selected ? uart_data : console_data;
     assign ready=request && (display_selected && !bad_aperture ? display_ready :
         (ram_selected || aperture && !bad_aperture) ? cpu_ready :
-        qx_selected ? qx_ready : service_selected ? qb_ready : rom_selected ? rom_ready : 1'b1);
+        qx_selected ? qx_ready : service_selected ? qb_ready : rom_selected ? rom_ready : uart_selected ? uart_seen : 1'b1);
     assign error=request && (bad_aperture || bad_register || (rom_selected && (writing || qx_busy)) ||
         (qx_selected && qx_error) || (service_selected && qb_error) ||
-        !(ram_selected || aperture || rom_selected || qx_selected || service_selected || console_selected));
+        !(ram_selected || aperture || rom_selected || qx_selected || service_selected || console_selected || uart_selected));
     always @(posedge clk)begin
         if(reset)boot_complete<=0;
         else if(request && !writing && address==0)boot_complete<=1;

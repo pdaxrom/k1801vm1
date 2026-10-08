@@ -20,7 +20,11 @@ module uj11_terak_console #(parameter integer CLOCK_HZ=50000000)(
     reg key_irq,printer_irq,emulator_irq;
     reg [7:0] key_latch;
     reg [15:0] output_latch;
-    reg [31:0] printer_delay,tone_divider;
+    localparam TONE_TICKS=CLOCK_HZ/1560,PRINTER_TICKS=CLOCK_HZ/1000000*480;
+    // These timers reload bounded constants; full 32-bit counters waste LUTs
+    // needed by the external UART on the 7000HC. Keep their intervals exact.
+    reg [$clog2(PRINTER_TICKS+1)-1:0] printer_delay;
+    reg [$clog2(TONE_TICKS)-1:0] tone_divider;
     reg tone;
     wire access=request && !seen;
     assign key_ready=!key_done;
@@ -54,7 +58,7 @@ module uj11_terak_console #(parameter integer CLOCK_HZ=50000000)(
         end else begin
             if(!request)seen<=0;
             if(request)seen<=1;
-            if(tone_divider==CLOCK_HZ/1560-1)begin tone_divider<=0;tone<=!tone;end
+            if(tone_divider==TONE_TICKS-1)begin tone_divider<=0;tone<=!tone;end
             else tone_divider<=tone_divider+1'b1;
             if(irq_ack)begin
                 if(emulator_irq)emulator_irq<=0;
@@ -77,7 +81,7 @@ module uj11_terak_console #(parameter integer CLOCK_HZ=50000000)(
                 13'o17564:if(writing && lanes[0])begin
                     output_ie<=write_data[6];
                     if(!write_data[6])printer_irq<=0;
-                    else if(!output_ie && output_done)printer_delay<=CLOCK_HZ/1000000*480;
+                    else if(!output_ie && output_done)printer_delay<=PRINTER_TICKS;
                 end
                 13'o17566:begin
                     if(writing)begin
@@ -86,7 +90,7 @@ module uj11_terak_console #(parameter integer CLOCK_HZ=50000000)(
                         output_done<=0;emulator_irq<=1;
                         printer_irq<=0;printer_delay<=0;
                     end else if(!writing)begin
-                        output_done<=1;emulator_irq<=0;printer_delay<=CLOCK_HZ/1000000*480;
+                        output_done<=1;emulator_irq<=0;printer_delay<=PRINTER_TICKS;
                     end
                 end
                 13'o17746:if(writing)begin
