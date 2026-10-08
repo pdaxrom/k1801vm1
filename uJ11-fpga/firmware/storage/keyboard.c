@@ -171,6 +171,14 @@ static void translate(unsigned code)
 			}
 		}
 	} else if (code < 128) {
+#ifdef UJ11_TERAK_BIOS
+		/* F10 is the BIOS save key; guests receive the unused ASCII GS control. */
+		if (code == 0x09) {
+			pending = 035;
+			keyboard_output_pending = 1;
+			return;
+		}
+#endif
 		ch = normal[code];
 #ifdef UJ11_TERAK
 		if (code == 0x66) {

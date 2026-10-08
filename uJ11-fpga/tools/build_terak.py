@@ -75,7 +75,7 @@ def sha(path):
 def firmware(rebuild=False):
     IOP_OUT.mkdir(parents=True, exist_ok=True)
     inputs = {p: sha(ROOT/p) for p in FIRMWARE+HEADERS+['tools/build_terak.py', 'tools/build_iop_mmu.py', 'tools/iop_ebr.py']}
-    base_flags = ['-march=rv32ic', '-mabi=ilp32', '-Os', '-ffreestanding', '-fno-builtin',
+    base_flags = ['-march=rv32ic', '-mabi=ilp32', '-Oz' if BOOT == 'bios' else '-Os', '-ffreestanding', '-fno-builtin',
                   '-ffunction-sections', '-fdata-sections', '-msmall-data-limit=0',
                   '-Wall', '-Wextra', '-Werror', '-DUJ11_TERAK', '-DUJ11_KEYBOARD']
     if DISPLAY == 'ebr':
@@ -84,8 +84,10 @@ def firmware(rebuild=False):
         base_flags.append('-DUJ11_TERAK_DMA_BYTES=65536')
     if BOOT == 'bios':
         base_flags.append('-DUJ11_TERAK_BIOS')
+    if BOOT == 'bios':
+        base_flags += ['-flto', '-msave-restore', '-mshorten-memrefs']
     if HD == 'rl':
-        base_flags += ['-DUJ11_TERAK_RL', '-flto']
+        base_flags.append('-DUJ11_TERAK_RL')
     record_path = IOP_OUT/'build.json'
     if record_path.exists() and not rebuild and not os.environ.get('RISCV_CC'):
         record = json.loads(record_path.read_text())
@@ -166,7 +168,7 @@ def build(rebuild=False):
     bios = None
     if BOOT == 'bios':
         from build_terak_bios import build as build_bios
-        bios = build_bios(OUT/'bios', hard_disk=HD == 'rl')
+        bios = build_bios(OUT/'bios', hard_disk=HD == 'rl', ram_kib=GUEST_RAM_KIB)
     rl_words = []
     if HD == 'rl':
         assembler = os.environ.get('MICROASM11', str(ROOT.parent/'microasm11/microasm11'))

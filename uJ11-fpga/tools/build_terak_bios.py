@@ -11,7 +11,7 @@ from pathlib import Path
 from board_common import ROOT
 
 
-def build(out, hard_disk=False):
+def build(out, hard_disk=False, ram_kib=256):
     out.mkdir(parents=True, exist_ok=True)
     template = ROOT/'firmware/terak/bios.asm'
     font_source = ROOT/'firmware/storage/terminal_font.h'
@@ -21,11 +21,9 @@ def build(out, hard_disk=False):
     font = '\n'.join('        db 0,'+','.join(re.findall(r'0x[0-9a-f]{2}', g))+',0' for g in glyphs)
     source = out/'bios.asm'
     text = template.read_text().replace('; @FONT@', font)
-    if hard_disk:
-        text = text.replace('        mov #help,r0', '        mov #hd,r0\n        mov #162620,r1\n'
-                            '        jsr pc,print\n        mov #help,r0')
-        text = text.replace('cmp r2,#3', 'cmp r2,#4').replace('PRESS 1-4', 'PRESS 1-5')
-        text = text.replace('help:   db', 'hd:     db "5  RT-11 5.7 XM / RL",0\nhelp:   db')
+    text = (text.replace('@MAX_PROFILE@', '5' if hard_disk else '4')
+            .replace('@RAM_KIB@', str(ram_kib))
+            .replace('@USABLE_KIB@', str(248 if ram_kib == 256 else ram_kib)))
     source.write_text(text)
     assembler = os.environ.get('MICROASM11', str(ROOT.parent/'microasm11/microasm11'))
     binary = out/'bios.bin'

@@ -75,12 +75,18 @@ def run(out):
         repeat(5)@(negedge clk);power_on=0;wait(initialized);@(negedge clk);initial_reset=0;
         wait(dut.cpu_start);
         if(BOOT_BIOS)begin
-            for(integer n=0;n<100;n++)begin
+            for(integer n=0;n<1000;n++)begin
                 #1000000;
-                if(has_text("PRESS 1-4"))break;
+                if(has_text("DEL: ENTER BIOS SETUP") || has_text("ESC: CANCEL CHANGES"))break;
             end
-            if(!dut.bus.boot_menu || !has_text("SELECT BOOT"))$fatal(1,"RAM test missed primary BIOS");
-            ps2_byte(8'h25); // Select TERAK4.CFG with the real keyboard path.
+            if(has_text("DEL: ENTER BIOS SETUP"))begin
+                ps2_byte(8'he0);ps2_byte(8'h71);
+                for(integer n=0;n<1000;n++)begin
+                    #1000000;if(has_text("ESC: CANCEL CHANGES"))break;
+                end
+            end
+            if(!dut.bus.boot_menu || !has_text("ESC: CANCEL CHANGES"))$fatal(1,"RAM test missed primary BIOS");
+            ps2_byte(8'h25);#20000000;ps2_byte(8'h5a); // Select TERAK4.CFG with the real keyboard path.
         end
         for(integer n=0;n<400;n++)begin
             #50000000;
@@ -116,6 +122,7 @@ endmodule
     command = ['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD', '-Wno-PINMISSING',
                '--top-module', 'tb_terak_boot', '-GDISPLAY_EBR=1', '-GRAM_BYTES=253952',
                f"-GBOOT_BIOS={int(hardware['boot_mode'] == 'bios')}",
+               f"-GRL_ENABLE={int(hardware['hard_disk'] == 'rl')}",
                f'-GMICROCODE="{CPU_OUT.relative_to(ROOT)}/microcode.mem"', '-j', '4', '--Mdir', str(out/'obj')]
     command += CORE+BOARD+GENERATED+[str(tb.relative_to(ROOT)), GUARD,
                                     'tests/models/async_sram_model.v', 'tests/models/spi_sd_model.v']

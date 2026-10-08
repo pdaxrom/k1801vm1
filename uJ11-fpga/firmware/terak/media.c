@@ -7,7 +7,7 @@ struct terak_media media[4] TERAK_COLD;
 #else
 struct terak_media media[4];
 #endif
-uint8_t track_meta[512];
+uint8_t track_meta[TERAK_TRACK_META_BYTES];
 #ifndef UJ11_TERAK_RL
 static struct sd_label sd_label;
 #endif
@@ -118,7 +118,7 @@ int track_load(unsigned unit, unsigned cylinder, unsigned head)
 		                ((u32)sector[4] << sector[5]) > 128 || media_crc(sector) != word(508)) {
 			return 0;
 		}
-		for (unsigned i = 0; i < 512; i++) {
+		for (unsigned i = 0; i < sizeof(track_meta); i++) {
 			track_meta[i] = sector[i];
 		}
 	} else {
@@ -173,7 +173,13 @@ int track_save(unsigned unit, unsigned cylinder, unsigned head)
 	if (media[unit].format != MEDIA_FD) {
 		return 1;
 	}
-	for (unsigned i = 0; i < 512; i++) {
+#ifdef UJ11_TERAK_RL
+	/* Keep the original reserved tail when updating CHRN/status entries. */
+	if (!fetch(media[unit].start + track_data(unit, cylinder, head) / 512 - 1)) {
+		return 0;
+	}
+#endif
+	for (unsigned i = 0; i < sizeof(track_meta); i++) {
 		sector[i] = track_meta[i];
 	}
 	u32 crc = media_crc(sector);

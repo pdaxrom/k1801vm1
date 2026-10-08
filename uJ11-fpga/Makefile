@@ -235,6 +235,7 @@ ifeq ($(TERAK_HD),rl)
 test: rt11-xm-image
 	$(PYTHON) tools/test_terak_rl.py --out $(OUT)/test-rl
 	$(PYTHON) tools/test_terak_rt11.py --system rt11xm --disk $(TERAK_RT11_DIR)/RT11XM57.rl01 --disk $(TERAK_RT11_DIR)/RT11KIT.rl02 --out $(OUT)/test-xm
+	$(PYTHON) tools/test_terak_setup.py --disk $(TERAK_RT11_DIR)/RT11XM57.rl01 --disk $(TERAK_RT11_DIR)/RT11KIT.rl02 --compiled $(OUT)/test-xm --out $(OUT)/test-setup
 else
 test:
 	$(PYTHON) tools/test_terak.py --out $(OUT)/test

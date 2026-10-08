@@ -13,8 +13,8 @@ struct partition {
 };
 #ifdef UJ11_TERAK_BIOS
 static struct partition partitions[PARTS] TERAK_COLD;
-static unsigned profile_number;
-static u32 card_capacity;
+static unsigned profile_number TERAK_COLD;
+static u32 card_capacity TERAK_COLD;
 #else
 static struct partition partitions[PARTS];
 #endif
@@ -350,7 +350,7 @@ int mbr_mount(u32 capacity)
 #ifdef UJ11_TERAK_BIOS
 int mbr_select(unsigned profile)
 {
-	if (profile < 1 || profile > (TERAK_UNITS == 8 ? 5 : 4)) {
+	if (profile > (TERAK_UNITS == 8 ? 5 : 4)) {
 		return 0;
 	}
 	struct terak_media saved[TERAK_UNITS];
@@ -365,13 +365,11 @@ int mbr_select(unsigned profile)
 		m->start = 0;
 	}
 	profile_number = profile;
-	int ok = mbr_mount(card_capacity) && (profile == 5 ?
+	int ok = mbr_mount(card_capacity) && (
 #ifdef UJ11_TERAK_RL
-	                                      rl_media[0].start :
-#else
-	                                      0 :
+	                 ((profile == 5 || !profile) && rl_media[0].start) ||
 #endif
-	                                      media[0].start);
+	                 (profile != 5 && media[0].start));
 	if (!ok) {
 		for (unsigned i = 0; i < TERAK_UNITS; i++) {
 			struct terak_media *m = media + (i & 3);
@@ -389,5 +387,18 @@ int mbr_select(unsigned profile)
 int mbr_bios(void)
 {
 	return partitions[0].type && fat_open("TBIOS   BIN", partitions[0].start, partitions[0].blocks, 4112) == 1;
+}
+
+int mbr_settings(void)
+{
+	return partitions[0].type && fat_open("TERAK   SET", partitions[0].start, partitions[0].blocks, 1024) == 1;
+}
+
+unsigned mbr_summary(unsigned unit)
+{
+	if (unit >= TERAK_UNITS || !selected[unit]) {
+		return 0;
+	}
+	return 0x8000 | (readonly[unit] << 14) | (formats[unit] << 8) | selected[unit];
 }
 #endif

@@ -361,7 +361,7 @@ void qb_service(void)
 					st0 |= 0x40;
 					st1 = 16;
 				} else {
-					for (unsigned i = 0; i < 512; i++) {
+					for (unsigned i = 0; i < sizeof(track_meta); i++) {
 						track_meta[i] = 0;
 					}
 					track_meta[0] = 'T';

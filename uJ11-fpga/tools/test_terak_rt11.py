@@ -14,7 +14,7 @@ from render_terak_screen import render
 
 
 def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
-        profile='fd', discard_status=False, menu_only=False, build_fb=False):
+        profile='fd', discard_status=False, menu_only=False, build_fb=False, setup_case=None):
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     hardware = build()
@@ -45,7 +45,19 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         volume = Fat16(data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512])
         choice = 1 if system == 'ucsd' else 3 if system == 'rt11fb' else 5 if system == 'rt11xm' else 2
         volume.put(f'TERAK{choice}.CFG', card['config'].encode())
-        volume.put('TERAK.CFG', b'version=1\ndrive0=off\ndrive1=off\ndrive2=off\ndrive3=off\n')
+        volume.put('TERAK.CFG', card['config'].encode())
+        if setup_case != 'missing':
+            settings = bytes(1024)
+            if setup_case == 'saved':
+                import struct
+                def record(sequence, profile):
+                    words = [0x4b54, 0x5453, 1, sequence, profile, profile ^ 65535, 0]+[0]*249
+                    words[6] = -sum(words) & 65535
+                    return struct.pack('<256H', *words)
+                settings = record(65535, 0)+record(0, choice)
+            volume.put('TERAK.SET', settings)
+            if setup_case == 'readonly':
+                volume.data[volume.files()['TERAK.SET'][0]+11] |= 1
         volume.put('TBIOS.BIN', (OUT/'bios/TBIOS.BIN').read_bytes())
         data[ALIGN*512:(ALIGN+FAT_BLOCKS)*512] = volume.data
         image.write_bytes(data)
@@ -59,6 +71,15 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         (out/'bios-font.hex').write_text(''.join(f'{b:02x}\n' for b in expected_font))
         bios_args = ([] if choice == 3 else ['+BIOS_BAD_CHOICE']) + [f'+BIOS_CHOICE={choice}', f'+BIOS_FONT={out}/bios-font.hex',
                      f'+BIOS_SCREEN_MEMORY={out}/bios-screen.hex']
+        if 'TERAK.SET' in volume.files():
+            import struct
+            chain = volume.chain(struct.unpack_from('<H', volume.files()['TERAK.SET'][1], 26)[0])
+            sectors = [ALIGN+(volume.first+(c-2)*volume.cluster_size)//512+b
+                       for c in chain for b in range(volume.spc)][:2]
+            bios_args += [f'+SET0={sectors[0]}', f'+SET1={sectors[1]}']
+        bios_args += {'save': ['+BIOS_SAVE_OK'], 'saved': ['+BIOS_SAVED'], 'timeout': ['+BIOS_TIMEOUT'],
+                      'missing': ['+BIOS_SAVE_ERROR'], 'readonly': ['+BIOS_SAVE_ERROR'],
+                      'failed': ['+BIOS_SAVE_ERROR', '+BIOS_FAIL_SAVE']}.get(setup_case, [])
     elif selection_only or menu_only:
         raise ValueError('BIOS menu/selection checks require UJ11_TERAK_BOOT=bios')
     boot_args = ([] if system == 'ucsd' else ['+RT11'])
@@ -96,7 +117,8 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         text = (out/(name+'.log')).read_text()
         if result.returncode:
             raise RuntimeError(text[-8000:])
-    expected = ('PASS native RT-11 FB disk preparation' if build_fb else
+    expected = ('PASS BIOS ten-second automatic default boot' if setup_case == 'timeout' else
+                'PASS native RT-11 FB disk preparation' if build_fb else
                 'PASS primary BIOS font and menu' if menu_only else 'PASS BIOS selection' if selection_only
                 else 'PASS Terak cold ROM/SD UCSD' if system == 'ucsd'
                 else 'PASS native TERAK RT-11')
@@ -104,13 +126,13 @@ def run(disks, out, system='rt11', selection_only=False, mechanical_speedup=1,
         raise AssertionError('Boot did not pass or changed the original card file')
     if any(hashlib.sha256((ROOT/p).read_bytes()).hexdigest() != digest for p, digest in hashes.items()):
         raise AssertionError('Source changed during qualification')
-    if bios_args:
+    if bios_args and setup_case != 'timeout':
         import re
         registers = re.search(r'BIOS_SCREEN GAR=(\d+) VIR=(\d+) VCR=(\d+)', text)
         if not registers:
             raise AssertionError('Missing BIOS display snapshot')
         render(out/'bios-screen.hex', *map(int, registers.groups()), out/'bios-screen.png')
-    if not selection_only and not menu_only and not build_fb:
+    if not selection_only and not menu_only and not build_fb and setup_case != 'timeout':
         import re
         registers = re.search(r'SCREEN GAR=(\d+) VIR=(\d+) VCR=(\d+)', text)
         if not registers:
@@ -138,6 +160,7 @@ if __name__ == '__main__':
                         help='Accelerate QX mechanical waits only; CPU/SPI/video remain at native rates')
     parser.add_argument('--profile', choices=('fd', 'sssd'), default='fd')
     parser.add_argument('--discard-status', action='store_true', help='Explicitly permit IMD status loss in raw media')
+    parser.add_argument('--setup-case', choices=('save', 'saved', 'timeout', 'missing', 'readonly', 'failed'))
     args = parser.parse_args()
     run(args.disk, args.out, args.system, args.selection_only, args.mechanical_speedup, args.profile,
-        args.discard_status, args.menu_only, args.build_fb)
+        args.discard_status, args.menu_only, args.build_fb, args.setup_case)

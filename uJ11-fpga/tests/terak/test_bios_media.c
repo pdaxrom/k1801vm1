@@ -58,7 +58,14 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	printf("\",\"valid\":%d}\n", valid && !count);
+	printf("\",\"valid\":%d,\"settings\":[", valid && !count);
+	for (unsigned writing = 0; writing < 2; writing++) {
+		for (unsigned slot = 0; slot < 2; slot++) {
+			u32 lba = mbr_settings() ? fat_setting(slot, writing) : 0;
+			printf("%s%u", writing || slot ? "," : "", lba);
+		}
+	}
+	puts("]}");
 	free(card);
 	return 0;
 }

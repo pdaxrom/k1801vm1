@@ -32,16 +32,22 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
         .diagnostic_halt(),.diagnostic_wait(),.diagnostic_retire(),.diagnostic_mode());
     async_sram_model ram(.address(sa),.data(sd),.ce_n(ce),.oe_n(oe),.we_n(we),.lb_n(lb),.ub_n(ub));
     spi_sd_model #(.SECTORS(256)) card(.cs_n(cs),.sck(sck),.mosi(mosi),.miso(miso),
-        .absent(1'b0),.fail_read(1'b0),.fail_write(1'b0),.stuck_busy(1'b0),
+        .absent(1'b0),.fail_read(1'b0),.fail_write(fail_settings_write),.stuck_busy(1'b0),
         .bad_ocr(1'b0),.bad_echo(1'b0),.bad_status(1'b0));
-    integer data_base=0,data_blocks=0,last_writes=0;
+    wire fail_settings_write=$test$plusargs("BIOS_FAIL_SAVE") && dut.bus.boot_menu;
+    integer data_base=0,data_blocks=0,last_writes=0,set0=0,set1=0;
+    initial begin
+        if($value$plusargs("SET0=%d",set0))begin end
+        if($value$plusargs("SET1=%d",set1))begin end
+    end
     initial begin
         if($value$plusargs("DATA_BASE=%d",data_base))begin
             if(!$value$plusargs("DATA_BLOCKS=%d",data_blocks))$fatal(1,"disk extent required");
         end
     end
-    always @(negedge clk)if(data_base && card.write_commands!=last_writes)begin
-        if(card.write_lba<data_base || card.write_lba>=data_base+data_blocks)
+    always @(negedge clk)if((data_base || set0) && card.write_commands!=last_writes)begin
+        if(!(set0 && (card.write_lba==set0 || card.write_lba==set1)) &&
+           !(data_base && card.write_lba>=data_base && card.write_lba<data_base+data_blocks))
             $fatal(1,"disk write escaped partition into MBR/FAT/other media: %0d",card.write_lba);
         last_writes=card.write_commands;
     end
@@ -254,11 +260,11 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
             $fatal(1,"warm guest reboot failed");
         fonts_before=font_writes;
         button_n=0;repeat(240)@(negedge clk);button_n=1;
-        for(integer n=0;n<400;n++)begin
+        for(integer n=0;n<1000;n++)begin
             #1000000;
-            if(dut.bus.boot_menu && font_writes>fonts_before && has_text(RL_ENABLE ? "PRESS 1-5" : "PRESS 1-4"))break;
+            if(dut.bus.boot_menu && font_writes>fonts_before && has_text("ESC: CANCEL CHANGES"))break;
         end
-        if(!dut.bus.boot_menu || !has_text("SELECT BOOT"))$fatal(1,"long reset did not return to BIOS");
+        if(!dut.bus.boot_menu || !has_text("ESC: CANCEL CHANGES"))$fatal(1,"long reset did not open Setup directly");
         check_bios_font();
         $display("PASS BIOS menu, selection, short/medium/long Reset and preserved media");
     endtask
@@ -271,11 +277,37 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
             integer choice;
             choice=2;
             if($value$plusargs("BIOS_CHOICE=%d",choice))begin end
-            for(integer n=0;n<100;n++)begin
+            for(integer n=0;n<1000;n++)begin
                 #1000000;
-                if(has_text(RL_ENABLE ? "PRESS 1-5" : "PRESS 1-4"))break;
+                if(dut.bus.vcr==7 && (has_text("DEL: ENTER BIOS SETUP") || has_text("ESC: CANCEL CHANGES")))break;
             end
-            if(!has_text("SELECT BOOT") || !dut.bus.boot_menu)$fatal(1,"primary BIOS did not reach native menu");
+            if(has_text("DEL: ENTER BIOS SETUP"))begin
+                if($test$plusargs("BIOS_SAVED"))begin
+                    if(!has_text("SAVED SELECTION FROM TERAK.SET"))$fatal(1,"saved record not selected");
+                    if($test$plusargs("BIOS_EXPECT_DEFAULT") ? !has_text("BOOT CONFIGURATION: DEFAULT") :
+                       !has_text("BOOT CONFIGURATION: RT-11 5.7 XM"))$fatal(1,"wrong saved generation/profile selected");
+                end else if(!has_text("DEFAULT CONFIGURATION: TERAK.CFG"))$fatal(1,"missing default summary");
+                if($test$plusargs("BIOS_TIMEOUT"))begin
+                    time started;
+                    started=$time;
+                    for(integer n=0;n<12000;n++)begin
+                        #1000000;
+                        if(!dut.bus.boot_menu)break;
+                    end
+                    if(dut.bus.boot_menu || $time-started<9900000000 || $time-started>10300000000)
+                        $fatal(1,"autoboot did not wait 10 real seconds: %0t",$time-started);
+                    $display("PASS BIOS ten-second automatic default boot");$finish;
+                end
+                ps2_byte(8'he0);ps2_byte(8'h71);
+                for(integer n=0;n<1000;n++)begin
+                    #1000000;
+                    if(dut.bus.vcr==7 && has_text("ESC: CANCEL CHANGES"))break;
+                end
+            end
+            if(!has_text("ESC: CANCEL CHANGES") || !dut.bus.boot_menu)begin
+                screen();
+                $fatal(1,"primary BIOS did not reach Setup PC=%o",dut.cpu.pc);
+            end
             check_bios_font();
             if($value$plusargs("BIOS_SCREEN_MEMORY=%s",snapshot))begin
                 save_screen(snapshot);
@@ -289,16 +321,78 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
             #20000000;
             if($test$plusargs("BIOS_BAD_CHOICE"))begin
                 ps2_byte(8'h26); // 3, intentionally absent TERAK3.CFG
-                // A shared FAT root can contain many more files than the
-                // isolated test card. Wait for the real rejection response.
-                for(integer n=0;n<100;n++)begin
-                    #1000000;
-                    if(has_text("UNAVAILABLE"))break;
-                end
-                if(!has_text("UNAVAILABLE") || !dut.bus.boot_menu)$fatal(1,"bad BIOS configuration escaped the menu");
+                #20000000;
+                if(has_text("RT-11 FB") || !dut.bus.boot_menu)$fatal(1,"unavailable profile was selectable");
             end
-            ps2_byte(choice==1 ? 8'h16 : choice==2 ? 8'h1e : choice==3 ? 8'h26 : choice==4 ? 8'h25 : 8'h2e);
+            ps2_byte(choice==0 ? 8'h45 : choice==1 ? 8'h16 : choice==2 ? 8'h1e : choice==3 ? 8'h26 : choice==4 ? 8'h25 : 8'h2e);
+            #20000000;
+            ps2_byte($test$plusargs("BIOS_SAVE_OK") || $test$plusargs("BIOS_SAVE_ERROR") ? 8'h09 : 8'h5a);
             #200000000;
+            // Shared cards can mount three CRC-checked floppy headers here.
+            // Wait for the service handshake instead of assuming 200 ms.
+            if(!$test$plusargs("BIOS_SAVE_ERROR"))begin
+                for(integer n=0;n<2000 && dut.bus.boot_menu;n++)#1000000;
+            end
+            if($test$plusargs("BIOS_SAVE_ERROR"))begin
+                if(!dut.bus.boot_menu || !has_text("CANNOT SAVE TERAK.SET"))$fatal(1,"save failure escaped Setup");
+                ps2_byte(8'h5a);#200000000;
+            end
+            if($test$plusargs("BIOS_SAVE_OK"))begin
+                integer sum,slot;
+                if(dut.bus.boot_menu || card.write_commands!=1 || card.dirty_count!=1 || card.dirty_lba[0]!=set0)
+                    $fatal(1,"F10 did not write exactly the inactive settings sector");
+                slot=card.overlay_slot(set0);sum=0;
+                for(integer i=0;i<256;i++)sum=(sum+card.memory[slot*512+i*2]+(card.memory[slot*512+i*2+1]<<8))&65535;
+                if(sum || card.memory[slot*512+6]!=1 || card.memory[slot*512+8]!=choice)
+                    $fatal(1,"invalid saved record checksum/generation/profile");
+                // A new power cycle must recover the saved choice from SD, without host patches.
+                initial_reset=1;power_on=1;repeat(5)@(negedge clk);power_on=0;
+                wait(!initialized);wait(initialized);@(negedge clk);initial_reset=0;wait(dut.cpu_start);
+                for(integer n=0;n<1000;n++)begin
+                    #1000000;
+                    if(has_text("DEL: ENTER BIOS SETUP") && has_text("SAVED SELECTION FROM TERAK.SET"))break;
+                end
+                if(!has_text("SAVED SELECTION FROM TERAK.SET"))$fatal(1,"saved configuration lost after power cycle");
+                // ENTER boots saved; later warm/long-reset checks exercise the same media.
+                ps2_byte(8'h5a);#200000000;
+                $display("PASS BIOS F10 verified sector write and saved selection after power cycle");
+            end
+            if($test$plusargs("BIOS_ACTIONS"))begin
+                integer old_writes,old_fonts;
+                old_writes=card.write_commands;old_fonts=font_writes;
+                button_n=0;repeat(240)@(negedge clk);button_n=1;
+                for(integer n=0;n<1000;n++)begin
+                    #1000000;if(dut.bus.boot_menu && font_writes>=old_fonts+960 && dut.bus.vcr==7 &&
+                                 has_text("ESC: CANCEL CHANGES"))break;
+                end
+                if(!dut.bus.boot_menu || !has_text("ESC: CANCEL CHANGES"))begin
+                    screen();
+                    $fatal(1,"long Reset: menu=%b start=%b requested=%b old/new font=%0d/%0d pending=%b idle=%b CPU=%o SERV=%h",
+                        dut.bus.boot_menu,dut.bus.boot_started,dut.bus.setup_requested,old_fonts,font_writes,
+                        button.pending,storage_idle,dut.cpu.pc,dut.bus.disk.ia);
+                end
+                // Up wraps default -> last available profile; Down returns to default.
+                ps2_byte(8'he0);ps2_byte(8'h75);#20000000;
+                ps2_byte(8'he0);ps2_byte(8'h72);#20000000;
+                ps2_byte(8'h45);#20000000;ps2_byte(8'h76);#200000000; // select 0, ESC
+                if(dut.bus.boot_menu || card.write_commands!=old_writes)$fatal(1,"ESC failed or changed settings");
+                if($test$plusargs("BIOS_SAVE_OK"))begin
+                    integer slot,sum;
+                    old_fonts=font_writes;
+                    button_n=0;repeat(240)@(negedge clk);button_n=1;
+                    for(integer n=0;n<1000;n++)begin
+                        #1000000;if(dut.bus.boot_menu && font_writes>=old_fonts+960 && dut.bus.vcr==7 &&
+                                 has_text("ESC: CANCEL CHANGES"))break;
+                    end
+                    if(!has_text("ESC: CANCEL CHANGES"))$fatal(1,"second long Reset");
+                    ps2_byte(8'h45);#20000000;ps2_byte(8'h09);#200000000;
+                    slot=card.overlay_slot(set1);sum=0;
+                    if(dut.bus.boot_menu || card.write_commands!=old_writes+1 || slot<0)$fatal(1,"second save did not alternate sectors");
+                    for(integer i=0;i<256;i++)sum=(sum+card.memory[slot*512+i*2]+(card.memory[slot*512+i*2+1]<<8))&65535;
+                    if(sum || card.memory[slot*512+6]!=2 || card.memory[slot*512+8]!=0)$fatal(1,"second saved record");
+                end
+                $display("PASS BIOS arrows, one-time boot, ESC without writes, direct long-Reset Setup and alternating saves");
+            end
             if($test$plusargs("BIOS_ONLY"))begin
                 $display("BIOS PC=%o menu=%b request=%b/%b addr=%o ready/error=%b/%b SERV ia=%h da=%h pending=%b",
                     dut.cpu.pc,dut.bus.boot_menu,dut.request,dut.writing,dut.address,dut.ready,dut.error,

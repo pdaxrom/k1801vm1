@@ -127,7 +127,7 @@ def prepare(source, bios, disks, out, capacity, profile=2):
                                                  'TERAK3.CFG', 'TERAK4.CFG')) or \
                 any(name in old_files for name in ('TERAK5.CFG', 'TBIOS.OLD')):
             raise ValueError('Expected the existing SJ/FB BIOS card without an XM profile')
-        if b'5  RT-11' not in boot:
+        if b'5  RT-11' not in boot and b'RT-11 5.7 XM / RL' not in boot:
             raise ValueError('XM requires the generated RL BIOS with menu choice 5')
         configs = {'TERAK5.CFG': ('version=1\ndrive0=off\ndrive1=off\ndrive2=off\ndrive3=off\n'
                                  f'rl0={additions[0]["partition"]},raw,rl01,rw\n'

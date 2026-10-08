@@ -16,7 +16,13 @@ enum { MEDIA_FD, RAW_SSSD, RAW_DSSD, RAW_SSDD, RAW_DSDD, RAW_TERAK_SSDD, RAW_TER
 #endif
 extern struct terak_media media[4];
 extern volatile uint8_t *const sector;
-extern uint8_t track_meta[512];
+#ifdef UJ11_TERAK_RL
+/* TRK1 header plus all 32 eight-byte sector entries; tail is reserved. */
+#define TERAK_TRACK_META_BYTES 288
+#else
+#define TERAK_TRACK_META_BYTES 512
+#endif
+extern uint8_t track_meta[TERAK_TRACK_META_BYTES];
 int fetch(u32 lba);
 int store(u32 lba);
 u32 word(unsigned offset);
@@ -36,8 +42,11 @@ int mbr_mount(u32 capacity);
 #endif
 int mbr_select(unsigned profile);
 int mbr_bios(void);
+int mbr_settings(void);
+unsigned mbr_summary(unsigned unit);
 int fat_open(const char *name, u32 start, u32 blocks, unsigned limit);
 int fat_read(void);
+u32 fat_setting(unsigned slot, unsigned writing);
 int bios_load(void);
 int bios_poll(void);
 void publish_media(unsigned menu);

@@ -1,10 +1,10 @@
-/* Bounded read-only FAT16 loader for the optional primary BIOS.
- * Every cluster link is checked against both FATs; no metadata is written. */
+/* Bounded FAT16 loader. Settings writes use preallocated file data only;
+ * every cluster link is checked against both FATs. No metadata is written. */
 #include "terak.h"
 
 static struct {
-	u32 start, data, fat, clusters, size, remaining;
-	unsigned cluster, next, block, spc, copies, spf;
+	u32 start, data, fat, clusters, size, remaining, position;
+	unsigned cluster, next, block, spc, copies, spf, readonly;
 } file TERAK_COLD;
 
 static unsigned half(unsigned p)
@@ -55,6 +55,7 @@ int fat_open(const char *name, u32 start, u32 blocks, unsigned limit)
 			}
 			file.cluster = half(p + 26);
 			file.size = word(p + 28);
+			file.readonly = sector[p + 11] & 1;
 			if (file.cluster < 2 || file.cluster >= 0xfff0 || file.cluster >= file.clusters + 2 ||
 			                !file.size || file.size > limit) {
 				return -1;
@@ -87,7 +88,8 @@ int fat_read(void)
 			return -1;
 		}
 	}
-	if (!fetch(file.start + file.data + (file.cluster - 2) * file.spc + file.block)) {
+	file.position = file.start + file.data + (file.cluster - 2) * file.spc + file.block;
+	if (!fetch(file.position)) {
 		return -1;
 	}
 	unsigned count = file.remaining < 512 ? file.remaining : 512;
@@ -97,4 +99,17 @@ int fat_read(void)
 		file.cluster = file.next;
 	}
 	return count;
+}
+
+/* Validate both separate records before exposing either data-sector LBA. */
+u32 fat_setting(unsigned slot, unsigned writing)
+{
+	if (slot > 1 || file.size != 1024 || (writing && file.readonly) || fat_read() != 512) {
+		return 0;
+	}
+	u32 first = file.position;
+	if (fat_read() != 512) {
+		return 0;
+	}
+	return slot ? file.position : first;
 }

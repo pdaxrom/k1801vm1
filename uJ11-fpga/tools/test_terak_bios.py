@@ -12,7 +12,7 @@ from test_terak_rt11 import run as boot
 def run(out):
     out = out.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    for pattern in ('test_terak_bios.py', 'test_terak_profiles.py'):
+    for pattern in ('test_terak_bios.py', 'test_terak_profiles.py', 'test_terak_setup_sd.py', 'test_terak_sd_upgrade.py'):
         subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests', '-p', pattern, '-v'],
                        cwd=ROOT, check=True)
     subprocess.run(['iverilog', '-g2012', '-s', 'tb_terak_button', '-o', str(out/'button'),

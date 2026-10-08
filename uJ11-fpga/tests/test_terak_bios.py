@@ -148,8 +148,44 @@ class TerakBiosTests(unittest.TestCase):
         self.assertEqual(r['drives'], [self.info['disks'][3]['start'], self.info['disks'][0]['start'], 0, 0])
         self.assertEqual(bytes.fromhex(r['bios']), self.payload)
 
+    def test_default_profile_and_settings_bounds(self):
+        f = self.volume()
+        f.put('TERAK.SET', bytes(1024))
+        r = self.check(f, 0)
+        self.assertEqual(r['selected'], 1)
+        self.assertTrue(all(r['settings']))
+        _, entry, _ = f.files()['TERAK.SET']
+        chain = f.chain(struct.unpack_from('<H', entry, 26)[0])
+        expected = [ALIGN+(f.first+(c-2)*f.cluster_size)//512 for c in chain]
+        self.assertEqual(r['settings'], expected*2)
+        f.data[f.files()['TERAK.SET'][0]+11] |= 1
+        self.assertEqual(self.check(f)['settings'], expected+[0, 0])
+        for size in (512, 1023, 1025):
+            f = self.volume()
+            f.put('TERAK.SET', bytes(size))
+            self.assertEqual(self.check(f)['settings'], [0]*4)
+
+    def test_settings_fragmentation_and_invalid_chains(self):
+        for kind in ('fragmented', 'short', 'long', 'cycle', 'bad', 'copies', 'outside'):
+            with self.subTest(kind=kind):
+                f = self.volume()
+                f.put('TERAK.SET', bytes(1024))
+                _, entry, _ = f.files()['TERAK.SET']
+                chain = f.chain(struct.unpack_from('<H', entry, 26)[0])
+                value = dict(fragmented=40, short=0xffff, long=40, cycle=chain[0], bad=0xfff7,
+                             copies=0xffff, outside=f.clusters+2)[kind]
+                at = chain[-1] if kind == 'long' else chain[0]
+                for copy in range(1 if kind == 'copies' else 2):
+                    struct.pack_into('<H', f.data, f.fat+copy*f.fat_size+at*2, value)
+                    if kind == 'fragmented':
+                        struct.pack_into('<H', f.data, f.fat+copy*f.fat_size+40*2, 0xffff)
+                r = self.check(f)
+                self.assertEqual(all(r['settings']), kind == 'fragmented')
+                if kind != 'fragmented':
+                    self.assertEqual(r['settings'], [0]*4)
+
     def test_failed_selection_keeps_previous_mounts(self):
-        for profile in (0, 2, 5):
+        for profile in (2, 5):
             r = self.check(self.volume(), profile)
             self.assertEqual(r['selected'], 0)
             self.assertEqual(r['drives'], [d['start'] for d in self.info['disks']])

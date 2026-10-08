@@ -58,6 +58,12 @@ int main(void)
 	keyboard_ready = 1;
 	keyboard_poll(0);
 	assert(count == 9 && output[8] == 'b' && !keyboard_output_pending);
+#ifdef UJ11_TERAK_BIOS
+	key(0x09);
+	key(0xf0);
+	key(0x09);
+	assert(count == 10 && output[9] == 035);
+#endif
 	puts("PASS Terak ASCII/control cursor keys and keyboard backpressure");
 	return 0;
 }

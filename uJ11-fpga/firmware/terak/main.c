@@ -33,10 +33,13 @@ void publish_media(unsigned menu)
 		}
 	}
 	unsigned qb_boot = media[0].start && track_load(0, 1, 0) && track_meta[6];
-	QX(3) = present | (readonly << 4) | (qb_boot << 8) | (menu << 9);
+	/* Write the complete media state once. Bit 31 is a read/acknowledge
+	 * latch for long Reset and must not be echoed by a media update. */
+	QX(3) = present | (readonly << 4) | (qb_boot << 8) | (menu << 9)
 #ifdef UJ11_TERAK_RL
-	QX(3) |= (rl_media[0].start != 0) << 10;
+	        | ((rl_media[0].start != 0) << 10)
 #endif
+	        ;
 }
 #endif
 

@@ -111,7 +111,20 @@ module uj11_terak_bus #(
         .dac(tvout),.underruns(underruns),.field_toggle(field_toggle));
     wire service_write;
     wire [6:0] service_address;
-    wire [31:0] service_data,service_read;
+    wire [31:0] service_data,service_read,qx_service_read;
+    // Remember that a guest has run before: cold_reset clears CPU_START in
+    // the SERV bridge before this clock edge. The latch survives SERV resets
+    // but clears on power-on, so initial SRAM clearing cannot request Setup.
+    reg setup_requested,boot_started;
+    always @(posedge clk)begin
+        if(power_on)begin setup_requested<=0;boot_started<=0;end
+        else begin
+            if(cpu_start)boot_started<=1;
+            if(BOOT_BIOS && cold_reset && boot_started)setup_requested<=1;
+            else if(service_write && service_address==3 && service_data[31])setup_requested<=0;
+        end
+    end
+    assign service_read=qx_service_read | {BOOT_BIOS && setup_requested && service_address==3,31'b0};
     wire qx_ready,qx_error,qx_busy,qx_irq,boot_qb,boot_menu,boot_rl,disk_idle;
     assign storage_idle=disk_idle && !qx_busy;
     wire [15:0] qx_data;
@@ -119,7 +132,7 @@ module uj11_terak_bus #(
         .request(request && qx_selected),.writing(writing),.data_register(address[1]),
         .write_data(write_data),.read_data(qx_data),.ready(qx_ready),.error(qx_error),.busy(qx_busy),.boot_qb(boot_qb),.boot_menu(boot_menu),.boot_rl(boot_rl),
         .irq_ack(irq_ack && irq_priority==4 && qx_irq),.irq(qx_irq),
-        .service_write(service_write),.service_address(service_address),.service_data(service_data),.service_read(service_read));
+        .service_write(service_write),.service_address(service_address),.service_data(service_data),.service_read(qx_service_read));
     wire key_valid,key_ready,console_irq;
     wire [7:0] key_data;
     wire [15:0] console_data,console_vector;
