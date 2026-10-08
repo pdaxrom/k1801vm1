@@ -1,5 +1,7 @@
-/* RLV11: four 16-bit registers at 174400, vector 160, 18-bit Q-bus DMA.
- * DEC EK-RLV11-TD-001, chapter 3. The command/sector algorithms follow
+/* RLV11: four registers at 174400, vector 160, 18-bit Q-bus DMA.
+ * The 2 MiB profile uses RLV12's fifth register and 22-bit DMA.
+ * DEC EK-RLV11-TD-001 chapter 3 / EK-RLV12-UG-002 section 4.6.
+ * The command/sector algorithms follow
  * uJ11's existing SERV RL implementation; no expanded floppy geometry.
  * RL01/RL02 raw images contain 40 x 256-byte sectors per track, two heads.
  */
@@ -7,13 +9,20 @@
 
 struct terak_media rl_media[4] TERAK_COLD;
 unsigned rl_irq TERAK_COLD;
-static uint16_t registers[4] TERAK_COLD, position[4] TERAK_COLD, header_crc TERAK_COLD;
+#ifdef UJ11_TERAK_RLV12
+#define RL_REGISTERS 5
+#define RL_ADDRESS_MASK 0x3fffff
+#else
+#define RL_REGISTERS 4
+#define RL_ADDRESS_MASK 0x3ffff
+#endif
+static uint16_t registers[RL_REGISTERS] TERAK_COLD, position[4] TERAK_COLD, header_crc TERAK_COLD;
 static uint8_t rotation[4] TERAK_COLD, header_index TERAK_COLD;
 static unsigned busy TERAK_COLD, epoch TERAK_COLD, generation TERAK_COLD;
 
 __attribute__((noinline)) void rl_reset(void)
 {
-	for (unsigned i = 0; i < 4; i++) {
+	for (unsigned i = 0; i < RL_REGISTERS; i++) {
 		registers[i] = 0;
 	}
 	registers[0] = 0200;
@@ -25,10 +34,14 @@ __attribute__((noinline)) void rl_reset(void)
 int rl_poll(u32 request)
 {
 	unsigned address = request & 017776;
+#ifdef UJ11_TERAK_RLV12
+	if (address < 014400 || address > 014410) {
+#else
 	if ((address & ~7u) != 014400) {
+#endif
 		return 0;
 	}
-	unsigned index = (address >> 1) & 3, lanes = (request >> 14) & 3;
+	unsigned index = (address >> 1) & (RL_REGISTERS == 5 ? 7 : 3), lanes = (request >> 14) & 3;
 	unsigned cs = registers[0], unit = (cs >> 8) & 3;
 	unsigned value = registers[index];
 	if (!index) {
@@ -45,6 +58,9 @@ int rl_poll(u32 request)
 			}
 			if (!busy) {
 				registers[0] = (merged & 01776) | 0200;
+#ifdef UJ11_TERAK_RLV12
+				registers[4] = (registers[4] & ~3u) | ((merged >> 4) & 3);
+#endif
 				if ((lanes & 1) && !(merged & 0200)) {
 					registers[0] &= ~0200u;
 					busy = 1;
@@ -54,6 +70,12 @@ int rl_poll(u32 request)
 			}
 		} else if (!busy) {
 			registers[index] = merged & (index == 1 ? 0177776 : 0177777);
+#ifdef UJ11_TERAK_RLV12
+			if (index == 4) {
+				registers[4] &= 077;
+				registers[0] = (cs & ~060u) | ((registers[4] & 3) << 4);
+			}
+#endif
 			header_index = 0;
 		}
 	} else if (index == 3 && (lanes & 2) && header_index) {
@@ -138,7 +160,11 @@ static unsigned command(void)
 	if (overrun) {
 		left = maximum;
 	}
+#ifdef UJ11_TERAK_RLV12
+	u32 address = registers[1] | ((u32)registers[4] << 16);
+#else
 	u32 address = registers[1] | ((cs & 060) << 12);
+#endif
 	unsigned original = registers[2], done = 0;
 	while (left && valid()) {
 		unsigned offset = sec & 1 ? 128 : 0, span = offset ? 128 : 256;
@@ -156,7 +182,8 @@ static unsigned command(void)
 			return 0;
 		}
 		DMA_ADDR = address;
-		DMA_MODE = 0; /* Physical 18-bit Q-bus; no UNIBUS map. */
+		/* The sector engine selects 18- or 22-bit address arithmetic here. */
+		DMA_MODE = RL_REGISTERS == 5;
 		DMA_COUNT = count;
 		WINDOW = offset | ((offset + span) << 8);
 		u32 status = transfer(fn == 5 ? LOAD : fn == 1 ? COMPARE : STORE);
@@ -177,10 +204,13 @@ static unsigned command(void)
 		}
 		left -= count;
 		done += count;
-		address = (address + 2 * count) & 0x3ffff;
+		address = (address + 2 * count) & RL_ADDRESS_MASK;
 		sec += (count + 127) >> 7;
 		registers[3] += count;
 		registers[1] = address;
+#ifdef UJ11_TERAK_RLV12
+		registers[4] = address >> 16;
+#endif
 		registers[0] = (registers[0] & ~060u) | ((address >> 12) & 060);
 		registers[2] = original + ((done + 127) >> 7);
 	}

@@ -19,14 +19,16 @@ HD = os.environ.get('UJ11_TERAK_HD', 'none')
 if HD not in ('none', 'rl') or HD == 'rl' and BOOT != 'bios':
     raise ValueError('UJ11_TERAK_HD must be none, or rl with BIOS boot')
 GUEST_RAM_KIB = int(os.environ.get('UJ11_TERAK_RAM_KIB', '56'))
-if GUEST_RAM_KIB not in (56, 128, 256):
-    raise ValueError('UJ11_TERAK_RAM_KIB must be 56, 128 or 256')
+if GUEST_RAM_KIB not in (56, 128, 256, 2048):
+    raise ValueError('UJ11_TERAK_RAM_KIB must be 56, 128, 256 or 2048')
 DISPLAY = os.environ.get('UJ11_TERAK_DISPLAY', 'sram' if GUEST_RAM_KIB == 56 else 'ebr')
 if DISPLAY not in ('sram', 'ebr'):
     raise ValueError('UJ11_TERAK_DISPLAY must be sram or ebr')
 if GUEST_RAM_KIB != 56 and DISPLAY != 'ebr':
     raise ValueError('Extended TERAK RAM requires separate EBR display memory')
 # The early LSI-11/23 has an 18-bit Q-bus; its top 8 KiB is I/O.
+# The 2 MiB extension uses the J11's 22-bit mode and canonical 4 MiB I/O
+# page, so all installed SRAM remains available to the guest.
 GUEST_RAM_BYTES = 248*1024 if GUEST_RAM_KIB == 256 else GUEST_RAM_KIB*1024
 OUT = ROOT/('build/hc7000-terak-'+str(GUEST_RAM_KIB)+'k' if GUEST_RAM_KIB != 56 else
             'build/hc7000-terak-ebr' if DISPLAY == 'ebr' else 'build/hc7000-terak')
@@ -88,6 +90,8 @@ def firmware(rebuild=False):
         base_flags += ['-flto', '-msave-restore', '-mshorten-memrefs']
     if HD == 'rl':
         base_flags.append('-DUJ11_TERAK_RL')
+        if GUEST_RAM_KIB == 2048:
+            base_flags.append('-DUJ11_TERAK_RLV12')
     record_path = IOP_OUT/'build.json'
     if record_path.exists() and not rebuild and not os.environ.get('RISCV_CC'):
         record = json.loads(record_path.read_text())
@@ -259,7 +263,8 @@ def build(rebuild=False):
                   boot_pc_octal='173774' if BOOT == 'bios' else '173000', boot_mode=BOOT, bios=bios,
                   hard_disk=HD,
                   guest_ram_bytes=GUEST_RAM_BYTES,
-                  memory_configuration_kib=GUEST_RAM_KIB, physical_address_bits=18,
+                  memory_configuration_kib=GUEST_RAM_KIB, physical_address_bits=22 if GUEST_RAM_KIB == 2048 else 18,
+                  rl_controller='rlv12' if HD == 'rl' and GUEST_RAM_KIB == 2048 else 'rlv11' if HD == 'rl' else None,
                   expected_ebr=26, diagnostics=diagnostics,
                   display_storage=DISPLAY, display_ebr=4 if DISPLAY == 'ebr' else 0,
                   video='native Terak compositor; monochrome PAL-60 525/60 presentation', bevent_hz=60,

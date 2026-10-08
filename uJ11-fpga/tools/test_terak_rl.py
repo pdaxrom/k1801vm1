@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Real SERV/SD qualification of the TERAK RLV11 build; regular images only."""
+"""Real SERV/SD qualification of the TERAK RLV11/RLV12 build; regular images only."""
 import argparse
 import hashlib
 import json
@@ -48,6 +48,7 @@ def run(out):
     commands = [
         ('build', ['verilator', '--binary', '--timing', '-Wno-WIDTH', '-Wno-TIMESCALEMOD',
                    '-Wno-PINMISSING', '--top-module', top, '-j', '4', '--Mdir', str(out/'obj')]+
+                  [f"-GRAM_BYTES={hardware['guest_ram_bytes']}"]+
                   CORE+BOARD+GENERATED+['tests/terak/'+top+'.v', GUARD,
                                       'tests/models/async_sram_model.v', 'tests/models/spi_sd_model.v']),
         ('controller', [str(out/'obj'/('V'+top))]+memory_args(hardware)+[f'+SD_IMAGE={image}',

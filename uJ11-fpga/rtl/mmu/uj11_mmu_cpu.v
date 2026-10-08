@@ -4,7 +4,8 @@
 module uj11_mmu_cpu #(
     parameter MICROCODE="build/hc7000-mmu-hardware/microcode.mem",
     parameter REGISTER_MICROCODE=0,
-    parameter [15:0] BOOT_PC=16'o004000
+    parameter [15:0] BOOT_PC=16'o004000,
+    parameter [15:0] CMR_VALUE=16'o001045
 )(
     input wire clk, reset, halt_button,
     input wire irq_valid,
@@ -282,10 +283,11 @@ module uj11_mmu_cpu #(
     assign mem_write_data=mapped_write_data;
     assign mapped_ready=cpu_csr_selected ? mapped_request : mem_ready;
     assign mapped_error=!cpu_csr_selected && mem_error;
-    // J11 CMR is read-only; 001045 identifies the reset CPU configuration.
+    // J11 CMR is read-only and describes the board's reset configuration.
+    // Bit 9 selects UNIBUS; a Q-bus board clears it.
     // RT-11 probes it after MFPT when selecting the extended-memory monitor.
     assign mapped_data=psw_selected ? psw : cpuerr_selected ? cpuerr : pirq_selected ? pirq :
-        cmr_selected ? 16'o001045 : mem_read_data;
+        cmr_selected ? CMR_VALUE : mem_read_data;
     // Internal CPU CSRs acknowledge locally in the request cycle. Do not
     // route the unrelated external-peripheral ready mux into PSW writes.
     wire psw_write=mapped_request && mapped_write && psw_selected;

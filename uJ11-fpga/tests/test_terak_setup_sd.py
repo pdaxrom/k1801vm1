@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
 from prepare_terak_setup_sd import prepare, Fat16
-from terak_mbr import create, partitions, ALIGN, FAT_BLOCKS
+from terak_mbr import create, partitions, raw_size, ALIGN, FAT_BLOCKS
 
 
 def bios(text):
@@ -18,6 +18,48 @@ def bios(text):
 
 
 class TerakSetupSdTests(unittest.TestCase):
+    def test_ramdiag_replaces_only_selected_disk(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            other, old_test, new_test = [root/n for n in ('other.raw', 'old.raw', 'new.raw')]
+            other.write_bytes(bytes(range(256))*1001)
+            old_test.write_bytes(bytes(raw_size('terak-dsdd')))
+            new_test.write_bytes(b'\xa5'*raw_size('terak-dsdd'))
+            source, boot = root/'card.img', root/'TBIOS.BIN'
+            create([('sssd', other), ('terak-dsdd', old_test)], source)
+            before = bytearray(source.read_bytes())
+            fat = Fat16(before[ALIGN*512:(ALIGN+FAT_BLOCKS)*512])
+            fat.put('TBIOS.BIN', bios('Old BIOS'))
+            fat.put('TERAK4.CFG', b'version=1\ndrive0=3,raw,terak-dsdd,ro\n')
+            fat.put('TERAK.SET', bytes(range(256))*4)
+            original = fat.files()
+            before[ALIGN*512:(ALIGN+FAT_BLOCKS)*512] = fat.data
+            source.write_bytes(before)
+            boot.write_bytes(bios('DEL: Enter BIOS Setup - 2048 KiB'))
+            plan = prepare(source, boot, root/'plan', len(before)//512, new_test)
+            after = (root/'plan/card-after.img').read_bytes()
+            table = partitions(io.BytesIO(before))
+            self.assertEqual(partitions(io.BytesIO(after)), table)
+            disk = table[2]
+            start, end = disk['start']*512, (disk['start']+disk['blocks'])*512
+            self.assertEqual(after[start:end], before[start:end])
+            disk = table[3]
+            start, end = disk['start']*512, (disk['start']+disk['blocks'])*512
+            self.assertEqual(after[start:end], new_test.read_bytes().ljust(end-start, b'\0'))
+            current = Fat16(after[ALIGN*512:(ALIGN+FAT_BLOCKS)*512]).files()
+            for name, value in original.items():
+                if name != 'TBIOS.BIN':
+                    self.assertEqual(current[name], value)
+            self.assertEqual(set(plan['replaced_disk_partitions']), {3})
+            self.assertEqual(source.read_bytes(), before)
+            for value in (b'drive0=1,raw,terak-dsdd,ro\n', b'drive0=3,fd,ro\n'):
+                fat.put('TERAK4.CFG', value)
+                before[ALIGN*512:(ALIGN+FAT_BLOCKS)*512] = fat.data
+                source.write_bytes(before)
+                with self.assertRaises(ValueError):
+                    prepare(source, boot, root/'bad', len(before)//512, new_test)
+                self.assertFalse((root/'bad').exists())
+
     def test_upgrade_and_repeat_preserve_settings_and_disks(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

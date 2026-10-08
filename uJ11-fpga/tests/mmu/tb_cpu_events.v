@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 // Execute guest instructions against the real CPU/MMU with a stalled bus.
 // Fault injection covers errors a RAM-only C fixture cannot generate.
-module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
+module tb_cpu_events #(parameter REGISTER_MICROCODE=0,parameter [15:0] CMR_VALUE=16'o001045);
 `ifdef UJ11_VENDOR_ROM
     GSR GSR_INST(.GSR(1'b1));PUR PUR_INST(.PUR(1'b1));
 `endif
@@ -14,7 +14,7 @@ module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
     reg ack=0,error=0,seen=0;reg [15:0] data=0;
     reg inject=0,emergency_error=0;reg [21:0] bad_address=0;
     integer delay_count=0,cycles=0,acks=0,checks=0,pos,i,p,e,k,stop_pc,sp;
-    uj11_mmu_cpu #(.REGISTER_MICROCODE(REGISTER_MICROCODE)) dut(.clk(clk),.reset(reset),.halt_button(1'b0),
+    uj11_mmu_cpu #(.REGISTER_MICROCODE(REGISTER_MICROCODE),.CMR_VALUE(CMR_VALUE)) dut(.clk(clk),.reset(reset),.halt_button(1'b0),
         .irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(16'o120),.irq_ack(irq_ack),
         .mem_request(request),.mem_write(writing),.mem_byte(byte_access),
         .mem_address(address),.mem_write_data(wdata),.mem_ready(ack),.mem_error(error),.mem_read_data(data),
@@ -79,13 +79,15 @@ module tb_cpu_events #(parameter REGISTER_MICROCODE=0);
         // RT-11 XM probes the read-only J11 CMR after MFPT. Word and both
         // byte-lane writes must remain local and leave the reset value intact.
         prepare();
+        word('o7);word('o10003); // MFPT, MOV R0,R3: J11 processor identity.
         word('o13700);word('o177750);
         mov('o65432,'o177750);word('o13701);word('o177750);
         word('o112737);word('o345);word('o177750);
         word('o112737);word('o123);word('o177751);
         word('o13702);word('o177750);stop_pc=pos;word(1);
         seek(stop_pc);
-        for(k=0;k<3;k++)begin regno=k;#1;check(regdata=='o1045,"CMR reads reset value and ignores writes");end
+        for(k=0;k<3;k++)begin regno=k;#1;check(regdata==CMR_VALUE,"CMR reads board value and ignores writes");end
+        regno=3;#1;check(regdata==5,"MFPT identifies the J11");
         // Software IRQ arbitration: higher external levels preempt PIRQ;
         // equal levels choose PIRQ and must not acknowledge the device.
         for(p=1;p<=7;p++)for(e=1;e<=7;e++)begin

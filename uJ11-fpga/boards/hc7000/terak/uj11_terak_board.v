@@ -53,6 +53,7 @@ module uj11_terak_board #(
         assign ready=bus_ready,error=bus_error,read_data=bus_read_data;
     end endgenerate
     uj11_mmu_cpu #(.BOOT_PC(BOOT_BIOS ? 16'o173774 : 16'o173000),.REGISTER_MICROCODE(1),
+        .CMR_VALUE(RAM_BYTES>262144 ? 16'o000045 : 16'o001045),
         .MICROCODE(MICROCODE)) cpu(.clk(clk),.reset(cpu_reset),.halt_button(halt_button),
         .irq_valid(irq_valid),.irq_priority(irq_priority),.irq_vector(irq_vector),.irq_ack(irq_ack),
         .peripheral_reset(peripheral_reset),.mem_request(request),.mem_write(writing),.mem_byte(byte_access),.mem_lock(cpu_lock),

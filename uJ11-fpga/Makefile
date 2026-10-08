@@ -12,8 +12,8 @@ MMU_CLOCK_MHZ ?= 50
 HC7000_VIDEO ?= 1
 HC7000_KEYBOARD ?= 1
 TERAK_RAM_KIB ?= 56
-ifeq ($(filter $(TERAK_RAM_KIB),56 128 256),)
-$(error TERAK_RAM_KIB must be 56, 128 or 256)
+ifeq ($(filter $(TERAK_RAM_KIB),56 128 256 2048),)
+$(error TERAK_RAM_KIB must be 56, 128, 256 or 2048)
 endif
 TERAK_DISPLAY ?= $(if $(filter 56,$(TERAK_RAM_KIB)),sram,ebr)
 ifeq ($(filter $(TERAK_DISPLAY),sram ebr),)
@@ -236,6 +236,9 @@ test: rt11-xm-image
 	$(PYTHON) tools/test_terak_rl.py --out $(OUT)/test-rl
 	$(PYTHON) tools/test_terak_rt11.py --system rt11xm --disk $(TERAK_RT11_DIR)/RT11XM57.rl01 --disk $(TERAK_RT11_DIR)/RT11KIT.rl02 --out $(OUT)/test-xm
 	$(PYTHON) tools/test_terak_setup.py --disk $(TERAK_RT11_DIR)/RT11XM57.rl01 --disk $(TERAK_RT11_DIR)/RT11KIT.rl02 --compiled $(OUT)/test-xm --out $(OUT)/test-setup
+ifeq ($(TERAK_RAM_KIB),2048)
+	$(PYTHON) tools/test_terak_ramdiag.py --out $(OUT)/test-ramdiag
+endif
 else
 test:
 	$(PYTHON) tools/test_terak.py --out $(OUT)/test

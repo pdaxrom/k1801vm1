@@ -2,8 +2,17 @@
  * DMA (50-0010-002 Rev E). Registers use the existing SERV peripheral bridge. */
 #include "terak.h"
 
-static uint8_t command[9], result[7], positions[4], seek_status[4], id_index[4];
+static uint8_t command[9], result[7];
+#ifdef UJ11_TERAK_RLV12
+/* RLV12 adds code but needs no extra EBR. These small controller counters
+ * fit in the existing serialized tail; retain the full 640-byte stack. */
+static unsigned received TERAK_COLD, needed TERAK_COLD, results TERAK_COLD, next_result TERAK_COLD;
+static unsigned pending TERAK_COLD, interrupt TERAK_COLD, seeking TERAK_COLD;
+static uint8_t positions[4] TERAK_COLD, seek_status[4] TERAK_COLD, id_index[4] TERAK_COLD;
+#else
 static unsigned received, needed, results, next_result, pending, interrupt, seeking;
+static uint8_t positions[4], seek_status[4], id_index[4];
+#endif
 #ifdef UJ11_TERAK_RL
 static unsigned dma_control TERAK_COLD, dma_count TERAK_COLD, dma_address TERAK_COLD;
 static unsigned count_high TERAK_COLD, address_high TERAK_COLD, non_dma TERAK_COLD;

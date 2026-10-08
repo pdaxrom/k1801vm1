@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 // Real SERV and SD card, with an independent bus master checking 256-byte RMW.
 module tb_terak_rl #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
+    localparam WIDE=RAM_BYTES>262144;
     reg clk=0,vclk=0,reset=1,power_on=1,peripheral_reset=0,request=0,writing=0,byte_access=0,irq_ack=0;
     always #10 clk=~clk;
     always #7.8125 vclk=~vclk;
@@ -59,6 +60,7 @@ module tb_terak_rl #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
     task transfer(input integer fn,input integer cylinder,input integer head,input integer sec,
                   input integer address,input integer words,input integer expected=0,input integer unit=0);
         seek(cylinder,head,unit);
+        if(WIDE)access(CSR+8,1,16'(address>>16));
         access(CSR+2,1,16'(address));access(CSR+4,1,16'((cylinder<<7)|(head<<6)|sec));
         access(CSR+6,1,16'(-words));access(CSR,1,16'(unit*256|((address>>12)&48)|fn*2));complete(expected);
     endtask
@@ -81,6 +83,15 @@ module tb_terak_rl #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
         access(22'o17771020,1,5);access(22'o17771020,0,0);
         if(result || !bus.boot_rl || bus.boot_menu)$fatal(1,"RL BIOS configuration failed");
         access(CSR,0,0);if((result&16'o201)!=16'o201)$fatal(1,"RL01 not ready CSR=%o",result);
+        if(WIDE)begin
+            access(CSR+8,1,16'hffff);access(CSR+8,0,0);
+            if(result!=63)$fatal(1,"RLV12 BAE reserved bits not masked");
+            access(CSR,0,0);if((result&48)!=48)$fatal(1,"BAE to CSR mirror");
+            access(CSR,1,16'o200);access(CSR+8,0,0);
+            if(result!=60)$fatal(1,"CSR cleared upper BAE bits or failed to mirror low bits");
+            byte_access=1;access(CSR+9,1,16'hff00);byte_access=0;
+            access(CSR+8,0,0);if(result!=60)$fatal(1,"BAE high-byte write changed address bits");
+        end
         seek(0);access(CSR+6,0,0); // Header FIFO is independently consumed by seek.
         access(CSR+4,1,16'o13);access(CSR,1,4);complete();access(CSR+6,0,0);
         if(result!=16'o35)$fatal(1,"RL01 status %o",result);
@@ -92,9 +103,23 @@ module tb_terak_rl #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
         access(CSR+2,0,0);if(result!=16'h100)$fatal(1,"RL BAR wrap %h",result);
         access(CSR,0,0);if((result&48)!=32)$fatal(1,"RL BAE carry %o",result);
         access(CSR+6,0,0);if(result)$fatal(1,"RL word count %o",result);
+        if(WIDE)begin
+            access(22'h100,1,16'hcafe);
+            transfer(6,3,1,6,'h3ff00,256);
+            check('h3ff00,3,1,6);check('h40000,3,1,7);
+            access(CSR+8,0,0);if(result!=4)$fatal(1,"RLV12 256 KiB carry");
+            transfer(6,3,1,6,'hfff00,256);
+            check('hfff00,3,1,6);check('h100000,3,1,7);
+            access(CSR+8,0,0);if(result!=16)$fatal(1,"RLV12 1 MiB carry");
+            transfer(6,3,1,6,'h1ffe00,256);
+            check('h1ffe00,3,1,6);check('h1fff00,3,1,7);
+            access(CSR+8,0,0);if(result!=32)$fatal(1,"RLV12 installed RAM boundary carry");
+            transfer(6,0,0,0,'h200000,128,8);
+            access(22'h100,0,0);if(result!=16'hcafe)$fatal(1,"high DMA aliased low memory");
+        end
         // Partial write of an odd 256-byte sector preserves the preceding half.
-        for(integer i=0;i<7;i++)access(22'('h21000+i*2),1,16'ha000+i);
-        transfer(5,3,1,7,'h21000,7);
+        for(integer i=0;i<7;i++)access(22'((WIDE ? 'h110000 : 'h21000)+i*2),1,16'ha000+i);
+        transfer(5,3,1,7,WIDE ? 'h110000 : 'h21000,7);
         transfer(6,3,1,6,'h22000,256);check('h22000,3,1,6);
         for(integer i=0;i<128;i++)begin
             access(22'('h22100+i*2),0,0);
@@ -105,7 +130,7 @@ module tb_terak_rl #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
         transfer(5,0,0,0,'h21000,7,1,1);
         if(card.write_commands!=1)$fatal(1,"read-only RL disk was written");
         transfer(6,0,0,40,'h22000,128,5);
-        transfer(6,0,0,0,'h3e000,128,8);
+        transfer(6,0,0,0,RAM_BYTES,128,8);
         // CRDY+IE produces a BR5 interrupt; acknowledge retains the CSR IE.
         access(CSR,1,16'o300);
         wait(bus.qb_irq);
@@ -121,7 +146,10 @@ module tb_terak_rl #(parameter DISPLAY_EBR=1,RAM_BYTES=253952);
         repeat(100000)@(negedge clk);
         access(CSR,0,0);if(result!=16'o201 || !bus.boot_rl)$fatal(1,"RL INIT lost media/state");
         if(card.write_commands!=1)$fatal(1,"reset committed an unintended disk write");
-        $display("PASS TERAK RL01/RL02 MBR, 18-bit DMA, half-sector RMW, compare, RO, NXM, IRQ and INIT");
+        if(WIDE)begin
+            access(CSR+8,0,0);if(result)$fatal(1,"INIT did not clear RLV12 BAE");
+        end
+        $display("PASS TERAK RL01/RL02 MBR, %0d-bit DMA, half-sector RMW, compare, RO, NXM, IRQ and INIT",WIDE ? 22 : 18);
         $finish;
     end
     initial begin #3000000000;$fatal(1,"RL test timeout");end

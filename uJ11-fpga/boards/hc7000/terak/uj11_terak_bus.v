@@ -33,7 +33,10 @@ module uj11_terak_bus #(
     wire rom_selected=io_page && offset[12:9]==(13'o13000>>9);
     wire qx_selected=io_page && offset[12:2]==(13'o17000>>2);
     wire qb_selected=io_page && (offset[12:4]==(13'o11000>>4) || BOOT_BIOS && offset==13'o11020);
-    wire rl_selected=RL_ENABLE && io_page && offset[12:3]==(13'o14400>>3);
+    // RLV12 adds its standard BAE register at 174410 for the 22-bit profile.
+    // The existing 18-bit RLV11 profile still responds to four registers only.
+    wire rl_selected=RL_ENABLE && io_page && (offset[12:3]==(13'o14400>>3) ||
+        RAM_BYTES>262144 && offset==13'o14410);
     wire service_selected=qb_selected || rl_selected;
     wire service_reset=BOOT_BIOS ? cold_reset : reset;
     wire guest_bus_reset=peripheral_reset || (BOOT_BIOS && reset);

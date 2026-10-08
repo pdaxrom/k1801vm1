@@ -1,5 +1,6 @@
-; Independent cold-boot diagnostic for the 18-bit TERAK memory profile.
-; Resident code/stack use bank 0; all 30 other 8 KiB banks are filled first,
+; Independent cold-boot diagnostic for the 18/22-bit TERAK memory profiles.
+; Parameters are substituted by tools/test_terak_ramdiag.py.
+; Resident code/stack use bank 0; all other 8 KiB banks are filled first,
 ; then compared through the CPU MMU, including the former 160000 I/O hole.
 ; No extended-memory software or FPP is required. QB E5 softboot at address 0.
         org 0
@@ -21,7 +22,8 @@ maps:   mov r1,(r0)+
         mov #8.,r2
 pdrs:   mov #177406,(r0)+
         sob r2,pdrs
-        mov #7600,@#1772356
+        mov #@IO_PAR@,@#1772356
+        mov #@MMR3@,@#172516
         mov #1,@#177572
         clr r2
 phase:  mov #1,r3
@@ -49,7 +51,7 @@ verify: cmp (r0)+,r4
         inc r4
         sob r1,verify
 next:   inc r3
-        cmp r3,#31.
+        cmp r3,#@BANKS@.
         bne bank
         inc r2
         cmp r2,#2
@@ -60,7 +62,7 @@ fail:   mov #bad,r5
 display:clr @#177572
         mov #200,@#177744
         mov #fonts,r0
-        mov #10.,r3
+        mov #11.,r3
 chars:  movb (r0)+,r1
         asl r1
         asl r1
@@ -77,16 +79,9 @@ glyph:  movb (r0)+,(r1)+
 text:   movb (r5)+,(r0)+
         bne text
 done:   br done
-good:   db "248K PASS",0
+good:   db "@PASS_LABEL@",0
 bad:    db "FAIL",0
-; Original 8x10 diagnostic glyphs, bit 0 at the left edge.
-fonts:  db 50.,0,0x3c,0x42,0x40,0x20,0x10,0x08,0x7e,0,0
-        db 52.,0,0x20,0x30,0x28,0x24,0x22,0x7e,0x20,0,0
-        db 56.,0,0x3c,0x42,0x42,0x3c,0x42,0x42,0x3c,0,0
-        db 75.,0,0x42,0x22,0x12,0x0e,0x12,0x22,0x42,0,0
-        db 80.,0,0x3e,0x42,0x42,0x3e,0x02,0x02,0x02,0,0
-        db 65.,0,0x3c,0x42,0x42,0x7e,0x42,0x42,0x42,0,0
-        db 83.,0,0x7c,0x02,0x02,0x3c,0x40,0x40,0x3e,0,0
-        db 70.,0,0x7e,0x02,0x02,0x3e,0x02,0x02,0x02,0,0
-        db 73.,0,0x3e,0x08,0x08,0x08,0x08,0x08,0x3e,0,0
-        db 76.,0,0x02,0x02,0x02,0x02,0x02,0x02,0x7e,0,0
+; Same 8x10 VT52 glyphs and baseline as the BIOS. Standalone boot also
+; installs the required characters; the surrounding BIOS text is unchanged.
+fonts:
+; @FONT@

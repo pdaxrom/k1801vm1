@@ -55,6 +55,11 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
         .write(dut.bus.disk.data_accept && dut.bus.disk.memory_selected && dut.bus.disk.de && dut.bus.disk.da<(DISPLAY_EBR ? 14848 : 18944)),
         .address(dut.bus.disk.da));
     integer text_writes=0,font_writes=0,rom_fetches=0,qx_commands=0;
+    integer upper_reads=0,upper_writes=0;
+    always @(posedge clk)if(!reset && dut.request && dut.ready && dut.bus.ram_selected &&
+                            dut.address>=22'h100000)begin
+        if(dut.writing)upper_writes++;else upper_reads++;
+    end
     integer white_pixels=0;
     always @(posedge vclk)if(!reset && dac==50)white_pixels++;
     reg key_consumed=0;
@@ -180,7 +185,7 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
                 "0":scan='h45; "1":scan='h16; "2":scan='h1e; "3":scan='h26;
                 "4":scan='h25; "5":scan='h2e; "6":scan='h36; "7":scan='h3d;
                 "8":scan='h3e; "9":scan='h46;
-                " ":scan='h29; ".":scan='h49; "/":scan='h4a; ":":scan='h4c;
+                " ":scan='h29; ".":scan='h49; "/":scan='h4a; ":":scan='h4c; "=":scan='h55;
                 default:$fatal(1,"unsupported command character %c",command[i]);
             endcase
             if(command[i]==":")ps2_byte('h12);
@@ -461,8 +466,29 @@ module tb_terak_boot #(parameter DISPLAY_EBR=0,RAM_BYTES=57344,BOOT_BIOS=0,RL_EN
             if($test$plusargs("RT11_XM"))begin
                 if(!has_text("RT11XM.SYS") || !has_text("MACRO"))$fatal(1,"XM directory contents missing");
                 run_command("SHOW MEMORY");
-                if(!has_text("EXTENDED MEMORY") || !has_text("00760000  MEMTOP"))
-                    $fatal(1,"XM did not discover the physical 248 KiB RAM limit");
+                if(!has_text("EXTENDED MEMORY") ||
+                   !has_text(RAM_BYTES>262144 ? "10000000  MEMTOP" : "00760000  MEMTOP"))
+                    $fatal(1,"XM did not discover the physical RAM limit: %0d bytes",RAM_BYTES);
+                if(RAM_BYTES>262144)begin
+                    run_command("SHOW CONFIGURATION");
+                    // CONFIGURATION scrolls its first lines off the native
+                    // 24-row screen. Check the actual MMU mode as well.
+                    if(!has_text("2048KB OF MEMORY") || !dut.cpu.mmr3[4])
+                        $fatal(1,"XM did not enable 22-bit addressing for 2 MiB");
+                    // Exercise the unmodified VMX handler above 1 MiB.
+                    run_command("REMOVE VM");
+                    run_command("SET VM BASE=40000");
+                    run_command("INSTALL VM");
+                    run_command("LOAD VM");
+                    run_command("INITIALIZE VM:","ARE YOU SURE");
+                    upper_reads=0;upper_writes=0;
+                    run_command("COPY STRTXM.COM VM:VMTEST.COM");
+                    run_command("TYPE VM:VMTEST.COM");
+                    if(!has_text("SET TT NOSCOPE") || !upper_reads || !upper_writes)
+                        $fatal(1,"VM disk did not read/write RAM above 1 MiB");
+                    $display("PASS XM 2 MiB / 22-bit addressing and native VMX disk above 1 MiB: read=%0d write=%0d",
+                             upper_reads,upper_writes);
+                end
                 run_command("COPY STRTXM.COM RLTEST.COM");
                 run_command("TYPE RLTEST.COM");
                 if(!has_text("SET TT NOSCOPE"))$fatal(1,"RL file write/read mismatch");
